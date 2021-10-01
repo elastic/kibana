@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Subscription } from 'rxjs';
 
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 
 import { inputsModel, State } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
@@ -31,6 +32,7 @@ import { ESTermQuery } from '../../../../common/typed_json';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 const ID = 'hostsUncommonProcessesQuery';
 
@@ -71,14 +73,14 @@ export const useUncommonProcesses = ({
   const { activePage, limit } = useDeepEqualSelector((state: State) =>
     getUncommonProcessesSelector(state, type)
   );
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    uncommonProcessesRequest,
-    setUncommonProcessesRequest,
-  ] = useState<HostsUncommonProcessesRequestOptions | null>(null);
+  const [uncommonProcessesRequest, setUncommonProcessesRequest] =
+    useState<HostsUncommonProcessesRequestOptions | null>(null);
+  const { addError, addWarning } = useAppToasts();
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -121,13 +123,11 @@ export const useUncommonProcesses = ({
       if (request == null || skip) {
         return;
       }
-
-      let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
-        const searchSubscription$ = data.search
+        searchSubscription$.current = data.search
           .search<HostsUncommonProcessesRequestOptions, HostsUncommonProcessesStrategyResponse>(
             request,
             {
@@ -138,45 +138,37 @@ export const useUncommonProcesses = ({
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                  setUncommonProcessesResponse((prevResponse) => ({
-                    ...prevResponse,
-                    uncommonProcesses: response.edges,
-                    inspect: getInspectResponse(response, prevResponse.inspect),
-                    pageInfo: response.pageInfo,
-                    refetch: refetch.current,
-                    totalCount: response.totalCount,
-                  }));
-                }
-                searchSubscription$.unsubscribe();
+                setLoading(false);
+                setUncommonProcessesResponse((prevResponse) => ({
+                  ...prevResponse,
+                  uncommonProcesses: response.edges,
+                  inspect: getInspectResponse(response, prevResponse.inspect),
+                  pageInfo: response.pageInfo,
+                  refetch: refetch.current,
+                  totalCount: response.totalCount,
+                }));
+                searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                }
-                notifications.toasts.addWarning(i18n.ERROR_UNCOMMON_PROCESSES);
-                searchSubscription$.unsubscribe();
+                setLoading(false);
+                addWarning(i18n.ERROR_UNCOMMON_PROCESSES);
+                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
-                  title: i18n.FAIL_UNCOMMON_PROCESSES,
-                  text: msg.message,
-                });
-              }
+              setLoading(false);
+              addError(msg, {
+                title: i18n.FAIL_UNCOMMON_PROCESSES,
+              });
+              searchSubscription$.current.unsubscribe();
             },
           });
       };
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {
@@ -204,6 +196,10 @@ export const useUncommonProcesses = ({
 
   useEffect(() => {
     uncommonProcessesSearch(uncommonProcessesRequest);
+    return () => {
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    };
   }, [uncommonProcessesRequest, uncommonProcessesSearch]);
 
   return [loading, uncommonProcessesResponse];

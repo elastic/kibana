@@ -13,7 +13,7 @@ exports[`Logs should render a default message 1`] = `
       values={
         Object {
           "link": <EuiLink
-            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation-configuration.html"
+            href="jest-metadata-mock-url"
             target="_blank"
           >
             <FormattedMessage
@@ -42,7 +42,7 @@ exports[`Logs should render with a bad indices reason 1`] = `
       values={
         Object {
           "link": <EuiLink
-            href="https://www.elastic.co/guide/en/kibana/current/monitor-troubleshooting.html"
+            href="jest-metadata-mock-url"
             target="_blank"
           >
             Click here for more information
@@ -67,7 +67,7 @@ exports[`Logs should render with a no cluster found reason 1`] = `
       values={
         Object {
           "link": <EuiLink
-            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
+            href="jest-metadata-mock-url"
             target="_blank"
           >
             setup
@@ -92,7 +92,7 @@ exports[`Logs should render with a no index found reason 1`] = `
       values={
         Object {
           "link": <EuiLink
-            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
+            href="jest-metadata-mock-url"
             target="_blank"
           >
             setup
@@ -117,7 +117,7 @@ exports[`Logs should render with a no index pattern found reason 1`] = `
       values={
         Object {
           "link": <EuiLink
-            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation-configuration.html"
+            href="jest-metadata-mock-url"
             target="_blank"
           >
             Filebeat
@@ -142,7 +142,7 @@ exports[`Logs should render with a no node found reason 1`] = `
       values={
         Object {
           "link": <EuiLink
-            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
+            href="jest-metadata-mock-url"
             target="_blank"
           >
             setup
@@ -167,7 +167,7 @@ exports[`Logs should render with a no structured logs reason 1`] = `
       values={
         Object {
           "link": <EuiLink
-            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
+            href="jest-metadata-mock-url"
             target="_blank"
           >
             points to JSON logs
@@ -195,7 +195,7 @@ exports[`Logs should render with a no type found reason 1`] = `
       values={
         Object {
           "link": <EuiLink
-            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
+            href="jest-metadata-mock-url"
             target="_blank"
           >
             these directions

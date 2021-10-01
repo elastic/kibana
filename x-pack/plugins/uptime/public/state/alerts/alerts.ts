@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -21,7 +22,7 @@ import {
   NewAlertParams,
 } from '../api/alerts';
 import { ActionConnector as RawActionConnector } from '../../../../triggers_actions_ui/public';
-import { Alert } from '../../../../alerts/common';
+import { Alert } from '../../../../alerting/common';
 import { kibanaService } from '../kibana_service';
 import { monitorIdSelector } from '../selectors';
 import { AlertsResult, MonitorIdParam } from '../actions/types';
@@ -52,7 +53,7 @@ export const deleteAnomalyAlertAction = createAsyncAction<{ alertId: string }, a
   'DELETE ANOMALY ALERT'
 );
 
-interface AlertState {
+export interface AlertState {
   connectors: AsyncInitState<ActionConnector[]>;
   newAlert: AsyncInitState<Alert<UptimeAlertTypeParams>>;
   alerts: AsyncInitState<AlertsResult>;
@@ -85,7 +86,7 @@ export const alertsReducer = handleActions<AlertState>(
 const showAlertDisabledSuccess = () => {
   kibanaService.core.notifications.toasts.addSuccess(
     i18n.translate('xpack.uptime.overview.alerts.disabled.success', {
-      defaultMessage: 'Alert successfully disabled!',
+      defaultMessage: 'Rule successfully disabled!',
     })
   );
 };
@@ -93,7 +94,7 @@ const showAlertDisabledSuccess = () => {
 const showAlertDisabledFailed = (err: Error) => {
   kibanaService.core.notifications.toasts.addError(err, {
     title: i18n.translate('xpack.uptime.overview.alerts.disabled.failed', {
-      defaultMessage: 'Alert cannot be disabled!',
+      defaultMessage: 'Rule cannot be disabled!',
     }),
   });
 };
@@ -156,7 +157,7 @@ export function* fetchAlertsEffect() {
     } catch (err) {
       kibanaService.core.notifications.toasts.addError(err, {
         title: i18n.translate('xpack.uptime.overview.alerts.enabled.failed', {
-          defaultMessage: 'Alert cannot be enabled!',
+          defaultMessage: 'Rule cannot be enabled!',
         }),
       });
       yield put(createAlertAction.fail(err));

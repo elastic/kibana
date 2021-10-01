@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
@@ -15,6 +16,8 @@ import { mockDataProviders } from '../../../timelines/components/timeline/data_p
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 import { ConditionalPortal, DraggableWrapper, getStyle } from './draggable_wrapper';
 import { useMountAppended } from '../../utils/use_mount_appended';
+
+jest.mock('../../lib/kibana');
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -39,7 +42,11 @@ describe('DraggableWrapper', () => {
       const wrapper = shallow(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+            <DraggableWrapper
+              dataProvider={dataProvider}
+              isDraggable={true}
+              render={() => message}
+            />
           </DragDropContextWrapper>
         </TestProviders>
       );
@@ -51,7 +58,11 @@ describe('DraggableWrapper', () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+            <DraggableWrapper
+              dataProvider={dataProvider}
+              isDraggable={true}
+              render={() => message}
+            />
           </DragDropContextWrapper>
         </TestProviders>
       );
@@ -63,19 +74,27 @@ describe('DraggableWrapper', () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+            <DraggableWrapper
+              dataProvider={dataProvider}
+              isDraggable={true}
+              render={() => message}
+            />
           </DragDropContextWrapper>
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(false);
+      expect(wrapper.find('[data-test-subj="hover-actions-copy-button"]').exists()).toBe(false);
     });
 
     test('it renders hover actions when the mouse is over the text of draggable wrapper', async () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+            <DraggableWrapper
+              dataProvider={dataProvider}
+              isDraggable={true}
+              render={() => message}
+            />
           </DragDropContextWrapper>
         </TestProviders>
       );
@@ -85,7 +104,7 @@ describe('DraggableWrapper', () => {
         wrapper.update();
         jest.runAllTimers();
         wrapper.update();
-        expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(true);
+        expect(wrapper.find('[data-test-subj="hover-actions-copy-button"]').exists()).toBe(true);
       });
     });
   });
@@ -95,7 +114,12 @@ describe('DraggableWrapper', () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper dataProvider={dataProvider} render={() => message} truncate />
+            <DraggableWrapper
+              dataProvider={dataProvider}
+              isDraggable={true}
+              render={() => message}
+              truncate
+            />
           </DragDropContextWrapper>
         </TestProviders>
       );
@@ -109,7 +133,11 @@ describe('DraggableWrapper', () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+            <DraggableWrapper
+              dataProvider={dataProvider}
+              isDraggable={true}
+              render={() => message}
+            />
           </DragDropContextWrapper>
         </TestProviders>
       );

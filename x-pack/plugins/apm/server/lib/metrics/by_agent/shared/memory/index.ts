@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
+import { withApmSpan } from '../../../../../utils/with_apm_span';
 import {
   METRIC_CGROUP_MEMORY_LIMIT_BYTES,
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
+import { Setup } from '../../../../helpers/setup_request';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import { ChartBase } from '../../../types';
 
@@ -44,7 +46,7 @@ const chartBase: ChartBase = {
 export const percentSystemMemoryUsedScript = {
   lang: 'expression',
   source: `1 - doc['${METRIC_SYSTEM_FREE_MEMORY}'] / doc['${METRIC_SYSTEM_TOTAL_MEMORY}']`,
-};
+} as const;
 
 export const percentCgroupMemoryUsedScript = {
   lang: 'painless',
@@ -66,47 +68,67 @@ export const percentCgroupMemoryUsedScript = {
 
     return used / total;
     `,
-};
+} as const;
 
 export async function getMemoryChartData({
+  environment,
+  kuery,
   setup,
   serviceName,
   serviceNodeName,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  environment: string;
+  kuery: string;
+  setup: Setup;
   serviceName: string;
   serviceNodeName?: string;
+  start: number;
+  end: number;
 }) {
-  const cgroupResponse = await fetchAndTransformMetrics({
-    setup,
-    serviceName,
-    serviceNodeName,
-    chartBase,
-    aggs: {
-      memoryUsedAvg: { avg: { script: percentCgroupMemoryUsedScript } },
-      memoryUsedMax: { max: { script: percentCgroupMemoryUsedScript } },
-    },
-    additionalFilters: [
-      { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
-    ],
-  });
-
-  if (cgroupResponse.noHits) {
-    return await fetchAndTransformMetrics({
+  return withApmSpan('get_memory_metrics_charts', async () => {
+    const cgroupResponse = await fetchAndTransformMetrics({
+      environment,
+      kuery,
       setup,
       serviceName,
       serviceNodeName,
+      start,
+      end,
       chartBase,
       aggs: {
-        memoryUsedAvg: { avg: { script: percentSystemMemoryUsedScript } },
-        memoryUsedMax: { max: { script: percentSystemMemoryUsedScript } },
+        memoryUsedAvg: { avg: { script: percentCgroupMemoryUsedScript } },
+        memoryUsedMax: { max: { script: percentCgroupMemoryUsedScript } },
       },
       additionalFilters: [
-        { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
-        { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+        { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
       ],
+      operationName: 'get_cgroup_memory_metrics_charts',
     });
-  }
 
-  return cgroupResponse;
+    if (cgroupResponse.noHits) {
+      return await fetchAndTransformMetrics({
+        environment,
+        kuery,
+        setup,
+        serviceName,
+        serviceNodeName,
+        start,
+        end,
+        chartBase,
+        aggs: {
+          memoryUsedAvg: { avg: { script: percentSystemMemoryUsedScript } },
+          memoryUsedMax: { max: { script: percentSystemMemoryUsedScript } },
+        },
+        additionalFilters: [
+          { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
+          { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+        ],
+        operationName: 'get_system_memory_metrics_charts',
+      });
+    }
+
+    return cgroupResponse;
+  });
 }

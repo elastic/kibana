@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -158,22 +160,21 @@ export const ComponentTemplateForm = ({
   };
 
   const buildComponentTemplateObject = useCallback(
-    (initialTemplate: ComponentTemplateDeserialized) => (
-      wizardData: WizardContent
-    ): ComponentTemplateDeserialized => {
-      const outputComponentTemplate = {
-        ...initialTemplate,
-        name: wizardData.logistics.name,
-        version: wizardData.logistics.version,
-        _meta: wizardData.logistics._meta,
-        template: {
-          settings: wizardData.settings,
-          mappings: wizardData.mappings,
-          aliases: wizardData.aliases,
-        },
-      };
-      return cleanupComponentTemplateObject(outputComponentTemplate);
-    },
+    (initialTemplate: ComponentTemplateDeserialized) =>
+      (wizardData: WizardContent): ComponentTemplateDeserialized => {
+        const outputComponentTemplate = {
+          ...initialTemplate,
+          name: wizardData.logistics.name,
+          version: wizardData.logistics.version,
+          _meta: wizardData.logistics._meta,
+          template: {
+            settings: wizardData.settings,
+            mappings: wizardData.mappings,
+            aliases: wizardData.aliases,
+          },
+        };
+        return cleanupComponentTemplateObject(outputComponentTemplate);
+      },
     []
   );
 

@@ -1,30 +1,19 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Datatable } from 'src/plugins/expressions/public';
 import { CoreStart } from '../../../../../core/public';
-import { FormatFactory } from '../../../../data/common/field_formats/utils';
+import { FormatFactory } from '../../../../field_formats/common';
 
 import { DataPublicPluginStart, exporters } from '../../services/data';
 import { downloadMultipleAs } from '../../services/share';
 import { Adapters, IEmbeddable } from '../../services/embeddable';
-import { ActionByType } from '../../services/ui_actions';
+import { Action } from '../../services/ui_actions';
 import { dashboardExportCsvAction } from '../../dashboard_strings';
 
 export const ACTION_EXPORT_CSV = 'ACTION_EXPORT_CSV';
@@ -44,7 +33,7 @@ export interface ExportContext {
  * This is "Export CSV" action which appears in the context
  * menu of a dashboard panel.
  */
-export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
+export class ExportCSVAction implements Action<ExportContext> {
   public readonly id = ACTION_EXPORT_CSV;
 
   public readonly type = ACTION_EXPORT_CSV;
@@ -105,6 +94,7 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
                 csvSeparator: this.params.core.uiSettings.get('csv:separator', ','),
                 quoteValues: this.params.core.uiSettings.get('csv:quoteValues', true),
                 formatFactory,
+                escapeFormulaValues: false,
               }),
               type: exporters.CSV_MIME_TYPE,
             };
@@ -116,7 +106,7 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
 
       // useful for testing
       if (context.asString) {
-        return (content as unknown) as Promise<void>;
+        return content as unknown as Promise<void>;
       }
 
       if (content) {

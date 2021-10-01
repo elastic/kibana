@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import util from 'util';
 import { isEqual, isEqualWith } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -26,7 +28,6 @@ export default function ({ getService }: FtrProviderContext) {
             indexPatterns: ['all', 'read'],
             savedObjectsManagement: ['all', 'read'],
             savedObjectsTagging: ['all', 'read'],
-            timelion: ['all', 'read'],
             graph: ['all', 'read'],
             maps: ['all', 'read'],
             canvas: ['all', 'read'],
@@ -34,8 +35,10 @@ export default function ({ getService }: FtrProviderContext) {
             logs: ['all', 'read'],
             uptime: ['all', 'read'],
             apm: ['all', 'read'],
+            osquery: ['all', 'read'],
             ml: ['all', 'read'],
             siem: ['all', 'read'],
+            securitySolutionCases: ['all', 'read'],
             fleet: ['all', 'read'],
             stackAlerts: ['all', 'read'],
             actions: ['all', 'read'],

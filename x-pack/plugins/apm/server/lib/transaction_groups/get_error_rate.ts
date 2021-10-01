@@ -1,10 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-import { Coordinate } from '../../../typings/timeseries';
 
 import {
   EVENT_OUTCOME,
@@ -13,34 +12,48 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
-import { rangeFilter } from '../../../common/utils/range_filter';
-import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
-import { getBucketSize } from '../helpers/get_bucket_size';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
+import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
+import { Coordinate } from '../../../typings/timeseries';
 import {
-  calculateTransactionErrorPercentage,
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+} from '../helpers/aggregated_transactions';
+import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
+import { Setup } from '../helpers/setup_request';
+import {
+  calculateFailedTransactionRate,
   getOutcomeAggregation,
-  getTransactionErrorRateTimeSeries,
+  getFailedTransactionRateTimeSeries,
 } from '../helpers/transaction_error_rate';
 
 export async function getErrorRate({
+  environment,
+  kuery,
   serviceName,
   transactionType,
   transactionName,
   setup,
   searchAggregatedTransactions,
+  start,
+  end,
 }: {
+  environment: string;
+  kuery: string;
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
 }): Promise<{
   noHits: boolean;
   transactionErrorRate: Coordinate[];
   average: number | null;
 }> {
-  const { start, end, esFilter, apmEventClient } = setup;
+  const { apmEventClient } = setup;
 
   const transactionNamefilter = transactionName
     ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
@@ -51,16 +64,22 @@ export async function getErrorRate({
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
     {
-      terms: { [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success] },
+      terms: {
+        [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
+      },
     },
     ...transactionNamefilter,
     ...transactionTypefilter,
-    ...esFilter,
+    ...getDocumentTypeFilterForAggregatedTransactions(
+      searchAggregatedTransactions
+    ),
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
+    ...kqlQuery(kuery),
   ];
 
-  const outcomes = getOutcomeAggregation({ searchAggregatedTransactions });
+  const outcomes = getOutcomeAggregation();
 
   const params = {
     apm: {
@@ -78,7 +97,11 @@ export async function getErrorRate({
         timeseries: {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: getBucketSize({ start, end }).intervalString,
+            fixed_interval: getBucketSizeForAggregatedTransactions({
+              start,
+              end,
+              searchAggregatedTransactions,
+            }).intervalString,
             min_doc_count: 0,
             extended_bounds: { min: start, max: end },
           },
@@ -90,7 +113,10 @@ export async function getErrorRate({
     },
   };
 
-  const resp = await apmEventClient.search(params);
+  const resp = await apmEventClient.search(
+    'get_transaction_group_error_rate',
+    params
+  );
 
   const noHits = resp.hits.total.value === 0;
 
@@ -98,13 +124,76 @@ export async function getErrorRate({
     return { noHits, transactionErrorRate: [], average: null };
   }
 
-  const transactionErrorRate = getTransactionErrorRateTimeSeries(
+  const transactionErrorRate = getFailedTransactionRateTimeSeries(
     resp.aggregations.timeseries.buckets
   );
 
-  const average = calculateTransactionErrorPercentage(
-    resp.aggregations.outcomes
-  );
+  const average = calculateFailedTransactionRate(resp.aggregations.outcomes);
 
   return { noHits, transactionErrorRate, average };
+}
+
+export async function getErrorRatePeriods({
+  environment,
+  kuery,
+  serviceName,
+  transactionType,
+  transactionName,
+  setup,
+  searchAggregatedTransactions,
+  comparisonStart,
+  comparisonEnd,
+  start,
+  end,
+}: {
+  environment: string;
+  kuery: string;
+  serviceName: string;
+  transactionType?: string;
+  transactionName?: string;
+  setup: Setup;
+  searchAggregatedTransactions: boolean;
+  comparisonStart?: number;
+  comparisonEnd?: number;
+  start: number;
+  end: number;
+}) {
+  const commonProps = {
+    environment,
+    kuery,
+    serviceName,
+    transactionType,
+    transactionName,
+    setup,
+    searchAggregatedTransactions,
+  };
+
+  const currentPeriodPromise = getErrorRate({ ...commonProps, start, end });
+
+  const previousPeriodPromise =
+    comparisonStart && comparisonEnd
+      ? getErrorRate({
+          ...commonProps,
+          start: comparisonStart,
+          end: comparisonEnd,
+        })
+      : { noHits: true, transactionErrorRate: [], average: null };
+
+  const [currentPeriod, previousPeriod] = await Promise.all([
+    currentPeriodPromise,
+    previousPeriodPromise,
+  ]);
+
+  const firstCurrentPeriod = currentPeriod.transactionErrorRate;
+
+  return {
+    currentPeriod,
+    previousPeriod: {
+      ...previousPeriod,
+      transactionErrorRate: offsetPreviousPeriodCoordinates({
+        currentPeriodTimeseries: firstCurrentPeriod,
+        previousPeriodTimeseries: previousPeriod.transactionErrorRate,
+      }),
+    },
+  };
 }

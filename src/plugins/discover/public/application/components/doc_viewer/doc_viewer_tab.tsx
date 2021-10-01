@@ -1,33 +1,25 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { isEqual } from 'lodash';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
 import { DocViewerError } from './doc_viewer_render_error';
 import { DocViewRenderFn, DocViewRenderProps } from '../../doc_views/doc_views_types';
+import { getServices } from '../../../kibana_services';
+import { KibanaContextProvider } from '../../../../../kibana_react/public';
 
 interface Props {
-  component?: React.ComponentType<DocViewRenderProps>;
   id: number;
-  render?: DocViewRenderFn;
   renderProps: DocViewRenderProps;
   title: string;
+  render?: DocViewRenderFn;
+  component?: React.ComponentType<DocViewRenderProps>;
 }
 
 interface State {
@@ -54,36 +46,37 @@ export class DocViewerTab extends React.Component<Props, State> {
     return (
       nextProps.renderProps.hit._id !== this.props.renderProps.hit._id ||
       nextProps.id !== this.props.id ||
+      !isEqual(nextProps.renderProps.columns, this.props.renderProps.columns) ||
       nextState.hasError
     );
   }
 
   render() {
-    const { component, render, renderProps, title } = this.props;
+    const { component: Component, render, renderProps, title } = this.props;
     const { hasError, error } = this.state;
 
     if (hasError && error) {
       return <DocViewerError error={error} />;
-    } else if (!render && !component) {
-      return (
-        <DocViewerError
-          error={`Invalid plugin ${title}, there is neither a (react) component nor a render function provided`}
-        />
-      );
     }
 
     if (render) {
-      // doc view is provided by a render function, e.g. for legacy Angular code
+      // doc view is provided by a render function
       return <DocViewRenderTab render={render} renderProps={renderProps} />;
     }
 
     // doc view is provided by a react component
+    if (Component) {
+      return (
+        <KibanaContextProvider services={{ uiSettings: getServices().uiSettings }}>
+          <Component {...renderProps} />
+        </KibanaContextProvider>
+      );
+    }
 
-    const Component = component as any;
     return (
-      <I18nProvider>
-        <Component {...renderProps} />
-      </I18nProvider>
+      <DocViewerError
+        error={`Invalid plugin ${title}, there is neither a (react) component nor a render function provided`}
+      />
     );
   }
 }

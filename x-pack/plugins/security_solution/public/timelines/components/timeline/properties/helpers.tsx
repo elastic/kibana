@@ -1,40 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiBadge, EuiButton, EuiButtonIcon, EuiToolTip, EuiTextArea } from '@elastic/eui';
-import { pick } from 'lodash/fp';
+import { EuiBadge, EuiButton, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import { TimelineTypeLiteral, TimelineType } from '../../../../../common/types/timeline';
-import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import {
-  useDeepEqualSelector,
-  useShallowEqualSelector,
-} from '../../../../common/hooks/use_selector';
+  TimelineTypeLiteral,
+  TimelineType,
+  TimelineStatus,
+} from '../../../../../common/types/timeline';
+import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 
-import { DescriptionContainer, NameField, NameWrapper } from './styles';
 import * as i18n from './translations';
-import { TimelineInput } from '../../../store/timeline/actions';
 import { useCreateTimelineButton } from './use_create_timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 
-export const historyToolTip = 'The chronological history of actions related to this timeline';
-export const streamLiveToolTip = 'Update the Timeline as new data arrives';
-export const newTimelineToolTip = 'Create a new timeline';
-export const TIMELINE_TITLE_CLASSNAME = 'timeline-title';
-
-const NotesCountBadge = (styled(EuiBadge)`
+const NotesCountBadge = styled(EuiBadge)`
   margin-left: 5px;
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 
 NotesCountBadge.displayName = 'NotesCountBadge';
-
-export type SaveTimeline = (args: TimelineInput) => void;
 
 interface AddToFavoritesButtonProps {
   timelineId: string;
@@ -48,6 +40,12 @@ const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({ ti
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).isFavorite
   );
 
+  const status = useShallowEqualSelector(
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).status
+  );
+
+  const disableFavoriteButton = status === TimelineStatus.immutable;
+
   const handleClick = useCallback(
     () => dispatch(timelineActions.updateIsFavorite({ id: timelineId, isFavorite: !isFavorite })),
     [dispatch, timelineId, isFavorite]
@@ -60,6 +58,7 @@ const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({ ti
       iconType={isFavorite ? 'starFilled' : 'starEmpty'}
       onClick={handleClick}
       data-test-subj={`timeline-favorite-${isFavorite ? 'filled' : 'empty'}-star`}
+      disabled={disableFavoriteButton}
     >
       {isFavorite ? i18n.REMOVE_FROM_FAVORITES : i18n.ADD_TO_FAVORITES}
     </EuiButton>
@@ -68,140 +67,6 @@ const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({ ti
 AddToFavoritesButtonComponent.displayName = 'AddToFavoritesButtonComponent';
 
 export const AddToFavoritesButton = React.memo(AddToFavoritesButtonComponent);
-
-interface DescriptionProps {
-  autoFocus?: boolean;
-  timelineId: string;
-  disableAutoSave?: boolean;
-  disableTooltip?: boolean;
-  disabled?: boolean;
-}
-
-export const Description = React.memo<DescriptionProps>(
-  ({
-    autoFocus = false,
-    timelineId,
-    disableAutoSave = false,
-    disableTooltip = false,
-    disabled = false,
-  }) => {
-    const dispatch = useDispatch();
-    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-
-    const description = useShallowEqualSelector(
-      (state) => (getTimeline(state, timelineId) ?? timelineDefaults).description
-    );
-
-    const onDescriptionChanged = useCallback(
-      (e) => {
-        dispatch(
-          timelineActions.updateDescription({
-            id: timelineId,
-            description: e.target.value,
-            disableAutoSave,
-          })
-        );
-      },
-      [dispatch, disableAutoSave, timelineId]
-    );
-
-    const inputField = useMemo(
-      () => (
-        <EuiTextArea
-          autoFocus={autoFocus}
-          data-test-subj="timeline-description-textarea"
-          aria-label={i18n.TIMELINE_DESCRIPTION}
-          fullWidth
-          onChange={onDescriptionChanged}
-          placeholder={i18n.DESCRIPTION}
-          value={description}
-          disabled={disabled}
-        />
-      ),
-      [autoFocus, description, onDescriptionChanged, disabled]
-    );
-
-    return (
-      <DescriptionContainer data-test-subj="description-container">
-        {disableTooltip ? (
-          inputField
-        ) : (
-          <EuiToolTip
-            data-test-subj="timeline-description-tool-tip"
-            content={i18n.DESCRIPTION_TOOL_TIP}
-          >
-            {inputField}
-          </EuiToolTip>
-        )}
-      </DescriptionContainer>
-    );
-  }
-);
-Description.displayName = 'Description';
-
-interface NameProps {
-  autoFocus?: boolean;
-  disableAutoSave?: boolean;
-  disableTooltip?: boolean;
-  disabled?: boolean;
-  timelineId: string;
-}
-
-export const Name = React.memo<NameProps>(
-  ({
-    autoFocus = false,
-    disableAutoSave = false,
-    disableTooltip = false,
-    disabled = false,
-    timelineId,
-  }) => {
-    const dispatch = useDispatch();
-    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-
-    const { title, timelineType } = useDeepEqualSelector((state) =>
-      pick(['title', 'timelineType'], getTimeline(state, timelineId) ?? timelineDefaults)
-    );
-
-    const handleChange = useCallback(
-      (e) =>
-        dispatch(
-          timelineActions.updateTitle({ id: timelineId, title: e.target.value, disableAutoSave })
-        ),
-      [dispatch, timelineId, disableAutoSave]
-    );
-
-    const nameField = useMemo(
-      () => (
-        <NameField
-          autoFocus={autoFocus}
-          aria-label={i18n.TIMELINE_TITLE}
-          data-test-subj="timeline-title-input"
-          disabled={disabled}
-          onChange={handleChange}
-          placeholder={
-            timelineType === TimelineType.template ? i18n.UNTITLED_TEMPLATE : i18n.UNTITLED_TIMELINE
-          }
-          spellCheck={true}
-          value={title}
-        />
-      ),
-      [autoFocus, handleChange, timelineType, title, disabled]
-    );
-
-    return (
-      <NameWrapper>
-        {disableTooltip ? (
-          nameField
-        ) : (
-          <EuiToolTip data-test-subj="timeline-title-tool-tip" content={i18n.TITLE}>
-            {nameField}
-          </EuiToolTip>
-        )}
-      </NameWrapper>
-    );
-  }
-);
-Name.displayName = 'Name';
 
 export interface NewTimelineProps {
   closeGearMenu?: () => void;

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -10,7 +12,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { CommonAlert } from '../../common/types/alerts';
 import { Legacy } from '../legacy_shims';
 import { hideBottomBar, showBottomBar } from '../lib/setup_mode';
-import { BASE_ALERT_API_PATH } from '../../../alerts/common';
+import { LEGACY_BASE_ALERT_API_PATH } from '../../../alerting/common';
 
 interface Props {
   alert: CommonAlert;
@@ -26,11 +28,11 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
   async function disableAlert() {
     setIsSaving(true);
     try {
-      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.id}/_disable`);
+      await Legacy.shims.http.post(`${LEGACY_BASE_ALERT_API_PATH}/alert/${alert.id}/_disable`);
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
         title: i18n.translate('xpack.monitoring.alerts.panel.disableAlert.errorTitle', {
-          defaultMessage: `Unable to disable alert`,
+          defaultMessage: `Unable to disable rule`,
         }),
         text: err.message,
       });
@@ -40,11 +42,11 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
   async function enableAlert() {
     setIsSaving(true);
     try {
-      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.id}/_enable`);
+      await Legacy.shims.http.post(`${LEGACY_BASE_ALERT_API_PATH}/alert/${alert.id}/_enable`);
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
         title: i18n.translate('xpack.monitoring.alerts.panel.enableAlert.errorTitle', {
-          defaultMessage: `Unable to enable alert`,
+          defaultMessage: `Unable to enable rule`,
         }),
         text: err.message,
       });
@@ -54,11 +56,11 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
   async function muteAlert() {
     setIsSaving(true);
     try {
-      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.id}/_mute_all`);
+      await Legacy.shims.http.post(`${LEGACY_BASE_ALERT_API_PATH}/alert/${alert.id}/_mute_all`);
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
         title: i18n.translate('xpack.monitoring.alerts.panel.muteAlert.errorTitle', {
-          defaultMessage: `Unable to mute alert`,
+          defaultMessage: `Unable to mute rule`,
         }),
         text: err.message,
       });
@@ -68,11 +70,11 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
   async function unmuteAlert() {
     setIsSaving(true);
     try {
-      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.id}/_unmute_all`);
+      await Legacy.shims.http.post(`${LEGACY_BASE_ALERT_API_PATH}/alert/${alert.id}/_unmute_all`);
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
         title: i18n.translate('xpack.monitoring.alerts.panel.ummuteAlert.errorTitle', {
-          defaultMessage: `Unable to unmute alert`,
+          defaultMessage: `Unable to unmute rule`,
         }),
         text: err.message,
       });
@@ -110,7 +112,7 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
             }}
           >
             {i18n.translate('xpack.monitoring.alerts.panel.editAlert', {
-              defaultMessage: `Edit alert`,
+              defaultMessage: `Edit rule`,
             })}
           </EuiButton>
         </EuiFlexItem>

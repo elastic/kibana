@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { identity } from 'lodash';
@@ -21,7 +22,8 @@ interface SetupDependencies {
 }
 
 export class AdvancedUiActionsServerPlugin
-  implements Plugin<SetupContract, StartContract, SetupDependencies> {
+  implements Plugin<SetupContract, StartContract, SetupDependencies>
+{
   protected readonly actionFactories: ActionFactoryRegistry = new Map();
 
   constructor() {}
@@ -51,7 +53,7 @@ export class AdvancedUiActionsServerPlugin
 
     this.actionFactories.set(definition.id, {
       id: definition.id,
-      telemetry: definition.telemetry || (() => ({})),
+      telemetry: definition.telemetry || ((state, stats) => stats),
       inject: definition.inject || identity,
       extract:
         definition.extract ||

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('../components/vector_style_editor', () => ({
@@ -21,9 +22,9 @@ import {
   DATA_MAPPING_FUNCTION,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
-import { mockField, MockLayer, MockStyle } from './__tests__/test_util';
+import { mockField, MockLayer, MockStyle } from './test_helpers/test_util';
 import { ColorDynamicOptions } from '../../../../../common/descriptor_types';
-import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
+import { IVectorLayer } from '../../../layers/vector_layer';
 import { IField } from '../../../fields/field';
 
 const makeProperty = (options: ColorDynamicOptions, style?: MockStyle, field?: IField) => {
@@ -31,7 +32,7 @@ const makeProperty = (options: ColorDynamicOptions, style?: MockStyle, field?: I
     options,
     VECTOR_STYLES.LINE_COLOR,
     field ? field : mockField,
-    (new MockLayer(style ? style : new MockStyle()) as unknown) as IVectorLayer,
+    new MockLayer(style ? style : new MockStyle()) as unknown as IVectorLayer,
     () => {
       return (value: RawValue) => value + '_format';
     }
@@ -315,7 +316,7 @@ describe('supportsFieldMeta', () => {
       dynamicStyleOptions,
       VECTOR_STYLES.LINE_COLOR,
       null,
-      (new MockLayer(new MockStyle()) as unknown) as IVectorLayer,
+      new MockLayer(new MockStyle()) as unknown as IVectorLayer,
       () => {
         return (value: RawValue) => value + '_format';
       }
@@ -641,7 +642,7 @@ test('Should read out ordinal type correctly', async () => {
 });
 
 describe('renderDataMappingPopover', () => {
-  test('Should enable toggle when field is backed by geojson-source', () => {
+  test('Should render OrdinalDataMappingPopover', () => {
     const colorStyle = makeProperty(
       {
         color: 'Blues',
@@ -650,25 +651,6 @@ describe('renderDataMappingPopover', () => {
       },
       undefined,
       mockField
-    );
-
-    const legendRow = colorStyle.renderDataMappingPopover(() => {});
-    expect(legendRow).toMatchSnapshot();
-  });
-
-  test('Should disable toggle when field is not backed by geojson source', () => {
-    const nonGeoJsonField = Object.create(mockField);
-    nonGeoJsonField.canReadFromGeoJson = () => {
-      return false;
-    };
-    const colorStyle = makeProperty(
-      {
-        color: 'Blues',
-        type: undefined,
-        fieldMetaOptions,
-      },
-      undefined,
-      nonGeoJsonField
     );
 
     const legendRow = colorStyle.renderDataMappingPopover(() => {});

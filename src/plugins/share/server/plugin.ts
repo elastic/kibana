@@ -1,34 +1,60 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
-import { createRoutes } from './routes/create_routes';
 import { url } from './saved_objects';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../common/constants';
+import { UrlService } from '../common/url_service';
+import { ServerUrlService, ServerShortUrlClientFactory } from './url_service';
+import { registerUrlServiceRoutes } from './url_service/http/register_url_service_routes';
+import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
 
-export class SharePlugin implements Plugin {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+/** @public */
+export interface SharePluginSetup {
+  url: ServerUrlService;
+}
 
-  public async setup(core: CoreSetup) {
-    createRoutes(core, this.initializerContext.logger.get());
+/** @public */
+export interface SharePluginStart {
+  url: ServerUrlService;
+}
+
+export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
+  private url?: ServerUrlService;
+  private version: string;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.version = initializerContext.env.packageInfo.version;
+  }
+
+  public setup(core: CoreSetup) {
+    this.url = new UrlService({
+      baseUrl: core.http.basePath.publicBaseUrl || core.http.basePath.serverBasePath,
+      version: this.initializerContext.env.packageInfo.version,
+      navigate: async () => {
+        throw new Error('Locator .navigate() is not supported on the server.');
+      },
+      getUrl: async () => {
+        throw new Error('Locator .getUrl() currently is not supported on the server.');
+      },
+      shortUrls: new ServerShortUrlClientFactory({
+        currentVersion: this.version,
+      }),
+    });
+
+    this.url.locators.create(new LegacyShortUrlLocatorDefinition());
+
+    const router = core.http.createRouter();
+
+    registerUrlServiceRoutes(core, router, this.url);
+
     core.savedObjects.registerType(url);
     core.uiSettings.register({
       [CSV_SEPARATOR_SETTING]: {
@@ -52,10 +78,18 @@ export class SharePlugin implements Plugin {
         schema: schema.boolean(),
       },
     });
+
+    return {
+      url: this.url,
+    };
   }
 
   public start() {
     this.initializerContext.logger.get().debug('Starting plugin');
+
+    return {
+      url: this.url!,
+    };
   }
 
   public stop() {

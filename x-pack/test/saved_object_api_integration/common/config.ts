@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import path from 'path';
 
 import { REPO_ROOT } from '@kbn/utils';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 
 import { services } from './services';
 
@@ -36,10 +37,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       services,
       junit: {
         reportName: 'X-Pack Saved Object API Integration Tests -- ' + name,
-      },
-
-      esArchiver: {
-        directory: path.join(__dirname, 'fixtures', 'es_archiver'),
       },
 
       esTestCluster: {

@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import request, { Cookie } from 'request';
+import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
+import { adminTestUser } from '@kbn/test';
 import type { AuthenticationProvider } from '../../../../plugins/security/common/model';
 import { getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -14,9 +16,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const es = getService('es');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
   const config = getService('config');
   const randomness = getService('randomness');
-  const [basicUsername, basicPassword] = config.get('servers.elasticsearch.auth').split(':');
+  const { username: basicUsername, password: basicPassword } = adminTestUser;
   const kibanaServerConfig = config.get('servers.kibana');
 
   async function checkSessionCookie(
@@ -35,8 +38,10 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   async function getNumberOfSessionDocuments() {
-    return (await es.search({ index: '.kibana_security_session*' })).body.hits.total
-      .value as number;
+    return (
+      // @ts-expect-error doesn't handle total as number
+      (await es.search({ index: '.kibana_security_session*' })).body.hits.total.value as number
+    );
   }
 
   async function loginWithSAML(providerName: string) {
@@ -49,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
     const authenticationResponse = await supertest
       .post('/api/security/saml/callback')
       .set('kbn-xsrf', 'xxx')
-      .set('Cookie', request.cookie(handshakeResponse.headers['set-cookie'][0])!.cookieString())
+      .set('Cookie', parseCookie(handshakeResponse.headers['set-cookie'][0])!.cookieString())
       .send({
         SAMLResponse: await getSAMLResponse({
           destination: `http://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
@@ -59,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
       })
       .expect(302);
 
-    const cookie = request.cookie(authenticationResponse.headers['set-cookie'][0])!;
+    const cookie = parseCookie(authenticationResponse.headers['set-cookie'][0])!;
     await checkSessionCookie(cookie, 'a@b.c', { type: 'saml', name: providerName });
     return cookie;
   }
@@ -67,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Session Lifespan cleanup', () => {
     beforeEach(async () => {
       await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
-      await es.indices.delete({ index: '.kibana_security_session*' }, { ignore: [404] });
+      await esDeleteAllIndices('.kibana_security_session*');
     });
 
     it('should properly clean up session expired because of lifespan', async function () {
@@ -84,7 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      const sessionCookie = request.cookie(response.headers['set-cookie'][0])!;
+      const sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(sessionCookie, basicUsername, {
         type: 'basic',
         name: 'basic1',
@@ -107,15 +112,12 @@ export default function ({ getService }: FtrProviderContext) {
     it('should properly clean up session expired because of lifespan when providers override global session config', async function () {
       this.timeout(60000);
 
-      const [
-        samlDisableSessionCookie,
-        samlOverrideSessionCookie,
-        samlFallbackSessionCookie,
-      ] = await Promise.all([
-        loginWithSAML('saml_disable'),
-        loginWithSAML('saml_override'),
-        loginWithSAML('saml_fallback'),
-      ]);
+      const [samlDisableSessionCookie, samlOverrideSessionCookie, samlFallbackSessionCookie] =
+        await Promise.all([
+          loginWithSAML('saml_disable'),
+          loginWithSAML('saml_override'),
+          loginWithSAML('saml_fallback'),
+        ]);
 
       const response = await supertest
         .post('/internal/security/login')
@@ -127,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username: basicUsername, password: basicPassword },
         })
         .expect(200);
-      const basicSessionCookie = request.cookie(response.headers['set-cookie'][0])!;
+      const basicSessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(basicSessionCookie, basicUsername, {
         type: 'basic',
         name: 'basic1',

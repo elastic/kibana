@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
-import { InfraNodeType } from '../../../../plugins/infra/server/graphql/types';
 import {
   InfraMetadata,
   InfraMetadataRequest,
@@ -43,14 +43,14 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('metadata', () => {
     describe('7.0.0', () => {
-      before(() => esArchiver.load('infra/7.0.0/hosts'));
-      after(() => esArchiver.unload('infra/7.0.0/hosts'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
 
       it('hosts', async () => {
         const metadata = await fetchMetadata({
           sourceId: 'default',
           nodeId: 'demo-stack-mysql-01',
-          nodeType: InfraNodeType.host,
+          nodeType: 'host',
           timeRange: timeRange700,
         });
         if (metadata) {
@@ -63,14 +63,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('6.6.0', () => {
-      before(() => esArchiver.load('infra/6.6.0/docker'));
-      after(() => esArchiver.unload('infra/6.6.0/docker'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/6.6.0/docker'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/6.6.0/docker'));
 
       it('docker', async () => {
         const metadata = await fetchMetadata({
           sourceId: 'default',
           nodeId: '631f36a845514442b93c3fdd2dc91bcd8feb680b8ac5832c7fb8fdc167bb938e',
-          nodeType: InfraNodeType.container,
+          nodeType: 'container',
           timeRange: timeRange660,
         });
         if (metadata) {
@@ -84,7 +84,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('8.0.0', () => {
       describe('cloud and host information', () => {
-        const archiveName = 'infra/8.0.0/logs_and_metrics_with_aws';
+        const archiveName =
+          'x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics_with_aws';
         before(() => esArchiver.load(archiveName));
         after(() => esArchiver.unload(archiveName));
 
@@ -92,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
           const metadata = await fetchMetadata({
             sourceId: 'default',
             nodeId: 'gke-observability-8--observability-8--bc1afd95-f0zc',
-            nodeType: InfraNodeType.host,
+            nodeType: 'host',
             timeRange: timeRange800withAws,
           });
           if (metadata) {
@@ -140,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
           const metadata = await fetchMetadata({
             sourceId: 'default',
             nodeId: 'ip-172-31-47-9.us-east-2.compute.internal',
-            nodeType: InfraNodeType.host,
+            nodeType: 'host',
             timeRange: timeRange800withAws,
           });
           if (metadata) {
@@ -189,7 +190,7 @@ export default function ({ getService }: FtrProviderContext) {
           const metadata = await fetchMetadata({
             sourceId: 'default',
             nodeId: '14887487-99f8-11e9-9a96-42010a84004d',
-            nodeType: InfraNodeType.pod,
+            nodeType: 'pod',
             timeRange: timeRange800withAws,
           });
           if (metadata) {
@@ -242,7 +243,7 @@ export default function ({ getService }: FtrProviderContext) {
           const metadata = await fetchMetadata({
             sourceId: 'default',
             nodeId: 'c74b04834c6d7cc1800c3afbe31d0c8c0c267f06e9eb45c2b0c2df3e6cee40c5',
-            nodeType: InfraNodeType.container,
+            nodeType: 'container',
             timeRange: timeRange800withAws,
           });
           if (metadata) {

@@ -1,26 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import moment from 'moment';
 
 import { TimeBuckets, TimeBucketsConfig } from './time_buckets';
 import { autoInterval } from '../../_interval_options';
+import { InvalidEsCalendarIntervalError } from '../../../utils';
 
 describe('TimeBuckets', () => {
   const timeBucketConfig: TimeBucketsConfig = {
@@ -120,12 +110,22 @@ describe('TimeBuckets', () => {
     }
   });
 
-  test('setInterval/getInterval - intreval is a "auto"', () => {
+  test('setInterval/getInterval - interval is a "auto"', () => {
     const timeBuckets = new TimeBuckets(timeBucketConfig);
     timeBuckets.setInterval(autoInterval);
     const interval = timeBuckets.getInterval();
 
     expect(interval.description).toEqual('0 milliseconds');
+    expect(interval.esValue).toEqual(0);
+    expect(interval.esUnit).toEqual('ms');
+    expect(interval.expression).toEqual('0ms');
+  });
+
+  test('setInterval/getInterval - interval is a "auto" (useNormalizedEsInterval is false)', () => {
+    const timeBuckets = new TimeBuckets(timeBucketConfig);
+    timeBuckets.setInterval(autoInterval);
+    const interval = timeBuckets.getInterval(false);
+
     expect(interval.esValue).toEqual(0);
     expect(interval.esUnit).toEqual('ms');
     expect(interval.expression).toEqual('0ms');
@@ -137,5 +137,15 @@ describe('TimeBuckets', () => {
     timeBuckets.getScaledDateFormat();
     const format = timeBuckets.getScaledDateFormat();
     expect(format).toEqual('HH:mm');
+  });
+
+  test('allows days but throws error on weeks', () => {
+    const timeBuckets = new TimeBuckets(timeBucketConfig);
+    timeBuckets.setInterval('14d');
+    const interval = timeBuckets.getInterval(false);
+    expect(interval.esUnit).toEqual('d');
+
+    timeBuckets.setInterval('2w');
+    expect(() => timeBuckets.getInterval(false)).toThrow(InvalidEsCalendarIntervalError);
   });
 });

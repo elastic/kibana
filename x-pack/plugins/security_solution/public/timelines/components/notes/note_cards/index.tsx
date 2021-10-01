@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiPanel, EuiScreenReaderOnly } from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 
-import { getNotesContainerClassName } from '../../../../common/components/accessibility/helpers';
+import { getNotesContainerClassName } from '../../../../../../timelines/public';
 import { AddNote } from '../add_note';
 import { AssociateNote } from '../helpers';
 import { NotePreviews, NotePreviewsContainer } from '../../open_timeline/note_previews';

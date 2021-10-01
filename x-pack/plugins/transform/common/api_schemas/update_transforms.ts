@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { TransformPivotConfig } from '../types/transform';
 
-import { settingsSchema, sourceSchema, syncSchema } from './transforms';
+import { retentionPolicySchema, settingsSchema, sourceSchema, syncSchema } from './transforms';
 
 // POST _transform/{transform_id}/_update
 export const postTransformsUpdateRequestSchema = schema.object({
@@ -21,6 +22,7 @@ export const postTransformsUpdateRequestSchema = schema.object({
     })
   ),
   frequency: schema.maybe(schema.string()),
+  retention_policy: schema.maybe(retentionPolicySchema),
   settings: schema.maybe(settingsSchema),
   source: schema.maybe(sourceSchema),
   sync: schema.maybe(syncSchema),

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiBadge, EuiText } from '@elastic/eui';
@@ -25,12 +26,12 @@ const Text = styled(EuiText)`
 
 Text.displayName = 'Text';
 
-const BadgeHighlighted = (styled(EuiBadge)`
+const BadgeHighlighted = styled(EuiBadge)`
   height: 20px;
   margin: 0 5px 0 5px;
   maxwidth: 85px;
   minwidth: 85px;
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 
 BadgeHighlighted.displayName = 'BadgeHighlighted';
 

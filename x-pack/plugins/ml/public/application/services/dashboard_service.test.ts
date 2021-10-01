@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { dashboardServiceProvider } from './dashboard_service';
@@ -22,9 +23,9 @@ jest.mock('@elastic/eui', () => {
 
 describe('DashboardService', () => {
   const mockSavedObjectClient = savedObjectsServiceMock.createStartContract().client;
-  const dashboardUrlGenerator = ({
+  const dashboardUrlGenerator = {
     createUrl: jest.fn(),
-  } as unknown) as DashboardUrlGenerator;
+  } as unknown as DashboardUrlGenerator;
   const dashboardService = dashboardServiceProvider(
     mockSavedObjectClient,
     '8.0.0',
@@ -47,7 +48,7 @@ describe('DashboardService', () => {
     // act
     dashboardService.attachPanels(
       'test-dashboard',
-      ({
+      {
         title: 'ML Test',
         hits: 0,
         description: '',
@@ -91,7 +92,7 @@ describe('DashboardService', () => {
         kibanaSavedObjectMeta: {
           searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}',
         },
-      } as unknown) as DashboardSavedObject,
+      } as unknown as DashboardSavedObject,
       [{ title: 'Test title', type: 'test-panel', embeddableConfig: { testConfig: '' } }]
     );
     // assert

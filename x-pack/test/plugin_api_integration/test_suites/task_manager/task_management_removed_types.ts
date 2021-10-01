@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
 import expect from '@kbn/expect';
 import url from 'url';
-import supertestAsPromised from 'supertest-as-promised';
+import supertest from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
 
@@ -42,23 +43,23 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const config = getService('config');
-  const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
+  const request = supertest(url.format(config.get('servers.kibana')));
 
   const REMOVED_TASK_TYPE_ID = 'be7e1250-3322-11eb-94c1-db6995e83f6a';
 
   describe('removed task types', () => {
     before(async () => {
-      await esArchiver.load('task_manager_removed_types');
+      await esArchiver.load('x-pack/test/functional/es_archives/task_manager_removed_types');
     });
 
     after(async () => {
-      await esArchiver.unload('task_manager_removed_types');
+      await esArchiver.unload('x-pack/test/functional/es_archives/task_manager_removed_types');
     });
 
     function scheduleTask(
       task: Partial<ConcreteTaskInstance | DeprecatedConcreteTaskInstance>
     ): Promise<SerializedConcreteTaskInstance> {
-      return supertest
+      return request
         .post('/api/sample_tasks/schedule')
         .set('kbn-xsrf', 'xxx')
         .send({ task })
@@ -69,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
     function currentTasks<State = unknown, Params = unknown>(): Promise<{
       docs: Array<SerializedConcreteTaskInstance<State, Params>>;
     }> {
-      return supertest
+      return request
         .get('/api/sample_tasks')
         .expect(200)
         .then((response) => response.body);

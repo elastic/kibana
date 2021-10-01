@@ -2,8 +2,9 @@
 
 #
 # Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-# or more contributor license agreements. Licensed under the Elastic License;
-# you may not use this file except in compliance with the Elastic License.
+# or more contributor license agreements. Licensed under the Elastic License
+# 2.0; you may not use this file except in compliance with the Elastic License
+# 2.0.
 #
 
 set -e
@@ -17,7 +18,7 @@ curl -s -k \
   -X POST ${ELASTICSEARCH_URL}/${TASK_MANAGER_INDEX}*/_delete_by_query \
   --data '{
     "query": {
-      "term" : { "task.scope" : "alerting" } 
+      "term" : { "task.scope" : "alerting" }
     }
   }' \
   | jq .

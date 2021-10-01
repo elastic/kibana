@@ -1,25 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
+import type {
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
-} from '../../../../../src/core/server';
-import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
-import { EncryptionKeyRotationService } from './encryption_key_rotation_service';
-import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
-
+} from 'src/core/server';
 import {
   coreMock,
   httpServerMock,
   loggingSystemMock,
   savedObjectsClientMock,
   savedObjectsTypeRegistryMock,
-} from '../../../../../src/core/server/mocks';
+} from 'src/core/server/mocks';
+
+import type { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
+import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
+import { EncryptionKeyRotationService } from './encryption_key_rotation_service';
 import { encryptedSavedObjectsServiceMock } from './index.mock';
 
 function getMockSavedObject(savedObject?: Partial<SavedObject<any>>) {

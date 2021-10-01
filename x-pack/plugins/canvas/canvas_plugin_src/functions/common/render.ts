@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { Render, ContainerStyle } from '../../../types';
+import { ExpressionValueRender, ContainerStyle } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 import { DEFAULT_ELEMENT_CSS } from '../../../common/lib/constants';
 
@@ -18,11 +19,14 @@ interface Arguments {
   css: string;
   containerStyle: ContainerStyleArgument;
 }
+
+export type Renderable = ExpressionValueRender<Arguments> & Arguments;
+
 export function render(): ExpressionFunctionDefinition<
   'render',
-  Render<any>,
+  ExpressionValueRender<any>,
   Arguments,
-  Render<Arguments>
+  ExpressionValueRender<Arguments>
 > {
   const { help, args: argHelp } = getFunctionHelp().render;
 
@@ -48,7 +52,6 @@ export function render(): ExpressionFunctionDefinition<
           'plot',
           'progress',
           'repeatImage',
-          'revealImage',
           'shape',
           'table',
           'time_filter',

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash/fp';
@@ -25,17 +26,19 @@ export const getBreadcrumbs = (
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
-      href: getUrlForApp(`${APP_ID}:${SecurityPageName.case}`, {
+      href: getUrlForApp(APP_ID, {
+        deepLinkId: SecurityPageName.case,
         path: queryParameters,
       }),
     },
   ];
-  if (params.detailName === 'create') {
+  if (params.pathName === '/create') {
     breadcrumb = [
       ...breadcrumb,
       {
         text: i18n.CREATE_BC_TITLE,
-        href: getUrlForApp(`${APP_ID}:${SecurityPageName.case}`, {
+        href: getUrlForApp(APP_ID, {
+          deepLinkId: SecurityPageName.case,
           path: getCreateCaseUrl(queryParameters),
         }),
       },
@@ -45,7 +48,8 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: params.state?.caseTitle ?? '',
-        href: getUrlForApp(`${APP_ID}:${SecurityPageName.case}`, {
+        href: getUrlForApp(APP_ID, {
+          deepLinkId: SecurityPageName.case,
           path: getCaseDetailsUrl({ id: params.detailName, search: queryParameters }),
         }),
       },

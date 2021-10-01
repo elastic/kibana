@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { render, wait } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
 
@@ -76,7 +77,7 @@ describe('Transform: <DefinePivotSummary />', () => {
       },
     };
 
-    const { getByText } = render(
+    const { queryByText } = render(
       <MlSharedContext.Provider value={mlSharedImports}>
         <StepDefineSummary formState={formState} searchItems={searchItems as SearchItems} />
       </MlSharedContext.Provider>
@@ -84,8 +85,9 @@ describe('Transform: <DefinePivotSummary />', () => {
 
     // Act
     // Assert
-    expect(getByText('Group by')).toBeInTheDocument();
-    expect(getByText('Aggregations')).toBeInTheDocument();
-    await wait();
+    await waitFor(() => {
+      expect(queryByText('Group by')).toBeInTheDocument();
+      expect(queryByText('Aggregations')).toBeInTheDocument();
+    });
   });
 });

@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import '../../../test/global_mocks';
 import { setupEnvironment } from '../helpers';
 
 import {
@@ -30,15 +32,6 @@ jest.mock('@elastic/eui', () => {
         data-test-subj="mockComboBox"
         onChange={(syntheticEvent: any) => {
           props.onChange([syntheticEvent['0']]);
-        }}
-      />
-    ),
-    // Mocking EuiCodeEditor, which uses React Ace under the hood
-    EuiCodeEditor: (props: any) => (
-      <input
-        data-test-subj="mockCodeEditor"
-        onChange={(syntheticEvent: any) => {
-          props.onChange(syntheticEvent.jsonString);
         }}
       />
     ),
@@ -100,7 +93,7 @@ describe('<TemplateCreate />', () => {
     (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = false;
   });
 
-  describe('on component mount', () => {
+  describe('composable index template', () => {
     beforeEach(async () => {
       await act(async () => {
         testBed = await setup();
@@ -114,6 +107,11 @@ describe('<TemplateCreate />', () => {
       expect(find('pageTitle').text()).toEqual('Create template');
     });
 
+    test('renders no deprecation warning', async () => {
+      const { exists } = testBed;
+      expect(exists('legacyIndexTemplateDeprecationWarning')).toBe(false);
+    });
+
     test('should not let the user go to the next step with invalid fields', async () => {
       const { find, actions, component } = testBed;
 
@@ -125,6 +123,26 @@ describe('<TemplateCreate />', () => {
       component.update();
 
       expect(find('nextButton').props().disabled).toEqual(true);
+    });
+  });
+
+  describe('legacy index template', () => {
+    beforeEach(async () => {
+      await act(async () => {
+        testBed = await setup(true);
+      });
+    });
+
+    test('should set the correct page title', () => {
+      const { exists, find } = testBed;
+
+      expect(exists('pageTitle')).toBe(true);
+      expect(find('pageTitle').text()).toEqual('Create legacy template');
+    });
+
+    test('renders deprecation warning', async () => {
+      const { exists } = testBed;
+      expect(exists('legacyIndexTemplateDeprecationWarning')).toBe(true);
     });
   });
 
@@ -147,6 +165,11 @@ describe('<TemplateCreate />', () => {
 
         expect(exists('stepComponents')).toBe(true);
         expect(find('stepTitle').text()).toEqual('Component templates (optional)');
+      });
+
+      it(`doesn't render the deprecated legacy index template warning`, () => {
+        const { exists } = testBed;
+        expect(exists('legacyIndexTemplateDeprecationWarning')).toBe(false);
       });
 
       it('should list the available component templates', () => {

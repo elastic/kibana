@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -14,6 +16,7 @@ import { Overview } from '../../../components/cluster/overview';
 import { SetupModeRenderer } from '../../../components/renderers';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { CODE_PATH_ALL } from '../../../../common/constants';
+import { EnableAlertsModal } from '../../../alerts/enable_alerts_modal.tsx';
 
 const CODE_PATHS = [CODE_PATH_ALL];
 
@@ -80,6 +83,7 @@ uiRoutes.when('/overview', {
                     setupMode={setupMode}
                     showLicenseExpiration={showLicenseExpiration}
                   />
+                  <EnableAlertsModal alerts={this.alerts} />
                   {bottomBarComponent}
                 </SetupModeContext.Provider>
               )}

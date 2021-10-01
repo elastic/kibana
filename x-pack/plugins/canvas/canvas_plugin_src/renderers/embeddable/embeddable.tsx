@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -23,7 +24,7 @@ import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 const { embeddable: strings } = RendererStrings;
 
 const embeddablesRegistry: {
-  [key: string]: IEmbeddable;
+  [key: string]: IEmbeddable | Promise<IEmbeddable>;
 } = {};
 
 const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
@@ -66,7 +67,15 @@ export const embeddableRendererFactory = (
           throw new EmbeddableFactoryNotFoundError(embeddableType);
         }
 
-        const embeddableObject = await factory.createFromSavedObject(input.id, input);
+        const embeddablePromise = factory
+          .createFromSavedObject(input.id, input)
+          .then((embeddable) => {
+            embeddablesRegistry[uniqueId] = embeddable;
+            return embeddable;
+          });
+        embeddablesRegistry[uniqueId] = embeddablePromise;
+
+        const embeddableObject = await (async () => embeddablePromise)();
 
         const palettes = await plugins.charts.palettes.getPalettes();
 
@@ -104,8 +113,12 @@ export const embeddableRendererFactory = (
           return ReactDOM.unmountComponentAtNode(domNode);
         });
       } else {
-        embeddablesRegistry[uniqueId].updateInput(input);
-        embeddablesRegistry[uniqueId].reload();
+        const embeddable = embeddablesRegistry[uniqueId];
+
+        if ('updateInput' in embeddable) {
+          embeddable.updateInput(input);
+          embeddable.reload();
+        }
       }
     },
   });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { actionTypeRegistryMock } from '../../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
@@ -51,23 +52,20 @@ describe('stepRuleActions utils', () => {
     const actionTypeRegistry = actionTypeRegistryMock.create();
 
     beforeAll(() => {
-      const actionMock = {
+      const actionMock = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'id',
         iconClass: 'iconClass',
         validateParams: validateParamsMock,
         selectMessage: 'message',
-        validateConnector: jest.fn(),
-        actionConnectorFields: null,
-        actionParamsFields: null,
-      };
+      });
       actionTypeRegistry.get.mockReturnValue(actionMock);
     });
 
-    it('should validate action params', () => {
+    it('should validate action params', async () => {
       validateParamsMock.mockReturnValue({ errors: [] });
 
       expect(
-        validateActionParams(
+        await validateActionParams(
           {
             id: '817b8bca-91d1-4729-8ee1-3a83aaafd9d4',
             group: 'default',
@@ -81,13 +79,13 @@ describe('stepRuleActions utils', () => {
       ).toHaveLength(0);
     });
 
-    it('should validate incorrect action params', () => {
+    it('should validate incorrect action params', async () => {
       validateParamsMock.mockReturnValue({
         errors: ['Message is required'],
       });
 
       expect(
-        validateActionParams(
+        await validateActionParams(
           {
             id: '817b8bca-91d1-4729-8ee1-3a83aaafd9d4',
             group: 'default',
@@ -99,7 +97,7 @@ describe('stepRuleActions utils', () => {
       ).toHaveLength(1);
     });
 
-    it('should validate incorrect action params and filter error objects', () => {
+    it('should validate incorrect action params and filter error objects', async () => {
       validateParamsMock.mockReturnValue({
         errors: [
           {
@@ -109,7 +107,7 @@ describe('stepRuleActions utils', () => {
       });
 
       expect(
-        validateActionParams(
+        await validateActionParams(
           {
             id: '817b8bca-91d1-4729-8ee1-3a83aaafd9d4',
             group: 'default',
@@ -121,13 +119,13 @@ describe('stepRuleActions utils', () => {
       ).toHaveLength(0);
     });
 
-    it('should validate incorrect action params and filter duplicated errors', () => {
+    it('should validate incorrect action params and filter duplicated errors', async () => {
       validateParamsMock.mockReturnValue({
         errors: ['Message is required', 'Message is required', 'Message is required'],
       });
 
       expect(
-        validateActionParams(
+        await validateActionParams(
           {
             id: '817b8bca-91d1-4729-8ee1-3a83aaafd9d4',
             group: 'default',

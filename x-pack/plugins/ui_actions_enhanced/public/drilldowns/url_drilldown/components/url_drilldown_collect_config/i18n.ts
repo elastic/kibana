@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -24,17 +25,10 @@ export const txtUrlPreviewHelpText = i18n.translate(
   }
 );
 
-export const txtAddVariableButtonTitle = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.addVariableButtonTitle',
-  {
-    defaultMessage: 'Add variable',
-  }
-);
-
 export const txtUrlTemplateLabel = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateLabel',
   {
-    defaultMessage: 'Enter URL template:',
+    defaultMessage: 'Enter URL:',
   }
 );
 
@@ -42,20 +36,6 @@ export const txtUrlTemplateSyntaxHelpLinkText = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateSyntaxHelpLinkText',
   {
     defaultMessage: 'Syntax help',
-  }
-);
-
-export const txtUrlTemplateVariablesHelpLinkText = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateVariablesHelpLinkText',
-  {
-    defaultMessage: 'Help',
-  }
-);
-
-export const txtUrlTemplateVariablesFilterPlaceholderText = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateVariablesFilterPlaceholderText',
-  {
-    defaultMessage: 'Filter variables',
   }
 );
 
@@ -76,6 +56,27 @@ export const txtUrlTemplatePreviewLinkText = i18n.translate(
 export const txtUrlTemplateOpenInNewTab = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.openInNewTabLabel',
   {
-    defaultMessage: 'Open in new tab',
+    defaultMessage: 'Open in new window',
+  }
+);
+
+export const txtUrlTemplateAdditionalOptions = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.additionalOptions',
+  {
+    defaultMessage: 'Additional options',
+  }
+);
+
+export const txtUrlTemplateEncodeUrl = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.encodeUrl',
+  {
+    defaultMessage: 'Encode URL',
+  }
+);
+
+export const txtUrlTemplateEncodeDescription = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.encodeDescription',
+  {
+    defaultMessage: 'If enabled, URL will be escaped using percent encoding',
   }
 );

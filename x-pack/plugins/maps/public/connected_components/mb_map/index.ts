@@ -1,36 +1,40 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { MBMap } from './mb_map';
+import { MbMap } from './mb_map';
 import {
+  clearGoto,
+  clearMouseCoordinates,
+  mapDestroyed,
   mapExtentChanged,
   mapReady,
-  mapDestroyed,
-  setMouseCoordinates,
-  clearMouseCoordinates,
-  clearGoto,
+  setAreTilesLoaded,
   setMapInitError,
-  MapExtentState,
+  setMouseCoordinates,
+  updateMetaFromTiles,
 } from '../../actions';
 import {
+  getGoto,
   getLayerList,
   getMapReady,
-  getGoto,
-  getScrollZoom,
-  isInteractiveDisabled,
-  isTooltipControlDisabled,
-  isViewControlHidden,
-  getSpatialFiltersLayer,
   getMapSettings,
+  getScrollZoom,
+  getSpatialFiltersLayer,
+  getTimeslice,
 } from '../../selectors/map_selectors';
+import { getDrawMode, getIsFullScreen } from '../../selectors/ui_selectors';
 import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
 import { MapStoreState } from '../../reducers/store';
+import { DRAW_MODE } from '../../../common/constants';
+import { TileMetaFeature } from '../../../common/descriptor_types';
+import type { MapExtentState } from '../../reducers/map/types';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -41,9 +45,11 @@ function mapStateToProps(state: MapStoreState) {
     goto: getGoto(state),
     inspectorAdapters: getInspectorAdapters(state),
     scrollZoom: getScrollZoom(state),
-    disableInteractive: isInteractiveDisabled(state),
-    disableTooltipControl: isTooltipControlDisabled(state),
-    hideViewControl: isViewControlHidden(state),
+    isFullScreen: getIsFullScreen(state),
+    timeslice: getTimeslice(state),
+    featureModeActive:
+      getDrawMode(state) === DRAW_MODE.DRAW_SHAPES || getDrawMode(state) === DRAW_MODE.DRAW_POINTS,
+    filterModeActive: getDrawMode(state) === DRAW_MODE.DRAW_FILTERS,
   };
 }
 
@@ -72,8 +78,14 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     setMapInitError(errorMessage: string) {
       dispatch(setMapInitError(errorMessage));
     },
+    setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
+      dispatch(setAreTilesLoaded(layerId, areTilesLoaded));
+    },
+    updateMetaFromTiles(layerId: string, features: TileMetaFeature[]) {
+      dispatch(updateMetaFromTiles(layerId, features));
+    },
   };
 }
 
-const connected = connect(mapStateToProps, mapDispatchToProps)(MBMap);
+const connected = connect(mapStateToProps, mapDispatchToProps)(MbMap);
 export { connected as MBMap };

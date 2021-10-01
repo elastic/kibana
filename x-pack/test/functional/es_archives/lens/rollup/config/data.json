@@ -47,6 +47,28 @@
 {
   "type": "doc",
   "value": {
+    "id": "index-pattern:lens-regular-data",
+    "index": ".kibana_1",
+    "source": {
+      "index-pattern" : {
+        "title" : "lens_regular_data",
+        "timeFieldName" : "@timestamp",
+        "fields" : "[]"
+      },
+      "type" : "index-pattern",
+      "references" : [ ],
+      "migrationVersion" : {
+        "index-pattern" : "7.6.0"
+      },
+      "updated_at" : "2020-08-19T08:39:09.998Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "config:8.0.0",
     "index": ".kibana_1",
     "source": {
@@ -54,7 +76,7 @@
         "accessibility:disableAnimations": true,
         "buildNum": 9007199254740991,
         "dateFormat:tz": "UTC",
-        "defaultIndex": "logstash-*"
+        "defaultIndex": "lens-rolled-up-data"
       },
       "references": [],
       "type": "config",

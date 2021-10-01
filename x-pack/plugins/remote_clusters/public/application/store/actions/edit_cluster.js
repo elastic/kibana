@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -96,14 +97,16 @@ export const editCluster = (cluster) => async (dispatch) => {
   }
 };
 
-export const startEditingCluster = ({ clusterName }) => (dispatch) => {
-  dispatch(loadClusters());
+export const startEditingCluster =
+  ({ clusterName }) =>
+  (dispatch) => {
+    dispatch(loadClusters());
 
-  dispatch({
-    type: EDIT_CLUSTER_START,
-    payload: { clusterName },
-  });
-};
+    dispatch({
+      type: EDIT_CLUSTER_START,
+      payload: { clusterName },
+    });
+  };
 
 export const stopEditingCluster = () => (dispatch) => {
   // Load the clusters to refresh the one we just edited.

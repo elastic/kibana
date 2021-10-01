@@ -1,16 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
-import { PackagePolicySchema, NamespaceSchema } from './package_policy';
+
 import { agentPolicyStatuses, dataTypes } from '../../../common';
 
-const AgentPolicyBaseSchema = {
+import { PackagePolicySchema, NamespaceSchema } from './package_policy';
+
+export const AgentPolicyBaseSchema = {
   name: schema.string({ minLength: 1 }),
   namespace: NamespaceSchema,
   description: schema.maybe(schema.string()),
+  is_managed: schema.maybe(schema.boolean()),
+  unenroll_timeout: schema.maybe(schema.number({ min: 0 })),
   monitoring_enabled: schema.maybe(
     schema.arrayOf(
       schema.oneOf([schema.literal(dataTypes.Logs), schema.literal(dataTypes.Metrics)])
@@ -25,6 +31,7 @@ export const NewAgentPolicySchema = schema.object({
 export const AgentPolicySchema = schema.object({
   ...AgentPolicyBaseSchema,
   id: schema.string(),
+  is_managed: schema.boolean(),
   status: schema.oneOf([
     schema.literal(agentPolicyStatuses.Active),
     schema.literal(agentPolicyStatuses.Inactive),

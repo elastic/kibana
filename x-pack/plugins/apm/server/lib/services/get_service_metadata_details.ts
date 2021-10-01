@@ -1,36 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SortOptions } from '../../../../../typings/elasticsearch';
+import { ProcessorEvent } from '../../../common/processor_event';
 import {
   AGENT,
   CLOUD,
   CLOUD_AVAILABILITY_ZONE,
   CLOUD_MACHINE_TYPE,
-  CONTAINER,
+  CONTAINER_ID,
   HOST,
   KUBERNETES,
-  PROCESSOR_EVENT,
   SERVICE,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
   SERVICE_VERSION,
 } from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { ContainerType } from '../../../common/service_metadata';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeQuery } from '../../../../observability/server';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { Setup } from '../helpers/setup_request';
+import { should } from './get_service_metadata_icons';
 
 type ServiceMetadataDetailsRaw = Pick<
   TransactionRaw,
   'service' | 'agent' | 'host' | 'container' | 'kubernetes' | 'cloud'
 >;
 
-interface ServiceMetadataDetails {
+export interface ServiceMetadataDetails {
   service?: {
     versions?: string[];
     runtime?: {
@@ -60,41 +61,43 @@ interface ServiceMetadataDetails {
 export async function getServiceMetadataDetails({
   serviceName,
   setup,
+  searchAggregatedTransactions,
+  start,
+  end,
 }: {
   serviceName: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
+  searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
 }): Promise<ServiceMetadataDetails> {
-  const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-    { range: rangeFilter(start, end) },
-    ...setup.esFilter,
-  ];
-
-  const should = [
-    { exists: { field: CONTAINER } },
-    { exists: { field: KUBERNETES } },
-    { exists: { field: CLOUD } },
-    { exists: { field: HOST } },
-    { exists: { field: AGENT } },
+    ...rangeQuery(start, end),
   ];
 
   const params = {
     apm: {
-      events: [ProcessorEvent.transaction],
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+        ProcessorEvent.error,
+        ProcessorEvent.metric,
+      ],
     },
     body: {
       size: 1,
-      _source: [SERVICE, AGENT, HOST, CONTAINER, KUBERNETES, CLOUD],
+      _source: [SERVICE, AGENT, HOST, CONTAINER_ID, KUBERNETES, CLOUD],
       query: { bool: { filter, should } },
       aggs: {
         serviceVersions: {
           terms: {
             field: SERVICE_VERSION,
             size: 10,
-            order: { _key: 'desc' } as SortOptions,
+            order: { _key: 'desc' as const },
           },
         },
         availabilityZones: {
@@ -114,7 +117,10 @@ export async function getServiceMetadataDetails({
     },
   };
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search(
+    'get_service_metadata_details',
+    params
+  );
 
   if (response.hits.total.value === 0) {
     return {

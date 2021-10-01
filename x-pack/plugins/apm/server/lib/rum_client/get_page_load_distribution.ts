@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TRANSACTION_DURATION } from '../../../common/elasticsearch_fieldnames';
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { SetupUX } from '../../routes/rum_client';
 
 export const MICRO_TO_SEC = 1000000;
 
@@ -62,15 +63,21 @@ export async function getPageLoadDistribution({
   minPercentile,
   maxPercentile,
   urlQuery,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX;
   minPercentile?: string;
   maxPercentile?: string;
   urlQuery?: string;
+  start: number;
+  end: number;
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
     urlQuery,
+    start,
+    end,
   });
 
   // we will first get 100 steps using 0sec and 50sec duration,
@@ -116,7 +123,7 @@ export async function getPageLoadDistribution({
   const {
     aggregations,
     hits: { total },
-  } = await apmEventClient.search(params);
+  } = await apmEventClient.search('get_page_load_distribution', params);
 
   if (total.value === 0) {
     return null;
@@ -136,6 +143,8 @@ export async function getPageLoadDistribution({
       maxDuration: maxPercQuery,
       // we pass 50sec as min to get next steps
       minDuration: maxDuration,
+      start,
+      end,
     });
 
     pageDistVals = pageDistVals.concat(additionalStepsPageVals);
@@ -143,12 +152,16 @@ export async function getPageLoadDistribution({
   }
 
   // calculate the diff to get actual page load on specific duration value
-  let pageDist = pageDistVals.map(({ key, value }, index: number, arr) => {
-    return {
-      x: microToSec(key),
-      y: index === 0 ? value : value - arr[index - 1].value,
-    };
-  });
+  let pageDist = pageDistVals.map(
+    ({ key, value: maybeNullValue }, index: number, arr) => {
+      // FIXME: values from percentile* aggs can be null
+      const value = maybeNullValue!;
+      return {
+        x: microToSec(key),
+        y: index === 0 ? value : value - arr[index - 1].value!,
+      };
+    }
+  );
 
   pageDist = removeZeroesFromTail(pageDist);
 
@@ -170,10 +183,14 @@ const getPercentilesDistribution = async ({
   setup,
   minDuration,
   maxDuration,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX;
   minDuration: number;
   maxDuration: number;
+  start: number;
+  end: number;
 }) => {
   const stepValues = getPLDChartSteps({
     minDuration: minDuration + 0.5 * MICRO_TO_SEC,
@@ -183,6 +200,8 @@ const getPercentilesDistribution = async ({
 
   const projection = getRumPageLoadTransactionsProjection({
     setup,
+    start,
+    end,
   });
 
   const params = mergeProjection(projection, {
@@ -205,7 +224,10 @@ const getPercentilesDistribution = async ({
 
   const { apmEventClient } = setup;
 
-  const { aggregations } = await apmEventClient.search(params);
+  const { aggregations } = await apmEventClient.search(
+    'get_page_load_distribution',
+    params
+  );
 
   return aggregations?.loadDistribution.values ?? [];
 };

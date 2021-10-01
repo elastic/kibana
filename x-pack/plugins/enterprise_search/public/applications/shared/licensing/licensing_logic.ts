@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
@@ -14,6 +15,8 @@ interface LicensingValues {
   licenseSubscription: Subscription | null;
   hasPlatinumLicense: boolean;
   hasGoldLicense: boolean;
+  isTrial: boolean;
+  canManageLicense: boolean;
 }
 interface LicensingActions {
   setLicense(license: ILicense): ILicense;
@@ -26,7 +29,7 @@ export const LicensingLogic = kea<MakeLogicType<LicensingValues, LicensingAction
     setLicense: (license) => license,
     setLicenseSubscription: (licenseSubscription) => licenseSubscription,
   },
-  reducers: {
+  reducers: ({ props }) => ({
     license: [
       null,
       {
@@ -39,7 +42,8 @@ export const LicensingLogic = kea<MakeLogicType<LicensingValues, LicensingAction
         setLicenseSubscription: (_, licenseSubscription) => licenseSubscription,
       },
     ],
-  },
+    canManageLicense: [props.canManageLicense || false, {}],
+  }),
   selectors: {
     hasPlatinumLicense: [
       (selectors) => [selectors.license],
@@ -54,6 +58,10 @@ export const LicensingLogic = kea<MakeLogicType<LicensingValues, LicensingAction
         const qualifyingLicenses = ['gold', 'platinum', 'enterprise', 'trial'];
         return license?.isActive && qualifyingLicenses.includes(license?.type);
       },
+    ],
+    isTrial: [
+      (selectors) => [selectors.license],
+      (license) => license?.isActive && license?.type === 'trial',
     ],
   },
   events: ({ props, actions, values }) => ({
@@ -74,6 +82,7 @@ export const LicensingLogic = kea<MakeLogicType<LicensingValues, LicensingAction
  */
 interface LicensingLogicProps {
   license$: Observable<ILicense>;
+  canManageLicense: boolean;
 }
 export const mountLicensingLogic = (props: LicensingLogicProps) => {
   LicensingLogic(props);

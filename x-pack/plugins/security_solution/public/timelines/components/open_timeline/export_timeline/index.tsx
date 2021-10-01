@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -9,7 +10,6 @@ import { DeleteTimelines } from '../types';
 
 import { TimelineDownloader } from './export_timeline';
 import { DeleteTimelineModalOverlay } from '../delete_timeline_modal';
-import { exportSelectedTimeline } from '../../../containers/api';
 
 export interface ExportTimeline {
   disableExportTimelineDownloader: () => void;
@@ -36,7 +36,6 @@ export const EditTimelineActionsComponent: React.FC<{
     <TimelineDownloader
       data-test-subj="TimelineDownloader"
       exportedIds={ids}
-      getExportedData={exportSelectedTimeline}
       isEnableDownloader={isEnableDownloader}
       onComplete={onComplete}
     />
@@ -54,4 +53,3 @@ export const EditTimelineActionsComponent: React.FC<{
 );
 
 export const EditTimelineActions = React.memo(EditTimelineActionsComponent);
-export const EditOneTimelineAction = React.memo(EditTimelineActionsComponent);

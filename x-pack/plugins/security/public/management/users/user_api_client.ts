@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { HttpStart } from 'src/core/public';
-import { User, EditUser } from '../../../common/model';
+import type { HttpStart } from 'src/core/public';
+
+import type { EditUser, User } from '../../../common/model';
 
 const usersUrl = '/internal/security/users';
 
@@ -30,7 +32,7 @@ export class UserAPIClient {
     });
   }
 
-  public async changePassword(username: string, password: string, currentPassword: string) {
+  public async changePassword(username: string, password: string, currentPassword?: string) {
     const data: Record<string, string> = {
       newPassword: password,
     };
@@ -41,5 +43,13 @@ export class UserAPIClient {
     await this.http.post(`${usersUrl}/${encodeURIComponent(username)}/password`, {
       body: JSON.stringify(data),
     });
+  }
+
+  public async disableUser(username: string) {
+    await this.http.post(`${usersUrl}/${encodeURIComponent(username)}/_disable`);
+  }
+
+  public async enableUser(username: string) {
+    await this.http.post(`${usersUrl}/${encodeURIComponent(username)}/_enable`);
   }
 }

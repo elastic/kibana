@@ -1,8 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../constants';
+import { RuleExecutionStatus } from '../common/schemas';
 import { getListArrayMock } from '../types/lists.mock';
 
 import { RulesSchema } from './rules_schema';
@@ -57,7 +61,7 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchem
   type: 'query',
   threat: [],
   version: 1,
-  status: 'succeeded',
+  status: RuleExecutionStatus.succeeded,
   status_date: '2020-02-22T16:47:50.047Z',
   last_success_at: '2020-02-22T16:47:50.047Z',
   last_success_message: 'succeeded',
@@ -125,6 +129,7 @@ export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<Rul
     from: 'now-6m',
     immutable: false,
     interval: '5m',
+    index: ['auditbeat-*'],
     rule_id: 'rule-1',
     output_index: '.siem-signals-default',
     max_signals: 100,
@@ -147,6 +152,7 @@ export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<Rul
     language: 'kuery',
     threat_query: '*:*',
     threat_index: ['list-index'],
+    threat_indicator_path: DEFAULT_INDICATOR_SOURCE_PATH,
     threat_mapping: [
       {
         entries: [

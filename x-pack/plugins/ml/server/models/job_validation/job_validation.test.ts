@@ -1,26 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IScopedClusterClient } from 'kibana/server';
 
 import { validateJob, ValidateJobPayload } from './job_validation';
-import { JobValidationMessage } from '../../../common/constants/messages';
+import { ES_CLIENT_TOTAL_HITS_RELATION } from '../../../common/types/es_client';
 import type { MlClient } from '../../lib/ml_client';
+import type { AuthorizationHeader } from '../../lib/request_authorization';
 
 const callAs = {
   fieldCaps: () => Promise.resolve({ body: { fields: [] } }),
-  search: () => Promise.resolve({ body: { hits: { total: { value: 1, relation: 'eq' } } } }),
+  search: () =>
+    Promise.resolve({
+      body: { hits: { total: { value: 1, relation: ES_CLIENT_TOTAL_HITS_RELATION.EQ } } },
+    }),
 };
 
-const mlClusterClient = ({
+const authHeader: AuthorizationHeader = {};
+
+const mlClusterClient = {
   asCurrentUser: callAs,
   asInternalUser: callAs,
-} as unknown) as IScopedClusterClient;
+} as unknown as IScopedClusterClient;
 
-const mlClient = ({
+const mlClient = {
   info: () =>
     Promise.resolve({
       body: {
@@ -30,18 +37,19 @@ const mlClient = ({
         },
       },
     }),
-} as unknown) as MlClient;
+  previewDatafeed: () => Promise.resolve({ body: [{}] }),
+} as unknown as MlClient;
 
 // Note: The tests cast `payload` as any
 // so we can simulate possible runtime payloads
 // that don't satisfy the TypeScript specs.
 describe('ML - validateJob', () => {
-  it('basic validation messages', () => {
-    const payload = ({
+  it('basic validation messages', async () => {
+    const payload = {
       job: { analysis_config: { detectors: [] } },
-    } as unknown) as ValidateJobPayload;
+    } as unknown as ValidateJobPayload;
 
-    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
       const ids = messages.map((m) => m.id);
 
       expect(ids).toStrictEqual([
@@ -54,14 +62,14 @@ describe('ML - validateJob', () => {
   });
 
   const jobIdTests = (testIds: string[], messageId: string) => {
-    const promises = testIds.map((id) => {
-      const payload = ({
+    const promises = testIds.map(async (id) => {
+      const payload = {
         job: {
           analysis_config: { detectors: [] },
           job_id: id,
         },
-      } as unknown) as ValidateJobPayload;
-      return validateJob(mlClusterClient, mlClient, payload).catch(() => {
+      } as unknown as ValidateJobPayload;
+      return validateJob(mlClusterClient, mlClient, payload, authHeader).catch(() => {
         new Error('Promise should not fail for jobIdTests.');
       });
     });
@@ -78,11 +86,11 @@ describe('ML - validateJob', () => {
   };
 
   const jobGroupIdTest = (testIds: string[], messageId: string) => {
-    const payload = ({
+    const payload = {
       job: { analysis_config: { detectors: [] }, groups: testIds },
-    } as unknown) as ValidateJobPayload;
+    } as unknown as ValidateJobPayload;
 
-    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids.includes(messageId)).toBe(true);
     });
@@ -119,10 +127,10 @@ describe('ML - validateJob', () => {
 
   const bucketSpanFormatTests = (testFormats: string[], messageId: string) => {
     const promises = testFormats.map((format) => {
-      const payload = ({
+      const payload = {
         job: { analysis_config: { bucket_span: format, detectors: [] } },
-      } as unknown) as ValidateJobPayload;
-      return validateJob(mlClusterClient, mlClient, payload).catch(() => {
+      } as unknown as ValidateJobPayload;
+      return validateJob(mlClusterClient, mlClient, payload, authHeader).catch(() => {
         new Error('Promise should not fail for bucketSpanFormatTests.');
       });
     });
@@ -146,10 +154,10 @@ describe('ML - validateJob', () => {
     return bucketSpanFormatTests(validBucketSpanFormats, 'bucket_span_valid');
   });
 
-  it('at least one detector function is empty', () => {
-    const payload = ({
+  it('at least one detector function is empty', async () => {
+    const payload = {
       job: { analysis_config: { detectors: [] as Array<{ function?: string }> } },
-    } as unknown) as ValidateJobPayload;
+    } as unknown as ValidateJobPayload;
     payload.job.analysis_config.detectors.push({
       function: 'count',
     });
@@ -157,55 +165,55 @@ describe('ML - validateJob', () => {
       function: '',
     });
     payload.job.analysis_config.detectors.push({
-      // @ts-expect-error
+      // @ts-expect-error incorrect type on purpose for test
       function: undefined,
     });
 
-    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids.includes('detectors_function_empty')).toBe(true);
     });
   });
 
-  it('detector function is not empty', () => {
-    const payload = ({
+  it('detector function is not empty', async () => {
+    const payload = {
       job: { analysis_config: { detectors: [] as Array<{ function?: string }> } },
-    } as unknown) as ValidateJobPayload;
+    } as unknown as ValidateJobPayload;
     payload.job.analysis_config.detectors.push({
       function: 'count',
     });
 
-    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids.includes('detectors_function_not_empty')).toBe(true);
     });
   });
 
-  it('invalid index fields', () => {
-    const payload = ({
+  it('invalid index fields', async () => {
+    const payload = {
       job: { analysis_config: { detectors: [] } },
       fields: {},
-    } as unknown) as ValidateJobPayload;
+    } as unknown as ValidateJobPayload;
 
-    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids.includes('index_fields_invalid')).toBe(true);
     });
   });
 
-  it('valid index fields', () => {
-    const payload = ({
+  it('valid index fields', async () => {
+    const payload = {
       job: { analysis_config: { detectors: [] } },
       fields: { testField: {} },
-    } as unknown) as ValidateJobPayload;
+    } as unknown as ValidateJobPayload;
 
-    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids.includes('index_fields_valid')).toBe(true);
     });
   });
 
-  const getBasicPayload = (): any => ({
+  const getBasicPayload = (): ValidateJobPayload => ({
     job: {
       job_id: 'test',
       analysis_config: {
@@ -227,7 +235,7 @@ describe('ML - validateJob', () => {
     const payload = getBasicPayload() as any;
     delete payload.job.analysis_config.influencers;
 
-    validateJob(mlClusterClient, mlClient, payload).then(
+    validateJob(mlClusterClient, mlClient, payload, authHeader).then(
       () =>
         done(
           new Error('Promise should not resolve for this test when influencers is not an Array.')
@@ -236,10 +244,10 @@ describe('ML - validateJob', () => {
     );
   });
 
-  it('detect duplicate detectors', () => {
+  it('detect duplicate detectors', async () => {
     const payload = getBasicPayload() as any;
     payload.job.analysis_config.detectors.push({ function: 'count' });
-    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual([
         'job_id_valid',
@@ -252,7 +260,7 @@ describe('ML - validateJob', () => {
     });
   });
 
-  it('dedupe duplicate messages', () => {
+  it('dedupe duplicate messages', async () => {
     const payload = getBasicPayload() as any;
     // in this test setup, the following configuration passes
     // the duplicate detectors check, but would return the same
@@ -262,7 +270,7 @@ describe('ML - validateJob', () => {
       { function: 'count', by_field_name: 'airline' },
       { function: 'count', partition_field_name: 'airline' },
     ];
-    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual([
         'job_id_valid',
@@ -274,10 +282,9 @@ describe('ML - validateJob', () => {
     });
   });
 
-  // Failing https://github.com/elastic/kibana/issues/65865
-  it('basic validation passes, extended checks return some messages', () => {
+  it('basic validation passes, extended checks return some messages', async () => {
     const payload = getBasicPayload();
-    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual([
         'job_id_valid',
@@ -288,9 +295,8 @@ describe('ML - validateJob', () => {
     });
   });
 
-  // Failing https://github.com/elastic/kibana/issues/65866
-  it('categorization job using mlcategory passes aggregatable field check', () => {
-    const payload: any = {
+  it('categorization job using mlcategory passes aggregatable field check', async () => {
+    const payload: ValidateJobPayload = {
       job: {
         job_id: 'categorization_test',
         analysis_config: {
@@ -310,7 +316,7 @@ describe('ML - validateJob', () => {
       fields: { testField: {} },
     };
 
-    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual([
         'job_id_valid',
@@ -323,8 +329,8 @@ describe('ML - validateJob', () => {
     });
   });
 
-  it('non-existent field reported as non aggregatable', () => {
-    const payload: any = {
+  it('non-existent field reported as non aggregatable', async () => {
+    const payload: ValidateJobPayload = {
       job: {
         job_id: 'categorization_test',
         analysis_config: {
@@ -343,7 +349,7 @@ describe('ML - validateJob', () => {
       fields: { testField: {} },
     };
 
-    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual([
         'job_id_valid',
@@ -355,9 +361,8 @@ describe('ML - validateJob', () => {
     });
   });
 
-  // Failing https://github.com/elastic/kibana/issues/65867
-  it('script field not reported as non aggregatable', () => {
-    const payload: any = {
+  it('script field not reported as non aggregatable', async () => {
+    const payload: ValidateJobPayload = {
       job: {
         job_id: 'categorization_test',
         analysis_config: {
@@ -386,7 +391,7 @@ describe('ML - validateJob', () => {
       fields: { testField: {} },
     };
 
-    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual([
         'job_id_valid',
@@ -399,26 +404,87 @@ describe('ML - validateJob', () => {
     });
   });
 
-  // the following two tests validate the correct template rendering of
-  // urls in messages with {{version}} in them to be replaced with the
-  // specified version. (defaulting to 'current')
-  const docsTestPayload = getBasicPayload() as any;
-  docsTestPayload.job.analysis_config.detectors = [{ function: 'count', by_field_name: 'airline' }];
-  it('creates a docs url pointing to the current docs version', () => {
-    return validateJob(mlClusterClient, mlClient, docsTestPayload).then((messages) => {
-      const message = messages[
-        messages.findIndex((m) => m.id === 'field_not_aggregatable')
-      ] as JobValidationMessage;
-      expect(message.url!.search('/current/')).not.toBe(-1);
-    });
+  it('datafeed preview contains no docs', async () => {
+    const payload: ValidateJobPayload = {
+      job: {
+        job_id: 'categorization_test',
+        analysis_config: {
+          bucket_span: '15m',
+          detectors: [
+            {
+              function: 'count',
+              partition_field_name: 'custom_script_field',
+            },
+          ],
+          influencers: [''],
+        },
+        data_description: { time_field: '@timestamp' },
+        datafeed_config: {
+          indices: [],
+        },
+      },
+      fields: { testField: {} },
+    };
+
+    const mlClientEmptyDatafeedPreview = {
+      ...mlClient,
+      previewDatafeed: () => Promise.resolve({ body: [] }),
+    } as unknown as MlClient;
+
+    return validateJob(mlClusterClient, mlClientEmptyDatafeedPreview, payload, authHeader).then(
+      (messages) => {
+        const ids = messages.map((m) => m.id);
+        expect(ids).toStrictEqual([
+          'job_id_valid',
+          'detectors_function_not_empty',
+          'index_fields_valid',
+          'field_not_aggregatable',
+          'time_field_invalid',
+          'datafeed_preview_no_documents',
+        ]);
+      }
+    );
   });
 
-  it('creates a docs url pointing to the master docs version', () => {
-    return validateJob(mlClusterClient, mlClient, docsTestPayload, 'master').then((messages) => {
-      const message = messages[
-        messages.findIndex((m) => m.id === 'field_not_aggregatable')
-      ] as JobValidationMessage;
-      expect(message.url!.search('/master/')).not.toBe(-1);
-    });
+  it('datafeed preview failed', async () => {
+    const payload: ValidateJobPayload = {
+      job: {
+        job_id: 'categorization_test',
+        analysis_config: {
+          bucket_span: '15m',
+          detectors: [
+            {
+              function: 'count',
+              partition_field_name: 'custom_script_field',
+            },
+          ],
+          influencers: [''],
+        },
+        data_description: { time_field: '@timestamp' },
+        datafeed_config: {
+          indices: [],
+        },
+      },
+      fields: { testField: {} },
+    };
+
+    const mlClientEmptyDatafeedPreview = {
+      ...mlClient,
+      previewDatafeed: () => Promise.reject({}),
+    } as unknown as MlClient;
+
+    return validateJob(mlClusterClient, mlClientEmptyDatafeedPreview, payload, authHeader).then(
+      (messages) => {
+        const ids = messages.map((m) => m.id);
+        expect(ids).toStrictEqual([
+          'job_id_valid',
+          'detectors_function_not_empty',
+          'index_fields_valid',
+          'field_not_aggregatable',
+          'time_field_invalid',
+          'datafeed_preview_failed',
+        ]);
+      }
+    );
   });
 });

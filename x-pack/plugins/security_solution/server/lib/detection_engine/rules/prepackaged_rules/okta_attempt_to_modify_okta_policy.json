@@ -11,10 +11,10 @@
     "logs-okta*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Attempt to Modify an Okta Policy",
-  "note": "The Okta Fleet integration or Filebeat module must be enabled to use this rule.",
-  "query": "event.dataset:okta.system and event.action:policy.lifecycle.update",
+  "note": "## Config\n\nThe Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:okta.system and event.action:policy.lifecycle.update\n",
   "references": [
     "https://developer.okta.com/docs/reference/api/system-log/",
     "https://developer.okta.com/docs/reference/api/event-types/"
@@ -30,6 +30,7 @@
     "SecOps",
     "Monitoring"
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 3
+  "version": 6
 }

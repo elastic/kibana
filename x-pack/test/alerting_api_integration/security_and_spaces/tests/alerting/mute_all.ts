@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -34,18 +35,18 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
       describe(scenario.id, () => {
         it('should handle mute alert request appropriately', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'MY action',
-              actionTypeId: 'test.noop',
+              connector_type_id: 'test.noop',
               config: {},
               secrets: {},
             })
             .expect(200);
 
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
@@ -60,7 +61,7 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getMuteAllRequest(createdAlert.id);
 
@@ -93,11 +94,11 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.muteAll).to.eql(true);
+              expect(updatedAlert.mute_all).to.eql(true);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -113,17 +114,17 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
 
         it('should handle mute alert request appropriately when consumer is the same as producer', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
                 enabled: false,
-                alertTypeId: 'test.restricted-noop',
+                rule_type_id: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getMuteAllRequest(createdAlert.id);
 
@@ -149,11 +150,11 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.muteAll).to.eql(true);
+              expect(updatedAlert.mute_all).to.eql(true);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -169,17 +170,17 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
 
         it('should handle mute alert request appropriately when consumer is not the producer', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
                 enabled: false,
-                alertTypeId: 'test.unrestricted-noop',
+                rule_type_id: 'test.unrestricted-noop',
                 consumer: 'alertsFixture',
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getMuteAllRequest(createdAlert.id);
 
@@ -216,11 +217,11 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.muteAll).to.eql(true);
+              expect(updatedAlert.mute_all).to.eql(true);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -236,17 +237,17 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
 
         it('should handle mute alert request appropriately when consumer is "alerts"', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
                 enabled: false,
-                alertTypeId: 'test.restricted-noop',
+                rule_type_id: 'test.restricted-noop',
                 consumer: 'alerts',
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getMuteAllRequest(createdAlert.id);
 
@@ -283,11 +284,11 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.muteAll).to.eql(true);
+              expect(updatedAlert.mute_all).to.eql(true);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,

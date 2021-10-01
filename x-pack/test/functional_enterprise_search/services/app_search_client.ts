@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import http from 'http';
@@ -104,14 +105,20 @@ const search = async (engineName: string): Promise<ISearchResponse> => {
 // Since the App Search API does not issue document receipts, the only way to tell whether or not documents
 // are fully indexed is to poll the search endpoint.
 export const waitForIndexedDocs = (engineName: string) => {
-  return new Promise<void>(async function (resolve) {
-    let isReady = false;
-    while (!isReady) {
-      const response = await search(engineName);
-      if (response.results && response.results.length > 0) {
-        isReady = true;
-        resolve();
+  return new Promise<void>(async function (resolve, reject) {
+    try {
+      let isReady = false;
+
+      while (!isReady) {
+        const response = await search(engineName);
+
+        if (response.results && response.results.length > 0) {
+          isReady = true;
+          resolve();
+        }
       }
+    } catch (error) {
+      reject(error);
     }
   });
 };

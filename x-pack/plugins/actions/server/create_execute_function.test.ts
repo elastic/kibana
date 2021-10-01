@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaRequest } from 'src/core/server';
@@ -27,7 +28,7 @@ describe('execute()', () => {
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       actionTypeRegistry,
-      isESOUsingEphemeralEncryptionKey: false,
+      isESOCanEncrypt: true,
       preconfiguredActions: [],
     });
     savedObjectsClient.get.mockResolvedValueOnce({
@@ -75,18 +76,95 @@ describe('execute()', () => {
         params: { baz: false },
         apiKey: Buffer.from('123:abc').toString('base64'),
       },
-      {}
+      {
+        references: [
+          {
+            id: '123',
+            name: 'actionRef',
+            type: 'action',
+          },
+        ],
+      }
     );
     expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith('123', 'mock-action', {
       notifyUsage: true,
     });
   });
 
+  test('schedules the action with all given parameters and relatedSavedObjects', async () => {
+    const actionTypeRegistry = actionTypeRegistryMock.create();
+    const executeFn = createExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      actionTypeRegistry,
+      isESOCanEncrypt: true,
+      preconfiguredActions: [],
+    });
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '123',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'mock-action',
+      },
+      references: [],
+    });
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: '234',
+      type: 'action_task_params',
+      attributes: {},
+      references: [],
+    });
+    await executeFn(savedObjectsClient, {
+      id: '123',
+      params: { baz: false },
+      spaceId: 'default',
+      apiKey: Buffer.from('123:abc').toString('base64'),
+      source: asHttpRequestExecutionSource(request),
+      relatedSavedObjects: [
+        {
+          id: 'some-id',
+          namespace: 'some-namespace',
+          type: 'some-type',
+          typeId: 'some-typeId',
+        },
+      ],
+    });
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      'action_task_params',
+      {
+        actionId: '123',
+        params: { baz: false },
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        relatedSavedObjects: [
+          {
+            id: 'related_some-type_0',
+            namespace: 'some-namespace',
+            type: 'some-type',
+            typeId: 'some-typeId',
+          },
+        ],
+      },
+      {
+        references: [
+          {
+            id: '123',
+            name: 'actionRef',
+            type: 'action',
+          },
+          {
+            id: 'some-id',
+            name: 'related_some-type_0',
+            type: 'some-type',
+          },
+        ],
+      }
+    );
+  });
+
   test('schedules the action with all given parameters with a preconfigured action', async () => {
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       actionTypeRegistry: actionTypeRegistryMock.create(),
-      isESOUsingEphemeralEncryptionKey: false,
+      isESOCanEncrypt: true,
       preconfiguredActions: [
         {
           id: '123',
@@ -157,10 +235,106 @@ describe('execute()', () => {
     );
   });
 
-  test('throws when passing isESOUsingEphemeralEncryptionKey with true as a value', async () => {
+  test('schedules the action with all given parameters with a preconfigured action and relatedSavedObjects', async () => {
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      isESOUsingEphemeralEncryptionKey: true,
+      actionTypeRegistry: actionTypeRegistryMock.create(),
+      isESOCanEncrypt: true,
+      preconfiguredActions: [
+        {
+          id: '123',
+          actionTypeId: 'mock-action-preconfigured',
+          config: {},
+          isPreconfigured: true,
+          name: 'x',
+          secrets: {},
+        },
+      ],
+    });
+    const source = { type: 'alert', id: uuid.v4() };
+
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '123',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'mock-action',
+      },
+      references: [],
+    });
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: '234',
+      type: 'action_task_params',
+      attributes: {},
+      references: [],
+    });
+    await executeFn(savedObjectsClient, {
+      id: '123',
+      params: { baz: false },
+      spaceId: 'default',
+      apiKey: Buffer.from('123:abc').toString('base64'),
+      source: asSavedObjectExecutionSource(source),
+      relatedSavedObjects: [
+        {
+          id: 'some-id',
+          namespace: 'some-namespace',
+          type: 'some-type',
+          typeId: 'some-typeId',
+        },
+      ],
+    });
+    expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+    expect(mockTaskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
+            Array [
+              Object {
+                "params": Object {
+                  "actionTaskParamsId": "234",
+                  "spaceId": "default",
+                },
+                "scope": Array [
+                  "actions",
+                ],
+                "state": Object {},
+                "taskType": "actions:mock-action-preconfigured",
+              },
+            ]
+        `);
+    expect(savedObjectsClient.get).not.toHaveBeenCalled();
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      'action_task_params',
+      {
+        actionId: '123',
+        params: { baz: false },
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        relatedSavedObjects: [
+          {
+            id: 'related_some-type_0',
+            namespace: 'some-namespace',
+            type: 'some-type',
+            typeId: 'some-typeId',
+          },
+        ],
+      },
+      {
+        references: [
+          {
+            id: source.id,
+            name: 'source',
+            type: source.type,
+          },
+          {
+            id: 'some-id',
+            name: 'related_some-type_0',
+            type: 'some-type',
+          },
+        ],
+      }
+    );
+  });
+
+  test('throws when passing isESOCanEncrypt with false as a value', async () => {
+    const executeFn = createExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      isESOCanEncrypt: false,
       actionTypeRegistry: actionTypeRegistryMock.create(),
       preconfiguredActions: [],
     });
@@ -172,7 +346,36 @@ describe('execute()', () => {
         apiKey: null,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unable to execute action because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
+      `"Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
+    );
+  });
+
+  test('throws when isMissingSecrets is true for connector', async () => {
+    const executeFn = createExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      isESOCanEncrypt: true,
+      actionTypeRegistry: actionTypeRegistryMock.create(),
+      preconfiguredActions: [],
+    });
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '123',
+      type: 'action',
+      attributes: {
+        name: 'mock-action',
+        isMissingSecrets: true,
+        actionTypeId: 'mock-action',
+      },
+      references: [],
+    });
+    await expect(
+      executeFn(savedObjectsClient, {
+        id: '123',
+        params: { baz: false },
+        spaceId: 'default',
+        apiKey: null,
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unable to execute action because no secrets are defined for the \\"mock-action\\" connector."`
     );
   });
 
@@ -180,7 +383,7 @@ describe('execute()', () => {
     const mockedActionTypeRegistry = actionTypeRegistryMock.create();
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      isESOUsingEphemeralEncryptionKey: false,
+      isESOCanEncrypt: true,
       actionTypeRegistry: mockedActionTypeRegistry,
       preconfiguredActions: [],
     });
@@ -210,7 +413,7 @@ describe('execute()', () => {
     const mockedActionTypeRegistry = actionTypeRegistryMock.create();
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      isESOUsingEphemeralEncryptionKey: false,
+      isESOCanEncrypt: true,
       actionTypeRegistry: mockedActionTypeRegistry,
       preconfiguredActions: [
         {

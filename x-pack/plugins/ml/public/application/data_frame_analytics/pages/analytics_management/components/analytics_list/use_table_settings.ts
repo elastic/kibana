@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Direction, EuiBasicTableProps, Pagination, PropertySort } from '@elastic/eui';
 import { useCallback, useMemo } from 'react';
 import { ListingPageUrlState } from '../../../../../../../common/types/common';
-import { DataVisualizerIndexBasedAppState } from '../../../../../../../common/types/ml_url_generator';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
@@ -38,7 +38,7 @@ interface UseTableSettingsReturnValue<T> {
 
 export function useTableSettings<TypeOfItem>(
   items: TypeOfItem[],
-  pageState: ListingPageUrlState | DataVisualizerIndexBasedAppState,
+  pageState: ListingPageUrlState,
   updatePageState: (update: Partial<ListingPageUrlState>) => void
 ): UseTableSettingsReturnValue<TypeOfItem> {
   const { pageIndex, pageSize, sortField, sortDirection } = pageState;

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
@@ -17,10 +18,12 @@ import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from '../common/constants';
  * @return {Array} array of rename operations and callback function for rename logging
  */
 export const deprecations = ({
+  deprecate,
   rename,
   renameFromRoot,
 }: ConfigDeprecationFactory): ConfigDeprecation[] => {
   return [
+    deprecate('enabled', '8.0.0'),
     // This order matters. The "blanket rename" needs to happen at the end
     renameFromRoot('xpack.monitoring.max_bucket_size', 'monitoring.ui.max_bucket_size'),
     renameFromRoot('xpack.monitoring.min_interval_seconds', 'monitoring.ui.min_interval_seconds'),
@@ -43,43 +46,62 @@ export const deprecations = ({
       'monitoring.ui.elasticsearch.logFetchCount'
     ),
     renameFromRoot('xpack.monitoring', 'monitoring'),
-    (config, fromPath, logger) => {
-      const clusterAlertsEnabled = get(config, 'cluster_alerts.enabled');
-      const emailNotificationsEnabled =
-        clusterAlertsEnabled && get(config, 'cluster_alerts.email_notifications.enabled');
+    (config, fromPath, addDeprecation) => {
+      const emailNotificationsEnabled = get(config, 'cluster_alerts.email_notifications.enabled');
       if (emailNotificationsEnabled && !get(config, CLUSTER_ALERTS_ADDRESS_CONFIG_KEY)) {
-        logger(
-          `Config key [${fromPath}.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}] will be required for email notifications to work in 7.0."`
-        );
+        addDeprecation({
+          message: `Config key [${fromPath}.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}] will be required for email notifications to work in 8.0."`,
+          correctiveActions: {
+            manualSteps: [
+              `Add [${fromPath}.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}] to your kibana configs."`,
+            ],
+          },
+        });
       }
       return config;
     },
-    (config, fromPath, logger) => {
+    (config, fromPath, addDeprecation) => {
       const es: Record<string, any> = get(config, 'elasticsearch');
       if (es) {
         if (es.username === 'elastic') {
-          logger(
-            `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana_system" user instead.`
-          );
+          addDeprecation({
+            message: `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana_system" user instead.`,
+            correctiveActions: {
+              manualSteps: [`Replace [${fromPath}.username] from "elastic" to "kibana_system".`],
+            },
+          });
         } else if (es.username === 'kibana') {
-          logger(
-            `Setting [${fromPath}.username] to "kibana" is deprecated. You should use the "kibana_system" user instead.`
-          );
+          addDeprecation({
+            message: `Setting [${fromPath}.username] to "kibana" is deprecated. You should use the "kibana_system" user instead.`,
+            correctiveActions: {
+              manualSteps: [`Replace [${fromPath}.username] from "kibana" to "kibana_system".`],
+            },
+          });
         }
       }
       return config;
     },
-    (config, fromPath, logger) => {
+    (config, fromPath, addDeprecation) => {
       const ssl: Record<string, any> = get(config, 'elasticsearch.ssl');
       if (ssl) {
         if (ssl.key !== undefined && ssl.certificate === undefined) {
-          logger(
-            `Setting [${fromPath}.key] without [${fromPath}.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
-          );
+          addDeprecation({
+            message: `Setting [${fromPath}.key] without [${fromPath}.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
+            correctiveActions: {
+              manualSteps: [
+                `Set [${fromPath}.ssl.certificate] in your kibana configs to enable TLS client authentication to Elasticsearch.`,
+              ],
+            },
+          });
         } else if (ssl.certificate !== undefined && ssl.key === undefined) {
-          logger(
-            `Setting [${fromPath}.certificate] without [${fromPath}.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
-          );
+          addDeprecation({
+            message: `Setting [${fromPath}.certificate] without [${fromPath}.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
+            correctiveActions: {
+              manualSteps: [
+                `Set [${fromPath}.ssl.key] in your kibana configs to enable TLS client authentication to Elasticsearch.`,
+              ],
+            },
+          });
         }
       }
       return config;

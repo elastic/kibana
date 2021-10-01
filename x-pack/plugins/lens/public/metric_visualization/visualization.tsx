@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import { Ast } from '@kbn/interpreter/target/common';
+import { Ast } from '@kbn/interpreter/common';
 import { getSuggestions } from './metric_suggestions';
 import { LensIconChartMetric } from '../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
-import { State } from './types';
+import type { MetricState } from '../../common/expressions';
+import { layerTypes } from '../../common';
 
 const toExpression = (
-  state: State,
+  state: MetricState,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
   attributes?: { mode?: 'reduced' | 'full'; title?: string; description?: string }
 ): Ast | null => {
@@ -41,7 +43,7 @@ const toExpression = (
   };
 };
 
-export const metricVisualization: Visualization<State> = {
+export const metricVisualization: Visualization<MetricState> = {
   id: 'lnsMetric',
 
   visualizationTypes: [
@@ -51,6 +53,10 @@ export const metricVisualization: Visualization<State> = {
       label: i18n.translate('xpack.lens.metric.label', {
         defaultMessage: 'Metric',
       }),
+      groupLabel: i18n.translate('xpack.lens.metric.groupLabel', {
+        defaultMessage: 'Tabular and single value',
+      }),
+      sortPriority: 1,
     },
   ],
 
@@ -80,11 +86,12 @@ export const metricVisualization: Visualization<State> = {
 
   getSuggestions,
 
-  initialize(frame, state) {
+  initialize(addNewLayer, state) {
     return (
       state || {
-        layerId: frame.addNewLayer(),
+        layerId: addNewLayer(),
         accessor: undefined,
+        layerType: layerTypes.DATA,
       }
     );
   },
@@ -104,6 +111,23 @@ export const metricVisualization: Visualization<State> = {
     };
   },
 
+  getSupportedLayers() {
+    return [
+      {
+        type: layerTypes.DATA,
+        label: i18n.translate('xpack.lens.metric.addLayer', {
+          defaultMessage: 'Add visualization layer',
+        }),
+      },
+    ];
+  },
+
+  getLayerType(layerId, state) {
+    if (state?.layerId === layerId) {
+      return state.layerType;
+    }
+  },
+
   toExpression,
   toPreviewExpression: (state, datasourceLayers) =>
     toExpression(state, datasourceLayers, { mode: 'reduced' }),
@@ -116,7 +140,7 @@ export const metricVisualization: Visualization<State> = {
     return { ...prevState, accessor: undefined };
   },
 
-  getErrorMessages(state, frame) {
+  getErrorMessages(state) {
     // Is it possible to break it?
     return undefined;
   },

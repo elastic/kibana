@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { PureComponent, Fragment } from 'react';
@@ -22,16 +11,16 @@ import React, { PureComponent, Fragment } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
+  EuiSplitPanel,
   EuiLink,
-  EuiPanel,
+  EuiCallOut,
   EuiSpacer,
-  EuiText,
   EuiTextColor,
   EuiBottomBar,
   EuiButton,
   EuiToolTip,
   EuiButtonEmpty,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isEmpty } from 'lodash';
@@ -58,6 +47,7 @@ interface FormProps {
   dockLinks: DocLinksStart['links'];
   toasts: ToastsStart;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  queryText?: string;
 }
 
 interface FormState {
@@ -252,17 +242,18 @@ export class Form extends PureComponent<FormProps> {
   renderCategory(category: Category, settings: FieldSetting[], totalSettings: number) {
     return (
       <Fragment key={category}>
-        <EuiPanel paddingSize="l">
-          <EuiForm>
-            <EuiText>
-              <EuiFlexGroup alignItems="baseline">
-                <EuiFlexItem grow={false}>
+        <EuiSplitPanel.Outer hasBorder>
+          <EuiSplitPanel.Inner color="subdued">
+            <EuiFlexGroup alignItems="baseline">
+              <EuiFlexItem grow={false}>
+                <EuiTitle>
                   <h2>{getCategoryName(category)}</h2>
-                </EuiFlexItem>
-                {this.renderClearQueryLink(totalSettings, settings.length)}
-              </EuiFlexGroup>
-            </EuiText>
-            <EuiSpacer size="m" />
+                </EuiTitle>
+              </EuiFlexItem>
+              {this.renderClearQueryLink(totalSettings, settings.length)}
+            </EuiFlexGroup>
+          </EuiSplitPanel.Inner>
+          <EuiSplitPanel.Inner>
             {settings.map((setting) => {
               return (
                 <Field
@@ -277,8 +268,8 @@ export class Form extends PureComponent<FormProps> {
                 />
               );
             })}
-          </EuiForm>
-        </EuiPanel>
+          </EuiSplitPanel.Inner>
+        </EuiSplitPanel.Outer>
         <EuiSpacer size="l" />
       </Fragment>
     );
@@ -287,22 +278,28 @@ export class Form extends PureComponent<FormProps> {
   maybeRenderNoSettings(clearQuery: FormProps['clearQuery']) {
     if (this.props.showNoResultsMessage) {
       return (
-        <EuiPanel paddingSize="l">
-          <FormattedMessage
-            id="advancedSettings.form.noSearchResultText"
-            defaultMessage="No settings found {clearSearch}"
-            values={{
-              clearSearch: (
-                <EuiLink onClick={clearQuery}>
-                  <FormattedMessage
-                    id="advancedSettings.form.clearNoSearchResultText"
-                    defaultMessage="(clear search)"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiPanel>
+        <EuiCallOut
+          color="danger"
+          title={
+            <>
+              <FormattedMessage
+                id="advancedSettings.form.noSearchResultText"
+                defaultMessage="No settings found for {queryText} {clearSearch}"
+                values={{
+                  clearSearch: (
+                    <EuiLink onClick={clearQuery}>
+                      <FormattedMessage
+                        id="advancedSettings.form.clearNoSearchResultText"
+                        defaultMessage="(clear search)"
+                      />
+                    </EuiLink>
+                  ),
+                  queryText: <strong>{this.props.queryText}</strong>,
+                }}
+              />
+            </>
+          }
+        />
       );
     }
     return null;

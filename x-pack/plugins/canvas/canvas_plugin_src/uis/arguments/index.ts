@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { axisConfig } from './axis_config';
@@ -30,6 +31,7 @@ import { string } from './string';
 import { textarea } from './textarea';
 // @ts-expect-error untyped local
 import { toggle } from './toggle';
+import { visdimension } from './vis_dimension';
 
 import { SetupInitializer } from '../../plugin';
 
@@ -47,6 +49,7 @@ export const args = [
   string,
   textarea,
   toggle,
+  visdimension,
 ];
 
 export const initializers = [dateFormatInitializer, numberFormatInitializer];

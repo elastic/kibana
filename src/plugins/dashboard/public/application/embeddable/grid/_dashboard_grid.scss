@@ -31,7 +31,7 @@
  * 1. Need to override the react grid layout height when a single panel is expanded. Important is required because
  * otherwise the height is set inline.
  */
- .dshLayout-isMaximizedPanel {
+.dshLayout-isMaximizedPanel {
   height: 100% !important; /* 1. */
   width: 100%;
   position: absolute !important; /* 1 */
@@ -66,7 +66,7 @@
   /**
    * Disable transitions from the library on each grid element.
    */
-   transition: none;
+  transition: none;
   /**
     * Copy over and overwrite the fill color with EUI color mixin (for theming)
     */

@@ -1,11 +1,8 @@
-body.canvas-isFullscreen { // sass-lint:disable-line no-qualifying-elements
+/* stylelint-disable selector-no-qualifying-type */
+body.canvas-isFullscreen {
   // following two rules are for overriding the header bar padding
   &.euiBody--headerIsFixed {
     padding-top: 0;
-  }
-
-  .headerWrapper ~ .app-wrapper {
-    min-height: 100vh;
   }
 
   // following rule is for docked navigation
@@ -15,6 +12,11 @@ body.canvas-isFullscreen { // sass-lint:disable-line no-qualifying-elements
 
   // hide global loading indicator
   .kbnLoadingIndicator {
+    display: none;
+  }
+
+  // hide global banners
+  #globalBannerList {
     display: none;
   }
 

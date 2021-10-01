@@ -1,33 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
-import { ThemeProvider } from 'styled-components';
 
 import { waitFor } from '@testing-library/react';
-import { TestProviders } from '../../../../common/mock/test_providers';
-import { mockOpenTimelineQueryResults } from '../../../../common/mock/timeline_results';
 import * as i18n from '../translations';
 
 import { OpenTimelineModalButton } from './open_timeline_modal_button';
 
 describe('OpenTimelineModalButton', () => {
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
-
   test('it renders the expected button text', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-          <OpenTimelineModalButton onClick={jest.fn()} />
-        </MockedProvider>
-      </TestProviders>
-    );
+    const wrapper = mount(<OpenTimelineModalButton onClick={jest.fn()} />);
 
     await waitFor(() => {
       wrapper.update();
@@ -41,15 +29,7 @@ describe('OpenTimelineModalButton', () => {
   describe('onClick prop', () => {
     test('it invokes onClick function provided as a prop when the button is clicked', async () => {
       const onClick = jest.fn();
-      const wrapper = mount(
-        <ThemeProvider theme={theme}>
-          <TestProviders>
-            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-              <OpenTimelineModalButton onClick={onClick} />
-            </MockedProvider>
-          </TestProviders>
-        </ThemeProvider>
-      );
+      const wrapper = mount(<OpenTimelineModalButton onClick={onClick} />);
 
       await waitFor(() => {
         wrapper.find('[data-test-subj="open-timeline-button"]').first().simulate('click');

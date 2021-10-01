@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { Subject } from 'rxjs';
 import { FlyoutEditDrilldownAction, FlyoutEditDrilldownParams } from './flyout_edit_drilldown';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
@@ -31,6 +33,9 @@ const actionParams: FlyoutEditDrilldownParams = {
   start: () => ({
     core: {
       overlays,
+      application: {
+        currentAppId$: new Subject(),
+      },
     } as any,
     plugins: {
       uiActionsEnhanced: uiActions,

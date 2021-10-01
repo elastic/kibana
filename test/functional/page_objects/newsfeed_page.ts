@@ -1,74 +1,59 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
-export function NewsfeedPageProvider({ getService, getPageObjects }: FtrProviderContext) {
-  const log = getService('log');
-  const find = getService('find');
-  const retry = getService('retry');
-  const flyout = getService('flyout');
-  const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common']);
+export class NewsfeedPageObject extends FtrService {
+  private readonly log = this.ctx.getService('log');
+  private readonly find = this.ctx.getService('find');
+  private readonly retry = this.ctx.getService('retry');
+  private readonly flyout = this.ctx.getService('flyout');
+  private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly common = this.ctx.getPageObject('common');
 
-  class NewsfeedPage {
-    async resetPage() {
-      await PageObjects.common.navigateToUrl('home', '', { useActualUrl: true });
-    }
-
-    async closeNewsfeedPanel() {
-      await flyout.ensureClosed('NewsfeedFlyout');
-      log.debug('clickNewsfeed icon');
-      await retry.waitFor('newsfeed flyout', async () => {
-        if (await testSubjects.exists('NewsfeedFlyout')) {
-          await testSubjects.click('NewsfeedFlyout > euiFlyoutCloseButton');
-          return false;
-        }
-        return true;
-      });
-    }
-
-    async openNewsfeedPanel() {
-      log.debug('clickNewsfeed icon');
-      return await testSubjects.exists('NewsfeedFlyout');
-    }
-
-    async getRedButtonSign() {
-      return await find.existsByCssSelector('.euiHeaderSectionItemButton__notification--dot');
-    }
-
-    async getNewsfeedList() {
-      const list = await testSubjects.find('NewsfeedFlyout');
-      const cells = await list.findAllByTestSubject('newsHeadAlert');
-
-      const objects = [];
-      for (const cell of cells) {
-        objects.push(await cell.getVisibleText());
-      }
-
-      return objects;
-    }
-
-    async openNewsfeedEmptyPanel() {
-      return await testSubjects.exists('emptyNewsfeed');
-    }
+  async resetPage() {
+    await this.common.navigateToUrl('home', '', { useActualUrl: true });
   }
 
-  return new NewsfeedPage();
+  async closeNewsfeedPanel() {
+    await this.flyout.ensureClosed('NewsfeedFlyout');
+    this.log.debug('clickNewsfeed icon');
+    await this.retry.waitFor('newsfeed flyout', async () => {
+      if (await this.testSubjects.exists('NewsfeedFlyout')) {
+        await this.testSubjects.click('NewsfeedFlyout > euiFlyoutCloseButton');
+        return false;
+      }
+      return true;
+    });
+  }
+
+  async openNewsfeedPanel() {
+    this.log.debug('clickNewsfeed icon');
+    return await this.testSubjects.exists('NewsfeedFlyout');
+  }
+
+  async getRedButtonSign() {
+    return await this.find.existsByCssSelector('.euiHeaderSectionItemButton__notification--dot');
+  }
+
+  async getNewsfeedList() {
+    const list = await this.testSubjects.find('NewsfeedFlyout');
+    const cells = await list.findAllByTestSubject('newsHeadAlert');
+
+    const objects = [];
+    for (const cell of cells) {
+      objects.push(await cell.getVisibleText());
+    }
+
+    return objects;
+  }
+
+  async openNewsfeedEmptyPanel() {
+    return await this.testSubjects.exists('emptyNewsfeed');
+  }
 }

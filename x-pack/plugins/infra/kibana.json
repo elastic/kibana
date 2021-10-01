@@ -6,14 +6,16 @@
     "features",
     "usageCollection",
     "spaces",
-    
+    "embeddable",
     "data",
     "dataEnhanced",
     "visTypeTimeseries",
-    "alerts",
-    "triggersActionsUi"
+    "alerting",
+    "triggersActionsUi",
+    "observability",
+    "ruleRegistry"
   ],
-  "optionalPlugins": ["ml", "observability", "home"],
+  "optionalPlugins": ["ml", "home", "embeddable", "osquery"],
   "server": true,
   "ui": true,
   "configPath": ["xpack", "infra"],
@@ -22,7 +24,13 @@
     "licenseManagement",
     "kibanaUtils",
     "kibanaReact",
-    "apm",
-    "home"
-  ]
+    "home",
+    "ml",
+    "embeddable"
+  ],
+  "owner": {
+    "name": "Logs and Metrics UI",
+    "githubTeam": "logs-metrics-ui"
+  },
+  "description": "This plugin visualizes data from Filebeat and Metricbeat, and integrates with other Observability solutions"
 }

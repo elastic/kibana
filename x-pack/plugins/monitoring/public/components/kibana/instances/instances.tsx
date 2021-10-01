@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -40,7 +41,7 @@ import { AlertsStatus } from '../../../alerts/status';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
 
-const getColumns = (setupMode: any, alerts: { [alertTypeId: string]: CommonAlertStatus }) => {
+const getColumns = (setupMode: any, alerts: { [alertTypeId: string]: CommonAlertStatus[] }) => {
   const columns = [
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.nameColumnTitle', {
@@ -172,7 +173,7 @@ const getColumns = (setupMode: any, alerts: { [alertTypeId: string]: CommonAlert
 
 interface Props {
   clusterStatus: any;
-  alerts: { [alertTypeId: string]: CommonAlertStatus };
+  alerts: { [alertTypeId: string]: CommonAlertStatus[] };
   setupMode: any;
   sorting: any;
   pagination: any;

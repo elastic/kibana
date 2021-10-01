@@ -1,20 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import moment from 'moment';
-import { useSelector } from 'react-redux';
 import { Direction, EuiBasicTable } from '@elastic/eui';
-import { certificatesSelector } from '../../state/certificates/certificates';
 import { CertStatus } from './cert_status';
 import { CertMonitors } from './cert_monitors';
 import * as labels from './translations';
-import { Cert, CertMonitor } from '../../../common/runtime_types';
+import { Cert, CertMonitor, CertResult } from '../../../common/runtime_types';
 import { FingerprintCol } from './fingerprint_col';
-import { NO_CERTS_AVAILABLE } from './translations';
+import { LOADING_CERTIFICATES, NO_CERTS_AVAILABLE } from './translations';
 
 interface Page {
   index: number;
@@ -39,11 +38,10 @@ interface Props {
   page: Page;
   sort: CertSort;
   onChange: (page: Page, sort: CertSort) => void;
+  certificates: CertResult & { loading?: boolean };
 }
 
-export const CertificateList: React.FC<Props> = ({ page, sort, onChange }) => {
-  const { data: certificates, loading } = useSelector(certificatesSelector);
-
+export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onChange }) => {
   const onTableChange = (newVal: Partial<Props>) => {
     onChange(newVal.page as Page, newVal.sort as CertSort);
   };
@@ -99,7 +97,7 @@ export const CertificateList: React.FC<Props> = ({ page, sort, onChange }) => {
 
   return (
     <EuiBasicTable
-      loading={loading}
+      loading={certificates.loading}
       columns={columns}
       items={certificates?.certs ?? []}
       pagination={pagination}
@@ -110,7 +108,13 @@ export const CertificateList: React.FC<Props> = ({ page, sort, onChange }) => {
           direction: sort.direction,
         },
       }}
-      noItemsMessage={<span data-test-subj="uptimeCertsEmptyMessage">{NO_CERTS_AVAILABLE}</span>}
+      noItemsMessage={
+        certificates.loading ? (
+          LOADING_CERTIFICATES
+        ) : (
+          <span data-test-subj="uptimeCertsEmptyMessage">{NO_CERTS_AVAILABLE}</span>
+        )
+      }
     />
   );
 };

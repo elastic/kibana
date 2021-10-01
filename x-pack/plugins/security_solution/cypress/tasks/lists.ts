@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -60,7 +61,9 @@ export const exportValueList = (): Cypress.Chainable<JQuery<HTMLElement>> => {
  * Given an array of value lists this will delete them all using Cypress Request and the lists REST API
  * Ref: https://www.elastic.co/guide/en/security/current/lists-api-delete-container.html
  */
-export const deleteValueLists = (lists: string[]): Array<Cypress.Chainable<Cypress.Response>> => {
+export const deleteValueLists = (
+  lists: string[]
+): Array<Cypress.Chainable<Cypress.Response<unknown>>> => {
   return lists.map((list) => deleteValueList(list));
 };
 
@@ -68,7 +71,7 @@ export const deleteValueLists = (lists: string[]): Array<Cypress.Chainable<Cypre
  * Given a single value list this will delete it using Cypress Request and lists REST API
  * Ref: https://www.elastic.co/guide/en/security/current/lists-api-delete-container.html
  */
-export const deleteValueList = (list: string): Cypress.Chainable<Cypress.Response> => {
+export const deleteValueList = (list: string): Cypress.Chainable<Cypress.Response<unknown>> => {
   return cy.request({
     method: 'DELETE',
     url: `api/lists?id=${list}`,
@@ -91,7 +94,7 @@ export const uploadListItemData = (
   file: string,
   type: string,
   data: string
-): Cypress.Chainable<Cypress.Response> => {
+): Cypress.Chainable<Cypress.Response<unknown>> => {
   const removedEmptyLines = data
     .split('\n')
     .filter((line) => line.trim() !== '')
@@ -184,7 +187,9 @@ export const importValueList = (
  * will cause errors.
  * Ref: https://www.elastic.co/guide/en/security/current/lists-api-delete-container.html
  */
-export const deleteAllValueListsFromUI = (): Array<Cypress.Chainable<Cypress.Response>> => {
+export const deleteAllValueListsFromUI = (): Array<
+  Cypress.Chainable<Cypress.Response<unknown>>
+> => {
   const lists = Cypress.$(VALUE_LIST_FILES)
     .toArray()
     .reduce<string[]>((accum, $el) => {

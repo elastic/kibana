@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -12,15 +13,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
 
   describe('When on the Trusted Apps list', function () {
-    this.tags('ciGroup7');
-
     before(async () => {
       await pageObjects.trustedApps.navigateToTrustedAppsList();
     });
 
     it('should show page title', async () => {
       expect(await testSubjects.getVisibleText('header-page-title')).to.equal(
-        'Trusted Applications'
+        'Trusted applications'
       );
     });
 
@@ -38,16 +37,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         SHA256
       );
       await testSubjects.click('addTrustedAppFlyout-createButton');
-      expect(await testSubjects.getVisibleText('conditionValue')).to.equal(SHA256.toLowerCase());
+      expect(
+        await testSubjects.getVisibleText('trustedAppCard-criteriaConditions-condition')
+      ).to.equal(
+        'AND process.hash.*IS a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476'
+      );
       await pageObjects.common.closeToast();
 
       // Remove it
-      await testSubjects.click('trustedAppDeleteButton');
+      await pageObjects.trustedApps.clickCardActionMenu();
+      await testSubjects.click('deleteTrustedAppAction');
       await testSubjects.click('trustedAppDeletionConfirm');
       await testSubjects.waitForDeleted('trustedAppDeletionConfirm');
-      expect(await testSubjects.getVisibleText('trustedAppsListViewCountLabel')).to.equal(
-        '0 trusted applications'
-      );
+      // We only expect one trusted app to have been visible
+      await testSubjects.missingOrFail('trustedAppCard');
     });
   });
 };

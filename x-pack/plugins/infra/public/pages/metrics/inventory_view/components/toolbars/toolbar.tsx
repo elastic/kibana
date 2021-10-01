@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FunctionComponent } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
-import { useSourceContext } from '../../../../../containers/source';
+import { useSourceContext } from '../../../../../containers/metrics_source';
 import {
   SnapshotMetricInput,
   SnapshotGroupBy,
@@ -23,7 +24,7 @@ import { WaffleOptionsState, WaffleSortOption } from '../../hooks/use_waffle_opt
 import { useInventoryMeta } from '../../hooks/use_inventory_meta';
 
 export interface ToolbarProps extends Omit<WaffleOptionsState, 'boundsOverride' | 'autoBounds'> {
-  createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => IIndexPattern;
+  createDerivedIndexPattern: (type: 'metrics') => IIndexPattern;
   changeMetric: (payload: SnapshotMetricInput) => void;
   changeGroupBy: (payload: SnapshotGroupBy) => void;
   changeCustomOptions: (payload: InfraGroupByOptions[]) => void;

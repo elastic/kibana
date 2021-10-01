@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { merge, Observable, timer, throwError } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { merge, Observable, timer, throwError, EMPTY } from 'rxjs';
+import { map, takeUntil, catchError } from 'rxjs/operators';
 import { uniq } from 'lodash';
 import { duration } from 'moment';
 import { i18n } from '@kbn/i18n';
@@ -176,16 +177,16 @@ export class SearchService {
     const serverResults$ = fetchServerResults(this.http!, params, {
       preference,
       aborted$,
-    });
+    }).pipe(catchError(() => EMPTY));
 
     const providersResults$ = [...this.providers.values()].map((provider) =>
       provider.find(params, providerOptions).pipe(
+        catchError(() => EMPTY),
         takeInArray(this.maxProviderResults),
         takeUntil(aborted$),
         map((results) => results.map((r) => processResult(r)))
       )
     );
-
     return merge(...providersResults$, serverResults$).pipe(
       map((results) => ({
         results,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash/fp';
@@ -52,12 +53,14 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
     filterQuery,
     indexNames,
     startDate,
+    skip: filterQuery === undefined,
   });
 
   const goToNetwork = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.network}`, {
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.network,
         path: getNetworkUrl(urlSearch),
       });
     },
@@ -119,9 +122,14 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
   return (
     <EuiFlexItem>
       <InspectButtonContainer>
-        <EuiPanel data-test-subj="overview-network-query">
+        <EuiPanel hasBorder data-test-subj="overview-network-query">
           <>
-            <HeaderSection id={OverviewNetworkQueryId} subtitle={subtitle} title={title}>
+            <HeaderSection
+              id={OverviewNetworkQueryId}
+              subtitle={subtitle}
+              title={title}
+              isInspectDisabled={filterQuery === undefined}
+            >
               {networkPageButton}
             </HeaderSection>
 

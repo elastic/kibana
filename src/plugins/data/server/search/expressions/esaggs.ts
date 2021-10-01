@@ -1,26 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { get } from 'lodash';
+import { defer } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { KibanaRequest, StartServicesAccessor } from 'src/core/server';
-import { Adapters } from 'src/plugins/inspector/common';
 import {
   EsaggsExpressionFunctionDefinition,
   EsaggsStartDependencies,
@@ -48,50 +38,47 @@ export function getFunctionDefinition({
 }): () => EsaggsExpressionFunctionDefinition {
   return () => ({
     ...getEsaggsMeta(),
-    async fn(
-      input,
-      args,
-      { inspectorAdapters, abortSignal, getSearchSessionId, getKibanaRequest }
-    ) {
-      const kibanaRequest = getKibanaRequest ? getKibanaRequest() : null;
-      if (!kibanaRequest) {
-        throw new Error(
-          i18n.translate('data.search.esaggs.error.kibanaRequest', {
-            defaultMessage:
-              'A KibanaRequest is required to execute this search on the server. ' +
-              'Please provide a request object to the expression execution params.',
-          })
+    fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId, getKibanaRequest }) {
+      return defer(async () => {
+        const kibanaRequest = getKibanaRequest ? getKibanaRequest() : null;
+        if (!kibanaRequest) {
+          throw new Error(
+            i18n.translate('data.search.esaggs.error.kibanaRequest', {
+              defaultMessage:
+                'A KibanaRequest is required to execute this search on the server. ' +
+                'Please provide a request object to the expression execution params.',
+            })
+          );
+        }
+
+        const { aggs, indexPatterns, searchSource } = await getStartDependencies(kibanaRequest);
+
+        const indexPattern = await indexPatterns.create(args.index.value, true);
+        const aggConfigs = aggs.createAggConfigs(
+          indexPattern,
+          args.aggs?.map((agg) => agg.value) ?? []
         );
-      }
 
-      const {
-        aggs,
-        deserializeFieldFormat,
-        indexPatterns,
-        searchSource,
-      } = await getStartDependencies(kibanaRequest);
+        aggConfigs.hierarchical = args.metricsAtAllLevels;
 
-      const indexPattern = await indexPatterns.create(args.index.value, true);
-      const aggConfigs = aggs.createAggConfigs(
-        indexPattern,
-        args.aggs!.map((agg) => agg.value)
+        return { aggConfigs, indexPattern, searchSource };
+      }).pipe(
+        switchMap(({ aggConfigs, indexPattern, searchSource }) =>
+          handleEsaggsRequest({
+            abortSignal,
+            aggs: aggConfigs,
+            filters: get(input, 'filters', undefined),
+            indexPattern,
+            inspectorAdapters,
+            partialRows: args.partialRows,
+            query: get(input, 'query', undefined) as any,
+            searchSessionId: getSearchSessionId(),
+            searchSourceService: searchSource,
+            timeFields: args.timeFields,
+            timeRange: get(input, 'timeRange', undefined),
+          })
+        )
       );
-
-      return await handleEsaggsRequest(input, args, {
-        abortSignal: (abortSignal as unknown) as AbortSignal,
-        aggs: aggConfigs,
-        deserializeFieldFormat,
-        filters: get(input, 'filters', undefined),
-        indexPattern,
-        inspectorAdapters: inspectorAdapters as Adapters,
-        metricsAtAllLevels: args.metricsAtAllLevels,
-        partialRows: args.partialRows,
-        query: get(input, 'query', undefined) as any,
-        searchSessionId: getSearchSessionId(),
-        searchSourceService: searchSource,
-        timeFields: args.timeFields,
-        timeRange: get(input, 'timeRange', undefined),
-      });
     },
   });
 }
@@ -117,16 +104,13 @@ export function getEsaggs({
 }): () => EsaggsExpressionFunctionDefinition {
   return getFunctionDefinition({
     getStartDependencies: async (request: KibanaRequest) => {
-      const [{ elasticsearch, savedObjects, uiSettings }, , self] = await getStartServices();
-      const { fieldFormats, indexPatterns, search } = self;
+      const [{ elasticsearch, savedObjects }, , self] = await getStartServices();
+      const { indexPatterns, search } = self;
       const esClient = elasticsearch.client.asScoped(request);
       const savedObjectsClient = savedObjects.getScopedClient(request);
-      const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
-      const scopedFieldFormats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
 
       return {
         aggs: await search.aggs.asScopedToClient(savedObjectsClient, esClient.asCurrentUser),
-        deserializeFieldFormat: scopedFieldFormats.deserialize.bind(scopedFieldFormats),
         indexPatterns: await indexPatterns.indexPatternsServiceFactory(
           savedObjectsClient,
           esClient.asCurrentUser

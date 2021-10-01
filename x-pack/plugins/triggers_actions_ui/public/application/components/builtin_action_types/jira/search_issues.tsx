@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, useEffect, useCallback, useState, memo } from 'react';
@@ -51,9 +52,10 @@ const SearchIssuesComponent: React.FC<Props> = ({
     id: selectedValue,
   });
 
-  useEffect(() => setOptions(issues.map((issue) => ({ label: issue.title, value: issue.key }))), [
-    issues,
-  ]);
+  useEffect(
+    () => setOptions(issues.map((issue) => ({ label: issue.title, value: issue.key }))),
+    [issues]
+  );
 
   useEffect(() => {
     if (isLoadingSingleIssue || singleIssue == null) {

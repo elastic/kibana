@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Logger } from 'src/core/server';
@@ -15,6 +16,7 @@ import {
 import { TaskStore } from '../task_store';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
 import { ManagedConfiguration } from '../lib/create_managed_configuration';
+import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
 
 export {
   MonitoringStats,
@@ -27,6 +29,7 @@ export {
 
 export function createMonitoringStats(
   taskPollingLifecycle: TaskPollingLifecycle,
+  ephemeralTaskLifecycle: EphemeralTaskLifecycle,
   taskStore: TaskStore,
   elasticsearchAndSOAvailability$: Observable<boolean>,
   config: TaskManagerConfig,
@@ -36,6 +39,7 @@ export function createMonitoringStats(
   return createMonitoringStatsStream(
     createAggregators(
       taskPollingLifecycle,
+      ephemeralTaskLifecycle,
       taskStore,
       elasticsearchAndSOAvailability$,
       config,

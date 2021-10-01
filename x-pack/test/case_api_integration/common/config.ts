@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 
 import path from 'path';
 import fs from 'fs';
@@ -16,6 +17,7 @@ interface CreateTestConfigOptions {
   license: string;
   disabledPlugins?: string[];
   ssl?: boolean;
+  testFiles?: string[];
 }
 
 // test.not-enabled is specifically not enabled
@@ -24,9 +26,11 @@ const enabledActionTypes = [
   '.index',
   '.jira',
   '.pagerduty',
+  '.swimlane',
   '.resilient',
   '.server-log',
   '.servicenow',
+  '.servicenow-sir',
   '.slack',
   '.webhook',
   '.case',
@@ -38,7 +42,7 @@ const enabledActionTypes = [
 ];
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
-  const { license = 'trial', disabledPlugins = [], ssl = false } = options;
+  const { license = 'trial', disabledPlugins = [], ssl = false, testFiles = [] } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(
@@ -53,7 +57,14 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       },
     };
 
-    const allFiles = fs.readdirSync(
+    // Find all folders in ./fixtures/plugins
+    const allFiles = fs.readdirSync(path.resolve(__dirname, 'fixtures', 'plugins'));
+    const plugins = allFiles.filter((file) =>
+      fs.statSync(path.resolve(__dirname, 'fixtures', 'plugins', file)).isDirectory()
+    );
+
+    // This is needed so that we can correctly use the alerting test frameworks mock implementation for the connectors.
+    const alertingAllFiles = fs.readdirSync(
       path.resolve(
         __dirname,
         '..',
@@ -64,7 +75,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         'plugins'
       )
     );
-    const plugins = allFiles.filter((file) =>
+
+    const alertingPlugins = alertingAllFiles.filter((file) =>
       fs
         .statSync(
           path.resolve(
@@ -81,14 +93,15 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         .isDirectory()
     );
 
+    const casesConfig = ['--xpack.cases.enabled=true'];
+
     return {
-      testFiles: [require.resolve(`../${name}/tests/`)],
+      testFiles: testFiles ? testFiles : [require.resolve('../tests/common')],
       servers,
       services,
       junit: {
         reportName: 'X-Pack Case API Integration Tests',
       },
-      esArchiver: xPackApiIntegrationTestsConfig.get('esArchiver'),
       esTestCluster: {
         ...xPackApiIntegrationTestsConfig.get('esTestCluster'),
         license,
@@ -104,11 +117,13 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
+          ...casesConfig,
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.eventLog.logEntries=true',
           ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
-          ...plugins.map(
+          // Actions simulators plugin. Needed for testing push to external services.
+          ...alertingPlugins.map(
             (pluginDir) =>
               `--plugin-path=${path.resolve(
                 __dirname,
@@ -120,6 +135,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 'plugins',
                 pluginDir
               )}`
+          ),
+          ...plugins.map(
+            (pluginDir) =>
+              `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`
           ),
           `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl

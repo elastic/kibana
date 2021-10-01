@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -16,7 +17,7 @@ export const BREADCRUMB_TITLE = i18n.translate(
 export const PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.detectionsPageTitle',
   {
-    defaultMessage: 'Detection alerts',
+    defaultMessage: 'Alerts',
   }
 );
 
@@ -36,13 +37,13 @@ export const SIGNAL = i18n.translate('xpack.securitySolution.detectionEngine.sig
 });
 
 export const ALERT = i18n.translate('xpack.securitySolution.detectionEngine.alertTitle', {
-  defaultMessage: 'Detection alerts',
+  defaultMessage: 'Alerts',
 });
 
 export const BUTTON_MANAGE_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.buttonManageRules',
   {
-    defaultMessage: 'Manage detection rules',
+    defaultMessage: 'Manage rules',
   }
 );
 
@@ -142,3 +143,18 @@ export const ML_RULES_UNAVAILABLE = (totalRules: number) =>
     defaultMessage:
       '{totalRules} {totalRules, plural, =1 {rule requires} other {rules require}} Machine Learning to enable.',
   });
+
+export const FEATURE_NO_PERMISSIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.noPermissionsTitle',
+  {
+    defaultMessage: 'Privileges required',
+  }
+);
+
+export const ALERTS_FEATURE_NO_PERMISSIONS_MSG = i18n.translate(
+  'xpack.securitySolution.detectionEngine.noPermissionsMessage',
+  {
+    defaultMessage:
+      'To view alerts, you must update privileges. For more information, contact your Kibana administrator.',
+  }
+);

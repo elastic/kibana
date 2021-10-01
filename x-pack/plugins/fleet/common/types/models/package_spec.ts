@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RegistryPolicyTemplate } from './epm';
+import type { RegistryPolicyTemplate, RegistryVarsEntry } from './epm';
 
 // Based on https://github.com/elastic/package-spec/blob/master/versions/1/manifest.spec.yml#L8
 export interface PackageSpecManifest {
@@ -21,6 +22,7 @@ export interface PackageSpecManifest {
   icons?: PackageSpecIcon[];
   screenshots?: PackageSpecScreenshot[];
   policy_templates?: RegistryPolicyTemplate[];
+  vars?: RegistryVarsEntry[];
   owner: { github: string };
 }
 

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -78,7 +67,6 @@ class TutorialUi extends React.Component {
 
   async componentDidMount() {
     const tutorial = await this.props.getTutorial(this.props.tutorialId);
-
     if (!this._isMounted) {
       return;
     }
@@ -183,15 +171,39 @@ class TutorialUi extends React.Component {
     const instructionSet = this.getInstructionSets()[instructionSetIndex];
     const esHitsCheckConfig = _.get(instructionSet, `statusCheck.esHitsCheck`);
 
-    if (esHitsCheckConfig) {
-      const statusCheckState = await this.fetchEsHitsStatus(esHitsCheckConfig);
+    //Checks if a custom status check callback  was registered in the CLIENT
+    //that matches the same name registered in the SERVER (customStatusCheckName)
+    const customStatusCheckCallback = getServices().tutorialService.getCustomStatusCheck(
+      this.state.tutorial.customStatusCheckName
+    );
 
-      this.setState((prevState) => ({
-        statusCheckStates: {
-          ...prevState.statusCheckStates,
-          [instructionSetIndex]: statusCheckState,
-        },
-      }));
+    const [esHitsStatusCheck, customStatusCheck] = await Promise.all([
+      ...(esHitsCheckConfig ? [this.fetchEsHitsStatus(esHitsCheckConfig)] : []),
+      ...(customStatusCheckCallback
+        ? [this.fetchCustomStatusCheck(customStatusCheckCallback)]
+        : []),
+    ]);
+
+    const nextStatusCheckState =
+      esHitsStatusCheck === StatusCheckStates.HAS_DATA ||
+      customStatusCheck === StatusCheckStates.HAS_DATA
+        ? StatusCheckStates.HAS_DATA
+        : StatusCheckStates.NO_DATA;
+
+    this.setState((prevState) => ({
+      statusCheckStates: {
+        ...prevState.statusCheckStates,
+        [instructionSetIndex]: nextStatusCheckState,
+      },
+    }));
+  };
+
+  fetchCustomStatusCheck = async (customStatusCheckCallback) => {
+    try {
+      const response = await customStatusCheckCallback();
+      return response ? StatusCheckStates.HAS_DATA : StatusCheckStates.NO_DATA;
+    } catch (e) {
+      return StatusCheckStates.ERROR;
     }
   };
 
@@ -289,6 +301,7 @@ class TutorialUi extends React.Component {
           setParameter={this.setParameter}
           replaceTemplateStrings={this.props.replaceTemplateStrings}
           key={index}
+          isCloudEnabled={this.props.isCloudEnabled}
         />
       );
     });

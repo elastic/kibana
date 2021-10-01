@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
+import { Subscription } from 'rxjs';
 
 import {
   NetworkQueries,
@@ -18,10 +20,10 @@ import { inputsModel } from '../../../common/store/inputs';
 import { createFilter } from '../../../common/containers/helpers';
 import { ESQuery } from '../../../../common/typed_json';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 export const ID = 'overviewNetworkQuery';
 
@@ -48,14 +50,13 @@ export const useNetworkOverview = ({
   skip = false,
   startDate,
 }: UseNetworkOverview): [boolean, NetworkOverviewArgs] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    overviewNetworkRequest,
-    setNetworkRequest,
-  ] = useState<NetworkOverviewRequestOptions | null>(null);
+  const [overviewNetworkRequest, setNetworkRequest] =
+    useState<NetworkOverviewRequestOptions | null>(null);
 
   const [overviewNetworkResponse, setNetworkOverviewResponse] = useState<NetworkOverviewArgs>({
     overviewNetwork: {},
@@ -67,19 +68,19 @@ export const useNetworkOverview = ({
     isInspected: false,
     refetch: refetch.current,
   });
+  const { addError, addWarning } = useAppToasts();
 
   const overviewNetworkSearch = useCallback(
     (request: NetworkOverviewRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
-      let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
-        const searchSubscription$ = data.search
+        searchSubscription$.current = data.search
           .search<NetworkOverviewRequestOptions, NetworkOverviewStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
@@ -87,44 +88,35 @@ export const useNetworkOverview = ({
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                  setNetworkOverviewResponse((prevResponse) => ({
-                    ...prevResponse,
-                    overviewNetwork: response.overviewNetwork,
-                    inspect: getInspectResponse(response, prevResponse.inspect),
-                    refetch: refetch.current,
-                  }));
-                }
-                searchSubscription$.unsubscribe();
+                setLoading(false);
+                setNetworkOverviewResponse((prevResponse) => ({
+                  ...prevResponse,
+                  overviewNetwork: response.overviewNetwork,
+                  inspect: getInspectResponse(response, prevResponse.inspect),
+                  refetch: refetch.current,
+                }));
+                searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                }
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_NETWORK_OVERVIEW);
-                searchSubscription$.unsubscribe();
+                setLoading(false);
+                addWarning(i18n.ERROR_NETWORK_OVERVIEW);
+                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
-                  title: i18n.FAIL_NETWORK_OVERVIEW,
-                  text: msg.message,
-                });
-              }
+              setLoading(false);
+              addError(msg, {
+                title: i18n.FAIL_NETWORK_OVERVIEW,
+              });
+              searchSubscription$.current.unsubscribe();
             },
           });
       };
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
-    [data.search, notifications.toasts]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {
@@ -149,6 +141,10 @@ export const useNetworkOverview = ({
 
   useEffect(() => {
     overviewNetworkSearch(overviewNetworkRequest);
+    return () => {
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    };
   }, [overviewNetworkRequest, overviewNetworkSearch]);
 
   return [loading, overviewNetworkResponse];

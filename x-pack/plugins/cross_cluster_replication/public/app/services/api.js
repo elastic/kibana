@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   API_BASE_PATH,
   API_REMOTE_CLUSTERS_BASE_PATH,
@@ -46,7 +48,8 @@ export const getHttpClient = () => {
 const createIdString = (ids) => ids.map((id) => encodeURIComponent(id)).join(',');
 
 /* Auto Follow Pattern */
-export const loadAutoFollowPatterns = () => httpClient.get(`${API_BASE_PATH}/auto_follow_patterns`);
+export const loadAutoFollowPatterns = (asSystemRequest) =>
+  httpClient.get(`${API_BASE_PATH}/auto_follow_patterns`, { asSystemRequest });
 
 export const getAutoFollowPattern = (id) =>
   httpClient.get(`${API_BASE_PATH}/auto_follow_patterns/${encodeURIComponent(id)}`);
@@ -98,7 +101,8 @@ export const resumeAutoFollowPattern = (id) => {
 };
 
 /* Follower Index */
-export const loadFollowerIndices = () => httpClient.get(`${API_BASE_PATH}/follower_indices`);
+export const loadFollowerIndices = (asSystemRequest) =>
+  httpClient.get(`${API_BASE_PATH}/follower_indices`, { asSystemRequest });
 
 export const getFollowerIndex = (id) =>
   httpClient.get(`${API_BASE_PATH}/follower_indices/${encodeURIComponent(id)}`);

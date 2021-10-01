@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
@@ -46,6 +47,18 @@ describe('Modal all errors', () => {
         'Error 2, Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
         'Error 3, Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
       ];
+      const wrapper = shallow(
+        <ModalAllErrors isShowing={true} toast={mockToastWithTwoError} toggle={toggle} />
+      );
+      expect(wrapper.find('[data-test-subj="modal-all-errors-accordion"]').length).toBe(
+        mockToastWithTwoError.errors.length
+      );
+    });
+
+    // This test exists to ensure that errors will work if it is a non-array which can happen in rare corner cases.
+    test('it doesnt cause errors when errors is not an array which can be the rare case in corner cases', () => {
+      const mockToastWithTwoError = cloneDeep(mockToast);
+      mockToastWithTwoError.errors = '' as unknown as string[];
       const wrapper = shallow(
         <ModalAllErrors isShowing={true} toast={mockToastWithTwoError} toggle={toggle} />
       );

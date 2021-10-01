@@ -1,27 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
-import { ComponentStrings } from '../../../i18n/components';
+import { i18n } from '@kbn/i18n';
+import { ExpressionContext } from '../../../types';
 
-interface Props {
-  context: {
-    error: string;
-  };
+const strings = {
+  getContextErrorMessage: (errorMessage: string | null = '') =>
+    i18n.translate('xpack.canvas.functionForm.contextError', {
+      defaultMessage: 'ERROR: {errorMessage}',
+      values: {
+        errorMessage,
+      },
+    }),
+};
+interface FunctionFormContextErrorProps {
+  context: ExpressionContext;
 }
 
-const { FunctionFormContextError: strings } = ComponentStrings;
-
-export const FunctionFormContextError: FunctionComponent<Props> = ({ context }) => (
+export const FunctionFormContextError: FunctionComponent<FunctionFormContextErrorProps> = ({
+  context,
+}) => (
   <div className="canvasFunctionForm canvasFunctionForm--error">
     {strings.getContextErrorMessage(context.error)}
   </div>
 );
-
-FunctionFormContextError.propTypes = {
-  context: PropTypes.shape({ error: PropTypes.string }).isRequired,
-};

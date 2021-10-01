@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
@@ -13,15 +15,27 @@ import { FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField, IndexPattern } from '../../types';
 import { updateColumnParam } from '../layer_helpers';
 import { DataType } from '../../../types';
-import { getInvalidFieldMessage, getSafeName } from './helpers';
+import {
+  getFormatFromPreviousColumn,
+  getInvalidFieldMessage,
+  getSafeName,
+  getFilter,
+} from './helpers';
+import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 
-function ofName(name: string) {
-  return i18n.translate('xpack.lens.indexPattern.lastValueOf', {
-    defaultMessage: 'Last value of {name}',
-    values: {
-      name,
-    },
-  });
+function ofName(name: string, timeShift: string | undefined) {
+  return adjustTimeScaleLabelSuffix(
+    i18n.translate('xpack.lens.indexPattern.lastValueOf', {
+      defaultMessage: 'Last value of {name}',
+      values: {
+        name,
+      },
+    }),
+    undefined,
+    undefined,
+    undefined,
+    timeShift
+  );
 }
 
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
@@ -89,7 +103,8 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
   displayName: i18n.translate('xpack.lens.indexPattern.lastValue', {
     defaultMessage: 'Last value',
   }),
-  getDefaultLabel: (column, indexPattern) => ofName(getSafeName(column.sourceField, indexPattern)),
+  getDefaultLabel: (column, indexPattern) =>
+    ofName(getSafeName(column.sourceField, indexPattern), column.timeShift),
   input: 'field',
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
@@ -100,9 +115,10 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     return {
       ...oldColumn,
       dataType: field.type as DataType,
-      label: ofName(field.displayName),
+      label: ofName(field.displayName, oldColumn.timeShift),
       sourceField: field.name,
       params: newParams,
+      scale: field.type === 'string' ? 'ordinal' : 'ratio',
     };
   },
   getPossibleOperationForField: ({ aggregationRestrictions, type }) => {
@@ -138,7 +154,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     }
     return errorMessages.length ? errorMessages : undefined;
   },
-  buildColumn({ field, previousColumn, indexPattern }) {
+  buildColumn({ field, previousColumn, indexPattern }, columnParams) {
     const sortField = isTimeFieldNameDateField(indexPattern)
       ? indexPattern.timeFieldName
       : indexPattern.fields.find((f) => f.type === 'date')?.name;
@@ -152,17 +168,22 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     }
 
     return {
-      label: ofName(field.displayName),
+      label: ofName(field.displayName, previousColumn?.timeShift),
       dataType: field.type as DataType,
       operationType: 'last_value',
       isBucketed: false,
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
       sourceField: field.name,
+      filter: getFilter(previousColumn, columnParams),
+      timeShift: columnParams?.shift || previousColumn?.timeShift,
       params: {
         sortField,
+        ...getFormatFromPreviousColumn(previousColumn),
       },
     };
   },
+  filterable: true,
+  shiftable: true,
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggTopHit']>('aggTopHit', {
       id: columnId,
@@ -173,6 +194,8 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       size: 1,
       sortOrder: 'desc',
       sortField: column.params.sortField,
+      // time shift is added to wrapping aggFilteredMetric if filter is set
+      timeShift: column.filter ? undefined : column.timeShift,
     }).toAst();
   },
 
@@ -238,7 +261,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
               );
             }}
             selectedOptions={
-              ((currentColumn.params?.sortField
+              (currentColumn.params?.sortField
                 ? [
                     {
                       label:
@@ -247,11 +270,27 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
                       value: currentColumn.params.sortField,
                     },
                   ]
-                : []) as unknown) as EuiComboBoxOptionOption[]
+                : []) as unknown as EuiComboBoxOptionOption[]
             }
           />
         </EuiFormRow>
       </>
     );
+  },
+  documentation: {
+    section: 'elasticsearch',
+    signature: i18n.translate('xpack.lens.indexPattern.lastValue.signature', {
+      defaultMessage: 'field: string',
+    }),
+    description: i18n.translate('xpack.lens.indexPattern.lastValue.documentation.markdown', {
+      defaultMessage: `
+Returns the value of a field from the last document, ordered by the default time field of the index pattern.
+
+This function is usefull the retrieve the latest state of an entity.
+
+Example: Get the current status of server A:
+\`last_value(server.status, kql=\'server.name="A"\')\`
+      `,
+    }),
   },
 };

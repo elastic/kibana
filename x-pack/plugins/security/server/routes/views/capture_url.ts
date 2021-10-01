@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteDefinitionParams } from '..';
+
+import type { RouteDefinitionParams } from '../';
 
 /**
  * Defines routes required for the Capture URL view.
@@ -15,11 +17,7 @@ export function defineCaptureURLRoutes({ httpResources }: RouteDefinitionParams)
     {
       path: '/internal/security/capture-url',
       validate: {
-        query: schema.object({
-          providerType: schema.string({ minLength: 1 }),
-          providerName: schema.string({ minLength: 1 }),
-          next: schema.maybe(schema.string()),
-        }),
+        query: schema.object({ next: schema.maybe(schema.string()) }, { unknowns: 'ignore' }),
       },
       options: { authRequired: false },
     },

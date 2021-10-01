@@ -1,9 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { SerializedConcreteTaskInstance } from '../../../../plugins/task_manager/server/task';
+
+export interface TaskManagerDoc {
+  type: string;
+  task: SerializedConcreteTaskInstance;
+}
 export class TaskManagerUtils {
   private readonly es: any;
   private readonly retry: any;
@@ -38,8 +45,8 @@ export class TaskManagerUtils {
           },
         },
       });
-      if (searchResult.hits.total.value) {
-        throw new Error(`Expected 0 tasks but received ${searchResult.hits.total.value}`);
+      if (searchResult.body.hits.total.value) {
+        throw new Error(`Expected 0 tasks but received ${searchResult.body.hits.total.value}`);
       }
     });
   }
@@ -76,8 +83,10 @@ export class TaskManagerUtils {
           },
         },
       });
-      if (searchResult.hits.total.value) {
-        throw new Error(`Expected 0 non-idle tasks but received ${searchResult.hits.total.value}`);
+      if (searchResult.body.hits.total.value) {
+        throw new Error(
+          `Expected 0 non-idle tasks but received ${searchResult.body.hits.total.value}`
+        );
       }
     });
   }
@@ -107,9 +116,9 @@ export class TaskManagerUtils {
           },
         },
       });
-      if (searchResult.hits.total.value) {
+      if (searchResult.body.hits.total.value) {
         throw new Error(
-          `Expected 0 action_task_params objects but received ${searchResult.hits.total.value}`
+          `Expected 0 action_task_params objects but received ${searchResult.body.hits.total.value}`
         );
       }
     });

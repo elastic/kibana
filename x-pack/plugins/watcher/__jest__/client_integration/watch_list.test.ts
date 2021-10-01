@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from 'react-dom/test-utils';
-import * as fixtures from '../../test/fixtures';
+import * as fixtures from '../../__fixtures__';
+import { ROUTES } from '../../common/constants';
 import { setupEnvironment, pageHelpers, getRandomString, findTestSubject } from './helpers';
 import { WatchListTestBed } from './helpers/watch_list.helpers';
-import { ROUTES } from '../../common/constants';
 
 const { API_ROOT } = ROUTES;
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { sortBy } from 'lodash';
@@ -20,7 +21,6 @@ import { deserializeTime, serializeTime } from './time_serialization';
 import { csvToArray } from './utils';
 
 export function deserializeSnapshotDetails(
-  repository: string,
   snapshotDetailsEs: SnapshotDetailsEs,
   managedRepository?: string,
   successfulSnapshots?: SnapshotDetailsEs[]
@@ -32,6 +32,7 @@ export function deserializeSnapshotDetails(
   const {
     snapshot,
     uuid,
+    repository,
     version_id: versionId,
     version,
     indices = [],

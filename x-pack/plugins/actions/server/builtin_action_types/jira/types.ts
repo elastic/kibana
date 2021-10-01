@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -15,10 +16,10 @@ import {
   ExecutorSubActionGetIncidentParamsSchema,
   ExecutorSubActionHandshakeParamsSchema,
   ExecutorSubActionGetCapabilitiesParamsSchema,
-  ExecutorSubActionGetIssueTypesParamsSchema,
   ExecutorSubActionGetFieldsByIssueTypeParamsSchema,
   ExecutorSubActionGetIssuesParamsSchema,
   ExecutorSubActionGetIssueParamsSchema,
+  ExecutorSubActionCommonFieldsParamsSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { Logger } from '../../../../../../src/core/server';
@@ -123,8 +124,8 @@ export type ExecutorSubActionGetCapabilitiesParams = TypeOf<
   typeof ExecutorSubActionGetCapabilitiesParamsSchema
 >;
 
-export type ExecutorSubActionGetIssueTypesParams = TypeOf<
-  typeof ExecutorSubActionGetIssueTypesParamsSchema
+export type ExecutorSubActionCommonFieldsParams = TypeOf<
+  typeof ExecutorSubActionCommonFieldsParamsSchema
 >;
 
 export type ExecutorSubActionGetFieldsByIssueTypeParams = TypeOf<
@@ -156,12 +157,12 @@ export interface HandshakeApiHandlerArgs extends ExternalServiceApiHandlerArgs {
 
 export interface GetIssueTypesHandlerArgs {
   externalService: ExternalService;
-  params: ExecutorSubActionGetIssueTypesParams;
+  params: ExecutorSubActionCommonFieldsParams;
 }
 
 export interface GetCommonFieldsHandlerArgs {
   externalService: ExternalService;
-  params: ExecutorSubActionGetIssueTypesParams;
+  params: ExecutorSubActionCommonFieldsParams;
 }
 
 export interface GetFieldsByIssueTypeHandlerArgs {

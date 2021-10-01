@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { getAggConfigFromEsAgg } from './pivot_aggs';
+import { getAggConfigFromEsAgg, isSpecialSortField } from './pivot_aggs';
 import {
   FilterAggForm,
   FilterTermForm,
@@ -64,5 +65,14 @@ describe('getAggConfigFromEsAgg', () => {
       field: 'test_field',
       parentAgg: result,
     });
+  });
+});
+
+describe('isSpecialSortField', () => {
+  test('detects special sort field', () => {
+    expect(isSpecialSortField('_score')).toBe(true);
+  });
+  test('rejects special fields that not supported yet', () => {
+    expect(isSpecialSortField('_doc')).toBe(false);
   });
 });

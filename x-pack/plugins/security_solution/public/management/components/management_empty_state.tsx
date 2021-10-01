@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, MouseEvent, CSSProperties } from 'react';
@@ -23,6 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import onboardingLogo from '../images/security_administration_onboarding.svg';
+import { useKibana } from '../../common/lib/kibana';
 
 const TEXT_ALIGN_CENTER: CSSProperties = Object.freeze({
   textAlign: 'center',
@@ -43,6 +45,7 @@ const PolicyEmptyState = React.memo<{
   onActionClick: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
   actionDisabled?: boolean;
 }>(({ loading, onActionClick, actionDisabled }) => {
+  const docLinks = useKibana().services.docLinks;
   return (
     <div data-test-subj="emptyPolicyTable">
       {loading ? (
@@ -82,10 +85,10 @@ const PolicyEmptyState = React.memo<{
                 id="xpack.securitySolution.endpoint.policyList.onboardingSectionThree"
                 defaultMessage="To get started, add the Endpoint Security integration to your Agents. For more information, "
               />
-              <EuiLink external href="https://www.elastic.co/guide/en/security/current/index.html">
+              <EuiLink external href={`${docLinks.links.siem.guide}`}>
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policyList.onboardingDocsLink"
-                  defaultMessage="view the Security app documentation"
+                  defaultMessage="view the Elastic Security documentation"
                 />
               </EuiLink>
             </EuiText>

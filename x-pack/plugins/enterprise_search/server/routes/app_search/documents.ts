@@ -1,12 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 
+import { skipBodyValidation } from '../../lib/route_config_helpers';
+
 import { RouteDependencies } from '../../plugin';
+
+export function registerDocumentsRoutes({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.post(
+    skipBodyValidation({
+      path: '/internal/app_search/engines/{engineName}/documents',
+      validate: {
+        params: schema.object({
+          engineName: schema.string(),
+        }),
+      },
+    }),
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:engineName/documents/new',
+    })
+  );
+}
 
 export function registerDocumentRoutes({
   router,
@@ -14,7 +36,7 @@ export function registerDocumentRoutes({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/engines/{engineName}/documents/{documentId}',
+      path: '/internal/app_search/engines/{engineName}/documents/{documentId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -22,15 +44,13 @@ export function registerDocumentRoutes({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/engines/${request.params.engineName}/documents/${request.params.documentId}`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:engineName/documents/:documentId',
+    })
   );
   router.delete(
     {
-      path: '/api/app_search/engines/{engineName}/documents/{documentId}',
+      path: '/internal/app_search/engines/{engineName}/documents/{documentId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -38,10 +58,8 @@ export function registerDocumentRoutes({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/engines/${request.params.engineName}/documents/${request.params.documentId}`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:engineName/documents/:documentId',
+    })
   );
 }

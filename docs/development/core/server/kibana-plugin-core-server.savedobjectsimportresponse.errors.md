@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-errors?: SavedObjectsImportError[];
+errors?: SavedObjectsImportFailure[];
 ```

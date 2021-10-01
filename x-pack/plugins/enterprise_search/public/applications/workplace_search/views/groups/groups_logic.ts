@@ -1,25 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
+
 import { i18n } from '@kbn/i18n';
 
-import { HttpLogic } from '../../../shared/http';
-
-import {
-  FlashMessagesLogic,
-  flashAPIErrors,
-  setSuccessMessage,
-} from '../../../shared/flash_messages';
-
-import { ContentSource, Group, User } from '../../types';
-
 import { JSON_HEADER as headers } from '../../../../../common/constants';
-import { DEFAULT_META } from '../../../shared/constants';
 import { Meta } from '../../../../../common/types';
+import { DEFAULT_META } from '../../../shared/constants';
+import {
+  clearFlashMessages,
+  flashAPIErrors,
+  flashSuccessToast,
+} from '../../../shared/flash_messages';
+import { HttpLogic } from '../../../shared/http';
+import { ContentSource, Group, User } from '../../types';
 
 export const MAX_NAME_LENGTH = 40;
 
@@ -256,7 +255,7 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
   listeners: ({ actions, values }) => ({
     initializeGroups: async () => {
       try {
-        const response = await HttpLogic.values.http.get('/api/workplace_search/groups');
+        const response = await HttpLogic.values.http.get('/internal/workplace_search/groups');
         actions.onInitializeGroups(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -289,13 +288,16 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
       };
 
       try {
-        const response = await HttpLogic.values.http.post('/api/workplace_search/groups/search', {
-          body: JSON.stringify({
-            page,
-            search,
-          }),
-          headers,
-        });
+        const response = await HttpLogic.values.http.post(
+          '/internal/workplace_search/groups/search',
+          {
+            body: JSON.stringify({
+              page,
+              search,
+            }),
+            headers,
+          }
+        );
 
         actions.setSearchResults(response);
       } catch (e) {
@@ -306,7 +308,7 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
       actions.setAllGroupLoading(true);
       try {
         const response = await HttpLogic.values.http.get(
-          `/api/workplace_search/groups/${groupId}/group_users`
+          `/internal/workplace_search/groups/${groupId}/group_users`
         );
         actions.setGroupUsers(response);
       } catch (e) {
@@ -315,7 +317,7 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
     },
     saveNewGroup: async () => {
       try {
-        const response = await HttpLogic.values.http.post('/api/workplace_search/groups', {
+        const response = await HttpLogic.values.http.post('/internal/workplace_search/groups', {
           body: JSON.stringify({ group_name: values.newGroupName }),
           headers,
         });
@@ -329,7 +331,7 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
           }
         );
 
-        setSuccessMessage(SUCCESS_MESSAGE);
+        flashSuccessToast(SUCCESS_MESSAGE);
         actions.setNewGroup(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -339,16 +341,16 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
       actions.getSearchResults();
     },
     openNewGroupModal: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
     resetGroupsFilters: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
     toggleFilterSourcesDropdown: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
     toggleFilterUsersDropdown: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
   }),
 });

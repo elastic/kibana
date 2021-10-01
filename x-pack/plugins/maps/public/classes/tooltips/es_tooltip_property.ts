@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -18,18 +19,25 @@ export class ESTooltipProperty implements ITooltipProperty {
   private readonly _tooltipProperty: ITooltipProperty;
   private readonly _indexPattern: IndexPattern;
   private readonly _field: IField;
+  private readonly _applyGlobalQuery: boolean;
 
-  constructor(tooltipProperty: ITooltipProperty, indexPattern: IndexPattern, field: IField) {
+  constructor(
+    tooltipProperty: ITooltipProperty,
+    indexPattern: IndexPattern,
+    field: IField,
+    applyGlobalQuery: boolean
+  ) {
     this._tooltipProperty = tooltipProperty;
     this._indexPattern = indexPattern;
     this._field = field;
+    this._applyGlobalQuery = applyGlobalQuery;
   }
 
   getPropertyKey(): string {
     return this._tooltipProperty.getPropertyKey();
   }
 
-  getPropertyName(): string {
+  getPropertyName() {
     return this._tooltipProperty.getPropertyName();
   }
 
@@ -64,6 +72,10 @@ export class ESTooltipProperty implements ITooltipProperty {
   }
 
   isFilterable(): boolean {
+    if (!this._applyGlobalQuery) {
+      return false;
+    }
+
     const indexPatternField = this._getIndexPatternField();
     return (
       !!indexPatternField &&
@@ -75,6 +87,10 @@ export class ESTooltipProperty implements ITooltipProperty {
   }
 
   async getESFilters(): Promise<Filter[]> {
+    if (!this._applyGlobalQuery) {
+      return [];
+    }
+
     const indexPatternField = this._getIndexPatternField();
     if (!indexPatternField) {
       return [];
@@ -86,7 +102,7 @@ export class ESTooltipProperty implements ITooltipProperty {
       existsFilter.meta.negate = true;
       return [existsFilter];
     } else {
-      return [esFilters.buildPhraseFilter(indexPatternField, value, this._indexPattern)];
+      return [esFilters.buildPhraseFilter(indexPatternField, value as string, this._indexPattern)];
     }
   }
 }

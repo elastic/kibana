@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DataAccessLayer, TimeRange } from '../../types';
@@ -47,15 +48,12 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
     databaseDocumentID: '_id',
     entityIDs: { origin: 'origin', firstChild: 'firstChild', secondChild: 'secondChild' },
   };
-  const {
-    tree,
-    relatedEvents,
-    nodeDataResponse,
-  } = mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
-    originID: metadata.entityIDs.origin,
-    firstChildID: metadata.entityIDs.firstChild,
-    secondChildID: metadata.entityIDs.secondChild,
-  });
+  const { tree, relatedEvents, nodeDataResponse } =
+    mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
+      originID: metadata.entityIDs.origin,
+      firstChildID: metadata.entityIDs.firstChild,
+      secondChildID: metadata.entityIDs.secondChild,
+    });
 
   return {
     metadata,

@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { useApolloClient } from '../../../common/utils/apollo_context';
 import {
   dispatchUpdateTimeline,
   queryTimelineById,
@@ -15,12 +15,10 @@ import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/s
 
 export const useTimelineClick = () => {
   const dispatch = useDispatch();
-  const apolloClient = useApolloClient();
 
   const handleTimelineClick = useCallback(
     (timelineId: string, graphEventId?: string) => {
       queryTimelineById({
-        apolloClient,
         graphEventId,
         timelineId,
         updateIsLoading: ({
@@ -33,7 +31,7 @@ export const useTimelineClick = () => {
         updateTimeline: dispatchUpdateTimeline(dispatch),
       });
     },
-    [apolloClient, dispatch]
+    [dispatch]
   );
 
   return handleTimelineClick;

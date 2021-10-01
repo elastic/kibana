@@ -1,34 +1,45 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { rangeFilter } from '../../../../common/utils/range_filter';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { rangeQuery, kqlQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
+import { Setup } from '../../helpers/setup_request';
 
 export async function getBuckets({
+  environment,
+  kuery,
   serviceName,
   groupId,
   bucketSize,
   setup,
+  start,
+  end,
 }: {
+  environment: string;
+  kuery: string;
   serviceName: string;
   groupId?: string;
   bucketSize: number;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
+  start: number;
+  end: number;
 }) {
-  const { start, end, esFilter, apmEventClient } = setup;
+  const { apmEventClient } = setup;
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
-    ...esFilter,
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
+    ...kqlQuery(kuery),
   ];
 
   if (groupId) {
@@ -62,7 +73,10 @@ export async function getBuckets({
     },
   };
 
-  const resp = await apmEventClient.search(params);
+  const resp = await apmEventClient.search(
+    'get_error_distribution_buckets',
+    params
+  );
 
   const buckets = (resp.aggregations?.distribution.buckets || []).map(
     (bucket) => ({

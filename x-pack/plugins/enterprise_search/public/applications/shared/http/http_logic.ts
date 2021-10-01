@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
 
 import { HttpSetup, HttpInterceptorResponseError, HttpResponse } from 'src/core/public';
 
-import { READ_ONLY_MODE_HEADER } from '../../../../common/constants';
+import { ERROR_CONNECTING_HEADER, READ_ONLY_MODE_HEADER } from '../../../../common/constants';
 
 interface HttpValues {
   http: HttpSetup;
@@ -59,11 +60,12 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
       const errorConnectingInterceptor = values.http.intercept({
         responseError: async (httpResponse) => {
           if (isEnterpriseSearchApi(httpResponse)) {
-            const { status } = httpResponse.response!;
-            const hasErrorConnecting = status === 502;
+            const hasErrorConnecting = httpResponse.response!.headers.get(ERROR_CONNECTING_HEADER);
 
-            if (hasErrorConnecting) {
+            if (hasErrorConnecting === 'true') {
               actions.setErrorConnecting(true);
+            } else {
+              actions.setErrorConnecting(false);
             }
           }
 
@@ -123,6 +125,8 @@ export const mountHttpLogic = (props: HttpLogicProps) => {
  * Small helper that checks whether or not an http call is for an Enterprise Search API
  */
 const isEnterpriseSearchApi = (httpResponse: HttpResponse) => {
-  const { url } = httpResponse.response!;
-  return url.includes('/api/app_search/') || url.includes('/api/workplace_search/');
+  if (!httpResponse.response) return false; // Typically this means Kibana has stopped working, in which case we short-circuit early to prevent errors
+
+  const { url } = httpResponse.response;
+  return url.includes('/internal/app_search/') || url.includes('/internal/workplace_search/');
 };

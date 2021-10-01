@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -58,10 +59,32 @@ export class JobDetails extends Component {
         ? props.jobGroups.map((g) => ({ label: g, color: tabColor(g) }))
         : [];
 
+    const { datafeedRunning, jobClosed } = props;
+
+    let mmlHelpText = null;
+    if (!jobClosed) {
+      mmlHelpText = (
+        <FormattedMessage
+          id="xpack.ml.jobsList.editJobFlyout.jobDetails.modelMemoryLimitJobOpenLabelHelp"
+          defaultMessage="Model memory limit cannot be edited while the job is open."
+        />
+      );
+    }
+
+    if (datafeedRunning) {
+      mmlHelpText = (
+        <FormattedMessage
+          id="xpack.ml.jobsList.editJobFlyout.jobDetails.modelMemoryLimitLabelHelp"
+          defaultMessage="Model memory limit cannot be edited while the datafeed is running."
+        />
+      );
+    }
+
     return {
       description: props.jobDescription,
       selectedGroups,
       mml: props.jobModelMemoryLimit,
+      mmlHelpText,
       mmlValidationError: props.jobModelMemoryLimitValidationError,
       groupsValidationError: props.jobGroupsValidationError,
       modelSnapshotRetentionDays: props.jobModelSnapshotRetentionDays,
@@ -138,8 +161,11 @@ export class JobDetails extends Component {
       groupsValidationError,
       modelSnapshotRetentionDays,
       dailyModelSnapshotRetentionAfterDays,
+      mmlHelpText,
     } = this.state;
-    const { datafeedRunning } = this.props;
+
+    const { datafeedRunning, jobClosed } = this.props;
+
     return (
       <React.Fragment>
         <EuiSpacer size="m" />
@@ -187,14 +213,7 @@ export class JobDetails extends Component {
                 defaultMessage="Model memory limit"
               />
             }
-            helpText={
-              datafeedRunning ? (
-                <FormattedMessage
-                  id="xpack.ml.jobsList.editJobFlyout.jobDetails.modelMemoryLimitLabelHelp"
-                  defaultMessage="Model memory limit cannot be edited while the datafeed is running."
-                />
-              ) : null
-            }
+            helpText={mmlHelpText}
             isInvalid={mmlValidationError !== ''}
             error={mmlValidationError}
           >
@@ -203,7 +222,7 @@ export class JobDetails extends Component {
               onChange={this.onMmlChange}
               isInvalid={mmlValidationError !== ''}
               error={mmlValidationError}
-              disabled={datafeedRunning}
+              disabled={datafeedRunning || !jobClosed}
             />
           </EuiFormRow>
           <EuiFormRow

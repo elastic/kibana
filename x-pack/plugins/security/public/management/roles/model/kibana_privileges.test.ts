@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
+import type { RoleKibanaPrivilege } from '../../../../common/model';
 import { kibanaFeatures } from '../__fixtures__/kibana_features';
-import { KibanaPrivileges } from './kibana_privileges';
-import { RoleKibanaPrivilege } from '../../../../common/model';
+import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
 import { KibanaPrivilege } from './kibana_privilege';
+import { KibanaPrivileges } from './kibana_privileges';
 
 describe('KibanaPrivileges', () => {
   describe('#getBasePrivileges', () => {
@@ -112,9 +113,8 @@ describe('KibanaPrivileges', () => {
           spaces: ['foo'],
         },
       ];
-      const collection = kibanaPrivileges.createCollectionFromRoleKibanaPrivileges(
-        assignedPrivileges
-      );
+      const collection =
+        kibanaPrivileges.createCollectionFromRoleKibanaPrivileges(assignedPrivileges);
 
       expect(
         collection.grantsPrivilege(

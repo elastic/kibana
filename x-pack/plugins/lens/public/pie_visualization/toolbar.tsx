@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './toolbar.scss';
-import React, { useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -15,14 +15,18 @@ import {
   EuiRange,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { Position } from '@elastic/charts';
+import type { Position } from '@elastic/charts';
+import type { PaletteRegistry } from 'src/plugins/charts/public';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
-import { PieVisualizationState, SharedLayerState } from './types';
+import type { PieVisualizationState, SharedPieLayerState } from '../../common/expressions';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
-import { ToolbarPopover, LegendSettingsPopover } from '../shared_components';
+import { ToolbarPopover, LegendSettingsPopover, useDebouncedValue } from '../shared_components';
 import { PalettePicker } from '../shared_components';
 
-const numberOptions: Array<{ value: SharedLayerState['numberDisplay']; inputDisplay: string }> = [
+const numberOptions: Array<{
+  value: SharedPieLayerState['numberDisplay'];
+  inputDisplay: string;
+}> = [
   {
     value: 'hidden',
     inputDisplay: i18n.translate('xpack.lens.pieChart.hiddenNumbersLabel', {
@@ -44,7 +48,7 @@ const numberOptions: Array<{ value: SharedLayerState['numberDisplay']; inputDisp
 ];
 
 const categoryOptions: Array<{
-  value: SharedLayerState['categoryDisplay'];
+  value: SharedPieLayerState['categoryDisplay'];
   inputDisplay: string;
 }> = [
   {
@@ -68,7 +72,7 @@ const categoryOptions: Array<{
 ];
 
 const categoryOptionsTreemap: Array<{
-  value: SharedLayerState['categoryDisplay'];
+  value: SharedPieLayerState['categoryDisplay'];
   inputDisplay: string;
 }> = [
   {
@@ -86,7 +90,7 @@ const categoryOptionsTreemap: Array<{
 ];
 
 const legendOptions: Array<{
-  value: SharedLayerState['legendDisplay'];
+  value: SharedPieLayerState['legendDisplay'];
   label: string;
   id: string;
 }> = [
@@ -120,7 +124,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
     return null;
   }
   return (
-    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
       <ToolbarPopover
         title={i18n.translate('xpack.lens.pieChart.valuesLabel', {
           defaultMessage: 'Labels',
@@ -178,12 +182,12 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         >
           <DecimalPlaceSlider
             value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
-            setValue={(value) =>
+            setValue={(value) => {
               setState({
                 ...state,
                 layers: [{ ...layer, percentDecimals: value }],
-              })
-            }
+              });
+            }}
           />
         </EuiFormRow>
       </ToolbarPopover>
@@ -216,6 +220,21 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
             layers: [{ ...layer, nestedLegend: !layer.nestedLegend }],
           });
         }}
+        shouldTruncate={layer.truncateLegend ?? true}
+        onTruncateLegendChange={() => {
+          const current = layer.truncateLegend ?? true;
+          setState({
+            ...state,
+            layers: [{ ...layer, truncateLegend: !current }],
+          });
+        }}
+        maxLines={layer?.legendMaxLines}
+        onMaxLinesChange={(val) => {
+          setState({
+            ...state,
+            layers: [{ ...layer, legendMaxLines: val }],
+          });
+        }}
       />
     </EuiFlexGroup>
   );
@@ -228,29 +247,37 @@ const DecimalPlaceSlider = ({
   value: number;
   setValue: (value: number) => void;
 }) => {
-  const [localValue, setLocalValue] = useState(value);
-  useDebounce(() => setValue(localValue), 256, [localValue]);
-
+  const { inputValue, handleInputChange } = useDebouncedValue(
+    {
+      value,
+      onChange: setValue,
+    },
+    { allowFalsyValue: true }
+  );
   return (
     <EuiRange
       data-test-subj="indexPattern-dimension-formatDecimals"
-      value={localValue}
+      value={inputValue}
       min={0}
       max={10}
       showInput
       compressed
       onChange={(e) => {
-        setLocalValue(Number(e.currentTarget.value));
+        handleInputChange(Number(e.currentTarget.value));
       }}
     />
   );
 };
 
-export function DimensionEditor(props: VisualizationDimensionEditorProps<PieVisualizationState>) {
+export function DimensionEditor(
+  props: VisualizationDimensionEditorProps<PieVisualizationState> & {
+    paletteService: PaletteRegistry;
+  }
+) {
   return (
     <>
       <PalettePicker
-        palettes={props.frame.availablePalettes}
+        palettes={props.paletteService}
         activePalette={props.state.palette}
         setPalette={(newPalette) => {
           props.setState({ ...props.state, palette: newPalette });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -21,13 +22,15 @@ export const Ip = React.memo<{
   contextId: string;
   eventId: string;
   fieldName: string;
+  isDraggable?: boolean;
   value?: string | null;
-}>(({ contextId, eventId, fieldName, value }) => (
+}>(({ contextId, eventId, fieldName, isDraggable, value }) => (
   <FormattedFieldValue
     contextId={contextId}
     data-test-subj="formatted-ip"
     eventId={eventId}
     fieldName={fieldName}
+    isDraggable={isDraggable}
     fieldType={IP_FIELD_TYPE}
     value={value}
     truncate

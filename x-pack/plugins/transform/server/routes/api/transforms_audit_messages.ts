@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { transformIdParamSchema, TransformIdParamSchema } from '../../../common/api_schemas/common';
-import { AuditMessage, TransformMessage } from '../../../common/types/messages';
+import { AuditMessage } from '../../../common/types/messages';
 
 import { RouteDependencies } from '../../types';
 
@@ -77,19 +78,27 @@ export function registerTransformsAuditMessagesRoutes({ router, license }: Route
       }
 
       try {
-        const { body: resp } = await ctx.core.elasticsearch.client.asCurrentUser.search({
-          index: ML_DF_NOTIFICATION_INDEX_PATTERN,
-          ignore_unavailable: true,
-          size: SIZE,
-          body: {
-            sort: [{ timestamp: { order: 'desc' } }, { transform_id: { order: 'asc' } }],
-            query,
-          },
-        });
+        const { body: resp } =
+          await ctx.core.elasticsearch.client.asCurrentUser.search<AuditMessage>({
+            index: ML_DF_NOTIFICATION_INDEX_PATTERN,
+            ignore_unavailable: true,
+            size: SIZE,
+            body: {
+              sort: [
+                { timestamp: { order: 'desc' as const } },
+                { transform_id: { order: 'asc' as const } },
+              ],
+              query,
+            },
+          });
 
-        let messages: TransformMessage[] = [];
-        if (resp.hits.total.value > 0) {
-          messages = resp.hits.hits.map((hit: AuditMessage) => hit._source);
+        let messages: AuditMessage[] = [];
+        // TODO: remove typeof checks when appropriate overloading is added for the `search` API
+        if (
+          (typeof resp.hits.total === 'number' && resp.hits.total > 0) ||
+          (typeof resp.hits.total === 'object' && resp.hits.total.value > 0)
+        ) {
+          messages = resp.hits.hits.map((hit) => hit._source!);
           messages.reverse();
         }
         return res.ok({ body: messages });

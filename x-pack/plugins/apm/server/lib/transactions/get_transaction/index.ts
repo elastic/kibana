@@ -1,29 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../../common/utils/range_filter';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { rangeQuery } from '../../../../../observability/server';
+import { Setup } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 
 export async function getTransaction({
   transactionId,
   traceId,
   setup,
+  start,
+  end,
 }: {
   transactionId: string;
-  traceId: string;
-  setup: Setup & SetupTimeRange;
+  traceId?: string;
+  setup: Setup;
+  start?: number;
+  end?: number;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
 
-  const resp = await apmEventClient.search({
+  const resp = await apmEventClient.search('get_transaction', {
     apm: {
       events: [ProcessorEvent.transaction],
     },
@@ -31,11 +37,11 @@ export async function getTransaction({
       size: 1,
       query: {
         bool: {
-          filter: [
+          filter: asMutableArray([
             { term: { [TRANSACTION_ID]: transactionId } },
-            { term: { [TRACE_ID]: traceId } },
-            { range: rangeFilter(start, end) },
-          ],
+            ...(traceId ? [{ term: { [TRACE_ID]: traceId } }] : []),
+            ...(start && end ? rangeQuery(start, end) : []),
+          ]),
         },
       },
     },

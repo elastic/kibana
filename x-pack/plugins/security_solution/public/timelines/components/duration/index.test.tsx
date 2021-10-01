@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -13,6 +14,8 @@ import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
 import { Duration } from '.';
 
+jest.mock('../../../common/lib/kibana');
+
 describe('Duration', () => {
   const mount = useMountAppended();
 
@@ -23,6 +26,7 @@ describe('Duration', () => {
           contextId="test"
           eventId="abc"
           fieldName="event.duration"
+          isDraggable={true}
           value={`${ONE_MILLISECOND_AS_NANOSECONDS}`}
         />
       </TestProviders>

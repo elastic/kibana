@@ -1,22 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import type { Agent } from 'http';
 import { defaultsDeep } from 'lodash';
 import { parse as parseUrl } from 'url';
 
@@ -25,7 +15,12 @@ import { ProxyConfig } from './proxy_config';
 export class ProxyConfigCollection {
   private configs: ProxyConfig[];
 
-  constructor(configs: Array<{ match: any; timeout: number }> = []) {
+  constructor(
+    configs: Array<{
+      match: { protocol: string; host: string; port: string; path: string };
+      timeout: number;
+    }> = []
+  ) {
     this.configs = configs.map((settings) => new ProxyConfig(settings));
   }
 
@@ -33,7 +28,7 @@ export class ProxyConfigCollection {
     return Boolean(this.configs.length);
   }
 
-  configForUri(uri: string): object {
+  configForUri(uri: string): { agent: Agent; timeout: number } {
     const parsedUri = parseUrl(uri);
     const settings = this.configs.map((config) => config.getForParsedUri(parsedUri as any));
     return defaultsDeep({}, ...settings);

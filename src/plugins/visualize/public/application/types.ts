@@ -1,33 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { History } from 'history';
-import { TimeRange, Query, Filter, DataPublicPluginStart } from 'src/plugins/data/public';
-import {
-  PersistedState,
-  SavedVisState,
-  VisualizationsStart,
-  Vis,
-  VisualizeEmbeddableContract,
-  VisSavedObject,
-} from 'src/plugins/visualizations/public';
-import {
+import type { EventEmitter } from 'events';
+import type { History } from 'history';
+
+import type { SerializableRecord } from '@kbn/utility-types';
+
+import type {
   CoreStart,
   PluginInitializerContext,
   ChromeStart,
@@ -35,25 +19,38 @@ import {
   ScopedHistory,
   AppMountParameters,
 } from 'kibana/public';
-import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
-import {
+
+import type {
+  VisualizationsStart,
+  Vis,
+  VisualizeEmbeddableContract,
+  VisSavedObject,
+  PersistedState,
+  VisParams,
+} from 'src/plugins/visualizations/public';
+
+import type {
   Storage,
   IKbnUrlStateStorage,
   ReduxLikeStateContainer,
 } from 'src/plugins/kibana_utils/public';
-import { SharePluginStart } from 'src/plugins/share/public';
-import { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/public';
-import { EmbeddableStart } from 'src/plugins/embeddable/public';
-import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
-import { EventEmitter } from 'events';
-import { DashboardStart } from '../../../dashboard/public';
-import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 
-export type PureVisState = SavedVisState;
+import type { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
+import type { Query, Filter, DataPublicPluginStart, TimeRange } from 'src/plugins/data/public';
+import type { SharePluginStart } from 'src/plugins/share/public';
+import type { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/public';
+import type { EmbeddableStart, EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
+import type { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import type { PresentationUtilPluginStart } from 'src/plugins/presentation_util/public';
+import type { DashboardStart } from '../../../dashboard/public';
+import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
+import type { UsageCollectionStart } from '../../../usage_collection/public';
+
+import { PureVisState } from '../../common/types';
 
 export interface VisualizeAppState {
   filters: Filter[];
-  uiState: Record<string, unknown>;
+  uiState: SerializableRecord;
   vis: PureVisState;
   query: Query;
   savedQuery?: string;
@@ -80,6 +77,64 @@ export type VisualizeAppStateContainer = ReduxLikeStateContainer<
   VisualizeAppStateTransitions
 >;
 
+export interface VisualizeServices extends CoreStart {
+  stateTransferService: EmbeddableStateTransfer;
+  embeddable: EmbeddableStart;
+  history: History;
+  kbnUrlStateStorage: IKbnUrlStateStorage;
+  urlForwarding: UrlForwardingStart;
+  pluginInitializerContext: PluginInitializerContext;
+  chrome: ChromeStart;
+  data: DataPublicPluginStart;
+  localStorage: Storage;
+  navigation: NavigationStart;
+  toastNotifications: ToastsStart;
+  share?: SharePluginStart;
+  visualizeCapabilities: Record<string, boolean | Record<string, boolean>>;
+  dashboardCapabilities: Record<string, boolean | Record<string, boolean>>;
+  visualizations: VisualizationsStart;
+  savedObjectsPublic: SavedObjectsStart;
+  savedVisualizations: VisualizationsStart['savedVisualizationsLoader'];
+  setActiveUrl: (newUrl: string) => void;
+  createVisEmbeddableFromObject: VisualizationsStart['__LEGACY']['createVisEmbeddableFromObject'];
+  restorePreviousUrl: () => void;
+  scopedHistory: ScopedHistory;
+  dashboard: DashboardStart;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  savedObjectsTagging?: SavedObjectsTaggingApi;
+  presentationUtil: PresentationUtilPluginStart;
+  usageCollection?: UsageCollectionStart;
+  getKibanaVersion: () => string;
+}
+
+export interface SavedVisInstance {
+  vis: Vis;
+  savedVis: VisSavedObject;
+  savedSearch?: SavedObject;
+  embeddableHandler: VisualizeEmbeddableContract;
+}
+
+export interface ByValueVisInstance {
+  vis: Vis;
+  savedVis: VisSavedObject;
+  savedSearch?: SavedObject;
+  embeddableHandler: VisualizeEmbeddableContract;
+}
+
+export type VisualizeEditorVisInstance = SavedVisInstance | ByValueVisInstance;
+
+export type VisEditorConstructor<TVisParams = VisParams> = new (
+  element: HTMLElement,
+  vis: Vis<TVisParams>,
+  eventEmitter: EventEmitter,
+  embeddableHandler: VisualizeEmbeddableContract
+) => IEditorController;
+
+export interface IEditorController {
+  render(props: EditorRenderProps): Promise<void> | void;
+  destroy(): void;
+}
+
 export interface EditorRenderProps {
   core: CoreStart;
   data: DataPublicPluginStart;
@@ -94,54 +149,4 @@ export interface EditorRenderProps {
   linked: boolean;
 }
 
-export interface VisualizeServices extends CoreStart {
-  embeddable: EmbeddableStart;
-  history: History;
-  kbnUrlStateStorage: IKbnUrlStateStorage;
-  urlForwarding: UrlForwardingStart;
-  pluginInitializerContext: PluginInitializerContext;
-  chrome: ChromeStart;
-  data: DataPublicPluginStart;
-  localStorage: Storage;
-  navigation: NavigationStart;
-  toastNotifications: ToastsStart;
-  share?: SharePluginStart;
-  visualizeCapabilities: any;
-  visualizations: VisualizationsStart;
-  savedObjectsPublic: SavedObjectsStart;
-  savedVisualizations: VisualizationsStart['savedVisualizationsLoader'];
-  setActiveUrl: (newUrl: string) => void;
-  createVisEmbeddableFromObject: VisualizationsStart['__LEGACY']['createVisEmbeddableFromObject'];
-  restorePreviousUrl: () => void;
-  scopedHistory: ScopedHistory;
-  dashboard: DashboardStart;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  savedObjectsTagging?: SavedObjectsTaggingApi;
-}
-
-export interface SavedVisInstance {
-  vis: Vis;
-  savedVis: VisSavedObject;
-  savedSearch?: SavedObject;
-  embeddableHandler: VisualizeEmbeddableContract;
-}
-
-export interface ByValueVisInstance {
-  vis: Vis;
-  savedSearch?: SavedObject;
-  embeddableHandler: VisualizeEmbeddableContract;
-}
-
-export type VisualizeEditorVisInstance = SavedVisInstance | ByValueVisInstance;
-
-export type VisEditorConstructor = new (
-  element: HTMLElement,
-  vis: Vis,
-  eventEmitter: EventEmitter,
-  embeddableHandler: VisualizeEmbeddableContract
-) => IEditorController;
-
-export interface IEditorController {
-  render(props: EditorRenderProps): Promise<void> | void;
-  destroy(): void;
-}
+export { PureVisState };

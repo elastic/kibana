@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { curry } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import { validate } from './validators';
 import {
@@ -30,6 +31,8 @@ import {
 import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
 
+export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
+
 interface GetActionTypeParams {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
@@ -37,6 +40,7 @@ interface GetActionTypeParams {
 
 const supportedSubActions: string[] = ['getFields', 'pushToService', 'incidentTypes', 'severity'];
 
+export const ActionTypeId = '.resilient';
 // action type definition
 export function getActionType(
   params: GetActionTypeParams
@@ -48,7 +52,7 @@ export function getActionType(
 > {
   const { logger, configurationUtilities } = params;
   return {
-    id: '.resilient',
+    id: ActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.NAME,
     validate: {
@@ -60,13 +64,16 @@ export function getActionType(
       }),
       params: ExecutorParamsSchema,
     },
-    executor: curry(executor)({ logger }),
+    executor: curry(executor)({ logger, configurationUtilities }),
   };
 }
 
 // action executor
 async function executor(
-  { logger }: { logger: Logger },
+  {
+    logger,
+    configurationUtilities,
+  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
   execOptions: ActionTypeExecutorOptions<
     ResilientPublicConfigurationType,
     ResilientSecretConfigurationType,
@@ -83,7 +90,7 @@ async function executor(
       secrets,
     },
     logger,
-    execOptions.proxySettings
+    configurationUtilities
   );
 
   if (!api[subAction]) {

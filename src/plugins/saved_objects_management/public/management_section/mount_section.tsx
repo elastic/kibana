@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { lazy, Suspense } from 'react';
@@ -25,17 +14,16 @@ import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../management/public';
+import type { SavedObjectManagementTypeInfo } from '../../common/types';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
-import { ISavedObjectsManagementServiceRegistry } from '../services';
 import { getAllowedTypes } from './../lib';
 
 interface MountParams {
   core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;
-  serviceRegistry: ISavedObjectsManagementServiceRegistry;
   mountParams: ManagementAppMountParams;
 }
 
-let allowedObjectTypes: string[] | undefined;
+let allowedObjectTypes: SavedObjectManagementTypeInfo[] | undefined;
 
 const title = i18n.translate('savedObjectsManagement.objects.savedObjectsTitle', {
   defaultMessage: 'Saved Objects',
@@ -43,20 +31,17 @@ const title = i18n.translate('savedObjectsManagement.objects.savedObjectsTitle',
 
 const SavedObjectsEditionPage = lazy(() => import('./saved_objects_edition_page'));
 const SavedObjectsTablePage = lazy(() => import('./saved_objects_table_page'));
-export const mountManagementSection = async ({
-  core,
-  mountParams,
-  serviceRegistry,
-}: MountParams) => {
-  const [coreStart, { data, savedObjectsTaggingOss }, pluginStart] = await core.getStartServices();
+export const mountManagementSection = async ({ core, mountParams }: MountParams) => {
+  const [coreStart, { data, savedObjectsTaggingOss, spaces: spacesApi }, pluginStart] =
+    await core.getStartServices();
+  const { capabilities } = coreStart.application;
   const { element, history, setBreadcrumbs } = mountParams;
-  if (allowedObjectTypes === undefined) {
+
+  if (!allowedObjectTypes) {
     allowedObjectTypes = await getAllowedTypes(coreStart.http);
   }
 
   coreStart.chrome.docTitle.change(title);
-
-  const capabilities = coreStart.application.capabilities;
 
   const RedirectToHomeIfUnauthorized: React.FunctionComponent = ({ children }) => {
     const allowed = capabilities?.management?.kibana?.objects ?? false;
@@ -72,12 +57,11 @@ export const mountManagementSection = async ({
     <I18nProvider>
       <Router history={history}>
         <Switch>
-          <Route path={'/:service/:id'} exact={true}>
+          <Route path={'/:type/:id'} exact={true}>
             <RedirectToHomeIfUnauthorized>
               <Suspense fallback={<EuiLoadingSpinner />}>
                 <SavedObjectsEditionPage
                   coreStart={coreStart}
-                  serviceRegistry={serviceRegistry}
                   setBreadcrumbs={setBreadcrumbs}
                   history={history}
                 />
@@ -90,8 +74,8 @@ export const mountManagementSection = async ({
                 <SavedObjectsTablePage
                   coreStart={coreStart}
                   taggingApi={savedObjectsTaggingOss?.getTaggingApi()}
+                  spacesApi={spacesApi}
                   dataStart={data}
-                  serviceRegistry={serviceRegistry}
                   actionRegistry={pluginStart.actions}
                   columnRegistry={pluginStart.columns}
                   allowedTypes={allowedObjectTypes}
@@ -107,6 +91,7 @@ export const mountManagementSection = async ({
   );
 
   return () => {
+    coreStart.chrome.docTitle.reset();
     ReactDOM.unmountComponentAtNode(element);
   };
 };

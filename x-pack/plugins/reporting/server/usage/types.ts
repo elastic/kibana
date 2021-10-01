@@ -1,45 +1,61 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-export interface KeyCountBucket {
-  key: string;
+export interface SizePercentiles {
+  '1.0': number | null;
+  '5.0': number | null;
+  '25.0': number | null;
+  '50.0': number | null;
+  '75.0': number | null;
+  '95.0': number | null;
+  '99.0': number | null;
+}
+
+interface DocCount {
   doc_count: number;
+}
+
+interface SizeStats {
+  sizes?: { values: SizePercentiles };
+}
+
+export interface KeyCountBucket extends DocCount, SizeStats {
+  key: string;
+  isDeprecated?: DocCount;
 }
 
 export interface AggregationBuckets {
   buckets: KeyCountBucket[];
 }
 
-export interface StatusByAppBucket {
+export interface StatusByAppBucket extends DocCount {
   key: string;
-  doc_count: number;
   jobTypes: {
-    buckets: Array<{
-      doc_count: number;
-      key: string;
-      appNames: AggregationBuckets;
-    }>;
+    buckets: Array<
+      {
+        key: string;
+        appNames: AggregationBuckets;
+      } & DocCount
+    >;
   };
 }
 
-export interface AggregationResultBuckets {
-  jobTypes: AggregationBuckets;
+export interface AggregationResultBuckets extends DocCount, SizeStats {
+  jobTypes?: AggregationBuckets;
   layoutTypes: {
-    doc_count: number;
-    pdf: AggregationBuckets;
-  };
+    pdf?: AggregationBuckets;
+  } & DocCount;
   objectTypes: {
-    doc_count: number;
-    pdf: AggregationBuckets;
-  };
+    pdf?: AggregationBuckets;
+  } & DocCount;
   statusTypes: AggregationBuckets;
   statusByApp: {
     buckets: StatusByAppBucket[];
   };
-  doc_count: number;
 }
 
 export interface SearchResponse {
@@ -56,46 +72,59 @@ export interface SearchResponse {
 export interface AvailableTotal {
   available: boolean;
   total: number;
+  deprecated?: number;
+  sizes?: SizePercentiles;
+  app?: {
+    search?: number;
+    dashboard?: number;
+    visualization?: number;
+    'canvas workpad'?: number;
+  };
+  layout?: {
+    print?: number;
+    preserve_layout?: number;
+    canvas?: number;
+  };
 }
 
-type BaseJobTypes = 'csv' | 'PNG' | 'printable_pdf';
+// FIXME: find a way to get this from exportTypesHandler or common/constants
+type BaseJobTypes =
+  | 'csv'
+  | 'csv_searchsource'
+  | 'csv_searchsource_immediate'
+  | 'PNG'
+  | 'PNGV2'
+  | 'printable_pdf'
+  | 'printable_pdf_v2';
+
 export interface LayoutCounts {
+  canvas: number;
   print: number;
   preserve_layout: number;
 }
 
-type AppNames = 'canvas workpad' | 'dashboard' | 'visualization';
 export type AppCounts = {
-  [A in AppNames]?: number;
+  [A in 'canvas workpad' | 'dashboard' | 'visualization' | 'search']?: number;
 };
 
-export type JobTypes = { [K in BaseJobTypes]: AvailableTotal } & {
-  printable_pdf: AvailableTotal & {
-    app: AppCounts;
-    layout: LayoutCounts;
-  };
-};
+export type JobTypes = { [K in BaseJobTypes]: AvailableTotal };
 
-type Statuses =
-  | 'cancelled'
-  | 'completed'
-  | 'completed_with_warnings'
-  | 'failed'
-  | 'pending'
-  | 'processing';
+export type ByAppCounts = { [J in BaseJobTypes]?: AppCounts };
+
+type Statuses = 'completed' | 'completed_with_warnings' | 'failed' | 'pending' | 'processing';
+
 type StatusCounts = {
   [S in Statuses]?: number;
 };
 type StatusByAppCounts = {
-  [S in Statuses]?: {
-    [J in BaseJobTypes]?: AppCounts;
-  };
+  [S in Statuses]?: ByAppCounts;
 };
 
 export type RangeStats = JobTypes & {
   _all: number;
   status: StatusCounts;
-  statuses: StatusByAppCounts;
+  statuses?: StatusByAppCounts;
+  output_size?: SizePercentiles;
 };
 
 export type ReportingUsageType = RangeStats & {
@@ -105,52 +134,7 @@ export type ReportingUsageType = RangeStats & {
   last7Days: RangeStats;
 };
 
-export type ExportType = 'csv' | 'printable_pdf' | 'PNG';
-export type FeatureAvailabilityMap = { [F in ExportType]: boolean };
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-
-export interface KeyCountBucket {
-  key: string;
-  doc_count: number;
-}
-
-export interface AggregationBuckets {
-  buckets: KeyCountBucket[];
-}
-
-export interface StatusByAppBucket {
-  key: string;
-  doc_count: number;
-  jobTypes: {
-    buckets: Array<{
-      doc_count: number;
-      key: string;
-      appNames: AggregationBuckets;
-    }>;
-  };
-}
-
-export interface AggregationResultBuckets {
-  jobTypes: AggregationBuckets;
-  layoutTypes: {
-    doc_count: number;
-    pdf: AggregationBuckets;
-  };
-  objectTypes: {
-    doc_count: number;
-    pdf: AggregationBuckets;
-  };
-  statusTypes: AggregationBuckets;
-  statusByApp: {
-    buckets: StatusByAppBucket[];
-  };
-  doc_count: number;
-}
+export type FeatureAvailabilityMap = Record<string, boolean>;
 
 export interface ReportingUsageSearchResponse {
   aggregations: {

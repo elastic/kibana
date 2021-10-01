@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
-  EuiButtonEmpty,
+  EuiHeaderLink,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
@@ -66,7 +67,7 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
       >
         <FormattedMessage
           id="xpack.uptime.navigateToAlertingButton.content"
-          defaultMessage="Manage alerts"
+          defaultMessage="Manage rules"
         />
       </EuiLink>
     ),
@@ -113,7 +114,7 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
       },
       {
         id: ALERT_CONTEXT_SELECT_TYPE_PANEL_ID,
-        title: 'create alerts',
+        title: ToggleFlyoutTranslations.toggleAlertFlyoutButtonLabel,
         items: selectionItems,
       },
     ];
@@ -122,7 +123,8 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
   return (
     <EuiPopover
       button={
-        <EuiButtonEmpty
+        <EuiHeaderLink
+          color="text"
           aria-label={ToggleFlyoutTranslations.toggleButtonAriaLabel}
           data-test-subj="xpack.uptime.alertsPopover.toggleButton"
           iconType="arrowDown"
@@ -131,9 +133,9 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
         >
           <FormattedMessage
             id="xpack.uptime.alerts.toggleAlertFlyoutButtonText"
-            defaultMessage="Alerts"
+            defaultMessage="Alerts and rules"
           />
-        </EuiButtonEmpty>
+        </EuiHeaderLink>
       }
       closePopover={() => setIsOpen(false)}
       isOpen={isOpen}

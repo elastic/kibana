@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { rangeQuery } from '../../../../observability/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { TRACE_ID } from '../../../common/elasticsearch_fieldnames';
 import {
@@ -14,9 +17,16 @@ import { Setup } from '../helpers/setup_request';
 
 export async function fetchServicePathsFromTraceIds(
   setup: Setup,
-  traceIds: string[]
+  traceIds: string[],
+  start: number,
+  end: number
 ) {
   const { apmEventClient } = setup;
+
+  // make sure there's a range so ES can skip shards
+  const dayInMs = 24 * 60 * 60 * 1000;
+  const startRange = start - dayInMs;
+  const endRange = end + dayInMs;
 
   const serviceMapParams = {
     apm: {
@@ -32,6 +42,7 @@ export async function fetchServicePathsFromTraceIds(
                 [TRACE_ID]: traceIds,
               },
             },
+            ...rangeQuery(startRange, endRange),
           ],
         },
       },
@@ -199,12 +210,13 @@ export async function fetchServicePathsFromTraceIds(
               return response;`,
             },
           },
-        },
+        } as const,
       },
     },
   };
 
   const serviceMapFromTraceIdsScriptResponse = await apmEventClient.search(
+    'get_service_paths_from_trace_ids',
     serviceMapParams
   );
 

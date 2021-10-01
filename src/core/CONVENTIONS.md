@@ -19,10 +19,7 @@ Definition of done for a feature:
 - has been verified manually by at least one reviewer
 - can be used by first & third party plugins
 - there is no contradiction between client and server API
-- works for OSS version
-   - works with and without a `server.basePath` configured
-   - cannot crash the Kibana server when it fails
-- works for the commercial version with a license
+- works with the subscription features
    - for a logged-in user
    - for anonymous user
    - compatible with Spaces
@@ -205,14 +202,14 @@ export class MyPlugin implements Plugin {
 }
 ```
 
-Prefer the pattern shown above, using `core.getStartServices()`, rather than store local references retrieved from `start`. 
+Prefer the pattern shown above, using `core.getStartServices()`, rather than store local references retrieved from `start`.
 
 **Bad:**
 ```ts
 export class MyPlugin implements Plugin {
  // Anti pattern
   private coreStart?: CoreStart;
-  private depsStart?: DepsStart;  
+  private depsStart?: DepsStart;
 
   public setup(core) {
     core.application.register({
@@ -223,7 +220,7 @@ export class MyPlugin implements Plugin {
         return renderApp(this.coreStart, this.depsStart, params);
       }
     });
-  }  
+  }
 
   public start(core, deps) {
     // Anti pattern
@@ -288,7 +285,7 @@ export class Plugin {
 
 #### Usage Collection
 
-For creating and registering a Usage Collector. Collectors should be defined in a separate directory `server/collectors/`. You can read more about usage collectors on `src/plugins/usage_collection/README.md`.
+For creating and registering a Usage Collector. Collectors should be defined in a separate directory `server/collectors/`. You can read more about usage collectors on `src/plugins/usage_collection/README.mdx`.
 
 ```ts
 // server/collectors/register.ts
@@ -364,5 +361,5 @@ Migration example from the legacy format is available in `src/core/MIGRATION_EXA
 
 ### Naming conventions
 
-Export start and setup contracts as `MyPluginStart` and `MyPluginSetup`. 
+Export start and setup contracts as `MyPluginStart` and `MyPluginSetup`.
 This avoids naming clashes, if everyone exported them simply as `Start` and `Setup`.

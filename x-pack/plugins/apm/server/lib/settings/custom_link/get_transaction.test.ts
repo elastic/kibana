@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   inspectSearchParams,
   SearchParamsMock,
@@ -21,7 +23,7 @@ describe('custom link get transaction', () => {
   it('fetches without filter', async () => {
     mock = await inspectSearchParams((setup) =>
       getTransaction({
-        setup: (setup as unknown) as Setup,
+        setup: setup as unknown as Setup,
       })
     );
 
@@ -30,7 +32,7 @@ describe('custom link get transaction', () => {
   it('fetches with all filter', async () => {
     mock = await inspectSearchParams((setup) =>
       getTransaction({
-        setup: (setup as unknown) as Setup,
+        setup: setup as unknown as Setup,
         filters: {
           [SERVICE_NAME]: 'foo',
           [SERVICE_ENVIRONMENT]: 'bar',

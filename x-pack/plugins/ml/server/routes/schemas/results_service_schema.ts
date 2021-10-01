@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
@@ -101,4 +102,13 @@ export const getCategorizerStoppedPartitionsSchema = schema.object({
    * If by partition_field_value, it will return a list of categorizer stopped partitions for each job_id
    */
   fieldToBucket: schema.maybe(schema.string()),
+});
+
+export const getDatafeedResultsChartDataSchema = schema.object({
+  /**
+   * Job id to fetch the bucket results for
+   */
+  jobId: schema.string(),
+  start: schema.number(),
+  end: schema.number(),
 });

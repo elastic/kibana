@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { waitFor } from '@testing-library/dom';
-import { ReactWrapper, shallow } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import '../../mock/match_media';
@@ -18,6 +19,10 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockAlertDetailsData } from './__mocks__';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TimelineTabs } from '../../../../common/types/timeline';
+import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
+
+jest.mock('../../../common/lib/kibana');
+jest.mock('../../containers/cti/event_enrichment');
 
 jest.mock('../link_to');
 describe('EventDetails', () => {
@@ -27,10 +32,11 @@ describe('EventDetails', () => {
     data: mockDetailItemData,
     id: mockDetailItemDataId,
     isAlert: false,
-    onViewSelected: jest.fn(),
+    onEventViewSelected: jest.fn(),
+    onThreatViewSelected: jest.fn(),
     timelineTabType: TimelineTabs.query,
     timelineId: 'test',
-    view: EventsViewType.summaryView,
+    eventView: EventsViewType.summaryView,
   };
 
   const alertsProps = {
@@ -42,6 +48,12 @@ describe('EventDetails', () => {
   let wrapper: ReactWrapper;
   let alertsWrapper: ReactWrapper;
   beforeAll(async () => {
+    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
+      result: [],
+      range: { to: 'now', from: 'now-30d' },
+      setRange: jest.fn(),
+      loading: false,
+    });
     wrapper = mount(
       <TestProviders>
         <EventDetails {...defaultProps} />
@@ -54,15 +66,9 @@ describe('EventDetails', () => {
     ) as ReactWrapper;
     await waitFor(() => wrapper.update());
   });
-  describe('rendering', () => {
-    test('should match snapshot', () => {
-      const shallowWrap = shallow(<EventDetails {...defaultProps} />);
-      expect(shallowWrap).toMatchSnapshot();
-    });
-  });
 
   describe('tabs', () => {
-    ['Table', 'JSON View'].forEach((tab) => {
+    ['Table', 'JSON'].forEach((tab) => {
       test(`it renders the ${tab} tab`, () => {
         expect(
           wrapper
@@ -81,7 +87,7 @@ describe('EventDetails', () => {
   });
 
   describe('alerts tabs', () => {
-    ['Summary', 'Table', 'JSON View'].forEach((tab) => {
+    ['Overview', 'Threat Intel', 'Table', 'JSON'].forEach((tab) => {
       test(`it renders the ${tab} tab`, () => {
         expect(
           alertsWrapper
@@ -92,14 +98,27 @@ describe('EventDetails', () => {
       });
     });
 
-    test('the Summary tab is selected by default', () => {
+    test('the Overview tab is selected by default', () => {
       expect(
         alertsWrapper
           .find('[data-test-subj="eventDetails"]')
           .find('.euiTab-isSelected')
           .first()
           .text()
-      ).toEqual('Summary');
+      ).toEqual('Overview');
+    });
+
+    test('Enrichment count is displayed as a notification', () => {
+      expect(
+        alertsWrapper.find('[data-test-subj="enrichment-count-notification"]').hostNodes().text()
+      ).toEqual('1');
+    });
+  });
+
+  describe('threat intel tab', () => {
+    it('renders a "no enrichments" panel view if there are no enrichments', () => {
+      alertsWrapper.find('[data-test-subj="threatIntelTab"]').first().simulate('click');
+      expect(alertsWrapper.find('[data-test-subj="no-enrichments-found"]').exists()).toEqual(true);
     });
   });
 });

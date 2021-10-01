@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { readFileSync } from 'fs';
 import path from 'path';
+
+import type { RegistryDataStream } from '../../../../types';
+
 import { rewriteIngestPipeline, getPipelineNameForInstallation } from './install';
-import { RegistryDataStream } from '../../../../types';
 
 test('a json-format pipeline with pipeline references is correctly rewritten', () => {
   const inputStandard = readFileSync(
@@ -118,7 +121,7 @@ test('getPipelineNameForInstallation gets correct name', () => {
   const packageVersion = '1.0.1';
   const pipelineRefName = 'pipeline-json';
   const pipelineEntryNameForInstallation = getPipelineNameForInstallation({
-    pipelineName: dataStream.ingest_pipeline,
+    pipelineName: dataStream.ingest_pipeline!,
     dataStream,
     packageVersion,
   });

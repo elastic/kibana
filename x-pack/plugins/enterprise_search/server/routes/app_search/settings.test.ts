@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
@@ -9,14 +10,14 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import { registerSettingsRoutes } from './settings';
 
 describe('log settings routes', () => {
-  describe('GET /api/app_search/log_settings', () => {
+  describe('GET /internal/app_search/log_settings', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/log_settings',
+        path: '/internal/app_search/log_settings',
       });
 
       registerSettingsRoutes({
@@ -26,23 +27,20 @@ describe('log settings routes', () => {
     });
 
     it('creates a request to enterprise search', () => {
-      mockRouter.callRoute({});
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/log_settings',
       });
     });
   });
 
-  describe('PUT /api/app_search/log_settings', () => {
+  describe('PUT /internal/app_search/log_settings', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/app_search/log_settings',
-        payload: 'body',
+        path: '/internal/app_search/log_settings',
       });
 
       registerSettingsRoutes({
@@ -52,7 +50,6 @@ describe('log settings routes', () => {
     });
 
     it('creates a request to enterprise search', () => {
-      mockRouter.callRoute({});
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/log_settings',
       });

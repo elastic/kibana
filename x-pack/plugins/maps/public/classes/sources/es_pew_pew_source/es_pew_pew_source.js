@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -108,6 +109,7 @@ export class ESPewPewSource extends AbstractESAggSource {
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
+    searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       destSplit: {
         terms: {
@@ -140,6 +142,20 @@ export class ESPewPewSource extends AbstractESAggSource {
       },
     });
 
+    // pewpew source is often used with security solution index-pattern
+    // Some underlying indices may not contain geo fields
+    // Filter out documents without geo fields to avoid shard failures for those indices
+    searchSource.setField('filter', [
+      ...searchSource.getField('filter'),
+      // destGeoField exists ensured by buffer filter
+      // so only need additional check for sourceGeoField
+      {
+        exists: {
+          field: this._descriptor.sourceGeoField,
+        },
+      },
+    ]);
+
     const esResponse = await this._runEsQuery({
       requestId: this.getId(),
       requestName: layerName,
@@ -148,6 +164,7 @@ export class ESPewPewSource extends AbstractESAggSource {
       requestDescription: i18n.translate('xpack.maps.source.pewPew.inspectorDescription', {
         defaultMessage: 'Source-destination connections request',
       }),
+      searchSessionId: searchFilters.searchSessionId,
     });
 
     const { featureCollection } = convertToLines(esResponse);
@@ -166,6 +183,7 @@ export class ESPewPewSource extends AbstractESAggSource {
 
   async getBoundsForFilters(boundsFilters, registerCancelCallback) {
     const searchSource = await this.makeSearchSource(boundsFilters, 0);
+    searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       destFitToBounds: {
         geo_bounds: {
@@ -183,7 +201,10 @@ export class ESPewPewSource extends AbstractESAggSource {
     try {
       const abortController = new AbortController();
       registerCancelCallback(() => abortController.abort());
-      const esResp = await searchSource.fetch({ abortSignal: abortController.signal });
+      const esResp = await searchSource.fetch({
+        abortSignal: abortController.signal,
+        legacyHitsTotal: false,
+      });
       if (esResp.aggregations.destFitToBounds.bounds) {
         corners.push([
           esResp.aggregations.destFitToBounds.bounds.top_left.lon,
@@ -219,7 +240,7 @@ export class ESPewPewSource extends AbstractESAggSource {
     return turfBboxToBounds(turfBbox(multiPoint(corners)));
   }
 
-  canFormatFeatureProperties() {
+  hasTooltipProperties() {
     return true;
   }
 }

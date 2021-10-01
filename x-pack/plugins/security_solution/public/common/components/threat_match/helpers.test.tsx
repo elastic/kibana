@@ -1,15 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  fields,
-  getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
 import { Entry, EmptyEntry, ThreatMapEntries, FormattedEntry } from './types';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common';
+import { FieldSpec, IndexPattern } from '../../../../../../../src/plugins/data/common';
 import moment from 'moment-timezone';
 
 import {
@@ -18,8 +16,13 @@ import {
   getFormattedEntries,
   getFormattedEntry,
   getUpdatedEntriesOnDelete,
+  customValidators,
 } from './helpers';
-import { ThreatMapEntry } from '../../../../common/detection_engine/schemas/types';
+import { ThreatMapEntry } from '@kbn/securitysolution-io-ts-alerting-types';
+
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('123'),
+}));
 
 const getMockIndexPattern = (): IndexPattern =>
   ({
@@ -29,6 +32,7 @@ const getMockIndexPattern = (): IndexPattern =>
   } as IndexPattern);
 
 const getMockEntry = (): FormattedEntry => ({
+  id: '123',
   field: getField('ip'),
   value: getField('ip'),
   type: 'mapping',
@@ -42,6 +46,7 @@ describe('Helpers', () => {
 
   afterEach(() => {
     moment.tz.setDefault('Browser');
+    jest.clearAllMocks();
   });
 
   describe('#getFormattedEntry', () => {
@@ -70,6 +75,7 @@ describe('Helpers', () => {
       const output = getFormattedEntry(payloadIndexPattern, payloadIndexPattern, payloadItem, 0);
       const expected: FormattedEntry = {
         entryIndex: 0,
+        id: '123',
         field: {
           name: 'machine.os.raw.text',
           type: 'string',
@@ -79,7 +85,7 @@ describe('Helpers', () => {
           searchable: false,
           aggregatable: false,
           readFromDocValues: true,
-        },
+        } as FieldSpec,
         type: 'mapping',
         value: undefined,
       };
@@ -94,6 +100,7 @@ describe('Helpers', () => {
       const output = getFormattedEntries(payloadIndexPattern, payloadIndexPattern, payloadItems);
       const expected: FormattedEntry[] = [
         {
+          id: '123',
           entryIndex: 0,
           field: undefined,
           value: undefined,
@@ -109,6 +116,7 @@ describe('Helpers', () => {
       const output = getFormattedEntries(payloadIndexPattern, payloadIndexPattern, payloadItems);
       const expected: FormattedEntry[] = [
         {
+          id: '123',
           entryIndex: 0,
           field: {
             name: 'machine.os',
@@ -119,7 +127,7 @@ describe('Helpers', () => {
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,
-          },
+          } as FieldSpec,
           value: undefined,
           type: 'mapping',
         },
@@ -134,6 +142,7 @@ describe('Helpers', () => {
       const output = getFormattedEntries(payloadIndexPattern, threatIndexPattern, payloadItems);
       const expected: FormattedEntry[] = [
         {
+          id: '123',
           entryIndex: 0,
           field: {
             name: 'machine.os',
@@ -144,7 +153,7 @@ describe('Helpers', () => {
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,
-          },
+          } as FieldSpec,
           value: {
             name: 'machine.os',
             type: 'string',
@@ -154,7 +163,7 @@ describe('Helpers', () => {
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,
-          },
+          } as FieldSpec,
           type: 'mapping',
         },
       ];
@@ -170,6 +179,7 @@ describe('Helpers', () => {
       const output = getFormattedEntries(payloadIndexPattern, payloadIndexPattern, payloadItems);
       const expected: FormattedEntry[] = [
         {
+          id: '123',
           field: {
             name: 'machine.os',
             type: 'string',
@@ -179,7 +189,7 @@ describe('Helpers', () => {
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,
-          },
+          } as FieldSpec,
           type: 'mapping',
           value: {
             name: 'machine.os',
@@ -190,10 +200,11 @@ describe('Helpers', () => {
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,
-          },
+          } as FieldSpec,
           entryIndex: 0,
         },
         {
+          id: '123',
           field: {
             name: 'ip',
             type: 'ip',
@@ -249,9 +260,10 @@ describe('Helpers', () => {
       const payloadItem = getMockEntry();
       const payloadIFieldType = getField('ip');
       const output = getEntryOnFieldChange(payloadItem, payloadIFieldType);
-      const expected: { updatedEntry: Entry; index: number } = {
+      const expected: { updatedEntry: Entry & { id: string }; index: number } = {
         index: 0,
         updatedEntry: {
+          id: '123',
           field: 'ip',
           type: 'mapping',
           value: 'ip',
@@ -278,6 +290,21 @@ describe('Helpers', () => {
         },
       ]);
       expect(items).toEqual([{ entries: [entry] }]);
+    });
+  });
+
+  describe('customValidators.forbiddenField', () => {
+    const FORBIDDEN = '*';
+
+    test('it returns expected value when a forbidden value is passed in', () => {
+      expect(customValidators.forbiddenField('*', FORBIDDEN)).toEqual({
+        code: 'ERR_FIELD_FORMAT',
+        message: 'The index pattern cannot be *. Please choose a more specific index pattern.',
+      });
+    });
+
+    test('it returns undefined when a non-forbidden value is passed in', () => {
+      expect(customValidators.forbiddenField('.test-index', FORBIDDEN)).not.toBeDefined();
     });
   });
 });

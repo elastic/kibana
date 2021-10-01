@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { REPOSITORY_TYPES, TIME_UNITS } from '../../../../common/constants';
 
 class TextService {
@@ -99,18 +101,6 @@ class TextService {
     }
 
     return getTypeName(type);
-  }
-
-  public getSizeNotationHelpText() {
-    return this.i18n.translate('xpack.snapshotRestore.repositoryForm.sizeNotationPlaceholder', {
-      defaultMessage: 'Examples: {example1}, {example2}, {example3}, {example4}',
-      values: {
-        example1: '1g',
-        example2: '10mb',
-        example3: '5k',
-        example4: '1024B',
-      },
-    });
   }
 
   public getTimeUnitLabel(timeUnit: 'd' | 'h' | 'm' | 's', timeValue: string) {

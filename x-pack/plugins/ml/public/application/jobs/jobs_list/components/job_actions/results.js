@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
 import React, { useMemo } from 'react';
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useCreateADLinks } from '../../../../components/custom_hooks/use_create_ad_links';
 
@@ -47,8 +48,7 @@ export function ResultLinks({ jobs }) {
           },
         })
       : undefined;
-
-  const jobActionsDisabled = jobs.length === 1 && jobs[0].deleting === true;
+  const jobActionsDisabled = jobs.length === 1 && jobs[0].blocked !== undefined;
   const { createLinkWithUserDefaults } = useCreateADLinks();
   const timeSeriesExplorerLink = useMemo(
     () => createLinkWithUserDefaults('timeseriesexplorer', jobs),
@@ -57,34 +57,44 @@ export function ResultLinks({ jobs }) {
   const anomalyExplorerLink = useMemo(() => createLinkWithUserDefaults('explorer', jobs), [jobs]);
 
   return (
-    <React.Fragment>
+    <EuiFlexGroup
+      gutterSize="xs"
+      justifyContent="flexEnd"
+      alignItems="center"
+      wrap={false}
+      direction="row"
+      responsive={false}
+    >
       {singleMetricVisible && (
-        <EuiToolTip
-          position="bottom"
-          content={singleMetricDisabledMessageText ?? openJobsInSingleMetricViewerText}
-        >
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="bottom"
+            content={singleMetricDisabledMessageText ?? openJobsInSingleMetricViewerText}
+          >
+            <EuiButtonIcon
+              href={timeSeriesExplorerLink}
+              iconType="visLine"
+              aria-label={openJobsInSingleMetricViewerText}
+              className="results-button"
+              isDisabled={singleMetricEnabled === false || jobActionsDisabled === true}
+              data-test-subj="mlOpenJobsInSingleMetricViewerButton"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiToolTip position="bottom" content={openJobsInAnomalyExplorerText}>
           <EuiButtonIcon
-            href={timeSeriesExplorerLink}
-            iconType="visLine"
-            aria-label={openJobsInSingleMetricViewerText}
+            href={anomalyExplorerLink}
+            iconType="visTable"
+            aria-label={openJobsInAnomalyExplorerText}
             className="results-button"
-            isDisabled={singleMetricEnabled === false || jobActionsDisabled === true}
-            data-test-subj="mlOpenJobsInSingleMetricViewerButton"
+            isDisabled={jobActionsDisabled === true}
+            data-test-subj="mlOpenJobsInAnomalyExplorerButton"
           />
         </EuiToolTip>
-      )}
-      <EuiToolTip position="bottom" content={openJobsInAnomalyExplorerText}>
-        <EuiButtonIcon
-          href={anomalyExplorerLink}
-          iconType="visTable"
-          aria-label={openJobsInAnomalyExplorerText}
-          className="results-button"
-          isDisabled={jobActionsDisabled === true}
-          data-test-subj="mlOpenJobsInAnomalyExplorerButton"
-        />
-      </EuiToolTip>
-      <div className="actions-border" />
-    </React.Fragment>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 ResultLinks.propTypes = {

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -22,6 +11,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const log = getService('log');
   const inspector = getService('inspector');
@@ -44,6 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const termsField = 'machine.ram';
 
     before(async function () {
+      await PageObjects.visualize.initTests();
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickTagCloud');
@@ -72,8 +63,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(data).to.eql([
         '32,212,254,720',
         '21,474,836,480',
-        '20,401,094,656',
         '19,327,352,832',
+        '20,401,094,656',
         '18,253,611,008',
       ]);
     });
@@ -100,8 +91,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(data).to.eql([
         '32,212,254,720',
         '21,474,836,480',
-        '20,401,094,656',
         '19,327,352,832',
+        '20,401,094,656',
         '18,253,611,008',
       ]);
     });
@@ -115,8 +106,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(data).to.eql([
         '32,212,254,720',
         '21,474,836,480',
-        '20,401,094,656',
         '19,327,352,832',
+        '20,401,094,656',
         '18,253,611,008',
       ]);
     });
@@ -131,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show the tags and relative size', function () {
       return PageObjects.tagCloud.getTextSizes().then(function (results) {
         log.debug('results here ' + results);
-        expect(results).to.eql(['72px', '63px', '25px', '32px', '18px']);
+        expect(results).to.eql(['72px', '63px', '32px', '25px', '18px']);
       });
     });
 
@@ -156,6 +147,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickIndexPatternLogstash();
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
+        await (
+          await (
+            await testSubjects.find('formatRow')
+          ).findAllByCssSelector('[data-test-subj="toggle"]')
+        )[0].click();
         await PageObjects.settings.setFieldFormat('bytes');
         await PageObjects.settings.controlChangeSave();
         await PageObjects.common.navigateToApp('visualize');
@@ -181,7 +177,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should format tags with field formatter', async function () {
         const data = await PageObjects.tagCloud.getTextTag();
         log.debug(data);
-        expect(data).to.eql(['30GB', '20GB', '19GB', '18GB', '17GB']);
+        expect(data).to.eql(['30GB', '20GB', '18GB', '19GB', '17GB']);
       });
 
       it('should apply filter with unformatted value', async function () {

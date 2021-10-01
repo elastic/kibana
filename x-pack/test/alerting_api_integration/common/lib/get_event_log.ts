@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IValidatedEvent } from '../../../../plugins/event_log/server';
@@ -28,6 +29,7 @@ interface GetEventLogParams {
   id: string;
   provider: string;
   actions: Map<string, { gte: number } | { equal: number }>;
+  filter?: string;
 }
 
 // Return event log entries given the specified parameters; for the `actions`
@@ -37,7 +39,9 @@ export async function getEventLog(params: GetEventLogParams): Promise<IValidated
   const supertest = getService('supertest');
 
   const spacePrefix = getUrlPrefix(spaceId);
-  const url = `${spacePrefix}/api/event_log/${type}/${id}/_find?per_page=5000`;
+  const url = `${spacePrefix}/api/event_log/${type}/${id}/_find?per_page=5000${
+    params.filter ? `&filter=${params.filter}` : ''
+  }`;
 
   const { body: result } = await supertest.get(url).expect(200);
   if (!result.total) {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -42,7 +43,7 @@ const SavedObjectsCreated: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncI
 
   const title = (
     <>
-      <EuiTitle size="xs">
+      <EuiTitle size="xs" data-test-subj="mlJobMgmtSyncFlyoutMissingObjectsTitle">
         <h3>
           <EuiTextColor color={items.length ? 'default' : 'subdued'}>
             <FormattedMessage
@@ -73,7 +74,7 @@ const SavedObjectsDeleted: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncI
 
   const title = (
     <>
-      <EuiTitle size="xs">
+      <EuiTitle size="xs" data-test-subj="mlJobMgmtSyncFlyoutUnmatchedObjectsTitle">
         <h3>
           <EuiTextColor color={items.length ? 'default' : 'subdued'}>
             <FormattedMessage
@@ -104,7 +105,7 @@ const DatafeedsAdded: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItems 
 
   const title = (
     <>
-      <EuiTitle size="xs">
+      <EuiTitle size="xs" data-test-subj="mlJobMgmtSyncFlyoutObjectsMissingDatafeedTitle">
         <h3>
           <EuiTextColor color={items.length ? 'default' : 'subdued'}>
             <FormattedMessage
@@ -135,7 +136,7 @@ const DatafeedsRemoved: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItem
 
   const title = (
     <>
-      <EuiTitle size="xs">
+      <EuiTitle size="xs" data-test-subj="mlJobMgmtSyncFlyoutObjectsUnmatchedDatafeedTitle">
         <h3>
           <EuiTextColor color={items.length ? 'default' : 'subdued'}>
             <FormattedMessage

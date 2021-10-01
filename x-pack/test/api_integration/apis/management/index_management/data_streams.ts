@@ -1,12 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -18,11 +14,11 @@ import { DataStream } from '../../../../../plugins/index_management/common';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   const createDataStream = async (name: string) => {
     // A data stream requires an index template before it can be created.
-    await es.dataManagement.saveComposableIndexTemplate({
+    await es.indices.putIndexTemplate({
       name,
       body: {
         // We need to match the names of backing indices with this template.
@@ -40,15 +36,15 @@ export default function ({ getService }: FtrProviderContext) {
       },
     });
 
-    await es.dataManagement.createDataStream({ name });
+    await es.indices.createDataStream({ name });
   };
 
   const deleteComposableIndexTemplate = async (name: string) => {
-    await es.dataManagement.deleteComposableIndexTemplate({ name });
+    await es.indices.deleteIndexTemplate({ name });
   };
 
   const deleteDataStream = async (name: string) => {
-    await es.dataManagement.deleteDataStream({ name });
+    await es.indices.deleteDataStream({ name });
     await deleteComposableIndexTemplate(name);
   };
 

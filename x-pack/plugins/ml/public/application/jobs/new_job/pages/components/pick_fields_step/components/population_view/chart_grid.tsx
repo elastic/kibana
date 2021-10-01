@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FC } from 'react';
@@ -14,7 +15,7 @@ import { ModelItem, Anomaly } from '../../../../../common/results_loader';
 import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
 import { SplitCards, useAnimateSplit } from '../split_cards';
 import { DetectorTitle } from '../detector_title';
-import { ByFieldSelector } from '../split_field';
+import { ByFieldSelector } from '../by_field';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
 
 type DetectorFieldValues = Record<number, string[]>;

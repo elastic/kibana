@@ -22,7 +22,6 @@ exports[`Storyshots renderers/TimeFilter default 1`] = `
         >
           <div
             className="euiPopover euiPopover--anchorDownLeft"
-            id="QuickSelectPopover"
           >
             <div
               className="euiPopover__anchor euiQuickSelectPopover__anchor"
@@ -40,8 +39,9 @@ exports[`Storyshots renderers/TimeFilter default 1`] = `
                 >
                   <span
                     className="euiButtonContent__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
-                    size="m"
+                    size="s"
                   />
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
@@ -104,7 +104,6 @@ exports[`Storyshots renderers/TimeFilter with absolute time bounds 1`] = `
         >
           <div
             className="euiPopover euiPopover--anchorDownLeft"
-            id="QuickSelectPopover"
           >
             <div
               className="euiPopover__anchor euiQuickSelectPopover__anchor"
@@ -122,8 +121,9 @@ exports[`Storyshots renderers/TimeFilter with absolute time bounds 1`] = `
                 >
                   <span
                     className="euiButtonContent__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
-                    size="m"
+                    size="s"
                   />
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
@@ -153,7 +153,7 @@ exports[`Storyshots renderers/TimeFilter with absolute time bounds 1`] = `
                     data-test-subj="superDatePickerstartDatePopoverButton"
                     disabled={false}
                     onClick={[Function]}
-                    title="01/01/2019"
+                    title="~ 5 months ago"
                   >
                     ~ 5 months ago
                   </button>
@@ -164,6 +164,7 @@ exports[`Storyshots renderers/TimeFilter with absolute time bounds 1`] = `
               >
                 <div
                   className="euiTextColor euiTextColor--subdued"
+                  style={Object {}}
                 >
                   →
                 </div>
@@ -179,7 +180,7 @@ exports[`Storyshots renderers/TimeFilter with absolute time bounds 1`] = `
                     data-test-subj="superDatePickerendDatePopoverButton"
                     disabled={false}
                     onClick={[Function]}
-                    title="12/31/2019"
+                    title="~ in 7 months"
                   >
                     ~ in 7 months
                   </button>
@@ -216,7 +217,6 @@ exports[`Storyshots renderers/TimeFilter with commonlyUsedRanges 1`] = `
         >
           <div
             className="euiPopover euiPopover--anchorDownLeft"
-            id="QuickSelectPopover"
           >
             <div
               className="euiPopover__anchor euiQuickSelectPopover__anchor"
@@ -234,8 +234,9 @@ exports[`Storyshots renderers/TimeFilter with commonlyUsedRanges 1`] = `
                 >
                   <span
                     className="euiButtonContent__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
-                    size="m"
+                    size="s"
                   />
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
@@ -298,7 +299,6 @@ exports[`Storyshots renderers/TimeFilter with dateFormat 1`] = `
         >
           <div
             className="euiPopover euiPopover--anchorDownLeft"
-            id="QuickSelectPopover"
           >
             <div
               className="euiPopover__anchor euiQuickSelectPopover__anchor"
@@ -316,8 +316,9 @@ exports[`Storyshots renderers/TimeFilter with dateFormat 1`] = `
                 >
                   <span
                     className="euiButtonContent__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
-                    size="m"
+                    size="s"
                   />
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
@@ -380,7 +381,6 @@ exports[`Storyshots renderers/TimeFilter with relative time bounds 1`] = `
         >
           <div
             className="euiPopover euiPopover--anchorDownLeft"
-            id="QuickSelectPopover"
           >
             <div
               className="euiPopover__anchor euiQuickSelectPopover__anchor"
@@ -398,8 +398,9 @@ exports[`Storyshots renderers/TimeFilter with relative time bounds 1`] = `
                 >
                   <span
                     className="euiButtonContent__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
-                    size="m"
+                    size="s"
                   />
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
@@ -429,7 +430,7 @@ exports[`Storyshots renderers/TimeFilter with relative time bounds 1`] = `
                     data-test-subj="superDatePickerstartDatePopoverButton"
                     disabled={false}
                     onClick={[Function]}
-                    title="now/w"
+                    title="~ 6 days ago"
                   >
                     ~ 6 days ago
                   </button>
@@ -440,6 +441,7 @@ exports[`Storyshots renderers/TimeFilter with relative time bounds 1`] = `
               >
                 <div
                   className="euiTextColor euiTextColor--subdued"
+                  style={Object {}}
                 >
                   →
                 </div>
@@ -455,7 +457,7 @@ exports[`Storyshots renderers/TimeFilter with relative time bounds 1`] = `
                     data-test-subj="superDatePickerendDatePopoverButton"
                     disabled={false}
                     onClick={[Function]}
-                    title="now/w"
+                    title="~ in a day"
                   >
                     ~ in a day
                   </button>

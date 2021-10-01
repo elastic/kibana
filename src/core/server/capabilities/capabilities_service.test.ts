@@ -1,23 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { httpServiceMock, InternalHttpServiceSetupMock } from '../http/http_service.mock';
+import {
+  httpServiceMock,
+  InternalHttpServicePrebootMock,
+  InternalHttpServiceSetupMock,
+} from '../http/http_service.mock';
 import { mockRouter, RouterMock } from '../http/router/router.mock';
 import { CapabilitiesService, CapabilitiesSetup } from './capabilities_service';
 import { mockCoreContext } from '../core_context.mock';
@@ -33,6 +26,31 @@ describe('CapabilitiesService', () => {
     router = mockRouter.create();
     http.createRouter.mockReturnValue(router);
     service = new CapabilitiesService(mockCoreContext.create());
+  });
+
+  describe('#preboot()', () => {
+    let httpPreboot: InternalHttpServicePrebootMock;
+    beforeEach(() => {
+      httpPreboot = httpServiceMock.createInternalPrebootContract();
+      service.preboot({ http: httpPreboot });
+    });
+
+    it('registers the capabilities routes', async () => {
+      expect(httpPreboot.registerRoutes).toHaveBeenCalledWith('', expect.any(Function));
+      expect(httpPreboot.registerRoutes).toHaveBeenCalledTimes(1);
+
+      const [[, callback]] = httpPreboot.registerRoutes.mock.calls;
+      callback(router);
+
+      expect(router.post).toHaveBeenCalledTimes(1);
+      expect(router.post).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/api/core/capabilities',
+          options: { authRequired: 'optional' },
+        }),
+        expect.any(Function)
+      );
+    });
   });
 
   describe('#setup()', () => {
@@ -181,6 +199,47 @@ describe('CapabilitiesService', () => {
             "b": true,
             "c": false,
           },
+        }
+      `);
+    });
+
+    it('allows to indicate that default capabilities should be returned', async () => {
+      setup.registerProvider(() => ({ customSection: { isDefault: true } }));
+      setup.registerSwitcher((req, capabilities, useDefaultCapabilities) =>
+        useDefaultCapabilities ? capabilities : { customSection: { isDefault: false } }
+      );
+
+      const start = service.start();
+      expect(await start.resolveCapabilities({} as any)).toMatchInlineSnapshot(`
+        Object {
+          "catalogue": Object {},
+          "customSection": Object {
+            "isDefault": false,
+          },
+          "management": Object {},
+          "navLinks": Object {},
+        }
+      `);
+      expect(await start.resolveCapabilities({} as any, { useDefaultCapabilities: false }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "catalogue": Object {},
+          "customSection": Object {
+            "isDefault": false,
+          },
+          "management": Object {},
+          "navLinks": Object {},
+        }
+      `);
+      expect(await start.resolveCapabilities({} as any, { useDefaultCapabilities: true }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "catalogue": Object {},
+          "customSection": Object {
+            "isDefault": true,
+          },
+          "management": Object {},
+          "navLinks": Object {},
         }
       `);
     });

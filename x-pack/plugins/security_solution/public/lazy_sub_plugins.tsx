@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -9,11 +10,16 @@
  * By loading these later we can reduce the initial bundle size and allow users to delay loading these dependencies until they are needed.
  */
 
-import { Detections } from './detections';
 import { Cases } from './cases';
+import { Detections } from './detections';
+import { Exceptions } from './exceptions';
+
 import { Hosts } from './hosts';
 import { Network } from './network';
+import { Ueba } from './ueba';
 import { Overview } from './overview';
+import { Rules } from './rules';
+
 import { Timelines } from './timelines';
 import { Management } from './management';
 
@@ -23,9 +29,12 @@ import { Management } from './management';
 const subPluginClasses = {
   Detections,
   Cases,
+  Exceptions,
   Hosts,
   Network,
+  Ueba,
   Overview,
+  Rules,
   Timelines,
   Management,
 };

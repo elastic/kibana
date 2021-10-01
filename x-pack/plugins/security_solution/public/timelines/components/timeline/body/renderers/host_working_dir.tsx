@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -16,10 +17,11 @@ interface Props {
   eventId: string;
   hostName: string | null | undefined;
   workingDirectory: string | null | undefined;
+  isDraggable?: boolean;
 }
 
 export const HostWorkingDir = React.memo<Props>(
-  ({ contextId, eventId, hostName, workingDirectory }) => (
+  ({ contextId, eventId, hostName, workingDirectory, isDraggable }) => (
     <>
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
@@ -27,6 +29,7 @@ export const HostWorkingDir = React.memo<Props>(
           eventId={eventId}
           field="host.name"
           value={hostName}
+          isDraggable={isDraggable}
         />
       </TokensFlexItem>
       {workingDirectory != null && (
@@ -41,6 +44,7 @@ export const HostWorkingDir = React.memo<Props>(
           field="process.working_directory"
           value={workingDirectory}
           iconType="folderOpen"
+          isDraggable={isDraggable}
         />
       </TokensFlexItem>
     </>

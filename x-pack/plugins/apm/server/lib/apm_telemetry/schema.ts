@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
@@ -16,10 +17,11 @@ import { ElasticAgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
 const long: { type: 'long' } = { type: 'long' };
 
-const aggregatedTransactionCountSchema: MakeSchemaFrom<AggregatedTransactionsCounts> = {
-  expected_metric_document_count: long,
-  transaction_count: long,
-};
+const aggregatedTransactionCountSchema: MakeSchemaFrom<AggregatedTransactionsCounts> =
+  {
+    expected_metric_document_count: long,
+    transaction_count: long,
+  };
 
 const timeframeMap1dSchema: MakeSchemaFrom<TimeframeMap1d> = {
   '1d': long,
@@ -73,10 +75,12 @@ const apmPerAgentSchema: Pick<
   //  In the meanwhile, we'll have to maintain these lists up to date (TS will remind us to update)
   services_per_agent: {
     dotnet: long,
+    'iOS/swift': long,
     go: long,
     java: long,
     'js-base': long,
     nodejs: long,
+    php: long,
     python: long,
     ruby: long,
     'rum-js': long,
@@ -90,14 +94,17 @@ const apmPerAgentSchema: Pick<
     'opentelemetry/php': long,
     'opentelemetry/python': long,
     'opentelemetry/ruby': long,
+    'opentelemetry/swift': long,
     'opentelemetry/webjs': long,
   },
   agents: {
     dotnet: agentSchema,
+    'iOS/swift': agentSchema,
     go: agentSchema,
     java: agentSchema,
     'js-base': agentSchema,
     nodejs: agentSchema,
+    php: agentSchema,
     python: agentSchema,
     ruby: agentSchema,
     'rum-js': agentSchema,
@@ -115,7 +122,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     },
   },
   environments: {
-    services_without_environments: long,
+    services_without_environment: long,
     services_with_multiple_environments: long,
     top_environments: { type: 'array', items: { type: 'keyword' } },
   },
@@ -132,6 +139,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     provider: { type: 'array', items: { type: 'keyword' } },
     region: { type: 'array', items: { type: 'keyword' } },
   },
+  host: { os: { platform: { type: 'array', items: { type: 'keyword' } } } },
   counts: {
     transaction: timeframeMapSchema,
     span: timeframeMapSchema,
@@ -182,6 +190,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
   tasks: {
     aggregated_transactions: { took: { ms: long } },
     cloud: { took: { ms: long } },
+    host: { took: { ms: long } },
     processor_events: { took: { ms: long } },
     agent_configuration: { took: { ms: long } },
     services: { took: { ms: long } },
@@ -191,5 +200,6 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     agents: { took: { ms: long } },
     indices_stats: { took: { ms: long } },
     cardinality: { took: { ms: long } },
+    environments: { took: { ms: long } },
   },
 };

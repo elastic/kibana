@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -18,7 +19,7 @@ import { AnomalyTranslations } from './translations';
 import { AlertExpressionPopover } from '../alert_expression_popover';
 import { DEFAULT_SEVERITY, SelectSeverity, SEVERITY_OPTIONS } from './select_severity';
 import { monitorIdSelector } from '../../../../state/selectors';
-import { getSeverityColor, getSeverityType } from '../../../../../../ml/public';
+import { getSeverityColor, getSeverity } from '../../../../../../ml/public';
 
 interface Props {
   alertParams: { [key: string]: any };
@@ -80,7 +81,7 @@ export function AnomalyAlertComponent({ setAlertParams, alertParams }: Props) {
                 style={{ textTransform: 'capitalize' }}
                 color={getSeverityColor(severity.val)}
               >
-                {getSeverityType(severity.val)}
+                {getSeverity(severity.val).label}
               </EuiHealth>
             }
             isEnabled={true}

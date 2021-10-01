@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { camelCase } from 'lodash';
 import { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
 import { HttpStart } from '../../../../../../../../src/core/public';
 import {
@@ -11,6 +14,7 @@ import {
   DETECTION_ENGINE_RULES_STATUS_URL,
   DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
   DETECTION_ENGINE_TAGS_URL,
+  DETECTION_ENGINE_RULES_BULK_ACTION,
 } from '../../../../../common/constants';
 import {
   UpdateRulesProps,
@@ -30,10 +34,14 @@ import {
   PrePackagedRulesStatusResponse,
   BulkRuleResponse,
   PatchRuleProps,
+  BulkActionProps,
+  BulkActionResponse,
 } from './types';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
+import { convertRulesFilterToKQL } from './utils';
+import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 /**
  * Create provided Rule
@@ -108,29 +116,11 @@ export const fetchRules = async ({
   },
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
-  const showCustomRuleFilter = filterOptions.showCustomRules
-    ? [`alert.attributes.tags: "__internal_immutable:false"`]
-    : [];
-  const showElasticRuleFilter = filterOptions.showElasticRules
-    ? [`alert.attributes.tags: "__internal_immutable:true"`]
-    : [];
-  const filtersWithoutTags = [
-    ...(filterOptions.filter.length ? [`alert.attributes.name: ${filterOptions.filter}`] : []),
-    ...showCustomRuleFilter,
-    ...showElasticRuleFilter,
-  ].join(' AND ');
+  const filterString = convertRulesFilterToKQL(filterOptions);
 
-  const tags = [
-    ...(filterOptions.tags?.map((t) => `alert.attributes.tags: "${t.replace(/"/g, '\\"')}"`) ?? []),
-  ].join(' AND ');
-
-  const filterString =
-    filtersWithoutTags !== '' && tags !== ''
-      ? `${filtersWithoutTags} AND (${tags})`
-      : filtersWithoutTags + tags;
-
+  // Sort field is camel cased because we use that in our mapping, but display snake case on the front end
   const getFieldNameForSortField = (field: string) => {
-    return field === 'name' ? `${field}.keyword` : field;
+    return field === 'name' ? `${field}.keyword` : camelCase(field);
   };
 
   const query = {
@@ -205,7 +195,7 @@ export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<B
  */
 export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<BulkRuleResponse> =>
   KibanaServices.get().http.fetch<Rule[]>(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`, {
-    method: 'DELETE',
+    method: 'POST',
     body: JSON.stringify(ids.map((id) => ({ id }))),
   });
 
@@ -229,7 +219,7 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
         rule_id: undefined,
         updated_at: undefined,
         updated_by: undefined,
-        enabled: rule.enabled,
+        enabled: false,
         immutable: undefined,
         last_success_at: undefined,
         last_success_message: undefined,
@@ -239,6 +229,23 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
         status_date: undefined,
       }))
     ),
+  });
+
+/**
+ * Perform bulk action with rules selected by a filter query
+ *
+ * @param query filter query to select rules to perform bulk action with
+ * @param action bulk action to perform
+ *
+ * @throws An error if response is not OK
+ */
+export const performBulkAction = async <Action extends BulkAction>({
+  action,
+  query,
+}: BulkActionProps<Action>): Promise<BulkActionResponse<Action>> =>
+  KibanaServices.get().http.fetch<BulkActionResponse<Action>>(DETECTION_ENGINE_RULES_BULK_ACTION, {
+    method: 'POST',
+    body: JSON.stringify({ action, query }),
   });
 
 /**

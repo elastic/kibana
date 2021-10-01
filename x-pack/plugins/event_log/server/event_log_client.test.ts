@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaRequest } from 'src/core/server';
@@ -11,7 +12,7 @@ import { merge } from 'lodash';
 import moment from 'moment';
 
 describe('EventLogStart', () => {
-  describe('findEventsBySavedObject', () => {
+  describe('findEventsBySavedObjectIds', () => {
     test('verifies that the user can access the specified saved object', async () => {
       const esContext = contextMock.create();
       const savedObjectGetter = jest.fn();
@@ -29,9 +30,9 @@ describe('EventLogStart', () => {
         references: [],
       });
 
-      await eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id');
+      await eventLogClient.findEventsBySavedObjectIds('saved-object-type', ['saved-object-id']);
 
-      expect(savedObjectGetter).toHaveBeenCalledWith('saved-object-type', 'saved-object-id');
+      expect(savedObjectGetter).toHaveBeenCalledWith('saved-object-type', ['saved-object-id']);
     });
 
     test('throws when the user doesnt have permission to access the specified saved object', async () => {
@@ -48,7 +49,7 @@ describe('EventLogStart', () => {
       savedObjectGetter.mockRejectedValue(new Error('Fail'));
 
       expect(
-        eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id')
+        eventLogClient.findEventsBySavedObjectIds('saved-object-type', ['saved-object-id'])
       ).rejects.toMatchInlineSnapshot(`[Error: Fail]`);
     });
 
@@ -107,24 +108,30 @@ describe('EventLogStart', () => {
         total: expectedEvents.length,
         data: expectedEvents,
       };
-      esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue(result);
+      esContext.esAdapter.queryEventsBySavedObjects.mockResolvedValue(result);
 
       expect(
-        await eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id')
+        await eventLogClient.findEventsBySavedObjectIds(
+          'saved-object-type',
+          ['saved-object-id'],
+          undefined,
+          ['legacy-id']
+        )
       ).toEqual(result);
 
-      expect(esContext.esAdapter.queryEventsBySavedObject).toHaveBeenCalledWith(
-        esContext.esNames.indexPattern,
-        undefined,
-        'saved-object-type',
-        'saved-object-id',
-        {
+      expect(esContext.esAdapter.queryEventsBySavedObjects).toHaveBeenCalledWith({
+        index: esContext.esNames.indexPattern,
+        namespace: undefined,
+        type: 'saved-object-type',
+        ids: ['saved-object-id'],
+        findOptions: {
           page: 1,
           per_page: 10,
           sort_field: '@timestamp',
           sort_order: 'asc',
-        }
-      );
+        },
+        legacyIds: ['legacy-id'],
+      });
     });
 
     test('fetches all events in time frame that reference the saved object', async () => {
@@ -182,32 +189,38 @@ describe('EventLogStart', () => {
         total: expectedEvents.length,
         data: expectedEvents,
       };
-      esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue(result);
+      esContext.esAdapter.queryEventsBySavedObjects.mockResolvedValue(result);
 
       const start = moment().subtract(1, 'days').toISOString();
       const end = moment().add(1, 'days').toISOString();
 
       expect(
-        await eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id', {
-          start,
-          end,
-        })
+        await eventLogClient.findEventsBySavedObjectIds(
+          'saved-object-type',
+          ['saved-object-id'],
+          {
+            start,
+            end,
+          },
+          ['legacy-id']
+        )
       ).toEqual(result);
 
-      expect(esContext.esAdapter.queryEventsBySavedObject).toHaveBeenCalledWith(
-        esContext.esNames.indexPattern,
-        undefined,
-        'saved-object-type',
-        'saved-object-id',
-        {
+      expect(esContext.esAdapter.queryEventsBySavedObjects).toHaveBeenCalledWith({
+        index: esContext.esNames.indexPattern,
+        namespace: undefined,
+        type: 'saved-object-type',
+        ids: ['saved-object-id'],
+        findOptions: {
           page: 1,
           per_page: 10,
           sort_field: '@timestamp',
           sort_order: 'asc',
           start,
           end,
-        }
-      );
+        },
+        legacyIds: ['legacy-id'],
+      });
     });
 
     test('validates that the start date is valid', async () => {
@@ -228,7 +241,7 @@ describe('EventLogStart', () => {
         references: [],
       });
 
-      esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue({
+      esContext.esAdapter.queryEventsBySavedObjects.mockResolvedValue({
         page: 0,
         per_page: 0,
         total: 0,
@@ -236,7 +249,7 @@ describe('EventLogStart', () => {
       });
 
       expect(
-        eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id', {
+        eventLogClient.findEventsBySavedObjectIds('saved-object-type', ['saved-object-id'], {
           start: 'not a date string',
         })
       ).rejects.toMatchInlineSnapshot(`[Error: [start]: Invalid Date]`);
@@ -260,7 +273,7 @@ describe('EventLogStart', () => {
         references: [],
       });
 
-      esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue({
+      esContext.esAdapter.queryEventsBySavedObjects.mockResolvedValue({
         page: 0,
         per_page: 0,
         total: 0,
@@ -268,7 +281,7 @@ describe('EventLogStart', () => {
       });
 
       expect(
-        eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id', {
+        eventLogClient.findEventsBySavedObjectIds('saved-object-type', ['saved-object-id'], {
           end: 'not a date string',
         })
       ).rejects.toMatchInlineSnapshot(`[Error: [end]: Invalid Date]`);
@@ -309,7 +322,7 @@ function fakeEvent(overrides = {}) {
 function FakeRequest(): KibanaRequest {
   const savedObjectGetter = jest.fn();
 
-  return ({
+  return {
     headers: {},
     getBasePath: () => '',
     path: '/',
@@ -323,5 +336,5 @@ function FakeRequest(): KibanaRequest {
       },
     },
     getSavedObjectsClient: () => savedObjectGetter,
-  } as unknown) as KibanaRequest;
+  } as unknown as KibanaRequest;
 }

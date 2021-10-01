@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, memo } from 'react';
 import {
   EuiSelectableOption,
   EuiModalBody,
+  EuiModalHeader,
   EuiMarkdownEditorUiPlugin,
   EuiCodeBlock,
 } from '@elastic/eui';
@@ -47,24 +49,32 @@ const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover
     []
   );
 
+  const handleTimelineChange = useCallback(
+    (timelineTitle, timelineId, graphEventId) => {
+      const url = formatUrl(getTimelineUrl(timelineId ?? '', graphEventId), {
+        absolute: true,
+        skipSearch: true,
+      });
+      onInsert(`[${timelineTitle}](${url})`, {
+        block: false,
+      });
+    },
+    [formatUrl, onInsert]
+  );
+
   return (
-    <EuiModalBody>
-      <SelectableTimeline
-        hideUntitled={true}
-        getSelectableOptions={handleGetSelectableOptions}
-        onTimelineChange={(timelineTitle, timelineId, graphEventId) => {
-          const url = formatUrl(getTimelineUrl(timelineId ?? '', graphEventId), {
-            absolute: true,
-            skipSearch: true,
-          });
-          onInsert(`[${timelineTitle}](${url})`, {
-            block: false,
-          });
-        }}
-        onClosePopover={onClosePopover}
-        timelineType={TimelineType.default}
-      />
-    </EuiModalBody>
+    <>
+      <EuiModalHeader />
+      <EuiModalBody>
+        <SelectableTimeline
+          hideUntitled={true}
+          getSelectableOptions={handleGetSelectableOptions}
+          onTimelineChange={handleTimelineChange}
+          onClosePopover={onClosePopover}
+          timelineType={TimelineType.default}
+        />
+      </EuiModalBody>
+    </>
   );
 };
 

@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { SavedObjectAttribute } from 'kibana/public';
 import { isEqual } from 'lodash';
 import { Reducer } from 'react';
-import { AlertActionParam, IntervalSchedule } from '../../../../../alerts/common';
+import { AlertActionParam, IntervalSchedule } from '../../../../../alerting/common';
 import { Alert, AlertAction } from '../../../types';
 
 export type InitialAlert = Partial<Alert> &
@@ -155,7 +157,7 @@ export const alertReducer = <AlertPhase extends InitialAlert | Alert>(
       if (
         index === undefined ||
         alert.actions[index] == null ||
-        isEqual(alert.actions[index][key], value)
+        (!!alert.actions[index][key] && isEqual(alert.actions[index][key], value))
       ) {
         return state;
       } else {

@@ -1,8 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import {
+  createListIndex,
+  deleteList,
+  exportList,
+  findLists,
+  importList,
+  readListIndex,
+} from '@kbn/securitysolution-list-api';
 
 import { HttpFetchOptions } from '../../../../../src/core/public';
 import { httpServiceMock } from '../../../../../src/core/public/mocks';
@@ -12,20 +22,14 @@ import { getListItemIndexExistSchemaResponseMock } from '../../common/schemas/re
 import { getFoundListSchemaMock } from '../../common/schemas/response/found_list_schema.mock';
 
 import {
-  createListIndex,
-  deleteList,
-  exportList,
-  findLists,
-  importList,
-  readListIndex,
-} from './api';
-import {
   ApiPayload,
   DeleteListParams,
   ExportListParams,
   FindListsParams,
   ImportListParams,
 } from './types';
+
+// TODO: This test should be ported to: packages/kbn-securitysolution-list-api/src/list_api/index.test.ts once the mocks are ported from Kibana core
 
 describe('Value Lists API', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;
@@ -70,7 +74,7 @@ describe('Value Lists API', () => {
       await expect(
         deleteList({
           http: httpMock,
-          ...((payload as unknown) as ApiPayload<DeleteListParams>),
+          ...(payload as unknown as ApiPayload<DeleteListParams>),
           signal: abortCtrl.signal,
         })
       ).rejects.toEqual(new Error('Invalid value "23" supplied to "id"'));
@@ -197,7 +201,7 @@ describe('Value Lists API', () => {
       );
 
       // httpmock's fetch signature is inferred incorrectly
-      const [[, { body }]] = (httpMock.fetch.mock.calls as unknown) as Array<
+      const [[, { body }]] = httpMock.fetch.mock.calls as unknown as Array<
         [unknown, HttpFetchOptions]
       >;
       const actualFile = (body as FormData).get('file');
@@ -227,7 +231,7 @@ describe('Value Lists API', () => {
     it('rejects with an error if request body is invalid (and does not make API call)', async () => {
       const abortCtrl = new AbortController();
       const payload: ApiPayload<ImportListParams> = {
-        file: (undefined as unknown) as File,
+        file: undefined as unknown as File,
         listId: 'list-id',
         type: 'ip',
       };
@@ -322,7 +326,7 @@ describe('Value Lists API', () => {
     it('rejects with an error if request params are invalid (and does not make API call)', async () => {
       const abortCtrl = new AbortController();
       const payload: ApiPayload<ExportListParams> = {
-        listId: (23 as unknown) as string,
+        listId: 23 as unknown as string,
       };
 
       await expect(

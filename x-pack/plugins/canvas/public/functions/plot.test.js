@@ -1,26 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { functionWrapper } from '../../__tests__/helpers/function_wrapper';
-import { testPlot } from '../../canvas_plugin_src/functions/common/__tests__/fixtures/test_pointseries';
+import { functionWrapper, fontStyle } from '../../../../../src/plugins/presentation_util/public';
+import { testPlot } from '../../canvas_plugin_src/functions/common/__fixtures__/test_pointseries';
 import {
-  fontStyle,
   grayscalePalette,
   yAxisConfig,
   xAxisConfig,
   seriesStyle,
   defaultStyle,
-} from '../../canvas_plugin_src/functions/common/__tests__/fixtures/test_styles';
+} from '../../canvas_plugin_src/functions/common/__fixtures__/test_styles';
 import { plotFunctionFactory } from './plot';
 
 describe('plot', () => {
   const fn = functionWrapper(
     plotFunctionFactory({
       get: () => ({
-        getColors: () => ['red', 'black'],
+        getCategoricalColors: () => ['red', 'black'],
       }),
     })
   );
@@ -32,12 +32,15 @@ describe('plot', () => {
   });
 
   describe('data', () => {
-    const result = fn(testPlot).value.data;
     it('is sorted by the series labels', () => {
+      const result = fn(testPlot).value.data;
+
       expect(result.every((val, i) => (!!i ? val.label >= result[i - 1].label : true))).toBe(true);
     });
 
     it('has one series per unique label', () => {
+      const result = fn(testPlot).value.data;
+
       const uniqueLabels = testPlot.rows
         .reduce(
           (unique, series) =>
@@ -51,6 +54,8 @@ describe('plot', () => {
     });
 
     it('populates the data of the plot with points from the pointseries', () => {
+      const result = fn(testPlot).value.data;
+
       expect(result[0].data).toEqual([
         [1517842800950, 605, { size: 100, text: 605 }],
         [1517929200950, 583, { size: 200, text: 583 }],
@@ -117,10 +122,11 @@ describe('plot', () => {
     describe('palette', () => {
       it('sets the color palette', () => {
         const mockedColors = jest.fn(() => ['#FFFFFF', '#888888', '#000000']);
+
         const mockedFn = functionWrapper(
           plotFunctionFactory({
             get: () => ({
-              getColors: mockedColors,
+              getCategoricalColors: mockedColors,
             }),
           })
         );

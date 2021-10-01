@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFormRow, EuiMutationObserver } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
@@ -48,6 +49,8 @@ interface QueryBarDefineRuleProps {
   resizeParentContainer?: (height: number) => void;
   onValidityChange?: (arg: boolean) => void;
 }
+
+const actionTimelineToHide: ActionTimelineToShow[] = ['duplicate', 'createFrom'];
 
 const StyledEuiFormRow = styled(EuiFormRow)`
   .kbnTypeahead__items {
@@ -251,8 +254,6 @@ export const QueryBarDefineRule = ({
       }
     }
   };
-
-  const actionTimelineToHide = useMemo<ActionTimelineToShow[]>(() => ['duplicate'], []);
 
   return (
     <>

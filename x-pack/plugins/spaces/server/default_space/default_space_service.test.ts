@@ -1,28 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as Rx from 'rxjs';
+import { first } from 'rxjs/operators';
+
+import { nextTick } from '@kbn/test/jest';
 import type { Writable } from '@kbn/utility-types';
-import {
-  DefaultSpaceService,
-  RETRY_SCALE_DURATION,
-  RETRY_DURATION_MAX,
-} from './default_space_service';
-import {
-  ServiceStatusLevels,
-  ServiceStatusLevel,
-  CoreStatus,
-  SavedObjectsRepository,
-  SavedObjectsErrorHelpers,
-} from '../../../../../src/core/server';
+import type { CoreStatus, SavedObjectsRepository, ServiceStatusLevel } from 'src/core/server';
+import { SavedObjectsErrorHelpers, ServiceStatusLevels } from 'src/core/server';
 import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
+
+import type { ILicense } from '../../../licensing/server';
 import { licensingMock } from '../../../licensing/server/mocks';
 import { SpacesLicenseService } from '../../common/licensing';
-import { ILicense } from '../../../licensing/server';
-import { nextTick } from '@kbn/test/jest';
-import { first } from 'rxjs/operators';
+import {
+  DefaultSpaceService,
+  RETRY_DURATION_MAX,
+  RETRY_SCALE_DURATION,
+} from './default_space_service';
 
 const advanceRetry = async (initializeCount: number) => {
   await Promise.resolve();
@@ -41,7 +40,7 @@ interface SetupOpts {
 const setup = ({ elasticsearchStatus, savedObjectsStatus, license }: SetupOpts) => {
   const core = coreMock.createSetup();
   const { status } = core;
-  status.core$ = (new Rx.BehaviorSubject({
+  status.core$ = new Rx.BehaviorSubject({
     elasticsearch: {
       level: elasticsearchStatus,
       summary: '',
@@ -50,7 +49,7 @@ const setup = ({ elasticsearchStatus, savedObjectsStatus, license }: SetupOpts) 
       level: savedObjectsStatus,
       summary: '',
     },
-  }) as unknown) as Rx.Observable<CoreStatus>;
+  }) as unknown as Rx.Observable<CoreStatus>;
 
   const { savedObjects } = coreMock.createStart();
   const repository = savedObjects.createInternalRepository() as jest.Mocked<SavedObjectsRepository>;
@@ -74,7 +73,7 @@ const setup = ({ elasticsearchStatus, savedObjectsStatus, license }: SetupOpts) 
   });
 
   return {
-    coreStatus: (status as unknown) as { core$: Rx.BehaviorSubject<CoreStatus> },
+    coreStatus: status as unknown as { core$: Rx.BehaviorSubject<CoreStatus> },
     serviceStatus$,
     logger,
     license$,
@@ -128,7 +127,7 @@ test(`does not initialize if savedObjects is unavailable`, async () => {
 
 test(`does not initialize if the license is unavailable`, async () => {
   const license = licensingMock.createLicense({
-    license: ({ type: ' ', status: ' ' } as unknown) as ILicense,
+    license: { type: ' ', status: ' ' } as unknown as ILicense,
   }) as Writable<ILicense>;
   license.isAvailable = false;
 

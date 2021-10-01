@@ -1,26 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
+import { IndexPatternField, IndexPattern, IndexPatternType } from 'src/plugins/data/public';
 import { IndexedFieldsTable } from './indexed_fields_table';
+import { getFieldInfo } from '../../utils';
 
 jest.mock('@elastic/eui', () => ({
   EuiFlexGroup: 'eui-flex-group',
@@ -37,17 +27,49 @@ jest.mock('./components/table', () => ({
 }));
 
 const helpers = {
-  redirectToRoute: (obj: any) => {},
-  getFieldInfo: () => [],
+  editField: (fieldName: string) => {},
+  deleteField: (fieldName: string) => {},
+  // getFieldInfo handles non rollups as well
+  getFieldInfo,
 };
 
-const indexPattern = ({
+const indexPattern = {
   getNonScriptedFields: () => fields,
   getFormatterForFieldNoDefault: () => ({ params: () => ({}) }),
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
-const mockFieldToIndexPatternField = (spec: Record<string, string | boolean | undefined>) => {
-  return new IndexPatternField((spec as unknown) as IndexPatternField['spec']);
+const rollupIndexPattern = {
+  type: IndexPatternType.ROLLUP,
+  typeMeta: {
+    params: {
+      'rollup-index': 'rollup',
+    },
+    aggs: {
+      date_histogram: {
+        timestamp: {
+          agg: 'date_histogram',
+          fixed_interval: '30s',
+          delay: '30s',
+          time_zone: 'UTC',
+        },
+      },
+      terms: { Elastic: { agg: 'terms' } },
+      histogram: { amount: { agg: 'histogram', interval: 5 } },
+      avg: { amount: { agg: 'avg' } },
+      max: { amount: { agg: 'max' } },
+      min: { amount: { agg: 'min' } },
+      sum: { amount: { agg: 'sum' } },
+      value_count: { amount: { agg: 'value_count' } },
+    },
+  },
+  getNonScriptedFields: () => fields,
+  getFormatterForFieldNoDefault: () => ({ params: () => ({}) }),
+} as unknown as IndexPattern;
+
+const mockFieldToIndexPatternField = (
+  spec: Record<string, string | string[] | boolean | undefined>
+) => {
+  return new IndexPatternField(spec as unknown as IndexPatternField['spec']);
 };
 
 const fields = [
@@ -55,10 +77,11 @@ const fields = [
     name: 'Elastic',
     displayName: 'Elastic',
     searchable: true,
-    type: 'string',
+    esTypes: ['keyword'],
   },
-  { name: 'timestamp', displayName: 'timestamp', type: 'date' },
-  { name: 'conflictingField', displayName: 'conflictingField', type: 'conflict' },
+  { name: 'timestamp', displayName: 'timestamp', esTypes: ['date'] },
+  { name: 'conflictingField', displayName: 'conflictingField', esTypes: ['keyword', 'long'] },
+  { name: 'amount', displayName: 'amount', esTypes: ['long'] },
 ].map(mockFieldToIndexPatternField);
 
 describe('IndexedFieldsTable', () => {
@@ -122,5 +145,27 @@ describe('IndexedFieldsTable', () => {
     component.update();
 
     expect(component).toMatchSnapshot();
+  });
+
+  describe('IndexedFieldsTable with rollup index pattern', () => {
+    test('should render normally', async () => {
+      const component = shallow(
+        <IndexedFieldsTable
+          fields={fields}
+          indexPattern={rollupIndexPattern}
+          helpers={helpers}
+          fieldWildcardMatcher={() => {
+            return () => false;
+          }}
+          indexedFieldTypeFilter=""
+          fieldFilter=""
+        />
+      );
+
+      await new Promise((resolve) => process.nextTick(resolve));
+      component.update();
+
+      expect(component).toMatchSnapshot();
+    });
   });
 });

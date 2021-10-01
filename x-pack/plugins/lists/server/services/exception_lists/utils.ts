@@ -1,65 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import uuid from 'uuid';
 import { SavedObject, SavedObjectsFindResponse, SavedObjectsUpdateResponse } from 'kibana/server';
-
-import {
-  SavedObjectType,
-  exceptionListAgnosticSavedObjectType,
-  exceptionListSavedObjectType,
-} from '../../../common/types';
-import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
 import {
   CommentsArray,
   CreateComment,
   CreateCommentsArray,
   ExceptionListItemSchema,
   ExceptionListSchema,
-  ExceptionListSoSchema,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
-  NamespaceType,
   UpdateCommentsArrayOrUndefined,
   exceptionListItemType,
   exceptionListType,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { getExceptionListType } from '@kbn/securitysolution-list-utils';
 
-export const getSavedObjectType = ({
-  namespaceType,
-}: {
-  namespaceType: NamespaceType;
-}): SavedObjectType => {
-  if (namespaceType === 'agnostic') {
-    return exceptionListAgnosticSavedObjectType;
-  } else {
-    return exceptionListSavedObjectType;
-  }
-};
-
-export const getExceptionListType = ({
-  savedObjectType,
-}: {
-  savedObjectType: string;
-}): NamespaceType => {
-  if (savedObjectType === exceptionListAgnosticSavedObjectType) {
-    return 'agnostic';
-  } else {
-    return 'single';
-  }
-};
-
-export const getSavedObjectTypes = ({
-  namespaceType,
-}: {
-  namespaceType: NamespaceTypeArray;
-}): SavedObjectType[] => {
-  return namespaceType.map((singleNamespaceType) =>
-    getSavedObjectType({ namespaceType: singleNamespaceType })
-  );
-};
+import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 export const transformSavedObjectToExceptionList = ({
   savedObject,

@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`isFullScreen 1`] = `
+<div
+  className="mapScaleControl mapScaleControlFullScreen"
+  style={
+    Object {
+      "width": "62.7474245034397px",
+    }
+  }
+>
+  ~50 km
+</div>
+`;
+
+exports[`render 1`] = `
+<div
+  className="mapScaleControl"
+  style={
+    Object {
+      "width": "62.7474245034397px",
+    }
+  }
+>
+  ~50 km
+</div>
+`;

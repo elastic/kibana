@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ReactNode, ChangeEvent, FormEvent, MouseEvent } from 'react';
@@ -47,6 +36,8 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   setFieldErrors: (fieldName: string, errors: ValidationError[]) => void;
   /** Access the fields on the form. */
   getFields: () => FieldsMap;
+  /** Access the defaultValue for a specific field */
+  getFieldDefaultValue: (path: string) => unknown;
   /**
    * Return the form data. It accepts an optional options object with an `unflatten` parameter (defaults to `true`).
    * If you are only interested in the raw form data, pass `unflatten: false` to the handler
@@ -64,12 +55,15 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   __addField: (field: FieldHook) => void;
   __removeField: (fieldNames: string | string[]) => void;
   __validateFields: (
-    fieldNames: string[]
+    fieldNames: string[],
+    /** Run only blocking validations */
+    onlyBlocking?: boolean
   ) => Promise<{ areFieldsValid: boolean; isFormValid: boolean | undefined }>;
   __updateFormDataAt: (field: string, value: unknown) => void;
   __updateDefaultValueAt: (field: string, value: unknown) => void;
   __readFieldConfigFromSchema: (field: string) => FieldConfig;
-  __getFieldDefaultValue: (path: string) => unknown;
+  __getFormDefaultValue: () => FormData;
+  __getFieldsRemoved: () => FieldsMap;
 }
 
 export type FormSchema<T extends FormData = FormData> = {
@@ -117,6 +111,8 @@ export interface FieldHook<T = unknown, I = T> {
   readonly errors: ValidationError[];
   readonly isValid: boolean;
   readonly isPristine: boolean;
+  readonly isDirty: boolean;
+  readonly isModified: boolean;
   readonly isValidating: boolean;
   readonly isValidated: boolean;
   readonly isChangingValue: boolean;
@@ -148,6 +144,7 @@ export interface FieldHook<T = unknown, I = T> {
     formData?: any;
     value?: I;
     validationType?: string;
+    onlyBlocking?: boolean;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
   reset: (options?: { resetValue?: boolean; defaultValue?: T }) => unknown | undefined;
   // Flag to indicate if the field value will be included in the form data outputted
@@ -196,6 +193,11 @@ export interface ValidationFuncArg<I extends FormData, V = unknown> {
   };
   formData: I;
   errors: readonly ValidationError[];
+  customData: {
+    /** Async handler that will resolve whenever a value is sent to the `validationData$` Observable */
+    provider: () => Promise<unknown>;
+    value: unknown;
+  };
 }
 
 export type ValidationFunc<

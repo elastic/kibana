@@ -1,16 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { v4 as uuidv4 } from 'uuid';
 import { Subscription } from 'rxjs';
 import { ActionStorage } from './dynamic_action_storage';
-import {
-  TriggerContextMapping,
-  UiActionsActionDefinition as ActionDefinition,
-} from '../../../../../src/plugins/ui_actions/public';
+import { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
 import { defaultState, transitions, selectors, State } from './dynamic_action_manager_state';
 import {
   StateContainer,
@@ -104,13 +102,13 @@ export class DynamicActionManager {
 
     const supportedTriggers = factory.supportedTriggers();
     for (const trigger of triggers) {
-      if (!supportedTriggers.includes(trigger as any))
+      if (!supportedTriggers.includes(trigger))
         throw new Error(
           `Can't attach [action=${actionId}] to [trigger=${trigger}]. Supported triggers for this action: ${supportedTriggers.join(
             ','
           )}`
         );
-      uiActions.attachAction(trigger as any, actionId);
+      uiActions.attachAction(trigger as string, actionId);
     }
   }
 
@@ -119,7 +117,7 @@ export class DynamicActionManager {
     const actionId = this.generateActionId(eventId);
     if (!uiActions.hasAction(actionId)) return;
 
-    for (const trigger of triggers) uiActions.detachAction(trigger as any, actionId);
+    for (const trigger of triggers) uiActions.detachAction(trigger, actionId);
     uiActions.unregisterAction(actionId);
   }
 
@@ -214,7 +212,12 @@ export class DynamicActionManager {
    * @param action Dynamic action for which to create an event.
    * @param triggers List of triggers to which action should react.
    */
-  public async createEvent(action: SerializedAction, triggers: Array<keyof TriggerContextMapping>) {
+  public async createEvent(action: SerializedAction, triggers: string[]) {
+    if (!triggers.length) {
+      // This error should never happen, hence it is not translated.
+      throw new Error('No triggers selected for event.');
+    }
+
     const event: SerializedEvent = {
       eventId: uuidv4(),
       triggers,
@@ -245,11 +248,7 @@ export class DynamicActionManager {
    * @param action New action for which to create the event.
    * @param triggers List of triggers to which action should react.
    */
-  public async updateEvent(
-    eventId: string,
-    action: SerializedAction,
-    triggers: Array<keyof TriggerContextMapping>
-  ) {
+  public async updateEvent(eventId: string, action: SerializedAction, triggers: string[]) {
     const event: SerializedEvent = {
       eventId,
       triggers,

@@ -1,11 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep } from 'lodash/fp';
-import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
+import {
+  ColumnHeaderOptions,
+  TimelineType,
+  TimelineStatus,
+  TimelineTabs,
+  TimelineId,
+} from '../../../../common/types/timeline';
 
 import {
   IS_OPERATOR,
@@ -14,9 +21,10 @@ import {
   DataProvidersAnd,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import { getColumnWidthFromType } from '../../../timelines/components/timeline/body/column_headers/helpers';
-import { Direction } from '../../../graphql/types';
+import {
+  DEFAULT_COLUMN_MIN_WIDTH,
+  RESIZED_COLUMN_MIN_WITH,
+} from '../../../timelines/components/timeline/body/constants';
 import { defaultHeaders } from '../../../common/mock';
 
 import {
@@ -27,7 +35,6 @@ import {
   removeTimelineColumn,
   removeTimelineProvider,
   updateTimelineColumns,
-  updateTimelineDescription,
   updateTimelineItemsPerPage,
   updateTimelinePerPageOptions,
   updateTimelineProviderEnabled,
@@ -37,12 +44,15 @@ import {
   updateTimelineRange,
   updateTimelineShowTimeline,
   updateTimelineSort,
-  updateTimelineTitle,
+  updateTimelineTitleAndDescription,
   upsertTimelineColumn,
+  updateGraphEventId,
 } from './helpers';
-import { ColumnHeaderOptions, TimelineModel } from './model';
+import { TimelineModel } from './model';
 import { timelineDefaults } from './defaults';
 import { TimelineById } from './types';
+import { Direction } from '../../../../common/search_strategy';
+import { FilterManager } from '../../../../../../../src/plugins/data/public';
 
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
 jest.mock('../../../common/utils/default_date_settings', () => {
@@ -53,6 +63,8 @@ jest.mock('../../../common/utils/default_date_settings', () => {
     DEFAULT_TO_MOMENT: new Date('2020-10-28T11:37:31.655Z'),
   };
 });
+
+const mockFilterManager = {} as FilterManager;
 
 const basicDataProvider: DataProvider = {
   and: [],
@@ -69,7 +81,9 @@ const basicDataProvider: DataProvider = {
 };
 const basicTimeline: TimelineModel = {
   activeTab: TimelineTabs.query,
+  prevActiveTab: TimelineTabs.graph,
   columns: [],
+  defaultColumns: [],
   dataProviders: [{ ...basicDataProvider }],
   dateRange: {
     start: '2020-07-07T08:20:18.966Z',
@@ -77,9 +91,16 @@ const basicTimeline: TimelineModel = {
   },
   deletedEventIds: [],
   description: '',
+  documentType: '',
+  eqlOptions: {
+    eventCategoryField: 'event.category',
+    tiebreakerField: '',
+    timestampField: '@timestamp',
+  },
   eventIdToNoteIds: {},
   excludedRowRendererIds: [],
-  expandedEvent: {},
+  expandedDetail: {},
+  filterManager: mockFilterManager,
   highlightedDropAndProviderId: '',
   historyIds: [],
   id: 'foo',
@@ -97,13 +118,16 @@ const basicTimeline: TimelineModel = {
   noteIds: [],
   pinnedEventIds: {},
   pinnedEventsSaveObject: {},
+  queryFields: [],
   savedObjectId: null,
+  selectAll: false,
   selectedEventIds: {},
   show: true,
   showCheckboxes: false,
   sort: [
     {
       columnId: '@timestamp',
+      columnType: 'number',
       sortDirection: Direction.desc,
     },
   ],
@@ -173,6 +197,20 @@ describe('Timeline', () => {
           show: true,
         },
       });
+    });
+
+    test('should contain existing filterManager', () => {
+      const update = addTimelineToStore({
+        id: 'foo',
+        timeline: {
+          ...basicTimeline,
+          status: TimelineStatus.immutable,
+          timelineType: TimelineType.template,
+        },
+        timelineById: timelineByIdMock,
+      });
+
+      expect(update.foo.filterManager).toEqual(mockFilterManager);
     });
   });
 
@@ -265,7 +303,7 @@ describe('Timeline', () => {
         id: 'event.action',
         type: 'keyword',
         aggregatable: true,
-        width: DEFAULT_COLUMN_MIN_WIDTH,
+        initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
       };
       mockWithExistingColumns = {
         ...timelineById,
@@ -587,12 +625,12 @@ describe('Timeline', () => {
       expect(update).not.toBe(timelineByIdMock);
     });
 
-    test('should update (just) the specified column of type `date` when the id matches, and the result of applying the delta is greater than the min width for a date column', () => {
+    test('should update initialWidth with the specified delta when the delta is positive', () => {
       const aDateColumn = columnsMock[0];
       const delta = 50;
       const expectedToHaveNewWidth = {
         ...aDateColumn,
-        width: getColumnWidthFromType(aDateColumn.type!) + delta,
+        initialWidth: Number(aDateColumn.initialWidth) + 50,
       };
       const expectedColumns = [expectedToHaveNewWidth, columnsMock[1], columnsMock[2]];
 
@@ -606,12 +644,12 @@ describe('Timeline', () => {
       expect(update.foo.columns).toEqual(expectedColumns);
     });
 
-    test('should NOT update (just) the specified column of type `date` when the id matches, because the result of applying the delta is less than the min width for a date column', () => {
+    test('should update initialWidth with the specified delta when the delta is negative, and the resulting width is greater than the min column width', () => {
       const aDateColumn = columnsMock[0];
-      const delta = -50; // this will be less than the min
+      const delta = 50 * -1; // the result will still be above the min column size
       const expectedToHaveNewWidth = {
         ...aDateColumn,
-        width: getColumnWidthFromType(aDateColumn.type!), // we expect the minimum
+        initialWidth: Number(aDateColumn.initialWidth) - 50,
       };
       const expectedColumns = [expectedToHaveNewWidth, columnsMock[1], columnsMock[2]];
 
@@ -625,37 +663,18 @@ describe('Timeline', () => {
       expect(update.foo.columns).toEqual(expectedColumns);
     });
 
-    test('should update (just) the specified non-date column when the id matches, and the result of applying the delta is greater than the min width for the column', () => {
-      const aNonDateColumn = columnsMock[1];
-      const delta = 50;
+    test('should set initialWidth to `RESIZED_COLUMN_MIN_WITH` when the requested delta results in a column that is too small ', () => {
+      const aDateColumn = columnsMock[0];
+      const delta = (Number(aDateColumn.initialWidth) - 5) * -1; // the requested delta would result in a width of just 5 pixels, which is too small
       const expectedToHaveNewWidth = {
-        ...aNonDateColumn,
-        width: getColumnWidthFromType(aNonDateColumn.type!) + delta,
+        ...aDateColumn,
+        initialWidth: RESIZED_COLUMN_MIN_WITH, // we expect the minimum
       };
-      const expectedColumns = [columnsMock[0], expectedToHaveNewWidth, columnsMock[2]];
+      const expectedColumns = [expectedToHaveNewWidth, columnsMock[1], columnsMock[2]];
 
       const update = applyDeltaToTimelineColumnWidth({
         id: 'foo',
-        columnId: aNonDateColumn.id,
-        delta,
-        timelineById: mockWithExistingColumns,
-      });
-
-      expect(update.foo.columns).toEqual(expectedColumns);
-    });
-
-    test('should NOT update the specified non-date column when the id matches, because the result of applying the delta is less than the min width for the column', () => {
-      const aNonDateColumn = columnsMock[1];
-      const delta = -50;
-      const expectedToHaveNewWidth = {
-        ...aNonDateColumn,
-        width: getColumnWidthFromType(aNonDateColumn.type!),
-      };
-      const expectedColumns = [columnsMock[0], expectedToHaveNewWidth, columnsMock[2]];
-
-      const update = applyDeltaToTimelineColumnWidth({
-        id: 'foo',
-        columnId: aNonDateColumn.id,
+        columnId: aDateColumn.id,
         delta,
         timelineById: mockWithExistingColumns,
       });
@@ -835,65 +854,40 @@ describe('Timeline', () => {
     });
   });
 
-  describe('#updateTimelineDescription', () => {
-    const newDescription = 'a new description';
-
-    test('should return a new reference and not the same reference', () => {
-      const update = updateTimelineDescription({
-        id: 'foo',
-        description: newDescription,
-        timelineById: timelineByIdMock,
-      });
-      expect(update).not.toBe(timelineByIdMock);
-    });
-
-    test('should update the timeline description', () => {
-      const update = updateTimelineDescription({
-        id: 'foo',
-        description: newDescription,
-        timelineById: timelineByIdMock,
-      });
-      expect(update.foo.description).toEqual(newDescription);
-    });
-
-    test('should always trim all leading whitespace and allow only one trailing space', () => {
-      const update = updateTimelineDescription({
-        id: 'foo',
-        description: '      breathing room      ',
-        timelineById: timelineByIdMock,
-      });
-      expect(update.foo.description).toEqual('breathing room ');
-    });
-  });
-
-  describe('#updateTimelineTitle', () => {
+  describe('#updateTimelineTitleAndDescription', () => {
     const newTitle = 'a new title';
+    const newDescription = 'breathing room';
 
     test('should return a new reference and not the same reference', () => {
-      const update = updateTimelineTitle({
+      const update = updateTimelineTitleAndDescription({
         id: 'foo',
+        description: '',
         title: newTitle,
         timelineById: timelineByIdMock,
       });
       expect(update).not.toBe(timelineByIdMock);
     });
 
-    test('should update the timeline title', () => {
-      const update = updateTimelineTitle({
+    test('should update the timeline title and description', () => {
+      const update = updateTimelineTitleAndDescription({
         id: 'foo',
+        description: newDescription,
         title: newTitle,
         timelineById: timelineByIdMock,
       });
       expect(update.foo.title).toEqual(newTitle);
+      expect(update.foo.description).toEqual(newDescription);
     });
 
-    test('should always trim all leading whitespace and allow only one trailing space', () => {
-      const update = updateTimelineTitle({
+    test('should always trim all leading whitespace', () => {
+      const update = updateTimelineTitleAndDescription({
         id: 'foo',
+        description: '      breathing room      ',
         title: '      room at the back      ',
         timelineById: timelineByIdMock,
       });
-      expect(update.foo.title).toEqual('room at the back ');
+      expect(update.foo.title).toEqual('room at the back');
+      expect(update.foo.description).toEqual('breathing room');
     });
   });
 
@@ -958,6 +952,7 @@ describe('Timeline', () => {
         sort: [
           {
             columnId: 'some column',
+            columnType: 'text',
             sortDirection: Direction.desc,
           },
         ],
@@ -969,7 +964,9 @@ describe('Timeline', () => {
     });
 
     test('should update the sort attribute', () => {
-      expect(update.foo.sort).toEqual([{ columnId: 'some column', sortDirection: Direction.desc }]);
+      expect(update.foo.sort).toEqual([
+        { columnId: 'some column', columnType: 'text', sortDirection: Direction.desc },
+      ]);
     });
   });
 
@@ -1771,6 +1768,57 @@ describe('Timeline', () => {
           },
         },
       ]);
+    });
+  });
+
+  describe('#updateGraphEventId', () => {
+    test('should return a new reference and not the same reference', () => {
+      const update = updateGraphEventId({
+        id: 'foo',
+        graphEventId: '123',
+        timelineById: timelineByIdMock,
+      });
+      expect(update).not.toBe(timelineByIdMock);
+    });
+
+    test('should empty graphEventId', () => {
+      const update = updateGraphEventId({
+        id: 'foo',
+        graphEventId: '',
+        timelineById: timelineByIdMock,
+      });
+      expect(update.foo.graphEventId).toEqual('');
+    });
+
+    test('should empty graphEventId and not change activeTab and prevActiveTab because TimelineId !== TimelineId.active', () => {
+      const update = updateGraphEventId({
+        id: 'foo',
+        graphEventId: '',
+        timelineById: timelineByIdMock,
+      });
+      expect(update.foo.graphEventId).toEqual('');
+      expect(update.foo.activeTab).toEqual(timelineByIdMock.foo.activeTab);
+      expect(update.foo.prevActiveTab).toEqual(timelineByIdMock.foo.prevActiveTab);
+    });
+
+    test('should empty graphEventId and return to the previous tab if TimelineId === TimelineId.active', () => {
+      const mock = cloneDeep(timelineByIdMock);
+      mock[TimelineId.active] = {
+        ...timelineByIdMock.foo,
+        activeTab: TimelineTabs.graph,
+        prevActiveTab: TimelineTabs.eql,
+      };
+      delete mock.foo;
+
+      const update = updateGraphEventId({
+        id: TimelineId.active,
+        graphEventId: '',
+        timelineById: mock,
+      });
+
+      expect(update[TimelineId.active].graphEventId).toEqual('');
+      expect(update[TimelineId.active].activeTab).toEqual(TimelineTabs.eql);
+      expect(update[TimelineId.active].prevActiveTab).toEqual(TimelineTabs.graph);
     });
   });
 });

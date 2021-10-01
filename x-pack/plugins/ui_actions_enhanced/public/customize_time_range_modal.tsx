@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component } from 'react';
@@ -73,7 +74,7 @@ export class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, 
     const parent = embeddable.parent as IContainer<{}, ContainerInput<TimeRangeInput>>;
     const parentPanels = parent!.getInput().panels;
 
-    // Remove any explicit input to this child from the parent.
+    // Remove explicit input to this child from the parent.
     parent!.updateInput({
       panels: {
         ...parentPanels,

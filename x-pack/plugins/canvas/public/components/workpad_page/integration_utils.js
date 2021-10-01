@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallowEqual } from 'recompose';
@@ -11,8 +12,8 @@ import { selectToplevelNodes } from '../../state/actions/transient';
 import { arrayToMap, flatten, identity } from '../../lib/aeroelastic/functional';
 import { getLocalTransformMatrix } from '../../lib/aeroelastic/layout_functions';
 import { matrixToAngle } from '../../lib/aeroelastic/matrix';
-import { isGroupId, elementToShape } from './utils';
-export * from './utils';
+import { isGroupId, elementToShape } from './positioning_utils';
+export * from './positioning_utils';
 
 const shapeToElement = (shape) => ({
   left: shape.transformMatrix[12] - shape.a,

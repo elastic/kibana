@@ -1,38 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import SemVer from 'semver/classes/semver';
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
 
-import { CloudSetup } from '../../cloud/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-
-import { NEXT_MAJOR_VERSION } from '../common/version';
+import { SetupDependencies, StartDependencies, AppServicesContext } from './types';
 import { Config } from '../common/config';
 
-interface Dependencies {
-  cloud: CloudSetup;
-  management: ManagementSetup;
-}
-
-export class UpgradeAssistantUIPlugin implements Plugin {
+export class UpgradeAssistantUIPlugin
+  implements Plugin<void, void, SetupDependencies, StartDependencies>
+{
   constructor(private ctx: PluginInitializerContext) {}
-  setup(coreSetup: CoreSetup, { cloud, management }: Dependencies) {
-    const { enabled } = this.ctx.config.get<Config>();
-
-    if (!enabled) {
-      return;
-    }
+  setup(coreSetup: CoreSetup<StartDependencies>, { management, cloud }: SetupDependencies) {
+    const { readonly } = this.ctx.config.get<Config>();
 
     const appRegistrar = management.sections.section.stack;
-    const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
+    const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);
+
+    const kibanaVersionInfo = {
+      currentMajor: kibanaVersion.major,
+      prevMajor: kibanaVersion.major - 1,
+      nextMajor: kibanaVersion.major + 1,
+    };
 
     const pluginName = i18n.translate('xpack.upgradeAssistant.appTitle', {
       defaultMessage: '{version} Upgrade Assistant',
-      values: { version: `${NEXT_MAJOR_VERSION}.0` },
+      values: { version: `${kibanaVersionInfo.nextMajor}.0` },
     });
 
     appRegistrar.registerApp({
@@ -40,15 +38,23 @@ export class UpgradeAssistantUIPlugin implements Plugin {
       title: pluginName,
       order: 1,
       async mount(params) {
-        const [coreStart] = await coreSetup.getStartServices();
+        const [coreStart, { discover, data }] = await coreSetup.getStartServices();
+        const services: AppServicesContext = { discover, data, cloud };
 
         const {
           chrome: { docTitle },
         } = coreStart;
 
         docTitle.change(pluginName);
+
         const { mountManagementSection } = await import('./application/mount_management_section');
-        const unmountAppCallback = await mountManagementSection(coreSetup, isCloudEnabled, params);
+        const unmountAppCallback = await mountManagementSection(
+          coreSetup,
+          params,
+          kibanaVersionInfo,
+          readonly,
+          services
+        );
 
         return () => {
           docTitle.reset();

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -14,8 +15,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Host Details', () => {
     describe('With filebeat', () => {
-      before(() => esArchiver.load('filebeat/default'));
-      after(() => esArchiver.unload('filebeat/default'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/filebeat/default'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default'));
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
@@ -228,6 +229,7 @@ export default function ({ getService }: FtrProviderContext) {
             docValueFields: [],
             hostName: 'raspberrypi',
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(hostDetails).to.eql(expectedResult.hostDetails);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import createContainer from 'constate';
@@ -16,9 +17,8 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export const useLogAnalysisCapabilities = () => {
   const { services } = useKibanaContextForPlugin();
-  const [mlCapabilities, setMlCapabilities] = useState<GetMlCapabilitiesResponsePayload>(
-    initialMlCapabilities
-  );
+  const [mlCapabilities, setMlCapabilities] =
+    useState<GetMlCapabilitiesResponsePayload>(initialMlCapabilities);
 
   const [fetchMlCapabilitiesRequest, fetchMlCapabilities] = useTrackedPromise(
     {
@@ -39,9 +39,10 @@ export const useLogAnalysisCapabilities = () => {
     fetchMlCapabilities();
   }, [fetchMlCapabilities]);
 
-  const isLoading = useMemo(() => fetchMlCapabilitiesRequest.state === 'pending', [
-    fetchMlCapabilitiesRequest.state,
-  ]);
+  const isLoading = useMemo(
+    () => fetchMlCapabilitiesRequest.state === 'pending',
+    [fetchMlCapabilitiesRequest.state]
+  );
 
   const hasLogAnalysisSetupCapabilities = mlCapabilities.capabilities.canCreateJob;
   const hasLogAnalysisReadCapabilities = mlCapabilities.capabilities.canGetJobs;

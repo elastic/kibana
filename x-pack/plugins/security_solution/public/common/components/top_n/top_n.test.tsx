@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount, ReactWrapper } from 'enzyme';
@@ -34,7 +35,7 @@ jest.mock('uuid', () => {
   };
 });
 
-const field = 'process.name';
+const field = 'host.name';
 const value = 'nice';
 const combinedQueries = {
   bool: {
@@ -100,7 +101,6 @@ describe('TopN', () => {
     field,
     filters: [],
     from: '2020-04-14T00:31:47.695Z',
-    indexNames: [],
     indexPattern: mockIndexPattern,
     options: defaultOptions,
     query,

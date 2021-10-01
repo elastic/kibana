@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../common/utils/range_filter';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { rangeQuery } from '../../../../observability/server';
+import { Setup } from '../helpers/setup_request';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -18,12 +20,16 @@ export async function getServiceTransactionTypes({
   setup,
   serviceName,
   searchAggregatedTransactions,
+  start,
+  end,
 }: {
   serviceName: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
 
   const params = {
     apm: {
@@ -42,7 +48,7 @@ export async function getServiceTransactionTypes({
               searchAggregatedTransactions
             ),
             { term: { [SERVICE_NAME]: serviceName } },
-            { range: rangeFilter(start, end) },
+            ...rangeQuery(start, end),
           ],
         },
       },
@@ -54,7 +60,10 @@ export async function getServiceTransactionTypes({
     },
   };
 
-  const { aggregations } = await apmEventClient.search(params);
+  const { aggregations } = await apmEventClient.search(
+    'get_service_transaction_types',
+    params
+  );
   const transactionTypes =
     aggregations?.types.buckets.map((bucket) => bucket.key as string) || [];
   return { transactionTypes };

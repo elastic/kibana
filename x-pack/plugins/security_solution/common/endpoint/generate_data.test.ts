@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import _ from 'lodash';
 import {
   EndpointDocGenerator,
@@ -85,7 +87,9 @@ describe('data generator', () => {
     expect(event2.event?.sequence).toBe((firstNonNullValue(event1.event?.sequence) ?? 0) + 1);
   });
 
-  it('creates the same documents with same random seed', () => {
+  // Lets run this one multiple times just to ensure that the randomness
+  // is truly predicable based on the seed passed
+  it.each([1, 2, 3, 4, 5])('[%#] creates the same documents with same random seed', () => {
     const generator1 = new EndpointDocGenerator('seed');
     const generator2 = new EndpointDocGenerator('seed');
     const timestamp = new Date().getTime();

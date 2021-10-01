@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import {
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../common/utils/range_filter';
+import { rangeQuery, kqlQuery } from '../../../observability/server';
+import { environmentQuery } from '../../common/utils/environment_query';
 import { SERVICE_NODE_NAME_MISSING } from '../../common/service_nodes';
 import { ProcessorEvent } from '../../common/processor_event';
 
@@ -26,22 +28,27 @@ function getServiceNodeNameFilters(serviceNodeName?: string) {
 }
 
 export function getMetricsProjection({
-  setup,
+  environment,
+  kuery,
   serviceName,
   serviceNodeName,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  environment: string;
+  kuery: string;
   serviceName: string;
   serviceNodeName?: string;
+  start: number;
+  end: number;
 }) {
-  const { start, end, esFilter } = setup;
-
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
     ...getServiceNodeNameFilters(serviceNodeName),
-    ...esFilter,
-  ];
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
+    ...kqlQuery(kuery),
+  ] as QueryDslQueryContainer[];
 
   return {
     apm: {

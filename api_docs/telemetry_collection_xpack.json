@@ -1,0 +1,42 @@
+{
+  "id": "telemetryCollectionXpack",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "telemetryCollectionXpack",
+        "id": "def-server.ESLicense",
+        "type": "Type",
+        "tags": [],
+        "label": "ESLicense",
+        "description": [],
+        "signature": [
+          "LicenseGetLicenseInformation"
+        ],
+        "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

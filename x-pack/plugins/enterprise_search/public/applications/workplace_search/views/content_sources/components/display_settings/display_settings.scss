@@ -1,24 +1,42 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // --------------------------------------------------
 // Custom Source display settings
 // --------------------------------------------------
 
-@mixin source_name {
+@mixin sourceName {
   font-size: .6875em;
   text-transform: uppercase;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: .06em;
 }
 
-@mixin example_result_box_shadow {
+@mixin exampleResultBoxShadow {
   box-shadow:
-    0 1px 3px rgba(black, 0.1),
+    0 1px 3px rgba($euiColorInk, .1),
     0 0 20px $euiColorLightestShade;
+}
+
+@mixin searchResultTag {
+  height: 20px;
+  border-radius: 2px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 .25rem;
+  background: #E9EDF2;
+  color: #3F4B58;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .075em;
+  white-space: nowrap;
+  z-index: 1;
+  margin-right: 5px;
 }
 
 // Wrapper
@@ -72,6 +90,28 @@
       color: $euiColorDarkShade;
     }
   }
+
+  &__tag {
+    @include searchResultTag;
+  }
+
+  &__tag-content {
+    display: inline-flex;
+    height: 20px;
+    flex-shrink: 0;
+    align-items: center;
+  }
+
+  &__meta {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    margin-top: .5rem;
+    font-size: .8em;
+    overflow: hidden;
+  }
 }
 
 .example-result-content-placeholder {
@@ -82,7 +122,7 @@
 .example-standout-result {
   border-radius: 4px;
   overflow: hidden;
-  @include example_result_box_shadow;
+  @include exampleResultBoxShadow;
 
   &__header,
   &__content {
@@ -97,7 +137,7 @@
 
   &__source-name {
     line-height: 34px;
-    @include source_name;
+    @include sourceName;
   }
 }
 
@@ -116,7 +156,7 @@
 
   &__source-name {
     line-height: 1.75em;
-    @include source_name;
+    @include sourceName;
   }
 
   &__content {
@@ -171,7 +211,7 @@
 }
 
 .example-result-detail-card {
-  @include example_result_box_shadow;
+  @include exampleResultBoxShadow;
 
   &__header {
     position: relative;

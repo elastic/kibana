@@ -1,35 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { lazy, useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiPageBody,
-  EuiPageContent,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-  EuiText,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiSpacer, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
 
-import { Section, routeToConnectors, routeToAlerts } from './constants';
+import { Section, routeToConnectors, routeToRules } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 import { hasShowActionsCapability } from './lib/capabilities';
 
-import { ActionsConnectorsList } from './sections/actions_connectors_list/components/actions_connectors_list';
-import { AlertsList } from './sections/alerts_list/components/alerts_list';
 import { HealthCheck } from './components/health_check';
 import { HealthContextProvider } from './context/health_context';
 import { useKibana } from '../common/lib/kibana';
+import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
+
+const ActionsConnectorsList = lazy(
+  () => import('./sections/actions_connectors_list/components/actions_connectors_list')
+);
+const AlertsList = lazy(() => import('./sections/alerts_list/components/alerts_list'));
 
 export interface MatchParams {
   section: Section;
@@ -55,9 +49,9 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   }> = [];
 
   tabs.push({
-    id: 'alerts',
+    id: 'rules',
     name: (
-      <FormattedMessage id="xpack.triggersActionsUI.home.alertsTabTitle" defaultMessage="Alerts" />
+      <FormattedMessage id="xpack.triggersActionsUI.home.rulesTabTitle" defaultMessage="Rules" />
     ),
   });
 
@@ -84,86 +78,66 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   }, [section, chrome, setBreadcrumbs]);
 
   return (
-    <EuiPageBody>
-      <EuiPageContent>
-        <EuiTitle size="m">
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <h1 data-test-subj="appTitle">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.home.appTitle"
-                  defaultMessage="Alerts and Actions"
-                />
-              </h1>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/managing-alerts-and-actions.html`}
-                target="_blank"
-                iconType="help"
-                data-test-subj="documentationLink"
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.home.alertsAndActionsDocsLinkText"
-                  defaultMessage="Documentation"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText>
-          <p>
+    <>
+      <EuiPageHeader
+        bottomBorder
+        pageTitle={
+          <span data-test-subj="appTitle">
             <FormattedMessage
-              id="xpack.triggersActionsUI.home.sectionDescription"
-              defaultMessage="Detect conditions using alerts, and take actions using connectors."
+              id="xpack.triggersActionsUI.home.appTitle"
+              defaultMessage="Rules and Connectors"
             />
-          </p>
-        </EuiText>
+          </span>
+        }
+        rightSideItems={[
+          <EuiButtonEmpty
+            href={docLinks.links.alerting.guide}
+            target="_blank"
+            iconType="help"
+            data-test-subj="documentationLink"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.home.docsLinkText"
+              defaultMessage="Documentation"
+            />
+          </EuiButtonEmpty>,
+        ]}
+        description={
+          <FormattedMessage
+            id="xpack.triggersActionsUI.home.sectionDescription"
+            defaultMessage="Detect conditions using rules, and take actions using connectors."
+          />
+        }
+        tabs={tabs.map((tab) => ({
+          label: tab.name,
+          onClick: () => onSectionChange(tab.id),
+          isSelected: tab.id === section,
+          key: tab.id,
+          'data-test-subj': `${tab.id}Tab`,
+        }))}
+      />
 
-        <EuiTabs>
-          {tabs.map((tab) => (
-            <EuiTab
-              onClick={() => onSectionChange(tab.id)}
-              isSelected={tab.id === section}
-              key={tab.id}
-              data-test-subj={`${tab.id}Tab`}
-            >
-              {tab.name}
-            </EuiTab>
-          ))}
-        </EuiTabs>
+      <EuiSpacer size="l" />
 
-        <EuiSpacer size="s" />
-
-        <Switch>
-          {canShowActions && (
+      <HealthContextProvider>
+        <HealthCheck waitForCheck={true}>
+          <Switch>
+            {canShowActions && (
+              <Route
+                exact
+                path={routeToConnectors}
+                component={suspendedComponentWithProps(ActionsConnectorsList, 'xl')}
+              />
+            )}
             <Route
               exact
-              path={routeToConnectors}
-              component={() => (
-                <HealthContextProvider>
-                  <HealthCheck waitForCheck={true}>
-                    <ActionsConnectorsList />
-                  </HealthCheck>
-                </HealthContextProvider>
-              )}
+              path={routeToRules}
+              component={suspendedComponentWithProps(AlertsList, 'xl')}
             />
-          )}
-          <Route
-            exact
-            path={routeToAlerts}
-            component={() => (
-              <HealthContextProvider>
-                <HealthCheck inFlyout={true} waitForCheck={true}>
-                  <AlertsList />
-                </HealthCheck>
-              </HealthContextProvider>
-            )}
-          />
-        </Switch>
-      </EuiPageContent>
-    </EuiPageBody>
+          </Switch>
+        </HealthCheck>
+      </HealthContextProvider>
+    </>
   );
 };
 

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { dropRight, last } from 'lodash';
@@ -144,28 +133,28 @@ describe('Top hit metric', () => {
   });
 
   it('should request the _source field', () => {
-    init({ field: '_source' });
-    expect(aggDsl.top_hits._source).toBeTruthy();
-    expect(aggDsl.top_hits.docvalue_fields).toBeUndefined();
+    init({ fieldName: '_source' });
+    expect(aggDsl.top_hits._source).toBe(true);
+    expect(aggDsl.top_hits.fields).toBeUndefined();
   });
 
-  it('requests both source and docvalues_fields for non-text aggregatable fields', () => {
+  it('requests fields for non-text aggregatable fields', () => {
     init({ fieldName: 'bytes', readFromDocValues: true });
-    expect(aggDsl.top_hits._source).toBe('bytes');
-    expect(aggDsl.top_hits.docvalue_fields).toEqual([{ field: 'bytes' }]);
+    expect(aggDsl.top_hits._source).toBe(false);
+    expect(aggDsl.top_hits.fields).toEqual([{ field: 'bytes' }]);
   });
 
-  it('requests both source and docvalues_fields for date aggregatable fields', () => {
+  it('requests fields for date aggregatable fields', () => {
     init({ fieldName: '@timestamp', readFromDocValues: true, fieldType: KBN_FIELD_TYPES.DATE });
 
-    expect(aggDsl.top_hits._source).toBe('@timestamp');
-    expect(aggDsl.top_hits.docvalue_fields).toEqual([{ field: '@timestamp', format: 'date_time' }]);
+    expect(aggDsl.top_hits._source).toBe(false);
+    expect(aggDsl.top_hits.fields).toEqual([{ field: '@timestamp', format: 'date_time' }]);
   });
 
-  it('requests just source for aggregatable text fields', () => {
+  it('requests fields for aggregatable text fields', () => {
     init({ fieldName: 'machine.os' });
-    expect(aggDsl.top_hits._source).toBe('machine.os');
-    expect(aggDsl.top_hits.docvalue_fields).toBeUndefined();
+    expect(aggDsl.top_hits._source).toBe(false);
+    expect(aggDsl.top_hits.fields).toEqual([{ field: 'machine.os' }]);
   });
 
   describe('try to get the value from the top hit', () => {

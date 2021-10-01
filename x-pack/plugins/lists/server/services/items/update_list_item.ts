@@ -1,22 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { CreateDocumentResponse } from 'elasticsearch';
-import { LegacyAPICaller } from 'kibana/server';
-
-import {
+import { ElasticsearchClient } from 'kibana/server';
+import type {
   Id,
   ListItemSchema,
   MetaOrUndefined,
-  UpdateEsListItemSchema,
   _VersionOrUndefined,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
+
 import { transformListItemToElasticQuery } from '../utils';
-import { decodeVersion } from '../utils/decode_version';
-import { encodeHitVersion } from '../utils/encode_hit_version';
+import { UpdateEsListItemSchema } from '../../schemas/elastic_query';
 
 import { getListItem } from './get_list_item';
 
@@ -24,7 +23,7 @@ export interface UpdateListItemOptions {
   _version: _VersionOrUndefined;
   id: Id;
   value: string | null | undefined;
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;
@@ -35,14 +34,14 @@ export const updateListItem = async ({
   _version,
   id,
   value,
-  callCluster,
+  esClient,
   listItemIndex,
   user,
   meta,
   dateNow,
 }: UpdateListItemOptions): Promise<ListItemSchema | null> => {
   const updatedAt = dateNow ?? new Date().toISOString();
-  const listItem = await getListItem({ callCluster, id, listItemIndex });
+  const listItem = await getListItem({ esClient, id, listItemIndex });
   if (listItem == null) {
     return null;
   } else {
@@ -61,7 +60,7 @@ export const updateListItem = async ({
         ...elasticQuery,
       };
 
-      const response = await callCluster<CreateDocumentResponse>('update', {
+      const { body: response } = await esClient.update({
         ...decodeVersion(_version),
         body: {
           doc,

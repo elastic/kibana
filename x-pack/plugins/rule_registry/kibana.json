@@ -1,0 +1,13 @@
+{
+  "id": "ruleRegistry",
+  "owner": {
+    "name": "RAC",
+    "githubTeam": "rac"
+  },
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "ruleRegistry"],
+  "requiredPlugins": ["alerting", "data", "triggersActionsUi"],
+  "optionalPlugins": ["security"],
+  "server": true
+}

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable max-classes-per-file */
@@ -112,109 +113,110 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
   });
 
   const execute = useMemo(
-    () => (...args: Arguments) => {
-      let rejectCancellationPromise!: (value: any) => void;
-      const cancellationPromise = new Promise<any>((_, reject) => {
-        rejectCancellationPromise = reject;
-      });
+    () =>
+      (...args: Arguments) => {
+        let rejectCancellationPromise!: (value: any) => void;
+        const cancellationPromise = new Promise<any>((_, reject) => {
+          rejectCancellationPromise = reject;
+        });
 
-      // remember the list of prior pending promises for cancellation
-      const previousPendingPromises = pendingPromises.current;
+        // remember the list of prior pending promises for cancellation
+        const previousPendingPromises = pendingPromises.current;
 
-      const cancelPreviousPendingPromises = () => {
-        previousPendingPromises.forEach((promise) => promise.cancel());
-      };
+        const cancelPreviousPendingPromises = () => {
+          previousPendingPromises.forEach((promise) => promise.cancel());
+        };
 
-      const newPromise = createPromise(...args);
-      const newCancelablePromise = Promise.race([newPromise, cancellationPromise]);
+        const newPromise = createPromise(...args);
+        const newCancelablePromise = Promise.race([newPromise, cancellationPromise]);
 
-      // track this new state
-      setPromiseState({
-        state: 'pending',
-        promise: newCancelablePromise,
-      });
+        // track this new state
+        setPromiseState({
+          state: 'pending',
+          promise: newCancelablePromise,
+        });
 
-      if (cancelPreviousOn === 'creation') {
-        cancelPreviousPendingPromises();
-      }
+        if (cancelPreviousOn === 'creation') {
+          cancelPreviousPendingPromises();
+        }
 
-      const newPendingPromise: CancelablePromise<Result> = {
-        cancel: () => {
-          rejectCancellationPromise(new CanceledPromiseError());
-        },
-        cancelSilently: () => {
-          rejectCancellationPromise(new SilentCanceledPromiseError());
-        },
-        promise: newCancelablePromise.then(
-          (value) => {
-            setPromiseState((previousPromiseState) =>
-              previousPromiseState.state === 'pending' &&
-              previousPromiseState.promise === newCancelablePromise
-                ? {
-                    state: 'resolved',
-                    promise: newPendingPromise.promise,
-                    value,
-                  }
-                : previousPromiseState
-            );
-
-            if (['settlement', 'resolution'].includes(cancelPreviousOn)) {
-              cancelPreviousPendingPromises();
-            }
-
-            // remove itself from the list of pending promises
-            pendingPromises.current = pendingPromises.current.filter(
-              (pendingPromise) => pendingPromise.promise !== newPendingPromise.promise
-            );
-
-            if (onResolve && shouldTriggerOrThrow()) {
-              onResolve(value);
-            }
-
-            return value;
+        const newPendingPromise: CancelablePromise<Result> = {
+          cancel: () => {
+            rejectCancellationPromise(new CanceledPromiseError());
           },
-          (value) => {
-            if (!(value instanceof SilentCanceledPromiseError)) {
+          cancelSilently: () => {
+            rejectCancellationPromise(new SilentCanceledPromiseError());
+          },
+          promise: newCancelablePromise.then(
+            (value) => {
               setPromiseState((previousPromiseState) =>
                 previousPromiseState.state === 'pending' &&
                 previousPromiseState.promise === newCancelablePromise
                   ? {
-                      state: 'rejected',
-                      promise: newCancelablePromise,
+                      state: 'resolved',
+                      promise: newPendingPromise.promise,
                       value,
                     }
                   : previousPromiseState
               );
-            }
 
-            if (['settlement', 'rejection'].includes(cancelPreviousOn)) {
-              cancelPreviousPendingPromises();
-            }
-
-            // remove itself from the list of pending promises
-            pendingPromises.current = pendingPromises.current.filter(
-              (pendingPromise) => pendingPromise.promise !== newPendingPromise.promise
-            );
-
-            if (shouldTriggerOrThrow()) {
-              if (onReject) {
-                onReject(value);
+              if (['settlement', 'resolution'].includes(cancelPreviousOn)) {
+                cancelPreviousPendingPromises();
               }
 
-              throw value;
+              // remove itself from the list of pending promises
+              pendingPromises.current = pendingPromises.current.filter(
+                (pendingPromise) => pendingPromise.promise !== newPendingPromise.promise
+              );
+
+              if (onResolve && shouldTriggerOrThrow()) {
+                onResolve(value);
+              }
+
+              return value;
+            },
+            (value) => {
+              if (!(value instanceof SilentCanceledPromiseError)) {
+                setPromiseState((previousPromiseState) =>
+                  previousPromiseState.state === 'pending' &&
+                  previousPromiseState.promise === newCancelablePromise
+                    ? {
+                        state: 'rejected',
+                        promise: newCancelablePromise,
+                        value,
+                      }
+                    : previousPromiseState
+                );
+              }
+
+              if (['settlement', 'rejection'].includes(cancelPreviousOn)) {
+                cancelPreviousPendingPromises();
+              }
+
+              // remove itself from the list of pending promises
+              pendingPromises.current = pendingPromises.current.filter(
+                (pendingPromise) => pendingPromise.promise !== newPendingPromise.promise
+              );
+
+              if (shouldTriggerOrThrow()) {
+                if (onReject) {
+                  onReject(value);
+                }
+
+                throw value;
+              }
             }
-          }
-        ),
-      };
+          ),
+        };
 
-      // add the new promise to the list of pending promises
-      pendingPromises.current = [...pendingPromises.current, newPendingPromise];
+        // add the new promise to the list of pending promises
+        pendingPromises.current = [...pendingPromises.current, newPendingPromise];
 
-      // silence "unhandled rejection" warnings
-      newPendingPromise.promise.catch(noOp);
+        // silence "unhandled rejection" warnings
+        newPendingPromise.promise.catch(noOp);
 
-      return newPendingPromise.promise;
-    },
+        return newPendingPromise.promise;
+      },
     // the dependencies are managed by the caller
     // eslint-disable-next-line react-hooks/exhaustive-deps
     dependencies
@@ -234,35 +236,39 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
   return [promiseState, execute] as [typeof promiseState, typeof execute];
 };
 
-interface UninitializedPromiseState {
+export interface UninitializedPromiseState {
   state: 'uninitialized';
 }
 
-interface PendingPromiseState<ResolvedValue> {
+export interface PendingPromiseState<ResolvedValue> {
   state: 'pending';
   promise: Promise<ResolvedValue>;
 }
 
-interface ResolvedPromiseState<ResolvedValue> {
+export interface ResolvedPromiseState<ResolvedValue> {
   state: 'resolved';
   promise: Promise<ResolvedValue>;
   value: ResolvedValue;
 }
 
-interface RejectedPromiseState<ResolvedValue, RejectedValue> {
+export interface RejectedPromiseState<ResolvedValue, RejectedValue> {
   state: 'rejected';
   promise: Promise<ResolvedValue>;
   value: RejectedValue;
 }
 
-type SettledPromise<ResolvedValue, RejectedValue> =
+export type SettledPromiseState<ResolvedValue, RejectedValue> =
   | ResolvedPromiseState<ResolvedValue>
   | RejectedPromiseState<ResolvedValue, RejectedValue>;
 
-type PromiseState<ResolvedValue, RejectedValue = unknown> =
+export type PromiseState<ResolvedValue, RejectedValue = unknown> =
   | UninitializedPromiseState
   | PendingPromiseState<ResolvedValue>
-  | SettledPromise<ResolvedValue, RejectedValue>;
+  | SettledPromiseState<ResolvedValue, RejectedValue>;
+
+export const isRejectedPromiseState = (
+  promiseState: PromiseState<any, any>
+): promiseState is RejectedPromiseState<any, any> => promiseState.state === 'rejected';
 
 interface CancelablePromise<ResolvedValue> {
   // reject the promise prematurely with a CanceledPromiseError

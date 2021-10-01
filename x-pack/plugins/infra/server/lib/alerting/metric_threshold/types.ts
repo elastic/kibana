@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Unit } from '@elastic/datemath';
 import { Comparator, AlertStates } from '../common/types';
 
@@ -27,14 +29,16 @@ interface BaseMetricExpressionParams {
   sourceId?: string;
   threshold: number[];
   comparator: Comparator;
+  warningComparator?: Comparator;
+  warningThreshold?: number[];
 }
 
-interface NonCountMetricExpressionParams extends BaseMetricExpressionParams {
+export interface NonCountMetricExpressionParams extends BaseMetricExpressionParams {
   aggType: Exclude<Aggregators, Aggregators.COUNT>;
   metric: string;
 }
 
-interface CountMetricExpressionParams extends BaseMetricExpressionParams {
+export interface CountMetricExpressionParams extends BaseMetricExpressionParams {
   aggType: Aggregators.COUNT;
   metric: never;
 }

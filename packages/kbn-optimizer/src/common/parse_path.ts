@@ -1,24 +1,56 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import normalizePath from 'normalize-path';
 import Qs from 'querystring';
+
+class ParsedPath {
+  constructor(
+    public readonly root: string,
+    public readonly dirs: string[],
+    public readonly query?: Record<string, unknown>,
+    public readonly filename?: string
+  ) {}
+
+  private indexOfDir(match: string | RegExp, fromIndex: number = 0) {
+    for (let i = fromIndex; i < this.dirs.length; i++) {
+      if (this.matchDir(i, match)) {
+        return i;
+      }
+    }
+
+    return -1;
+  }
+
+  private matchDir(i: number, match: string | RegExp) {
+    return typeof match === 'string' ? this.dirs[i] === match : match.test(this.dirs[i]);
+  }
+
+  matchDirs(...segments: Array<string | RegExp>) {
+    const [first, ...rest] = segments;
+    let fromIndex = 0;
+    while (true) {
+      // do the dirs include the first segment to match?
+      const startIndex = this.indexOfDir(first, fromIndex);
+      if (startIndex === -1) {
+        return;
+      }
+
+      // are all of the ...rest segments also matched at this point?
+      if (!rest.length || rest.every((seg, i) => this.matchDir(startIndex + 1 + i, seg))) {
+        return { startIndex, endIndex: startIndex + rest.length };
+      }
+
+      // no match, search again, this time looking at instances after the matched instance
+      fromIndex = startIndex + 1;
+    }
+  }
+}
 
 /**
  * Parse an absolute path, supporting normalized paths from webpack,
@@ -26,11 +58,12 @@ import Qs from 'querystring';
  */
 export function parseDirPath(path: string) {
   const filePath = parseFilePath(path);
-  return {
-    ...filePath,
-    dirs: [...filePath.dirs, ...(filePath.filename ? [filePath.filename] : [])],
-    filename: undefined,
-  };
+  return new ParsedPath(
+    filePath.root,
+    [...filePath.dirs, ...(filePath.filename ? [filePath.filename] : [])],
+    filePath.query,
+    undefined
+  );
 }
 
 export function parseFilePath(path: string) {
@@ -43,10 +76,10 @@ export function parseFilePath(path: string) {
   }
 
   const [root, ...others] = normalized.split('/');
-  return {
-    root: root === '' ? '/' : root,
-    dirs: others.slice(0, -1),
+  return new ParsedPath(
+    root === '' ? '/' : root,
+    others.slice(0, -1),
     query,
-    filename: others[others.length - 1] || undefined,
-  };
+    others[others.length - 1] || undefined
+  );
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable react/display-name */
@@ -28,7 +29,7 @@ const FailureHistoryComponent: React.FC<FailureHistoryProps> = ({ id }) => {
   const [loading, ruleStatus] = useRuleStatus(id);
   if (loading) {
     return (
-      <EuiPanel>
+      <EuiPanel hasBorder>
         <HeaderSection title={i18n.LAST_FIVE_ERRORS} />
         <EuiLoadingContent />
       </EuiPanel>
@@ -59,7 +60,7 @@ const FailureHistoryComponent: React.FC<FailureHistoryProps> = ({ id }) => {
     },
   ];
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder>
       <HeaderSection title={i18n.LAST_FIVE_ERRORS} />
       <EuiBasicTable
         columns={columns}

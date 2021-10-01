@@ -1,25 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
-import { IndexPatternField, IndexPattern, IFieldType } from '../../../../../../plugins/data/public';
+import { IndexPatternField, IndexPattern } from '../../../../../../plugins/data/public';
 import { Table } from './components/table';
 import { IndexedFieldItem } from './types';
 
@@ -29,8 +18,9 @@ interface IndexedFieldsTableProps {
   fieldFilter?: string;
   indexedFieldTypeFilter?: string;
   helpers: {
-    redirectToRoute: (obj: any) => void;
-    getFieldInfo: (indexPattern: IndexPattern, field: IFieldType) => string[];
+    editField: (fieldName: string) => void;
+    deleteField: (fieldName: string) => void;
+    getFieldInfo: (indexPattern: IndexPattern, field: IndexPatternField) => string[];
   };
   fieldWildcardMatcher: (filters: any[]) => (val: any) => boolean;
 }
@@ -71,10 +61,14 @@ export class IndexedFieldsTable extends Component<
         fields.map((field) => {
           return {
             ...field.spec,
+            type: field.esTypes?.join(', ') || '',
+            kbnType: field.type,
             displayName: field.displayName,
             format: indexPattern.getFormatterForFieldNoDefault(field.name)?.type?.title || '',
             excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
             info: helpers.getFieldInfo && helpers.getFieldInfo(indexPattern, field),
+            isMapped: !!field.isMapped,
+            hasRuntime: !!field.runtimeField,
           };
         })) ||
       []
@@ -113,7 +107,8 @@ export class IndexedFieldsTable extends Component<
         <Table
           indexPattern={indexPattern}
           items={fields}
-          editField={(field) => this.props.helpers.redirectToRoute(field)}
+          editField={(field) => this.props.helpers.editField(field.name)}
+          deleteField={(fieldName) => this.props.helpers.deleteField(fieldName)}
         />
       </div>
     );

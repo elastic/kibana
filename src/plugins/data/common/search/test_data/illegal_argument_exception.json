@@ -1,0 +1,14 @@
+{
+    "error" : {
+      "root_cause" : [
+        {
+          "type" : "illegal_argument_exception",
+          "reason" : "failed to parse setting [timeout] with value [1] as a time value: unit is missing or unrecognized"
+        }
+      ],
+      "type" : "illegal_argument_exception",
+      "reason" : "failed to parse setting [timeout] with value [1] as a time value: unit is missing or unrecognized"
+    },
+    "status" : 400
+  }
+  

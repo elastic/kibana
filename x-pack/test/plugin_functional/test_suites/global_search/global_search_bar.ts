@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -14,12 +15,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     const browser = getService('browser');
 
     before(async () => {
-      await esArchiver.load('global_search/search_syntax');
+      await esArchiver.load(
+        'x-pack/test/plugin_functional/es_archives/global_search/search_syntax'
+      );
       await common.navigateToApp('home');
     });
 
     after(async () => {
-      await esArchiver.unload('global_search/search_syntax');
+      await esArchiver.unload(
+        'x-pack/test/plugin_functional/es_archives/global_search/search_syntax'
+      );
     });
 
     afterEach(async () => {
@@ -61,6 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'dashboard 1 (tag-2)',
           'dashboard 2 (tag-3)',
           'dashboard 3 (tag-1 and tag-3)',
+          'dashboard 4 (tag-special-chars)',
         ]);
       });
       it('shows a suggestion when searching for a term matching a tag name', async () => {
@@ -94,6 +100,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'dashboard 1 (tag-2)',
           'dashboard 2 (tag-3)',
           'dashboard 3 (tag-1 and tag-3)',
+          'dashboard 4 (tag-special-chars)',
         ]);
       });
 
@@ -111,6 +118,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'dashboard 1 (tag-2)',
           'dashboard 2 (tag-3)',
           'dashboard 3 (tag-1 and tag-3)',
+          'dashboard 4 (tag-special-chars)',
         ]);
       });
 
@@ -179,6 +187,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const results = await navigationalSearch.getDisplayedResults();
 
         expect(results.map((result) => result.label)).to.eql(['My awesome vis (tag-4)']);
+      });
+
+      it('allows to filter by tags containing special characters', async () => {
+        await navigationalSearch.searchFor('tag:"my%tag"');
+
+        const results = await navigationalSearch.getDisplayedResults();
+
+        expect(results.map((result) => result.label)).to.eql(['dashboard 4 (tag-special-chars)']);
       });
 
       it('returns no results when searching for an unknown tag', async () => {

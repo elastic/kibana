@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { shortenUrl } from './url_shortener';
@@ -24,7 +13,7 @@ describe('Url shortener', () => {
 
   let postStub: jest.Mock;
   beforeEach(() => {
-    postStub = jest.fn(() => Promise.resolve({ urlId: shareId }));
+    postStub = jest.fn(() => Promise.resolve({ id: shareId }));
   });
 
   describe('Shorten without base path', () => {
@@ -34,9 +23,6 @@ describe('Url shortener', () => {
         post: postStub,
       });
       expect(shortUrl).toBe(`http://localhost:5601/goto/${shareId}`);
-      expect(postStub).toHaveBeenCalledWith(`/api/shorten_url`, {
-        body: '{"url":"/app/kibana#123"}',
-      });
     });
 
     it('should shorten urls without a port', async () => {
@@ -45,9 +31,6 @@ describe('Url shortener', () => {
         post: postStub,
       });
       expect(shortUrl).toBe(`http://localhost/goto/${shareId}`);
-      expect(postStub).toHaveBeenCalledWith(`/api/shorten_url`, {
-        body: '{"url":"/app/kibana#123"}',
-      });
     });
   });
 
@@ -60,9 +43,6 @@ describe('Url shortener', () => {
         post: postStub,
       });
       expect(shortUrl).toBe(`http://localhost:5601${basePath}/goto/${shareId}`);
-      expect(postStub).toHaveBeenCalledWith(`/api/shorten_url`, {
-        body: '{"url":"/app/kibana#123"}',
-      });
     });
 
     it('should shorten urls without a port', async () => {
@@ -71,9 +51,6 @@ describe('Url shortener', () => {
         post: postStub,
       });
       expect(shortUrl).toBe(`http://localhost${basePath}/goto/${shareId}`);
-      expect(postStub).toHaveBeenCalledWith(`/api/shorten_url`, {
-        body: '{"url":"/app/kibana#123"}',
-      });
     });
 
     it('should shorten urls with a query string', async () => {
@@ -82,9 +59,6 @@ describe('Url shortener', () => {
         post: postStub,
       });
       expect(shortUrl).toBe(`http://localhost${basePath}/goto/${shareId}`);
-      expect(postStub).toHaveBeenCalledWith(`/api/shorten_url`, {
-        body: '{"url":"/app/kibana?foo#123"}',
-      });
     });
 
     it('should shorten urls without a hash', async () => {
@@ -93,9 +67,6 @@ describe('Url shortener', () => {
         post: postStub,
       });
       expect(shortUrl).toBe(`http://localhost${basePath}/goto/${shareId}`);
-      expect(postStub).toHaveBeenCalledWith(`/api/shorten_url`, {
-        body: '{"url":"/app/kibana"}',
-      });
     });
 
     it('should shorten urls with a query string in the hash', async () => {
@@ -106,10 +77,6 @@ describe('Url shortener', () => {
         post: postStub,
       });
       expect(shortUrl).toBe(`http://localhost${basePath}/goto/${shareId}`);
-      expect(postStub).toHaveBeenCalledWith(`/api/shorten_url`, {
-        body:
-          '{"url":"/app/discover#/?_g=(refreshInterval:(pause:!f,value:0),time:(from:now-15m,mode:quick,to:now))&_a=(columns:!(_source),index:%27logstash-*%27,interval:auto,query:(query_string:(analyze_wildcard:!t,query:%27*%27)),sort:!(%27@timestamp%27,desc))"}',
-      });
     });
   });
 });

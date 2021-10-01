@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { get } from 'lodash';
@@ -24,7 +13,13 @@ import useMount from 'react-use/lib/useMount';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AggParam, IAggConfig, IFieldParamType, IndexPatternField } from 'src/plugins/data/public';
+import {
+  AggParam,
+  IAggConfig,
+  IFieldParamType,
+  IndexPatternField,
+  KBN_FIELD_TYPES,
+} from '../../../../../plugins/data/public';
 import { formatListAsProse, parseCommaSeparatedList, useValidation } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
 import { ComboBoxGroupedOptions } from '../../utils';
@@ -66,6 +61,7 @@ function FieldParamEditor({
     }
   };
   const errors = customError ? [customError] : [];
+  let showErrorMessageImmediately = false;
 
   if (!indexedFields.length) {
     errors.push(
@@ -80,9 +76,38 @@ function FieldParamEditor({
     );
   }
 
+  if (value && value.type === KBN_FIELD_TYPES.MISSING) {
+    errors.push(
+      i18n.translate('visDefaultEditor.controls.field.fieldIsNotExists', {
+        defaultMessage:
+          'The field "{fieldParameter}" associated with this object no longer exists in the index pattern. Please use another field.',
+        values: {
+          fieldParameter: value.name,
+        },
+      })
+    );
+    showErrorMessageImmediately = true;
+  } else if (
+    value &&
+    !getFieldTypes(agg).find((type: string) => type === value.type || type === '*')
+  ) {
+    errors.push(
+      i18n.translate('visDefaultEditor.controls.field.invalidFieldForAggregation', {
+        defaultMessage:
+          'Saved field "{fieldParameter}" of index pattern "{indexPatternTitle}" is invalid for use with this aggregation. Please select a new field.',
+        values: {
+          fieldParameter: value?.name,
+          indexPatternTitle: agg.getIndexPattern && agg.getIndexPattern().title,
+        },
+      })
+    );
+    showErrorMessageImmediately = true;
+  }
+
   const isValid = !!value && !errors.length && !isDirty;
   // we show an error message right away if there is no compatible fields
-  const showErrorMessage = (showValidation || !indexedFields.length) && !isValid;
+  const showErrorMessage =
+    (showValidation || !indexedFields.length || showErrorMessageImmediately) && !isValid;
 
   useValidation(setValidity, isValid);
   useMount(() => {
@@ -133,10 +158,14 @@ function FieldParamEditor({
 }
 
 function getFieldTypesString(agg: IAggConfig) {
+  return formatListAsProse(getFieldTypes(agg), { inclusive: false });
+}
+
+function getFieldTypes(agg: IAggConfig) {
   const param =
     get(agg, 'type.params', []).find((p: AggParam) => p.name === 'field') ||
     ({} as IFieldParamType);
-  return formatListAsProse(parseCommaSeparatedList(param.filterFieldTypes), { inclusive: false });
+  return parseCommaSeparatedList(param.filterFieldTypes || []);
 }
 
 export { FieldParamEditor };

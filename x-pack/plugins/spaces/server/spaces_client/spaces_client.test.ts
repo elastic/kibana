@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
+
+import type { GetAllSpacesPurpose } from '../../common';
+import type { ConfigType } from '../config';
+import { ConfigSchema } from '../config';
 import { SpacesClient } from './spaces_client';
-import { ConfigType, ConfigSchema } from '../config';
-import { GetAllSpacesPurpose } from '../../common/model/types';
-import { savedObjectsRepositoryMock } from '../../../../../src/core/server/mocks';
 
 const createMockDebugLogger = () => {
   return jest.fn();
@@ -337,5 +340,26 @@ describe('#delete', () => {
     expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
     expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', id);
     expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith(id);
+  });
+
+  describe('#disableLegacyUrlAliases', () => {
+    test(`updates legacy URL aliases using callWithRequestRepository`, async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+
+      const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository);
+      const aliases = [
+        { targetSpace: 'space1', targetType: 'foo', sourceId: '123' },
+        { targetSpace: 'space2', targetType: 'bar', sourceId: '456' },
+      ];
+      await client.disableLegacyUrlAliases(aliases);
+
+      expect(mockCallWithRequestRepository.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(mockCallWithRequestRepository.bulkUpdate).toHaveBeenCalledWith([
+        { type: 'legacy-url-alias', id: 'space1:foo:123', attributes: { disabled: true } },
+        { type: 'legacy-url-alias', id: 'space2:bar:456', attributes: { disabled: true } },
+      ]);
+    });
   });
 });

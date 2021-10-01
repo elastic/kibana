@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -49,6 +50,22 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
+        outputRule.version = 2;
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare).to.eql(outputRule);
+      });
+
+      it("should patch a machine_learning rule's job ID if in a legacy format", async () => {
+        await createRule(supertest, getSimpleMlRule('rule-1'));
+
+        // patch a simple rule's name
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ rule_id: 'rule-1', machine_learning_job_id: 'some_job_id' })
+          .expect(200);
+
+        const outputRule = getSimpleMlRuleOutput();
         outputRule.version = 2;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);

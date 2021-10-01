@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import axios from 'axios';
+import { getExecuteDetails } from '../../__fixtures__';
+import { WATCH_TYPES } from '../../common/constants';
 import {
   setupEnvironment,
   pageHelpers,
@@ -16,8 +19,6 @@ import {
   unwrapBodyResponse,
 } from './helpers';
 import { WatchCreateThresholdTestBed } from './helpers/watch_create_threshold.helpers';
-import { getExecuteDetails } from '../../test/fixtures';
-import { WATCH_TYPES } from '../../common/constants';
 
 const WATCH_NAME = 'my_test_watch';
 
@@ -552,8 +553,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
                 port: Number(PORT),
                 scheme: SCHEME,
                 path: PATH,
-                body:
-                  '{\n  "message": "Watch [{{ctx.metadata.name}}] has exceeded the threshold"\n}', // Default
+                body: '{\n  "message": "Watch [{{ctx.metadata.name}}] has exceeded the threshold"\n}', // Default
                 username: USERNAME,
                 password: PASSWORD,
                 webhook: {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -47,6 +48,7 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
     eventId,
     eventEnd,
     eventStart,
+    isDraggable,
     networkBytes,
     networkCommunityId,
     networkDirection,
@@ -75,6 +77,7 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
         <UserProcess
           contextId={contextId}
           eventId={eventId}
+          isDraggable={isDraggable}
           processName={processName}
           userName={userName}
         />
@@ -87,6 +90,7 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
           eventId={eventId}
           eventEnd={eventEnd}
           eventStart={eventStart}
+          isDraggable={isDraggable}
         />
       </EuiFlexItemMarginRight>
 
@@ -103,6 +107,7 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
           destinationPackets={destinationPackets}
           destinationPort={destinationPort}
           eventId={eventId}
+          isDraggable={isDraggable}
           networkBytes={networkBytes}
           networkCommunityId={networkCommunityId}
           networkDirection={networkDirection}

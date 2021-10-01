@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IScopedClusterClient } from 'kibana/server';
@@ -78,9 +79,9 @@ export function analyticsAuditMessagesProvider({ asInternalUser }: IScopedCluste
       },
     });
 
-    let messages = [];
-    if (body.hits.total.value > 0) {
-      messages = body.hits.hits.map((hit: Message) => hit._source);
+    let messages: JobMessage[] = [];
+    if (typeof body.hits.total !== 'number' && body.hits.total.value > 0) {
+      messages = (body.hits.hits as Message[]).map((hit) => hit._source);
       messages.reverse();
     }
     return messages;

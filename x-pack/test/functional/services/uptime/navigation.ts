@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -9,6 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const PageObjects = getPageObjects(['common', 'timePicker', 'header']);
 
   const goToUptimeRoot = async () => {
@@ -69,8 +71,8 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     goToCertificates: async () => {
       if (!(await testSubjects.exists('uptimeCertificatesPage', { timeout: 0 }))) {
         return retry.try(async () => {
-          if (await testSubjects.exists('uptimeCertificatesLink', { timeout: 0 })) {
-            await testSubjects.click('uptimeCertificatesLink', 10000);
+          if (await find.existsByCssSelector('[href="/app/uptime/certificates"]', 0)) {
+            await find.clickByCssSelector('[href="/app/uptime/certificates"]');
           }
           await testSubjects.existOrFail('uptimeCertificatesPage');
         });

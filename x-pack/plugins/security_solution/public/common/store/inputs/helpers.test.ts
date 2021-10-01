@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep } from 'lodash/fp';
@@ -275,10 +276,10 @@ describe('Inputs', () => {
           ],
           timerange: {
             from: '2020-07-07T08:20:18.966Z',
-            fromStr: 'now-24h',
+            fromStr: 'now/d',
             kind: 'relative',
             to: '2020-07-08T08:20:18.966Z',
-            toStr: 'now',
+            toStr: 'now/d',
           },
           query: { query: '', language: 'kuery' },
           filters: [],
@@ -292,10 +293,10 @@ describe('Inputs', () => {
           queries: [],
           timerange: {
             from: '2020-07-07T08:20:18.966Z',
-            fromStr: 'now-24h',
+            fromStr: 'now/d',
             kind: 'relative',
             to: '2020-07-08T08:20:18.966Z',
-            toStr: 'now',
+            toStr: 'now/d',
           },
           query: { query: '', language: 'kuery' },
           filters: [],

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -21,7 +22,7 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       originalWindowSize = await browser.getWindowSize();
       await browser.setWindowSize(1600, 1000);
-      await esArchiver.load('logstash/example_pipelines');
+      await esArchiver.load('x-pack/test/functional/es_archives/logstash/example_pipelines');
     });
 
     beforeEach(async () => {
@@ -29,7 +30,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async () => {
-      await esArchiver.unload('logstash/example_pipelines');
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash/example_pipelines');
       await browser.setWindowSize(originalWindowSize.width, originalWindowSize.height);
     });
 

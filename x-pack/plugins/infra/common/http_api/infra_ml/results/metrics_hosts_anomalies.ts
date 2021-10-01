@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
@@ -12,17 +13,23 @@ import { anomalyTypeRT, paginationCursorRT, sortRT, paginationRT, metricRT } fro
 export const INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH =
   '/api/infra/infra_ml/results/metrics_hosts_anomalies';
 
-const metricsHostAnomalyCommonFieldsRT = rt.type({
-  id: rt.string,
-  anomalyScore: rt.number,
-  typical: rt.number,
-  actual: rt.number,
-  type: anomalyTypeRT,
-  influencers: rt.array(rt.string),
-  duration: rt.number,
-  startTime: rt.number,
-  jobId: rt.string,
-});
+const metricsHostAnomalyCommonFieldsRT = rt.intersection([
+  rt.type({
+    id: rt.string,
+    anomalyScore: rt.number,
+    typical: rt.number,
+    actual: rt.number,
+    type: anomalyTypeRT,
+    influencers: rt.array(rt.string),
+    duration: rt.number,
+    startTime: rt.number,
+    jobId: rt.string,
+  }),
+  rt.partial({
+    partitionFieldName: rt.string,
+    partitionFieldValue: rt.string,
+  }),
+]);
 const metricsHostsAnomalyRT = metricsHostAnomalyCommonFieldsRT;
 
 export type MetricsHostsAnomaly = rt.TypeOf<typeof metricsHostsAnomalyRT>;
@@ -61,10 +68,13 @@ export const getMetricsHostsAnomaliesRequestPayloadRT = rt.type({
     rt.type({
       // the ID of the source configuration
       sourceId: rt.string,
+      anomalyThreshold: rt.number,
       // the time range to fetch the log entry anomalies from
       timeRange: timeRangeRT,
     }),
     rt.partial({
+      query: rt.string,
+      hostName: rt.string,
       metric: metricRT,
       // Pagination properties
       pagination: paginationRT,

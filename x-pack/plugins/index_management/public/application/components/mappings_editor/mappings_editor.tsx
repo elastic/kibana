@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -50,50 +51,48 @@ interface Props {
 }
 
 export const MappingsEditor = React.memo(({ onChange, value, docLinks, indexSettings }: Props) => {
-  const {
-    parsedDefaultValue,
-    multipleMappingsDeclared,
-  } = useMemo<MappingsEditorParsedMetadata>(() => {
-    const mappingsDefinition = extractMappingsDefinition(value);
+  const { parsedDefaultValue, multipleMappingsDeclared } =
+    useMemo<MappingsEditorParsedMetadata>(() => {
+      const mappingsDefinition = extractMappingsDefinition(value);
 
-    if (mappingsDefinition === null) {
-      return { multipleMappingsDeclared: true };
-    }
+      if (mappingsDefinition === null) {
+        return { multipleMappingsDeclared: true };
+      }
 
-    const {
-      _source,
-      _meta,
-      _routing,
-      dynamic,
-      properties,
-      runtime,
-      /* eslint-disable @typescript-eslint/naming-convention */
-      numeric_detection,
-      date_detection,
-      dynamic_date_formats,
-      dynamic_templates,
-      /* eslint-enable @typescript-eslint/naming-convention */
-    } = mappingsDefinition;
-
-    const parsed = {
-      configuration: {
+      const {
         _source,
         _meta,
         _routing,
         dynamic,
+        properties,
+        runtime,
+        /* eslint-disable @typescript-eslint/naming-convention */
         numeric_detection,
         date_detection,
         dynamic_date_formats,
-      },
-      fields: properties,
-      templates: {
         dynamic_templates,
-      },
-      runtime,
-    };
+        /* eslint-enable @typescript-eslint/naming-convention */
+      } = mappingsDefinition;
 
-    return { parsedDefaultValue: parsed, multipleMappingsDeclared: false };
-  }, [value]);
+      const parsed = {
+        configuration: {
+          _source,
+          _meta,
+          _routing,
+          dynamic,
+          numeric_detection,
+          date_detection,
+          dynamic_date_formats,
+        },
+        fields: properties,
+        templates: {
+          dynamic_templates,
+        },
+        runtime,
+      };
+
+      return { parsedDefaultValue: parsed, multipleMappingsDeclared: false };
+    }, [value]);
 
   /**
    * Hook that will listen to:

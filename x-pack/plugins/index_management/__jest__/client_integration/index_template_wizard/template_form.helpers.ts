@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { act } from 'react-dom/test-utils';
 
 import { TestBed, SetupFunc, UnwrapPromise } from '@kbn/test/jest';
@@ -204,7 +206,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
 
     await act(async () => {
       if (settings) {
-        find('mockCodeEditor').simulate('change', {
+        find('settingsEditor').simulate('change', {
           jsonString: settings,
         }); // Using mocked EuiCodeEditor
       }
@@ -239,7 +241,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
 
     if (aliases) {
       await act(async () => {
-        find('mockCodeEditor').simulate('change', {
+        find('aliasesEditor').simulate('change', {
           jsonString: aliases,
         }); // Using mocked EuiCodeEditor
       });
@@ -304,6 +306,7 @@ export type TestSubjects =
   | 'indexPatternsField'
   | 'indexPatternsWarning'
   | 'indexPatternsWarningDescription'
+  | 'legacyIndexTemplateDeprecationWarning'
   | 'mappingsEditorFieldEdit'
   | 'mockCodeEditor'
   | 'mockComboBox'
@@ -334,4 +337,6 @@ export type TestSubjects =
   | 'templateFormContainer'
   | 'testingEditor'
   | 'versionField'
+  | 'aliasesEditor'
+  | 'settingsEditor'
   | 'versionField.input';

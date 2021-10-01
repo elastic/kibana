@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SavedObjectsClient } from './saved_objects_client';
@@ -158,6 +147,143 @@ describe('SavedObjectsClient', () => {
     });
   });
 
+  describe('#resolve', () => {
+    function mockResolvedObjects(...objects: Array<Record<string, unknown>>) {
+      http.fetch.mockResolvedValue({
+        resolved_objects: objects.map((obj) => ({
+          saved_object: obj,
+          outcome: 'conflict',
+          alias_target_id: 'another-id',
+        })),
+      });
+    }
+
+    test('rejects if `type` parameter is undefined', () => {
+      return expect(
+        savedObjectsClient.resolve(undefined as any, undefined as any)
+      ).rejects.toMatchInlineSnapshot(`[Error: requires type and id]`);
+    });
+
+    test('rejects if `id` parameter is undefined', () => {
+      return expect(
+        savedObjectsClient.resolve('index-pattern', undefined as any)
+      ).rejects.toMatchInlineSnapshot(`[Error: requires type and id]`);
+    });
+
+    test('rejects when HTTP call fails', () => {
+      http.fetch.mockRejectedValue(new Error('Request failed'));
+      return expect(savedObjectsClient.resolve(doc.type, doc.id)).rejects.toMatchInlineSnapshot(
+        `[Error: Request failed]`
+      );
+    });
+
+    test('makes HTTP call', async () => {
+      mockResolvedObjects(doc);
+      await savedObjectsClient.resolve(doc.type, doc.id);
+      expect(http.fetch.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "/api/saved_objects/_bulk_resolve",
+          Object {
+            "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\"}]",
+            "method": "POST",
+            "query": undefined,
+          },
+        ]
+      `);
+    });
+
+    test('batches several #resolve calls into a single HTTP call', async () => {
+      // Await #resolve call to ensure batchQueue is empty and throttle has reset
+      mockResolvedObjects({ ...doc, type: 'type2' });
+      await savedObjectsClient.resolve('type2', doc.id);
+      http.fetch.mockClear();
+
+      // Make two #resolve calls right after one another
+      mockResolvedObjects({ ...doc, type: 'type1' }, { ...doc, type: 'type0' });
+      savedObjectsClient.resolve('type1', doc.id);
+      await savedObjectsClient.resolve('type0', doc.id);
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/api/saved_objects/_bulk_resolve",
+            Object {
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"type1\\"},{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"type0\\"}]",
+              "method": "POST",
+              "query": undefined,
+            },
+          ],
+        ]
+      `);
+    });
+
+    test('removes duplicates when calling `_bulk_resolve`', async () => {
+      // Await #resolve call to ensure batchQueue is empty and throttle has reset
+      mockResolvedObjects({ ...doc, type: 'type2' });
+      await savedObjectsClient.resolve('type2', doc.id);
+      http.fetch.mockClear();
+
+      mockResolvedObjects(doc, { ...doc, type: 'some-type', id: 'some-id' }); // the client will only request two objects, so we only mock two results
+      savedObjectsClient.resolve(doc.type, doc.id);
+      savedObjectsClient.resolve('some-type', 'some-id');
+      await savedObjectsClient.resolve(doc.type, doc.id);
+
+      expect(http.fetch).toHaveBeenCalledTimes(1);
+      expect(http.fetch.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "/api/saved_objects/_bulk_resolve",
+          Object {
+            "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\"},{\\"id\\":\\"some-id\\",\\"type\\":\\"some-type\\"}]",
+            "method": "POST",
+            "query": undefined,
+          },
+        ]
+      `);
+    });
+
+    test('resolves with correct object when there are duplicates present', async () => {
+      // Await #resolve call to ensure batchQueue is empty and throttle has reset
+      mockResolvedObjects({ ...doc, type: 'type2' });
+      await savedObjectsClient.resolve('type2', doc.id);
+      http.fetch.mockClear();
+
+      mockResolvedObjects(doc);
+      const call1 = savedObjectsClient.resolve(doc.type, doc.id);
+      const objFromCall2 = await savedObjectsClient.resolve(doc.type, doc.id);
+      const objFromCall1 = await call1;
+
+      expect(objFromCall1.saved_object.type).toBe(doc.type);
+      expect(objFromCall1.saved_object.id).toBe(doc.id);
+
+      expect(objFromCall2.saved_object.type).toBe(doc.type);
+      expect(objFromCall2.saved_object.id).toBe(doc.id);
+    });
+
+    test('do not share instances or references between duplicate callers', async () => {
+      // Await #resolve call to ensure batchQueue is empty and throttle has reset
+      await savedObjectsClient.resolve('type2', doc.id);
+      mockResolvedObjects({ ...doc, type: 'type2' });
+      http.fetch.mockClear();
+
+      mockResolvedObjects(doc);
+      const call1 = savedObjectsClient.resolve(doc.type, doc.id);
+      const objFromCall2 = await savedObjectsClient.resolve(doc.type, doc.id);
+      const objFromCall1 = await call1;
+
+      objFromCall1.saved_object.set('title', 'new title');
+      expect(objFromCall2.saved_object.get('title')).toEqual('Example title');
+    });
+
+    test('resolves with ResolvedSimpleSavedObject instance', async () => {
+      mockResolvedObjects(doc);
+      const result = await savedObjectsClient.resolve(doc.type, doc.id);
+      expect(result.saved_object).toBeInstanceOf(SimpleSavedObject);
+      expect(result.saved_object.type).toBe(doc.type);
+      expect(result.saved_object.get('title')).toBe('Example title');
+      expect(result.outcome).toBe('conflict');
+      expect(result.alias_target_id).toBe('another-id');
+    });
+  });
+
   describe('#delete', () => {
     beforeEach(() => {
       http.fetch.mockResolvedValue({});
@@ -226,6 +352,26 @@ describe('SavedObjectsClient', () => {
             "/api/saved_objects/index-pattern/logstash-*",
             Object {
               "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"},\\"version\\":\\"1\\"}",
+              "method": "PUT",
+              "query": undefined,
+            },
+          ],
+        ]
+      `);
+    });
+
+    test('handles the `upsert` option', () => {
+      savedObjectsClient.update('index-pattern', 'logstash-*', attributes, {
+        upsert: {
+          hello: 'dolly',
+        },
+      });
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/api/saved_objects/index-pattern/logstash-*",
+            Object {
+              "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"},\\"upsert\\":{\\"hello\\":\\"dolly\\"}}",
               "method": "PUT",
               "query": undefined,
             },

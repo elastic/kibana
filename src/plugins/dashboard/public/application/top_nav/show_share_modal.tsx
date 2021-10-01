@@ -1,49 +1,57 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { EuiCheckboxGroup } from '@elastic/eui';
-import React from 'react';
-import { ReactElement, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import React, { ReactElement, useState } from 'react';
+import type { Capabilities } from 'src/core/public';
 import { DashboardSavedObject } from '../..';
+import { shareModalStrings } from '../../dashboard_strings';
+import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator';
+import { TimeRange } from '../../services/data';
+import { ViewMode } from '../../services/embeddable';
 import { setStateToKbnUrl, unhashUrl } from '../../services/kibana_utils';
 import { SharePluginStart } from '../../services/share';
+import { DashboardAppCapabilities, DashboardState } from '../../types';
 import { dashboardUrlParams } from '../dashboard_router';
-import { DashboardStateManager } from '../dashboard_state_manager';
-import { shareModalStrings } from '../../dashboard_strings';
-import { DashboardCapabilities } from '../types';
+import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
 
 const showFilterBarId = 'showFilterBar';
 
 interface ShowShareModalProps {
+  isDirty: boolean;
+  kibanaVersion: string;
   share: SharePluginStart;
   anchorElement: HTMLElement;
   savedDashboard: DashboardSavedObject;
-  dashboardCapabilities: DashboardCapabilities;
-  dashboardStateManager: DashboardStateManager;
+  currentDashboardState: DashboardState;
+  dashboardCapabilities: DashboardAppCapabilities;
+  timeRange: TimeRange;
 }
+
+export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
+  if (!anonymousUserCapabilities.dashboard) return false;
+
+  const dashboard = anonymousUserCapabilities.dashboard as unknown as DashboardAppCapabilities;
+
+  return !!dashboard.show;
+};
 
 export function ShowShareModal({
   share,
+  isDirty,
+  kibanaVersion,
   anchorElement,
   savedDashboard,
   dashboardCapabilities,
-  dashboardStateManager,
+  currentDashboardState,
+  timeRange,
 }: ShowShareModalProps) {
   const EmbedUrlParamExtension = ({
     setParamValue,
@@ -102,27 +110,57 @@ export function ShowShareModal({
     );
   };
 
+  const rawDashboardState = stateToRawDashboardState({
+    state: currentDashboardState,
+    version: kibanaVersion,
+  });
+
+  const locatorParams: DashboardAppLocatorParams = {
+    dashboardId: savedDashboard.id,
+    filters: rawDashboardState.filters,
+    preserveSavedFilters: true,
+    query: rawDashboardState.query,
+    savedQuery: rawDashboardState.savedQuery,
+    useHash: false,
+    panels: rawDashboardState.panels,
+    timeRange,
+    viewMode: ViewMode.VIEW, // For share locators we always load the dashboard in view mode
+    refreshInterval: undefined, // We don't share refresh interval externally
+    options: rawDashboardState.options,
+  };
+
   share.toggleShareContextMenu({
+    isDirty,
     anchorElement,
     allowEmbed: true,
-    allowShortUrl: !dashboardCapabilities.hideWriteControls || dashboardCapabilities.createShortUrl,
+    allowShortUrl: dashboardCapabilities.createShortUrl,
     shareableUrl: setStateToKbnUrl(
       '_a',
-      dashboardStateManager.getAppState(),
+      rawDashboardState,
       { useHash: false, storeInHashQuery: true },
       unhashUrl(window.location.href)
     ),
     objectId: savedDashboard.id,
     objectType: 'dashboard',
     sharingData: {
-      title: savedDashboard.title,
+      title:
+        savedDashboard.title ||
+        i18n.translate('dashboard.share.defaultDashboardTitle', {
+          defaultMessage: 'Dashboard [{date}]',
+          values: { date: moment().toISOString(true) },
+        }),
+      locatorParams: {
+        id: DASHBOARD_APP_LOCATOR,
+        version: kibanaVersion,
+        params: locatorParams,
+      },
     },
-    isDirty: dashboardStateManager.getIsDirty(),
     embedUrlParamExtensions: [
       {
         paramName: 'embed',
         component: EmbedUrlParamExtension,
       },
     ],
+    showPublicUrlSwitch,
   });
 }

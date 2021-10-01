@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -25,7 +26,6 @@ import { timelineSelectors } from '../../timelines/store/timeline';
 import { inputsSelectors } from './inputs';
 import { SubPluginsInitReducer, createReducer } from './reducer';
 import { createRootEpic } from './epic';
-import { AppApolloClient } from '../lib/lib';
 import { AppAction } from './actions';
 import { Immutable } from '../../../common/endpoint/types';
 import { State } from './types';
@@ -51,7 +51,6 @@ let store: Store<State, Action> | null = null;
 export const createStore = (
   state: PreloadedState<State>,
   pluginsReducer: SubPluginsInitReducer,
-  apolloClient: Observable<AppApolloClient>,
   kibana: Observable<CoreStart>,
   storage: Storage,
   additionalMiddleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>
@@ -59,7 +58,6 @@ export const createStore = (
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
   const middlewareDependencies: TimelineEpicDependencies<State> = {
-    apolloClient$: apolloClient,
     kibana$: kibana,
     selectAllTimelineQuery: inputsSelectors.globalQueryByIdSelector,
     selectNotesByIdSelector: appSelectors.selectNotesByIdSelector,

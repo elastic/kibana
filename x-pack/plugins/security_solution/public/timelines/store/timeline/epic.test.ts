@@ -1,62 +1,66 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Filter, esFilters } from '../../../../../../../src/plugins/data/public';
+import { Direction } from '../../../../common/search_strategy';
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
-import { Direction } from '../../../graphql/types';
 import { convertTimelineAsInput } from './epic';
 import { TimelineModel } from './model';
 
 describe('Epic Timeline', () => {
   describe('#convertTimelineAsInput ', () => {
     test('should return a TimelineInput instead of TimelineModel ', () => {
+      const columns: TimelineModel['columns'] = [
+        {
+          columnHeaderType: 'not-filtered',
+          id: '@timestamp',
+          initialWidth: 190,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'message',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'event.category',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'event.action',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'host.name',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'source.ip',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'destination.ip',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'user.name',
+          initialWidth: 180,
+        },
+      ];
       const timelineModel: TimelineModel = {
         activeTab: TimelineTabs.query,
-        columns: [
-          {
-            columnHeaderType: 'not-filtered',
-            id: '@timestamp',
-            width: 190,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'message',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.category',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.action',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'host.name',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'source.ip',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'destination.ip',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'user.name',
-            width: 180,
-          },
-        ],
+        prevActiveTab: TimelineTabs.notes,
+        columns,
+        defaultColumns: columns,
         dataProviders: [
           {
             id: 'hosts-table-hostName-DESKTOP-QBBSCUT',
@@ -71,8 +75,7 @@ describe('Epic Timeline', () => {
             },
             and: [
               {
-                id:
-                  'plain-column-renderer-data-provider-hosts-page-event_module-CQg7I24BHe9nqdOi_LYL-event_module-endgame',
+                id: 'plain-column-renderer-data-provider-hosts-page-event_module-CQg7I24BHe9nqdOi_LYL-event_module-endgame',
                 name: 'event.module: endgame',
                 enabled: true,
                 excluded: false,
@@ -88,9 +91,15 @@ describe('Epic Timeline', () => {
         ],
         deletedEventIds: [],
         description: '',
+        documentType: '',
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          tiebreakerField: '',
+          timestampField: '@timestamp',
+        },
         eventIdToNoteIds: {},
         eventType: 'all',
-        expandedEvent: {},
+        expandedDetail: {},
         excludedRowRendererIds: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -137,6 +146,8 @@ describe('Epic Timeline', () => {
           },
         },
         loadingEventIds: [],
+        queryFields: [],
+        selectAll: false,
         title: 'saved',
         timelineType: TimelineType.default,
         templateTimelineId: null,
@@ -149,7 +160,7 @@ describe('Epic Timeline', () => {
         selectedEventIds: {},
         show: true,
         showCheckboxes: false,
-        sort: [{ columnId: '@timestamp', sortDirection: Direction.desc }],
+        sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
         status: TimelineStatus.active,
         version: 'WzM4LDFd',
         id: '11169110-fc22-11e9-8ca9-072f15ce2685',
@@ -205,8 +216,7 @@ describe('Epic Timeline', () => {
               {
                 enabled: true,
                 excluded: false,
-                id:
-                  'plain-column-renderer-data-provider-hosts-page-event_module-CQg7I24BHe9nqdOi_LYL-event_module-endgame',
+                id: 'plain-column-renderer-data-provider-hosts-page-event_module-CQg7I24BHe9nqdOi_LYL-event_module-endgame',
                 kqlQuery: '',
                 name: 'event.module: endgame',
                 queryMatch: {
@@ -233,6 +243,11 @@ describe('Epic Timeline', () => {
           start: '2019-10-30T21:06:27.644Z',
         },
         description: '',
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          tiebreakerField: '',
+          timestampField: '@timestamp',
+        },
         eventType: 'all',
         excludedRowRendererIds: [],
         filters: [
@@ -289,6 +304,7 @@ describe('Epic Timeline', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],

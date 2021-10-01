@@ -1,32 +1,21 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { Observable, of } from 'rxjs';
 import { AbortError, abortSignalToPromise, defer } from '../../../kibana_utils/public';
 import {
   ItemBufferParams,
   TimedItemBufferParams,
   createBatchedFunction,
-  BatchResponseItem,
   ErrorLike,
+  normalizeError,
 } from '../../common';
-import { fetchStreaming, split } from '../streaming';
-import { normalizeError } from '../../common';
+import { fetchStreaming } from '../streaming';
 import { BatchedFunc, BatchItem } from './types';
 
 export interface BatchedFunctionProtocolError extends ErrorLike {
@@ -58,6 +47,11 @@ export interface StreamingBatchedFunctionParams<Payload, Result> {
    * before sending the batch request.
    */
   maxItemAge?: TimedItemBufferParams<any>['maxItemAge'];
+
+  /**
+   * Disabled zlib compression of response chunks.
+   */
+  compressionDisabled$?: Observable<boolean>;
 }
 
 /**
@@ -75,6 +69,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
     fetchStreaming: fetchStreamingInjected = fetchStreaming,
     flushOnMaxItems = 25,
     maxItemAge = 10,
+    compressionDisabled$ = of(false),
   } = params;
   const [fn] = createBatchedFunction({
     onCall: (payload: Payload, signal?: AbortSignal) => {
@@ -130,6 +125,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           body: JSON.stringify({ batch }),
           method: 'POST',
           signal: abortController.signal,
+          compressionDisabled$,
         });
 
         const handleStreamError = (error: any) => {
@@ -138,10 +134,10 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           for (const { future } of items) future.reject(normalizedError);
         };
 
-        stream.pipe(split('\n')).subscribe({
+        stream.subscribe({
           next: (json: string) => {
             try {
-              const response = JSON.parse(json) as BatchResponseItem<Result, ErrorLike>;
+              const response = JSON.parse(json);
               if (response.error) {
                 items[response.id].future.reject(response.error);
               } else if (response.result !== undefined) {

@@ -1,0 +1,20 @@
+{
+  "type": "index",
+  "value": {
+    "index": "test-index-unmapped-fields",
+    "mappings": {
+      "dynamic": "false",
+      "properties": {
+        "timestamp": {"type": "date"},
+        "message": { "type": "text" },
+        "address": { "type": "text" }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

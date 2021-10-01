@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -14,7 +15,7 @@ import createSagaMiddleware from 'redux-saga';
 import { createStore, applyMiddleware, AnyAction } from 'redux';
 import { ChromeStart } from 'kibana/public';
 import { GraphStoreDependencies, createRootReducer, GraphStore, GraphState } from './store';
-import { Workspace, GraphWorkspaceSavedObject, IndexPatternSavedObject } from '../types';
+import { Workspace } from '../types';
 import { IndexPattern } from '../../../../../src/plugins/data/public';
 
 export interface MockedGraphEnvironment {
@@ -39,58 +40,50 @@ export function createMockGraphStore({
   mockedDepsOverwrites?: Partial<jest.Mocked<GraphStoreDependencies>>;
   initialStateOverwrites?: Partial<GraphState>;
 }): MockedGraphEnvironment {
-  const workspaceMock = ({
+  const workspaceMock = {
     runLayout: jest.fn(),
+    simpleSearch: jest.fn(),
     nodes: [],
     edges: [],
     options: {},
     blocklistedNodes: [],
-  } as unknown) as Workspace;
-
-  const savedWorkspace = ({
-    save: jest.fn(),
-  } as unknown) as GraphWorkspaceSavedObject;
+  } as unknown as Workspace;
 
   const mockedDeps: jest.Mocked<GraphStoreDependencies> = {
+    basePath: '',
     addBasePath: jest.fn((url: string) => url),
     changeUrl: jest.fn(),
-    chrome: ({
+    chrome: {
       setBreadcrumbs: jest.fn(),
-    } as unknown) as ChromeStart,
-    createWorkspace: jest.fn(),
+    } as unknown as ChromeStart,
+    createWorkspace: jest.fn((index, advancedSettings) => workspaceMock),
     getWorkspace: jest.fn(() => workspaceMock),
-    getSavedWorkspace: jest.fn(() => savedWorkspace),
     indexPatternProvider: {
       get: jest.fn(() =>
-        Promise.resolve(({ id: '123', title: 'test-pattern' } as unknown) as IndexPattern)
+        Promise.resolve({ id: '123', title: 'test-pattern' } as unknown as IndexPattern)
       ),
     },
-    indexPatterns: [
-      ({ id: '123', attributes: { title: 'test-pattern' } } as unknown) as IndexPatternSavedObject,
-    ],
     I18nContext: jest
       .fn()
       .mockImplementation(({ children }: { children: React.ReactNode }) => children),
-    notifications: ({
+    notifications: {
       toasts: {
         addDanger: jest.fn(),
         addSuccess: jest.fn(),
       },
-    } as unknown) as NotificationsStart,
+    } as unknown as NotificationsStart,
     http: {} as HttpStart,
-    notifyAngular: jest.fn(),
+    notifyReact: jest.fn(),
     savePolicy: 'configAndData',
     showSaveModal: jest.fn(),
-    setLiveResponseFields: jest.fn(),
-    setUrlTemplates: jest.fn(),
-    setWorkspaceInitialized: jest.fn(),
-    overlays: ({
+    overlays: {
       openModal: jest.fn(),
-    } as unknown) as OverlayStart,
-    savedObjectsClient: ({
+    } as unknown as OverlayStart,
+    savedObjectsClient: {
       find: jest.fn(),
       get: jest.fn(),
-    } as unknown) as SavedObjectsClientContract,
+    } as unknown as SavedObjectsClientContract,
+    handleSearchQueryError: jest.fn(),
     ...mockedDepsOverwrites,
   };
   const sagaMiddleware = createSagaMiddleware();

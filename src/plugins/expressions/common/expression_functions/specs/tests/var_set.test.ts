@@ -1,25 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { functionWrapper } from './utils';
 import { variableSet } from '../var_set';
 import { ExecutionContext } from '../../../execution/types';
+import { createUnitTestExecutor } from '../../../test_helpers';
+import { first } from 'rxjs/operators';
 
 describe('expression_functions', () => {
   describe('var_set', () => {
@@ -33,6 +24,7 @@ describe('expression_functions', () => {
       context = {
         getSearchContext: () => input,
         getSearchSessionId: () => undefined,
+        getExecutionContext: () => undefined,
         types: {},
         variables: { test: 1 },
         abortSignal: {} as any,
@@ -43,21 +35,49 @@ describe('expression_functions', () => {
     });
 
     it('updates a variable', () => {
-      const actual = fn(input, { name: 'test', value: 2 }, context);
+      const actual = fn(input, { name: ['test'], value: [2] }, context);
       expect(variables.test).toEqual(2);
       expect(actual).toEqual(input);
     });
 
     it('sets a new variable', () => {
-      const actual = fn(input, { name: 'new', value: 3 }, context);
+      const actual = fn(input, { name: ['new'], value: [3] }, context);
       expect(variables.new).toEqual(3);
       expect(actual).toEqual(input);
     });
 
     it('stores context if value is not set', () => {
-      const actual = fn(input, { name: 'test' }, context);
+      const actual = fn(input, { name: ['test'], value: [] }, context);
       expect(variables.test).toEqual(input);
       expect(actual).toEqual(input);
+    });
+
+    it('sets multiple variables', () => {
+      const actual = fn(input, { name: ['new1', 'new2', 'new3'], value: [1, , 3] }, context);
+      expect(variables.new1).toEqual(1);
+      expect(variables.new2).toEqual(input);
+      expect(variables.new3).toEqual(3);
+      expect(actual).toEqual(input);
+    });
+
+    describe('running function thru executor', () => {
+      const executor = createUnitTestExecutor();
+      executor.registerFunction(variableSet);
+
+      it('sets the variables', async () => {
+        const vars = {};
+        const { result } = await executor
+          .run('var_set name=test1 name=test2 value=1', 2, { variables: vars })
+          .pipe(first())
+          .toPromise();
+
+        expect(result).toEqual(2);
+
+        expect(vars).toEqual({
+          test1: 1,
+          test2: 2,
+        });
+      });
     });
   });
 });

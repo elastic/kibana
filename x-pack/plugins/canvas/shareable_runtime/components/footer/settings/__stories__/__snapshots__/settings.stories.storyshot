@@ -23,18 +23,13 @@ exports[`Storyshots shareables/Footer/Settings component 1`] = `
       <div
         className="euiPopover euiPopover--anchorUpRight"
         id="settings"
-        onKeyDown={[Function]}
-        onMouseDown={[Function]}
-        onMouseUp={[Function]}
-        onTouchEnd={[Function]}
-        onTouchStart={[Function]}
       >
         <div
           className="euiPopover__anchor"
         >
           <button
             aria-label="Settings"
-            className="euiButtonIcon euiButtonIcon--ghost"
+            className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
             disabled={false}
             onClick={[Function]}
             type="button"
@@ -42,6 +37,7 @@ exports[`Storyshots shareables/Footer/Settings component 1`] = `
             <span
               aria-hidden="true"
               className="euiButtonIcon__icon"
+              color="inherit"
               data-euiicon-type="gear"
               size="m"
             />
@@ -76,18 +72,13 @@ exports[`Storyshots shareables/Footer/Settings contextual 1`] = `
       <div
         className="euiPopover euiPopover--anchorUpRight"
         id="settings"
-        onKeyDown={[Function]}
-        onMouseDown={[Function]}
-        onMouseUp={[Function]}
-        onTouchEnd={[Function]}
-        onTouchStart={[Function]}
       >
         <div
           className="euiPopover__anchor"
         >
           <button
             aria-label="Settings"
-            className="euiButtonIcon euiButtonIcon--ghost"
+            className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
             disabled={false}
             onClick={[Function]}
             type="button"
@@ -95,6 +86,7 @@ exports[`Storyshots shareables/Footer/Settings contextual 1`] = `
             <span
               aria-hidden="true"
               className="euiButtonIcon__icon"
+              color="inherit"
               data-euiicon-type="gear"
               size="m"
             />

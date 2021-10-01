@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -16,16 +17,25 @@ import { i18n } from '@kbn/i18n';
 
 import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 
+import {
+  isNumericChartData,
+  isOrdinalChartData,
+  ChartData,
+  ChartDataItem,
+  NumericDataItem,
+  OrdinalDataItem,
+} from '../../../../common/types/field_histograms';
+
 import { NON_AGGREGATABLE } from './common';
 
 export const hoveredRow$ = new BehaviorSubject<any | null>(null);
 
-const BAR_COLOR = euiPaletteColorBlind()[0];
+export const BAR_COLOR = euiPaletteColorBlind()[0];
 const BAR_COLOR_BLUR = euiPaletteColorBlind({ rotations: 2 })[10];
 const MAX_CHART_COLUMNS = 20;
 
 type XScaleType = 'ordinal' | 'time' | 'linear' | undefined;
-const getXScaleType = (kbnFieldType: KBN_FIELD_TYPES | undefined): XScaleType => {
+export const getXScaleType = (kbnFieldType: KBN_FIELD_TYPES | undefined): XScaleType => {
   switch (kbnFieldType) {
     case KBN_FIELD_TYPES.BOOLEAN:
     case KBN_FIELD_TYPES.IP:
@@ -64,64 +74,6 @@ export const getFieldType = (schema: EuiDataGridColumn['schema']): KBN_FIELD_TYP
 
   return fieldType;
 };
-
-interface NumericDataItem {
-  key: number;
-  key_as_string?: string | number;
-  doc_count: number;
-}
-
-interface NumericChartData {
-  data: NumericDataItem[];
-  id: string;
-  interval: number;
-  stats: [number, number];
-  type: 'numeric';
-}
-
-export const isNumericChartData = (arg: any): arg is NumericChartData => {
-  return (
-    arg.hasOwnProperty('data') &&
-    arg.hasOwnProperty('id') &&
-    arg.hasOwnProperty('interval') &&
-    arg.hasOwnProperty('stats') &&
-    arg.hasOwnProperty('type')
-  );
-};
-
-export interface OrdinalDataItem {
-  key: string;
-  key_as_string?: string;
-  doc_count: number;
-}
-
-export interface OrdinalChartData {
-  type: 'ordinal' | 'boolean';
-  cardinality: number;
-  data: OrdinalDataItem[];
-  id: string;
-}
-
-export const isOrdinalChartData = (arg: any): arg is OrdinalChartData => {
-  return (
-    arg.hasOwnProperty('data') &&
-    arg.hasOwnProperty('cardinality') &&
-    arg.hasOwnProperty('id') &&
-    arg.hasOwnProperty('type')
-  );
-};
-
-interface UnsupportedChartData {
-  id: string;
-  type: 'unsupported';
-}
-
-export const isUnsupportedChartData = (arg: any): arg is UnsupportedChartData => {
-  return arg.hasOwnProperty('type') && arg.type === 'unsupported';
-};
-
-export type ChartDataItem = NumericDataItem | OrdinalDataItem;
-export type ChartData = NumericChartData | OrdinalChartData | UnsupportedChartData;
 
 type LegendText = string | JSX.Element;
 export const getLegendText = (

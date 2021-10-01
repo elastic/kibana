@@ -1,26 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import React, { useState, Fragment, useEffect } from 'react';
-import * as Rx from 'rxjs';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { NewsfeedApi } from '../lib/api';
 import { NewsfeedFlyout } from './flyout_list';
 import { FetchResult } from '../types';
 
@@ -28,46 +17,44 @@ export interface INewsfeedContext {
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
   newsFetchResult: FetchResult | void | null;
 }
+
 export const NewsfeedContext = React.createContext({} as INewsfeedContext);
 
-export type NewsfeedApiFetchResult = Rx.Observable<void | FetchResult | null>;
-
 export interface Props {
-  apiFetchResult: NewsfeedApiFetchResult;
+  newsfeedApi: NewsfeedApi;
 }
 
-export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
-  const [showBadge, setShowBadge] = useState<boolean>(false);
+export const NewsfeedNavButton = ({ newsfeedApi }: Props) => {
   const [flyoutVisible, setFlyoutVisible] = useState<boolean>(false);
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
+  const hasNew = useMemo(() => {
+    return newsFetchResult ? newsFetchResult.hasNew : false;
+  }, [newsFetchResult]);
 
   useEffect(() => {
-    function handleStatusChange(fetchResult: FetchResult | void | null) {
-      if (fetchResult) {
-        setShowBadge(fetchResult.hasNew);
-      }
-      setNewsFetchResult(fetchResult);
-    }
-
-    const subscription = apiFetchResult.subscribe((res) => handleStatusChange(res));
+    const subscription = newsfeedApi.fetchResults$.subscribe((results) => {
+      setNewsFetchResult(results);
+    });
     return () => subscription.unsubscribe();
-  }, [apiFetchResult]);
+  }, [newsfeedApi]);
 
-  function showFlyout() {
-    setShowBadge(false);
+  const showFlyout = useCallback(() => {
+    if (newsFetchResult) {
+      newsfeedApi.markAsRead(newsFetchResult.feedItems.map((item) => item.hash));
+    }
     setFlyoutVisible(!flyoutVisible);
-  }
+  }, [newsfeedApi, newsFetchResult, flyoutVisible]);
 
   return (
     <NewsfeedContext.Provider value={{ setFlyoutVisible, newsFetchResult }}>
-      <Fragment>
+      <>
         <EuiHeaderSectionItemButton
           data-test-subj="newsfeed"
           aria-controls="keyPadMenu"
           aria-expanded={flyoutVisible}
           aria-haspopup="true"
           aria-label={
-            showBadge
+            hasNew
               ? i18n.translate('newsfeed.headerButton.unreadAriaLabel', {
                   defaultMessage: 'Newsfeed menu - unread items available',
                 })
@@ -75,13 +62,13 @@ export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
                   defaultMessage: 'Newsfeed menu - all items read',
                 })
           }
-          notification={showBadge ? true : null}
+          notification={hasNew ? true : null}
           onClick={showFlyout}
         >
           <EuiIcon type="cheer" size="m" />
         </EuiHeaderSectionItemButton>
         {flyoutVisible ? <NewsfeedFlyout /> : null}
-      </Fragment>
+      </>
     </NewsfeedContext.Provider>
   );
 };

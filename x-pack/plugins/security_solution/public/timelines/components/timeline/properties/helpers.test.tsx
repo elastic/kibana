@@ -1,19 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { Description, Name, NewTimeline, NewTimelineProps } from './helpers';
+import { AddToFavoritesButton, NewTimeline, NewTimelineProps } from './helpers';
 import { useCreateTimelineButton } from './use_create_timeline';
-import * as i18n from './translations';
-import { mockTimelineModel, TestProviders } from '../../../../common/mock';
-import { TimelineType } from '../../../../../common/types/timeline';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-
-jest.mock('../../../../common/hooks/use_selector');
+import { kibanaObservable, TestProviders } from '../../../../common/mock/test_providers';
+import { timelineActions } from '../../../../timelines/store/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
+import {
+  createSecuritySolutionStorageMock,
+  mockGlobalState,
+  SUB_PLUGINS_REDUCER,
+} from '../../../../common/mock';
+import { createStore } from '../../../../common/store';
 
 jest.mock('./use_create_timeline');
 
@@ -87,86 +92,142 @@ describe('NewTimeline', () => {
   });
 });
 
-describe('Description', () => {
-  const props = {
-    description: 'xxx',
-    timelineId: 'timeline-1',
-    updateDescription: jest.fn(),
-  };
+describe('Favorite Button', () => {
+  describe('Non Elastic prebuilt templates', () => {
+    test('should render favorite button', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AddToFavoritesButton timelineId="test" />
+        </TestProviders>
+      );
 
-  test('should render tooltip', () => {
-    const component = mount(
-      <TestProviders>
-        <Description {...props} />
-      </TestProviders>
-    );
-    expect(
-      component.find('[data-test-subj="timeline-description-tool-tip"]').first().prop('content')
-    ).toEqual(i18n.DESCRIPTION_TOOL_TIP);
-  });
-
-  test('should render textarea if isTextArea is true', () => {
-    const testProps = {
-      ...props,
-      isTextArea: true,
-    };
-    const component = mount(
-      <TestProviders>
-        <Description {...testProps} />
-      </TestProviders>
-    );
-    expect(component.find('[data-test-subj="timeline-description-textarea"]').exists()).toEqual(
-      true
-    );
-  });
-});
-
-describe('Name', () => {
-  const props = {
-    timelineId: 'timeline-1',
-    timelineType: TimelineType.default,
-    title: 'xxx',
-    updateTitle: jest.fn(),
-  };
-
-  beforeAll(() => {
-    (useDeepEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
-  });
-
-  test('should render tooltip', () => {
-    const component = mount(
-      <TestProviders>
-        <Name {...props} />
-      </TestProviders>
-    );
-    expect(
-      component.find('[data-test-subj="timeline-title-tool-tip"]').first().prop('content')
-    ).toEqual(i18n.TITLE);
-  });
-
-  test('should render placeholder by timelineType - timeline', () => {
-    const component = mount(
-      <TestProviders>
-        <Name {...props} />
-      </TestProviders>
-    );
-    expect(
-      component.find('[data-test-subj="timeline-title-input"]').first().prop('placeholder')
-    ).toEqual(i18n.UNTITLED_TIMELINE);
-  });
-
-  test('should render placeholder by timelineType - timeline template', () => {
-    (useDeepEqualSelector as jest.Mock).mockReturnValue({
-      ...mockTimelineModel,
-      timelineType: TimelineType.template,
+      expect(wrapper.find('[data-test-subj="timeline-favorite-empty-star"]').exists()).toBeTruthy();
     });
-    const component = mount(
-      <TestProviders>
-        <Name {...props} />
-      </TestProviders>
-    );
-    expect(
-      component.find('[data-test-subj="timeline-title-input"]').first().prop('placeholder')
-    ).toEqual(i18n.UNTITLED_TEMPLATE);
+
+    test('Favorite button should be enabled ', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AddToFavoritesButton timelineId="test" />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find('[data-test-subj="timeline-favorite-empty-star"]').first().prop('disabled')
+      ).toEqual(false);
+    });
+
+    test('Should update isFavorite after clicking on favorite button', async () => {
+      const spy = jest.spyOn(timelineActions, 'updateIsFavorite');
+      const wrapper = mount(
+        <TestProviders>
+          <AddToFavoritesButton timelineId="test" />
+        </TestProviders>
+      );
+
+      wrapper.simulate('click');
+
+      expect(spy).toHaveBeenCalled();
+    });
+
+    test('should disable favorite button with filled star', () => {
+      const { storage } = createSecuritySolutionStorageMock();
+
+      const store = createStore(
+        {
+          ...mockGlobalState,
+          timeline: {
+            ...mockGlobalState.timeline,
+            timelineById: {
+              test: {
+                ...mockGlobalState.timeline.timelineById.test,
+                isFavorite: true,
+              },
+            },
+          },
+        },
+        SUB_PLUGINS_REDUCER,
+        kibanaObservable,
+        storage
+      );
+      const wrapper = mount(
+        <TestProviders store={store}>
+          <AddToFavoritesButton timelineId="test" />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find('[data-test-subj="timeline-favorite-filled-star"]').exists()
+      ).toBeTruthy();
+    });
+  });
+
+  describe('Elast prebuilt templates', () => {
+    test('should disable favorite button', () => {
+      const { storage } = createSecuritySolutionStorageMock();
+
+      const store = createStore(
+        {
+          ...mockGlobalState,
+          timeline: {
+            ...mockGlobalState.timeline,
+            timelineById: {
+              test: {
+                ...mockGlobalState.timeline.timelineById.test,
+                status: TimelineStatus.immutable,
+                timelineType: TimelineType.template,
+                templateTimelineId: 'mock-template-timeline-id',
+                templateTimelineVersion: 1,
+              },
+            },
+          },
+        },
+        SUB_PLUGINS_REDUCER,
+        kibanaObservable,
+        storage
+      );
+      const wrapper = mount(
+        <TestProviders store={store}>
+          <AddToFavoritesButton timelineId="test" />
+        </TestProviders>
+      );
+      expect(
+        wrapper.find('[data-test-subj="timeline-favorite-empty-star"]').first().prop('disabled')
+      ).toEqual(true);
+    });
+  });
+
+  describe('Custom templates', () => {
+    test('should enable favorite button', () => {
+      const { storage } = createSecuritySolutionStorageMock();
+
+      const store = createStore(
+        {
+          ...mockGlobalState,
+          timeline: {
+            ...mockGlobalState.timeline,
+            timelineById: {
+              test: {
+                ...mockGlobalState.timeline.timelineById.test,
+                status: TimelineStatus.active,
+                timelineType: TimelineType.template,
+                templateTimelineId: 'mock-template-timeline-id',
+                templateTimelineVersion: 1,
+              },
+            },
+          },
+        },
+        SUB_PLUGINS_REDUCER,
+        kibanaObservable,
+        storage
+      );
+      const wrapper = mount(
+        <TestProviders store={store}>
+          <AddToFavoritesButton timelineId="test" />
+        </TestProviders>
+      );
+      expect(
+        wrapper.find('[data-test-subj="timeline-favorite-empty-star"]').first().prop('disabled')
+      ).toEqual(false);
+    });
   });
 });

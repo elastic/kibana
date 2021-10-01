@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import expect from '@kbn/expect/expect.js';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { deletePolicyStream } from './data_stream_helper';
 
@@ -13,7 +14,12 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   describe('Endpoint policy api', () => {
     describe('GET /api/endpoint/policy_response', () => {
-      before(async () => await esArchiver.load('endpoint/policy', { useCreate: true }));
+      before(
+        async () =>
+          await esArchiver.load('x-pack/test/functional/es_archives/endpoint/policy', {
+            useCreate: true,
+          })
+      );
 
       // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
       // to do it manually

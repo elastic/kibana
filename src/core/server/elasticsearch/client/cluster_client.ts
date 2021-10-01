@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Client } from '@elastic/elasticsearch';
@@ -65,16 +54,26 @@ export interface ICustomClusterClient extends IClusterClient {
 export class ClusterClient implements ICustomClusterClient {
   public readonly asInternalUser: Client;
   private readonly rootScopedClient: Client;
+  private readonly allowListHeaders: string[];
 
   private isClosed = false;
 
   constructor(
     private readonly config: ElasticsearchClientConfig,
     logger: Logger,
-    private readonly getAuthHeaders: GetAuthHeaders = noop
+    type: string,
+    private readonly getAuthHeaders: GetAuthHeaders = noop,
+    getExecutionContext: () => string | undefined = noop
   ) {
-    this.asInternalUser = configureClient(config, { logger });
-    this.rootScopedClient = configureClient(config, { logger, scoped: true });
+    this.asInternalUser = configureClient(config, { logger, type, getExecutionContext });
+    this.rootScopedClient = configureClient(config, {
+      logger,
+      type,
+      getExecutionContext,
+      scoped: true,
+    });
+
+    this.allowListHeaders = ['x-opaque-id', ...this.config.requestHeadersWhitelist];
   }
 
   asScoped(request: ScopeableRequest) {
@@ -100,10 +99,10 @@ export class ClusterClient implements ICustomClusterClient {
       const requestIdHeaders = isKibanaRequest(request) ? { 'x-opaque-id': request.id } : {};
       const authHeaders = this.getAuthHeaders(request);
 
-      scopedHeaders = filterHeaders({ ...requestHeaders, ...requestIdHeaders, ...authHeaders }, [
-        'x-opaque-id',
-        ...this.config.requestHeadersWhitelist,
-      ]);
+      scopedHeaders = filterHeaders(
+        { ...requestHeaders, ...requestIdHeaders, ...authHeaders },
+        this.allowListHeaders
+      );
     } else {
       scopedHeaders = filterHeaders(request?.headers ?? {}, this.config.requestHeadersWhitelist);
     }

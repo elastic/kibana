@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
@@ -18,11 +19,13 @@ const createTestCases = () => {
   const exportableObjects = [
     cases.singleNamespaceObject,
     cases.multiNamespaceObject,
+    cases.multiNamespaceIsolatedObject,
     cases.namespaceAgnosticObject,
   ];
   const exportableTypes = [
     cases.singleNamespaceType,
     cases.multiNamespaceType,
+    cases.multiNamespaceIsolatedType,
     cases.namespaceAgnosticType,
   ];
   const nonExportableObjectsAndTypes = [cases.hiddenObject, cases.hiddenType];
@@ -40,16 +43,12 @@ export default function ({ getService }: FtrProviderContext) {
 
   const { addTests, createTestDefinitions } = exportTestSuiteFactory(esArchiver, supertest);
   const createTests = () => {
-    const {
-      exportableObjects,
-      exportableTypes,
-      nonExportableObjectsAndTypes,
-      allObjectsAndTypes,
-    } = createTestCases();
+    const { exportableObjects, exportableTypes, nonExportableObjectsAndTypes, allObjectsAndTypes } =
+      createTestCases();
     return {
       unauthorized: [
         createTestDefinitions(exportableObjects, { statusCode: 403, reason: 'unauthorized' }),
-        createTestDefinitions(exportableTypes, { statusCode: 200, reason: 'unauthorized' }), // failure with empty result
+        createTestDefinitions(exportableTypes, { statusCode: 403, reason: 'unauthorized' }), // failure with empty result
         createTestDefinitions(nonExportableObjectsAndTypes, false),
       ].flat(),
       authorized: createTestDefinitions(allObjectsAndTypes, false),

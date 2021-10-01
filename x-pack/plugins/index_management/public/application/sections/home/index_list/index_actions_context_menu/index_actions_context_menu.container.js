@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { connect } from 'react-redux';
@@ -33,6 +34,7 @@ import {
 const mapStateToProps = (state, ownProps) => {
   const indexStatusByName = {};
   const { indexNames } = ownProps;
+  const allIndices = state.indices.byId;
 
   indexNames.forEach((indexName) => {
     indexStatusByName[indexName] = getIndexStatusByIndexName(state, indexName);
@@ -41,8 +43,8 @@ const mapStateToProps = (state, ownProps) => {
   return {
     indexStatusByName,
     indices: getIndicesByName(state, indexNames),
-    isSystemIndexByName: getIsSystemIndexByName(indexNames),
-    hasSystemIndex: hasSystemIndex(indexNames),
+    isSystemIndexByName: getIsSystemIndexByName(indexNames, allIndices),
+    hasSystemIndex: hasSystemIndex(indexNames, allIndices),
   };
 };
 

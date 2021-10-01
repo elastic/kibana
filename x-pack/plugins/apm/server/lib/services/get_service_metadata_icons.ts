@@ -1,63 +1,86 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { ProcessorEvent } from '../../../common/processor_event';
 import {
   AGENT_NAME,
   CLOUD_PROVIDER,
   CONTAINER_ID,
   KUBERNETES,
-  PROCESSOR_EVENT,
   SERVICE_NAME,
+  POD_NAME,
+  HOST_OS_PLATFORM,
 } from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { ContainerType } from '../../../common/service_metadata';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeQuery } from '../../../../observability/server';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { Setup } from '../helpers/setup_request';
 
 type ServiceMetadataIconsRaw = Pick<
   TransactionRaw,
   'kubernetes' | 'cloud' | 'container' | 'agent'
 >;
 
-interface ServiceMetadataIcons {
+export interface ServiceMetadataIcons {
   agentName?: string;
   containerType?: ContainerType;
   cloudProvider?: string;
 }
 
+export const should = [
+  { exists: { field: CONTAINER_ID } },
+  { exists: { field: POD_NAME } },
+  { exists: { field: CLOUD_PROVIDER } },
+  { exists: { field: HOST_OS_PLATFORM } },
+  { exists: { field: AGENT_NAME } },
+];
+
 export async function getServiceMetadataIcons({
   serviceName,
   setup,
+  searchAggregatedTransactions,
+  start,
+  end,
 }: {
   serviceName: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
+  searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
 }): Promise<ServiceMetadataIcons> {
-  const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-    { range: rangeFilter(start, end) },
-    ...setup.esFilter,
+    ...rangeQuery(start, end),
   ];
 
   const params = {
     apm: {
-      events: [ProcessorEvent.transaction],
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+        ProcessorEvent.error,
+        ProcessorEvent.metric,
+      ],
     },
-    terminateAfter: 1,
     body: {
       size: 1,
       _source: [KUBERNETES, CLOUD_PROVIDER, CONTAINER_ID, AGENT_NAME],
-      query: { bool: { filter } },
+      query: { bool: { filter, should } },
     },
   };
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search(
+    'get_service_metadata_icons',
+    params
+  );
 
   if (response.hits.total.value === 0) {
     return {

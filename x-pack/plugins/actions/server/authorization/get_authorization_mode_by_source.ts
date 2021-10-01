@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { ActionExecutionSource, isSavedObjectExecutionSource } from '../lib';
-import { ALERT_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { ALERT_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 
 const LEGACY_VERSION = 'pre-7.10.0';
 

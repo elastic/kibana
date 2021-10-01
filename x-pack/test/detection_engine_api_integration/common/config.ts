@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 
 interface CreateTestConfigOptions {
@@ -19,6 +20,7 @@ const enabledActionTypes = [
   '.email',
   '.index',
   '.pagerduty',
+  '.swimlane',
   '.server-log',
   '.servicenow',
   '.slack',
@@ -52,7 +54,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       junit: {
         reportName: 'X-Pack Detection Engine API Integration Tests',
       },
-      esArchiver: xPackApiIntegrationTestsConfig.get('esArchiver'),
       esTestCluster: {
         ...xPackApiIntegrationTestsConfig.get('esTestCluster'),
         license,
@@ -69,6 +70,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.eventLog.logEntries=true',
+          `--xpack.securitySolution.alertIgnoreFields=${JSON.stringify([
+            'testing_ignored.constant',
+            '/testing_regex*/',
+          ])}`, // See tests within the file "ignore_fields.ts" which use these values in "alertIgnoreFields"
           ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
           ...(ssl
             ? [

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect, useMemo, useState } from 'react';
@@ -55,9 +56,10 @@ export const useLogSummaryHighlights = (
     [sourceId, startTimestamp, endTimestamp, bucketSize, filterQuery, highlightTerms]
   );
 
-  const debouncedLoadSummaryHighlights = useMemo(() => debounce(loadLogSummaryHighlights, 275), [
-    loadLogSummaryHighlights,
-  ]);
+  const debouncedLoadSummaryHighlights = useMemo(
+    () => debounce(loadLogSummaryHighlights, 275),
+    [loadLogSummaryHighlights]
+  );
 
   useEffect(() => {
     setLogSummaryHighlights([]);

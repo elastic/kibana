@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -14,13 +15,9 @@ import { API_BASE_PATH } from './constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
 
-  const {
-    createComponentTemplate,
-    cleanUpComponentTemplates,
-    deleteComponentTemplate,
-  } = initElasticsearchHelpers(es);
+  const { createComponentTemplate, cleanUpComponentTemplates, deleteComponentTemplate } =
+    initElasticsearchHelpers(getService);
 
   describe('Component templates', function () {
     after(async () => {
@@ -281,8 +278,19 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body).to.eql({
           statusCode: 404,
           error: 'Not Found',
-          message:
-            '[resource_not_found_exception] component template matching [component_does_not_exist] not found',
+          message: 'component template matching [component_does_not_exist] not found',
+          attributes: {
+            error: {
+              reason: 'component template matching [component_does_not_exist] not found',
+              root_cause: [
+                {
+                  reason: 'component template matching [component_does_not_exist] not found',
+                  type: 'resource_not_found_exception',
+                },
+              ],
+              type: 'resource_not_found_exception',
+            },
+          },
         });
       });
     });
@@ -306,12 +314,9 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         // Create several component templates that can be used to test deletion
         await Promise.all(
-          [
-            componentTemplateA,
-            componentTemplateB,
-            componentTemplateC,
-            componentTemplateD,
-          ].map((template) => createComponentTemplate(template, false))
+          [componentTemplateA, componentTemplateB, componentTemplateC, componentTemplateD].map(
+            (template) => createComponentTemplate(template, false)
+          )
         ).catch((err) => {
           // eslint-disable-next-line no-console
           console.log(`[Setup error] Error creating component templates: ${err.message}`);
@@ -356,10 +361,19 @@ export default function ({ getService }: FtrProviderContext) {
         const uri = `${API_BASE_PATH}/component_templates/${componentTemplateName},${COMPONENT_DOES_NOT_EXIST}`;
 
         const { body } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
-
         expect(body.itemsDeleted).to.eql([componentTemplateName]);
         expect(body.errors[0].name).to.eql(COMPONENT_DOES_NOT_EXIST);
-        expect(body.errors[0].error.msg).to.contain('index_template_missing_exception');
+
+        expect(body.errors[0].error.payload.attributes.error).to.eql({
+          root_cause: [
+            {
+              type: 'resource_not_found_exception',
+              reason: 'component_does_not_exist',
+            },
+          ],
+          type: 'resource_not_found_exception',
+          reason: 'component_does_not_exist',
+        });
       });
     });
 

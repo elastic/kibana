@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
-import { errors } from 'elasticsearch';
 import { httpServerMock } from 'src/core/server/mocks';
+
 import { createAppContextStartContractMock } from '../mocks';
 import { appContextService } from '../services';
+
 import {
   IngestManagerError,
   RegistryError,
@@ -16,9 +18,6 @@ import {
   PackageUnsupportedMediaTypeError,
   defaultIngestErrorHandler,
 } from './index';
-
-const LegacyESErrors = errors as Record<string, any>;
-type ITestEsErrorsFnParams = [errorCode: string, error: any, expectedMessage: string];
 
 describe('defaultIngestErrorHandler', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
@@ -31,55 +30,6 @@ describe('defaultIngestErrorHandler', () => {
   afterEach(async () => {
     jest.clearAllMocks();
     appContextService.stop();
-  });
-
-  async function testEsErrorsFn(...args: ITestEsErrorsFnParams) {
-    const [, error, expectedMessage] = args;
-    jest.clearAllMocks();
-    const response = httpServerMock.createResponseFactory();
-    await defaultIngestErrorHandler({ error, response });
-
-    // response
-    expect(response.ok).toHaveBeenCalledTimes(0);
-    expect(response.customError).toHaveBeenCalledTimes(1);
-    expect(response.customError).toHaveBeenCalledWith({
-      statusCode: error.status,
-      body: { message: expectedMessage },
-    });
-
-    // logging
-    expect(mockContract.logger?.error).toHaveBeenCalledTimes(1);
-    expect(mockContract.logger?.error).toHaveBeenCalledWith(expectedMessage);
-  }
-
-  describe('use the HTTP error status code provided by LegacyESErrors', () => {
-    const statusCodes = Object.keys(LegacyESErrors).filter((key) => /^\d+$/.test(key));
-    const errorCodes = statusCodes.filter((key) => parseInt(key, 10) >= 400);
-    const casesWithPathResponse: ITestEsErrorsFnParams[] = errorCodes.map((errorCode) => [
-      errorCode,
-      new LegacyESErrors[errorCode]('the root message', {
-        path: '/path/to/call',
-        response: 'response is here',
-      }),
-      'the root message response from /path/to/call: response is here',
-    ]);
-    const casesWithOtherMeta: ITestEsErrorsFnParams[] = errorCodes.map((errorCode) => [
-      errorCode,
-      new LegacyESErrors[errorCode]('the root message', {
-        other: '/path/to/call',
-        props: 'response is here',
-      }),
-      'the root message',
-    ]);
-    const casesWithoutMeta: ITestEsErrorsFnParams[] = errorCodes.map((errorCode) => [
-      errorCode,
-      new LegacyESErrors[errorCode]('some message'),
-      'some message',
-    ]);
-
-    test.each(casesWithPathResponse)('%d - with path & response', testEsErrorsFn);
-    test.each(casesWithOtherMeta)('%d - with other metadata', testEsErrorsFn);
-    test.each(casesWithoutMeta)('%d - without metadata', testEsErrorsFn);
   });
 
   describe('IngestManagerError', () => {

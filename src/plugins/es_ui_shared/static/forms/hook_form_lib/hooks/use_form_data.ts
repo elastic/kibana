@@ -1,22 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-import { useState, useEffect, useRef, useCallback } from 'react';
+
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
 import { FormData, FormHook } from '../types';
 import { unflattenObject } from '../lib';
@@ -34,6 +24,9 @@ export const useFormData = <I extends object = FormData, T extends object = I>(
 ): HookReturn<I, T> => {
   const { watch, form } = options;
   const ctx = useFormDataContext<T, I>();
+  const watchToArray: string[] = watch === undefined ? [] : Array.isArray(watch) ? watch : [watch];
+  // We will use "stringifiedWatch" to compare if the array has changed in the useMemo() below
+  const stringifiedWatch = watchToArray.join('.');
 
   let getFormData: Context<T, I>['getFormData'];
   let getFormData$: Context<T, I>['getFormData$'];
@@ -64,16 +57,14 @@ export const useFormData = <I extends object = FormData, T extends object = I>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getFormData, formData]);
 
-  useEffect(() => {
-    const subscription = getFormData$().subscribe((raw) => {
+  const subscription = useMemo(() => {
+    return getFormData$().subscribe((raw) => {
       if (!isMounted.current && Object.keys(raw).length === 0) {
         return;
       }
 
-      if (watch) {
-        const pathsToWatchArray: string[] = Array.isArray(watch) ? watch : [watch];
-
-        if (pathsToWatchArray.some((path) => previousRawData.current[path] !== raw[path])) {
+      if (watchToArray.length > 0) {
+        if (watchToArray.some((path) => previousRawData.current[path] !== raw[path])) {
           previousRawData.current = raw;
           // Only update the state if one of the field we watch has changed.
           setFormData(unflattenObject<I>(raw));
@@ -82,8 +73,13 @@ export const useFormData = <I extends object = FormData, T extends object = I>(
         setFormData(unflattenObject<I>(raw));
       }
     });
+    // To compare we use the stringified version of the "watchToArray" array
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stringifiedWatch, getFormData$]);
+
+  useEffect(() => {
     return subscription.unsubscribe;
-  }, [getFormData$, watch]);
+  }, [subscription]);
 
   useEffect(() => {
     isMounted.current = true;

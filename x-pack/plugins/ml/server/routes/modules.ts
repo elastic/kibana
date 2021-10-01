@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TypeOf } from '@kbn/config-schema';
@@ -44,7 +45,7 @@ function getModule(
   savedObjectsClient: SavedObjectsClientContract,
   jobSavedObjectService: JobSavedObjectService,
   request: KibanaRequest,
-  moduleId: string
+  moduleId?: string
 ) {
   const dr = new DataRecognizer(
     client,
@@ -532,7 +533,7 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup Modules
    *
-   * @api {post} /api/ml/modules/jobs_exist/:moduleId Check if module jobs exist
+   * @api {get} /api/ml/modules/jobs_exist/:moduleId Check if module jobs exist
    * @apiName CheckExistingModuleJobs
    * @apiDescription Check whether the jobs in the module with the specified ID exist in the
    *      current list of jobs. The check runs a test to see if any of the jobs in existence

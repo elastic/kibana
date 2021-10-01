@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useContext, useEffect, useState } from 'react';
@@ -16,6 +17,7 @@ import { CategorizationPerPartitionField } from '../categorization_partition_fie
 
 import { FieldExamples } from './field_examples';
 import { ExamplesValidCallout } from './examples_valid_callout';
+import { InvalidCssVersionCallout } from './invalid_ccs_version_valid_callout';
 import {
   CategoryFieldExample,
   FieldExampleCheck,
@@ -32,6 +34,7 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
   const jobCreator = jc as CategorizationJobCreator;
 
   const [loadingData, setLoadingData] = useState(false);
+  const [ccsVersionFailure, setCcsVersionFailure] = useState(false);
   const [start, setStart] = useState(jobCreator.start);
   const [end, setEnd] = useState(jobCreator.end);
   const [categorizationAnalyzerString, setCategorizationAnalyzerString] = useState(
@@ -84,10 +87,12 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
           examples,
           overallValidStatus: tempOverallValidStatus,
           validationChecks: tempValidationChecks,
+          ccsVersionFailure: tempCcsVersionFailure,
         } = await jobCreator.loadCategorizationFieldExamples();
         setFieldExamples(examples);
         setOverallValidStatus(tempOverallValidStatus);
         setValidationChecks(tempValidationChecks);
+        setCcsVersionFailure(tempCcsVersionFailure);
         setLoadingData(false);
       } catch (error) {
         setLoadingData(false);
@@ -95,11 +100,13 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
         setValidationChecks([]);
         setOverallValidStatus(CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID);
         getToastNotificationService().displayErrorToast(error);
+        setCcsVersionFailure(false);
       }
     } else {
       setFieldExamples(null);
       setValidationChecks([]);
       setOverallValidStatus(CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID);
+      setCcsVersionFailure(false);
     }
     setIsValid(categorizationFieldName !== null);
   }
@@ -118,7 +125,7 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
           <div />
         </LoadingWrapper>
       )}
-      {fieldExamples !== null && loadingData === false && (
+      {ccsVersionFailure === false && fieldExamples !== null && loadingData === false && (
         <>
           <ExamplesValidCallout
             overallValidStatus={overallValidStatus}
@@ -128,6 +135,7 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
           <FieldExamples fieldExamples={fieldExamples} />
         </>
       )}
+      {ccsVersionFailure === true && <InvalidCssVersionCallout />}
       <EuiHorizontalRule />
       <CategorizationPerPartitionField />
     </>

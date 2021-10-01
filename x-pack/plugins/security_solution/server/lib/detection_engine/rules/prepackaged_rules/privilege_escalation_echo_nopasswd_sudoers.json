@@ -1,0 +1,53 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "A sudoers file specifies the commands users or groups can run and from which terminals. Adversaries can take advantage of these configurations to execute commands as other users or spawn processes with higher privileges.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Potential Privilege Escalation via Sudoers File Modification",
+  "query": "event.category:process and event.type:start and process.args:(echo and *NOPASSWD*ALL*)\n",
+  "risk_score": 73,
+  "rule_id": "76152ca1-71d0-4003-9e37-0983e12832da",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "macOS",
+    "Threat Detection",
+    "Privilege Escalation"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1548",
+          "name": "Abuse Elevation Control Mechanism",
+          "reference": "https://attack.mitre.org/techniques/T1548/",
+          "subtechnique": [
+            {
+              "id": "T1548.003",
+              "name": "Sudo and Sudo Caching",
+              "reference": "https://attack.mitre.org/techniques/T1548/003/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}

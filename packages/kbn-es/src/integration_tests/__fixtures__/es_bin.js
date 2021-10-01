@@ -1,22 +1,11 @@
 #!/usr/bin/env node
 
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const fs = require('fs');
@@ -42,10 +31,35 @@ const { ES_KEY_PATH, ES_CERT_PATH } = require('@kbn/dev-utils');
     },
     (req, res) => {
       const url = new URL(req.url, serverUrl);
-      const send = (code, body) => {
-        res.writeHead(code, { 'content-type': 'application/json' });
+      const send = (code, body, headers = {}) => {
+        res.writeHead(code, { 'content-type': 'application/json', ...headers });
         res.end(JSON.stringify(body));
       };
+
+      // ES client's Product check request: it checks some fields in the body and the header
+      if (url.pathname === '/') {
+        return send(
+          200,
+          {
+            name: 'es-bin',
+            cluster_name: 'elasticsearch',
+            cluster_uuid: 'k0sr2gr9S4OBtygmu9ndzA',
+            version: {
+              number: '8.0.0-SNAPSHOT',
+              build_flavor: 'default',
+              build_type: 'tar',
+              build_hash: 'b11c15b7e0af64f90c3eb9c52c2534b4f143a070',
+              build_date: '2021-08-03T19:32:39.781056185Z',
+              build_snapshot: true,
+              lucene_version: '8.9.0',
+              minimum_wire_compatibility_version: '7.15.0',
+              minimum_index_compatibility_version: '7.0.0',
+            },
+            tagline: 'You Know, for Search',
+          },
+          { 'x-elastic-product': 'Elasticsearch' }
+        );
+      }
 
       if (url.pathname === '/_xpack') {
         return send(400, {

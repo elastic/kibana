@@ -1,29 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { enforceOptions } from 'broadcast-channel';
 import { Observable } from 'rxjs';
-import BroadcastChannel from 'broadcast-channel';
-import { CoreSetup } from 'src/core/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { mockSecurityOssPlugin } from '../../../../src/plugins/security_oss/public/mocks';
-import { SessionTimeout } from './session';
-import { PluginStartDependencies, SecurityPlugin } from './plugin';
 
-import { coreMock } from '../../../../src/core/public/mocks';
-import { managementPluginMock } from '../../../../src/plugins/management/public/mocks';
+import type { CoreSetup } from 'src/core/public';
+import { coreMock } from 'src/core/public/mocks';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import { managementPluginMock } from 'src/plugins/management/public/mocks';
+import { mockSecurityOssPlugin } from 'src/plugins/security_oss/public/mocks';
+
+import type { FeaturesPluginStart } from '../../features/public';
 import { licensingMock } from '../../licensing/public/mocks';
 import { ManagementService } from './management';
-import { FeaturesPluginStart } from '../../features/public';
+import type { PluginStartDependencies } from './plugin';
+import { SecurityPlugin } from './plugin';
 
 describe('Security Plugin', () => {
   beforeAll(() => {
-    BroadcastChannel.enforceOptions({ type: 'simulate' });
+    enforceOptions({ type: 'simulate' });
   });
   afterAll(() => {
-    BroadcastChannel.enforceOptions(null);
+    enforceOptions(null);
   });
 
   describe('#setup', () => {
@@ -40,16 +42,14 @@ describe('Security Plugin', () => {
           }
         )
       ).toEqual({
-        __legacyCompat: { logoutUrl: '/some-base-path/logout', tenant: '/some-base-path' },
         authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
         license: {
           isLicenseAvailable: expect.any(Function),
           isEnabled: expect.any(Function),
-          getType: expect.any(Function),
           getFeatures: expect.any(Function),
+          hasAtLeast: expect.any(Function),
           features$: expect.any(Observable),
         },
-        sessionTimeout: expect.any(SessionTimeout),
       });
     });
 
@@ -74,8 +74,8 @@ describe('Security Plugin', () => {
         license: {
           isLicenseAvailable: expect.any(Function),
           isEnabled: expect.any(Function),
-          getType: expect.any(Function),
           getFeatures: expect.any(Function),
+          hasAtLeast: expect.any(Function),
           features$: expect.any(Observable),
         },
         management: managementSetupMock,
@@ -100,6 +100,16 @@ describe('Security Plugin', () => {
           features: {} as FeaturesPluginStart,
         })
       ).toEqual({
+        uiApi: {
+          components: {
+            getChangePassword: expect.any(Function),
+            getPersonalInfo: expect.any(Function),
+          },
+        },
+        authc: {
+          getCurrentUser: expect.any(Function),
+          areAPIKeysEnabled: expect.any(Function),
+        },
         navControlService: {
           getUserMenuLinks$: expect.any(Function),
           addUserMenuLinks: expect.any(Function),

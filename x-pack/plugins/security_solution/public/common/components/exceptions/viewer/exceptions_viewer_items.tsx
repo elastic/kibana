@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from '../translations';
 import { ExceptionItem } from './exception_item';
 import { AndOrBadge } from '../../and_or_badge';
-import { ExceptionListItemSchema } from '../../../../../public/lists_plugin_deps';
-import { ExceptionListItemIdentifiers } from '../types';
+import type { ExceptionListItemIdentifiers } from '../types';
 
 const MyFlexItem = styled(EuiFlexItem)`
   margin: ${({ theme }) => `${theme.eui.euiSize} 0`};

@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { cloneDeep } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
@@ -19,6 +19,7 @@ import { mockTimelineResults } from '../../../common/mock/timeline_results';
 import { OpenTimeline } from './open_timeline';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from './constants';
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -31,8 +32,19 @@ jest.mock('react-router-dom', () => {
   };
 });
 
+const mockTheme = getMockTheme({
+  eui: {
+    euiSizeL: '10px',
+    paddingSizes: {
+      s: '10px',
+    },
+    euiBreakpoints: {
+      l: '1200px',
+    },
+  },
+});
+
 describe('OpenTimeline', () => {
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const title = 'All Timelines / Open Timelines';
 
   let mockResults: OpenTimelineResult[];
@@ -72,7 +84,7 @@ describe('OpenTimeline', () => {
   test('it renders the search row', () => {
     const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -83,7 +95,7 @@ describe('OpenTimeline', () => {
   test('it renders the timelines table', () => {
     const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -94,7 +106,7 @@ describe('OpenTimeline', () => {
   test('it shows the delete action columns when onDeleteSelected and deleteTimelines are specified', () => {
     const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -114,7 +126,7 @@ describe('OpenTimeline', () => {
       deleteTimelines: undefined,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -134,7 +146,7 @@ describe('OpenTimeline', () => {
       deleteTimelines: undefined,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -154,7 +166,7 @@ describe('OpenTimeline', () => {
       deleteTimelines: undefined,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -173,7 +185,7 @@ describe('OpenTimeline', () => {
       query: '',
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -187,7 +199,7 @@ describe('OpenTimeline', () => {
       query: '   ',
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -201,7 +213,7 @@ describe('OpenTimeline', () => {
       query: 'Would you like to go to Denver?',
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -217,7 +229,7 @@ describe('OpenTimeline', () => {
       query: '   Is it starting to feel cramped in here?   ',
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -233,7 +245,7 @@ describe('OpenTimeline', () => {
       query: '',
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -249,7 +261,7 @@ describe('OpenTimeline', () => {
       query: '   ',
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -265,7 +277,7 @@ describe('OpenTimeline', () => {
       query: 'How was your day?',
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -281,7 +293,7 @@ describe('OpenTimeline', () => {
       timelineStatus: TimelineStatus.active,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -296,7 +308,7 @@ describe('OpenTimeline', () => {
       selectedItems: [],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -316,7 +328,7 @@ describe('OpenTimeline', () => {
       selectedItems: [],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -336,7 +348,7 @@ describe('OpenTimeline', () => {
       selectedItems: [{}],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -356,7 +368,7 @@ describe('OpenTimeline', () => {
       selectedItems: [{}],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -375,7 +387,7 @@ describe('OpenTimeline', () => {
       timelineStatus: TimelineStatus.active,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -391,7 +403,7 @@ describe('OpenTimeline', () => {
       timelineStatus: TimelineStatus.active,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -405,7 +417,7 @@ describe('OpenTimeline', () => {
       timelineStatus: TimelineStatus.immutable,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -419,7 +431,7 @@ describe('OpenTimeline', () => {
       timelineStatus: TimelineStatus.immutable,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -435,7 +447,7 @@ describe('OpenTimeline', () => {
       timelineStatus: TimelineStatus.immutable,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -449,7 +461,7 @@ describe('OpenTimeline', () => {
       timelineStatus: null,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -463,7 +475,7 @@ describe('OpenTimeline', () => {
       timelineStatus: null,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );
@@ -479,7 +491,7 @@ describe('OpenTimeline', () => {
       timelineStatus: null,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
       </ThemeProvider>
     );

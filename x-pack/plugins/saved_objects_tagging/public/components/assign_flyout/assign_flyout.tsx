@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useState, useEffect, useCallback } from 'react';
@@ -74,8 +75,9 @@ export const AssignFlyout: FC<AssignFlyoutProps> = ({
           [getKey(result)]: getObjectStatus(result, tagIds),
         };
       }, {} as AssignmentStatusMap);
-      const assignedCount = Object.values(fetchedStatus).filter((status) => status !== 'none')
-        .length;
+      const assignedCount = Object.values(fetchedStatus).filter(
+        (status) => status !== 'none'
+      ).length;
 
       setResults(sortByStatusAndTitle(fetched, fetchedStatus));
       setOverrides({});

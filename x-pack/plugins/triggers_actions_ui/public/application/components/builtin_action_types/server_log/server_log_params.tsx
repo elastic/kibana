@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { Fragment, useEffect, useState } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSelect, EuiFormRow } from '@elastic/eui';
 import { ActionParamsProps } from '../../../../types';
@@ -46,7 +48,7 @@ export const ServerLogParamsFields: React.FunctionComponent<
   }, [defaultMessage]);
 
   return (
-    <Fragment>
+    <>
       <EuiFormRow
         id="loggingLevel"
         fullWidth
@@ -83,7 +85,7 @@ export const ServerLogParamsFields: React.FunctionComponent<
         )}
         errors={errors.message as string[]}
       />
-    </Fragment>
+    </>
   );
 };
 

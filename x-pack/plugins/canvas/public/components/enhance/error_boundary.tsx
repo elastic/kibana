@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ErrorInfo, FC, ReactElement } from 'react';
@@ -37,10 +38,12 @@ export const errorBoundaryHoc = compose<ComponentProps, Pick<ComponentProps, 'ch
   withState('error', 'setError', null),
   withState('errorInfo', 'setErrorInfo', null),
   withHandlers<Pick<Props, 'setError' | 'setErrorInfo'>, Pick<Props, 'resetErrorState'>>({
-    resetErrorState: ({ setError, setErrorInfo }) => () => {
-      setError(null);
-      setErrorInfo(null);
-    },
+    resetErrorState:
+      ({ setError, setErrorInfo }) =>
+      () => {
+        setError(null);
+        setErrorInfo(null);
+      },
   }),
   lifecycle<Props, Props>({
     componentDidCatch(error, errorInfo) {

@@ -1,25 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { StatusResponse } from '../../../../types/status';
 import { httpServiceMock } from '../../../http/http_service.mock';
 import { notificationServiceMock } from '../../../notifications/notifications_service.mock';
+import { mocked } from '../../../../server/metrics/event_loop_delays/event_loop_delays_monitor.mocks';
 import { loadStatus } from './load_status';
 
 const mockedResponse: StatusResponse = {
@@ -28,36 +18,37 @@ const mockedResponse: StatusResponse = {
   version: {
     number: '8.0.0',
     build_hash: '9007199254740991',
-    build_number: '12',
-    build_snapshot: 'XXXXXXXX',
+    build_number: 12,
+    build_snapshot: false,
   },
   status: {
     overall: {
-      id: 'overall',
-      state: 'yellow',
-      title: 'Yellow',
-      message: 'yellow',
-      uiColor: 'secondary',
+      level: 'degraded',
+      summary: 'yellow',
     },
-    statuses: [
-      {
-        id: 'plugin:1',
-        state: 'green',
-        title: 'Green',
-        message: 'Ready',
-        uiColor: 'secondary',
+    core: {
+      elasticsearch: {
+        level: 'available',
+        summary: 'Elasticsearch is available',
       },
-      {
-        id: 'plugin:2',
-        state: 'yellow',
-        title: 'Yellow',
-        message: 'Something is weird',
-        uiColor: 'warning',
+      savedObjects: {
+        level: 'available',
+        summary: 'SavedObjects service has completed migrations and is available',
       },
-    ],
+    },
+    plugins: {
+      '1': {
+        level: 'available',
+        summary: 'Ready',
+      },
+      '2': {
+        level: 'degraded',
+        summary: 'Something is weird',
+      },
+    },
   },
   metrics: {
-    collected_at: new Date('2020-01-01 01:00:00'),
+    last_updated: '2020-01-01 01:00:00',
     collection_interval_in_millis: 1000,
     os: {
       platform: 'darwin' as const,
@@ -71,6 +62,7 @@ const mockedResponse: StatusResponse = {
       },
     },
     process: {
+      pid: 1,
       memory: {
         heap: {
           size_limit: 1000000,
@@ -80,9 +72,25 @@ const mockedResponse: StatusResponse = {
         resident_set_size_in_bytes: 1,
       },
       event_loop_delay: 1,
-      pid: 1,
+      event_loop_delay_histogram: mocked.createHistogram(),
       uptime_in_millis: 1,
     },
+    processes: [
+      {
+        pid: 1,
+        memory: {
+          heap: {
+            size_limit: 1000000,
+            used_in_bytes: 100,
+            total_in_bytes: 0,
+          },
+          resident_set_size_in_bytes: 1,
+        },
+        event_loop_delay: 1,
+        event_loop_delay_histogram: mocked.createHistogram(),
+        uptime_in_millis: 1,
+      },
+    ],
     response_times: {
       avg_in_millis: 4000,
       max_in_millis: 8000,
@@ -91,6 +99,7 @@ const mockedResponse: StatusResponse = {
       disconnects: 1,
       total: 400,
       statusCodes: {},
+      status_codes: {},
     },
     concurrent_connections: 1,
   },
@@ -111,16 +120,84 @@ describe('response processing', () => {
     expect(data.name).toEqual('My computer');
   });
 
+  test('throws when an error occurs', async () => {
+    http.get.mockReset();
+
+    http.get.mockRejectedValue(new Error());
+
+    await expect(loadStatus({ http, notifications })).rejects.toThrowError();
+    expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+  });
+
+  test('throws when a 503 occurs which does not contain an appropriate payload', async () => {
+    const error = new Error() as any;
+    error.response = { status: 503 };
+    error.body = {};
+
+    http.get.mockReset();
+    http.get.mockRejectedValue(error);
+
+    await expect(loadStatus({ http, notifications })).rejects.toThrowError();
+    expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+  });
+
+  test('does not throw when a 503 occurs which contains an appropriate payload', async () => {
+    const error = new Error() as any;
+    error.response = { status: 503 };
+    error.body = mockedResponse;
+
+    http.get.mockReset();
+    http.get.mockRejectedValue(error);
+
+    const data = await loadStatus({ http, notifications });
+    expect(data.name).toEqual('My computer');
+  });
+
+  test('throws when a non-503 occurs which contains an appropriate payload', async () => {
+    const error = new Error() as any;
+    error.response = { status: 500 };
+    error.body = mockedResponse;
+
+    http.get.mockReset();
+    http.get.mockRejectedValue(error);
+
+    await expect(loadStatus({ http, notifications })).rejects.toThrowError();
+    expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+  });
+
   test('includes the plugin statuses', async () => {
     const data = await loadStatus({ http, notifications });
     expect(data.statuses).toEqual([
       {
+        id: 'core:elasticsearch',
+        state: {
+          id: 'available',
+          title: 'Green',
+          message: 'Elasticsearch is available',
+          uiColor: 'secondary',
+        },
+      },
+      {
+        id: 'core:savedObjects',
+        state: {
+          id: 'available',
+          title: 'Green',
+          message: 'SavedObjects service has completed migrations and is available',
+          uiColor: 'secondary',
+        },
+      },
+      {
         id: 'plugin:1',
-        state: { id: 'green', title: 'Green', message: 'Ready', uiColor: 'secondary' },
+        state: { id: 'available', title: 'Green', message: 'Ready', uiColor: 'secondary' },
       },
       {
         id: 'plugin:2',
-        state: { id: 'yellow', title: 'Yellow', message: 'Something is weird', uiColor: 'warning' },
+        state: {
+          id: 'degraded',
+          title: 'Yellow',
+          message: 'Something is weird',
+          uiColor: 'warning',
+        },
       },
     ]);
   });
@@ -128,10 +205,10 @@ describe('response processing', () => {
   test('includes the serverState', async () => {
     const data = await loadStatus({ http, notifications });
     expect(data.serverState).toEqual({
-      id: 'yellow',
+      id: 'degraded',
       title: 'Yellow',
       message: 'yellow',
-      uiColor: 'secondary',
+      uiColor: 'warning',
     });
   });
 

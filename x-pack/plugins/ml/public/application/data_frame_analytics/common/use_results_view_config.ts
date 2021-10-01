@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect, useState } from 'react';
@@ -14,7 +15,7 @@ import { extractErrorMessage } from '../../../../common/util/errors';
 
 import { getIndexPatternIdFromName } from '../../util/index_utils';
 import { ml } from '../../services/ml_api_service';
-import { newJobCapsService } from '../../services/new_job_capabilities_service';
+import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useMlContext } from '../../contexts/ml';
 
 import { DataFrameAnalyticsConfig } from '../common';
@@ -102,6 +103,12 @@ export const useResultsViewConfig = (jobId: string) => {
 
             try {
               indexP = await mlContext.indexPatterns.get(destIndexPatternId);
+
+              // Force refreshing the fields list here because a user directly coming
+              // from the job creation wizard might land on the page without the
+              // index pattern being fully initialized because it was created
+              // before the analytics job populated the destination index.
+              await mlContext.indexPatterns.refreshFields(indexP);
             } catch (e) {
               indexP = undefined;
             }
@@ -118,7 +125,7 @@ export const useResultsViewConfig = (jobId: string) => {
             }
 
             if (indexP !== undefined) {
-              await newJobCapsService.initializeFromIndexPattern(indexP, false, false);
+              await newJobCapsServiceAnalytics.initializeFromIndexPattern(indexP);
               setJobConfig(analyticsConfigs.data_frame_analytics[0]);
               setIndexPattern(indexP);
               setIsInitialized(true);

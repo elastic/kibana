@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -23,16 +24,16 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { reactRouterNavigate } from '../../../../../shared_imports';
-import { SectionLoading, SectionError, Error, DataHealth } from '../../../../components';
+import { SectionLoading, reactRouterNavigate } from '../../../../../shared_imports';
+import { SectionError, Error, DataHealth } from '../../../../components';
 import { useLoadDataStream } from '../../../../services/api';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
-import { useUrlGenerator } from '../../../../services/use_url_generator';
 import { getIndexListUri, getTemplateDetailsLink } from '../../../../services/routing';
-import { ILM_PAGES_POLICY_EDIT, ILM_URL_GENERATOR_ID } from '../../../../constants';
+import { ILM_PAGES_POLICY_EDIT } from '../../../../constants';
 import { useAppContext } from '../../../../app_context';
 import { DataStreamsBadges } from '../data_stream_badges';
+import { useIlmLocator } from '../../../../services/use_ilm_locator';
 
 interface DetailsListProps {
   details: Array<{
@@ -88,13 +89,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
 
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
-  const ilmPolicyLink = useUrlGenerator({
-    urlGeneratorId: ILM_URL_GENERATOR_ID,
-    urlGeneratorState: {
-      page: ILM_PAGES_POLICY_EDIT,
-      policyName: dataStream?.ilmPolicyName,
-    },
-  });
+  const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, dataStream?.ilmPolicyName);
   const { history } = useAppContext();
 
   let content;

@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   EuiFormRow,
   EuiComboBox,
@@ -41,20 +42,18 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
   const { incident, comments } = useMemo(
     () =>
       actionParams.subActionParams ??
-      (({
+      ({
         incident: {},
         comments: [],
-      } as unknown) as ResilientActionParams['subActionParams']),
+      } as unknown as ResilientActionParams['subActionParams']),
     [actionParams.subActionParams]
   );
-  const {
-    isLoading: isLoadingIncidentTypes,
-    incidentTypes: allIncidentTypes,
-  } = useGetIncidentTypes({
-    http,
-    toastNotifications: toasts,
-    actionConnector,
-  });
+  const { isLoading: isLoadingIncidentTypes, incidentTypes: allIncidentTypes } =
+    useGetIncidentTypes({
+      http,
+      toastNotifications: toasts,
+      actionConnector,
+    });
 
   const { isLoading: isLoadingSeverity, severity } = useGetSeverity({
     http,
@@ -78,22 +77,21 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         : [],
     [allIncidentTypes]
   );
-  const selectedIncidentTypesComboBoxOptions: Array<
-    EuiComboBoxOptionOption<string>
-  > = useMemo(() => {
-    const allIncidentTypesAsObject = allIncidentTypes.reduce(
-      (acc, type) => ({ ...acc, [type.id.toString()]: type.name }),
-      {} as Record<string, string>
-    );
-    return incident.incidentTypes
-      ? incident.incidentTypes
-          .map((type) => ({
-            label: allIncidentTypesAsObject[type.toString()],
-            value: type.toString(),
-          }))
-          .filter((type) => type.label != null)
-      : [];
-  }, [allIncidentTypes, incident.incidentTypes]);
+  const selectedIncidentTypesComboBoxOptions: Array<EuiComboBoxOptionOption<string>> =
+    useMemo(() => {
+      const allIncidentTypesAsObject = allIncidentTypes.reduce(
+        (acc, type) => ({ ...acc, [type.id.toString()]: type.name }),
+        {} as Record<string, string>
+      );
+      return incident.incidentTypes
+        ? incident.incidentTypes
+            .map((type) => ({
+              label: allIncidentTypesAsObject[type.toString()],
+              value: type.toString(),
+            }))
+            .filter((type) => type.label != null)
+        : [];
+    }, [allIncidentTypes, incident.incidentTypes]);
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
@@ -146,6 +144,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector]);
+
   useEffect(() => {
     if (!actionParams.subAction) {
       editAction('subAction', 'pushToService', index);
@@ -164,7 +163,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
   }, [actionParams]);
 
   return (
-    <Fragment>
+    <>
       <EuiTitle size="s">
         <h3>Incident</h3>
       </EuiTitle>
@@ -210,8 +209,12 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
       <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth
-        error={errors.name}
-        isInvalid={errors.name.length > 0 && incident.name !== undefined}
+        error={errors['subActionParams.incident.name']}
+        isInvalid={
+          errors['subActionParams.incident.name'] !== undefined &&
+          errors['subActionParams.incident.name'].length > 0 &&
+          incident.name !== undefined
+        }
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.resilient.nameFieldLabel',
           { defaultMessage: 'Name (required)' }
@@ -223,7 +226,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           messageVariables={messageVariables}
           paramsProperty={'name'}
           inputTargetValue={incident.name ?? undefined}
-          errors={errors.name as string[]}
+          errors={(errors['subActionParams.incident.name'] ?? []) as string[]}
         />
       </EuiFormRow>
       <TextAreaWithMessageVariables
@@ -236,7 +239,6 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           'xpack.triggersActionsUI.components.builtinActionTypes.resilient.descriptionTextAreaFieldLabel',
           { defaultMessage: 'Description' }
         )}
-        errors={errors.description as string[]}
       />
       <TextAreaWithMessageVariables
         index={index}
@@ -248,9 +250,8 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           'xpack.triggersActionsUI.components.builtinActionTypes.resilient.commentsTextAreaFieldLabel',
           { defaultMessage: 'Additional comments' }
         )}
-        errors={errors.comments as string[]}
       />
-    </Fragment>
+    </>
   );
 };
 

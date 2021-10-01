@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
@@ -34,7 +23,8 @@ const createTestAction = ({
   grouping?: PresentableGrouping;
 }) =>
   createAction({
-    type: type as any, // mapping doesn't matter for this test
+    id: type as string,
+    type,
     getDisplayName: () => dispayName,
     order,
     execute: async () => {},
@@ -77,7 +67,7 @@ test('sorts items in DESC order by "order" field first, then by display name', a
   ].sort(() => 0.5 - Math.random());
 
   const result = await buildContextMenuForActions({
-    actions: actions.map((action) => ({ action, context: {}, trigger: '' as any })),
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: '' } })),
   });
 
   expect(result.map(resultMapper)).toMatchInlineSnapshot(`
@@ -135,7 +125,9 @@ test('can build menu with one action', async () => {
           dispayName: 'Foo',
         }),
         context: {},
-        trigger: 'TETS_TRIGGER' as any,
+        trigger: {
+          id: 'TETS_TRIGGER',
+        },
       },
     ],
     closeMenu: () => {},
@@ -166,7 +158,7 @@ test('orders items according to "order" field', async () => {
     }),
   ];
   const menu = await buildContextMenuForActions({
-    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
   });
 
   expect(menu[0].items![0].name).toBe('Bar');
@@ -183,7 +175,7 @@ test('orders items according to "order" field', async () => {
     }),
   ];
   const menu2 = await buildContextMenuForActions({
-    actions: actions2.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+    actions: actions2.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
   });
 
   expect(menu2[0].items![0].name).toBe('Bar');
@@ -209,7 +201,7 @@ test('hides items behind in "More" submenu if there are more than 4 actions', as
     }),
   ];
   const menu = await buildContextMenuForActions({
-    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
   });
 
   expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
@@ -266,7 +258,7 @@ test('separates grouped items from main items with a separator', async () => {
     }),
   ];
   const menu = await buildContextMenuForActions({
-    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
   });
 
   expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
@@ -332,7 +324,7 @@ test('separates multiple groups each with its own separator', async () => {
     }),
   ];
   const menu = await buildContextMenuForActions({
-    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
   });
 
   expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
@@ -402,7 +394,7 @@ test('does not add separator for first grouping if there are no main items', asy
     }),
   ];
   const menu = await buildContextMenuForActions({
-    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
   });
 
   expect(menu.map(resultMapper)).toMatchInlineSnapshot(`

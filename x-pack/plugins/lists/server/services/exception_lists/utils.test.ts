@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import sinon from 'sinon';
 import moment from 'moment';
 import uuid from 'uuid';
@@ -18,7 +20,7 @@ describe('utils', () => {
   let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
-    ((uuid.v4 as unknown) as jest.Mock)
+    (uuid.v4 as unknown as jest.Mock)
       .mockImplementationOnce(() => '123')
       .mockImplementationOnce(() => '456');
 

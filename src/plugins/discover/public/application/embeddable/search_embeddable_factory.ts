@@ -1,23 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { auto } from 'angular';
 import { i18n } from '@kbn/i18n';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { getServices } from '../../kibana_services';
@@ -29,8 +17,9 @@ import {
 
 import { TimeRange } from '../../../../data/public';
 
-import { SearchInput, SearchOutput, SearchEmbeddable } from './types';
+import { SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
+import { SavedSearchEmbeddable } from './saved_search_embeddable';
 
 interface StartServices {
   executeTriggerActions: UiActionsStart['executeTriggerActions'];
@@ -38,25 +27,18 @@ interface StartServices {
 }
 
 export class SearchEmbeddableFactory
-  implements EmbeddableFactoryDefinition<SearchInput, SearchOutput, SearchEmbeddable> {
+  implements EmbeddableFactoryDefinition<SearchInput, SearchOutput, SavedSearchEmbeddable>
+{
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
-  private $injector: auto.IInjectorService | null;
-  private getInjector: () => Promise<auto.IInjectorService> | null;
   public readonly savedObjectMetaData = {
     name: i18n.translate('discover.savedSearch.savedObjectName', {
       defaultMessage: 'Saved search',
     }),
     type: 'search',
-    getIconForSavedObject: () => 'search',
+    getIconForSavedObject: () => 'discoverApp',
   };
 
-  constructor(
-    private getStartServices: () => Promise<StartServices>,
-    getInjector: () => Promise<auto.IInjectorService>
-  ) {
-    this.$injector = null;
-    this.getInjector = getInjector;
-  }
+  constructor(private getStartServices: () => Promise<StartServices>) {}
 
   public canCreateNew() {
     return false;
@@ -76,14 +58,7 @@ export class SearchEmbeddableFactory
     savedObjectId: string,
     input: Partial<SearchInput> & { id: string; timeRange: TimeRange },
     parent?: Container
-  ): Promise<SearchEmbeddable | ErrorEmbeddable> => {
-    if (!this.$injector) {
-      this.$injector = await this.getInjector();
-    }
-    const $injector = this.$injector as auto.IInjectorService;
-
-    const $compile = $injector.get<ng.ICompileService>('$compile');
-    const $rootScope = $injector.get<ng.IRootScopeService>('$rootScope');
+  ): Promise<SavedSearchEmbeddable | ErrorEmbeddable> => {
     const filterManager = getServices().filterManager;
 
     const url = await getServices().getSavedSearchUrlById(savedObjectId);
@@ -92,12 +67,12 @@ export class SearchEmbeddableFactory
       const savedObject = await getServices().getSavedSearchById(savedObjectId);
       const indexPattern = savedObject.searchSource.getField('index');
       const { executeTriggerActions } = await this.getStartServices();
-      const { SearchEmbeddable: SearchEmbeddableClass } = await import('./search_embeddable');
-      return new SearchEmbeddableClass(
+      const { SavedSearchEmbeddable: SavedSearchEmbeddableClass } = await import(
+        './saved_search_embeddable'
+      );
+      return new SavedSearchEmbeddableClass(
         {
           savedSearch: savedObject,
-          $rootScope,
-          $compile,
           editUrl,
           editPath: url,
           filterManager,

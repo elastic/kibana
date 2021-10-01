@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* es-lint-disable import/no-extraneous-dependencies */
@@ -31,22 +32,21 @@ export const getInitialState: () => State = () => getState();
 export const getMiddleware = () => applyMiddleware(thunkMiddleware);
 export const getReducer = () => getRootReducer(getInitialState());
 
-export const patchDispatch: (store: Store, dispatch: Dispatch) => Dispatch = (store, dispatch) => (
-  action
-) => {
-  const channel = addons.getChannel();
+export const patchDispatch: (store: Store, dispatch: Dispatch) => Dispatch =
+  (store, dispatch) => (action) => {
+    const channel = addons.getChannel();
 
-  const previousState = store.getState();
-  const returnValue = dispatch(action);
-  const newState = store.getState();
-  const change = diff(previousState, newState) || {};
+    const previousState = store.getState();
+    const returnValue = dispatch(action);
+    const newState = store.getState();
+    const change = diff(previousState, newState) || {};
 
-  channel.emit(EVENTS.ACTION, {
-    previousState,
-    newState,
-    change,
-    action: isFunction(action) ? { type: '(thunk)' } : action,
-  });
+    channel.emit(EVENTS.ACTION, {
+      previousState,
+      newState,
+      change,
+      action: isFunction(action) ? { type: '(thunk)' } : action,
+    });
 
-  return returnValue;
-};
+    return returnValue;
+  };

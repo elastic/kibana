@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -26,8 +27,7 @@ export const help: FunctionHelp<FunctionFactory<typeof replace>> = {
     flags: i18n.translate('xpack.canvas.functions.replace.args.flagsHelpText', {
       defaultMessage: 'Specify flags. See {url}.',
       values: {
-        url:
-          'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp',
+        url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp',
       },
     }),
     replacement: i18n.translate('xpack.canvas.functions.replace.args.replacementHelpText', {

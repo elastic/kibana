@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { createEndpointListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_LIST_URL } from '@kbn/securitysolution-list-constants';
 
-import { ENDPOINT_LIST_URL } from '../../common/constants';
-import { buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/shared_imports';
-import { createEndpointListSchema } from '../../common/schemas';
+import type { ListsPluginRouter } from '../types';
 
+import { buildSiemResponse } from './utils';
 import { getExceptionListClient } from './utils/get_exception_list_client';
 
 /**
@@ -22,7 +24,7 @@ import { getExceptionListClient } from './utils/get_exception_list_client';
  * object.
  * @param router The router to use.
  */
-export const createEndpointListRoute = (router: IRouter): void => {
+export const createEndpointListRoute = (router: ListsPluginRouter): void => {
   router.post(
     {
       options: {

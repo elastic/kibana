@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
 import {
-  DiscoverUrlGeneratorState,
+  DiscoverAppLocatorParams,
   SearchInput,
 } from '../../../../../../src/plugins/discover/public';
 import {
@@ -14,7 +15,7 @@ import {
   esFilters,
 } from '../../../../../../src/plugins/data/public';
 import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
-import { KibanaURL } from '../../../../../../src/plugins/share/public';
+import { KibanaLocation } from '../../../../../../src/plugins/share/public';
 import * as shared from './shared';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
 
@@ -30,7 +31,8 @@ export const ACTION_EXPLORE_DATA_CHART = 'ACTION_EXPLORE_DATA_CHART';
  */
 export class ExploreDataChartAction
   extends AbstractExploreDataAction<ExploreDataChartActionContext>
-  implements Action<ExploreDataChartActionContext> {
+  implements Action<ExploreDataChartActionContext>
+{
   public readonly id = ACTION_EXPLORE_DATA_CHART;
 
   public readonly type = ACTION_EXPLORE_DATA_CHART;
@@ -42,14 +44,14 @@ export class ExploreDataChartAction
     return super.isCompatible(context);
   }
 
-  protected readonly getUrl = async (
+  protected readonly getLocation = async (
     context: ExploreDataChartActionContext
-  ): Promise<KibanaURL> => {
+  ): Promise<KibanaLocation> => {
     const { plugins } = this.params.start();
-    const { urlGenerator } = plugins.discover;
+    const { locator } = plugins.discover;
 
-    if (!urlGenerator) {
-      throw new Error('Discover URL generator not available.');
+    if (!locator) {
+      throw new Error('Discover URL locator not available.');
     }
 
     const { embeddable } = context;
@@ -58,23 +60,23 @@ export class ExploreDataChartAction
       context.timeFieldName
     );
 
-    const state: DiscoverUrlGeneratorState = {
+    const params: DiscoverAppLocatorParams = {
       filters,
       timeRange,
     };
 
     if (embeddable) {
-      state.indexPatternId = shared.getIndexPatterns(embeddable)[0] || undefined;
+      params.indexPatternId = shared.getIndexPatterns(embeddable)[0] || undefined;
 
       const input = embeddable.getInput() as Readonly<SearchInput>;
 
-      if (input.timeRange && !state.timeRange) state.timeRange = input.timeRange;
-      if (input.query) state.query = input.query;
-      if (input.filters) state.filters = [...input.filters, ...(state.filters || [])];
+      if (input.timeRange && !params.timeRange) params.timeRange = input.timeRange;
+      if (input.query) params.query = input.query;
+      if (input.filters) params.filters = [...input.filters, ...(params.filters || [])];
     }
 
-    const path = await urlGenerator.createUrl(state);
+    const location = await locator.getLocation(params);
 
-    return new KibanaURL(path);
+    return location;
   };
 }

@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SessionStorage } from '../../../../../src/core/server';
-import { SessionCookie, SessionCookieOptions } from './session_cookie';
-
+import type { SessionStorage } from 'src/core/server';
 import {
-  loggingSystemMock,
-  httpServiceMock,
-  sessionStorageMock,
   httpServerMock,
-} from '../../../../../src/core/server/mocks';
+  httpServiceMock,
+  loggingSystemMock,
+  sessionStorageMock,
+} from 'src/core/server/mocks';
+
+import type { SessionCookieOptions } from './session_cookie';
+import { SessionCookie } from './session_cookie';
 import { sessionCookieMock } from './session_cookie.mock';
 
 describe('Session cookie', () => {
@@ -57,9 +59,8 @@ describe('Session cookie', () => {
     });
 
     it('cookie validator properly handles cookies with different base path', () => {
-      const [
-        [{ validate }],
-      ] = (sessionCookieOptions.createCookieSessionStorageFactory as jest.Mock).mock.calls;
+      const [[{ validate }]] = (sessionCookieOptions.createCookieSessionStorageFactory as jest.Mock)
+        .mock.calls;
 
       expect(
         validate(sessionCookieMock.createValue({ path: sessionCookieOptions.serverBasePath }))

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { EmbeddableInput } from '../../../services/embeddable';
@@ -29,7 +18,7 @@ interface TestInput extends EmbeddableInput {
 const panels: { [key: string]: DashboardPanelState } = {};
 
 test('createPanelState adds a new panel state in 0,0 position', () => {
-  const panelState = createPanelState<TestInput>(
+  const { newPanel: panelState } = createPanelState<TestInput>(
     {
       type: CONTACT_CARD_EMBEDDABLE,
       explicitInput: { test: 'hi', id: '123' },
@@ -48,7 +37,7 @@ test('createPanelState adds a new panel state in 0,0 position', () => {
 });
 
 test('createPanelState adds a second new panel state', () => {
-  const panelState = createPanelState<TestInput>(
+  const { newPanel: panelState } = createPanelState<TestInput>(
     { type: CONTACT_CARD_EMBEDDABLE, explicitInput: { test: 'bye', id: '456' } },
     panels
   );
@@ -62,7 +51,7 @@ test('createPanelState adds a second new panel state', () => {
 });
 
 test('createPanelState adds a third new panel state', () => {
-  const panelState = createPanelState<TestInput>(
+  const { newPanel: panelState } = createPanelState<TestInput>(
     {
       type: CONTACT_CARD_EMBEDDABLE,
       explicitInput: { test: 'bye', id: '789' },
@@ -79,7 +68,7 @@ test('createPanelState adds a third new panel state', () => {
 
 test('createPanelState adds a new panel state in the top most position', () => {
   delete panels['456'];
-  const panelState = createPanelState<TestInput>(
+  const { newPanel: panelState } = createPanelState<TestInput>(
     {
       type: CONTACT_CARD_EMBEDDABLE,
       explicitInput: { test: 'bye', id: '987' },

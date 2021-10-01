@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MetricsExplorerRequestBody, MetricsAPIRequest } from '../../../../common/http_api';
@@ -27,7 +28,7 @@ const BASE_METRICS_UI_OPTIONS: MetricsAPIRequest = {
     interval: '1m',
   },
   limit: 9,
-  dropLastBucket: true,
+  dropPartialBuckets: true,
   indexPattern: 'metrics-*',
   metrics: [
     { id: 'metric_0', aggregations: { metric_0: { avg: { field: 'system.cpu.user.pct' } } } },

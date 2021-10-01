@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -9,7 +10,7 @@ import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
 
-import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types';
+import { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   IIndexPattern,
   Filter,
@@ -35,10 +36,9 @@ import {
   buildThresholdDescription,
   buildThreatMappingDescription,
 } from './helpers';
-import { buildMlJobDescription } from './ml_job_description';
+import { buildMlJobsDescription } from './ml_job_description';
 import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
-import { Threats, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { THREAT_QUERY_LABEL } from './translations';
 import { filterEmptyThreats } from '../../../pages/detection_engine/rules/create/helpers';
 
@@ -48,6 +48,7 @@ const DescriptionListContainer = styled(EuiDescriptionList)`
   }
   &.euiDescriptionList--column .euiDescriptionList__description {
     width: 70%;
+    overflow-wrap: anywhere;
   }
 `;
 
@@ -72,8 +73,8 @@ export const StepRuleDescriptionComponent = <T,>({
     if (key === 'machineLearningJobId') {
       return [
         ...acc,
-        buildMlJobDescription(
-          get(key, data) as string,
+        buildMlJobsDescription(
+          get(key, data) as string[],
           (get(key, schema) as { label: string }).label
         ),
       ];

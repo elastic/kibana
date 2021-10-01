@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -17,10 +18,12 @@ export const DRAG_SELECT_ACTION = {
 } as const;
 
 export const EXPLORER_ACTION = {
+  CLEAR_EXPLORER_DATA: 'clearExplorerData',
   CLEAR_INFLUENCER_FILTER_SETTINGS: 'clearInfluencerFilterSettings',
   CLEAR_JOBS: 'clearJobs',
   JOB_SELECTION_CHANGE: 'jobSelectionChange',
   SET_CHARTS: 'setCharts',
+  SET_CHARTS_DATA_LOADING: 'setChartsDataLoading',
   SET_EXPLORER_DATA: 'setExplorerData',
   SET_FILTER_DATA: 'setFilterData',
   SET_INFLUENCER_FILTER_SETTINGS: 'setInfluencerFilterSettings',
@@ -30,6 +33,8 @@ export const EXPLORER_ACTION = {
   SET_VIEW_BY_SWIMLANE_LOADING: 'setViewBySwimlaneLoading',
   SET_VIEW_BY_PER_PAGE: 'setViewByPerPage',
   SET_VIEW_BY_FROM_PAGE: 'setViewByFromPage',
+  SET_SWIM_LANE_SEVERITY: 'setSwimLaneSeverity',
+  SET_SHOW_CHARTS: 'setShowCharts',
 };
 
 export const FILTER_ACTION = {
@@ -48,7 +53,10 @@ export const CHART_TYPE = {
   EVENT_DISTRIBUTION: 'event_distribution',
   POPULATION_DISTRIBUTION: 'population_distribution',
   SINGLE_METRIC: 'single_metric',
-};
+  GEO_MAP: 'geo_map',
+} as const;
+
+export type ChartType = typeof CHART_TYPE[keyof typeof CHART_TYPE];
 
 export const MAX_CATEGORY_EXAMPLES = 10;
 
@@ -73,6 +81,6 @@ export const OVERALL_LABEL = i18n.translate('xpack.ml.explorer.overallLabel', {
 export const ANOMALY_SWIM_LANE_HARD_LIMIT = 1000;
 
 /**
- * Default page size fot the anomaly swim lane.
+ * Default page size for the anomaly swim lane.
  */
 export const SWIM_LANE_DEFAULT_PAGE_SIZE = 10;

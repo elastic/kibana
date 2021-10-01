@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ExportTypesRegistry } from '../lib/export_types_registry';
@@ -14,6 +15,13 @@ import { FeaturesAvailability } from './';
  */
 export function getExportTypesHandler(exportTypesRegistry: ExportTypesRegistry) {
   return {
+    /*
+     * Allow usage collection to loop through each registered job type
+     */
+    getJobTypes() {
+      return exportTypesRegistry.getAll().map(({ jobType }) => jobType);
+    },
+
     /*
      * Based on the X-Pack license and which export types are available,
      * returns an object where the keys are the export types and the values are
@@ -45,3 +53,5 @@ export function getExportTypesHandler(exportTypesRegistry: ExportTypesRegistry) 
     },
   };
 }
+
+export type ExportTypesHandler = ReturnType<typeof getExportTypesHandler>;

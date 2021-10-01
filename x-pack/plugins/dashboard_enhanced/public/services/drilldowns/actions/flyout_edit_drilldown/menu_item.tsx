@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -9,8 +10,11 @@ import { EuiNotificationBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useContainerState } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { EnhancedEmbeddableContext } from '../../../../../../embeddable_enhanced/public';
 import { txtDisplayName } from './i18n';
+import { ActionExecutionContext } from '../../../../../../../../src/plugins/ui_actions/public';
 
-export const MenuItem: React.FC<{ context: EnhancedEmbeddableContext }> = ({ context }) => {
+export const MenuItem: React.FC<{ context: ActionExecutionContext<EnhancedEmbeddableContext> }> = ({
+  context,
+}) => {
   const { events } = useContainerState(context.embeddable.enhancements.dynamicActions.state);
   const count = events.length;
 

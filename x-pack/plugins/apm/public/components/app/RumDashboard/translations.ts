@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -103,8 +104,8 @@ export const I18LABELS = {
       defaultMessage: 'Page load duration by region (avg.)',
     }
   ),
-  searchByUrl: i18n.translate('xpack.apm.rum.filters.searchByUrl', {
-    defaultMessage: 'Search by URL',
+  filterByUrl: i18n.translate('xpack.apm.rum.filters.filterByUrl', {
+    defaultMessage: 'Filter by URL',
   }),
   getSearchResultsLabel: (total: number) =>
     i18n.translate('xpack.apm.rum.filters.searchResults', {

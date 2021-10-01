@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getExistingEnvironmentsForService } from './get_environments/get_existing_environments_for_service';
@@ -26,9 +27,10 @@ describe('agent configuration queries', () => {
     it('fetches all environments', async () => {
       mock = await inspectSearchParams((setup) =>
         getAllEnvironments({
+          searchAggregatedTransactions: false,
           serviceName: 'foo',
           setup,
-          searchAggregatedTransactions: false,
+          size: 50,
         })
       );
 
@@ -42,6 +44,7 @@ describe('agent configuration queries', () => {
         getExistingEnvironmentsForService({
           serviceName: 'foo',
           setup,
+          size: 50,
         })
       );
 
@@ -55,6 +58,7 @@ describe('agent configuration queries', () => {
         getServiceNames({
           setup,
           searchAggregatedTransactions: false,
+          size: 50,
         })
       );
 

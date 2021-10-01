@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment } from 'react';
@@ -27,6 +28,8 @@ import { EuiDescriptionListProps } from '@elastic/eui/src/components/description
 import { ModelItemFull } from './models_list';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { timeFormatter } from '../../../../../../../common/util/date_utils';
+import { isDefined } from '../../../../../../../common/types/guards';
+import { isPopulatedObject } from '../../../../../../../common';
 
 interface ExpandedRowProps {
   item: ModelItemFull;
@@ -65,9 +68,13 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     license_level,
     pipelines,
+    description,
   } = item;
 
+  const { analytics_config: analyticsConfig, ...restMetaData } = metadata ?? {};
+
   const details = {
+    description,
     tags,
     version,
     estimated_operations,
@@ -78,6 +85,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
 
   function formatToListItems(items: Record<string, any>): EuiDescriptionListProps['listItems'] {
     return Object.entries(items)
+      .filter(([, value]) => isDefined(value))
       .map(([title, value]) => {
         if (title in formatterDictionary) {
           return {
@@ -99,20 +107,14 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                 {JSON.stringify(value, null, 2)}
               </EuiCodeBlock>
             ) : (
-              value
+              value.toString()
             ),
         };
-      })
-      .filter(({ description }) => {
-        return description !== undefined;
       });
   }
 
   const {
-    services: {
-      share,
-      application: { navigateToUrl },
-    },
+    services: { share },
   } = useMlKibana();
 
   const tabs = [
@@ -146,6 +148,26 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                 />
               </EuiPanel>
             </EuiFlexItem>
+            {isPopulatedObject(restMetaData) ? (
+              <EuiFlexItem>
+                <EuiPanel>
+                  <EuiTitle size={'xs'}>
+                    <h5>
+                      <FormattedMessage
+                        id="xpack.ml.trainedModels.modelsList.expandedRow.metadataTitle"
+                        defaultMessage="Metadata"
+                      />
+                    </h5>
+                  </EuiTitle>
+                  <EuiSpacer size={'m'} />
+                  <EuiDescriptionList
+                    compressed={true}
+                    type="column"
+                    listItems={formatToListItems(restMetaData)}
+                  />
+                </EuiPanel>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGrid>
         </>
       ),
@@ -184,7 +206,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                       />
                     </EuiPanel>
                   </EuiFlexItem>
-                  {metadata?.analytics_config && (
+                  {analyticsConfig && (
                     <EuiFlexItem>
                       <EuiPanel>
                         <EuiTitle size={'xs'}>
@@ -199,7 +221,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                         <EuiDescriptionList
                           compressed={true}
                           type="column"
-                          listItems={formatToListItems(metadata.analytics_config)}
+                          listItems={formatToListItems(analyticsConfig)}
                         />
                       </EuiPanel>
                     </EuiFlexItem>
@@ -364,62 +386,63 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
               <>
                 <EuiSpacer size={'m'} />
                 <EuiFlexGrid columns={2} gutterSize={'m'}>
-                  {Object.entries(pipelines).map(([pipelineName, { processors, description }]) => {
-                    return (
-                      <EuiFlexItem key={pipelineName}>
-                        <EuiPanel>
-                          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                            <EuiFlexItem grow={false}>
-                              <EuiTitle size={'xs'}>
-                                <h5>{pipelineName}</h5>
-                              </EuiTitle>
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiButtonEmpty
-                                onClick={async () => {
-                                  const ingestPipelinesAppUrlGenerator = share.urlGenerators.getUrlGenerator(
-                                    'INGEST_PIPELINES_APP_URL_GENERATOR'
-                                  );
-                                  await navigateToUrl(
-                                    await ingestPipelinesAppUrlGenerator.createUrl({
+                  {Object.entries(pipelines).map(
+                    ([pipelineName, { processors, description: pipelineDescription }]) => {
+                      return (
+                        <EuiFlexItem key={pipelineName}>
+                          <EuiPanel>
+                            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                              <EuiFlexItem grow={false}>
+                                <EuiTitle size={'xs'}>
+                                  <h5>{pipelineName}</h5>
+                                </EuiTitle>
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <EuiButtonEmpty
+                                  onClick={() => {
+                                    const locator = share.url.locators.get(
+                                      'INGEST_PIPELINES_APP_LOCATOR'
+                                    );
+                                    if (!locator) return;
+                                    locator.navigate({
                                       page: 'pipeline_edit',
                                       pipelineId: pipelineName,
                                       absolute: true,
-                                    })
-                                  );
-                                }}
-                              >
-                                <FormattedMessage
-                                  id="xpack.ml.trainedModels.modelsList.expandedRow.editPipelineLabel"
-                                  defaultMessage="Edit"
-                                />
-                              </EuiButtonEmpty>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
+                                    });
+                                  }}
+                                >
+                                  <FormattedMessage
+                                    id="xpack.ml.trainedModels.modelsList.expandedRow.editPipelineLabel"
+                                    defaultMessage="Edit"
+                                  />
+                                </EuiButtonEmpty>
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
 
-                          {description && <EuiText>{description}</EuiText>}
-                          <EuiSpacer size={'m'} />
-                          <EuiTitle size={'xxs'}>
-                            <h6>
-                              <FormattedMessage
-                                id="xpack.ml.trainedModels.modelsList.expandedRow.processorsTitle"
-                                defaultMessage="Processors"
-                              />
-                            </h6>
-                          </EuiTitle>
-                          <EuiCodeBlock
-                            language="painless"
-                            fontSize="m"
-                            paddingSize="m"
-                            overflowHeight={300}
-                            isCopyable
-                          >
-                            {JSON.stringify(processors, null, 2)}
-                          </EuiCodeBlock>
-                        </EuiPanel>
-                      </EuiFlexItem>
-                    );
-                  })}
+                            {pipelineDescription && <EuiText>{pipelineDescription}</EuiText>}
+                            <EuiSpacer size={'m'} />
+                            <EuiTitle size={'xxs'}>
+                              <h6>
+                                <FormattedMessage
+                                  id="xpack.ml.trainedModels.modelsList.expandedRow.processorsTitle"
+                                  defaultMessage="Processors"
+                                />
+                              </h6>
+                            </EuiTitle>
+                            <EuiCodeBlock
+                              language="json"
+                              fontSize="m"
+                              paddingSize="m"
+                              overflowHeight={300}
+                              isCopyable
+                            >
+                              {JSON.stringify(processors, null, 2)}
+                            </EuiCodeBlock>
+                          </EuiPanel>
+                        </EuiFlexItem>
+                      );
+                    }
+                  )}
                 </EuiFlexGrid>
               </>
             ),

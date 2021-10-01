@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getCriteriaFromNetworkType } from './get_criteria_from_network_type';
 import { NetworkType } from '../../../../network/store/model';
-import { FlowTarget } from '../../../../graphql/types';
+import { FlowTarget } from '../../../../../common/search_strategy';
 
 describe('get_criteria_from_network_type', () => {
   test('returns network names from criteria if the network type is details and it is source', () => {

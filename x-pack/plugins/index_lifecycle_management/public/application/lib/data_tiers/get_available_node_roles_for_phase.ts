@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -11,8 +12,6 @@ import {
 } from '../../../../common/types';
 
 import { phaseToNodePreferenceMap } from '../../../../common/constants';
-
-export type AllocationNodeRole = DataTierRole | 'none';
 
 /**
  * Given a phase and current cluster node roles, determine which nodes the phase
@@ -25,7 +24,7 @@ export type AllocationNodeRole = DataTierRole | 'none';
 export const getAvailableNodeRoleForPhase = (
   phase: PhaseWithAllocation,
   nodesByRoles: ListNodesRouteResponse['nodesByRoles']
-): AllocationNodeRole => {
+): DataTierRole | undefined => {
   const preferredNodeRoles = phaseToNodePreferenceMap[phase];
 
   // The 'data' role covers all node roles, so if we have at least one node with the data role
@@ -34,5 +33,5 @@ export const getAvailableNodeRoleForPhase = (
     return preferredNodeRoles[0];
   }
 
-  return preferredNodeRoles.find((role) => Boolean(nodesByRoles[role]?.length)) ?? 'none';
+  return preferredNodeRoles.find((role) => Boolean(nodesByRoles[role]?.length));
 };

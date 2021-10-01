@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import hash from 'object-hash';
@@ -12,7 +13,7 @@ import {
 } from '../../../../common/agent_configuration/configuration_types';
 import { APMIndexDocumentParams } from '../../helpers/create_es_client/create_internal_es_client';
 
-export async function createOrUpdateConfiguration({
+export function createOrUpdateConfiguration({
   configurationId,
   configurationIntake,
   setup,
@@ -44,5 +45,5 @@ export async function createOrUpdateConfiguration({
     params.id = configurationId;
   }
 
-  return internalClient.index(params);
+  return internalClient.index('create_or_update_agent_configuration', params);
 }

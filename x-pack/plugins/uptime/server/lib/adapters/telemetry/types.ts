@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export interface PageViewParams {
@@ -39,4 +40,8 @@ export interface UptimeTelemetry {
   dateRangeEnd: string[];
   autorefreshInterval: number[];
   autoRefreshEnabled: boolean;
+
+  fleet_no_of_unique_monitors: number;
+  fleet_monitor_frequency: number[];
+  fleet_monitor_name_stats: Stats;
 }

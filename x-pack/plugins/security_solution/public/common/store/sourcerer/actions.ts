@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import actionCreatorFactory from 'typescript-fsa';
@@ -21,9 +22,8 @@ export const setIndexPatternsList = actionCreator<{
   configIndexPatterns: string[];
 }>('SET_INDEX_PATTERNS_LIST');
 
-export const setSignalIndexName = actionCreator<{ signalIndexName: string }>(
-  'SET_SIGNAL_INDEX_NAME'
-);
+export const setSignalIndexName =
+  actionCreator<{ signalIndexName: string }>('SET_SIGNAL_INDEX_NAME');
 
 export const setSourcererScopeLoading = actionCreator<{ id: SourcererScopeName; loading: boolean }>(
   'SET_SOURCERER_SCOPE_LOADING'

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { HttpStart } from 'kibana/public';
@@ -9,7 +10,9 @@ import { HttpStart } from 'kibana/public';
 import {
   TRUSTED_APPS_CREATE_API,
   TRUSTED_APPS_DELETE_API,
+  TRUSTED_APPS_GET_API,
   TRUSTED_APPS_LIST_API,
+  TRUSTED_APPS_UPDATE_API,
   TRUSTED_APPS_SUMMARY_API,
 } from '../../../../../common/endpoint/constants';
 
@@ -20,18 +23,39 @@ import {
   PostTrustedAppCreateRequest,
   PostTrustedAppCreateResponse,
   GetTrustedAppsSummaryResponse,
+  PutTrustedAppUpdateRequest,
+  PutTrustedAppUpdateResponse,
+  PutTrustedAppsRequestParams,
+  GetOneTrustedAppRequestParams,
+  GetOneTrustedAppResponse,
+  GetTrustedAppsSummaryRequest,
 } from '../../../../../common/endpoint/types/trusted_apps';
+import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 
-import { resolvePathVariables } from './utils';
+import { sendGetEndpointSpecificPackagePolicies } from '../../policy/store/services/ingest';
 
 export interface TrustedAppsService {
+  getTrustedApp(params: GetOneTrustedAppRequestParams): Promise<GetOneTrustedAppResponse>;
   getTrustedAppsList(request: GetTrustedAppsListRequest): Promise<GetTrustedListAppsResponse>;
   deleteTrustedApp(request: DeleteTrustedAppsRequestParams): Promise<void>;
   createTrustedApp(request: PostTrustedAppCreateRequest): Promise<PostTrustedAppCreateResponse>;
+  updateTrustedApp(
+    params: PutTrustedAppsRequestParams,
+    request: PutTrustedAppUpdateRequest
+  ): Promise<PutTrustedAppUpdateResponse>;
+  getPolicyList(
+    options?: Parameters<typeof sendGetEndpointSpecificPackagePolicies>[1]
+  ): ReturnType<typeof sendGetEndpointSpecificPackagePolicies>;
 }
 
 export class TrustedAppsHttpService implements TrustedAppsService {
   constructor(private http: HttpStart) {}
+
+  async getTrustedApp(params: GetOneTrustedAppRequestParams) {
+    return this.http.get<GetOneTrustedAppResponse>(
+      resolvePathVariables(TRUSTED_APPS_GET_API, params)
+    );
+  }
 
   async getTrustedAppsList(request: GetTrustedAppsListRequest) {
     return this.http.get<GetTrustedListAppsResponse>(TRUSTED_APPS_LIST_API, {
@@ -49,7 +73,23 @@ export class TrustedAppsHttpService implements TrustedAppsService {
     });
   }
 
-  async getTrustedAppsSummary() {
-    return this.http.get<GetTrustedAppsSummaryResponse>(TRUSTED_APPS_SUMMARY_API);
+  async updateTrustedApp(
+    params: PutTrustedAppsRequestParams,
+    updatedTrustedApp: PutTrustedAppUpdateRequest
+  ) {
+    return this.http.put<PutTrustedAppUpdateResponse>(
+      resolvePathVariables(TRUSTED_APPS_UPDATE_API, params),
+      { body: JSON.stringify(updatedTrustedApp) }
+    );
+  }
+
+  async getTrustedAppsSummary(request: GetTrustedAppsSummaryRequest) {
+    return this.http.get<GetTrustedAppsSummaryResponse>(TRUSTED_APPS_SUMMARY_API, {
+      query: request,
+    });
+  }
+
+  getPolicyList(options?: Parameters<typeof sendGetEndpointSpecificPackagePolicies>[1]) {
+    return sendGetEndpointSpecificPackagePolicies(this.http, options);
   }
 }

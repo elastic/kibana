@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RequestHandler } from 'src/core/server';
-import { TypeOf } from '@kbn/config-schema';
-import { GetOneOutputRequestSchema, PutOutputRequestSchema } from '../../types';
-import { GetOneOutputResponse, GetOutputsResponse } from '../../../common';
+import type { RequestHandler } from 'src/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+
+import type { GetOneOutputRequestSchema, PutOutputRequestSchema } from '../../types';
+import type { GetOneOutputResponse, GetOutputsResponse } from '../../../common';
 import { outputService } from '../../services/output';
 import { defaultIngestErrorHandler } from '../../errors';
 
@@ -29,28 +31,27 @@ export const getOutputsHandler: RequestHandler = async (context, request, respon
   }
 };
 
-export const getOneOuputHandler: RequestHandler<
-  TypeOf<typeof GetOneOutputRequestSchema.params>
-> = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  try {
-    const output = await outputService.get(soClient, request.params.outputId);
+export const getOneOuputHandler: RequestHandler<TypeOf<typeof GetOneOutputRequestSchema.params>> =
+  async (context, request, response) => {
+    const soClient = context.core.savedObjects.client;
+    try {
+      const output = await outputService.get(soClient, request.params.outputId);
 
-    const body: GetOneOutputResponse = {
-      item: output,
-    };
+      const body: GetOneOutputResponse = {
+        item: output,
+      };
 
-    return response.ok({ body });
-  } catch (error) {
-    if (error.isBoom && error.output.statusCode === 404) {
-      return response.notFound({
-        body: { message: `Output ${request.params.outputId} not found` },
-      });
+      return response.ok({ body });
+    } catch (error) {
+      if (error.isBoom && error.output.statusCode === 404) {
+        return response.notFound({
+          body: { message: `Output ${request.params.outputId} not found` },
+        });
+      }
+
+      return defaultIngestErrorHandler({ error, response });
     }
-
-    return defaultIngestErrorHandler({ error, response });
-  }
-};
+  };
 
 export const putOuputHandler: RequestHandler<
   TypeOf<typeof PutOutputRequestSchema.params>,

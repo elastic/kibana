@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -46,6 +47,11 @@ export function WebCoreVitalsTitle({
   const closePopover = () => setIsPopoverOpen(false);
   const closeBrowserPopover = () => setIsBrowserPopoverOpen(false);
 
+  const helpAriaLabel = i18n.translate(
+    'xpack.observability.ux.dashboard.webCoreVitals.helpAriaLabel',
+    { defaultMessage: 'help' }
+  );
+
   return (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem>
@@ -56,6 +62,7 @@ export function WebCoreVitalsTitle({
               isOpen={isPopoverOpen}
               button={
                 <EuiButtonIcon
+                  aria-label={helpAriaLabel}
                   onClick={() => setIsPopoverOpen(true)}
                   color={'text'}
                   iconType={'questionInCircle'}
@@ -98,6 +105,7 @@ export function WebCoreVitalsTitle({
                 isOpen={isBrowserPopoverOpen}
                 button={
                   <EuiButtonIcon
+                    aria-label={helpAriaLabel}
                     onClick={() => setIsBrowserPopoverOpen(true)}
                     color={'text'}
                     iconType={'questionInCircle'}

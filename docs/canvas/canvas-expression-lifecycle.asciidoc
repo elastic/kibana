@@ -177,8 +177,8 @@ Since all of the sub-expressions are now resolved into actual values, the <<imag
 demodata
 | image dataurl={
   if condition={getCell price | gte 100} 
-    then={asset 3cb3ec3a-84d7-48fa-8709-274ad5cc9e0b} 
-    else={asset cbc11a1f-8f25-4163-94b4-2c3a060192e7}
+    then={asset "asset-3cb3ec3a-84d7-48fa-8709-274ad5cc9e0b"} 
+    else={asset "asset-cbc11a1f-8f25-4163-94b4-2c3a060192e7"}
 }
 ----
 

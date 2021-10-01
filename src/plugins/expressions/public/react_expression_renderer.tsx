@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useRef, useEffect, useState, useLayoutEffect } from 'react';
@@ -41,7 +30,11 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
   ) => React.ReactElement | React.ReactElement[];
   padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
   onEvent?: (event: ExpressionRendererEvent) => void;
-  onData$?: <TData, TInspectorAdapters>(data: TData, adapters?: TInspectorAdapters) => void;
+  onData$?: <TData, TInspectorAdapters>(
+    data: TData,
+    adapters?: TInspectorAdapters,
+    partial?: boolean
+  ) => void;
   /**
    * An observable which can be used to re-run the expression without destroying the component
    */
@@ -86,12 +79,16 @@ export const ReactExpressionRenderer = ({
   const hasHandledErrorRef = useRef(false);
 
   // will call done() in LayoutEffect when done with rendering custom error state
-  const errorRenderHandlerRef: React.MutableRefObject<null | IInterpreterRenderHandlers> = useRef(
-    null
-  );
+  const errorRenderHandlerRef: React.MutableRefObject<null | IInterpreterRenderHandlers> =
+    useRef(null);
   const [debouncedExpression, setDebouncedExpression] = useState(expression);
   const [waitingForDebounceToComplete, setDebouncePending] = useState(false);
+  const firstRender = useRef(true);
   useShallowCompareEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
     if (debounce === undefined) {
       return;
     }
@@ -141,8 +138,8 @@ export const ReactExpressionRenderer = ({
     }
     if (onData$) {
       subs.push(
-        expressionLoaderRef.current.data$.subscribe((newData) => {
-          onData$(newData, expressionLoaderRef.current?.inspect());
+        expressionLoaderRef.current.data$.subscribe(({ partial, result }) => {
+          onData$(result, expressionLoaderRef.current?.inspect(), partial);
         })
       );
     }
@@ -173,6 +170,7 @@ export const ReactExpressionRenderer = ({
   }, [
     hasCustomRenderErrorHandler,
     onEvent,
+    expressionLoaderOptions.interactive,
     expressionLoaderOptions.renderMode,
     expressionLoaderOptions.syncColors,
   ]);

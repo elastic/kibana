@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useFakeTimers, SinonFakeTimers } from 'sinon';
@@ -36,9 +37,9 @@ describe('delay', () => {
       isModelMemoryEstimationPayloadValid: true,
     } as JobValidator;
     wizardInitialized$ = new BehaviorSubject<boolean>(false);
-    mockJobCreator = ({
+    mockJobCreator = {
       wizardInitialized$,
-    } as unknown) as JobCreator;
+    } as unknown as JobCreator;
     modelMemoryEstimator = modelMemoryEstimatorProvider(mockJobCreator, mockJobValidator);
   });
   afterEach(() => {
@@ -105,9 +106,9 @@ describe('delay', () => {
 
     modelMemoryEstimator.updates$.subscribe(spy);
 
-    modelMemoryEstimator.update(({
+    modelMemoryEstimator.update({
       analysisConfig: { detectors: [] },
-    } as unknown) as CalculatePayload);
+    } as unknown as CalculatePayload);
     // @ts-ignore
     mockJobValidator.isModelMemoryEstimationPayloadValid = false;
     clock.tick(601);

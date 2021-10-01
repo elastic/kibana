@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { PackageInfo, AgentPolicy, PackagePolicy } from '../types';
 
-// Assume packages only ever include 1 config template for now
+import type { PackageInfo, AgentPolicy, PackagePolicy } from '../types';
+
 export const isPackageLimited = (packageInfo: PackageInfo): boolean => {
-  return packageInfo.policy_templates?.[0]?.multiple === false;
+  return (packageInfo.policy_templates || []).some(
+    (policyTemplate) => policyTemplate.multiple === false
+  );
 };
 
 export const doesAgentPolicyAlreadyIncludePackage = (

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { argv } from 'yargs';
@@ -9,6 +10,7 @@ import { execSync } from 'child_process';
 import moment from 'moment';
 import path from 'path';
 import fs from 'fs';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { getEsClient } from '../shared/get_es_client';
 import { parseIndexUrl } from '../shared/parse_index_url';
 
@@ -35,8 +37,14 @@ async function run() {
       bool: {
         must_not: [
           {
-            term: {
-              'service.name': 'elastic-co-frontend',
+            terms: {
+              'service.name': [
+                'elastic-co-frontend',
+                'filebeat',
+                'metricbeat',
+                'heartbeat',
+                'apm-server',
+              ],
             },
           },
         ],
@@ -94,18 +102,6 @@ async function run() {
         ],
       },
     },
-    {
-      index: '.kibana',
-      bool: {
-        filter: [
-          {
-            term: {
-              type: 'ml-job',
-            },
-          },
-        ],
-      },
-    },
   ];
 
   // eslint-disable-next-line no-console
@@ -115,14 +111,12 @@ async function run() {
 
   const query = {
     bool: {
-      should: should.map(({ bool }) => ({ bool })),
+      should: should.map(({ bool }) => ({ bool })) as QueryDslQueryContainer[],
       minimum_should_match: 1,
     },
   };
 
   const root = path.join(__dirname, '../../../../..');
-  const commonDir = path.join(root, 'x-pack/test/apm_api_integration/common');
-  const archivesDir = path.join(commonDir, 'fixtures/es_archiver');
 
   const options = parseIndexUrl(esUrl);
 
@@ -153,15 +147,15 @@ async function run() {
       (bucket) => bucket.key as string
     ) ?? [];
 
-  // create the archive
+  const indicesToArchive = indicesWithDocs.join(',');
 
+  // create the archive
+  const tmpDir = path.join(__dirname, 'tmp/');
   execSync(
-    `node scripts/es_archiver save ${archiveName} ${indicesWithDocs
-      .filter((index) => !index.startsWith('.kibana'))
-      .concat('.kibana')
-      .join(
-        ','
-      )} --dir=${archivesDir} --kibana-url=${kibanaUrl} --es-url=${esUrl} --query='${JSON.stringify(
+    `node scripts/es_archiver save ${path.join(
+      tmpDir,
+      archiveName
+    )} ${indicesToArchive} --kibana-url=${kibanaUrl} --es-url=${esUrl} --query='${JSON.stringify(
       query
     )}'`,
     {
@@ -173,7 +167,7 @@ async function run() {
   const currentConfig = {};
 
   // get the current metadata and extend/override metadata for the new archive
-  const configFilePath = path.join(commonDir, 'archives_metadata.ts');
+  const configFilePath = path.join(tmpDir, 'archives_metadata.ts');
 
   try {
     Object.assign(currentConfig, (await import(configFilePath)).default);
@@ -191,13 +185,32 @@ async function run() {
 
   fs.writeFileSync(
     configFilePath,
-    `export default ${JSON.stringify(newConfig, null, 2)}`,
+    `
+    /* eslint-disable-next-line*/
+    export default ${JSON.stringify(newConfig, null, 2)}`,
     { encoding: 'utf-8' }
   );
 
-  // run ESLint on the generated metadata files
+  const esArchiverDir = 'fixtures/es_archiver/';
 
-  execSync('node scripts/eslint **/*/archives_metadata.ts --fix', {
+  const apiIntegrationDir = path.join(
+    root,
+    'x-pack/test/apm_api_integration/common',
+    esArchiverDir
+  );
+  const e2eDir = path.join(__dirname, '../../ftr_e2e/cypress', esArchiverDir);
+
+  // Copy generated files to e2e test folder
+  execSync(`cp -r ${tmpDir} ${e2eDir}`);
+
+  // Copy generated files to API integration test folder
+  execSync(`cp -r ${tmpDir} ${apiIntegrationDir}`);
+
+  // Delete tmp folder
+  execSync(`rm -rf ${tmpDir}`);
+
+  // run ESLint on the generated metadata files
+  execSync('node scripts/eslint x-pack/**/*/archives_metadata.ts --fix', {
     cwd: root,
     stdio: 'inherit',
   });

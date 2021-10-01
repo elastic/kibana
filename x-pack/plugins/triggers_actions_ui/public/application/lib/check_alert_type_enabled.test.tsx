@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AlertType } from '../../types';
@@ -60,7 +61,7 @@ describe('checkAlertTypeEnabled', () => {
     expect(checkAlertTypeEnabled(alertType)).toMatchInlineSnapshot(`
       Object {
         "isEnabled": false,
-        "message": "This alert type requires a Gold license.",
+        "message": "This rule type requires a Gold license.",
       }
     `);
   });

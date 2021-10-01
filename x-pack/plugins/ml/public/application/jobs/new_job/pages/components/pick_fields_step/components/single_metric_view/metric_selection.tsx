@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, FC, useContext, useEffect, useState, useMemo } from 'react';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { SingleMetricJobCreator } from '../../../../../common/job_creator';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { AggSelect, DropDownLabel, DropDownProps, createLabel } from '../agg_select';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
+import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { AggFieldPair } from '../../../../../../../../../common/types/fields';
+import { sortFields } from '../../../../../../../../../common/util/fields_utils';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
 import { getChartSettings } from '../../../charts/common/settings';
 import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
@@ -31,7 +33,10 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
   } = useContext(JobCreatorContext);
   const jobCreator = jc as SingleMetricJobCreator;
 
-  const { fields } = newJobCapsService;
+  const fields = useMemo(
+    () => sortFields([...newJobCapsService.fields, ...jobCreator.runtimeFields]),
+    []
+  );
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>(
     jobCreator.aggFieldPair !== null ? [{ label: createLabel(jobCreator.aggFieldPair) }] : []
   );
@@ -87,7 +92,9 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
           [aggFieldPair],
           null,
           null,
-          cs.intervalMs
+          cs.intervalMs,
+          jobCreator.runtimeMappings,
+          jobCreator.datafeedConfig.indices_options
         );
         if (resp[DTR_IDX] !== undefined) {
           setLineChartData(resp);

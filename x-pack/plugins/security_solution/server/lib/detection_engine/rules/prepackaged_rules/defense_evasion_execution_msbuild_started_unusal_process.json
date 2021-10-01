@@ -9,12 +9,13 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
-  "language": "kuery",
-  "license": "Elastic License",
+  "language": "eql",
+  "license": "Elastic License v2",
   "name": "Microsoft Build Engine Started an Unusual Process",
-  "query": "event.category:process and event.type:(start or process_started) and process.parent.name:MSBuild.exe and process.name:(csc.exe or iexplore.exe or powershell.exe)",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"MSBuild.exe\" and\n  process.name : (\"csc.exe\", \"iexplore.exe\", \"powershell.exe\")\n",
   "references": [
     "https://blog.talosintelligence.com/2020/02/building-bypass-with-msbuild.html"
   ],
@@ -38,13 +39,21 @@
       },
       "technique": [
         {
-          "id": "T1500",
-          "name": "Compile After Delivery",
-          "reference": "https://attack.mitre.org/techniques/T1500/"
+          "id": "T1027",
+          "name": "Obfuscated Files or Information",
+          "reference": "https://attack.mitre.org/techniques/T1027/",
+          "subtechnique": [
+            {
+              "id": "T1027.004",
+              "name": "Compile After Delivery",
+              "reference": "https://attack.mitre.org/techniques/T1027/004/"
+            }
+          ]
         }
       ]
     }
   ],
-  "type": "query",
-  "version": 4
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 8
 }

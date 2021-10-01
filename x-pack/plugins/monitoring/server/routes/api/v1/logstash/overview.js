@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 import { getClusterStatus } from '../../../../lib/logstash/get_cluster_status';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors';
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { metricSet } from './metric_set_overview';
 import { INDEX_PATTERN_LOGSTASH } from '../../../../../common/constants';
 
@@ -51,7 +52,16 @@ export function logstashOverviewRoute(server) {
 
       try {
         const [metrics, clusterStatus] = await Promise.all([
-          getMetrics(req, lsIndexPattern, metricSet),
+          getMetrics(req, lsIndexPattern, metricSet, [
+            {
+              bool: {
+                should: [
+                  { term: { type: 'logstash_stats' } },
+                  { term: { 'metricset.name': 'stats' } },
+                ],
+              },
+            },
+          ]),
           getClusterStatus(req, lsIndexPattern, { clusterUuid }),
         ]);
 

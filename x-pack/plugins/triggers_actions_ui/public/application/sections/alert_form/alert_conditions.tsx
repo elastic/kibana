@@ -1,17 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { PropsWithChildren } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexItem, EuiText, EuiFlexGroup, EuiTitle, EuiButtonEmpty } from '@elastic/eui';
 import { partition } from 'lodash';
-import { ActionGroup, getBuiltinActionGroups } from '../../../../../alerts/common';
+import { ActionGroup, getBuiltinActionGroups } from '../../../../../alerting/common';
 
 const BUILT_IN_ACTION_GROUPS: Set<string> = new Set(getBuiltinActionGroups().map(({ id }) => id));
 
-export type ActionGroupWithCondition<T> = ActionGroup &
+export type ActionGroupWithCondition<
+  T,
+  ActionGroupIds extends string
+> = ActionGroup<ActionGroupIds> &
   (
     | // allow isRequired=false with or without conditions
     {
@@ -25,22 +30,26 @@ export type ActionGroupWithCondition<T> = ActionGroup &
       }
   );
 
-export interface AlertConditionsProps<ConditionProps> {
+export interface AlertConditionsProps<ConditionProps, ActionGroupIds extends string> {
   headline?: string;
-  actionGroups: Array<ActionGroupWithCondition<ConditionProps>>;
-  onInitializeConditionsFor?: (actionGroup: ActionGroupWithCondition<ConditionProps>) => void;
-  onResetConditionsFor?: (actionGroup: ActionGroupWithCondition<ConditionProps>) => void;
+  actionGroups: Array<ActionGroupWithCondition<ConditionProps, ActionGroupIds>>;
+  onInitializeConditionsFor?: (
+    actionGroup: ActionGroupWithCondition<ConditionProps, ActionGroupIds>
+  ) => void;
+  onResetConditionsFor?: (
+    actionGroup: ActionGroupWithCondition<ConditionProps, ActionGroupIds>
+  ) => void;
   includeBuiltInActionGroups?: boolean;
 }
 
-export const AlertConditions = <ConditionProps extends any>({
+export const AlertConditions = <ConditionProps extends any, ActionGroupIds extends string>({
   headline,
   actionGroups,
   onInitializeConditionsFor,
   onResetConditionsFor,
   includeBuiltInActionGroups = false,
   children,
-}: PropsWithChildren<AlertConditionsProps<ConditionProps>>) => {
+}: PropsWithChildren<AlertConditionsProps<ConditionProps, ActionGroupIds>>) => {
   const [withConditions, withoutConditions] = partition(
     includeBuiltInActionGroups
       ? actionGroups
@@ -115,3 +124,6 @@ export const AlertConditions = <ConditionProps extends any>({
     </EuiFlexGroup>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { AlertConditions as default };

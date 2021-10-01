@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText, EuiSpacer } from '@elastic/eui';
@@ -12,24 +13,25 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import {
+  DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
+  IS_DRAGGING_CLASS_NAME,
+} from '@kbn/securitysolution-t-grid';
 import { timelineActions } from '../../../store/timeline';
 
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
-import { useDraggableKeyboardWrapper } from '../../../../common/components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { AddDataProviderPopover } from './add_data_provider_popover';
 import { BrowserFields } from '../../../../common/containers/source';
 import {
-  DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
   getTimelineProviderDraggableId,
   getTimelineProviderDroppableId,
-  IS_DRAGGING_CLASS_NAME,
 } from '../../../../common/components/drag_and_drop/helpers';
-
 import { DataProvider, DataProviderType, DataProvidersAnd, IS_OPERATOR } from './data_provider';
 import { EMPTY_GROUP, flattenIntoAndGroups } from './helpers';
 import { ProviderItemBadge } from './provider_item_badge';
 
 import * as i18n from './translations';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export const EMPTY_PROVIDERS_GROUP_CLASS_NAME = 'empty-providers-group';
 
@@ -155,9 +157,10 @@ interface DataProvidersGroupItem extends Omit<Props, 'dataProviders'> {
 export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
   ({ browserFields, group, groupIndex, dataProvider, index, timelineId }) => {
     const keyboardHandlerRef = useRef<HTMLDivElement | null>(null);
-    const [, setHoverActionsOwnFocus] = useState<boolean>(false);
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [, setClosePopOverTrigger] = useState(false);
     const dispatch = useDispatch();
+    const { timelines } = useKibana().services;
 
     const handleClosePopOverTrigger = useCallback(() => {
       setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger);
@@ -240,16 +243,25 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
     }, []);
 
     const openPopover = useCallback(() => {
-      setHoverActionsOwnFocus(true);
+      setIsPopoverOpen(true);
     }, []);
 
-    const { onBlur, onKeyDown } = useDraggableKeyboardWrapper({
+    const { onBlur, onKeyDown } = timelines.getUseDraggableKeyboardWrapper()({
       closePopover: handleClosePopOverTrigger,
       draggableId,
       fieldName: dataProvider.queryMatch.field,
       keyboardHandlerRef,
       openPopover,
     });
+
+    const keyDownHandler = useCallback(
+      (keyboardEvent: React.KeyboardEvent<Element>) => {
+        if (keyboardHandlerRef.current === document.activeElement) {
+          onKeyDown(keyboardEvent);
+        }
+      },
+      [onKeyDown]
+    );
 
     const DraggableContent = useCallback(
       (provided, snapshot) => (
@@ -275,6 +287,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
                 kqlQuery={index > 0 ? dataProvider.kqlQuery : group[0].kqlQuery}
                 isEnabled={index > 0 ? dataProvider.enabled : group[0].enabled}
                 isExcluded={index > 0 ? dataProvider.excluded : group[0].excluded}
+                isPopoverOpen={isPopoverOpen}
                 onDataProviderEdited={handleDataProviderEdited}
                 operator={
                   index > 0
@@ -284,6 +297,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
                 register={dataProvider}
                 providerId={index > 0 ? group[0].id : dataProvider.id}
                 timelineId={timelineId}
+                setIsPopoverOpen={setIsPopoverOpen}
                 toggleEnabledProvider={handleToggleEnabledProvider}
                 toggleExcludedProvider={handleToggleExcludedProvider}
                 toggleTypeProvider={handleToggleTypeProvider}
@@ -315,7 +329,9 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
         handleToggleExcludedProvider,
         handleToggleTypeProvider,
         index,
+        isPopoverOpen,
         keyboardHandlerRef,
+        setIsPopoverOpen,
         timelineId,
       ]
     );
@@ -326,7 +342,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
         data-test-subj="draggableWrapperKeyboardHandler"
         onClick={onFocus}
         onBlur={onBlur}
-        onKeyDown={onKeyDown}
+        onKeyDown={keyDownHandler}
         ref={keyboardHandlerRef}
         role="button"
         tabIndex={0}
@@ -361,10 +377,10 @@ interface DataProvidersGroup extends Props {
 
 const DataProvidersGroup = React.memo<DataProvidersGroup>(
   ({ browserFields, timelineId, group, groupIndex, isLastGroup }) => {
-    const droppableId = useMemo(() => getTimelineProviderDroppableId({ groupIndex, timelineId }), [
-      groupIndex,
-      timelineId,
-    ]);
+    const droppableId = useMemo(
+      () => getTimelineProviderDroppableId({ groupIndex, timelineId }),
+      [groupIndex, timelineId]
+    );
 
     const GroupDataProviders = useMemo(
       () =>

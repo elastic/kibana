@@ -1,16 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Fragment, useRef, useState, ReactElement } from 'react';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
+import type { ReactElement } from 'react';
+import React, { Fragment, useRef, useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { NotificationsStart } from 'src/core/public';
-import { RoleMapping } from '../../../../../common/model';
-import { RoleMappingsAPIClient } from '../../role_mappings_api_client';
+import type { NotificationsStart } from 'src/core/public';
+
+import type { RoleMapping } from '../../../../../common/model';
+import type { RoleMappingsAPIClient } from '../../role_mappings_api_client';
 
 interface Props {
   roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;
@@ -139,59 +143,57 @@ export const DeleteProvider: React.FunctionComponent<Props> = ({
     const isSingle = roleMappings.length === 1;
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={
-            isSingle
-              ? i18n.translate(
-                  'xpack.security.management.roleMappings.deleteRoleMapping.confirmModal.deleteSingleTitle',
-                  {
-                    defaultMessage: "Delete role mapping '{name}'?",
-                    values: { name: roleMappings[0].name },
-                  }
-                )
-              : i18n.translate(
-                  'xpack.security.management.roleMappings.deleteRoleMapping.confirmModal.deleteMultipleTitle',
-                  {
-                    defaultMessage: 'Delete {count} role mappings?',
-                    values: { count: roleMappings.length },
-                  }
-                )
+      <EuiConfirmModal
+        title={
+          isSingle
+            ? i18n.translate(
+                'xpack.security.management.roleMappings.deleteRoleMapping.confirmModal.deleteSingleTitle',
+                {
+                  defaultMessage: "Delete role mapping '{name}'?",
+                  values: { name: roleMappings[0].name },
+                }
+              )
+            : i18n.translate(
+                'xpack.security.management.roleMappings.deleteRoleMapping.confirmModal.deleteMultipleTitle',
+                {
+                  defaultMessage: 'Delete {count} role mappings?',
+                  values: { count: roleMappings.length },
+                }
+              )
+        }
+        onCancel={closeModal}
+        onConfirm={deleteRoleMappings}
+        cancelButtonText={i18n.translate(
+          'xpack.security.management.roleMappings.deleteRoleMapping.confirmModal.cancelButtonLabel',
+          { defaultMessage: 'Cancel' }
+        )}
+        confirmButtonText={i18n.translate(
+          'xpack.security.management.roleMappings.deleteRoleMapping.confirmModal.confirmButtonLabel',
+          {
+            defaultMessage: 'Delete {count, plural, one {role mapping} other {role mappings}}',
+            values: { count: roleMappings.length },
           }
-          onCancel={closeModal}
-          onConfirm={deleteRoleMappings}
-          cancelButtonText={i18n.translate(
-            'xpack.security.management.roleMappings.deleteRoleMapping.confirmModal.cancelButtonLabel',
-            { defaultMessage: 'Cancel' }
-          )}
-          confirmButtonText={i18n.translate(
-            'xpack.security.management.roleMappings.deleteRoleMapping.confirmModal.confirmButtonLabel',
-            {
-              defaultMessage: 'Delete {count, plural, one {role mapping} other {role mappings}}',
-              values: { count: roleMappings.length },
-            }
-          )}
-          confirmButtonDisabled={isDeleteInProgress}
-          buttonColor="danger"
-          data-test-subj="deleteRoleMappingConfirmationModal"
-        >
-          {!isSingle ? (
-            <Fragment>
-              <p>
-                {i18n.translate(
-                  'xpack.security.management.roleMappings.deleteRoleMapping.confirmModal.deleteMultipleListDescription',
-                  { defaultMessage: 'You are about to delete these role mappings:' }
-                )}
-              </p>
-              <ul>
-                {roleMappings.map(({ name }) => (
-                  <li key={name}>{name}</li>
-                ))}
-              </ul>
-            </Fragment>
-          ) : null}
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+        )}
+        confirmButtonDisabled={isDeleteInProgress}
+        buttonColor="danger"
+        data-test-subj="deleteRoleMappingConfirmationModal"
+      >
+        {!isSingle ? (
+          <Fragment>
+            <p>
+              {i18n.translate(
+                'xpack.security.management.roleMappings.deleteRoleMapping.confirmModal.deleteMultipleListDescription',
+                { defaultMessage: 'You are about to delete these role mappings:' }
+              )}
+            </p>
+            <ul>
+              {roleMappings.map(({ name }) => (
+                <li key={name}>{name}</li>
+              ))}
+            </ul>
+          </Fragment>
+        ) : null}
+      </EuiConfirmModal>
     );
   };
 

@@ -1,18 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import sinon from 'sinon';
 import { getStackStats, getAllStats, handleAllStats } from './get_all_stats';
 import { ESClusterStats } from './get_es_stats';
 import { KibanaStats } from './get_kibana_stats';
-import { ClustersHighLevelStats } from './get_high_level_stats';
+import { LogstashStatsByClusterUuid } from './get_logstash_stats';
 
 describe('get_all_stats', () => {
   const timestamp = Date.now();
-  const callCluster = sinon.stub();
+  const searchMock = sinon.stub();
+  const callCluster = { search: searchMock } as unknown as ElasticsearchClient;
+  afterEach(() => {
+    searchMock.reset();
+  });
 
   const esClusters = [
     { cluster_uuid: 'a' },
@@ -144,30 +150,32 @@ describe('get_all_stats', () => {
             logstash: {
               count: 1,
               versions: [{ version: '2.3.4-beta2', count: 1 }],
-              os: {
-                platforms: [],
-                platformReleases: [],
-                distros: [],
-                distroReleases: [],
+              cluster_stats: {
+                collection_types: {
+                  internal_collection: 1,
+                },
+                pipelines: {},
+                plugins: [],
               },
-              cloud: undefined,
             },
           },
         },
       ];
 
-      callCluster
-        .withArgs('search')
+      searchMock
         .onCall(0)
-        .returns(Promise.resolve(esStatsResponse))
+        .returns(Promise.resolve({ body: esStatsResponse }))
         .onCall(1)
-        .returns(Promise.resolve(kibanaStatsResponse))
+        .returns(Promise.resolve({ body: kibanaStatsResponse }))
         .onCall(2)
-        .returns(Promise.resolve(logstashStatsResponse))
+        .returns(Promise.resolve({ body: logstashStatsResponse }))
+        .returns(Promise.resolve({ body: logstashStatsResponse }))
         .onCall(3)
-        .returns(Promise.resolve({})) // Beats stats
+        .returns(Promise.resolve({ body: {} })) // Beats stats
         .onCall(4)
-        .returns(Promise.resolve({})); // Beats state
+        .returns(Promise.resolve({ body: {} })) // Beats state
+        .onCall(5)
+        .returns(Promise.resolve({ body: {} })); // Logstash state
 
       expect(await getAllStats(['a'], callCluster, timestamp, 1)).toStrictEqual(allClusters);
     });
@@ -177,7 +185,7 @@ describe('get_all_stats', () => {
         aggregations: { cluster_uuids: { buckets: [] } },
       };
 
-      callCluster.withArgs('search').returns(Promise.resolve(clusterUuidsResponse));
+      searchMock.returns(Promise.resolve({ body: clusterUuidsResponse }));
 
       expect(await getAllStats([], callCluster, timestamp, 1)).toStrictEqual([]);
     });
@@ -186,8 +194,8 @@ describe('get_all_stats', () => {
   describe('handleAllStats', () => {
     it('handles response', () => {
       const clusters = handleAllStats(esClusters as ESClusterStats[], {
-        kibana: (kibanaStats as unknown) as KibanaStats,
-        logstash: (logstashStats as unknown) as ClustersHighLevelStats,
+        kibana: kibanaStats as unknown as KibanaStats,
+        logstash: logstashStats as unknown as LogstashStatsByClusterUuid,
         beats: {},
       });
 

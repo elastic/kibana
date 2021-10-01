@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiText } from '@elastic/eui';
@@ -9,7 +10,6 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { DraggableBadge } from '../../../common/components/draggables';
-import { ExternalLinkIcon } from '../../../common/components/external_link_icon';
 import { CertificateFingerprintLink } from '../../../common/components/links';
 
 import * as i18n from './translations';
@@ -40,8 +40,9 @@ export const CertificateFingerprint = React.memo<{
   certificateType: CertificateType;
   contextId: string;
   fieldName: string;
+  isDraggable?: boolean;
   value?: string | null;
-}>(({ eventId, certificateType, contextId, fieldName, value }) => {
+}>(({ eventId, certificateType, contextId, fieldName, isDraggable, value }) => {
   return (
     <DraggableBadge
       contextId={contextId}
@@ -49,6 +50,7 @@ export const CertificateFingerprint = React.memo<{
       eventId={eventId}
       field={fieldName}
       iconType="snowflake"
+      isDraggable={isDraggable}
       tooltipContent={
         <EuiText size="xs">
           <span>{fieldName}</span>
@@ -60,7 +62,6 @@ export const CertificateFingerprint = React.memo<{
         {certificateType === 'client' ? i18n.CLIENT_CERT : i18n.SERVER_CERT}
       </FingerprintLabel>
       <CertificateFingerprintLink certificateFingerprint={value || ''} />
-      <ExternalLinkIcon />
     </DraggableBadge>
   );
 });

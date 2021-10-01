@@ -1,18 +1,49 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import React, { useState, useCallback } from 'react';
 import { PropTypes } from 'prop-types';
 import { connect } from 'react-redux';
-import { withState, withHandlers, compose } from 'recompose';
 import { get } from 'lodash';
 import { datasourceRegistry } from '../../expression_types';
 import { getServerFunctions } from '../../state/selectors/app';
 import { getSelectedElement, getSelectedPage } from '../../state/selectors/workpad';
 import { setArgumentAtIndex, setAstAtIndex, flushContext } from '../../state/actions/elements';
 import { Datasource as Component } from './datasource';
+
+const DatasourceComponent = (props) => {
+  const { args, datasource } = props;
+  const [stateArgs, updateArgs] = useState(args);
+  const [selecting, setSelecting] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
+  const [isInvalid, setInvalid] = useState(false);
+  const [stateDatasource, selectDatasource] = useState(datasource);
+
+  const resetArgs = useCallback(() => {
+    updateArgs(args);
+  }, [updateArgs, args]);
+
+  return (
+    <Component
+      {...props}
+      stateArgs={stateArgs}
+      updateArgs={updateArgs}
+      selecting={selecting}
+      setSelecting={setSelecting}
+      previewing={previewing}
+      setPreviewing={setPreviewing}
+      isInvalid={isInvalid}
+      setInvalid={setInvalid}
+      stateDatasource={stateDatasource}
+      selectDatasource={selectDatasource}
+      resetArgs={resetArgs}
+    />
+  );
+};
 
 const mapStateToProps = (state) => ({
   element: getSelectedElement(state),
@@ -22,10 +53,12 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   dispatchArgumentAtIndex: (props) => (arg) => dispatch(setArgumentAtIndex({ ...props, arg })),
-  dispatchAstAtIndex: ({ index, element, pageId }) => (ast) => {
-    dispatch(flushContext(element.id));
-    dispatch(setAstAtIndex(index, ast, element, pageId));
-  },
+  dispatchAstAtIndex:
+    ({ index, element, pageId }) =>
+    (ast) => {
+      dispatch(flushContext(element.id));
+      dispatch(setAstAtIndex(index, ast, element, pageId));
+    },
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
@@ -81,17 +114,11 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   };
 };
 
-export const Datasource = compose(
-  connect(mapStateToProps, mapDispatchToProps, mergeProps),
-  withState('stateArgs', 'updateArgs', ({ args }) => args),
-  withState('selecting', 'setSelecting', false),
-  withState('previewing', 'setPreviewing', false),
-  withState('isInvalid', 'setInvalid', false),
-  withState('stateDatasource', 'selectDatasource', ({ datasource }) => datasource),
-  withHandlers({
-    resetArgs: ({ updateArgs, args }) => () => updateArgs(args),
-  })
-)(Component);
+export const Datasource = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+  mergeProps
+)(DatasourceComponent);
 
 Datasource.propTypes = {
   done: PropTypes.func,

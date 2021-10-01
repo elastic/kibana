@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -12,11 +13,12 @@ const ES_TEST_INDEX_NAME = 'functional-test-actions-index';
 
 // eslint-disable-next-line import/no-default-export
 export default function indexTest({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const supertest = getService('supertest');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('index action', () => {
-    beforeEach(() => clearTestIndex(es));
+    beforeEach(() => esDeleteAllIndices(ES_TEST_INDEX_NAME));
 
     let createdActionID: string;
     let createdActionIDWithIndex: string;
@@ -39,6 +41,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         isPreconfigured: false,
         name: 'An index action',
         actionTypeId: '.index',
+        isMissingSecrets: false,
         config: {
           index: ES_TEST_INDEX_NAME,
           refresh: false,
@@ -55,6 +58,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
         isPreconfigured: false,
+        isMissingSecrets: false,
         name: 'An index action',
         actionTypeId: '.index',
         config: { index: ES_TEST_INDEX_NAME, refresh: false, executionTimeField: null },
@@ -80,6 +84,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         isPreconfigured: false,
         name: 'An index action with index config',
         actionTypeId: '.index',
+        isMissingSecrets: false,
         config: {
           index: ES_TEST_INDEX_NAME,
           refresh: true,
@@ -98,6 +103,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         isPreconfigured: false,
         name: 'An index action with index config',
         actionTypeId: '.index',
+        isMissingSecrets: false,
         config: {
           index: ES_TEST_INDEX_NAME,
           refresh: true,
@@ -138,17 +144,10 @@ export default function indexTest({ getService }: FtrProviderContext) {
   });
 }
 
-async function clearTestIndex(es: any) {
-  return await es.indices.delete({
-    index: ES_TEST_INDEX_NAME,
-    ignoreUnavailable: true,
-  });
-}
-
 async function getTestIndexItems(es: any) {
   const result = await es.search({
     index: ES_TEST_INDEX_NAME,
   });
 
-  return result.hits.hits;
+  return result.body.hits.hits;
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -11,7 +12,7 @@ import { RouteDependencies } from '../../plugin';
 export function registerGroupsRoute({ router, enterpriseSearchRequestHandler }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/groups',
+      path: '/internal/workplace_search/groups',
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -21,19 +22,16 @@ export function registerGroupsRoute({ router, enterpriseSearchRequestHandler }: 
 
   router.post(
     {
-      path: '/api/workplace_search/groups',
+      path: '/internal/workplace_search/groups',
       validate: {
         body: schema.object({
           group_name: schema.string(),
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: '/ws/org/groups',
-        body: request.body,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/groups',
+    })
   );
 }
 
@@ -43,7 +41,7 @@ export function registerSearchGroupsRoute({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/workplace_search/groups/search',
+      path: '/internal/workplace_search/groups/search',
       validate: {
         body: schema.object({
           page: schema.object({
@@ -58,35 +56,30 @@ export function registerSearchGroupsRoute({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: '/ws/org/groups/search',
-        body: request.body,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/groups/search',
+    })
   );
 }
 
 export function registerGroupRoute({ router, enterpriseSearchRequestHandler }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/groups/{id}',
+      path: '/internal/workplace_search/groups/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/ws/org/groups/${request.params.id}`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/groups/:id',
+    })
   );
 
   router.put(
     {
-      path: '/api/workplace_search/groups/{id}',
+      path: '/internal/workplace_search/groups/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -98,28 +91,23 @@ export function registerGroupRoute({ router, enterpriseSearchRequestHandler }: R
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/ws/org/groups/${request.params.id}`,
-        body: request.body,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/groups/:id',
+    })
   );
 
   router.delete(
     {
-      path: '/api/workplace_search/groups/{id}',
+      path: '/internal/workplace_search/groups/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/ws/org/groups/${request.params.id}`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/groups/:id',
+    })
   );
 }
 
@@ -129,18 +117,16 @@ export function registerGroupUsersRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/groups/{id}/group_users',
+      path: '/internal/workplace_search/groups/{id}/group_users',
       validate: {
         params: schema.object({
           id: schema.string(),
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/ws/org/groups/${request.params.id}/group_users`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/groups/:id/group_users',
+    })
   );
 }
 
@@ -150,7 +136,7 @@ export function registerShareGroupRoute({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/workplace_search/groups/{id}/share',
+      path: '/internal/workplace_search/groups/{id}/share',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -160,37 +146,9 @@ export function registerShareGroupRoute({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/ws/org/groups/${request.params.id}/share`,
-        body: request.body,
-      })(context, request, response);
-    }
-  );
-}
-
-export function registerAssignGroupRoute({
-  router,
-  enterpriseSearchRequestHandler,
-}: RouteDependencies) {
-  router.post(
-    {
-      path: '/api/workplace_search/groups/{id}/assign',
-      validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-        body: schema.object({
-          user_ids: schema.arrayOf(schema.string()),
-        }),
-      },
-    },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/ws/org/groups/${request.params.id}/assign`,
-        body: request.body,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/groups/:id/share',
+    })
   );
 }
 
@@ -200,7 +158,7 @@ export function registerBoostsGroupRoute({
 }: RouteDependencies) {
   router.put(
     {
-      path: '/api/workplace_search/groups/{id}/boosts',
+      path: '/internal/workplace_search/groups/{id}/boosts',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -212,12 +170,9 @@ export function registerBoostsGroupRoute({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/ws/org/groups/${request.params.id}/update_source_boosts`,
-        body: request.body,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/groups/:id/update_source_boosts',
+    })
   );
 }
 
@@ -227,6 +182,5 @@ export const registerGroupsRoutes = (dependencies: RouteDependencies) => {
   registerGroupRoute(dependencies);
   registerGroupUsersRoute(dependencies);
   registerShareGroupRoute(dependencies);
-  registerAssignGroupRoute(dependencies);
   registerBoostsGroupRoute(dependencies);
 };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
@@ -9,7 +10,6 @@ import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
 import uuid from 'uuid';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 
-import { getColumnWidthFromType } from '../../../timelines/components/timeline/body/column_headers/helpers';
 import { Sort } from '../../../timelines/components/timeline/body/sort';
 import {
   DataProvider,
@@ -19,26 +19,33 @@ import {
   IS_OPERATOR,
   EXISTS_OPERATOR,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { SerializedFilterQuery } from '../../../common/store/model';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
+  ColumnHeaderOptions,
   TimelineEventsType,
-  TimelineExpandedEvent,
   TimelineTypeLiteral,
   TimelineType,
   RowRendererId,
   TimelineStatus,
   TimelineId,
+  TimelineTabs,
+  SerializedFilterQuery,
+  ToggleDetailPanel,
+  TimelinePersistInput,
 } from '../../../../common/types/timeline';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 
 import { timelineDefaults } from './defaults';
-import { ColumnHeaderOptions, KqlMode, TimelineModel } from './model';
+import { KqlMode, TimelineModel } from './model';
 import { TimelineById } from './types';
 import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
+import {
+  DEFAULT_COLUMN_MIN_WIDTH,
+  RESIZED_COLUMN_MIN_WITH,
+} from '../../components/timeline/body/constants';
 import { activeTimeline } from '../../containers/active_timeline_context';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
@@ -143,13 +150,15 @@ export const addTimelineToStore = ({
 }: AddTimelineParams): TimelineById => {
   if (shouldResetActiveTimelineContext(id, timelineById[id], timeline)) {
     activeTimeline.setActivePage(0);
-    activeTimeline.setExpandedEvent({});
+    activeTimeline.setExpandedDetail({});
   }
   return {
     ...timelineById,
     [id]: {
       ...timeline,
+      filterManager: timelineById[id].filterManager,
       isLoading: timelineById[id].isLoading,
+      initialized: timelineById[id].initialized,
       dateRange:
         timeline.status === TimelineStatus.immutable &&
         timeline.timelineType === TimelineType.template
@@ -162,47 +171,20 @@ export const addTimelineToStore = ({
   };
 };
 
-interface AddNewTimelineParams {
-  columns: ColumnHeaderOptions[];
-  dataProviders?: DataProvider[];
-  dateRange?: {
-    start: string;
-    end: string;
-  };
-  excludedRowRendererIds?: RowRendererId[];
-  expandedEvent?: TimelineExpandedEvent;
-  filters?: Filter[];
-  id: string;
-  itemsPerPage?: number;
-  indexNames: string[];
-  kqlQuery?: {
-    filterQuery: SerializedFilterQuery | null;
-  };
-  show?: boolean;
-  sort?: Sort[];
-  showCheckboxes?: boolean;
+interface AddNewTimelineParams extends TimelinePersistInput {
   timelineById: TimelineById;
   timelineType: TimelineTypeLiteral;
 }
 
 /** Adds a new `Timeline` to the provided collection of `TimelineById` */
 export const addNewTimeline = ({
-  columns,
-  dataProviders = [],
-  dateRange: maybeDateRange,
-  excludedRowRendererIds = [],
-  expandedEvent = {},
-  filters = timelineDefaults.filters,
   id,
-  itemsPerPage = timelineDefaults.itemsPerPage,
-  indexNames,
-  kqlQuery = { filterQuery: null },
-  sort = timelineDefaults.sort,
-  show = false,
-  showCheckboxes = false,
   timelineById,
   timelineType,
+  dateRange: maybeDateRange,
+  ...timelineProps
 }: AddNewTimelineParams): TimelineById => {
+  const timeline = timelineById[id];
   const { from: startDateRange, to: endDateRange } = normalizeTimeRange({ from: '', to: '' });
   const dateRange = maybeDateRange ?? { start: startDateRange, end: endDateRange };
   const templateTimelineInfo =
@@ -216,23 +198,14 @@ export const addNewTimeline = ({
     ...timelineById,
     [id]: {
       id,
+      ...(timeline ? timeline : {}),
       ...timelineDefaults,
-      columns,
-      dataProviders,
+      ...timelineProps,
       dateRange,
-      expandedEvent,
-      excludedRowRendererIds,
-      filters,
-      itemsPerPage,
-      indexNames,
-      kqlQuery,
-      sort,
-      show,
       savedObjectId: null,
       version: null,
       isSaving: false,
       isLoading: false,
-      showCheckboxes,
       timelineType,
       ...templateTimelineInfo,
     },
@@ -302,6 +275,9 @@ export const updateGraphEventId = ({
     [id]: {
       ...timeline,
       graphEventId,
+      ...(graphEventId === '' && id === TimelineId.active
+        ? { activeTab: timeline.prevActiveTab, prevActiveTab: timeline.activeTab }
+        : {}),
     },
   };
 };
@@ -489,13 +465,14 @@ export const applyDeltaToTimelineColumnWidth = ({
       },
     };
   }
-  const minWidthPixels = getColumnWidthFromType(timeline.columns[columnIndex].type!);
-  const requestedWidth = timeline.columns[columnIndex].width + delta; // raw change in width
-  const width = Math.max(minWidthPixels, requestedWidth); // if the requested width is smaller than the min, use the min
+
+  const requestedWidth =
+    (timeline.columns[columnIndex].initialWidth ?? DEFAULT_COLUMN_MIN_WIDTH) + delta; // raw change in width
+  const initialWidth = Math.max(RESIZED_COLUMN_MIN_WITH, requestedWidth); // if the requested width is smaller than the min, use the min
 
   const columnWithNewWidth = {
     ...timeline.columns[columnIndex],
-    width,
+    initialWidth,
   };
 
   const columns = [
@@ -602,46 +579,27 @@ export const updateTimelineColumns = ({
   };
 };
 
-interface UpdateTimelineDescriptionParams {
-  id: string;
+interface UpdateTimelineTitleAndDescriptionParams {
   description: string;
-  timelineById: TimelineById;
-}
-
-export const updateTimelineDescription = ({
-  id,
-  description,
-  timelineById,
-}: UpdateTimelineDescriptionParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      description: description.endsWith(' ') ? `${description.trim()} ` : description.trim(),
-    },
-  };
-};
-
-interface UpdateTimelineTitleParams {
   id: string;
   title: string;
   timelineById: TimelineById;
 }
 
-export const updateTimelineTitle = ({
+export const updateTimelineTitleAndDescription = ({
+  description,
   id,
   title,
   timelineById,
-}: UpdateTimelineTitleParams): TimelineById => {
+}: UpdateTimelineTitleAndDescriptionParams): TimelineById => {
   const timeline = timelineById[id];
 
   return {
     ...timelineById,
     [id]: {
       ...timeline,
-      title: title.endsWith(' ') ? `${title.trim()} ` : title.trim(),
+      description: description.trim(),
+      title: title.trim(),
     },
   };
 };
@@ -1448,4 +1406,22 @@ export const updateExcludedRowRenderersIds = ({
       excludedRowRendererIds,
     },
   };
+};
+
+export const updateTimelineDetailsPanel = (action: ToggleDetailPanel) => {
+  const { tabType } = action;
+
+  const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail']);
+  const expandedTabType = tabType ?? TimelineTabs.query;
+
+  return action.panelView && panelViewOptions.has(action.panelView)
+    ? {
+        [expandedTabType]: {
+          params: action.params ? { ...action.params } : {},
+          panelView: action.panelView,
+        },
+      }
+    : {
+        [expandedTabType]: {},
+      };
 };

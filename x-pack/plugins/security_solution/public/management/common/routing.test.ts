@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { extractTrustedAppsListPageLocation, getTrustedAppsListPath } from './routing';
@@ -97,27 +98,37 @@ describe('routing', () => {
 
   describe('getTrustedAppsListPath()', () => {
     it('builds proper path when no parameters provided', () => {
-      expect(getTrustedAppsListPath()).toEqual('/trusted_apps');
+      expect(getTrustedAppsListPath()).toEqual('/administration/trusted_apps');
     });
 
     it('builds proper path when empty parameters provided', () => {
-      expect(getTrustedAppsListPath({})).toEqual('/trusted_apps');
+      expect(getTrustedAppsListPath({})).toEqual('/administration/trusted_apps');
     });
 
     it('builds proper path when only page size provided', () => {
-      expect(getTrustedAppsListPath({ page_size: 20 })).toEqual('/trusted_apps?page_size=20');
+      const pageSize = 20;
+      expect(getTrustedAppsListPath({ page_size: pageSize })).toEqual(
+        `/administration/trusted_apps?page_size=${pageSize}`
+      );
     });
 
     it('builds proper path when only page index provided', () => {
-      expect(getTrustedAppsListPath({ page_index: 2 })).toEqual('/trusted_apps?page_index=2');
+      const pageIndex = 2;
+      expect(getTrustedAppsListPath({ page_index: pageIndex })).toEqual(
+        `/administration/trusted_apps?page_index=${pageIndex}`
+      );
     });
 
     it('builds proper path when only "show" provided', () => {
-      expect(getTrustedAppsListPath({ show: 'create' })).toEqual('/trusted_apps?show=create');
+      const show = 'create';
+      expect(getTrustedAppsListPath({ show })).toEqual(`/administration/trusted_apps?show=${show}`);
     });
 
     it('builds proper path when only view type provided', () => {
-      expect(getTrustedAppsListPath({ view_type: 'list' })).toEqual('/trusted_apps?view_type=list');
+      const viewType = 'list';
+      expect(getTrustedAppsListPath({ view_type: viewType })).toEqual(
+        `/administration/trusted_apps?view_type=${viewType}`
+      );
     });
 
     it('builds proper path when all params provided', () => {
@@ -126,55 +137,82 @@ describe('routing', () => {
         page_size: 20,
         show: 'create',
         view_type: 'list',
+        filter: 'test',
+        included_policies: 'globally',
+        excluded_policies: 'unassigned',
       };
 
       expect(getTrustedAppsListPath(location)).toEqual(
-        '/trusted_apps?page_index=2&page_size=20&view_type=list&show=create'
+        `/administration/trusted_apps?page_index=${location.page_index}&page_size=${location.page_size}&view_type=${location.view_type}&show=${location.show}&filter=${location.filter}&included_policies=${location.included_policies}&excluded_policies=${location.excluded_policies}`
       );
     });
 
     it('builds proper path when page index is equal to default', () => {
-      const path = getTrustedAppsListPath({
+      const location: TrustedAppsListPageLocation = {
         page_index: MANAGEMENT_DEFAULT_PAGE,
         page_size: 20,
         show: 'create',
         view_type: 'list',
-      });
+        filter: '',
+        included_policies: '',
+        excluded_policies: '',
+      };
+      const path = getTrustedAppsListPath(location);
 
-      expect(path).toEqual('/trusted_apps?page_size=20&view_type=list&show=create');
+      expect(path).toEqual(
+        `/administration/trusted_apps?page_size=${location.page_size}&view_type=${location.view_type}&show=${location.show}`
+      );
     });
 
     it('builds proper path when page size is equal to default', () => {
-      const path = getTrustedAppsListPath({
+      const location: TrustedAppsListPageLocation = {
         page_index: 2,
         page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
         show: 'create',
         view_type: 'list',
-      });
+        filter: '',
+        included_policies: '',
+        excluded_policies: '',
+      };
+      const path = getTrustedAppsListPath(location);
 
-      expect(path).toEqual('/trusted_apps?page_index=2&view_type=list&show=create');
+      expect(path).toEqual(
+        `/administration/trusted_apps?page_index=${location.page_index}&view_type=${location.view_type}&show=${location.show}`
+      );
     });
 
     it('builds proper path when "show" is equal to default', () => {
-      const path = getTrustedAppsListPath({
+      const location: TrustedAppsListPageLocation = {
         page_index: 2,
         page_size: 20,
         show: undefined,
         view_type: 'list',
-      });
+        filter: '',
+        included_policies: '',
+        excluded_policies: '',
+      };
+      const path = getTrustedAppsListPath(location);
 
-      expect(path).toEqual('/trusted_apps?page_index=2&page_size=20&view_type=list');
+      expect(path).toEqual(
+        `/administration/trusted_apps?page_index=${location.page_index}&page_size=${location.page_size}&view_type=${location.view_type}`
+      );
     });
 
     it('builds proper path when view type is equal to default', () => {
-      const path = getTrustedAppsListPath({
+      const location: TrustedAppsListPageLocation = {
         page_index: 2,
         page_size: 20,
         show: 'create',
         view_type: 'grid',
-      });
+        filter: '',
+        included_policies: '',
+        excluded_policies: '',
+      };
+      const path = getTrustedAppsListPath(location);
 
-      expect(path).toEqual('/trusted_apps?page_index=2&page_size=20&show=create');
+      expect(path).toEqual(
+        `/administration/trusted_apps?page_index=${location.page_index}&page_size=${location.page_size}&show=${location.show}`
+      );
     });
 
     it('builds proper path when params are equal to default', () => {
@@ -185,7 +223,7 @@ describe('routing', () => {
         view_type: 'grid',
       });
 
-      expect(path).toEqual('/trusted_apps');
+      expect(path).toEqual('/administration/trusted_apps');
     });
   });
 });

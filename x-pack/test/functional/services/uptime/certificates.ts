@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -10,6 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export function UptimeCertProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const find = getService('find');
 
   const PageObjects = getPageObjects(['common', 'timePicker', 'header']);
 
@@ -26,7 +28,7 @@ export function UptimeCertProvider({ getService, getPageObjects }: FtrProviderCo
   return {
     async hasViewCertButton() {
       return retry.tryForTime(15000, async () => {
-        await testSubjects.existOrFail('uptimeCertificatesLink');
+        await find.existsByCssSelector('[href="/app/uptime/certificates"]');
       });
     },
     async certificateExists(cert: { certId: string; monitorId: string }) {

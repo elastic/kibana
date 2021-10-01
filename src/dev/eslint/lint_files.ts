@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { CLIEngine } from 'eslint';
@@ -22,6 +11,45 @@ import { CLIEngine } from 'eslint';
 import { REPO_ROOT } from '@kbn/utils';
 import { createFailError, ToolingLog } from '@kbn/dev-utils';
 import { File } from '../file';
+
+// For files living on the filesystem
+function lintFilesOnFS(cli: CLIEngine, files: File[]) {
+  const paths = files.map((file) => file.getRelativePath());
+  return cli.executeOnFiles(paths);
+}
+
+// For files living somewhere else (ie. git object)
+async function lintFilesOnContent(cli: CLIEngine, files: File[]) {
+  const report: {
+    results: any[];
+    errorCount: number;
+    warningCount: number;
+    fixableErrorCount: number;
+    fixableWarningCount: number;
+  } = {
+    results: [],
+    errorCount: 0,
+    warningCount: 0,
+    fixableErrorCount: 0,
+    fixableWarningCount: 0,
+  };
+
+  for (let i = 0; i < files.length; i++) {
+    const r = cli.executeOnText(await files[i].getContent(), files[i].getRelativePath());
+    // Despite a relative path was given, the result would contain an absolute one. Work around it.
+    r.results[0].filePath = r.results[0].filePath.replace(
+      files[i].getAbsolutePath(),
+      files[i].getRelativePath()
+    );
+    report.results.push(...r.results);
+    report.errorCount += r.errorCount;
+    report.warningCount += r.warningCount;
+    report.fixableErrorCount += r.fixableErrorCount;
+    report.fixableWarningCount += r.fixableWarningCount;
+  }
+
+  return report;
+}
 
 /**
  * Lints a list of files with eslint. eslint reports are written to the log
@@ -31,15 +59,16 @@ import { File } from '../file';
  * @param  {Array<File>} files
  * @return {undefined}
  */
-export function lintFiles(log: ToolingLog, files: File[], { fix }: { fix?: boolean } = {}) {
+export async function lintFiles(log: ToolingLog, files: File[], { fix }: { fix?: boolean } = {}) {
   const cli = new CLIEngine({
     cache: true,
     cwd: REPO_ROOT,
     fix,
   });
 
-  const paths = files.map((file) => file.getRelativePath());
-  const report = cli.executeOnFiles(paths);
+  const virtualFilesCount = files.filter((file) => file.isVirtual()).length;
+  const report =
+    virtualFilesCount && !fix ? await lintFilesOnContent(cli, files) : lintFilesOnFS(cli, files);
 
   if (fix) {
     CLIEngine.outputFixes(report);

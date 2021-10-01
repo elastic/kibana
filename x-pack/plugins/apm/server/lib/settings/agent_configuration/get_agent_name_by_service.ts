@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ProcessorEvent } from '../../../../common/processor_event';
@@ -42,7 +43,10 @@ export async function getAgentNameByService({
     },
   };
 
-  const { aggregations } = await apmEventClient.search(params);
+  const { aggregations } = await apmEventClient.search(
+    'get_agent_name_by_service',
+    params
+  );
   const agentName = aggregations?.agent_names.buckets[0]?.key;
   return agentName as string | undefined;
 }

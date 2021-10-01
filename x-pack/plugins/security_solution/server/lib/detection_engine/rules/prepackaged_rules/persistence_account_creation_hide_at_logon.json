@@ -1,0 +1,55 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies attempts to create a local account that will be hidden from the macOS logon window. This may indicate an attempt to evade user attention while maintaining persistence using a separate local account.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Potential Hidden Local User Account Creation",
+  "query": "event.category:process and event.type:(start or process_started) and\n process.name:dscl and process.args:(IsHidden and create and (true or 1 or yes))\n",
+  "references": [
+    "https://support.apple.com/en-us/HT203998"
+  ],
+  "risk_score": 47,
+  "rule_id": "41b638a1-8ab6-4f8e-86d9-466317ef2db5",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "macOS",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1078",
+          "name": "Valid Accounts",
+          "reference": "https://attack.mitre.org/techniques/T1078/",
+          "subtechnique": [
+            {
+              "id": "T1078.003",
+              "name": "Local Accounts",
+              "reference": "https://attack.mitre.org/techniques/T1078/003/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}

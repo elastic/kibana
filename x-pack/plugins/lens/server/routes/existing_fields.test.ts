@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IndexPattern } from 'src/plugins/data/common';
@@ -21,7 +22,7 @@ describe('existingFields', () => {
   }
 
   function searchResults(fields: Record<string, unknown[]> = {}) {
-    return { fields };
+    return { fields, _index: '_index', _id: '_id' };
   }
 
   it('should handle root level fields', () => {
@@ -60,9 +61,29 @@ describe('existingFields', () => {
     expect(result).toEqual(['bar']);
   });
 
+  it('supports runtime fields', () => {
+    const result = existingFields(
+      [searchResults({ runtime_foo: ['scriptvalue'] })],
+      [
+        field({
+          name: 'runtime_foo',
+          runtimeField: { type: 'long', script: { source: '2+2' } },
+        }),
+      ]
+    );
+
+    expect(result).toEqual(['runtime_foo']);
+  });
+
   it('supports meta fields', () => {
     const result = existingFields(
-      [{ _mymeta: 'abc', ...searchResults({ bar: ['scriptvalue'] }) }],
+      [
+        {
+          // @ts-expect-error _mymeta is not defined on estypes.SearchHit
+          _mymeta: 'abc',
+          ...searchResults({ bar: ['scriptvalue'] }),
+        },
+      ],
       [field({ name: '_mymeta', isMeta: true })]
     );
 
@@ -77,6 +98,11 @@ describe('buildFieldList', () => {
     typeMeta: 'typemeta',
     fields: [
       { name: 'foo', scripted: true, lang: 'painless', script: '2+2' },
+      {
+        name: 'runtime_foo',
+        isMapped: false,
+        runtimeField: { type: 'long', script: { source: '2+2' } },
+      },
       { name: 'bar' },
       { name: '@bar' },
       { name: 'baz' },
@@ -85,7 +111,7 @@ describe('buildFieldList', () => {
   };
 
   it('supports scripted fields', () => {
-    const fields = buildFieldList((indexPattern as unknown) as IndexPattern, []);
+    const fields = buildFieldList(indexPattern as unknown as IndexPattern, []);
     expect(fields.find((f) => f.isScript)).toMatchObject({
       isScript: true,
       name: 'foo',
@@ -94,8 +120,16 @@ describe('buildFieldList', () => {
     });
   });
 
+  it('supports runtime fields', () => {
+    const fields = buildFieldList(indexPattern as unknown as IndexPattern, []);
+    expect(fields.find((f) => f.runtimeField)).toMatchObject({
+      name: 'runtime_foo',
+      runtimeField: { type: 'long', script: { source: '2+2' } },
+    });
+  });
+
   it('supports meta fields', () => {
-    const fields = buildFieldList((indexPattern as unknown) as IndexPattern, ['_mymeta']);
+    const fields = buildFieldList(indexPattern as unknown as IndexPattern, ['_mymeta']);
     expect(fields.find((f) => f.isMeta)).toMatchObject({
       isScript: false,
       isMeta: true,

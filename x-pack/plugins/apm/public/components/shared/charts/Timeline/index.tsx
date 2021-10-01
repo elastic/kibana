@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
 import React, { PureComponent, ReactNode } from 'react';
 import { makeWidthFlexible } from 'react-vis';
+import { AgentMark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/Marks/get_agent_marks';
+import { ErrorMark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/Marks/get_error_marks';
 import { getPlotValues } from './plotUtils';
-import { TimelineAxis } from './TimelineAxis';
+import { TimelineAxis } from './timeline_axis';
 import { VerticalLines } from './VerticalLines';
-import { ErrorMark } from '../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_error_marks';
-import { AgentMark } from '../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
 
 export type Mark = AgentMark | ErrorMark;
 

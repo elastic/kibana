@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep, each, find, get, isNumber } from 'lodash';
@@ -12,7 +13,6 @@ import { ml } from './ml_api_service';
 
 import { getToastNotificationService } from '../services/toast_notification_service';
 import { isWebUrl } from '../util/url_utils';
-import { ML_DATA_PREVIEW_COUNT } from '../../../common/util/job_utils';
 import { TIME_FORMAT } from '../../../common/constants/time_format';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { validateTimeRange } from '../../../common/util/date_utils';
@@ -28,6 +28,8 @@ class JobService {
     // if populated when loading the job management page, the start datafeed modal
     // is automatically opened.
     this.tempJobCloningObjects = {
+      createdBy: undefined,
+      datafeed: undefined,
       job: undefined,
       skipTimeRangeStep: false,
       start: undefined,
@@ -85,26 +87,6 @@ class JobService {
         }),
         value: 0,
         show: true,
-      },
-    };
-  }
-
-  getBlankJob() {
-    return {
-      job_id: '',
-      description: '',
-      groups: [],
-      analysis_config: {
-        bucket_span: '15m',
-        influencers: [],
-        detectors: [],
-      },
-      data_description: {
-        time_field: '',
-        time_format: '', // 'epoch',
-        field_delimiter: '',
-        quote_character: '"',
-        format: 'delimited',
       },
     };
   }
@@ -325,67 +307,15 @@ class JobService {
     return ml.addJob({ jobId: job.job_id, job }).then(func).catch(func);
   }
 
-  cloneJob(job) {
-    // create a deep copy of a job object
-    // also remove items from the job which are set by the server and not needed
-    // in the future this formatting could be optional
-    const tempJob = cloneDeep(job);
-
-    // remove all of the items which should not be copied
-    // such as counts, state and times
-    delete tempJob.state;
-    delete tempJob.job_version;
-    delete tempJob.data_counts;
-    delete tempJob.create_time;
-    delete tempJob.finished_time;
-    delete tempJob.last_data_time;
-    delete tempJob.model_size_stats;
-    delete tempJob.node;
-    delete tempJob.average_bucket_processing_time_ms;
-    delete tempJob.model_snapshot_id;
-    delete tempJob.open_time;
-    delete tempJob.established_model_memory;
-    delete tempJob.calendars;
-    delete tempJob.timing_stats;
-    delete tempJob.forecasts_stats;
-    delete tempJob.assignment_explanation;
-
-    delete tempJob.analysis_config.use_per_partition_normalization;
-
-    each(tempJob.analysis_config.detectors, (d) => {
-      delete d.detector_index;
-    });
+  cloneDatafeed(datafeed) {
+    const tempDatafeed = cloneDeep(datafeed);
 
     // remove parts of the datafeed config which should not be copied
-    if (tempJob.datafeed_config) {
-      delete tempJob.datafeed_config.datafeed_id;
-      delete tempJob.datafeed_config.job_id;
-      delete tempJob.datafeed_config.state;
-      delete tempJob.datafeed_config.node;
-      delete tempJob.datafeed_config.timing_stats;
-      delete tempJob.datafeed_config.assignment_explanation;
-
-      // remove query_delay if it's between 60s and 120s
-      // the back-end produces a random value between 60 and 120 and so
-      // by deleting it, the back-end will produce a new random value
-      if (tempJob.datafeed_config.query_delay) {
-        const interval = parseInterval(tempJob.datafeed_config.query_delay);
-        if (interval !== null) {
-          const queryDelay = interval.asSeconds();
-          if (queryDelay > 60 && queryDelay < 120) {
-            delete tempJob.datafeed_config.query_delay;
-          }
-        }
-      }
+    if (tempDatafeed) {
+      delete tempDatafeed.datafeed_id;
+      delete tempDatafeed.job_id;
     }
-
-    // when jumping from a wizard to the advanced job creation,
-    // the wizard's created_by information should be stripped.
-    if (tempJob.custom_settings && tempJob.custom_settings.created_by) {
-      delete tempJob.custom_settings.created_by;
-    }
-
-    return tempJob;
+    return tempDatafeed;
   }
 
   // find a job based on the id
@@ -395,165 +325,6 @@ class JobService {
     });
 
     return job;
-  }
-
-  searchPreview(job) {
-    return new Promise((resolve, reject) => {
-      if (job.datafeed_config) {
-        // if query is set, add it to the search, otherwise use match_all
-        let query = { match_all: {} };
-        if (job.datafeed_config.query) {
-          query = job.datafeed_config.query;
-        }
-
-        // Get bucket span
-        // Get first doc time for datafeed
-        // Create a new query - must user query and must range query.
-        // Time range 'to' first doc time plus < 10 buckets
-
-        // Do a preliminary search to get the date of the earliest doc matching the
-        // query in the datafeed. This will be used to apply a time range criteria
-        // on the datafeed search preview.
-        // This time filter is required for datafeed searches using aggregations to ensure
-        // the search does not create too many buckets (default 10000 max_bucket limit),
-        // but apply it to searches without aggregations too for consistency.
-        ml.getTimeFieldRange({
-          index: job.datafeed_config.indices,
-          timeFieldName: job.data_description.time_field,
-          query,
-        })
-          .then((timeRange) => {
-            const bucketSpan = parseInterval(job.analysis_config.bucket_span);
-            const earliestMs = timeRange.start.epoch;
-            const latestMs = +timeRange.start.epoch + 10 * bucketSpan.asMilliseconds();
-
-            const body = {
-              query: {
-                bool: {
-                  must: [
-                    {
-                      range: {
-                        [job.data_description.time_field]: {
-                          gte: earliestMs,
-                          lt: latestMs,
-                          format: 'epoch_millis',
-                        },
-                      },
-                    },
-                    query,
-                  ],
-                },
-              },
-            };
-
-            // if aggs or aggregations is set, add it to the search
-            const aggregations = job.datafeed_config.aggs || job.datafeed_config.aggregations;
-            if (aggregations && Object.keys(aggregations).length) {
-              body.size = 0;
-              body.aggregations = aggregations;
-
-              // add script_fields if present
-              const scriptFields = job.datafeed_config.script_fields;
-              if (scriptFields && Object.keys(scriptFields).length) {
-                body.script_fields = scriptFields;
-              }
-
-              // add runtime_mappings if present
-              const runtimeMappings = job.datafeed_config.runtime_mappings;
-              if (runtimeMappings && Object.keys(runtimeMappings).length) {
-                body.runtime_mappings = runtimeMappings;
-              }
-            } else {
-              // if aggregations is not set and retrieveWholeSource is not set, add all of the fields from the job
-              body.size = ML_DATA_PREVIEW_COUNT;
-
-              // add script_fields if present
-              const scriptFields = job.datafeed_config.script_fields;
-              if (scriptFields && Object.keys(scriptFields).length) {
-                body.script_fields = scriptFields;
-              }
-
-              // add runtime_mappings if present
-              const runtimeMappings = job.datafeed_config.runtime_mappings;
-              if (runtimeMappings && Object.keys(runtimeMappings).length) {
-                body.runtime_mappings = runtimeMappings;
-              }
-
-              const fields = {};
-
-              // get fields from detectors
-              if (job.analysis_config.detectors) {
-                each(job.analysis_config.detectors, (dtr) => {
-                  if (dtr.by_field_name) {
-                    fields[dtr.by_field_name] = {};
-                  }
-                  if (dtr.field_name) {
-                    fields[dtr.field_name] = {};
-                  }
-                  if (dtr.over_field_name) {
-                    fields[dtr.over_field_name] = {};
-                  }
-                  if (dtr.partition_field_name) {
-                    fields[dtr.partition_field_name] = {};
-                  }
-                });
-              }
-
-              // get fields from influencers
-              if (job.analysis_config.influencers) {
-                each(job.analysis_config.influencers, (inf) => {
-                  fields[inf] = {};
-                });
-              }
-
-              // get fields from categorizationFieldName
-              if (job.analysis_config.categorization_field_name) {
-                fields[job.analysis_config.categorization_field_name] = {};
-              }
-
-              // get fields from summary_count_field_name
-              if (job.analysis_config.summary_count_field_name) {
-                fields[job.analysis_config.summary_count_field_name] = {};
-              }
-
-              // get fields from time_field
-              if (job.data_description.time_field) {
-                fields[job.data_description.time_field] = {};
-              }
-
-              // add runtime fields
-              if (runtimeMappings) {
-                Object.keys(runtimeMappings).forEach((fieldName) => {
-                  fields[fieldName] = {};
-                });
-              }
-
-              const fieldsList = Object.keys(fields);
-              if (fieldsList.length) {
-                body.fields = fieldsList;
-                body._source = false;
-              }
-            }
-
-            const data = {
-              index: job.datafeed_config.indices,
-              body,
-              ...(job.datafeed_config.indices_options || {}),
-            };
-
-            ml.esSearch(data)
-              .then((resp) => {
-                resolve(resp);
-              })
-              .catch((resp) => {
-                reject(resp);
-              });
-          })
-          .catch((resp) => {
-            reject(resp);
-          });
-      }
-    });
   }
 
   openJob(jobId) {
@@ -615,6 +386,10 @@ class JobService {
     return ml.jobs.closeJobs(jIds);
   }
 
+  resetJobs(jIds) {
+    return ml.jobs.resetJobs(jIds);
+  }
+
   validateDetector(detector) {
     return new Promise((resolve, reject) => {
       if (detector) {
@@ -637,10 +412,6 @@ class JobService {
       datafeedId = `datafeed-${jobId}`;
     }
     return datafeedId;
-  }
-
-  getDatafeedPreview(datafeedId) {
-    return ml.datafeedPreview({ datafeedId });
   }
 
   // get the list of job group ids as well as how many jobs are in each group

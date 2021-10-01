@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
@@ -25,22 +14,33 @@ export interface CustomPaletteArguments {
   color?: string[];
   gradient: boolean;
   reverse?: boolean;
+  stop?: number[];
+  range?: 'number' | 'percent';
+  rangeMin?: number;
+  rangeMax?: number;
+  continuity?: 'above' | 'below' | 'all' | 'none';
 }
 
 export interface CustomPaletteState {
   colors: string[];
   gradient: boolean;
+  stops: number[];
+  range: 'number' | 'percent';
+  rangeMin: number;
+  rangeMax: number;
+  continuity?: 'above' | 'below' | 'all' | 'none';
 }
 
 export interface SystemPaletteArguments {
   name: string;
 }
 
-export interface PaletteOutput<T = unknown> {
-  type: 'palette';
+export interface PaletteOutput<T = { [key: string]: unknown }> {
+  type: 'palette' | 'system_palette';
   name: string;
   params?: T;
 }
+
 export const defaultCustomColors = [
   // This set of defaults originated in Canvas, which, at present, is the primary
   // consumer of this function.  Changing this default requires a change in Canvas
@@ -94,6 +94,35 @@ export function palette(): ExpressionFunctionDefinition<
         }),
         required: false,
       },
+      stop: {
+        multi: true,
+        types: ['number'],
+        help: i18n.translate('charts.functions.palette.args.stopHelpText', {
+          defaultMessage:
+            'The palette color stops. When used, it must be associated with each color.',
+        }),
+        required: false,
+      },
+      continuity: {
+        types: ['string'],
+        options: ['above', 'below', 'all', 'none'],
+        default: 'above',
+        help: '',
+      },
+      rangeMin: {
+        types: ['number'],
+        help: '',
+      },
+      rangeMax: {
+        types: ['number'],
+        help: '',
+      },
+      range: {
+        types: ['string'],
+        options: ['number', 'percent'],
+        default: 'percent',
+        help: '',
+      },
       gradient: {
         types: ['boolean'],
         default: false,
@@ -112,15 +141,32 @@ export function palette(): ExpressionFunctionDefinition<
       },
     },
     fn: (input, args) => {
-      const { color, reverse, gradient } = args;
+      const {
+        color,
+        continuity,
+        reverse,
+        gradient,
+        stop,
+        range,
+        rangeMin = 0,
+        rangeMax = 100,
+      } = args;
       const colors = ([] as string[]).concat(color || defaultCustomColors);
-
+      const stops = ([] as number[]).concat(stop || []);
+      if (stops.length > 0 && colors.length !== stops.length) {
+        throw Error('When stop is used, each color must have an associated stop value.');
+      }
       return {
         type: 'palette',
         name: 'custom',
         params: {
           colors: reverse ? colors.reverse() : colors,
+          stops,
+          range: range ?? 'percent',
           gradient,
+          continuity,
+          rangeMin,
+          rangeMax,
         },
       };
     },

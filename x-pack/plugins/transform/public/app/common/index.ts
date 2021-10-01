@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export { isAggName } from './aggregations';
@@ -27,7 +28,6 @@ export {
 } from './transform';
 export { TRANSFORM_LIST_COLUMN, TransformListAction, TransformListRow } from './transform_list';
 export { getTransformProgress, isCompletedBatchTransform } from './transform_stats';
-export { getDiscoverUrl } from './navigation';
 export {
   getEsAggFromAggConfig,
   isPivotAggsConfigWithUiSupport,
@@ -63,6 +63,7 @@ export {
   getPreviewTransformRequestBody,
   getCreateTransformRequestBody,
   getPivotQuery,
+  getRequestPayload,
   isDefaultQuery,
   isMatchAllQuery,
   isSimpleQuery,

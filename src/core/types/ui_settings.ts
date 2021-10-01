@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { Type } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
 
@@ -32,7 +22,8 @@ export type UiSettingsType =
   | 'boolean'
   | 'string'
   | 'array'
-  | 'image';
+  | 'image'
+  | 'color';
 
 /**
  * UiSettings deprecation field options.
@@ -66,16 +57,22 @@ export interface UiSettingsParams<T = unknown> {
   requiresPageReload?: boolean;
   /** a flag indicating that value cannot be changed */
   readonly?: boolean;
+  /**
+   * a flag indicating that value might contain user sensitive data.
+   * used by telemetry to mask the value of the setting when sent.
+   */
+  sensitive?: boolean;
   /** defines a type of UI element {@link UiSettingsType} */
   type?: UiSettingsType;
   /** optional deprecation information. Used to generate a deprecation warning. */
   deprecation?: DeprecationSettings;
-  /*
-   * Allows defining a custom validation applicable to value change on the client.
-   * @deprecated
-   * Use schema instead.
+  /**
+   * index of the settings within its category (ascending order, smallest will be displayed first).
+   * Used for ordering in the UI.
+   *
+   * @remark settings without order defined will be displayed last and ordered by name
    */
-  validation?: ImageValidation | StringValidation;
+  order?: number;
   /*
    * Value validation schema
    * Used to validate value on write and read.
@@ -97,40 +94,6 @@ export interface UiSettingsParams<T = unknown> {
  * @public
  * */
 export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
-
-/**
- * Allows regex objects or a regex string
- * @public
- * */
-export type StringValidation = StringValidationRegex | StringValidationRegexString;
-
-/**
- * StringValidation with regex object
- * @public
- * */
-export interface StringValidationRegex {
-  regex: RegExp;
-  message: string;
-}
-
-/**
- * StringValidation as regex string
- * @public
- * */
-export interface StringValidationRegexString {
-  regexString: string;
-  message: string;
-}
-
-/**
- * @public
- * */
-export interface ImageValidation {
-  maxSize: {
-    length: number;
-    description: string;
-  };
-}
 
 /**
  * Describes the values explicitly set by user.

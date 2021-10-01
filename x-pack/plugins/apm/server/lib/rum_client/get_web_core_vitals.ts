@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { SetupUX } from '../../routes/rum_client';
 import {
   CLS_FIELD,
   FCP_FIELD,
@@ -19,14 +20,20 @@ export async function getWebCoreVitals({
   setup,
   urlQuery,
   percentile = 50,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX;
   urlQuery?: string;
   percentile?: number;
+  start: number;
+  end: number;
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
     urlQuery,
+    start,
+    end,
   });
 
   const params = mergeProjection(projection, {
@@ -102,7 +109,7 @@ export async function getWebCoreVitals({
 
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search('get_web_core_vitals', params);
   const {
     lcp,
     cls,
@@ -116,7 +123,7 @@ export async function getWebCoreVitals({
   } = response.aggregations ?? {};
 
   const getRanksPercentages = (
-    ranks?: Array<{ key: number; value: number }>
+    ranks?: Array<{ key: number; value: number | null }>
   ) => {
     const ranksVal = ranks?.map(({ value }) => value?.toFixed(0) ?? 0) ?? [];
     return [

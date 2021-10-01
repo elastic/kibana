@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Server } from '@hapi/hapi';
@@ -23,6 +12,8 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { CspConfig } from '../csp';
 import { mockRouter, RouterMock } from './router/router.mock';
 import {
+  InternalHttpServicePreboot,
+  HttpServicePreboot,
   InternalHttpServiceSetup,
   HttpServiceSetup,
   HttpServiceStart,
@@ -42,6 +33,10 @@ import { ExternalUrlConfig } from '../external_url';
 type BasePathMocked = jest.Mocked<InternalHttpServiceSetup['basePath']>;
 type AuthMocked = jest.Mocked<InternalHttpServiceSetup['auth']>;
 
+export type HttpServicePrebootMock = jest.Mocked<HttpServicePreboot>;
+export type InternalHttpServicePrebootMock = jest.Mocked<
+  Omit<InternalHttpServicePreboot, 'basePath'>
+> & { basePath: BasePathMocked };
 export type HttpServiceSetupMock = jest.Mocked<
   Omit<HttpServiceSetup, 'basePath' | 'createRouter'>
 > & {
@@ -83,10 +78,37 @@ const createAuthMock = () => {
   return mock;
 };
 
+const createInternalPrebootContractMock = () => {
+  const mock: InternalHttpServicePrebootMock = {
+    registerRoutes: jest.fn(),
+    // @ts-expect-error tsc cannot infer ContextName and uses never
+    registerRouteHandlerContext: jest.fn(),
+    registerStaticDir: jest.fn(),
+    basePath: createBasePathMock(),
+    csp: CspConfig.DEFAULT,
+    externalUrl: ExternalUrlConfig.DEFAULT,
+    auth: createAuthMock(),
+    getServerInfo: jest.fn(),
+  };
+  return mock;
+};
+
+const createPrebootContractMock = () => {
+  const internalMock = createInternalPrebootContractMock();
+
+  const mock: HttpServicePrebootMock = {
+    registerRoutes: internalMock.registerRoutes,
+    basePath: createBasePathMock(),
+    getServerInfo: jest.fn(),
+  };
+
+  return mock;
+};
+
 const createInternalSetupContractMock = () => {
   const mock: InternalHttpServiceSetupMock = {
     // we can mock other hapi server methods when we need it
-    server: ({
+    server: {
       name: 'http-server-test',
       version: 'kibana',
       route: jest.fn(),
@@ -94,12 +116,13 @@ const createInternalSetupContractMock = () => {
       stop: jest.fn(),
       config: jest.fn().mockReturnValue(configMock.create()),
       // @ts-expect-error somehow it thinks that `Server` isn't a `Construtable`
-    } as unknown) as jest.MockedClass<Server>,
+    } as unknown as jest.MockedClass<Server>,
     createCookieSessionStorageFactory: jest.fn(),
     registerOnPreRouting: jest.fn(),
     registerOnPreAuth: jest.fn(),
     registerAuth: jest.fn(),
     registerOnPostAuth: jest.fn(),
+    // @ts-expect-error tsc cannot infer ContextName and uses never
     registerRouteHandlerContext: jest.fn(),
     registerOnPreResponse: jest.fn(),
     createRouter: jest.fn().mockImplementation(() => mockRouter.create({})),
@@ -110,6 +133,7 @@ const createInternalSetupContractMock = () => {
     auth: createAuthMock(),
     getAuthHeaders: jest.fn(),
     getServerInfo: jest.fn(),
+    registerPrebootRoutes: jest.fn(),
   };
   mock.createCookieSessionStorageFactory.mockResolvedValue(sessionStorageMock.createFactory());
   mock.createRouter.mockImplementation(() => mockRouter.create());
@@ -136,6 +160,7 @@ const createSetupContractMock = () => {
     basePath: internalMock.basePath,
     csp: CspConfig.DEFAULT,
     createRouter: jest.fn(),
+    // @ts-expect-error tsc cannot infer ContextName and uses never
     registerRouteHandlerContext: jest.fn(),
     auth: {
       get: internalMock.auth.get,
@@ -174,11 +199,13 @@ type HttpServiceContract = PublicMethodsOf<HttpService>;
 
 const createHttpServiceMock = () => {
   const mocked: jest.Mocked<HttpServiceContract> = {
+    preboot: jest.fn(),
     setup: jest.fn(),
     getStartContract: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
   };
+  mocked.preboot.mockResolvedValue(createInternalPrebootContractMock());
   mocked.setup.mockResolvedValue(createInternalSetupContractMock());
   mocked.getStartContract.mockReturnValue(createInternalStartContractMock());
   mocked.start.mockResolvedValue(createInternalStartContractMock());
@@ -213,6 +240,8 @@ export const httpServiceMock = {
   create: createHttpServiceMock,
   createBasePath: createBasePathMock,
   createAuth: createAuthMock,
+  createInternalPrebootContract: createInternalPrebootContractMock,
+  createPrebootContract: createPrebootContractMock,
   createInternalSetupContract: createInternalSetupContractMock,
   createSetupContract: createSetupContractMock,
   createInternalStartContract: createInternalStartContractMock,

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, memo } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 
 import { CallOutMessage } from './callout_types';
 import { CallOut } from './callout';
@@ -20,7 +22,12 @@ const CallOutSwitcherComponent: FC<CallOutSwitcherProps> = ({ namespace, conditi
   const { isVisible, dismiss } = useCallOutStorage([message], namespace);
 
   const shouldRender = condition && isVisible(message);
-  return shouldRender ? <CallOut message={message} onDismiss={dismiss} /> : null;
+  return shouldRender ? (
+    <>
+      <CallOut message={message} onDismiss={dismiss} />
+      <EuiSpacer size="l" />
+    </>
+  ) : null;
 };
 
 export const CallOutSwitcher = memo(CallOutSwitcherComponent);

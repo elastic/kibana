@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -151,16 +152,21 @@ interface EsError {
   reason: string;
   line?: number;
   col?: number;
+  script?: string;
 }
 
 /**
  * Returns an error message based on the root cause
  */
-function extractErrorMessage({ type, reason, line, col }: EsError): string {
+function extractErrorMessage({ type, reason, script, line, col }: EsError): string {
   let message = `[${type}] ${reason}`;
 
   if (line !== undefined && col !== undefined) {
     message += `, with line=${line} & col=${col}`;
+  }
+
+  if (script !== undefined) {
+    message += ` '${script}'`;
   }
 
   return message;

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { AssetParts, InstallSource } from '../../../../common/types';
+import type { AssetParts, InstallSource } from '../../../../common/types';
 import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
+
 import {
-  SharedKey,
   getArchiveEntry,
   setArchiveEntry,
   deleteArchiveEntry,
@@ -16,6 +17,7 @@ import {
   deleteArchiveFilelist,
   deletePackageInfo,
 } from './cache';
+import type { SharedKey } from './cache';
 import { getBufferExtractor } from './extract';
 
 export * from './cache';
@@ -110,6 +112,13 @@ export function getPathParts(path: string): AssetParts {
     dataset = type;
     // drop the `data_stream/dataset-name` portion & re-parse
     [pkgkey, service, type, file] = path.replace(`data_stream/${dataset}/`, '').split('/');
+  }
+
+  // To support the NOTICE asset at the root level
+  if (service === 'NOTICE.txt') {
+    file = service;
+    type = 'notice';
+    service = '';
   }
 
   // This is to cover for the fields.yml files inside the "fields" directory

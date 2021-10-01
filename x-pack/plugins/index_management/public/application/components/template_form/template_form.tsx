@@ -1,23 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState, useCallback, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiButton } from '@elastic/eui';
+import { EuiSpacer, EuiButton, EuiPageHeader } from '@elastic/eui';
+import { ScopedHistory } from 'kibana/public';
 
 import { TemplateDeserialized } from '../../../../common';
 import { serializers, Forms, GlobalFlyout } from '../../../shared_imports';
-import { SectionError } from '../section_error';
-import {
-  SimulateTemplateFlyoutContent,
-  SimulateTemplateProps,
-  simulateTemplateFlyoutProps,
-  SimulateTemplateFilters,
-} from '../index_templates';
-import { StepLogisticsContainer, StepComponentContainer, StepReviewContainer } from './steps';
 import {
   CommonWizardSteps,
   StepSettingsContainer,
@@ -25,6 +20,15 @@ import {
   StepAliasesContainer,
 } from '../shared';
 import { documentationService } from '../../services/documentation';
+import { SectionError } from '../section_error';
+import {
+  SimulateTemplateFlyoutContent,
+  SimulateTemplateProps,
+  simulateTemplateFlyoutProps,
+  SimulateTemplateFilters,
+  LegacyIndexTemplatesDeprecation,
+} from '../index_templates';
+import { StepLogisticsContainer, StepComponentContainer, StepReviewContainer } from './steps';
 
 const { stripEmptyFields } = serializers;
 const { FormWizard, FormWizardStep } = Forms;
@@ -36,6 +40,7 @@ interface Props {
   clearSaveError: () => void;
   isSaving: boolean;
   saveError: any;
+  history?: ScopedHistory;
   isLegacy?: boolean;
   defaultValue?: TemplateDeserialized;
   isEditing?: boolean;
@@ -96,6 +101,7 @@ export const TemplateForm = ({
   saveError,
   clearSaveError,
   onSave,
+  history,
 }: Props) => {
   const [wizardContent, setWizardContent] = useState<Forms.Content<WizardContent> | null>(null);
   const { addContent: addContentToGlobalFlyout, closeFlyout } = useGlobalFlyout();
@@ -190,22 +196,21 @@ export const TemplateForm = ({
   };
 
   const buildTemplateObject = useCallback(
-    (initialTemplate: TemplateDeserialized) => (
-      wizardData: WizardContent
-    ): TemplateDeserialized => {
-      const outputTemplate = {
-        ...wizardData.logistics,
-        _kbnMeta: initialTemplate._kbnMeta,
-        composedOf: wizardData.components,
-        template: {
-          settings: wizardData.settings,
-          mappings: wizardData.mappings,
-          aliases: wizardData.aliases,
-        },
-      };
+    (initialTemplate: TemplateDeserialized) =>
+      (wizardData: WizardContent): TemplateDeserialized => {
+        const outputTemplate = {
+          ...wizardData.logistics,
+          _kbnMeta: initialTemplate._kbnMeta,
+          composedOf: wizardData.components,
+          template: {
+            settings: wizardData.settings,
+            mappings: wizardData.mappings,
+            aliases: wizardData.aliases,
+          },
+        };
 
-      return cleanupTemplateObject(outputTemplate);
-    },
+        return cleanupTemplateObject(outputTemplate);
+      },
     []
   );
 
@@ -281,12 +286,20 @@ export const TemplateForm = ({
     );
   };
 
+  const isLegacyIndexTemplate = indexTemplate._kbnMeta.isLegacy === true;
+
   return (
     <>
       {/* Form header */}
-      {title}
+      <EuiPageHeader pageTitle={<span data-test-subj="pageTitle">{title}</span>} bottomBorder />
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
+
+      {isLegacyIndexTemplate && (
+        <LegacyIndexTemplatesDeprecation history={history} showCta={true} />
+      )}
+
+      <EuiSpacer size="s" />
 
       <FormWizard<WizardContent, WizardSection>
         defaultValue={wizardDefaultValue}
@@ -309,7 +322,7 @@ export const TemplateForm = ({
           />
         </FormWizardStep>
 
-        {indexTemplate._kbnMeta.isLegacy !== true && (
+        {!isLegacyIndexTemplate && (
           <FormWizardStep id={wizardSections.components.id} label={wizardSections.components.label}>
             <StepComponentContainer />
           </FormWizardStep>

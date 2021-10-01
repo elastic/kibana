@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { ReactElement } from 'react';
@@ -57,6 +59,8 @@ export class AbstractStyleProperty<T> implements IStyleProperty<T> {
       return '';
     } else if (typeof value === 'boolean') {
       return value.toString();
+    } else if (Array.isArray(value)) {
+      return value.join(', ');
     } else {
       return value;
     }

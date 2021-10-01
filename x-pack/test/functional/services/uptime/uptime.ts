@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -14,6 +15,7 @@ import { UptimeAlertsProvider } from './alerts';
 import { UptimeMLAnomalyProvider } from './ml_anomaly';
 import { UptimeCertProvider } from './certificates';
 import { UptimeOverviewProvider } from './overview';
+import { SyntheticsPackageProvider } from './synthetics_package';
 
 export function UptimeProvider(context: FtrProviderContext) {
   const common = UptimeCommonProvider(context);
@@ -24,6 +26,7 @@ export function UptimeProvider(context: FtrProviderContext) {
   const ml = UptimeMLAnomalyProvider(context);
   const cert = UptimeCertProvider(context);
   const overview = UptimeOverviewProvider(context);
+  const syntheticsPackage = SyntheticsPackageProvider(context);
 
   return {
     common,
@@ -34,5 +37,6 @@ export function UptimeProvider(context: FtrProviderContext) {
     ml,
     cert,
     overview,
+    syntheticsPackage,
   };
 }

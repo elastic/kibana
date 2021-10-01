@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
@@ -9,7 +10,7 @@ import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
 import { PivotGroupByConfig } from '../common';
 
 import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
-import { StepDetailsExposedState } from '../sections/create_transform/components/step_details/step_details_form';
+import { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
 
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
 import { PivotAggsConfig } from './pivot_aggs';
@@ -19,6 +20,8 @@ import {
   getCreateTransformRequestBody,
   getCreateTransformSettingsRequestBody,
   getPivotQuery,
+  getMissingBucketConfig,
+  getRequestPayload,
   isDefaultQuery,
   isMatchAllQuery,
   isSimpleQuery,
@@ -26,6 +29,7 @@ import {
   PivotQuery,
 } from './request';
 import { LatestFunctionConfigUI } from '../../../common/types/transform';
+import { RuntimeField } from '../../../../../../src/plugins/data/common';
 
 const simpleQuery: PivotQuery = { query_string: { query: 'airline:AAL' } };
 
@@ -120,16 +124,64 @@ describe('Transform: Common', () => {
     });
   });
 
-  test('getPreviewTransformRequestBody() with missing_buckets config', () => {
-    const query = getPivotQuery('the-query');
-    const request = getPreviewTransformRequestBody('the-index-pattern-title', query, {
+  test('getMissingBucketConfig()', () => {
+    expect(getMissingBucketConfig(groupByTerms)).toEqual({});
+    expect(getMissingBucketConfig({ ...groupByTerms, ...{ missing_bucket: true } })).toEqual({
+      missing_bucket: true,
+    });
+    expect(getMissingBucketConfig({ ...groupByTerms, ...{ missing_bucket: false } })).toEqual({
+      missing_bucket: false,
+    });
+  });
+
+  test('getRequestPayload()', () => {
+    expect(getRequestPayload([], [groupByTerms])).toEqual({
       pivot: {
-        aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+        aggregations: {},
         group_by: {
-          'the-group-by-agg-name': { terms: { field: 'the-group-by-field', missing_bucket: true } },
+          'the-group-by-agg-name': {
+            terms: {
+              field: 'the-group-by-field',
+            },
+          },
         },
       },
     });
+    expect(getRequestPayload([], [{ ...groupByTerms, ...{ missing_bucket: true } }])).toEqual({
+      pivot: {
+        aggregations: {},
+        group_by: {
+          'the-group-by-agg-name': {
+            terms: {
+              field: 'the-group-by-field',
+              missing_bucket: true,
+            },
+          },
+        },
+      },
+    });
+    expect(getRequestPayload([], [{ ...groupByTerms, ...{ missing_bucket: false } }])).toEqual({
+      pivot: {
+        aggregations: {},
+        group_by: {
+          'the-group-by-agg-name': {
+            terms: {
+              field: 'the-group-by-field',
+              missing_bucket: false,
+            },
+          },
+        },
+      },
+    });
+  });
+
+  test('getPreviewTransformRequestBody() with missing_buckets config', () => {
+    const query = getPivotQuery('the-query');
+    const request = getPreviewTransformRequestBody(
+      'the-index-pattern-title',
+      query,
+      getRequestPayload([aggsAvg], [{ ...groupByTerms, ...{ missing_bucket: true } }])
+    );
 
     expect(request).toEqual({
       pivot: {
@@ -167,12 +219,18 @@ describe('Transform: Common', () => {
       validationStatus: {
         isValid: true,
       },
+      runtimeMappings: undefined,
+      runtimeMappingsUpdated: false,
+      isRuntimeMappingsEditorEnabled: false,
     };
     const transformDetailsState: StepDetailsExposedState = {
       continuousModeDateField: 'the-continuous-mode-date-field',
       continuousModeDelay: 'the-continuous-mode-delay',
       createIndexPattern: false,
       isContinuousModeEnabled: false,
+      isRetentionPolicyEnabled: false,
+      retentionPolicyDateField: '',
+      retentionPolicyMaxAge: '',
       transformId: 'the-transform-id',
       transformDescription: 'the-transform-description',
       transformFrequency: '1m',
@@ -204,6 +262,85 @@ describe('Transform: Common', () => {
       source: {
         index: ['the-index-pattern-title'],
         query: { query_string: { default_operator: 'AND', query: 'the-search-query' } },
+      },
+    });
+  });
+
+  test('getCreateTransformRequestBody() with runtime fields', () => {
+    const runtimeMappings = {
+      rt_bytes_bigger: {
+        type: 'double',
+        script: {
+          source: "emit(doc['bytes'].value * 2.0)",
+        },
+      } as RuntimeField,
+    };
+
+    const pivotState: StepDefineExposedState = {
+      aggList: { 'the-agg-name': aggsAvg },
+      groupByList: { 'the-group-by-name': groupByTerms },
+      isAdvancedPivotEditorEnabled: false,
+      isAdvancedSourceEditorEnabled: false,
+      sourceConfigUpdated: false,
+      searchLanguage: 'kuery',
+      searchString: 'the-query',
+      searchQuery: 'the-search-query',
+      valid: true,
+      transformFunction: 'pivot',
+      latestConfig: {} as LatestFunctionConfigUI,
+      previewRequest: {
+        pivot: {
+          aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+          group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+        },
+      },
+      validationStatus: {
+        isValid: true,
+      },
+      runtimeMappings,
+      runtimeMappingsUpdated: false,
+      isRuntimeMappingsEditorEnabled: false,
+    };
+    const transformDetailsState: StepDetailsExposedState = {
+      continuousModeDateField: 'the-continuous-mode-date-field',
+      continuousModeDelay: 'the-continuous-mode-delay',
+      createIndexPattern: false,
+      isContinuousModeEnabled: false,
+      isRetentionPolicyEnabled: false,
+      retentionPolicyDateField: '',
+      retentionPolicyMaxAge: '',
+      transformId: 'the-transform-id',
+      transformDescription: 'the-transform-description',
+      transformFrequency: '1m',
+      transformSettingsMaxPageSearchSize: 100,
+      transformSettingsDocsPerSecond: 400,
+      destinationIndex: 'the-destination-index',
+      touched: true,
+      valid: true,
+    };
+
+    const request = getCreateTransformRequestBody(
+      'the-index-pattern-title',
+      pivotState,
+      transformDetailsState
+    );
+
+    expect(request).toEqual({
+      description: 'the-transform-description',
+      dest: { index: 'the-destination-index' },
+      frequency: '1m',
+      pivot: {
+        aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+        group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+      },
+      settings: {
+        max_page_search_size: 100,
+        docs_per_second: 400,
+      },
+      source: {
+        index: ['the-index-pattern-title'],
+        query: { query_string: { default_operator: 'AND', query: 'the-search-query' } },
+        runtime_mappings: runtimeMappings,
       },
     });
   });

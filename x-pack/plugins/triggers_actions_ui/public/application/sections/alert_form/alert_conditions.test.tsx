@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
@@ -61,7 +63,7 @@ describe('alert_conditions', () => {
     const ConditionForm = ({
       actionGroup,
     }: {
-      actionGroup?: ActionGroupWithCondition<{ someProp: string }>;
+      actionGroup?: ActionGroupWithCondition<{ someProp: string }, string>;
     }) => {
       return (
         <EuiDescriptionList>
@@ -113,7 +115,7 @@ describe('alert_conditions', () => {
     const ConditionForm = ({
       actionGroup,
     }: {
-      actionGroup?: ActionGroupWithCondition<{ someProp: string }>;
+      actionGroup?: ActionGroupWithCondition<{ someProp: string }, string>;
     }) => {
       return (
         <EuiDescriptionList>
@@ -165,7 +167,7 @@ describe('alert_conditions', () => {
     const ConditionForm = ({
       actionGroup,
     }: {
-      actionGroup?: ActionGroupWithCondition<{ someProp: string }>;
+      actionGroup?: ActionGroupWithCondition<{ someProp: string }, string>;
     }) => {
       return (
         <EuiDescriptionList>
@@ -218,8 +220,10 @@ describe('alert_conditions', () => {
       actionGroup,
       someCallbackProp,
     }: {
-      actionGroup?: ActionGroupWithCondition<{ someProp: string }>;
-      someCallbackProp: (actionGroup: ActionGroupWithCondition<{ someProp: string }>) => void;
+      actionGroup?: ActionGroupWithCondition<{ someProp: string }, string>;
+      someCallbackProp: (
+        actionGroup: ActionGroupWithCondition<{ someProp: string }, string>
+      ) => void;
     }) => {
       if (!actionGroup) {
         return <div />;

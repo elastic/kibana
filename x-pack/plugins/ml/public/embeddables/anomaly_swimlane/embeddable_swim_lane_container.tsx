@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useCallback, useState, useEffect } from 'react';
@@ -46,28 +47,22 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
   onOutputChange,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
+
   const [fromPage, setFromPage] = useState<number>(1);
 
   const [{}, { uiActions }] = services;
 
   const [selectedCells, setSelectedCells] = useState<AppStateSelectedCells | undefined>();
 
-  const [
-    swimlaneType,
-    swimlaneData,
-    perPage,
-    setPerPage,
-    timeBuckets,
-    isLoading,
-    error,
-  ] = useSwimlaneInputResolver(
-    embeddableInput,
-    onInputChange,
-    refresh,
-    services,
-    chartWidth,
-    fromPage
-  );
+  const [swimlaneType, swimlaneData, perPage, setPerPage, timeBuckets, isLoading, error] =
+    useSwimlaneInputResolver(
+      embeddableInput,
+      onInputChange,
+      refresh,
+      services,
+      chartWidth,
+      fromPage
+    );
 
   useEffect(() => {
     onOutputChange({

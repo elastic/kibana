@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { httpServerMock, coreMock } from '../../../../../src/core/server/mocks';
@@ -20,9 +21,6 @@ describe('getContextFactory', () => {
 
     expect(coreStart.savedObjects.getTypeRegistry).toHaveBeenCalledTimes(1);
 
-    expect(coreStart.elasticsearch.legacy.client.asScoped).toHaveBeenCalledTimes(1);
-    expect(coreStart.elasticsearch.legacy.client.asScoped).toHaveBeenCalledWith(request);
-
     const soClient = coreStart.savedObjects.getScopedClient.mock.results[0].value;
     expect(coreStart.uiSettings.asScopedToClient).toHaveBeenCalledTimes(1);
     expect(coreStart.uiSettings.asScopedToClient).toHaveBeenCalledWith(soClient);
@@ -33,7 +31,6 @@ describe('getContextFactory', () => {
     expect(context).toEqual({
       core: {
         savedObjects: expect.any(Object),
-        elasticsearch: expect.any(Object),
         uiSettings: expect.any(Object),
         capabilities: expect.any(Object),
       },

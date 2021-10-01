@@ -34,10 +34,7 @@ exports[`SetupModeRenderer should render the flyout open 1`] = `
   <EuiSpacer
     size="xxl"
   />
-  <EuiBottomBar
-    affordForDisplacement={true}
-    paddingSize="m"
-  >
+  <EuiBottomBar>
     <EuiFlexGroup
       alignItems="center"
       data-test-subj="monitoringSetupModeBottomBar"
@@ -137,10 +134,7 @@ exports[`SetupModeRenderer should render with setup mode enabled 1`] = `
   <EuiSpacer
     size="xxl"
   />
-  <EuiBottomBar
-    affordForDisplacement={true}
-    paddingSize="m"
-  >
+  <EuiBottomBar>
     <EuiFlexGroup
       alignItems="center"
       data-test-subj="monitoringSetupModeBottomBar"

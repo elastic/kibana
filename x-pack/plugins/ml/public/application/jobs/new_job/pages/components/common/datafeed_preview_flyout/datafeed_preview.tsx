@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useState, useEffect, useMemo, useCallback } from 'react';
@@ -18,17 +19,20 @@ import {
 
 import { CombinedJob } from '../../../../../../../../common/types/anomaly_detection_jobs';
 import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
-import { mlJobService } from '../../../../../../services/job_service';
-import { ML_DATA_PREVIEW_COUNT } from '../../../../../../../../common/util/job_utils';
+import { useMlApiContext } from '../../../../../../contexts/kibana';
 
 export const DatafeedPreview: FC<{
   combinedJob: CombinedJob | null;
   heightOffset?: number;
 }> = ({ combinedJob, heightOffset = 0 }) => {
+  const {
+    jobs: { datafeedPreview },
+  } = useMlApiContext();
   // the ace editor requires a fixed height
-  const editorHeight = useMemo(() => `${window.innerHeight - 230 - heightOffset}px`, [
-    heightOffset,
-  ]);
+  const editorHeight = useMemo(
+    () => `${window.innerHeight - 230 - heightOffset}px`,
+    [heightOffset]
+  );
   const [loading, setLoading] = useState(false);
   const [previewJsonString, setPreviewJsonString] = useState('');
   const [outOfDate, setOutOfDate] = useState(false);
@@ -60,15 +64,17 @@ export const DatafeedPreview: FC<{
 
     if (combinedJob.datafeed_config && combinedJob.datafeed_config.indices.length) {
       try {
-        const resp = await mlJobService.searchPreview(combinedJob);
-        let data = resp.hits.hits;
-        // the first item under aggregations can be any name
-        if (typeof resp.aggregations === 'object' && Object.keys(resp.aggregations).length > 0) {
-          const accessor = Object.keys(resp.aggregations)[0];
-          data = resp.aggregations[accessor].buckets.slice(0, ML_DATA_PREVIEW_COUNT);
+        const { datafeed_config: datafeed, ...job } = combinedJob;
+        if (job.analysis_config.detectors.length === 0) {
+          setPreviewJsonString(
+            i18n.translate('xpack.ml.newJob.wizard.datafeedPreviewFlyout.noDetectors', {
+              defaultMessage: 'No detectors configured',
+            })
+          );
+        } else {
+          const preview = await datafeedPreview(undefined, job, datafeed);
+          setPreviewJsonString(JSON.stringify(preview, null, 2));
         }
-
-        setPreviewJsonString(JSON.stringify(data, null, 2));
       } catch (error) {
         setPreviewJsonString(JSON.stringify(error, null, 2));
       }

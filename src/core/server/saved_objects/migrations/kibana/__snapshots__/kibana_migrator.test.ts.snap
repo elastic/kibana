@@ -6,6 +6,7 @@ Object {
     "migrationMappingPropertyHashes": Object {
       "amap": "510f1f0adb69830cf8a1c5ce2923ed82",
       "bmap": "510f1f0adb69830cf8a1c5ce2923ed82",
+      "coreMigrationVersion": "2f4316de49999235636386fe51dc06c1",
       "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
       "namespace": "2f4316de49999235636386fe51dc06c1",
       "namespaces": "2f4316de49999235636386fe51dc06c1",
@@ -30,6 +31,9 @@ Object {
           "type": "text",
         },
       },
+    },
+    "coreMigrationVersion": Object {
+      "type": "keyword",
     },
     "migrationVersion": Object {
       "dynamic": "true",

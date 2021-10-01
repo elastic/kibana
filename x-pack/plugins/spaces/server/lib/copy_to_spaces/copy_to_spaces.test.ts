@@ -1,49 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Readable } from 'stream';
-import {
+
+import type {
+  SavedObjectsExportByObjectOptions,
   SavedObjectsImportResponse,
-  SavedObjectsImportOptions,
-  SavedObjectsExportOptions,
   SavedObjectsImportSuccess,
 } from 'src/core/server';
 import {
   coreMock,
   httpServerMock,
-  savedObjectsTypeRegistryMock,
   savedObjectsClientMock,
+  savedObjectsServiceMock,
+  savedObjectsTypeRegistryMock,
 } from 'src/core/server/mocks';
+
 import { copySavedObjectsToSpacesFactory } from './copy_to_spaces';
-
-// Mock out circular dependency
-jest.mock('../../../../../../src/core/server/saved_objects/es_query', () => {});
-
-jest.mock('../../../../../../src/core/server', () => {
-  return {
-    ...(jest.requireActual('../../../../../../src/core/server') as Record<string, unknown>),
-    exportSavedObjectsToStream: jest.fn(),
-    importSavedObjectsFromStream: jest.fn(),
-  };
-});
-import {
-  exportSavedObjectsToStream,
-  importSavedObjectsFromStream,
-} from '../../../../../../src/core/server';
 
 interface SetupOpts {
   objects: Array<{ type: string; id: string; attributes: Record<string, any> }>;
-  exportSavedObjectsToStreamImpl?: (opts: SavedObjectsExportOptions) => Promise<Readable>;
-  importSavedObjectsFromStreamImpl?: (
-    opts: SavedObjectsImportOptions
-  ) => Promise<SavedObjectsImportResponse>;
+  exportByObjectsImpl?: (opts: SavedObjectsExportByObjectOptions) => Promise<Readable>;
 }
 
-const EXPORT_LIMIT = 1000;
-
-const expectStreamToContainObjects = async (
+const expectStreamToEqualObjects = async (
   stream: Readable,
   expectedObjects: SetupOpts['objects']
 ) => {
@@ -62,10 +46,18 @@ const expectStreamToContainObjects = async (
 };
 
 describe('copySavedObjectsToSpaces', () => {
+  const FAILURE_SPACE = 'failure-space';
   const mockExportResults = [
-    { type: 'dashboard', id: 'my-dashboard', attributes: {} },
-    { type: 'visualization', id: 'my-viz', attributes: {} },
-    { type: 'index-pattern', id: 'my-index-pattern', attributes: {} },
+    // For this test case, these three objects can be shared to multiple spaces
+    { type: 'dashboard', id: 'my-dashboard', namespaces: ['source'], attributes: {} },
+    { type: 'visualization', id: 'my-viz', namespaces: ['source', 'destination1'], attributes: {} },
+    {
+      type: 'index-pattern',
+      id: 'my-index-pattern',
+      namespaces: ['source', 'destination1', 'destination2'],
+      attributes: {},
+    },
+    // This object is namespace-agnostic and cannot be copied to another space
     { type: 'globaltype', id: 'my-globaltype', attributes: {} },
   ];
 
@@ -73,15 +65,19 @@ describe('copySavedObjectsToSpaces', () => {
     const coreStart = coreMock.createStart();
 
     const savedObjectsClient = savedObjectsClientMock.create();
+    const savedObjectsExporter = savedObjectsServiceMock.createExporter();
+    const savedObjectsImporter = savedObjectsServiceMock.createImporter();
     const typeRegistry = savedObjectsTypeRegistryMock.create();
     coreStart.savedObjects.getScopedClient.mockReturnValue(savedObjectsClient);
     coreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
+    coreStart.savedObjects.createExporter.mockReturnValue(savedObjectsExporter);
+    coreStart.savedObjects.createImporter.mockReturnValue(savedObjectsImporter);
 
     typeRegistry.getImportableAndExportableTypes.mockReturnValue([
       // don't need to include all types, just need a positive case (agnostic) and a negative case (non-agnostic)
       {
         name: 'dashboard',
-        namespaceType: 'single',
+        namespaceType: 'multiple',
         hidden: false,
         mappings: { properties: {} },
       },
@@ -98,62 +94,79 @@ describe('copySavedObjectsToSpaces', () => {
         .some((t) => t.name === type && t.namespaceType === 'agnostic')
     );
 
-    (exportSavedObjectsToStream as jest.Mock).mockImplementation(
-      async (opts: SavedObjectsExportOptions) => {
-        return (
-          setupOpts.exportSavedObjectsToStreamImpl?.(opts) ??
-          new Readable({
-            objectMode: true,
-            read() {
-              setupOpts.objects.forEach((o) => this.push(o));
+    savedObjectsExporter.exportByObjects.mockImplementation(async (opts) => {
+      return (
+        setupOpts.exportByObjectsImpl?.(opts) ??
+        new Readable({
+          objectMode: true,
+          read() {
+            setupOpts.objects.forEach((o) => this.push(o));
 
-              this.push(null);
-            },
-          })
-        );
+            this.push(null);
+          },
+        })
+      );
+    });
+
+    savedObjectsImporter.import.mockImplementation(async (opts) => {
+      if (opts.namespace === FAILURE_SPACE) {
+        throw new Error(`Some error occurred!`);
       }
-    );
 
-    (importSavedObjectsFromStream as jest.Mock).mockImplementation(
-      async (opts: SavedObjectsImportOptions) => {
-        const defaultImpl = async () => {
-          // namespace-agnostic types should be filtered out before import
-          const filteredObjects = setupOpts.objects.filter(({ type }) => type !== 'globaltype');
-          await expectStreamToContainObjects(opts.readStream, filteredObjects);
-          const response: SavedObjectsImportResponse = {
-            success: true,
-            successCount: filteredObjects.length,
-            successResults: [
-              ('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess,
-            ],
-          };
+      // expectedObjects will never include globaltype, and each object will have its namespaces field omitted
+      let expectedObjects = [
+        { type: 'dashboard', id: 'my-dashboard', attributes: {} },
+        { type: 'visualization', id: 'my-viz', attributes: {} },
+        { type: 'index-pattern', id: 'my-index-pattern', attributes: {} },
+      ];
 
-          return Promise.resolve(response);
-        };
-
-        return setupOpts.importSavedObjectsFromStreamImpl?.(opts) ?? defaultImpl();
+      if (!opts.createNewCopies) {
+        // if we are *not* creating new copies of objects, then we check destination spaces so we don't try to copy an object to a space where it already exists
+        switch (opts.namespace) {
+          case 'destination1':
+            expectedObjects = [
+              { type: 'dashboard', id: 'my-dashboard', attributes: {} },
+              // the visualization and index-pattern are not imported into destination1, they already exist there
+            ];
+            break;
+          case 'destination2':
+            expectedObjects = [
+              { type: 'dashboard', id: 'my-dashboard', attributes: {} },
+              { type: 'visualization', id: 'my-viz', attributes: {} },
+              // the index-pattern is not imported into destination2, it already exists there
+            ];
+            break;
+        }
       }
-    );
+
+      await expectStreamToEqualObjects(opts.readStream, expectedObjects);
+      const response: SavedObjectsImportResponse = {
+        success: true,
+        successCount: expectedObjects.length,
+        successResults: ['Some success(es) occurred!' as unknown as SavedObjectsImportSuccess],
+        warnings: [],
+      };
+
+      return Promise.resolve(response);
+    });
 
     return {
       savedObjects: coreStart.savedObjects,
       savedObjectsClient,
+      savedObjectsExporter,
+      savedObjectsImporter,
       typeRegistry,
     };
   };
 
   it('uses the Saved Objects Service to perform an export followed by a series of imports', async () => {
-    const { savedObjects, savedObjectsClient, typeRegistry } = setup({
+    const { savedObjects, savedObjectsExporter, savedObjectsImporter } = setup({
       objects: mockExportResults,
     });
 
     const request = httpServerMock.createKibanaRequest();
 
-    const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
-      savedObjects,
-      () => EXPORT_LIMIT,
-      request
-    );
+    const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(savedObjects, request);
 
     const namespace = 'sourceSpace';
     const objects = [{ type: 'dashboard', id: 'my-dashboard' }];
@@ -162,6 +175,71 @@ describe('copySavedObjectsToSpaces', () => {
       overwrite: true,
       objects,
       createNewCopies: false,
+    });
+
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "destination1": Object {
+          "errors": undefined,
+          "success": true,
+          "successCount": 1,
+          "successResults": Array [
+            "Some success(es) occurred!",
+          ],
+        },
+        "destination2": Object {
+          "errors": undefined,
+          "success": true,
+          "successCount": 2,
+          "successResults": Array [
+            "Some success(es) occurred!",
+          ],
+        },
+      }
+    `);
+
+    expect(savedObjectsExporter.exportByObjects).toHaveBeenCalledWith({
+      request: expect.any(Object),
+      excludeExportDetails: true,
+      includeNamespaces: true,
+      includeReferencesDeep: true,
+      namespace,
+      objects,
+    });
+
+    const importOptions = {
+      createNewCopies: false,
+      overwrite: true,
+      readStream: expect.any(Readable),
+    };
+    expect(savedObjectsImporter.import).toHaveBeenNthCalledWith(1, {
+      ...importOptions,
+      namespace: 'destination1',
+    });
+    expect(savedObjectsImporter.import).toHaveBeenNthCalledWith(2, {
+      ...importOptions,
+      namespace: 'destination2',
+    });
+  });
+
+  it('does not skip copying objects to spaces where they already exist if createNewCopies is enabled', async () => {
+    const { savedObjects, savedObjectsExporter, savedObjectsImporter } = setup({
+      objects: mockExportResults.map(({ namespaces, ...remainingAttrs }) => ({
+        ...remainingAttrs, // the objects are exported without the namespaces array
+      })),
+    });
+
+    const request = httpServerMock.createKibanaRequest();
+
+    const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(savedObjects, request);
+
+    const namespace = 'sourceSpace';
+    const objects = [{ type: 'dashboard', id: 'my-dashboard' }];
+    const result = await copySavedObjectsToSpaces(namespace, ['destination1', 'destination2'], {
+      includeReferences: true,
+      overwrite: false,
+      objects,
+      createNewCopies: true,
     });
 
     expect(result).toMatchInlineSnapshot(`
@@ -185,28 +263,25 @@ describe('copySavedObjectsToSpaces', () => {
       }
     `);
 
-    expect(exportSavedObjectsToStream).toHaveBeenCalledWith({
+    expect(savedObjectsExporter.exportByObjects).toHaveBeenCalledWith({
+      request: expect.any(Object),
       excludeExportDetails: true,
-      exportSizeLimit: EXPORT_LIMIT,
+      includeNamespaces: false,
       includeReferencesDeep: true,
       namespace,
       objects,
-      savedObjectsClient,
     });
 
     const importOptions = {
-      createNewCopies: false,
-      objectLimit: EXPORT_LIMIT,
-      overwrite: true,
+      createNewCopies: true,
+      overwrite: false,
       readStream: expect.any(Readable),
-      savedObjectsClient,
-      typeRegistry,
     };
-    expect(importSavedObjectsFromStream).toHaveBeenNthCalledWith(1, {
+    expect(savedObjectsImporter.import).toHaveBeenNthCalledWith(1, {
       ...importOptions,
       namespace: 'destination1',
     });
-    expect(importSavedObjectsFromStream).toHaveBeenNthCalledWith(2, {
+    expect(savedObjectsImporter.import).toHaveBeenNthCalledWith(2, {
       ...importOptions,
       namespace: 'destination2',
     });
@@ -215,32 +290,15 @@ describe('copySavedObjectsToSpaces', () => {
   it(`doesn't stop copy if some spaces fail`, async () => {
     const { savedObjects } = setup({
       objects: mockExportResults,
-      importSavedObjectsFromStreamImpl: async (opts) => {
-        if (opts.namespace === 'failure-space') {
-          throw new Error(`Some error occurred!`);
-        }
-        // namespace-agnostic types should be filtered out before import
-        const filteredObjects = mockExportResults.filter(({ type }) => type !== 'globaltype');
-        await expectStreamToContainObjects(opts.readStream, filteredObjects);
-        return Promise.resolve({
-          success: true,
-          successCount: filteredObjects.length,
-          successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
-        });
-      },
     });
 
     const request = httpServerMock.createKibanaRequest();
 
-    const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
-      savedObjects,
-      () => EXPORT_LIMIT,
-      request
-    );
+    const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(savedObjects, request);
 
     const result = await copySavedObjectsToSpaces(
       'sourceSpace',
-      ['failure-space', 'non-existent-space', 'marketing'],
+      [FAILURE_SPACE, 'non-existent-space', 'marketing'],
       {
         includeReferences: true,
         overwrite: true,
@@ -248,6 +306,7 @@ describe('copySavedObjectsToSpaces', () => {
         createNewCopies: false,
       }
     );
+    // See savedObjectsImporter.import mock implementation above; FAILURE_SPACE is a special case that will throw an error
 
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -281,7 +340,7 @@ describe('copySavedObjectsToSpaces', () => {
   it(`handles stream read errors`, async () => {
     const { savedObjects } = setup({
       objects: mockExportResults,
-      exportSavedObjectsToStreamImpl: (_opts) => {
+      exportByObjectsImpl: (_opts) => {
         return Promise.resolve(
           new Readable({
             objectMode: true,
@@ -295,11 +354,7 @@ describe('copySavedObjectsToSpaces', () => {
 
     const request = httpServerMock.createKibanaRequest();
 
-    const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
-      savedObjects,
-      () => EXPORT_LIMIT,
-      request
-    );
+    const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(savedObjects, request);
 
     await expect(
       copySavedObjectsToSpaces(

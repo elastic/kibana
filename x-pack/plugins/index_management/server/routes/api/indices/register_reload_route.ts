@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
@@ -17,32 +19,21 @@ const bodySchema = schema.maybe(
 
 export function registerReloadRoute({
   router,
-  license,
   indexDataEnricher,
-  lib,
+  lib: { handleEsError },
 }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/reload'), validate: { body: bodySchema } },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { indexNames = [] } = (req.body as typeof bodySchema.type) ?? {};
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { indexNames = [] } = (request.body as typeof bodySchema.type) ?? {};
 
       try {
-        const indices = await fetchIndices(
-          ctx.core.elasticsearch.legacy.client.callAsCurrentUser,
-          indexDataEnricher,
-          indexNames
-        );
-        return res.ok({ body: indices });
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        return res.internalError({ body: e });
+        const indices = await fetchIndices(client, indexDataEnricher, indexNames);
+        return response.ok({ body: indices });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
-    })
+    }
   );
 }

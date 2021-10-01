@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
@@ -12,7 +13,7 @@ import {
   isEscape,
   focusColumn,
   OnColumnFocused,
-} from '../../../../../../common/components/accessibility/helpers';
+} from '../../../../../../../../timelines/public';
 
 type FocusOwnership = 'not-owned' | 'owned';
 
@@ -89,12 +90,10 @@ export const useStatefulEventFocus = ({
     ]
   );
 
-  const memoizedReturn = useMemo(() => ({ focusOwnership, onFocus, onOutsideClick, onKeyDown }), [
-    focusOwnership,
-    onFocus,
-    onKeyDown,
-    onOutsideClick,
-  ]);
+  const memoizedReturn = useMemo(
+    () => ({ focusOwnership, onFocus, onOutsideClick, onKeyDown }),
+    [focusOwnership, onFocus, onKeyDown, onOutsideClick]
+  );
 
   return memoizedReturn;
 };

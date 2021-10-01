@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { createContext, useMemo, useState } from 'react';
@@ -29,7 +30,7 @@ export const CsmSharedContext = createContext(defaultContext);
 export function CsmSharedContextProvider({
   children,
 }: {
-  children: JSX.Element[];
+  children: JSX.Element;
 }) {
   const [newData, setNewData] = useState<SharedData>({ totalPageViews: 0 });
 

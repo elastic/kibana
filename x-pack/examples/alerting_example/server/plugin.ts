@@ -1,35 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Plugin, CoreSetup } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import { PluginSetupContract as AlertingSetup } from '../../../plugins/alerts/server';
+// import directly to support examples functional tests (@kbn-test/src/functional_tests/lib/babel_register_for_test_plugins.js)
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils/default_app_categories';
+import { PluginSetupContract as AlertingSetup } from '../../../plugins/alerting/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../plugins/features/server';
 
 import { alertType as alwaysFiringAlert } from './alert_types/always_firing';
 import { alertType as peopleInSpaceAlert } from './alert_types/astros';
-import { INDEX_THRESHOLD_ID } from '../../../plugins/stack_alerts/server';
+// can't import static code from another plugin to support examples functional test
+const INDEX_THRESHOLD_ID = '.index-threshold';
 import { ALERTING_EXAMPLE_APP_ID } from '../common/constants';
 
-// this plugin's dependendencies
+// this plugin's dependencies
 export interface AlertingExampleDeps {
-  alerts: AlertingSetup;
+  alerting: AlertingSetup;
   features: FeaturesPluginSetup;
 }
 
 export class AlertingExamplePlugin implements Plugin<void, void, AlertingExampleDeps> {
-  public setup(core: CoreSetup, { alerts, features }: AlertingExampleDeps) {
-    alerts.registerType(alwaysFiringAlert);
-    alerts.registerType(peopleInSpaceAlert);
+  public setup(core: CoreSetup, { alerting, features }: AlertingExampleDeps) {
+    alerting.registerType(alwaysFiringAlert);
+    alerting.registerType(peopleInSpaceAlert);
 
     features.registerKibanaFeature({
       id: ALERTING_EXAMPLE_APP_ID,
       name: i18n.translate('alertsExample.featureRegistry.alertsExampleFeatureName', {
-        defaultMessage: 'Alerts Example',
+        defaultMessage: 'Alerting Examples',
       }),
       app: [],
       management: {
@@ -40,7 +44,12 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
       privileges: {
         all: {
           alerting: {
-            all: [alwaysFiringAlert.id, peopleInSpaceAlert.id, INDEX_THRESHOLD_ID],
+            rule: {
+              all: [alwaysFiringAlert.id, peopleInSpaceAlert.id, INDEX_THRESHOLD_ID],
+            },
+            alert: {
+              all: [alwaysFiringAlert.id, peopleInSpaceAlert.id, INDEX_THRESHOLD_ID],
+            },
           },
           savedObject: {
             all: [],
@@ -53,7 +62,12 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
         },
         read: {
           alerting: {
-            read: [alwaysFiringAlert.id, peopleInSpaceAlert.id, INDEX_THRESHOLD_ID],
+            rule: {
+              read: [alwaysFiringAlert.id, peopleInSpaceAlert.id, INDEX_THRESHOLD_ID],
+            },
+            alert: {
+              read: [alwaysFiringAlert.id, peopleInSpaceAlert.id, INDEX_THRESHOLD_ID],
+            },
           },
           savedObject: {
             all: [],

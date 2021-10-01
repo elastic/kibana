@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -22,19 +11,23 @@ import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
-import { getForceNow } from './lib/get_force_now';
 import { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
+import { NowProviderInternalContract } from '../../now_provider';
 import {
   calculateBounds,
+  getAbsoluteTimeRange,
   getTime,
+  getRelativeTime,
   IIndexPattern,
   RefreshInterval,
   TimeRange,
 } from '../../../common';
 import { TimeHistoryContract } from './time_history';
+import { createAutoRefreshLoop, AutoRefreshDoneFn } from './lib/auto_refresh_loop';
+
+export { AutoRefreshDoneFn };
 
 // TODO: remove!
-
 export class Timefilter {
   // Fired when isTimeRangeSelectorEnabled \ isAutoRefreshSelectorEnabled are toggled
   private enabledUpdated$ = new BehaviorSubject(false);
@@ -42,8 +35,6 @@ export class Timefilter {
   private timeUpdate$ = new Subject();
   // Fired when a user changes the the autorefresh settings
   private refreshIntervalUpdate$ = new Subject();
-  // Used when an auto refresh is triggered
-  private autoRefreshFetch$ = new Subject();
   private fetch$ = new Subject();
 
   private _time: TimeRange;
@@ -55,12 +46,17 @@ export class Timefilter {
   private _isTimeRangeSelectorEnabled: boolean = false;
   private _isAutoRefreshSelectorEnabled: boolean = false;
 
-  private _autoRefreshIntervalId: number = 0;
-
   private readonly timeDefaults: TimeRange;
   private readonly refreshIntervalDefaults: RefreshInterval;
 
-  constructor(config: TimefilterConfig, timeHistory: TimeHistoryContract) {
+  // Used when an auto refresh is triggered
+  private readonly autoRefreshLoop = createAutoRefreshLoop();
+
+  constructor(
+    config: TimefilterConfig,
+    timeHistory: TimeHistoryContract,
+    private readonly nowProvider: NowProviderInternalContract
+  ) {
     this._history = timeHistory;
     this.timeDefaults = config.timeDefaults;
     this.refreshIntervalDefaults = config.refreshIntervalDefaults;
@@ -92,9 +88,13 @@ export class Timefilter {
     return this.refreshIntervalUpdate$.asObservable();
   };
 
-  public getAutoRefreshFetch$ = () => {
-    return this.autoRefreshFetch$.asObservable();
-  };
+  /**
+   * Get an observable that emits when it is time to refetch data due to refresh interval
+   * Each subscription to this observable resets internal interval
+   * Emitted value is a callback {@link AutoRefreshDoneFn} that must be called to restart refresh interval loop
+   * Apps should use this callback to start next auto refresh loop when view finished updating
+   */
+  public getAutoRefreshFetch$ = () => this.autoRefreshLoop.loop$;
 
   public getFetch$ = () => {
     return this.fetch$.asObservable();
@@ -108,6 +108,13 @@ export class Timefilter {
       to: moment.isMoment(to) ? to.toISOString() : to,
     };
   };
+
+  /**
+   * Same as {@link getTime}, but also converts relative time range to absolute time range
+   */
+  public getAbsoluteTime() {
+    return getAbsoluteTimeRange(this._time, { forceNow: this.nowProvider.get() });
+  }
 
   /**
    * Updates timefilter time.
@@ -165,19 +172,37 @@ export class Timefilter {
       }
     }
 
-    // Clear the previous auto refresh interval and start a new one (if not paused)
-    clearInterval(this._autoRefreshIntervalId);
-    if (!newRefreshInterval.pause) {
-      this._autoRefreshIntervalId = window.setInterval(
-        () => this.autoRefreshFetch$.next(),
-        newRefreshInterval.value
-      );
+    this.autoRefreshLoop.stop();
+    if (!newRefreshInterval.pause && newRefreshInterval.value !== 0) {
+      this.autoRefreshLoop.start(newRefreshInterval.value);
     }
   };
 
+  /**
+   * Create a time filter that coerces all time values to absolute time.
+   *
+   * This is useful for creating a filter that ensures all ES queries will fetch the exact same data
+   * and leverages ES query cache for performance improvement.
+   *
+   * One use case is keeping different elements embedded in the same UI in sync.
+   */
   public createFilter = (indexPattern: IIndexPattern, timeRange?: TimeRange) => {
     return getTime(indexPattern, timeRange ? timeRange : this._time, {
-      forceNow: this.getForceNow(),
+      forceNow: this.nowProvider.get(),
+    });
+  };
+
+  /**
+   * Create a time filter that converts only absolute time to ISO strings, it leaves relative time
+   * values unchanged (e.g. "now-1").
+   *
+   * This is useful for sending datemath values to ES endpoints to generate reports over time.
+   *
+   * @note Consumers of this function need to ensure that the ES endpoint supports datemath.
+   */
+  public createRelativeFilter = (indexPattern: IIndexPattern, timeRange?: TimeRange) => {
+    return getRelativeTime(indexPattern, timeRange ? timeRange : this._time, {
+      forceNow: this.nowProvider.get(),
     });
   };
 
@@ -186,7 +211,7 @@ export class Timefilter {
   }
 
   public calculateBounds(timeRange: TimeRange): TimeRangeBounds {
-    return calculateBounds(timeRange, { forceNow: this.getForceNow() });
+    return calculateBounds(timeRange, { forceNow: this.nowProvider.get() });
   }
 
   public getActiveBounds(): TimeRangeBounds | undefined {
@@ -234,10 +259,6 @@ export class Timefilter {
   public getRefreshIntervalDefaults(): RefreshInterval {
     return _.cloneDeep(this.refreshIntervalDefaults);
   }
-
-  private getForceNow = () => {
-    return getForceNow();
-  };
 }
 
 export type TimefilterContract = PublicMethodsOf<Timefilter>;

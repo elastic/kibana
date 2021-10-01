@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
@@ -22,7 +11,6 @@ import Boom from '@hapi/boom';
 
 import { isConfigSchema } from '@kbn/config-schema';
 import { Logger } from '../../logging';
-import { LegacyElasticsearchErrorHelpers } from '../../elasticsearch/legacy/errors';
 import {
   isUnauthorizedError as isElasticsearchUnauthorizedError,
   UnauthorizedError as EsNotAuthorizedError,
@@ -40,7 +28,8 @@ import { RequestHandlerContext } from '../../../server';
 import { wrapErrors } from './error_wrapper';
 import { RouteValidator } from './validator';
 
-interface RouterRoute {
+/** @internal */
+export interface RouterRoute {
   method: RouteMethod;
   path: string;
   options: RouteConfigOptions<RouteMethod>;
@@ -55,9 +44,12 @@ interface RouterRoute {
  *
  * @public
  */
-export type RouteRegistrar<Method extends RouteMethod> = <P, Q, B>(
+export type RouteRegistrar<
+  Method extends RouteMethod,
+  Context extends RequestHandlerContext = RequestHandlerContext
+> = <P, Q, B>(
   route: RouteConfig<P, Q, B, Method>,
-  handler: RequestHandler<P, Q, B, Method>
+  handler: RequestHandler<P, Q, B, Context, Method>
 ) => void;
 
 /**
@@ -66,7 +58,7 @@ export type RouteRegistrar<Method extends RouteMethod> = <P, Q, B>(
  *
  * @public
  */
-export interface IRouter {
+export interface IRouter<Context extends RequestHandlerContext = RequestHandlerContext> {
   /**
    * Resulted path
    */
@@ -77,35 +69,35 @@ export interface IRouter {
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  get: RouteRegistrar<'get'>;
+  get: RouteRegistrar<'get', Context>;
 
   /**
    * Register a route handler for `POST` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  post: RouteRegistrar<'post'>;
+  post: RouteRegistrar<'post', Context>;
 
   /**
    * Register a route handler for `PUT` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  put: RouteRegistrar<'put'>;
+  put: RouteRegistrar<'put', Context>;
 
   /**
    * Register a route handler for `PATCH` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  patch: RouteRegistrar<'patch'>;
+  patch: RouteRegistrar<'patch', Context>;
 
   /**
    * Register a route handler for `DELETE` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  delete: RouteRegistrar<'delete'>;
+  delete: RouteRegistrar<'delete', Context>;
 
   /**
    * Wrap a router handler to catch and converts legacy boom errors to proper custom errors.
@@ -121,9 +113,13 @@ export interface IRouter {
   getRoutes: () => RouterRoute[];
 }
 
-export type ContextEnhancer<P, Q, B, Method extends RouteMethod> = (
-  handler: RequestHandler<P, Q, B, Method>
-) => RequestHandlerEnhanced<P, Q, B, Method>;
+export type ContextEnhancer<
+  P,
+  Q,
+  B,
+  Method extends RouteMethod,
+  Context extends RequestHandlerContext
+> = (handler: RequestHandler<P, Q, B, Context, Method>) => RequestHandlerEnhanced<P, Q, B, Method>;
 
 function getRouteFullPath(routerPath: string, routePath: string) {
   // If router's path ends with slash and route's path starts with slash,
@@ -206,38 +202,42 @@ function validOptions(
 /**
  * @internal
  */
-export class Router implements IRouter {
+export class Router<Context extends RequestHandlerContext = RequestHandlerContext>
+  implements IRouter<Context>
+{
   public routes: Array<Readonly<RouterRoute>> = [];
-  public get: IRouter['get'];
-  public post: IRouter['post'];
-  public delete: IRouter['delete'];
-  public put: IRouter['put'];
-  public patch: IRouter['patch'];
+  public get: IRouter<Context>['get'];
+  public post: IRouter<Context>['post'];
+  public delete: IRouter<Context>['delete'];
+  public put: IRouter<Context>['put'];
+  public patch: IRouter<Context>['patch'];
 
   constructor(
     public readonly routerPath: string,
     private readonly log: Logger,
-    private readonly enhanceWithContext: ContextEnhancer<any, any, any, any>
+    private readonly enhanceWithContext: ContextEnhancer<any, any, any, any, any>
   ) {
-    const buildMethod = <Method extends RouteMethod>(method: Method) => <P, Q, B>(
-      route: RouteConfig<P, Q, B, Method>,
-      handler: RequestHandler<P, Q, B, Method>
-    ) => {
-      const routeSchemas = routeSchemasFromRouteConfig(route, method);
+    const buildMethod =
+      <Method extends RouteMethod>(method: Method) =>
+      <P, Q, B>(
+        route: RouteConfig<P, Q, B, Method>,
+        handler: RequestHandler<P, Q, B, Context, Method>
+      ) => {
+        const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
-      this.routes.push({
-        handler: async (req, responseToolkit) =>
-          await this.handle({
-            routeSchemas,
-            request: req,
-            responseToolkit,
-            handler: this.enhanceWithContext(handler),
-          }),
-        method,
-        path: getRouteFullPath(this.routerPath, route.path),
-        options: validOptions(method, route),
-      });
-    };
+        this.routes.push({
+          handler: async (req, responseToolkit) =>
+            await this.handle({
+              routeSchemas,
+              request: req,
+              responseToolkit,
+              handler: this.enhanceWithContext(handler),
+            }),
+          method,
+          path: getRouteFullPath(this.routerPath, route.path),
+          options: validOptions(method, route),
+        });
+      };
 
     this.get = buildMethod('get');
     this.post = buildMethod('post');
@@ -282,10 +282,6 @@ export class Router implements IRouter {
           kibanaResponseFactory.unauthorized(convertEsUnauthorized(e))
         );
       }
-      // forward 401 (boom) errors from legacy ES client
-      if (LegacyElasticsearchErrorHelpers.isNotAuthorizedError(e)) {
-        return e;
-      }
       return hapiResponseAdapter.toInternalError();
     }
   }
@@ -311,12 +307,14 @@ type WithoutHeadArgument<T> = T extends (first: any, ...rest: infer Params) => i
   : never;
 
 type RequestHandlerEnhanced<P, Q, B, Method extends RouteMethod> = WithoutHeadArgument<
-  RequestHandler<P, Q, B, Method>
+  RequestHandler<P, Q, B, RequestHandlerContext, Method>
 >;
 
 /**
  * A function executed when route path matched requested resource path.
  * Request handler is expected to return a result of one of {@link KibanaResponseFactory} functions.
+ * If anything else is returned, or an error is thrown, the HTTP service will automatically log the error
+ * and respond `500 - Internal Server Error`.
  * @param context {@link RequestHandlerContext} - the core context exposed for this request.
  * @param request {@link KibanaRequest} - object containing information about requested resource,
  * such as path, method, headers, parameters, query, body, etc.
@@ -352,10 +350,11 @@ export type RequestHandler<
   P = unknown,
   Q = unknown,
   B = unknown,
+  Context extends RequestHandlerContext = RequestHandlerContext,
   Method extends RouteMethod = any,
   ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
 > = (
-  context: RequestHandlerContext,
+  context: Context,
   request: KibanaRequest<P, Q, B, Method>,
   response: ResponseFactory
 ) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
@@ -377,8 +376,9 @@ export type RequestHandlerWrapper = <
   P,
   Q,
   B,
+  Context extends RequestHandlerContext = RequestHandlerContext,
   Method extends RouteMethod = any,
   ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
 >(
-  handler: RequestHandler<P, Q, B, Method, ResponseFactory>
-) => RequestHandler<P, Q, B, Method, ResponseFactory>;
+  handler: RequestHandler<P, Q, B, Context, Method, ResponseFactory>
+) => RequestHandler<P, Q, B, Context, Method, ResponseFactory>;

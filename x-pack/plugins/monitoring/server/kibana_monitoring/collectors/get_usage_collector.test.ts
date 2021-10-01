@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getMonitoringUsageCollector } from './get_usage_collector';
@@ -58,7 +59,8 @@ jest.mock('./lib/fetch_license_type', () => ({
 }));
 
 describe('getMonitoringUsageCollector', () => {
-  const esClient = elasticsearchServiceMock.createLegacyClusterClient();
+  const esClient = elasticsearchServiceMock.createClusterClient();
+  const getEsClient = () => esClient;
   const config: any = {
     ui: {
       ccs: {
@@ -71,7 +73,7 @@ describe('getMonitoringUsageCollector', () => {
     const usageCollection: any = {
       makeUsageCollector: jest.fn(),
     };
-    await getMonitoringUsageCollector(usageCollection, config, esClient);
+    getMonitoringUsageCollector(usageCollection, config, getEsClient);
 
     const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
 
@@ -121,7 +123,7 @@ describe('getMonitoringUsageCollector', () => {
       makeUsageCollector: jest.fn(),
     };
 
-    await getMonitoringUsageCollector(usageCollection, config, esClient);
+    getMonitoringUsageCollector(usageCollection, config, getEsClient);
     const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
     const args = mock.calls[0];
 
@@ -148,7 +150,7 @@ describe('getMonitoringUsageCollector', () => {
       makeUsageCollector: jest.fn(),
     };
 
-    await getMonitoringUsageCollector(usageCollection, config, esClient);
+    getMonitoringUsageCollector(usageCollection, config, getEsClient);
     const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
     const args = mock.calls[0];
 
@@ -168,7 +170,7 @@ describe('getMonitoringUsageCollector', () => {
       makeUsageCollector: jest.fn(),
     };
 
-    await getMonitoringUsageCollector(usageCollection, config, esClient);
+    getMonitoringUsageCollector(usageCollection, config, getEsClient);
     const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
     const args = mock.calls[0];
 

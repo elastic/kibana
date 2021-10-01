@@ -1,24 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import path from 'path';
 import { PageOrientation, PredefinedPageSize } from 'pdfmake/interfaces';
 import { EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
 import { LevelLogger } from '../';
-import { getDefaultLayoutSelectors } from '../../../common';
 import { LAYOUT_TYPES } from '../../../common/constants';
-import { LayoutSelectorDictionary, Size } from '../../../common/types';
+import { Size } from '../../../common/types';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { CaptureConfig } from '../../types';
-import { Layout, LayoutInstance } from './';
+import { getDefaultLayoutSelectors, LayoutInstance, LayoutSelectorDictionary } from './';
+import { Layout } from './layout';
 
 export class PrintLayout extends Layout implements LayoutInstance {
   public readonly selectors: LayoutSelectorDictionary = {
     ...getDefaultLayoutSelectors(),
-    screenshot: '[data-shared-item]',
+    screenshot: '[data-shared-item]', // override '[data-shared-items-container]'
   };
   public readonly groupCount = 2;
   private captureConfig: CaptureConfig;

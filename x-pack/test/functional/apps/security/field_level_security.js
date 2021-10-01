@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -13,11 +14,14 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'discover', 'header']);
+  const kibanaServer = getService('kibanaServer');
 
   describe('field_level_security', () => {
     before('initialize tests', async () => {
-      await esArchiver.loadIfNeeded('security/flstest/data'); //( data)
-      await esArchiver.load('security/flstest/kibana'); //(savedobject)
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/security/flstest/data'); //( data)
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/security/flstest/index_pattern'
+      );
       await browser.setWindowSize(1600, 1000);
     });
 
@@ -71,14 +75,12 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should add new user customer1 ', async function () {
-      await PageObjects.security.clickElasticsearchUsers();
-      await PageObjects.security.addUser({
+      await PageObjects.security.createUser({
         username: 'customer1',
         password: 'changeme',
-        confirmPassword: 'changeme',
-        fullname: 'customer one',
+        confirm_password: 'changeme',
+        full_name: 'customer one',
         email: 'flstest@elastic.com',
-        save: true,
         roles: ['kibana_admin', 'a_viewssnrole'],
       });
       const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
@@ -87,14 +89,12 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should add new user customer2 ', async function () {
-      await PageObjects.security.clickElasticsearchUsers();
-      await PageObjects.security.addUser({
+      await PageObjects.security.createUser({
         username: 'customer2',
         password: 'changeme',
-        confirmPassword: 'changeme',
-        fullname: 'customer two',
+        confirm_password: 'changeme',
+        full_name: 'customer two',
         email: 'flstest@elastic.com',
-        save: true,
         roles: ['kibana_admin', 'a_view_no_ssn_role'],
       });
       const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
@@ -111,9 +111,7 @@ export default function ({ getService, getPageObjects }) {
         expect(hitCount).to.be('2');
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
-      expect(rowData).to.be(
-        'customer_ssn:444.555.6666 customer_name:ABC Company customer_region:WEST _id:2 _type: - _index:flstest _score:0'
-      );
+      expect(rowData).to.contain('ssn');
     });
 
     it('user customer2 should not see ssn', async function () {
@@ -125,13 +123,14 @@ export default function ({ getService, getPageObjects }) {
         expect(hitCount).to.be('2');
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
-      expect(rowData).to.be(
-        'customer_name:ABC Company customer_region:WEST _id:2 _type: - _index:flstest _score:0'
-      );
+      expect(rowData).not.to.contain('ssn');
     });
 
     after(async function () {
       await PageObjects.security.forceLogout();
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/security/flstest/index_pattern'
+      );
     });
   });
 }

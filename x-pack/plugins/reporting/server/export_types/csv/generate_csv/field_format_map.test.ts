@@ -1,18 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
-import { fieldFormats, FieldFormatsGetConfigFn, UI_SETTINGS } from 'src/plugins/data/server';
-import { IndexPatternSavedObject } from '../types';
+import {
+  FieldFormatsGetConfigFn,
+  FieldFormatsRegistry,
+  BytesFormat,
+  NumberFormat,
+  FORMATS_UI_SETTINGS,
+} from 'src/plugins/field_formats/common';
+import { IndexPatternSavedObjectDeprecatedCSV } from '../types';
 import { fieldFormatMapFactory } from './field_format_map';
 
 type ConfigValue = { number: { id: string; params: {} } } | string;
 
 describe('field format map', function () {
-  const indexPatternSavedObject: IndexPatternSavedObject = {
+  const indexPatternSavedObject: IndexPatternSavedObjectDeprecatedCSV = {
     timeFieldName: '@timestamp',
     title: 'logstash-*',
     attributes: {
@@ -21,16 +28,16 @@ describe('field format map', function () {
     },
   };
   const configMock: Record<string, ConfigValue> = {};
-  configMock[UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP] = {
+  configMock[FORMATS_UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP] = {
     number: { id: 'number', params: {} },
   };
-  configMock[UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN] = '0,0.[000]';
+  configMock[FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN] = '0,0.[000]';
   const getConfig = ((key: string) => configMock[key]) as FieldFormatsGetConfigFn;
   const testValue = '4000';
   const mockTimezone = 'Browser';
 
-  const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
-  fieldFormatsRegistry.init(getConfig, {}, [fieldFormats.BytesFormat, fieldFormats.NumberFormat]);
+  const fieldFormatsRegistry = new FieldFormatsRegistry();
+  fieldFormatsRegistry.init(getConfig, {}, [BytesFormat, NumberFormat]);
 
   const formatMap = fieldFormatMapFactory(
     indexPatternSavedObject,

@@ -1,23 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger, RequestHandlerContext } from 'src/core/server';
+import type {
+  IRouter,
+  Logger,
+  IScopedClusterClient,
+  SavedObjectsBulkCreateObject,
+} from 'src/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 import {
@@ -32,7 +27,7 @@ const insertDataIntoIndex = (
   dataIndexConfig: any,
   index: string,
   nowReference: string,
-  context: RequestHandlerContext,
+  esClient: IScopedClusterClient,
   logger: Logger
 ) => {
   function updateTimestamps(doc: any) {
@@ -61,9 +56,11 @@ const insertDataIntoIndex = (
       bulk.push(insertCmd);
       bulk.push(updateTimestamps(doc));
     });
-    const resp = await context.core.elasticsearch.legacy.client.callAsCurrentUser('bulk', {
+
+    const { body: resp } = await esClient.asCurrentUser.bulk({
       body: bulk,
     });
+
     if (resp.errors) {
       const errMsg = `sample_data install errors while bulk inserting. Elasticsearch response: ${JSON.stringify(
         resp,
@@ -110,7 +107,7 @@ export function createInstallRoute(
 
         // clean up any old installation of dataset
         try {
-          await context.core.elasticsearch.legacy.client.callAsCurrentUser('indices.delete', {
+          await context.core.elasticsearch.client.asCurrentUser.indices.delete({
             index,
           });
         } catch (err) {
@@ -118,17 +115,13 @@ export function createInstallRoute(
         }
 
         try {
-          const createIndexParams = {
+          await context.core.elasticsearch.client.asCurrentUser.indices.create({
             index,
             body: {
               settings: { index: { number_of_shards: 1, auto_expand_replicas: '0-1' } },
               mappings: { properties: dataIndexConfig.fields },
             },
-          };
-          await context.core.elasticsearch.legacy.client.callAsCurrentUser(
-            'indices.create',
-            createIndexParams
-          );
+          });
         } catch (err) {
           const errMsg = `Unable to create sample data index "${index}", error: ${err.message}`;
           logger.warn(errMsg);
@@ -140,34 +133,41 @@ export function createInstallRoute(
             dataIndexConfig,
             index,
             nowReference,
-            context,
+            context.core.elasticsearch.client,
             logger
           );
           (counts as any)[index] = count;
         } catch (err) {
           const errMsg = `sample_data install errors while loading data. Error: ${err}`;
-          logger.warn(errMsg);
-          return res.internalError({ body: errMsg });
+          throw new Error(errMsg);
         }
       }
 
       let createResults;
       try {
-        createResults = await context.core.savedObjects.client.bulkCreate(
-          sampleDataset.savedObjects.map(({ version, ...savedObject }) => savedObject),
+        const { getClient, typeRegistry } = context.core.savedObjects;
+
+        const includedHiddenTypes = sampleDataset.savedObjects
+          .map((object) => object.type)
+          .filter((supportedType) => typeRegistry.isHidden(supportedType));
+
+        const client = getClient({ includedHiddenTypes });
+
+        const savedObjects = sampleDataset.savedObjects as SavedObjectsBulkCreateObject[];
+        createResults = await client.bulkCreate(
+          savedObjects.map(({ version, ...savedObject }) => savedObject),
           { overwrite: true }
         );
       } catch (err) {
         const errMsg = `bulkCreate failed, error: ${err.message}`;
-        logger.warn(errMsg);
-        return res.internalError({ body: errMsg });
+        throw new Error(errMsg);
       }
       const errors = createResults.saved_objects.filter((savedObjectCreateResult) => {
         return Boolean(savedObjectCreateResult.error);
       });
       if (errors.length > 0) {
-        const errMsg = `sample_data install errors while loading saved objects. Errors: ${errors.join(
-          ','
+        const errMsg = `sample_data install errors while loading saved objects. Errors: ${JSON.stringify(
+          errors
         )}`;
         logger.warn(errMsg);
         return res.customError({ body: errMsg, statusCode: 403 });

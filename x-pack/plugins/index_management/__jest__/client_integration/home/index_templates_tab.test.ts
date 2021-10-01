@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from 'react-dom/test-utils';
@@ -30,7 +31,7 @@ describe('Index Templates tab', () => {
     server.restore();
   });
 
-  describe('when there are no index templates', () => {
+  describe('when there are no index templates of either kind', () => {
     test('should display an empty prompt', async () => {
       httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
 
@@ -42,6 +43,26 @@ describe('Index Templates tab', () => {
 
       expect(exists('sectionLoading')).toBe(false);
       expect(exists('emptyPrompt')).toBe(true);
+    });
+  });
+
+  describe('when there are composable index templates but no legacy index templates', () => {
+    test('only the composable index templates table is visible', async () => {
+      httpRequestsMockHelpers.setLoadTemplatesResponse({
+        templates: [fixtures.getComposableTemplate()],
+        legacyTemplates: [],
+      });
+
+      await act(async () => {
+        testBed = await setup();
+      });
+      const { exists, component } = testBed;
+      component.update();
+
+      expect(exists('sectionLoading')).toBe(false);
+      expect(exists('emptyPrompt')).toBe(false);
+      expect(exists('templateTable')).toBe(true);
+      expect(exists('legacyTemplateTable')).toBe(false);
     });
   });
 

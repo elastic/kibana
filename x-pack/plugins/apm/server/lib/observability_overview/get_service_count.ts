@@ -1,23 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeQuery } from '../../../../observability/server';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 
 export async function getServiceCount({
   setup,
   searchAggregatedTransactions,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
 }) {
-  const { apmEventClient, start, end } = setup;
+  const { apmEventClient } = setup;
 
   const params = {
     apm: {
@@ -33,13 +38,16 @@ export async function getServiceCount({
       size: 0,
       query: {
         bool: {
-          filter: [{ range: rangeFilter(start, end) }],
+          filter: rangeQuery(start, end),
         },
       },
       aggs: { serviceCount: { cardinality: { field: SERVICE_NAME } } },
     },
   };
 
-  const { aggregations } = await apmEventClient.search(params);
+  const { aggregations } = await apmEventClient.search(
+    'observability_overview_get_service_count',
+    params
+  );
   return aggregations?.serviceCount.value || 0;
 }

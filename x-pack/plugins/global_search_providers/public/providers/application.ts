@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { from, of } from 'rxjs';
@@ -19,8 +20,8 @@ export const createApplicationResultProvider = (
     mergeMap((application) => application.applications$),
     map((apps) =>
       [...apps.values()].filter(
-        // only include non-chromeless enabled apps with visible navLinks
-        (app) => app.status === 0 && app.navLinkStatus === 1 && app.chromeless !== true
+        // only include non-chromeless enabled apps
+        (app) => app.status === 0 && app.chromeless !== true
       )
     ),
     shareReplay(1)

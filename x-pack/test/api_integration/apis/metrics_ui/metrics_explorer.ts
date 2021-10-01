@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -20,8 +21,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Metrics Explorer API', () => {
     describe('with data', () => {
-      before(() => esArchiver.load('infra/7.0.0/hosts'));
-      after(() => esArchiver.unload('infra/7.0.0/hosts'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
 
       it('should work for multiple metrics', async () => {
         const postBody = {
@@ -56,12 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
           { name: 'metric_0', type: 'number' },
           { name: 'metric_1', type: 'number' },
         ]);
-        expect(firstSeries.rows).to.have.length(9);
-        expect(firstSeries.rows![1]).to.eql({
-          metric_0: 0.005333333333333333,
-          metric_1: 131,
-          timestamp: 1547571300000,
-        });
+        expect(firstSeries.rows).to.have.length(8);
       });
 
       it('should apply filterQuery to data', async () => {
@@ -95,11 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
           { name: 'timestamp', type: 'date' },
           { name: 'metric_0', type: 'number' },
         ]);
-        expect(firstSeries.rows).to.have.length(9);
-        expect(firstSeries.rows![1]).to.eql({
-          metric_0: 0.024,
-          timestamp: 1547571300000,
-        });
+        expect(firstSeries.rows).to.have.length(8);
       });
 
       it('should work for empty metrics', async () => {
@@ -158,12 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
           { name: 'metric_0', type: 'number' },
           { name: 'groupBy', type: 'string' },
         ]);
-        expect(firstSeries.rows).to.have.length(9);
-        expect(firstSeries.rows![1]).to.eql({
-          groupBy: 'system.diskio',
-          metric_0: 24,
-          timestamp: 1547571300000,
-        });
+        expect(firstSeries.rows).to.have.length(8);
         expect(body.pageInfo).to.eql({
           afterKey: { groupBy0: 'system.fsstat' },
           total: 12,
@@ -203,12 +190,7 @@ export default function ({ getService }: FtrProviderContext) {
           { name: 'metric_0', type: 'number' },
           { name: 'groupBy', type: 'string' },
         ]);
-        expect(firstSeries.rows).to.have.length(9);
-        expect(firstSeries.rows![1]).to.eql({
-          groupBy: 'demo-stack-mysql-01 / eth0',
-          metric_0: 53577.683333333334,
-          timestamp: 1547571300000,
-        });
+        expect(firstSeries.rows).to.have.length(8);
         expect(body.pageInfo).to.eql({
           afterKey: { groupBy0: 'demo-stack-mysql-01', groupBy1: 'eth2' },
           total: 4,

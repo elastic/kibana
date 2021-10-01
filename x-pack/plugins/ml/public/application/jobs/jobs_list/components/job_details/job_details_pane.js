@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiTitle,
   EuiTable,
   EuiTableBody,
@@ -41,9 +44,14 @@ function Section({ section }) {
 
   return (
     <React.Fragment>
-      <EuiTitle size="xs">
-        <h4>{section.title}</h4>
-      </EuiTitle>
+      <EuiFlexGroup gutterSize="xs">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h4>{section.title}</h4>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{section.titleAction}</EuiFlexItem>
+      </EuiFlexGroup>
       <div className="job-section" data-test-subj={`mlJobRowDetailsSection-${section.id}`}>
         <EuiTable compressed={true}>
           <EuiTableBody>

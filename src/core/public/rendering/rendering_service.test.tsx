@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -59,54 +48,38 @@ describe('RenderingService#start', () => {
 
   it('renders application service into provided DOM element', () => {
     startService();
-    expect(targetDomElement.querySelector('div.application')).toMatchInlineSnapshot(`
-              <div
-                class="application class-name"
-              >
-                <div>
-                  Hello application!
-                </div>
-              </div>
-          `);
+    expect(targetDomElement.querySelector('div.kbnAppWrapper')).toMatchInlineSnapshot(`
+      <div
+        class="kbnAppWrapper kbnAppWrapper--hiddenChrome"
+      >
+        <div
+          id="app-fixed-viewport"
+        />
+        <div>
+          Hello application!
+        </div>
+      </div>
+    `);
   });
 
-  it('adds the `chrome-hidden` class to the AppWrapper when chrome is hidden', () => {
+  it('adds the `kbnAppWrapper--hiddenChrome` class to the AppWrapper when chrome is hidden', () => {
     const isVisible$ = new BehaviorSubject(true);
     chrome.getIsVisible$.mockReturnValue(isVisible$);
     startService();
 
-    const appWrapper = targetDomElement.querySelector('div.app-wrapper')!;
-    expect(appWrapper.className).toEqual('app-wrapper');
+    const appWrapper = targetDomElement.querySelector('div.kbnAppWrapper')!;
+    expect(appWrapper.className).toEqual('kbnAppWrapper');
 
     act(() => isVisible$.next(false));
-    expect(appWrapper.className).toEqual('app-wrapper hidden-chrome');
+    expect(appWrapper.className).toEqual('kbnAppWrapper kbnAppWrapper--hiddenChrome');
 
     act(() => isVisible$.next(true));
-    expect(appWrapper.className).toEqual('app-wrapper');
-  });
-
-  it('adds the application classes to the AppContainer', () => {
-    const applicationClasses$ = new BehaviorSubject<string[]>([]);
-    chrome.getApplicationClasses$.mockReturnValue(applicationClasses$);
-    startService();
-
-    const appContainer = targetDomElement.querySelector('div.application')!;
-    expect(appContainer.className).toEqual('application');
-
-    act(() => applicationClasses$.next(['classA', 'classB']));
-    expect(appContainer.className).toEqual('application classA classB');
-
-    act(() => applicationClasses$.next(['classC']));
-    expect(appContainer.className).toEqual('application classC');
-
-    act(() => applicationClasses$.next([]));
-    expect(appContainer.className).toEqual('application');
+    expect(appWrapper.className).toEqual('kbnAppWrapper');
   });
 
   it('contains wrapper divs', () => {
     startService();
-    expect(targetDomElement.querySelector('div.app-wrapper')).toBeDefined();
-    expect(targetDomElement.querySelector('div.app-wrapper-pannel')).toBeDefined();
+    expect(targetDomElement.querySelector('div.kbnAppWrapper')).toBeDefined();
   });
 
   it('renders the banner UI', () => {

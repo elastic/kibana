@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { renderHook } from '@testing-library/react-hooks';
@@ -27,7 +16,7 @@ import { createVisualizeServicesMock } from '../mocks';
 describe('useLinkedSearchUpdates', () => {
   let mockServices: jest.Mocked<VisualizeServices>;
   const eventEmitter = new EventEmitter();
-  const savedVisInstance = ({
+  const savedVisInstance = {
     vis: {
       data: {
         searchSource: { setField: jest.fn(), setParent: jest.fn() },
@@ -35,7 +24,7 @@ describe('useLinkedSearchUpdates', () => {
     },
     savedVis: {},
     embeddableHandler: {},
-  } as unknown) as SavedVisInstance;
+  } as unknown as SavedVisInstance;
 
   beforeEach(() => {
     mockServices = createVisualizeServicesMock();
@@ -48,19 +37,19 @@ describe('useLinkedSearchUpdates', () => {
   });
 
   it('should subscribe on unlinkFromSavedSearch event if vis is based on saved search', () => {
-    const mockAppState = ({
+    const mockAppState = {
       transitions: {
         unlinkSavedSearch: jest.fn(),
       },
-    } as unknown) as VisualizeAppStateContainer;
-    savedVisInstance.savedSearch = ({
+    } as unknown as VisualizeAppStateContainer;
+    savedVisInstance.savedSearch = {
       searchSource: {
         getParent: jest.fn(),
         getField: jest.fn(),
         getOwnField: jest.fn(),
       },
       title: 'savedSearch',
-    } as unknown) as SavedVisInstance['savedSearch'];
+    } as unknown as SavedVisInstance['savedSearch'];
 
     renderHook(() =>
       useLinkedSearchUpdates(mockServices, eventEmitter, mockAppState, savedVisInstance)

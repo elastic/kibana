@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { fetchBeatsStats, processResults } from './get_beats_stats';
 import sinon from 'sinon';
+import { ElasticsearchClient } from 'kibana/server';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const beatsStatsResultSet = require('./__mocks__/fixtures/beats_stats_results');
 
@@ -22,40 +24,41 @@ describe('Get Beats Stats', () => {
     const clusterUuids = ['aCluster', 'bCluster', 'cCluster'];
     const start = new Date().toISOString();
     const end = new Date().toISOString();
-    let callCluster = sinon.stub();
+    const searchMock = sinon.stub();
+    const callCluster = { search: searchMock } as unknown as ElasticsearchClient;
 
     beforeEach(() => {
       const getStub = { get: sinon.stub() };
       getStub.get.withArgs('xpack.monitoring.beats.index_pattern').returns('beats-indices-*');
-      callCluster = sinon.stub();
+      searchMock.reset();
     });
 
     it('should set `from: 0, to: 10000` in the query', async () => {
+      searchMock.returns(Promise.resolve({ body: {} }));
       await fetchBeatsStats(callCluster, clusterUuids, start, end, {} as any);
-      const { args } = callCluster.firstCall;
-      const [api, { body }] = args;
+      const { args } = searchMock.firstCall;
+      const [{ body }] = args;
 
-      expect(api).toEqual('search');
       expect(body.from).toEqual(0);
       expect(body.size).toEqual(10000);
     });
 
     it('should set `from: 10000, from: 10000` in the query', async () => {
+      searchMock.returns(Promise.resolve({ body: {} }));
       await fetchBeatsStats(callCluster, clusterUuids, start, end, { page: 1 } as any);
-      const { args } = callCluster.firstCall;
-      const [api, { body }] = args;
+      const { args } = searchMock.firstCall;
+      const [{ body }] = args;
 
-      expect(api).toEqual('search');
       expect(body.from).toEqual(10000);
       expect(body.size).toEqual(10000);
     });
 
     it('should set `from: 20000, from: 10000` in the query', async () => {
+      searchMock.returns(Promise.resolve({ body: {} }));
       await fetchBeatsStats(callCluster, clusterUuids, start, end, { page: 2 } as any);
-      const { args } = callCluster.firstCall;
-      const [api, { body }] = args;
+      const { args } = searchMock.firstCall;
+      const [{ body }] = args;
 
-      expect(api).toEqual('search');
       expect(body.from).toEqual(20000);
       expect(body.size).toEqual(10000);
     });

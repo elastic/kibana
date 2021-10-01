@@ -4,7 +4,7 @@
 
 ## RouteConfigOptions.authRequired property
 
-Defines authentication mode for a route: - true. A user has to have valid credentials to access a resource - false. A user can access a resource without any credentials. - 'optional'. A user can access a resource if has valid credentials or no credentials at all. Can be useful when we grant access to a resource but want to identify a user if possible.
+Defines authentication mode for a route: - true. A user has to have valid credentials to access a resource - false. A user can access a resource without any credentials. - 'optional'. A user can access a resource, and will be authenticated if provided credentials are valid. Can be useful when we grant access to a resource but want to identify a user if possible.
 
 Defaults to `true` if an auth mechanism is registered.
 

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -22,14 +11,16 @@ import {
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportUnknownError,
   SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportResponse,
 } from 'src/core/public';
 import { processImportResponse } from './process_import_response';
 
 describe('processImportResponse()', () => {
   test('works when no errors exist in the response', () => {
-    const response = {
+    const response: SavedObjectsImportResponse = {
       success: true,
       successCount: 0,
+      warnings: [],
     };
     const result = processImportResponse(response);
     expect(result.status).toBe('success');
@@ -37,7 +28,7 @@ describe('processImportResponse()', () => {
   });
 
   test('conflict errors get added to failedImports and result in idle status', () => {
-    const response = {
+    const response: SavedObjectsImportResponse = {
       success: false,
       successCount: 0,
       errors: [
@@ -50,6 +41,7 @@ describe('processImportResponse()', () => {
           meta: {},
         },
       ],
+      warnings: [],
     };
     const result = processImportResponse(response);
     expect(result.failedImports).toMatchInlineSnapshot(`
@@ -70,7 +62,7 @@ describe('processImportResponse()', () => {
   });
 
   test('ambiguous conflict errors get added to failedImports and result in idle status', () => {
-    const response = {
+    const response: SavedObjectsImportResponse = {
       success: false,
       successCount: 0,
       errors: [
@@ -83,6 +75,7 @@ describe('processImportResponse()', () => {
           meta: {},
         },
       ],
+      warnings: [],
     };
     const result = processImportResponse(response);
     expect(result.failedImports).toMatchInlineSnapshot(`
@@ -103,7 +96,7 @@ describe('processImportResponse()', () => {
   });
 
   test('unknown errors get added to failedImports and result in success status', () => {
-    const response = {
+    const response: SavedObjectsImportResponse = {
       success: false,
       successCount: 0,
       errors: [
@@ -116,6 +109,7 @@ describe('processImportResponse()', () => {
           meta: {},
         },
       ],
+      warnings: [],
     };
     const result = processImportResponse(response);
     expect(result.failedImports).toMatchInlineSnapshot(`
@@ -136,7 +130,7 @@ describe('processImportResponse()', () => {
   });
 
   test('missing references get added to failedImports and result in idle status', () => {
-    const response = {
+    const response: SavedObjectsImportResponse = {
       success: false,
       successCount: 0,
       errors: [
@@ -155,6 +149,7 @@ describe('processImportResponse()', () => {
           meta: {},
         },
       ],
+      warnings: [],
     };
     const result = processImportResponse(response);
     expect(result.failedImports).toMatchInlineSnapshot(`
@@ -181,7 +176,7 @@ describe('processImportResponse()', () => {
   });
 
   test('missing references get added to unmatchedReferences, but are not duplicated', () => {
-    const response = {
+    const response: SavedObjectsImportResponse = {
       success: false,
       successCount: 0,
       errors: [
@@ -199,6 +194,7 @@ describe('processImportResponse()', () => {
           meta: {},
         },
       ],
+      warnings: [],
     };
     const result = processImportResponse(response);
     expect(result.unmatchedReferences).toEqual([
@@ -208,10 +204,11 @@ describe('processImportResponse()', () => {
   });
 
   test('success results get added to successfulImports and result in success status', () => {
-    const response = {
+    const response: SavedObjectsImportResponse = {
       success: true,
       successCount: 1,
       successResults: [{ type: 'a', id: '1', meta: {} }],
+      warnings: [],
     };
     const result = processImportResponse(response);
     expect(result.successfulImports).toMatchInlineSnapshot(`
@@ -224,5 +221,23 @@ describe('processImportResponse()', () => {
       ]
     `);
     expect(result.status).toBe('success');
+  });
+
+  test('warnings from the response get returned', () => {
+    const response: SavedObjectsImportResponse = {
+      success: true,
+      successCount: 1,
+      successResults: [{ type: 'a', id: '1', meta: {} }],
+      warnings: [
+        {
+          type: 'action_required',
+          message: 'foo',
+          actionPath: '/somewhere',
+        },
+      ],
+    };
+    const result = processImportResponse(response);
+    expect(result.status).toBe('success');
+    expect(result.importWarnings).toEqual(response.warnings);
   });
 });

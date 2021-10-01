@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -21,7 +22,8 @@ export interface RemoteClustersPluginSetup {
 }
 
 export class RemoteClustersUIPlugin
-  implements Plugin<RemoteClustersPluginSetup, void, Dependencies, any> {
+  implements Plugin<RemoteClustersPluginSetup, void, Dependencies, any>
+{
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   setup(
@@ -59,13 +61,14 @@ export class RemoteClustersUIPlugin
           initNotification(toasts, fatalErrors);
           initHttp(http);
 
-          const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
+          const isCloudEnabled: boolean = Boolean(cloud?.isCloudEnabled);
+          const cloudBaseUrl: string = cloud?.baseUrl ?? '';
 
           const { renderApp } = await import('./application');
           const unmountAppCallback = await renderApp(
             element,
             i18nContext,
-            { isCloudEnabled },
+            { isCloudEnabled, cloudBaseUrl },
             history
           );
 

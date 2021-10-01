@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import { CommonProps, EuiText, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ConditionGroup, ConditionGroupProps } from '../condition_group';
+import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
 
 export type LogicalConditionBuilderProps = CommonProps & ConditionGroupProps;
 export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
@@ -22,14 +24,8 @@ export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
     onVisited,
     'data-test-subj': dataTestSubj,
   }) => {
-    const getTestId = useCallback(
-      (suffix: string): string | undefined => {
-        if (dataTestSubj) {
-          return `${dataTestSubj}-${suffix}`;
-        }
-      },
-      [dataTestSubj]
-    );
+    const getTestId = useTestIdGenerator(dataTestSubj);
+
     return (
       <div data-test-subj={dataTestSubj} className={className}>
         <div>

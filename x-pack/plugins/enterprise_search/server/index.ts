@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
+
 import { EnterpriseSearchPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
@@ -17,6 +19,15 @@ export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   accessCheckTimeout: schema.number({ defaultValue: 5000 }),
   accessCheckTimeoutWarning: schema.number({ defaultValue: 300 }),
+  ssl: schema.object({
+    certificateAuthorities: schema.maybe(
+      schema.oneOf([schema.arrayOf(schema.string(), { minSize: 1 }), schema.string()])
+    ),
+    verificationMode: schema.oneOf(
+      [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+      { defaultValue: 'full' }
+    ),
+  }),
 });
 
 export type ConfigType = TypeOf<typeof configSchema>;
@@ -26,4 +37,5 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   exposeToBrowser: {
     host: true,
   },
+  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
 };

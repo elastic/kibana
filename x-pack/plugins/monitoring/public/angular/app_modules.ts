@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import angular, { IWindowService } from 'angular';
@@ -12,7 +13,7 @@ import 'angular-route';
 import '../index.scss';
 import { upperFirst } from 'lodash';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-import { AppMountContext } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import {
   createTopNavDirective,
@@ -41,6 +42,8 @@ import { licenseProvider } from '../services/license';
 // @ts-ignore
 import { titleProvider } from '../services/title';
 // @ts-ignore
+import { enableAlertsModalProvider } from '../services/enable_alerts_modal';
+// @ts-ignore
 import { monitoringMlListingProvider } from '../directives/elasticsearch/ml_job_listing';
 // @ts-ignore
 import { monitoringMainProvider } from '../directives/main';
@@ -49,7 +52,7 @@ export const appModuleName = 'monitoring';
 
 type IPrivate = <T>(provider: (...injectable: unknown[]) => T) => T;
 
-const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react', 'ui.bootstrap'];
+const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react'];
 
 export const localAppModule = ({
   core,
@@ -141,6 +144,9 @@ function createMonitoringAppServices() {
     .service('features', function (Private: IPrivate) {
       return Private(featuresProvider);
     })
+    .service('enableAlertsModal', function (Private: IPrivate) {
+      return Private(enableAlertsModalProvider);
+    })
     .service('license', function (Private: IPrivate) {
       return Private(licenseProvider);
     })
@@ -218,7 +224,7 @@ function createLocalI18nModule() {
     .directive('i18nId', i18nDirective);
 }
 
-function createHrefModule(core: AppMountContext['core']) {
+function createHrefModule(core: CoreStart) {
   const name: string = 'kbnHref';
   angular.module('monitoring/href', []).directive(name, function () {
     return {
@@ -230,6 +236,11 @@ function createHrefModule(core: AppMountContext['core']) {
               const url = getSafeForExternalLink(val as string);
               $attr.$set('href', core.http.basePath.prepend(url));
             }
+          });
+
+          _$scope.$on('$locationChangeSuccess', () => {
+            const url = getSafeForExternalLink($attr.href as string);
+            $attr.$set('href', core.http.basePath.prepend(url));
           });
         },
       },

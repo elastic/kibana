@@ -1,9 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { layerTypes } from '../../../../common';
+import { initialState } from '../../../state_management/lens_slice';
 import { removeLayer, appendLayer } from './layer_actions';
 
 function createTestArgs(initialLayerIds: string[]) {
@@ -41,6 +44,7 @@ function createTestArgs(initialLayerIds: string[]) {
 
   return {
     state: {
+      ...initialState,
       activeDatasourceId: 'ds1',
       datasourceStates,
       title: 'foo',
@@ -116,6 +120,7 @@ describe('appendLayer', () => {
       generateId: () => 'foo',
       state,
       trackUiEvent,
+      layerType: layerTypes.DATA,
     });
 
     expect(newState.visualization.state).toEqual(['layer1', 'layer2', 'foo']);

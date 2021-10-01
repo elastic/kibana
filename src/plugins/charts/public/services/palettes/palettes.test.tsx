@@ -1,23 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { coreMock } from '../../../../../core/public/mocks';
 import { createColorPalette as createLegacyColorPalette } from '../../../../../../src/plugins/charts/public';
 import { PaletteDefinition } from './types';
 import { buildPalettes } from './palettes';
@@ -25,23 +13,20 @@ import { colorsServiceMock } from '../legacy_colors/mock';
 import { euiPaletteColorBlind, euiPaletteColorBlindBehindText } from '@elastic/eui';
 
 describe('palettes', () => {
-  const palettes: Record<string, PaletteDefinition> = buildPalettes(
-    coreMock.createStart().uiSettings,
-    colorsServiceMock
-  );
+  const palettes: Record<string, PaletteDefinition> = buildPalettes(colorsServiceMock);
   describe('default palette', () => {
     describe('syncColors: false', () => {
       it('should return different colors based on behind text flag', () => {
         const palette = palettes.default;
 
-        const color1 = palette.getColor([
+        const color1 = palette.getCategoricalColor([
           {
             name: 'abc',
             rankAtDepth: 0,
             totalSeriesAtDepth: 5,
           },
         ]);
-        const color2 = palette.getColor(
+        const color2 = palette.getCategoricalColor(
           [
             {
               name: 'abc',
@@ -59,14 +44,14 @@ describe('palettes', () => {
       it('should return different colors based on rank at current series', () => {
         const palette = palettes.default;
 
-        const color1 = palette.getColor([
+        const color1 = palette.getCategoricalColor([
           {
             name: 'abc',
             rankAtDepth: 0,
             totalSeriesAtDepth: 5,
           },
         ]);
-        const color2 = palette.getColor([
+        const color2 = palette.getCategoricalColor([
           {
             name: 'abc',
             rankAtDepth: 1,
@@ -79,7 +64,7 @@ describe('palettes', () => {
       it('should return the same color for different positions on outer series layers', () => {
         const palette = palettes.default;
 
-        const color1 = palette.getColor([
+        const color1 = palette.getCategoricalColor([
           {
             name: 'abc',
             rankAtDepth: 0,
@@ -91,7 +76,7 @@ describe('palettes', () => {
             totalSeriesAtDepth: 2,
           },
         ]);
-        const color2 = palette.getColor([
+        const color2 = palette.getCategoricalColor([
           {
             name: 'abc',
             rankAtDepth: 0,
@@ -111,7 +96,7 @@ describe('palettes', () => {
       it('should return different colors based on behind text flag', () => {
         const palette = palettes.default;
 
-        const color1 = palette.getColor(
+        const color1 = palette.getCategoricalColor(
           [
             {
               name: 'abc',
@@ -123,7 +108,7 @@ describe('palettes', () => {
             syncColors: true,
           }
         );
-        const color2 = palette.getColor(
+        const color2 = palette.getCategoricalColor(
           [
             {
               name: 'abc',
@@ -142,7 +127,7 @@ describe('palettes', () => {
       it('should return different colors for different keys', () => {
         const palette = palettes.default;
 
-        const color1 = palette.getColor(
+        const color1 = palette.getCategoricalColor(
           [
             {
               name: 'abc',
@@ -154,7 +139,7 @@ describe('palettes', () => {
             syncColors: true,
           }
         );
-        const color2 = palette.getColor(
+        const color2 = palette.getCategoricalColor(
           [
             {
               name: 'def',
@@ -172,7 +157,7 @@ describe('palettes', () => {
       it('should return the same color for the same key, irregardless of rank', () => {
         const palette = palettes.default;
 
-        const color1 = palette.getColor(
+        const color1 = palette.getCategoricalColor(
           [
             {
               name: 'hij',
@@ -184,7 +169,7 @@ describe('palettes', () => {
             syncColors: true,
           }
         );
-        const color2 = palette.getColor(
+        const color2 = palette.getCategoricalColor(
           [
             {
               name: 'hij',
@@ -202,7 +187,7 @@ describe('palettes', () => {
       it('should return the same color for different positions on outer series layers', () => {
         const palette = palettes.default;
 
-        const color1 = palette.getColor(
+        const color1 = palette.getCategoricalColor(
           [
             {
               name: 'klm',
@@ -219,7 +204,7 @@ describe('palettes', () => {
             syncColors: true,
           }
         );
-        const color2 = palette.getColor(
+        const color2 = palette.getCategoricalColor(
           [
             {
               name: 'klm',
@@ -242,7 +227,7 @@ describe('palettes', () => {
       it('should return the same index of the behind text palette for same key', () => {
         const palette = palettes.default;
 
-        const color1 = palette.getColor(
+        const color1 = palette.getCategoricalColor(
           [
             {
               name: 'klm',
@@ -259,7 +244,7 @@ describe('palettes', () => {
             syncColors: true,
           }
         );
-        const color2 = palette.getColor(
+        const color2 = palette.getCategoricalColor(
           [
             {
               name: 'klm',
@@ -288,15 +273,15 @@ describe('palettes', () => {
     const palette = palettes.warm;
 
     it('should use the whole gradient', () => {
-      const wholePalette = palette.getColors(10);
-      const color1 = palette.getColor([
+      const wholePalette = palette.getCategoricalColors(10);
+      const color1 = palette.getCategoricalColor([
         {
           name: 'abc',
           rankAtDepth: 0,
           totalSeriesAtDepth: 10,
         },
       ]);
-      const color2 = palette.getColor([
+      const color2 = palette.getCategoricalColor([
         {
           name: 'def',
           rankAtDepth: 9,
@@ -313,12 +298,13 @@ describe('palettes', () => {
 
     beforeEach(() => {
       (colorsServiceMock.mappedColors.mapKeys as jest.Mock).mockClear();
+      (colorsServiceMock.mappedColors.getColorFromConfig as jest.Mock).mockReset();
       (colorsServiceMock.mappedColors.get as jest.Mock).mockClear();
     });
 
     describe('syncColors: false', () => {
       it('should not query legacy color service', () => {
-        palette.getColor(
+        palette.getCategoricalColor(
           [
             {
               name: 'abc',
@@ -334,8 +320,32 @@ describe('palettes', () => {
         expect(colorsServiceMock.mappedColors.get).not.toHaveBeenCalled();
       });
 
+      it('should respect the advanced settings color mapping', () => {
+        const configColorGetter = colorsServiceMock.mappedColors.getColorFromConfig as jest.Mock;
+        configColorGetter.mockImplementation(() => 'blue');
+        const result = palette.getCategoricalColor(
+          [
+            {
+              name: 'abc',
+              rankAtDepth: 2,
+              totalSeriesAtDepth: 10,
+            },
+            {
+              name: 'def',
+              rankAtDepth: 0,
+              totalSeriesAtDepth: 10,
+            },
+          ],
+          {
+            syncColors: false,
+          }
+        );
+        expect(result).toEqual('blue');
+        expect(configColorGetter).toHaveBeenCalledWith('abc');
+      });
+
       it('should return a color from the legacy palette based on position of first series', () => {
-        const result = palette.getColor(
+        const result = palette.getCategoricalColor(
           [
             {
               name: 'abc',
@@ -358,7 +368,7 @@ describe('palettes', () => {
 
     describe('syncColors: true', () => {
       it('should query legacy color service', () => {
-        palette.getColor(
+        palette.getCategoricalColor(
           [
             {
               name: 'abc',
@@ -374,8 +384,32 @@ describe('palettes', () => {
         expect(colorsServiceMock.mappedColors.get).toHaveBeenCalledWith('abc');
       });
 
+      it('should respect the advanced settings color mapping', () => {
+        const configColorGetter = colorsServiceMock.mappedColors.getColorFromConfig as jest.Mock;
+        configColorGetter.mockImplementation(() => 'blue');
+        const result = palette.getCategoricalColor(
+          [
+            {
+              name: 'abc',
+              rankAtDepth: 2,
+              totalSeriesAtDepth: 10,
+            },
+            {
+              name: 'def',
+              rankAtDepth: 0,
+              totalSeriesAtDepth: 10,
+            },
+          ],
+          {
+            syncColors: false,
+          }
+        );
+        expect(result).toEqual('blue');
+        expect(configColorGetter).toHaveBeenCalledWith('abc');
+      });
+
       it('should always use root series', () => {
-        palette.getColor(
+        palette.getCategoricalColor(
           [
             {
               name: 'abc',
@@ -403,7 +437,7 @@ describe('palettes', () => {
   describe('custom palette', () => {
     const palette = palettes.custom;
     it('should return different colors based on rank at current series', () => {
-      const color1 = palette.getColor(
+      const color1 = palette.getCategoricalColor(
         [
           {
             name: 'abc',
@@ -416,7 +450,7 @@ describe('palettes', () => {
           colors: ['#00ff00', '#000000'],
         }
       );
-      const color2 = palette.getColor(
+      const color2 = palette.getCategoricalColor(
         [
           {
             name: 'abc',
@@ -433,7 +467,7 @@ describe('palettes', () => {
     });
 
     it('should return the same color for different positions on outer series layers', () => {
-      const color1 = palette.getColor(
+      const color1 = palette.getCategoricalColor(
         [
           {
             name: 'abc',
@@ -451,7 +485,7 @@ describe('palettes', () => {
           colors: ['#00ff00', '#000000'],
         }
       );
-      const color2 = palette.getColor(
+      const color2 = palette.getCategoricalColor(
         [
           {
             name: 'abc',
@@ -473,7 +507,7 @@ describe('palettes', () => {
     });
 
     it('should use passed in colors', () => {
-      const color = palette.getColor(
+      const color = palette.getCategoricalColor(
         [
           {
             name: 'abc',
@@ -488,6 +522,57 @@ describe('palettes', () => {
         }
       );
       expect(color).toEqual('#00ff00');
+    });
+
+    // just an integration test here. More in depth tests on the subject can be found on the helper file
+    it('should return a color for the given value with its domain', () => {
+      expect(
+        palette.getColorForValue!(
+          0,
+          { colors: ['red', 'green', 'blue'], stops: [], gradient: false },
+          { min: 0, max: 100 }
+        )
+      ).toBe('red');
+    });
+
+    it('should return a color for the given value with its domain based on custom stops', () => {
+      expect(
+        palette.getColorForValue!(
+          60,
+          {
+            colors: ['red', 'green', 'blue'],
+            stops: [10, 50, 100],
+            range: 'percent',
+            gradient: false,
+            rangeMin: 0,
+            rangeMax: 100,
+          },
+          { min: 0, max: 100 }
+        )
+      ).toBe('blue');
+    });
+
+    // just make sure to not have broken anything
+    it('should work with only legacy arguments, filling with default values the new ones', () => {
+      expect(palette.toExpression({ colors: [], gradient: false })).toEqual({
+        type: 'expression',
+        chain: [
+          {
+            type: 'function',
+            function: 'palette',
+            arguments: {
+              color: [],
+              gradient: [false],
+              reverse: [false],
+              continuity: ['above'],
+              stop: [],
+              range: ['percent'],
+              rangeMax: [],
+              rangeMin: [],
+            },
+          },
+        ],
+      });
     });
   });
 });

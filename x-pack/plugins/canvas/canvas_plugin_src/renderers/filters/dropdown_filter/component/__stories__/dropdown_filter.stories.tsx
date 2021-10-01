@@ -1,37 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
+import { storiesOf } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import { DropdownFilter } from '../dropdown_filter';
 
-const choices = ['Item One', 'Item Two', 'Item Three'];
+const choices: Array<[string, string]> = [
+  ['1', 'Item One'],
+  ['2', 'Item Two'],
+  ['3', 'Item Three'],
+];
 
 storiesOf('renderers/DropdownFilter', module)
-  .add('default', () => <DropdownFilter onChange={action('onChange')} commit={action('commit')} />)
+  .add('default', () => <DropdownFilter commit={action('commit')} />)
   .add('with new value', () => (
-    <DropdownFilter onChange={action('onChange')} commit={action('commit')} value="selectedValue" />
+    <DropdownFilter commit={action('commit')} initialValue="selectedValue" />
   ))
-  .add('with choices', () => (
-    <DropdownFilter onChange={action('onChange')} commit={action('commit')} choices={choices} />
-  ))
+  .add('with choices', () => <DropdownFilter commit={action('commit')} choices={choices} />)
   .add('with choices and value', () => (
-    <DropdownFilter
-      onChange={action('onChange')}
-      commit={action('commit')}
-      choices={choices}
-      value="Item Two"
-    />
+    <DropdownFilter commit={action('commit')} choices={choices} initialValue="Item Two" />
   ))
   .add('with choices and new value', () => (
-    <DropdownFilter
-      onChange={action('onChange')}
-      commit={action('commit')}
-      choices={choices}
-      value="selectedValue"
-    />
+    <DropdownFilter commit={action('commit')} choices={choices} initialValue="selectedValue" />
   ));

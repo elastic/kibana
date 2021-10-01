@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -18,9 +19,9 @@ export default function enterpriseSearchSetupGuideTests({
   const PageObjects = getPageObjects(['appSearch']);
 
   describe('Setup Guide', function () {
-    before(async () => await esArchiver.load('empty_kibana'));
+    before(async () => await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana'));
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     describe('when no enterpriseSearch.host is configured', () => {

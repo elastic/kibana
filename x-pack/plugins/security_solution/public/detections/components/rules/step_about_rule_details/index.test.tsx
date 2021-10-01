@@ -1,23 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { EuiProgress, EuiButtonGroup } from '@elastic/eui';
 import { ThemeProvider } from 'styled-components';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { StepAboutRuleToggleDetails } from '.';
 import { mockAboutStepRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { StepAboutRule } from '../step_about_rule';
 import { AboutStepRule } from '../../../pages/detection_engine/rules/types';
+import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 
 jest.mock('../../../../common/lib/kibana');
 
-const theme = () => ({ eui: euiDarkVars, darkMode: true });
+const mockTheme = getMockTheme({
+  eui: { euiSizeL: '10px', euiBreakpoints: { s: '450px' }, paddingSizes: { m: '10px' } },
+});
 
 describe('StepAboutRuleToggleDetails', () => {
   let mockRule: AboutStepRule;
@@ -91,7 +95,7 @@ describe('StepAboutRuleToggleDetails', () => {
   describe('note value does exist', () => {
     test('it renders toggle buttons, defaulted to "details"', () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <StepAboutRuleToggleDetails
             loading={false}
             stepDataDetails={{
@@ -110,7 +114,7 @@ describe('StepAboutRuleToggleDetails', () => {
 
     test('it allows users to toggle between "details" and "note"', () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <StepAboutRuleToggleDetails
             loading={false}
             stepDataDetails={{
@@ -137,7 +141,7 @@ describe('StepAboutRuleToggleDetails', () => {
 
     test('it displays notes markdown when user toggles to "notes"', () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <StepAboutRuleToggleDetails
             loading={false}
             stepDataDetails={{
@@ -156,7 +160,7 @@ describe('StepAboutRuleToggleDetails', () => {
         .simulate('change', { target: { value: 'notes' } });
 
       expect(wrapper.find('EuiButtonGroup[idSelected="notes"]').exists()).toBeTruthy();
-      expect(wrapper.find('.euiMarkdownFormat').text()).toEqual(
+      expect(wrapper.find('div.euiMarkdownFormat').text()).toEqual(
         'this is some markdown documentation'
       );
     });

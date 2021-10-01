@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { CallAsCurrentUser } from '../types';
+import { IScopedClusterClient } from 'kibana/server';
 import { Index } from '../index';
 
-export type Enricher = (indices: Index[], callAsCurrentUser: CallAsCurrentUser) => Promise<Index[]>;
+export type Enricher = (indices: Index[], client: IScopedClusterClient) => Promise<Index[]>;
 
 export class IndexDataEnricher {
   private readonly _enrichers: Enricher[] = [];
@@ -18,14 +19,14 @@ export class IndexDataEnricher {
 
   public enrichIndices = async (
     indices: Index[],
-    callAsCurrentUser: CallAsCurrentUser
+    client: IScopedClusterClient
   ): Promise<Index[]> => {
     let enrichedIndices = indices;
 
     for (let i = 0; i < this.enrichers.length; i++) {
       const dataEnricher = this.enrichers[i];
       try {
-        const dataEnricherResponse = await dataEnricher(enrichedIndices, callAsCurrentUser);
+        const dataEnricherResponse = await dataEnricher(enrichedIndices, client);
         enrichedIndices = dataEnricherResponse;
       } catch (e) {
         // silently swallow enricher response errors

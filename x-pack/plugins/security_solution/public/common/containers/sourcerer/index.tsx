@@ -1,18 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { matchPath } from 'react-router-dom';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useIndexFields } from '../source';
 import { useUserInfo } from '../../../detections/components/user_info';
 import { timelineSelectors } from '../../../timelines/store/timeline';
-import { TimelineId } from '../../../../common/types/timeline';
+import { ALERTS_PATH, RULES_PATH, UEBA_PATH } from '../../../../common/constants';
+import { TimelineId } from '../../../../common';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 
 export const useInitSourcerer = (
@@ -54,8 +57,7 @@ export const useInitSourcerer = (
       !loadingSignalIndex &&
       signalIndexName != null &&
       signalIndexNameSelector == null &&
-      (activeTimeline == null ||
-        (activeTimeline != null && activeTimeline.savedObjectId == null)) &&
+      (activeTimeline == null || activeTimeline.savedObjectId == null) &&
       initialTimelineSourcerer.current
     ) {
       initialTimelineSourcerer.current = false;
@@ -65,7 +67,11 @@ export const useInitSourcerer = (
           selectedPatterns: [...ConfigIndexPatterns, signalIndexName],
         })
       );
-    } else if (signalIndexNameSelector != null && initialTimelineSourcerer.current) {
+    } else if (
+      signalIndexNameSelector != null &&
+      (activeTimeline == null || activeTimeline.savedObjectId == null) &&
+      initialTimelineSourcerer.current
+    ) {
       initialTimelineSourcerer.current = false;
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
@@ -98,7 +104,11 @@ export const useInitSourcerer = (
           selectedPatterns: [signalIndexName],
         })
       );
-    } else if (signalIndexNameSelector != null && initialTimelineSourcerer.current) {
+    } else if (
+      scopeId === SourcererScopeName.detections &&
+      signalIndexNameSelector != null &&
+      initialTimelineSourcerer.current
+    ) {
       initialDetectionSourcerer.current = false;
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
@@ -112,6 +122,16 @@ export const useInitSourcerer = (
 
 export const useSourcererScope = (scope: SourcererScopeName = SourcererScopeName.default) => {
   const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
-  const SourcererScope = useDeepEqualSelector((state) => sourcererScopeSelector(state, scope));
-  return SourcererScope;
+  return useDeepEqualSelector((state) => sourcererScopeSelector(state, scope));
+};
+
+export const getScopeFromPath = (
+  pathname: string
+): SourcererScopeName.default | SourcererScopeName.detections => {
+  return matchPath(pathname, {
+    path: [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${UEBA_PATH}/:id`],
+    strict: false,
+  }) == null
+    ? SourcererScopeName.default
+    : SourcererScopeName.detections;
 };

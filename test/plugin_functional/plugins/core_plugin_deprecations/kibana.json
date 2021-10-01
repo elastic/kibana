@@ -1,0 +1,12 @@
+{
+  "id": "corePluginDeprecations",
+  "version": "0.0.1",
+  "owner": {
+    "name": "Core",
+    "githubTeam": "kibana-core"
+  },
+  "kibanaVersion": "kibana",
+  "configPath": ["corePluginDeprecations"],
+  "server": true,
+  "ui": false
+}

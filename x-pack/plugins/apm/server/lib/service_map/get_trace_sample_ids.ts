@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import Boom from '@hapi/boom';
 import { sortBy, take, uniq } from 'lodash';
-import { ESFilter } from '../../../../../typings/elasticsearch';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -14,9 +16,9 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
-import { rangeFilter } from '../../../common/utils/range_filter';
-import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { rangeQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
+import { Setup } from '../helpers/setup_request';
 
 const MAX_TRACES_TO_INSPECT = 1000;
 
@@ -24,33 +26,38 @@ export async function getTraceSampleIds({
   serviceName,
   environment,
   setup,
+  start,
+  end,
 }: {
   serviceName?: string;
-  environment?: string;
-  setup: Setup & SetupTimeRange;
+  environment: string;
+  setup: Setup;
+  start: number;
+  end: number;
 }) {
-  const { start, end, apmEventClient, config } = setup;
-
-  const rangeQuery = { range: rangeFilter(start, end) };
+  const { apmEventClient, config } = setup;
 
   const query = {
     bool: {
-      filter: [
-        {
-          exists: {
-            field: SPAN_DESTINATION_SERVICE_RESOURCE,
-          },
-        },
-        rangeQuery,
-      ] as ESFilter[],
+      filter: [...rangeQuery(start, end)],
     },
-  } as { bool: { filter: ESFilter[]; must_not?: ESFilter[] | ESFilter } };
+  };
+
+  let events: ProcessorEvent[];
 
   if (serviceName) {
     query.bool.filter.push({ term: { [SERVICE_NAME]: serviceName } });
+    events = [ProcessorEvent.span, ProcessorEvent.transaction];
+  } else {
+    events = [ProcessorEvent.span];
+    query.bool.filter.push({
+      exists: {
+        field: SPAN_DESTINATION_SERVICE_RESOURCE,
+      },
+    });
   }
 
-  query.bool.filter.push(...getEnvironmentUiFilterES(environment));
+  query.bool.filter.push(...environmentQuery(environment));
 
   const fingerprintBucketSize = serviceName
     ? config['xpack.apm.serviceMapFingerprintBucketSize']
@@ -64,7 +71,7 @@ export async function getTraceSampleIds({
 
   const params = {
     apm: {
-      events: [ProcessorEvent.span],
+      events,
     },
     body: {
       size: 0,
@@ -72,11 +79,12 @@ export async function getTraceSampleIds({
       aggs: {
         connections: {
           composite: {
-            sources: [
+            sources: asMutableArray([
               {
                 [SPAN_DESTINATION_SERVICE_RESOURCE]: {
                   terms: {
                     field: SPAN_DESTINATION_SERVICE_RESOURCE,
+                    missing_bucket: true,
                   },
                 },
               },
@@ -95,7 +103,7 @@ export async function getTraceSampleIds({
                   },
                 },
               },
-            ],
+            ] as const),
             size: fingerprintBucketSize,
           },
           aggs: {
@@ -125,7 +133,10 @@ export async function getTraceSampleIds({
   };
 
   try {
-    const tracesSampleResponse = await apmEventClient.search(params);
+    const tracesSampleResponse = await apmEventClient.search(
+      'get_trace_sample_ids',
+      params
+    );
     // make sure at least one trace per composite/connection bucket
     // is queried
     const traceIdsWithPriority =

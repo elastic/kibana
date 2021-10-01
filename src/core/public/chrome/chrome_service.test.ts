@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { shallow } from 'enzyme';
@@ -34,8 +23,10 @@ import { getAppInfo } from '../application/utils';
 class FakeApp implements App {
   public title = `${this.id} App`;
   public mount = () => () => {};
+
   constructor(public id: string, public chromeless?: boolean) {}
 }
+
 const store = new Map();
 const originalLocalStorage = window.localStorage;
 
@@ -64,8 +55,21 @@ function defaultStartDeps(availableApps?: App[]) {
   return deps;
 }
 
+function defaultStartTestOptions({
+  browserSupportsCsp = true,
+  kibanaVersion = 'version',
+}: {
+  browserSupportsCsp?: boolean;
+  kibanaVersion?: string;
+}): any {
+  return {
+    browserSupportsCsp,
+    kibanaVersion,
+  };
+}
+
 async function start({
-  options = { browserSupportsCsp: true },
+  options = defaultStartTestOptions({}),
   cspConfigMock = { warnLegacyBrowsers: true },
   startDeps = defaultStartDeps(),
 }: { options?: any; cspConfigMock?: any; startDeps?: ReturnType<typeof defaultStartDeps> } = {}) {
@@ -93,7 +97,9 @@ afterAll(() => {
 
 describe('start', () => {
   it('adds legacy browser warning if browserSupportsCsp is disabled and warnLegacyBrowsers is enabled', async () => {
-    const { startDeps } = await start({ options: { browserSupportsCsp: false } });
+    const { startDeps } = await start({
+      options: { browserSupportsCsp: false, kibanaVersion: '7.0.0' },
+    });
 
     expect(startDeps.notifications.toasts.addWarning.mock.calls).toMatchInlineSnapshot(`
       Array [
@@ -104,6 +110,41 @@ describe('start', () => {
         ],
       ]
     `);
+  });
+
+  it('adds the kibana versioned class to the document body', async () => {
+    const { chrome, service } = await start({
+      options: { browserSupportsCsp: false, kibanaVersion: '1.2.3' },
+    });
+    const promise = chrome.getBodyClasses$().pipe(toArray()).toPromise();
+    service.stop();
+    await expect(promise).resolves.toMatchInlineSnapshot(`
+            Array [
+              Array [
+                "kbnBody",
+                "kbnBody--noHeaderBanner",
+                "kbnBody--chromeHidden",
+                "kbnVersion-1-2-3",
+              ],
+            ]
+          `);
+  });
+  it('strips off "snapshot" from the kibana version if present', async () => {
+    const { chrome, service } = await start({
+      options: { browserSupportsCsp: false, kibanaVersion: '8.0.0-SnAPshot' },
+    });
+    const promise = chrome.getBodyClasses$().pipe(toArray()).toPromise();
+    service.stop();
+    await expect(promise).resolves.toMatchInlineSnapshot(`
+            Array [
+              Array [
+                "kbnBody",
+                "kbnBody--noHeaderBanner",
+                "kbnBody--chromeHidden",
+                "kbnVersion-8-0-0",
+              ],
+            ]
+          `);
   });
 
   it('does not add legacy browser warning if browser supports CSP', async () => {
@@ -128,36 +169,6 @@ describe('start', () => {
       // Have to do some fanagling to get the type system and enzyme to accept this.
       // Don't capture the snapshot because it's 600+ lines long.
       expect(shallow(React.createElement(() => chrome.getHeaderComponent()))).toBeDefined();
-    });
-  });
-
-  describe('brand', () => {
-    it('updates/emits the brand as it changes', async () => {
-      const { chrome, service } = await start();
-      const promise = chrome.getBrand$().pipe(toArray()).toPromise();
-
-      chrome.setBrand({
-        logo: 'big logo',
-        smallLogo: 'not so big logo',
-      });
-      chrome.setBrand({
-        logo: 'big logo without small logo',
-      });
-      service.stop();
-
-      await expect(promise).resolves.toMatchInlineSnapshot(`
-                      Array [
-                        Object {},
-                        Object {
-                          "logo": "big logo",
-                          "smallLogo": "not so big logo",
-                        },
-                        Object {
-                          "logo": "big logo without small logo",
-                          "smallLogo": undefined,
-                        },
-                      ]
-                  `);
     });
   });
 
@@ -250,54 +261,6 @@ describe('start', () => {
     });
   });
 
-  describe('application classes', () => {
-    it('updates/emits the application classes', async () => {
-      const { chrome, service } = await start();
-      const promise = chrome.getApplicationClasses$().pipe(toArray()).toPromise();
-
-      chrome.addApplicationClass('foo');
-      chrome.addApplicationClass('foo');
-      chrome.addApplicationClass('bar');
-      chrome.addApplicationClass('bar');
-      chrome.addApplicationClass('baz');
-      chrome.removeApplicationClass('bar');
-      chrome.removeApplicationClass('foo');
-      service.stop();
-
-      await expect(promise).resolves.toMatchInlineSnapshot(`
-                      Array [
-                        Array [],
-                        Array [
-                          "foo",
-                        ],
-                        Array [
-                          "foo",
-                        ],
-                        Array [
-                          "foo",
-                          "bar",
-                        ],
-                        Array [
-                          "foo",
-                          "bar",
-                        ],
-                        Array [
-                          "foo",
-                          "bar",
-                          "baz",
-                        ],
-                        Array [
-                          "foo",
-                          "baz",
-                        ],
-                        Array [
-                          "baz",
-                        ],
-                      ]
-                  `);
-    });
-  });
-
   describe('badge', () => {
     it('updates/emits the current badge', async () => {
       const { chrome, service } = await start();
@@ -368,7 +331,9 @@ describe('start', () => {
       const { chrome, service } = await start();
       const promise = chrome.getBreadcrumbsAppendExtension$().pipe(toArray()).toPromise();
 
-      chrome.setBreadcrumbsAppendExtension({ content: (element) => () => {} });
+      chrome.setBreadcrumbsAppendExtension({
+        content: (element) => () => {},
+      });
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
@@ -422,6 +387,19 @@ describe('start', () => {
                 undefined,
               ]
             `);
+    });
+  });
+
+  describe('header banner', () => {
+    it('updates/emits the state of the header banner', async () => {
+      const { chrome, service } = await start();
+      const promise = chrome.hasHeaderBanner$().pipe(toArray()).toPromise();
+
+      chrome.setHeaderBanner({ content: () => () => undefined });
+      chrome.setHeaderBanner(undefined);
+      service.stop();
+
+      await expect(promise).resolves.toEqual([false, true, false]);
     });
   });
 
@@ -482,14 +460,12 @@ describe('start', () => {
 describe('stop', () => {
   it('completes applicationClass$, getIsNavDrawerLocked, breadcrumbs$, isVisible$, and brand$ observables', async () => {
     const { chrome, service } = await start();
-    const promise = Rx.combineLatest(
-      chrome.getBrand$(),
-      chrome.getApplicationClasses$(),
+    const promise = Rx.combineLatest([
       chrome.getIsNavDrawerLocked$(),
       chrome.getBreadcrumbs$(),
       chrome.getIsVisible$(),
-      chrome.getHelpExtension$()
-    ).toPromise();
+      chrome.getHelpExtension$(),
+    ]).toPromise();
 
     service.stop();
     await promise;
@@ -500,14 +476,12 @@ describe('stop', () => {
     service.stop();
 
     await expect(
-      Rx.combineLatest(
-        chrome.getBrand$(),
-        chrome.getApplicationClasses$(),
+      Rx.combineLatest([
         chrome.getIsNavDrawerLocked$(),
         chrome.getBreadcrumbs$(),
         chrome.getIsVisible$(),
-        chrome.getHelpExtension$()
-      ).toPromise()
+        chrome.getHelpExtension$(),
+      ]).toPromise()
     ).resolves.toBe(undefined);
   });
 });

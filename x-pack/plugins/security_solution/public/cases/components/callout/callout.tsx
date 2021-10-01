@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiCallOut, EuiButton, EuiDescriptionList } from '@elastic/eui';
@@ -28,17 +29,14 @@ const CallOutComponent = ({
   showCallOut,
   handleDismissCallout,
 }: CallOutProps) => {
-  const handleCallOut = useCallback(() => handleDismissCallout(id, type), [
-    handleDismissCallout,
-    id,
-    type,
-  ]);
+  const handleCallOut = useCallback(
+    () => handleDismissCallout(id, type),
+    [handleDismissCallout, id, type]
+  );
 
-  return showCallOut ? (
+  return showCallOut && !isEmpty(messages) ? (
     <EuiCallOut title={title} color={type} iconType="gear" data-test-subj={`case-callout-${id}`}>
-      {!isEmpty(messages) && (
-        <EuiDescriptionList data-test-subj={`callout-messages-${id}`} listItems={messages} />
-      )}
+      <EuiDescriptionList data-test-subj={`callout-messages-${id}`} listItems={messages} />
       <EuiButton
         data-test-subj={`callout-dismiss-${id}`}
         color={type === 'success' ? 'secondary' : type}

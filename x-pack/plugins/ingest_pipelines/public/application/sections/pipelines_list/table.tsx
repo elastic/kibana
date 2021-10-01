@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -89,7 +91,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
           {...reactRouterNavigate(history, '/create')}
         >
           {i18n.translate('xpack.ingestPipelines.list.table.createPipelineButtonLabel', {
-            defaultMessage: 'Create a pipeline',
+            defaultMessage: 'Create pipeline',
           })}
         </EuiButton>,
       ],

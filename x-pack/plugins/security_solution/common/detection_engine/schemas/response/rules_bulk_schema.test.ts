@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { left } from 'fp-ts/lib/Either';
@@ -10,8 +11,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { RulesBulkSchema, rulesBulkSchema } from './rules_bulk_schema';
 import { RulesSchema } from './rules_schema';
 import { ErrorSchema } from './error_schema';
-import { exactCheck } from '../../../exact_check';
-import { foldLeftRight, getPaths } from '../../../test_utils';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getRulesSchemaMock } from './rules_schema.mocks';
 import { getErrorSchemaMock } from './error_schema.mocks';

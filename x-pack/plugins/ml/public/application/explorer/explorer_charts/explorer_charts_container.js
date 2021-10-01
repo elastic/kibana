@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+import './_index.scss';
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -29,20 +31,24 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { MlTooltipComponent } from '../../components/chart_tooltip';
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { ML_APP_URL_GENERATOR } from '../../../../common/constants/ml_url_generator';
-import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
+import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
-
+import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
+import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
 const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucketsDescription', {
   defaultMessage:
     'This selection contains too many buckets to be displayed. You should shorten the time range of the view or narrow the selection in the timeline.',
 });
+
 const textViewButton = i18n.translate(
   'xpack.ml.explorer.charts.openInSingleMetricViewerButtonLabel',
   {
     defaultMessage: 'Open in Single Metric Viewer',
   }
 );
+const mapsPluginMessage = i18n.translate('xpack.ml.explorer.charts.mapsPluginMissingMessage', {
+  defaultMessage: 'maps or embeddable start plugin not found',
+});
 
 // create a somewhat unique ID
 // from charts metadata for React's key attribute
@@ -59,28 +65,44 @@ function ExplorerChartContainer({
   severity,
   tooManyBuckets,
   wrapLabel,
-  mlUrlGenerator,
-  basePath,
+  mlLocator,
+  timeBuckets,
+  timefilter,
+  onSelectEntity,
+  recentlyAccessed,
+  tooManyBucketsCalloutMsg,
+  showSelectedInterval,
 }) {
-  const [explorerSeriesLink, setExplorerSeriesLink] = useState();
+  const [explorerSeriesLink, setExplorerSeriesLink] = useState('');
 
   useEffect(() => {
     let isCancelled = false;
     const generateLink = async () => {
-      const singleMetricViewerLink = await getExploreSeriesLink(mlUrlGenerator, series);
-      if (!isCancelled) {
-        setExplorerSeriesLink(singleMetricViewerLink);
+      if (!isCancelled && series.functionDescription !== ML_JOB_AGGREGATION.LAT_LONG) {
+        try {
+          const singleMetricViewerLink = await getExploreSeriesLink(mlLocator, series, timefilter);
+          setExplorerSeriesLink(singleMetricViewerLink);
+        } catch (error) {
+          setExplorerSeriesLink('');
+        }
       }
     };
     generateLink();
     return () => {
       isCancelled = true;
     };
-  }, [mlUrlGenerator, series]);
+  }, [mlLocator, series]);
 
   const addToRecentlyAccessed = useCallback(() => {
-    addItemToRecentlyAccessed('timeseriesexplorer', series.jobId, explorerSeriesLink);
-  }, [explorerSeriesLink]);
+    if (recentlyAccessed) {
+      addItemToRecentlyAccessed(
+        'timeseriesexplorer',
+        series.jobId,
+        explorerSeriesLink,
+        recentlyAccessed
+      );
+    }
+  }, [explorerSeriesLink, recentlyAccessed]);
   const { detectorLabel, entityFields } = series;
 
   const chartType = getChartType(series);
@@ -115,6 +137,7 @@ function ExplorerChartContainer({
             entityFields={entityFields}
             infoTooltip={{ ...series.infoTooltip, chartType }}
             wrapLabel={wrapLabel}
+            onSelectEntity={onSelectEntity}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -122,7 +145,7 @@ function ExplorerChartContainer({
             {tooManyBuckets && (
               <span className="ml-explorer-chart-icon">
                 <EuiIconTip
-                  content={textTooManyBuckets}
+                  content={tooManyBucketsCalloutMsg ?? textTooManyBuckets}
                   position="top"
                   size="s"
                   type="alert"
@@ -139,7 +162,7 @@ function ExplorerChartContainer({
                   iconSide="right"
                   iconType="visLine"
                   size="xs"
-                  href={`${basePath}/app/ml${explorerSeriesLink}`}
+                  href={explorerSeriesLink}
                   onClick={addToRecentlyAccessed}
                 >
                   <FormattedMessage id="xpack.ml.explorer.charts.viewLabel" defaultMessage="View" />
@@ -150,6 +173,19 @@ function ExplorerChartContainer({
         </EuiFlexItem>
       </EuiFlexGroup>
       {(() => {
+        if (chartType === CHART_TYPE.GEO_MAP) {
+          return (
+            <MlTooltipComponent>
+              {(tooltipService) => (
+                <EmbeddedMapComponentWrapper
+                  seriesConfig={series}
+                  tooltipService={tooltipService}
+                />
+              )}
+            </MlTooltipComponent>
+          );
+        }
+
         if (
           chartType === CHART_TYPE.EVENT_DISTRIBUTION ||
           chartType === CHART_TYPE.POPULATION_DISTRIBUTION
@@ -158,27 +194,33 @@ function ExplorerChartContainer({
             <MlTooltipComponent>
               {(tooltipService) => (
                 <ExplorerChartDistribution
+                  timeBuckets={timeBuckets}
                   tooManyBuckets={tooManyBuckets}
                   seriesConfig={series}
                   severity={severity}
                   tooltipService={tooltipService}
+                  showSelectedInterval={showSelectedInterval}
                 />
               )}
             </MlTooltipComponent>
           );
         }
-        return (
-          <MlTooltipComponent>
-            {(tooltipService) => (
-              <ExplorerChartSingleMetric
-                tooManyBuckets={tooManyBuckets}
-                seriesConfig={series}
-                severity={severity}
-                tooltipService={tooltipService}
-              />
-            )}
-          </MlTooltipComponent>
-        );
+        if (chartType === CHART_TYPE.SINGLE_METRIC) {
+          return (
+            <MlTooltipComponent>
+              {(tooltipService) => (
+                <ExplorerChartSingleMetric
+                  timeBuckets={timeBuckets}
+                  tooManyBuckets={tooManyBuckets}
+                  seriesConfig={series}
+                  severity={severity}
+                  tooltipService={tooltipService}
+                  showSelectedInterval={showSelectedInterval}
+                />
+              )}
+            </MlTooltipComponent>
+          );
+        }
       })()}
     </React.Fragment>
   );
@@ -192,29 +234,53 @@ export const ExplorerChartsContainerUI = ({
   tooManyBuckets,
   kibana,
   errorMessages,
+  mlLocator,
+  timeBuckets,
+  timefilter,
+  onSelectEntity,
+  tooManyBucketsCalloutMsg,
+  showSelectedInterval,
 }) => {
   const {
     services: {
-      http: { basePath },
-      share: {
-        urlGenerators: { getUrlGenerator },
-      },
+      chrome: { recentlyAccessed },
+      embeddable: embeddablePlugin,
+      maps: mapsPlugin,
     },
   } = kibana;
-  const mlUrlGenerator = useMemo(() => getUrlGenerator(ML_APP_URL_GENERATOR), [getUrlGenerator]);
+
+  let seriesToPlotFiltered;
+
+  if (!embeddablePlugin || !mapsPlugin) {
+    seriesToPlotFiltered = [];
+    // Show missing plugin callout
+    seriesToPlot.forEach((series) => {
+      if (series.functionDescription === 'lat_long') {
+        if (errorMessages[mapsPluginMessage] === undefined) {
+          errorMessages[mapsPluginMessage] = new Set([series.jobId]);
+        } else {
+          errorMessages[mapsPluginMessage].add(series.jobId);
+        }
+      } else {
+        seriesToPlotFiltered.push(series);
+      }
+    });
+  }
+
+  const seriesToUse = seriesToPlotFiltered !== undefined ? seriesToPlotFiltered : seriesToPlot;
 
   // <EuiFlexGrid> doesn't allow a setting of `columns={1}` when chartsPerRow would be 1.
   // If that's the case we trick it doing that with the following settings:
   const chartsWidth = chartsPerRow === 1 ? 'calc(100% - 20px)' : 'auto';
   const chartsColumns = chartsPerRow === 1 ? 0 : chartsPerRow;
 
-  const wrapLabel = seriesToPlot.some((series) => isLabelLengthAboveThreshold(series));
+  const wrapLabel = seriesToUse.some((series) => isLabelLengthAboveThreshold(series));
   return (
     <>
       <ExplorerChartsErrorCallOuts errorMessagesByType={errorMessages} />
-      <EuiFlexGrid columns={chartsColumns}>
-        {seriesToPlot.length > 0 &&
-          seriesToPlot.map((series) => (
+      <EuiFlexGrid columns={chartsColumns} data-test-subj="mlExplorerChartsContainer">
+        {seriesToUse.length > 0 &&
+          seriesToUse.map((series) => (
             <EuiFlexItem
               key={getChartId(series)}
               className="ml-explorer-chart-container"
@@ -225,8 +291,13 @@ export const ExplorerChartsContainerUI = ({
                 severity={severity}
                 tooManyBuckets={tooManyBuckets}
                 wrapLabel={wrapLabel}
-                mlUrlGenerator={mlUrlGenerator}
-                basePath={basePath.get()}
+                mlLocator={mlLocator}
+                timeBuckets={timeBuckets}
+                timefilter={timefilter}
+                onSelectEntity={onSelectEntity}
+                recentlyAccessed={recentlyAccessed}
+                tooManyBucketsCalloutMsg={tooManyBucketsCalloutMsg}
+                showSelectedInterval={showSelectedInterval}
               />
             </EuiFlexItem>
           ))}

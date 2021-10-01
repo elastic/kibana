@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -34,18 +35,11 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
   if (inSetupMode) {
     return null;
   }
-
-  const list = [];
-  for (const alertTypeId of Object.keys(alerts)) {
-    const alertInstance = alerts[alertTypeId];
-    for (const state of alertInstance.states) {
-      list.push({
-        alert: alertInstance,
-        state,
-      });
-    }
-  }
-
+  // get a list of each alert state for each rule
+  const list = Object.values(alerts)
+    .flat()
+    .map((alert) => alert.states.map((state) => ({ alert, state })))
+    .flat();
   if (list.length === 0) {
     return null;
   }
@@ -109,7 +103,7 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
             }
           )}
           <EuiListGroupItem
-            label={<AlertConfiguration alert={status.alert.rawAlert} key={index} compressed />}
+            label={<AlertConfiguration alert={status.alert.sanitizedRule} key={index} compressed />}
           />
         </EuiListGroup>
       </EuiAccordion>

@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import type { LicenseCheck } from '../shared_imports';
 import { checkLicense } from './license_check';
 
 describe('License check', () => {
@@ -40,7 +43,7 @@ describe('License check', () => {
   });
 
   it('shows and enables links if state is not known', () => {
-    expect(checkLicense({ state: 'PONYFOO' } as any)).toEqual({
+    expect(checkLicense({ state: 'PONYFOO' } as unknown as LicenseCheck)).toEqual({
       enableLinks: true,
       showLinks: true,
       message: '',

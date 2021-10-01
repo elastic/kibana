@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
@@ -104,9 +105,8 @@ class FieldFormatService {
               if (dtr.field_name !== undefined && esAgg !== 'cardinality') {
                 const field = fieldList.getByName(dtr.field_name);
                 if (field !== undefined) {
-                  formatsByDetector[dtr.detector_index!] = indexPatternData.getFormatterForField(
-                    field
-                  );
+                  formatsByDetector[dtr.detector_index!] =
+                    indexPatternData.getFormatterForField(field);
                 }
               }
             });

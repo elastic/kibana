@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getOr } from 'lodash/fp';
@@ -11,17 +12,13 @@ import { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
 
 import { Filter, FilterManager } from '../../../../../../../../src/plugins/data/public';
-import {
-  SerializedFilterQuery,
-  State,
-  inputsModel,
-  inputsSelectors,
-} from '../../../../common/store';
+import { State, inputsModel, inputsSelectors } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { KqlMode, TimelineModel } from '../../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { dispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { SearchOrFilter } from './search_or_filter';
+import { SerializedFilterQuery } from '../../../../../common/types/timeline';
 
 interface OwnProps {
   filterManager: FilterManager;

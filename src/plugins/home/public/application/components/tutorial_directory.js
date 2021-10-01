@@ -1,45 +1,22 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
+import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { Synopsis } from './synopsis';
 import { SampleDataSetCards } from './sample_data_set_cards';
 import { getServices } from '../kibana_services';
-
-import {
-  EuiPage,
-  EuiTabs,
-  EuiTab,
-  EuiFlexItem,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiSpacer,
-  EuiTitle,
-  EuiPageBody,
-} from '@elastic/eui';
-
+import { KibanaPageTemplate } from '../../../../kibana_react/public';
 import { getTutorials } from '../load_tutorials';
-
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 
 const ALL_TAB_ID = 'all';
 const SAMPLE_DATA_TAB_ID = 'sampleData';
@@ -52,6 +29,8 @@ const addDataTitle = i18n.translate('home.breadcrumbs.addDataTitle', {
 class TutorialDirectoryUi extends React.Component {
   constructor(props) {
     super(props);
+
+    const extraTabs = getServices().addDataService.getAddDataTabs();
 
     this.tabs = [
       {
@@ -88,7 +67,13 @@ class TutorialDirectoryUi extends React.Component {
           id: 'home.tutorial.tabs.sampleDataTitle',
           defaultMessage: 'Sample data',
         }),
+        content: <SampleDataSetCards addBasePath={this.props.addBasePath} />,
       },
+      ...extraTabs.map(({ id, name, component: Component }) => ({
+        id,
+        name,
+        content: <Component />,
+      })),
     ];
 
     let openTab = ALL_TAB_ID;
@@ -151,6 +136,7 @@ class TutorialDirectoryUi extends React.Component {
     // Add card for sample data that only gets show in "all" tab
     tutorialCards.push({
       id: 'sample_data',
+
       name: this.props.intl.formatMessage({
         id: 'home.tutorial.card.sampleDataTitle',
         defaultMessage: 'Sample Data',
@@ -186,21 +172,19 @@ class TutorialDirectoryUi extends React.Component {
     });
   };
 
-  renderTabs = () => {
-    return this.tabs.map((tab, index) => (
-      <EuiTab
-        onClick={() => this.onSelectedTabChanged(tab.id)}
-        isSelected={tab.id === this.state.selectedTabId}
-        key={index}
-      >
-        {tab.name}
-      </EuiTab>
-    ));
+  getTabs = () => {
+    return this.tabs.map((tab) => ({
+      label: tab.name,
+      onClick: () => this.onSelectedTabChanged(tab.id),
+      isSelected: tab.id === this.state.selectedTabId,
+      'data-test-subj': `homeTab-${tab.id}`,
+    }));
   };
 
   renderTabContent = () => {
-    if (this.state.selectedTabId === SAMPLE_DATA_TAB_ID) {
-      return <SampleDataSetCards addBasePath={this.props.addBasePath} />;
+    const tab = this.tabs.find(({ id }) => id === this.state.selectedTabId);
+    if (tab?.content) {
+      return tab.content;
     }
 
     return (
@@ -214,7 +198,7 @@ class TutorialDirectoryUi extends React.Component {
           })
           .map((tutorial) => {
             return (
-              <EuiFlexItem key={tutorial.name}>
+              <EuiFlexItem data-test-subj={`homeTab-${tutorial.name}`} key={tutorial.name}>
                 <Synopsis
                   id={tutorial.id}
                   iconType={tutorial.icon}
@@ -258,41 +242,31 @@ class TutorialDirectoryUi extends React.Component {
     ) : null;
   };
 
-  renderHeader = () => {
-    const notices = this.renderNotices();
-    const headerLinks = this.renderHeaderLinks();
-
-    return (
-      <>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem>
-            <EuiTitle size="l">
-              <h1>
-                <FormattedMessage
-                  id="home.tutorial.addDataToKibanaTitle"
-                  defaultMessage="Add data"
-                />
-              </h1>
-            </EuiTitle>
-          </EuiFlexItem>
-          {headerLinks ? <EuiFlexItem grow={false}>{headerLinks}</EuiFlexItem> : null}
-        </EuiFlexGroup>
-        {notices}
-      </>
-    );
-  };
-
   render() {
+    const headerLinks = this.renderHeaderLinks();
+    const tabs = this.getTabs();
+    const notices = this.renderNotices();
+
     return (
-      <EuiPage restrictWidth={1200}>
-        <EuiPageBody>
-          {this.renderHeader()}
-          <EuiSpacer size="m" />
-          <EuiTabs>{this.renderTabs()}</EuiTabs>
-          <EuiSpacer />
-          {this.renderTabContent()}
-        </EuiPageBody>
-      </EuiPage>
+      <KibanaPageTemplate
+        restrictWidth={1200}
+        template="empty"
+        pageHeader={{
+          pageTitle: (
+            <FormattedMessage id="home.tutorial.addDataToKibanaTitle" defaultMessage="Add data" />
+          ),
+          tabs,
+          rightSideItems: headerLinks ? [headerLinks] : [],
+        }}
+      >
+        {notices && (
+          <>
+            {notices}
+            <EuiSpacer size="s" />
+          </>
+        )}
+        {this.renderTabContent()}
+      </KibanaPageTemplate>
     );
   }
 }

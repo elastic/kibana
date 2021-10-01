@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
@@ -10,7 +11,6 @@ import React from 'react';
 import '../../../../../common/mock/match_media';
 import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
 import { defaultHeaders } from './default_headers';
-import { Direction } from '../../../../../graphql/types';
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
 import { Sort } from '../sort';
 import { TestProviders } from '../../../../../common/mock/test_providers';
@@ -19,6 +19,12 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 import { ColumnHeadersComponent } from '.';
 import { cloneDeep } from 'lodash/fp';
 import { timelineActions } from '../../../../store/timeline';
+import { TimelineTabs } from '../../../../../../common/types/timeline';
+import { Direction } from '../../../../../../common/search_strategy';
+import { defaultControlColumn } from '../control_columns';
+import { testTrailingControlColumns } from '../../../../../common/mock/mock_timeline_control_columns';
+
+jest.mock('../../../../../common/lib/kibana');
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -38,6 +44,7 @@ describe('ColumnHeaders', () => {
     const sort: Sort[] = [
       {
         columnId: '@timestamp',
+        columnType: 'number',
         sortDirection: Direction.desc,
       },
     ];
@@ -54,7 +61,10 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
+            leadingControlColumns={[defaultControlColumn]}
+            trailingControlColumns={[]}
           />
         </TestProviders>
       );
@@ -73,7 +83,10 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
+            leadingControlColumns={[defaultControlColumn]}
+            trailingControlColumns={[]}
           />
         </TestProviders>
       );
@@ -93,7 +106,10 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
+            leadingControlColumns={[defaultControlColumn]}
+            trailingControlColumns={[]}
           />
         </TestProviders>
       );
@@ -108,10 +124,12 @@ describe('ColumnHeaders', () => {
     let mockSort: Sort[] = [
       {
         columnId: '@timestamp',
+        columnType: 'number',
         sortDirection: Direction.desc,
       },
       {
         columnId: 'host.name',
+        columnType: 'text',
         sortDirection: Direction.asc,
       },
     ];
@@ -126,10 +144,12 @@ describe('ColumnHeaders', () => {
       mockSort = [
         {
           columnId: '@timestamp',
+          columnType: 'number',
           sortDirection: Direction.desc,
         },
         {
           columnId: 'host.name',
+          columnType: 'text',
           sortDirection: Direction.asc,
         },
       ];
@@ -147,7 +167,10 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={mockSort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
+            leadingControlColumns={[defaultControlColumn]}
+            trailingControlColumns={[]}
           />
         </TestProviders>
       );
@@ -162,13 +185,15 @@ describe('ColumnHeaders', () => {
           sort: [
             {
               columnId: '@timestamp',
+              columnType: 'number',
               sortDirection: Direction.desc,
             },
             {
               columnId: 'host.name',
+              columnType: 'text',
               sortDirection: Direction.asc,
             },
-            { columnId: 'event.category', sortDirection: Direction.desc },
+            { columnId: 'event.category', columnType: 'text', sortDirection: Direction.desc },
           ],
         })
       );
@@ -186,7 +211,10 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={mockSort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
+            leadingControlColumns={[defaultControlColumn]}
+            trailingControlColumns={[]}
           />
         </TestProviders>
       );
@@ -201,9 +229,10 @@ describe('ColumnHeaders', () => {
           sort: [
             {
               columnId: '@timestamp',
+              columnType: 'number',
               sortDirection: Direction.asc,
             },
-            { columnId: 'host.name', sortDirection: Direction.asc },
+            { columnId: 'host.name', columnType: 'text', sortDirection: Direction.asc },
           ],
         })
       );
@@ -221,7 +250,10 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={mockSort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
+            leadingControlColumns={[defaultControlColumn]}
+            trailingControlColumns={[]}
           />
         </TestProviders>
       );
@@ -236,12 +268,36 @@ describe('ColumnHeaders', () => {
           sort: [
             {
               columnId: '@timestamp',
+              columnType: 'number',
               sortDirection: Direction.desc,
             },
-            { columnId: 'host.name', sortDirection: Direction.desc },
+            { columnId: 'host.name', columnType: 'text', sortDirection: Direction.desc },
           ],
         })
       );
+    });
+    test('Does not render the default leading action column header and renders a custom trailing header', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <ColumnHeadersComponent
+            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            browserFields={mockBrowserFields}
+            columnHeaders={mockDefaultHeaders}
+            isSelectAllChecked={false}
+            onSelectAll={jest.fn()}
+            showEventsSelect={false}
+            showSelectAllCheckbox={false}
+            sort={mockSort}
+            tabType={TimelineTabs.query}
+            timelineId={timelineId}
+            leadingControlColumns={[]}
+            trailingControlColumns={testTrailingControlColumns}
+          />
+        </TestProviders>
+      );
+
+      expect(wrapper.exists('[data-test-subj="field-browser"]')).toBeFalsy();
+      expect(wrapper.exists('[data-test-subj="test-header-action-cell"]')).toBeTruthy();
     });
   });
 });

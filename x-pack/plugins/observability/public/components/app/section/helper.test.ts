@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { onBrushEnd } from './helper';
 import { History } from 'history';
 
 describe('Chart helper', () => {
   describe('onBrushEnd', () => {
-    const history = ({
+    const history = {
       push: jest.fn(),
       location: {
         search: '',
       },
-    } as unknown) as History;
+    } as unknown as History;
     it("doesn't push a new history when x is not defined", () => {
       onBrushEnd({ x: undefined, history });
       expect(history.push).not.toBeCalled();

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import rison from 'rison-node';
@@ -10,7 +11,6 @@ import '../../../classes/sources/wms_source';
 import '../../../classes/sources/ems_file_source';
 import '../../../classes/sources/es_search_source';
 import '../../../classes/sources/es_pew_pew_source';
-import '../../../classes/sources/kibana_regionmap_source';
 import '../../../classes/sources/es_geo_grid_source';
 import '../../../classes/sources/xyz_tms_source';
 import { getToasts } from '../../../kibana_services';

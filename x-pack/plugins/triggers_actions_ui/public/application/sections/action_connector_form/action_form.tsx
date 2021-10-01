@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -29,17 +30,22 @@ import {
   ActionTypeRegistryContract,
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
-import { ConnectorAddModal } from './connector_add_modal';
-import { ActionTypeForm, ActionTypeFormProps } from './action_type_form';
+import { ActionTypeForm } from './action_type_form';
 import { AddConnectorInline } from './connector_add_inline';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
-import { VIEW_LICENSE_OPTIONS_LINK, DEFAULT_HIDDEN_ACTION_TYPES } from '../../../common/constants';
-import { ActionGroup, AlertActionParam } from '../../../../../alerts/common';
+import {
+  VIEW_LICENSE_OPTIONS_LINK,
+  DEFAULT_HIDDEN_ACTION_TYPES,
+  DEFAULT_HIDDEN_ONLY_ON_ALERTS_ACTION_TYPES,
+} from '../../../common/constants';
+import { ActionGroup, AlertActionParam } from '../../../../../alerting/common';
 import { useKibana } from '../../../common/lib/kibana';
 import { DefaultActionParamsGetter } from '../../lib/get_defaults_for_action_params';
+import { ConnectorAddModal } from '.';
+import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 
-export interface ActionGroupWithMessageVariables extends ActionGroup {
+export interface ActionGroupWithMessageVariables extends ActionGroup<string> {
   omitOptionalMessageVariables?: boolean;
   defaultActionMessage?: string;
 }
@@ -64,7 +70,7 @@ export interface ActionAccordionFormProps {
 
 interface ActiveActionConnectorState {
   actionTypeId: string;
-  index: number;
+  indices: number[];
 }
 
 export const ActionForm = ({
@@ -99,18 +105,19 @@ export const ActionForm = ({
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [emptyActionsIds, setEmptyActionsIds] = useState<string[]>([]);
 
-  const closeAddConnectorModal = useCallback(() => setAddModalVisibility(false), [
-    setAddModalVisibility,
-  ]);
+  const closeAddConnectorModal = useCallback(
+    () => setAddModalVisibility(false),
+    [setAddModalVisibility]
+  );
 
   // load action types
   useEffect(() => {
     (async () => {
       try {
         setIsLoadingActionTypes(true);
-        const registeredActionTypes = (
-          actionTypes ?? (await loadActionTypes({ http }))
-        ).sort((a, b) => a.name.localeCompare(b.name));
+        const registeredActionTypes = (actionTypes ?? (await loadActionTypes({ http }))).sort(
+          (a, b) => a.name.localeCompare(b.name)
+        );
         const index: ActionTypeIndex = {};
         for (const actionTypeItem of registeredActionTypes) {
           index[actionTypeItem.id] = actionTypeItem;
@@ -119,8 +126,8 @@ export const ActionForm = ({
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionTypesMessage',
-            { defaultMessage: 'Unable to load action types' }
+            'xpack.triggersActionsUI.sections.actionForm.unableToLoadConnectorTypesMessage',
+            { defaultMessage: 'Unable to load connector types' }
           ),
         });
       } finally {
@@ -136,11 +143,11 @@ export const ActionForm = ({
       try {
         setIsLoadingConnectors(true);
         const loadedConnectors = await loadConnectors({ http });
-        setConnectors(loadedConnectors);
+        setConnectors(loadedConnectors.filter((connector) => !connector.isMissingSecrets));
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionsMessage',
+            'xpack.triggersActionsUI.sections.actionForm.unableToLoadActionsMessage',
             {
               defaultMessage: 'Unable to load connectors',
             }
@@ -188,7 +195,7 @@ export const ActionForm = ({
   function addActionType(actionTypeModel: ActionTypeModel) {
     if (!defaultActionGroupId) {
       toasts!.addDanger({
-        title: i18n.translate('xpack.triggersActionsUI.sections.alertForm.unableToAddAction', {
+        title: i18n.translate('xpack.triggersActionsUI.sections.actionForm.unableToAddAction', {
           defaultMessage: 'Unable to add action, because default action group is not defined',
         }),
       });
@@ -230,9 +237,15 @@ export const ActionForm = ({
       .list()
       /**
        * TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
+       * TODO: Need to decide about ServiceNow SIR connector.
        * If actionTypes are set, hidden connectors are filtered out. Otherwise, they are not.
        */
-      .filter(({ id }) => actionTypes ?? !DEFAULT_HIDDEN_ACTION_TYPES.includes(id))
+      .filter(
+        ({ id }) =>
+          actionTypes ??
+          (!DEFAULT_HIDDEN_ACTION_TYPES.includes(id) &&
+            !DEFAULT_HIDDEN_ONLY_ON_ALERTS_ACTION_TYPES.includes(id))
+      )
       .filter((item) => actionTypesIndex[item.id])
       .filter((item) => !!item.actionParamsFields)
       .sort((a, b) =>
@@ -260,7 +273,14 @@ export const ActionForm = ({
             label={actionTypesIndex[item.id].name}
             onClick={() => addActionType(item)}
           >
-            <EuiIcon size="xl" type={item.iconClass} />
+            <EuiIcon
+              size="xl"
+              type={
+                typeof item.iconClass === 'string'
+                  ? item.iconClass
+                  : suspendedComponentWithProps(item.iconClass as React.ComponentType)
+              }
+            />
           </EuiKeyPadMenuItem>
         );
 
@@ -280,17 +300,17 @@ export const ActionForm = ({
   return isLoadingConnectors ? (
     <SectionLoading>
       <FormattedMessage
-        id="xpack.triggersActionsUI.sections.alertForm.loadingConnectorsDescription"
+        id="xpack.triggersActionsUI.sections.actionForm.loadingConnectorsDescription"
         defaultMessage="Loading connectors…"
       />
     </SectionLoading>
   ) : (
-    <Fragment>
+    <>
       <EuiTitle size="s">
         <h4>
           <FormattedMessage
             defaultMessage="Actions"
-            id="xpack.triggersActionsUI.sections.alertForm.actionSectionsTitle"
+            id="xpack.triggersActionsUI.sections.actionForm.actionSectionsTitle"
           />
         </h4>
       </EuiTitle>
@@ -307,8 +327,8 @@ export const ActionForm = ({
                 index={index}
                 key={`action-form-action-at-${index}`}
                 actionTypeRegistry={actionTypeRegistry}
-                defaultActionGroupId={defaultActionGroupId}
                 emptyActionsIds={emptyActionsIds}
+                connectors={connectors}
                 onDeleteConnector={() => {
                   const updatedActions = actions.filter(
                     (_item: AlertAction, i: number) => i !== index
@@ -321,22 +341,27 @@ export const ActionForm = ({
                   setActiveActionItem(undefined);
                 }}
                 onAddConnector={() => {
-                  setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
+                  setActiveActionItem({
+                    actionTypeId: actionItem.actionTypeId,
+                    indices: actions
+                      .map((item: AlertAction, idx: number) =>
+                        item.id === actionItem.id ? idx : -1
+                      )
+                      .filter((idx: number) => idx >= 0),
+                  });
                   setAddModalVisibility(true);
+                }}
+                onSelectConnector={(connectorId: string) => {
+                  setActionIdByIndex(connectorId, index);
                 }}
               />
             );
           }
 
-          const actionParamsErrors: ActionTypeFormProps['actionParamsErrors'] = actionTypeRegistry
-            .get(actionItem.actionTypeId)
-            ?.validateParams(actionItem.params);
-
           return (
             <ActionTypeForm
               actionItem={actionItem}
               actionConnector={actionConnector}
-              actionParamsErrors={actionParamsErrors}
               index={index}
               key={`action-form-action-at-${index}`}
               setActionParamsProperty={setActionParamsProperty}
@@ -350,7 +375,7 @@ export const ActionForm = ({
               isActionGroupDisabledForActionType={isActionGroupDisabledForActionType}
               setActionGroupIdByIndex={setActionGroupIdByIndex}
               onAddConnector={() => {
-                setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
+                setActiveActionItem({ actionTypeId: actionItem.actionTypeId, indices: [index] });
                 setAddModalVisibility(true);
               }}
               onConnectorSelected={(id: string) => {
@@ -373,14 +398,14 @@ export const ActionForm = ({
         })}
       <EuiSpacer size="m" />
       {isAddActionPanelOpen ? (
-        <Fragment>
+        <>
           <EuiFlexGroup id="alertActionTypeTitle" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
                 <h5>
                   <FormattedMessage
-                    defaultMessage="Select an action type"
-                    id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeTitle"
+                    defaultMessage="Select a connector type"
+                    id="xpack.triggersActionsUI.sections.actionForm.selectConnectorTypeTitle"
                   />
                 </h5>
               </EuiTitle>
@@ -396,8 +421,8 @@ export const ActionForm = ({
                       className="actActionForm__getMoreActionsLink"
                     >
                       <FormattedMessage
-                        defaultMessage="Get more actions"
-                        id="xpack.triggersActionsUI.sections.actionForm.getMoreActionsTitle"
+                        defaultMessage="Get more connectors"
+                        id="xpack.triggersActionsUI.sections.actionForm.getMoreConnectorsTitle"
                       />
                     </EuiLink>
                   </h5>
@@ -410,15 +435,15 @@ export const ActionForm = ({
             {isLoadingActionTypes ? (
               <SectionLoading>
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertForm.loadingActionTypesDescription"
-                  defaultMessage="Loading action types…"
+                  id="xpack.triggersActionsUI.sections.actionForm.loadingConnectorTypesDescription"
+                  defaultMessage="Loading connector types…"
                 />
               </SectionLoading>
             ) : (
               actionTypeNodes
             )}
           </EuiFlexGroup>
-        </Fragment>
+        </>
       ) : (
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
@@ -428,7 +453,7 @@ export const ActionForm = ({
               onClick={() => setIsAddActionPanelOpen(true)}
             >
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertForm.addActionButtonLabel"
+                id="xpack.triggersActionsUI.sections.actionForm.addActionButtonLabel"
                 defaultMessage="Add action"
               />
             </EuiButton>
@@ -437,17 +462,17 @@ export const ActionForm = ({
       )}
       {actionTypesIndex && activeActionItem && addModalVisible ? (
         <ConnectorAddModal
-          key={activeActionItem.index}
           actionType={actionTypesIndex[activeActionItem.actionTypeId]}
           onClose={closeAddConnectorModal}
           postSaveEventHandler={(savedAction: ActionConnector) => {
             connectors.push(savedAction);
-            setActionIdByIndex(savedAction.id, activeActionItem.index);
+            const indicesToUpdate = activeActionItem.indices || [];
+            indicesToUpdate.forEach((index: number) => setActionIdByIndex(savedAction.id, index));
           }}
           actionTypeRegistry={actionTypeRegistry}
         />
       ) : null}
-    </Fragment>
+    </>
   );
 };
 

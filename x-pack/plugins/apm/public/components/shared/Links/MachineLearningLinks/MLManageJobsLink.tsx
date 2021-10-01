@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiLink } from '@elastic/eui';
@@ -25,9 +26,10 @@ export function MLManageJobsLink({ children, external }: Props) {
 
   const { urlParams } = useUrlParams();
 
-  const timePickerRefreshIntervalDefaults = core.uiSettings.get<TimePickerRefreshInterval>(
-    UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS
-  );
+  const timePickerRefreshIntervalDefaults =
+    core.uiSettings.get<TimePickerRefreshInterval>(
+      UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS
+    );
 
   const {
     // hardcoding a custom default of 1 hour since the default kibana timerange of 15 minutes is shorter than the ML interval

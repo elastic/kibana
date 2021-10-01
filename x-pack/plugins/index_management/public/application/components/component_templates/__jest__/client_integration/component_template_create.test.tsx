@@ -1,12 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import '../../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor/jest_mock';
+import '../../../../../../test/global_mocks';
 import { setupEnvironment } from './helpers';
 import { setup, ComponentTemplateCreateTestBed } from './helpers/component_template_create.helpers';
 
@@ -22,15 +25,6 @@ jest.mock('@elastic/eui', () => {
         data-test-subj="mockComboBox"
         onChange={(syntheticEvent: any) => {
           props.onChange([syntheticEvent['0']]);
-        }}
-      />
-    ),
-    // Mocking EuiCodeEditor, which uses React Ace under the hood
-    EuiCodeEditor: (props: any) => (
-      <input
-        data-test-subj="mockCodeEditor"
-        onChange={(syntheticEvent: any) => {
-          props.onChange(syntheticEvent.jsonString);
         }}
       />
     ),
@@ -73,7 +67,7 @@ describe('<ComponentTemplateCreate />', () => {
 
         // Meta editor should be hidden by default
         // Since the editor itself is mocked, we checked for the mocked element
-        expect(exists('mockCodeEditor')).toBe(false);
+        expect(exists('metaEditor')).toBe(false);
 
         await act(async () => {
           actions.toggleMetaSwitch();
@@ -81,7 +75,7 @@ describe('<ComponentTemplateCreate />', () => {
 
         component.update();
 
-        expect(exists('mockCodeEditor')).toBe(true);
+        expect(exists('metaEditor')).toBe(true);
       });
 
       describe('Validation', () => {

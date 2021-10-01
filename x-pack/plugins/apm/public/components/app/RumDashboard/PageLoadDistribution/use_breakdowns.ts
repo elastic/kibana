@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -15,13 +16,11 @@ interface Props {
 }
 
 export const useBreakdowns = ({ percentileRange, field, value }: Props) => {
-  const { urlParams, uiFilters } = useUrlParams();
-
+  const { urlParams, uxUiFilters } = useUrlParams();
   const { start, end, searchTerm } = urlParams;
-
   const { min: minP, max: maxP } = percentileRange ?? {};
 
-  return useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end && field && value) {
         return callApmApi({
@@ -31,7 +30,7 @@ export const useBreakdowns = ({ percentileRange, field, value }: Props) => {
               start,
               end,
               breakdown: value,
-              uiFilters: JSON.stringify(uiFilters),
+              uiFilters: JSON.stringify(uxUiFilters),
               urlQuery: searchTerm,
               ...(minP && maxP
                 ? {
@@ -44,6 +43,8 @@ export const useBreakdowns = ({ percentileRange, field, value }: Props) => {
         });
       }
     },
-    [end, start, uiFilters, field, value, minP, maxP, searchTerm]
+    [end, start, uxUiFilters, field, value, minP, maxP, searchTerm]
   );
+
+  return { breakdowns: data?.pageLoadDistBreakdown ?? [], status };
 };

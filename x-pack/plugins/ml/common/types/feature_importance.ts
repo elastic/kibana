@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { isPopulatedObject } from '../util/object_utils';
 
 export type FeatureImportanceClassName = string | number | boolean;
 
@@ -85,15 +88,11 @@ export function isRegressionTotalFeatureImportance(
 export function isClassificationFeatureImportanceBaseline(
   baselineData: any
 ): baselineData is ClassificationFeatureImportanceBaseline {
-  return (
-    typeof baselineData === 'object' &&
-    baselineData.hasOwnProperty('classes') &&
-    Array.isArray(baselineData.classes)
-  );
+  return isPopulatedObject(baselineData, ['classes']) && Array.isArray(baselineData.classes);
 }
 
 export function isRegressionFeatureImportanceBaseline(
   baselineData: any
 ): baselineData is RegressionFeatureImportanceBaseline {
-  return typeof baselineData === 'object' && baselineData.hasOwnProperty('baseline');
+  return isPopulatedObject(baselineData, ['baseline']);
 }

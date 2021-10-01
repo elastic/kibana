@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -17,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect } from 'react';
+import type { Query } from '../../../../../../../src/plugins/data/public';
 import { TimeKey } from '../../../../common/time';
 import { useLogEntry } from '../../../containers/logs/log_entry';
 import { CenteredEuiFlyoutBody } from '../../centered_flyout_body';
@@ -28,7 +30,7 @@ import { LogEntryFieldsTable } from './log_entry_fields_table';
 export interface LogEntryFlyoutProps {
   logEntryId: string | null | undefined;
   onCloseFlyout: () => void;
-  onSetFieldFilter?: (filter: string, logEntryId: string, timeKey?: TimeKey) => void;
+  onSetFieldFilter?: (filter: Query, logEntryId: string, timeKey?: TimeKey) => void;
   sourceId: string | null | undefined;
 }
 
@@ -88,7 +90,7 @@ export const LogEntryFlyout = ({
               </>
             ) : null}
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem style={{ padding: 8 }} grow={false}>
             {logEntry ? <LogEntryActionsMenu logEntry={logEntry} /> : null}
           </EuiFlexItem>
         </EuiFlexGroup>

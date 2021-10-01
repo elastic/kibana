@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import './collapsible_nav.scss';
@@ -26,7 +15,7 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiShowFor,
-  EuiText,
+  EuiCollapsibleNavProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
@@ -89,6 +78,7 @@ interface Props {
   navigateToApp: InternalApplicationStart['navigateToApp'];
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
   customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
+  button: EuiCollapsibleNavProps['button'];
 }
 
 export function CollapsibleNav({
@@ -102,6 +92,7 @@ export function CollapsibleNav({
   closeNav,
   navigateToApp,
   navigateToUrl,
+  button,
   ...observables
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
@@ -118,7 +109,7 @@ export function CollapsibleNav({
       link,
       appId,
       dataTestSubj: 'collapsibleNavAppLink',
-      navigateToApp,
+      navigateToUrl,
       onClick: closeNav,
       ...(needsIcon && { basePath }),
     });
@@ -132,8 +123,10 @@ export function CollapsibleNav({
         defaultMessage: 'Primary',
       })}
       isOpen={isNavOpen}
-      isDocked={isLocked}
       onClose={closeNav}
+      button={button}
+      ownFocus={false}
+      size={248}
     >
       {customNavLink && (
         <Fragment>
@@ -148,7 +141,7 @@ export function CollapsibleNav({
                   createEuiListItem({
                     link: customNavLink,
                     basePath,
-                    navigateToApp,
+                    navigateToUrl,
                     dataTestSubj: 'collapsibleNavCustomNavLink',
                     onClick: closeNav,
                     externalLink: true,
@@ -182,6 +175,7 @@ export function CollapsibleNav({
                 label: 'Home',
                 iconType: 'home',
                 href: homeHref,
+                'data-test-subj': 'homeLink',
                 onClick: (event) => {
                   if (isModifiedOrPrevented(event)) {
                     return;
@@ -202,16 +196,18 @@ export function CollapsibleNav({
       </EuiFlexItem>
 
       {/* Recently viewed */}
-      <EuiCollapsibleNavGroup
-        key="recentlyViewed"
-        background="light"
-        title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
-        isCollapsible={true}
-        initialIsOpen={getIsCategoryOpen('recentlyViewed', storage)}
-        onToggle={(isCategoryOpen) => setIsCategoryOpen('recentlyViewed', isCategoryOpen, storage)}
-        data-test-subj="collapsibleNavGroup-recentlyViewed"
-      >
-        {recentlyAccessed.length > 0 ? (
+      {recentlyAccessed.length > 0 && (
+        <EuiCollapsibleNavGroup
+          key="recentlyViewed"
+          background="light"
+          title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
+          isCollapsible={true}
+          initialIsOpen={getIsCategoryOpen('recentlyViewed', storage)}
+          onToggle={(isCategoryOpen) =>
+            setIsCategoryOpen('recentlyViewed', isCategoryOpen, storage)
+          }
+          data-test-subj="collapsibleNavGroup-recentlyViewed"
+        >
           <EuiListGroup
             aria-label={i18n.translate('core.ui.recentlyViewedAriaLabel', {
               defaultMessage: 'Recently viewed links',
@@ -243,16 +239,8 @@ export function CollapsibleNav({
             size="s"
             className="kbnCollapsibleNav__recentsListGroup"
           />
-        ) : (
-          <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
-            <p>
-              {i18n.translate('core.ui.EmptyRecentlyViewed', {
-                defaultMessage: 'No recently viewed items',
-              })}
-            </p>
-          </EuiText>
-        )}
-      </EuiCollapsibleNavGroup>
+        </EuiCollapsibleNavGroup>
+      )}
 
       <EuiHorizontalRule margin="none" />
 
@@ -265,6 +253,7 @@ export function CollapsibleNav({
             <EuiCollapsibleNavGroup
               key={category.id}
               iconType={category.euiIconType}
+              iconSize="m"
               title={category.label}
               isCollapsible={true}
               initialIsOpen={getIsCategoryOpen(category.id, storage)}
@@ -296,7 +285,7 @@ export function CollapsibleNav({
         ))}
 
         {/* Docking button only for larger screens that can support it*/}
-        <EuiShowFor sizes={['l', 'xl']}>
+        <EuiShowFor sizes={'none'}>
           <EuiCollapsibleNavGroup>
             <EuiListGroup flush>
               <EuiListGroupItem

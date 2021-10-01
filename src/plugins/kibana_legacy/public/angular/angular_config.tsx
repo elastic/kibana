@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -24,6 +13,7 @@ import {
   ILocationProvider,
   IModule,
   IRootScopeService,
+  IRequestConfig,
 } from 'angular';
 import $ from 'jquery';
 import { set } from '@elastic/safer-lodash-set';
@@ -33,7 +23,6 @@ import { ChromeBreadcrumb, EnvironmentMode, PackageInfo } from 'kibana/public';
 import { History } from 'history';
 
 import { CoreStart } from 'kibana/public';
-import { isSystemApiRequest } from '../utils';
 import { formatAngularHttpError, isAngularHttpError } from '../notify/lib';
 
 export interface RouteConfiguration {
@@ -47,6 +36,11 @@ export interface RouteConfiguration {
   template?: string;
   k7Breadcrumbs?: (...args: any[]) => ChromeBreadcrumb[];
   requireUICapability?: string;
+}
+
+function isSystemApiRequest(request: IRequestConfig) {
+  const { headers } = request;
+  return headers && !!headers['kbn-system-request'];
 }
 
 /**
@@ -174,149 +168,143 @@ export const $setupXsrfRequestInterceptor = (version: string) => {
  * active $http requests on each digest loop and expose the count to
  * the core.loadingCount api
  */
-const capture$httpLoadingCount = (newPlatform: CoreStart) => (
-  $rootScope: IRootScopeService,
-  $http: IHttpService
-) => {
-  newPlatform.http.addLoadingCountSource(
-    new Rx.Observable((observer) => {
-      const unwatch = $rootScope.$watch(() => {
-        const reqs = $http.pendingRequests || [];
-        observer.next(reqs.filter((req) => !isSystemApiRequest(req)).length);
-      });
+const capture$httpLoadingCount =
+  (newPlatform: CoreStart) => ($rootScope: IRootScopeService, $http: IHttpService) => {
+    newPlatform.http.addLoadingCountSource(
+      new Rx.Observable((observer) => {
+        const unwatch = $rootScope.$watch(() => {
+          const reqs = $http.pendingRequests || [];
+          observer.next(reqs.filter((req) => !isSystemApiRequest(req)).length);
+        });
 
-      return unwatch;
-    })
-  );
-};
+        return unwatch;
+      })
+    );
+  };
 
 /**
  * integrates with angular to automatically redirect to home if required
  * capability is not met
  */
-const $setupUICapabilityRedirect = (newPlatform: CoreStart) => (
-  $rootScope: IRootScopeService,
-  $injector: any
-) => {
-  const isKibanaAppRoute = window.location.pathname.endsWith('/app/kibana');
-  // this feature only works within kibana app for now after everything is
-  // switched to the application service, this can be changed to handle all
-  // apps.
-  if (!isKibanaAppRoute) {
-    return;
-  }
-  $rootScope.$on(
-    '$routeChangeStart',
-    (event, { $$route: route }: { $$route?: RouteConfiguration } = {}) => {
-      if (!route || !route.requireUICapability) {
-        return;
-      }
-
-      if (!get(newPlatform.application.capabilities, route.requireUICapability)) {
-        $injector.get('$location').url('/home');
-        event.preventDefault();
-      }
+const $setupUICapabilityRedirect =
+  (newPlatform: CoreStart) => ($rootScope: IRootScopeService, $injector: any) => {
+    const isKibanaAppRoute = window.location.pathname.endsWith('/app/kibana');
+    // this feature only works within kibana app for now after everything is
+    // switched to the application service, this can be changed to handle all
+    // apps.
+    if (!isKibanaAppRoute) {
+      return;
     }
-  );
-};
+    $rootScope.$on(
+      '$routeChangeStart',
+      (event, { $$route: route }: { $$route?: RouteConfiguration } = {}) => {
+        if (!route || !route.requireUICapability) {
+          return;
+        }
+
+        if (!get(newPlatform.application.capabilities, route.requireUICapability)) {
+          $injector.get('$location').url('/home');
+          event.preventDefault();
+        }
+      }
+    );
+  };
 
 /**
  * internal angular run function that will be called when angular bootstraps and
  * lets us integrate with the angular router so that we can automatically clear
  * the breadcrumbs if we switch to a Kibana app that does not use breadcrumbs correctly
  */
-const $setupBreadcrumbsAutoClear = (newPlatform: CoreStart, isLocalAngular: boolean) => (
-  $rootScope: IRootScopeService,
-  $injector: any
-) => {
-  // A flag used to determine if we should automatically
-  // clear the breadcrumbs between angular route changes.
-  let breadcrumbSetSinceRouteChange = false;
-  const $route = $injector.has('$route') ? $injector.get('$route') : {};
+const $setupBreadcrumbsAutoClear =
+  (newPlatform: CoreStart, isLocalAngular: boolean) =>
+  ($rootScope: IRootScopeService, $injector: any) => {
+    // A flag used to determine if we should automatically
+    // clear the breadcrumbs between angular route changes.
+    let breadcrumbSetSinceRouteChange = false;
+    const $route = $injector.has('$route') ? $injector.get('$route') : {};
 
-  // reset breadcrumbSetSinceRouteChange any time the breadcrumbs change, even
-  // if it was done directly through the new platform
-  newPlatform.chrome.getBreadcrumbs$().subscribe({
-    next() {
-      breadcrumbSetSinceRouteChange = true;
-    },
-  });
+    // reset breadcrumbSetSinceRouteChange any time the breadcrumbs change, even
+    // if it was done directly through the new platform
+    newPlatform.chrome.getBreadcrumbs$().subscribe({
+      next() {
+        breadcrumbSetSinceRouteChange = true;
+      },
+    });
 
-  $rootScope.$on('$routeChangeStart', () => {
-    breadcrumbSetSinceRouteChange = false;
-  });
+    $rootScope.$on('$routeChangeStart', () => {
+      breadcrumbSetSinceRouteChange = false;
+    });
 
-  $rootScope.$on('$routeChangeSuccess', () => {
-    if (isDummyRoute($route, isLocalAngular)) {
-      return;
-    }
-    const current = $route.current || {};
-
-    if (breadcrumbSetSinceRouteChange || (current.$$route && current.$$route.redirectTo)) {
-      return;
-    }
-
-    const k7BreadcrumbsProvider = current.k7Breadcrumbs;
-    if (!k7BreadcrumbsProvider) {
-      newPlatform.chrome.setBreadcrumbs([]);
-      return;
-    }
-
-    try {
-      newPlatform.chrome.setBreadcrumbs($injector.invoke(k7BreadcrumbsProvider));
-    } catch (error) {
-      if (isAngularHttpError(error)) {
-        error = formatAngularHttpError(error);
+    $rootScope.$on('$routeChangeSuccess', () => {
+      if (isDummyRoute($route, isLocalAngular)) {
+        return;
       }
-      newPlatform.fatalErrors.add(error, 'location');
-    }
-  });
-};
+      const current = $route.current || {};
+
+      if (breadcrumbSetSinceRouteChange || (current.$$route && current.$$route.redirectTo)) {
+        return;
+      }
+
+      const k7BreadcrumbsProvider = current.k7Breadcrumbs;
+      if (!k7BreadcrumbsProvider) {
+        newPlatform.chrome.setBreadcrumbs([]);
+        return;
+      }
+
+      try {
+        newPlatform.chrome.setBreadcrumbs($injector.invoke(k7BreadcrumbsProvider));
+      } catch (error) {
+        if (isAngularHttpError(error)) {
+          error = formatAngularHttpError(error);
+        }
+        newPlatform.fatalErrors.add(error, 'location');
+      }
+    });
+  };
 
 /**
  * internal angular run function that will be called when angular bootstraps and
  * lets us integrate with the angular router so that we can automatically clear
  * the badge if we switch to a Kibana app that does not use the badge correctly
  */
-const $setupBadgeAutoClear = (newPlatform: CoreStart, isLocalAngular: boolean) => (
-  $rootScope: IRootScopeService,
-  $injector: any
-) => {
-  // A flag used to determine if we should automatically
-  // clear the badge between angular route changes.
-  let badgeSetSinceRouteChange = false;
-  const $route = $injector.has('$route') ? $injector.get('$route') : {};
+const $setupBadgeAutoClear =
+  (newPlatform: CoreStart, isLocalAngular: boolean) =>
+  ($rootScope: IRootScopeService, $injector: any) => {
+    // A flag used to determine if we should automatically
+    // clear the badge between angular route changes.
+    let badgeSetSinceRouteChange = false;
+    const $route = $injector.has('$route') ? $injector.get('$route') : {};
 
-  $rootScope.$on('$routeChangeStart', () => {
-    badgeSetSinceRouteChange = false;
-  });
+    $rootScope.$on('$routeChangeStart', () => {
+      badgeSetSinceRouteChange = false;
+    });
 
-  $rootScope.$on('$routeChangeSuccess', () => {
-    if (isDummyRoute($route, isLocalAngular)) {
-      return;
-    }
-    const current = $route.current || {};
-
-    if (badgeSetSinceRouteChange || (current.$$route && current.$$route.redirectTo)) {
-      return;
-    }
-
-    const badgeProvider = current.badge;
-    if (!badgeProvider) {
-      newPlatform.chrome.setBadge(undefined);
-      return;
-    }
-
-    try {
-      newPlatform.chrome.setBadge($injector.invoke(badgeProvider));
-    } catch (error) {
-      if (isAngularHttpError(error)) {
-        error = formatAngularHttpError(error);
+    $rootScope.$on('$routeChangeSuccess', () => {
+      if (isDummyRoute($route, isLocalAngular)) {
+        return;
       }
-      newPlatform.fatalErrors.add(error, 'location');
-    }
-  });
-};
+      const current = $route.current || {};
+
+      if (badgeSetSinceRouteChange || (current.$$route && current.$$route.redirectTo)) {
+        return;
+      }
+
+      const badgeProvider = current.badge;
+      if (!badgeProvider) {
+        newPlatform.chrome.setBadge(undefined);
+        return;
+      }
+
+      try {
+        newPlatform.chrome.setBadge($injector.invoke(badgeProvider));
+      } catch (error) {
+        if (isAngularHttpError(error)) {
+          error = formatAngularHttpError(error);
+        }
+        newPlatform.fatalErrors.add(error, 'location');
+      }
+    });
+  };
 
 /**
  * internal angular run function that will be called when angular bootstraps and
@@ -324,40 +312,39 @@ const $setupBadgeAutoClear = (newPlatform: CoreStart, isLocalAngular: boolean) =
  * the helpExtension if we switch to a Kibana app that does not set its own
  * helpExtension
  */
-const $setupHelpExtensionAutoClear = (newPlatform: CoreStart, isLocalAngular: boolean) => (
-  $rootScope: IRootScopeService,
-  $injector: any
-) => {
-  /**
-   * reset helpExtensionSetSinceRouteChange any time the helpExtension changes, even
-   * if it was done directly through the new platform
-   */
-  let helpExtensionSetSinceRouteChange = false;
-  newPlatform.chrome.getHelpExtension$().subscribe({
-    next() {
-      helpExtensionSetSinceRouteChange = true;
-    },
-  });
+const $setupHelpExtensionAutoClear =
+  (newPlatform: CoreStart, isLocalAngular: boolean) =>
+  ($rootScope: IRootScopeService, $injector: any) => {
+    /**
+     * reset helpExtensionSetSinceRouteChange any time the helpExtension changes, even
+     * if it was done directly through the new platform
+     */
+    let helpExtensionSetSinceRouteChange = false;
+    newPlatform.chrome.getHelpExtension$().subscribe({
+      next() {
+        helpExtensionSetSinceRouteChange = true;
+      },
+    });
 
-  const $route = $injector.has('$route') ? $injector.get('$route') : {};
+    const $route = $injector.has('$route') ? $injector.get('$route') : {};
 
-  $rootScope.$on('$routeChangeStart', () => {
-    if (isDummyRoute($route, isLocalAngular)) {
-      return;
-    }
-    helpExtensionSetSinceRouteChange = false;
-  });
+    $rootScope.$on('$routeChangeStart', () => {
+      if (isDummyRoute($route, isLocalAngular)) {
+        return;
+      }
+      helpExtensionSetSinceRouteChange = false;
+    });
 
-  $rootScope.$on('$routeChangeSuccess', () => {
-    if (isDummyRoute($route, isLocalAngular)) {
-      return;
-    }
-    const current = $route.current || {};
+    $rootScope.$on('$routeChangeSuccess', () => {
+      if (isDummyRoute($route, isLocalAngular)) {
+        return;
+      }
+      const current = $route.current || {};
 
-    if (helpExtensionSetSinceRouteChange || (current.$$route && current.$$route.redirectTo)) {
-      return;
-    }
+      if (helpExtensionSetSinceRouteChange || (current.$$route && current.$$route.redirectTo)) {
+        return;
+      }
 
-    newPlatform.chrome.setHelpExtension(current.helpExtension);
-  });
-};
+      newPlatform.chrome.setHelpExtension(current.helpExtension);
+    });
+  };

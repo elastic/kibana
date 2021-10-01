@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -21,12 +22,12 @@ import { nodesByIndices } from '../../../components/elasticsearch/shard_allocati
 import { MonitoringViewBaseController } from '../../base_controller';
 import {
   CODE_PATH_ELASTICSEARCH,
-  ALERT_CPU_USAGE,
-  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
-  ALERT_THREAD_POOL_WRITE_REJECTIONS,
-  ALERT_MISSING_MONITORING_DATA,
-  ALERT_DISK_USAGE,
-  ALERT_MEMORY_USAGE,
+  RULE_CPU_USAGE,
+  RULE_THREAD_POOL_SEARCH_REJECTIONS,
+  RULE_THREAD_POOL_WRITE_REJECTIONS,
+  RULE_MISSING_MONITORING_DATA,
+  RULE_DISK_USAGE,
+  RULE_MEMORY_USAGE,
   ELASTICSEARCH_SYSTEM_ID,
 } from '../../../../common/constants';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
@@ -63,12 +64,12 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
           shouldFetch: true,
           options: {
             alertTypeIds: [
-              ALERT_CPU_USAGE,
-              ALERT_DISK_USAGE,
-              ALERT_THREAD_POOL_SEARCH_REJECTIONS,
-              ALERT_THREAD_POOL_WRITE_REJECTIONS,
-              ALERT_MEMORY_USAGE,
-              ALERT_MISSING_MONITORING_DATA,
+              RULE_CPU_USAGE,
+              RULE_DISK_USAGE,
+              RULE_THREAD_POOL_SEARCH_REJECTIONS,
+              RULE_THREAD_POOL_WRITE_REJECTIONS,
+              RULE_MEMORY_USAGE,
+              RULE_MISSING_MONITORING_DATA,
             ],
             filters: [
               {

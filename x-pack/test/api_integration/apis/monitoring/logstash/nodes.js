@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -12,7 +13,7 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('node listing', () => {
-    const archive = 'monitoring/logstash-pipelines';
+    const archive = 'x-pack/test/functional/es_archives/monitoring/logstash_pipelines';
     const timeRange = {
       min: '2018-01-22T09:33:13.000Z',
       max: '2018-01-22T09:41:04.000Z',

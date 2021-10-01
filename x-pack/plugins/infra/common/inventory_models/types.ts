@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
@@ -281,11 +282,13 @@ export const ESSumBucketAggRT = rt.type({
   }),
 });
 
-export const ESTopHitsAggRT = rt.type({
-  top_hits: rt.object,
+export const ESTopMetricsAggRT = rt.type({
+  top_metrics: rt.type({
+    metrics: rt.union([rt.array(rt.type({ field: rt.string })), rt.type({ field: rt.string })]),
+  }),
 });
 
-interface SnapshotTermsWithAggregation {
+export interface SnapshotTermsWithAggregation {
   terms: { field: string };
   aggregations: MetricsUIAggregation;
 }
@@ -308,7 +311,7 @@ export const ESAggregationRT = rt.union([
   ESSumBucketAggRT,
   ESTermsWithAggregationRT,
   ESCaridnalityAggRT,
-  ESTopHitsAggRT,
+  ESTopMetricsAggRT,
 ]);
 
 export const MetricsUIAggregationRT = rt.record(rt.string, ESAggregationRT);

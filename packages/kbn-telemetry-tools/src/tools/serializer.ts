@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as ts from 'typescript';
@@ -30,7 +19,7 @@ export enum TelemetryKinds {
   Date = 10001,
 }
 
-interface DescriptorValue {
+export interface DescriptorValue {
   kind: ts.SyntaxKind | TelemetryKinds;
   type: keyof typeof ts.SyntaxKind | keyof typeof TelemetryKinds;
 }
@@ -51,6 +40,13 @@ export function isObjectDescriptor(value: any) {
   }
 
   return false;
+}
+
+export function descriptorToObject(descriptor: Descriptor | DescriptorValue) {
+  return Object.entries(descriptor).reduce((acc, [key, value]) => {
+    acc[key] = value.kind ? kindToDescriptorName(value.kind) : descriptorToObject(value);
+    return acc;
+  }, {} as Record<string, any>);
 }
 
 export function kindToDescriptorName(kind: number) {
@@ -86,6 +82,7 @@ export function getConstraints(node: ts.Node, program: ts.Program): any {
     return getConstraints(node.type, program);
   }
 
+  // node input ('a' | 'b'). returns ['a', 'b'];
   if (ts.isUnionTypeNode(node)) {
     const types = node.types.filter(discardNullOrUndefined);
     return types.reduce<any>((acc, typeNode) => {
@@ -99,6 +96,10 @@ export function getConstraints(node: ts.Node, program: ts.Program): any {
     return node.literal.text;
   }
 
+  if (ts.isStringLiteral(node)) {
+    return node.text;
+  }
+
   if (ts.isImportSpecifier(node)) {
     const source = node.getSourceFile();
     const importedModuleName = getModuleSpecifier(node);
@@ -108,6 +109,24 @@ export function getConstraints(node: ts.Node, program: ts.Program): any {
     return getConstraints(declarationNode, program);
   }
 
+  // node input ( enum { A = 'my_a', B = 'my_b' } ). returns ['my_a', 'my_b'];
+  if (ts.isEnumDeclaration(node)) {
+    return node.members.map((member) => getConstraints(member, program));
+  }
+
+  // node input ( 'A = my_a' )
+  if (ts.isEnumMember(node)) {
+    const { initializer } = node;
+    if (!initializer) {
+      // no initializer ( enum { A } );
+      const memberName = node.getText();
+      throw Error(
+        `EnumMember (${memberName}) must have an initializer. Example: (enum { ${memberName} = '${memberName}' })`
+      );
+    }
+
+    return getConstraints(initializer, program);
+  }
   throw Error(`Unsupported constraint of kind ${node.kind} [${ts.SyntaxKind[node.kind]}]`);
 }
 
@@ -117,22 +136,41 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
       return getDescriptor(node.type, program);
     }
   }
+
+  /**
+   * Supported interface keys:
+   * inteface T { [computed_value]: ANY_VALUE };
+   * inteface T { hardcoded_string: ANY_VALUE };
+   */
   if (ts.isTypeLiteralNode(node) || ts.isInterfaceDeclaration(node)) {
     return node.members.reduce((acc, m) => {
-      const key = m.name?.getText();
-      if (key) {
-        return { ...acc, [key]: getDescriptor(m, program) };
-      } else {
-        return { ...acc, ...getDescriptor(m, program) };
+      const { name: nameNode } = m;
+      if (nameNode) {
+        const nodeText = nameNode.getText();
+        if (ts.isComputedPropertyName(nameNode)) {
+          const typeChecker = program.getTypeChecker();
+          const symbol = typeChecker.getSymbolAtLocation(nameNode);
+          const key = symbol?.getName();
+          if (!key) {
+            throw Error(`Unable to parse computed value of ${nodeText}.`);
+          }
+          return { ...acc, [key]: getDescriptor(m, program) };
+        }
+
+        return { ...acc, [nodeText]: getDescriptor(m, program) };
       }
+
+      return { ...acc, ...getDescriptor(m, program) };
     }, {});
   }
 
-  // If it's defined as signature { [key: string]: OtherInterface }
+  /**
+   * Supported signature constraints of `string`:
+   * { [key in 'prop1' | 'prop2']: value }
+   * { [key in Enum]: value }
+   */
   if ((ts.isIndexSignatureDeclaration(node) || ts.isMappedTypeNode(node)) && node.type) {
     const descriptor = getDescriptor(node.type, program);
-
-    // If we know the constraints of `string` ({ [key in 'prop1' | 'prop2']: value })
     const constraint = (node as ts.MappedTypeNode).typeParameter?.constraint;
     if (constraint) {
       const constraints = getConstraints(constraint, program);
@@ -169,6 +207,16 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
     if (symbolName === 'Date') {
       return { kind: TelemetryKinds.Date, type: 'Date' };
     }
+
+    // Support Array<T>
+    if (symbolName === 'Array') {
+      if (node.typeArguments?.length !== 1) {
+        throw Error('Array type only supports 1 type parameter Array<T>');
+      }
+      const typeArgument = node.typeArguments[0];
+      return { items: getDescriptor(typeArgument, program) };
+    }
+
     // Support `Record<string, SOMETHING>`
     if (symbolName === 'Record') {
       const descriptor = getDescriptor(node.typeArguments![1], program);
@@ -196,7 +244,7 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
     return getDescriptor(node.typeName, program);
   }
 
-  if (ts.isImportSpecifier(node)) {
+  if (ts.isImportSpecifier(node) || ts.isExportSpecifier(node)) {
     const source = node.getSourceFile();
     const importedModuleName = getModuleSpecifier(node);
 
@@ -254,7 +302,7 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
     case ts.SyntaxKind.UnionType:
     case ts.SyntaxKind.AnyKeyword:
     default:
-      throw new Error(`Unknown type ${ts.SyntaxKind[node.kind]}; ${node.getText()}`);
+      throw new Error(`Unknown type ${ts.SyntaxKind[node.kind]}`);
   }
 }
 

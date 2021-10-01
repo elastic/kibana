@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiDatePicker, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React, { useCallback } from 'react';
-import { withTheme, EuiTheme } from '../../../../../../../observability/public';
+import { withTheme, EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 
 interface Props {
@@ -16,13 +17,8 @@ interface Props {
 }
 
 export const WaffleTimeControls = withTheme(({ theme }: Props) => {
-  const {
-    currentTime,
-    isAutoReloading,
-    startAutoReload,
-    stopAutoReload,
-    jumpToTime,
-  } = useWaffleTimeContext();
+  const { currentTime, isAutoReloading, startAutoReload, stopAutoReload, jumpToTime } =
+    useWaffleTimeContext();
 
   const currentMoment = moment(currentTime);
 
@@ -52,18 +48,9 @@ export const WaffleTimeControls = withTheme(({ theme }: Props) => {
   );
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none">
-      <EuiFlexItem
-        grow={false}
-        style={{
-          border: theme?.eui.euiFormInputGroupBorder,
-          boxShadow: `0px 3px 2px ${theme?.eui.euiTableActionsBorderColor}, 0px 1px 1px ${theme?.eui.euiTableActionsBorderColor}`,
-          marginRight: theme?.eui.paddingSizes.m,
-        }}
-        data-test-subj="waffleDatePicker"
-      >
+    <EuiFlexGroup gutterSize="m">
+      <EuiFlexItem grow={false} data-test-subj="waffleDatePicker">
         <EuiDatePicker
-          className="euiFieldText--inGroup"
           dateFormat="L LTS"
           disabled={isAutoReloading}
           injectTimes={currentMoment ? [currentMoment] : []}

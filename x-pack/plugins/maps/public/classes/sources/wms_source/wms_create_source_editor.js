@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -38,8 +39,6 @@ export class WMSCreateSourceEditor extends Component {
     styleOptions: [],
     selectedLayerOptions: [],
     selectedStyleOptions: [],
-    attributionText: '',
-    attributionUrl: '',
   };
   componentDidMount() {
     this._isMounted = true;
@@ -50,7 +49,7 @@ export class WMSCreateSourceEditor extends Component {
   }
 
   _previewIfPossible = _.debounce(() => {
-    const { serviceUrl, layers, styles, attributionText, attributionUrl } = this.state;
+    const { serviceUrl, layers, styles } = this.state;
 
     const sourceConfig =
       serviceUrl && layers
@@ -58,8 +57,6 @@ export class WMSCreateSourceEditor extends Component {
             serviceUrl,
             layers,
             styles,
-            attributionText,
-            attributionUrl,
           }
         : null;
     this.props.onSourceConfigChange(sourceConfig);
@@ -154,15 +151,6 @@ export class WMSCreateSourceEditor extends Component {
     );
   };
 
-  _handleWMSAttributionChange(attributionUpdate) {
-    const { attributionText, attributionUrl } = this.state;
-    this.setState(attributionUpdate, () => {
-      if (attributionText && attributionUrl) {
-        this._previewIfPossible();
-      }
-    });
-  }
-
   _renderLayerAndStyleInputs() {
     if (!this.state.hasAttemptedToLoadCapabilities || this.state.isLoadingCapabilities) {
       return null;
@@ -244,49 +232,6 @@ export class WMSCreateSourceEditor extends Component {
     );
   }
 
-  _renderAttributionInputs() {
-    if (!this.state.layers) {
-      return;
-    }
-
-    const { attributionText, attributionUrl } = this.state;
-
-    return (
-      <Fragment>
-        <EuiFormRow
-          label="Attribution text"
-          isInvalid={attributionUrl !== '' && attributionText === ''}
-          error={[
-            i18n.translate('xpack.maps.source.wms.attributionText', {
-              defaultMessage: 'Attribution url must have accompanying text',
-            }),
-          ]}
-        >
-          <EuiFieldText
-            onChange={({ target }) =>
-              this._handleWMSAttributionChange({ attributionText: target.value })
-            }
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label="Attribution link"
-          isInvalid={attributionText !== '' && attributionUrl === ''}
-          error={[
-            i18n.translate('xpack.maps.source.wms.attributionLink', {
-              defaultMessage: 'Attribution text must have an accompanying link',
-            }),
-          ]}
-        >
-          <EuiFieldText
-            onChange={({ target }) =>
-              this._handleWMSAttributionChange({ attributionUrl: target.value })
-            }
-          />
-        </EuiFormRow>
-      </Fragment>
-    );
-  }
-
   render() {
     return (
       <EuiPanel>
@@ -301,8 +246,6 @@ export class WMSCreateSourceEditor extends Component {
         {this._renderGetCapabilitiesButton()}
 
         {this._renderLayerAndStyleInputs()}
-
-        {this._renderAttributionInputs()}
       </EuiPanel>
     );
   }

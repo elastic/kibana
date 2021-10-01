@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { DeepPartial } from '../../../../../plugins/ml/common/types/common';
 import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
 
@@ -24,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
       return [
         {
           suiteTitle: 'binary classification job',
-          archive: 'ml/ihp_outlier',
+          archive: 'x-pack/test/functional/es_archives/ml/ihp_outlier',
           indexPattern: { name: 'ft_ihp_outlier', timeField: '@timestamp' },
           job: {
             id: `ihp_fi_binary_${timestamp}`,
@@ -69,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         {
           suiteTitle: 'multi class classification job',
-          archive: 'ml/ihp_outlier',
+          archive: 'x-pack/test/functional/es_archives/ml/ihp_outlier',
           indexPattern: { name: 'ft_ihp_outlier', timeField: '@timestamp' },
           job: {
             id: `ihp_fi_multi_${timestamp}`,
@@ -114,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         {
           suiteTitle: 'regression job',
-          archive: 'ml/egs_regression',
+          archive: 'x-pack/test/functional/es_archives/ml/egs_regression',
           indexPattern: { name: 'ft_egs_regression', timeField: '@timestamp' },
           job: {
             id: `egs_fi_reg_${timestamp}`,
@@ -186,6 +188,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToDataFrameAnalytics();
           await ml.dataFrameAnalyticsTable.waitForAnalyticsToLoad();
+          await ml.testResources.createIndexPatternIfNeeded(testData.job.dest!.index as string);
           await ml.dataFrameAnalyticsTable.openResultsView(testData.job.id as string);
         });
 
@@ -201,9 +204,8 @@ export default function ({ getService }: FtrProviderContext) {
         it('should display the feature importance decision path in the data grid', async () => {
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
-          await ml.dataFrameAnalyticsResults.openFeatureImportanceDecisionPathPopover();
-          await ml.dataFrameAnalyticsResults.assertFeatureImportanceDecisionPathElementsExists();
-          await ml.dataFrameAnalyticsResults.assertFeatureImportanceDecisionPathChartElementsExists();
+          await ml.dataFrameAnalyticsResults.openFeatureImportancePopover();
+          await ml.dataFrameAnalyticsResults.assertFeatureImportancePopoverContent();
         });
       });
     }

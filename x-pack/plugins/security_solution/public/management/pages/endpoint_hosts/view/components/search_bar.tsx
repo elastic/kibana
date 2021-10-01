@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
@@ -23,7 +24,7 @@ const AdminQueryBar = styled.div`
 
 export const AdminSearchBar = memo(() => {
   const history = useHistory();
-  const queryParams = useEndpointSelector(selectors.uiQueryParams);
+  const { admin_query: _, ...queryParams } = useEndpointSelector(selectors.uiQueryParams);
   const searchBarIndexPatterns = useEndpointSelector(selectors.patterns);
   const searchBarQuery = useEndpointSelector(selectors.searchBarQuery);
   const clonedIndexPatterns = useMemo(
@@ -36,7 +37,11 @@ export const AdminSearchBar = memo(() => {
       history.push(
         urlFromQueryParams({
           ...queryParams,
-          admin_query: encode((params.query as unknown) as RisonValue),
+          // ensure we reset the page back to the first one, so that user id not (possibly) being left on an invalid page
+          page_index: '0',
+          ...(params.query?.query.trim()
+            ? { admin_query: encode(params.query as unknown as RisonValue) }
+            : {}),
         })
       );
     },
@@ -56,6 +61,7 @@ export const AdminSearchBar = memo(() => {
             timeHistory={timeHistory}
             onQuerySubmit={onQuerySubmit}
             isLoading={false}
+            iconType="search"
             showFilterBar={false}
             showDatePicker={false}
             showQueryBar={true}

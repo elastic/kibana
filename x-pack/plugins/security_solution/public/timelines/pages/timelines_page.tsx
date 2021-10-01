@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -11,7 +12,7 @@ import { useParams } from 'react-router-dom';
 
 import { TimelineId, TimelineType } from '../../../common/types/timeline';
 import { HeaderPage } from '../../common/components/header_page';
-import { WrapperPage } from '../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { OverviewEmpty } from '../../overview/components/overview_empty';
@@ -37,15 +38,15 @@ export const TimelinesPageComponent: React.FC = () => {
   }, [setImportDataModalToggle]);
   const { indicesExist } = useSourcererScope();
 
-  const capabilitiesCanUserCRUD: boolean = !!useKibana().services.application.capabilities.siem
-    .crud;
+  const capabilitiesCanUserCRUD: boolean =
+    !!useKibana().services.application.capabilities.siem.crud;
 
   return (
     <>
       {indicesExist ? (
         <>
-          <WrapperPage>
-            <HeaderPage border hideSourcerer={true} title={i18n.PAGE_TITLE}>
+          <SecuritySolutionPageWrapper>
+            <HeaderPage hideSourcerer={true} title={i18n.PAGE_TITLE}>
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexItem>
                   {capabilitiesCanUserCRUD && (
@@ -88,13 +89,13 @@ export const TimelinesPageComponent: React.FC = () => {
                 data-test-subj="stateful-open-timeline"
               />
             </TimelinesContainer>
-          </WrapperPage>
+          </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <WrapperPage>
+        <SecuritySolutionPageWrapper>
           <HeaderPage hideSourcerer={true} border title={i18n.PAGE_TITLE} />
           <OverviewEmpty />
-        </WrapperPage>
+        </SecuritySolutionPageWrapper>
       )}
 
       <SpyRoute pageName={SecurityPageName.timelines} />

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   TemplateDeserialized,
   LegacyTemplateSerialized,
@@ -14,15 +16,8 @@ import {
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
 export function serializeTemplate(templateDeserialized: TemplateDeserialized): TemplateSerialized {
-  const {
-    version,
-    priority,
-    indexPatterns,
-    template,
-    composedOf,
-    dataStream,
-    _meta,
-  } = templateDeserialized;
+  const { version, priority, indexPatterns, template, composedOf, dataStream, _meta } =
+    templateDeserialized;
 
   return {
     version,
@@ -84,10 +79,8 @@ export function deserializeTemplateList(
   cloudManagedTemplatePrefix?: string
 ): TemplateListItem[] {
   return indexTemplates.map(({ name, index_template: templateSerialized }) => {
-    const {
-      template: { mappings, settings, aliases } = {},
-      ...deserializedTemplate
-    } = deserializeTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
+    const { template: { mappings, settings, aliases } = {}, ...deserializedTemplate } =
+      deserializeTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
 
     return {
       ...deserializedTemplate,
@@ -148,10 +141,8 @@ export function deserializeLegacyTemplateList(
   cloudManagedTemplatePrefix?: string
 ): TemplateListItem[] {
   return Object.entries(indexTemplatesByName).map(([name, templateSerialized]) => {
-    const {
-      template: { mappings, settings, aliases } = {},
-      ...deserializedTemplate
-    } = deserializeLegacyTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
+    const { template: { mappings, settings, aliases } = {}, ...deserializedTemplate } =
+      deserializeLegacyTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
 
     return {
       ...deserializedTemplate,

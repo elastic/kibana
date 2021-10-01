@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, memo } from 'react';
@@ -17,11 +18,10 @@ export const TimelineMarkDownRendererComponent: React.FC<
   }
 > = ({ id, title, graphEventId }) => {
   const handleTimelineClick = useTimelineClick();
-  const onClickTimeline = useCallback(() => handleTimelineClick(id ?? '', graphEventId), [
-    id,
-    graphEventId,
-    handleTimelineClick,
-  ]);
+  const onClickTimeline = useCallback(
+    () => handleTimelineClick(id ?? '', graphEventId),
+    [id, graphEventId, handleTimelineClick]
+  );
   return (
     <EuiToolTip content={i18n.TIMELINE_ID(id ?? '')}>
       <EuiLink onClick={onClickTimeline} data-test-subj={`markdown-timeline-link-${id}`}>

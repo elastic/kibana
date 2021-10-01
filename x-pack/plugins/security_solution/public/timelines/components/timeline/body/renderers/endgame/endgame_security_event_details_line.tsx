@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
@@ -34,8 +35,10 @@ interface Props {
   endgameTargetUserName: string | null | undefined;
   eventAction: string | null | undefined;
   eventCode: string | null | undefined;
+  eventOutcome: string | null | undefined;
   hostName: string | null | undefined;
   id: string;
+  isDraggable?: boolean;
   processExecutable: string | null | undefined;
   processName: string | null | undefined;
   processPid: number | null | undefined;
@@ -56,8 +59,10 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
     endgameTargetUserName,
     eventAction,
     eventCode,
+    eventOutcome,
     hostName,
     id,
+    isDraggable,
     processExecutable,
     processName,
     processPid,
@@ -66,7 +71,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
     winlogEventId,
   }) => {
     const domain = getTargetUserAndTargetDomain(eventAction) ? endgameTargetDomainName : userDomain;
-    const eventDetails = getEventDetails(eventAction);
+    const eventDetails = getEventDetails({ eventAction, eventOutcome });
     const hostNameSeparator = getHostNameSeparator(eventAction);
     const user = getTargetUserAndTargetDomain(eventAction) ? endgameTargetUserName : userName;
     const userDomainField = getUserDomainField(eventAction);
@@ -92,6 +97,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
             eventId={id}
             hostName={hostName}
             hostNameSeparator={hostNameSeparator}
+            isDraggable={isDraggable}
             userDomain={domain}
             userDomainField={userDomainField}
             userName={user}
@@ -113,6 +119,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                   contextId={contextId}
                   eventId={id}
                   field="endgame.logon_type"
+                  isDraggable={isDraggable}
                   queryValue={String(endgameLogonType)}
                   value={`${endgameLogonType} - ${getHumanReadableLogonType(endgameLogonType)}`}
                 />
@@ -133,6 +140,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                   contextId={contextId}
                   eventId={id}
                   field="endgame.target_logon_id"
+                  isDraggable={isDraggable}
                   value={endgameTargetLogonId}
                 />
               </TokensFlexItem>
@@ -152,6 +160,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
               endgamePid={undefined}
               endgameProcessName={undefined}
               eventId={id}
+              isDraggable={isDraggable}
               processPid={processPid}
               processName={processName}
               processExecutable={processExecutable}
@@ -173,6 +182,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                   contextId={contextId}
                   eventId={id}
                   field="endgame.subject_user_name"
+                  isDraggable={isDraggable}
                   iconType="user"
                   value={endgameSubjectUserName}
                 />
@@ -194,6 +204,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                   contextId={contextId}
                   eventId={id}
                   field="endgame.subject_domain_name"
+                  isDraggable={isDraggable}
                   value={endgameSubjectDomainName}
                 />
               </TokensFlexItem>
@@ -213,6 +224,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                   contextId={contextId}
                   eventId={id}
                   field="endgame.subject_logon_id"
+                  isDraggable={isDraggable}
                   value={endgameSubjectLogonId}
                 />
               </TokensFlexItem>

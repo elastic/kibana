@@ -1,127 +1,184 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, useEffect, useCallback, useState } from 'react';
 import {
+  CriteriaWithPagination,
   EuiBasicTable,
   EuiEmptyPrompt,
   EuiLoadingContent,
   EuiProgress,
-  EuiFieldSearch,
+  EuiSearchBarProps,
+  EuiSpacer,
 } from '@elastic/eui';
-import styled from 'styled-components';
-import { History } from 'history';
-import { set } from 'lodash/fp';
 
+import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
+import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
+import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { AutoDownload } from '../../../../../../common/components/auto_download/auto_download';
-import { NamespaceType } from '../../../../../../../../lists/common';
 import { useKibana } from '../../../../../../common/lib/kibana';
-import { useApi, useExceptionLists } from '../../../../../../shared_imports';
-import { FormatUrl } from '../../../../../../common/components/link_to';
-import { HeaderSection } from '../../../../../../common/components/header_section';
+import { useFormatUrl } from '../../../../../../common/components/link_to';
 import { Loader } from '../../../../../../common/components/loader';
 import { Panel } from '../../../../../../common/components/panel';
+import { DetectionEngineHeaderPage } from '../../../../../components/detection_engine_header_page';
+
 import * as i18n from './translations';
 import { AllRulesUtilityBar } from '../utility_bar';
-import { LastUpdatedAt } from '../../../../../../common/components/last_updated';
 import { AllExceptionListsColumns, getAllExceptionListsColumns } from './columns';
 import { useAllExceptionLists } from './use_all_exception_lists';
+import { ReferenceErrorModal } from '../../../../../components/value_lists_management_modal/reference_error_modal';
+import { patchRule } from '../../../../../containers/detection_engine/rules/api';
+import { ExceptionsSearchBar } from './exceptions_search_bar';
+import { getSearchFilters } from '../helpers';
+import { SecurityPageName } from '../../../../../../../common/constants';
+import { useUserData } from '../../../../../components/user_info';
+import { userHasPermissions } from '../../helpers';
+import { useListsConfig } from '../../../../../containers/detection_engine/lists/use_lists_config';
+import { ExceptionsTableItem } from './types';
 
-// Known lost battle with Eui :(
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const MyEuiBasicTable = styled(EuiBasicTable as any)`` as any;
+export type Func = () => Promise<void>;
 
-export type Func = () => void;
-export interface ExceptionListFilter {
-  name?: string | null;
-  list_id?: string | null;
-  created_by?: string | null;
+interface ReferenceModalState {
+  contentText: string;
+  rulesReferences: string[];
+  isLoading: boolean;
+  listId: string;
+  listNamespaceType: NamespaceType;
 }
 
-interface ExceptionListsTableProps {
-  history: History;
-  hasNoPermissions: boolean;
-  loading: boolean;
-  formatUrl: FormatUrl;
-}
+const exceptionReferenceModalInitialState: ReferenceModalState = {
+  contentText: '',
+  rulesReferences: [],
+  isLoading: false,
+  listId: '',
+  listNamespaceType: 'single',
+};
 
-export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
-  ({ formatUrl, history, hasNoPermissions, loading }) => {
-    const {
-      services: { http, notifications },
-    } = useKibana();
-    const { exportExceptionList } = useApi(http);
-    const [filters, setFilters] = useState<ExceptionListFilter>({
-      name: null,
-      list_id: null,
-      created_by: null,
-    });
-    const [loadingExceptions, exceptions, pagination, refreshExceptions] = useExceptionLists({
+export const ExceptionListsTable = React.memo(() => {
+  const { formatUrl } = useFormatUrl(SecurityPageName.rules);
+  const [{ loading: userInfoLoading, canUserCRUD }] = useUserData();
+  const hasPermissions = userHasPermissions(canUserCRUD);
+
+  const { loading: listsConfigLoading } = useListsConfig();
+  const loading = userInfoLoading || listsConfigLoading;
+
+  const {
+    services: { http, notifications, timelines, application },
+  } = useKibana();
+  const { exportExceptionList, deleteExceptionList } = useApi(http);
+
+  const [showReferenceErrorModal, setShowReferenceErrorModal] = useState(false);
+  const [referenceModalState, setReferenceModalState] = useState<ReferenceModalState>(
+    exceptionReferenceModalInitialState
+  );
+  const [filters, setFilters] = useState<ExceptionListFilter | undefined>(undefined);
+  const [loadingExceptions, exceptions, pagination, setPagination, refreshExceptions] =
+    useExceptionLists({
       errorMessage: i18n.ERROR_EXCEPTION_LISTS,
       filterOptions: filters,
       http,
       namespaceTypes: ['single', 'agnostic'],
       notifications,
       showTrustedApps: false,
+      showEventFilters: false,
     });
-    const [loadingTableInfo, data] = useAllExceptionLists({
-      exceptionLists: exceptions ?? [],
-    });
-    const [initLoading, setInitLoading] = useState(true);
-    const [lastUpdated, setLastUpdated] = useState(Date.now());
-    const [deletingListIds, setDeletingListIds] = useState<string[]>([]);
-    const [exportingListIds, setExportingListIds] = useState<string[]>([]);
-    const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
+  const [loadingTableInfo, exceptionListsWithRuleRefs, exceptionsListsRef] = useAllExceptionLists({
+    exceptionLists: exceptions ?? [],
+  });
+  const [initLoading, setInitLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState(Date.now());
+  const [deletingListIds, setDeletingListIds] = useState<string[]>([]);
+  const [exportingListIds, setExportingListIds] = useState<string[]>([]);
+  const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
+  const { navigateToUrl } = application;
+  const { addError } = useAppToasts();
 
-    const handleDelete = useCallback(
-      ({
-        id,
-        listId,
-        namespaceType,
-      }: {
-        id: string;
-        listId: string;
-        namespaceType: NamespaceType;
-      }) => async () => {
+  const handleDeleteSuccess = useCallback(
+    (listId?: string) => () => {
+      notifications.toasts.addSuccess({
+        title: i18n.exceptionDeleteSuccessMessage(listId ?? referenceModalState.listId),
+      });
+    },
+    [notifications.toasts, referenceModalState.listId]
+  );
+
+  const handleDeleteError = useCallback(
+    (err: Error & { body?: { message: string } }): void => {
+      addError(err, {
+        title: i18n.EXCEPTION_DELETE_ERROR,
+      });
+    },
+    [addError]
+  );
+
+  const handleDelete = useCallback(
+    ({ id, listId, namespaceType }: { id: string; listId: string; namespaceType: NamespaceType }) =>
+      async () => {
         try {
           setDeletingListIds((ids) => [...ids, id]);
+          if (refreshExceptions != null) {
+            refreshExceptions();
+          }
+
+          if (exceptionsListsRef[id] != null && exceptionsListsRef[id].rules.length === 0) {
+            await deleteExceptionList({
+              id,
+              namespaceType,
+              onError: handleDeleteError,
+              onSuccess: handleDeleteSuccess(listId),
+            });
+
+            if (refreshExceptions != null) {
+              refreshExceptions();
+            }
+          } else {
+            setReferenceModalState({
+              contentText: i18n.referenceErrorMessage(exceptionsListsRef[id].rules.length),
+              rulesReferences: exceptionsListsRef[id].rules.map(({ name }) => name),
+              isLoading: true,
+              listId: id,
+              listNamespaceType: namespaceType,
+            });
+            setShowReferenceErrorModal(true);
+          }
           // route to patch rules with associated exception list
         } catch (error) {
-          notifications.toasts.addError(error, { title: i18n.EXCEPTION_DELETE_ERROR });
+          handleDeleteError(error);
         } finally {
-          setDeletingListIds((ids) => [...ids.filter((_id) => _id !== id)]);
+          setDeletingListIds((ids) => ids.filter((_id) => _id !== id));
         }
       },
-      [notifications.toasts]
-    );
+    [
+      deleteExceptionList,
+      exceptionsListsRef,
+      handleDeleteError,
+      handleDeleteSuccess,
+      refreshExceptions,
+    ]
+  );
 
-    const handleExportSuccess = useCallback(
-      (listId: string) => (blob: Blob): void => {
+  const handleExportSuccess = useCallback(
+    (listId: string) =>
+      (blob: Blob): void => {
         setExportDownload({ name: listId, blob });
       },
-      []
-    );
+    []
+  );
 
-    const handleExportError = useCallback(
-      (err: Error) => {
-        notifications.toasts.addError(err, { title: i18n.EXCEPTION_EXPORT_ERROR });
-      },
-      [notifications.toasts]
-    );
+  const handleExportError = useCallback(
+    (err: Error) => {
+      addError(err, { title: i18n.EXCEPTION_EXPORT_ERROR });
+    },
+    [addError]
+  );
 
-    const handleExport = useCallback(
-      ({
-        id,
-        listId,
-        namespaceType,
-      }: {
-        id: string;
-        listId: string;
-        namespaceType: NamespaceType;
-      }) => async () => {
+  const handleExport = useCallback(
+    ({ id, listId, namespaceType }: { id: string; listId: string; namespaceType: NamespaceType }) =>
+      async () => {
         setExportingListIds((ids) => [...ids, id]);
         await exportExceptionList({
           id,
@@ -131,141 +188,223 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
           onSuccess: handleExportSuccess(listId),
         });
       },
-      [exportExceptionList, handleExportError, handleExportSuccess]
+    [exportExceptionList, handleExportError, handleExportSuccess]
+  );
+
+  const exceptionsColumns = useMemo((): AllExceptionListsColumns[] => {
+    return getAllExceptionListsColumns(handleExport, handleDelete, formatUrl, navigateToUrl);
+  }, [handleExport, handleDelete, formatUrl, navigateToUrl]);
+
+  const handleRefresh = useCallback((): void => {
+    if (refreshExceptions != null) {
+      setLastUpdated(Date.now());
+      refreshExceptions();
+    }
+  }, [refreshExceptions]);
+
+  useEffect(() => {
+    if (initLoading && !loading && !loadingExceptions && !loadingTableInfo) {
+      setInitLoading(false);
+    }
+  }, [initLoading, loading, loadingExceptions, loadingTableInfo]);
+
+  const emptyPrompt = useMemo((): JSX.Element => {
+    return (
+      <EuiEmptyPrompt
+        title={<h3>{i18n.NO_EXCEPTION_LISTS}</h3>}
+        titleSize="xs"
+        body={i18n.NO_LISTS_BODY}
+      />
     );
+  }, []);
 
-    const exceptionsColumns = useMemo((): AllExceptionListsColumns[] => {
-      return getAllExceptionListsColumns(handleExport, handleDelete, history, formatUrl);
-    }, [handleExport, handleDelete, history, formatUrl]);
+  const handleSearch = useCallback(
+    async ({
+      query,
+      queryText,
+    }: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]): Promise<void> => {
+      const filterOptions = {
+        name: null,
+        list_id: null,
+        created_by: null,
+        type: null,
+        tags: null,
+      };
+      const searchTerms = getSearchFilters({
+        defaultSearchTerm: 'name',
+        filterOptions,
+        query,
+        searchValue: queryText,
+      });
+      setFilters(searchTerms);
+    },
+    []
+  );
 
-    const handleRefresh = useCallback((): void => {
+  const handleCloseReferenceErrorModal = useCallback((): void => {
+    setDeletingListIds([]);
+    setShowReferenceErrorModal(false);
+    setReferenceModalState({
+      contentText: '',
+      rulesReferences: [],
+      isLoading: false,
+      listId: '',
+      listNamespaceType: 'single',
+    });
+  }, []);
+
+  const handleReferenceDelete = useCallback(async (): Promise<void> => {
+    const exceptionListId = referenceModalState.listId;
+    const exceptionListNamespaceType = referenceModalState.listNamespaceType;
+    const relevantRules = exceptionsListsRef[exceptionListId].rules;
+
+    try {
+      await Promise.all(
+        relevantRules.map((rule) => {
+          const abortCtrl = new AbortController();
+          const exceptionLists = (rule.exceptions_list ?? []).filter(
+            ({ id }) => id !== exceptionListId
+          );
+
+          return patchRule({
+            ruleProperties: {
+              rule_id: rule.rule_id,
+              exceptions_list: exceptionLists,
+            },
+            signal: abortCtrl.signal,
+          });
+        })
+      );
+
+      await deleteExceptionList({
+        id: exceptionListId,
+        namespaceType: exceptionListNamespaceType,
+        onError: handleDeleteError,
+        onSuccess: handleDeleteSuccess(),
+      });
+    } catch (err) {
+      handleDeleteError(err);
+    } finally {
+      setReferenceModalState(exceptionReferenceModalInitialState);
+      setDeletingListIds([]);
+      setShowReferenceErrorModal(false);
       if (refreshExceptions != null) {
-        setLastUpdated(Date.now());
         refreshExceptions();
       }
-    }, [refreshExceptions]);
+    }
+  }, [
+    referenceModalState.listId,
+    referenceModalState.listNamespaceType,
+    exceptionsListsRef,
+    deleteExceptionList,
+    handleDeleteError,
+    handleDeleteSuccess,
+    refreshExceptions,
+  ]);
 
-    useEffect(() => {
-      if (initLoading && !loading && !loadingExceptions && !loadingTableInfo) {
-        setInitLoading(false);
-      }
-    }, [initLoading, loading, loadingExceptions, loadingTableInfo]);
+  const paginationMemo = useMemo(
+    () => ({
+      pageIndex: pagination.page - 1,
+      pageSize: pagination.perPage,
+      totalItemCount: pagination.total || 0,
+      pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
+    }),
+    [pagination]
+  );
 
-    const emptyPrompt = useMemo((): JSX.Element => {
-      return (
-        <EuiEmptyPrompt
-          title={<h3>{i18n.NO_EXCEPTION_LISTS}</h3>}
-          titleSize="xs"
-          body={i18n.NO_LISTS_BODY}
-        />
-      );
-    }, []);
+  const handleOnDownload = useCallback(() => {
+    setExportDownload({});
+  }, []);
 
-    const handleSearch = useCallback((search: string) => {
-      const regex = search.split(/\s+(?=([^"]*"[^"]*")*[^"]*$)/);
-      const formattedFilter = regex
-        .filter((c) => c != null)
-        .reduce<ExceptionListFilter>(
-          (filter, term) => {
-            const [qualifier, value] = term.split(':');
+  const tableItems = useMemo<ExceptionsTableItem[]>(
+    () =>
+      (exceptionListsWithRuleRefs ?? []).map((item) => ({
+        ...item,
+        isDeleting: deletingListIds.includes(item.id),
+        isExporting: exportingListIds.includes(item.id),
+      })),
+    [deletingListIds, exceptionListsWithRuleRefs, exportingListIds]
+  );
 
-            if (qualifier == null) {
-              filter.name = search;
-            } else if (value != null && Object.keys(filter).includes(qualifier)) {
-              return set(qualifier, value, filter);
-            }
+  const handlePaginationChange = useCallback(
+    (criteria: CriteriaWithPagination<ExceptionsTableItem>) => {
+      const { index, size } = criteria.page;
+      setPagination((currentPagination) => ({
+        ...currentPagination,
+        perPage: size,
+        page: index + 1,
+      }));
+    },
+    [setPagination]
+  );
 
-            return filter;
-          },
-          { name: null, list_id: null, created_by: null }
-        );
-      setFilters(formattedFilter);
-    }, []);
+  return (
+    <>
+      <DetectionEngineHeaderPage
+        title={i18n.ALL_EXCEPTIONS}
+        subtitle={i18n.ALL_EXCEPTIONS_DESCRIPTION}
+        subtitle2={timelines.getLastUpdated({ showUpdating: loading, updatedAt: lastUpdated })}
+      />
+      <Panel loading={!initLoading && loadingTableInfo} data-test-subj="allExceptionListsPanel">
+        <>
+          {loadingTableInfo && (
+            <EuiProgress
+              data-test-subj="loadingRulesInfoProgress"
+              size="xs"
+              position="absolute"
+              color="accent"
+            />
+          )}
+          {!initLoading && <ExceptionsSearchBar onSearch={handleSearch} />}
+          <EuiSpacer size="m" />
 
-    const paginationMemo = useMemo(
-      () => ({
-        pageIndex: pagination.page - 1,
-        pageSize: pagination.perPage,
-        totalItemCount: pagination.total,
-        pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
-      }),
-      [pagination]
-    );
+          {loadingTableInfo && !initLoading && !showReferenceErrorModal && (
+            <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
+          )}
 
-    const handleOnDownload = useCallback(() => {
-      setExportDownload({});
-    }, []);
-
-    const tableItems = (data ?? []).map((item) => ({
-      ...item,
-      isDeleting: deletingListIds.includes(item.id),
-      isExporting: exportingListIds.includes(item.id),
-    }));
-
-    return (
-      <>
-        <AutoDownload
-          blob={exportDownload.blob}
-          name={`${exportDownload.name}.ndjson`}
-          onDownload={handleOnDownload}
-        />
-        <Panel loading={!initLoading && loadingTableInfo} data-test-subj="allExceptionListsPanel">
-          <>
-            {loadingTableInfo && (
-              <EuiProgress
-                data-test-subj="loadingRulesInfoProgress"
-                size="xs"
-                position="absolute"
-                color="accent"
+          {initLoading ? (
+            <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
+          ) : (
+            <>
+              <AllRulesUtilityBar
+                showBulkActions={false}
+                canBulkEdit={hasPermissions}
+                paginationTotal={exceptionListsWithRuleRefs.length ?? 0}
+                numberSelectedItems={0}
+                onRefresh={handleRefresh}
               />
-            )}
-            <HeaderSection
-              split
-              title={i18n.ALL_EXCEPTIONS}
-              subtitle={<LastUpdatedAt showUpdating={loading} updatedAt={lastUpdated} />}
-            >
-              <EuiFieldSearch
-                data-test-subj="exceptionsHeaderSearch"
-                aria-label={i18n.EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER}
-                placeholder={i18n.EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER}
-                onSearch={handleSearch}
-                disabled={initLoading}
-                incremental={false}
-                fullWidth
+              <EuiBasicTable<ExceptionsTableItem>
+                data-test-subj="exceptions-table"
+                columns={exceptionsColumns}
+                isSelectable={hasPermissions}
+                itemId="id"
+                items={tableItems}
+                noItemsMessage={emptyPrompt}
+                onChange={handlePaginationChange}
+                pagination={paginationMemo}
               />
-            </HeaderSection>
-
-            {loadingTableInfo && !initLoading && (
-              <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
-            )}
-            {initLoading ? (
-              <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
-            ) : (
-              <>
-                <AllRulesUtilityBar
-                  showBulkActions={false}
-                  userHasNoPermissions={hasNoPermissions}
-                  paginationTotal={data.length ?? 0}
-                  numberSelectedItems={0}
-                  onRefresh={handleRefresh}
-                />
-                <MyEuiBasicTable
-                  data-test-subj="exceptions-table"
-                  columns={exceptionsColumns}
-                  isSelectable={!hasNoPermissions ?? false}
-                  itemId="id"
-                  items={tableItems}
-                  noItemsMessage={emptyPrompt}
-                  onChange={() => {}}
-                  pagination={paginationMemo}
-                />
-              </>
-            )}
-          </>
-        </Panel>
-      </>
-    );
-  }
-);
+            </>
+          )}
+        </>
+      </Panel>
+      <AutoDownload
+        blob={exportDownload.blob}
+        name={`${exportDownload.name}.ndjson`}
+        onDownload={handleOnDownload}
+      />
+      <ReferenceErrorModal
+        cancelText={i18n.REFERENCE_MODAL_CANCEL_BUTTON}
+        confirmText={i18n.REFERENCE_MODAL_CONFIRM_BUTTON}
+        contentText={referenceModalState.contentText}
+        onCancel={handleCloseReferenceErrorModal}
+        onClose={handleCloseReferenceErrorModal}
+        onConfirm={handleReferenceDelete}
+        references={referenceModalState.rulesReferences}
+        showModal={showReferenceErrorModal}
+        titleText={i18n.REFERENCE_MODAL_TITLE}
+      />
+    </>
+  );
+});
 
 ExceptionListsTable.displayName = 'ExceptionListsTable';

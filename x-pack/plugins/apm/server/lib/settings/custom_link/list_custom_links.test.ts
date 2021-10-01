@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { listCustomLinks } from './list_custom_links';
@@ -21,7 +22,7 @@ describe('List Custom Links', () => {
   it('fetches all custom links', async () => {
     mock = await inspectSearchParams((setup) =>
       listCustomLinks({
-        setup: (setup as unknown) as Setup,
+        setup: setup as unknown as Setup,
       })
     );
 
@@ -36,7 +37,7 @@ describe('List Custom Links', () => {
     mock = await inspectSearchParams((setup) =>
       listCustomLinks({
         filters,
-        setup: (setup as unknown) as Setup,
+        setup: setup as unknown as Setup,
       })
     );
 

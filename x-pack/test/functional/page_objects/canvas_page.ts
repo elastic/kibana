@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -38,7 +39,7 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
      * to load the workpad. Resolves once the workpad is in the DOM
      */
     async loadFirstWorkpad(workpadName: string) {
-      const elem = await testSubjects.find('canvasWorkpadLoaderWorkpad');
+      const elem = await testSubjects.find('canvasWorkpadTableWorkpad');
       const text = await elem.getVisibleText();
       expect(text).to.be(workpadName);
       await elem.click();

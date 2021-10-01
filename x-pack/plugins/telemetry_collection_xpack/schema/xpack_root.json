@@ -1,0 +1,54 @@
+{
+  "properties": {
+    "license": {
+      "properties": {
+        "uid": {
+          "type": "keyword"
+        },
+        "hkey": {
+          "type": "long"
+        },
+        "issue_date": {
+          "type": "date"
+        },
+        "expiry_date": {
+          "type": "date"
+        },
+        "expiry_date_in_millis": {
+          "type": "long"
+        },
+        "issue_date_in_millis": {
+          "type": "long"
+        },
+        "start_date_in_millis": {
+          "type": "long"
+        },
+        "issued_to": {
+          "type": "keyword"
+        },
+        "issuer": {
+          "type": "keyword"
+        },
+        "status": {
+          "type": "keyword"
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "max_nodes": {
+          "type": "long"
+        },
+        "max_resource_units": {
+          "type": "long"
+        }
+      }
+    },
+    "stack_stats": {
+      "properties": {
+        "xpack": {
+          "type": "pass_through"
+        }
+      }
+    }
+  }
+}

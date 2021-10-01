@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ActionsConfigurationUtilities } from './actions_config';
@@ -14,6 +15,16 @@ const createActionsConfigMock = () => {
     ensureHostnameAllowed: jest.fn().mockReturnValue({}),
     ensureUriAllowed: jest.fn().mockReturnValue({}),
     ensureActionTypeEnabled: jest.fn().mockReturnValue({}),
+    getSSLSettings: jest.fn().mockReturnValue({
+      verificationMode: 'full',
+    }),
+    getProxySettings: jest.fn().mockReturnValue(undefined),
+    getResponseSettings: jest.fn().mockReturnValue({
+      maxContentLength: 1000000,
+      timeout: 360000,
+    }),
+    getCustomHostSettings: jest.fn().mockReturnValue(undefined),
+    getMicrosoftGraphApiUrl: jest.fn().mockReturnValue(undefined),
   };
   return mocked;
 };

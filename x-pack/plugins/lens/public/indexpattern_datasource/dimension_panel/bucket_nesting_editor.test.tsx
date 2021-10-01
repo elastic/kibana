@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
@@ -98,8 +99,10 @@ describe('BucketNestingEditor', () => {
       />
     );
 
-    const nestingSwitch = component.find('[data-test-subj="indexPattern-nesting-switch"]').first();
-    (nestingSwitch.prop('onChange') as () => {})();
+    component
+      .find('[data-test-subj="indexPattern-nesting-switch"] button')
+      .first()
+      .simulate('click');
 
     expect(setColumns).toHaveBeenCalledTimes(1);
     expect(setColumns).toHaveBeenCalledWith(['a', 'b', 'c']);
@@ -116,10 +119,10 @@ describe('BucketNestingEditor', () => {
       },
     });
 
-    (component
-      .find('[data-test-subj="indexPattern-nesting-switch"]')
+    component
+      .find('[data-test-subj="indexPattern-nesting-switch"] button')
       .first()
-      .prop('onChange') as () => {})();
+      .simulate('click');
 
     expect(setColumns).toHaveBeenCalledTimes(2);
     expect(setColumns).toHaveBeenLastCalledWith(['b', 'a', 'c']);
@@ -133,7 +136,7 @@ describe('BucketNestingEditor', () => {
         layer={{
           columnOrder: ['a', 'b', 'c'],
           columns: {
-            a: mockCol({ operationType: 'avg', isBucketed: false }),
+            a: mockCol({ operationType: 'average', isBucketed: false }),
             b: mockCol({ operationType: 'max', isBucketed: false }),
             c: mockCol({ operationType: 'min', isBucketed: false }),
           },
@@ -209,8 +212,8 @@ describe('BucketNestingEditor', () => {
       />
     );
 
-    const control = component.find('[data-test-subj="indexPattern-nesting-select"]').first();
-    (control.prop('onChange') as (e: unknown) => {})({
+    const control = component.find('[data-test-subj="indexPattern-nesting-select"] select').first();
+    control.simulate('change', {
       target: { value: 'b' },
     });
 
@@ -236,10 +239,8 @@ describe('BucketNestingEditor', () => {
       />
     );
 
-    const control = component.find('[data-test-subj="indexPattern-nesting-select"]').first();
-    (control.prop('onChange') as (e: unknown) => {})({
-      target: { value: '' },
-    });
+    const control = component.find('[data-test-subj="indexPattern-nesting-select"] select').first();
+    control.simulate('change', { target: { value: '' } });
 
     expect(setColumns).toHaveBeenCalledWith(['a', 'c', 'b']);
   });
@@ -263,8 +264,8 @@ describe('BucketNestingEditor', () => {
       />
     );
 
-    const control = component.find('[data-test-subj="indexPattern-nesting-select"]').first();
-    (control.prop('onChange') as (e: unknown) => {})({
+    const control = component.find('[data-test-subj="indexPattern-nesting-select"] select').first();
+    control.simulate('change', {
       target: { value: '' },
     });
 

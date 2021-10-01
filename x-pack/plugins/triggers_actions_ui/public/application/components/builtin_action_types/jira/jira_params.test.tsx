@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { mount } from 'enzyme';
 import JiraParamsFields from './jira_params';
@@ -48,7 +50,7 @@ const defaultProps = {
   actionConnector: connector,
   actionParams,
   editAction,
-  errors: { summary: [] },
+  errors: { 'subActionParams.incident.summary': [] },
   index: 0,
   messageVariables: [],
 };
@@ -83,6 +85,14 @@ describe('JiraParamsFields renders', () => {
         ],
         defaultValue: { name: 'Medium', id: '3' },
       },
+    },
+  };
+  const useGetFieldsByIssueTypeResponseNoPriority = {
+    ...useGetFieldsByIssueTypeResponse,
+    fields: {
+      summary: { allowedValues: [], defaultValue: {} },
+      labels: { allowedValues: [], defaultValue: {} },
+      description: { allowedValues: [], defaultValue: {} },
     },
   };
 
@@ -244,7 +254,7 @@ describe('JiraParamsFields renders', () => {
   test('If summary has errors, form row is invalid', () => {
     const newProps = {
       ...defaultProps,
-      errors: { summary: ['error'] },
+      errors: { 'subActionParams.incident.summary': ['error'] },
     };
     const wrapper = mount(<JiraParamsFields {...newProps} />);
     const summary = wrapper.find('[data-test-subj="summary-row"]').first();
@@ -327,17 +337,21 @@ describe('JiraParamsFields renders', () => {
       const wrapper = mount(<JiraParamsFields {...newProps} />);
       const parent = wrapper.find('[data-test-subj="parent-search"]');
 
-      ((parent.props() as unknown) as {
-        onChange: (val: string) => void;
-      }).onChange('Cool');
+      (
+        parent.props() as unknown as {
+          onChange: (val: string) => void;
+        }
+      ).onChange('Cool');
       expect(editAction.mock.calls[1][1].incident.parent).toEqual('Cool');
     });
     test('Label update triggers editAction', () => {
       const wrapper = mount(<JiraParamsFields {...defaultProps} />);
       const labels = wrapper.find('[data-test-subj="labelsComboBox"]');
-      ((labels.at(0).props() as unknown) as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }).onChange([{ label: 'Cool' }]);
+      (
+        labels.at(0).props() as unknown as {
+          onChange: (a: EuiComboBoxOptionOption[]) => void;
+        }
+      ).onChange([{ label: 'Cool' }]);
       expect(editAction.mock.calls[1][1].incident.labels).toEqual(['Cool']);
     });
     test('Label undefined update triggers editAction', () => {
@@ -357,18 +371,22 @@ describe('JiraParamsFields renders', () => {
       const wrapper = mount(<JiraParamsFields {...newProps} />);
       const labels = wrapper.find('[data-test-subj="labelsComboBox"]');
 
-      ((labels.at(0).props() as unknown) as {
-        onBlur: () => void;
-      }).onBlur();
+      (
+        labels.at(0).props() as unknown as {
+          onBlur: () => void;
+        }
+      ).onBlur();
       expect(editAction.mock.calls[1][1].incident.labels).toEqual([]);
     });
     test('New label creation triggers editAction', () => {
       const wrapper = mount(<JiraParamsFields {...defaultProps} />);
       const labels = wrapper.find('[data-test-subj="labelsComboBox"]');
       const searchValue = 'neato';
-      ((labels.at(0).props() as unknown) as {
-        onCreateOption: (searchValue: string) => void;
-      }).onCreateOption(searchValue);
+      (
+        labels.at(0).props() as unknown as {
+          onCreateOption: (searchValue: string) => void;
+        }
+      ).onCreateOption(searchValue);
       expect(editAction.mock.calls[1][1].incident.labels).toEqual(['kibana', searchValue]);
     });
     test('A comment triggers editAction', () => {
@@ -385,6 +403,23 @@ describe('JiraParamsFields renders', () => {
       expect(editAction.mock.calls[0][1].comments.length).toEqual(0);
       expect(comments.simulate('change', emptyComment));
       expect(editAction.mock.calls.length).toEqual(1);
+    });
+    test('Clears any left behind priority when issueType changes and hasPriority becomes false', () => {
+      useGetFieldsByIssueTypeMock
+        .mockReturnValueOnce(useGetFieldsByIssueTypeResponse)
+        .mockReturnValue(useGetFieldsByIssueTypeResponseNoPriority);
+      const wrapper = mount(<JiraParamsFields {...defaultProps} />);
+      wrapper.setProps({
+        ...{
+          ...defaultProps,
+          actionParams: {
+            ...defaultProps.actionParams,
+            incident: { issueType: '10001' },
+          },
+        },
+      });
+      expect(editAction.mock.calls[0][1].incident.priority).toEqual('Medium');
+      expect(editAction.mock.calls[1][1].incident.priority).toEqual(null);
     });
   });
 });

@@ -1,0 +1,803 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DonutChart component passes correct props without errors for valid props 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  responsive={false}
+>
+  <EuiFlexItem
+    grow={false}
+    style={
+      Object {
+        "position": "relative",
+      }
+    }
+  >
+    <Chart
+      aria-label="Pie chart showing the current status. 32 of 127 monitors are down."
+      baseTheme={
+        Object {
+          "arcSeriesStyle": Object {
+            "arc": Object {
+              "opacity": 1,
+              "stroke": "black",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
+          "areaSeriesStyle": Object {
+            "area": Object {
+              "opacity": 0.3,
+              "visible": true,
+            },
+            "line": Object {
+              "opacity": 1,
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "point": Object {
+              "fill": "white",
+              "opacity": 1,
+              "radius": 2,
+              "strokeWidth": 1,
+              "visible": false,
+            },
+          },
+          "axes": Object {
+            "axisLine": Object {
+              "stroke": "#eaeaea",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "axisPanelTitle": Object {
+              "fill": "#333",
+              "fontFamily": "sans-serif",
+              "fontSize": 10,
+              "padding": Object {
+                "inner": 8,
+                "outer": 0,
+              },
+              "visible": true,
+            },
+            "axisTitle": Object {
+              "fill": "#333",
+              "fontFamily": "sans-serif",
+              "fontSize": 12,
+              "padding": Object {
+                "inner": 8,
+                "outer": 0,
+              },
+              "visible": true,
+            },
+            "gridLine": Object {
+              "horizontal": Object {
+                "dash": Array [
+                  0,
+                  0,
+                ],
+                "opacity": 1,
+                "stroke": "#D3DAE6",
+                "strokeWidth": 1,
+                "visible": false,
+              },
+              "vertical": Object {
+                "dash": Array [
+                  0,
+                  0,
+                ],
+                "opacity": 1,
+                "stroke": "#D3DAE6",
+                "strokeWidth": 1,
+                "visible": false,
+              },
+            },
+            "tickLabel": Object {
+              "alignment": Object {
+                "horizontal": "near",
+                "vertical": "near",
+              },
+              "fill": "#777",
+              "fontFamily": "sans-serif",
+              "fontSize": 10,
+              "fontStyle": "normal",
+              "offset": Object {
+                "reference": "local",
+                "x": 0,
+                "y": 0,
+              },
+              "padding": 0,
+              "rotation": 0,
+              "visible": true,
+            },
+            "tickLine": Object {
+              "padding": 10,
+              "size": 10,
+              "stroke": "#eaeaea",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
+          "background": Object {
+            "color": "transparent",
+          },
+          "barSeriesStyle": Object {
+            "displayValue": Object {
+              "fill": "#777",
+              "fontFamily": "sans-serif",
+              "fontSize": 8,
+              "fontStyle": "normal",
+              "offsetX": 0,
+              "offsetY": 0,
+              "padding": 0,
+            },
+            "rect": Object {
+              "opacity": 1,
+            },
+            "rectBorder": Object {
+              "strokeWidth": 1,
+              "visible": false,
+            },
+          },
+          "bubbleSeriesStyle": Object {
+            "point": Object {
+              "fill": "white",
+              "opacity": 1,
+              "radius": 2,
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
+          "chartMargins": Object {
+            "bottom": 10,
+            "left": 10,
+            "right": 10,
+            "top": 10,
+          },
+          "chartPaddings": Object {
+            "bottom": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+          },
+          "colors": Object {
+            "defaultVizColor": "red",
+            "vizColors": Array [
+              "#1EA593",
+              "#2B70F7",
+              "#CE0060",
+              "#38007E",
+              "#FCA5D3",
+              "#F37020",
+              "#E49E29",
+              "#B0916F",
+              "#7B000B",
+              "#34130C",
+            ],
+          },
+          "crosshair": Object {
+            "band": Object {
+              "fill": "#F5F5F5",
+              "visible": true,
+            },
+            "crossLine": Object {
+              "dash": Array [
+                5,
+                5,
+              ],
+              "stroke": "#98A2B3",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "line": Object {
+              "stroke": "#98A2B3",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
+          "goal": Object {
+            "majorCenterLabel": Object {
+              "fill": "black",
+              "fontFamily": "sans-serif",
+              "fontStyle": "normal",
+            },
+            "majorLabel": Object {
+              "fill": "black",
+              "fontFamily": "sans-serif",
+              "fontStyle": "normal",
+            },
+            "maxFontSize": 64,
+            "minFontSize": 8,
+            "minorCenterLabel": Object {
+              "fill": "black",
+              "fontFamily": "sans-serif",
+              "fontStyle": "normal",
+            },
+            "minorLabel": Object {
+              "fill": "black",
+              "fontFamily": "sans-serif",
+              "fontStyle": "normal",
+            },
+            "progressLine": Object {
+              "stroke": "black",
+            },
+            "targetLine": Object {
+              "stroke": "black",
+            },
+            "tickLabel": Object {
+              "fill": "black",
+              "fontFamily": "sans-serif",
+              "fontStyle": "normal",
+            },
+            "tickLine": Object {
+              "stroke": "darkgrey",
+            },
+          },
+          "legend": Object {
+            "horizontalHeight": 64,
+            "labelOptions": Object {
+              "maxLines": 1,
+            },
+            "margin": 0,
+            "spacingBuffer": 10,
+            "verticalWidth": 200,
+          },
+          "lineSeriesStyle": Object {
+            "line": Object {
+              "opacity": 1,
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "point": Object {
+              "fill": "white",
+              "opacity": 1,
+              "radius": 2,
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
+          "scales": Object {
+            "barsPadding": 0.25,
+            "histogramPadding": 0.05,
+          },
+          "sharedStyle": Object {
+            "default": Object {
+              "opacity": 1,
+            },
+            "highlighted": Object {
+              "opacity": 1,
+            },
+            "unhighlighted": Object {
+              "opacity": 0.25,
+            },
+          },
+        }
+      }
+      renderer="canvas"
+      size={125}
+      theme={
+        Object {
+          "areaSeriesStyle": Object {
+            "area": Object {
+              "opacity": 0.3,
+            },
+            "line": Object {
+              "strokeWidth": 2,
+            },
+            "point": Object {
+              "fill": "rgba(255, 255, 255, 1)",
+              "radius": 3,
+              "strokeWidth": 2,
+              "visible": false,
+            },
+          },
+          "axes": Object {
+            "axisLine": Object {
+              "stroke": "rgba(238, 240, 243, 1)",
+            },
+            "axisTitle": Object {
+              "fill": "rgba(52, 55, 65, 1)",
+              "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+              "fontSize": 12,
+              "padding": Object {
+                "inner": 10,
+                "outer": 0,
+              },
+            },
+            "gridLine": Object {
+              "horizontal": Object {
+                "dash": Array [
+                  0,
+                  0,
+                ],
+                "opacity": 1,
+                "stroke": "rgba(238, 240, 243, 1)",
+                "strokeWidth": 1,
+                "visible": true,
+              },
+              "vertical": Object {
+                "dash": Array [
+                  4,
+                  4,
+                ],
+                "opacity": 1,
+                "stroke": "rgba(238, 240, 243, 1)",
+                "strokeWidth": 1,
+                "visible": true,
+              },
+            },
+            "tickLabel": Object {
+              "fill": "rgba(106, 113, 125, 1)",
+              "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+              "fontSize": 10,
+              "padding": Object {
+                "inner": 10,
+                "outer": 8,
+              },
+            },
+            "tickLine": Object {
+              "stroke": "rgba(238, 240, 243, 1)",
+              "strokeWidth": 1,
+              "visible": false,
+            },
+          },
+          "background": Object {
+            "color": "rgba(255, 255, 255, 1)",
+          },
+          "barSeriesStyle": Object {
+            "displayValue": Object {
+              "fill": "rgba(106, 113, 125, 1)",
+              "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+              "fontSize": 8,
+            },
+          },
+          "chartMargins": Object {
+            "bottom": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+          },
+          "colors": Object {
+            "defaultVizColor": "#6092C0",
+            "vizColors": Array [
+              "#54B399",
+              "#6092C0",
+              "#9170B8",
+              "#CA8EAE",
+              "#D36086",
+              "#E7664C",
+              "#AA6556",
+              "#DA8B45",
+              "#B9A888",
+              "#D6BF57",
+            ],
+          },
+          "crosshair": Object {
+            "band": Object {
+              "fill": "rgba(245, 247, 250, 1)",
+            },
+            "crossLine": Object {
+              "dash": Array [
+                4,
+                4,
+              ],
+              "stroke": "rgba(105, 112, 125, 1)",
+              "strokeWidth": 1,
+            },
+            "line": Object {
+              "dash": Array [
+                4,
+                4,
+              ],
+              "stroke": "rgba(105, 112, 125, 1)",
+              "strokeWidth": 1,
+            },
+          },
+          "goal": Object {
+            "majorCenterLabel": Object {
+              "fill": "rgba(52, 55, 65, 1)",
+              "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            },
+            "majorLabel": Object {
+              "fill": "rgba(52, 55, 65, 1)",
+              "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            },
+            "minorCenterLabel": Object {
+              "fill": "rgba(106, 113, 125, 1)",
+              "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            },
+            "minorLabel": Object {
+              "fill": "rgba(106, 113, 125, 1)",
+              "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            },
+            "progressLine": Object {
+              "stroke": "rgba(52, 55, 65, 1)",
+            },
+            "targetLine": Object {
+              "stroke": "rgba(52, 55, 65, 1)",
+            },
+            "tickLabel": Object {
+              "fill": "rgba(106, 113, 125, 1)",
+              "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            },
+            "tickLine": Object {
+              "stroke": "rgba(152, 162, 179, 1)",
+            },
+          },
+          "lineSeriesStyle": Object {
+            "line": Object {
+              "strokeWidth": 2,
+            },
+            "point": Object {
+              "fill": "rgba(255, 255, 255, 1)",
+              "radius": 3,
+              "strokeWidth": 2,
+            },
+          },
+          "scales": Object {
+            "barsPadding": 0.25,
+            "histogramPadding": 0.05,
+          },
+        }
+      }
+    >
+      <Connect(SpecInstance) />
+      <Connect(SpecInstance)
+        config={
+          Object {
+            "circlePadding": 4,
+            "emptySizeRatio": 0.4,
+            "idealFontSizeJump": 1.1,
+            "linkLabel": Object {
+              "maximumSection": Infinity,
+            },
+            "margin": Object {
+              "bottom": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+            },
+            "outerSizeRatio": 0.9,
+            "partitionLayout": "sunburst",
+          }
+        }
+        data={
+          Array [
+            Object {
+              "label": "Down",
+              "value": 32,
+            },
+            Object {
+              "label": "Up",
+              "value": 95,
+            },
+          ]
+        }
+        id="spec_1"
+        layers={
+          Array [
+            Object {
+              "groupByRollup": [Function],
+              "nodeLabel": [Function],
+              "shape": Object {
+                "fillColor": [Function],
+              },
+            },
+          ]
+        }
+        valueAccessor={[Function]}
+      />
+    </Chart>
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <DonutChartLegend
+      down={32}
+      up={95}
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`DonutChart component renders a donut chart 1`] = `
+.c1.c1 {
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+.c2 {
+  text-align: right;
+}
+
+.c0 {
+  max-width: 150px;
+  min-width: 100px;
+}
+
+@media (max-width:767px) {
+  .c0 {
+    min-width: 0px;
+    max-width: 100px;
+  }
+}
+
+<div
+  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+>
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
+    style="position:relative"
+  >
+    <div
+      class="echChart"
+      style="width:125px;height:125px"
+    >
+      <div
+        class="echChartBackground"
+        style="background-color:transparent"
+      />
+      <div
+        class="echChartStatus"
+        data-ech-render-complete="false"
+        data-ech-render-count="0"
+      />
+      <div
+        class="echChartResizer"
+      />
+      <div
+        class="echContainer"
+      />
+    </div>
+  </div>
+  <div
+    class="euiFlexItem"
+  >
+    <div
+      class="c0"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+      >
+        <span
+          class="euiFlexItem euiFlexItem--flexGrowZero c1"
+        >
+          <div
+            class="euiHealth euiHealth--textSizeS"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <span
+                  color="#bd271e"
+                  data-euiicon-type="dot"
+                />
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              />
+            </div>
+          </div>
+        </span>
+        <span
+          class="euiFlexItem euiFlexItem--flexGrowZero c1"
+          data-test-subj="xpack.uptime.snapshot.donutChart.down.label"
+        >
+          Down
+        </span>
+        <span
+          class="euiFlexItem c2"
+          data-test-subj="xpack.uptime.snapshot.donutChart.down"
+        >
+          32
+        </span>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+      >
+        <span
+          class="euiFlexItem euiFlexItem--flexGrowZero c1"
+        >
+          <div
+            class="euiHealth euiHealth--textSizeS"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <span
+                  color="#d3dae6"
+                  data-euiicon-type="dot"
+                />
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              />
+            </div>
+          </div>
+        </span>
+        <span
+          class="euiFlexItem euiFlexItem--flexGrowZero c1"
+          data-test-subj="xpack.uptime.snapshot.donutChart.up.label"
+        >
+          Up
+        </span>
+        <span
+          class="euiFlexItem c2"
+          data-test-subj="xpack.uptime.snapshot.donutChart.up"
+        >
+          95
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`DonutChart component renders a green check when all monitors are up 1`] = `
+.c2.c2 {
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+.c3 {
+  text-align: right;
+}
+
+.c1 {
+  max-width: 150px;
+  min-width: 100px;
+}
+
+.c0 {
+  height: 42px;
+  width: 42px;
+  color: #017d73;
+  top: 51px;
+  left: 51px;
+  position: absolute;
+}
+
+@media (max-width:767px) {
+  .c1 {
+    min-width: 0px;
+    max-width: 100px;
+  }
+}
+
+<div
+  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+>
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
+    style="position:relative"
+  >
+    <div
+      class="echChart"
+      style="width:125px;height:125px"
+    >
+      <div
+        class="echChartBackground"
+        style="background-color:transparent"
+      />
+      <div
+        class="echChartStatus"
+        data-ech-render-complete="false"
+        data-ech-render-count="0"
+      />
+      <div
+        class="echChartResizer"
+      />
+      <div
+        class="echContainer"
+      />
+    </div>
+    <span
+      class="c0 greenCheckIcon"
+      data-euiicon-type="checkInCircleFilled"
+    />
+  </div>
+  <div
+    class="euiFlexItem"
+  >
+    <div
+      class="c1"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+      >
+        <span
+          class="euiFlexItem euiFlexItem--flexGrowZero c2"
+        >
+          <div
+            class="euiHealth euiHealth--textSizeS"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <span
+                  color="#bd271e"
+                  data-euiicon-type="dot"
+                />
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              />
+            </div>
+          </div>
+        </span>
+        <span
+          class="euiFlexItem euiFlexItem--flexGrowZero c2"
+          data-test-subj="xpack.uptime.snapshot.donutChart.down.label"
+        >
+          Down
+        </span>
+        <span
+          class="euiFlexItem c3"
+          data-test-subj="xpack.uptime.snapshot.donutChart.down"
+        >
+          0
+        </span>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+      >
+        <span
+          class="euiFlexItem euiFlexItem--flexGrowZero c2"
+        >
+          <div
+            class="euiHealth euiHealth--textSizeS"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <span
+                  color="#d3dae6"
+                  data-euiicon-type="dot"
+                />
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              />
+            </div>
+          </div>
+        </span>
+        <span
+          class="euiFlexItem euiFlexItem--flexGrowZero c2"
+          data-test-subj="xpack.uptime.snapshot.donutChart.up.label"
+        >
+          Up
+        </span>
+        <span
+          class="euiFlexItem c3"
+          data-test-subj="xpack.uptime.snapshot.donutChart.up"
+        >
+          95
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;

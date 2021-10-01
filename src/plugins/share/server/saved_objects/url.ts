@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { SavedObjectsType } from 'kibana/server';
 
 export const url: SavedObjectsType = {
@@ -29,9 +19,23 @@ export const url: SavedObjectsType = {
     getTitle(obj) {
       return `/goto/${encodeURIComponent(obj.id)}`;
     },
+    getInAppUrl(obj) {
+      return {
+        path: '/goto/' + encodeURIComponent(obj.id),
+        uiCapabilitiesPath: '',
+      };
+    },
   },
   mappings: {
     properties: {
+      slug: {
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
+      },
       accessCount: {
         type: 'long',
       },
@@ -41,6 +45,9 @@ export const url: SavedObjectsType = {
       createDate: {
         type: 'date',
       },
+      // Legacy field - contains already pre-formatted final URL.
+      // This is here to support old saved objects that have this field.
+      // TODO: Remove this field and execute a migration to the new format.
       url: {
         type: 'text',
         fields: {
@@ -49,6 +56,11 @@ export const url: SavedObjectsType = {
             ignore_above: 2048,
           },
         },
+      },
+      // Information needed to load and execute a locator.
+      locatorJSON: {
+        type: 'text',
+        index: false,
       },
     },
   },

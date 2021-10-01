@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { validate } from '../../../../../common/validate';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import {
   patchRulesBulkSchema,
@@ -12,7 +13,7 @@ import {
 } from '../../../../../common/detection_engine/schemas/request/patch_rules_bulk_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
-import { IRouter } from '../../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
@@ -21,12 +22,14 @@ import { transformBulkError, buildSiemResponse } from '../utils';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
 import { patchRules } from '../../rules/patch_rules';
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { readRules } from '../../rules/read_rules';
 import { PartialFilter } from '../../types';
 
-export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
+export const patchRulesBulkRoute = (
+  router: SecuritySolutionPluginRouter,
+  ml: SetupPlugins['ml'],
+  isRuleRegistryEnabled: boolean
+) => {
   router.patch(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
@@ -42,10 +45,11 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
-      const alertsClient = context.alerting?.getAlertsClient();
+      const rulesClient = context.alerting?.getRulesClient();
+      const ruleStatusClient = context.securitySolution.getExecutionLogClient();
       const savedObjectsClient = context.core.savedObjects.client;
 
-      if (!alertsClient) {
+      if (!rulesClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
@@ -55,7 +59,6 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
         request,
         savedObjectsClient,
       });
-      const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
           const {
@@ -119,7 +122,12 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
               throwHttpError(await mlAuthz.validateRuleType(type));
             }
 
-            const existingRule = await readRules({ alertsClient, ruleId, id });
+            const existingRule = await readRules({
+              isRuleRegistryEnabled,
+              rulesClient,
+              ruleId,
+              id,
+            });
             if (existingRule?.params.type) {
               // reject an unauthorized modification of an ML rule
               throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
@@ -127,7 +135,7 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
 
             const rule = await patchRules({
               rule: existingRule,
-              alertsClient,
+              rulesClient,
               author,
               buildingBlockType,
               description,
@@ -140,7 +148,8 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
               license,
               outputIndex,
               savedId,
-              savedObjectsClient,
+              spaceId: context.securitySolution.getSpaceId(),
+              ruleStatusClient,
               timelineId,
               timelineTitle,
               meta,
@@ -164,6 +173,7 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
               threatQuery,
               threatMapping,
               threatLanguage,
+              throttle,
               concurrentSearches,
               itemsPerSearch,
               timestampOverride,
@@ -176,23 +186,12 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
               exceptionsList,
             });
             if (rule != null && rule.enabled != null && rule.name != null) {
-              const ruleActions = await updateRulesNotifications({
-                ruleAlertId: rule.id,
-                alertsClient,
-                savedObjectsClient,
-                enabled: rule.enabled,
-                actions,
-                throttle,
-                name: rule.name,
-              });
               const ruleStatuses = await ruleStatusClient.find({
-                perPage: 1,
-                sortField: 'statusDate',
-                sortOrder: 'desc',
-                search: rule.id,
-                searchFields: ['alertId'],
+                logsCount: 1,
+                ruleId: rule.id,
+                spaceId: context.securitySolution.getSpaceId(),
               });
-              return transformValidateBulkError(rule.id, rule, ruleActions, ruleStatuses);
+              return transformValidateBulkError(rule.id, rule, ruleStatuses, isRuleRegistryEnabled);
             } else {
               return getIdBulkError({ id, ruleId });
             }

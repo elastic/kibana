@@ -1,12 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { memo, useState, useEffect } from 'react';
+
+import React, { memo, useState, useEffect, useCallback } from 'react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import { useStartServices } from '../../../../../hooks';
+
 import { AGENT_LOG_INDEX_PATTERN, DATASET_FIELD, AGENT_DATASET } from './constants';
 
 export const DatasetFilter: React.FunctionComponent<{
@@ -17,6 +21,9 @@ export const DatasetFilter: React.FunctionComponent<{
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [datasetValues, setDatasetValues] = useState<string[]>([AGENT_DATASET]);
+
+  const togglePopover = useCallback(() => setIsOpen((prevIsOpen) => !prevIsOpen), [setIsOpen]);
+  const closePopover = useCallback(() => setIsOpen(false), [setIsOpen]);
 
   useEffect(() => {
     const fetchValues = async () => {
@@ -30,7 +37,7 @@ export const DatasetFilter: React.FunctionComponent<{
           field: DATASET_FIELD,
           query: '',
         });
-        setDatasetValues(values.sort());
+        if (values.length > 0) setDatasetValues(values.sort());
       } catch (e) {
         setDatasetValues([AGENT_DATASET]);
       }
@@ -44,7 +51,7 @@ export const DatasetFilter: React.FunctionComponent<{
       button={
         <EuiFilterButton
           iconType="arrowDown"
-          onClick={() => setIsOpen(true)}
+          onClick={togglePopover}
           isSelected={isOpen}
           isLoading={isLoading}
           numFilters={datasetValues.length}
@@ -57,7 +64,7 @@ export const DatasetFilter: React.FunctionComponent<{
         </EuiFilterButton>
       }
       isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
+      closePopover={closePopover}
       panelPaddingSize="none"
     >
       {datasetValues.map((dataset) => (

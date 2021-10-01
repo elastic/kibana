@@ -1,40 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { mockTelemetryActions } from '../../../__mocks__';
-import './__mocks__/overview_logic.mock';
+import { mockTelemetryActions } from '../../../__mocks__/kea_logic';
 import { setMockValues } from './__mocks__';
+import './__mocks__/overview_logic.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { SOURCES_PATH, USERS_PATH } from '../../routes';
+import { ADD_SOURCE_PATH, USERS_AND_ROLES_PATH } from '../../routes';
 
-import { OnboardingSteps, OrgNameOnboarding } from './onboarding_steps';
 import { OnboardingCard } from './onboarding_card';
+import { OnboardingSteps, OrgNameOnboarding } from './onboarding_steps';
 
 const account = {
   id: '1',
   isAdmin: true,
-  canCreatePersonalSources: true,
+  canCreatePrivateSources: true,
   groups: [],
-  isCurated: false,
-  canCreateInvitations: true,
 };
 
 describe('OnboardingSteps', () => {
-  describe('Shared Sources', () => {
+  describe('Organizational Sources', () => {
     it('renders 0 sources state', () => {
-      setMockValues({ canCreateContentSources: true });
       const wrapper = shallow(<OnboardingSteps />);
 
-      expect(wrapper.find(OnboardingCard)).toHaveLength(1);
-      expect(wrapper.find(OnboardingCard).prop('actionPath')).toBe(SOURCES_PATH);
-      expect(wrapper.find(OnboardingCard).prop('description')).toBe(
-        'Add shared sources for your organization to start searching.'
+      expect(wrapper.find(OnboardingCard)).toHaveLength(2);
+      expect(wrapper.find(OnboardingCard).first().prop('actionPath')).toBe(ADD_SOURCE_PATH);
+      expect(wrapper.find(OnboardingCard).first().prop('description')).toBe(
+        'Add organizational sources for your organization to start searching.'
       );
     });
 
@@ -42,23 +41,15 @@ describe('OnboardingSteps', () => {
       setMockValues({ sourcesCount: 2, hasOrgSources: true });
       const wrapper = shallow(<OnboardingSteps />);
 
-      expect(wrapper.find(OnboardingCard).prop('description')).toEqual(
-        'You have added 2 shared sources. Happy searching.'
+      expect(wrapper.find(OnboardingCard).first().prop('description')).toEqual(
+        'You have added 2 organizational sources. Happy searching.'
       );
-    });
-
-    it('disables link when the user cannot create sources', () => {
-      setMockValues({ canCreateContentSources: false });
-      const wrapper = shallow(<OnboardingSteps />);
-
-      expect(wrapper.find(OnboardingCard).prop('actionPath')).toBe(undefined);
     });
   });
 
   describe('Users & Invitations', () => {
-    it('renders 0 users when not on federated auth', () => {
+    it('renders 0 users state', () => {
       setMockValues({
-        isFederatedAuth: false,
         account,
         accountsCount: 0,
         hasUsers: false,
@@ -66,7 +57,7 @@ describe('OnboardingSteps', () => {
       const wrapper = shallow(<OnboardingSteps />);
 
       expect(wrapper.find(OnboardingCard)).toHaveLength(2);
-      expect(wrapper.find(OnboardingCard).last().prop('actionPath')).toBe(USERS_PATH);
+      expect(wrapper.find(OnboardingCard).last().prop('actionPath')).toBe(USERS_AND_ROLES_PATH);
       expect(wrapper.find(OnboardingCard).last().prop('description')).toEqual(
         'Invite your colleagues into this organization to search with you.'
       );
@@ -74,7 +65,6 @@ describe('OnboardingSteps', () => {
 
     it('renders completed users state', () => {
       setMockValues({
-        isFederatedAuth: false,
         account,
         accountsCount: 1,
         hasUsers: true,
@@ -84,18 +74,6 @@ describe('OnboardingSteps', () => {
       expect(wrapper.find(OnboardingCard).last().prop('description')).toEqual(
         'Nice, you’ve invited colleagues to search with you.'
       );
-    });
-
-    it('disables link when the user cannot create invitations', () => {
-      setMockValues({
-        isFederatedAuth: false,
-        account: {
-          ...account,
-          canCreateInvitations: false,
-        },
-      });
-      const wrapper = shallow(<OnboardingSteps />);
-      expect(wrapper.find(OnboardingCard).last().prop('actionPath')).toBe(undefined);
     });
   });
 

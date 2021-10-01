@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { NotificationsStart, FatalErrorsSetup } from 'kibana/public';
@@ -31,9 +32,10 @@ export function setFatalErrors(newFatalErrors: FatalErrorsSetup) {
   fatalErrors = newFatalErrors;
 }
 
-export const [getUiStatsReporter, setUiStatsReporter] = createGetterSetter<
-  (type: UiCounterMetricType, eventNames: string | string[], count?: number) => void
->('uiMetric');
+export const [getUiStatsReporter, setUiStatsReporter] =
+  createGetterSetter<
+    (type: UiCounterMetricType, eventNames: string | string[], count?: number) => void
+  >('uiMetric');
 
 // default value if usageCollection is not available
 setUiStatsReporter(() => {});

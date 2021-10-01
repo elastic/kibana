@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { connect } from 'react-redux';
@@ -14,15 +15,13 @@ import {
   getFilters,
   getQuery,
   getQueryableUniqueIndexPatternIds,
-  getRefreshConfig,
   getTimeFilters,
   hasDirtyState,
 } from '../../../selectors/map_selectors';
-import { setQuery, setRefreshConfig, enableFullScreen, openMapSettings } from '../../../actions';
+import { setQuery, enableFullScreen, openMapSettings } from '../../../actions';
 import { FLYOUT_STATE } from '../../../reducers/ui';
 import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
 import { MapStoreState } from '../../../reducers/store';
-import { MapRefreshConfig } from '../../../../common/descriptor_types';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -32,7 +31,6 @@ function mapStateToProps(state: MapStoreState) {
     inspectorAdapters: getInspectorAdapters(state),
     nextIndexPatternIds: getQueryableUniqueIndexPatternIds(state),
     flyoutDisplay: getFlyoutDisplay(state),
-    refreshConfig: getRefreshConfig(state),
     filters: getFilters(state),
     query: getQuery(state),
     timeFilters: getTimeFilters(state),
@@ -41,16 +39,18 @@ function mapStateToProps(state: MapStoreState) {
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    dispatchSetQuery: ({
+    setQuery: ({
       forceRefresh,
       filters,
       query,
       timeFilters,
+      searchSessionId,
     }: {
       filters?: Filter[];
       query?: Query;
       timeFilters?: TimeRange;
       forceRefresh?: boolean;
+      searchSessionId?: string;
     }) => {
       dispatch(
         setQuery({
@@ -58,11 +58,10 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
           query,
           timeFilters,
           forceRefresh,
+          searchSessionId,
         })
       );
     },
-    setRefreshConfig: (refreshConfig: MapRefreshConfig) =>
-      dispatch(setRefreshConfig(refreshConfig)),
     enableFullScreen: () => dispatch(enableFullScreen()),
     openMapSettings: () => dispatch(openMapSettings()),
   };

@@ -1,26 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { coreMock } from '../../../core/public/mocks';
 import { testPlugin } from './tests/test_plugin';
 import { EmbeddableFactoryProvider } from './types';
 import { defaultEmbeddableFactoryProvider } from './lib';
-import { HelloWorldEmbeddable } from '../../../../examples/embeddable_examples/public';
+import { HelloWorldEmbeddable } from './tests/fixtures';
 
 test('can set custom embeddable factory provider', async () => {
   const coreSetup = coreMock.createSetup();
@@ -116,8 +106,34 @@ describe('embeddable factory', () => {
     my: 'state',
   } as any;
 
+  const containerEmbeddableFactoryId = 'CONTAINER';
+  const containerEmbeddableFactory = {
+    type: containerEmbeddableFactoryId,
+    create: jest.fn(),
+    getDisplayName: () => 'Container',
+    isContainer: true,
+    isEditable: () => Promise.resolve(true),
+    extract: jest.fn().mockImplementation((state) => ({ state, references: [] })),
+    inject: jest.fn().mockImplementation((state) => state),
+    telemetry: jest.fn().mockResolvedValue({}),
+    migrations: { '7.12.0': jest.fn().mockImplementation((state) => state) },
+  };
+
+  const containerState = {
+    id: containerEmbeddableFactoryId,
+    type: containerEmbeddableFactoryId,
+    some: 'state',
+    panels: [
+      {
+        ...embeddableState,
+      },
+    ],
+  } as any;
+
+  setup.registerEmbeddableFactory(embeddableFactoryId, embeddableFactory);
+  setup.registerEmbeddableFactory(containerEmbeddableFactoryId, containerEmbeddableFactory);
+
   test('cannot register embeddable factory with the same ID', async () => {
-    setup.registerEmbeddableFactory(embeddableFactoryId, embeddableFactory);
     expect(() =>
       setup.registerEmbeddableFactory(embeddableFactoryId, embeddableFactory)
     ).toThrowError(
@@ -141,7 +157,25 @@ describe('embeddable factory', () => {
   });
 
   test('embeddableFactory migrate function gets called when calling embeddable migrate', () => {
-    start.migrate(embeddableState, '7.11.0');
+    start.getAllMigrations!()['7.11.0']!(embeddableState);
+    expect(embeddableFactory.migrations['7.11.0']).toBeCalledWith(embeddableState);
+  });
+
+  test('panels inside container get automatically migrated when migrating conta1iner', () => {
+    start.getAllMigrations!()['7.11.0']!(containerState);
+    expect(embeddableFactory.migrations['7.11.0']).toBeCalledWith(embeddableState);
+  });
+
+  test('migrateToLatest returns list of all migrations', () => {
+    const migrations = start.getAllMigrations();
+    expect(migrations).toMatchSnapshot();
+  });
+
+  test('migrateToLatest calls correct migrate functions', () => {
+    start.migrateToLatest!({
+      state: embeddableState,
+      version: '7.11.0',
+    });
     expect(embeddableFactory.migrations['7.11.0']).toBeCalledWith(embeddableState);
   });
 });
@@ -166,8 +200,9 @@ describe('embeddable enhancements', () => {
     },
   } as any;
 
+  setup.registerEnhancement(embeddableEnhancement);
+
   test('cannot register embeddable enhancement with the same ID', async () => {
-    setup.registerEnhancement(embeddableEnhancement);
     expect(() => setup.registerEnhancement(embeddableEnhancement)).toThrowError(
       'enhancement with id test already exists in the registry'
     );
@@ -189,9 +224,17 @@ describe('embeddable enhancements', () => {
   });
 
   test('enhancement migrate function gets called when calling embeddable migrate', () => {
-    start.migrate(embeddableState, '7.11.0');
+    start.getAllMigrations!()['7.11.0']!(embeddableState);
     expect(embeddableEnhancement.migrations['7.11.0']).toBeCalledWith(
       embeddableState.enhancements.test
     );
+  });
+
+  test('doesnt fail if there is no migration function registered for specific version', () => {
+    expect(() => {
+      start.getAllMigrations!()['7.11.0']!(embeddableState);
+    }).not.toThrow();
+
+    expect(start.getAllMigrations!()['7.11.0']!(embeddableState)).toEqual(embeddableState);
   });
 });

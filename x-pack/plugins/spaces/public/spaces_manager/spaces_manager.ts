@@ -1,37 +1,54 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { Observable, BehaviorSubject } from 'rxjs';
-import { skipWhile } from 'rxjs/operators';
-import { HttpSetup } from 'src/core/public';
-import { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
-import { Space } from '../../common/model/space';
-import { GetAllSpacesPurpose, GetSpaceResult } from '../../common/model/types';
-import { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
 
-type SavedObject = Pick<SavedObjectsManagementRecord, 'type' | 'id'>;
-interface GetAllSpacesOptions {
-  purpose?: GetAllSpacesPurpose;
-  includeAuthorizedPurposes?: boolean;
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { skipWhile } from 'rxjs/operators';
+
+import type {
+  HttpSetup,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+} from 'src/core/public';
+
+import type {
+  GetAllSpacesOptions,
+  GetSpaceResult,
+  LegacyUrlAliasTarget,
+  Space,
+} from '../../common';
+import type { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
+
+interface SavedObjectTarget {
+  type: string;
+  id: string;
 }
+
+const TAG_TYPE = 'tag';
 
 export class SpacesManager {
   private activeSpace$: BehaviorSubject<Space | null> = new BehaviorSubject<Space | null>(null);
 
   private readonly serverBasePath: string;
 
-  public readonly onActiveSpaceChange$: Observable<Space>;
+  private readonly _onActiveSpaceChange$: Observable<Space>;
 
   constructor(private readonly http: HttpSetup) {
     this.serverBasePath = http.basePath.serverBasePath;
 
-    this.onActiveSpaceChange$ = this.activeSpace$
+    this._onActiveSpaceChange$ = this.activeSpace$
       .asObservable()
       .pipe(skipWhile((v: Space | null) => v == null)) as Observable<Space>;
+  }
 
-    this.refreshActiveSpace();
+  public get onActiveSpaceChange$() {
+    if (!this.activeSpace$.value) {
+      this.refreshActiveSpace();
+    }
+    return this._onActiveSpaceChange$;
   }
 
   public async getSpaces(options: GetAllSpacesOptions = {}): Promise<GetSpaceResult[]> {
@@ -44,14 +61,14 @@ export class SpacesManager {
     return await this.http.get(`/api/spaces/space/${encodeURIComponent(id)}`);
   }
 
-  public getActiveSpace({ forceRefresh = false } = {}) {
+  public async getActiveSpace({ forceRefresh = false } = {}) {
     if (this.isAnonymousPath()) {
       throw new Error(`Cannot retrieve the active space for anonymous paths`);
     }
-    if (!forceRefresh && this.activeSpace$.value) {
-      return Promise.resolve(this.activeSpace$.value);
+    if (forceRefresh || !this.activeSpace$.value) {
+      await this.refreshActiveSpace();
     }
-    return this.http.get('/internal/spaces/_active_space') as Promise<Space>;
+    return this.activeSpace$.value!;
   }
 
   public async createSpace(space: Space) {
@@ -79,8 +96,14 @@ export class SpacesManager {
     await this.http.delete(`/api/spaces/space/${encodeURIComponent(space.id)}`);
   }
 
+  public async disableLegacyUrlAliases(aliases: LegacyUrlAliasTarget[]) {
+    await this.http.post('/api/spaces/_disable_legacy_url_aliases', {
+      body: JSON.stringify({ aliases }),
+    });
+  }
+
   public async copySavedObjects(
-    objects: SavedObject[],
+    objects: SavedObjectTarget[],
     spaces: string[],
     includeReferences: boolean,
     createNewCopies: boolean,
@@ -98,7 +121,7 @@ export class SpacesManager {
   }
 
   public async resolveCopySavedObjectsErrors(
-    objects: SavedObject[],
+    objects: SavedObjectTarget[],
     retries: unknown,
     includeReferences: boolean,
     createNewCopies: boolean
@@ -128,15 +151,33 @@ export class SpacesManager {
       });
   }
 
-  public async shareSavedObjectAdd(object: SavedObject, spaces: string[]): Promise<void> {
-    return this.http.post(`/api/spaces/_share_saved_object_add`, {
-      body: JSON.stringify({ object, spaces }),
-    });
+  public async getShareableReferences(
+    objects: SavedObjectTarget[]
+  ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
+    const response = await this.http.post<SavedObjectsCollectMultiNamespaceReferencesResponse>(
+      `/api/spaces/_get_shareable_references`,
+      { body: JSON.stringify({ objects }) }
+    );
+
+    // We should exclude any child-reference tags because we don't yet support reconciling/merging duplicate tags. In other words: tags can
+    // be shared directly, but if a tag is only included as a reference of a requested object, it should not be shared.
+    const requestedObjectsSet = objects.reduce(
+      (acc, { type, id }) => acc.add(`${type}:${id}`),
+      new Set<string>()
+    );
+    const filteredObjects = response.objects.filter(
+      ({ type, id }) => type !== TAG_TYPE || requestedObjectsSet.has(`${type}:${id}`)
+    );
+    return { objects: filteredObjects };
   }
 
-  public async shareSavedObjectRemove(object: SavedObject, spaces: string[]): Promise<void> {
-    return this.http.post(`/api/spaces/_share_saved_object_remove`, {
-      body: JSON.stringify({ object, spaces }),
+  public async updateSavedObjectsSpaces(
+    objects: SavedObjectTarget[],
+    spacesToAdd: string[],
+    spacesToRemove: string[]
+  ): Promise<void> {
+    return this.http.post(`/api/spaces/_update_objects_spaces`, {
+      body: JSON.stringify({ objects, spacesToAdd, spacesToRemove }),
     });
   }
 
@@ -149,7 +190,7 @@ export class SpacesManager {
     if (this.isAnonymousPath()) {
       return;
     }
-    const activeSpace = await this.getActiveSpace({ forceRefresh: true });
+    const activeSpace = await this.http.get('/internal/spaces/_active_space');
     this.activeSpace$.next(activeSpace);
   }
 

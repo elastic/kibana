@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -44,7 +45,11 @@ const RecentTimelinesItem = React.memo<RecentTimelinesItemProps>(
 
     const render = useCallback(
       (showHoverContent) => (
-        <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+        <EuiFlexGroup
+          gutterSize="none"
+          justifyContent="spaceBetween"
+          data-test-subj="overview-recent-timelines"
+        >
           <EuiFlexItem grow={false}>
             <RecentTimelineHeader onOpenTimeline={onOpenTimeline} timeline={timeline} />
             <RecentTimelineCounts timeline={timeline} />

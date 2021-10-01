@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -72,8 +73,9 @@ const GeoFieldValues = React.memo<{
   contextId: string;
   eventId: string;
   fieldName: string;
+  isDraggable?: boolean;
   values?: string[] | null;
-}>(({ contextId, eventId, fieldName, values }) =>
+}>(({ contextId, eventId, fieldName, isDraggable, values }) =>
   values != null ? (
     <>
       {uniq(values).map((value) => (
@@ -91,6 +93,7 @@ const GeoFieldValues = React.memo<{
                 data-test-subj={fieldName}
                 field={fieldName}
                 id={`geo-field-values-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+                isDraggable={isDraggable}
                 tooltipContent={fieldName}
                 value={value}
               />
@@ -113,7 +116,7 @@ GeoFieldValues.displayName = 'GeoFieldValues';
  * - `source|destination.geo.city_name`
  */
 export const GeoFields = React.memo<GeoFieldsProps>((props) => {
-  const { contextId, eventId, type } = props;
+  const { contextId, eventId, isDraggable, type } = props;
 
   const propNameToFieldName = getGeoFieldPropNameToFieldNameMap(type);
   return (
@@ -123,6 +126,7 @@ export const GeoFields = React.memo<GeoFieldsProps>((props) => {
           contextId={contextId}
           eventId={eventId}
           fieldName={geo.fieldName}
+          isDraggable={isDraggable}
           key={geo.fieldName}
           values={get(geo.prop, props)}
         />

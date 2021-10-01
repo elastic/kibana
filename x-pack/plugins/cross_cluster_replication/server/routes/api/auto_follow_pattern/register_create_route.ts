@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -16,7 +17,7 @@ import { RouteDependencies } from '../../../types';
 export const registerCreateRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   const bodySchema = schema.object({
     id: schema.string(),
@@ -33,6 +34,7 @@ export const registerCreateRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
       const { id, ...rest } = request.body;
       const body = serializeAutoFollowPattern(rest as AutoFollowPattern);
 
@@ -41,36 +43,29 @@ export const registerCreateRoute = ({
        * the same id does not exist.
        */
       try {
-        await context.crossClusterReplication!.client.callAsCurrentUser('ccr.autoFollowPattern', {
-          id,
-        });
+        await client.asCurrentUser.ccr.getAutoFollowPattern({ name: id });
+
         // If we get here it means that an auto-follow pattern with the same id exists
         return response.conflict({
           body: `An auto-follow pattern with the name "${id}" already exists.`,
         });
-      } catch (err) {
-        if (err.statusCode !== 404) {
-          if (isEsError(err)) {
-            return response.customError(formatEsError(err));
-          }
-          // Case: default
-          return response.internalError({ body: err });
+      } catch (error) {
+        if (error.statusCode !== 404) {
+          return handleEsError({ error, response });
         }
       }
 
       try {
-        return response.ok({
-          body: await context.crossClusterReplication!.client.callAsCurrentUser(
-            'ccr.saveAutoFollowPattern',
-            { id, body }
-          ),
+        const { body: responseBody } = await client.asCurrentUser.ccr.putAutoFollowPattern({
+          name: id,
+          body,
         });
-      } catch (err) {
-        if (isEsError(err)) {
-          return response.customError(formatEsError(err));
-        }
-        // Case: default
-        return response.internalError({ body: err });
+
+        return response.ok({
+          body: responseBody,
+        });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     })
   );

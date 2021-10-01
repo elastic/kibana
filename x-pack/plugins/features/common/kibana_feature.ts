@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { RecursiveReadonly } from '@kbn/utility-types';
@@ -98,6 +99,11 @@ export interface KibanaFeatureConfig {
   alerting?: readonly string[];
 
   /**
+   * If your feature grants access to specific case types, you can specify them here to control visibility based on the current space.
+   */
+  cases?: readonly string[];
+
+  /**
    * Feature privilege definition.
    *
    * @example
@@ -180,6 +186,10 @@ export class KibanaFeature {
 
   public get alerting() {
     return this.config.alerting;
+  }
+
+  public get cases() {
+    return this.config.cases;
   }
 
   public get excludeFromBasePrivileges() {

@@ -6,14 +6,16 @@
   "false_positives": [
     "Some normal use of this program, at varying levels of frequency, may originate from scripts, automation tools and frameworks. Usage by non-engineers and ordinary users is unusual."
   ],
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
-  "language": "kuery",
-  "license": "Elastic License",
+  "language": "eql",
+  "license": "Elastic License v2",
   "name": "Whoami Process Activity",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:whoami.exe",
+  "query": "process where event.type in (\"start\", \"process_started\") and process.name : \"whoami.exe\"\n",
   "risk_score": 21,
   "rule_id": "ef862985-3f13-4262-a686-5f357bbb9bc2",
   "severity": "low",
@@ -41,6 +43,7 @@
       ]
     }
   ],
-  "type": "query",
-  "version": 4
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 7
 }

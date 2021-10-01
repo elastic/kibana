@@ -1,26 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import moment from 'moment';
+import * as Rx from 'rxjs';
 import { isSavedObjectOlderThan, rollUiCounterIndices } from './rollups';
 import { savedObjectsRepositoryMock, loggingSystemMock } from '../../../../../../core/server/mocks';
 import { SavedObjectsFindResult } from 'kibana/server';
+
 import {
   UICounterSavedObjectAttributes,
   UI_COUNTER_SAVED_OBJECT_TYPE,
@@ -81,14 +72,18 @@ describe('isSavedObjectOlderThan', () => {
 describe('rollUiCounterIndices', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let savedObjectClient: ReturnType<typeof savedObjectsRepositoryMock.create>;
+  let stopUsingUiCounterIndicies$: Rx.Subject<void>;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     savedObjectClient = savedObjectsRepositoryMock.create();
+    stopUsingUiCounterIndicies$ = new Rx.Subject();
   });
 
   it('returns undefined if no savedObjectsClient initialised yet', async () => {
-    await expect(rollUiCounterIndices(logger, undefined)).resolves.toBe(undefined);
+    await expect(
+      rollUiCounterIndices(logger, stopUsingUiCounterIndicies$, undefined)
+    ).resolves.toBe(undefined);
     expect(logger.warn).toHaveBeenCalledTimes(0);
   });
 
@@ -101,10 +96,26 @@ describe('rollUiCounterIndices', () => {
           throw new Error(`Unexpected type [${type}]`);
       }
     });
-    await expect(rollUiCounterIndices(logger, savedObjectClient)).resolves.toEqual([]);
+    await expect(
+      rollUiCounterIndices(logger, stopUsingUiCounterIndicies$, savedObjectClient)
+    ).resolves.toEqual([]);
     expect(savedObjectClient.find).toBeCalled();
     expect(savedObjectClient.delete).not.toBeCalled();
     expect(logger.warn).toHaveBeenCalledTimes(0);
+  });
+  it('calls Subject complete() on empty saved objects', async () => {
+    savedObjectClient.find.mockImplementation(async ({ type, page = 1, perPage = 10 }) => {
+      switch (type) {
+        case UI_COUNTER_SAVED_OBJECT_TYPE:
+          return { saved_objects: [], total: 0, page, per_page: perPage };
+        default:
+          throw new Error(`Unexpected type [${type}]`);
+      }
+    });
+    await expect(
+      rollUiCounterIndices(logger, stopUsingUiCounterIndicies$, savedObjectClient)
+    ).resolves.toEqual([]);
+    expect(stopUsingUiCounterIndicies$.isStopped).toBe(true);
   });
 
   it(`deletes documents older than ${UI_COUNTERS_KEEP_DOCS_FOR_DAYS} days`, async () => {
@@ -122,7 +133,9 @@ describe('rollUiCounterIndices', () => {
           throw new Error(`Unexpected type [${type}]`);
       }
     });
-    await expect(rollUiCounterIndices(logger, savedObjectClient)).resolves.toHaveLength(2);
+    await expect(
+      rollUiCounterIndices(logger, stopUsingUiCounterIndicies$, savedObjectClient)
+    ).resolves.toHaveLength(2);
     expect(savedObjectClient.find).toBeCalled();
     expect(savedObjectClient.delete).toHaveBeenCalledTimes(2);
     expect(savedObjectClient.delete).toHaveBeenNthCalledWith(
@@ -142,7 +155,9 @@ describe('rollUiCounterIndices', () => {
     savedObjectClient.find.mockImplementation(async () => {
       throw new Error(`Expected error!`);
     });
-    await expect(rollUiCounterIndices(logger, savedObjectClient)).resolves.toEqual(undefined);
+    await expect(
+      rollUiCounterIndices(logger, stopUsingUiCounterIndicies$, savedObjectClient)
+    ).resolves.toEqual(undefined);
     expect(savedObjectClient.find).toBeCalled();
     expect(savedObjectClient.delete).not.toBeCalled();
     expect(logger.warn).toHaveBeenCalledTimes(2);
@@ -162,7 +177,9 @@ describe('rollUiCounterIndices', () => {
     savedObjectClient.delete.mockImplementation(async () => {
       throw new Error(`Expected error!`);
     });
-    await expect(rollUiCounterIndices(logger, savedObjectClient)).resolves.toEqual(undefined);
+    await expect(
+      rollUiCounterIndices(logger, stopUsingUiCounterIndicies$, savedObjectClient)
+    ).resolves.toEqual(undefined);
     expect(savedObjectClient.find).toBeCalled();
     expect(savedObjectClient.delete).toHaveBeenCalledTimes(1);
     expect(savedObjectClient.delete).toHaveBeenNthCalledWith(

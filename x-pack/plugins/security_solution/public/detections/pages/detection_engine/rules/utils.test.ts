@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getBreadcrumbs } from './utils';
@@ -10,7 +11,7 @@ const getUrlForAppMock = (appId: string, options?: { path?: string; absolute?: b
   `${appId}${options?.path ?? ''}`;
 
 describe('getBreadcrumbs', () => {
-  it('returns default value for incorrect params', () => {
+  it('Does not render for incorrect params', () => {
     expect(
       getBreadcrumbs(
         {
@@ -23,6 +24,6 @@ describe('getBreadcrumbs', () => {
         [],
         getUrlForAppMock
       )
-    ).toEqual([{ href: 'securitySolution:detections', text: 'Detections' }]);
+    ).toEqual([]);
   });
 });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -21,24 +22,24 @@ describe('UiActionsService', () => {
   describe('action factories', () => {
     const factoryDefinition1: ActionFactoryDefinition = {
       id: 'test-factory-1',
-      CollectConfig: {} as any,
+      CollectConfig: {},
       createConfig: () => ({}),
       isConfigValid: () => true,
-      create: () => ({} as any),
+      create: () => ({}),
       supportedTriggers() {
         return ['VALUE_CLICK_TRIGGER'];
       },
-    };
+    } as unknown as ActionFactoryDefinition;
     const factoryDefinition2: ActionFactoryDefinition = {
       id: 'test-factory-2',
-      CollectConfig: {} as any,
+      CollectConfig: {},
       createConfig: () => ({}),
       isConfigValid: () => true,
-      create: () => ({} as any),
+      create: () => ({}),
       supportedTriggers() {
         return ['VALUE_CLICK_TRIGGER'];
       },
-    };
+    } as unknown as ActionFactoryDefinition;
 
     test('.getActionFactories() returns empty array if no action factories registered', () => {
       const service = new UiActionsServiceEnhancements(deps);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -11,7 +12,6 @@ import {
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiOverlayMask,
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
@@ -122,22 +122,21 @@ export const DeleteActionModal: FC<DeleteAction> = ({
   );
 
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={isBulkAction === true ? bulkDeleteModalTitle : deleteModalTitle}
-        onCancel={closeModal}
-        onConfirm={deleteAndCloseModal}
-        cancelButtonText={i18n.translate('xpack.transform.transformList.deleteModalCancelButton', {
-          defaultMessage: 'Cancel',
-        })}
-        confirmButtonText={i18n.translate('xpack.transform.transformList.deleteModalDeleteButton', {
-          defaultMessage: 'Delete',
-        })}
-        defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-        buttonColor="danger"
-      >
-        {isBulkAction ? bulkDeleteModalContent : deleteModalContent}
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      data-test-subj="transformDeleteModal"
+      title={isBulkAction === true ? bulkDeleteModalTitle : deleteModalTitle}
+      onCancel={closeModal}
+      onConfirm={deleteAndCloseModal}
+      cancelButtonText={i18n.translate('xpack.transform.transformList.deleteModalCancelButton', {
+        defaultMessage: 'Cancel',
+      })}
+      confirmButtonText={i18n.translate('xpack.transform.transformList.deleteModalDeleteButton', {
+        defaultMessage: 'Delete',
+      })}
+      defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+      buttonColor="danger"
+    >
+      {isBulkAction ? bulkDeleteModalContent : deleteModalContent}
+    </EuiConfirmModal>
   );
 };

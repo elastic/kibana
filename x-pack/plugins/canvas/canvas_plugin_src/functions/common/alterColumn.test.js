@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
+import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { getFunctionErrors } from '../../../i18n';
-import { emptyTable, testTable } from './__tests__/fixtures/test_tables';
+import { emptyTable, testTable } from './__fixtures__/test_tables';
 import { alterColumn } from './alterColumn';
 
 const errors = getFunctionErrors().alterColumn;
 
 describe('alterColumn', () => {
   const fn = functionWrapper(alterColumn);
+
   const nameColumnIndex = testTable.columns.findIndex(({ name }) => name === 'name');
   const timeColumnIndex = testTable.columns.findIndex(({ name }) => name === 'time');
   const priceColumnIndex = testTable.columns.findIndex(({ name }) => name === 'price');

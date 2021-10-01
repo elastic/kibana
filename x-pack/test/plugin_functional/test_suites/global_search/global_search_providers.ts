@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -29,11 +30,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('SavedObject provider', function () {
       before(async () => {
-        await esArchiver.load('global_search/basic');
+        await esArchiver.load('x-pack/test/plugin_functional/es_archives/global_search/basic');
       });
 
       after(async () => {
-        await esArchiver.unload('global_search/basic');
+        await esArchiver.unload('x-pack/test/plugin_functional/es_archives/global_search/basic');
       });
 
       it('can search for index patterns', async () => {

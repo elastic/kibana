@@ -1,141 +1,152 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-import React, { useState } from 'react';
-import { escapeRegExp } from 'lodash';
-import { DocViewTableRow } from './table_row';
-import { trimAngularSpan } from './table_helper';
-import { DocViewRenderProps } from '../../doc_views/doc_views_types';
 
-const COLLAPSE_LINE_LENGTH = 350;
+import React, { useCallback, useMemo } from 'react';
+import { EuiInMemoryTable } from '@elastic/eui';
+import { IndexPattern, IndexPatternField } from '../../../../../data/public';
+import { SHOW_MULTIFIELDS } from '../../../../common';
+import { getServices } from '../../../kibana_services';
+import { isNestedFieldParent } from '../../apps/main/utils/nested_fields';
+import {
+  DocViewFilterFn,
+  ElasticSearchHit,
+  DocViewRenderProps,
+} from '../../doc_views/doc_views_types';
+import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';
+import { getFieldsToShow } from '../../helpers/get_fields_to_show';
 
-export function DocViewTable({
+export interface DocViewerTableProps {
+  columns?: string[];
+  filter?: DocViewFilterFn;
+  hit: ElasticSearchHit;
+  indexPattern?: IndexPattern;
+  onAddColumn?: (columnName: string) => void;
+  onRemoveColumn?: (columnName: string) => void;
+}
+
+export interface FieldRecord {
+  action: {
+    isActive: boolean;
+    onFilter?: DocViewFilterFn;
+    onToggleColumn: (field: string) => void;
+    flattenedField: unknown;
+  };
+  field: {
+    displayName: string;
+    field: string;
+    scripted: boolean;
+    fieldType?: string;
+    fieldMapping?: IndexPatternField;
+  };
+  value: {
+    formattedValue: string;
+  };
+}
+
+export const DocViewerTable = ({
+  columns,
   hit,
   indexPattern,
   filter,
-  columns,
   onAddColumn,
   onRemoveColumn,
-}: DocViewRenderProps) {
-  const [fieldRowOpen, setFieldRowOpen] = useState({} as Record<string, boolean>);
+}: DocViewRenderProps) => {
+  const showMultiFields = getServices().uiSettings.get(SHOW_MULTIFIELDS);
+
+  const mapping = useCallback(
+    (name: string) => indexPattern?.fields.getByName(name),
+    [indexPattern?.fields]
+  );
+
+  const formattedHit = useMemo(() => indexPattern?.formatHit(hit, 'html'), [hit, indexPattern]);
+
+  const tableColumns = useMemo(() => {
+    return filter ? [ACTIONS_COLUMN, ...MAIN_COLUMNS] : MAIN_COLUMNS;
+  }, [filter]);
+
+  const onToggleColumn = useCallback(
+    (field: string) => {
+      if (!onRemoveColumn || !onAddColumn || !columns) {
+        return;
+      }
+      if (columns.includes(field)) {
+        onRemoveColumn(field);
+      } else {
+        onAddColumn(field);
+      }
+    },
+    [onRemoveColumn, onAddColumn, columns]
+  );
+
+  const onSetRowProps = useCallback(({ field: { field } }: FieldRecord) => {
+    return {
+      key: field,
+      className: 'kbnDocViewer__tableRow',
+      'data-test-subj': `tableDocViewRow-${field}`,
+    };
+  }, []);
+
   if (!indexPattern) {
     return null;
   }
-  const mapping = indexPattern.fields.getByName;
-  const flattened = indexPattern.flattenHit(hit);
-  const formatted = indexPattern.formatHit(hit, 'html');
 
-  function toggleValueCollapse(field: string) {
-    fieldRowOpen[field] = !fieldRowOpen[field];
-    setFieldRowOpen({ ...fieldRowOpen });
-  }
+  const flattened = indexPattern?.flattenHit(hit);
+  const fieldsToShow = getFieldsToShow(Object.keys(flattened), indexPattern, showMultiFields);
+
+  const items: FieldRecord[] = Object.keys(flattened)
+    .filter((fieldName) => {
+      return fieldsToShow.includes(fieldName);
+    })
+    .sort((fieldA, fieldB) => {
+      const mappingA = mapping(fieldA);
+      const mappingB = mapping(fieldB);
+      const nameA = !mappingA || !mappingA.displayName ? fieldA : mappingA.displayName;
+      const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
+      return nameA.localeCompare(nameB);
+    })
+    .map((field) => {
+      const fieldMapping = mapping(field);
+      const displayName = fieldMapping?.displayName ?? field;
+      const fieldType = isNestedFieldParent(field, indexPattern) ? 'nested' : fieldMapping?.type;
+
+      return {
+        action: {
+          onToggleColumn,
+          onFilter: filter,
+          isActive: !!columns?.includes(field),
+          flattenedField: flattened[field],
+        },
+        field: {
+          field,
+          displayName,
+          fieldMapping,
+          fieldType,
+          scripted: Boolean(fieldMapping?.scripted),
+        },
+        value: {
+          formattedValue: formattedHit[field],
+        },
+      };
+    });
 
   return (
-    <table className="table table-condensed kbnDocViewerTable">
-      <tbody>
-        {Object.keys(flattened)
-          .sort((fieldA, fieldB) => {
-            const mappingA = mapping(fieldA);
-            const mappingB = mapping(fieldB);
-            const nameA = !mappingA || !mappingA.displayName ? fieldA : mappingA.displayName;
-            const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
-            return nameA.localeCompare(nameB);
-          })
-          .map((field) => {
-            const valueRaw = flattened[field];
-            const value = trimAngularSpan(String(formatted[field]));
-
-            const isCollapsible = value.length > COLLAPSE_LINE_LENGTH;
-            const isCollapsed = isCollapsible && !fieldRowOpen[field];
-            const toggleColumn =
-              onRemoveColumn && onAddColumn && Array.isArray(columns)
-                ? () => {
-                    if (columns.includes(field)) {
-                      onRemoveColumn(field);
-                    } else {
-                      onAddColumn(field);
-                    }
-                  }
-                : undefined;
-            const displayUnderscoreWarning = !mapping(field) && field.indexOf('_') === 0;
-
-            // Discover doesn't flatten arrays of objects, so for documents with an `object` or `nested` field that
-            // contains an array, Discover will only detect the top level root field. We want to detect when those
-            // root fields are `nested` so that we can display the proper icon and label. However, those root
-            // `nested` fields are not a part of the index pattern. Their children are though, and contain nested path
-            // info. So to detect nested fields we look through the index pattern for nested children
-            // whose path begins with the current field. There are edge cases where
-            // this could incorrectly identify a plain `object` field as `nested`. Say we had the following document
-            // where `foo` is a plain object field and `bar` is a nested field.
-            // {
-            //   "foo": [
-            //   {
-            //     "bar": [
-            //       {
-            //         "baz": "qux"
-            //       }
-            //     ]
-            //   },
-            //   {
-            //     "bar": [
-            //       {
-            //         "baz": "qux"
-            //       }
-            //     ]
-            //   }
-            // ]
-            // }
-            //
-            // The following code will search for `foo`, find it at the beginning of the path to the nested child field
-            // `foo.bar.baz` and incorrectly mark `foo` as nested. Any time we're searching for the name of a plain object
-            // field that happens to match a segment of a nested path, we'll get a false positive.
-            // We're aware of this issue and we'll have to live with
-            // it in the short term. The long term fix will be to add info about the `nested` and `object` root fields
-            // to the index pattern, but that has its own complications which you can read more about in the following
-            // issue: https://github.com/elastic/kibana/issues/54957
-            const isNestedField =
-              !indexPattern.fields.getByName(field) &&
-              !!indexPattern.fields.getAll().find((patternField) => {
-                // We only want to match a full path segment
-                const nestedRootRegex = new RegExp(escapeRegExp(field) + '(\\.|$)');
-                return nestedRootRegex.test(patternField.subType?.nested?.path ?? '');
-              });
-            const fieldType = isNestedField ? 'nested' : indexPattern.fields.getByName(field)?.type;
-
-            return (
-              <DocViewTableRow
-                key={field}
-                field={field}
-                fieldMapping={mapping(field)}
-                fieldType={String(fieldType)}
-                displayUnderscoreWarning={displayUnderscoreWarning}
-                isCollapsed={isCollapsed}
-                isCollapsible={isCollapsible}
-                isColumnActive={Array.isArray(columns) && columns.includes(field)}
-                onFilter={filter}
-                onToggleCollapse={() => toggleValueCollapse(field)}
-                onToggleColumn={toggleColumn}
-                value={value}
-                valueRaw={valueRaw}
-              />
-            );
-          })}
-      </tbody>
-    </table>
+    <EuiInMemoryTable
+      tableLayout="auto"
+      className="kbnDocViewer__table"
+      items={items}
+      columns={tableColumns}
+      rowProps={onSetRowProps}
+      pagination={false}
+      responsive={false}
+    />
   );
-}
+};
+
+// Required for usage in React.lazy
+// eslint-disable-next-line import/no-default-export
+export default DocViewerTable;

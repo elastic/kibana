@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // The Annotation interface is based on annotation documents stored in the
@@ -85,7 +86,12 @@ export interface Annotation {
   annotation: string;
   job_id: string;
   type: ANNOTATION_TYPE.ANNOTATION | ANNOTATION_TYPE.COMMENT;
-  event?: string;
+  event?:
+    | 'user'
+    | 'delayed_data'
+    | 'model_snapshot_stored'
+    | 'model_change'
+    | 'categorization_status_change';
   detector_index?: number;
   partition_field_name?: string;
   partition_field_value?: string;

@@ -1,33 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiSpacer, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-// @ts-expect-error types are not available for this package yet
-import { Results, Paging, ResultsPerPage } from '@elastic/react-search-ui';
 import { useValues } from 'kea';
 
-import { ResultView } from './views';
-import { Pagination } from './pagination';
-import { useSearchContextState } from './hooks';
-import { DocumentCreationButton } from '../document_creation_button';
-import { AppLogic } from '../../../app_logic';
+import { EuiFlexGroup, EuiSpacer, EuiEmptyPrompt } from '@elastic/eui';
+// @ts-expect-error types are not available for this package yet
+import { Results, Paging, ResultsPerPage } from '@elastic/react-search-ui';
+import { i18n } from '@kbn/i18n';
+
+import { Loading } from '../../../../shared/loading';
 import { EngineLogic } from '../../engine';
-import { DOCS_PREFIX } from '../../../routes';
 import { Result } from '../../result/types';
+
+import { useSearchContextState } from './hooks';
+import { Pagination } from './pagination';
+import { ResultView } from './views';
 
 export const SearchExperienceContent: React.FC = () => {
   const { resultSearchTerm, totalResults, wasSearched } = useSearchContextState();
 
-  const { myRole } = useValues(AppLogic);
   const { isMetaEngine, engine } = useValues(EngineLogic);
 
-  if (!wasSearched) return null;
+  if (!wasSearched) return <Loading />;
 
   if (totalResults) {
     return (
@@ -81,34 +81,5 @@ export const SearchExperienceContent: React.FC = () => {
     );
   }
 
-  // If we have no results AND no search term, show a CTA for the user to index documents
-  return (
-    <EuiEmptyPrompt
-      data-test-subj="documentsSearchNoDocuments"
-      title={
-        <h2>
-          {i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.indexDocumentsTitle', {
-            defaultMessage: 'No documents yet!',
-          })}
-        </h2>
-      }
-      body={i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.indexDocuments', {
-        defaultMessage: 'Indexed documents will show up here.',
-      })}
-      actions={
-        !isMetaEngine && myRole.canManageEngineDocuments ? (
-          <DocumentCreationButton />
-        ) : (
-          <EuiButton
-            data-test-subj="documentsSearchDocsLink"
-            href={`${DOCS_PREFIX}/indexing-documents-guide.html`}
-          >
-            {i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.indexingGuide', {
-              defaultMessage: 'Read the indexing guide',
-            })}
-          </EuiButton>
-        )
-      }
-    />
-  );
+  return null;
 };

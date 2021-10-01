@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFieldSearch, EuiOutsideClickDetector, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { QuerySuggestion } from '../../../../../../src/plugins/data/public';
-import { euiStyled } from '../../../../observability/public';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { composeStateUpdaters } from '../../utils/typed_react';
 import { SuggestionItem } from './suggestion_item';
 
@@ -264,18 +265,17 @@ const withNextSuggestionSelected = (
       : 0,
 });
 
-const withSuggestionAtIndexSelected = (suggestionIndex: number) => (
-  state: AutocompleteFieldState,
-  props: AutocompleteFieldProps
-): AutocompleteFieldState => ({
-  ...state,
-  selectedIndex:
-    props.suggestions.length === 0
-      ? null
-      : suggestionIndex >= 0 && suggestionIndex < props.suggestions.length
-      ? suggestionIndex
-      : 0,
-});
+const withSuggestionAtIndexSelected =
+  (suggestionIndex: number) =>
+  (state: AutocompleteFieldState, props: AutocompleteFieldProps): AutocompleteFieldState => ({
+    ...state,
+    selectedIndex:
+      props.suggestions.length === 0
+        ? null
+        : suggestionIndex >= 0 && suggestionIndex < props.suggestions.length
+        ? suggestionIndex
+        : 0,
+  });
 
 const withSuggestionsVisible = (state: AutocompleteFieldState) => ({
   ...state,

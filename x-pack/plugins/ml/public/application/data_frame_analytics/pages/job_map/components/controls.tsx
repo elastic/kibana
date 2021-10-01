@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useEffect, useState, useContext, useCallback } from 'react';
@@ -29,13 +30,9 @@ import { EuiDescriptionListProps } from '@elastic/eui/src/components/description
 import { CytoscapeContext } from './cytoscape';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/util/date_utils';
 import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
-import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
-import {
-  useMlUrlGenerator,
-  useNotifications,
-  useNavigateToPath,
-} from '../../../../contexts/kibana';
+import { useMlLocator, useNotifications, useNavigateToPath } from '../../../../contexts/kibana';
 import { getIndexPatternIdFromName } from '../../../../util/index_utils';
 import { useNavigateToWizardWithClonedJob } from '../../analytics_management/components/action_clone/clone_action_name';
 import {
@@ -82,6 +79,7 @@ export const Controls: FC<Props> = React.memo(
     const [isPopoverOpen, setPopover] = useState<boolean>(false);
     const [didUntag, setDidUntag] = useState<boolean>(false);
 
+    const canCreateDataFrameAnalytics: boolean = checkPermission('canCreateDataFrameAnalytics');
     const canDeleteDataFrameAnalytics: boolean = checkPermission('canDeleteDataFrameAnalytics');
     const deleteAction = useDeleteAction(canDeleteDataFrameAnalytics);
     const {
@@ -96,7 +94,7 @@ export const Controls: FC<Props> = React.memo(
       openDeleteJobCheckModal,
     } = deleteAction;
     const { toasts } = useNotifications();
-    const mlUrlGenerator = useMlUrlGenerator();
+    const mlLocator = useMlLocator()!;
     const navigateToPath = useNavigateToPath();
     const navigateToWizardWithClonedJob = useNavigateToWizardWithClonedJob();
 
@@ -117,7 +115,7 @@ export const Controls: FC<Props> = React.memo(
       const indexId = getIndexPatternIdFromName(nodeLabel);
 
       if (indexId) {
-        const path = await mlUrlGenerator.createUrl({
+        const path = await mlLocator.getUrl({
           page: ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB,
           pageState: { index: indexId },
         });
@@ -201,6 +199,7 @@ export const Controls: FC<Props> = React.memo(
             <EuiContextMenuItem
               key={`${nodeId}-delete`}
               icon="trash"
+              disabled={!canDeleteDataFrameAnalytics}
               onClick={() => {
                 openDeleteJobCheckModal({ config: details[nodeId], stats: details[nodeId]?.stats });
               }}
@@ -210,7 +209,12 @@ export const Controls: FC<Props> = React.memo(
                 defaultMessage="Delete job"
               />
             </EuiContextMenuItem>,
-            <EuiContextMenuItem key={`${nodeId}-clone`} icon="copy" onClick={onCloneJobClick}>
+            <EuiContextMenuItem
+              key={`${nodeId}-clone`}
+              icon="copy"
+              disabled={!canCreateDataFrameAnalytics}
+              onClick={onCloneJobClick}
+            >
               <FormattedMessage
                 id="xpack.ml.dataframe.analyticsMap.flyout.cloneJobButton"
                 defaultMessage="Clone job"
@@ -221,6 +225,7 @@ export const Controls: FC<Props> = React.memo(
       ...(nodeType === JOB_MAP_NODE_TYPES.INDEX
         ? [
             <EuiContextMenuItem
+              disabled={!canCreateDataFrameAnalytics}
               key={`${nodeId}-create`}
               icon="plusInCircle"
               onClick={onCreateJobClick}
@@ -240,6 +245,9 @@ export const Controls: FC<Props> = React.memo(
               icon="branch"
               onClick={() => {
                 getNodeData({ id: nodeLabel, type: nodeType });
+                if (cy) {
+                  cy.elements().unselect();
+                }
                 setShowFlyout(false);
                 setPopover(false);
               }}
@@ -255,12 +263,7 @@ export const Controls: FC<Props> = React.memo(
 
     return (
       <EuiPortal>
-        <EuiFlyout
-          ownFocus
-          size="m"
-          onClose={() => setShowFlyout(false)}
-          data-test-subj="mlAnalyticsJobMapFlyout"
-        >
+        <EuiFlyout ownFocus size="m" onClose={deselect} data-test-subj="mlAnalyticsJobMapFlyout">
           <EuiFlyoutHeader>
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem grow={false}>

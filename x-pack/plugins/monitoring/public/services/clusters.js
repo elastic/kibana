@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ajaxErrorHandlersProvider } from '../lib/ajax_error_handler';
 import { Legacy } from '../legacy_shims';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
 import { showInternalMonitoringToast } from '../lib/internal_monitoring_toasts';
-import { showSecurityToast } from '../alerts/lib/security_toasts';
 
 function formatClusters(clusters) {
   return clusters.map(formatCluster);
@@ -22,7 +22,6 @@ function formatCluster(cluster) {
 }
 
 let once = false;
-let inTransit = false;
 
 export function monitoringClustersProvider($injector) {
   return async (clusterUuid, ccs, codePaths) => {
@@ -38,25 +37,19 @@ export function monitoringClustersProvider($injector) {
 
     async function getClusters() {
       try {
-        const response = await $http.post(url, {
-          ccs,
-          timeRange: {
-            min: min.toISOString(),
-            max: max.toISOString(),
+        const response = await $http.post(
+          url,
+          {
+            ccs,
+            timeRange: {
+              min: min.toISOString(),
+              max: max.toISOString(),
+            },
+            codePaths,
           },
-          codePaths,
-        });
+          { headers: { 'kbn-system-request': 'true' } }
+        );
         return formatClusters(response.data);
-      } catch (err) {
-        const Private = $injector.get('Private');
-        const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
-        return ajaxErrorHandlers(err);
-      }
-    }
-
-    async function ensureAlertsEnabled() {
-      try {
-        return $http.post('../api/monitoring/v1/alerts/enable', {});
       } catch (err) {
         const Private = $injector.get('Private');
         const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
@@ -88,18 +81,15 @@ export function monitoringClustersProvider($injector) {
       }
     }
 
-    if (!once && !inTransit) {
-      inTransit = true;
+    if (!once) {
+      once = true;
       const clusters = await getClusters();
       if (clusters.length) {
         try {
-          const [{ data }] = await Promise.all([ensureAlertsEnabled(), ensureMetricbeatEnabled()]);
-          showSecurityToast(data);
-          once = true;
+          await ensureMetricbeatEnabled();
         } catch (_err) {
           // Intentionally swallow the error as this will retry the next page load
         }
-        inTransit = false;
       }
       return clusters;
     }

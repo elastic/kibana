@@ -1,18 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
+import { buildReasonMessageForThreatMatchAlert } from '../reason_formatters';
 import { CreateThreatSignalOptions } from './types';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 
 export const createThreatSignal = async ({
+  tuple,
   threatMapping,
+  threatEnrichment,
   query,
   inputIndex,
   type,
@@ -21,36 +25,25 @@ export const createThreatSignal = async ({
   savedId,
   services,
   exceptionItems,
-  gap,
-  previousStartedAt,
   listClient,
   logger,
   eventsTelemetry,
   alertId,
   outputIndex,
-  params,
+  ruleSO,
   searchAfterSize,
-  actions,
-  createdBy,
-  createdAt,
-  updatedBy,
-  interval,
-  updatedAt,
-  enabled,
-  refresh,
-  tags,
-  throttle,
   buildRuleMessage,
-  name,
   currentThreatList,
   currentResult,
+  bulkCreate,
+  wrapHits,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
     threatList: currentThreatList,
   });
 
-  if (threatFilter.query.bool.should.length === 0) {
+  if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
     // empty threat list and we do not want to return everything as being
     // a hit so opt to return the existing result.
     logger.debug(
@@ -73,15 +66,15 @@ export const createThreatSignal = async ({
 
     logger.debug(
       buildRuleMessage(
-        `${threatFilter.query.bool.should.length} indicator items are being checked for existence of matches`
+        `${threatFilter.query?.bool.should.length} indicator items are being checked for existence of matches`
       )
     );
+
     const result = await searchAfterAndBulkCreate({
-      gap,
-      previousStartedAt,
+      tuple,
       listClient,
       exceptionsList: exceptionItems,
-      ruleParams: params,
+      ruleSO,
       services,
       logger,
       eventsTelemetry,
@@ -89,24 +82,20 @@ export const createThreatSignal = async ({
       inputIndexPattern: inputIndex,
       signalsIndex: outputIndex,
       filter: esFilter,
-      actions,
-      name,
-      createdBy,
-      createdAt,
-      updatedBy,
-      updatedAt,
-      interval,
-      enabled,
       pageSize: searchAfterSize,
-      refresh,
-      tags,
-      throttle,
       buildRuleMessage,
+      buildReasonMessage: buildReasonMessageForThreatMatchAlert,
+      enrichment: threatEnrichment,
+      bulkCreate,
+      wrapHits,
+      sortOrder: 'desc',
+      trackTotalHits: false,
     });
+
     logger.debug(
       buildRuleMessage(
         `${
-          threatFilter.query.bool.should.length
+          threatFilter.query?.bool.should.length
         } items have completed match checks and the total times to search were ${
           result.searchAfterTimes.length !== 0 ? result.searchAfterTimes : '(unknown) '
         }ms`

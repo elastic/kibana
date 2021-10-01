@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { take } from 'rxjs/operators';
@@ -65,7 +54,7 @@ describe('calculateStatus', () => {
     });
   });
 
-  it('changes to available with a differemnt message when isCompatible and warningNodes present', async () => {
+  it('changes to available with a different message when isCompatible and warningNodes present', async () => {
     expect(
       await calculateStatus$(
         of({
@@ -203,6 +192,119 @@ describe('calculateStatus', () => {
             ],
           },
           "summary": "Some nodes are incompatible",
+        },
+        Object {
+          "level": available,
+          "meta": Object {
+            "incompatibleNodes": Array [],
+            "warningNodes": Array [],
+          },
+          "summary": "Elasticsearch is available",
+        },
+      ]
+    `);
+  });
+
+  it('emits status updates when node info request error changes', () => {
+    const nodeCompat$ = new Subject<NodesVersionCompatibility>();
+
+    const statusUpdates: ServiceStatus[] = [];
+    const subscription = calculateStatus$(nodeCompat$).subscribe((status) =>
+      statusUpdates.push(status)
+    );
+
+    nodeCompat$.next({
+      isCompatible: false,
+      kibanaVersion: '1.1.1',
+      incompatibleNodes: [],
+      warningNodes: [],
+      message: 'Unable to retrieve version info. connect ECONNREFUSED',
+      nodesInfoRequestError: new Error('connect ECONNREFUSED'),
+    });
+    nodeCompat$.next({
+      isCompatible: false,
+      kibanaVersion: '1.1.1',
+      incompatibleNodes: [],
+      warningNodes: [],
+      message: 'Unable to retrieve version info. security_exception',
+      nodesInfoRequestError: new Error('security_exception'),
+    });
+
+    subscription.unsubscribe();
+    expect(statusUpdates).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "level": unavailable,
+          "meta": Object {
+            "incompatibleNodes": Array [],
+            "warningNodes": Array [],
+          },
+          "summary": "Waiting for Elasticsearch",
+        },
+        Object {
+          "level": critical,
+          "meta": Object {
+            "incompatibleNodes": Array [],
+            "nodesInfoRequestError": [Error: connect ECONNREFUSED],
+            "warningNodes": Array [],
+          },
+          "summary": "Unable to retrieve version info. connect ECONNREFUSED",
+        },
+        Object {
+          "level": critical,
+          "meta": Object {
+            "incompatibleNodes": Array [],
+            "nodesInfoRequestError": [Error: security_exception],
+            "warningNodes": Array [],
+          },
+          "summary": "Unable to retrieve version info. security_exception",
+        },
+      ]
+    `);
+  });
+
+  it('changes to available when a request error is resolved', () => {
+    const nodeCompat$ = new Subject<NodesVersionCompatibility>();
+
+    const statusUpdates: ServiceStatus[] = [];
+    const subscription = calculateStatus$(nodeCompat$).subscribe((status) =>
+      statusUpdates.push(status)
+    );
+
+    nodeCompat$.next({
+      isCompatible: false,
+      kibanaVersion: '1.1.1',
+      incompatibleNodes: [],
+      warningNodes: [],
+      message: 'Unable to retrieve version info. security_exception',
+      nodesInfoRequestError: new Error('security_exception'),
+    });
+    nodeCompat$.next({
+      isCompatible: true,
+      kibanaVersion: '1.1.1',
+      warningNodes: [],
+      incompatibleNodes: [],
+    });
+
+    subscription.unsubscribe();
+    expect(statusUpdates).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "level": unavailable,
+          "meta": Object {
+            "incompatibleNodes": Array [],
+            "warningNodes": Array [],
+          },
+          "summary": "Waiting for Elasticsearch",
+        },
+        Object {
+          "level": critical,
+          "meta": Object {
+            "incompatibleNodes": Array [],
+            "nodesInfoRequestError": [Error: security_exception],
+            "warningNodes": Array [],
+          },
+          "summary": "Unable to retrieve version info. security_exception",
         },
         Object {
           "level": available,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -10,10 +11,9 @@ import { waitFor } from '@testing-library/react';
 
 import '../../../../../common/mock/match_media';
 import '../../../../../common/mock/formatted_relative';
-import { AllRules } from './index';
-import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
-import { useRules, useRulesStatuses } from '../../../../containers/detection_engine/rules';
 import { TestProviders } from '../../../../../common/mock';
+
+import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
 import { createUseUiSetting$Mock } from '../../../../../common/lib/kibana/kibana_react.mock';
 import {
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
@@ -21,6 +21,14 @@ import {
   DEFAULT_RULE_REFRESH_IDLE_VALUE,
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
 } from '../../../../../../common/constants';
+
+import {
+  useRulesTable,
+  useRulesStatuses,
+  RulesTableState,
+} from '../../../../containers/detection_engine/rules';
+
+import { AllRules } from './index';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -39,6 +47,7 @@ jest.mock('../../../../containers/detection_engine/rules');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
+const mockUseRulesTable = useRulesTable as jest.Mock;
 
 describe('AllRules', () => {
   const mockRefetchRulesData = jest.fn();
@@ -61,15 +70,12 @@ describe('AllRules', () => {
         : useUiSetting$Mock(key, defaultValue);
     });
 
-    (useRules as jest.Mock).mockReturnValue([
-      false,
-      {
-        page: 1,
-        perPage: 20,
-        total: 1,
-        data: [
+    mockUseRulesTable.mockImplementation(({ initialStateOverride }) => {
+      const initialState: RulesTableState = {
+        rules: [
           {
             actions: [],
+            author: [],
             created_at: '2020-02-14T19:49:28.178Z',
             created_by: 'elastic',
             description: 'jibber jabber',
@@ -88,8 +94,10 @@ describe('AllRules', () => {
             query: 'host.name:*',
             references: [],
             risk_score: 73,
+            risk_score_mapping: [],
             rule_id: '571afc56-5ed9-465d-a2a9-045f099f6e7e',
             severity: 'high',
+            severity_mapping: [],
             tags: ['Elastic', 'Endpoint'],
             threat: [],
             throttle: null,
@@ -100,9 +108,44 @@ describe('AllRules', () => {
             version: 1,
           },
         ],
-      },
-      mockRefetchRulesData,
-    ]);
+        pagination: {
+          page: 1,
+          perPage: 20,
+          total: 1,
+        },
+        filterOptions: {
+          filter: '',
+          sortField: 'enabled',
+          sortOrder: 'desc',
+          tags: [],
+          showCustomRules: false,
+          showElasticRules: false,
+        },
+        loadingRulesAction: null,
+        loadingRuleIds: [],
+        selectedRuleIds: [],
+        lastUpdated: 0,
+        isRefreshOn: true,
+        isRefreshing: false,
+        isAllSelected: false,
+        showIdleModal: false,
+      };
+
+      return {
+        state: { ...initialState, ...initialStateOverride },
+        dispatch: jest.fn(),
+        reFetchRules: mockRefetchRulesData,
+        setRules: jest.fn(),
+        updateRules: jest.fn(),
+        updateOptions: jest.fn(),
+        actionStarted: jest.fn(),
+        actionStopped: jest.fn(),
+        setShowIdleModal: jest.fn(),
+        setLastRefreshDate: jest.fn(),
+        setAutoRefreshOn: jest.fn(),
+        setIsRefreshing: jest.fn(),
+      };
+    });
 
     (useRulesStatuses as jest.Mock).mockReturnValue({
       loading: false,
@@ -114,7 +157,7 @@ describe('AllRules', () => {
             gap: null,
             last_failure_at: null,
             last_failure_message: null,
-            last_look_back_date: new Date().toISOString(),
+            last_look_back_date: new Date().toISOString(), // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
             last_success_at: new Date().toISOString(),
             last_success_message: 'it is a success',
             search_after_time_durations: ['616.97'],
@@ -146,7 +189,7 @@ describe('AllRules', () => {
     const wrapper = shallow(
       <AllRules
         createPrePackagedRules={jest.fn()}
-        hasNoPermissions={false}
+        hasPermissions
         loading={false}
         loadingCreatePrePackagedRules={false}
         refetchPrePackagedRulesStatus={jest.fn()}
@@ -166,7 +209,7 @@ describe('AllRules', () => {
       <TestProviders>
         <AllRules
           createPrePackagedRules={jest.fn()}
-          hasNoPermissions={false}
+          hasPermissions
           loading={false}
           loadingCreatePrePackagedRules={false}
           refetchPrePackagedRulesStatus={jest.fn()}
@@ -202,7 +245,7 @@ describe('AllRules', () => {
       <TestProviders>
         <AllRules
           createPrePackagedRules={jest.fn()}
-          hasNoPermissions={false}
+          hasPermissions
           loading={false}
           loadingCreatePrePackagedRules={false}
           refetchPrePackagedRulesStatus={jest.fn()}
@@ -236,7 +279,7 @@ describe('AllRules', () => {
         <TestProviders>
           <AllRules
             createPrePackagedRules={jest.fn()}
-            hasNoPermissions={false}
+            hasPermissions
             loading={false}
             loadingCreatePrePackagedRules={false}
             refetchPrePackagedRulesStatus={jest.fn()}
@@ -261,7 +304,7 @@ describe('AllRules', () => {
       <TestProviders>
         <AllRules
           createPrePackagedRules={jest.fn()}
-          hasNoPermissions={false}
+          hasPermissions
           loading={false}
           loadingCreatePrePackagedRules={false}
           refetchPrePackagedRulesStatus={jest.fn()}
@@ -281,35 +324,6 @@ describe('AllRules', () => {
       wrapper.update();
       expect(wrapper.exists('[data-test-subj="monitoring-table"]')).toBeTruthy();
       expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeFalsy();
-    });
-  });
-
-  it('renders exceptions lists tab when tab clicked', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <AllRules
-          createPrePackagedRules={jest.fn()}
-          hasNoPermissions={false}
-          loading={false}
-          loadingCreatePrePackagedRules={false}
-          refetchPrePackagedRulesStatus={jest.fn()}
-          rulesCustomInstalled={1}
-          rulesInstalled={0}
-          rulesNotInstalled={0}
-          rulesNotUpdated={0}
-          setRefreshRulesData={jest.fn()}
-        />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      const exceptionsTab = wrapper.find('[data-test-subj="allRulesTableTab-exceptions"] button');
-      exceptionsTab.simulate('click');
-
-      wrapper.update();
-      expect(wrapper.exists('[data-test-subj="allExceptionListsPanel"]')).toBeTruthy();
-      expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeFalsy();
-      expect(wrapper.exists('[data-test-subj="monitoring-table"]')).toBeFalsy();
     });
   });
 });

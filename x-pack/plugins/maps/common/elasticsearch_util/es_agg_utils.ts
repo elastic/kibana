@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { IndexPattern, IFieldType } from '../../../../../src/plugins/data/common';
+import type { IndexPattern, IndexPatternField } from 'src/plugins/data/common';
 import { AGG_TYPE, JOIN_FIELD_NAME_PREFIX, TOP_TERM_PERCENTAGE_SUFFIX } from '../constants';
 
 export type BucketProperties = Record<string | number, unknown>;
 export type PropertiesMap = Map<string, BucketProperties>;
 
-export function getField(indexPattern: IndexPattern, fieldName: string): IFieldType {
+export function getField(indexPattern: IndexPattern, fieldName: string): IndexPatternField {
   const field = indexPattern.fields.getByName(fieldName);
   if (!field) {
     throw new Error(
@@ -24,7 +26,7 @@ export function getField(indexPattern: IndexPattern, fieldName: string): IFieldT
   return field;
 }
 
-export function addFieldToDSL(dsl: object, field: IFieldType) {
+export function addFieldToDSL(dsl: object, field: IndexPatternField) {
   return !field.scripted
     ? { ...dsl, field: field.name }
     : {

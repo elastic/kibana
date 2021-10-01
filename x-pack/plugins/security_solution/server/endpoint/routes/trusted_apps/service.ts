@@ -1,30 +1,91 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type { SavedObjectsClientContract } from 'kibana/server';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { isEmpty, isEqual } from 'lodash/fp';
 import { ExceptionListClient } from '../../../../../lists/server';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
 
 import {
   DeleteTrustedAppsRequestParams,
+  GetOneTrustedAppResponse,
   GetTrustedAppsListRequest,
   GetTrustedAppsSummaryResponse,
   GetTrustedListAppsResponse,
   PostTrustedAppCreateRequest,
   PostTrustedAppCreateResponse,
+  PutTrustedAppUpdateRequest,
+  PutTrustedAppUpdateResponse,
+  GetTrustedAppsSummaryRequest,
+  TrustedApp,
 } from '../../../../common/endpoint/types';
 
 import {
   exceptionListItemToTrustedApp,
   newTrustedAppToCreateExceptionListItemOptions,
   osFromExceptionItem,
+  updatedTrustedAppToUpdateExceptionListItemOptions,
 } from './mapping';
+import {
+  TrustedAppNotFoundError,
+  TrustedAppVersionConflictError,
+  TrustedAppPolicyNotExistsError,
+} from './errors';
+import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
+import { PackagePolicy } from '../../../../../fleet/common';
+import { EndpointLicenseError } from '../../errors';
 
-export class MissingTrustedAppException {
-  constructor(public id: string) {}
-}
+const getNonExistingPoliciesFromTrustedApp = async (
+  savedObjectClient: SavedObjectsClientContract,
+  packagePolicyClient: PackagePolicyServiceInterface,
+  trustedApp: PutTrustedAppUpdateRequest | PostTrustedAppCreateRequest
+): Promise<PackagePolicy[]> => {
+  if (
+    !trustedApp.effectScope ||
+    trustedApp.effectScope.type === 'global' ||
+    (trustedApp.effectScope.type === 'policy' && isEmpty(trustedApp.effectScope.policies))
+  ) {
+    return [];
+  }
+
+  const policies = await packagePolicyClient.getByIDs(
+    savedObjectClient,
+    trustedApp.effectScope.policies
+  );
+
+  if (!policies) {
+    return [];
+  }
+
+  return policies.filter((policy) => policy.version === undefined);
+};
+
+const isUserTryingToModifyEffectScopeWithoutPermissions = (
+  currentTrustedApp: TrustedApp,
+  updatedTrustedApp: PutTrustedAppUpdateRequest,
+  isAtLeastPlatinum: boolean
+): boolean => {
+  if (updatedTrustedApp.effectScope.type === 'global') {
+    return false;
+  } else if (isAtLeastPlatinum) {
+    return false;
+  } else if (
+    isEqual(
+      currentTrustedApp.effectScope.type === 'policy' &&
+        currentTrustedApp.effectScope.policies.sort(),
+      updatedTrustedApp.effectScope.policies.sort()
+    )
+  ) {
+    return false;
+  } else {
+    return true;
+  }
+};
 
 export const deleteTrustedApp = async (
   exceptionsListClient: ExceptionListClient,
@@ -37,13 +98,32 @@ export const deleteTrustedApp = async (
   });
 
   if (!exceptionListItem) {
-    throw new MissingTrustedAppException(id);
+    throw new TrustedAppNotFoundError(id);
   }
+};
+
+export const getTrustedApp = async (
+  exceptionsListClient: ExceptionListClient,
+  id: string
+): Promise<GetOneTrustedAppResponse> => {
+  const trustedAppExceptionItem = await exceptionsListClient.getExceptionListItem({
+    itemId: '',
+    id,
+    namespaceType: 'agnostic',
+  });
+
+  if (!trustedAppExceptionItem) {
+    throw new TrustedAppNotFoundError(id);
+  }
+
+  return {
+    data: exceptionListItemToTrustedApp(trustedAppExceptionItem),
+  };
 };
 
 export const getTrustedAppsList = async (
   exceptionsListClient: ExceptionListClient,
-  { page, per_page: perPage }: GetTrustedAppsListRequest
+  { page, per_page: perPage, kuery }: GetTrustedAppsListRequest
 ): Promise<GetTrustedListAppsResponse> => {
   // Ensure list is created if it does not exist
   await exceptionsListClient.createTrustedAppsList();
@@ -52,7 +132,7 @@ export const getTrustedAppsList = async (
     listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
     page,
     perPage,
-    filter: undefined,
+    filter: kuery,
     namespaceType: 'agnostic',
     sortField: 'name',
     sortOrder: 'asc',
@@ -68,10 +148,30 @@ export const getTrustedAppsList = async (
 
 export const createTrustedApp = async (
   exceptionsListClient: ExceptionListClient,
-  newTrustedApp: PostTrustedAppCreateRequest
+  savedObjectClient: SavedObjectsClientContract,
+  packagePolicyClient: PackagePolicyServiceInterface,
+  newTrustedApp: PostTrustedAppCreateRequest,
+  isAtLeastPlatinum: boolean
 ): Promise<PostTrustedAppCreateResponse> => {
   // Ensure list is created if it does not exist
   await exceptionsListClient.createTrustedAppsList();
+
+  if (newTrustedApp.effectScope.type === 'policy' && !isAtLeastPlatinum) {
+    throw new EndpointLicenseError();
+  }
+
+  const unexistingPolicies = await getNonExistingPoliciesFromTrustedApp(
+    savedObjectClient,
+    packagePolicyClient,
+    newTrustedApp
+  );
+
+  if (!isEmpty(unexistingPolicies)) {
+    throw new TrustedAppPolicyNotExistsError(
+      newTrustedApp.name,
+      unexistingPolicies.map((policy) => policy.id)
+    );
+  }
 
   const createdTrustedAppExceptionItem = await exceptionsListClient.createExceptionListItem(
     newTrustedAppToCreateExceptionListItemOptions(newTrustedApp)
@@ -80,12 +180,77 @@ export const createTrustedApp = async (
   return { data: exceptionListItemToTrustedApp(createdTrustedAppExceptionItem) };
 };
 
+export const updateTrustedApp = async (
+  exceptionsListClient: ExceptionListClient,
+  savedObjectClient: SavedObjectsClientContract,
+  packagePolicyClient: PackagePolicyServiceInterface,
+  id: string,
+  updatedTrustedApp: PutTrustedAppUpdateRequest,
+  isAtLeastPlatinum: boolean
+): Promise<PutTrustedAppUpdateResponse> => {
+  const currentTrustedApp = await exceptionsListClient.getExceptionListItem({
+    itemId: '',
+    id,
+    namespaceType: 'agnostic',
+  });
+
+  if (!currentTrustedApp) {
+    throw new TrustedAppNotFoundError(id);
+  }
+
+  if (
+    isUserTryingToModifyEffectScopeWithoutPermissions(
+      exceptionListItemToTrustedApp(currentTrustedApp),
+      updatedTrustedApp,
+      isAtLeastPlatinum
+    )
+  ) {
+    throw new EndpointLicenseError();
+  }
+
+  const unexistingPolicies = await getNonExistingPoliciesFromTrustedApp(
+    savedObjectClient,
+    packagePolicyClient,
+    updatedTrustedApp
+  );
+
+  if (!isEmpty(unexistingPolicies)) {
+    throw new TrustedAppPolicyNotExistsError(
+      updatedTrustedApp.name,
+      unexistingPolicies.map((policy) => policy.id)
+    );
+  }
+
+  let updatedTrustedAppExceptionItem: ExceptionListItemSchema | null;
+
+  try {
+    updatedTrustedAppExceptionItem = await exceptionsListClient.updateExceptionListItem(
+      updatedTrustedAppToUpdateExceptionListItemOptions(currentTrustedApp, updatedTrustedApp)
+    );
+  } catch (e) {
+    if (e?.output?.statusCode === 409) {
+      throw new TrustedAppVersionConflictError(id, e);
+    }
+
+    throw e;
+  }
+
+  // If `null` is returned, then that means the TA does not exist (could happen in race conditions)
+  if (!updatedTrustedAppExceptionItem) {
+    throw new TrustedAppNotFoundError(id);
+  }
+
+  return {
+    data: exceptionListItemToTrustedApp(updatedTrustedAppExceptionItem),
+  };
+};
+
 export const getTrustedAppsSummary = async (
-  exceptionsListClient: ExceptionListClient
+  exceptionsListClient: ExceptionListClient,
+  { kuery }: GetTrustedAppsSummaryRequest
 ): Promise<GetTrustedAppsSummaryResponse> => {
   // Ensure list is created if it does not exist
   await exceptionsListClient.createTrustedAppsList();
-
   const summary = {
     linux: 0,
     windows: 0,
@@ -101,7 +266,7 @@ export const getTrustedAppsSummary = async (
       listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
       page,
       perPage,
-      filter: undefined,
+      filter: kuery,
       namespaceType: 'agnostic',
       sortField: undefined,
       sortOrder: undefined,

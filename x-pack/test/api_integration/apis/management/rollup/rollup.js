@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -11,7 +12,6 @@ import { registerHelpers } from './rollup.test_helpers';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
 
   const {
     createIndexWithMappings,
@@ -22,7 +22,7 @@ export default function ({ getService }) {
     startJob,
     stopJob,
     cleanUp,
-  } = registerHelpers({ supertest, es });
+  } = registerHelpers(getService);
 
   describe('jobs', () => {
     after(() => cleanUp());
@@ -56,10 +56,16 @@ export default function ({ getService }) {
         expect(body.doesMatchIndices).to.be(true);
         expect(body.doesMatchRollupIndices).to.be(false);
         expect(body.dateFields).to.eql(['testCreatedField']);
-        expect(body.keywordFields).to.eql(['testTagField']);
-
-        // Allowing the test to account for future addition of doc_count
-        expect(body.numericFields.indexOf('testTotalField')).to.be.greaterThan(-1);
+        // '_tier' is an expected metadata field from ES
+        // Order is not guaranteed, so we assert against individual field names
+        ['_tier', 'testTagField'].forEach((keywordField) => {
+          expect(body.keywordFields.includes(keywordField)).to.be(true);
+        });
+        // '_doc_count' is an expected metadata field from ES
+        // Order is not guaranteed, so we assert against individual field names
+        ['_doc_count', 'testTotalField'].forEach((numericField) => {
+          expect(body.numericFields.includes(numericField)).to.be(true);
+        });
       });
 
       it("should not return any fields when the index pattern doesn't match any indices", async () => {

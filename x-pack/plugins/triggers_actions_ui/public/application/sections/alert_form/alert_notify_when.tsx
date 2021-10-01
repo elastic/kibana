@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
+
+import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -32,12 +34,12 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
     inputDisplay: i18n.translate(
       'xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActionGroupChange.display',
       {
-        defaultMessage: 'Only on status change.',
+        defaultMessage: 'Only on status change',
       }
     ),
     'data-test-subj': 'onActionGroupChange',
     dropdownDisplay: (
-      <Fragment>
+      <>
         <strong>
           <FormattedMessage
             defaultMessage="Only on status change"
@@ -52,7 +54,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
             />
           </p>
         </EuiText>
-      </Fragment>
+      </>
     ),
   },
   {
@@ -65,7 +67,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
     ),
     'data-test-subj': 'onActiveAlert',
     dropdownDisplay: (
-      <Fragment>
+      <>
         <strong>
           <FormattedMessage
             defaultMessage="Every time alert is active"
@@ -75,12 +77,12 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage="Actions run with every active alert interval."
+              defaultMessage="Actions repeat at the rule interval when the alert is active."
               id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActiveAlert.description"
             />
           </p>
         </EuiText>
-      </Fragment>
+      </>
     ),
   },
   {
@@ -93,7 +95,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
     ),
     'data-test-subj': 'onThrottleInterval',
     dropdownDisplay: (
-      <Fragment>
+      <>
         <strong>
           <FormattedMessage
             defaultMessage="On a custom action interval"
@@ -108,7 +110,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
             />
           </p>
         </EuiText>
-      </Fragment>
+      </>
     ),
   },
 ];
@@ -130,9 +132,8 @@ export const AlertNotifyWhen = ({
 }: AlertNotifyWhenProps) => {
   const [alertThrottle, setAlertThrottle] = useState<number>(throttle || 1);
   const [showCustomThrottleOpts, setShowCustomThrottleOpts] = useState<boolean>(false);
-  const [notifyWhenValue, setNotifyWhenValue] = useState<AlertNotifyWhenType>(
-    DEFAULT_NOTIFY_WHEN_VALUE
-  );
+  const [notifyWhenValue, setNotifyWhenValue] =
+    useState<AlertNotifyWhenType>(DEFAULT_NOTIFY_WHEN_VALUE);
 
   useEffect(() => {
     if (alert.notifyWhen) {
@@ -164,14 +165,14 @@ export const AlertNotifyWhen = ({
         position="right"
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.renotifyWithTooltip', {
-          defaultMessage: 'Define how often to repeat the action while the alert is active.',
+          defaultMessage: 'Define how often to repeat the action while the rule is active.',
         })}
       />
     </>
   );
 
   return (
-    <Fragment>
+    <>
       <EuiFormRow fullWidth label={labelForAlertRenotify}>
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>
@@ -182,7 +183,7 @@ export const AlertNotifyWhen = ({
               onChange={onNotifyWhenValueChange}
             />
             {showCustomThrottleOpts && (
-              <Fragment>
+              <>
                 <EuiSpacer />
                 <EuiFormRow fullWidth>
                   <EuiFlexGroup gutterSize="s">
@@ -225,11 +226,11 @@ export const AlertNotifyWhen = ({
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFormRow>
-              </Fragment>
+              </>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
-    </Fragment>
+    </>
   );
 };

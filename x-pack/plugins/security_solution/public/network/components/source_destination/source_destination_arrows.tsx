@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
@@ -55,10 +56,11 @@ Data.displayName = 'Data';
 const SourceArrow = React.memo<{
   contextId: string;
   eventId: string;
+  isDraggable?: boolean;
   sourceBytes: string | undefined;
   sourceBytesPercent: number | undefined;
   sourcePackets: string | undefined;
-}>(({ contextId, eventId, sourceBytes, sourceBytesPercent, sourcePackets }) => {
+}>(({ contextId, eventId, isDraggable, sourceBytes, sourceBytesPercent, sourcePackets }) => {
   const sourceArrowHeight =
     sourceBytesPercent != null
       ? getArrowHeightFromPercent(sourceBytesPercent)
@@ -75,6 +77,7 @@ const SourceArrow = React.memo<{
           <DefaultDraggable
             field={SOURCE_BYTES_FIELD_NAME}
             id={`source-arrow-default-draggable-${contextId}-${eventId}-${SOURCE_BYTES_FIELD_NAME}-${sourceBytes}`}
+            isDraggable={isDraggable}
             value={sourceBytes}
           >
             <Data size="xs">
@@ -100,6 +103,7 @@ const SourceArrow = React.memo<{
           <DefaultDraggable
             field={SOURCE_PACKETS_FIELD_NAME}
             id={`source-arrow-default-draggable-${contextId}-${eventId}-${SOURCE_PACKETS_FIELD_NAME}-${sourcePackets}`}
+            isDraggable={isDraggable}
             value={sourcePackets}
           >
             <Data size="xs">
@@ -128,73 +132,85 @@ SourceArrow.displayName = 'SourceArrow';
  */
 const DestinationArrow = React.memo<{
   contextId: string;
-  eventId: string;
   destinationBytes: string | undefined;
   destinationBytesPercent: number | undefined;
   destinationPackets: string | undefined;
-}>(({ contextId, eventId, destinationBytes, destinationBytesPercent, destinationPackets }) => {
-  const destinationArrowHeight =
-    destinationBytesPercent != null
-      ? getArrowHeightFromPercent(destinationBytesPercent)
-      : DEFAULT_ARROW_HEIGHT;
+  eventId: string;
+  isDraggable?: boolean;
+}>(
+  ({
+    contextId,
+    destinationBytes,
+    destinationBytesPercent,
+    destinationPackets,
+    eventId,
+    isDraggable,
+  }) => {
+    const destinationArrowHeight =
+      destinationBytesPercent != null
+        ? getArrowHeightFromPercent(destinationBytesPercent)
+        : DEFAULT_ARROW_HEIGHT;
 
-  return (
-    <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
-      <EuiFlexItem grow={false}>
-        <ArrowHead direction="arrowLeft" />
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <ArrowBody height={destinationArrowHeight} />
-      </EuiFlexItem>
-
-      {destinationBytes != null && !isNaN(Number(destinationBytes)) ? (
+    return (
+      <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
         <EuiFlexItem grow={false}>
-          <DefaultDraggable
-            field={DESTINATION_BYTES_FIELD_NAME}
-            id={`destination-arrow-default-draggable-${contextId}-${eventId}-${DESTINATION_BYTES_FIELD_NAME}-${destinationBytes}`}
-            value={destinationBytes}
-          >
-            <Data size="xs">
-              {destinationBytesPercent != null ? (
-                <Percent data-test-subj="destination-bytes-percent">
-                  {`(${numeral(destinationBytesPercent).format('0.00')}%)`}
-                </Percent>
-              ) : null}
-              <span data-test-subj="destination-bytes">
-                <PreferenceFormattedBytes value={destinationBytes} />
-              </span>
-            </Data>
-          </DefaultDraggable>
+          <ArrowHead direction="arrowLeft" />
         </EuiFlexItem>
-      ) : null}
 
-      <EuiFlexItem grow={false}>
-        <ArrowBody height={destinationArrowHeight} />
-      </EuiFlexItem>
-
-      {destinationPackets != null && !isNaN(Number(destinationPackets)) ? (
         <EuiFlexItem grow={false}>
-          <DefaultDraggable
-            field={DESTINATION_PACKETS_FIELD_NAME}
-            id={`destination-arrow-default-draggable-${contextId}-${eventId}-${DESTINATION_PACKETS_FIELD_NAME}-${destinationPackets}`}
-            value={destinationPackets}
-          >
-            <Data size="xs">
-              <span data-test-subj="destination-packets">{`${numeral(destinationPackets).format(
-                '0,0'
-              )} ${i18n.PACKETS}`}</span>
-            </Data>
-          </DefaultDraggable>
+          <ArrowBody height={destinationArrowHeight} />
         </EuiFlexItem>
-      ) : null}
 
-      <EuiFlexItem grow={false}>
-        <ArrowBody height={destinationArrowHeight} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
+        {destinationBytes != null && !isNaN(Number(destinationBytes)) ? (
+          <EuiFlexItem grow={false}>
+            <DefaultDraggable
+              field={DESTINATION_BYTES_FIELD_NAME}
+              id={`destination-arrow-default-draggable-${contextId}-${eventId}-${DESTINATION_BYTES_FIELD_NAME}-${destinationBytes}`}
+              isDraggable={isDraggable}
+              value={destinationBytes}
+            >
+              <Data size="xs">
+                {destinationBytesPercent != null ? (
+                  <Percent data-test-subj="destination-bytes-percent">
+                    {`(${numeral(destinationBytesPercent).format('0.00')}%)`}
+                  </Percent>
+                ) : null}
+                <span data-test-subj="destination-bytes">
+                  <PreferenceFormattedBytes value={destinationBytes} />
+                </span>
+              </Data>
+            </DefaultDraggable>
+          </EuiFlexItem>
+        ) : null}
+
+        <EuiFlexItem grow={false}>
+          <ArrowBody height={destinationArrowHeight} />
+        </EuiFlexItem>
+
+        {destinationPackets != null && !isNaN(Number(destinationPackets)) ? (
+          <EuiFlexItem grow={false}>
+            <DefaultDraggable
+              field={DESTINATION_PACKETS_FIELD_NAME}
+              id={`destination-arrow-default-draggable-${contextId}-${eventId}-${DESTINATION_PACKETS_FIELD_NAME}-${destinationPackets}`}
+              isDraggable={isDraggable}
+              value={destinationPackets}
+            >
+              <Data size="xs">
+                <span data-test-subj="destination-packets">{`${numeral(destinationPackets).format(
+                  '0,0'
+                )} ${i18n.PACKETS}`}</span>
+              </Data>
+            </DefaultDraggable>
+          </EuiFlexItem>
+        ) : null}
+
+        <EuiFlexItem grow={false}>
+          <ArrowBody height={destinationArrowHeight} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
 
 DestinationArrow.displayName = 'DestinationArrow';
 
@@ -207,67 +223,79 @@ export const SourceDestinationArrows = React.memo<{
   destinationBytes?: string[] | null;
   destinationPackets?: string[] | null;
   eventId: string;
+  isDraggable?: boolean;
   sourceBytes?: string[] | null;
   sourcePackets?: string[] | null;
-}>(({ contextId, destinationBytes, destinationPackets, eventId, sourceBytes, sourcePackets }) => {
-  const maybeSourceBytes =
-    sourceBytes != null && hasOneValue(sourceBytes) ? sourceBytes[0] : undefined;
+}>(
+  ({
+    contextId,
+    destinationBytes,
+    destinationPackets,
+    eventId,
+    isDraggable,
+    sourceBytes,
+    sourcePackets,
+  }) => {
+    const maybeSourceBytes =
+      sourceBytes != null && hasOneValue(sourceBytes) ? sourceBytes[0] : undefined;
 
-  const maybeSourcePackets =
-    sourcePackets != null && hasOneValue(sourcePackets) ? sourcePackets[0] : undefined;
+    const maybeSourcePackets =
+      sourcePackets != null && hasOneValue(sourcePackets) ? sourcePackets[0] : undefined;
 
-  const maybeDestinationBytes =
-    destinationBytes != null && hasOneValue(destinationBytes) ? destinationBytes[0] : undefined;
+    const maybeDestinationBytes =
+      destinationBytes != null && hasOneValue(destinationBytes) ? destinationBytes[0] : undefined;
 
-  const maybeDestinationPackets =
-    destinationPackets != null && hasOneValue(destinationPackets)
-      ? destinationPackets[0]
-      : undefined;
+    const maybeDestinationPackets =
+      destinationPackets != null && hasOneValue(destinationPackets)
+        ? destinationPackets[0]
+        : undefined;
 
-  const maybeSourceBytesPercent =
-    maybeSourceBytes != null && maybeDestinationBytes != null
-      ? getPercent({
-          numerator: Number(maybeSourceBytes),
-          denominator: Number(maybeSourceBytes) + Number(maybeDestinationBytes),
-        })
-      : undefined;
+    const maybeSourceBytesPercent =
+      maybeSourceBytes != null && maybeDestinationBytes != null
+        ? getPercent({
+            numerator: Number(maybeSourceBytes),
+            denominator: Number(maybeSourceBytes) + Number(maybeDestinationBytes),
+          })
+        : undefined;
 
-  const maybeDestinationBytesPercent =
-    maybeSourceBytesPercent != null ? 100 - maybeSourceBytesPercent : undefined;
+    const maybeDestinationBytesPercent =
+      maybeSourceBytesPercent != null ? 100 - maybeSourceBytesPercent : undefined;
 
-  return (
-    <SourceDestinationArrowsContainer
-      alignItems="center"
-      data-test-subj="source-destination-arrows-container"
-      justifyContent="center"
-      direction="column"
-      gutterSize="none"
-    >
-      {maybeSourceBytes != null ? (
-        <EuiFlexItem grow={false}>
-          <SourceArrow
-            contextId={contextId}
-            sourceBytes={maybeSourceBytes}
-            sourcePackets={maybeSourcePackets}
-            sourceBytesPercent={maybeSourceBytesPercent}
-            eventId={eventId}
-          />
-        </EuiFlexItem>
-      ) : null}
-
-      {maybeDestinationBytes != null ? (
-        <EuiFlexItem grow={false}>
-          <DestinationArrow
-            contextId={contextId}
-            destinationBytes={maybeDestinationBytes}
-            destinationPackets={maybeDestinationPackets}
-            destinationBytesPercent={maybeDestinationBytesPercent}
-            eventId={eventId}
-          />
-        </EuiFlexItem>
-      ) : null}
-    </SourceDestinationArrowsContainer>
-  );
-});
+    return (
+      <SourceDestinationArrowsContainer
+        alignItems="center"
+        data-test-subj="source-destination-arrows-container"
+        justifyContent="center"
+        direction="column"
+        gutterSize="none"
+      >
+        {maybeSourceBytes != null ? (
+          <EuiFlexItem grow={false}>
+            <SourceArrow
+              contextId={contextId}
+              eventId={eventId}
+              isDraggable={isDraggable}
+              sourceBytes={maybeSourceBytes}
+              sourcePackets={maybeSourcePackets}
+              sourceBytesPercent={maybeSourceBytesPercent}
+            />
+          </EuiFlexItem>
+        ) : null}
+        {maybeDestinationBytes != null ? (
+          <EuiFlexItem grow={false}>
+            <DestinationArrow
+              contextId={contextId}
+              destinationBytes={maybeDestinationBytes}
+              destinationPackets={maybeDestinationPackets}
+              destinationBytesPercent={maybeDestinationBytesPercent}
+              eventId={eventId}
+              isDraggable={isDraggable}
+            />
+          </EuiFlexItem>
+        ) : null}
+      </SourceDestinationArrowsContainer>
+    );
+  }
+);
 
 SourceDestinationArrows.displayName = 'SourceDestinationArrows';

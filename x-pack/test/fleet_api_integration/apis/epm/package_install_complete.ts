@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -11,6 +12,7 @@ import {
 } from '../../../../plugins/fleet/common';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -23,6 +25,7 @@ export default function (providerContext: FtrProviderContext) {
   const pkgUpdateVersion = '0.2.0';
   describe('setup checks packages completed install', async () => {
     skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
     describe('package install', async () => {
       before(async () => {
         if (!server.enabled) return;

@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
 import { useActions, useValues } from 'kea';
-
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiSpacer,
@@ -17,14 +16,14 @@ import {
   EuiTableHeader,
   EuiTableHeaderCell,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
+import { ACTIONS_HEADER } from '../../../../shared/constants';
 import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';
-
-import { AppLogic } from '../../../app_logic';
 import { GroupsLogic } from '../groups_logic';
-import { GroupRow } from './group_row';
 
 import { ClearFiltersLink } from './clear_filters_link';
+import { GroupRow } from './group_row';
 
 const GROUP_TABLE_HEADER = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.groupsTable.groupTableHeader',
@@ -32,16 +31,18 @@ const GROUP_TABLE_HEADER = i18n.translate(
     defaultMessage: 'Group',
   }
 );
+
+const GROUPS_PAGINATION_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.groupsTable.groupPagination.label',
+  {
+    defaultMessage: 'Groups',
+  }
+);
+
 const SOURCES_TABLE_HEADER = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.groupsTable.sourcesTableHeader',
   {
     defaultMessage: 'Content sources',
-  }
-);
-const USERS_TABLE_HEADER = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.groups.groupsTable.usersTableHeader',
-  {
-    defaultMessage: 'Users',
   }
 );
 
@@ -54,12 +55,11 @@ export const GroupsTable: React.FC<{}> = () => {
     groups,
     hasFiltersSet,
   } = useValues(GroupsLogic);
-  const { isFederatedAuth } = useValues(AppLogic);
 
   const clearFiltersLink = hasFiltersSet ? <ClearFiltersLink /> : undefined;
 
   const paginationOptions = {
-    itemLabel: 'Groups',
+    itemLabel: GROUPS_PAGINATION_LABEL,
     totalPages,
     totalItems,
     activePage,
@@ -76,12 +76,11 @@ export const GroupsTable: React.FC<{}> = () => {
     <>
       {showPagination ? <TablePaginationBar {...paginationOptions} /> : clearFiltersLink}
       <EuiSpacer size="m" />
-      <EuiTable className="groups-table" tableLayout="auto">
+      <EuiTable tableLayout="auto">
         <EuiTableHeader>
           <EuiTableHeaderCell>{GROUP_TABLE_HEADER}</EuiTableHeaderCell>
           <EuiTableHeaderCell>{SOURCES_TABLE_HEADER}</EuiTableHeaderCell>
-          {!isFederatedAuth && <EuiTableHeaderCell>{USERS_TABLE_HEADER}</EuiTableHeaderCell>}
-          <EuiTableHeaderCell />
+          <EuiTableHeaderCell align="right">{ACTIONS_HEADER}</EuiTableHeaderCell>
         </EuiTableHeader>
         <EuiTableBody>
           {groups.map((group, index) => (
@@ -90,7 +89,7 @@ export const GroupsTable: React.FC<{}> = () => {
         </EuiTableBody>
       </EuiTable>
       <EuiSpacer size="m" />
-      {showPagination && <TablePaginationBar {...paginationOptions} hideLabelCount={true} />}
+      {showPagination && <TablePaginationBar {...paginationOptions} hideLabelCount />}
     </>
   );
 };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -29,7 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
     }
     // click elsewhere to close the filter dropdown
-    const searchFilter = await find.byCssSelector('main .euiFieldSearch');
+    const searchFilter = await find.byCssSelector('.euiPageBody .euiFieldSearch');
     await searchFilter.click();
     // wait until the table refreshes
     await listingTable.waitUntilTableIsLoaded();
@@ -45,14 +46,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await testSubjects.click('savedObjectTitle');
   };
 
-  describe('visualize integration', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/89958
+  describe.skip('visualize integration', () => {
     before(async () => {
-      await esArchiver.load('visualize');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/visualize'
+      );
+      await esArchiver.loadIfNeeded(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional'
+      );
     });
     after(async () => {
-      await esArchiver.unload('visualize');
-      await esArchiver.unload('logstash_functional');
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/visualize'
+      );
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     describe('listing', () => {
@@ -94,7 +104,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo();
 
         await PageObjects.visualize.ensureSavePanelOpen();
-        await testSubjects.setValue('savedObjectTitle', 'My new markdown viz');
+        await PageObjects.visualize.setSaveModalValues('My new markdown viz');
+
         await selectSavedObjectTags('tag-1');
 
         await testSubjects.click('confirmSaveSavedObjectButton');
@@ -118,7 +129,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo();
 
         await PageObjects.visualize.ensureSavePanelOpen();
-        await testSubjects.setValue('savedObjectTitle', 'vis-with-new-tag');
+        await PageObjects.visualize.setSaveModalValues('vis-with-new-tag');
 
         await testSubjects.click('savedObjectTagSelector');
         await testSubjects.click(`tagSelectorOption-action__create`);
@@ -150,7 +161,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('editing', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/88639
+    describe.skip('editing', () => {
       beforeEach(async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.waitUntilTableIsLoaded();

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { monaco } from '@kbn/monaco';
@@ -96,7 +97,6 @@ export const language: Language = {
 
 export function registerLanguage(functions: ExpressionFunction[]) {
   language.keywords = functions.map((fn) => fn.name);
-
   monaco.languages.register({ id: LANGUAGE_ID });
   monaco.languages.setMonarchTokensProvider(LANGUAGE_ID, language);
 }

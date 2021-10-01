@@ -1,24 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-
-export const JIRA_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.selectMessageText',
-  {
-    defaultMessage: 'Create an incident in Jira.',
-  }
-);
-
-export const JIRA_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.actionTypeTitle',
-  {
-    defaultMessage: 'Jira',
-  }
-);
 
 export const API_URL_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.apiUrlTextFieldLabel',
@@ -69,14 +56,6 @@ export const JIRA_AUTHENTICATION_LABEL = i18n.translate(
   }
 );
 
-export const JIRA_REMEMBER_VALUES_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.rememberValuesLabel',
-  {
-    defaultMessage:
-      'Remember these values. You must reenter them each time you edit the connector.',
-  }
-);
-
 export const JIRA_REENTER_VALUES_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.reenterValuesLabel',
   {
@@ -88,33 +67,33 @@ export const JIRA_REENTER_VALUES_LABEL = i18n.translate(
 export const JIRA_EMAIL_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.emailTextFieldLabel',
   {
-    defaultMessage: 'Username or email address',
+    defaultMessage: 'Email address',
   }
 );
 
 export const JIRA_EMAIL_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredEmailTextField',
   {
-    defaultMessage: 'Username or email address is required',
+    defaultMessage: 'Email address is required',
   }
 );
 
 export const JIRA_API_TOKEN_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.apiTokenTextFieldLabel',
   {
-    defaultMessage: 'API token or password',
+    defaultMessage: 'API token',
   }
 );
 
 export const JIRA_API_TOKEN_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredApiTokenTextField',
   {
-    defaultMessage: 'API token or password is required',
+    defaultMessage: 'API token is required',
   }
 );
 
 export const MAPPING_FIELD_SUMMARY = i18n.translate(
-  'xpack.triggersActionsUI.case.configureCases.mappingFieldSummary',
+  'xpack.triggersActionsUI.cases.configureCases.mappingFieldSummary',
   {
     defaultMessage: 'Summary',
   }
@@ -196,5 +175,12 @@ export const SEARCH_ISSUES_LOADING = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.searchIssuesLoading',
   {
     defaultMessage: 'Loading...',
+  }
+);
+
+export const LABELS_WHITE_SPACES = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.jira.labelsSpacesErrorMessage',
+  {
+    defaultMessage: 'Labels cannot contain spaces.',
   }
 );

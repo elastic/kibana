@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import Fs from 'fs';
 import { resolve, join } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
-import { services } from './services';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from './page_objects';
 
 // .server-log is specifically not enabled
@@ -15,6 +16,7 @@ const enabledActionTypes = [
   '.email',
   '.index',
   '.pagerduty',
+  '.swimlane',
   '.servicenow',
   '.slack',
   '.webhook',
@@ -33,18 +35,19 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     elasticsearch: {
       ...xpackFunctionalConfig.get('servers.elasticsearch'),
       protocol: 'https',
+      certificateAuthorities: [Fs.readFileSync(CA_CERT_PATH)],
     },
   };
 
   const returnedObject = {
     ...xpackFunctionalConfig.getAll(),
     servers,
-    services,
     pageObjects,
     // list paths to the files that contain your plugins tests
     testFiles: [
       resolve(__dirname, './apps/triggers_actions_ui'),
       resolve(__dirname, './apps/uptime'),
+      resolve(__dirname, './apps/ml'),
     ],
     apps: {
       ...xpackFunctionalConfig.get('apps'),
@@ -64,6 +67,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
         `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
+        `--xpack.actions.preconfiguredAlertHistoryEsIndex=false`,
         `--xpack.actions.preconfigured=${JSON.stringify({
           'my-slack1': {
             actionTypeId: '.slack',
@@ -87,6 +91,22 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           },
         })}`,
       ],
+    },
+    security: {
+      roles: {
+        alerts_and_actions_role: {
+          kibana: [
+            {
+              feature: {
+                actions: ['all'],
+                stackAlerts: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+      },
+      defaultRoles: ['superuser'],
     },
   };
 

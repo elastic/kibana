@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -314,6 +315,22 @@ describe('getTimeRangeSettings', () => {
       expect(to).toBe(new Date(DEFAULT_TO_DATE).toISOString());
     });
 
+    test('should round up "to" when from and to are both "now/d"', () => {
+      const mockTo = 'now/d';
+      const mockFrom = 'now/d';
+      mockTimeRange({ from: mockFrom, to: mockTo });
+      const { to } = getTimeRangeSettings();
+      expect(to).toContain('59:59.999Z');
+    });
+
+    test('should round up "to" when from and to are different date maths', () => {
+      const mockTo = 'now/d';
+      const mockFrom = 'now/d+1';
+      mockTimeRange({ from: mockFrom, to: mockTo });
+      const { to } = getTimeRangeSettings();
+      expect(to).toContain('59:59.999Z');
+    });
+
     test('should return the DEFAULT_TO_DATE when the from value is malformed', () => {
       const malformedTimeRange = { from: true };
       if (isMalformedTimeRange(malformedTimeRange)) {
@@ -481,17 +498,21 @@ describe('getIntervalSettings', () => {
     beforeEach(() => {
       // Disable momentJS deprecation warning and it looks like it is not typed either so
       // we have to disable the type as well and cannot extend it easily.
-      ((moment as unknown) as {
-        suppressDeprecationWarnings: boolean;
-      }).suppressDeprecationWarnings = true;
+      (
+        moment as unknown as {
+          suppressDeprecationWarnings: boolean;
+        }
+      ).suppressDeprecationWarnings = true;
     });
 
     afterEach(() => {
       // Re-enable momentJS deprecation warning and it looks like it is not typed either so
       // we have to disable the type as well and cannot extend it easily.
-      ((moment as unknown) as {
-        suppressDeprecationWarnings: boolean;
-      }).suppressDeprecationWarnings = false;
+      (
+        moment as unknown as {
+          suppressDeprecationWarnings: boolean;
+        }
+      ).suppressDeprecationWarnings = false;
     });
     test('should return the first value if it is ok', () => {
       const value = parseDateWithDefault(
@@ -504,6 +525,11 @@ describe('getIntervalSettings', () => {
     test('should return the second value if the first is a bad string', () => {
       const value = parseDateWithDefault('trashed string', moment('1950-05-31T13:03:54.234Z'));
       expect(value.toISOString()).toBe(new Date('1950-05-31T13:03:54.234Z').toISOString());
+    });
+
+    test('should round up a valid date string and end with 59:59.999Z', () => {
+      const value = parseDateWithDefault('now/d', moment('1950-05-31T13:03:54.234Z'), true);
+      expect(value.toISOString()).toContain('59:59.999Z');
     });
   });
 });

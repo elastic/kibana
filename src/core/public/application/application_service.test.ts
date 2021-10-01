@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -26,14 +15,13 @@ import {
 import { createElement } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { bufferCount, take, takeUntil } from 'rxjs/operators';
-import { shallow, mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 
-import { contextServiceMock } from '../context/context_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
-import { App, PublicAppInfo, AppNavLinkStatus, AppStatus, AppUpdater } from './types';
+import { App, AppDeepLink, AppNavLinkStatus, AppStatus, AppUpdater, PublicAppInfo } from './types';
 import { act } from 'react-dom/test-utils';
 
 const createApp = (props: Partial<App>): App => {
@@ -54,7 +42,6 @@ describe('#setup()', () => {
     const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
     setupDeps = {
       http,
-      context: contextServiceMock.createSetupContract(),
       redirectTo: jest.fn(),
     };
     startDeps = { http, overlays: overlayServiceMock.createStartContract() };
@@ -88,7 +75,10 @@ describe('#setup()', () => {
       const pluginId = Symbol('plugin');
       const updater$ = new BehaviorSubject<AppUpdater>((app) => ({}));
       setup.register(pluginId, createApp({ id: 'app1', updater$ }));
-      setup.register(pluginId, createApp({ id: 'app2' }));
+      setup.register(
+        pluginId,
+        createApp({ id: 'app2', deepLinks: [{ id: 'subapp1', title: 'Subapp', path: '/subapp' }] })
+      );
       const { applications$ } = await service.start(startDeps);
 
       let applications = await applications$.pipe(take(1)).toPromise();
@@ -105,6 +95,11 @@ describe('#setup()', () => {
           id: 'app2',
           navLinkStatus: AppNavLinkStatus.visible,
           status: AppStatus.accessible,
+          deepLinks: [
+            expect.objectContaining({
+              navLinkStatus: AppNavLinkStatus.hidden,
+            }),
+          ],
         })
       );
 
@@ -112,6 +107,7 @@ describe('#setup()', () => {
         status: AppStatus.inaccessible,
         tooltip: 'App inaccessible due to reason',
         defaultPath: 'foo/bar',
+        deepLinks: [{ id: 'subapp2', title: 'Subapp 2', path: '/subapp2' }],
       }));
 
       applications = await applications$.pipe(take(1)).toPromise();
@@ -123,6 +119,9 @@ describe('#setup()', () => {
           status: AppStatus.inaccessible,
           defaultPath: 'foo/bar',
           tooltip: 'App inaccessible due to reason',
+          deepLinks: [
+            expect.objectContaining({ id: 'subapp2', title: 'Subapp 2', path: '/subapp2' }),
+          ],
         })
       );
       expect(applications.get('app2')).toEqual(
@@ -366,16 +365,85 @@ describe('#setup()', () => {
       expect(MockHistory.push).toHaveBeenCalledWith('/app/app1', undefined);
       MockHistory.push.mockClear();
     });
-  });
 
-  it("`registerMountContext` calls context container's registerContext", () => {
-    const { registerMountContext } = service.setup(setupDeps);
-    const container = setupDeps.context.createContextContainer.mock.results[0].value;
-    const pluginId = Symbol();
+    it('preserves the deep links if the update does not modify them', async () => {
+      const setup = service.setup(setupDeps);
 
-    const appMount = () => () => undefined;
-    registerMountContext(pluginId, 'test' as any, appMount);
-    expect(container.registerContext).toHaveBeenCalledWith(pluginId, 'test', appMount);
+      const pluginId = Symbol('plugin');
+      const updater$ = new BehaviorSubject<AppUpdater>((app) => ({}));
+
+      const deepLinks: AppDeepLink[] = [
+        {
+          id: 'foo',
+          title: 'Foo',
+          searchable: true,
+          navLinkStatus: AppNavLinkStatus.visible,
+          path: '/foo',
+        },
+        {
+          id: 'bar',
+          title: 'Bar',
+          searchable: false,
+          navLinkStatus: AppNavLinkStatus.hidden,
+          path: '/bar',
+        },
+      ];
+
+      setup.register(pluginId, createApp({ id: 'app1', deepLinks, updater$ }));
+
+      const { applications$ } = await service.start(startDeps);
+
+      updater$.next((app) => ({ defaultPath: '/foo' }));
+
+      let appInfos = await applications$.pipe(take(1)).toPromise();
+
+      expect(appInfos.get('app1')!.deepLinks).toEqual([
+        {
+          deepLinks: [],
+          id: 'foo',
+          keywords: [],
+          navLinkStatus: 1,
+          path: '/foo',
+          searchable: true,
+          title: 'Foo',
+        },
+        {
+          deepLinks: [],
+          id: 'bar',
+          keywords: [],
+          navLinkStatus: 3,
+          path: '/bar',
+          searchable: false,
+          title: 'Bar',
+        },
+      ]);
+
+      updater$.next((app) => ({
+        deepLinks: [
+          {
+            id: 'bar',
+            title: 'Bar',
+            searchable: false,
+            navLinkStatus: AppNavLinkStatus.hidden,
+            path: '/bar',
+          },
+        ],
+      }));
+
+      appInfos = await applications$.pipe(take(1)).toPromise();
+
+      expect(appInfos.get('app1')!.deepLinks).toEqual([
+        {
+          deepLinks: [],
+          id: 'bar',
+          keywords: [],
+          navLinkStatus: 3,
+          path: '/bar',
+          searchable: false,
+          title: 'Bar',
+        },
+      ]);
+    });
   });
 });
 
@@ -384,7 +452,6 @@ describe('#start()', () => {
     const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
     setupDeps = {
       http,
-      context: contextServiceMock.createSetupContract(),
       redirectTo: jest.fn(),
     };
     startDeps = { http, overlays: overlayServiceMock.createStartContract() };
@@ -507,6 +574,56 @@ describe('#start()', () => {
       expect(getUrlForApp('app1', { path: '/deep//link/' })).toBe('/base-path/app/app1/deep/link');
       expect(getUrlForApp('app1', { path: '//deep/link//' })).toBe('/base-path/app/app1/deep/link');
       expect(getUrlForApp('app1', { path: 'deep/link///' })).toBe('/base-path/app/app1/deep/link');
+    });
+
+    describe('deepLinkId option', () => {
+      it('ignores the deepLinkId parameter if it is unknown', async () => {
+        service.setup(setupDeps);
+
+        service.setup(setupDeps);
+        const { getUrlForApp } = await service.start(startDeps);
+
+        expect(getUrlForApp('app1', { deepLinkId: 'unkown-deep-link' })).toBe(
+          '/base-path/app/app1'
+        );
+      });
+
+      it('creates URLs with deepLinkId parameter', async () => {
+        const { register } = service.setup(setupDeps);
+
+        register(
+          Symbol(),
+          createApp({
+            id: 'app1',
+            appRoute: '/custom/app-path',
+            deepLinks: [{ id: 'dl1', title: 'deep link 1', path: '/deep-link' }],
+          })
+        );
+
+        const { getUrlForApp } = await service.start(startDeps);
+
+        expect(getUrlForApp('app1', { deepLinkId: 'dl1' })).toBe(
+          '/base-path/custom/app-path/deep-link'
+        );
+      });
+
+      it('creates URLs with deepLinkId and path parameters', async () => {
+        const { register } = service.setup(setupDeps);
+
+        register(
+          Symbol(),
+          createApp({
+            id: 'app1',
+            appRoute: '/custom/app-path',
+            deepLinks: [{ id: 'dl1', title: 'deep link 1', path: '/deep-link' }],
+          })
+        );
+
+        const { getUrlForApp } = await service.start(startDeps);
+        expect(getUrlForApp('app1', { deepLinkId: 'dl1', path: 'foo/bar' })).toBe(
+          '/base-path/custom/app-path/deep-link/foo/bar'
+        );
+      });
     });
 
     it('does not append trailing slash if hash is provided in path parameter', async () => {
@@ -687,6 +804,21 @@ describe('#start()', () => {
       `);
     });
 
+    it("when openInNewTab is true it doesn't update currentApp$ after mounting", async () => {
+      service.setup(setupDeps);
+
+      const { currentAppId$, navigateToApp } = await service.start(startDeps);
+      const stop$ = new Subject();
+      const promise = currentAppId$.pipe(bufferCount(4), takeUntil(stop$)).toPromise();
+
+      await navigateToApp('delta', { openInNewTab: true });
+      stop$.next();
+
+      const appIds = await promise;
+
+      expect(appIds).toBeUndefined();
+    });
+
     it('updates httpLoadingCount$ while mounting', async () => {
       // Use a memory history so that mounting the component will work
       const { createMemoryHistory } = jest.requireActual('history');
@@ -830,6 +962,128 @@ describe('#start()', () => {
         expect(MockHistory.replace).not.toHaveBeenCalled();
       });
     });
+
+    describe('deepLinkId option', () => {
+      beforeEach(() => {
+        MockHistory.push.mockClear();
+      });
+
+      it('preserves trailing slash when path contains a hash', async () => {
+        const { register } = service.setup(setupDeps);
+
+        register(
+          Symbol(),
+          createApp({
+            id: 'app1',
+            appRoute: '/custom/app-path',
+            deepLinks: [{ id: 'dl1', title: 'deep link 1', path: '/deep-link' }],
+          })
+        );
+
+        const { navigateToApp } = await service.start(startDeps);
+        await navigateToApp('app1', { deepLinkId: 'dl1', path: '#/' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith(
+          '/custom/app-path/deep-link#/',
+          undefined
+        );
+
+        await navigateToApp('app1', { deepLinkId: 'dl1', path: '#/foo/bar/' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith(
+          '/custom/app-path/deep-link#/foo/bar/',
+          undefined
+        );
+
+        await navigateToApp('app1', { deepLinkId: 'dl1', path: '/path#/' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith(
+          '/custom/app-path/deep-link/path#/',
+          undefined
+        );
+
+        await navigateToApp('app1', { deepLinkId: 'dl1', path: '/path#/hash/' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith(
+          '/custom/app-path/deep-link/path#/hash/',
+          undefined
+        );
+
+        await navigateToApp('app1', { deepLinkId: 'dl1', path: '/path/' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith(
+          '/custom/app-path/deep-link/path',
+          undefined
+        );
+      });
+
+      it('omits the defaultPath when the deepLinkId parameter is specified', async () => {
+        const { register } = service.setup(setupDeps);
+
+        register(
+          Symbol(),
+          createApp({
+            id: 'app1',
+            defaultPath: 'default/path',
+            deepLinks: [{ id: 'dl1', title: 'deep link 1', path: '/deep-link' }],
+          })
+        );
+        register(
+          Symbol(),
+          createApp({
+            id: 'app2',
+            appRoute: '/custom-app-path',
+            defaultPath: '/my-default',
+            deepLinks: [{ id: 'dl2', title: 'deep link 2', path: '/deep-link-2' }],
+          })
+        );
+
+        const { navigateToApp } = await service.start(startDeps);
+
+        await navigateToApp('app1', {});
+        expect(MockHistory.push).toHaveBeenLastCalledWith('/app/app1/default/path', undefined);
+
+        await navigateToApp('app1', { deepLinkId: 'dl1' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith('/app/app1/deep-link', undefined);
+
+        await navigateToApp('app1', { deepLinkId: 'dl1', path: 'some-other-path' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith(
+          '/app/app1/deep-link/some-other-path',
+          undefined
+        );
+
+        await navigateToApp('app2', {});
+        expect(MockHistory.push).toHaveBeenLastCalledWith('/custom-app-path/my-default', undefined);
+
+        await navigateToApp('app2', { deepLinkId: 'dl2' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith(
+          '/custom-app-path/deep-link-2',
+          undefined
+        );
+
+        await navigateToApp('app2', { deepLinkId: 'dl2', path: 'some-other-path' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith(
+          '/custom-app-path/deep-link-2/some-other-path',
+          undefined
+        );
+      });
+
+      it('ignores the deepLinkId parameter if it is unknown', async () => {
+        const { register } = service.setup(setupDeps);
+
+        register(
+          Symbol(),
+          createApp({
+            id: 'app1',
+            defaultPath: 'default/path',
+            deepLinks: [{ id: 'dl1', title: 'deep link 1', path: '/deep-link' }],
+          })
+        );
+
+        const { navigateToApp } = await service.start(startDeps);
+
+        await navigateToApp('app1', { deepLinkId: 'dl-unknown' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith('/app/app1/default/path', undefined);
+
+        await navigateToApp('app1', { deepLinkId: 'dl-unknown', path: 'some-other-path' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith('/app/app1/some-other-path', undefined);
+      });
+    });
   });
 
   describe('navigateToUrl', () => {
@@ -869,7 +1123,6 @@ describe('#stop()', () => {
     const http = httpServiceMock.createSetupContract({ basePath: '/test' });
     setupDeps = {
       http,
-      context: contextServiceMock.createSetupContract(),
     };
     startDeps = { http, overlays: overlayServiceMock.createStartContract() };
     service = new ApplicationService();

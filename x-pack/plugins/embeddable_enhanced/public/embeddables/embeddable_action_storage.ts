@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import {
   DynamicActionsState,
   UiActionsEnhancedAbstractActionStorage as AbstractActionStorage,
@@ -14,12 +16,11 @@ import {
   EmbeddableOutput,
   IEmbeddable,
 } from '../../../../../src/plugins/embeddable/public';
-import { SerializableState } from '../../../../../src/plugins/kibana_utils/common';
 
 export interface EmbeddableWithDynamicActionsInput extends EmbeddableInput {
   enhancements?: {
     dynamicActions: DynamicActionsState;
-    [key: string]: SerializableState;
+    [key: string]: SerializableRecord;
   };
 }
 

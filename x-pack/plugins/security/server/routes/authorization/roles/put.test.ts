@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Type } from '@kbn/config-schema';
-import { kibanaResponseFactory } from '../../../../../../../src/core/server';
-import { LicenseCheck } from '../../../../../licensing/server';
-import { GLOBAL_RESOURCE } from '../../../../common/constants';
-import { definePutRolesRoutes } from './put';
+import type { Type } from '@kbn/config-schema';
+import { kibanaResponseFactory } from 'src/core/server';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
 
-import { coreMock, httpServerMock } from '../../../../../../../src/core/server/mocks';
-import { routeDefinitionParamsMock } from '../../index.mock';
 import { KibanaFeature } from '../../../../../features/server';
+import type { LicenseCheck } from '../../../../../licensing/server';
+import { GLOBAL_RESOURCE } from '../../../../common/constants';
 import { securityFeatureUsageServiceMock } from '../../../feature_usage/index.mock';
+import { routeDefinitionParamsMock } from '../../index.mock';
+import { definePutRolesRoutes } from './put';
 
 const application = 'kibana-.kibana';
 const privilegeMap = {

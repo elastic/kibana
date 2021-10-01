@@ -1,0 +1,35 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    "common/**/*",
+    "scripts/**/*",
+    "public/**/*",
+    "public/components/monitor/status_details/location_map/embeddables/low_poly_layer.json",
+    "server/**/*",
+    "server/lib/requests/__fixtures__/monitor_charts_mock.json",
+    "../../../typings/**/*"
+  ],
+  "references": [
+    {
+      "path": "../alerting/tsconfig.json"
+    },
+    {
+      "path": "../ml/tsconfig.json"
+    },
+    {
+      "path": "../triggers_actions_ui/tsconfig.json"
+    },
+    {
+      "path": "../observability/tsconfig.json"
+    },
+    {
+      "path": "../fleet/tsconfig.json"
+    }
+  ]
+}

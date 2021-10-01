@@ -1,0 +1,41 @@
+[[alerts-api-mute-all]]
+=== Legacy mute all alert instances API
+++++
+<titleabbrev>Legacy mute all alert instances</titleabbrev>
+++++
+
+deprecated::[7.13.0,Use <<mute-all-alerts-api>> instead.]
+
+Mute all alert instances.
+
+[[alerts-api-mute-all-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/alerts/alert/<id>/_mute_all`
+
+`POST <kibana host>:<port>/s/<space_id>/api/alerts/alert/<id>/_mute_all`
+
+[[alerts-api-mute-all-path-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The ID of the alert whose instances you want to mute.
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[alerts-api-mute-all-response-codes]]
+==== Response code
+
+`200`::
+  Indicates a successful call.
+
+==== Example
+
+Mute all alert instances with ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/alerts/alert/41893910-6bca-11eb-9e0d-85d233e3ee35/_mute_all
+--------------------------------------------------
+// KIBANA

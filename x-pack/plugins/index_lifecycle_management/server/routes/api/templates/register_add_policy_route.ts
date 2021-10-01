@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { merge } from 'lodash';
@@ -31,17 +32,17 @@ async function getIndexTemplate(
     ignore: [404],
   };
 
-  const response = await client.indices.getIndexTemplate<{
-    index_templates: TemplateFromEs[];
-  }>(
+  const response = await client.indices.getIndexTemplate(
     {
       name: templateName,
     },
     options
   );
 
-  const { index_templates: templates } = response.body;
-  return templates?.find((template) => template.name === templateName)?.index_template;
+  const { index_templates: templates } = response.body as {
+    index_templates: TemplateFromEs[];
+  };
+  return templates.find((template) => template.name === templateName)?.index_template;
 }
 
 async function updateIndexTemplate(
@@ -79,6 +80,7 @@ async function updateIndexTemplate(
   if (isLegacy) {
     return client.indices.putTemplate({ name: templateName, body: indexTemplate });
   }
+  // @ts-expect-error Type 'IndexSettings' is not assignable to type 'IndicesIndexSettings'.
   return client.indices.putIndexTemplate({ name: templateName, body: indexTemplate });
 }
 

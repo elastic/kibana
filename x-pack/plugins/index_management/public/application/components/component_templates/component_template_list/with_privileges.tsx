@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FunctionComponent } from 'react';
 
 import {
-  SectionError,
+  PageLoading,
+  PageError,
   useAuthorizationContext,
   WithPrivileges,
-  SectionLoading,
   NotAuthorizedSection,
 } from '../shared_imports';
 import { APP_CLUSTER_REQUIRED_PRIVILEGES } from '../constants';
@@ -24,7 +26,7 @@ export const ComponentTemplatesWithPrivileges: FunctionComponent = ({
 
   if (apiError) {
     return (
-      <SectionError
+      <PageError
         title={
           <FormattedMessage
             id="xpack.idxMgmt.home.componentTemplates.checkingPrivilegesErrorMessage"
@@ -43,12 +45,12 @@ export const ComponentTemplatesWithPrivileges: FunctionComponent = ({
       {({ isLoading, hasPrivileges, privilegesMissing }) => {
         if (isLoading) {
           return (
-            <SectionLoading>
+            <PageLoading>
               <FormattedMessage
                 id="xpack.idxMgmt.home.componentTemplates.checkingPrivilegesDescription"
                 defaultMessage="Checking privileges…"
               />
-            </SectionLoading>
+            </PageLoading>
           );
         }
 

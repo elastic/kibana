@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { map } from 'rxjs/operators';
@@ -59,7 +60,9 @@ export function startAppStateSyncing(appStateManager: AppStateManager) {
   stateContainer.set(initialAppState);
 
   // set current url to whatever is in app state container
-  kbnUrlStateStorage.set('_a', initialAppState);
+  kbnUrlStateStorage.set('_a', initialAppState, {
+    replace: true,
+  });
 
   // finally start syncing state containers with url
   startSyncingAppStateWithUrl();

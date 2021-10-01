@@ -1,20 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-jest.mock('./', () => ({
-  FlashMessagesLogic: {
-    actions: {
-      setFlashMessages: jest.fn(),
-      setQueuedMessages: jest.fn(),
-    },
-  },
-}));
-import { FlashMessagesLogic } from './';
+import '../../__mocks__/kea_logic/kibana_logic.mock';
 
-import { flashAPIErrors } from './handle_api_errors';
+import { FlashMessagesLogic } from './flash_messages_logic';
+
+import { flashAPIErrors, getErrorsFromHttpResponse } from './handle_api_errors';
 
 describe('flashAPIErrors', () => {
   const mockHttpError = {
@@ -30,6 +25,9 @@ describe('flashAPIErrors', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    FlashMessagesLogic.mount();
+    jest.spyOn(FlashMessagesLogic.actions, 'setFlashMessages');
+    jest.spyOn(FlashMessagesLogic.actions, 'setQueuedMessages');
   });
 
   it('converts API errors into flash messages', () => {
@@ -70,10 +68,29 @@ describe('flashAPIErrors', () => {
     try {
       flashAPIErrors(Error('whatever') as any);
     } catch (e) {
-      expect(e.message).toEqual('whatever');
       expect(FlashMessagesLogic.actions.setFlashMessages).toHaveBeenCalledWith([
-        { type: 'error', message: 'An unexpected error occurred' },
+        { type: 'error', message: expect.any(String) },
       ]);
     }
+  });
+});
+
+describe('getErrorsFromHttpResponse', () => {
+  it('should return errors from the response if present', () => {
+    expect(
+      getErrorsFromHttpResponse({
+        body: { attributes: { errors: ['first error', 'second error'] } },
+      } as any)
+    ).toEqual(['first error', 'second error']);
+  });
+
+  it('should return a message from the responnse if no errors', () => {
+    expect(getErrorsFromHttpResponse({ body: { message: 'test message' } } as any)).toEqual([
+      'test message',
+    ]);
+  });
+
+  it('should return the a default message otherwise', () => {
+    expect(getErrorsFromHttpResponse({} as any)).toEqual([expect.any(String)]);
   });
 });

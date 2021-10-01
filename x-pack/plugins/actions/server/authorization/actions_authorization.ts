@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
 import { KibanaRequest } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { ActionsAuthorizationAuditLogger } from './audit_logger';
-import { ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../saved_objects';
+import {
+  ACTION_SAVED_OBJECT_TYPE,
+  ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+} from '../constants/saved_objects';
 import { AuthorizationMode } from './get_authorization_mode_by_source';
 
 export interface ConstructorOptions {

@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { DocViewer } from './doc_viewer';
@@ -24,9 +14,16 @@ import { getDocViewsRegistry } from '../../../kibana_services';
 import { DocViewRenderProps } from '../../doc_views/doc_views_types';
 
 jest.mock('../../../kibana_services', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let registry: any[] = [];
   return {
+    getServices: () => ({
+      uiSettings: {
+        get: jest.fn(),
+      },
+    }),
     getDocViewsRegistry: () => ({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       addDocView(view: any) {
         registry.push(view);
       },
@@ -41,6 +38,7 @@ jest.mock('../../../kibana_services', () => {
 });
 
 beforeEach(() => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (getDocViewsRegistry() as any).resetRegistry();
   jest.clearAllMocks();
 });
@@ -49,6 +47,7 @@ test('Render <DocViewer/> with 3 different tabs', () => {
   const registry = getDocViewsRegistry();
   registry.addDocView({ order: 10, title: 'Render function', render: jest.fn() });
   registry.addDocView({ order: 20, title: 'React component', component: () => <div>test</div> });
+  // @ts-expect-error This should be invalid and will throw an error when rendering
   registry.addDocView({ order: 30, title: 'Invalid doc view' });
 
   const renderProps = { hit: {} } as DocViewRenderProps;

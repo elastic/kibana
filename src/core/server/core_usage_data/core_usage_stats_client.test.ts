@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { httpServerMock, httpServiceMock, savedObjectsRepositoryMock } from '../mocks';
@@ -31,10 +20,14 @@ import {
   DELETE_STATS_PREFIX,
   FIND_STATS_PREFIX,
   GET_STATS_PREFIX,
+  RESOLVE_STATS_PREFIX,
   UPDATE_STATS_PREFIX,
   IMPORT_STATS_PREFIX,
   RESOLVE_IMPORT_STATS_PREFIX,
   EXPORT_STATS_PREFIX,
+  LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX,
+  LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX,
+  BULK_RESOLVE_STATS_PREFIX,
 } from './core_usage_stats_client';
 import { CoreUsageStatsClient } from '.';
 import { DEFAULT_NAMESPACE_STRING } from '../saved_objects/service/lib/utils';
@@ -224,6 +217,81 @@ describe('CoreUsageStatsClient', () => {
           `${BULK_GET_STATS_PREFIX}.total`,
           `${BULK_GET_STATS_PREFIX}.namespace.custom.total`,
           `${BULK_GET_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+        ],
+        incrementOptions
+      );
+    });
+  });
+
+  describe('#incrementSavedObjectsBulkResolve', () => {
+    it('does not throw an error if repository incrementCounter operation fails', async () => {
+      const { usageStatsClient, repositoryMock } = setup();
+      repositoryMock.incrementCounter.mockRejectedValue(new Error('Oh no!'));
+
+      const request = httpServerMock.createKibanaRequest();
+      await expect(
+        usageStatsClient.incrementSavedObjectsBulkResolve({
+          request,
+        } as BaseIncrementOptions)
+      ).resolves.toBeUndefined();
+      expect(repositoryMock.incrementCounter).toHaveBeenCalled();
+    });
+
+    it('handles falsy options appropriately', async () => {
+      const { usageStatsClient, repositoryMock } = setup();
+
+      const request = httpServerMock.createKibanaRequest();
+      await usageStatsClient.incrementSavedObjectsBulkResolve({
+        request,
+      } as BaseIncrementOptions);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
+        CORE_USAGE_STATS_TYPE,
+        CORE_USAGE_STATS_ID,
+        [
+          `${BULK_RESOLVE_STATS_PREFIX}.total`,
+          `${BULK_RESOLVE_STATS_PREFIX}.namespace.default.total`,
+          `${BULK_RESOLVE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+        ],
+        incrementOptions
+      );
+    });
+
+    it('handles truthy options and the default namespace string appropriately', async () => {
+      const { usageStatsClient, repositoryMock } = setup(DEFAULT_NAMESPACE_STRING);
+
+      const request = httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders });
+      await usageStatsClient.incrementSavedObjectsBulkResolve({
+        request,
+      } as BaseIncrementOptions);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
+        CORE_USAGE_STATS_TYPE,
+        CORE_USAGE_STATS_ID,
+        [
+          `${BULK_RESOLVE_STATS_PREFIX}.total`,
+          `${BULK_RESOLVE_STATS_PREFIX}.namespace.default.total`,
+          `${BULK_RESOLVE_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+        ],
+        incrementOptions
+      );
+    });
+
+    it('handles a non-default space appropriately', async () => {
+      const { usageStatsClient, repositoryMock } = setup('foo');
+
+      const request = httpServerMock.createKibanaRequest();
+      await usageStatsClient.incrementSavedObjectsBulkResolve({
+        request,
+      } as BaseIncrementOptions);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
+        CORE_USAGE_STATS_TYPE,
+        CORE_USAGE_STATS_ID,
+        [
+          `${BULK_RESOLVE_STATS_PREFIX}.total`,
+          `${BULK_RESOLVE_STATS_PREFIX}.namespace.custom.total`,
+          `${BULK_RESOLVE_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
         ],
         incrementOptions
       );
@@ -605,6 +673,81 @@ describe('CoreUsageStatsClient', () => {
     });
   });
 
+  describe('#incrementSavedObjectsResolve', () => {
+    it('does not throw an error if repository incrementCounter operation fails', async () => {
+      const { usageStatsClient, repositoryMock } = setup();
+      repositoryMock.incrementCounter.mockRejectedValue(new Error('Oh no!'));
+
+      const request = httpServerMock.createKibanaRequest();
+      await expect(
+        usageStatsClient.incrementSavedObjectsResolve({
+          request,
+        } as BaseIncrementOptions)
+      ).resolves.toBeUndefined();
+      expect(repositoryMock.incrementCounter).toHaveBeenCalled();
+    });
+
+    it('handles falsy options appropriately', async () => {
+      const { usageStatsClient, repositoryMock } = setup();
+
+      const request = httpServerMock.createKibanaRequest();
+      await usageStatsClient.incrementSavedObjectsResolve({
+        request,
+      } as BaseIncrementOptions);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
+        CORE_USAGE_STATS_TYPE,
+        CORE_USAGE_STATS_ID,
+        [
+          `${RESOLVE_STATS_PREFIX}.total`,
+          `${RESOLVE_STATS_PREFIX}.namespace.default.total`,
+          `${RESOLVE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+        ],
+        incrementOptions
+      );
+    });
+
+    it('handles truthy options and the default namespace string appropriately', async () => {
+      const { usageStatsClient, repositoryMock } = setup(DEFAULT_NAMESPACE_STRING);
+
+      const request = httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders });
+      await usageStatsClient.incrementSavedObjectsResolve({
+        request,
+      } as BaseIncrementOptions);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
+        CORE_USAGE_STATS_TYPE,
+        CORE_USAGE_STATS_ID,
+        [
+          `${RESOLVE_STATS_PREFIX}.total`,
+          `${RESOLVE_STATS_PREFIX}.namespace.default.total`,
+          `${RESOLVE_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+        ],
+        incrementOptions
+      );
+    });
+
+    it('handles a non-default space appropriately', async () => {
+      const { usageStatsClient, repositoryMock } = setup('foo');
+
+      const request = httpServerMock.createKibanaRequest();
+      await usageStatsClient.incrementSavedObjectsResolve({
+        request,
+      } as BaseIncrementOptions);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
+        CORE_USAGE_STATS_TYPE,
+        CORE_USAGE_STATS_ID,
+        [
+          `${RESOLVE_STATS_PREFIX}.total`,
+          `${RESOLVE_STATS_PREFIX}.namespace.custom.total`,
+          `${RESOLVE_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+        ],
+        incrementOptions
+      );
+    });
+  });
+
   describe('#incrementSavedObjectsUpdate', () => {
     it('does not throw an error if repository incrementCounter operation fails', async () => {
       const { usageStatsClient, repositoryMock } = setup();
@@ -725,8 +868,14 @@ describe('CoreUsageStatsClient', () => {
         createNewCopies: true,
         overwrite: true,
       } as IncrementSavedObjectsImportOptions);
-      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
-      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
+      await usageStatsClient.incrementSavedObjectsImport({
+        request,
+        createNewCopies: false,
+        overwrite: true,
+      } as IncrementSavedObjectsImportOptions);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(2);
+      expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
+        1,
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
@@ -734,6 +883,19 @@ describe('CoreUsageStatsClient', () => {
           `${IMPORT_STATS_PREFIX}.namespace.default.total`,
           `${IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
           `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
+          // excludes 'overwriteEnabled.yes' and 'overwriteEnabled.no' when createNewCopies is true
+        ],
+        incrementOptions
+      );
+      expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
+        2,
+        CORE_USAGE_STATS_TYPE,
+        CORE_USAGE_STATS_ID,
+        [
+          `${IMPORT_STATS_PREFIX}.total`,
+          `${IMPORT_STATS_PREFIX}.namespace.default.total`,
+          `${IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+          `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
           `${IMPORT_STATS_PREFIX}.overwriteEnabled.yes`,
         ],
         incrementOptions
@@ -918,6 +1080,116 @@ describe('CoreUsageStatsClient', () => {
           `${EXPORT_STATS_PREFIX}.namespace.custom.total`,
           `${EXPORT_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
           `${EXPORT_STATS_PREFIX}.allTypesSelected.no`,
+        ],
+        incrementOptions
+      );
+    });
+  });
+
+  describe('#incrementLegacyDashboardsImport', () => {
+    it('does not throw an error if repository incrementCounter operation fails', async () => {
+      const { usageStatsClient, repositoryMock } = setup();
+      repositoryMock.incrementCounter.mockRejectedValue(new Error('Oh no!'));
+
+      const request = httpServerMock.createKibanaRequest();
+      await expect(
+        usageStatsClient.incrementLegacyDashboardsImport({
+          request,
+        } as IncrementSavedObjectsExportOptions)
+      ).resolves.toBeUndefined();
+      expect(repositoryMock.incrementCounter).toHaveBeenCalled();
+    });
+
+    it('handles the default namespace string and first party request appropriately', async () => {
+      const { usageStatsClient, repositoryMock } = setup(DEFAULT_NAMESPACE_STRING);
+
+      const request = httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders });
+      await usageStatsClient.incrementLegacyDashboardsImport({
+        request,
+      } as IncrementSavedObjectsExportOptions);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
+        CORE_USAGE_STATS_TYPE,
+        CORE_USAGE_STATS_ID,
+        [
+          `${LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX}.total`,
+          `${LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX}.namespace.default.total`,
+          `${LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+        ],
+        incrementOptions
+      );
+    });
+
+    it('handles a non-default space and and third party request appropriately', async () => {
+      const { usageStatsClient, repositoryMock } = setup('foo');
+
+      const request = httpServerMock.createKibanaRequest();
+      await usageStatsClient.incrementLegacyDashboardsImport({
+        request,
+      } as IncrementSavedObjectsExportOptions);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
+        CORE_USAGE_STATS_TYPE,
+        CORE_USAGE_STATS_ID,
+        [
+          `${LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX}.total`,
+          `${LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX}.namespace.custom.total`,
+          `${LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+        ],
+        incrementOptions
+      );
+    });
+  });
+
+  describe('#incrementLegacyDashboardsExport', () => {
+    it('does not throw an error if repository incrementCounter operation fails', async () => {
+      const { usageStatsClient, repositoryMock } = setup();
+      repositoryMock.incrementCounter.mockRejectedValue(new Error('Oh no!'));
+
+      const request = httpServerMock.createKibanaRequest();
+      await expect(
+        usageStatsClient.incrementLegacyDashboardsExport({
+          request,
+        } as IncrementSavedObjectsExportOptions)
+      ).resolves.toBeUndefined();
+      expect(repositoryMock.incrementCounter).toHaveBeenCalled();
+    });
+
+    it('handles the default namespace string and first party request appropriately', async () => {
+      const { usageStatsClient, repositoryMock } = setup(DEFAULT_NAMESPACE_STRING);
+
+      const request = httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders });
+      await usageStatsClient.incrementLegacyDashboardsExport({
+        request,
+      } as IncrementSavedObjectsExportOptions);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
+        CORE_USAGE_STATS_TYPE,
+        CORE_USAGE_STATS_ID,
+        [
+          `${LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX}.total`,
+          `${LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX}.namespace.default.total`,
+          `${LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+        ],
+        incrementOptions
+      );
+    });
+
+    it('handles a non-default space and and third party request appropriately', async () => {
+      const { usageStatsClient, repositoryMock } = setup('foo');
+
+      const request = httpServerMock.createKibanaRequest();
+      await usageStatsClient.incrementLegacyDashboardsExport({
+        request,
+      } as IncrementSavedObjectsExportOptions);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
+        CORE_USAGE_STATS_TYPE,
+        CORE_USAGE_STATS_ID,
+        [
+          `${LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX}.total`,
+          `${LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX}.namespace.custom.total`,
+          `${LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
         ],
         incrementOptions
       );

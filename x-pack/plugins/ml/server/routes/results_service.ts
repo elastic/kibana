@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { wrapError } from '../client/error_wrapper';
@@ -10,6 +11,7 @@ import {
   anomaliesTableDataSchema,
   categoryDefinitionSchema,
   categoryExamplesSchema,
+  getDatafeedResultsChartDataSchema,
   maxAnomalyScoreSchema,
   partitionFieldValuesSchema,
   anomalySearchSchema,
@@ -104,9 +106,9 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
   /**
    * @apiGroup ResultsService
    *
-   * @api {post} /api/ml/results/anomalies_table_data Prepare anomalies records for table display
+   * @api {post} /api/ml/results/anomalies_table_data Get anomalies records for table display
    * @apiName GetAnomaliesTableData
-   * @apiDescription Retrieves anomaly records for an anomaly detection job and formats them for anomalies table display
+   * @apiDescription Retrieves anomaly records for an anomaly detection job and formats them for anomalies table display.
    *
    * @apiSchema (body) anomaliesTableDataSchema
    */
@@ -136,7 +138,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
   /**
    * @apiGroup ResultsService
    *
-   * @api {post} /api/ml/results/category_definition Returns category definition
+   * @api {post} /api/ml/results/category_definition Get category definition
    * @apiName GetCategoryDefinition
    * @apiDescription Returns the definition of the category with the specified ID and job ID
    *
@@ -168,7 +170,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
   /**
    * @apiGroup ResultsService
    *
-   * @api {post} /api/ml/results/max_anomaly_score Returns the maximum anomaly_score
+   * @api {post} /api/ml/results/max_anomaly_score Get the maximum anomaly_score
    * @apiName GetMaxAnomalyScore
    * @apiDescription Returns the maximum anomaly score of the bucket results for the request job ID(s) and time range
    *
@@ -200,7 +202,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
   /**
    * @apiGroup ResultsService
    *
-   * @api {post} /api/ml/results/category_examples Returns category examples
+   * @api {post} /api/ml/results/category_examples Get category examples
    * @apiName GetCategoryExamples
    * @apiDescription Returns examples for the categories with the specified IDs from the job with the supplied ID
    *
@@ -264,8 +266,10 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
   /**
    * @apiGroup ResultsService
    *
-   * @api {post} /api/ml/results/anomaly_search Performs a search on the anomaly results index
+   * @api {post} /api/ml/results/anomaly_search Run a search on the anomaly results index
    * @apiName AnomalySearch
+   * @apiDescription Runs the supplied query against the anomaly results index for the specified job IDs.
+   * @apiSchema (body) anomalySearchSchema
    */
   router.post(
     {
@@ -293,7 +297,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
   /**
    * @apiGroup ResultsService
    *
-   * @api {get} /api/ml/results/:jobId/categorizer_stats
+   * @api {get} /api/ml/results/:jobId/categorizer_stats Return categorizer statistics
    * @apiName GetCategorizerStats
    * @apiDescription Returns the categorizer stats for the specified job ID
    * @apiSchema (params) jobIdSchema
@@ -325,7 +329,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
   /**
    * @apiGroup ResultsService
    *
-   * @api {get} /api/ml/results/category_stopped_partitions
+   * @api {post} /api/ml/results/category_stopped_partitions Get partitions that have stopped being categorized
    * @apiName GetCategoryStoppedPartitions
    * @apiDescription Returns information on the partitions that have stopped being categorized due to the categorization status changing from ok to warn. Can return either the list of stopped partitions for each job, or just the list of job IDs.
    * @apiSchema (body) getCategorizerStoppedPartitionsSchema
@@ -343,6 +347,39 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const resp = await getCategoryStoppedPartitions(mlClient, request.body);
+        return response.ok({
+          body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup ResultsService
+   *
+   * @api {post} /api/ml/results/datafeed_results_chart Get datafeed results chart data
+   * @apiName GetDatafeedResultsChartData
+   * @apiDescription Returns datafeed results chart data
+   *
+   * @apiSchema (body) getDatafeedResultsChartDataSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/results/datafeed_results_chart',
+      validate: {
+        body: getDatafeedResultsChartDataSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+      try {
+        const { getDatafeedResultsChartData } = resultsServiceProvider(mlClient, client);
+        const resp = await getDatafeedResultsChartData(request.body);
+
         return response.ok({
           body: resp,
         });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IScopedClusterClient } from 'kibana/server';
@@ -10,8 +11,8 @@ import { PipelineDefinition } from '../../../common/types/trained_models';
 export function modelsProvider(client: IScopedClusterClient) {
   return {
     /**
-     * Retrieves the map of model ids and associated pipelines.
-     * @param modelIds
+     * Retrieves the map of model ids and aliases with associated pipelines.
+     * @param modelIds - Array of models ids and model aliases.
      */
     async getModelsPipelines(modelIds: string[]) {
       const modelIdsMap = new Map<string, Record<string, PipelineDefinition> | null>(

@@ -1,26 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
 
 interface PollerOptions {
-  functionToPoll: () => Promise<any>;
+  functionToPoll: () => Promise<void>;
   pollFrequencyInMillis: number;
   trailing?: boolean;
   continuePollingOnError?: boolean;
   pollFrequencyErrorMultiplier?: number;
-  successFunction?: (...args: any) => any;
-  errorFunction?: (error: Error) => any;
+  successFunction?: (...args: unknown[]) => void;
+  errorFunction?: (error: Error) => void;
 }
 
-// @TODO Maybe move to observables someday
 export class Poller {
-  private readonly functionToPoll: () => Promise<any>;
-  private readonly successFunction: (...args: any) => any;
-  private readonly errorFunction: (error: Error) => any;
+  private readonly functionToPoll: () => Promise<void>;
+  private readonly successFunction: (...args: unknown[]) => void;
+  private readonly errorFunction: (error: Error) => void;
   private _isRunning: boolean;
   private _timeoutId: NodeJS.Timeout | null;
   private pollFrequencyInMillis: number;

@@ -1,12 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { InstallablePackage } from '../../../types';
-import { getAssets } from './assets';
+import type { InstallablePackage } from '../../../types';
+
 import { getArchiveFilelist } from '../archive/cache';
+
+import { getAssets } from './assets';
 
 jest.mock('../archive/cache', () => {
   return {
@@ -40,7 +43,7 @@ const tests = [
       name: 'coredns',
       version: '1.0.1',
     },
-    // Non existant dataset
+    // Non existent dataset
     dataset: 'foo',
     filter: (path: string) => {
       return true;

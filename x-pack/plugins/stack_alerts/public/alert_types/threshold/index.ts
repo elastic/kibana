@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { validateExpression } from './validation';
@@ -16,9 +18,7 @@ export function getAlertType(): AlertTypeModel<IndexThresholdAlertParams> {
       defaultMessage: 'Alert when an aggregated query meets the threshold.',
     }),
     iconClass: 'alert',
-    documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/alert-types.html#alert-type-index-threshold`;
-    },
+    documentationUrl: (docLinks) => docLinks.links.alerting.indexThreshold,
     alertParamsExpression: lazy(() => import('./expression')),
     validate: validateExpression,
     defaultActionMessage: i18n.translate(

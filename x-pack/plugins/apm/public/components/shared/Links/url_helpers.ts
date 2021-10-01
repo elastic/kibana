@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { History } from 'history';
 import { parse, stringify } from 'query-string';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { url } from '../../../../../../../src/plugins/kibana_utils/public';
-import { LocalUIFilterName } from '../../../../common/ui_filter';
+import { UxLocalUIFilterName } from '../../../../common/ux_ui_filter';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
   return search ? parse(search.slice(1), { sort: false }) : {};
@@ -65,6 +65,8 @@ export function createHref(
 }
 
 export type APMQueryParams = {
+  sampleRangeFrom?: number;
+  sampleRangeTo?: number;
   transactionId?: string;
   transactionName?: string;
   transactionType?: string;
@@ -85,8 +87,16 @@ export type APMQueryParams = {
   refreshInterval?: string | number;
   searchTerm?: string;
   percentile?: 50 | 75 | 90 | 95 | 99;
-  latencyAggregationType?: LatencyAggregationType;
-} & { [key in LocalUIFilterName]?: string };
+  latencyAggregationType?: string;
+  comparisonEnabled?: boolean;
+  comparisonType?: string;
+  transactionResult?: string;
+  host?: string;
+  containerId?: string;
+  podName?: string;
+  agentName?: string;
+  serviceVersion?: string;
+} & { [key in UxLocalUIFilterName]?: string };
 
 // forces every value of T[K] to be type: string
 type StringifyAll<T> = { [K in keyof T]: string };

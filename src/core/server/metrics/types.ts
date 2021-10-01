@@ -1,24 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Observable } from 'rxjs';
-import { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics } from './collectors';
+import type { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics } from './collectors';
 
 /**
  * APIs to retrieves metrics gathered and exposed by the core platform.
@@ -62,8 +51,13 @@ export type InternalMetricsServiceStart = MetricsServiceStart;
 export interface OpsMetrics {
   /** Time metrics were recorded at. */
   collected_at: Date;
-  /** Process related metrics */
+  /**
+   * Process related metrics.
+   * @deprecated use the processes field instead.
+   */
   process: OpsProcessMetrics;
+  /** Process related metrics. Reports an array of objects for each kibana pid.*/
+  processes: OpsProcessMetrics[];
   /** OS related metrics */
   os: OpsOsMetrics;
   /** server response time stats */
@@ -72,4 +66,38 @@ export interface OpsMetrics {
   requests: OpsServerMetrics['requests'];
   /** number of current concurrent connections to the server */
   concurrent_connections: OpsServerMetrics['concurrent_connections'];
+}
+
+/**
+ * an IntervalHistogram object that samples and reports the event loop delay over time.
+ * The delays will be reported in nanoseconds.
+ *
+ * @public
+ */
+export interface IntervalHistogram {
+  // The first timestamp the interval timer kicked in for collecting data points.
+  fromTimestamp: string;
+  // Last timestamp the interval timer kicked in for collecting data points.
+  lastUpdatedAt: string;
+  // The minimum recorded event loop delay.
+  min: number;
+  // The maximum recorded event loop delay.
+  max: number;
+  // The mean of the recorded event loop delays.
+  mean: number;
+  // The number of times the event loop delay exceeded the maximum 1 hour event loop delay threshold.
+  exceeds: number;
+  // The standard deviation of the recorded event loop delays.
+  stddev: number;
+  // An object detailing the accumulated percentile distribution.
+  percentiles: {
+    // 50th percentile of delays of the collected data points.
+    50: number;
+    // 75th percentile of delays of the collected data points.
+    75: number;
+    // 95th percentile of delays of the collected data points.
+    95: number;
+    // 99th percentile of delays of the collected data points.
+    99: number;
+  };
 }

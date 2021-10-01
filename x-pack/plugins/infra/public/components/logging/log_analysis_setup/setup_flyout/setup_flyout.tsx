@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -25,12 +26,8 @@ const FLYOUT_HEADING_ID = 'logAnalysisSetupFlyoutHeading';
 export const LogAnalysisSetupFlyout: React.FC<{
   allowedModules?: ModuleId[];
 }> = ({ allowedModules = moduleIds }) => {
-  const {
-    closeFlyout,
-    flyoutView,
-    showModuleList,
-    showModuleSetup,
-  } = useLogAnalysisSetupFlyoutStateContext();
+  const { closeFlyout, flyoutView, showModuleList, showModuleSetup } =
+    useLogAnalysisSetupFlyoutStateContext();
 
   if (flyoutView.view === 'hidden') {
     return null;

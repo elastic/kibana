@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -89,6 +90,62 @@ export const CREATED_FILE = i18n.translate('xpack.securitySolution.system.create
 export const DELETED_FILE = i18n.translate('xpack.securitySolution.system.deletedFileDescription', {
   defaultMessage: 'deleted a file',
 });
+
+export const EXECUTED_PROCESS = i18n.translate(
+  'xpack.securitySolution.rowRenderer.executedProcessDescription',
+  {
+    defaultMessage: 'executed process',
+  }
+);
+
+export const FORKED_PROCESS = i18n.translate(
+  'xpack.securitySolution.rowRenderer.forkedProcessDescription',
+  {
+    defaultMessage: 'forked process',
+  }
+);
+
+export const LOADED_LIBRARY = i18n.translate(
+  'xpack.securitySolution.rowRenderer.loadedLibraryDescription',
+  {
+    defaultMessage: 'loaded library',
+  }
+);
+
+export const MADE_A_HTTP_REQUEST_VIA = i18n.translate(
+  'xpack.securitySolution.rowRenderer.madeAHttpRequestViaDescription',
+  {
+    defaultMessage: 'made a http request via',
+  }
+);
+
+export const MODIFIED_FILE = i18n.translate(
+  'xpack.securitySolution.rowRenderer.modifiedFileDescription',
+  {
+    defaultMessage: 'modified a file',
+  }
+);
+
+export const MODIFIED_REGISTRY_KEY = i18n.translate(
+  'xpack.securitySolution.rowRenderer.modifiedRegistryKeyDescription',
+  {
+    defaultMessage: 'modified registry key',
+  }
+);
+
+export const OVERWROTE_FILE = i18n.translate(
+  'xpack.securitySolution.rowRenderer.overwroteFileDescription',
+  {
+    defaultMessage: 'overwrote a file',
+  }
+);
+
+export const RENAMED_FILE = i18n.translate(
+  'xpack.securitySolution.rowRenderer.renamedFileDescription',
+  {
+    defaultMessage: 'renamed a file',
+  }
+);
 
 export const EXISTING_PROCESS = i18n.translate(
   'xpack.securitySolution.system.existingProcessDescription',
@@ -203,6 +260,76 @@ export const VIA_PARENT_PROCESS = i18n.translate(
   'xpack.securitySolution.system.viaParentProcessDescription',
   {
     defaultMessage: 'via parent process',
+  }
+);
+
+export const RANSOMWARE_WAS_PREVENTED_FROM_ENCRYPTING_FILES = i18n.translate(
+  'xpack.securitySolution.rowRenderer.ransomwareWasPreventedFromeEcryptingFilesDescription',
+  {
+    defaultMessage: 'ransomware was prevented from encrypting files',
+  }
+);
+
+export const RANSOMWARE_WAS_DETECTED_ENCRYPTING_FILES = i18n.translate(
+  'xpack.securitySolution.rowRenderer.ransomwareWasDetectedEcryptingFilesDescription',
+  {
+    defaultMessage: 'ransomware was detected encrypting files',
+  }
+);
+
+export const WAS_DETECTED_CREATING_A_MALICIOUS_FILE = i18n.translate(
+  'xpack.securitySolution.rowRenderer.wasDetectedCreatingAMaliciousFileDescription',
+  {
+    defaultMessage: 'was detected creating a malicious file',
+  }
+);
+
+export const WAS_PREVENTED_FROM_CREATING_A_MALICIOUS_FILE = i18n.translate(
+  'xpack.securitySolution.rowRenderer.wasPreventedFromCreatingAMaliciousFileDescription',
+  {
+    defaultMessage: 'was prevented from creating a malicious file',
+  }
+);
+
+export const WAS_DETECTED_MODIFYING_A_MALICIOUS_FILE = i18n.translate(
+  'xpack.securitySolution.rowRenderer.wasDetectedModifyingAMaliciousFileDescription',
+  {
+    defaultMessage: 'was detected modifying a malicious file',
+  }
+);
+
+export const WAS_PREVENTED_FROM_MODIFYING_A_MALICIOUS_FILE = i18n.translate(
+  'xpack.securitySolution.rowRenderer.wasPreventedFromModifyingAMaliciousFileDescription',
+  {
+    defaultMessage: 'was prevented from modifying a malicious file',
+  }
+);
+
+export const WAS_DETECTED_RENAMING_A_MALICIOUS_FILE = i18n.translate(
+  'xpack.securitySolution.rowRenderer.wasDetectedRenamingAMaliciousFileDescription',
+  {
+    defaultMessage: 'was detected renaming a malicious file',
+  }
+);
+
+export const WAS_PREVENTED_FROM_RENAMING_A_MALICIOUS_FILE = i18n.translate(
+  'xpack.securitySolution.rowRenderer.wasPreventedFromRenamingAMaliciousFileDescription',
+  {
+    defaultMessage: 'was prevented from renaming a malicious file',
+  }
+);
+
+export const WAS_DETECTED_EXECUTING_A_MALICIOUS_PROCESS = i18n.translate(
+  'xpack.securitySolution.rowRenderer.wasDetectedExecutingAMaliciousProcessDescription',
+  {
+    defaultMessage: 'was detected executing a malicious process',
+  }
+);
+
+export const WAS_PREVENTED_FROM_EXECUTING_A_MALICIOUS_PROCESS = i18n.translate(
+  'xpack.securitySolution.rowRenderer.wasPreventedFromExecutingAMaliciousProcessDescription',
+  {
+    defaultMessage: 'was prevented from executing a malicious process',
   }
 );
 

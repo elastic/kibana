@@ -1,35 +1,30 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+import type { ErrorCause } from '@elastic/elasticsearch/api/types';
+import type { FailedShard, Reason } from './types';
+import { KibanaServerError } from '../../../../kibana_utils/common';
 
-import { IEsError } from './types';
-
-export function getFailedShards(err: IEsError) {
-  const failedShards =
-    err.body?.attributes?.error?.failed_shards ||
-    err.body?.attributes?.error?.caused_by?.failed_shards;
+export function getFailedShards(err: KibanaServerError<any>): FailedShard | undefined {
+  const errorInfo = err.attributes;
+  const failedShards = errorInfo?.failed_shards || errorInfo?.caused_by?.failed_shards;
   return failedShards ? failedShards[0] : undefined;
 }
 
-export function getTopLevelCause(err: IEsError) {
-  return err.body?.attributes?.error;
+function getNestedCause(err: KibanaServerError | ErrorCause): Reason {
+  const attr = ((err as KibanaServerError).attributes || err) as ErrorCause;
+  const { type, reason, caused_by: causedBy } = attr;
+  if (causedBy) {
+    return getNestedCause(causedBy);
+  }
+  return { type, reason };
 }
 
-export function getRootCause(err: IEsError) {
-  return getFailedShards(err)?.reason;
+export function getRootCause(err: KibanaServerError) {
+  // Give shard failures priority, then try to get the error navigating nested objects
+  return getFailedShards(err)?.reason || getNestedCause(err);
 }

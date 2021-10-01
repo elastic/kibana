@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { URL } from 'url';
@@ -41,11 +30,11 @@ import {
   registerTelemetryUsageCollector,
   registerTelemetryPluginUsageCollector,
 } from './collectors';
-import { TelemetryConfigType } from './config';
+import type { TelemetryConfigType } from './config';
 import { FetcherTask } from './fetcher';
 import { handleOldSettings } from './handle_old_settings';
 import { getTelemetrySavedObject } from './telemetry_repository';
-import { getTelemetryOptIn } from '../common/telemetry_config';
+import { getTelemetryOptIn, getTelemetryChannelEndpoint } from '../common/telemetry_config';
 
 interface TelemetryPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;
@@ -56,6 +45,9 @@ interface TelemetryPluginsDepsStart {
   telemetryCollectionManager: TelemetryCollectionManagerPluginStart;
 }
 
+/**
+ * Server's setup exposed APIs by the telemetry plugin
+ */
 export interface TelemetryPluginSetup {
   /**
    * Resolves into the telemetry Url used to send telemetry.
@@ -64,6 +56,9 @@ export interface TelemetryPluginSetup {
   getTelemetryUrl: () => Promise<URL>;
 }
 
+/**
+ * Server's start exposed APIs by the telemetry plugin
+ */
 export interface TelemetryPluginStart {
   /**
    * Resolves `true` if the user has opted into send Elastic usage data.
@@ -99,7 +94,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   public setup(
-    { elasticsearch, http, savedObjects }: CoreSetup,
+    { http, savedObjects }: CoreSetup,
     { usageCollection, telemetryCollectionManager }: TelemetryPluginsDepsSetup
   ): TelemetryPluginSetup {
     const currentKibanaVersion = this.currentKibanaVersion;
@@ -122,8 +117,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     return {
       getTelemetryUrl: async () => {
-        const config = await config$.pipe(take(1)).toPromise();
-        return new URL(config.url);
+        const { sendUsageTo } = await config$.pipe(take(1)).toPromise();
+        const telemetryUrl = getTelemetryChannelEndpoint({ env: sendUsageTo, channelName: 'main' });
+
+        return new URL(telemetryUrl);
       },
     };
   }

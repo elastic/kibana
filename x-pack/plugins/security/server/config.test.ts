@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('crypto', () => ({
@@ -9,8 +10,9 @@ jest.mock('crypto', () => ({
   constants: jest.requireActual('crypto').constants,
 }));
 
-import { loggingSystemMock } from '../../../../src/core/server/mocks';
-import { createConfig, ConfigSchema } from './config';
+import { loggingSystemMock } from 'src/core/server/mocks';
+
+import { ConfigSchema, createConfig } from './config';
 
 describe('config schema', () => {
   it('generates proper defaults', () => {
@@ -56,9 +58,12 @@ describe('config schema', () => {
         "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "loginAssistanceMessage": "",
+        "public": Object {},
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
+          "idleTimeout": "PT1H",
+          "lifespan": "P30D",
         },
       }
     `);
@@ -105,9 +110,12 @@ describe('config schema', () => {
         "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "loginAssistanceMessage": "",
+        "public": Object {},
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
+          "idleTimeout": "PT1H",
+          "lifespan": "P30D",
         },
       }
     `);
@@ -153,9 +161,12 @@ describe('config schema', () => {
         "cookieName": "sid",
         "enabled": true,
         "loginAssistanceMessage": "",
+        "public": Object {},
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
+          "idleTimeout": "PT1H",
+          "lifespan": "P30D",
         },
       }
     `);
@@ -169,6 +180,109 @@ describe('config schema', () => {
     expect(() => ConfigSchema.validate({ encryptionKey: 'foo' }, { dist: true })).toThrow(
       '[encryptionKey]: value has length [3] but it must have a minimum length of [32].'
     );
+  });
+
+  describe('public', () => {
+    it('properly validates `protocol`', async () => {
+      expect(ConfigSchema.validate({ public: { protocol: 'http' } }).public).toMatchInlineSnapshot(`
+        Object {
+          "protocol": "http",
+        }
+      `);
+
+      expect(ConfigSchema.validate({ public: { protocol: 'https' } }).public)
+        .toMatchInlineSnapshot(`
+        Object {
+          "protocol": "https",
+        }
+      `);
+
+      expect(() => ConfigSchema.validate({ public: { protocol: 'ftp' } }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[public.protocol]: types that failed validation:
+        - [public.protocol.0]: expected value to equal [http]
+        - [public.protocol.1]: expected value to equal [https]"
+      `);
+
+      expect(() => ConfigSchema.validate({ public: { protocol: 'some-protocol' } }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[public.protocol]: types that failed validation:
+        - [public.protocol.0]: expected value to equal [http]
+        - [public.protocol.1]: expected value to equal [https]"
+      `);
+    });
+
+    it('properly validates `hostname`', async () => {
+      expect(ConfigSchema.validate({ public: { hostname: 'elastic.co' } }).public)
+        .toMatchInlineSnapshot(`
+        Object {
+          "hostname": "elastic.co",
+        }
+      `);
+
+      expect(ConfigSchema.validate({ public: { hostname: '192.168.1.1' } }).public)
+        .toMatchInlineSnapshot(`
+        Object {
+          "hostname": "192.168.1.1",
+        }
+      `);
+
+      expect(ConfigSchema.validate({ public: { hostname: '::1' } }).public).toMatchInlineSnapshot(`
+        Object {
+          "hostname": "::1",
+        }
+      `);
+
+      expect(() =>
+        ConfigSchema.validate({ public: { hostname: 'http://elastic.co' } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[public.hostname]: value must be a valid hostname (see RFC 1123)."`
+      );
+
+      expect(() =>
+        ConfigSchema.validate({ public: { hostname: 'localhost:5601' } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[public.hostname]: value must be a valid hostname (see RFC 1123)."`
+      );
+    });
+
+    it('properly validates `port`', async () => {
+      expect(ConfigSchema.validate({ public: { port: 1234 } }).public).toMatchInlineSnapshot(`
+        Object {
+          "port": 1234,
+        }
+      `);
+
+      expect(ConfigSchema.validate({ public: { port: 0 } }).public).toMatchInlineSnapshot(`
+        Object {
+          "port": 0,
+        }
+      `);
+
+      expect(ConfigSchema.validate({ public: { port: 65535 } }).public).toMatchInlineSnapshot(`
+        Object {
+          "port": 65535,
+        }
+      `);
+
+      expect(() =>
+        ConfigSchema.validate({ public: { port: -1 } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[public.port]: Value must be equal to or greater than [0]."`
+      );
+
+      expect(() =>
+        ConfigSchema.validate({ public: { port: 65536 } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[public.port]: Value must be equal to or lower than [65535]."`
+      );
+
+      expect(() =>
+        ConfigSchema.validate({ public: { port: '56x1' } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[public.port]: expected value of type [number] but got [string]"`
+      );
+    });
   });
 
   describe('authc.oidc', () => {
@@ -247,14 +361,42 @@ describe('config schema', () => {
   });
 
   describe('authc.saml', () => {
-    it('fails if authc.providers includes `saml`, but `saml.realm` is not specified', async () => {
-      expect(() => ConfigSchema.validate({ authc: { providers: ['saml'] } })).toThrow(
-        '[authc.saml.realm]: expected value of type [string] but got [undefined]'
-      );
+    it('does not fail if authc.providers includes `saml`, but `saml.realm` is not specified', async () => {
+      expect(ConfigSchema.validate({ authc: { providers: ['saml'] } }).authc)
+        .toMatchInlineSnapshot(`
+        Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
+          "providers": Array [
+            "saml",
+          ],
+          "saml": Object {},
+          "selector": Object {},
+        }
+      `);
 
-      expect(() => ConfigSchema.validate({ authc: { providers: ['saml'], saml: {} } })).toThrow(
-        '[authc.saml.realm]: expected value of type [string] but got [undefined]'
-      );
+      expect(ConfigSchema.validate({ authc: { providers: ['saml'], saml: {} } }).authc)
+        .toMatchInlineSnapshot(`
+        Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
+          "providers": Array [
+            "saml",
+          ],
+          "saml": Object {},
+          "selector": Object {},
+        }
+      `);
 
       expect(
         ConfigSchema.validate({
@@ -1557,21 +1699,21 @@ describe('createConfig()', () => {
       ConfigSchema.validate({
         audit: {
           appender: {
-            kind: 'file',
-            path: '/path/to/file.txt',
+            type: 'file',
+            fileName: '/path/to/file.txt',
             layout: {
-              kind: 'json',
+              type: 'json',
             },
           },
         },
       }).audit.appender
     ).toMatchInlineSnapshot(`
       Object {
-        "kind": "file",
+        "fileName": "/path/to/file.txt",
         "layout": Object {
-          "kind": "json",
+          "type": "json",
         },
-        "path": "/path/to/file.txt",
+        "type": "file",
       }
     `);
   });
@@ -1582,12 +1724,12 @@ describe('createConfig()', () => {
         audit: {
           // no layout configured
           appender: {
-            kind: 'file',
+            type: 'file',
             path: '/path/to/file.txt',
           },
         },
       })
-    ).toThrow('[audit.appender.2.kind]: expected value to equal [legacy-appender]');
+    ).toThrow('[audit.appender.2.type]: expected value to equal [legacy-appender]');
   });
 
   it('rejects an ignore_filter when no appender is configured', () => {
@@ -1613,11 +1755,11 @@ describe('createConfig()', () => {
     it('returns default values if neither global nor provider specific settings are set', async () => {
       expect(createMockConfig().session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
         .toMatchInlineSnapshot(`
-          Object {
-            "idleTimeout": null,
-            "lifespan": null,
-          }
-        `);
+        Object {
+          "idleTimeout": "PT1H",
+          "lifespan": "P30D",
+        }
+      `);
     });
 
     it('correctly handles explicitly disabled global settings', async () => {
@@ -1651,11 +1793,11 @@ describe('createConfig()', () => {
           name: 'basic1',
         })
       ).toMatchInlineSnapshot(`
-          Object {
-            "idleTimeout": "PT0.123S",
-            "lifespan": null,
-          }
-        `);
+        Object {
+          "idleTimeout": "PT0.123S",
+          "lifespan": "P30D",
+        }
+      `);
 
       expect(
         createMockConfig({ session: { lifespan: 456 } }).session.getExpirationTimeouts({
@@ -1663,11 +1805,11 @@ describe('createConfig()', () => {
           name: 'basic1',
         })
       ).toMatchInlineSnapshot(`
-          Object {
-            "idleTimeout": null,
-            "lifespan": "PT0.456S",
-          }
-        `);
+        Object {
+          "idleTimeout": "PT1H",
+          "lifespan": "PT0.456S",
+        }
+      `);
 
       expect(
         createMockConfig({
@@ -1681,41 +1823,39 @@ describe('createConfig()', () => {
         `);
     });
 
-    it('falls back to the global settings if provider is not known', async () => {
-      expect(
-        createMockConfig({ session: { idleTimeout: 123 } }).session.getExpirationTimeouts({
-          type: 'some type',
-          name: 'some name',
-        })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "idleTimeout": "PT0.123S",
-          "lifespan": null,
-        }
-      `);
+    it('falls back to the global settings if provider is not known or is undefined', async () => {
+      [{ type: 'some type', name: 'some name' }, undefined].forEach((provider) => {
+        expect(
+          createMockConfig({ session: { idleTimeout: 123 } }).session.getExpirationTimeouts(
+            provider
+          )
+        ).toMatchInlineSnapshot(`
+          Object {
+            "idleTimeout": "PT0.123S",
+            "lifespan": "P30D",
+          }
+        `);
 
-      expect(
-        createMockConfig({ session: { lifespan: 456 } }).session.getExpirationTimeouts({
-          type: 'some type',
-          name: 'some name',
-        })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "idleTimeout": null,
-          "lifespan": "PT0.456S",
-        }
-      `);
+        expect(
+          createMockConfig({ session: { lifespan: 456 } }).session.getExpirationTimeouts(provider)
+        ).toMatchInlineSnapshot(`
+          Object {
+            "idleTimeout": "PT1H",
+            "lifespan": "PT0.456S",
+          }
+        `);
 
-      expect(
-        createMockConfig({
-          session: { idleTimeout: 123, lifespan: 456 },
-        }).session.getExpirationTimeouts({ type: 'some type', name: 'some name' })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "idleTimeout": "PT0.123S",
-          "lifespan": "PT0.456S",
-        }
-      `);
+        expect(
+          createMockConfig({
+            session: { idleTimeout: 123, lifespan: 456 },
+          }).session.getExpirationTimeouts(provider)
+        ).toMatchInlineSnapshot(`
+          Object {
+            "idleTimeout": "PT0.123S",
+            "lifespan": "PT0.456S",
+          }
+        `);
+      });
     });
 
     it('uses provider overrides if specified (only idle timeout)', async () => {
@@ -1732,14 +1872,14 @@ describe('createConfig()', () => {
         .toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT0.321S",
-          "lifespan": null,
+          "lifespan": "P30D",
         }
       `);
       expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
         .toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT5M32.211S",
-          "lifespan": null,
+          "lifespan": "P30D",
         }
       `);
 
@@ -1756,14 +1896,14 @@ describe('createConfig()', () => {
         .toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT0.321S",
-          "lifespan": null,
+          "lifespan": "P30D",
         }
       `);
       expect(configWithGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
         .toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT5M32.211S",
-          "lifespan": null,
+          "lifespan": "P30D",
         }
       `);
     });
@@ -1781,14 +1921,14 @@ describe('createConfig()', () => {
       expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": null,
+          "idleTimeout": "PT1H",
           "lifespan": "PT0.654S",
         }
       `);
       expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": null,
+          "idleTimeout": "PT1H",
           "lifespan": "PT11M5.544S",
         }
       `);
@@ -1805,7 +1945,7 @@ describe('createConfig()', () => {
       expect(configWithGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": null,
+          "idleTimeout": "PT1H",
           "lifespan": "PT0.654S",
         }
       `);

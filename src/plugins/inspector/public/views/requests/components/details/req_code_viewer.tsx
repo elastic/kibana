@@ -1,28 +1,26 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiFlexItem, EuiFlexGroup, EuiCopy, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
-import { CodeEditor } from '../../../../../../kibana_react/public';
+// We want to allow both right-clicking to open in a new tab and clicking through
+// the "Open in Console" link. We could use `RedirectAppLinks` at the top level
+// but that inserts a div which messes up the layout of the inspector.
+/* eslint-disable @elastic/eui/href-or-on-click */
+
+import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { XJsonLang } from '@kbn/monaco';
+import { compressToEncodedURIComponent } from 'lz-string';
+import React, { useCallback } from 'react';
+import { CodeEditor, useKibana } from '../../../../../../kibana_react/public';
+import { InspectorPluginStartDeps } from '../../../../plugin';
 
 interface RequestCodeViewerProps {
+  indexPattern?: string;
   json: string;
 }
 
@@ -30,53 +28,85 @@ const copyToClipboardLabel = i18n.translate('inspector.requests.copyToClipboardL
   defaultMessage: 'Copy to clipboard',
 });
 
+const openInConsoleLabel = i18n.translate('inspector.requests.openInConsoleLabel', {
+  defaultMessage: 'Open in Console',
+});
+
 /**
  * @internal
  */
-export const RequestCodeViewer = ({ json }: RequestCodeViewerProps) => (
-  <EuiFlexGroup
-    direction="column"
-    gutterSize="s"
-    wrap={false}
-    responsive={false}
-    className="insRequestCodeViewer"
-  >
-    <EuiFlexItem grow={false}>
-      <EuiSpacer size="s" />
-      <div className="eui-textRight">
-        <EuiCopy textToCopy={json}>
-          {(copy) => (
+export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps) => {
+  const { services } = useKibana<InspectorPluginStartDeps>();
+
+  const navigateToUrl = services.application?.navigateToUrl;
+  const canShowDevTools = services.application?.capabilities?.dev_tools.show;
+  const devToolsDataUri = compressToEncodedURIComponent(`GET ${indexPattern}/_search\n${json}`);
+  const devToolsHref = services.share.url.locators
+    .get('CONSOLE_APP_LOCATOR')
+    ?.useUrl({ loadFrom: `data:text/plain,${devToolsDataUri}` });
+  const shouldShowDevToolsLink = !!(indexPattern && canShowDevTools);
+  const handleDevToolsLinkClick = useCallback(
+    () => devToolsHref && navigateToUrl && navigateToUrl(devToolsHref),
+    [devToolsHref, navigateToUrl]
+  );
+
+  return (
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      wrap={false}
+      responsive={false}
+      className="insRequestCodeViewer"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="s" />
+        <div className="eui-textRight">
+          <EuiCopy textToCopy={json}>
+            {(copy) => (
+              <EuiButtonEmpty
+                size="xs"
+                flush="right"
+                iconType="copyClipboard"
+                onClick={copy}
+                data-test-subj="inspectorRequestCopyClipboardButton"
+              >
+                {copyToClipboardLabel}
+              </EuiButtonEmpty>
+            )}
+          </EuiCopy>
+          {shouldShowDevToolsLink && (
             <EuiButtonEmpty
               size="xs"
               flush="right"
-              iconType="copyClipboard"
-              onClick={copy}
-              data-test-subj="inspectorRequestCopyClipboardButton"
+              iconType="wrench"
+              href={devToolsHref}
+              onClick={handleDevToolsLinkClick}
+              data-test-subj="inspectorRequestOpenInConsoleButton"
             >
-              {copyToClipboardLabel}
+              {openInConsoleLabel}
             </EuiButtonEmpty>
           )}
-        </EuiCopy>
-      </div>
-    </EuiFlexItem>
-    <EuiFlexItem grow={true}>
-      <CodeEditor
-        languageId="json"
-        value={json}
-        onChange={() => {}}
-        options={{
-          readOnly: true,
-          lineNumbers: 'off',
-          fontSize: 12,
-          minimap: {
-            enabled: false,
-          },
-          scrollBeyondLastLine: false,
-          wordWrap: 'on',
-          wrappingIndent: 'indent',
-          automaticLayout: true,
-        }}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem grow={true}>
+        <CodeEditor
+          languageId={XJsonLang.ID}
+          value={json}
+          options={{
+            readOnly: true,
+            lineNumbers: 'off',
+            fontSize: 12,
+            minimap: {
+              enabled: false,
+            },
+            folding: true,
+            scrollBeyondLastLine: false,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+            automaticLayout: true,
+          }}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};

@@ -1,51 +1,83 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ACTION_GROUP_DEFINITIONS, CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { apiService } from './utils';
 import { ActionConnector } from '../alerts/alerts';
 
 import { AlertsResult, MonitorIdParam } from '../actions/types';
-import { AlertAction } from '../../../../triggers_actions_ui/public';
+import { ActionType, AsApiContract } from '../../../../triggers_actions_ui/public';
 import { API_URLS } from '../../../common/constants';
-import { MonitorStatusTranslations } from '../../../common/translations';
-import { Alert, AlertTypeParams } from '../../../../alerts/common';
+import { Alert, AlertTypeParams } from '../../../../alerting/common';
+import { AtomicStatusCheckParams } from '../../../common/runtime_types/alerts';
 
-const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
+import { populateAlertActions, RuleAction } from './alert_actions';
+import { Ping } from '../../../common/runtime_types/ping';
 
 const UPTIME_AUTO_ALERT = 'UPTIME_AUTO';
 
-export const fetchConnectors = async () => {
-  return await apiService.get(API_URLS.ALERT_ACTIONS);
+export const fetchConnectors = async (): Promise<ActionConnector[]> => {
+  const response = (await apiService.get(API_URLS.RULE_CONNECTORS)) as Array<
+    AsApiContract<ActionConnector>
+  >;
+  return response.map(
+    ({
+      connector_type_id: actionTypeId,
+      referenced_by_count: referencedByCount,
+      is_preconfigured: isPreconfigured,
+      is_missing_secrets: isMissingSecrets,
+      ...res
+    }) => ({
+      ...res,
+      actionTypeId,
+      referencedByCount,
+      isPreconfigured,
+      isMissingSecrets,
+    })
+  );
 };
 
 export interface NewAlertParams extends AlertTypeParams {
-  monitorId: string;
-  monitorName?: string;
+  selectedMonitor: Ping;
   defaultActions: ActionConnector[];
 }
+
+type NewMonitorStatusAlert = Omit<
+  Alert<AtomicStatusCheckParams>,
+  | 'id'
+  | 'createdBy'
+  | 'updatedBy'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'apiKey'
+  | 'apiKeyOwner'
+  | 'muteAll'
+  | 'mutedInstanceIds'
+  | 'executionStatus'
+  | 'alertTypeId'
+  | 'notifyWhen'
+  | 'actions'
+> & {
+  rule_type_id: Alert<AtomicStatusCheckParams>['alertTypeId'];
+  notify_when: Alert<AtomicStatusCheckParams>['notifyWhen'];
+  actions: RuleAction[];
+};
 
 export const createAlert = async ({
   defaultActions,
   monitorId,
-  monitorName,
+  selectedMonitor,
 }: NewAlertParams): Promise<Alert> => {
-  const actions: AlertAction[] = [];
-  defaultActions.forEach((aId) => {
-    actions.push({
-      id: aId.id,
-      actionTypeId: aId.actionTypeId,
-      group: MONITOR_STATUS.id,
-      params: {
-        message: MonitorStatusTranslations.defaultActionMessage,
-      },
-    });
+  const actions: RuleAction[] = populateAlertActions({
+    defaultActions,
+    selectedMonitor,
   });
 
-  const data = {
+  const data: NewMonitorStatusAlert = {
     actions,
     params: {
       numTimes: 1,
@@ -58,13 +90,16 @@ export const createAlert = async ({
       filters: { 'url.port': [], 'observer.geo.name': [], 'monitor.type': [], tags: [] },
     },
     consumer: 'uptime',
-    alertTypeId: CLIENT_ALERT_TYPES.MONITOR_STATUS,
+    rule_type_id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
     schedule: { interval: '1m' },
+    notify_when: 'onActionGroupChange',
     tags: [UPTIME_AUTO_ALERT],
-    name: `${monitorName} (Simple status alert)`,
+    name: `${selectedMonitor?.monitor.name || selectedMonitor?.url?.full}(Simple status alert)`,
+    enabled: true,
+    throttle: null,
   };
 
-  return await apiService.post(API_URLS.CREATE_ALERT, data);
+  return await apiService.post(API_URLS.CREATE_RULE, data);
 };
 
 export const fetchMonitorAlertRecords = async (): Promise<AlertsResult> => {
@@ -78,7 +113,7 @@ export const fetchMonitorAlertRecords = async (): Promise<AlertsResult> => {
     search_fields: ['name', 'tags'],
     search: 'UPTIME_AUTO',
   };
-  return await apiService.get(API_URLS.ALERTS_FIND, data);
+  return await apiService.get(API_URLS.RULES_FIND, data);
 };
 
 export const fetchAlertRecords = async ({
@@ -92,10 +127,29 @@ export const fetchAlertRecords = async ({
     sort_field: 'name.keyword',
     sort_order: 'asc',
   };
-  const alerts = await apiService.get(API_URLS.ALERTS_FIND, data);
+  const alerts = await apiService.get(API_URLS.RULES_FIND, data);
   return alerts.data.find((alert: Alert<NewAlertParams>) => alert.params.monitorId === monitorId);
 };
 
 export const disableAlertById = async ({ alertId }: { alertId: string }) => {
-  return await apiService.delete(API_URLS.ALERT + alertId);
+  return await apiService.delete(API_URLS.DELETE_RULE + alertId);
+};
+
+export const fetchActionTypes = async (): Promise<ActionType[]> => {
+  const response = (await apiService.get(API_URLS.CONNECTOR_TYPES)) as Array<
+    AsApiContract<ActionType>
+  >;
+  return response.map<ActionType>(
+    ({
+      enabled_in_config: enabledInConfig,
+      enabled_in_license: enabledInLicense,
+      minimum_license_required: minimumLicenseRequired,
+      ...res
+    }: AsApiContract<ActionType>) => ({
+      ...res,
+      enabledInConfig,
+      enabledInLicense,
+      minimumLicenseRequired,
+    })
+  );
 };

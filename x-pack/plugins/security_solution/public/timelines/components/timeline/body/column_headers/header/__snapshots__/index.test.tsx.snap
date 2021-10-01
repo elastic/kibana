@@ -7,16 +7,19 @@ exports[`Header renders correctly against snapshot 1`] = `
       Object {
         "columnHeaderType": "not-filtered",
         "id": "@timestamp",
-        "width": 190,
+        "initialWidth": 190,
+        "type": "number",
       }
     }
     isLoading={false}
     isResizing={false}
     onClick={[Function]}
+    showSortingCapability={true}
     sort={
       Array [
         Object {
           "columnId": "@timestamp",
+          "columnType": "number",
           "sortDirection": "desc",
         },
       ]
@@ -27,7 +30,8 @@ exports[`Header renders correctly against snapshot 1`] = `
         Object {
           "columnHeaderType": "not-filtered",
           "id": "@timestamp",
-          "width": 190,
+          "initialWidth": 190,
+          "type": "number",
         }
       }
       isLoading={false}
@@ -36,6 +40,7 @@ exports[`Header renders correctly against snapshot 1`] = `
         Array [
           Object {
             "columnId": "@timestamp",
+            "columnType": "number",
             "sortDirection": "desc",
           },
         ]
@@ -47,7 +52,8 @@ exports[`Header renders correctly against snapshot 1`] = `
       Object {
         "columnHeaderType": "not-filtered",
         "id": "@timestamp",
-        "width": 190,
+        "initialWidth": 190,
+        "type": "number",
       }
     }
     onFilterChange={[Function]}

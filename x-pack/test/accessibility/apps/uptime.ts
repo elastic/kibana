@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -16,10 +17,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const uptimeService = getService('uptime');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+  const toasts = getService('toasts');
 
   describe('uptime', () => {
     before(async () => {
-      await esArchiver.load('uptime/blank');
+      await esArchiver.load('x-pack/test/functional/es_archives/uptime/blank');
       await makeChecks(es, A11Y_TEST_MONITOR_ID, 150, 1, 1000, {
         tls: {
           certificate_not_valid_after: moment().add(30, 'days').toISOString(),
@@ -43,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('uptime/blank');
+      await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
     });
 
     it('overview page', async () => {
@@ -58,7 +60,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('overview alert popover controls', async () => {
       await uptimeService.overview.openAlertsPopover();
+      await toasts.dismissAllToasts();
       await a11y.testAppSnapshot();
+    });
+
+    it('overview alert popover controls nested content', async () => {
       await uptimeService.overview.navigateToNestedPopover();
       await a11y.testAppSnapshot();
     });

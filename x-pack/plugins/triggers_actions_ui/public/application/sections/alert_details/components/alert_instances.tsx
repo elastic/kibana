@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import moment, { Duration } from 'moment';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiHealth, EuiSpacer, EuiSwitch, EuiToolTip } from '@elastic/eui';
+import { EuiBasicTable, EuiHealth, EuiSpacer, EuiToolTip } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padStart, chunk } from 'lodash';
-import { ActionGroup, AlertInstanceStatusValues } from '../../../../../../alerts/common';
+import { ActionGroup, AlertInstanceStatusValues } from '../../../../../../alerting/common';
 import {
   Alert,
   AlertInstanceSummary,
@@ -25,6 +26,7 @@ import {
 } from '../../common/components/with_bulk_alert_api_operations';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import './alert_instances.scss';
+import { RuleMutedSwitch } from './rule_muted_switch';
 
 type AlertInstancesProps = {
   alert: Alert;
@@ -42,8 +44,8 @@ export const alertInstancesTableColumns = (
   {
     field: 'instance',
     name: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.instance',
-      { defaultMessage: 'Instance' }
+      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.alert',
+      { defaultMessage: 'Alert' }
     ),
     sortable: false,
     truncateText: true,
@@ -111,17 +113,11 @@ export const alertInstancesTableColumns = (
     ),
     render: (alertInstance: AlertInstanceListItem) => {
       return (
-        <Fragment>
-          <EuiSwitch
-            label="mute"
-            showLabel={false}
-            compressed={true}
-            checked={alertInstance.isMuted}
-            disabled={readOnly}
-            data-test-subj={`muteAlertInstanceButton_${alertInstance.instance}`}
-            onChange={() => onMuteAction(alertInstance)}
-          />
-        </Fragment>
+        <RuleMutedSwitch
+          disabled={readOnly}
+          onMuteAction={async () => await onMuteAction(alertInstance)}
+          alertInstance={alertInstance}
+        />
       );
     },
     sortable: false,
@@ -166,7 +162,7 @@ export function AlertInstances({
   };
 
   return (
-    <Fragment>
+    <>
       <EuiSpacer size="xl" />
       <input
         type="hidden"
@@ -195,7 +191,7 @@ export function AlertInstances({
         tableLayout="fixed"
         className="alertInstancesList"
       />
-    </Fragment>
+    </>
   );
 }
 export const AlertInstancesWithApi = withBulkAlertOperations(AlertInstances);
@@ -225,13 +221,13 @@ const ACTIVE_LABEL = i18n.translate(
 
 const INACTIVE_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.status.inactive',
-  { defaultMessage: 'OK' }
+  { defaultMessage: 'Recovered' }
 );
 
 function getActionGroupName(alertType: AlertType, actionGroupId?: string): string | undefined {
   actionGroupId = actionGroupId || alertType.defaultActionGroupId;
   const actionGroup = alertType?.actionGroups?.find(
-    (group: ActionGroup) => group.id === actionGroupId
+    (group: ActionGroup<string>) => group.id === actionGroupId
   );
   return actionGroup?.name;
 }

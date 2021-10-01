@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MlResultsService } from '../../../services/results_service';
@@ -28,7 +29,9 @@ export function chartLoaderProvider(mlResultsService: MlResultsService) {
       job.data_description.time_field,
       job.data_counts.earliest_record_timestamp,
       job.data_counts.latest_record_timestamp,
-      intervalMs
+      intervalMs,
+      job.datafeed_config.runtime_mappings,
+      job.datafeed_config.indices_options
     );
     if (resp.error !== undefined) {
       throw resp.error;

@@ -1,11 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { TimelineExpandedEventType } from '../../../common/types/timeline';
-import { TimelineEventsAllRequestOptions } from '../../../common/search_strategy/timeline';
+import {
+  TimelineExpandedDetail,
+  TimelineExpandedDetailType,
+  TimelineTabs,
+} from '../../../common/types/timeline';
+import {
+  TimelineEqlRequestOptions,
+  TimelineEventsAllRequestOptions,
+} from '../../../common/search_strategy/timeline';
 import { TimelineArgs } from '.';
 
 /*
@@ -21,10 +29,12 @@ import { TimelineArgs } from '.';
 
 class ActiveTimelineEvents {
   private _activePage: number = 0;
-  private _expandedEvent: TimelineExpandedEventType = {};
+  private _expandedDetail: TimelineExpandedDetail = {};
   private _pageName: string = '';
   private _request: TimelineEventsAllRequestOptions | null = null;
   private _response: TimelineArgs | null = null;
+  private _eqlRequest: TimelineEqlRequestOptions | null = null;
+  private _eqlResponse: TimelineArgs | null = null;
 
   getActivePage() {
     return this._activePage;
@@ -34,20 +44,40 @@ class ActiveTimelineEvents {
     this._activePage = activePage;
   }
 
-  getExpandedEvent() {
-    return this._expandedEvent;
+  getExpandedDetail() {
+    return this._expandedDetail;
   }
 
-  toggleExpandedEvent(expandedEvent: TimelineExpandedEventType) {
-    if (expandedEvent.eventId === this._expandedEvent.eventId) {
-      this._expandedEvent = {};
+  toggleExpandedDetail(expandedDetail: TimelineExpandedDetailType) {
+    const queryTab = TimelineTabs.query;
+    const currentExpandedDetail = this._expandedDetail[queryTab];
+    let isSameExpandedDetail;
+
+    // Check if the stored details matches the incoming detail
+    if (currentExpandedDetail?.panelView === 'eventDetail') {
+      isSameExpandedDetail =
+        expandedDetail?.panelView === 'eventDetail' &&
+        expandedDetail?.params?.eventId === currentExpandedDetail?.params?.eventId;
+    } else if (currentExpandedDetail?.panelView === 'hostDetail') {
+      isSameExpandedDetail =
+        expandedDetail?.panelView === 'hostDetail' &&
+        expandedDetail?.params?.hostName === currentExpandedDetail?.params?.hostName;
+    } else if (currentExpandedDetail?.panelView === 'networkDetail') {
+      isSameExpandedDetail =
+        expandedDetail?.panelView === 'networkDetail' &&
+        expandedDetail?.params?.ip === currentExpandedDetail?.params?.ip;
+    }
+
+    // if so, unset it, otherwise set it
+    if (isSameExpandedDetail) {
+      this._expandedDetail = {};
     } else {
-      this._expandedEvent = expandedEvent;
+      this._expandedDetail = { [queryTab]: { ...expandedDetail } };
     }
   }
 
-  setExpandedEvent(expandedEvent: TimelineExpandedEventType) {
-    this._expandedEvent = expandedEvent;
+  setExpandedDetail(expandedDetail: TimelineExpandedDetail) {
+    this._expandedDetail = expandedDetail;
   }
 
   getPageName() {
@@ -72,6 +102,22 @@ class ActiveTimelineEvents {
 
   setResponse(resp: TimelineArgs | null) {
     this._response = resp;
+  }
+
+  getEqlRequest() {
+    return this._eqlRequest;
+  }
+
+  setEqlRequest(req: TimelineEqlRequestOptions) {
+    this._eqlRequest = req;
+  }
+
+  getEqlResponse() {
+    return this._eqlResponse;
+  }
+
+  setEqlResponse(resp: TimelineArgs | null) {
+    this._eqlResponse = resp;
   }
 }
 

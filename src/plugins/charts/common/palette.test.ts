@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -23,13 +12,14 @@ import {
   systemPalette,
   PaletteOutput,
   CustomPaletteState,
+  CustomPaletteArguments,
 } from './palette';
 import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
 
 describe('palette', () => {
   const fn = functionWrapper(palette()) as (
     context: null,
-    args?: { color?: string[]; gradient?: boolean; reverse?: boolean }
+    args?: Partial<CustomPaletteArguments>
   ) => PaletteOutput<CustomPaletteState>;
 
   it('results a palette', () => {
@@ -42,6 +32,18 @@ describe('palette', () => {
       it('sets colors', () => {
         const result = fn(null, { color: ['red', 'green', 'blue'] });
         expect(result.params!.colors).toEqual(['red', 'green', 'blue']);
+      });
+
+      it('defaults to pault_tor_14 colors', () => {
+        const result = fn(null);
+        expect(result.params!.colors).toEqual(defaultCustomColors);
+      });
+    });
+
+    describe('stop', () => {
+      it('sets stops', () => {
+        const result = fn(null, { color: ['red', 'green', 'blue'], stop: [1, 2, 3] });
+        expect(result.params!.stops).toEqual([1, 2, 3]);
       });
 
       it('defaults to pault_tor_14 colors', () => {
@@ -79,6 +81,16 @@ describe('palette', () => {
       it(`defaults to 'false`, () => {
         const result = fn(null);
         expect(result.params!.colors).toEqual(defaultCustomColors);
+      });
+
+      it('keeps the stops order pristine when set', () => {
+        const stops = [1, 2, 3];
+        const result = fn(null, {
+          color: ['red', 'green', 'blue'],
+          stop: [1, 2, 3],
+          reverse: true,
+        });
+        expect(result.params!.stops).toEqual(stops);
       });
     });
   });

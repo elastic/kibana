@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -47,7 +48,7 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
   };
 
   const getIndex = () => {
-    return getSimpleArg('index', args)[0] || '';
+    return getSimpleArg('index', args)[0] || defaultIndex || '';
   };
 
   const getQuery = () => {
@@ -71,10 +72,6 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
   const [sortField, sortOrder] = getSortBy();
 
   const index = getIndex();
-
-  if (!index && defaultIndex) {
-    setArg('index', defaultIndex);
-  }
 
   const sortOptions = [
     { value: 'asc', text: strings.getAscendingOption() },

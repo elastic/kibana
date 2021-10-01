@@ -6,6 +6,7 @@ Object {
     "migrationMappingPropertyHashes": Object {
       "aaa": "625b32086eb1d1203564cf85062dd22e",
       "bbb": "18c78c995965207ed3f6e7fc5c6e55fe",
+      "coreMigrationVersion": "2f4316de49999235636386fe51dc06c1",
       "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
       "namespace": "2f4316de49999235636386fe51dc06c1",
       "namespaces": "2f4316de49999235636386fe51dc06c1",
@@ -22,6 +23,9 @@ Object {
     },
     "bbb": Object {
       "type": "long",
+    },
+    "coreMigrationVersion": Object {
+      "type": "keyword",
     },
     "migrationVersion": Object {
       "dynamic": "true",
@@ -64,6 +68,7 @@ exports[`buildActiveMappings handles the \`dynamic\` property of types 1`] = `
 Object {
   "_meta": Object {
     "migrationMappingPropertyHashes": Object {
+      "coreMigrationVersion": "2f4316de49999235636386fe51dc06c1",
       "firstType": "635418ab953d81d93f1190b70a8d3f57",
       "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
       "namespace": "2f4316de49999235636386fe51dc06c1",
@@ -78,6 +83,9 @@ Object {
   },
   "dynamic": "strict",
   "properties": Object {
+    "coreMigrationVersion": Object {
+      "type": "keyword",
+    },
     "firstType": Object {
       "dynamic": "strict",
       "properties": Object {

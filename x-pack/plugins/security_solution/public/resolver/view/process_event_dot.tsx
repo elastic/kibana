@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useContext } from 'react';
 import styled from 'styled-components';
 import { htmlIdGenerator, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector } from 'react-redux';
@@ -15,6 +16,7 @@ import { applyMatrix3 } from '../models/vector2';
 import { Vector2, Matrix3, ResolverState } from '../types';
 import { ResolverNode } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
+import { SideEffectContext } from './side_effect_context';
 import * as nodeModel from '../../../common/endpoint/models/node';
 import * as selectors from '../store/selectors';
 import { fontSize } from './font_size';
@@ -155,6 +157,7 @@ const UnstyledProcessEventDot = React.memo(
     const htmlIDPrefix = `resolver:${resolverComponentInstanceID}`;
 
     const symbolIDs = useSymbolIDs();
+    const { timestamp } = useContext(SideEffectContext);
 
     /**
      * Convert the position, which is in 'world' coordinates, to screen coordinates.
@@ -171,9 +174,10 @@ const UnstyledProcessEventDot = React.memo(
 
     // define a standard way of giving HTML IDs to nodes based on their entity_id/nodeID.
     // this is used to link nodes via aria attributes
-    const nodeHTMLID = useCallback((id: string) => htmlIdGenerator(htmlIDPrefix)(`${id}:node`), [
-      htmlIDPrefix,
-    ]);
+    const nodeHTMLID = useCallback(
+      (id: string) => htmlIdGenerator(htmlIDPrefix)(`${id}:node`),
+      [htmlIDPrefix]
+    );
 
     const ariaLevel: number | null = useSelector((state: ResolverState) =>
       selectors.ariaLevel(state)(nodeID)
@@ -288,9 +292,12 @@ const UnstyledProcessEventDot = React.memo(
     const handleFocus = useCallback(() => {
       dispatch({
         type: 'userFocusedOnResolverNode',
-        payload: nodeID,
+        payload: {
+          nodeID,
+          time: timestamp(),
+        },
       });
-    }, [dispatch, nodeID]);
+    }, [dispatch, nodeID, timestamp]);
 
     const handleClick = useCallback(
       (clickEvent) => {
@@ -306,12 +313,15 @@ const UnstyledProcessEventDot = React.memo(
         } else {
           dispatch({
             type: 'userSelectedResolverNode',
-            payload: nodeID,
+            payload: {
+              nodeID,
+              time: timestamp(),
+            },
           });
           processDetailNavProps.onClick(clickEvent);
         }
       },
-      [animationTarget, dispatch, nodeID, processDetailNavProps, nodeState]
+      [animationTarget, dispatch, nodeID, processDetailNavProps, nodeState, timestamp]
     );
 
     const grandTotal: number | null = useSelector((state: ResolverState) =>
@@ -319,11 +329,7 @@ const UnstyledProcessEventDot = React.memo(
     );
 
     const nodeName = nodeModel.nodeName(node);
-
     /* eslint-disable jsx-a11y/click-events-have-key-events */
-    /**
-     * Key event handling (e.g. 'Enter'/'Space') is provisioned by the `EuiKeyboardAccessible` component
-     */
     return (
       <div
         data-test-subj="resolver:node"

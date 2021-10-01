@@ -1,20 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { Fragment, lazy } from 'react';
+
+import React, { lazy } from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { EuiAccordion } from '@elastic/eui';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult, Alert, AlertAction } from '../../../types';
+import {
+  ValidationResult,
+  Alert,
+  AlertAction,
+  ConnectorValidationResult,
+  GenericValidationResult,
+} from '../../../types';
 import ActionForm from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import {
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
-} from '../../../../../alerts/common';
+} from '../../../../../alerting/common';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({
@@ -25,7 +34,7 @@ const setHasActionsWithBrokenConnector = jest.fn();
 describe('action_form', () => {
   const mockedActionParamsFields = lazy(async () => ({
     default() {
-      return <Fragment />;
+      return <></>;
     },
   }));
 
@@ -36,7 +45,7 @@ describe('action_form', () => {
     validate: (): ValidationResult => {
       return { errors: {} };
     },
-    alertParamsExpression: () => <Fragment />,
+    alertParamsExpression: () => <></>,
     requiresAppContext: false,
   };
 
@@ -44,12 +53,12 @@ describe('action_form', () => {
     id: 'my-action-type',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ValidationResult => {
-      return { errors: {} };
+    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+      return Promise.resolve({});
     },
-    validateParams: (): ValidationResult => {
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
-      return validationResult;
+      return Promise.resolve(validationResult);
     },
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
@@ -59,12 +68,12 @@ describe('action_form', () => {
     id: 'disabled-by-config',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ValidationResult => {
-      return { errors: {} };
+    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+      return Promise.resolve({});
     },
-    validateParams: (): ValidationResult => {
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
-      return validationResult;
+      return Promise.resolve(validationResult);
     },
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
@@ -74,12 +83,12 @@ describe('action_form', () => {
     id: '.jira',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ValidationResult => {
-      return { errors: {} };
+    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+      return Promise.resolve({});
     },
-    validateParams: (): ValidationResult => {
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
-      return validationResult;
+      return Promise.resolve(validationResult);
     },
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
@@ -89,12 +98,12 @@ describe('action_form', () => {
     id: 'disabled-by-license',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ValidationResult => {
-      return { errors: {} };
+    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+      return Promise.resolve({});
     },
-    validateParams: (): ValidationResult => {
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
-      return validationResult;
+      return Promise.resolve(validationResult);
     },
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
@@ -104,31 +113,83 @@ describe('action_form', () => {
     id: 'preconfigured',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ValidationResult => {
-      return { errors: {} };
+    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+      return Promise.resolve({});
     },
-    validateParams: (): ValidationResult => {
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
-      return validationResult;
+      return Promise.resolve(validationResult);
     },
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
   };
 
-  const actionTypeWithoutParams = {
-    id: 'my-action-type-without-params',
-    iconClass: 'test',
-    selectMessage: 'test',
-    validateConnector: (): ValidationResult => {
-      return { errors: {} };
+  const allActions = [
+    {
+      secrets: {},
+      isMissingSecrets: false,
+      id: 'test',
+      actionTypeId: actionType.id,
+      name: 'Test connector',
+      config: {},
+      isPreconfigured: false,
     },
-    validateParams: (): ValidationResult => {
-      const validationResult = { errors: {} };
-      return validationResult;
+    {
+      secrets: {},
+      isMissingSecrets: false,
+      id: 'test2',
+      actionTypeId: actionType.id,
+      name: 'Test connector 2',
+      config: {},
+      isPreconfigured: true,
     },
-    actionConnectorFields: null,
-    actionParamsFields: null,
-  };
+    {
+      secrets: {},
+      isMissingSecrets: false,
+      id: 'test3',
+      actionTypeId: preconfiguredOnly.id,
+      name: 'Preconfigured Only',
+      config: {},
+      isPreconfigured: true,
+    },
+    {
+      secrets: {},
+      isMissingSecrets: false,
+      id: 'test4',
+      actionTypeId: preconfiguredOnly.id,
+      name: 'Regular connector',
+      config: {},
+      isPreconfigured: false,
+    },
+    {
+      secrets: {},
+      isMissingSecrets: false,
+      id: '.servicenow',
+      actionTypeId: '.servicenow',
+      name: 'Non consumer connector',
+      config: {},
+      isPreconfigured: false,
+    },
+    {
+      secrets: {},
+      isMissingSecrets: false,
+      id: '.jira',
+      actionTypeId: disabledByActionType.id,
+      name: 'Connector with disabled action group',
+      config: {},
+      isPreconfigured: false,
+    },
+    {
+      secrets: null,
+      isMissingSecrets: true,
+      id: '.jira',
+      actionTypeId: actionType.id,
+      name: 'Connector with disabled action group',
+      config: {},
+      isPreconfigured: false,
+    },
+  ];
+
   const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
   describe('action_form in alert', () => {
@@ -136,56 +197,7 @@ describe('action_form', () => {
       const actionTypeRegistry = actionTypeRegistryMock.create();
 
       const { loadAllActions } = jest.requireMock('../../lib/action_connector_api');
-      loadAllActions.mockResolvedValueOnce([
-        {
-          secrets: {},
-          id: 'test',
-          actionTypeId: actionType.id,
-          name: 'Test connector',
-          config: {},
-          isPreconfigured: false,
-        },
-        {
-          secrets: {},
-          id: 'test2',
-          actionTypeId: actionType.id,
-          name: 'Test connector 2',
-          config: {},
-          isPreconfigured: true,
-        },
-        {
-          secrets: {},
-          id: 'test3',
-          actionTypeId: preconfiguredOnly.id,
-          name: 'Preconfigured Only',
-          config: {},
-          isPreconfigured: true,
-        },
-        {
-          secrets: {},
-          id: 'test4',
-          actionTypeId: preconfiguredOnly.id,
-          name: 'Regular connector',
-          config: {},
-          isPreconfigured: false,
-        },
-        {
-          secrets: {},
-          id: '.servicenow',
-          actionTypeId: '.servicenow',
-          name: 'Non consumer connector',
-          config: {},
-          isPreconfigured: false,
-        },
-        {
-          secrets: {},
-          id: '.jira',
-          actionTypeId: disabledByActionType.id,
-          name: 'Connector with disabled action group',
-          config: {},
-          isPreconfigured: false,
-        },
-      ]);
+      loadAllActions.mockResolvedValueOnce(allActions);
       const mocks = coreMock.createSetup();
       const [
         {
@@ -207,11 +219,10 @@ describe('action_form', () => {
         disabledByLicenseActionType,
         disabledByActionType,
         preconfiguredOnly,
-        actionTypeWithoutParams,
       ]);
       actionTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(actionType);
-      const initialAlert = ({
+      const initialAlert = {
         name: 'test',
         params: {},
         consumer: 'alerts',
@@ -235,7 +246,7 @@ describe('action_form', () => {
         muteAll: false,
         enabled: false,
         mutedInstanceIds: [],
-      } as unknown) as Alert;
+      } as unknown as Alert;
 
       const defaultActionMessage = 'Alert [{{context.metadata.name}}] has exceeded the threshold';
       const wrapper = mountWithIntl(
@@ -322,14 +333,6 @@ describe('action_form', () => {
             {
               id: '.jira',
               name: 'Disabled by action type',
-              enabled: true,
-              enabledInConfig: true,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'basic',
-            },
-            {
-              id: actionTypeWithoutParams.id,
-              name: 'Action type without params',
               enabled: true,
               enabledInConfig: true,
               enabledInLicense: true,
@@ -481,6 +484,15 @@ describe('action_form', () => {
       );
       actionOption.first().simulate('click');
       const combobox = wrapper.find(`[data-test-subj="selectActionConnector-${actionType.id}"]`);
+      const numConnectors = allActions.filter(
+        (action) => action.actionTypeId === actionType.id
+      ).length;
+      const numConnectorsWithMissingSecrets = allActions.filter(
+        (action) => action.actionTypeId === actionType.id && action.isMissingSecrets
+      ).length;
+      expect((combobox.first().props() as any).options.length).toEqual(
+        numConnectors - numConnectorsWithMissingSecrets
+      );
       expect((combobox.first().props() as any).options).toMatchInlineSnapshot(`
               Array [
                 Object {
@@ -537,16 +549,8 @@ describe('action_form', () => {
       ).toBeTruthy();
     });
 
-    it(`shouldn't render action types without params component`, async () => {
-      const wrapper = await setup();
-      const actionOption = wrapper.find(
-        `[data-test-subj="${actionTypeWithoutParams.id}-ActionTypeSelectOption"]`
-      );
-      expect(actionOption.exists()).toBeFalsy();
-    });
-
     it('recognizes actions with broken connectors', async () => {
-      await setup([
+      const wrapper = await setup([
         {
           group: 'default',
           id: 'test',
@@ -563,8 +567,20 @@ describe('action_form', () => {
             message: 'broken',
           },
         },
+        {
+          group: 'not the default',
+          id: 'connector-doesnt-exist',
+          actionTypeId: actionType.id,
+          params: {
+            message: 'broken',
+          },
+        },
       ]);
       expect(setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(true);
+      expect(wrapper.find(EuiAccordion)).toHaveLength(3);
+      expect(
+        wrapper.find(`EuiIconTip[data-test-subj="alertActionAccordionErrorTooltip"]`)
+      ).toHaveLength(2);
     });
   });
 });

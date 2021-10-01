@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Embeddable, IContainer, ContainerInput } from '../../../../src/plugins/embeddable/public';
@@ -13,9 +14,6 @@ export function doesInheritTimeRange(embeddable: Embeddable<TimeRangeInput>) {
   }
 
   const parent = embeddable.parent as IContainer<{}, ContainerInput<TimeRangeInput>>;
-
-  // Note: this logic might not work in a container nested world... the explicit input
-  // may be on the root... or any of the interim parents.
 
   // if it's a dashboard emptys screen, there will be no embeddable
   if (!parent.getInput().panels[embeddable.id]) {

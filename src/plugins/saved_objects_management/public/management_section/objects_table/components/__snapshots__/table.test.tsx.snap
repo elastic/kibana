@@ -60,7 +60,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           display="inlineBlock"
           hasArrow={true}
           isOpen={false}
-          ownFocus={false}
+          ownFocus={true}
           panelPaddingSize="m"
         >
           <EuiFormRow
@@ -146,7 +146,6 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           Object {
             "actions": Array [
               Object {
-                "available": [Function],
                 "data-test-subj": "savedObjectsTableAction-inspect",
                 "description": "Inspect this saved object",
                 "icon": "inspect",
@@ -276,7 +275,7 @@ exports[`Table should render normally 1`] = `
           display="inlineBlock"
           hasArrow={true}
           isOpen={false}
-          ownFocus={false}
+          ownFocus={true}
           panelPaddingSize="m"
         >
           <EuiFormRow
@@ -362,7 +361,6 @@ exports[`Table should render normally 1`] = `
           Object {
             "actions": Array [
               Object {
-                "available": [Function],
                 "data-test-subj": "savedObjectsTableAction-inspect",
                 "description": "Inspect this saved object",
                 "icon": "inspect",

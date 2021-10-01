@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useCallback, useContext } from 'react';
@@ -9,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { encode } from 'rison-node';
 import moment from 'moment';
 
-import { LogEntry, LogEntryContext } from '../../../../../../common/http_api';
-import { TimeRange } from '../../../../../../common/http_api/shared';
+import { LogEntry, LogEntryContext } from '../../../../../../common/log_entry';
+import { TimeRange } from '../../../../../../common/time';
 import {
   getFriendlyNameForPartitionId,
   partitionField,
@@ -127,6 +128,7 @@ export const CategoryExampleMessage: React.FunctionComponent<{
                 onClick: () => {
                   const logEntry: LogEntry = {
                     id,
+                    index: '', // TODO: use real index when loading via async search
                     context,
                     cursor: { time: timestamp, tiebreaker },
                     columns: [],

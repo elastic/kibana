@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
 import { DraggableBadge } from '../../../../../common/components/draggables';
@@ -19,6 +21,7 @@ interface Props {
   processExecutable: string | undefined | null;
   processPid: number | undefined | null;
   processName: string | undefined | null;
+  isDraggable?: boolean;
 }
 
 export const ProcessDraggable = React.memo<Props>(
@@ -30,6 +33,7 @@ export const ProcessDraggable = React.memo<Props>(
     processExecutable,
     processName,
     processPid,
+    isDraggable,
   }) => {
     if (
       isNillEmptyOrNotFinite(processName) &&
@@ -42,51 +46,66 @@ export const ProcessDraggable = React.memo<Props>(
     }
 
     return (
-      <div>
+      <EuiFlexGroup alignItems="center" gutterSize="none">
         {!isNillEmptyOrNotFinite(processName) ? (
-          <DraggableBadge
-            contextId={contextId}
-            eventId={eventId}
-            field="process.name"
-            value={processName}
-            iconType="console"
-          />
+          <EuiFlexItem grow={false}>
+            <DraggableBadge
+              contextId={contextId}
+              eventId={eventId}
+              field="process.name"
+              value={processName}
+              iconType="console"
+              isDraggable={isDraggable}
+            />
+          </EuiFlexItem>
         ) : !isNillEmptyOrNotFinite(processExecutable) ? (
-          <DraggableBadge
-            contextId={contextId}
-            eventId={eventId}
-            field="process.executable"
-            value={processExecutable}
-            iconType="console"
-          />
+          <EuiFlexItem grow={false}>
+            <DraggableBadge
+              contextId={contextId}
+              eventId={eventId}
+              field="process.executable"
+              value={processExecutable}
+              iconType="console"
+              isDraggable={isDraggable}
+            />
+          </EuiFlexItem>
         ) : !isNillEmptyOrNotFinite(endgameProcessName) ? (
-          <DraggableBadge
-            contextId={contextId}
-            eventId={eventId}
-            field="endgame.process_name"
-            value={endgameProcessName}
-            iconType="console"
-          />
+          <EuiFlexItem grow={false}>
+            <DraggableBadge
+              contextId={contextId}
+              eventId={eventId}
+              field="endgame.process_name"
+              value={endgameProcessName}
+              iconType="console"
+              isDraggable={isDraggable}
+            />
+          </EuiFlexItem>
         ) : null}
 
         {!isNillEmptyOrNotFinite(processPid) ? (
-          <DraggableBadge
-            contextId={contextId}
-            eventId={eventId}
-            field="process.pid"
-            queryValue={String(processPid)}
-            value={`(${String(processPid)})`}
-          />
+          <EuiFlexItem grow={false}>
+            <DraggableBadge
+              contextId={contextId}
+              eventId={eventId}
+              field="process.pid"
+              queryValue={String(processPid)}
+              value={`(${String(processPid)})`}
+              isDraggable={isDraggable}
+            />
+          </EuiFlexItem>
         ) : !isNillEmptyOrNotFinite(endgamePid) ? (
-          <DraggableBadge
-            contextId={contextId}
-            eventId={eventId}
-            field="endgame.pid"
-            queryValue={String(endgamePid)}
-            value={`(${String(endgamePid)})`}
-          />
+          <EuiFlexItem grow={false}>
+            <DraggableBadge
+              contextId={contextId}
+              eventId={eventId}
+              field="endgame.pid"
+              queryValue={String(endgamePid)}
+              value={`(${String(endgamePid)})`}
+              isDraggable={isDraggable}
+            />
+          </EuiFlexItem>
         ) : null}
-      </div>
+      </EuiFlexGroup>
     );
   }
 );
@@ -102,6 +121,7 @@ export const ProcessDraggableWithNonExistentProcess = React.memo<Props>(
     processExecutable,
     processName,
     processPid,
+    isDraggable,
   }) => {
     if (
       endgamePid == null &&
@@ -121,6 +141,7 @@ export const ProcessDraggableWithNonExistentProcess = React.memo<Props>(
           processExecutable={processExecutable}
           processName={processName}
           processPid={processPid}
+          isDraggable={isDraggable}
         />
       );
     }

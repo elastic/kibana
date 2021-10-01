@@ -1,22 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import React, { PureComponent, Fragment } from 'react';
 import { intersection, union, get } from 'lodash';
 
@@ -36,7 +25,6 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiLink,
-  EuiOverlayMask,
   EuiSelect,
   EuiSpacer,
   EuiText,
@@ -45,16 +33,15 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { FieldFormatInstanceType } from 'src/plugins/field_formats/common';
 import {
   getEnabledScriptingLanguages,
   getDeprecatedScriptingLanguages,
   getSupportedScriptingLanguages,
 } from '../../scripting_languages';
 import {
-  IndexPatternField,
-  FieldFormatInstanceType,
   IndexPattern,
-  IFieldType,
+  IndexPatternField,
   KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
   DataPublicPluginStart,
@@ -112,7 +99,7 @@ export interface FieldEditorState {
   isReady: boolean;
   isCreating: boolean;
   isDeprecatedLang: boolean;
-  scriptingLangs: string[];
+  scriptingLangs: estypes.ScriptLanguage[];
   fieldTypes: string[];
   fieldTypeFormats: FieldTypeFormat[];
   existingFieldNames: string[];
@@ -143,8 +130,8 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
   public readonly context!: IndexPatternManagmentContextValue;
 
-  supportedLangs: string[] = [];
-  deprecatedLangs: string[] = [];
+  supportedLangs: estypes.ScriptLanguage[] = [];
+  deprecatedLangs: estypes.ScriptLanguage[] = [];
   constructor(props: FieldEdiorProps, context: IndexPatternManagmentContextValue) {
     super(props, context);
 
@@ -157,7 +144,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       scriptingLangs: [],
       fieldTypes: [],
       fieldTypeFormats: [],
-      existingFieldNames: indexPattern.fields.getAll().map((f: IFieldType) => f.name),
+      existingFieldNames: indexPattern.fields.getAll().map((f: IndexPatternField) => f.name),
       fieldFormatId: undefined,
       fieldFormatParams: {},
       showScriptingHelp: false,
@@ -201,6 +188,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     this.setState({
       isReady: true,
       isCreating: !indexPattern.fields.getByName(spec.name),
+      // @ts-expect-error '' is not a valid ScriptLanguage
       isDeprecatedLang: this.deprecatedLangs.includes(spec.lang || ''),
       errors: [],
       scriptingLangs,
@@ -236,7 +224,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     });
   };
 
-  onLangChange = (lang: string) => {
+  onLangChange = (lang: estypes.ScriptLanguage) => {
     const { spec } = this.state;
     const fieldTypes = get(FIELD_TYPES_BY_LANG, lang, DEFAULT_FIELD_TYPES);
     spec.lang = lang;
@@ -264,7 +252,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     });
   };
 
-  onFormatParamsChange = (newParams: { fieldType: string; [key: string]: any }) => {
+  onFormatParamsChange = (newParams: { [key: string]: any }) => {
     const { fieldFormatId } = this.state;
     this.onFormatChange(fieldFormatId as string, newParams);
   };
@@ -385,7 +373,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           })}
           data-test-subj="editorFieldLang"
           onChange={(e) => {
-            this.onLangChange(e.target.value);
+            this.onLangChange(e.target.value as estypes.ScriptLanguage);
           }}
         />
       </EuiFormRow>
@@ -499,7 +487,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
   renderFormat() {
     const { spec, fieldTypeFormats, fieldFormatId, fieldFormatParams, format } = this.state;
-    const { indexPatternManagementStart } = this.context.services;
+    const { fieldFormatEditors } = this.context.services;
     const defaultFormat = (fieldTypeFormats[0] as InitialFieldTypeFormat).defaultFieldFormat.title;
 
     const label = defaultFormat ? (
@@ -543,7 +531,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             fieldFormat={format}
             fieldFormatId={fieldFormatId}
             fieldFormatParams={fieldFormatParams || {}}
-            fieldFormatEditors={indexPatternManagementStart.fieldFormatEditors}
+            fieldFormatEditors={fieldFormatEditors}
             onChange={this.onFormatParamsChange}
             onError={this.onFormatParamsError}
           />
@@ -654,42 +642,40 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { spec } = this.state;
 
     return this.state.showDeleteModal ? (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={i18n.translate('indexPatternManagement.deleteFieldHeader', {
-            defaultMessage: "Delete field '{fieldName}'",
-            values: { fieldName: spec.name },
-          })}
-          onCancel={this.hideDeleteModal}
-          onConfirm={() => {
-            this.hideDeleteModal();
-            this.deleteField();
-          }}
-          cancelButtonText={i18n.translate('indexPatternManagement.deleteField.cancelButton', {
-            defaultMessage: 'Cancel',
-          })}
-          confirmButtonText={i18n.translate('indexPatternManagement.deleteField.deleteButton', {
-            defaultMessage: 'Delete',
-          })}
-          buttonColor="danger"
-          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-        >
-          <p>
-            <FormattedMessage
-              id="indexPatternManagement.deleteFieldLabel"
-              defaultMessage="You can't recover a deleted field.{separator}Are you sure you want to do this?"
-              values={{
-                separator: (
-                  <span>
-                    <br />
-                    <br />
-                  </span>
-                ),
-              }}
-            />
-          </p>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title={i18n.translate('indexPatternManagement.deleteFieldHeader', {
+          defaultMessage: "Delete field '{fieldName}'",
+          values: { fieldName: spec.name },
+        })}
+        onCancel={this.hideDeleteModal}
+        onConfirm={() => {
+          this.hideDeleteModal();
+          this.deleteField();
+        }}
+        cancelButtonText={i18n.translate('indexPatternManagement.deleteField.cancelButton', {
+          defaultMessage: 'Cancel',
+        })}
+        confirmButtonText={i18n.translate('indexPatternManagement.deleteField.deleteButton', {
+          defaultMessage: 'Delete',
+        })}
+        buttonColor="danger"
+        defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+      >
+        <p>
+          <FormattedMessage
+            id="indexPatternManagement.deleteFieldLabel"
+            defaultMessage="You can't recover a deleted field.{separator}Are you sure you want to do this?"
+            values={{
+              separator: (
+                <span>
+                  <br />
+                  <br />
+                </span>
+              ),
+            }}
+          />
+        </p>
+      </EuiConfirmModal>
     ) : null;
   };
 

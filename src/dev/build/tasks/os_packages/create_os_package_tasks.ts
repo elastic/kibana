@@ -1,25 +1,23 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Task } from '../../lib';
 import { runFpm } from './run_fpm';
-import { runDockerGenerator, runDockerGeneratorForUBI } from './docker_generator';
+import { runDockerGenerator } from './docker_generator';
+import { createOSPackageKibanaYML } from './create_os_package_kibana_yml';
+
+export const CreatePackageConfig: Task = {
+  description: 'Creating OS package kibana.yml',
+
+  async run(config, log, build) {
+    await createOSPackageKibanaYML(config, build);
+  },
+};
 
 export const CreateDebPackage: Task = {
   description: 'Creating deb package',
@@ -60,20 +58,82 @@ export const CreateRpmPackage: Task = {
   },
 };
 
-export const CreateDockerPackage: Task = {
-  description: 'Creating docker package',
+const dockerBuildDate = new Date().toISOString();
+export const CreateDockerCentOS: Task = {
+  description: 'Creating Docker CentOS image',
 
   async run(config, log, build) {
-    // Builds Docker targets for default and oss
-    await runDockerGenerator(config, log, build);
+    await runDockerGenerator(config, log, build, {
+      architecture: 'x64',
+      context: false,
+      image: true,
+      dockerBuildDate,
+    });
+    await runDockerGenerator(config, log, build, {
+      architecture: 'aarch64',
+      context: false,
+      image: true,
+      dockerBuildDate,
+    });
   },
 };
 
-export const CreateDockerUbiPackage: Task = {
-  description: 'Creating docker ubi package',
+export const CreateDockerUBI: Task = {
+  description: 'Creating Docker UBI image',
 
   async run(config, log, build) {
-    // Builds Docker target default with ubi7 base image
-    await runDockerGeneratorForUBI(config, log, build);
+    await runDockerGenerator(config, log, build, {
+      architecture: 'x64',
+      context: false,
+      ubi: true,
+      image: true,
+    });
+  },
+};
+
+export const CreateDockerCloud: Task = {
+  description: 'Creating Docker Cloud image',
+
+  async run(config, log, build) {
+    await runDockerGenerator(config, log, build, {
+      architecture: 'x64',
+      context: false,
+      cloud: true,
+      image: true,
+    });
+    await runDockerGenerator(config, log, build, {
+      architecture: 'aarch64',
+      context: false,
+      cloud: true,
+      image: true,
+    });
+  },
+};
+
+export const CreateDockerContexts: Task = {
+  description: 'Creating Docker build contexts',
+
+  async run(config, log, build) {
+    await runDockerGenerator(config, log, build, {
+      context: true,
+      image: false,
+      dockerBuildDate,
+    });
+
+    await runDockerGenerator(config, log, build, {
+      ubi: true,
+      context: true,
+      image: false,
+    });
+    await runDockerGenerator(config, log, build, {
+      ironbank: true,
+      context: true,
+      image: false,
+    });
+    await runDockerGenerator(config, log, build, {
+      cloud: true,
+      context: true,
+      image: false,
+    });
   },
 };

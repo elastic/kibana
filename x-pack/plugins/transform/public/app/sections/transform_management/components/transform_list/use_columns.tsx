@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -22,13 +23,18 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
-import { TransformId } from '../../../../../../common/types/transform';
+import {
+  isLatestTransform,
+  isPivotTransform,
+  TransformId,
+} from '../../../../../../common/types/transform';
 import { TransformStats } from '../../../../../../common/types/transform_stats';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { getTransformProgress, TransformListRow, TRANSFORM_LIST_COLUMN } from '../../../../common';
 import { useActions } from './use_actions';
 
+// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L250
 const STATE_COLOR = {
   aborting: 'warning',
   failed: 'danger',
@@ -36,6 +42,7 @@ const STATE_COLOR = {
   started: 'primary',
   stopped: 'hollow',
   stopping: 'hollow',
+  waiting: 'hollow',
 } as const;
 
 export const getTaskStateBadge = (
@@ -64,9 +71,13 @@ export const getTaskStateBadge = (
 export const useColumns = (
   expandedRowItemIds: TransformId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<TransformId[]>>,
+  transformNodes: number,
   transformSelection: TransformListRow[]
 ) => {
-  const { actions, modals } = useActions({ forceDisable: transformSelection.length > 0 });
+  const { actions, modals } = useActions({
+    forceDisable: transformSelection.length > 0,
+    transformNodes,
+  });
 
   function toggleDetails(item: TransformListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);
@@ -85,6 +96,7 @@ export const useColumns = (
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableFieldDataColumnType<TransformListRow>,
     EuiTableFieldDataColumnType<TransformListRow>,
+    EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
@@ -137,6 +149,27 @@ export const useColumns = (
       name: i18n.translate('xpack.transform.description', { defaultMessage: 'Description' }),
       sortable: true,
       truncateText: true,
+    },
+    {
+      name: i18n.translate('xpack.transform.type', { defaultMessage: 'Type' }),
+      'data-test-subj': 'transformListColumnType',
+      sortable: (item: TransformListRow) => item.mode,
+      truncateText: true,
+      render(item: TransformListRow) {
+        let transformType = i18n.translate('xpack.transform.type.unknown', {
+          defaultMessage: 'unknown',
+        });
+        if (isPivotTransform(item.config) === true) {
+          transformType = i18n.translate('xpack.transform.type.pivot', { defaultMessage: 'pivot' });
+        }
+        if (isLatestTransform(item.config) === true) {
+          transformType = i18n.translate('xpack.transform.type.latest', {
+            defaultMessage: 'latest',
+          });
+        }
+        return <EuiBadge color="hollow">{transformType}</EuiBadge>;
+      },
+      width: '100px',
     },
     {
       name: i18n.translate('xpack.transform.status', { defaultMessage: 'Status' }),
@@ -197,13 +230,15 @@ export const useColumns = (
             {!isBatchTransform && (
               <Fragment>
                 <EuiFlexItem style={{ width: '40px' }} grow={false}>
-                  {/* If not stopped or failed show the animated progress bar */}
+                  {/* If not stopped, failed or waiting show the animated progress bar */}
                   {item.stats.state !== TRANSFORM_STATE.STOPPED &&
+                    item.stats.state !== TRANSFORM_STATE.WAITING &&
                     item.stats.state !== TRANSFORM_STATE.FAILED && (
                       <EuiProgress color="primary" size="m" />
                     )}
-                  {/* If stopped or failed show an empty (0%) progress bar */}
+                  {/* If stopped, failed or waiting show an empty (0%) progress bar */}
                   {(item.stats.state === TRANSFORM_STATE.STOPPED ||
+                    item.stats.state === TRANSFORM_STATE.WAITING ||
                     item.stats.state === TRANSFORM_STATE.FAILED) && (
                     <EuiProgress value={0} max={100} color="primary" size="m" />
                   )}

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, useState } from 'react';
@@ -15,18 +16,22 @@ import {
   EuiText,
   EuiIconTip,
   EuiSpacer,
+  EuiPageContent,
   EuiEmptyPrompt,
   EuiLink,
 } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
 import {
+  PageLoading,
+  PageError,
+  Error,
   reactRouterNavigate,
   extractQueryParams,
   attemptToURIDecode,
+  APP_WRAPPER_CLASS,
 } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
-import { SectionError, SectionLoading, Error } from '../../../components';
 import { useLoadDataStreams } from '../../../services/api';
 import { documentationService } from '../../../services/documentation';
 import { Section } from '../home';
@@ -52,11 +57,16 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   const {
     core: { getUrlForApp },
-    plugins: { fleet },
+    plugins: { isFleetEnabled },
   } = useAppContext();
 
   const [isIncludeStatsChecked, setIsIncludeStatsChecked] = useState(false);
-  const { error, isLoading, data: dataStreams, resendRequest: reload } = useLoadDataStreams({
+  const {
+    error,
+    isLoading,
+    data: dataStreams,
+    resendRequest: reload,
+  } = useLoadDataStreams({
     includeStats: isIncludeStatsChecked,
   });
 
@@ -165,16 +175,16 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   if (isLoading) {
     content = (
-      <SectionLoading>
+      <PageLoading>
         <FormattedMessage
           id="xpack.idxMgmt.dataStreamList.loadingDataStreamsDescription"
           defaultMessage="Loading data streams…"
         />
-      </SectionLoading>
+      </PageLoading>
     );
   } else if (error) {
     content = (
-      <SectionError
+      <PageError
         title={
           <FormattedMessage
             id="xpack.idxMgmt.dataStreamList.loadingDataStreamsErrorMessage"
@@ -203,7 +213,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
               defaultMessage="Data streams store time-series data across multiple indices."
             />
             {' ' /* We need this space to separate these two sentences. */}
-            {fleet ? (
+            {isFleetEnabled ? (
               <FormattedMessage
                 id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIngestManagerMessage"
                 defaultMessage="Get started with data streams in {link}."
@@ -251,10 +261,10 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
         data-test-subj="emptyPrompt"
       />
     );
-  } else if (Array.isArray(dataStreams) && dataStreams.length > 0) {
-    activateHiddenFilter(isSelectedDataStreamHidden(dataStreams, decodedDataStreamName));
+  } else {
+    activateHiddenFilter(isSelectedDataStreamHidden(dataStreams!, decodedDataStreamName));
     content = (
-      <>
+      <EuiPageContent hasShadow={false} paddingSize="none" data-test-subj="dataStreamList">
         {renderHeader()}
         <EuiSpacer size="l" />
 
@@ -269,12 +279,12 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           history={history as ScopedHistory}
           includeStats={isIncludeStatsChecked}
         />
-      </>
+      </EuiPageContent>
     );
   }
 
   return (
-    <div data-test-subj="dataStreamList">
+    <div className={APP_WRAPPER_CLASS}>
       {content}
 
       {/*

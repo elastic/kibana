@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import sinon from 'sinon';
 import {
   getClusterUuids,
@@ -12,40 +14,52 @@ import {
 } from './get_cluster_uuids';
 
 describe('get_cluster_uuids', () => {
-  const callCluster = sinon.stub();
+  const searchMock = sinon.stub();
+  const callCluster = { search: searchMock } as unknown as ElasticsearchClient;
+
+  afterEach(() => {
+    searchMock.reset();
+  });
+
   const response = {
-    aggregations: {
-      cluster_uuids: {
-        buckets: [{ key: 'abc' }, { key: 'xyz' }, { key: '123' }],
+    body: {
+      aggregations: {
+        cluster_uuids: {
+          buckets: [{ key: 'abc' }, { key: 'xyz' }, { key: '123' }],
+        },
       },
     },
   };
-  const expectedUuids = response.aggregations.cluster_uuids.buckets.map((bucket) => bucket.key);
+
+  const expectedUuids = response.body.aggregations.cluster_uuids.buckets.map(
+    (bucket) => bucket.key
+  );
+
   const timestamp = Date.now();
 
   describe('getClusterUuids', () => {
     it('returns cluster UUIDs', async () => {
-      callCluster.withArgs('search').returns(Promise.resolve(response));
+      searchMock.returns(Promise.resolve(response));
       expect(await getClusterUuids(callCluster, timestamp, 1)).toStrictEqual(expectedUuids);
     });
   });
 
   describe('fetchClusterUuids', () => {
     it('searches for clusters', async () => {
-      callCluster.returns(Promise.resolve(response));
-      expect(await fetchClusterUuids(callCluster, timestamp, 1)).toStrictEqual(response);
+      searchMock.returns(Promise.resolve(response));
+      expect(await fetchClusterUuids(callCluster, timestamp, 1)).toStrictEqual(response.body);
     });
   });
 
   describe('handleClusterUuidsResponse', () => {
-    // filterPath makes it easy to ignore anything unexpected because it will come back empty
+    // filter_path makes it easy to ignore anything unexpected because it will come back empty
     it('handles unexpected response', () => {
       const clusterUuids = handleClusterUuidsResponse({});
       expect(clusterUuids.length).toStrictEqual(0);
     });
 
     it('handles valid response', () => {
-      const clusterUuids = handleClusterUuidsResponse(response);
+      const clusterUuids = handleClusterUuidsResponse(response.body);
       expect(clusterUuids).toStrictEqual(expectedUuids);
     });
 

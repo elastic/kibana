@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiComboBox } from '@elastic/eui';
@@ -15,9 +16,10 @@ interface Props {
   options: MetricsExplorerOptions;
   onChange: (groupBy: string | null | string[]) => void;
   fields: IFieldType[];
+  errorOptions?: string[];
 }
 
-export const MetricsExplorerGroupBy = ({ options, onChange, fields }: Props) => {
+export const MetricsExplorerGroupBy = ({ options, onChange, fields, errorOptions }: Props) => {
   const handleChange = useCallback(
     (selectedOptions: Array<{ label: string }>) => {
       const groupBy = selectedOptions.map((option) => option.label);
@@ -27,13 +29,22 @@ export const MetricsExplorerGroupBy = ({ options, onChange, fields }: Props) => 
   );
 
   const selectedOptions = Array.isArray(options.groupBy)
-    ? options.groupBy.map((field) => ({ label: field }))
+    ? options.groupBy.map((field) => ({
+        label: field,
+        color: errorOptions?.includes(field) ? 'danger' : undefined,
+      }))
     : options.groupBy
-    ? [{ label: options.groupBy }]
+    ? [
+        {
+          label: options.groupBy,
+          color: errorOptions?.includes(options.groupBy) ? 'danger' : undefined,
+        },
+      ]
     : [];
 
   return (
     <EuiComboBox
+      data-test-subj="metricsExplorer-groupBy"
       placeholder={i18n.translate('xpack.infra.metricsExplorer.groupByLabel', {
         defaultMessage: 'Everything',
       })}

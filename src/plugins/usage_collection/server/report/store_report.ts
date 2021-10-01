@@ -1,38 +1,30 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ISavedObjectsRepository } from 'src/core/server';
 import moment from 'moment';
 import { chain, sumBy } from 'lodash';
 import { ReportSchemaType } from './schema';
+import { storeApplicationUsage } from './store_application_usage';
+import { UsageCounter } from '../usage_counters';
+import { serializeUiCounterName } from '../../common/ui_counters';
 
 export async function storeReport(
   internalRepository: ISavedObjectsRepository,
+  uiCountersUsageCounter: UsageCounter,
   report: ReportSchemaType
 ) {
   const uiCounters = report.uiCounter ? Object.entries(report.uiCounter) : [];
   const userAgents = report.userAgent ? Object.entries(report.userAgent) : [];
-  const appUsage = report.application_usage ? Object.values(report.application_usage) : [];
+  const appUsages = report.application_usage ? Object.values(report.application_usage) : [];
 
   const momentTimestamp = moment();
   const timestamp = momentTimestamp.toDate();
-  const date = momentTimestamp.format('DDMMYYYY');
 
   return Promise.allSettled([
     // User Agent
@@ -65,31 +57,16 @@ export async function storeReport(
       })
       .value(),
     // UI Counters
-    ...uiCounters.map(async ([key, metric]) => {
+    ...uiCounters.map(async ([, metric]) => {
       const { appName, eventName, total, type } = metric;
-      const savedObjectId = `${appName}:${date}:${type}:${eventName}`;
-      return [
-        await internalRepository.incrementCounter('ui-counter', savedObjectId, [
-          { fieldName: 'count', incrementBy: total },
-        ]),
-      ];
+      const counterName = serializeUiCounterName({ appName, eventName });
+      uiCountersUsageCounter.incrementCounter({
+        counterName,
+        counterType: type,
+        incrementBy: total,
+      });
     }),
     // Application Usage
-    ...[
-      (async () => {
-        if (!appUsage.length) return [];
-        const { saved_objects: savedObjects } = await internalRepository.bulkCreate(
-          appUsage.map((metric) => ({
-            type: 'application_usage_transactional',
-            attributes: {
-              ...metric,
-              timestamp,
-            },
-          }))
-        );
-
-        return savedObjects;
-      })(),
-    ],
+    storeApplicationUsage(internalRepository, appUsages, timestamp),
   ]);
 }

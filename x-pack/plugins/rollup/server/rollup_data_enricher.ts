@@ -1,23 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { IScopedClusterClient } from 'kibana/server';
 import { Index } from '../../../plugins/index_management/server';
 
-export const rollupDataEnricher = async (indicesList: Index[], callWithRequest: any) => {
+export const rollupDataEnricher = async (indicesList: Index[], client: IScopedClusterClient) => {
   if (!indicesList || !indicesList.length) {
     return Promise.resolve(indicesList);
   }
 
-  const params = {
-    path: '/_all/_rollup/data',
-    method: 'GET',
-  };
-
   try {
-    const rollupJobData = await callWithRequest('transport.request', params);
+    const { body: rollupJobData } = await client.asCurrentUser.rollup.getRollupIndexCaps({
+      index: '_all',
+    });
+
     return indicesList.map((index) => {
       const isRollupIndex = !!rollupJobData[index.name];
       return {

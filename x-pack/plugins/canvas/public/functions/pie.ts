@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, keyBy, map, groupBy } from 'lodash';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-// @ts-expect-error untyped local
 import { getLegendConfig } from '../../common/lib/get_legend_config';
 import { getFunctionHelp } from '../../i18n';
 import {
@@ -61,7 +61,7 @@ export interface Pie {
   options: PieOptions;
 }
 
-interface Arguments {
+export interface Arguments {
   palette: PaletteOutput;
   seriesStyle: SeriesStyle[];
   radius: number | 'auto';
@@ -134,17 +134,8 @@ export function pieFunctionFactory(
         },
       },
       fn: (input, args) => {
-        const {
-          tilt,
-          radius,
-          labelRadius,
-          labels,
-          hole,
-          legend,
-          palette,
-          font,
-          seriesStyle,
-        } = args;
+        const { tilt, radius, labelRadius, labels, hole, legend, palette, font, seriesStyle } =
+          args;
         const seriesStyles = keyBy(seriesStyle || [], 'label') || {};
 
         const data: PieData[] = map(groupBy(input.rows, 'color'), (series, label = '') => {
@@ -173,7 +164,7 @@ export function pieFunctionFactory(
               canvas: false,
               colors: paletteService
                 .get(palette.name || 'custom')
-                .getColors(data.length, palette.params),
+                .getCategoricalColors(data.length, palette.params),
               legend: getLegendConfig(legend, data.length),
               grid: {
                 show: false,

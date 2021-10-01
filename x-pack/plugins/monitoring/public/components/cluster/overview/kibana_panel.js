@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -28,7 +29,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
-import { KIBANA_SYSTEM_ID, ALERT_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
+import { KIBANA_SYSTEM_ID, RULE_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { AlertsBadge } from '../../../alerts/badge';
 import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
@@ -36,7 +37,7 @@ import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
 import { SetupModeContext } from '../../setup_mode/setup_mode_context';
 
-const INSTANCES_PANEL_ALERTS = [ALERT_KIBANA_VERSION_MISMATCH];
+const INSTANCES_PANEL_ALERTS = [RULE_KIBANA_VERSION_MISMATCH];
 
 export function KibanaPanel(props) {
   const setupMode = props.setupMode;
@@ -48,7 +49,7 @@ export function KibanaPanel(props) {
     return null;
   }
 
-  const statusIndicator = <HealthStatusIndicator status={props.status} />;
+  const statusIndicator = <HealthStatusIndicator status={props.status} product={'kb'} />;
 
   const goToKibana = () => getSafeForExternalLink('#/kibana');
   const goToInstances = () => getSafeForExternalLink('#/kibana/instances');

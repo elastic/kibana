@@ -1,12 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
-import { take } from 'rxjs/operators';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+  DEFAULT_APP_CATEGORIES,
+} from '../../../../src/core/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 // @ts-ignore
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
@@ -15,11 +22,11 @@ import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
 // @ts-ignore
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';
 import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
-import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getExistingMapPath } from '../common/constants';
+import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getFullPath } from '../common/constants';
 import { mapSavedObjects, mapsTelemetrySavedObjects } from './saved_objects';
 import { MapsXPackConfig } from '../config';
 // @ts-ignore
-import { setInternalRepository } from './kibana_server_services';
+import { setIndexPatternsService, setInternalRepository } from './kibana_server_services';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
 // @ts-ignore
@@ -27,15 +34,23 @@ import { initRoutes } from './routes';
 import { ILicense } from '../../licensing/common/types';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
-import { MapsLegacyPluginSetup } from '../../../../src/plugins/maps_legacy/server';
+import { MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/server';
 import { EMSSettings } from '../common/ems_settings';
+import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
+import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
+import { embeddableMigrations } from './embeddable_migrations';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
   usageCollection: UsageCollectionSetup;
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
-  mapsLegacy: MapsLegacyPluginSetup;
+  mapsEms: MapsEmsPluginSetup;
+  embeddable: EmbeddableSetup;
+}
+
+export interface StartDeps {
+  data: DataPluginStart;
 }
 
 export class MapsPlugin implements Plugin {
@@ -62,29 +77,17 @@ export class MapsPlugin implements Plugin {
 
       home.sampleData.addAppLinksToSampleDataset('ecommerce', [
         {
-          path: getExistingMapPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
+          path: getFullPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
           icon: APP_ICON,
         },
       ]);
 
-      home.sampleData.replacePanelInSampleDatasetDashboard({
-        sampleDataId: 'ecommerce',
-        dashboardId: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
-        oldEmbeddableId: '9c6f83f0-bb4d-11e8-9c84-77068524bcab',
-        embeddableId: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
-        // @ts-ignore
-        embeddableType: 'map',
-        embeddableConfig: {
-          isLayerTOCOpen: false,
-        },
-      });
-
       home.sampleData.addSavedObjectsToSampleDataset('flights', getFlightsSavedObjects());
 
       home.sampleData.addAppLinksToSampleDataset('flights', [
         {
-          path: getExistingMapPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
+          path: getFullPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
           icon: APP_ICON,
         },
@@ -105,7 +108,7 @@ export class MapsPlugin implements Plugin {
       home.sampleData.addSavedObjectsToSampleDataset('logs', getWebLogsSavedObjects());
       home.sampleData.addAppLinksToSampleDataset('logs', [
         {
-          path: getExistingMapPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
+          path: getFullPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
           icon: APP_ICON,
         },
@@ -132,12 +135,11 @@ export class MapsPlugin implements Plugin {
   }
 
   // @ts-ignore
-  async setup(core: CoreSetup, plugins: SetupDeps) {
-    const { usageCollection, home, licensing, features, mapsLegacy } = plugins;
-    // @ts-ignore
+  setup(core: CoreSetup, plugins: SetupDeps) {
+    const { usageCollection, home, licensing, features, mapsEms } = plugins;
+    const mapsEmsConfig = mapsEms.config;
     const config$ = this._initializerContext.config.create();
-    const mapsLegacyConfig = await mapsLegacy.config$.pipe(take(1)).toPromise();
-    const currentConfig = await config$.pipe(take(1)).toPromise();
+    const currentConfig = this._initializerContext.config.get();
 
     // @ts-ignore
     const mapsEnabled = currentConfig.enabled;
@@ -149,20 +151,14 @@ export class MapsPlugin implements Plugin {
 
     let isEnterprisePlus = false;
     let lastLicenseId: string | undefined;
-    const emsSettings = new EMSSettings(mapsLegacyConfig, () => isEnterprisePlus);
+    const emsSettings = new EMSSettings(mapsEmsConfig, () => isEnterprisePlus);
     licensing.license$.subscribe((license: ILicense) => {
       const enterprise = license.check(APP_ID, 'enterprise');
       isEnterprisePlus = enterprise.state === 'valid';
       lastLicenseId = license.uid;
     });
 
-    initRoutes(
-      core.http.createRouter(),
-      () => lastLicenseId,
-      emsSettings,
-      this.kibanaVersion,
-      this._logger
-    );
+    initRoutes(core, () => lastLicenseId, emsSettings, this.kibanaVersion, this._logger);
 
     this._initHomeData(home, core.http.basePath.prepend, emsSettings);
 
@@ -199,7 +195,12 @@ export class MapsPlugin implements Plugin {
 
     core.savedObjects.registerType(mapsTelemetrySavedObjects);
     core.savedObjects.registerType(mapSavedObjects);
-    registerMapsUsageCollector(usageCollection, currentConfig);
+    registerMapsUsageCollector(usageCollection);
+
+    plugins.embeddable.registerEmbeddableFactory({
+      id: MAP_SAVED_OBJECT_TYPE,
+      migrations: embeddableMigrations,
+    });
 
     return {
       config: config$,
@@ -207,7 +208,11 @@ export class MapsPlugin implements Plugin {
   }
 
   // @ts-ignore
-  start(core: CoreStart) {
+  start(core: CoreStart, plugins: StartDeps) {
     setInternalRepository(core.savedObjects.createInternalRepository);
+    setIndexPatternsService(
+      plugins.data.indexPatterns.indexPatternsServiceFactory,
+      core.elasticsearch.client.asInternalUser
+    );
   }
 }

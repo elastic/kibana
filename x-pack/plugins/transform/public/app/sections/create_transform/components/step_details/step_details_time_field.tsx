@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -23,7 +24,7 @@ export const StepDetailsTimeField: FC<Props> = ({
   const noTimeFieldLabel = i18n.translate(
     'xpack.transform.stepDetailsForm.noTimeFieldOptionLabel',
     {
-      defaultMessage: "I don't want to use the time filter",
+      defaultMessage: "I don't want to use the time field option",
     }
   );
 
@@ -43,7 +44,7 @@ export const StepDetailsTimeField: FC<Props> = ({
       label={
         <FormattedMessage
           id="xpack.transform.stepDetailsForm.indexPatternTimeFieldLabel"
-          defaultMessage="Time field"
+          defaultMessage="Time field for Kibana index pattern"
         />
       }
       helpText={

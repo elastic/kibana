@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -15,10 +16,12 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster-green-gold', {
+        await setup('x-pack/test/functional/es_archives/monitoring/singlecluster_green_gold', {
           from: 'Aug 23, 2017 @ 21:29:35.267',
           to: 'Aug 23, 2017 @ 21:47:25.556',
         });
+
+        await overview.closeAlertsModal();
       });
 
       after(async () => {
@@ -66,10 +69,12 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster-yellow-platinum', {
+        await setup('x-pack/test/functional/es_archives/monitoring/singlecluster_yellow_platinum', {
           from: 'Aug 29, 2017 @ 17:23:47.528',
           to: 'Aug 29, 2017 @ 17:25:50.701',
         });
+
+        await overview.closeAlertsModal();
       });
 
       after(async () => {
@@ -112,10 +117,12 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster-yellow-basic', {
+        await setup('x-pack/test/functional/es_archives/monitoring/singlecluster_yellow_basic', {
           from: 'Aug 29, 2017 @ 17:55:43.879',
           to: 'Aug 29, 2017 @ 18:01:34.958',
         });
+
+        await overview.closeAlertsModal();
       });
 
       after(async () => {

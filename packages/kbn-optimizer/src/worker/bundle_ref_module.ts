@@ -16,7 +16,6 @@ export class BundleRefModule extends Module {
   public built = false;
   public buildMeta?: any;
   public buildInfo?: any;
-  public exportsArgument = '__webpack_exports__';
 
   constructor(public readonly ref: BundleRef) {
     super('kbn/bundleRef', null);
@@ -45,7 +44,9 @@ export class BundleRefModule extends Module {
   build(_: any, __: any, ___: any, ____: any, callback: () => void) {
     this.built = true;
     this.buildMeta = {};
-    this.buildInfo = {};
+    this.buildInfo = {
+      exportsArgument: '__webpack_exports__',
+    };
     callback();
   }
 

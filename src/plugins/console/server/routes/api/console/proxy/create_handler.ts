@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Agent, IncomingMessage } from 'http';
@@ -52,7 +41,7 @@ function toURL(base: string, path: string) {
 }
 
 function filterHeaders(originalHeaders: object, headersToKeep: string[]): object {
-  const normalizeHeader = function (header: any) {
+  const normalizeHeader = function (header: string) {
     if (!header) {
       return '';
     }
@@ -79,7 +68,7 @@ function getRequestConfig(
     return {
       ...proxyConfigCollection.configForUri(uri),
       headers: newHeaders,
-    } as any;
+    };
   }
 
   return {
@@ -92,7 +81,7 @@ function getProxyHeaders(req: KibanaRequest) {
   const headers = Object.create(null);
 
   // Scope this proto-unsafe functionality to where it is being used.
-  function extendCommaList(obj: Record<string, any>, property: string, value: any) {
+  function extendCommaList(obj: Record<string, any>, property: string, value: string) {
     obj[property] = (obj[property] ? obj[property] + ',' : '') + value;
   }
 
@@ -113,93 +102,95 @@ function getProxyHeaders(req: KibanaRequest) {
   return headers;
 }
 
-export const createHandler = ({
-  log,
-  proxy: { readLegacyESConfig, pathFilters, proxyConfigCollection },
-}: RouteDependencies): RequestHandler<unknown, Query, Body> => async (ctx, request, response) => {
-  const { body, query } = request;
-  const { path, method } = query;
+export const createHandler =
+  ({
+    log,
+    proxy: { readLegacyESConfig, pathFilters, proxyConfigCollection },
+  }: RouteDependencies): RequestHandler<unknown, Query, Body> =>
+  async (ctx, request, response) => {
+    const { body, query } = request;
+    const { path, method } = query;
 
-  if (!pathFilters.some((re) => re.test(path))) {
-    return response.forbidden({
-      body: `Error connecting to '${path}':\n\nUnable to send requests to that path.`,
+    if (!pathFilters.some((re) => re.test(path))) {
+      return response.forbidden({
+        body: `Error connecting to '${path}':\n\nUnable to send requests to that path.`,
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+      });
+    }
+
+    const legacyConfig = await readLegacyESConfig();
+    const { hosts } = legacyConfig;
+    let esIncomingMessage: IncomingMessage;
+
+    for (let idx = 0; idx < hosts.length; ++idx) {
+      const host = hosts[idx];
+      try {
+        const uri = toURL(host, path);
+
+        // Because this can technically be provided by a settings-defined proxy config, we need to
+        // preserve these property names to maintain BWC.
+        const { timeout, agent, headers, rejectUnauthorized } = getRequestConfig(
+          request.headers,
+          legacyConfig,
+          proxyConfigCollection,
+          uri.toString()
+        );
+
+        const requestHeaders = {
+          ...headers,
+          ...getProxyHeaders(request),
+        };
+
+        esIncomingMessage = await proxyRequest({
+          method: method.toLowerCase() as 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head',
+          headers: requestHeaders,
+          uri,
+          timeout,
+          payload: body,
+          rejectUnauthorized,
+          agent,
+        });
+
+        break;
+      } catch (e) {
+        // If we reached here it means we hit a lower level network issue than just, for e.g., a 500.
+        // We try contacting another node in that case.
+        log.error(e);
+        if (idx === hosts.length - 1) {
+          log.warn(`Could not connect to any configured ES node [${hosts.join(', ')}]`);
+          return response.customError({
+            statusCode: 502,
+            body: e,
+          });
+        }
+        // Otherwise, try the next host...
+      }
+    }
+
+    const {
+      statusCode,
+      statusMessage,
+      headers: { warning },
+    } = esIncomingMessage!;
+
+    if (method.toUpperCase() !== 'HEAD') {
+      return response.custom({
+        statusCode: statusCode!,
+        body: esIncomingMessage!,
+        headers: {
+          warning: warning || '',
+        },
+      });
+    }
+
+    return response.custom({
+      statusCode: statusCode!,
+      body: `${statusCode} - ${statusMessage}`,
       headers: {
+        warning: warning || '',
         'Content-Type': 'text/plain',
       },
     });
-  }
-
-  const legacyConfig = await readLegacyESConfig();
-  const { hosts } = legacyConfig;
-  let esIncomingMessage: IncomingMessage;
-
-  for (let idx = 0; idx < hosts.length; ++idx) {
-    const host = hosts[idx];
-    try {
-      const uri = toURL(host, path);
-
-      // Because this can technically be provided by a settings-defined proxy config, we need to
-      // preserve these property names to maintain BWC.
-      const { timeout, agent, headers, rejectUnauthorized } = getRequestConfig(
-        request.headers,
-        legacyConfig,
-        proxyConfigCollection,
-        uri.toString()
-      );
-
-      const requestHeaders = {
-        ...headers,
-        ...getProxyHeaders(request),
-      };
-
-      esIncomingMessage = await proxyRequest({
-        method: method.toLowerCase() as any,
-        headers: requestHeaders,
-        uri,
-        timeout,
-        payload: body,
-        rejectUnauthorized,
-        agent,
-      });
-
-      break;
-    } catch (e) {
-      // If we reached here it means we hit a lower level network issue than just, for e.g., a 500.
-      // We try contacting another node in that case.
-      log.error(e);
-      if (idx === hosts.length - 1) {
-        log.warn(`Could not connect to any configured ES node [${hosts.join(', ')}]`);
-        return response.customError({
-          statusCode: 502,
-          body: e,
-        });
-      }
-      // Otherwise, try the next host...
-    }
-  }
-
-  const {
-    statusCode,
-    statusMessage,
-    headers: { warning },
-  } = esIncomingMessage!;
-
-  if (method.toUpperCase() !== 'HEAD') {
-    return response.custom({
-      statusCode: statusCode!,
-      body: esIncomingMessage!,
-      headers: {
-        warning: warning || '',
-      },
-    });
-  }
-
-  return response.custom({
-    statusCode: statusCode!,
-    body: `${statusCode} - ${statusMessage}`,
-    headers: {
-      warning: warning || '',
-      'Content-Type': 'text/plain',
-    },
-  });
-};
+  };

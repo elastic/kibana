@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
@@ -72,16 +61,22 @@ const TopNav = ({
     const session = embeddableHandler.openInspector();
     setInspectorSession(session);
   }, [embeddableHandler]);
+
+  const doReload = useCallback(async () => {
+    // start a new session to make sure all data is up to date
+    services.data.search.session.start();
+
+    await visInstance.embeddableHandler.reload();
+  }, [visInstance.embeddableHandler, services.data.search.session]);
+
   const handleRefresh = useCallback(
     (_payload: any, isUpdate?: boolean) => {
       if (isUpdate === false) {
-        visInstance.embeddableHandler.reload();
+        doReload();
       }
     },
-    [visInstance.embeddableHandler]
+    [doReload]
   );
-  const stateTransfer = services.embeddable.getStateTransfer();
-  const savedObjectsClient = services.savedObjects.client;
 
   const config = useMemo(() => {
     if (isEmbeddableRendered) {
@@ -96,10 +91,8 @@ const TopNav = ({
           visInstance,
           stateContainer,
           visualizationIdFromUrl,
-          stateTransfer,
-          savedObjectsClient,
+          stateTransfer: services.stateTransferService,
           embeddableId,
-          onAppLeave,
         },
         services
       );
@@ -117,9 +110,6 @@ const TopNav = ({
     visualizationIdFromUrl,
     services,
     embeddableId,
-    stateTransfer,
-    savedObjectsClient,
-    onAppLeave,
   ]);
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>(
     vis.data.indexPattern ? [vis.data.indexPattern] : []
@@ -147,8 +137,9 @@ const TopNav = ({
       // Confirm when the user has made any changes to an existing visualizations
       // or when the user has configured something without saving
       if (
-        ((originatingApp && originatingApp === 'dashboards') || originatingApp === 'canvas') &&
-        (hasUnappliedChanges || hasUnsavedChanges)
+        originatingApp &&
+        (hasUnappliedChanges || hasUnsavedChanges) &&
+        !services.stateTransferService.isTransferInProgress
       ) {
         return actions.confirm(
           i18n.translate('visualize.confirmModal.confirmTextDescription', {
@@ -161,12 +152,17 @@ const TopNav = ({
       }
       return actions.default();
     });
+    return () => {
+      // reset on app leave handler so leaving from the listing page doesn't trigger a confirmation
+      onAppLeave((actions) => actions.default());
+    };
   }, [
     onAppLeave,
-    hasUnappliedChanges,
-    hasUnsavedChanges,
-    visualizeCapabilities.save,
     originatingApp,
+    hasUnsavedChanges,
+    hasUnappliedChanges,
+    visualizeCapabilities.save,
+    services.stateTransferService.isTransferInProgress,
   ]);
 
   useEffect(() => {
@@ -192,6 +188,21 @@ const TopNav = ({
     }
   }, [vis.params, vis.type, services.data.indexPatterns, vis.data.indexPattern]);
 
+  useEffect(() => {
+    const autoRefreshFetchSub = services.data.query.timefilter.timefilter
+      .getAutoRefreshFetch$()
+      .subscribe(async (done) => {
+        try {
+          await doReload();
+        } finally {
+          done();
+        }
+      });
+    return () => {
+      autoRefreshFetchSub.unsubscribe();
+    };
+  }, [services.data.query.timefilter.timefilter, doReload]);
+
   return isChromeVisible ? (
     /**
      * Most visualizations have all search bar components enabled.
@@ -213,7 +224,7 @@ const TopNav = ({
       showDatePicker={showDatePicker()}
       showFilterBar={showFilterBar}
       showQueryInput={showQueryInput}
-      showSaveQuery={services.visualizeCapabilities.saveQuery}
+      showSaveQuery={Boolean(services.visualizeCapabilities.saveQuery)}
       showSearchBar
       useDefaultBehaviors
     />

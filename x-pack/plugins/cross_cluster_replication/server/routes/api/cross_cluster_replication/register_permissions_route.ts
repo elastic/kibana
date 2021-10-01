@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { addBasePath } from '../../../services';
@@ -13,7 +14,7 @@ import { RouteDependencies } from '../../../types';
 export const registerPermissionsRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   router.get(
     {
@@ -21,6 +22,8 @@ export const registerPermissionsRoute = ({
       validate: false,
     },
     license.guardApiRoute(async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+
       if (!license.isEsSecurityEnabled) {
         // If security has been disabled in elasticsearch.yml. we'll just let the user use CCR
         // because permissions are irrelevant.
@@ -34,9 +37,8 @@ export const registerPermissionsRoute = ({
 
       try {
         const {
-          has_all_requested: hasPermission,
-          cluster,
-        } = await context.crossClusterReplication!.client.callAsCurrentUser('ccr.permissions', {
+          body: { has_all_requested: hasPermission, cluster },
+        } = await client.asCurrentUser.security.hasPrivileges({
           body: {
             cluster: ['manage', 'manage_ccr'],
           },
@@ -58,12 +60,8 @@ export const registerPermissionsRoute = ({
             missingClusterPrivileges,
           },
         });
-      } catch (err) {
-        if (isEsError(err)) {
-          return response.customError(formatEsError(err));
-        }
-        // Case: default
-        return response.internalError({ body: err });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     })
   );

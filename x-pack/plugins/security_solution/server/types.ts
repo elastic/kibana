@@ -1,19 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type { IRouter, RequestHandlerContext } from 'src/core/server';
+import type { ListsApiRequestHandlerContext } from '../../lists/server';
+import type { LicensingApiRequestHandlerContext } from '../../licensing/server';
+import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
+
 import { AppClient } from './client';
+import { RuleExecutionLogClient } from './lib/detection_engine/rule_execution_log/rule_execution_log_client';
+import type { ActionsApiRequestHandlerContext } from '../../actions/server';
 
 export { AppClient };
 
 export interface AppRequestContext {
   getAppClient: () => AppClient;
+  getSpaceId: () => string;
+  getExecutionLogClient: () => RuleExecutionLogClient;
 }
 
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    securitySolution?: AppRequestContext;
-  }
-}
+export type SecuritySolutionRequestHandlerContext = RequestHandlerContext & {
+  securitySolution: AppRequestContext;
+  licensing: LicensingApiRequestHandlerContext;
+  alerting: AlertingApiRequestHandlerContext;
+  actions: ActionsApiRequestHandlerContext;
+  lists?: ListsApiRequestHandlerContext;
+};
+
+export type SecuritySolutionPluginRouter = IRouter<SecuritySolutionRequestHandlerContext>;

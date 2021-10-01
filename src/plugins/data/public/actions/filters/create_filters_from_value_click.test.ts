@@ -1,34 +1,20 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import {
-  fieldFormats,
-  FieldFormatsGetConfigFn,
-  esFilters,
-  IndexPatternsContract,
-} from '../../../public';
+import { IndexPatternsContract } from '../../../public';
 import { dataPluginMock } from '../../../public/mocks';
 import { setIndexPatterns, setSearchService } from '../../../public/services';
 import {
   createFiltersFromValueClickAction,
   ValueClickDataContext,
 } from './create_filters_from_value_click';
+import { FieldFormatsGetConfigFn, BytesFormat } from '../../../../field_formats/common';
+import { RangeFilter } from '@kbn/es-query';
 
 const mockField = {
   name: 'bytes',
@@ -75,7 +61,7 @@ describe('createFiltersFromValueClick', () => {
 
     const dataStart = dataPluginMock.createStartContract();
     setSearchService(dataStart.search);
-    setIndexPatterns(({
+    setIndexPatterns({
       ...dataStart.indexPatterns,
       get: async () => ({
         id: 'logstash-*',
@@ -83,10 +69,9 @@ describe('createFiltersFromValueClick', () => {
           getByName: () => mockField,
           filter: () => [mockField],
         },
-        getFormatterForField: () =>
-          new fieldFormats.BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
+        getFormatterForField: () => new BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
       }),
-    } as unknown) as IndexPatternsContract);
+    } as unknown as IndexPatternsContract);
   });
 
   test('ignores event when value for rows is not provided', async () => {
@@ -101,7 +86,7 @@ describe('createFiltersFromValueClick', () => {
     const filters = await createFiltersFromValueClickAction({ data: dataPoints });
 
     expect(filters.length).toEqual(1);
-    expect(filters[0].query.match_phrase.bytes).toEqual('2048');
+    expect(filters[0].query?.match_phrase.bytes).toEqual('2048');
   });
 
   test('handles an event when aggregations type is not terms', async () => {
@@ -109,11 +94,15 @@ describe('createFiltersFromValueClick', () => {
 
     expect(filters.length).toEqual(1);
 
-    const [rangeFilter] = filters;
+    const [rangeFilter] = filters as RangeFilter[];
+    expect(rangeFilter.range.bytes.gte).toEqual(2048);
+    expect(rangeFilter.range.bytes.lt).toEqual(2078);
+  });
 
-    if (esFilters.isRangeFilter(rangeFilter)) {
-      expect(rangeFilter.range.bytes.gte).toEqual(2048);
-      expect(rangeFilter.range.bytes.lt).toEqual(2078);
-    }
+  test('handles non-unique filters', async () => {
+    const [point] = dataPoints;
+    const filters = await createFiltersFromValueClickAction({ data: [point, point] });
+
+    expect(filters.length).toEqual(1);
   });
 });

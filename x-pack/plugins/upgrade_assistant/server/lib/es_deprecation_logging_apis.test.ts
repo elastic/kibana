@@ -1,21 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import {
   getDeprecationLoggingStatus,
   isDeprecationLoggingEnabled,
   setDeprecationLogging,
+  isDeprecationLogIndexingEnabled,
 } from './es_deprecation_logging_apis';
 
 describe('getDeprecationLoggingStatus', () => {
   it('calls cluster.getSettings', async () => {
-    const dataClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+    const dataClient = elasticsearchServiceMock.createScopedClusterClient();
     await getDeprecationLoggingStatus(dataClient);
-    expect(dataClient.callAsCurrentUser).toHaveBeenCalledWith('cluster.getSettings', {
-      includeDefaults: true,
+    expect(dataClient.asCurrentUser.cluster.getSettings).toHaveBeenCalledWith({
+      include_defaults: true,
     });
   });
 });
@@ -23,20 +26,38 @@ describe('getDeprecationLoggingStatus', () => {
 describe('setDeprecationLogging', () => {
   describe('isEnabled = true', () => {
     it('calls cluster.putSettings with logger.deprecation = WARN', async () => {
-      const dataClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+      const dataClient = elasticsearchServiceMock.createScopedClusterClient();
       await setDeprecationLogging(dataClient, true);
-      expect(dataClient.callAsCurrentUser).toHaveBeenCalledWith('cluster.putSettings', {
-        body: { transient: { 'logger.deprecation': 'WARN' } },
+      expect(dataClient.asCurrentUser.cluster.putSettings).toHaveBeenCalledWith({
+        body: {
+          persistent: {
+            'logger.deprecation': 'WARN',
+            'cluster.deprecation_indexing.enabled': true,
+          },
+          transient: {
+            'logger.deprecation': 'WARN',
+            'cluster.deprecation_indexing.enabled': true,
+          },
+        },
       });
     });
   });
 
   describe('isEnabled = false', () => {
     it('calls cluster.putSettings with logger.deprecation = ERROR', async () => {
-      const dataClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+      const dataClient = elasticsearchServiceMock.createScopedClusterClient();
       await setDeprecationLogging(dataClient, false);
-      expect(dataClient.callAsCurrentUser).toHaveBeenCalledWith('cluster.putSettings', {
-        body: { transient: { 'logger.deprecation': 'ERROR' } },
+      expect(dataClient.asCurrentUser.cluster.putSettings).toHaveBeenCalledWith({
+        body: {
+          persistent: {
+            'logger.deprecation': 'ERROR',
+            'cluster.deprecation_indexing.enabled': false,
+          },
+          transient: {
+            'logger.deprecation': 'ERROR',
+            'cluster.deprecation_indexing.enabled': false,
+          },
+        },
       });
     });
   });
@@ -78,6 +99,27 @@ describe('isDeprecationLoggingEnabled', () => {
       isDeprecationLoggingEnabled({
         default: { logger: { deprecation: 'FATAL' } },
         persistent: { logger: { deprecation: 'WARN' } },
+      })
+    ).toBe(true);
+  });
+});
+
+describe('isDeprecationLogIndexingEnabled', () => {
+  it('allows transient to override persistent and default', () => {
+    expect(
+      isDeprecationLogIndexingEnabled({
+        default: { cluster: { deprecation_indexing: { enabled: 'false' } } },
+        persistent: { cluster: { deprecation_indexing: { enabled: 'false' } } },
+        transient: { cluster: { deprecation_indexing: { enabled: 'true' } } },
+      })
+    ).toBe(true);
+  });
+
+  it('allows persistent to override default', () => {
+    expect(
+      isDeprecationLogIndexingEnabled({
+        default: { cluster: { deprecation_indexing: { enabled: 'false' } } },
+        persistent: { cluster: { deprecation_indexing: { enabled: 'true' } } },
       })
     ).toBe(true);
   });

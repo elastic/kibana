@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ComponentType } from 'react';
@@ -33,14 +34,18 @@ interface OuterProps {
 const wrap = (Component: ComponentType<any>) =>
   // TODO: this should be in a helper
   withHandlers<OuterProps, Handlers>({
-    getArgValue: ({ argValue }) => (name, alt) => {
-      const args = get(argValue, 'chain.0.arguments', {});
-      return get(args, `${name}.0`, alt);
-    },
-    setArgValue: ({ argValue, onValueChange }) => (name, val) => {
-      const newValue = set(argValue, `chain.0.arguments.${name}.0`, val);
-      onValueChange(newValue);
-    },
+    getArgValue:
+      ({ argValue }) =>
+      (name, alt) => {
+        const args = get(argValue, 'chain.0.arguments', {});
+        return get(args, `${name}.0`, alt);
+      },
+    setArgValue:
+      ({ argValue, onValueChange }) =>
+      (name, val) => {
+        const newValue = set(argValue, `chain.0.arguments.${name}.0`, val);
+        onValueChange(newValue);
+      },
   })(Component);
 
 export const containerStyle = () => ({

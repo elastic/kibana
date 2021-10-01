@@ -25,7 +25,7 @@
 .canvasElementCard {
   .euiCard__top {
     text-align: center;
-    width: calc(100% + #{$euiSize}* 2);
+    width: calc(100% + #{$euiSize} * 2);
     height: 85px;
     margin: calc(-1 * #{$euiSize}) calc(-1 * #{$euiSize}) 0;
   }

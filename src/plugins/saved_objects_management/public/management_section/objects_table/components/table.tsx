@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ApplicationStart, IBasePath } from 'src/core/public';
@@ -39,6 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SavedObjectsTaggingApi } from '../../../../../saved_objects_tagging_oss/public';
+import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 import { SavedObjectWithMetadata } from '../../../types';
 import {
@@ -50,6 +40,7 @@ import {
 export interface TableProps {
   taggingApi?: SavedObjectsTaggingApi;
   basePath: IBasePath;
+  allowedTypes: SavedObjectManagementTypeInfo[];
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
   selectedSavedObjects: SavedObjectWithMetadata[];
@@ -59,7 +50,7 @@ export interface TableProps {
   filterOptions: any[];
   capabilities: ApplicationStart['capabilities'];
   onDelete: () => void;
-  onActionRefresh: (object: SavedObjectWithMetadata) => void;
+  onActionRefresh: (objects: Array<{ type: string; id: string }>) => void;
   onExport: (includeReferencesDeep: boolean) => void;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   pageIndex: number;
@@ -81,7 +72,6 @@ interface TableState {
   isExportPopoverOpen: boolean;
   isIncludeReferencesDeepChecked: boolean;
   activeAction?: SavedObjectsManagementAction;
-  isColumnDataLoaded: boolean;
 }
 
 export class Table extends PureComponent<TableProps, TableState> {
@@ -91,21 +81,11 @@ export class Table extends PureComponent<TableProps, TableState> {
     isExportPopoverOpen: false,
     isIncludeReferencesDeepChecked: true,
     activeAction: undefined,
-    isColumnDataLoaded: false,
   };
 
   constructor(props: TableProps) {
     super(props);
   }
-
-  componentDidMount() {
-    this.loadColumnData();
-  }
-
-  loadColumnData = async () => {
-    await Promise.all(this.props.columnRegistry.getAll().map((column) => column.loadData()));
-    this.setState({ isColumnDataLoaded: true });
-  };
 
   onChange = ({ query, error }: any) => {
     if (error) {
@@ -167,6 +147,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       actionRegistry,
       columnRegistry,
       taggingApi,
+      allowedTypes,
     } = this.props;
 
     const pagination = {
@@ -204,10 +185,11 @@ export class Table extends PureComponent<TableProps, TableState> {
         sortable: false,
         'data-test-subj': 'savedObjectsTableRowType',
         render: (type: string, object: SavedObjectWithMetadata) => {
+          const typeLabel = getSavedObjectLabel(type, allowedTypes);
           return (
-            <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
+            <EuiToolTip position="top" content={typeLabel}>
               <EuiIcon
-                aria-label={getSavedObjectLabel(type)}
+                aria-label={typeLabel}
                 type={object.meta.icon || 'apps'}
                 size="s"
                 data-test-subj="objectType"
@@ -265,7 +247,6 @@ export class Table extends PureComponent<TableProps, TableState> {
             type: 'icon',
             icon: 'inspect',
             onClick: (object) => goInspectObject(object),
-            available: (object) => !!object.meta.editUrl,
             'data-test-subj': 'savedObjectsTableAction-inspect',
           },
           {
@@ -299,10 +280,9 @@ export class Table extends PureComponent<TableProps, TableState> {
                   this.setState({
                     activeAction: undefined,
                   });
-                  const { refreshOnFinish = () => false } = action;
-                  if (refreshOnFinish()) {
-                    onActionRefresh(object);
-                  }
+                  const { refreshOnFinish = () => [] } = action;
+                  const objectsToRefresh = refreshOnFinish();
+                  onActionRefresh(objectsToRefresh);
                 });
 
                 if (action.euiAction.onClick) {

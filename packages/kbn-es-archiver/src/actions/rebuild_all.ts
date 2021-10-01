@@ -1,27 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { resolve, dirname, relative } from 'path';
+import { resolve, relative } from 'path';
 import { stat, Stats, rename, createReadStream, createWriteStream } from 'fs';
 import { Readable, Writable } from 'stream';
 import { fromNode } from 'bluebird';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import { createPromiseFromStreams } from '@kbn/utils';
 import {
   prioritizeMappings,
@@ -36,15 +25,7 @@ async function isDirectory(path: string): Promise<boolean> {
   return stats.isDirectory();
 }
 
-export async function rebuildAllAction({
-  dataDir,
-  log,
-  rootDir = dataDir,
-}: {
-  dataDir: string;
-  log: ToolingLog;
-  rootDir?: string;
-}) {
+export async function rebuildAllAction({ dataDir, log }: { dataDir: string; log: ToolingLog }) {
   const childNames = prioritizeMappings(await readDirectory(dataDir));
   for (const childName of childNames) {
     const childPath = resolve(dataDir, childName);
@@ -53,13 +34,12 @@ export async function rebuildAllAction({
       await rebuildAllAction({
         dataDir: childPath,
         log,
-        rootDir,
       });
       continue;
     }
 
-    const archiveName = dirname(relative(rootDir, childPath));
-    log.info(`${archiveName} Rebuilding ${childName}`);
+    const archiveName = relative(REPO_ROOT, childPath);
+    log.info('[%s] Rebuilding %j', archiveName, childName);
     const gzip = isGzip(childPath);
     const tempFile = childPath + (gzip ? '.rebuilding.gz' : '.rebuilding');
 
@@ -71,6 +51,6 @@ export async function rebuildAllAction({
     ] as [Readable, ...Writable[]]);
 
     await fromNode((cb) => rename(tempFile, childPath, cb));
-    log.info(`${archiveName} Rebuilt ${childName}`);
+    log.info('[%s] Rebuilt %j', archiveName, childName);
   }
 }

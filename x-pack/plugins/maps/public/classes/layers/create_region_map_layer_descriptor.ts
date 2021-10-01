@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import uuid from 'uuid/v4';
 import {
   AggDescriptor,
   ColorDynamicOptions,
+  ESTermSourceDescriptor,
   LayerDescriptor,
 } from '../../../common/descriptor_types';
 import {
@@ -20,13 +22,25 @@ import {
 } from '../../../common/constants';
 import { VectorStyle } from '../styles/vector/vector_style';
 import { EMSFileSource } from '../sources/ems_file_source';
-// @ts-ignore
-import { VectorLayer } from './vector_layer/vector_layer';
+import { VectorLayer } from './vector_layer';
 import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
 import { NUMERICAL_COLOR_PALETTES } from '../styles/color_palettes';
 import { getJoinAggKey } from '../../../common/get_agg_key';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
+
+export interface CreateRegionMapLayerDescriptorParams {
+  label: string;
+  emsLayerId?: string;
+  leftFieldName?: string;
+  termsFieldName?: string;
+  termsSize?: number;
+  colorSchema: string;
+  indexPatternId?: string;
+  indexPatternTitle?: string;
+  metricAgg: string;
+  metricFieldName?: string;
+}
 
 export function createAggDescriptor(metricAgg: string, metricFieldName?: string): AggDescriptor {
   const aggTypeKey = Object.keys(AGG_TYPE).find((key) => {
@@ -48,22 +62,13 @@ export function createRegionMapLayerDescriptor({
   emsLayerId,
   leftFieldName,
   termsFieldName,
+  termsSize,
   colorSchema,
   indexPatternId,
   indexPatternTitle,
   metricAgg,
   metricFieldName,
-}: {
-  label: string;
-  emsLayerId?: string;
-  leftFieldName?: string;
-  termsFieldName?: string;
-  colorSchema: string;
-  indexPatternId?: string;
-  indexPatternTitle?: string;
-  metricAgg: string;
-  metricFieldName?: string;
-}): LayerDescriptor | null {
+}: CreateRegionMapLayerDescriptorParams): LayerDescriptor | null {
   if (!indexPatternId || !emsLayerId || !leftFieldName || !termsFieldName) {
     return null;
   }
@@ -78,21 +83,26 @@ export function createRegionMapLayerDescriptor({
   const colorPallette = NUMERICAL_COLOR_PALETTES.find((pallette) => {
     return pallette.value.toLowerCase() === colorSchema.toLowerCase();
   });
+  const termSourceDescriptor: ESTermSourceDescriptor = {
+    type: SOURCE_TYPES.ES_TERM_SOURCE,
+    id: joinId,
+    indexPatternId,
+    indexPatternTitle: indexPatternTitle ? indexPatternTitle : indexPatternId,
+    term: termsFieldName,
+    metrics: [metricsDescriptor],
+    applyGlobalQuery: true,
+    applyGlobalTime: true,
+    applyForceRefresh: true,
+  };
+  if (termsSize !== undefined) {
+    termSourceDescriptor.size = termsSize;
+  }
   return VectorLayer.createDescriptor({
     label,
     joins: [
       {
         leftField: leftFieldName,
-        right: {
-          type: SOURCE_TYPES.ES_TERM_SOURCE,
-          id: joinId,
-          indexPatternId,
-          indexPatternTitle: indexPatternTitle ? indexPatternTitle : indexPatternId,
-          term: termsFieldName,
-          metrics: [metricsDescriptor],
-          applyGlobalQuery: true,
-          applyGlobalTime: true,
-        },
+        right: termSourceDescriptor,
       },
     ],
     sourceDescriptor: EMSFileSource.createDescriptor({

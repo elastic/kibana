@@ -1,28 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { InternalHttpServiceSetup } from '../../http';
-import { CoreUsageDataSetup } from '../../core_usage_data';
+import { InternalCoreUsageDataSetup } from '../../core_usage_data';
 import { Logger } from '../../logging';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { IKibanaMigrator } from '../migrations';
 import { registerGetRoute } from './get';
+import { registerResolveRoute } from './resolve';
 import { registerCreateRoute } from './create';
 import { registerDeleteRoute } from './delete';
 import { registerFindRoute } from './find';
@@ -30,11 +20,15 @@ import { registerUpdateRoute } from './update';
 import { registerBulkGetRoute } from './bulk_get';
 import { registerBulkCreateRoute } from './bulk_create';
 import { registerBulkUpdateRoute } from './bulk_update';
-import { registerLogLegacyImportRoute } from './log_legacy_import';
 import { registerExportRoute } from './export';
 import { registerImportRoute } from './import';
 import { registerResolveImportErrorsRoute } from './resolve_import_errors';
 import { registerMigrateRoute } from './migrate';
+import { registerLegacyImportRoute } from './legacy_import_export/import';
+import { registerLegacyExportRoute } from './legacy_import_export/export';
+import { registerBulkResolveRoute } from './bulk_resolve';
+import { registerDeleteUnknownTypesRoute } from './deprecations';
+import { KibanaConfigType } from '../../kibana_config';
 
 export function registerRoutes({
   http,
@@ -42,29 +36,43 @@ export function registerRoutes({
   logger,
   config,
   migratorPromise,
+  kibanaVersion,
+  kibanaConfig,
 }: {
   http: InternalHttpServiceSetup;
-  coreUsageData: CoreUsageDataSetup;
+  coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
   config: SavedObjectConfig;
   migratorPromise: Promise<IKibanaMigrator>;
+  kibanaVersion: string;
+  kibanaConfig: KibanaConfigType;
 }) {
   const router = http.createRouter('/api/saved_objects/');
 
   registerGetRoute(router, { coreUsageData });
+  registerResolveRoute(router, { coreUsageData });
   registerCreateRoute(router, { coreUsageData });
   registerDeleteRoute(router, { coreUsageData });
   registerFindRoute(router, { coreUsageData });
   registerUpdateRoute(router, { coreUsageData });
   registerBulkGetRoute(router, { coreUsageData });
   registerBulkCreateRoute(router, { coreUsageData });
+  registerBulkResolveRoute(router, { coreUsageData });
   registerBulkUpdateRoute(router, { coreUsageData });
-  registerLogLegacyImportRoute(router, logger);
   registerExportRoute(router, { config, coreUsageData });
   registerImportRoute(router, { config, coreUsageData });
   registerResolveImportErrorsRoute(router, { config, coreUsageData });
 
+  const legacyRouter = http.createRouter('');
+  registerLegacyImportRoute(legacyRouter, {
+    maxImportPayloadBytes: config.maxImportPayloadBytes,
+    coreUsageData,
+    logger,
+  });
+  registerLegacyExportRoute(legacyRouter, { kibanaVersion, coreUsageData, logger });
+
   const internalRouter = http.createRouter('/internal/saved_objects/');
 
   registerMigrateRoute(internalRouter, migratorPromise);
+  registerDeleteUnknownTypesRoute(internalRouter, { config, kibanaConfig, kibanaVersion });
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, useState, useCallback, useEffect, useMemo } from 'react';
@@ -11,7 +12,6 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalFooter,
-  EuiOverlayMask,
   EuiButton,
   EuiButtonEmpty,
   EuiHorizontalRule,
@@ -22,20 +22,27 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
+import type {
+  ExceptionListType,
+  OsTypeArray,
+  OsType,
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
+  hasEqlSequenceQuery,
+  isEqlRule,
+  isThresholdRule,
+} from '../../../../../common/detection_engine/utils';
 import { useFetchIndex } from '../../../containers/source';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
-import {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-  ExceptionListType,
-} from '../../../../../public/lists_plugin_deps';
+import { ExceptionBuilder } from '../../../../../public/shared_imports';
+
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
 import { useKibana } from '../../../lib/kibana';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { ExceptionBuilderComponent } from '../builder';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { AddExceptionComments } from '../add_exception_comments';
 import {
@@ -44,6 +51,7 @@ import {
   entryHasListType,
   entryHasNonEcsType,
   lowercaseHashValues,
+  filterIndexPatterns,
 } from '../helpers';
 import { Loader } from '../../loader';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
@@ -98,7 +106,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   onConfirm,
   onRuleChange,
 }: EditExceptionModalProps) {
-  const { http } = useKibana().services;
+  const { http, data } = useKibana().services;
   const [comment, setComment] = useState('');
   const [errorsExist, setErrorExists] = useState(false);
   const { rule: maybeRule, loading: isRuleLoading } = useRuleAsync(ruleId);
@@ -111,17 +119,14 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   >([]);
   const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
-  const memoSignalIndexName = useMemo(() => (signalIndexName !== null ? [signalIndexName] : []), [
-    signalIndexName,
-  ]);
-  const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex(
-    memoSignalIndexName
+  const memoSignalIndexName = useMemo(
+    () => (signalIndexName !== null ? [signalIndexName] : []),
+    [signalIndexName]
   );
+  const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] =
+    useFetchIndex(memoSignalIndexName);
 
-  const memoMlJobIds = useMemo(
-    () => (maybeRule?.machine_learning_job_id != null ? [maybeRule.machine_learning_job_id] : []),
-    [maybeRule]
-  );
+  const memoMlJobIds = useMemo(() => maybeRule?.machine_learning_job_id ?? [], [maybeRule]);
   const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);
 
   const memoRuleIndices = useMemo(() => {
@@ -279,126 +284,156 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     return false;
   }, [maybeRule]);
 
+  const osDisplay = (osTypes: OsTypeArray): string => {
+    const translateOS = (currentOs: OsType): string => {
+      return currentOs === 'linux'
+        ? sharedI18n.OPERATING_SYSTEM_LINUX
+        : currentOs === 'macos'
+        ? sharedI18n.OPERATING_SYSTEM_MAC
+        : sharedI18n.OPERATING_SYSTEM_WINDOWS;
+    };
+    return osTypes
+      .reduce((osString, currentOs) => {
+        return `${translateOS(currentOs)}, ${osString}`;
+      }, '')
+      .slice(0, -2);
+  };
+
   return (
-    <EuiOverlayMask onClick={onCancel}>
-      <Modal onClose={onCancel} data-test-subj="add-exception-modal">
-        <ModalHeader>
-          <EuiModalHeaderTitle>
-            {exceptionListType === 'endpoint'
-              ? i18n.EDIT_ENDPOINT_EXCEPTION_TITLE
-              : i18n.EDIT_EXCEPTION_TITLE}
-          </EuiModalHeaderTitle>
-          <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
-            {ruleName}
-          </ModalHeaderSubtitle>
-        </ModalHeader>
-        {(addExceptionIsLoading || isIndexPatternLoading || isSignalIndexLoading) && (
-          <Loader data-test-subj="loadingEditExceptionModal" size="xl" />
-        )}
-        {!isSignalIndexLoading &&
-          !addExceptionIsLoading &&
-          !isIndexPatternLoading &&
-          !isRuleLoading &&
-          !mlJobLoading && (
-            <>
-              <ModalBodySection className="builder-section">
-                {isRuleEQLSequenceStatement && (
-                  <>
-                    <EuiCallOut
-                      data-test-subj="eql-sequence-callout"
-                      title={i18n.EDIT_EXCEPTION_SEQUENCE_WARNING}
-                    />
-                    <EuiSpacer />
-                  </>
-                )}
-                <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
-                <EuiSpacer />
-                <ExceptionBuilderComponent
-                  exceptionListItems={[exceptionItem]}
-                  listType={exceptionListType}
-                  listId={exceptionItem.list_id}
-                  listNamespaceType={exceptionItem.namespace_type}
-                  ruleName={ruleName}
-                  isOrDisabled
-                  isAndDisabled={false}
-                  isNestedDisabled={false}
-                  data-test-subj="edit-exception-modal-builder"
-                  id-aria="edit-exception-modal-builder"
-                  onChange={handleBuilderOnChange}
-                  indexPatterns={indexPatterns}
-                  ruleType={maybeRule?.type}
-                />
-
-                <EuiSpacer />
-
-                <AddExceptionComments
-                  exceptionItemComments={exceptionItem.comments}
-                  newCommentValue={comment}
-                  newCommentOnChange={onCommentChange}
-                />
-              </ModalBodySection>
-              <EuiHorizontalRule />
-              <ModalBodySection>
-                <EuiFormRow fullWidth>
-                  <EuiCheckbox
-                    data-test-subj="close-alert-on-add-edit-exception-checkbox"
-                    id="close-alert-on-add-edit-exception-checkbox"
-                    label={
-                      shouldDisableBulkClose
-                        ? i18n.BULK_CLOSE_LABEL_DISABLED
-                        : i18n.BULK_CLOSE_LABEL
-                    }
-                    checked={shouldBulkCloseAlert}
-                    onChange={onBulkCloseAlertCheckboxChange}
-                    disabled={shouldDisableBulkClose}
+    <Modal onClose={onCancel} data-test-subj="add-exception-modal">
+      <ModalHeader>
+        <EuiModalHeaderTitle>
+          {exceptionListType === 'endpoint'
+            ? i18n.EDIT_ENDPOINT_EXCEPTION_TITLE
+            : i18n.EDIT_EXCEPTION_TITLE}
+        </EuiModalHeaderTitle>
+        <EuiSpacer size="xs" />
+        <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
+          {ruleName}
+        </ModalHeaderSubtitle>
+      </ModalHeader>
+      {(addExceptionIsLoading || isIndexPatternLoading || isSignalIndexLoading) && (
+        <Loader data-test-subj="loadingEditExceptionModal" size="xl" />
+      )}
+      {!isSignalIndexLoading &&
+        !addExceptionIsLoading &&
+        !isIndexPatternLoading &&
+        !isRuleLoading &&
+        !mlJobLoading && (
+          <>
+            <ModalBodySection className="builder-section">
+              {isRuleEQLSequenceStatement && (
+                <>
+                  <EuiCallOut
+                    data-test-subj="eql-sequence-callout"
+                    title={i18n.EDIT_EXCEPTION_SEQUENCE_WARNING}
                   />
-                </EuiFormRow>
-                {exceptionListType === 'endpoint' && (
-                  <>
-                    <EuiSpacer />
-                    <EuiText data-test-subj="edit-exception-endpoint-text" color="subdued" size="s">
-                      {i18n.ENDPOINT_QUARANTINE_TEXT}
-                    </EuiText>
-                  </>
-                )}
-              </ModalBodySection>
-            </>
-          )}
-        {updateError != null && (
-          <ModalBodySection>
-            <ErrorCallout
-              http={http}
-              errorInfo={updateError}
-              rule={maybeRule}
-              onCancel={onCancel}
-              onSuccess={handleDissasociationSuccess}
-              onError={handleDissasociationError}
-            />
-          </ModalBodySection>
-        )}
-        {hasVersionConflict && (
-          <ModalBodySection>
-            <EuiCallOut title={i18n.VERSION_CONFLICT_ERROR_TITLE} color="danger" iconType="alert">
-              <p>{i18n.VERSION_CONFLICT_ERROR_DESCRIPTION}</p>
-            </EuiCallOut>
-          </ModalBodySection>
-        )}
-        {updateError == null && (
-          <EuiModalFooter>
-            <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
+                  <EuiSpacer />
+                </>
+              )}
+              <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
+              <EuiSpacer />
+              {exceptionListType === 'endpoint' && (
+                <>
+                  <EuiText size="xs">
+                    <dl>
+                      <dt>{sharedI18n.OPERATING_SYSTEM_LABEL}</dt>
+                      <dd>{osDisplay(exceptionItem.os_types)}</dd>
+                    </dl>
+                  </EuiText>
+                  <EuiSpacer />
+                </>
+              )}
+              {ExceptionBuilder.getExceptionBuilderComponentLazy({
+                allowLargeValueLists:
+                  !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type),
+                httpService: http,
+                autocompleteService: data.autocomplete,
+                exceptionListItems: [exceptionItem],
+                listType: exceptionListType,
+                listId: exceptionItem.list_id,
+                listNamespaceType: exceptionItem.namespace_type,
+                listTypeSpecificIndexPatternFilter: filterIndexPatterns,
+                ruleName,
+                isOrDisabled: true,
+                isAndDisabled: false,
+                osTypes: exceptionItem.os_types,
+                isNestedDisabled: false,
+                dataTestSubj: 'edit-exception-modal-builder',
+                idAria: 'edit-exception-modal-builder',
+                onChange: handleBuilderOnChange,
+                indexPatterns,
+              })}
 
-            <EuiButton
-              data-test-subj="edit-exception-confirm-button"
-              onClick={onEditExceptionConfirm}
-              isLoading={addExceptionIsLoading}
-              isDisabled={isSubmitButtonDisabled}
-              fill
-            >
-              {i18n.EDIT_EXCEPTION_SAVE_BUTTON}
-            </EuiButton>
-          </EuiModalFooter>
+              <EuiSpacer />
+
+              <AddExceptionComments
+                exceptionItemComments={exceptionItem.comments}
+                newCommentValue={comment}
+                newCommentOnChange={onCommentChange}
+              />
+            </ModalBodySection>
+            <EuiHorizontalRule />
+            <ModalBodySection>
+              <EuiFormRow fullWidth>
+                <EuiCheckbox
+                  data-test-subj="close-alert-on-add-edit-exception-checkbox"
+                  id="close-alert-on-add-edit-exception-checkbox"
+                  label={
+                    shouldDisableBulkClose ? i18n.BULK_CLOSE_LABEL_DISABLED : i18n.BULK_CLOSE_LABEL
+                  }
+                  checked={shouldBulkCloseAlert}
+                  onChange={onBulkCloseAlertCheckboxChange}
+                  disabled={shouldDisableBulkClose}
+                />
+              </EuiFormRow>
+              {exceptionListType === 'endpoint' && (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiText data-test-subj="edit-exception-endpoint-text" color="subdued" size="s">
+                    {i18n.ENDPOINT_QUARANTINE_TEXT}
+                  </EuiText>
+                </>
+              )}
+            </ModalBodySection>
+          </>
         )}
-      </Modal>
-    </EuiOverlayMask>
+      {updateError != null && (
+        <ModalBodySection>
+          <ErrorCallout
+            http={http}
+            errorInfo={updateError}
+            rule={maybeRule}
+            onCancel={onCancel}
+            onSuccess={handleDissasociationSuccess}
+            onError={handleDissasociationError}
+          />
+        </ModalBodySection>
+      )}
+      {hasVersionConflict && (
+        <ModalBodySection>
+          <EuiCallOut title={i18n.VERSION_CONFLICT_ERROR_TITLE} color="danger" iconType="alert">
+            <p>{i18n.VERSION_CONFLICT_ERROR_DESCRIPTION}</p>
+          </EuiCallOut>
+        </ModalBodySection>
+      )}
+      {updateError == null && (
+        <EuiModalFooter>
+          <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={onCancel}>
+            {i18n.CANCEL}
+          </EuiButtonEmpty>
+
+          <EuiButton
+            data-test-subj="edit-exception-confirm-button"
+            onClick={onEditExceptionConfirm}
+            isLoading={addExceptionIsLoading}
+            isDisabled={isSubmitButtonDisabled}
+            fill
+          >
+            {i18n.EDIT_EXCEPTION_SAVE_BUTTON}
+          </EuiButton>
+        </EuiModalFooter>
+      )}
+    </Modal>
   );
 });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Axis, BarSeries, niceTimeFormatter, Position, ScaleType, Settings } from '@elastic/charts';
@@ -30,11 +31,24 @@ function formatTpm(value?: number) {
   return numeral(value).format('0.00a');
 }
 
+function formatTpmStat(value?: number) {
+  if (!value || value === 0) {
+    return '0';
+  }
+  if (value <= 0.1) {
+    return '< 0.1';
+  }
+  if (value > 1000) {
+    return numeral(value).format('0.00a');
+  }
+  return numeral(value).format('0,0.0');
+}
+
 export function APMSection({ bucketSize }: Props) {
   const theme = useContext(ThemeContext);
   const chartTheme = useChartTheme();
   const history = useHistory();
-  const { forceUpdate, hasData } = useHasData();
+  const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
 
   const { data, status } = useFetcher(
@@ -52,7 +66,7 @@ export function APMSection({ bucketSize }: Props) {
     [bucketSize, relativeStart, relativeEnd, forceUpdate]
   );
 
-  if (!hasData.apm?.hasData) {
+  if (!hasDataMap.apm?.hasData) {
     return null;
   }
 
@@ -92,9 +106,9 @@ export function APMSection({ bucketSize }: Props) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <StyledStat
-            title={formatTpm(stats?.transactions.value)}
-            description={i18n.translate('xpack.observability.overview.apm.transactionsPerMinute', {
-              defaultMessage: 'Transactions per minute',
+            title={`${formatTpmStat(stats?.transactions.value)} tpm`}
+            description={i18n.translate('xpack.observability.overview.apm.throughput', {
+              defaultMessage: 'Throughput',
             })}
             isLoading={isLoading}
             color={transactionsColor}

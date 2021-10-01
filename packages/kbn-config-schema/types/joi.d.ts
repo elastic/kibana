@@ -1,27 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import * as Joi from 'joi';
 import { ByteSizeValue } from '../src/byte_size_value';
 
 declare module 'joi' {
   interface BytesSchema extends AnySchema {
     min(limit: number | string | ByteSizeValue): this;
+
     max(limit: number | string | ByteSizeValue): this;
   }
 
@@ -33,6 +24,14 @@ declare module 'joi' {
     entries(key: AnySchema, value: AnySchema): this;
   }
 
+  interface ErrorReport {
+    // missing from the typedef
+    // see https://github.com/sideway/joi/blob/master/lib/errors.js
+    local?: Record<string, any>;
+
+    toString(): string;
+  }
+
   export type JoiRoot = Joi.Root & {
     bytes: () => BytesSchema;
     duration: () => AnySchema;
@@ -40,13 +39,4 @@ declare module 'joi' {
     record: () => RecordSchema;
     stream: () => AnySchema;
   };
-
-  interface AnySchema {
-    custom(validator: (value: any) => string | void): this;
-  }
-
-  // Joi types don't include `schema` function even though it's supported.
-  interface ObjectSchema {
-    schema(): this;
-  }
 }

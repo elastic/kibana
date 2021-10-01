@@ -18,7 +18,7 @@ export declare class SimpleSavedObject<T = unknown>
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(client, { id, type, version, attributes, error, references, migrationVersion })](./kibana-plugin-core-public.simplesavedobject._constructor_.md) |  | Constructs a new instance of the <code>SimpleSavedObject</code> class |
+|  [(constructor)(client, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, })](./kibana-plugin-core-public.simplesavedobject._constructor_.md) |  | Constructs a new instance of the <code>SimpleSavedObject</code> class |
 
 ## Properties
 
@@ -26,9 +26,11 @@ export declare class SimpleSavedObject<T = unknown>
 |  --- | --- | --- | --- |
 |  [\_version](./kibana-plugin-core-public.simplesavedobject._version.md) |  | <code>SavedObjectType&lt;T&gt;['version']</code> |  |
 |  [attributes](./kibana-plugin-core-public.simplesavedobject.attributes.md) |  | <code>T</code> |  |
+|  [coreMigrationVersion](./kibana-plugin-core-public.simplesavedobject.coremigrationversion.md) |  | <code>SavedObjectType&lt;T&gt;['coreMigrationVersion']</code> |  |
 |  [error](./kibana-plugin-core-public.simplesavedobject.error.md) |  | <code>SavedObjectType&lt;T&gt;['error']</code> |  |
 |  [id](./kibana-plugin-core-public.simplesavedobject.id.md) |  | <code>SavedObjectType&lt;T&gt;['id']</code> |  |
 |  [migrationVersion](./kibana-plugin-core-public.simplesavedobject.migrationversion.md) |  | <code>SavedObjectType&lt;T&gt;['migrationVersion']</code> |  |
+|  [namespaces](./kibana-plugin-core-public.simplesavedobject.namespaces.md) |  | <code>SavedObjectType&lt;T&gt;['namespaces']</code> | Space(s) that this saved object exists in. This attribute is not used for "global" saved object types which are registered with <code>namespaceType: 'agnostic'</code>. |
 |  [references](./kibana-plugin-core-public.simplesavedobject.references.md) |  | <code>SavedObjectType&lt;T&gt;['references']</code> |  |
 |  [type](./kibana-plugin-core-public.simplesavedobject.type.md) |  | <code>SavedObjectType&lt;T&gt;['type']</code> |  |
 

@@ -1,18 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Mustache from 'mustache';
+import { DeserializerOrUndefined, type } from '@kbn/securitysolution-io-ts-list-types';
 
-import {
-  DeserializerOrUndefined,
-  SearchEsListItemSchema,
-  esDataTypeGeoPointRange,
-  esDataTypeRange,
-  type,
-} from '../../../common/schemas';
+import { SearchEsListItemSchema } from '../../schemas/elastic_response';
+import { esDataTypeGeoPointRange, esDataTypeRange } from '../../schemas/common/schemas';
 
 export const DEFAULT_GEO_POINT = '{{{lat}}},{{{lon}}}';
 export const DEFAULT_DATE_RANGE = '{{{gte}}},{{{lte}}}';

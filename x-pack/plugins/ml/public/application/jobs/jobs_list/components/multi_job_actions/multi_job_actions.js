@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 
-import { EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
 import { ResultLinks } from '../job_actions';
 import { MultiJobActionsMenu } from './actions_menu';
@@ -29,32 +30,48 @@ export class MultiJobActions extends Component {
         data-test-subj={`mlADJobListMultiSelectActionsArea ${jobsSelected ? 'active' : 'inactive'}`}
       >
         {jobsSelected && (
-          <Fragment>
-            <EuiTitle size="s" style={{ display: 'inline' }}>
-              <h3>
-                <FormattedMessage
-                  id="xpack.ml.jobsList.multiJobsActions.jobsSelectedLabel"
-                  defaultMessage="{selectedJobsCount, plural, one {# job} other {# jobs}}   selected"
-                  values={{ selectedJobsCount: this.props.selectedJobs.length }}
-                />
-              </h3>
-            </EuiTitle>
-            <div className="actions-border-large" />
-            <ResultLinks jobs={this.props.selectedJobs} />
-
-            <GroupSelector
-              jobs={this.props.selectedJobs}
-              allJobIds={this.props.allJobIds}
-              refreshJobs={this.props.refreshJobs}
-            />
-
-            <MultiJobActionsMenu
-              jobs={this.props.selectedJobs}
-              showStartDatafeedModal={this.props.showStartDatafeedModal}
-              showDeleteJobModal={this.props.showDeleteJobModal}
-              refreshJobs={this.props.refreshJobs}
-            />
-          </Fragment>
+          <EuiFlexGroup
+            gutterSize="xs"
+            alignItems="center"
+            wrap={false}
+            direction="row"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="s">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.ml.jobsList.multiJobsActions.jobsSelectedLabel"
+                    defaultMessage="{selectedJobsCount, plural, one {# job} other {# jobs}}   selected"
+                    values={{ selectedJobsCount: this.props.selectedJobs.length }}
+                  />
+                </h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <div className="actions-border-large" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ResultLinks jobs={this.props.selectedJobs} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <GroupSelector
+                jobs={this.props.selectedJobs}
+                allJobIds={this.props.allJobIds}
+                refreshJobs={this.props.refreshJobs}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <MultiJobActionsMenu
+                jobs={this.props.selectedJobs}
+                showStartDatafeedModal={this.props.showStartDatafeedModal}
+                showDeleteJobModal={this.props.showDeleteJobModal}
+                showResetJobModal={this.props.showResetJobModal}
+                refreshJobs={this.props.refreshJobs}
+                showCreateAlertFlyout={this.props.showCreateAlertFlyout}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         )}
       </div>
     );
@@ -65,5 +82,7 @@ MultiJobActions.propTypes = {
   allJobIds: PropTypes.array.isRequired,
   showStartDatafeedModal: PropTypes.func.isRequired,
   showDeleteJobModal: PropTypes.func.isRequired,
+  showResetJobModal: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,
+  showCreateAlertFlyout: PropTypes.func.isRequired,
 };

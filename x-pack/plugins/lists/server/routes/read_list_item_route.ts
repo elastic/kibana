@@ -1,19 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import {
+  listItemArraySchema,
+  listItemSchema,
+  readListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
-import { LIST_ITEM_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { listItemArraySchema, listItemSchema, readListItemSchema } from '../../common/schemas';
-import { validate } from '../../common/shared_imports';
+import type { ListsPluginRouter } from '../types';
+
+import { buildRouteValidation, buildSiemResponse } from './utils';
 
 import { getListClient } from '.';
 
-export const readListItemRoute = (router: IRouter): void => {
+export const readListItemRoute = (router: ListsPluginRouter): void => {
   router.get(
     {
       options: {

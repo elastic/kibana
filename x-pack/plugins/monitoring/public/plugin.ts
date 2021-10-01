@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -13,20 +14,21 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'kibana/public';
+import { Legacy } from './legacy_shims';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-import { UI_SETTINGS } from '../../../../src/plugins/data/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { MonitoringStartPluginDependencies, MonitoringConfig } from './types';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
 import {
-  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
-  ALERT_THREAD_POOL_WRITE_REJECTIONS,
-  ALERT_DETAILS,
+  RULE_THREAD_POOL_SEARCH_REJECTIONS,
+  RULE_THREAD_POOL_WRITE_REJECTIONS,
+  RULE_DETAILS,
 } from '../common/constants';
+import { setConfig } from './external_config';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -35,9 +37,12 @@ interface MonitoringSetupPluginDependencies {
   usageCollection: UsageCollectionSetup;
 }
 
+const HASH_CHANGE = 'hashchange';
+
 export class MonitoringPlugin
   implements
-    Plugin<boolean, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies> {
+    Plugin<void, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies>
+{
   constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {}
 
   public async setup(
@@ -73,7 +78,7 @@ export class MonitoringPlugin
       });
     }
 
-    await this.registerAlertsAsync(plugins);
+    await this.registerAlerts(plugins, monitoring);
 
     const app: App = {
       id,
@@ -84,6 +89,7 @@ export class MonitoringPlugin
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { AngularApp } = await import('./angular');
+        const externalConfig = this.getExternalConfig();
         const deps: MonitoringStartPluginDependencies = {
           navigation: pluginsStart.navigation,
           kibanaLegacy: pluginsStart.kibanaLegacy,
@@ -92,47 +98,78 @@ export class MonitoringPlugin
           data: pluginsStart.data,
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           pluginInitializerContext: this.initializerContext,
-          externalConfig: this.getExternalConfig(),
+          externalConfig,
           triggersActionsUi: pluginsStart.triggersActionsUi,
           usageCollection: plugins.usageCollection,
+          appMountParameters: params,
         };
 
-        this.setInitialTimefilter(deps);
-
-        const monitoringApp = new AngularApp(deps);
-        const removeHistoryListener = params.history.listen((location) => {
-          if (location.pathname === '' && location.hash === '') {
-            monitoringApp.applyScope();
-          }
+        Legacy.init({
+          core: deps.core,
+          element: deps.element,
+          data: deps.data,
+          navigation: deps.navigation,
+          isCloud: deps.isCloud,
+          pluginInitializerContext: deps.pluginInitializerContext,
+          externalConfig: deps.externalConfig,
+          kibanaLegacy: deps.kibanaLegacy,
+          triggersActionsUi: deps.triggersActionsUi,
+          usageCollection: deps.usageCollection,
+          appMountParameters: deps.appMountParameters,
         });
 
-        return () => {
-          removeHistoryListener();
-          monitoringApp.destroy();
-        };
+        const config = Object.fromEntries(externalConfig);
+        setConfig(config);
+        if (config.renderReactApp) {
+          const { renderApp } = await import('./application');
+          return renderApp(coreStart, pluginsStart, params, config);
+        } else {
+          const monitoringApp = new AngularApp(deps);
+          const removeHistoryListener = params.history.listen((location) => {
+            if (location.pathname === '' && location.hash === '') {
+              monitoringApp.applyScope();
+            }
+          });
+
+          const removeHashChange = this.setInitialTimefilter(deps);
+          return () => {
+            if (removeHashChange) {
+              removeHashChange();
+            }
+            removeHistoryListener();
+            monitoringApp.destroy();
+          };
+        }
       },
     };
 
     core.application.register(app);
-    return true;
   }
 
   public start(core: CoreStart, plugins: any) {}
 
   public stop() {}
 
-  private setInitialTimefilter({ core: coreContext, data }: MonitoringStartPluginDependencies) {
+  private setInitialTimefilter({ data }: MonitoringStartPluginDependencies) {
     const { timefilter } = data.query.timefilter;
-    const { uiSettings } = coreContext;
-    const refreshInterval = { value: 10000, pause: false };
-    const time = { from: 'now-1h', to: 'now' };
-    timefilter.setRefreshInterval(refreshInterval);
-    timefilter.setTime(time);
-    uiSettings.overrideLocalDefault(
-      UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS,
-      JSON.stringify(refreshInterval)
-    );
-    uiSettings.overrideLocalDefault(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS, JSON.stringify(time));
+    const { pause: pauseByDefault } = timefilter.getRefreshIntervalDefaults();
+    if (pauseByDefault) {
+      return;
+    }
+    /**
+     * We can't use timefilter.getRefreshIntervalUpdate$ last value,
+     * since it's not a BehaviorSubject. This means we need to wait for
+     * hash change because of angular's applyAsync
+     */
+    const onHashChange = () => {
+      const { value, pause } = timefilter.getRefreshInterval();
+      if (!value && pause) {
+        window.removeEventListener(HASH_CHANGE, onHashChange);
+        timefilter.setRefreshInterval({ value: 10000, pause: false });
+      }
+    };
+    window.addEventListener(HASH_CHANGE, onHashChange, false);
+    return () => window.removeEventListener(HASH_CHANGE, onHashChange);
   }
 
   private getExternalConfig() {
@@ -142,10 +179,18 @@ export class MonitoringPlugin
       ['showLicenseExpiration', monitoring.ui.show_license_expiration],
       ['showCgroupMetricsElasticsearch', monitoring.ui.container.elasticsearch.enabled],
       ['showCgroupMetricsLogstash', monitoring.ui.container.logstash.enabled],
+      ['renderReactApp', monitoring.ui.render_react_app],
     ];
   }
 
-  private registerAlertsAsync = async (plugins: MonitoringSetupPluginDependencies) => {
+  private async registerAlerts(
+    plugins: MonitoringSetupPluginDependencies,
+    config: MonitoringConfig
+  ) {
+    const {
+      triggersActionsUi: { ruleTypeRegistry },
+    } = plugins;
+
     const { createCpuUsageAlertType } = await import('./alerts/cpu_usage_alert');
     const { createMissingMonitoringDataAlertType } = await import(
       './alerts/missing_monitoring_data_alert'
@@ -157,30 +202,31 @@ export class MonitoringPlugin
     );
     const { createMemoryUsageAlertType } = await import('./alerts/memory_usage_alert');
     const { createCCRReadExceptionsAlertType } = await import('./alerts/ccr_read_exceptions_alert');
+    const { createLargeShardSizeAlertType } = await import('./alerts/large_shard_size_alert');
 
-    const {
-      triggersActionsUi: { alertTypeRegistry },
-    } = plugins;
-    alertTypeRegistry.register(createCpuUsageAlertType());
-    alertTypeRegistry.register(createDiskUsageAlertType());
-    alertTypeRegistry.register(createMemoryUsageAlertType());
-    alertTypeRegistry.register(createMissingMonitoringDataAlertType());
-    alertTypeRegistry.register(
+    ruleTypeRegistry.register(createCpuUsageAlertType(config));
+    ruleTypeRegistry.register(createDiskUsageAlertType(config));
+    ruleTypeRegistry.register(createMemoryUsageAlertType(config));
+    ruleTypeRegistry.register(createMissingMonitoringDataAlertType());
+    ruleTypeRegistry.register(
       createThreadPoolRejectionsAlertType(
-        ALERT_THREAD_POOL_SEARCH_REJECTIONS,
-        ALERT_DETAILS[ALERT_THREAD_POOL_SEARCH_REJECTIONS]
+        RULE_THREAD_POOL_SEARCH_REJECTIONS,
+        RULE_DETAILS[RULE_THREAD_POOL_SEARCH_REJECTIONS],
+        config
       )
     );
-    alertTypeRegistry.register(
+    ruleTypeRegistry.register(
       createThreadPoolRejectionsAlertType(
-        ALERT_THREAD_POOL_WRITE_REJECTIONS,
-        ALERT_DETAILS[ALERT_THREAD_POOL_WRITE_REJECTIONS]
+        RULE_THREAD_POOL_WRITE_REJECTIONS,
+        RULE_DETAILS[RULE_THREAD_POOL_WRITE_REJECTIONS],
+        config
       )
     );
-    alertTypeRegistry.register(createCCRReadExceptionsAlertType());
-    const legacyAlertTypes = createLegacyAlertTypes();
+    ruleTypeRegistry.register(createCCRReadExceptionsAlertType(config));
+    ruleTypeRegistry.register(createLargeShardSizeAlertType(config));
+    const legacyAlertTypes = createLegacyAlertTypes(config);
     for (const legacyAlertType of legacyAlertTypes) {
-      alertTypeRegistry.register(legacyAlertType);
+      ruleTypeRegistry.register(legacyAlertType);
     }
-  };
+  }
 }

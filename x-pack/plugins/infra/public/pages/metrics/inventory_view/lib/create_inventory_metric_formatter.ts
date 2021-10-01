@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
@@ -77,17 +78,16 @@ const METRIC_FORMATTERS: MetricFormatters = {
   },
 };
 
-export const createInventoryMetricFormatter = (metric: SnapshotMetricInput) => (
-  val: string | number
-) => {
-  if (SnapshotCustomMetricInputRT.is(metric)) {
-    const formatter = createFormatterForMetric(metric);
+export const createInventoryMetricFormatter =
+  (metric: SnapshotMetricInput) => (val: string | number) => {
+    if (SnapshotCustomMetricInputRT.is(metric)) {
+      const formatter = createFormatterForMetric(metric);
+      return formatter(val);
+    }
+    const metricFormatter = get(METRIC_FORMATTERS, metric.type, METRIC_FORMATTERS.count);
+    if (val == null) {
+      return '';
+    }
+    const formatter = createFormatter(metricFormatter.formatter, metricFormatter.template);
     return formatter(val);
-  }
-  const metricFormatter = get(METRIC_FORMATTERS, metric.type, METRIC_FORMATTERS.count);
-  if (val == null) {
-    return '';
-  }
-  const formatter = createFormatter(metricFormatter.formatter, metricFormatter.template);
-  return formatter(val);
-};
+  };

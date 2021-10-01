@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useContext } from 'react';
@@ -51,8 +52,8 @@ export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
     <EuiDescriptionList>
       <EuiDescriptionListTitle>
         {i18n.translate('xpack.uptime.monitorList.enabledAlerts.title', {
-          defaultMessage: 'Enabled alerts',
-          description: 'Alerts enabled for this monitor',
+          defaultMessage: 'Enabled rules',
+          description: 'Rules enabled for this monitor',
         })}
       </EuiDescriptionListTitle>
       <EuiDescriptionListDescription>
@@ -60,7 +61,7 @@ export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
           <EuiCallOut
             size="s"
             title={i18n.translate('xpack.uptime.monitorList.enabledAlerts.noAlert', {
-              defaultMessage: 'No alert is enabled for this monitor.',
+              defaultMessage: 'No rules are enabled for this monitor.',
             })}
           />
         )}

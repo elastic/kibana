@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteDefinitionParams } from '.';
+
+import type { RouteDefinitionParams } from './';
 
 /**
  * The default maximum value of from + size for searches to .kibana index. Since we cannot use scroll
@@ -43,15 +45,13 @@ export function defineKeyRotationRoutes({
     async (context, request, response) => {
       if (config.keyRotation.decryptionOnlyKeys.length === 0) {
         return response.badRequest({
-          body:
-            'Kibana is not configured to support encryption key rotation. Update `kibana.yml` to include `xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys` to rotate your encryption keys.',
+          body: 'Kibana is not configured to support encryption key rotation. Update `kibana.yml` to include `xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys` to rotate your encryption keys.',
         });
       }
 
       if (rotationInProgress) {
         return response.customError({
-          body:
-            'Encryption key rotation is in progress already. Please wait until it is completed and try again.',
+          body: 'Encryption key rotation is in progress already. Please wait until it is completed and try again.',
           statusCode: 429,
         });
       }

@@ -1,28 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as Rx from 'rxjs';
-import { SpacesService } from './spaces_service';
+
+import type { HttpServiceSetup, KibanaRequest, SavedObjectsRepository } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
-import {
-  KibanaRequest,
-  SavedObjectsErrorHelpers,
-  HttpServiceSetup,
-  SavedObjectsRepository,
-} from 'src/core/server';
+
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { getSpaceIdFromPath } from '../../common/lib/spaces_url_parser';
 import { spacesConfig } from '../lib/__fixtures__';
 import { SpacesClientService } from '../spaces_client';
+import { SpacesService } from './spaces_service';
 
 const createService = (serverBasePath: string = '') => {
   const spacesService = new SpacesService();
 
   const coreStart = coreMock.createStart();
 
-  const respositoryMock = ({
+  const respositoryMock = {
     get: jest.fn().mockImplementation((type, id) => {
       if (type === 'space' && id === 'foo') {
         return Promise.resolve({
@@ -45,7 +45,7 @@ const createService = (serverBasePath: string = '') => {
       }
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }),
-  } as unknown) as SavedObjectsRepository;
+  } as unknown as SavedObjectsRepository;
 
   coreStart.savedObjects.createInternalRepository.mockReturnValue(respositoryMock);
   coreStart.savedObjects.createScopedRepository.mockReturnValue(respositoryMock);

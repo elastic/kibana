@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Fs from 'fs';
@@ -48,14 +37,21 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   };
 
   const writeCoverage = (coverageJson: string) => {
-    if (!Fs.existsSync(coverageDir)) {
-      Fs.mkdirSync(coverageDir, { recursive: true });
+    // on CI we make hard link clone and run tests from kibana${process.env.CI_GROUP} root path
+    const re = new RegExp(`kibana${process.env.CI_GROUP}`, 'g');
+    const dir = process.env.CI ? coverageDir.replace(re, 'kibana') : coverageDir;
+
+    if (!Fs.existsSync(dir)) {
+      Fs.mkdirSync(dir, { recursive: true });
     }
+
     const id = coverageCounter++;
     const timestamp = Date.now();
-    const path = resolve(coverageDir, `${id}.${timestamp}.coverage.json`);
+    const path = resolve(dir, `${id}.${timestamp}.coverage.json`);
     log.info('writing coverage to', path);
-    Fs.writeFileSync(path, JSON.stringify(JSON.parse(coverageJson), null, 2));
+
+    const jsonString = process.env.CI ? coverageJson.replace(re, 'kibana') : coverageJson;
+    Fs.writeFileSync(path, JSON.stringify(JSON.parse(jsonString), null, 2));
   };
 
   const browserConfig: BrowserConfig = {

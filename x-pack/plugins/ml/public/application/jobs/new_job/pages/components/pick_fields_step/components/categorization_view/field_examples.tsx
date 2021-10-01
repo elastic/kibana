@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiText } from '@elastic/eui';
+import { EuiBasicTable, EuiCodeBlock } from '@elastic/eui';
 import { CategoryFieldExample } from '../../../../../../../../../common/types/categories';
 
 interface Props {
@@ -30,9 +31,14 @@ export const FieldExamples: FC<Props> = ({ fieldExamples }) => {
         }
       ),
       render: (example: any) => (
-        <EuiText size="s">
-          <code>{example}</code>
-        </EuiText>
+        <EuiCodeBlock
+          fontSize="s"
+          paddingSize="none"
+          transparentBackground
+          style={{ maxHeight: '200px' }} // Don't use overflowHeight as don't want to show the fullscreen button
+        >
+          {example}
+        </EuiCodeBlock>
       ),
     },
   ];

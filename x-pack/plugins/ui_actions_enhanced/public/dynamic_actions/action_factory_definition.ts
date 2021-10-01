@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
@@ -13,8 +14,6 @@ import {
 } from './types';
 import { LicenseType } from '../../../licensing/public';
 import {
-  TriggerContextMapping,
-  TriggerId,
   UiActionsActionDefinition as ActionDefinition,
   UiActionsPresentable as Presentable,
 } from '../../../../../src/plugins/ui_actions/public';
@@ -25,11 +24,8 @@ import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_ut
  */
 export interface ActionFactoryDefinition<
   Config extends BaseActionConfig = BaseActionConfig,
-  SupportedTriggers extends TriggerId = TriggerId,
-  FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
-    triggers: SupportedTriggers[];
-  },
-  ActionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
+  ExecutionContext extends object = object,
+  FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
 > extends Partial<Omit<Presentable<FactoryContext>, 'getHref'>>,
     Configurable<Config, FactoryContext>,
     PersistableStateDefinition<SerializedEvent> {
@@ -65,7 +61,7 @@ export interface ActionFactoryDefinition<
    */
   create(
     serializedAction: Omit<SerializedAction<Config>, 'factoryId'>
-  ): ActionDefinition<ActionContext>;
+  ): ActionDefinition<ExecutionContext>;
 
-  supportedTriggers(): SupportedTriggers[];
+  supportedTriggers(): string[];
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -12,6 +13,7 @@ import {
 } from '../../../../plugins/security_solution/common/constants';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { SIGNALS_TEMPLATE_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
+import { Signal } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -20,7 +22,7 @@ import {
   getIndexNameFromLoad,
   waitForIndexToPopulate,
 } from '../../utils';
-import { createUserAndRole } from '../roles_users_utils';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 interface CreateResponse {
   index: string;
@@ -33,7 +35,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const kbnClient = getService('kibanaServer');
-  const security = getService('security');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
@@ -47,16 +48,16 @@ export default ({ getService }: FtrProviderContext): void => {
       await createSignalsIndex(supertest);
 
       legacySignalsIndexName = getIndexNameFromLoad(
-        await esArchiver.load('signals/legacy_signals_index')
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/legacy_signals_index')
       );
       outdatedSignalsIndexName = getIndexNameFromLoad(
-        await esArchiver.load('signals/outdated_signals_index')
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
     });
 
     afterEach(async () => {
-      await esArchiver.unload('signals/outdated_signals_index');
-      await esArchiver.unload('signals/legacy_signals_index');
+      await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
+      await esArchiver.unload('x-pack/test/functional/es_archives/signals/legacy_signals_index');
       await deleteMigrations({
         kbnClient,
         ids: createdMigrations.filter((m) => m?.migration_id).map((m) => m.migration_id),
@@ -96,11 +97,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const [{ migration_index: newIndex }] = createResponses;
       await waitForIndexToPopulate(es, newIndex);
-      const { body: migrationResults } = await es.search({ index: newIndex });
+      const { body: migrationResults } = await es.search<{ signal: Signal }>({ index: newIndex });
 
       expect(migrationResults.hits.hits).length(1);
-      const migratedSignal = migrationResults.hits.hits[0]._source.signal;
-      expect(migratedSignal._meta.version).to.equal(SIGNALS_TEMPLATE_VERSION);
+      const migratedSignal = migrationResults.hits.hits[0]._source?.signal;
+      expect(migratedSignal?._meta?.version).to.equal(SIGNALS_TEMPLATE_VERSION);
     });
 
     it('specifying the signals alias itself is a bad request', async () => {
@@ -172,7 +173,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('rejects the request if the user does not have sufficient privileges', async () => {
-      await createUserAndRole(security, ROLES.t1_analyst);
+      await createUserAndRole(getService, ROLES.t1_analyst);
 
       await supertestWithoutAuth
         .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
@@ -180,6 +181,8 @@ export default ({ getService }: FtrProviderContext): void => {
         .auth(ROLES.t1_analyst, 'changeme')
         .send({ index: [legacySignalsIndexName] })
         .expect(400);
+
+      await deleteUserAndRole(getService, ROLES.t1_analyst);
     });
   });
 };

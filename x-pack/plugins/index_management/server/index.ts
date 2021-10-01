@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
 
 import { IndexMgmtServerPlugin } from './plugin';
 import { configSchema } from './config';
 
-export const plugin = (ctx: PluginInitializerContext) => new IndexMgmtServerPlugin(ctx);
+export const plugin = (context: PluginInitializerContext) => new IndexMgmtServerPlugin(context);
 
-export const config = {
+export const config: PluginConfigDescriptor = {
   schema: configSchema,
+  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
 };
 
 /** @public */

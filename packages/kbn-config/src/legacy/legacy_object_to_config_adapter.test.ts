@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { LegacyObjectToConfigAdapter } from './legacy_object_to_config_adapter';
@@ -75,59 +64,6 @@ describe('#get', () => {
     });
 
     expect(configAdapter.get('logging')).toMatchSnapshot();
-  });
-
-  test('correctly handles server config.', () => {
-    const configAdapter = new LegacyObjectToConfigAdapter({
-      server: {
-        name: 'kibana-hostname',
-        autoListen: true,
-        basePath: '/abc',
-        cors: false,
-        customResponseHeaders: { 'custom-header': 'custom-value' },
-        host: 'host',
-        maxPayloadBytes: 1000,
-        keepaliveTimeout: 5000,
-        socketTimeout: 2000,
-        port: 1234,
-        publicBaseUrl: 'https://myhost.com/abc',
-        rewriteBasePath: false,
-        ssl: { enabled: true, keyPassphrase: 'some-phrase', someNewValue: 'new' },
-        compression: { enabled: true },
-        someNotSupportedValue: 'val',
-        xsrf: {
-          disableProtection: false,
-          allowlist: [],
-        },
-      },
-    });
-
-    const configAdapterWithDisabledSSL = new LegacyObjectToConfigAdapter({
-      server: {
-        name: 'kibana-hostname',
-        autoListen: true,
-        basePath: '/abc',
-        cors: false,
-        customResponseHeaders: { 'custom-header': 'custom-value' },
-        host: 'host',
-        maxPayloadBytes: 1000,
-        keepaliveTimeout: 5000,
-        socketTimeout: 2000,
-        port: 1234,
-        publicBaseUrl: 'http://myhost.com/abc',
-        rewriteBasePath: false,
-        ssl: { enabled: false, certificate: 'cert', key: 'key' },
-        compression: { enabled: true },
-        someNotSupportedValue: 'val',
-        xsrf: {
-          disableProtection: false,
-          allowlist: [],
-        },
-      },
-    });
-
-    expect(configAdapter.get('server')).toMatchSnapshot('default');
-    expect(configAdapterWithDisabledSSL.get('server')).toMatchSnapshot('disabled ssl');
   });
 });
 

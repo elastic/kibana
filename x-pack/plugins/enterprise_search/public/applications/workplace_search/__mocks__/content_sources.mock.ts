@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { mergeServerAndStaticData } from '../views/content_sources/sources_logic';
+import { groups } from './groups.mock';
+
 import { staticSourceData } from '../views/content_sources/source_data';
+import { mergeServerAndStaticData } from '../views/content_sources/sources_logic';
 
 export const contentSources = [
   {
@@ -18,13 +21,15 @@ export const contentSources = [
     name: 'source',
     documentCount: '123',
     isFederatedSource: false,
-    errorReason: 0,
+    errorReason: null,
     allowsReauth: true,
     boost: 1,
+    activities: [],
+    isOauth1: false,
   },
   {
     id: '124',
-    serviceType: 'jira',
+    serviceType: 'jira_cloud',
     searchable: true,
     supportedByLicense: true,
     status: 'synced',
@@ -32,9 +37,91 @@ export const contentSources = [
     name: 'Jira',
     documentCount: '34234',
     isFederatedSource: false,
-    errorReason: 0,
+    errorReason: null,
     allowsReauth: true,
     boost: 0.5,
+    activities: [],
+    isOauth1: true,
+  },
+];
+
+const defaultIndexing = {
+  enabled: true,
+  defaultAction: 'include',
+  rules: [],
+  schedule: {
+    intervals: [],
+    blocked: [],
+  },
+  features: {
+    contentExtraction: {
+      enabled: true,
+    },
+    thumbnails: {
+      enabled: true,
+    },
+  },
+};
+
+export const fullContentSources = [
+  {
+    ...contentSources[0],
+    activities: [
+      {
+        details: ['detail'],
+        event: 'this is an event',
+        time: '2021-01-20',
+        status: 'syncing',
+      },
+    ],
+    details: [
+      {
+        title: 'My Thing',
+        description: 'This is a thing.',
+      },
+    ],
+    summary: [
+      {
+        count: 1,
+        type: 'summary',
+      },
+    ],
+    indexing: defaultIndexing,
+    groups,
+    custom: false,
+    isIndexedSource: true,
+    areThumbnailsConfigEnabled: true,
+    accessToken: '123token',
+    urlField: 'myLink',
+    titleField: 'heading',
+    licenseSupportsPermissions: true,
+    serviceTypeSupportsPermissions: true,
+    indexPermissions: true,
+    hasPermissions: true,
+    urlFieldIsLinkable: true,
+    createdAt: '2021-01-20',
+    serviceName: 'myService',
+  },
+  {
+    ...contentSources[1],
+    activities: [],
+    details: [],
+    summary: [],
+    groups: [],
+    indexing: defaultIndexing,
+    custom: true,
+    isIndexedSource: true,
+    areThumbnailsConfigEnabled: true,
+    accessToken: '123token',
+    urlField: 'url',
+    titleField: 'title',
+    licenseSupportsPermissions: false,
+    serviceTypeSupportsPermissions: false,
+    indexPermissions: false,
+    hasPermissions: false,
+    urlFieldIsLinkable: false,
+    createdAt: '2021-01-20',
+    serviceName: 'custom',
   },
 ];
 
@@ -218,6 +305,7 @@ export const sourceConfigData = {
   privateSourcesEnabled: false,
   categories: ['wiki', 'atlassian', 'intranet'],
   configuredFields: {
+    isOauth1: false,
     clientId: 'CyztADsSECRETCSAUCEh1a',
     clientSecret: 'GSjJxqSECRETCSAUCEksHk',
     baseUrl: 'https://mine.atlassian.net',
@@ -226,3 +314,63 @@ export const sourceConfigData = {
     consumerKey: 'elastic_enterprise_search_123',
   },
 };
+
+export const oauthApplication = {
+  name: 'app',
+  uid: '123uid123',
+  secret: 'shhhhhhhhh',
+  redirectUri: 'https://foo',
+  confidential: false,
+  nativeRedirectUri: 'https://bar',
+};
+
+export const exampleResult = {
+  sourceName: 'source',
+  searchResultConfig: {
+    titleField: 'otherTitle',
+    subtitleField: 'otherSubtitle',
+    urlField: 'myLink',
+    urlFieldIsLinkable: true,
+    color: '#e3e3e3',
+    descriptionField: 'about',
+    typeField: 'otherType',
+    mediaTypeField: 'otherMediaType',
+    createdByField: 'otherCreatedBy',
+    updatedByField: 'otherUpdatedBy',
+    detailFields: [
+      { fieldName: 'cats', label: 'Felines' },
+      { fieldName: 'dogs', label: 'Canines' },
+    ],
+  },
+  exampleDocuments: [
+    {
+      myLink: 'http://foo',
+      otherTitle: 'foo',
+      content_source_id: '60e85e7ea2564c265a88a4f0',
+      external_id: 'doc-60e85eb7a2564c937a88a4f3',
+      last_updated: '2021-07-09T14:35:35+00:00',
+      updated_at: '2021-07-09T14:35:35+00:00',
+      source: 'custom',
+    },
+  ],
+  schemaFields: {},
+};
+
+export const mostRecentIndexJob = {
+  isActive: true,
+  hasErrors: true,
+  percentageComplete: 50,
+  activeReindexJobId: '123',
+  numDocumentsWithErrors: 1,
+};
+
+export const contentItems = [
+  {
+    id: '1234',
+    last_updated: '2021-01-21',
+  },
+  {
+    id: '1235',
+    last_updated: '2021-01-20',
+  },
+];

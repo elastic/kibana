@@ -1,23 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
+import { ObservableLike, UnwrapObservable, UnwrapPromiseOrReturn } from '@kbn/utility-types';
 
 /**
  * This can convert a type into a known Expression string representation of
@@ -34,9 +23,9 @@ export type TypeToString<T> = KnownTypeToString<T> | UnmappedTypeStrings;
  * the `type` key as a string literal type for it.
  */
 // prettier-ignore
-export type KnownTypeToString<T> = 
-  T extends string ? 'string' : 
-  T extends boolean ? 'boolean' : 
+export type KnownTypeToString<T> =
+  T extends string ? 'string' :
+  T extends boolean ? 'boolean' :
   T extends number ? 'number' :
   T extends null ? 'null' :
   T extends { type: string } ? T['type'] :
@@ -47,7 +36,9 @@ export type KnownTypeToString<T> =
  *
  * `someArgument: Promise<boolean | string>` results in `types: ['boolean', 'string']`
  */
-export type TypeString<T> = KnownTypeToString<UnwrapPromiseOrReturn<T>>;
+export type TypeString<T> = KnownTypeToString<
+  T extends ObservableLike<any> ? UnwrapObservable<T> : UnwrapPromiseOrReturn<T>
+>;
 
 /**
  * Types used in Expressions that don't map to a primitive cleanly:

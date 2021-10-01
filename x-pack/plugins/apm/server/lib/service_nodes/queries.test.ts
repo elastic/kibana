@@ -1,12 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getServiceNodes } from './';
@@ -16,6 +12,7 @@ import {
 } from '../../utils/test_helpers';
 import { getServiceNodeMetadata } from '../services/get_service_node_metadata';
 import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 describe('service node queries', () => {
   let mock: SearchParamsMock;
@@ -26,7 +23,14 @@ describe('service node queries', () => {
 
   it('fetches services nodes', async () => {
     mock = await inspectSearchParams((setup) =>
-      getServiceNodes({ setup, serviceName: 'foo' })
+      getServiceNodes({
+        setup,
+        serviceName: 'foo',
+        kuery: '',
+        environment: ENVIRONMENT_ALL.value,
+        start: 0,
+        end: 50000,
+      })
     );
 
     expect(mock.params).toMatchSnapshot();
@@ -38,6 +42,9 @@ describe('service node queries', () => {
         setup,
         serviceName: 'foo',
         serviceNodeName: 'bar',
+        kuery: '',
+        start: 0,
+        end: 50000,
       })
     );
 
@@ -50,6 +57,9 @@ describe('service node queries', () => {
         setup,
         serviceName: 'foo',
         serviceNodeName: SERVICE_NODE_NAME_MISSING,
+        kuery: '',
+        start: 0,
+        end: 50000,
       })
     );
 

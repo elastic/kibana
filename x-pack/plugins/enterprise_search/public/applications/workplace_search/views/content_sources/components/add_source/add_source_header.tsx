@@ -1,14 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
 import { startCase } from 'lodash';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiTextColor,
+} from '@elastic/eui';
 
 import { SourceIcon } from '../../../../components/shared/source_icon';
 
@@ -35,23 +43,22 @@ export const AddSourceHeader: React.FC<AddSourceHeaderProps> = ({
         <EuiFlexItem grow={false}>
           <SourceIcon
             serviceType={serviceType}
-            fullBleed={true}
             name={name}
             className="adding-a-source__icon"
+            size="xxl"
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText size="m">
-            <h3 className="adding-a-source__name">
+          <EuiTitle size="s">
+            <h1>
               <EuiTextColor color="default">{name}</EuiTextColor>
-            </h3>
-          </EuiText>
+            </h1>
+          </EuiTitle>
           <EuiText size="xs" color="subdued">
             {categories.map((category) => startCase(category)).join(', ')}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="xl" />
     </>
   );
 };

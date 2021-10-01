@@ -1,31 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { keyBy } from 'lodash';
+
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'accountSetting']);
   const log = getService('log');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('useremail', function () {
     before(async () => {
-      await esArchiver.load('security/discover');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/security/discover'
+      );
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchUsers();
     });
 
     it('should add new user', async function () {
-      await PageObjects.security.addUser({
+      await PageObjects.security.createUser({
         username: 'newuser',
         password: 'changeme',
-        confirmPassword: 'changeme',
-        fullname: 'newuserFirst newuserLast',
+        confirm_password: 'changeme',
+        full_name: 'newuserFirst newuserLast',
         email: 'newuser@myEmail.com',
-        save: true,
         roles: ['kibana_admin', 'superuser'],
       });
       const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
@@ -55,6 +58,9 @@ export default function ({ getService, getPageObjects }) {
 
     after(async function () {
       await PageObjects.security.forceLogout();
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/security/discover'
+      );
     });
   });
 }

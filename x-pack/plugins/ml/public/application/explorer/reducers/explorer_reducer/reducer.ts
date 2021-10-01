@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { formatHumanReadableDateTime } from '../../../../../common/util/date_utils';
@@ -19,7 +20,7 @@ import {
 import { checkSelectedCells } from './check_selected_cells';
 import { clearInfluencerFilterSettings } from './clear_influencer_filter_settings';
 import { jobSelectionChange } from './job_selection_change';
-import { ExplorerState } from './state';
+import { ExplorerState, getExplorerDefaultState } from './state';
 import { setInfluencerFilterSettings } from './set_influencer_filter_settings';
 import { setKqlQueryBarPlaceholder } from './set_kql_query_bar_placeholder';
 import { getTimeBoundsFromSelection } from '../../hooks/use_selected_cells';
@@ -30,6 +31,10 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
   let nextState: ExplorerState;
 
   switch (type) {
+    case EXPLORER_ACTION.CLEAR_EXPLORER_DATA:
+      nextState = getExplorerDefaultState();
+      break;
+
     case EXPLORER_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS:
       nextState = clearInfluencerFilterSettings(state);
       break;
@@ -46,6 +51,14 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
 
     case EXPLORER_ACTION.JOB_SELECTION_CHANGE:
       nextState = jobSelectionChange(state, payload);
+      break;
+
+    case EXPLORER_ACTION.SET_CHARTS_DATA_LOADING:
+      nextState = {
+        ...state,
+        anomalyChartsDataLoading: true,
+        chartsData: getDefaultChartsData(),
+      };
       break;
 
     case EXPLORER_ACTION.SET_CHARTS:
@@ -136,6 +149,22 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       };
       break;
 
+    case EXPLORER_ACTION.SET_SWIM_LANE_SEVERITY:
+      nextState = {
+        ...state,
+        // reset current page on the page size change
+        viewByFromPage: 1,
+        swimLaneSeverity: payload,
+      };
+      break;
+
+    case EXPLORER_ACTION.SET_SHOW_CHARTS:
+      nextState = {
+        ...state,
+        showCharts: payload,
+      };
+      break;
+
     default:
       nextState = state;
   }
@@ -168,7 +197,9 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
     ...nextState,
     swimlaneBucketInterval,
     viewByLoadedForTimeFormatted: timeRange
-      ? formatHumanReadableDateTime(timeRange.earliestMs)
+      ? `${formatHumanReadableDateTime(timeRange.earliestMs)} - ${formatHumanReadableDateTime(
+          timeRange.latestMs
+        )}`
       : null,
     viewBySwimlaneFieldName,
     viewBySwimlaneOptions,

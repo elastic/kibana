@@ -1,26 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
+import { AppState } from '../../state';
 
 /**
  * NOTE: This variable name MUST start with 'mock*' in order for
  * Jest to accept its use within a jest.mock()
  */
-export const mockStore = {
-  overviewFilters: {
-    filters: {
-      locations: [],
-      ports: [],
-      schemes: [],
-      tags: [],
-    },
-    errors: [],
-    loading: false,
-  },
+export const mockState: AppState = {
   dynamicSettings: {
     settings: DYNAMIC_SETTINGS_DEFAULTS,
     loading: false,
@@ -30,15 +22,6 @@ export const mockStore = {
     monitorLocationsList: new Map(),
     loading: false,
     errors: [],
-  },
-  snapshot: {
-    count: {
-      up: 2,
-      down: 0,
-      total: 2,
-    },
-    errors: [],
-    loading: false,
   },
   ui: {
     alertFlyoutVisible: false,
@@ -51,11 +34,6 @@ export const mockStore = {
   monitorStatus: {
     status: null,
     loading: false,
-  },
-  indexPattern: {
-    index_pattern: null,
-    loading: false,
-    errors: [],
   },
   ping: {
     pingHistogram: null,
@@ -102,17 +80,22 @@ export const mockStore = {
     },
   },
   certificates: {
-    certs: {
-      data: null,
-      loading: false,
-    },
+    total: 0,
   },
   selectedFilters: null,
   alerts: {
     alertDeletion: { data: null, loading: false },
     anomalyAlert: { data: null, loading: false },
+    anomalyAlertDeletion: { data: null, loading: false },
     alerts: { data: null, loading: false },
     connectors: { data: null, loading: false },
     newAlert: { data: null, loading: false },
+  },
+  journeys: {},
+  networkEvents: {},
+  synthetics: {
+    blocks: {},
+    cacheSize: 0,
+    hitCount: [],
   },
 };

@@ -1,23 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Pager, EuiSearchBar } from '@elastic/eui';
 
 import { createSelector } from 'reselect';
 import * as qs from 'query-string';
 import { indexStatusLabels } from '../../lib/index_status_labels';
+import { isHiddenIndex, isSystemIndex } from '../../lib/indices';
 import { sortTable } from '../../services';
+import { extensionsService } from './extension_service';
 
-// Temporary hack to provide the extensionsService instance to this file.
-// TODO: Refactor and export all the app selectors through the app dependencies context
-
-let extensionsService;
-export const setExtensionsService = (_extensionsService) => {
-  extensionsService = _extensionsService;
-};
-// End hack
+export { extensionsService };
 
 export const getDetailPanelData = (state) => state.detailPanel.data;
 export const getDetailPanelError = (state) => state.detailPanel.error;
@@ -43,14 +40,14 @@ export const getIndexStatusByIndexName = (state, indexName) => {
   const { status } = indices[indexName] || {};
   return status;
 };
-export const getIsSystemIndexByName = (indexNames) => {
+export const getIsSystemIndexByName = (indexNames, allIndices) => {
   return indexNames.reduce((obj, indexName) => {
-    obj[indexName] = indexName.startsWith('.');
+    obj[indexName] = isSystemIndex(allIndices[indexName]);
     return obj;
   }, {});
 };
-export const hasSystemIndex = (indexNames) => {
-  return Boolean(indexNames.find((indexName) => indexName.startsWith('.')));
+export const hasSystemIndex = (indexNames, allIndices) => {
+  return indexNames.some((indexName) => isSystemIndex(allIndices[indexName]));
 };
 
 const defaultFilterFields = ['name'];
@@ -94,9 +91,7 @@ export const getFilteredIndices = createSelector(
     const includeHidden = includeHiddenParam === 'true';
     const filteredIndices = includeHidden
       ? indexArray
-      : indexArray.filter((index) => {
-          return !(index.name + '').startsWith('.') && !index.hidden;
-        });
+      : indexArray.filter((index) => !isHiddenIndex(index));
     const filter = tableState.filter || EuiSearchBar.Query.MATCH_ALL;
     return EuiSearchBar.Query.execute(filter, filteredIndices, {
       defaultFields: defaultFilterFields,

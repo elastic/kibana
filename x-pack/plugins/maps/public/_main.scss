@@ -1,17 +1,13 @@
-@import '../../../../src/core/public/variables';
+@import '../../../../src/core/public/mixins';
 
 // sass-lint:disable no-ids
 #maps-plugin {
+  @include kibanaFullBodyHeight();
+
   display: flex;
   flex-direction: column;
-  height: calc(100vh - #{$kbnHeaderOffset});
   width: 100%;
   overflow: hidden;
-}
-
-.mapFullScreen {
-  // sass-lint:disable no-important
-  height: 100vh !important;
 }
 
 #react-maps-root {

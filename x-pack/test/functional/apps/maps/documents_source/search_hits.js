@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -52,7 +53,7 @@ export default function ({ getPageObjects, getService }) {
     describe('inspector', () => {
       it('should register elasticsearch request in inspector', async () => {
         const hits = await PageObjects.maps.getHits();
-        expect(hits).to.equal('6');
+        expect(hits).to.equal('5');
       });
     });
 
@@ -73,7 +74,7 @@ export default function ({ getPageObjects, getService }) {
         const requestStats = await inspector.getTableData();
         const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
         await inspector.close();
-        expect(hits).to.equal('3');
+        expect(hits).to.equal('2');
       });
 
       it('should re-fetch query when "refresh" is clicked', async () => {

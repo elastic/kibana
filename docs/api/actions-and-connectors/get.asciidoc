@@ -1,0 +1,56 @@
+[[get-connector-api]]
+=== Get connector API
+++++
+<titleabbrev>Get connector</titleabbrev>
+++++
+
+Retrieves a connector by ID.
+
+[[get-connector-api-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/actions/connector/<id>`
+
+`GET <kibana host>:<port>/s/<space_id>/api/actions/connector/<id>`
+
+[[get-connector-api-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The ID of the connector.
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[get-connector-api-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[get-connector-api-example]]
+==== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/actions/connector/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "id": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad",
+  "connector_type_id": ".index",
+  "name": "my-connector",
+  "config": {
+    "index": "test-index",
+    "refresh": false,
+    "executionTimeField": null
+  },
+  "is_preconfigured": false,
+  "is_missing_secrets": false
+}
+--------------------------------------------------

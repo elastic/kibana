@@ -1,42 +1,50 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { CoreSetup } from 'kibana/public';
 import { getUrlIdFromGotoRoute, getUrlPath, GOTO_PREFIX } from '../../common/short_url_routes';
+import {
+  LEGACY_SHORT_URL_LOCATOR_ID,
+  LegacyShortUrlLocatorParams,
+} from '../../common/url_service/locators/legacy_short_url_locator';
+import type { UrlService, ShortUrlData } from '../../common/url_service';
 
-export const createShortUrlRedirectApp = (core: CoreSetup, location: Location) => ({
+export const createShortUrlRedirectApp = (
+  core: CoreSetup,
+  location: Location,
+  urlService: UrlService
+) => ({
   id: 'short_url_redirect',
   appRoute: GOTO_PREFIX,
   chromeless: true,
   title: 'Short URL Redirect',
   async mount() {
     const urlId = getUrlIdFromGotoRoute(location.pathname);
+    if (!urlId) throw new Error('Url id not present in path');
 
-    if (!urlId) {
-      throw new Error('Url id not present in path');
+    const response = await core.http.get<ShortUrlData>(getUrlPath(urlId));
+    const locator = urlService.locators.get(response.locator.id);
+
+    if (!locator) throw new Error(`Locator [id = ${response.locator.id}] not found.`);
+
+    if (response.locator.id !== LEGACY_SHORT_URL_LOCATOR_ID) {
+      await locator.navigate(response.locator.state, { replace: true });
+      return () => {};
     }
 
-    const response = await core.http.get<{ url: string }>(getUrlPath(urlId));
-    const redirectUrl = response.url;
-    const { hashUrl } = await import('../../../kibana_utils/public');
-    const hashedUrl = hashUrl(redirectUrl);
-    const url = core.http.basePath.prepend(hashedUrl);
+    let redirectUrl = (response.locator.state as LegacyShortUrlLocatorParams).url;
+    const storeInSessionStorage = core.uiSettings.get('state:storeInSessionStorage');
+    if (storeInSessionStorage) {
+      const { hashUrl } = await import('../../../kibana_utils/public');
+      redirectUrl = hashUrl(redirectUrl);
+    }
+
+    const url = core.http.basePath.prepend(redirectUrl);
 
     location.href = url;
 

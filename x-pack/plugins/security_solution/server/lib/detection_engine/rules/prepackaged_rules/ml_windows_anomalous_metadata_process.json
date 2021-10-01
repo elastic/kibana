@@ -9,8 +9,11 @@
   ],
   "from": "now-45m",
   "interval": "15m",
-  "license": "Elastic License",
-  "machine_learning_job_id": "windows_rare_metadata_process",
+  "license": "Elastic License v2",
+  "machine_learning_job_id": [
+    "windows_rare_metadata_process",
+    "v2_windows_rare_metadata_process"
+  ],
   "name": "Unusual Windows Process Calling the Metadata Service",
   "risk_score": 21,
   "rule_id": "abae61a8-c560-4dbd-acca-1e1438bff36b",
@@ -23,5 +26,5 @@
     "ML"
   ],
   "type": "machine_learning",
-  "version": 1
+  "version": 3
 }

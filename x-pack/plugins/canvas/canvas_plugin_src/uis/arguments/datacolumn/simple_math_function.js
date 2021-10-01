@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -11,7 +12,7 @@ import { ArgumentStrings } from '../../../../i18n';
 
 const { DataColumn: strings } = ArgumentStrings;
 
-export const SimpleMathFunction = ({ onChange, value, inputRef, onlymath }) => {
+export const SimpleMathFunction = ({ onChange, value, onlymath }) => {
   const options = [
     { text: strings.getOptionAverage(), value: 'mean' },
     { text: strings.getOptionCount(), value: 'size' },
@@ -28,15 +29,12 @@ export const SimpleMathFunction = ({ onChange, value, inputRef, onlymath }) => {
     options.unshift({ text: strings.getOptionValue(), value: '' });
   }
 
-  return (
-    <EuiSelect compressed options={options} inputRef={inputRef} value={value} onChange={onChange} />
-  );
+  return <EuiSelect compressed options={options} value={value} onChange={onChange} />;
 };
 
 SimpleMathFunction.propTypes = {
   onChange: PropTypes.func,
   value: PropTypes.string,
-  inputRef: PropTypes.func,
   onlymath: PropTypes.bool,
 };
 

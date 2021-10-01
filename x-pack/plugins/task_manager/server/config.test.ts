@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { configSchema } from './config';
 
 describe('config validation', () => {
@@ -11,11 +13,19 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "enabled": true,
+        "ephemeral_tasks": Object {
+          "enabled": false,
+          "request_capacity": 10,
+        },
         "index": ".kibana_task_manager",
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
         "monitored_aggregated_stats_refresh_rate": 60000,
+        "monitored_stats_health_verbose_log": Object {
+          "enabled": false,
+          "warn_delayed_task_start_in_seconds": 60,
+        },
         "monitored_stats_required_freshness": 4000,
         "monitored_stats_running_average_window": 50,
         "monitored_task_execution_thresholds": Object {
@@ -27,6 +37,10 @@ describe('config validation', () => {
         },
         "poll_interval": 3000,
         "request_capacity": 1000,
+        "unsafe": Object {
+          "exclude_task_types": Array [],
+        },
+        "version_conflict_threshold": 80,
       }
     `);
   });
@@ -58,11 +72,19 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "enabled": true,
+        "ephemeral_tasks": Object {
+          "enabled": false,
+          "request_capacity": 10,
+        },
         "index": ".kibana_task_manager",
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
         "monitored_aggregated_stats_refresh_rate": 60000,
+        "monitored_stats_health_verbose_log": Object {
+          "enabled": false,
+          "warn_delayed_task_start_in_seconds": 60,
+        },
         "monitored_stats_required_freshness": 4000,
         "monitored_stats_running_average_window": 50,
         "monitored_task_execution_thresholds": Object {
@@ -74,6 +96,10 @@ describe('config validation', () => {
         },
         "poll_interval": 3000,
         "request_capacity": 1000,
+        "unsafe": Object {
+          "exclude_task_types": Array [],
+        },
+        "version_conflict_threshold": 80,
       }
     `);
   });
@@ -92,11 +118,19 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "enabled": true,
+        "ephemeral_tasks": Object {
+          "enabled": false,
+          "request_capacity": 10,
+        },
         "index": ".kibana_task_manager",
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
         "monitored_aggregated_stats_refresh_rate": 60000,
+        "monitored_stats_health_verbose_log": Object {
+          "enabled": false,
+          "warn_delayed_task_start_in_seconds": 60,
+        },
         "monitored_stats_required_freshness": 4000,
         "monitored_stats_running_average_window": 50,
         "monitored_task_execution_thresholds": Object {
@@ -113,6 +147,10 @@ describe('config validation', () => {
         },
         "poll_interval": 3000,
         "request_capacity": 1000,
+        "unsafe": Object {
+          "exclude_task_types": Array [],
+        },
+        "version_conflict_threshold": 80,
       }
     `);
   });

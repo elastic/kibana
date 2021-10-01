@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -52,6 +53,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
                 catalogueId !== 'ml' &&
                 catalogueId !== 'ml_file_data_visualizer' &&
                 catalogueId !== 'monitoring' &&
+                catalogueId !== 'osquery' &&
                 !esFeatureExceptions.includes(catalogueId)
             );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
@@ -73,6 +75,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               'appSearch',
               'workplaceSearch',
               'spaces',
+              'osquery',
               ...esFeatureExceptions,
             ];
             const expected = mapValues(

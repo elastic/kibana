@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import moment from 'moment';
@@ -28,12 +17,20 @@ jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
     services: {
       http: { basePath: { prepend: jest.fn((path: string) => (path ? path : 'path')) } },
       data: { indexPatterns: {} },
+      share: { url: { locators: { get: () => ({ useUrl: () => '' }) } } },
       uiSettings: { get: jest.fn() },
+      docLinks: {
+        links: {
+          kibana: 'kibana_docs_url',
+        },
+      },
     },
   }),
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),
+  overviewPageActions: jest.fn().mockReturnValue([]),
   OverviewPageFooter: jest.fn().mockReturnValue(<></>),
-  OverviewPageHeader: jest.fn().mockReturnValue(<></>),
+  KibanaPageTemplate: jest.fn().mockReturnValue(<></>),
+  KibanaPageTemplateSolutionNavAvatar: jest.fn().mockReturnValue(<></>),
 }));
 
 jest.mock('../../lib/ui_metric', () => ({
@@ -89,9 +86,8 @@ const mockNewsFetchResult = {
 const mockSolutions = [
   {
     id: 'kibana',
-    title: 'Kibana',
-    subtitle: 'Visualize & analyze',
-    appDescriptions: ['Analyze data in dashboards'],
+    title: 'Analytics',
+    description: 'Description of Kibana',
     icon: 'logoKibana',
     path: 'kibana_landing_page',
     order: 1,
@@ -99,9 +95,7 @@ const mockSolutions = [
   {
     id: 'solution-2',
     title: 'Solution two',
-    subtitle: 'Subtitle for solution two',
     description: 'Description of solution two',
-    appDescriptions: ['Example use case'],
     icon: 'empty',
     path: 'path-to-solution-two',
     order: 2,
@@ -109,9 +103,7 @@ const mockSolutions = [
   {
     id: 'solution-3',
     title: 'Solution three',
-    subtitle: 'Subtitle for solution three',
     description: 'Description of solution three',
-    appDescriptions: ['Example use case'],
     icon: 'empty',
     path: 'path-to-solution-three',
     order: 3,
@@ -119,9 +111,7 @@ const mockSolutions = [
   {
     id: 'solution-4',
     title: 'Solution four',
-    subtitle: 'Subtitle for solution four',
     description: 'Description of solution four',
-    appDescriptions: ['Example use case'],
     icon: 'empty',
     path: 'path-to-solution-four',
     order: 4,

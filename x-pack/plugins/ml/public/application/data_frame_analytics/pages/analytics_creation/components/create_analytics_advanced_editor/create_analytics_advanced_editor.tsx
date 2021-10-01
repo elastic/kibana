@@ -1,27 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useRef } from 'react';
-
-import {
-  EuiCallOut,
-  EuiCodeEditor,
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
-  EuiSpacer,
-  EuiSwitch,
-} from '@elastic/eui';
+import React, { FC, Fragment, useEffect, useMemo, useRef } from 'react';
+import { debounce } from 'lodash';
+import { EuiCallOut, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { XJsonMode } from '../../../../../../../shared_imports';
-
-const xJsonMode = new XJsonMode();
-
+import { CodeEditor } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { useNotifications } from '../../../../../contexts/kibana';
+import { ml } from '../../../../../services/ml_api_service';
+import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { CreateStep } from '../create_step';
 import { ANALYTICS_STEPS } from '../../page';
@@ -42,10 +35,32 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
   } = state.form;
 
   const forceInput = useRef<HTMLInputElement | null>(null);
+  const { toasts } = useNotifications();
 
   const onChange = (str: string) => {
     setAdvancedEditorRawString(str);
   };
+
+  const debouncedJobIdCheck = useMemo(
+    () =>
+      debounce(async () => {
+        try {
+          const results = await ml.dataFrameAnalytics.jobsExist([jobId], true);
+          setFormState({ jobIdExists: results[jobId].exists });
+        } catch (e) {
+          toasts.addDanger(
+            i18n.translate(
+              'xpack.ml.dataframe.analytics.create.advancedEditor.errorCheckingJobIdExists',
+              {
+                defaultMessage: 'The following error occurred checking if job id exists: {error}',
+                values: { error: extractErrorMessage(e) },
+              }
+            )
+          );
+        }
+      }, 400),
+    [jobId]
+  );
 
   // Temp effect to close the context menu popover on Clone button click
   useEffect(() => {
@@ -56,6 +71,18 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
     evt.initEvent('mouseup', true, true);
     forceInput.current.dispatchEvent(evt);
   }, []);
+
+  useEffect(() => {
+    if (jobIdValid === true) {
+      debouncedJobIdCheck();
+    } else if (typeof jobId === 'string' && jobId.trim() === '' && jobIdExists === true) {
+      setFormState({ jobIdExists: false });
+    }
+
+    return () => {
+      debouncedJobIdCheck.cancel();
+    };
+  }, [jobId]);
 
   return (
     <EuiForm className="mlDataFrameAnalyticsCreateForm">
@@ -117,22 +144,37 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
         )}
         style={{ maxWidth: '100%' }}
       >
-        <EuiCodeEditor
-          isReadOnly={isJobCreated}
-          mode={xJsonMode}
-          width="100%"
+        <CodeEditor
+          languageId={'json'}
+          height={500}
+          languageConfiguration={{
+            autoClosingPairs: [
+              {
+                open: '{',
+                close: '}',
+              },
+            ],
+          }}
           value={advancedEditorRawString}
           onChange={onChange}
-          setOptions={{
-            fontSize: '12px',
+          options={{
+            ariaLabel: i18n.translate(
+              'xpack.ml.dataframe.analytics.create.advancedEditor.codeEditorAriaLabel',
+              {
+                defaultMessage: 'Advanced analytics job editor',
+              }
+            ),
+            automaticLayout: true,
+            readOnly: isJobCreated,
+            fontSize: 12,
+            scrollBeyondLastLine: false,
+            quickSuggestions: true,
+            minimap: {
+              enabled: false,
+            },
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
           }}
-          theme="textmate"
-          aria-label={i18n.translate(
-            'xpack.ml.dataframe.analytics.create.advancedEditor.codeEditorAriaLabel',
-            {
-              defaultMessage: 'Advanced analytics job editor',
-            }
-          )}
         />
       </EuiFormRow>
       <EuiSpacer />

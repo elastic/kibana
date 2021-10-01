@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
-import { getInputIndex } from './get_input_output_index';
+import { getInputIndex, GetInputIndex } from './get_input_output_index';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
 describe('get_input_output_index', () => {
   let servicesMock: AlertServicesMock;
@@ -18,7 +20,7 @@ describe('get_input_output_index', () => {
   afterAll(() => {
     jest.resetAllMocks();
   });
-
+  let defaultProps: GetInputIndex;
   beforeEach(() => {
     servicesMock = alertsMock.createAlertServices();
     servicesMock.savedObjectsClient.get.mockImplementation(async (type: string, id: string) => ({
@@ -27,6 +29,14 @@ describe('get_input_output_index', () => {
       references: [],
       attributes: {},
     }));
+    defaultProps = {
+      services: servicesMock,
+      version: '8.0.0',
+      index: ['test-input-index-1'],
+      experimentalFeatures: {
+        ...allowedExperimentalValues,
+      },
+    };
   });
 
   describe('getInputOutputIndex', () => {
@@ -37,7 +47,7 @@ describe('get_input_output_index', () => {
         references: [],
         attributes: {},
       }));
-      const inputIndex = await getInputIndex(servicesMock, '8.0.0', ['test-input-index-1']);
+      const inputIndex = await getInputIndex(defaultProps);
       expect(inputIndex).toEqual(['test-input-index-1']);
     });
 
@@ -50,7 +60,10 @@ describe('get_input_output_index', () => {
           [DEFAULT_INDEX_KEY]: ['configured-index-1', 'configured-index-2'],
         },
       }));
-      const inputIndex = await getInputIndex(servicesMock, '8.0.0', undefined);
+      const inputIndex = await getInputIndex({
+        ...defaultProps,
+        index: undefined,
+      });
       expect(inputIndex).toEqual(['configured-index-1', 'configured-index-2']);
     });
 
@@ -63,7 +76,10 @@ describe('get_input_output_index', () => {
           [DEFAULT_INDEX_KEY]: ['configured-index-1', 'configured-index-2'],
         },
       }));
-      const inputIndex = await getInputIndex(servicesMock, '8.0.0', null);
+      const inputIndex = await getInputIndex({
+        ...defaultProps,
+        index: null,
+      });
       expect(inputIndex).toEqual(['configured-index-1', 'configured-index-2']);
     });
 
@@ -76,7 +92,26 @@ describe('get_input_output_index', () => {
           [DEFAULT_INDEX_KEY]: null,
         },
       }));
-      const inputIndex = await getInputIndex(servicesMock, '8.0.0', null);
+      const inputIndex = await getInputIndex({
+        ...defaultProps,
+        index: null,
+      });
+      expect(inputIndex).toEqual(DEFAULT_INDEX_PATTERN);
+    });
+
+    test('Returns a saved object inputIndex default along with experimental features when uebaEnabled=true', async () => {
+      servicesMock.savedObjectsClient.get.mockImplementation(async (type: string, id: string) => ({
+        id,
+        type,
+        references: [],
+        attributes: {
+          [DEFAULT_INDEX_KEY]: null,
+        },
+      }));
+      const inputIndex = await getInputIndex({
+        ...defaultProps,
+        index: null,
+      });
       expect(inputIndex).toEqual(DEFAULT_INDEX_PATTERN);
     });
 
@@ -89,17 +124,26 @@ describe('get_input_output_index', () => {
           [DEFAULT_INDEX_KEY]: null,
         },
       }));
-      const inputIndex = await getInputIndex(servicesMock, '8.0.0', undefined);
+      const inputIndex = await getInputIndex({
+        ...defaultProps,
+        index: undefined,
+      });
       expect(inputIndex).toEqual(DEFAULT_INDEX_PATTERN);
     });
 
     test('Returns a saved object inputIndex default from constants if both passed in inputIndex and configuration attributes are missing and the index is undefined', async () => {
-      const inputIndex = await getInputIndex(servicesMock, '8.0.0', undefined);
+      const inputIndex = await getInputIndex({
+        ...defaultProps,
+        index: undefined,
+      });
       expect(inputIndex).toEqual(DEFAULT_INDEX_PATTERN);
     });
 
     test('Returns a saved object inputIndex default from constants if both passed in inputIndex and configuration attributes are missing and the index is null', async () => {
-      const inputIndex = await getInputIndex(servicesMock, '8.0.0', null);
+      const inputIndex = await getInputIndex({
+        ...defaultProps,
+        index: null,
+      });
       expect(inputIndex).toEqual(DEFAULT_INDEX_PATTERN);
     });
   });

@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   Axis,
   BarSeries,
   Chart,
@@ -46,10 +47,10 @@ export function ChartPreview({
   const yMax = Math.max(...values, threshold * 1.2);
 
   const style = {
-    fill: theme.eui.euiColorVis9,
+    fill: theme.eui.euiColorVis2,
     line: {
       strokeWidth: 2,
-      stroke: theme.eui.euiColorVis9,
+      stroke: theme.eui.euiColorVis2,
       opacity: 1,
     },
     opacity: thresholdOpacity,
@@ -73,7 +74,7 @@ export function ChartPreview({
         <Settings tooltip="none" />
         <LineAnnotation
           dataValues={[{ dataValue: threshold }]}
-          domainType={AnnotationDomainTypes.YDomain}
+          domainType={AnnotationDomainType.YDomain}
           id="chart_preview_line_annotation"
           markerPosition="left"
           style={style}

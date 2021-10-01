@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ServerExtType, Server } from '@hapi/hapi';
@@ -99,7 +88,7 @@ export class LegacyLoggingServer {
     // We set `ops.interval` to max allowed number and `ops` filter to value
     // that doesn't exist to avoid logging of ops at all, if turned on it will be
     // logged by the "legacy" Kibana.
-    const { value: loggingConfig } = legacyLoggingConfigSchema.validate({
+    const loggingConfig = legacyLoggingConfigSchema.validate({
       ...legacyLoggingConfig,
       events: {
         ...legacyLoggingConfig.events,
@@ -107,7 +96,7 @@ export class LegacyLoggingServer {
       },
     });
 
-    setupLogging((this as unknown) as Server, loggingConfig, 2147483647);
+    setupLogging(this as unknown as Server, loggingConfig, 2147483647);
   }
 
   public register({ plugin: { register }, options }: PluginRegisterParams): Promise<void> {
@@ -123,7 +112,6 @@ export class LegacyLoggingServer {
         tags: [getLegacyLogLevel(level), ...context.split('.'), ...tags],
         timestamp: timestamp.getTime(),
       })
-      // @ts-expect-error @hapi/podium emit is actually an async function
       .catch((err) => {
         // eslint-disable-next-line no-console
         console.error('An unexpected error occurred while writing to the log:', err.stack);

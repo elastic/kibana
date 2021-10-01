@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -22,7 +11,8 @@ import { AggType, AggTypeConfig } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
 import { AggConfig } from '../agg_config';
 import { METRIC_TYPES } from './metric_agg_types';
-import { FieldTypes } from '../param_types';
+import { BaseParamType, FieldTypes } from '../param_types';
+import { AggGroupNames } from '../agg_groups';
 
 export interface IMetricAggConfig extends AggConfig {
   type: InstanceType<typeof MetricAggType>;
@@ -58,6 +48,14 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
   constructor(config: MetricAggTypeConfig<TMetricAggConfig>) {
     super(config);
 
+    this.params.push(
+      new BaseParamType({
+        name: 'timeShift',
+        type: 'string',
+        write: () => {},
+      }) as MetricAggParam<TMetricAggConfig>
+    );
+
     this.getValue =
       config.getValue ||
       ((agg, bucket) => {
@@ -80,6 +78,14 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
       });
 
     this.isScalable = config.isScalable || (() => false);
+
+    // split at this point if there are time shifts and this is the first metric
+    this.splitForTimeShift = (agg, aggs) =>
+      aggs.hasTimeShifts() &&
+      aggs.byType(AggGroupNames.Metrics)[0] === agg &&
+      !aggs
+        .byType(AggGroupNames.Buckets)
+        .some((bucketAgg) => bucketAgg.type.splitForTimeShift(bucketAgg, aggs));
   }
 }
 

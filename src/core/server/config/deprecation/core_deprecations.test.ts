@@ -1,80 +1,36 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { configDeprecationFactory, applyDeprecations } from '@kbn/config';
+import { getDeprecationsForGlobalSettings } from '../test_utils';
 import { coreDeprecationProvider } from './core_deprecations';
-
 const initialEnv = { ...process.env };
 
-const applyCoreDeprecations = (settings: Record<string, any> = {}) => {
-  const deprecations = coreDeprecationProvider(configDeprecationFactory);
-  const deprecationMessages: string[] = [];
-  const migrated = applyDeprecations(
-    settings,
-    deprecations.map((deprecation) => ({
-      deprecation,
-      path: '',
-    })),
-    (msg) => deprecationMessages.push(msg)
-  );
-  return {
-    messages: deprecationMessages,
-    migrated,
-  };
-};
+const applyCoreDeprecations = (settings?: Record<string, any>) =>
+  getDeprecationsForGlobalSettings({ provider: coreDeprecationProvider, settings });
 
 describe('core deprecations', () => {
   beforeEach(() => {
     process.env = { ...initialEnv };
   });
 
-  describe('configPath', () => {
-    it('logs a warning if CONFIG_PATH environ variable is set', () => {
-      process.env.CONFIG_PATH = 'somepath';
+  describe('kibanaPathConf', () => {
+    it('logs a warning if KIBANA_PATH_CONF environ variable is set', () => {
+      process.env.KIBANA_PATH_CONF = 'somepath';
       const { messages } = applyCoreDeprecations();
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "Environment variable CONFIG_PATH is deprecated. It has been replaced with KBN_PATH_CONF pointing to a config folder",
+          "Environment variable \\"KIBANA_PATH_CONF\\" is deprecated. It has been replaced with \\"KBN_PATH_CONF\\" pointing to a config folder",
         ]
       `);
     });
 
-    it('does not log a warning if CONFIG_PATH environ variable is unset', () => {
-      delete process.env.CONFIG_PATH;
-      const { messages } = applyCoreDeprecations();
-      expect(messages).toHaveLength(0);
-    });
-  });
-
-  describe('dataPath', () => {
-    it('logs a warning if DATA_PATH environ variable is set', () => {
-      process.env.DATA_PATH = 'somepath';
-      const { messages } = applyCoreDeprecations();
-      expect(messages).toMatchInlineSnapshot(`
-        Array [
-          "Environment variable \\"DATA_PATH\\" will be removed.  It has been replaced with kibana.yml setting \\"path.data\\"",
-        ]
-      `);
-    });
-
-    it('does not log a warning if DATA_PATH environ variable is unset', () => {
-      delete process.env.DATA_PATH;
+    it('does not log a warning if KIBANA_PATH_CONF environ variable is unset', () => {
+      delete process.env.KIBANA_PATH_CONF;
       const { messages } = applyCoreDeprecations();
       expect(messages).toHaveLength(0);
     });
@@ -88,7 +44,7 @@ describe('core deprecations', () => {
       expect(migrated.server.xsrf.allowlist).toEqual(['/path']);
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"server.xsrf.whitelist\\" is deprecated and has been replaced by \\"server.xsrf.allowlist\\"",
+          "Setting \\"server.xsrf.whitelist\\" has been replaced by \\"server.xsrf.allowlist\\"",
         ]
       `);
     });
@@ -245,6 +201,232 @@ describe('core deprecations', () => {
       expect(
         applyCoreDeprecations({ csp: { rules: [`worker-src blob:`] } }).migrated.csp.rules
       ).toEqual([`worker-src blob:`]);
+    });
+  });
+
+  describe('logging.events.ops', () => {
+    it('warns when ops events are used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { ops: '*' } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.events.ops\\" has been deprecated and will be removed in 8.0. To access ops data moving forward, please enable debug logs for the \\"metrics.ops\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
+        ]
+      `);
+    });
+  });
+
+  describe('logging.events.request and logging.events.response', () => {
+    it('warns when request and response events are used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { request: '*', response: '*' } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request and/or response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
+        ]
+      `);
+    });
+
+    it('warns when only request event is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { request: '*' } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request and/or response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
+        ]
+      `);
+    });
+
+    it('warns when only response event is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { response: '*' } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request and/or response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
+        ]
+      `);
+    });
+  });
+
+  describe('logging.timezone', () => {
+    it('warns when ops events are used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { timezone: 'GMT' },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.timezone\\" has been deprecated and will be removed in 8.0. To set the timezone moving forward, please add a timezone date modifier to the log pattern in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
+        ]
+      `);
+    });
+  });
+
+  describe('logging.dest', () => {
+    it('warns when dest is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { dest: 'stdout' },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.dest\\" has been deprecated and will be removed in 8.0. To set the destination moving forward, you can use the \\"console\\" appender in your logging configuration or define a custom one. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
+        ]
+      `);
+    });
+    it('warns when dest path is given', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { dest: '/log-log.txt' },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.dest\\" has been deprecated and will be removed in 8.0. To set the destination moving forward, you can use the \\"console\\" appender in your logging configuration or define a custom one. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
+        ]
+      `);
+    });
+  });
+
+  describe('logging.quiet, logging.silent and logging.verbose', () => {
+    it('warns when quiet is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { quiet: true },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.quiet\\" has been deprecated and will be removed in 8.0. Moving forward, you can use \\"logging.root.level:error\\" in your logging configuration. ",
+        ]
+      `);
+    });
+    it('warns when silent is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { silent: true },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.silent\\" has been deprecated and will be removed in 8.0. Moving forward, you can use \\"logging.root.level:off\\" in your logging configuration. ",
+        ]
+      `);
+    });
+    it('warns when verbose is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { verbose: true },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.verbose\\" has been deprecated and will be removed in 8.0. Moving forward, you can use \\"logging.root.level:all\\" in your logging configuration. ",
+        ]
+      `);
+    });
+  });
+
+  describe('logging.json', () => {
+    it('warns when json is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { json: true },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.json\\" has been deprecated and will be removed in 8.0. To specify log message format moving forward, you can configure the \\"appender.layout\\" property for every custom appender in your logging configuration. There is currently no default layout for custom appenders and each one must be declared explicitly. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
+        ]
+      `);
+    });
+  });
+
+  describe('logging.rotate.enabled, logging.rotate.usePolling, logging.rotate.pollingInterval, logging.rotate.everyBytes and logging.rotate.keepFiles', () => {
+    it('warns when logging.rotate configurations are used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { rotate: { enabled: true } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.rotate\\" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enable log rotation using the \\"rolling-file\\" appender for a logger in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender",
+        ]
+      `);
+    });
+
+    it('warns when logging.rotate polling configurations are used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { rotate: { enabled: true, usePolling: true, pollingInterval: 5000 } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.rotate\\" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enable log rotation using the \\"rolling-file\\" appender for a logger in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender",
+        ]
+      `);
+    });
+
+    it('warns when logging.rotate.everyBytes configurations are used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { rotate: { enabled: true, everyBytes: 1048576 } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.rotate\\" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enable log rotation using the \\"rolling-file\\" appender for a logger in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender",
+        ]
+      `);
+    });
+
+    it('warns when logging.rotate.keepFiles is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { rotate: { enabled: true, keepFiles: 1024 } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.rotate\\" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enable log rotation using the \\"rolling-file\\" appender for a logger in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender",
+        ]
+      `);
+    });
+  });
+
+  describe('logging.events.log', () => {
+    it('warns when events.log is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { log: ['info'] } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.events.log\\" has been deprecated and will be removed in 8.0. Moving forward, log levels can be customized on a per-logger basis using the new logging configuration.",
+        ]
+      `);
+    });
+  });
+
+  describe('logging.events.error', () => {
+    it('warns when events.error is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { error: ['some error'] } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.events.error\\" has been deprecated and will be removed in 8.0. Moving forward, you can use \\"logging.root.level: error\\" in your logging configuration.",
+        ]
+      `);
+    });
+  });
+
+  describe('logging.filter', () => {
+    it('warns when filter.cookie is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { filter: { cookie: 'none' } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.filter\\" has been deprecated and will be removed in 8.0.",
+        ]
+      `);
+    });
+
+    it('warns when filter.authorization is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { filter: { authorization: 'none' } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.filter\\" has been deprecated and will be removed in 8.0.",
+        ]
+      `);
     });
   });
 });

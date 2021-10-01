@@ -1,29 +1,19 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { resolve } from 'path';
+import { resolve, relative } from 'path';
 import { createReadStream } from 'fs';
 import { Readable } from 'stream';
-import { ToolingLog, KbnClient } from '@kbn/dev-utils';
-import { Client } from 'elasticsearch';
-
+import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import { KbnClient } from '@kbn/test';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
+import { ES_CLIENT_HEADERS } from '../client_headers';
 
 import {
   isGzip,
@@ -47,23 +37,21 @@ const pipeline = (...streams: Readable[]) =>
   );
 
 export async function loadAction({
-  name,
+  inputDir,
   skipExisting,
   useCreate,
   client,
-  dataDir,
   log,
   kbnClient,
 }: {
-  name: string;
+  inputDir: string;
   skipExisting: boolean;
   useCreate: boolean;
-  client: Client;
-  dataDir: string;
+  client: KibanaClient;
   log: ToolingLog;
   kbnClient: KbnClient;
 }) {
-  const inputDir = resolve(dataDir, name);
+  const name = relative(REPO_ROOT, inputDir);
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
   const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
@@ -101,17 +89,24 @@ export async function loadAction({
     }
   }
 
-  await client.indices.refresh({
-    index: '_all',
-    allowNoIndices: true,
-  });
+  await client.indices.refresh(
+    {
+      index: '_all',
+      allow_no_indices: true,
+    },
+    {
+      headers: ES_CLIENT_HEADERS,
+    }
+  );
 
   // If we affected the Kibana index, we need to ensure it's migrated...
   if (Object.keys(result).some((k) => k.startsWith('.kibana'))) {
-    await migrateKibanaIndex({ client, kbnClient });
+    await migrateKibanaIndex(kbnClient);
+    log.debug('[%s] Migrated Kibana index after loading Kibana data', name);
 
     if (kibanaPluginIds.includes('spaces')) {
       await createDefaultSpace({ client, index: '.kibana' });
+      log.debug('[%s] Ensured that default space exists in .kibana', name);
     }
   }
 

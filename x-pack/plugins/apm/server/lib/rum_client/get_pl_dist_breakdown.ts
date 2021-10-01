@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { SetupUX } from '../../routes/rum_client';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   USER_AGENT_DEVICE,
@@ -42,12 +43,16 @@ export const getPageLoadDistBreakdown = async ({
   maxPercentile,
   breakdown,
   urlQuery,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX;
   minPercentile: number;
   maxPercentile: number;
   breakdown: string;
   urlQuery?: string;
+  start: number;
+  end: number;
 }) => {
   // convert secs to micros
   const stepValues = getPLDChartSteps({
@@ -58,6 +63,8 @@ export const getPageLoadDistBreakdown = async ({
   const projection = getRumPageLoadTransactionsProjection({
     setup,
     urlQuery,
+    start,
+    end,
   });
 
   const params = mergeProjection(projection, {
@@ -91,16 +98,21 @@ export const getPageLoadDistBreakdown = async ({
 
   const { apmEventClient } = setup;
 
-  const { aggregations } = await apmEventClient.search(params);
+  const { aggregations } = await apmEventClient.search(
+    'get_page_load_dist_breakdown',
+    params
+  );
 
   const pageDistBreakdowns = aggregations?.breakdowns.buckets;
 
   return pageDistBreakdowns?.map(({ key, page_dist: pageDist }) => {
     let seriesData = pageDist.values?.map(
-      ({ key: pKey, value }, index: number, arr) => {
+      ({ key: pKey, value: maybeNullValue }, index: number, arr) => {
+        // FIXME: values from percentile* aggs can be null
+        const value = maybeNullValue!;
         return {
           x: microToSec(pKey),
-          y: index === 0 ? value : value - arr[index - 1].value,
+          y: index === 0 ? value : value - arr[index - 1].value!,
         };
       }
     );

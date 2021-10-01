@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment, useContext, useEffect, useState } from 'react';
@@ -25,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AnomalyDetectionSettingsContext } from './anomaly_detection_settings_context';
 import { useNotifications } from '../contexts/kibana';
 import { ml } from '../services/ml_api_service';
-import { ML_PAGES } from '../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
 
 export const AnomalyDetectionSettings: FC = () => {
@@ -130,7 +131,6 @@ export const AnomalyDetectionSettings: FC = () => {
                 <EuiButtonEmpty
                   data-test-subj="mlCalendarsMngButton"
                   flush="left"
-                  size="l"
                   color="primary"
                   onClick={redirectToCalendarList}
                   isDisabled={canGetCalendars === false}
@@ -145,7 +145,6 @@ export const AnomalyDetectionSettings: FC = () => {
                 <EuiButtonEmpty
                   data-test-subj="mlCalendarsCreateButton"
                   flush="left"
-                  size="l"
                   color="primary"
                   onClick={redirectToNewCalendarPage}
                   isDisabled={canCreateCalendar === false}
@@ -198,7 +197,6 @@ export const AnomalyDetectionSettings: FC = () => {
                 <EuiButtonEmpty
                   data-test-subj="mlFilterListsMngButton"
                   flush="left"
-                  size="l"
                   color="primary"
                   onClick={redirectToFilterLists}
                   isDisabled={canGetFilters === false}
@@ -212,7 +210,6 @@ export const AnomalyDetectionSettings: FC = () => {
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   data-test-subj="mlFilterListsCreateButton"
-                  size="l"
                   color="primary"
                   onClick={redirectToNewFilterListPage}
                   isDisabled={canCreateFilter === false}

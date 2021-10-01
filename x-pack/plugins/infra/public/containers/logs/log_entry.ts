@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useCallback } from 'react';
@@ -11,7 +12,11 @@ import {
   logEntrySearchResponsePayloadRT,
   LOG_ENTRY_SEARCH_STRATEGY,
 } from '../../../common/search_strategies/log_entries/log_entry';
-import { useDataSearch, useLatestPartialDataSearchResponse } from '../../utils/data_search';
+import {
+  normalizeDataSearchResponses,
+  useDataSearch,
+  useLatestPartialDataSearchResponse,
+} from '../../utils/data_search';
 
 export const useLogEntry = ({
   sourceId,
@@ -31,6 +36,7 @@ export const useLogEntry = ({
           }
         : null;
     }, [sourceId, logEntryId]),
+    parseResponses: parseLogEntrySearchResponses,
   });
 
   const {
@@ -41,11 +47,7 @@ export const useLogEntry = ({
     latestResponseErrors,
     loaded,
     total,
-  } = useLatestPartialDataSearchResponse(
-    logEntrySearchRequests$,
-    null,
-    decodeLogEntrySearchResponse
-  );
+  } = useLatestPartialDataSearchResponse(logEntrySearchRequests$);
 
   return {
     cancelRequest,
@@ -59,4 +61,7 @@ export const useLogEntry = ({
   };
 };
 
-const decodeLogEntrySearchResponse = decodeOrThrow(logEntrySearchResponsePayloadRT);
+const parseLogEntrySearchResponses = normalizeDataSearchResponses(
+  null,
+  decodeOrThrow(logEntrySearchResponsePayloadRT)
+);

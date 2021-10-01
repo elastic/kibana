@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
+import { createListIfItDoesNotExist } from '../lists/create_list_if_it_does_not_exist';
 
 import {
   LinesResult,
@@ -20,6 +22,10 @@ import { createListItemsBulk } from '.';
 
 jest.mock('./create_list_items_bulk', () => ({
   createListItemsBulk: jest.fn(),
+}));
+
+jest.mock('../lists/create_list_if_it_does_not_exist', () => ({
+  createListIfItDoesNotExist: jest.fn(),
 }));
 
 describe('write_lines_to_bulk_list_items', () => {
@@ -58,6 +64,17 @@ describe('write_lines_to_bulk_list_items', () => {
       await promise;
       expect(createListItemsBulk).toBeCalledWith(
         expect.objectContaining({ value: ['127.0.0.1', '127.0.0.2'] })
+      );
+    });
+
+    it('creates a list with a decoded file name', async () => {
+      const options = getImportListItemsToStreamOptionsMock();
+      const promise = importListItemsToStream({ ...options, listId: undefined });
+      options.stream.push(`--\nContent-Disposition: attachment; filename="%22Filename%22.txt"`);
+      options.stream.push(null);
+      await promise;
+      expect(createListIfItDoesNotExist).toBeCalledWith(
+        expect.objectContaining({ id: `"Filename".txt`, name: `"Filename".txt` })
       );
     });
   });

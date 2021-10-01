@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ApplicationStart } from 'kibana/public';
-import { NewPackagePolicy, PackagePolicy } from '../../../../fleet/common';
+import { Agent, PackagePolicy, UpdatePackagePolicy } from '../../../../fleet/common';
 import { ManifestSchema } from '../schema/manifest';
 
+export * from './actions';
 export * from './os';
 export * from './trusted_apps';
 
@@ -15,6 +17,16 @@ export * from './trusted_apps';
  * Supported React-Router state for the Policy Details page
  */
 export interface PolicyDetailsRouteState {
+  /**
+   * Override the "back link" displayed at the top-left corner of page with custom routing
+   */
+  backLink?: {
+    /** link label text */
+    label: string;
+    navigateTo: Parameters<ApplicationStart['navigateToApp']>;
+    href?: string;
+  };
+
   /**
    * Where the user should be redirected to when the `Save` button is clicked and the update was successful
    */
@@ -57,9 +69,14 @@ export type Immutable<T> = T extends undefined | null | boolean | string | numbe
   : ImmutableObject<T>;
 
 export type ImmutableArray<T> = ReadonlyArray<Immutable<T>>;
-type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
-type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
-type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
+export type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
+export type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
+export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
+
+/**
+ * Utility type that will return back a union of the given [T]ype and an Immutable version of it
+ */
+export type MaybeImmutable<T> = T | Immutable<T>;
 
 /**
  * Stats for related events for a particular node in a resolver graph.
@@ -140,207 +157,6 @@ export interface NewResolverTree {
 }
 
 /**
- * Statistical information for a node in a resolver tree.
- * @deprecated use {@link EventStats} instead to model the stats for a node
- */
-export interface ResolverNodeStats {
-  /**
-   * The stats for related events (excludes alerts and process events) for a particular node in the resolver tree.
-   */
-  events: EventStats;
-  /**
-   * The total number of alerts that exist for a node.
-   */
-  totalAlerts: number;
-}
-
-/**
- * A child node can also have additional children so we need to provide a pagination cursor.
- *
- * @deprecated use {@link ResolverNode} instead
- */
-export interface ResolverChildNode extends ResolverLifecycleNode {
-  /**
-   * nextChild can have 3 different states:
-   *
-   * undefined: This indicates that you should not use this node for additional queries. It does not mean that node does
-   * not have any more direct children. The node could have more direct children but to determine that, use the
-   * ResolverChildren node's nextChild.
-   *
-   * null: Indicates that we have received all the children of the node. There may be more descendants though.
-   *
-   * string: Indicates this is a leaf node and it can be used to continue querying for additional descendants
-   * using this node's entity_id
-   *
-   * For more information see the resolver docs on pagination [here](../../server/endpoint/routes/resolver/docs/README.md#L129)
-   */
-  nextChild?: string | null;
-}
-
-/**
- * Safe version of `ResolverChildNode`.
- *
- * @deprecated use {@link ResolverNode} instead
- */
-export interface SafeResolverChildNode extends SafeResolverLifecycleNode {
-  /**
-   * nextChild can have 3 different states:
-   *
-   * undefined: This indicates that you should not use this node for additional queries. It does not mean that node does
-   * not have any more direct children. The node could have more direct children but to determine that, use the
-   * ResolverChildren node's nextChild.
-   *
-   * null: Indicates that we have received all the children of the node. There may be more descendants though.
-   *
-   * string: Indicates this is a leaf node and it can be used to continue querying for additional descendants
-   * using this node's entity_id
-   *
-   * For more information see the resolver docs on pagination [here](../../server/endpoint/routes/resolver/docs/README.md#L129)
-   */
-  nextChild?: string | null;
-}
-
-/**
- * The response structure for the children route. The structure is an array of nodes where each node
- * has an array of lifecycle events.
- *
- * @deprecated use {@link ResolverNode} instead
- */
-export interface ResolverChildren {
-  childNodes: ResolverChildNode[];
-  /**
-   * nextChild can have 2 different states:
-   *
-   * null: Indicates that we have received all the descendants that can be retrieved using this node. To retrieve more
-   * nodes in the tree use a cursor provided in one of the returned children. If no other cursor exists then the tree
-   * is complete.
-   *
-   * string: Indicates this node has more descendants that can be retrieved, pass this cursor in while using this node's
-   * entity_id for the request.
-   */
-  nextChild: string | null;
-}
-
-/**
- * Safe version of `ResolverChildren`.
- *
- * @deprecated use {@link ResolverNode} instead
- */
-export interface SafeResolverChildren {
-  childNodes: SafeResolverChildNode[];
-  /**
-   * nextChild can have 2 different states:
-   *
-   * null: Indicates that we have received all the descendants that can be retrieved using this node. To retrieve more
-   * nodes in the tree use a cursor provided in one of the returned children. If no other cursor exists then the tree
-   * is complete.
-   *
-   * string: Indicates this node has more descendants that can be retrieved, pass this cursor in while using this node's
-   * entity_id for the request.
-   */
-  nextChild: string | null;
-}
-
-/**
- * A flattened tree representing the nodes in a resolver graph.
- *
- * @deprecated use {@link ResolverNode} instead
- */
-export interface ResolverTree {
-  /**
-   * Origin of the tree. This is in the middle of the tree. Typically this would be the same
-   * process node that generated an alert.
-   */
-  entityID: string;
-  children: ResolverChildren;
-  relatedEvents: Omit<ResolverRelatedEvents, 'entityID'>;
-  relatedAlerts: Omit<ResolverRelatedAlerts, 'entityID'>;
-  ancestry: ResolverAncestry;
-  lifecycle: SafeResolverEvent[];
-  stats: ResolverNodeStats;
-}
-
-/**
- * Safe version of `ResolverTree`.
- *
- * @deprecated use {@link ResolverNode} instead
- */
-export interface SafeResolverTree {
-  /**
-   * Origin of the tree. This is in the middle of the tree. Typically this would be the same
-   * process node that generated an alert.
-   */
-  entityID: string;
-  children: SafeResolverChildren;
-  relatedAlerts: Omit<ResolverRelatedAlerts, 'entityID'>;
-  ancestry: SafeResolverAncestry;
-  lifecycle: SafeResolverEvent[];
-  stats: ResolverNodeStats;
-}
-
-/**
- * The lifecycle events (start, end etc) for a node.
- *
- * @deprecated use {@link ResolverNode} instead
- */
-export interface ResolverLifecycleNode {
-  entityID: string;
-  lifecycle: SafeResolverEvent[];
-  /**
-   * stats are only set when the entire tree is being fetched
-   */
-  stats?: ResolverNodeStats;
-}
-
-/**
- * Safe version of `ResolverLifecycleNode`.
- *
- * @deprecated use {@link ResolverNode} instead
- */
-export interface SafeResolverLifecycleNode {
-  entityID: string;
-  lifecycle: SafeResolverEvent[];
-  /**
-   * stats are only set when the entire tree is being fetched
-   */
-  stats?: ResolverNodeStats;
-}
-
-/**
- * The response structure when searching for ancestors of a node.
- *
- * @deprecated use {@link ResolverNode} instead
- */
-export interface ResolverAncestry {
-  /**
-   * An array of ancestors with the lifecycle events grouped together
-   */
-  ancestors: ResolverLifecycleNode[];
-  /**
-   * A cursor for retrieving additional ancestors for a particular node. `null` indicates that there were no additional
-   * ancestors when the request returned. More could have been ingested by ES after the fact though.
-   */
-  nextAncestor: string | null;
-}
-
-/**
- * Safe version of `ResolverAncestry`.
- *
- * @deprecated use {@link ResolverNode} instead
- */
-export interface SafeResolverAncestry {
-  /**
-   * An array of ancestors with the lifecycle events grouped together
-   */
-  ancestors: SafeResolverLifecycleNode[];
-  /**
-   * A cursor for retrieving additional ancestors for a particular node. `null` indicates that there were no additional
-   * ancestors when the request returned. More could have been ingested by ES after the fact though.
-   */
-  nextAncestor: string | null;
-}
-
-/**
  * Response structure for the related events route.
  *
  * @deprecated use {@link ResolverNode} instead
@@ -361,15 +177,6 @@ export interface ResolverPaginatedEvents {
 }
 
 /**
- * Response structure for the alerts route.
- */
-export interface ResolverRelatedAlerts {
-  entityID: string;
-  alerts: SafeResolverEvent[];
-  nextAlert: string | null;
-}
-
-/**
  * Returned by the server via /api/endpoint/metadata
  */
 export interface HostResultList {
@@ -381,8 +188,6 @@ export interface HostResultList {
   request_page_size: number;
   /* the page index requested */
   request_page_index: number;
-  /* the version of the query strategy */
-  query_strategy_version: MetadataQueryStrategyVersions;
   /* policy IDs and versions */
   policy_info?: HostInfo['policy_info'];
 }
@@ -500,6 +305,46 @@ export type AlertEvent = Partial<{
       }>;
     }>;
   }>;
+  // disabling naming-convention to accommodate external field
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  Memory_protection: Partial<{
+    feature: ECSField<string>;
+    self_injection: ECSField<boolean>;
+  }>;
+  destination: Partial<{
+    port: ECSField<number>;
+    ip: ECSField<string>;
+  }>;
+  source: Partial<{
+    port: ECSField<number>;
+    ip: ECSField<string>;
+  }>;
+  registry: Partial<{
+    path: ECSField<string>;
+    value: ECSField<string>;
+    data: Partial<{
+      strings: ECSField<string>;
+    }>;
+  }>;
+  Target: Partial<{
+    process: Partial<{
+      thread: Partial<{
+        Ext: Partial<{
+          start_address_allocation_offset: ECSField<number>;
+          start_address_bytes_disasm_hash: ECSField<string>;
+          start_address_details: Partial<{
+            allocation_type: ECSField<string>;
+            allocation_size: ECSField<number>;
+            region_size: ECSField<number>;
+            region_protection: ECSField<string>;
+            memory_pe: Partial<{
+              imphash: ECSField<string>;
+            }>;
+          }>;
+        }>;
+      }>;
+    }>;
+  }>;
   process: Partial<{
     command_line: ECSField<string>;
     ppid: ECSField<number>;
@@ -533,7 +378,15 @@ export type AlertEvent = Partial<{
         >;
       }>;
       user: ECSField<string>;
+      malware_signature: Partial<{
+        all_names: ECSField<string>;
+        identifier: ECSField<string>;
+      }>;
     }>;
+  }>;
+  rule: Partial<{
+    id: ECSField<string>;
+    description: ECSField<string>;
   }>;
   file: Partial<{
     owner: ECSField<string>;
@@ -584,12 +437,12 @@ export enum HostStatus {
    * Default state of the host when no host information is present or host information cannot
    * be retrieved. e.g. API error
    */
-  ERROR = 'error',
+  UNHEALTHY = 'unhealthy',
 
   /**
    * Host is online as indicated by its checkin status during the last checkin window
    */
-  ONLINE = 'online',
+  HEALTHY = 'healthy',
 
   /**
    * Host is offline as indicated by its checkin status during the last checkin window
@@ -597,14 +450,19 @@ export enum HostStatus {
   OFFLINE = 'offline',
 
   /**
-   * Host is unenrolling as indicated by its checkin status during the last checkin window
+   * Host is unenrolling, enrolling or updating as indicated by its checkin status during the last checkin window
    */
-  UNENROLLING = 'unenrolling',
-}
+  UPDATING = 'updating',
 
-export enum MetadataQueryStrategyVersions {
-  VERSION_1 = 'v1',
-  VERSION_2 = 'v2',
+  /**
+   * Host is inactive as indicated by its checkin status during the last checkin window
+   */
+  INACTIVE = 'inactive',
+
+  /**
+   * Host is unenrolled
+   */
+  UNENROLLED = 'unenrolled',
 }
 
 export type PolicyInfo = Immutable<{
@@ -631,17 +489,10 @@ export type HostInfo = Immutable<{
      */
     endpoint: PolicyInfo;
   };
-  /* the version of the query strategy */
-  query_strategy_version: MetadataQueryStrategyVersions;
 }>;
 
-export type HostMetadataDetails = Immutable<{
-  agent: {
-    id: string;
-  };
-  HostDetails: HostMetadata;
-}>;
-
+// HostMetadataDetails is now just HostMetadata
+// HostDetails is also just HostMetadata
 export type HostMetadata = Immutable<{
   '@timestamp': number;
   event: {
@@ -666,10 +517,26 @@ export type HostMetadata = Immutable<{
         id: string;
         status: HostPolicyResponseActionStatus;
         name: string;
+        /** The endpoint integration policy revision number in kibana */
         endpoint_policy_version: number;
         version: number;
       };
     };
+    configuration?: {
+      /**
+       * Shows whether the endpoint is set up to be isolated. (e.g. a user has isolated a host,
+       * and the endpoint successfully received that action and applied the setting)
+       */
+      isolation?: boolean;
+    };
+    state?: {
+      /**
+       * Shows what the current state of the host is. This could differ from `Endpoint.configuration.isolation`
+       * in some cases, but normally they will match
+       */
+      isolation?: boolean;
+    };
+    capabilities?: string[];
   };
   agent: {
     id: string;
@@ -677,6 +544,16 @@ export type HostMetadata = Immutable<{
   };
   host: Host;
   data_stream: DataStream;
+}>;
+
+export type UnitedAgentMetadata = Immutable<{
+  agent: {
+    id: string;
+  };
+  united: {
+    endpoint: HostMetadata;
+    agent: Agent;
+  };
 }>;
 
 export interface LegacyEndpointEvent {
@@ -840,6 +717,8 @@ export type SafeEndpointEvent = Partial<{
     }>;
   }>;
   network: Partial<{
+    transport: ECSField<string>;
+    type: ECSField<string>;
     direction: ECSField<string>;
     forwarded_ip: ECSField<string>;
   }>;
@@ -991,8 +870,7 @@ type KbnConfigSchemaInputObjectTypeOf<P extends Record<string, unknown>> = {
   [K in Exclude<keyof P, keyof KbnConfigSchemaNonOptionalProps<P>>]?: KbnConfigSchemaInputTypeOf<
     P[K]
   >;
-} &
-  { [K in keyof KbnConfigSchemaNonOptionalProps<P>]: KbnConfigSchemaInputTypeOf<P[K]> };
+} & { [K in keyof KbnConfigSchemaNonOptionalProps<P>]: KbnConfigSchemaInputTypeOf<P[K]> };
 
 /**
  * Takes the props of a schema.object type, and returns a version that excludes
@@ -1026,12 +904,27 @@ export interface PolicyConfig {
       registry: boolean;
       security: boolean;
     };
-    malware: MalwareFields;
+    malware: ProtectionFields;
+    memory_protection: ProtectionFields & SupportedFields;
+    behavior_protection: ProtectionFields & SupportedFields;
+    ransomware: ProtectionFields & SupportedFields;
     logging: {
       file: string;
     };
     popup: {
       malware: {
+        message: string;
+        enabled: boolean;
+      };
+      ransomware: {
+        message: string;
+        enabled: boolean;
+      };
+      memory_protection: {
+        message: string;
+        enabled: boolean;
+      };
+      behavior_protection: {
         message: string;
         enabled: boolean;
       };
@@ -1047,9 +940,14 @@ export interface PolicyConfig {
       process: boolean;
       network: boolean;
     };
-    malware: MalwareFields;
+    malware: ProtectionFields;
+    behavior_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
+        message: string;
+        enabled: boolean;
+      };
+      behavior_protection: {
         message: string;
         enabled: boolean;
       };
@@ -1064,6 +962,18 @@ export interface PolicyConfig {
       file: boolean;
       process: boolean;
       network: boolean;
+    };
+    malware: ProtectionFields;
+    behavior_protection: ProtectionFields & SupportedFields;
+    popup: {
+      malware: {
+        message: string;
+        enabled: boolean;
+      };
+      behavior_protection: {
+        message: string;
+        enabled: boolean;
+      };
     };
     logging: {
       file: string;
@@ -1080,21 +990,39 @@ export interface UIPolicyConfig {
    */
   windows: Pick<
     PolicyConfig['windows'],
-    'events' | 'malware' | 'popup' | 'antivirus_registration' | 'advanced'
+    | 'events'
+    | 'malware'
+    | 'ransomware'
+    | 'popup'
+    | 'antivirus_registration'
+    | 'advanced'
+    | 'memory_protection'
+    | 'behavior_protection'
   >;
   /**
    * Mac-specific policy configuration that is supported via the UI
    */
-  mac: Pick<PolicyConfig['mac'], 'malware' | 'events' | 'popup' | 'advanced'>;
+  mac: Pick<
+    PolicyConfig['mac'],
+    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection'
+  >;
   /**
    * Linux-specific policy configuration that is supported via the UI
    */
-  linux: Pick<PolicyConfig['linux'], 'events' | 'advanced'>;
+  linux: Pick<
+    PolicyConfig['linux'],
+    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection'
+  >;
 }
 
-/** Policy: Malware protection fields */
-export interface MalwareFields {
+/** Policy:  Protection fields */
+export interface ProtectionFields {
   mode: ProtectionModes;
+}
+
+/** Policy:  Supported fields */
+export interface SupportedFields {
+  supported: boolean;
 }
 
 /** Policy protection mode options */
@@ -1112,7 +1040,7 @@ export type PolicyData = PackagePolicy & NewPolicyData;
 /**
  * New policy data. Used when updating the policy record via ingest APIs
  */
-export type NewPolicyData = NewPackagePolicy & {
+export type NewPolicyData = UpdatePackagePolicy & {
   inputs: [
     {
       type: 'endpoint';
@@ -1137,6 +1065,7 @@ export enum HostPolicyResponseActionStatus {
   success = 'success',
   failure = 'failure',
   warning = 'warning',
+  unsupported = 'unsupported',
 }
 
 /**
@@ -1174,7 +1103,8 @@ export interface HostPolicyResponseAppliedAction {
   message: string;
 }
 
-export type HostPolicyResponseConfiguration = HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations'];
+export type HostPolicyResponseConfiguration =
+  HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations'];
 
 interface HostPolicyResponseConfigurationStatus {
   status: HostPolicyResponseActionStatus;
@@ -1268,4 +1198,26 @@ export interface GetAgentSummaryResponse {
     policy_id?: string;
     versions_count: { [key: string]: number };
   };
+}
+
+/**
+ * REST API response for retrieving exception summary
+ */
+export interface GetExceptionSummaryResponse {
+  total: number;
+  windows: number;
+  macos: number;
+  linux: number;
+}
+
+/**
+ * Supported React-Router state for the Generic List page
+ */
+export interface ListPageRouteState {
+  /** Where the user should be redirected to when the `Back` button is clicked */
+  onBackButtonNavigateTo: Parameters<ApplicationStart['navigateToApp']>;
+  /** The URL for the `Back` button */
+  backButtonUrl?: string;
+  /** The label for the button */
+  backButtonLabel?: string;
 }

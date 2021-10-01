@@ -1,33 +1,27 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { HttpService } from './http_service';
 import { HttpSetup } from './types';
 import { BehaviorSubject } from 'rxjs';
 import { BasePath } from './base_path';
+import { basePathMock } from './base_path.mock';
 
 export type HttpSetupMock = jest.Mocked<HttpSetup> & {
   basePath: BasePath;
   anonymousPaths: jest.Mocked<HttpSetup['anonymousPaths']>;
 };
 
-const createServiceMock = ({ basePath = '' } = {}): HttpSetupMock => ({
+const createServiceMock = ({
+  basePath = '',
+  publicBaseUrl,
+}: { basePath?: string; publicBaseUrl?: string } = {}): HttpSetupMock => ({
   fetch: jest.fn(),
   get: jest.fn(),
   head: jest.fn(),
@@ -36,7 +30,7 @@ const createServiceMock = ({ basePath = '' } = {}): HttpSetupMock => ({
   patch: jest.fn(),
   delete: jest.fn(),
   options: jest.fn(),
-  basePath: new BasePath(basePath),
+  basePath: new BasePath(basePath, undefined, publicBaseUrl),
   anonymousPaths: {
     register: jest.fn(),
     isAnonymous: jest.fn(),
@@ -64,4 +58,5 @@ export const httpServiceMock = {
   create: createMock,
   createSetupContract: createServiceMock,
   createStartContract: createServiceMock,
+  createBasePath: basePathMock.create,
 };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Setup } from '../../../helpers/setup_request';
@@ -14,12 +15,13 @@ import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_
 export async function getExistingEnvironmentsForService({
   serviceName,
   setup,
+  size,
 }: {
   serviceName: string | undefined;
   setup: Setup;
+  size: number;
 }) {
-  const { internalClient, indices, config } = setup;
-  const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
+  const { internalClient, indices } = setup;
 
   const bool = serviceName
     ? { filter: [{ term: { [SERVICE_NAME]: serviceName } }] }
@@ -35,14 +37,17 @@ export async function getExistingEnvironmentsForService({
           terms: {
             field: SERVICE_ENVIRONMENT,
             missing: ALL_OPTION_VALUE,
-            size: maxServiceEnvironments,
+            size,
           },
         },
       },
     },
   };
 
-  const resp = await internalClient.search(params);
+  const resp = await internalClient.search(
+    'get_existing_environments_for_service',
+    params
+  );
   const existingEnvironments =
     resp.aggregations?.environments.buckets.map(
       (bucket) => bucket.key as string

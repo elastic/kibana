@@ -16,5 +16,5 @@ export interface CapabilitiesStart
 
 |  Method | Description |
 |  --- | --- |
-|  [resolveCapabilities(request)](./kibana-plugin-core-server.capabilitiesstart.resolvecapabilities.md) | Resolve the [Capabilities](./kibana-plugin-core-server.capabilities.md) to be used for given request |
+|  [resolveCapabilities(request, options)](./kibana-plugin-core-server.capabilitiesstart.resolvecapabilities.md) | Resolve the [Capabilities](./kibana-plugin-core-server.capabilities.md) to be used for given request |
 

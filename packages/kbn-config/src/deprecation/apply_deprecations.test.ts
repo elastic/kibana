@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { applyDeprecations } from './apply_deprecations';
@@ -43,28 +32,57 @@ describe('applyDeprecations', () => {
     expect(handlerC).toHaveBeenCalledTimes(1);
   });
 
-  it('calls handlers with correct arguments', () => {
-    const logger = () => undefined;
+  it('passes path to addDeprecation factory', () => {
+    const addDeprecation = jest.fn();
+    const createAddDeprecation = jest.fn().mockReturnValue(addDeprecation);
     const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
-    const alteredConfig = { foo: 'bar' };
 
-    const handlerA = jest.fn().mockReturnValue(alteredConfig);
-    const handlerB = jest.fn().mockImplementation((conf) => conf);
+    const handlerA = jest.fn().mockReturnValue({ unset: [{ path: 'deprecated' }] });
+    const handlerB = jest.fn().mockReturnValue(undefined);
 
     applyDeprecations(
       initialConfig,
       [wrapHandler(handlerA, 'pathA'), wrapHandler(handlerB, 'pathB')],
-      logger
+      createAddDeprecation
     );
 
-    expect(handlerA).toHaveBeenCalledWith(initialConfig, 'pathA', logger);
-    expect(handlerB).toHaveBeenCalledWith(alteredConfig, 'pathB', logger);
+    expect(createAddDeprecation).toBeCalledTimes(2);
+    expect(createAddDeprecation).toHaveBeenNthCalledWith(1, 'pathA');
+    expect(createAddDeprecation).toHaveBeenNthCalledWith(2, 'pathB');
+  });
+
+  it('calls handlers with correct arguments', () => {
+    const addDeprecation = jest.fn();
+    const createAddDeprecation = jest.fn().mockReturnValue(addDeprecation);
+    const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
+    const alteredConfig = { foo: 'bar' };
+
+    const configs: Array<{ fn: string; config: Record<string, any> }> = [];
+    const handlerA = jest.fn().mockImplementation((config) => {
+      // the first argument is mutated between calls, we store a copy of it
+      configs.push({ fn: 'handlerA', config: { ...config } });
+      return { unset: [{ path: 'deprecated' }] };
+    });
+    const handlerB = jest.fn().mockImplementation((config) => {
+      configs.push({ fn: 'handlerB', config: { ...config } });
+    });
+
+    applyDeprecations(
+      initialConfig,
+      [wrapHandler(handlerA, 'pathA'), wrapHandler(handlerB, 'pathB')],
+      createAddDeprecation
+    );
+
+    expect(configs).toEqual([
+      { fn: 'handlerA', config: initialConfig },
+      { fn: 'handlerB', config: alteredConfig },
+    ]);
   });
 
   it('returns the migrated config', () => {
     const initialConfig = { foo: 'bar', deprecated: 'deprecated', renamed: 'renamed' };
 
-    const migrated = applyDeprecations(initialConfig, [
+    const { config: migrated } = applyDeprecations(initialConfig, [
       wrapHandler(deprecations.unused('deprecated')),
       wrapHandler(deprecations.rename('renamed', 'newname')),
     ]);
@@ -75,11 +93,68 @@ describe('applyDeprecations', () => {
   it('does not alter the initial config', () => {
     const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
 
-    const migrated = applyDeprecations(initialConfig, [
+    const { config: migrated } = applyDeprecations(initialConfig, [
       wrapHandler(deprecations.unused('deprecated')),
     ]);
 
     expect(initialConfig).toEqual({ foo: 'bar', deprecated: 'deprecated' });
     expect(migrated).toEqual({ foo: 'bar' });
+  });
+
+  it('ignores a command for unknown path', () => {
+    const addDeprecation = jest.fn();
+    const createAddDeprecation = jest.fn().mockReturnValue(addDeprecation);
+    const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
+
+    const handler = jest.fn().mockImplementation((config) => {
+      return { unset: [{ path: 'unknown' }] };
+    });
+
+    const { config: migrated } = applyDeprecations(
+      initialConfig,
+      [wrapHandler(handler, 'pathA')],
+      createAddDeprecation
+    );
+
+    expect(migrated).toEqual(initialConfig);
+  });
+
+  it('ignores an unknown command', () => {
+    const addDeprecation = jest.fn();
+    const createAddDeprecation = jest.fn().mockReturnValue(addDeprecation);
+    const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
+
+    const handler = jest.fn().mockImplementation((config) => {
+      return { rewrite: [{ path: 'foo' }] };
+    });
+
+    const { config: migrated } = applyDeprecations(
+      initialConfig,
+      [wrapHandler(handler, 'pathA')],
+      createAddDeprecation
+    );
+
+    expect(migrated).toEqual(initialConfig);
+  });
+
+  it('returns a list of changes config paths', () => {
+    const addDeprecation = jest.fn();
+    const createAddDeprecation = jest.fn().mockReturnValue(addDeprecation);
+    const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
+
+    const handler = jest.fn().mockImplementation((config) => {
+      return { set: [{ path: 'foo', value: 'bar' }], unset: [{ path: 'baz' }] };
+    });
+
+    const { changedPaths } = applyDeprecations(
+      initialConfig,
+      [wrapHandler(handler, 'pathA')],
+      createAddDeprecation
+    );
+
+    expect(changedPaths).toEqual({
+      set: ['foo'],
+      unset: ['baz'],
+    });
   });
 });

@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
-  SerializedNode,
   WorkspaceNode,
   WorkspaceEdge,
   SerializedEdge,
@@ -16,13 +16,15 @@ import {
   SerializedWorkspaceState,
   Workspace,
   AdvancedSettings,
+  SerializedNode,
+  BlockListedNode,
 } from '../../types';
 import { IndexpatternDatasource } from '../../state_management';
 
 function serializeNode(
-  { data, scaledSize, parent, x, y, label, color }: WorkspaceNode,
+  { data, scaledSize, parent, x, y, label, color }: BlockListedNode,
   allNodes: WorkspaceNode[] = []
-): SerializedNode {
+) {
   return {
     x,
     y,

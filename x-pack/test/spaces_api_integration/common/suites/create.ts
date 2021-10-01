@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -62,67 +63,74 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
-  const makeCreateTest = (describeFn: DescribeFn) => (
-    description: string,
-    { user = {}, spaceId, tests }: CreateTestDefinition
-  ) => {
-    describeFn(description, () => {
-      beforeEach(() => esArchiver.load('saved_objects/spaces'));
-      afterEach(() => esArchiver.unload('saved_objects/spaces'));
+  const makeCreateTest =
+    (describeFn: DescribeFn) =>
+    (description: string, { user = {}, spaceId, tests }: CreateTestDefinition) => {
+      describeFn(description, () => {
+        beforeEach(() =>
+          esArchiver.load(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        afterEach(() =>
+          esArchiver.unload(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
 
-      getTestScenariosForSpace(spaceId).forEach(({ urlPrefix, scenario }) => {
-        it(`should return ${tests.newSpace.statusCode} ${scenario}`, async () => {
-          return supertest
-            .post(`${urlPrefix}/api/spaces/space`)
-            .auth(user.username, user.password)
-            .send({
-              name: 'marketing',
-              id: 'marketing',
-              description: 'a description',
-              color: '#5c5959',
-              disabledFeatures: [],
-            })
-            .expect(tests.newSpace.statusCode)
-            .then(tests.newSpace.response);
-        });
-
-        describe('when it already exists', () => {
-          it(`should return ${tests.alreadyExists.statusCode} ${scenario}`, async () => {
+        getTestScenariosForSpace(spaceId).forEach(({ urlPrefix, scenario }) => {
+          it(`should return ${tests.newSpace.statusCode} ${scenario}`, async () => {
             return supertest
               .post(`${urlPrefix}/api/spaces/space`)
               .auth(user.username, user.password)
               .send({
-                name: 'space_1',
-                id: 'space_1',
-                color: '#ffffff',
-                description: 'a description',
-                disabledFeatures: [],
-              })
-              .expect(tests.alreadyExists.statusCode)
-              .then(tests.alreadyExists.response);
-          });
-        });
-
-        describe('when _reserved is specified', () => {
-          it(`should return ${tests.reservedSpecified.statusCode} and ignore _reserved ${scenario}`, async () => {
-            return supertest
-              .post(`${urlPrefix}/api/spaces/space`)
-              .auth(user.username, user.password)
-              .send({
-                name: 'reserved space',
-                id: 'reserved',
+                name: 'marketing',
+                id: 'marketing',
                 description: 'a description',
                 color: '#5c5959',
-                _reserved: true,
                 disabledFeatures: [],
               })
-              .expect(tests.reservedSpecified.statusCode)
-              .then(tests.reservedSpecified.response);
+              .expect(tests.newSpace.statusCode)
+              .then(tests.newSpace.response);
+          });
+
+          describe('when it already exists', () => {
+            it(`should return ${tests.alreadyExists.statusCode} ${scenario}`, async () => {
+              return supertest
+                .post(`${urlPrefix}/api/spaces/space`)
+                .auth(user.username, user.password)
+                .send({
+                  name: 'space_1',
+                  id: 'space_1',
+                  color: '#ffffff',
+                  description: 'a description',
+                  disabledFeatures: [],
+                })
+                .expect(tests.alreadyExists.statusCode)
+                .then(tests.alreadyExists.response);
+            });
+          });
+
+          describe('when _reserved is specified', () => {
+            it(`should return ${tests.reservedSpecified.statusCode} and ignore _reserved ${scenario}`, async () => {
+              return supertest
+                .post(`${urlPrefix}/api/spaces/space`)
+                .auth(user.username, user.password)
+                .send({
+                  name: 'reserved space',
+                  id: 'reserved',
+                  description: 'a description',
+                  color: '#5c5959',
+                  _reserved: true,
+                  disabledFeatures: [],
+                })
+                .expect(tests.reservedSpecified.statusCode)
+                .then(tests.reservedSpecified.response);
+            });
           });
         });
       });
-    });
-  };
+    };
 
   const createTest = makeCreateTest(describe);
   // @ts-ignore

@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
-import { wrapEsError } from '../../helpers';
 
 import { TemplateDeserialized } from '../../../../common';
 
@@ -21,16 +21,19 @@ const bodySchema = schema.object({
   ),
 });
 
-export function registerDeleteRoute({ router, license }: RouteDependencies) {
+export function registerDeleteRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
     {
       path: addBasePath('/delete_index_templates'),
       validate: { body: bodySchema },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
-      const { templates } = req.body as TypeOf<typeof bodySchema>;
-      const response: { templatesDeleted: Array<TemplateDeserialized['name']>; errors: any[] } = {
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { templates } = request.body as TypeOf<typeof bodySchema>;
+      const responseBody: {
+        templatesDeleted: Array<TemplateDeserialized['name']>;
+        errors: any[];
+      } = {
         templatesDeleted: [],
         errors: [],
       };
@@ -39,26 +42,26 @@ export function registerDeleteRoute({ router, license }: RouteDependencies) {
         templates.map(async ({ name, isLegacy }) => {
           try {
             if (isLegacy) {
-              await callAsCurrentUser('indices.deleteTemplate', {
+              await client.asCurrentUser.indices.deleteTemplate({
                 name,
               });
             } else {
-              await callAsCurrentUser('dataManagement.deleteComposableIndexTemplate', {
+              await client.asCurrentUser.indices.deleteIndexTemplate({
                 name,
               });
             }
 
-            return response.templatesDeleted.push(name);
-          } catch (e) {
-            return response.errors.push({
+            return responseBody.templatesDeleted.push(name);
+          } catch (error) {
+            return responseBody.errors.push({
               name,
-              error: wrapEsError(e),
+              error: handleEsError({ error, response }),
             });
           }
         })
       );
 
-      return res.ok({ body: response });
-    })
+      return response.ok({ body: responseBody });
+    }
   );
 }

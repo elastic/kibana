@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import { ANOMALY_SEVERITY } from '../../ml/common';
+import { ANOMALY_SEVERITY } from './ml_constants';
 import {
   getSeverityType,
   getSeverityColor as mlGetSeverityColor,
@@ -31,6 +32,8 @@ export function getSeverity(score: number | undefined) {
 export function getSeverityColor(score: number) {
   return mlGetSeverityColor(score);
 }
+
+export const ML_TRANSACTION_LATENCY_DETECTOR_INDEX = 0;
 
 export const ML_ERRORS = {
   INVALID_LICENSE: i18n.translate(

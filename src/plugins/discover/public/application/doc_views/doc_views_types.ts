@@ -1,34 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { ComponentType } from 'react';
-import { IScope } from 'angular';
-import { SearchResponse } from 'elasticsearch';
+
+import type { estypes } from '@elastic/elasticsearch';
 import { IndexPattern } from '../../../../data/public';
 
-export interface AngularDirective {
-  controller: (...injectedServices: any[]) => void;
-  template: string;
-}
-
-export type AngularScope = IScope;
-
-export type ElasticSearchHit<T = unknown> = SearchResponse<T>['hits']['hits'][number];
+export type ElasticSearchHit<T = unknown> = estypes.SearchHit<T>;
 
 export interface FieldMapping {
   filterable?: boolean;
@@ -59,17 +42,28 @@ export type DocViewRenderFn = (
   renderProps: DocViewRenderProps
 ) => () => void;
 
-export interface DocViewInput {
-  component?: DocViewerComponent;
-  directive?: AngularDirective;
+export interface BaseDocViewInput {
   order: number;
-  render?: DocViewRenderFn;
   shouldShow?: (hit: ElasticSearchHit) => boolean;
   title: string;
 }
 
-export interface DocView extends DocViewInput {
-  shouldShow: (hit: ElasticSearchHit) => boolean;
+export interface RenderDocViewInput extends BaseDocViewInput {
+  render: DocViewRenderFn;
+  component?: undefined;
+  directive?: undefined;
 }
+
+interface ComponentDocViewInput extends BaseDocViewInput {
+  component: DocViewerComponent;
+  render?: undefined;
+  directive?: undefined;
+}
+
+export type DocViewInput = ComponentDocViewInput | RenderDocViewInput;
+
+export type DocView = DocViewInput & {
+  shouldShow: NonNullable<DocViewInput['shouldShow']>;
+};
 
 export type DocViewInputFn = () => DocViewInput;

@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { spacesMock } from '../../../spaces/server/mocks';
+
+import { checkAccess } from './check_access';
 
 jest.mock('./enterprise_search_config_api', () => ({
   callEnterpriseSearchConfigAPI: jest.fn(),
 }));
 import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
-
-import { checkAccess } from './check_access';
-import { spacesMock } from '../../../spaces/server/mocks';
 
 const enabledSpace = {
   id: 'space',
@@ -50,6 +52,30 @@ describe('checkAccess', () => {
     spaces: mockSpaces,
   } as any;
 
+  describe('when security is disabled', () => {
+    it('should deny all access', async () => {
+      const security = {
+        authz: { mode: { useRbacForRequest: () => false } },
+      };
+      expect(await checkAccess({ ...mockDependencies, security })).toEqual({
+        hasAppSearchAccess: false,
+        hasWorkplaceSearchAccess: false,
+      });
+    });
+  });
+
+  describe('when the current request is unauthenticated', () => {
+    it('should deny all access', async () => {
+      const request = {
+        auth: { isAuthenticated: false },
+      };
+      expect(await checkAccess({ ...mockDependencies, request })).toEqual({
+        hasAppSearchAccess: false,
+        hasWorkplaceSearchAccess: false,
+      });
+    });
+  });
+
   describe('when the space is disabled', () => {
     it('should deny all access', async () => {
       mockSpaces.spacesService.getActiveSpace.mockResolvedValueOnce(disabledSpace);
@@ -60,18 +86,7 @@ describe('checkAccess', () => {
     });
   });
 
-  describe('when the spaces plugin is unavailable', () => {
-    describe('when security is disabled', () => {
-      it('should allow all access', async () => {
-        const spaces = undefined;
-        const security = undefined;
-        expect(await checkAccess({ ...mockDependencies, spaces, security })).toEqual({
-          hasAppSearchAccess: true,
-          hasWorkplaceSearchAccess: true,
-        });
-      });
-    });
-
+  describe('when the Spaces plugin is unavailable', () => {
     describe('when getActiveSpace returns 403 forbidden', () => {
       it('should deny all access', async () => {
         mockSpaces.spacesService.getActiveSpace.mockReturnValueOnce(
@@ -101,16 +116,6 @@ describe('checkAccess', () => {
   describe('when the space is enabled', () => {
     beforeEach(() => {
       mockSpaces.spacesService.getActiveSpace.mockResolvedValueOnce(enabledSpace);
-    });
-
-    describe('when security is disabled', () => {
-      it('should allow all access', async () => {
-        const security = undefined;
-        expect(await checkAccess({ ...mockDependencies, security })).toEqual({
-          hasAppSearchAccess: true,
-          hasWorkplaceSearchAccess: true,
-        });
-      });
     });
 
     describe('when the user is a superuser', () => {

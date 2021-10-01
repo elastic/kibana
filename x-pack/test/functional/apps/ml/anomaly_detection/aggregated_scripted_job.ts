@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -15,6 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supportedTestSuites = [
     {
       suiteTitle: 'supported job with aggregation field',
+      // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_supported_aggs_${ts}`,
         job_type: 'anomaly_detector',
@@ -48,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
         allow_lazy_open: false,
         groups: [],
       } as Job,
-      datafeedConfig: ({
+      datafeedConfig: {
         datafeed_id: `datafeed-fq_supported_aggs_${ts}`,
         job_id: `fq_supported_aggs_${ts}`,
         chunking_config: {
@@ -97,10 +99,11 @@ export default function ({ getService }: FtrProviderContext) {
         delayed_data_check_config: {
           enabled: true,
         },
-      } as unknown) as Datafeed,
+      } as unknown as Datafeed,
     },
     {
       suiteTitle: 'supported job with scripted field',
+      // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_supported_script_${ts}`,
         job_type: 'anomaly_detector',
@@ -133,7 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
         allow_lazy_open: false,
         groups: [],
       } as Job,
-      datafeedConfig: ({
+      datafeedConfig: {
         chunking_config: {
           mode: 'auto',
         },
@@ -168,13 +171,14 @@ export default function ({ getService }: FtrProviderContext) {
         },
         job_id: `fq_supported_script_${ts}`,
         datafeed_id: `datafeed-fq_supported_script_${ts}`,
-      } as unknown) as Datafeed,
+      } as unknown as Datafeed,
     },
   ];
 
   const unsupportedTestSuites = [
     {
       suiteTitle: 'unsupported job with bucket_script aggregation field',
+      // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_unsupported_aggs_${ts}`,
         job_type: 'anomaly_detector',
@@ -208,7 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
         allow_lazy_open: false,
         groups: [],
       } as Job,
-      datafeedConfig: ({
+      datafeedConfig: {
         datafeed_id: `datafeed-fq_unsupported_aggs_${ts}`,
         job_id: `fq_unsupported_aggs_${ts}`,
         chunking_config: {
@@ -275,10 +279,11 @@ export default function ({ getService }: FtrProviderContext) {
         delayed_data_check_config: {
           enabled: true,
         },
-      } as unknown) as Datafeed,
+      } as unknown as Datafeed,
     },
     {
       suiteTitle: 'unsupported job with partition by of a scripted field',
+      // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_unsupported_script_${ts}`,
         job_type: 'anomaly_detector',
@@ -312,7 +317,7 @@ export default function ({ getService }: FtrProviderContext) {
         allow_lazy_open: false,
         groups: [],
       } as Job,
-      datafeedConfig: ({
+      datafeedConfig: {
         chunking_config: {
           mode: 'auto',
         },
@@ -354,15 +359,15 @@ export default function ({ getService }: FtrProviderContext) {
         },
         job_id: `fq_unsupported_script_${ts}`,
         datafeed_id: `datafeed-fq_unsupported_script_${ts}`,
-      } as unknown) as Datafeed,
+      } as unknown as Datafeed,
     },
   ];
 
   describe('aggregated or scripted job', function () {
     this.tags(['mlqa']);
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
       await ml.testResources.setKibanaTimeZoneToUTC();

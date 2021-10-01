@@ -1,39 +1,26 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 // eslint-disable-next-line max-classes-per-file
 import { InternalCoreStart } from './internal_types';
 import { KibanaRequest } from './http/router';
 import { SavedObjectsClientContract } from './saved_objects/types';
-import { InternalSavedObjectsServiceStart, ISavedObjectTypeRegistry } from './saved_objects';
 import {
-  InternalElasticsearchServiceStart,
-  IScopedClusterClient,
-  LegacyScopedClusterClient,
-} from './elasticsearch';
+  InternalSavedObjectsServiceStart,
+  ISavedObjectTypeRegistry,
+  SavedObjectsClientProviderOptions,
+} from './saved_objects';
+import { InternalElasticsearchServiceStart, IScopedClusterClient } from './elasticsearch';
 import { InternalUiSettingsServiceStart, IUiSettingsClient } from './ui_settings';
+import { DeprecationsClient, InternalDeprecationsServiceStart } from './deprecations';
 
 class CoreElasticsearchRouteHandlerContext {
   #client?: IScopedClusterClient;
-  #legacy?: {
-    client: Pick<LegacyScopedClusterClient, 'callAsInternalUser' | 'callAsCurrentUser'>;
-  };
 
   constructor(
     private readonly elasticsearchStart: InternalElasticsearchServiceStart,
@@ -45,15 +32,6 @@ class CoreElasticsearchRouteHandlerContext {
       this.#client = this.elasticsearchStart.client.asScoped(this.request);
     }
     return this.#client;
-  }
-
-  public get legacy() {
-    if (this.#legacy == null) {
-      this.#legacy = {
-        client: this.elasticsearchStart.legacy.client.asScoped(this.request),
-      };
-    }
-    return this.#legacy;
   }
 }
 
@@ -78,6 +56,19 @@ class CoreSavedObjectsRouteHandlerContext {
     }
     return this.#typeRegistry;
   }
+
+  public getClient = (options?: SavedObjectsClientProviderOptions) => {
+    if (!options) return this.client;
+    return this.savedObjectsStart.getScopedClient(this.request, options);
+  };
+
+  public getExporter = (client: SavedObjectsClientContract) => {
+    return this.savedObjectsStart.createExporter(client);
+  };
+
+  public getImporter = (client: SavedObjectsClientContract) => {
+    return this.savedObjectsStart.createImporter(client);
+  };
 }
 
 class CoreUiSettingsRouteHandlerContext {
@@ -97,10 +88,30 @@ class CoreUiSettingsRouteHandlerContext {
   }
 }
 
+class CoreDeprecationsRouteHandlerContext {
+  #client?: DeprecationsClient;
+  constructor(
+    private readonly deprecationsStart: InternalDeprecationsServiceStart,
+    private readonly elasticsearchRouterHandlerContext: CoreElasticsearchRouteHandlerContext,
+    private readonly savedObjectsRouterHandlerContext: CoreSavedObjectsRouteHandlerContext
+  ) {}
+
+  public get client() {
+    if (this.#client == null) {
+      this.#client = this.deprecationsStart.asScopedToClient(
+        this.elasticsearchRouterHandlerContext.client,
+        this.savedObjectsRouterHandlerContext.client
+      );
+    }
+    return this.#client;
+  }
+}
+
 export class CoreRouteHandlerContext {
   readonly elasticsearch: CoreElasticsearchRouteHandlerContext;
   readonly savedObjects: CoreSavedObjectsRouteHandlerContext;
   readonly uiSettings: CoreUiSettingsRouteHandlerContext;
+  readonly deprecations: CoreDeprecationsRouteHandlerContext;
 
   constructor(
     private readonly coreStart: InternalCoreStart,
@@ -116,6 +127,11 @@ export class CoreRouteHandlerContext {
     );
     this.uiSettings = new CoreUiSettingsRouteHandlerContext(
       this.coreStart.uiSettings,
+      this.savedObjects
+    );
+    this.deprecations = new CoreDeprecationsRouteHandlerContext(
+      this.coreStart.deprecations,
+      this.elasticsearch,
       this.savedObjects
     );
   }

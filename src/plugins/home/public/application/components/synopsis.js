@@ -1,63 +1,38 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { EuiCard, EuiIcon } from '@elastic/eui';
 
-export function Synopsis({
-  id,
-  description,
-  iconUrl,
-  iconType,
-  title,
-  url,
-  wrapInPanel,
-  onClick,
-  isBeta,
-}) {
+export function Synopsis({ id, description, iconUrl, iconType, title, url, onClick, isBeta }) {
   let optionalImg;
+
   if (iconUrl) {
     optionalImg = <img alt="" className="synopsisIcon" src={iconUrl} />;
   } else if (iconType) {
     optionalImg = <EuiIcon color="text" size="l" title="" type={iconType} />;
   }
 
-  const classes = classNames('homSynopsis__card', {
-    'homSynopsis__card--noPanel': !wrapInPanel,
-  });
-
   return (
     <EuiCard
-      className={classes}
-      layout="horizontal"
-      icon={optionalImg}
-      titleSize="xs"
-      title={title}
-      description={description}
-      onClick={onClick}
-      href={url}
-      data-test-subj={`homeSynopsisLink${id.toLowerCase()}`}
       betaBadgeLabel={isBeta ? 'Beta' : null}
+      className="homSynopsis__card"
+      data-test-subj={`homeSynopsisLink${id.toLowerCase()}`}
+      description={description}
+      href={url}
+      icon={optionalImg}
+      layout="horizontal"
+      onClick={onClick}
+      title={title}
       titleElement="h3"
+      titleSize="xs"
     />
   );
 }

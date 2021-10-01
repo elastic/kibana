@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from './breadcrumb';
 import { i18n } from '@kbn/i18n';
-import { routeToConnectors, routeToAlerts, routeToHome } from '../constants';
+import { routeToConnectors, routeToRules, routeToHome } from '../constants';
 
 describe('getAlertingSectionBreadcrumb', () => {
   test('if change calls return proper breadcrumb title ', async () => {
@@ -15,15 +17,15 @@ describe('getAlertingSectionBreadcrumb', () => {
       }),
       href: `${routeToConnectors}`,
     });
-    expect(getAlertingSectionBreadcrumb('alerts')).toMatchObject({
-      text: i18n.translate('xpack.triggersActionsUI.alerts.breadcrumbTitle', {
-        defaultMessage: 'Alerts',
+    expect(getAlertingSectionBreadcrumb('rules')).toMatchObject({
+      text: i18n.translate('xpack.triggersActionsUI.rules.breadcrumbTitle', {
+        defaultMessage: 'Rules',
       }),
-      href: `${routeToAlerts}`,
+      href: `${routeToRules}`,
     });
     expect(getAlertingSectionBreadcrumb('home')).toMatchObject({
       text: i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {
-        defaultMessage: 'Alerts and Actions',
+        defaultMessage: 'Rules and Connectors',
       }),
       href: `${routeToHome}`,
     });
@@ -36,7 +38,7 @@ describe('getAlertDetailsBreadcrumb', () => {
       text: i18n.translate('xpack.triggersActionsUI.alertDetails.breadcrumbTitle', {
         defaultMessage: 'testName',
       }),
-      href: '/alert/testId',
+      href: '/rule/testId',
     });
   });
 });

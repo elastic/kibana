@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ListNodesRouteResponse, DataTierRole } from '../../../../common/types';
@@ -74,6 +75,7 @@ export function registerListRoute({
     'ml.enabled',
     'ml.machine_memory',
     'ml.max_open_jobs',
+    'ml.max_jvm_size',
     // Used by ML to identify nodes that have transform enabled:
     // https://github.com/elastic/elasticsearch/pull/52712/files#diff-225cc2c1291b4c60a8c3412a619094e1R147
     'transform.node',
@@ -86,15 +88,14 @@ export function registerListRoute({
     { path: addBasePath('/nodes/list'), validate: false },
     license.guardApiRoute(async (context, request, response) => {
       try {
-        const settingsResponse = await context.core.elasticsearch.client.asCurrentUser.transport.request(
-          {
+        const settingsResponse =
+          await context.core.elasticsearch.client.asCurrentUser.transport.request({
             method: 'GET',
             path: '/_nodes/settings',
             querystring: {
               format: 'json',
             },
-          }
-        );
+          });
         const body: ListNodesRouteResponse = convertSettingsIntoLists(
           settingsResponse.body as Settings,
           disallowedNodeAttributes

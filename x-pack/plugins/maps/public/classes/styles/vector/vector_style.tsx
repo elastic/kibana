@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
-import { FeatureIdentifier, Map as MbMap } from 'mapbox-gl';
+import { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
 import { FeatureCollection } from 'geojson';
 import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
 import { getDefaultStaticProperties, LINE_STYLES, POLYGON_STYLES } from './vector_style_defaults';
@@ -14,6 +15,8 @@ import {
   DEFAULT_ICON,
   FIELD_ORIGIN,
   GEO_JSON_TYPE,
+  KBN_IS_CENTROID_FEATURE,
+  KBN_VECTOR_SHAPE_TYPE_COUNTS,
   LAYER_STYLE_TYPE,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
   STYLE_TYPE,
@@ -61,6 +64,7 @@ import {
   StyleMetaDescriptor,
   StylePropertyField,
   StylePropertyOptions,
+  TileMetaFeature,
   VectorStyleDescriptor,
   VectorStylePropertiesDescriptor,
 } from '../../../../common/descriptor_types';
@@ -68,10 +72,11 @@ import { DataRequest } from '../../util/data_request';
 import { IStyle } from '../style';
 import { IStyleProperty } from './properties/style_property';
 import { IField } from '../../fields/field';
-import { IVectorLayer } from '../../layers/vector_layer/vector_layer';
+import { IVectorLayer } from '../../layers/vector_layer';
 import { IVectorSource } from '../../sources/vector_source';
 import { createStyleFieldsHelper, StyleFieldsHelper } from './style_fields_helper';
 import { IESAggField } from '../../fields/agg';
+import { VectorShapeTypeCounts } from '../../../../common/get_geometry_counts';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
@@ -87,9 +92,9 @@ export interface IVectorStyle extends IStyle {
     previousFields: IField[],
     mapColors: string[]
   ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
-  pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest): Promise<StyleMetaDescriptor>;
   isTimeAware: () => boolean;
   getIcon: () => ReactElement<any>;
+  getIconFromGeometryTypes: (isLinesOnly: boolean, isPointsOnly: boolean) => ReactElement<any>;
   hasLegendDetails: () => Promise<boolean>;
   renderLegendDetails: () => ReactElement<any>;
   clearFeatureState: (featureCollection: FeatureCollection, mbMap: MbMap, sourceId: string) => void;
@@ -176,7 +181,8 @@ export class VectorStyle implements IVectorStyle {
   constructor(
     descriptor: VectorStyleDescriptor | null,
     source: IVectorSource,
-    layer: IVectorLayer
+    layer: IVectorLayer,
+    chartsPaletteServiceGetColor?: (value: string) => string | null
   ) {
     this._source = source;
     this._layer = layer;
@@ -195,11 +201,13 @@ export class VectorStyle implements IVectorStyle {
     );
     this._lineColorStyleProperty = this._makeColorProperty(
       this._descriptor.properties[VECTOR_STYLES.LINE_COLOR],
-      VECTOR_STYLES.LINE_COLOR
+      VECTOR_STYLES.LINE_COLOR,
+      chartsPaletteServiceGetColor
     );
     this._fillColorStyleProperty = this._makeColorProperty(
       this._descriptor.properties[VECTOR_STYLES.FILL_COLOR],
-      VECTOR_STYLES.FILL_COLOR
+      VECTOR_STYLES.FILL_COLOR,
+      chartsPaletteServiceGetColor
     );
     this._lineWidthStyleProperty = this._makeSizeProperty(
       this._descriptor.properties[VECTOR_STYLES.LINE_WIDTH],
@@ -228,11 +236,13 @@ export class VectorStyle implements IVectorStyle {
     );
     this._labelColorStyleProperty = this._makeColorProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_COLOR],
-      VECTOR_STYLES.LABEL_COLOR
+      VECTOR_STYLES.LABEL_COLOR,
+      chartsPaletteServiceGetColor
     );
     this._labelBorderColorStyleProperty = this._makeColorProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_COLOR],
-      VECTOR_STYLES.LABEL_BORDER_COLOR
+      VECTOR_STYLES.LABEL_BORDER_COLOR,
+      chartsPaletteServiceGetColor
     );
     this._labelBorderSizeStyleProperty = new LabelBorderSizeProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_SIZE].options,
@@ -248,9 +258,9 @@ export class VectorStyle implements IVectorStyle {
     mapColors: string[]
   ) {
     const originalProperties = this.getRawProperties();
-    const invalidStyleNames: VECTOR_STYLES[] = (Object.keys(
-      originalProperties
-    ) as VECTOR_STYLES[]).filter((key) => {
+    const invalidStyleNames: VECTOR_STYLES[] = (
+      Object.keys(originalProperties) as VECTOR_STYLES[]
+    ).filter((key) => {
       const dynamicOptions = getDynamicOptions(originalProperties, key);
       if (!dynamicOptions || !dynamicOptions.field || !dynamicOptions.field.name) {
         return false;
@@ -481,9 +491,87 @@ export class VectorStyle implements IVectorStyle {
     );
   }
 
-  async pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest) {
-    const features = _.get(sourceDataRequest.getData(), 'features', []);
+  async pluckStyleMetaFromTileMeta(metaFeatures: TileMetaFeature[]): Promise<StyleMetaDescriptor> {
+    const shapeTypeCountMeta: VectorShapeTypeCounts = metaFeatures.reduce(
+      (accumulator: VectorShapeTypeCounts, tileMeta: TileMetaFeature) => {
+        if (
+          !tileMeta ||
+          !tileMeta.properties ||
+          !tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS]
+        ) {
+          return accumulator;
+        }
 
+        accumulator[VECTOR_SHAPE_TYPE.POINT] +=
+          tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.POINT];
+        accumulator[VECTOR_SHAPE_TYPE.LINE] +=
+          tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.LINE];
+        accumulator[VECTOR_SHAPE_TYPE.POLYGON] +=
+          tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.POLYGON];
+
+        return accumulator;
+      },
+      {
+        [VECTOR_SHAPE_TYPE.POLYGON]: 0,
+        [VECTOR_SHAPE_TYPE.LINE]: 0,
+        [VECTOR_SHAPE_TYPE.POINT]: 0,
+      }
+    );
+
+    const isLinesOnly =
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] > 0 &&
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] === 0 &&
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] === 0;
+    const isPointsOnly =
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] === 0 &&
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] > 0 &&
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] === 0;
+    const isPolygonsOnly =
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] === 0 &&
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] === 0 &&
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] > 0;
+
+    const styleMeta: StyleMetaDescriptor = {
+      geometryTypes: {
+        isPointsOnly,
+        isLinesOnly,
+        isPolygonsOnly,
+      },
+      fieldMeta: {},
+    };
+
+    const dynamicProperties = this.getDynamicPropertiesArray();
+    if (dynamicProperties.length === 0 || !metaFeatures) {
+      // no additional meta data to pull from source data request.
+      return styleMeta;
+    }
+
+    dynamicProperties.forEach((dynamicProperty) => {
+      const ordinalStyleMeta =
+        dynamicProperty.pluckOrdinalStyleMetaFromTileMetaFeatures(metaFeatures);
+      const categoricalStyleMeta =
+        dynamicProperty.pluckCategoricalStyleMetaFromTileMetaFeatures(metaFeatures);
+
+      const name = dynamicProperty.getFieldName();
+      if (!styleMeta.fieldMeta[name]) {
+        styleMeta.fieldMeta[name] = {};
+      }
+      if (categoricalStyleMeta) {
+        styleMeta.fieldMeta[name].categories = categoricalStyleMeta;
+      }
+
+      if (ordinalStyleMeta) {
+        styleMeta.fieldMeta[name].range = ordinalStyleMeta;
+      }
+    });
+
+    return styleMeta;
+  }
+
+  async pluckStyleMetaFromSourceDataRequest(
+    sourceDataRequest: DataRequest
+  ): Promise<StyleMetaDescriptor> {
+    const features = _.get(sourceDataRequest.getData(), 'features', []);
     const supportedFeatures = await this._source.getSupportedShapeTypes();
     const hasFeatureType = {
       [VECTOR_SHAPE_TYPE.POINT]: false,
@@ -493,6 +581,12 @@ export class VectorStyle implements IVectorStyle {
     if (supportedFeatures.length > 1) {
       for (let i = 0; i < features.length; i++) {
         const feature = features[i];
+
+        // ignore centroid features as they are added for styling and not part of the real data set
+        if (feature.properties[KBN_IS_CENTROID_FEATURE]) {
+          continue;
+        }
+
         if (!hasFeatureType[VECTOR_SHAPE_TYPE.POINT] && POINTS.includes(feature.geometry.type)) {
           hasFeatureType[VECTOR_SHAPE_TYPE.POINT] = true;
         }
@@ -535,21 +629,24 @@ export class VectorStyle implements IVectorStyle {
       return styleMeta;
     }
 
-    dynamicProperties.forEach((dynamicProperty) => {
-      const categoricalStyleMeta = dynamicProperty.pluckCategoricalStyleMetaFromFeatures(features);
-      const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromFeatures(features);
-      const name = dynamicProperty.getFieldName();
-      if (!styleMeta.fieldMeta[name]) {
-        styleMeta.fieldMeta[name] = {};
-      }
-      if (categoricalStyleMeta) {
-        styleMeta.fieldMeta[name].categories = categoricalStyleMeta;
-      }
+    dynamicProperties.forEach(
+      (dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions>) => {
+        const categoricalStyleMeta =
+          dynamicProperty.pluckCategoricalStyleMetaFromFeatures(features);
+        const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromFeatures(features);
+        const name = dynamicProperty.getFieldName();
+        if (!styleMeta.fieldMeta[name]) {
+          styleMeta.fieldMeta[name] = {};
+        }
+        if (categoricalStyleMeta) {
+          styleMeta.fieldMeta[name].categories = categoricalStyleMeta;
+        }
 
-      if (ordinalStyleMeta) {
-        styleMeta.fieldMeta[name].range = ordinalStyleMeta;
+        if (ordinalStyleMeta) {
+          styleMeta.fieldMeta[name].range = ordinalStyleMeta;
+        }
       }
-    });
+    );
 
     return styleMeta;
   }
@@ -613,7 +710,7 @@ export class VectorStyle implements IVectorStyle {
       dataRequestId = SOURCE_FORMATTERS_DATA_REQUEST_ID;
     } else {
       const targetJoin = this._layer.getValidJoins().find((join) => {
-        return join.getRightJoinSource().hasMatchingMetricField(fieldName);
+        return !!join.getRightJoinSource().getFieldByName(fieldName);
       });
       if (targetJoin) {
         dataRequestId = targetJoin.getSourceFormattersDataRequestId();
@@ -640,8 +737,7 @@ export class VectorStyle implements IVectorStyle {
       : (this._iconStyleProperty as StaticIconProperty).getOptions().value;
   }
 
-  getIcon = () => {
-    const isLinesOnly = this._getIsLinesOnly();
+  getIconFromGeometryTypes(isLinesOnly: boolean, isPointsOnly: boolean) {
     let strokeColor;
     if (isLinesOnly) {
       strokeColor = extractColorFromStyleProperty(
@@ -663,14 +759,20 @@ export class VectorStyle implements IVectorStyle {
 
     return (
       <VectorIcon
-        isPointsOnly={this._getIsPointsOnly()}
+        isPointsOnly={isPointsOnly}
         isLinesOnly={isLinesOnly}
         symbolId={this._getSymbolId()}
         strokeColor={strokeColor}
         fillColor={fillColor}
       />
     );
-  };
+  }
+
+  getIcon() {
+    const isLinesOnly = this._getIsLinesOnly();
+    const isPointsOnly = this._getIsPointsOnly();
+    return this.getIconFromGeometryTypes(isLinesOnly, isPointsOnly);
+  }
 
   _getLegendDetailStyleProperties = () => {
     return this.getDynamicPropertiesArray().filter((styleProperty) => {
@@ -834,7 +936,7 @@ export class VectorStyle implements IVectorStyle {
     this._iconOrientationProperty.syncIconRotationWithMb(symbolLayerId, mbMap);
   }
 
-  _makeField(fieldDescriptor?: StylePropertyField) {
+  _makeField(fieldDescriptor?: StylePropertyField): IField | null {
     if (!fieldDescriptor || !fieldDescriptor.name) {
       return null;
     }
@@ -845,10 +947,10 @@ export class VectorStyle implements IVectorStyle {
       return this._source.getFieldByName(fieldDescriptor.name);
     } else if (fieldDescriptor.origin === FIELD_ORIGIN.JOIN) {
       const targetJoin = this._layer.getValidJoins().find((join) => {
-        return join.getRightJoinSource().hasMatchingMetricField(fieldDescriptor.name);
+        return !!join.getRightJoinSource().getFieldByName(fieldDescriptor.name);
       });
       return targetJoin
-        ? targetJoin.getRightJoinSource().getMetricFieldForName(fieldDescriptor.name)
+        ? targetJoin.getRightJoinSource().getFieldByName(fieldDescriptor.name)
         : null;
     } else {
       throw new Error(`Unknown origin-type ${fieldDescriptor.origin}`);
@@ -882,7 +984,8 @@ export class VectorStyle implements IVectorStyle {
 
   _makeColorProperty(
     descriptor: ColorStylePropertyDescriptor | undefined,
-    styleName: VECTOR_STYLES
+    styleName: VECTOR_STYLES,
+    chartsPaletteServiceGetColor?: (value: string) => string | null
   ) {
     if (!descriptor || !descriptor.options) {
       return new StaticColorProperty({ color: '' }, styleName);
@@ -896,7 +999,8 @@ export class VectorStyle implements IVectorStyle {
         styleName,
         field,
         this._layer,
-        this._getFieldFormatter
+        this._getFieldFormatter,
+        chartsPaletteServiceGetColor
       );
     } else {
       throw new Error(`${descriptor} not implemented`);

@@ -1,32 +1,38 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
 import { useValues } from 'kea';
 
-import { GroupLogic } from '../group_logic';
+import { EuiSideNavItemType } from '@elastic/eui';
+
+import { generateNavLink } from '../../../../shared/layout';
 import { NAV } from '../../../constants';
-
-import { SideNavLink } from '../../../../shared/layout';
-
 import { getGroupPath, getGroupSourcePrioritizationPath } from '../../../routes';
+import { GroupLogic } from '../group_logic';
 
-export const GroupSubNav: React.FC = () => {
+export const useGroupSubNav = () => {
   const {
     group: { id },
   } = useValues(GroupLogic);
 
-  if (!id) return null;
+  if (!id) return undefined;
 
-  return (
-    <>
-      <SideNavLink to={getGroupPath(id)}>{NAV.GROUP_OVERVIEW}</SideNavLink>
-      <SideNavLink to={getGroupSourcePrioritizationPath(id)}>
-        {NAV.SOURCE_PRIORITIZATION}
-      </SideNavLink>
-    </>
-  );
+  const navItems: Array<EuiSideNavItemType<unknown>> = [
+    {
+      id: 'groupOverview',
+      name: NAV.GROUP_OVERVIEW,
+      ...generateNavLink({ to: getGroupPath(id) }),
+    },
+    {
+      id: 'groupSourcePrioritization',
+      name: NAV.SOURCE_PRIORITIZATION,
+      ...generateNavLink({ to: getGroupSourcePrioritizationPath(id) }),
+    },
+  ];
+
+  return navItems;
 };

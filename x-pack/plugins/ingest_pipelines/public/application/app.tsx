@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPageContent } from '@elastic/eui';
+import { EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import { Router, Switch, Route } from 'react-router-dom';
 
@@ -17,7 +19,6 @@ import {
   useAuthorizationContext,
   WithPrivileges,
   SectionLoading,
-  NotAuthorizedSection,
 } from '../shared_imports';
 
 import { PipelinesList, PipelinesCreate, PipelinesEdit, PipelinesClone } from './sections';
@@ -59,35 +60,42 @@ export const App: FunctionComponent = () => {
       {({ isLoading, hasPrivileges, privilegesMissing }) => {
         if (isLoading) {
           return (
-            <SectionLoading>
-              <FormattedMessage
-                id="xpack.ingestPipelines.app.checkingPrivilegesDescription"
-                defaultMessage="Checking privileges…"
-              />
-            </SectionLoading>
+            <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+              <SectionLoading>
+                <FormattedMessage
+                  id="xpack.ingestPipelines.app.checkingPrivilegesDescription"
+                  defaultMessage="Checking privileges…"
+                />
+              </SectionLoading>
+            </EuiPageContent>
           );
         }
 
         if (!hasPrivileges) {
           return (
-            <EuiPageContent>
-              <NotAuthorizedSection
+            <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+              <EuiEmptyPrompt
+                iconType="securityApp"
                 title={
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.app.deniedPrivilegeTitle"
-                    defaultMessage="Cluster privileges required"
-                  />
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.ingestPipelines.app.deniedPrivilegeTitle"
+                      defaultMessage="Cluster privileges required"
+                    />
+                  </h2>
                 }
-                message={
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.app.deniedPrivilegeDescription"
-                    defaultMessage="To use Ingest Pipelines, you must have {privilegesCount,
-                    plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
-                    values={{
-                      missingPrivileges: privilegesMissing.cluster!.join(', '),
-                      privilegesCount: privilegesMissing.cluster!.length,
-                    }}
-                  />
+                body={
+                  <p>
+                    <FormattedMessage
+                      id="xpack.ingestPipelines.app.deniedPrivilegeDescription"
+                      defaultMessage="To use Ingest Pipelines, you must have {privilegesCount,
+                      plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
+                      values={{
+                        missingPrivileges: privilegesMissing.cluster!.join(', '),
+                        privilegesCount: privilegesMissing.cluster!.length,
+                      }}
+                    />
+                  </p>
                 }
               />
             </EuiPageContent>

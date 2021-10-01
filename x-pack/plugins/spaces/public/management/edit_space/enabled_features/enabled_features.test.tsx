@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type { EuiCheckboxProps } from '@elastic/eui';
 import React from 'react';
-import { mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
+
+import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/public';
+
+import type { KibanaFeatureConfig } from '../../../../../features/public';
 import { EnabledFeatures } from './enabled_features';
-import { KibanaFeatureConfig } from '../../../../../features/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../../../../src/core/public';
-import { findTestSubject } from '@kbn/test/jest';
-import { EuiCheckboxProps } from '@elastic/eui';
 
 const features: KibanaFeatureConfig[] = [
   {
@@ -30,11 +32,9 @@ const features: KibanaFeatureConfig[] = [
 ];
 
 describe('EnabledFeatures', () => {
-  const getUrlForApp = (appId: string) => appId;
-
   it(`renders as expected`, () => {
     expect(
-      shallowWithIntl<EnabledFeatures>(
+      shallowWithIntl(
         <EnabledFeatures
           features={features}
           space={{
@@ -42,9 +42,7 @@ describe('EnabledFeatures', () => {
             name: 'my space',
             disabledFeatures: ['feature-1', 'feature-2'],
           }}
-          securityEnabled={true}
           onChange={jest.fn()}
-          getUrlForApp={getUrlForApp}
         />
       )
     ).toMatchSnapshot();
@@ -61,9 +59,7 @@ describe('EnabledFeatures', () => {
           name: 'my space',
           disabledFeatures: ['feature-1', 'feature-2'],
         }}
-        securityEnabled={true}
         onChange={changeHandler}
-        getUrlForApp={getUrlForApp}
       />
     );
 
@@ -96,9 +92,7 @@ describe('EnabledFeatures', () => {
           name: 'my space',
           disabledFeatures: [],
         }}
-        securityEnabled={true}
         onChange={changeHandler}
-        getUrlForApp={getUrlForApp}
       />
     );
 
@@ -134,9 +128,7 @@ describe('EnabledFeatures', () => {
           name: 'my space',
           disabledFeatures: [],
         }}
-        securityEnabled={true}
         onChange={changeHandler}
-        getUrlForApp={getUrlForApp}
       />
     );
 
@@ -165,9 +157,7 @@ describe('EnabledFeatures', () => {
           name: 'my space',
           disabledFeatures: ['feature-1', 'feature-2'],
         }}
-        securityEnabled={true}
         onChange={changeHandler}
-        getUrlForApp={getUrlForApp}
       />
     );
 
@@ -194,9 +184,7 @@ describe('EnabledFeatures', () => {
           name: 'my space',
           disabledFeatures: ['feature-1'],
         }}
-        securityEnabled={true}
         onChange={jest.fn()}
-        getUrlForApp={getUrlForApp}
       />
     );
     expect(findTestSubject(wrapper, 'hideAllFeaturesLink')).toHaveLength(1);
@@ -214,9 +202,7 @@ describe('EnabledFeatures', () => {
             name: 'my space',
             disabledFeatures: [],
           }}
-          securityEnabled={true}
           onChange={changeHandler}
-          getUrlForApp={getUrlForApp}
         />
       );
 
@@ -243,9 +229,7 @@ describe('EnabledFeatures', () => {
             name: 'my space',
             disabledFeatures: [],
           }}
-          securityEnabled={true}
           onChange={changeHandler}
-          getUrlForApp={getUrlForApp}
         />
       );
 

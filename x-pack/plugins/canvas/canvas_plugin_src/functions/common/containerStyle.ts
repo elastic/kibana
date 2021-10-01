@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { ContainerStyle, Overflow, BackgroundRepeat, BackgroundSize } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
-import { isValidUrl } from '../../../common/lib/url';
+import { isValidUrl } from '../../../../../../src/plugins/presentation_util/common/lib';
 
 interface Output extends ContainerStyle {
   type: 'containerStyle';

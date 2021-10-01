@@ -1,27 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
-import { parse } from 'url';
 
 export default function canvasSmokeTest({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common']);
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
+  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
 
   describe('smoke test', function () {
     this.tags('includeFirefox');
-    const workpadListSelector = 'canvasWorkpadLoaderTable > canvasWorkpadLoaderWorkpad';
+    const workpadListSelector = 'canvasWorkpadTable > canvasWorkpadTableWorkpad';
     const testWorkpadId = 'workpad-1705f884-6224-47de-ba49-ca224fe6ec31';
 
     before(async () => {
-      await esArchiver.load('canvas/default');
+      await kibanaServer.importExport.load(archive);
       await PageObjects.common.navigateToApp('canvas');
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload(archive);
     });
 
     it('loads workpad list', async () => {
@@ -44,7 +49,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
         const url = await browser.getCurrentUrl();
 
         // remove all the search params, just compare the route
-        const hashRoute = parse(url).hash.split('?')[0];
+        const hashRoute = new URL(url).hash.split('?')[0];
         expect(hashRoute).to.equal(`#/workpad/${testWorkpadId}/page/1`);
       });
     });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { promises as fs } from 'fs';
@@ -39,8 +40,7 @@ export async function checkIfPngsMatch(
     log.debug(`writeFile: ${baselineCopyPath}`);
     await fs.writeFile(baselineCopyPath, await fs.readFile(baselinepngPath));
   } catch (error) {
-    log.error(`No baseline png found at ${baselinepngPath}`);
-    return 0;
+    throw new Error(`No baseline png found at ${baselinepngPath}`);
   }
   log.debug(`writeFile: ${actualCopyPath}`);
   await fs.writeFile(actualCopyPath, await fs.readFile(actualpngPath));

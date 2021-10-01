@@ -1,25 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject, Subscription, asyncScheduler, identity } from 'rxjs';
+import { filter, map, delay, throttleTime } from 'rxjs/operators';
 import { defaults } from 'lodash';
+import { UnwrapObservable } from '@kbn/utility-types';
 import { Adapters } from '../../inspector/public';
 import { IExpressionLoaderParams } from './types';
 import { ExpressionAstExpression } from '../common';
@@ -31,7 +21,7 @@ import { getExpressionsService } from './services';
 type Data = any;
 
 export class ExpressionLoader {
-  data$: Observable<Data>;
+  data$: ReturnType<ExecutionContract['getData']>;
   update$: ExpressionRenderHandler['update$'];
   render$: ExpressionRenderHandler['render$'];
   events$: ExpressionRenderHandler['events$'];
@@ -39,10 +29,11 @@ export class ExpressionLoader {
 
   private execution: ExecutionContract | undefined;
   private renderHandler: ExpressionRenderHandler;
-  private dataSubject: Subject<Data>;
+  private dataSubject: Subject<UnwrapObservable<ExpressionLoader['data$']>>;
   private loadingSubject: Subject<boolean>;
   private data: Data;
   private params: IExpressionLoaderParams = {};
+  private subscription?: Subscription;
 
   constructor(
     element: HTMLElement,
@@ -62,6 +53,7 @@ export class ExpressionLoader {
     );
 
     this.renderHandler = new ExpressionRenderHandler(element, {
+      interactive: params?.interactive,
       onRenderError: params && params.onRenderError,
       renderMode: params?.renderMode,
       syncColors: params?.syncColors,
@@ -78,8 +70,8 @@ export class ExpressionLoader {
       }
     });
 
-    this.data$.subscribe((data) => {
-      this.render(data);
+    this.data$.subscribe(({ result }) => {
+      this.render(result);
     });
 
     this.render$.subscribe(() => {
@@ -98,27 +90,20 @@ export class ExpressionLoader {
     this.dataSubject.complete();
     this.loadingSubject.complete();
     this.renderHandler.destroy();
-    if (this.execution) {
-      this.execution.cancel();
-    }
+    this.cancel();
+    this.subscription?.unsubscribe();
   }
 
   cancel() {
-    if (this.execution) {
-      this.execution.cancel();
-    }
+    this.execution?.cancel();
   }
 
   getExpression(): string | undefined {
-    if (this.execution) {
-      return this.execution.getExpression();
-    }
+    return this.execution?.getExpression();
   }
 
   getAst(): ExpressionAstExpression | undefined {
-    if (this.execution) {
-      return this.execution.getAst();
-    }
+    return this.execution?.getAst();
   }
 
   getElement(): HTMLElement {
@@ -126,7 +111,7 @@ export class ExpressionLoader {
   }
 
   inspect(): Adapters | undefined {
-    return this.execution ? (this.execution.inspect() as Adapters) : undefined;
+    return this.execution?.inspect() as Adapters;
   }
 
   update(expression?: string | ExpressionAstExpression, params?: IExpressionLoaderParams): void {
@@ -140,10 +125,11 @@ export class ExpressionLoader {
     }
   }
 
-  private loadData = async (
+  private loadData = (
     expression: string | ExpressionAstExpression,
     params: IExpressionLoaderParams
-  ): Promise<void> => {
+  ) => {
+    this.subscription?.unsubscribe();
     if (this.execution && this.execution.isPending) {
       this.execution.cancel();
     }
@@ -154,14 +140,19 @@ export class ExpressionLoader {
       inspectorAdapters: params.inspectorAdapters,
       searchSessionId: params.searchSessionId,
       debug: params.debug,
+      syncColors: params.syncColors,
+      executionContext: params.executionContext,
     });
-
-    const prevDataHandler = this.execution;
-    const data = await prevDataHandler.getData();
-    if (this.execution !== prevDataHandler) {
-      return;
-    }
-    this.dataSubject.next(data);
+    this.subscription = this.execution
+      .getData()
+      .pipe(
+        delay(0), // delaying until the next tick since we execute the expression in the constructor
+        filter(({ partial }) => params.partial || !partial),
+        params.partial && params.throttle
+          ? throttleTime(params.throttle, asyncScheduler, { leading: true, trailing: true })
+          : identity
+      )
+      .subscribe((value) => this.dataSubject.next(value));
   };
 
   private render(data: Data): void {
@@ -189,10 +180,15 @@ export class ExpressionLoader {
     if (params.searchSessionId && this.params) {
       this.params.searchSessionId = params.searchSessionId;
     }
+    this.params.syncColors = params.syncColors;
     this.params.debug = Boolean(params.debug);
+    this.params.partial = Boolean(params.partial);
+    this.params.throttle = Number(params.throttle ?? 1000);
 
     this.params.inspectorAdapters = (params.inspectorAdapters ||
       this.execution?.inspect()) as Adapters;
+
+    this.params.executionContext = params.executionContext;
   }
 }
 

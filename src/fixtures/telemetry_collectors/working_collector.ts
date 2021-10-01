@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { CollectorSet } from '../../plugins/usage_collection/server/collector';
 import { loggerMock } from '../../core/server/logging/logger.mock';
 
@@ -28,13 +18,17 @@ interface MyObject {
   total: number;
   type: boolean;
 }
-
+const COMPUTED_TERM = 'computed_term';
+export interface CONSTANT_TERM_INTERFACE {
+  [COMPUTED_TERM]?: MyObject;
+}
 interface Usage {
   flat?: string;
   my_str?: string;
   my_objects: MyObject;
   my_array?: MyObject[];
   my_str_array?: string[];
+  interface_terms?: CONSTANT_TERM_INTERFACE;
   my_index_signature_prop?: {
     [key: string]: number;
   };
@@ -99,6 +93,12 @@ export const myCollector = makeUsageCollector<Usage>({
       },
     },
     my_str_array: { type: 'array', items: { type: 'keyword' } },
+    interface_terms: {
+      computed_term: {
+        total: { type: 'long' },
+        type: { type: 'boolean' },
+      },
+    },
     my_index_signature_prop: {
       count: { type: 'long' },
       avg: { type: 'float' },

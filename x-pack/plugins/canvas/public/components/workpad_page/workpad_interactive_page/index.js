@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { compose, lifecycle, withHandlers, withProps, withState } from 'recompose';
@@ -242,17 +243,7 @@ export const InteractivePage = compose(
   })),
   withProps((...props) => ({
     ...props,
-    canDragElement: (element) => {
-      return !isEmbeddableBody(element) && isInWorkpad(element);
-
-      const hasClosest = typeof element.closest === 'function';
-
-      if (hasClosest) {
-        return !element.closest('.embeddable') || element.closest('.embPanel__header');
-      } else {
-        return !closest.call(element, '.embeddable') || closest.call(element, '.embPanel__header');
-      }
-    },
+    canDragElement: (element) => !isEmbeddableBody(element) && isInWorkpad(element),
   })),
   withHandlers(eventHandlers), // Captures user intent, needs to have reconciled state
   () => InteractiveComponent

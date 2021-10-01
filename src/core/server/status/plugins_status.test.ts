@@ -1,25 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { PluginName } from '../plugins';
 import { PluginsStatusService } from './plugins_status';
-import { of, Observable, BehaviorSubject } from 'rxjs';
+import { of, Observable, BehaviorSubject, ReplaySubject } from 'rxjs';
 import { ServiceStatusLevels, CoreStatus, ServiceStatus } from './types';
 import { first } from 'rxjs/operators';
 import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
@@ -44,6 +33,28 @@ describe('PluginStatusService', () => {
     ['b', ['a']],
     ['c', ['a', 'b']],
   ]);
+
+  describe('set', () => {
+    it('throws an exception if called after registrations are blocked', () => {
+      const service = new PluginsStatusService({
+        core$: coreAllAvailable$,
+        pluginDependencies,
+      });
+
+      service.blockNewRegistrations();
+      expect(() => {
+        service.set(
+          'a',
+          of({
+            level: ServiceStatusLevels.available,
+            summary: 'fail!',
+          })
+        );
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Custom statuses cannot be registered after setup, plugin [a] attempted"`
+      );
+    });
+  });
 
   describe('getDerivedStatus$', () => {
     it(`defaults to core's most severe status`, async () => {
@@ -236,11 +247,73 @@ describe('PluginStatusService', () => {
       subscription.unsubscribe();
 
       expect(statusUpdates).toEqual([
-        { a: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' } },
         { a: { level: ServiceStatusLevels.degraded, summary: 'a degraded' } },
         { a: { level: ServiceStatusLevels.unavailable, summary: 'a unavailable' } },
         { a: { level: ServiceStatusLevels.available, summary: 'a available' } },
       ]);
+    });
+
+    it('updates when a plugin status observable emits', async () => {
+      const service = new PluginsStatusService({
+        core$: coreAllAvailable$,
+        pluginDependencies: new Map([['a', []]]),
+      });
+      const statusUpdates: Array<Record<PluginName, ServiceStatus>> = [];
+      const subscription = service
+        .getAll$()
+        .subscribe((pluginStatuses) => statusUpdates.push(pluginStatuses));
+
+      const aStatus$ = new BehaviorSubject<ServiceStatus>({
+        level: ServiceStatusLevels.degraded,
+        summary: 'a degraded',
+      });
+      service.set('a', aStatus$);
+      aStatus$.next({ level: ServiceStatusLevels.unavailable, summary: 'a unavailable' });
+      aStatus$.next({ level: ServiceStatusLevels.available, summary: 'a available' });
+      subscription.unsubscribe();
+
+      expect(statusUpdates).toEqual([
+        { a: { level: ServiceStatusLevels.degraded, summary: 'a degraded' } },
+        { a: { level: ServiceStatusLevels.unavailable, summary: 'a unavailable' } },
+        { a: { level: ServiceStatusLevels.available, summary: 'a available' } },
+      ]);
+    });
+
+    it('emits an unavailable status if first emission times out, then continues future emissions', async () => {
+      jest.useFakeTimers();
+      const service = new PluginsStatusService({
+        core$: coreAllAvailable$,
+        pluginDependencies: new Map([
+          ['a', []],
+          ['b', ['a']],
+        ]),
+      });
+
+      const pluginA$ = new ReplaySubject<ServiceStatus>(1);
+      service.set('a', pluginA$);
+      const firstEmission = service.getAll$().pipe(first()).toPromise();
+      jest.runAllTimers();
+
+      expect(await firstEmission).toEqual({
+        a: { level: ServiceStatusLevels.unavailable, summary: 'Status check timed out after 30s' },
+        b: {
+          level: ServiceStatusLevels.unavailable,
+          summary: '[a]: Status check timed out after 30s',
+          detail: 'See the status page for more information',
+          meta: {
+            affectedServices: ['a'],
+          },
+        },
+      });
+
+      pluginA$.next({ level: ServiceStatusLevels.available, summary: 'a available' });
+      const secondEmission = service.getAll$().pipe(first()).toPromise();
+      jest.runAllTimers();
+      expect(await secondEmission).toEqual({
+        a: { level: ServiceStatusLevels.available, summary: 'a available' },
+        b: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' },
+      });
+      jest.useRealTimers();
     });
   });
 
@@ -282,6 +355,35 @@ describe('PluginStatusService', () => {
       }).toThrowError();
     });
 
+    it('debounces plugins custom status registration', async () => {
+      const service = new PluginsStatusService({
+        core$: coreAllAvailable$,
+        pluginDependencies,
+      });
+      const available: ServiceStatus = {
+        level: ServiceStatusLevels.available,
+        summary: 'a available',
+      };
+
+      const statusUpdates: Array<Record<string, ServiceStatus>> = [];
+      const subscription = service
+        .getDependenciesStatus$('b')
+        .subscribe((status) => statusUpdates.push(status));
+
+      const pluginA$ = new BehaviorSubject(available);
+      service.set('a', pluginA$);
+
+      expect(statusUpdates).toStrictEqual([]);
+
+      const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      // Waiting for the debounce timeout should cut a new update
+      await delay(25);
+      subscription.unsubscribe();
+
+      expect(statusUpdates).toStrictEqual([{ a: available }]);
+    });
+
     it('debounces events in quick succession', async () => {
       const service = new PluginsStatusService({
         core$: coreAllAvailable$,
@@ -312,9 +414,9 @@ describe('PluginStatusService', () => {
       pluginA$.next(available);
       pluginA$.next(degraded);
       // Waiting for the debounce timeout should cut a new update
-      await delay(500);
+      await delay(25);
       pluginA$.next(available);
-      await delay(500);
+      await delay(25);
       subscription.unsubscribe();
 
       expect(statusUpdates).toMatchInlineSnapshot(`

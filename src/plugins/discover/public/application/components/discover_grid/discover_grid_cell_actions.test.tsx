@@ -1,32 +1,29 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { FilterInBtn, FilterOutBtn } from './discover_grid_cell_actions';
+import { FilterInBtn, FilterOutBtn, buildCellActions } from './discover_grid_cell_actions';
 import { DiscoverGridContext } from './discover_grid_context';
 
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import { esHits } from '../../../__mocks__/es_hits';
 import { EuiButton } from '@elastic/eui';
+import { IndexPatternField } from 'src/plugins/data/common';
 
 describe('Discover cell actions ', function () {
+  it('should not show cell actions for unfilterable fields', async () => {
+    expect(
+      buildCellActions({ name: 'foo', filterable: false } as IndexPatternField)
+    ).toBeUndefined();
+  });
+
   it('triggers filter function when FilterInBtn is clicked', async () => {
     const contextMock = {
       expanded: undefined,
@@ -35,11 +32,14 @@ describe('Discover cell actions ', function () {
       onFilter: jest.fn(),
       indexPattern: indexPatternMock,
       isDarkMode: false,
+      selectedDocs: [],
+      setSelectedDocs: jest.fn(),
     };
 
     const component = mountWithIntl(
       <DiscoverGridContext.Provider value={contextMock}>
         <FilterInBtn
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Component={(props: any) => <EuiButton {...props} />}
           rowIndex={1}
           columnId={'extension'}
@@ -60,11 +60,14 @@ describe('Discover cell actions ', function () {
       onFilter: jest.fn(),
       indexPattern: indexPatternMock,
       isDarkMode: false,
+      selectedDocs: [],
+      setSelectedDocs: jest.fn(),
     };
 
     const component = mountWithIntl(
       <DiscoverGridContext.Provider value={contextMock}>
         <FilterOutBtn
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Component={(props: any) => <EuiButton {...props} />}
           rowIndex={1}
           columnId={'extension'}

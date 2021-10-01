@@ -1,30 +1,19 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-import { defaultsDeep, omit } from 'lodash';
 
 import { SavedObjectsErrorHelpers } from '../saved_objects';
 import { SavedObjectsClientContract } from '../saved_objects/types';
 import { Logger } from '../logging';
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
-import { IUiSettingsClient, UiSettingsParams, PublicUiSettingsParams } from './types';
+import { UiSettingsParams } from './types';
 import { CannotOverrideError } from './ui_settings_errors';
 import { Cache } from './cache';
+import { BaseUiSettingsClient } from './base_ui_settings_client';
 
 export interface UiSettingsServiceOptions {
   type: string;
@@ -45,55 +34,24 @@ interface UserProvidedValue<T = unknown> {
   isOverridden?: boolean;
 }
 
-type UiSettingsRawValue = UiSettingsParams & UserProvidedValue;
-
 type UserProvided<T = unknown> = Record<string, UserProvidedValue<T>>;
-type UiSettingsRaw = Record<string, UiSettingsRawValue>;
 
-export class UiSettingsClient implements IUiSettingsClient {
+export class UiSettingsClient extends BaseUiSettingsClient {
   private readonly type: UiSettingsServiceOptions['type'];
   private readonly id: UiSettingsServiceOptions['id'];
   private readonly buildNum: UiSettingsServiceOptions['buildNum'];
   private readonly savedObjectsClient: UiSettingsServiceOptions['savedObjectsClient'];
-  private readonly overrides: NonNullable<UiSettingsServiceOptions['overrides']>;
-  private readonly defaults: NonNullable<UiSettingsServiceOptions['defaults']>;
-  private readonly log: Logger;
   private readonly cache: Cache;
 
   constructor(options: UiSettingsServiceOptions) {
     const { type, id, buildNum, savedObjectsClient, log, defaults = {}, overrides = {} } = options;
+    super({ overrides, defaults, log });
 
     this.type = type;
     this.id = id;
     this.buildNum = buildNum;
     this.savedObjectsClient = savedObjectsClient;
-    this.defaults = defaults;
-    this.overrides = overrides;
-    this.log = log;
     this.cache = new Cache();
-  }
-
-  getRegistered() {
-    const copiedDefaults: Record<string, PublicUiSettingsParams> = {};
-    for (const [key, value] of Object.entries(this.defaults)) {
-      copiedDefaults[key] = omit(value, 'schema');
-    }
-    return copiedDefaults;
-  }
-
-  async get<T = any>(key: string): Promise<T> {
-    const all = await this.getAll();
-    return all[key];
-  }
-
-  async getAll<T = any>() {
-    const raw = await this.getRaw();
-
-    return Object.keys(raw).reduce((all, key) => {
-      const item = raw[key];
-      all[key] = ('userValue' in item ? item.userValue : item.value) as T;
-      return all;
-    }, {} as Record<string, T>);
   }
 
   async getUserProvided<T = unknown>(): Promise<UserProvided<T>> {
@@ -138,26 +96,9 @@ export class UiSettingsClient implements IUiSettingsClient {
     await this.setMany(changes);
   }
 
-  isOverridden(key: string) {
-    return this.overrides.hasOwnProperty(key);
-  }
-
   private assertUpdateAllowed(key: string) {
     if (this.isOverridden(key)) {
       throw new CannotOverrideError(`Unable to update "${key}" because it is overridden`);
-    }
-  }
-
-  private async getRaw(): Promise<UiSettingsRaw> {
-    const userProvided = await this.getUserProvided();
-    return defaultsDeep({}, userProvided, this.defaults);
-  }
-
-  private validateKey(key: string, value: unknown) {
-    const definition = this.defaults[key];
-    if (value === null || definition === undefined) return;
-    if (definition.schema) {
-      definition.schema.validate(value, {}, `validation [${key}]`);
     }
   }
 

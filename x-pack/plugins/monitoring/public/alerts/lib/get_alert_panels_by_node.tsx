@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment } from 'react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import { AlertPanel } from '../panel';
@@ -35,19 +37,21 @@ export function getAlertPanelsByNode(
     [uuid: string]: CommonAlertState[];
   } = {};
 
-  for (const { states, rawAlert } of alerts) {
-    const { alertTypeId } = rawAlert;
+  for (const { states, sanitizedRule } of alerts) {
+    const { id: alertId } = sanitizedRule;
     for (const alertState of states.filter(({ state: _state }) => stateFilter(_state))) {
       const { state } = alertState;
       statesByNodes[state.nodeId] = statesByNodes[state.nodeId] || [];
       statesByNodes[state.nodeId].push(alertState);
 
       alertsByNodes[state.nodeId] = alertsByNodes[state.nodeId] || {};
-      alertsByNodes[state.nodeId][alertTypeId] = alertsByNodes[alertState.state.nodeId][
-        alertTypeId
-      ] || { alert: rawAlert, states: [], count: 0 };
-      alertsByNodes[state.nodeId][alertTypeId].count++;
-      alertsByNodes[state.nodeId][alertTypeId].states.push(alertState);
+      alertsByNodes[state.nodeId][alertId] = alertsByNodes[alertState.state.nodeId][alertId] || {
+        alert: sanitizedRule,
+        states: [],
+        count: 0,
+      };
+      alertsByNodes[state.nodeId][alertId].count++;
+      alertsByNodes[state.nodeId][alertId].states.push(alertState);
     }
   }
 
@@ -135,6 +139,5 @@ export function getAlertPanelsByNode(
       return accum;
     }, []),
   ];
-
   return panels;
 }

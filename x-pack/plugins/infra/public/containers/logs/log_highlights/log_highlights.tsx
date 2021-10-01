@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import createContainer from 'constate';
@@ -38,20 +39,17 @@ export const useLogHighlightsState = ({
   const throttledStartTimestamp = useThrottle(startTimestamp, FETCH_THROTTLE_INTERVAL);
   const throttledEndTimestamp = useThrottle(endTimestamp, FETCH_THROTTLE_INTERVAL);
 
-  const {
-    logEntryHighlights,
-    logEntryHighlightsById,
-    loadLogEntryHighlightsRequest,
-  } = useLogEntryHighlights(
-    sourceId,
-    sourceVersion,
-    throttledStartTimestamp,
-    throttledEndTimestamp,
-    centerCursor,
-    size,
-    filterQuery,
-    highlightTerms
-  );
+  const { logEntryHighlights, logEntryHighlightsById, loadLogEntryHighlightsRequest } =
+    useLogEntryHighlights(
+      sourceId,
+      sourceVersion,
+      throttledStartTimestamp,
+      throttledEndTimestamp,
+      centerCursor,
+      size,
+      filterQuery,
+      highlightTerms
+    );
 
   const { logSummaryHighlights, loadLogSummaryHighlightsRequest } = useLogSummaryHighlights(
     sourceId,

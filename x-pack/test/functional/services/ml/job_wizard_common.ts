@@ -1,13 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlCommonUI } from './common_ui';
 import { MlCustomUrls } from './custom_urls';
+
+export interface SectionOptions {
+  withAdvancedSection: boolean;
+}
 
 export function MachineLearningJobWizardCommonProvider(
   { getService }: FtrProviderContext,
@@ -17,10 +23,6 @@ export function MachineLearningJobWizardCommonProvider(
   const comboBox = getService('comboBox');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-
-  interface SectionOptions {
-    withAdvancedSection: boolean;
-  }
 
   function advancedSectionSelector(subSelector?: string) {
     const subj = 'mlJobWizardAdvancedSection';
@@ -525,7 +527,7 @@ export function MachineLearningJobWizardCommonProvider(
 
       const expectedIndex = existingCustomUrls.length;
 
-      await customUrls.assertCustomUrlItem(expectedIndex, customUrl.label);
+      await customUrls.assertCustomUrlLabel(expectedIndex, customUrl.label);
     },
 
     async ensureAdvancedSectionOpen() {

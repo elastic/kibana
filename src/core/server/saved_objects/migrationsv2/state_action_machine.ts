@@ -1,26 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 export interface ControlState {
   controlState: string;
 }
-
-const MAX_STEPS_WITHOUT_CONTROL_STATE_CHANGE = 50;
 
 /**
  * A state-action machine next function that returns the next action thunk
@@ -75,22 +63,12 @@ export async function stateActionMachine<S extends ControlState>(
   model: Model<S>
 ) {
   let state = initialState;
-  let controlStateStepCounter = 0;
   let nextAction = next(state);
 
   while (nextAction != null) {
     // Perform the action that triggers the next step
     const actionResponse = await nextAction();
     const newState = model(state, actionResponse);
-
-    controlStateStepCounter =
-      newState.controlState === state.controlState ? controlStateStepCounter + 1 : 0;
-    if (controlStateStepCounter >= MAX_STEPS_WITHOUT_CONTROL_STATE_CHANGE) {
-      // This is just a fail-safe to ensure we don't get stuck in an infinite loop
-      throw new Error(
-        `Control state didn't change after ${MAX_STEPS_WITHOUT_CONTROL_STATE_CHANGE} steps aborting.`
-      );
-    }
 
     // Get ready for the next step
     state = newState;

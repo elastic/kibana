@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
@@ -36,7 +37,7 @@ export const TelemetryLogic = kea<MakeLogicType<TelemetryActions>>({
       const { http } = HttpLogic.values;
       try {
         const body = JSON.stringify({ product, action, metric });
-        await http.put('/api/enterprise_search/stats', { headers, body });
+        await http.put('/internal/enterprise_search/stats', { headers, body });
       } catch (error) {
         throw new Error('Unable to send telemetry');
       }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -14,11 +15,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('preserve url', function () {
     before(async function () {
-      await esArchiver.load('spaces/multi_space');
+      await esArchiver.load('x-pack/test/functional/es_archives/spaces/multi_space');
     });
 
     after(function () {
-      return esArchiver.unload('spaces/multi_space');
+      return esArchiver.unload('x-pack/test/functional/es_archives/spaces/multi_space');
     });
 
     it('goes back to last opened url', async function () {

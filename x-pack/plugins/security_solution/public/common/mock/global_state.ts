@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -12,6 +13,9 @@ import {
   NetworkTopTablesFields,
   NetworkTlsFields,
   NetworkUsersFields,
+  RiskScoreFields,
+  HostRulesFields,
+  HostTacticsFields,
 } from '../../../common/search_strategy';
 import { State } from '../store';
 
@@ -24,12 +28,14 @@ import {
   DEFAULT_INDEX_PATTERN,
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
+import { uebaModel } from '../../ueba/store';
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../common/types/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
 import { mockBrowserFields, mockDocValueFields } from '../containers/source/mock';
 import { mockIndexPattern } from './index_pattern';
+import { allowedExperimentalValues } from '../../../common/experimental_features';
 
 export const mockGlobalState: State = {
   app: {
@@ -38,6 +44,7 @@ export const mockGlobalState: State = {
       { id: 'error-id-1', title: 'title-1', message: ['error-message-1'] },
       { id: 'error-id-2', title: 'title-2', message: ['error-message-2'] },
     ],
+    enableExperimental: allowedExperimentalValues,
   },
   hosts: {
     page: {
@@ -52,7 +59,7 @@ export const mockGlobalState: State = {
         events: { activePage: 0, limit: 10 },
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
-        alerts: { activePage: 0, limit: 10 },
+        externalAlerts: { activePage: 0, limit: 10 },
       },
     },
     details: {
@@ -67,7 +74,7 @@ export const mockGlobalState: State = {
         events: { activePage: 0, limit: 10 },
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
-        alerts: { activePage: 0, limit: 10 },
+        externalAlerts: { activePage: 0, limit: 10 },
       },
     },
   },
@@ -157,6 +164,36 @@ export const mockGlobalState: State = {
       },
     },
   },
+  ueba: {
+    page: {
+      queries: {
+        [uebaModel.UebaTableType.riskScore]: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+        },
+      },
+    },
+    details: {
+      queries: {
+        [uebaModel.UebaTableType.hostRules]: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: HostRulesFields.riskScore, direction: Direction.desc },
+        },
+        [uebaModel.UebaTableType.hostTactics]: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: HostTacticsFields.riskScore, direction: Direction.desc },
+        },
+        [uebaModel.UebaTableType.userRules]: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: HostRulesFields.riskScore, direction: Direction.desc },
+        },
+      },
+    },
+  },
   inputs: {
     global: {
       timerange: {
@@ -203,17 +240,27 @@ export const mockGlobalState: State = {
     timelineById: {
       test: {
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.notes,
         deletedEventIds: [],
+        documentType: '',
+        queryFields: [],
+        selectAll: false,
         id: 'test',
         savedObjectId: null,
         columns: defaultHeaders,
+        defaultColumns: defaultHeaders,
         indexNames: DEFAULT_INDEX_PATTERN,
         itemsPerPage: 5,
         dataProviders: [],
         description: '',
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          tiebreakerField: '',
+          timestampField: '@timestamp',
+        },
         eventIdToNoteIds: {},
         excludedRowRendererIds: [],
-        expandedEvent: {},
+        expandedDetail: {},
         highlightedDropAndProviderId: '',
         historyIds: [],
         isFavorite: false,
@@ -238,7 +285,7 @@ export const mockGlobalState: State = {
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
         itemsPerPageOptions: [5, 10, 20],
-        sort: [{ columnId: '@timestamp', sortDirection: Direction.desc }],
+        sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
         isSaving: false,
         version: null,
         status: TimelineStatus.active,

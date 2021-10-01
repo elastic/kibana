@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { join } from 'path';
@@ -26,23 +15,19 @@ const isString = (v: any): v is string => typeof v === 'string';
 
 const CONFIG_PATHS = [
   process.env.KBN_PATH_CONF && join(process.env.KBN_PATH_CONF, 'kibana.yml'),
-  process.env.KIBANA_PATH_CONF && join(process.env.KIBANA_PATH_CONF, 'kibana.yml'),
-  process.env.CONFIG_PATH, // deprecated
+  process.env.KIBANA_PATH_CONF && join(process.env.KIBANA_PATH_CONF, 'kibana.yml'), // deprecated
   join(REPO_ROOT, 'config/kibana.yml'),
+  '/etc/kibana/kibana.yml',
 ].filter(isString);
 
 const CONFIG_DIRECTORIES = [
   process.env.KBN_PATH_CONF,
-  process.env.KIBANA_PATH_CONF,
+  process.env.KIBANA_PATH_CONF, // deprecated
   join(REPO_ROOT, 'config'),
   '/etc/kibana',
 ].filter(isString);
 
-const DATA_PATHS = [
-  process.env.DATA_PATH, // deprecated
-  join(REPO_ROOT, 'data'),
-  '/var/lib/kibana',
-].filter(isString);
+const DATA_PATHS = [join(REPO_ROOT, 'data'), '/var/lib/kibana'].filter(isString);
 
 function findFile(paths: string[]) {
   const availablePath = paths.find((configPath) => {

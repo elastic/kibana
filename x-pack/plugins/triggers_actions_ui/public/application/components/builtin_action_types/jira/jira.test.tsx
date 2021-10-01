@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '.././index';
 import { ActionTypeModel } from '../../../../types';
@@ -27,7 +29,7 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('jira connector validation', () => {
-  test('connector validation succeeds when connector config is valid', () => {
+  test('connector validation succeeds when connector config is valid', async () => {
     const actionConnector = {
       secrets: {
         email: 'email',
@@ -43,18 +45,24 @@ describe('jira connector validation', () => {
       },
     } as JiraActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiUrl: [],
-        email: [],
-        apiToken: [],
-        projectKey: [],
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
+      config: {
+        errors: {
+          apiUrl: [],
+          projectKey: [],
+        },
+      },
+      secrets: {
+        errors: {
+          apiToken: [],
+          email: [],
+        },
       },
     });
   });
 
-  test('connector validation fails when connector config is not valid', () => {
-    const actionConnector = ({
+  test('connector validation fails when connector config is not valid', async () => {
+    const actionConnector = {
       secrets: {
         email: 'user',
       },
@@ -62,38 +70,61 @@ describe('jira connector validation', () => {
       actionTypeId: '.jira',
       name: 'jira',
       config: {},
-    } as unknown) as JiraActionConnector;
+    } as unknown as JiraActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiUrl: ['URL is required.'],
-        email: [],
-        apiToken: ['API token or password is required'],
-        projectKey: ['Project key is required'],
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
+      config: {
+        errors: {
+          apiUrl: ['URL is required.'],
+          projectKey: ['Project key is required'],
+        },
+      },
+      secrets: {
+        errors: {
+          apiToken: ['API token is required'],
+          email: [],
+        },
       },
     });
   });
 });
 
 describe('jira action params validation', () => {
-  test('action params validation succeeds when action params is valid', () => {
+  test('action params validation succeeds when action params is valid', async () => {
     const actionParams = {
       subActionParams: { incident: { summary: 'some title {{test}}' }, comments: [] },
     };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { summary: [] },
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: { 'subActionParams.incident.summary': [], 'subActionParams.incident.labels': [] },
     });
   });
 
-  test('params validation fails when body is not valid', () => {
+  test('params validation fails when body is not valid', async () => {
     const actionParams = {
       subActionParams: { incident: { summary: '' }, comments: [] },
     };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        summary: ['Summary is required.'],
+        'subActionParams.incident.summary': ['Summary is required.'],
+        'subActionParams.incident.labels': [],
+      },
+    });
+  });
+
+  test('params validation fails when labels contain spaces', async () => {
+    const actionParams = {
+      subActionParams: {
+        incident: { summary: 'some title', labels: ['label with spaces'] },
+        comments: [],
+      },
+    };
+
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        'subActionParams.incident.summary': [],
+        'subActionParams.incident.labels': ['Labels cannot contain spaces.'],
       },
     });
   });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CONTEXT_DEFAULTS, QUERY } from '../../../common/constants';
@@ -24,6 +25,7 @@ export interface GetMonitorStatesParams {
   pageSize: number;
   filters?: string | null;
   statusFilter?: string;
+  query?: string;
 }
 
 // To simplify the handling of the group of pagination vars they're passed back to the client as a string
@@ -47,6 +49,7 @@ export const getMonitorStates: UMElasticsearchQueryFn<
   pageSize,
   filters,
   statusFilter,
+  query,
 }) => {
   pagination = pagination || CONTEXT_DEFAULTS.CURSOR_PAGINATION;
   statusFilter = statusFilter === null ? undefined : statusFilter;
@@ -58,7 +61,8 @@ export const getMonitorStates: UMElasticsearchQueryFn<
     pagination,
     filters && filters !== '' ? JSON.parse(filters) : null,
     pageSize,
-    statusFilter
+    statusFilter,
+    query
   );
 
   const size = Math.min(queryContext.size, QUERY.DEFAULT_AGGS_CAP);
@@ -148,7 +152,7 @@ export const getHistogramForMonitors = async (
   };
   const { body: result } = await queryContext.search({ body: params });
 
-  const histoBuckets: any[] = result.aggregations?.histogram.buckets ?? [];
+  const histoBuckets: any[] = (result.aggregations as any)?.histogram.buckets ?? [];
   const simplified = histoBuckets.map((histoBucket: any): { timestamp: number; byId: any } => {
     const byId: { [key: string]: number } = {};
     histoBucket.by_id.buckets.forEach((idBucket: any) => {

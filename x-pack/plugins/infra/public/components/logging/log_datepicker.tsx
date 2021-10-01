@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 interface LogDatepickerProps {
@@ -48,24 +49,19 @@ export const LogDatepicker: React.FC<LogDatepickerProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {isStreaming ? (
-          <EuiButtonEmpty
-            color="primary"
-            iconType="pause"
-            iconSide="left"
-            onClick={onStopStreaming}
-          >
+          <EuiButton color="primary" iconType="pause" iconSide="left" onClick={onStopStreaming}>
             <FormattedMessage
               id="xpack.infra.logs.stopStreamingButtonLabel"
               defaultMessage="Stop streaming"
             />
-          </EuiButtonEmpty>
+          </EuiButton>
         ) : (
-          <EuiButtonEmpty iconType="play" iconSide="left" onClick={onStartStreaming}>
+          <EuiButton color="primary" iconType="play" iconSide="left" onClick={onStartStreaming}>
             <FormattedMessage
               id="xpack.infra.logs.startStreamingButtonLabel"
               defaultMessage="Stream live"
             />
-          </EuiButtonEmpty>
+          </EuiButton>
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

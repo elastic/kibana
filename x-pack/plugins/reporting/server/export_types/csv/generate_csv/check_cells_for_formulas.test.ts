@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { checkIfRowsHaveFormulas } from './check_cells_for_formulas';
@@ -86,7 +87,7 @@ describe(`Check CSV Injected values`, () => {
           {
             _doc: 'foo-bar',
             // need to assert non-string values still return false
-            value: (nonRow as unknown) as string,
+            value: nonRow as unknown as string,
             title: 'nice',
           },
           ['_doc', 'value', 'title']

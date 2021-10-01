@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EsNames } from './names';
@@ -11,13 +12,16 @@ import mappings from '../../generated/mappings.json';
 export function getIndexTemplate(esNames: EsNames) {
   const indexTemplateBody = {
     index_patterns: [esNames.indexPatternWithVersion],
-    settings: {
-      number_of_shards: 1,
-      auto_expand_replicas: '0-1',
-      'index.lifecycle.name': esNames.ilmPolicy,
-      'index.lifecycle.rollover_alias': esNames.alias,
+    template: {
+      settings: {
+        number_of_shards: 1,
+        auto_expand_replicas: '0-1',
+        'index.lifecycle.name': esNames.ilmPolicy,
+        'index.lifecycle.rollover_alias': esNames.alias,
+        'index.hidden': true,
+      },
+      mappings,
     },
-    mappings,
   };
 
   return indexTemplateBody;

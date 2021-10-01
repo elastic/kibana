@@ -1,5 +1,5 @@
 post:
-  summary: Ingest Manager - Setup
+  summary: Setup
   tags: []
   responses:
     '200':
@@ -7,10 +7,7 @@ post:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              isInitialized:
-                type: boolean
+            $ref: ../components/schemas/fleet_setup_response.yaml
     '500':
       description: Internal Server Error
       content:
@@ -20,6 +17,6 @@ post:
             properties:
               message:
                 type: string
-  operationId: post-setup
+  operationId: setup
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

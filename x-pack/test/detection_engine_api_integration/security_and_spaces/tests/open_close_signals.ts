@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
+import type { estypes } from '@elastic/elasticsearch';
 
-import { SearchResponse } from 'elasticsearch';
 import { Signal } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -26,7 +27,7 @@ import {
   waitForRuleSuccessOrStatus,
   getRuleForSignalTesting,
 } from '../../utils';
-import { createUserAndRole } from '../roles_users_utils';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 
 // eslint-disable-next-line import/no-default-export
@@ -34,7 +35,6 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const securityService = getService('security');
 
   describe('open_close_signals', () => {
     describe('validation checks', () => {
@@ -68,15 +68,22 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('tests with auditbeat data', () => {
+        before(async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+        });
+
+        after(async () => {
+          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+        });
+
         beforeEach(async () => {
           await deleteAllAlerts(supertest);
           await createSignalsIndex(supertest);
-          await esArchiver.load('auditbeat/hosts');
         });
+
         afterEach(async () => {
           await deleteSignalsIndex(supertest);
           await deleteAllAlerts(supertest);
-          await esArchiver.unload('auditbeat/hosts');
         });
 
         it('should be able to execute and get 10 signals', async () => {
@@ -95,11 +102,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 10, [id]);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
           const everySignalOpen = signalsOpen.hits.hits.every(
-            ({
-              _source: {
-                signal: { status },
-              },
-            }) => status === 'open'
+            (hit) => hit._source?.signal?.status === 'open'
           );
           expect(everySignalOpen).to.eql(true);
         });
@@ -121,13 +124,12 @@ export default ({ getService }: FtrProviderContext) => {
             .send(setSignalStatus({ signalIds, status: 'closed' }))
             .expect(200);
 
-          const {
-            body: signalsClosed,
-          }: { body: SearchResponse<{ signal: Signal }> } = await supertest
-            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds(signalIds))
-            .expect(200);
+          const { body: signalsClosed }: { body: estypes.SearchResponse<{ signal: Signal }> } =
+            await supertest
+              .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+              .set('kbn-xsrf', 'true')
+              .send(getQuerySignalIds(signalIds))
+              .expect(200);
           expect(signalsClosed.hits.hits.length).to.equal(10);
         });
 
@@ -148,30 +150,25 @@ export default ({ getService }: FtrProviderContext) => {
             .send(setSignalStatus({ signalIds, status: 'closed' }))
             .expect(200);
 
-          const {
-            body: signalsClosed,
-          }: { body: SearchResponse<{ signal: Signal }> } = await supertest
-            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds(signalIds))
-            .expect(200);
+          const { body: signalsClosed }: { body: estypes.SearchResponse<{ signal: Signal }> } =
+            await supertest
+              .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+              .set('kbn-xsrf', 'true')
+              .send(getQuerySignalIds(signalIds))
+              .expect(200);
 
           const everySignalClosed = signalsClosed.hits.hits.every(
-            ({
-              _source: {
-                signal: { status },
-              },
-            }) => status === 'closed'
+            (hit) => hit._source?.signal?.status === 'closed'
           );
           expect(everySignalClosed).to.eql(true);
         });
 
-        it('should NOT be able to close signals with t1 analyst user', async () => {
+        it('should be able to close signals with t1 analyst user', async () => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
-          await createUserAndRole(securityService, ROLES.t1_analyst);
+          await createUserAndRole(getService, ROLES.t1_analyst);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
           const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
@@ -182,26 +179,23 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .auth(ROLES.t1_analyst, 'changeme')
             .send(setSignalStatus({ signalIds, status: 'closed' }))
-            .expect(403);
+            .expect(200);
 
           // query for the signals with the superuser
           // to allow a check that the signals were NOT closed with t1 analyst
-          const {
-            body: signalsClosed,
-          }: { body: SearchResponse<{ signal: Signal }> } = await supertest
-            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds(signalIds))
-            .expect(200);
+          const { body: signalsClosed }: { body: estypes.SearchResponse<{ signal: Signal }> } =
+            await supertest
+              .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+              .set('kbn-xsrf', 'true')
+              .send(getQuerySignalIds(signalIds))
+              .expect(200);
 
-          const everySignalOpen = signalsClosed.hits.hits.every(
-            ({
-              _source: {
-                signal: { status },
-              },
-            }) => status === 'open'
+          const everySignalClosed = signalsClosed.hits.hits.every(
+            (hit) => hit._source?.signal?.status === 'closed'
           );
-          expect(everySignalOpen).to.eql(true);
+          expect(everySignalClosed).to.eql(true);
+
+          await deleteUserAndRole(getService, ROLES.t1_analyst);
         });
 
         it('should be able to close signals with soc_manager user', async () => {
@@ -210,7 +204,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const userAndRole = ROLES.soc_manager;
-          await createUserAndRole(securityService, userAndRole);
+          await createUserAndRole(getService, userAndRole);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
           const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
@@ -223,22 +217,19 @@ export default ({ getService }: FtrProviderContext) => {
             .send(setSignalStatus({ signalIds, status: 'closed' }))
             .expect(200);
 
-          const {
-            body: signalsClosed,
-          }: { body: SearchResponse<{ signal: Signal }> } = await supertest
-            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds(signalIds))
-            .expect(200);
+          const { body: signalsClosed }: { body: estypes.SearchResponse<{ signal: Signal }> } =
+            await supertest
+              .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+              .set('kbn-xsrf', 'true')
+              .send(getQuerySignalIds(signalIds))
+              .expect(200);
 
           const everySignalClosed = signalsClosed.hits.hits.every(
-            ({
-              _source: {
-                signal: { status },
-              },
-            }) => status === 'closed'
+            (hit) => hit._source?.signal?.status === 'closed'
           );
           expect(everySignalClosed).to.eql(true);
+
+          await deleteUserAndRole(getService, userAndRole);
         });
       });
     });

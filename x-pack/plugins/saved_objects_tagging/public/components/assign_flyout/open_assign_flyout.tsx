@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -37,28 +38,30 @@ const LazyAssignFlyout = React.lazy(() =>
   import('./assign_flyout').then(({ AssignFlyout }) => ({ default: AssignFlyout }))
 );
 
-export const getAssignFlyoutOpener = ({
-  overlays,
-  notifications,
-  tagCache,
-  assignmentService,
-  assignableTypes,
-}: GetAssignFlyoutOpenerOptions): AssignFlyoutOpener => async ({ tagIds }) => {
-  const flyout = overlays.openFlyout(
-    toMountPoint(
-      <React.Suspense fallback={<LoadingIndicator />}>
-        <LazyAssignFlyout
-          tagIds={tagIds}
-          tagCache={tagCache}
-          notifications={notifications}
-          allowedTypes={assignableTypes}
-          assignmentService={assignmentService}
-          onClose={() => flyout.close()}
-        />
-      </React.Suspense>
-    ),
-    { size: 'm', maxWidth: 600 }
-  );
+export const getAssignFlyoutOpener =
+  ({
+    overlays,
+    notifications,
+    tagCache,
+    assignmentService,
+    assignableTypes,
+  }: GetAssignFlyoutOpenerOptions): AssignFlyoutOpener =>
+  async ({ tagIds }) => {
+    const flyout = overlays.openFlyout(
+      toMountPoint(
+        <React.Suspense fallback={<LoadingIndicator />}>
+          <LazyAssignFlyout
+            tagIds={tagIds}
+            tagCache={tagCache}
+            notifications={notifications}
+            allowedTypes={assignableTypes}
+            assignmentService={assignmentService}
+            onClose={() => flyout.close()}
+          />
+        </React.Suspense>
+      ),
+      { size: 'm', maxWidth: 600 }
+    );
 
-  return flyout;
-};
+    return flyout;
+  };

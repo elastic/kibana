@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { isAbsolute } from 'path';
@@ -28,6 +17,7 @@ import { decorateSnapshotUi } from '../snapshots/decorate_snapshot_ui';
  *
  *  @param  {Mocha} mocha
  *  @param  {ToolingLog} log
+ *  @param  {Config} config
  *  @param  {ProviderCollection} providers
  *  @param  {String} path
  *  @return {undefined} - mutates mocha, no return value
@@ -35,12 +25,16 @@ import { decorateSnapshotUi } from '../snapshots/decorate_snapshot_ui';
 export const loadTestFiles = ({
   mocha,
   log,
+  config,
   lifecycle,
   providers,
   paths,
   updateBaselines,
   updateSnapshots,
 }) => {
+  const dockerServers = config.get('dockerServers');
+  const isDockerGroup = dockerServers && Object.keys(dockerServers).length;
+
   decorateSnapshotUi({ lifecycle, updateSnapshots, isCi: !!process.env.CI });
 
   const innerLoadTestFile = (path) => {
@@ -66,7 +60,10 @@ export const loadTestFiles = ({
     loadTracer(provider, `testProvider[${path}]`, () => {
       // mocha.suite hocus-pocus comes from: https://git.io/vDnXO
 
-      const context = decorateMochaUi(lifecycle, global);
+      const context = decorateMochaUi(log, lifecycle, global, {
+        isDockerGroup,
+        rootTags: config.get('rootTags'),
+      });
       mocha.suite.emit('pre-require', context, path, mocha);
 
       const returnVal = provider({

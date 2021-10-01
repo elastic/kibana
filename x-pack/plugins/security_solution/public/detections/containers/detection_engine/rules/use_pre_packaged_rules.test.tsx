@@ -1,14 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { ReactElement } from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { ReturnPrePackagedRulesAndTimelines, usePrePackagedRules } from './use_pre_packaged_rules';
 import * as api from './api';
 import { shallow } from 'enzyme';
 import * as i18n from './translations';
+
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: jest.fn(),
+  useToasts: jest.fn().mockReturnValue({
+    addError: jest.fn(),
+    addSuccess: jest.fn(),
+    addWarning: jest.fn(),
+  }),
+}));
 
 jest.mock('./api', () => ({
   getPrePackagedRulesStatus: jest.fn(),
@@ -17,7 +28,6 @@ jest.mock('./api', () => ({
 
 describe('usePrePackagedRules', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
     jest.restoreAllMocks();
   });
 

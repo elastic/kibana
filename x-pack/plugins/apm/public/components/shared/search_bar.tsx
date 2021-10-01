@@ -1,29 +1,98 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import {
+  EuiFlexGroup,
+  EuiFlexGroupProps,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import { useBreakpoints } from '../../hooks/use_breakpoints';
 import { DatePicker } from './DatePicker';
-import { KueryBar } from './KueryBar';
+import { KueryBar } from './kuery_bar';
+import { TimeComparison } from './time_comparison';
+import { TransactionTypeSelect } from './transaction_type_select';
 
-const SearchBarFlexGroup = styled(EuiFlexGroup)`
-  margin: ${({ theme }) =>
-    `${theme.eui.euiSizeM} ${theme.eui.euiSizeM} -${theme.eui.gutterTypes.gutterMedium} ${theme.eui.euiSizeM}`};
-`;
+interface Props {
+  hidden?: boolean;
+  showKueryBar?: boolean;
+  showTimeComparison?: boolean;
+  showTransactionTypeSelector?: boolean;
+  kueryBarPlaceholder?: string;
+  kueryBarBoolFilter?: QueryDslQueryContainer[];
+}
 
-export function SearchBar(props: { prepend?: React.ReactNode | string }) {
+export function SearchBar({
+  hidden = false,
+  showKueryBar = true,
+  showTimeComparison = false,
+  showTransactionTypeSelector = false,
+  kueryBarBoolFilter,
+  kueryBarPlaceholder,
+}: Props) {
+  const { isSmall, isMedium, isLarge, isXl, isXXL, isXXXL } = useBreakpoints();
+
+  if (hidden) {
+    return null;
+  }
+
+  const searchBarDirection: EuiFlexGroupProps['direction'] =
+    isXXXL || (!isXl && !showTimeComparison) ? 'row' : 'column';
+
   return (
-    <SearchBarFlexGroup alignItems="flexStart" gutterSize="s">
-      <EuiFlexItem grow={3}>
-        <KueryBar prepend={props.prepend} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={1}>
-        <DatePicker />
-      </EuiFlexItem>
-    </SearchBarFlexGroup>
+    <>
+      <EuiFlexGroup
+        gutterSize="s"
+        responsive={false}
+        direction={searchBarDirection}
+      >
+        <EuiFlexItem>
+          <EuiFlexGroup
+            direction={isLarge ? 'columnReverse' : 'row'}
+            gutterSize="s"
+            responsive={false}
+          >
+            {showTransactionTypeSelector && (
+              <EuiFlexItem grow={false}>
+                <TransactionTypeSelect />
+              </EuiFlexItem>
+            )}
+
+            {showKueryBar && (
+              <EuiFlexItem>
+                <KueryBar
+                  placeholder={kueryBarPlaceholder}
+                  boolFilter={kueryBarBoolFilter}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={showTimeComparison && !isXXXL}>
+          <EuiFlexGroup
+            direction={isSmall || isMedium || isLarge ? 'columnReverse' : 'row'}
+            justifyContent={isXXL ? 'flexEnd' : undefined}
+            gutterSize="s"
+            responsive={false}
+          >
+            {showTimeComparison && (
+              <EuiFlexItem grow={isXXXL} style={{ minWidth: 300 }}>
+                <TimeComparison />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <DatePicker />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+    </>
   );
 }

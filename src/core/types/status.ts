@@ -1,52 +1,63 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import type { OpsMetrics } from '../server/metrics';
+import type {
+  CoreStatus as CoreStatusFromServer,
+  ServiceStatus as ServiceStatusFromServer,
+  ServiceStatusLevel as ServiceStatusLevelFromServer,
+  OpsMetrics,
+} from '../server';
 
-export interface ServerStatus {
-  id: string;
-  title: string;
-  state: string;
-  message: string;
-  uiColor: string;
-  icon?: string;
-  since?: string;
+/**
+ * We need this type to convert the object `ServiceStatusLevel` to a union of the possible strings.
+ * This is because of the "stringification" that occurs when serving HTTP requests.
+ */
+export type ServiceStatusLevel = ReturnType<ServiceStatusLevelFromServer['toString']>;
+
+export interface ServiceStatus extends Omit<ServiceStatusFromServer, 'level'> {
+  level: ServiceStatusLevel;
 }
 
-export type ServerMetrics = OpsMetrics & {
+/**
+ * Copy all the services listed in CoreStatus with their specific ServiceStatus declarations
+ * but overwriting the `level` to its stringified version.
+ */
+export type CoreStatus = {
+  [ServiceName in keyof CoreStatusFromServer]: Omit<CoreStatusFromServer[ServiceName], 'level'> & {
+    level: ServiceStatusLevel;
+  };
+};
+
+export type ServerMetrics = Omit<OpsMetrics, 'collected_at'> & {
+  last_updated: string;
   collection_interval_in_millis: number;
+  requests: {
+    status_codes: Record<number, number>;
+  };
 };
 
 export interface ServerVersion {
   number: string;
   build_hash: string;
-  build_number: string;
-  build_snapshot: string;
+  build_number: number;
+  build_snapshot: boolean;
+}
+
+export interface StatusInfo {
+  overall: ServiceStatus;
+  core: CoreStatus;
+  plugins: Record<string, ServiceStatus>;
 }
 
 export interface StatusResponse {
   name: string;
   uuid: string;
   version: ServerVersion;
-  status: {
-    overall: ServerStatus;
-    statuses: ServerStatus[];
-  };
+  status: StatusInfo;
   metrics: ServerMetrics;
 }

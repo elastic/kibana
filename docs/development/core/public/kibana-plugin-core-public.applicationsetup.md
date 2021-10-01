@@ -17,5 +17,4 @@ export interface ApplicationSetup
 |  --- | --- |
 |  [register(app)](./kibana-plugin-core-public.applicationsetup.register.md) | Register an mountable application to the system. |
 |  [registerAppUpdater(appUpdater$)](./kibana-plugin-core-public.applicationsetup.registerappupdater.md) | Register an application updater that can be used to change the [AppUpdatableFields](./kibana-plugin-core-public.appupdatablefields.md) fields of all applications at runtime.<!-- -->This is meant to be used by plugins that needs to updates the whole list of applications. To only updates a specific application, use the <code>updater$</code> property of the registered application instead. |
-|  [registerMountContext(contextName, provider)](./kibana-plugin-core-public.applicationsetup.registermountcontext.md) | Register a context provider for application mounting. Will only be available to applications that depend on the plugin that registered this context. Deprecated, use [CoreSetup.getStartServices](./kibana-plugin-core-public.coresetup.getstartservices.md)<!-- -->. |
 

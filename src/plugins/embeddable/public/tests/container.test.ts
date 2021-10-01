@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as Rx from 'rxjs';
@@ -36,10 +25,7 @@ import { ERROR_EMBEDDABLE_TYPE } from '../lib/embeddables/error_embeddable';
 import { FilterableEmbeddableFactory } from '../lib/test_samples/embeddables/filterable_embeddable_factory';
 import { CONTACT_CARD_EMBEDDABLE } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { SlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
-import {
-  HELLO_WORLD_EMBEDDABLE,
-  HelloWorldEmbeddableFactoryDefinition,
-} from '../../../../../examples/embeddable_examples/public';
+import { HELLO_WORLD_EMBEDDABLE, HelloWorldEmbeddableFactoryDefinition } from './fixtures';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
 import {
   ContactCardEmbeddableInput,
@@ -300,19 +286,14 @@ test('Container view mode change propagates to children', async () => {
 });
 
 test(`Container updates its state when a child's input is updated`, async (done) => {
-  const {
-    container,
-    embeddable,
-    start,
-    coreStart,
-    uiActions,
-  } = await creatHelloWorldContainerAndEmbeddable(
-    { id: 'hello', panels: {}, viewMode: ViewMode.VIEW },
-    {
-      id: '123',
-      firstName: 'Susy',
-    }
-  );
+  const { container, embeddable, start, coreStart, uiActions } =
+    await creatHelloWorldContainerAndEmbeddable(
+      { id: 'hello', panels: {}, viewMode: ViewMode.VIEW },
+      {
+        id: '123',
+        firstName: 'Susy',
+      }
+    );
 
   expect(isErrorEmbeddable(embeddable)).toBe(false);
 
@@ -513,8 +494,7 @@ test('Panel removed from input state', async () => {
   const { container } = await creatHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {},
-    filters: [],
-  } as any);
+  });
 
   const embeddable = await container.addNewEmbeddable<
     FilterableEmbeddableInput,
@@ -540,8 +520,7 @@ test('Panel added to input state', async () => {
   const { container, start } = await creatHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {},
-    filters: [],
-  } as any);
+  });
 
   const embeddable = await container.addNewEmbeddable<
     FilterableEmbeddableInput,
@@ -731,7 +710,7 @@ test('untilEmbeddableLoaded() throws an error if there is no such child panel in
 
   const [, error] = await of(container.untilEmbeddableLoaded('123'));
   expect(error).toBeInstanceOf(Error);
-  expect(error.message).toMatchInlineSnapshot(`"Panel not found"`);
+  expect((error as Error).message).toMatchInlineSnapshot(`"Panel not found"`);
 });
 
 test('untilEmbeddableLoaded() resolves if child is loaded in the container', async (done) => {

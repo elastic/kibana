@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -56,7 +45,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-const setup = async (opts: { buildDefaultDist: boolean; buildOssDist: boolean }) => {
+const setup = async () => {
   const config = await Config.create({
     isRelease: true,
     targetAllPlatforms: true,
@@ -66,55 +55,14 @@ const setup = async (opts: { buildDefaultDist: boolean; buildOssDist: boolean })
   const run = createRunner({
     config,
     log,
-    ...opts,
   });
 
   return { config, run };
 };
 
-describe('buildOssDist = true, buildDefaultDist = true', () => {
+describe('default dist', () => {
   it('runs global task once, passing config and log', async () => {
-    const { config, run } = await setup({
-      buildDefaultDist: true,
-      buildOssDist: true,
-    });
-
-    const mock = jest.fn();
-
-    await run({
-      global: true,
-      description: 'foo',
-      run: mock,
-    });
-
-    expect(mock).toHaveBeenCalledTimes(1);
-    expect(mock).toHaveBeenLastCalledWith(config, log, [expect.any(Build), expect.any(Build)]);
-  });
-
-  it('calls local tasks twice, passing each build', async () => {
-    const { config, run } = await setup({
-      buildDefaultDist: true,
-      buildOssDist: true,
-    });
-
-    const mock = jest.fn();
-
-    await run({
-      description: 'foo',
-      run: mock,
-    });
-
-    expect(mock).toHaveBeenCalledTimes(2);
-    expect(mock).toHaveBeenCalledWith(config, log, expect.any(Build));
-  });
-});
-
-describe('just default dist', () => {
-  it('runs global task once, passing config and log', async () => {
-    const { config, run } = await setup({
-      buildDefaultDist: true,
-      buildOssDist: false,
-    });
+    const { config, run } = await setup();
 
     const mock = jest.fn();
 
@@ -129,10 +77,7 @@ describe('just default dist', () => {
   });
 
   it('calls local tasks once, passing the default build', async () => {
-    const { config, run } = await setup({
-      buildDefaultDist: true,
-      buildOssDist: false,
-    });
+    const { config, run } = await setup();
 
     const mock = jest.fn();
 
@@ -143,62 +88,12 @@ describe('just default dist', () => {
 
     expect(mock).toHaveBeenCalledTimes(1);
     expect(mock).toHaveBeenCalledWith(config, log, expect.any(Build));
-    const [args] = mock.mock.calls;
-    const [, , build] = args;
-    if (build.isOss()) {
-      throw new Error('expected build to be the default dist, not the oss dist');
-    }
-  });
-});
-
-describe('just oss dist', () => {
-  it('runs global task once, passing config and log', async () => {
-    const { config, run } = await setup({
-      buildDefaultDist: false,
-      buildOssDist: true,
-    });
-
-    const mock = jest.fn();
-
-    await run({
-      global: true,
-      description: 'foo',
-      run: mock,
-    });
-
-    expect(mock).toHaveBeenCalledTimes(1);
-    expect(mock).toHaveBeenLastCalledWith(config, log, [expect.any(Build)]);
-  });
-
-  it('calls local tasks once, passing the oss build', async () => {
-    const { config, run } = await setup({
-      buildDefaultDist: false,
-      buildOssDist: true,
-    });
-
-    const mock = jest.fn();
-
-    await run({
-      description: 'foo',
-      run: mock,
-    });
-
-    expect(mock).toHaveBeenCalledTimes(1);
-    expect(mock).toHaveBeenCalledWith(config, log, expect.any(Build));
-    const [args] = mock.mock.calls;
-    const [, , build] = args;
-    if (!build.isOss()) {
-      throw new Error('expected build to be the oss dist, not the default dist');
-    }
   });
 });
 
 describe('task rejection', () => {
   it('rejects, logs error, and marks error logged', async () => {
-    const { run } = await setup({
-      buildDefaultDist: true,
-      buildOssDist: false,
-    });
+    const { run } = await setup();
 
     const error = new Error('FOO');
     expect(isErrorLogged(error)).toBe(false);
@@ -224,10 +119,7 @@ describe('task rejection', () => {
   });
 
   it('just rethrows errors that have already been logged', async () => {
-    const { run } = await setup({
-      buildDefaultDist: true,
-      buildOssDist: false,
-    });
+    const { run } = await setup();
 
     const error = markErrorLogged(new Error('FOO'));
     const promise = run({

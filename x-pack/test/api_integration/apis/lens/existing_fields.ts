@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -44,6 +45,7 @@ const fieldsWithData = [
   'machine.os',
   'machine.os.raw',
   'machine.ram',
+  'machine.ram_range',
   'memory',
   'phpmemory',
   'referer',
@@ -160,12 +162,12 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('existing_fields apis', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('visualize/default');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/visualize/default');
     });
     after(async () => {
-      await esArchiver.unload('logstash_functional');
-      await esArchiver.unload('visualize/default');
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/test/functional/es_archives/visualize/default');
     });
 
     describe('existence', () => {

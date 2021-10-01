@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import stripAnsi from 'strip-ansi';
@@ -24,16 +13,21 @@ import { FailedTestCase, TestReport, makeFailedTestCaseIter } from './test_repor
 export type TestFailure = FailedTestCase['$'] & {
   failure: string;
   likelyIrrelevant: boolean;
+  'system-out'?: string;
 };
 
-const getFailureText = (failure: FailedTestCase['failure']) => {
-  const [failureNode] = failure;
-
-  if (failureNode && typeof failureNode === 'object' && typeof failureNode._ === 'string') {
-    return stripAnsi(failureNode._);
+const getText = (node?: Array<string | { _: string }>) => {
+  if (!node) {
+    return '';
   }
 
-  return stripAnsi(String(failureNode));
+  const [nodeWrapped] = node;
+
+  if (nodeWrapped && typeof nodeWrapped === 'object' && typeof nodeWrapped._ === 'string') {
+    return stripAnsi(nodeWrapped._);
+  }
+
+  return stripAnsi(String(nodeWrapped));
 };
 
 const isLikelyIrrelevant = (name: string, failure: string) => {
@@ -73,7 +67,7 @@ export function getFailures(report: TestReport) {
   const failures: TestFailure[] = [];
 
   for (const testCase of makeFailedTestCaseIter(report)) {
-    const failure = getFailureText(testCase.failure);
+    const failure = getText(testCase.failure);
     const likelyIrrelevant = isLikelyIrrelevant(testCase.$.name, failure);
 
     failures.push({
@@ -82,6 +76,7 @@ export function getFailures(report: TestReport) {
       // Strip ANSI color characters
       failure,
       likelyIrrelevant,
+      'system-out': getText(testCase['system-out']),
     });
   }
 

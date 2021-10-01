@@ -1,19 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { useDispatch, useSelector } from 'react-redux';
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import React, { useContext, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { useDispatch } from 'react-redux';
+import { EuiSpacer } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
 import { useTrackPageview } from '../../../observability/public';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { getDynamicSettings } from '../state/actions/dynamic_settings';
-import { UptimeRefreshContext } from '../contexts';
-import { certificatesSelector, getCertificatesAction } from '../state/certificates/certificates';
 import { CertificateList, CertificateSearch, CertSort } from '../components/certificates';
+import { useCertSearch } from '../components/certificates/use_cert_search';
+import { setCertificatesTotalAction } from '../state/certificates/certificates';
 
 const DEFAULT_PAGE_SIZE = 10;
 const LOCAL_STORAGE_KEY = 'xpack.uptime.certList.pageSize';
@@ -40,39 +40,24 @@ export const CertificatesPage: React.FC = () => {
 
   const dispatch = useDispatch();
 
-  const { lastRefresh } = useContext(UptimeRefreshContext);
-
   useEffect(() => {
     dispatch(getDynamicSettings());
   }, [dispatch]);
 
-  useEffect(() => {
-    dispatch(
-      getCertificatesAction.get({
-        search,
-        ...page,
-        sortBy: sort.field,
-        direction: sort.direction,
-      })
-    );
-  }, [dispatch, page, search, sort.direction, sort.field, lastRefresh]);
+  const certificates = useCertSearch({
+    search,
+    size: page.size,
+    pageIndex: page.index,
+    sortBy: sort.field,
+    direction: sort.direction,
+  });
 
-  const { data: certificates } = useSelector(certificatesSelector);
+  useEffect(() => {
+    dispatch(setCertificatesTotalAction({ total: certificates.total }));
+  }, [certificates.total, dispatch]);
 
   return (
-    <EuiPanel>
-      <EuiTitle>
-        <h1 className="eui-textNoWrap">
-          <FormattedMessage
-            id="xpack.uptime.certificates.heading"
-            defaultMessage="TLS Certificates ({total})"
-            values={{
-              total: <span data-test-subj="uptimeCertTotal">{certificates?.total ?? 0}</span>,
-            }}
-          />
-        </h1>
-      </EuiTitle>
-
+    <>
       <EuiSpacer size="m" />
       <CertificateSearch setSearch={setSearch} />
       <EuiSpacer size="m" />
@@ -84,7 +69,8 @@ export const CertificatesPage: React.FC = () => {
           localStorage.setItem(LOCAL_STORAGE_KEY, pageVal.size.toString());
         }}
         sort={sort}
+        certificates={certificates}
       />
-    </EuiPanel>
+    </>
   );
 };

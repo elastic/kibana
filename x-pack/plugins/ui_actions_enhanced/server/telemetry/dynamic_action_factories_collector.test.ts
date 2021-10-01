@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -13,26 +14,26 @@ import { ActionFactory } from '../types';
 type GetActionFactory = (id: string) => undefined | ActionFactory;
 
 const factories: Record<string, ActionFactory> = {
-  FACTORY_ID_1: ({
+  FACTORY_ID_1: {
     id: 'FACTORY_ID_1',
-    telemetry: jest.fn((state: DynamicActionsState, stats: Record<string, any>) => {
+    telemetry: jest.fn((state: DynamicActionsState, stats: Record<string, number>) => {
       stats.myStat_1 = 1;
       stats.myStat_2 = 123;
       return stats;
     }),
-  } as unknown) as ActionFactory,
-  FACTORY_ID_2: ({
+  } as unknown as ActionFactory,
+  FACTORY_ID_2: {
     id: 'FACTORY_ID_2',
-    telemetry: jest.fn((state: DynamicActionsState, stats: Record<string, any>) => stats),
-  } as unknown) as ActionFactory,
-  FACTORY_ID_3: ({
+    telemetry: jest.fn((state: DynamicActionsState, stats: Record<string, number>) => stats),
+  } as unknown as ActionFactory,
+  FACTORY_ID_3: {
     id: 'FACTORY_ID_3',
-    telemetry: jest.fn((state: DynamicActionsState, stats: Record<string, any>) => {
+    telemetry: jest.fn((state: DynamicActionsState, stats: Record<string, number | string>) => {
       stats.myStat_1 = 2;
       stats.stringStat = 'abc';
       return stats;
     }),
-  } as unknown) as ActionFactory,
+  } as unknown as ActionFactory,
 };
 
 const getActionFactory: GetActionFactory = (id: string) => factories[id];
@@ -76,7 +77,7 @@ const state: DynamicActionsState = {
 
 beforeEach(() => {
   Object.values(factories).forEach((factory) => {
-    ((factory.telemetry as unknown) as jest.SpyInstance).mockClear();
+    (factory.telemetry as unknown as jest.SpyInstance).mockClear();
   });
 });
 
@@ -99,8 +100,8 @@ describe('dynamicActionFactoriesCollector', () => {
     };
     dynamicActionFactoriesCollector(getActionFactory, currentState, {});
 
-    const spy1 = (factories.FACTORY_ID_1.telemetry as unknown) as jest.SpyInstance;
-    const spy2 = (factories.FACTORY_ID_2.telemetry as unknown) as jest.SpyInstance;
+    const spy1 = factories.FACTORY_ID_1.telemetry as unknown as jest.SpyInstance;
+    const spy2 = factories.FACTORY_ID_2.telemetry as unknown as jest.SpyInstance;
 
     expect(spy1).toHaveBeenCalledTimes(1);
     expect(spy2).toHaveBeenCalledTimes(0);

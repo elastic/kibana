@@ -1,16 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { CoreStart } from 'kibana/public';
 import { ILicense } from '../../../../../licensing/common/types';
 import {
   AppLocation,
   Immutable,
-  MalwareFields,
+  ProtectionFields,
   PolicyData,
   UIPolicyConfig,
+  PostTrustedAppCreateResponse,
+  GetTrustedListAppsResponse,
+  MaybeImmutable,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import {
@@ -20,6 +25,18 @@ import {
   GetPackagesResponse,
   UpdatePackagePolicyResponse,
 } from '../../../../../fleet/common';
+import { AsyncResourceState } from '../../state';
+import { ImmutableMiddlewareAPI } from '../../../common/store';
+import { AppAction } from '../../../common/store/actions';
+
+/**
+ * Function that runs Policy Details middleware
+ */
+export type MiddlewareRunner = (
+  coreStart: CoreStart,
+  store: ImmutableMiddlewareAPI<PolicyDetailsState, AppAction>,
+  action: MaybeImmutable<AppAction>
+) => Promise<void>;
 
 /**
  * Policy list store state
@@ -60,8 +77,10 @@ export interface PolicyDetailsState {
   isLoading: boolean;
   /** current location of the application */
   location?: Immutable<AppLocation>;
+  /** artifacts namespace inside policy details page */
+  artifacts: PolicyArtifactsState;
   /** A summary of stats for the agents associated with a given Fleet Agent Policy */
-  agentStatusSummary?: GetAgentStatusResponse['results'];
+  agentStatusSummary?: Omit<GetAgentStatusResponse['results'], 'updating'>;
   /** Status of an update to the policy  */
   updateStatus?: {
     success: boolean;
@@ -72,17 +91,30 @@ export interface PolicyDetailsState {
 }
 
 /**
- * The URL search params that are supported by the Policy List page view
+ * Policy artifacts store state
  */
-export interface PolicyListUrlSearchParams {
-  page_index: number;
-  page_size: number;
+export interface PolicyArtifactsState {
+  /** artifacts location params  */
+  location: PolicyDetailsArtifactsPageLocation;
+  /** A list of artifacts can be linked to the policy  */
+  assignableList: AsyncResourceState<GetTrustedListAppsResponse>;
+  /** Represents if avaialble trusted apps entries exist, regardless of whether the list is showing results  */
+  assignableListEntriesExist: AsyncResourceState<boolean>;
+  /** A list of trusted apps going to be updated  */
+  trustedAppsToUpdate: AsyncResourceState<PostTrustedAppCreateResponse[]>;
 }
 
 export enum OS {
   windows = 'windows',
   mac = 'mac',
   linux = 'linux',
+}
+
+export interface PolicyDetailsArtifactsPageLocation {
+  page_index: number;
+  page_size: number;
+  show?: 'list';
+  filter: string;
 }
 
 /**
@@ -108,7 +140,40 @@ export type KeysByValueCriteria<O, Criteria> = {
 }[keyof O];
 
 /** Returns an array of the policy OSes that have a malware protection field */
-export type MalwareProtectionOSes = KeysByValueCriteria<UIPolicyConfig, { malware: MalwareFields }>;
+export type MalwareProtectionOSes = KeysByValueCriteria<
+  UIPolicyConfig,
+  { malware: ProtectionFields }
+>;
+
+/** Returns an array of the policy OSes that have a memory protection field */
+export type MemoryProtectionOSes = KeysByValueCriteria<
+  UIPolicyConfig,
+  { memory_protection: ProtectionFields }
+>;
+
+/** Returns an array of the policy OSes that have a behavior protection field */
+export type BehaviorProtectionOSes = KeysByValueCriteria<
+  UIPolicyConfig,
+  { behavior_protection: ProtectionFields }
+>;
+
+/** Returns an array of the policy OSes that have a ransomware protection field */
+export type RansomwareProtectionOSes = KeysByValueCriteria<
+  UIPolicyConfig,
+  { ransomware: ProtectionFields }
+>;
+
+export type PolicyProtection =
+  | keyof Pick<
+      UIPolicyConfig['windows'],
+      'malware' | 'ransomware' | 'memory_protection' | 'behavior_protection'
+    >
+  | keyof Pick<UIPolicyConfig['mac'], 'malware' | 'behavior_protection'>
+  | keyof Pick<UIPolicyConfig['linux'], 'malware' | 'behavior_protection'>;
+
+export type MacPolicyProtection = keyof Pick<UIPolicyConfig['mac'], 'malware'>;
+
+export type LinuxPolicyProtection = keyof Pick<UIPolicyConfig['linux'], 'malware'>;
 
 export interface GetPolicyListResponse extends GetPackagePoliciesResponse {
   items: PolicyData[];

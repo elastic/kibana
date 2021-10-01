@@ -1,12 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import {
+  ElasticsearchClient,
+  SavedObjectsBaseOptions,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBulkResponse,
+} from 'kibana/server';
+import { AlertHistoryEsIndexConnectorId } from '../../common';
+import { ActionResult, PreConfiguredAction } from '../types';
 
-export async function getTotalCount(callCluster: LegacyAPICaller, kibanaIndex: string) {
+export async function getTotalCount(
+  esClient: ElasticsearchClient,
+  kibanaIndex: string,
+  preconfiguredActions?: PreConfiguredAction[]
+) {
   const scriptedMetric = {
     scripted_metric: {
       init_script: 'state.types = [:]',
@@ -33,7 +45,7 @@ export async function getTotalCount(callCluster: LegacyAPICaller, kibanaIndex: s
     },
   };
 
-  const searchResult = await callCluster('search', {
+  const { body: searchResult } = await esClient.search({
     index: kibanaIndex,
     body: {
       query: {
@@ -46,26 +58,44 @@ export async function getTotalCount(callCluster: LegacyAPICaller, kibanaIndex: s
       },
     },
   });
-
+  // @ts-expect-error aggegation type is not specified
+  const aggs = searchResult.aggregations?.byActionTypeId.value?.types;
+  const countByType = Object.keys(aggs).reduce(
+    // ES DSL aggregations are returned as `any` by esClient.search
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (obj: any, key: string) => ({
+      ...obj,
+      [replaceFirstAndLastDotSymbols(key)]: aggs[key],
+    }),
+    {}
+  );
+  if (preconfiguredActions && preconfiguredActions.length) {
+    for (const preconfiguredAction of preconfiguredActions) {
+      const actionTypeId = replaceFirstAndLastDotSymbols(preconfiguredAction.actionTypeId);
+      countByType[actionTypeId] = countByType[actionTypeId] || 0;
+      countByType[actionTypeId]++;
+    }
+  }
   return {
-    countTotal: Object.keys(searchResult.aggregations.byActionTypeId.value.types).reduce(
-      (total: number, key: string) =>
-        parseInt(searchResult.aggregations.byActionTypeId.value.types[key], 0) + total,
-      0
-    ),
-    countByType: Object.keys(searchResult.aggregations.byActionTypeId.value.types).reduce(
-      // ES DSL aggregations are returned as `any` by callCluster
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (obj: any, key: string) => ({
-        ...obj,
-        [key.replace('.', '__')]: searchResult.aggregations.byActionTypeId.value.types[key],
-      }),
-      {}
-    ),
+    countTotal:
+      Object.keys(aggs).reduce((total: number, key: string) => parseInt(aggs[key], 0) + total, 0) +
+      (preconfiguredActions?.length ?? 0),
+    countByType,
   };
 }
 
-export async function getInUseTotalCount(callCluster: LegacyAPICaller, kibanaIndex: string) {
+export async function getInUseTotalCount(
+  esClient: ElasticsearchClient,
+  actionsBulkGet: (
+    objects?: SavedObjectsBulkGetObject[] | undefined,
+    options?: SavedObjectsBaseOptions | undefined
+  ) => Promise<SavedObjectsBulkResponse<ActionResult<Record<string, unknown>>>>,
+  kibanaIndex: string
+): Promise<{
+  countTotal: number;
+  countByType: Record<string, number>;
+  countByAlertHistoryConnectorType: number;
+}> {
   const scriptedMetric = {
     scripted_metric: {
       init_script: 'state.connectorIds = new HashMap(); state.total = 0;',
@@ -101,31 +131,102 @@ export async function getInUseTotalCount(callCluster: LegacyAPICaller, kibanaInd
     },
   };
 
-  const actionResults = await callCluster('search', {
+  const preconfiguredActionsScriptedMetric = {
+    scripted_metric: {
+      init_script: 'state.actionRefs = new HashMap(); state.total = 0;',
+      map_script: `
+        String actionRef = doc['alert.actions.actionRef'].value;
+        String actionTypeId = doc['alert.actions.actionTypeId'].value;
+        if (actionRef.startsWith('preconfigured:') && state.actionRefs[actionRef] === null) {
+          HashMap map = new HashMap();
+          map.actionRef = actionRef;
+          map.actionTypeId = actionTypeId;
+          state.actionRefs[actionRef] = map;
+          state.total++;
+        }
+      `,
+      // Combine script is executed per cluster, but we already have a key-value pair per cluster.
+      // Despite docs that say this is optional, this script can't be blank.
+      combine_script: 'return state',
+      // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
+      // This also needs to account for having no data
+      reduce_script: `
+          Map actionRefs = [:];
+          long total = 0;
+          for (state in states) {
+            if (state !== null) {
+              total += state.total;
+              for (String k : state.actionRefs.keySet()) {
+                actionRefs.put(k, state.actionRefs.get(k));
+              }
+            }
+          }
+          Map result = new HashMap();
+          result.total = total;
+          result.actionRefs = actionRefs;
+          return result;
+      `,
+    },
+  };
+
+  const { body: actionResults } = await esClient.search({
     index: kibanaIndex,
     body: {
       query: {
         bool: {
           filter: {
             bool: {
+              must_not: {
+                term: {
+                  type: 'action_task_params',
+                },
+              },
               must: {
-                nested: {
-                  path: 'references',
-                  query: {
-                    bool: {
-                      filter: {
-                        bool: {
-                          must: [
-                            {
-                              term: {
-                                'references.type': 'action',
+                bool: {
+                  should: [
+                    {
+                      nested: {
+                        path: 'references',
+                        query: {
+                          bool: {
+                            filter: {
+                              bool: {
+                                must: [
+                                  {
+                                    term: {
+                                      'references.type': 'action',
+                                    },
+                                  },
+                                ],
                               },
                             },
-                          ],
+                          },
                         },
                       },
                     },
-                  },
+                    {
+                      nested: {
+                        path: 'alert.actions',
+                        query: {
+                          bool: {
+                            filter: {
+                              bool: {
+                                must: [
+                                  {
+                                    prefix: {
+                                      'alert.actions.actionRef': {
+                                        value: 'preconfigured:',
+                                      },
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
                 },
               },
             },
@@ -141,11 +242,66 @@ export async function getInUseTotalCount(callCluster: LegacyAPICaller, kibanaInd
             actionRefIds: scriptedMetric,
           },
         },
+        preconfigured_actions: {
+          nested: {
+            path: 'alert.actions',
+          },
+          aggs: {
+            preconfiguredActionRefIds: preconfiguredActionsScriptedMetric,
+          },
+        },
       },
     },
   });
 
-  return actionResults.aggregations.refs.actionRefIds.value.total;
+  // @ts-expect-error aggegation type is not specified
+  const aggs = actionResults.aggregations.refs.actionRefIds.value;
+  const preconfiguredActionsAggs =
+    // @ts-expect-error aggegation type is not specified
+    actionResults.aggregations.preconfigured_actions?.preconfiguredActionRefIds.value;
+  const bulkFilter = Object.entries(aggs.connectorIds).map(([key]) => ({
+    id: key,
+    type: 'action',
+    fields: ['id', 'actionTypeId'],
+  }));
+  const actions = await actionsBulkGet(bulkFilter);
+  const countByActionTypeId = actions.saved_objects.reduce(
+    (actionTypeCount: Record<string, number>, action) => {
+      const alertTypeId = replaceFirstAndLastDotSymbols(action.attributes.actionTypeId);
+      const currentCount =
+        actionTypeCount[alertTypeId] !== undefined ? actionTypeCount[alertTypeId] : 0;
+      actionTypeCount[alertTypeId] = currentCount + 1;
+      return actionTypeCount;
+    },
+    {}
+  );
+
+  let preconfiguredAlertHistoryConnectors = 0;
+  const preconfiguredActionsRefs: Array<{
+    actionTypeId: string;
+    actionRef: string;
+  }> = preconfiguredActionsAggs ? Object.values(preconfiguredActionsAggs?.actionRefs) : [];
+  for (const { actionRef, actionTypeId: rawActionTypeId } of preconfiguredActionsRefs) {
+    const actionTypeId = replaceFirstAndLastDotSymbols(rawActionTypeId);
+    countByActionTypeId[actionTypeId] = countByActionTypeId[actionTypeId] || 0;
+    countByActionTypeId[actionTypeId]++;
+    if (actionRef === `preconfigured:${AlertHistoryEsIndexConnectorId}`) {
+      preconfiguredAlertHistoryConnectors++;
+    }
+  }
+
+  return {
+    countTotal: aggs.total + (preconfiguredActionsAggs?.total ?? 0),
+    countByType: countByActionTypeId,
+    countByAlertHistoryConnectorType: preconfiguredAlertHistoryConnectors,
+  };
+}
+
+function replaceFirstAndLastDotSymbols(strToReplace: string) {
+  const hasFirstSymbolDot = strToReplace.startsWith('.');
+  const appliedString = hasFirstSymbolDot ? strToReplace.replace('.', '__') : strToReplace;
+  const hasLastSymbolDot = strToReplace.endsWith('.');
+  return hasLastSymbolDot ? `${appliedString.slice(0, -1)}__` : appliedString;
 }
 
 // TODO: Implement executions count telemetry with eventLog, when it will write to index

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -32,8 +33,8 @@ import {
   UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB,
   UIM_TEMPLATE_DETAIL_PANEL_PREVIEW_TAB,
 } from '../../../../../../common/constants';
-import { UseRequestResponse } from '../../../../../shared_imports';
-import { TemplateDeleteModal, SectionLoading, SectionError, Error } from '../../../../components';
+import { SectionLoading, UseRequestResponse } from '../../../../../shared_imports';
+import { TemplateDeleteModal, SectionError, Error } from '../../../../components';
 import { useLoadIndexTemplate } from '../../../../services/api';
 import { useServices } from '../../../../app_context';
 import { TabAliases, TabMappings, TabSettings } from '../../../../components/shared';

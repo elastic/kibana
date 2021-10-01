@@ -1,9 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { IRouter } from 'src/core/server';
+
+import type { IRouter } from 'src/core/server';
+
 import { PLUGIN_ID, PACKAGE_POLICY_API_ROUTES } from '../../constants';
 import {
   GetPackagePoliciesRequestSchema,
@@ -11,13 +14,16 @@ import {
   CreatePackagePolicyRequestSchema,
   UpdatePackagePolicyRequestSchema,
   DeletePackagePoliciesRequestSchema,
+  UpgradePackagePoliciesRequestSchema,
 } from '../../types';
+
 import {
   getPackagePoliciesHandler,
   getOnePackagePolicyHandler,
   createPackagePolicyHandler,
   updatePackagePolicyHandler,
   deletePackagePolicyHandler,
+  upgradePackagePolicyHandler,
 } from './handlers';
 
 export const registerRoutes = (router: IRouter) => {
@@ -69,5 +75,15 @@ export const registerRoutes = (router: IRouter) => {
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
     deletePackagePolicyHandler
+  );
+
+  // Upgrade
+  router.post(
+    {
+      path: PACKAGE_POLICY_API_ROUTES.UPGRADE_PATTERN,
+      validate: UpgradePackagePoliciesRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    upgradePackagePolicyHandler
   );
 };

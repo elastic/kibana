@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
 
+import { DefaultExportFileName } from '@kbn/securitysolution-io-ts-alerting-types';
+import { DefaultStringBooleanFalse } from '@kbn/securitysolution-io-ts-types';
 import { rule_id, FileName, ExcludeExportDetails } from '../common/schemas';
-
-import { DefaultExportFileName } from '../types/default_export_file_name';
-import { DefaultStringBooleanFalse } from '../types/default_string_boolean_false';
 
 const objects = t.array(t.exact(t.type({ rule_id })));
 export const exportRulesSchema = t.union([t.exact(t.type({ objects })), t.null]);

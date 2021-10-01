@@ -1,24 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { reduceRight } from 'lodash';
 
+import { Filter } from '@kbn/es-query';
 import { mapSpatialFilter } from './mappers/map_spatial_filter';
 import { mapMatchAll } from './mappers/map_match_all';
 import { mapPhrase } from './mappers/map_phrase';
@@ -27,11 +17,8 @@ import { mapRange } from './mappers/map_range';
 import { mapExists } from './mappers/map_exists';
 import { mapMissing } from './mappers/map_missing';
 import { mapQueryString } from './mappers/map_query_string';
-import { mapGeoBoundingBox } from './mappers/map_geo_bounding_box';
-import { mapGeoPolygon } from './mappers/map_geo_polygon';
 import { mapDefault } from './mappers/map_default';
 import { generateMappingChain } from './generate_mapping_chain';
-import { Filter } from '../../../../common';
 
 export function mapFilter(filter: Filter) {
   /** Mappers **/
@@ -59,8 +46,6 @@ export function mapFilter(filter: Filter) {
     mapExists,
     mapMissing,
     mapQueryString,
-    mapGeoBoundingBox,
-    mapGeoPolygon,
     mapDefault,
   ];
 

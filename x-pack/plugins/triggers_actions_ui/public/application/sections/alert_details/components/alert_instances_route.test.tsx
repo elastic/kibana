@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
@@ -41,9 +43,9 @@ describe('getAlertState useEffect handler', () => {
 
     loadAlertInstanceSummary.mockImplementationOnce(async () => alertInstanceSummary);
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
+    } as unknown as ToastsApi;
 
     await getAlertInstanceSummary(
       alert.id,
@@ -80,9 +82,9 @@ describe('getAlertState useEffect handler', () => {
       throw new Error('OMG');
     });
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
+    } as unknown as ToastsApi;
     await getAlertInstanceSummary(
       alert.id,
       loadAlertInstanceSummary,
@@ -91,7 +93,7 @@ describe('getAlertState useEffect handler', () => {
     );
     expect(toastNotifications.addDanger).toHaveBeenCalledTimes(1);
     expect(toastNotifications.addDanger).toHaveBeenCalledWith({
-      title: 'Unable to load alert instance summary: OMG',
+      title: 'Unable to load alerts: OMG',
     });
   });
 });

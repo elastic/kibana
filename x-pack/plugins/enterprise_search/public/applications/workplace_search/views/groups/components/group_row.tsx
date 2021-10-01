@@ -1,33 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import moment from 'moment';
-import { useValues } from 'kea';
 
-import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 
 import { EuiTableRow, EuiTableRowCell, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { TruncatedContent } from '../../../../shared/truncate';
+import { MANAGE_BUTTON_LABEL } from '../../../../shared/constants';
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
-
-import { Group } from '../../../types';
-
-import { AppLogic } from '../../../app_logic';
+import { TruncatedContent } from '../../../../shared/truncate';
 import { getGroupPath } from '../../../routes';
+import { Group } from '../../../types';
 import { MAX_NAME_LENGTH } from '../group_logic';
+
 import { GroupSources } from './group_sources';
-import { GroupUsers } from './group_users';
 
 const DAYS_CUTOFF = 8;
 export const NO_SOURCES_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.noSourcesMessage',
   {
-    defaultMessage: 'No shared content sources',
+    defaultMessage: 'No organizational content sources',
   }
 );
 export const NO_USERS_MESSAGE = i18n.translate(
@@ -42,16 +40,7 @@ const dateDisplay = (date: string) =>
     ? moment(date).fromNow()
     : moment(date).format('MMMM D, YYYY');
 
-export const GroupRow: React.FC<Group> = ({
-  id,
-  name,
-  updatedAt,
-  contentSources,
-  users,
-  usersCount,
-}) => {
-  const { isFederatedAuth } = useValues(AppLogic);
-
+export const GroupRow: React.FC<Group> = ({ id, name, updatedAt, contentSources }) => {
   const GROUP_UPDATED_TEXT = i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.groups.groupUpdatedText',
     {
@@ -80,20 +69,9 @@ export const GroupRow: React.FC<Group> = ({
           )}
         </div>
       </EuiTableRowCell>
-      {!isFederatedAuth && (
-        <EuiTableRowCell>
-          <div className="user-group__accounts">
-            {usersCount > 0 ? (
-              <GroupUsers groupUsers={users} usersCount={usersCount} groupId={id} />
-            ) : (
-              NO_USERS_MESSAGE
-            )}
-          </div>
-        </EuiTableRowCell>
-      )}
-      <EuiTableRowCell>
+      <EuiTableRowCell align="right">
         <strong>
-          <EuiLinkTo to={getGroupPath(id)}>
+          <EuiLinkTo aria-label={MANAGE_BUTTON_LABEL} to={getGroupPath(id)}>
             <EuiIcon type="pencil" />
           </EuiLinkTo>
         </strong>

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -20,6 +21,7 @@ interface MountSectionParams {
   assignmentService: ITagAssignmentService;
   core: CoreSetup<{}, SavedObjectTaggingPluginStart>;
   mountParams: ManagementAppMountParams;
+  title: string;
 }
 
 const RedirectToHomeIfUnauthorized: FC<{
@@ -39,11 +41,13 @@ export const mountSection = async ({
   assignmentService,
   core,
   mountParams,
+  title,
 }: MountSectionParams) => {
   const [coreStart] = await core.getStartServices();
   const { element, setBreadcrumbs } = mountParams;
   const capabilities = getTagsCapabilities(coreStart.application.capabilities);
   const assignableTypes = await assignmentService.getAssignableTypes();
+  coreStart.chrome.docTitle.change(title);
 
   ReactDOM.render(
     <I18nProvider>
@@ -63,6 +67,7 @@ export const mountSection = async ({
   );
 
   return () => {
+    coreStart.chrome.docTitle.reset();
     ReactDOM.unmountComponentAtNode(element);
   };
 };

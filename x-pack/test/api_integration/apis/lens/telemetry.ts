@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
 import expect from '@kbn/expect';
-import { Client } from '@elastic/elasticsearch';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -19,7 +19,7 @@ const COMMON_HEADERS = {
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es: Client = getService('es');
+  const es = getService('es');
 
   async function assertExpectedSavedObjects(num: number) {
     // Make sure that new/deleted docs are available to search
@@ -175,7 +175,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should collect telemetry on saved visualization types with a painless script', async () => {
       const esArchiver = getService('esArchiver');
 
-      await esArchiver.loadIfNeeded('lens/basic');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
 
       const results = await getVisualizationCounts(() => Promise.resolve(es), '.kibana');
 
@@ -195,7 +195,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
       expect(results.saved_overall_total).to.eql(3);
 
-      await esArchiver.unload('lens/basic');
+      await esArchiver.unload('x-pack/test/functional/es_archives/lens/basic');
     });
   });
 };

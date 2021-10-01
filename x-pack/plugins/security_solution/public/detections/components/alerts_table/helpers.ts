@@ -1,23 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash/fp';
-import {
-  Filter,
-  esKuery,
-  KueryNode,
-  esFilters,
-} from '../../../../../../../src/plugins/data/public';
+import { Filter, FilterStateStore, KueryNode, fromKueryExpression } from '@kbn/es-query';
 import {
   DataProvider,
   DataProviderType,
   DataProvidersAnd,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { TimelineType } from '../../../graphql/types';
+import { TimelineType } from '../../../../common/types/timeline';
 
 interface FindValueToChangeInQuery {
   field: string;
@@ -119,7 +115,7 @@ export const replaceTemplateFieldFromQuery = (
 ): string => {
   if (timelineType === TimelineType.default) {
     if (query.trim() !== '') {
-      const valueToChange = findValueToChangeInQuery(esKuery.fromKueryExpression(query));
+      const valueToChange = findValueToChangeInQuery(fromKueryExpression(query));
       return valueToChange.reduce((newQuery, vtc) => {
         const newValue = getStringArray(vtc.field, eventData);
         if (newValue.length) {
@@ -242,7 +238,7 @@ export const buildTimeRangeFilter = (from: string, to: string): Filter[] => [
       },
     },
     $state: {
-      store: esFilters.FilterStateStore.APP_STATE,
+      store: FilterStateStore.APP_STATE,
     },
   } as Filter,
 ];

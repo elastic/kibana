@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import * as ts from 'typescript';
 
 export interface DocEntry {
@@ -79,7 +81,7 @@ export function extractDocumentation(
    * @param type
    */
   function getTypeMembers(type: ts.Type): ts.Symbol[] | undefined {
-    const argsOfType = checker.getTypeArguments((type as unknown) as ts.TypeReference);
+    const argsOfType = checker.getTypeArguments(type as unknown as ts.TypeReference);
 
     let members = type.getProperties();
 
@@ -97,7 +99,7 @@ export function extractDocumentation(
   function resolveTypeProperties(type: ts.Type): ts.Symbol[] {
     let props = type.getProperties();
 
-    const typeArguments = checker.getTypeArguments((type as unknown) as ts.TypeReference);
+    const typeArguments = checker.getTypeArguments(type as unknown as ts.TypeReference);
 
     if (type.aliasTypeArguments) {
       // @ts-ignores

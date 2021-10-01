@@ -1,36 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
 import {
   EuiButton,
   EuiConfirmModal,
-  EuiOverlayMask,
+  EuiEmptyPrompt,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiPanel,
   EuiSpacer,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { AppLogic } from '../../../app_logic';
+import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { TruncatedContent } from '../../../../shared/truncate';
+import noOrgSourcesIcon from '../../../assets/share_circle.svg';
+import { WorkplaceSearchPageTemplate } from '../../../components/layout';
 import { ContentSection } from '../../../components/shared/content_section';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
-import { Loading } from '../../../../shared/loading';
 import { SourcesTable } from '../../../components/shared/sources_table';
-
-import { GroupUsersTable } from './group_users_table';
-
+import { NAV, CANCEL_BUTTON } from '../../../constants';
+import { USERS_AND_ROLES_PATH } from '../../../routes';
 import { GroupLogic, MAX_NAME_LENGTH } from '../group_logic';
 
 export const EMPTY_SOURCES_DESCRIPTION = i18n.translate(
@@ -39,28 +39,29 @@ export const EMPTY_SOURCES_DESCRIPTION = i18n.translate(
     defaultMessage: 'No content sources are shared with this group.',
   }
 );
+const USERS_SECTION_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.overview.usersSectionTitle',
+  {
+    defaultMessage: 'Group users',
+  }
+);
 const GROUP_USERS_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.overview.groupUsersDescription',
   {
-    defaultMessage: 'Members will be able to search over the group’s sources.',
-  }
-);
-export const EMPTY_USERS_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.groups.overview.emptyUsersDescription',
-  {
-    defaultMessage: 'There are no users in this group.',
+    defaultMessage:
+      "Users assigned to this group gain access to the sources' data and content defined above. User assignments for this group can be managed in the Users and Roles area.",
   }
 );
 const MANAGE_SOURCES_BUTTON_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.overview.manageSourcesButtonText',
   {
-    defaultMessage: 'Manage shared content sources',
+    defaultMessage: 'Manage organizational content sources',
   }
 );
 const MANAGE_USERS_BUTTON_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.overview.manageUsersButtonText',
   {
-    defaultMessage: 'Manage users',
+    defaultMessage: 'Manage users and roles',
   }
 );
 const NAME_SECTION_TITLE = i18n.translate(
@@ -99,12 +100,6 @@ const REMOVE_BUTTON_TEXT = i18n.translate(
     defaultMessage: 'Remove group',
   }
 );
-const CANCEL_REMOVE_BUTTON_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.groups.overview.cancelRemoveButtonText',
-  {
-    defaultMessage: 'Cancel',
-  }
-);
 const CONFIRM_TITLE_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.overview.confirmTitleText',
   {
@@ -115,25 +110,20 @@ const CONFIRM_TITLE_TEXT = i18n.translate(
 export const GroupOverview: React.FC = () => {
   const {
     deleteGroup,
-    showSharedSourcesModal,
-    showManageUsersModal,
+    showOrgSourcesModal,
     showConfirmDeleteModal,
     hideConfirmDeleteModal,
     updateGroupName,
     onGroupNameInputChange,
   } = useActions(GroupLogic);
   const {
-    group: { name, contentSources, users, canDeleteGroup },
+    group: { name, contentSources, canDeleteGroup },
     groupNameInputValue,
     dataLoading,
     confirmDeleteModalVisible,
   } = useValues(GroupLogic);
 
-  const { isFederatedAuth } = useValues(AppLogic);
-
-  if (dataLoading) return <Loading />;
-
-  const truncatedName = (
+  const truncatedName = name && (
     <TruncatedContent tooltipType="title" content={name} length={MAX_NAME_LENGTH} />
   );
 
@@ -152,6 +142,12 @@ export const GroupOverview: React.FC = () => {
       values: { name },
     }
   );
+  const GROUP_SOURCES_TITLE = i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.groups.overview.groupSourcesTitle',
+    {
+      defaultMessage: 'Group content sources',
+    }
+  );
   const GROUP_SOURCES_DESCRIPTION = i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.groups.overview.groupSourcesDescription',
     {
@@ -160,40 +156,52 @@ export const GroupOverview: React.FC = () => {
     }
   );
 
-  const hasContentSources = contentSources.length > 0;
-  const hasUsers = users.length > 0;
+  const hasContentSources = contentSources?.length > 0;
 
   const manageSourcesButton = (
-    <EuiButton color="primary" onClick={showSharedSourcesModal}>
+    <EuiButton color="primary" onClick={showOrgSourcesModal}>
       {MANAGE_SOURCES_BUTTON_TEXT}
     </EuiButton>
   );
-  const manageUsersButton = !isFederatedAuth && (
-    <EuiButton color="primary" onClick={showManageUsersModal}>
+  const manageUsersButton = (
+    <EuiButtonTo color="primary" to={USERS_AND_ROLES_PATH}>
       {MANAGE_USERS_BUTTON_TEXT}
-    </EuiButton>
+    </EuiButtonTo>
   );
   const sourcesTable = <SourcesTable sources={contentSources} />;
 
   const sourcesSection = (
     <ContentSection
-      title="Group content sources"
-      description={hasContentSources ? GROUP_SOURCES_DESCRIPTION : EMPTY_SOURCES_DESCRIPTION}
+      title={GROUP_SOURCES_TITLE}
+      description={GROUP_SOURCES_DESCRIPTION}
       action={manageSourcesButton}
       data-test-subj="GroupContentSourcesSection"
     >
-      {hasContentSources && sourcesTable}
+      {sourcesTable}
     </ContentSection>
   );
 
-  const usersSection = !isFederatedAuth && (
+  const sourcesEmptyState = (
+    <>
+      <EuiPanel paddingSize="none" color="subdued">
+        <EuiEmptyPrompt
+          iconType={noOrgSourcesIcon}
+          title={<h2>{GROUP_SOURCES_TITLE}</h2>}
+          body={<p>{EMPTY_SOURCES_DESCRIPTION}</p>}
+          actions={manageSourcesButton}
+        />
+      </EuiPanel>
+      <EuiSpacer />
+    </>
+  );
+
+  const usersSection = (
     <ContentSection
-      title="Group users"
-      description={hasUsers ? GROUP_USERS_DESCRIPTION : EMPTY_USERS_DESCRIPTION}
-      action={manageUsersButton}
+      title={USERS_SECTION_TITLE}
+      description={GROUP_USERS_DESCRIPTION}
       data-test-subj="GroupUsersSection"
     >
-      {hasUsers && <GroupUsersTable />}
+      {manageUsersButton}
     </ContentSection>
   );
 
@@ -232,18 +240,16 @@ export const GroupOverview: React.FC = () => {
       <EuiSpacer size="xxl" />
       <ContentSection title={REMOVE_SECTION_TITLE} description={REMOVE_SECTION_DESCRIPTION}>
         {confirmDeleteModalVisible && (
-          <EuiOverlayMask>
-            <EuiConfirmModal
-              onCancel={hideConfirmDeleteModal}
-              onConfirm={deleteGroup}
-              confirmButtonText={CONFIRM_REMOVE_BUTTON_TEXT}
-              title={CONFIRM_TITLE_TEXT}
-              cancelButtonText={CANCEL_REMOVE_BUTTON_TEXT}
-              defaultFocusedButton="confirm"
-            >
-              {CONFIRM_REMOVE_DESCRIPTION}
-            </EuiConfirmModal>
-          </EuiOverlayMask>
+          <EuiConfirmModal
+            onCancel={hideConfirmDeleteModal}
+            onConfirm={deleteGroup}
+            confirmButtonText={CONFIRM_REMOVE_BUTTON_TEXT}
+            title={CONFIRM_TITLE_TEXT}
+            cancelButtonText={CANCEL_BUTTON}
+            defaultFocusedButton="confirm"
+          >
+            {CONFIRM_REMOVE_DESCRIPTION}
+          </EuiConfirmModal>
         )}
         <EuiButton
           color="danger"
@@ -258,13 +264,16 @@ export const GroupOverview: React.FC = () => {
   );
 
   return (
-    <>
-      <ViewContentHeader title={truncatedName} />
-      <EuiSpacer />
-      {sourcesSection}
+    <WorkplaceSearchPageTemplate
+      pageChrome={[NAV.GROUPS, name || '...']}
+      pageViewTelemetry="group_overview"
+      pageHeader={{ pageTitle: truncatedName }}
+      isLoading={dataLoading}
+    >
+      {hasContentSources ? sourcesSection : sourcesEmptyState}
       {usersSection}
       {nameSection}
       {canDeleteGroup && deleteSection}
-    </>
+    </WorkplaceSearchPageTemplate>
   );
 };

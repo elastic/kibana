@@ -1,0 +1,13 @@
+.lnsHelpPopover__panel {
+  max-width: $euiSize * 30;
+}
+
+.lnsHelpPopover__content {
+  @include euiYScrollWithShadows;
+  max-height: 40vh;
+  padding: $euiSizeM;
+}
+
+.lnsHelpPopover__buttonIcon {
+  margin-right: $euiSizeXS;
+}

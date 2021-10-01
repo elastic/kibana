@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
@@ -32,6 +33,7 @@ interface RenderRuleNameProps {
   contextId: string;
   eventId: string;
   fieldName: string;
+  isDraggable: boolean;
   linkValue: string | null | undefined;
   truncate?: boolean;
   value: string | number | null | undefined;
@@ -41,54 +43,75 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   contextId,
   eventId,
   fieldName,
+  isDraggable,
   linkValue,
   truncate,
   value,
 }) => {
   const ruleName = `${value}`;
   const ruleId = linkValue;
-  const { search } = useFormatUrl(SecurityPageName.detections);
+  const { search } = useFormatUrl(SecurityPageName.rules);
   const { navigateToApp, getUrlForApp } = useKibana().services.application;
-  const content = truncate ? <TruncatableText>{value}</TruncatableText> : value;
+  const content = truncate ? (
+    <TruncatableText dataTestSubj={`formatted-field-${fieldName}`}>{value}</TruncatableText>
+  ) : (
+    value
+  );
 
   const goToRuleDetails = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.detections}`, {
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.rules,
         path: getRuleDetailsUrl(ruleId ?? '', search),
       });
     },
     [navigateToApp, ruleId, search]
   );
 
-  return isString(value) && ruleName.length > 0 && ruleId != null ? (
-    <DefaultDraggable
-      field={fieldName}
-      id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${ruleId}`}
-      tooltipContent={value}
-      value={value}
-    >
+  if (isString(value) && ruleName.length > 0 && ruleId != null) {
+    const link = (
       <LinkAnchor
         onClick={goToRuleDetails}
-        href={getUrlForApp(`${APP_ID}:${SecurityPageName.detections}`, {
+        href={getUrlForApp(APP_ID, {
+          deepLinkId: SecurityPageName.rules,
           path: getRuleDetailsUrl(ruleId, search),
         })}
       >
         {content}
       </LinkAnchor>
-    </DefaultDraggable>
-  ) : value != null ? (
-    <DefaultDraggable
-      field={fieldName}
-      id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${ruleId}`}
-      tooltipContent={value}
-      value={`${value}`}
-    >
-      {value}
-    </DefaultDraggable>
-  ) : (
-    getEmptyTagValue()
-  );
+    );
+
+    return isDraggable ? (
+      <DefaultDraggable
+        field={fieldName}
+        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${ruleId}`}
+        isDraggable={isDraggable}
+        tooltipContent={value}
+        value={value}
+      >
+        {link}
+      </DefaultDraggable>
+    ) : (
+      link
+    );
+  } else if (value != null) {
+    return isDraggable ? (
+      <DefaultDraggable
+        field={fieldName}
+        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${ruleId}`}
+        isDraggable={isDraggable}
+        tooltipContent={value}
+        value={`${value}`}
+      >
+        {value}
+      </DefaultDraggable>
+    ) : (
+      <>{value}</>
+    );
+  }
+
+  return getEmptyTagValue();
 };
 
 const canYouAddEndpointLogo = (moduleName: string, endpointUrl: string | null | undefined) =>
@@ -102,6 +125,7 @@ export const renderEventModule = ({
   contextId,
   eventId,
   fieldName,
+  isDraggable,
   linkValue,
   truncate,
   value,
@@ -109,6 +133,7 @@ export const renderEventModule = ({
   contextId: string;
   eventId: string;
   fieldName: string;
+  isDraggable: boolean;
   linkValue: string | null | undefined;
   truncate?: boolean;
   value: string | number | null | undefined;
@@ -127,14 +152,19 @@ export const renderEventModule = ({
       }
     >
       <EventModuleFlexItem>
-        <DefaultDraggable
-          field={fieldName}
-          id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${moduleName}`}
-          tooltipContent={value}
-          value={value}
-        >
-          {content}
-        </DefaultDraggable>
+        {isDraggable ? (
+          <DefaultDraggable
+            field={fieldName}
+            id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${moduleName}`}
+            isDraggable={isDraggable}
+            tooltipContent={value}
+            value={value}
+          >
+            {content}
+          </DefaultDraggable>
+        ) : (
+          <>{content}</>
+        )}
       </EventModuleFlexItem>
       {endpointRefUrl != null && canYouAddEndpointLogo(moduleName, endpointRefUrl) && (
         <EuiFlexItem grow={false}>
@@ -163,6 +193,7 @@ export const renderUrl = ({
   contextId,
   eventId,
   fieldName,
+  isDraggable,
   linkValue,
   truncate,
   value,
@@ -170,28 +201,39 @@ export const renderUrl = ({
   contextId: string;
   eventId: string;
   fieldName: string;
+  isDraggable: boolean;
   linkValue: string | null | undefined;
   truncate?: boolean;
   value: string | number | null | undefined;
 }) => {
   const urlName = `${value}`;
 
-  const content = truncate ? <TruncatableText>{value}</TruncatableText> : value;
-
-  return isString(value) && urlName.length > 0 ? (
-    <DefaultDraggable
-      field={fieldName}
-      id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${urlName}`}
-      tooltipContent={value}
-      value={value}
-    >
+  const formattedValue = truncate ? <TruncatableText>{value}</TruncatableText> : value;
+  const content = (
+    <>
       {!isUrlInvalid(urlName) && (
         <EuiLink target="_blank" href={urlName}>
-          {content}
+          {formattedValue}
         </EuiLink>
       )}
-      {isUrlInvalid(urlName) && <>{content}</>}
-    </DefaultDraggable>
+      {isUrlInvalid(urlName) && <>{formattedValue}</>}
+    </>
+  );
+
+  return isString(value) && urlName.length > 0 ? (
+    isDraggable ? (
+      <DefaultDraggable
+        field={fieldName}
+        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${urlName}`}
+        isDraggable={isDraggable}
+        tooltipContent={value}
+        value={value}
+      >
+        {content}
+      </DefaultDraggable>
+    ) : (
+      content
+    )
   ) : (
     getEmptyTagValue()
   );

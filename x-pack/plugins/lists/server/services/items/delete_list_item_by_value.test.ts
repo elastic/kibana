@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
@@ -24,7 +25,7 @@ describe('delete_list_item_by_value', () => {
   });
 
   test('Delete returns a an empty array if the list items are also empty', async () => {
-    ((getListItemByValues as unknown) as jest.Mock).mockResolvedValueOnce([]);
+    (getListItemByValues as unknown as jest.Mock).mockResolvedValueOnce([]);
     const options = getDeleteListItemByValueOptionsMock();
     const deletedListItem = await deleteListItemByValue(options);
     expect(deletedListItem).toEqual([]);
@@ -32,7 +33,7 @@ describe('delete_list_item_by_value', () => {
 
   test('Delete returns the list item if a list item is returned from "getListByValues"', async () => {
     const listItems = [getListItemResponseMock()];
-    ((getListItemByValues as unknown) as jest.Mock).mockResolvedValueOnce(listItems);
+    (getListItemByValues as unknown as jest.Mock).mockResolvedValueOnce(listItems);
     const options = getDeleteListItemByValueOptionsMock();
     const deletedListItem = await deleteListItemByValue(options);
     expect(deletedListItem).toEqual(listItems);
@@ -40,7 +41,7 @@ describe('delete_list_item_by_value', () => {
 
   test('Delete calls "deleteByQuery" if a list item is returned from "getListByValues"', async () => {
     const listItems = [getListItemResponseMock()];
-    ((getListItemByValues as unknown) as jest.Mock).mockResolvedValueOnce(listItems);
+    (getListItemByValues as unknown as jest.Mock).mockResolvedValueOnce(listItems);
     const options = getDeleteListItemByValueOptionsMock();
     await deleteListItemByValue(options);
     const deleteByQuery = {
@@ -60,8 +61,8 @@ describe('delete_list_item_by_value', () => {
         },
       },
       index: '.items',
-      refresh: 'wait_for',
+      refresh: false,
     };
-    expect(options.callCluster).toBeCalledWith('deleteByQuery', deleteByQuery);
+    expect(options.esClient.deleteByQuery).toBeCalledWith(deleteByQuery);
   });
 });

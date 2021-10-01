@@ -1,24 +1,40 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import '../../__mocks__/kea.mock';
+jest.mock('./', () => ({
+  generateReactRouterProps: ({ to }: { to: string }) => ({
+    href: `/app/enterprise_search${to}`,
+    onClick: () => {},
+  }),
+}));
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
-import { EuiLink, EuiButton, EuiButtonEmpty, EuiPanel, EuiCard } from '@elastic/eui';
 
-import { mockKibanaValues, mockHistory } from '../../__mocks__';
+import { shallow } from 'enzyme';
 
-import { EuiLinkTo, EuiButtonTo, EuiButtonEmptyTo, EuiPanelTo, EuiCardTo } from './eui_components';
+import {
+  EuiLink,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiListGroupItem,
+  EuiPanel,
+  EuiCard,
+} from '@elastic/eui';
 
-describe('EUI & React Router Component Helpers', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+import {
+  EuiLinkTo,
+  EuiButtonTo,
+  EuiButtonEmptyTo,
+  EuiListGroupItemTo,
+  EuiPanelTo,
+  EuiCardTo,
+} from './eui_components';
 
+describe('React Router EUI component helpers', () => {
   it('renders an EuiLink', () => {
     const wrapper = shallow(<EuiLinkTo to="/" />);
 
@@ -37,6 +53,13 @@ describe('EUI & React Router Component Helpers', () => {
     expect(wrapper.find(EuiButtonEmpty)).toHaveLength(1);
   });
 
+  it('renders an EuiListGroupItem', () => {
+    const wrapper = shallow(<EuiListGroupItemTo to="/" label="foo" />);
+
+    expect(wrapper.find(EuiListGroupItem)).toHaveLength(1);
+    expect(wrapper.find(EuiListGroupItem).prop('label')).toEqual('foo');
+  });
+
   it('renders an EuiPanel', () => {
     const wrapper = shallow(<EuiPanelTo to="/" paddingSize="l" />);
 
@@ -52,64 +75,18 @@ describe('EUI & React Router Component Helpers', () => {
   });
 
   it('passes down all ...rest props', () => {
-    const wrapper = shallow(<EuiLinkTo to="/" data-test-subj="foo" external={true} />);
+    const wrapper = shallow(<EuiLinkTo to="/" data-test-subj="test" external />);
     const link = wrapper.find(EuiLink);
 
     expect(link.prop('external')).toEqual(true);
-    expect(link.prop('data-test-subj')).toEqual('foo');
+    expect(link.prop('data-test-subj')).toEqual('test');
   });
 
-  it('renders with the correct href and onClick props', () => {
-    const wrapper = mount(<EuiLinkTo to="/foo/bar" />);
+  it('renders with generated href and onClick props', () => {
+    const wrapper = shallow(<EuiLinkTo to="/hello/world" />);
     const link = wrapper.find(EuiLink);
 
     expect(link.prop('onClick')).toBeInstanceOf(Function);
-    expect(link.prop('href')).toEqual('/app/enterprise_search/foo/bar');
-    expect(mockHistory.createHref).toHaveBeenCalled();
-  });
-
-  it('renders with the correct non-basenamed href when shouldNotCreateHref is passed', () => {
-    const wrapper = mount(<EuiLinkTo to="/foo/bar" shouldNotCreateHref />);
-    const link = wrapper.find(EuiLink);
-
-    expect(link.prop('href')).toEqual('/foo/bar');
-    expect(mockHistory.createHref).not.toHaveBeenCalled();
-  });
-
-  describe('onClick', () => {
-    it('prevents default navigation and uses React Router history', () => {
-      const wrapper = mount(<EuiLinkTo to="/bar/baz" />);
-
-      const simulatedEvent = {
-        button: 0,
-        target: { getAttribute: () => '_self' },
-        preventDefault: jest.fn(),
-      };
-      wrapper.find(EuiLink).simulate('click', simulatedEvent);
-
-      expect(simulatedEvent.preventDefault).toHaveBeenCalled();
-      expect(mockKibanaValues.navigateToUrl).toHaveBeenCalled();
-    });
-
-    it('does not prevent default browser behavior on new tab/window clicks', () => {
-      const wrapper = mount(<EuiLinkTo to="/bar/baz" />);
-
-      const simulatedEvent = {
-        shiftKey: true,
-        target: { getAttribute: () => '_blank' },
-      };
-      wrapper.find(EuiLink).simulate('click', simulatedEvent);
-
-      expect(mockKibanaValues.navigateToUrl).not.toHaveBeenCalled();
-    });
-
-    it('calls inherited onClick actions in addition to default navigation', () => {
-      const customOnClick = jest.fn(); // Can be anything from telemetry to a state reset
-      const wrapper = mount(<EuiLinkTo to="/narnia" onClick={customOnClick} />);
-
-      wrapper.find(EuiLink).simulate('click', { shiftKey: true });
-
-      expect(customOnClick).toHaveBeenCalled();
-    });
+    expect(link.prop('href')).toEqual('/app/enterprise_search/hello/world');
   });
 });

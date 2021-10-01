@@ -1,37 +1,28 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 
 import { ChromeStart, DocLinksStart } from 'kibana/public';
 import { Filter } from '../../../../data/public';
+import { redirectWhenMissing } from '../../../../kibana_utils/public';
+import { VisualizeConstants } from '../visualize_constants';
 import { VisualizeServices, VisualizeEditorVisInstance } from '../types';
 
 export const addHelpMenuToAppChrome = (chrome: ChromeStart, docLinks: DocLinksStart) => {
   chrome.setHelpExtension({
     appName: i18n.translate('visualize.helpMenu.appName', {
-      defaultMessage: 'Visualize',
+      defaultMessage: 'Visualize Library',
     }),
     links: [
       {
         linkType: 'documentation',
-        href: `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/visualize.html`,
+        href: `${docLinks.links.visualize.guide}`,
       },
     ],
   });
@@ -43,7 +34,7 @@ export const addBadgeToAppChrome = (chrome: ChromeStart) => {
       defaultMessage: 'Read only',
     }),
     tooltip: i18n.translate('visualize.badge.readOnly.tooltip', {
-      defaultMessage: 'Unable to save visualizations',
+      defaultMessage: 'Unable to save visualizations to the library',
     }),
     iconType: 'glasses',
   });
@@ -68,4 +59,37 @@ export const visStateToEditorState = (
     vis: { ...savedVisState.visState, title: vis.title },
     linked: savedVis && savedVis.id ? !!savedVis.savedSearchId : !!savedVisState.savedSearchId,
   };
+};
+
+export const redirectToSavedObjectPage = (
+  services: VisualizeServices,
+  error: any,
+  savedVisualizationsId?: string
+) => {
+  const {
+    history,
+    setActiveUrl,
+    toastNotifications,
+    http: { basePath },
+    application: { navigateToApp },
+  } = services;
+  const managementRedirectTarget = {
+    app: 'management',
+    path: `kibana/objects/savedVisualizations/${savedVisualizationsId}`,
+  };
+  redirectWhenMissing({
+    history,
+    navigateToApp,
+    toastNotifications,
+    basePath,
+    mapping: {
+      visualization: VisualizeConstants.LANDING_PAGE_PATH,
+      search: managementRedirectTarget,
+      'index-pattern': managementRedirectTarget,
+      'index-pattern-field': managementRedirectTarget,
+    },
+    onBeforeRedirect() {
+      setActiveUrl(VisualizeConstants.LANDING_PAGE_PATH);
+    },
+  })(error);
 };

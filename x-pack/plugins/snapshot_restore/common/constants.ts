@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { LicenseType } from '../../licensing/common/types';
 import { RepositoryType } from './types';
 
@@ -63,3 +65,9 @@ export const TIME_UNITS: { [key: string]: 'd' | 'h' | 'm' | 's' } = {
   MINUTE: 'm',
   SECOND: 's',
 };
+
+/**
+ * [Temporary workaround] In order to prevent client-side performance issues for users with a large number of snapshots,
+ * we set a hard-coded limit on the number of snapshots we return from the ES snapshots API
+ */
+export const SNAPSHOT_LIST_MAX_SIZE = 1000;

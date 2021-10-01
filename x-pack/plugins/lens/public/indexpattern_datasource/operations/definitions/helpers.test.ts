@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createMockedIndexPattern } from '../../mocks';
@@ -30,13 +31,13 @@ describe('helpers', () => {
           dataType: 'number',
           isBucketed: false,
           label: 'Foo',
-          operationType: 'avg', // <= invalid
+          operationType: 'average', // <= invalid
           sourceField: 'timestamp',
         },
         createMockedIndexPattern()
       );
       expect(messages).toHaveLength(1);
-      expect(messages![0]).toEqual('Field timestamp was not found');
+      expect(messages![0]).toEqual('Field timestamp is of the wrong type');
     });
 
     it('returns no message if all fields are matching', () => {
@@ -45,7 +46,7 @@ describe('helpers', () => {
           dataType: 'number',
           isBucketed: false,
           label: 'Foo',
-          operationType: 'avg',
+          operationType: 'average',
           sourceField: 'bytes',
         },
         createMockedIndexPattern()

@@ -1,16 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, ReactEventHandler } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { ComponentStrings } from '../../../i18n';
-
-const { PagePreviewPageControls: strings } = ComponentStrings;
+const strings = {
+  getClonePageAriaLabel: () =>
+    i18n.translate('xpack.canvas.pagePreviewPageControls.clonePageAriaLabel', {
+      defaultMessage: 'Clone page',
+    }),
+  getClonePageTooltip: () =>
+    i18n.translate('xpack.canvas.pagePreviewPageControls.clonePageTooltip', {
+      defaultMessage: 'Clone',
+    }),
+  getDeletePageAriaLabel: () =>
+    i18n.translate('xpack.canvas.pagePreviewPageControls.deletePageAriaLabel', {
+      defaultMessage: 'Delete page',
+    }),
+  getDeletePageTooltip: () =>
+    i18n.translate('xpack.canvas.pagePreviewPageControls.deletePageTooltip', {
+      defaultMessage: 'Delete',
+    }),
+};
 
 interface Props {
   pageId: string;

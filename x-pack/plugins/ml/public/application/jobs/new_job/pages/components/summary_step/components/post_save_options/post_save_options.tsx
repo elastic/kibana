@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment, useContext, useState } from 'react';
@@ -12,16 +13,13 @@ import { JobRunner } from '../../../../../common/job_runner';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
 import { extractErrorMessage } from '../../../../../../../../../common/util/errors';
 
-// @ts-ignore
-import { CreateWatchFlyout } from '../../../../../../jobs_list/components/create_watch_flyout/index';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { DATAFEED_STATE } from '../../../../../../../../../common/constants/states';
+import { MlAnomalyAlertFlyout } from '../../../../../../../../alerting/ml_alerting_flyout';
 
 interface Props {
   jobRunner: JobRunner | null;
 }
-
-type ShowFlyout = (jobId: string) => void;
 
 export const PostSaveOptions: FC<Props> = ({ jobRunner }) => {
   const {
@@ -29,21 +27,7 @@ export const PostSaveOptions: FC<Props> = ({ jobRunner }) => {
   } = useMlKibana();
   const { jobCreator } = useContext(JobCreatorContext);
   const [datafeedState, setDatafeedState] = useState(DATAFEED_STATE.STOPPED);
-  const [watchFlyoutVisible, setWatchFlyoutVisible] = useState(false);
-  const [watchCreated, setWatchCreated] = useState(false);
-
-  function setShowCreateWatchFlyoutFunction(showFlyout: ShowFlyout) {
-    showFlyout(jobCreator.jobId);
-  }
-
-  function flyoutHidden(jobCreated: boolean) {
-    setWatchFlyoutVisible(false);
-    setWatchCreated(jobCreated);
-  }
-
-  function unsetShowCreateWatchFlyoutFunction() {
-    setWatchFlyoutVisible(false);
-  }
+  const [alertFlyoutVisible, setAlertFlyoutVisible] = useState(false);
 
   async function startJobInRealTime() {
     const { toasts } = notifications;
@@ -92,28 +76,26 @@ export const PostSaveOptions: FC<Props> = ({ jobRunner }) => {
           />
         </EuiButton>
       </EuiFlexItem>
+
       <EuiFlexItem grow={false}>
         <EuiButton
           isDisabled={
-            datafeedState === DATAFEED_STATE.STOPPED ||
-            datafeedState === DATAFEED_STATE.STARTING ||
-            watchCreated === true
+            datafeedState === DATAFEED_STATE.STOPPED || datafeedState === DATAFEED_STATE.STARTING
           }
-          onClick={() => setWatchFlyoutVisible(true)}
-          data-test-subj="mlJobWizardButtonCreateWatch"
+          onClick={setAlertFlyoutVisible.bind(null, true)}
+          data-test-subj="mlJobWizardButtonCreateAlert"
         >
           <FormattedMessage
-            id="xpack.ml.newJob.wizard.summaryStep.postSaveOptions.createWatch"
-            defaultMessage="Create watch"
+            id="xpack.ml.newJob.wizard.summaryStep.postSaveOptions.createAlert"
+            defaultMessage="Create alert rule"
           />
         </EuiButton>
       </EuiFlexItem>
 
-      {datafeedState === DATAFEED_STATE.STARTED && watchFlyoutVisible && (
-        <CreateWatchFlyout
-          setShowFunction={setShowCreateWatchFlyoutFunction}
-          unsetShowFunction={unsetShowCreateWatchFlyoutFunction}
-          flyoutHidden={flyoutHidden}
+      {datafeedState === DATAFEED_STATE.STARTED && alertFlyoutVisible && (
+        <MlAnomalyAlertFlyout
+          jobIds={[jobCreator.jobId]}
+          onCloseFlyout={setAlertFlyoutVisible.bind(null, false)}
         />
       )}
     </Fragment>

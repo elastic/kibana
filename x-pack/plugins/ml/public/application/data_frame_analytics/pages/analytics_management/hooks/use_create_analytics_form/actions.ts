@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DeepReadonly } from '../../../../../../../common/types/common';
@@ -65,7 +66,7 @@ export type Action =
 // Actions wrapping the dispatcher exposed by the custom hook
 export interface ActionDispatchers {
   closeModal: () => void;
-  createAnalyticsJob: () => void;
+  createAnalyticsJob: () => Promise<boolean>;
   initiateWizard: () => Promise<void>;
   resetAdvancedEditorMessages: () => void;
   setAdvancedEditorRawString: (payload: State['advancedEditorRawString']) => void;

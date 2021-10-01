@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Embeddable, EmbeddableInput } from '../../../../../../../src/plugins/embeddable/public';
@@ -11,23 +12,19 @@ import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   AdvancedUiActionsStart,
 } from '../../../../../ui_actions_enhanced/public';
-import { TriggerContextMapping } from '../../../../../../../src/plugins/ui_actions/public';
 import { uiActionsEnhancedPluginMock } from '../../../../../ui_actions_enhanced/public/mocks';
 
 export class MockEmbeddable extends Embeddable {
   public rootType = 'dashboard';
   public readonly type = 'mock';
-  private readonly triggers: Array<keyof TriggerContextMapping> = [];
-  constructor(
-    initialInput: EmbeddableInput,
-    params: { supportedTriggers?: Array<keyof TriggerContextMapping> }
-  ) {
+  private readonly triggers: string[] = [];
+  constructor(initialInput: EmbeddableInput, params: { supportedTriggers?: string[] }) {
     super(initialInput, {}, undefined);
     this.triggers = params.supportedTriggers ?? [];
   }
   public render(node: HTMLElement) {}
   public reload() {}
-  public supportedTriggers(): Array<keyof TriggerContextMapping> {
+  public supportedTriggers(): string[] {
     return this.triggers;
   }
   public getRoot() {

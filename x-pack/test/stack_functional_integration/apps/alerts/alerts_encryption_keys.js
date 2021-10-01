@@ -1,12 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
+import { resolve } from 'path';
+import { REPO_ROOT } from '@kbn/dev-utils';
 
-const ARCHIVE = 'email_connectors_with_encryption_rotation';
+const INTEGRATION_TEST_ROOT = process.env.WORKSPACE || resolve(REPO_ROOT, '../integration-test');
+const ARCHIVE = resolve(
+  INTEGRATION_TEST_ROOT,
+  'test/es_archives/email_connectors_with_encryption_rotation'
+);
 
 export default ({ getPageObjects, getService }) => {
   const esArchiver = getService('esArchiver');
@@ -36,8 +43,8 @@ export default ({ getPageObjects, getService }) => {
           await testConnector(connectorName);
           await retry.try(async () => {
             const executionFailureResultCallout = await testSubjects.find('executionFailureResult');
-            expect(await executionFailureResultCallout.getVisibleText()).to.match(
-              /Internal Server Error/
+            expect(await executionFailureResultCallout.getVisibleText()).to.be(
+              'Test failed to run\nThe following error was found:\nerror sending email\nDetails:\nMail command failed: 550 5.7.1 Relaying denied'
             );
           });
           expect(true).to.be(true);

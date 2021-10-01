@@ -1,27 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['dashboard', 'header']);
+  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
   const listingTable = getService('listingTable');
+  const testSubjects = getService('testSubjects');
+  const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('dashboard save', function describeIndexTests() {
     this.tags('includeFirefox');
@@ -121,6 +112,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await listingTable.searchAndExpectItemsCount('dashboard', dashboardNameEnterKey, 1);
+    });
+
+    it('Does not show quick save menu item on a new dashboard', async function () {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.dashboard.expectMissingQuickSaveOption();
+    });
+
+    it('Does not show dashboard save modal when on quick save', async function () {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.dashboard.saveDashboard('test quick save');
+
+      await PageObjects.dashboard.switchToEditMode();
+      await PageObjects.dashboard.expectExistsQuickSaveOption();
+      await dashboardAddPanel.clickMarkdownQuickButton();
+      await PageObjects.visualize.saveVisualizationAndReturn();
+      await PageObjects.dashboard.waitForRenderComplete();
+      await PageObjects.dashboard.clickQuickSave();
+
+      await testSubjects.existOrFail('saveDashboardSuccess');
+    });
+
+    it('Stays in edit mode after performing a quick save', async function () {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('dashboardQuickSaveMenuItem');
     });
   });
 }

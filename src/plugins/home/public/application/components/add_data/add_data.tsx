@@ -1,107 +1,121 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { FC, MouseEvent } from 'react';
-import PropTypes from 'prop-types';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiImage,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { METRIC_TYPE } from '@kbn/analytics';
-// @ts-expect-error untyped service
-import { FeatureCatalogueEntry } from '../../services';
+import { ApplicationStart } from 'kibana/public';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 // @ts-expect-error untyped component
 import { Synopsis } from '../synopsis';
 import { getServices } from '../../kibana_services';
+import { RedirectAppLinks } from '../../../../../kibana_react/public';
 
 interface Props {
   addBasePath: (path: string) => string;
-  features: FeatureCatalogueEntry[];
+  application: ApplicationStart;
+  isDarkMode: boolean;
 }
 
-export const AddData: FC<Props> = ({ addBasePath, features }) => {
+export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode }) => {
   const { trackUiMetric } = getServices();
 
   return (
-    <section className="homDataAdd" aria-labelledby="homDataAdd__title">
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={1}>
-          <EuiTitle size="s">
-            <h2 id="homDataAdd__title">
-              <FormattedMessage id="home.addData.sectionTitle" defaultMessage="Ingest your data" />
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
+    <>
+      <section className="homDataAdd" aria-labelledby="homDataAdd__title">
+        <EuiFlexGroup alignItems="flexEnd">
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <h2 id="homDataAdd__title">
+                <FormattedMessage
+                  id="home.addData.sectionTitle"
+                  defaultMessage="Get started by adding your data"
+                />
+              </h2>
+            </EuiTitle>
 
-        <EuiFlexItem className="homDataAdd__actions" grow={false}>
-          <div>
-            <EuiButtonEmpty
-              className="homDataAdd__actionButton"
-              flush="left"
-              href="#/tutorial_directory/sampleData"
-              iconType="visTable"
-              size="xs"
-            >
-              <FormattedMessage
-                id="home.addData.sampleDataButtonLabel"
-                defaultMessage="Try our sample data"
-              />
-            </EuiButtonEmpty>
-          </div>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            <EuiSpacer />
 
-      <EuiSpacer size="m" />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="home.addData.text"
+                  defaultMessage="To start working with your data, use one of our many ingest options. Collect data from an app or service, or upload a file. If you're not ready to use your own data, add a sample data set."
+                />
+              </p>
+            </EuiText>
 
-      <EuiFlexGroup className="homDataAdd__content">
-        {features.map((feature) => (
-          <EuiFlexItem key={feature.id}>
-            <Synopsis
-              id={feature.id}
-              onClick={(event: MouseEvent) => {
-                trackUiMetric(METRIC_TYPE.CLICK, `ingest_data_card_${feature.id}`);
-                createAppNavigationHandler(feature.path)(event);
-              }}
-              description={feature.description}
-              iconType={feature.icon}
-              title={feature.title}
-              url={addBasePath(feature.path)}
-              wrapInPanel
+            <EuiSpacer />
+
+            <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+              <EuiFlexItem grow={false}>
+                <RedirectAppLinks application={application}>
+                  {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                  <EuiButton
+                    data-test-subj="homeAddData"
+                    fill
+                    href={addBasePath('/app/home#/tutorial_directory')}
+                    iconType="plusInCircle"
+                    onClick={(event: MouseEvent) => {
+                      trackUiMetric(METRIC_TYPE.CLICK, 'home_tutorial_directory');
+                      createAppNavigationHandler('/app/home#/tutorial_directory')(event);
+                    }}
+                  >
+                    <FormattedMessage
+                      id="home.addData.addDataButtonLabel"
+                      defaultMessage="Add your data"
+                    />
+                  </EuiButton>
+                </RedirectAppLinks>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="addSampleData"
+                  href={addBasePath('#/tutorial_directory/sampleData')}
+                  iconType="documents"
+                >
+                  <FormattedMessage
+                    id="home.addData.sampleDataButtonLabel"
+                    defaultMessage="Try sample data"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiImage
+              alt="Illustration of Elastic data integrations"
+              className="homDataAdd__illustration"
+              src={
+                addBasePath('/plugins/kibanaReact/assets/') +
+                (isDarkMode
+                  ? 'illustration_integrations_darkmode.svg'
+                  : 'illustration_integrations_lightmode.svg')
+              }
             />
           </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    </section>
-  );
-};
+        </EuiFlexGroup>
+      </section>
 
-AddData.propTypes = {
-  addBasePath: PropTypes.func.isRequired,
-  features: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      title: PropTypes.string.isRequired,
-      description: PropTypes.string.isRequired,
-      icon: PropTypes.string.isRequired,
-      path: PropTypes.string.isRequired,
-      showOnHomePage: PropTypes.bool.isRequired,
-      category: PropTypes.string.isRequired,
-      order: PropTypes.number,
-    })
-  ),
+      <EuiHorizontalRule margin="xxl" />
+    </>
+  );
 };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DeepPartial } from 'utility-types';
@@ -34,7 +35,7 @@ export interface APMUsage {
     };
   };
   environments: {
-    services_without_environments: number;
+    services_without_environment: number;
     services_with_multiple_environments: number;
     top_environments: string[];
   };
@@ -51,6 +52,7 @@ export interface APMUsage {
     provider: string[];
     region: string[];
   };
+  host: { os: { platform: string[] } };
   counts: {
     transaction: TimeframeMap;
     span: TimeframeMap;
@@ -131,6 +133,7 @@ export interface APMUsage {
   tasks: Record<
     | 'aggregated_transactions'
     | 'cloud'
+    | 'host'
     | 'processor_events'
     | 'agent_configuration'
     | 'services'
@@ -139,7 +142,8 @@ export interface APMUsage {
     | 'integrations'
     | 'agents'
     | 'indices_stats'
-    | 'cardinality',
+    | 'cardinality'
+    | 'environments',
     { took: { ms: number } }
   >;
 }

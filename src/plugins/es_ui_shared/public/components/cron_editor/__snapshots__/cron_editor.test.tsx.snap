@@ -170,6 +170,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                   </select>
                 </EuiValidatableControl>
                 <EuiFormControlLayoutIcons
+                  compressed={false}
                   icon={
                     Object {
                       "side": "right",
@@ -182,6 +183,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                     className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                   >
                     <EuiFormControlLayoutCustomIcon
+                      size="m"
                       type="arrowDown"
                     >
                       <span
@@ -190,12 +192,14 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                         <EuiIcon
                           aria-hidden="true"
                           className="euiFormControlLayoutCustomIcon__icon"
+                          size="m"
                           type="arrowDown"
                         >
                           <span
                             aria-hidden="true"
                             className="euiFormControlLayoutCustomIcon__icon"
                             data-euiicon-type="arrowDown"
+                            size="m"
                           />
                         </EuiIcon>
                       </span>
@@ -914,6 +918,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                             </select>
                           </EuiValidatableControl>
                           <EuiFormControlLayoutIcons
+                            compressed={false}
                             icon={
                               Object {
                                 "side": "right",
@@ -926,6 +931,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                               className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                             >
                               <EuiFormControlLayoutCustomIcon
+                                size="m"
                                 type="arrowDown"
                               >
                                 <span
@@ -934,12 +940,14 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                                   <EuiIcon
                                     aria-hidden="true"
                                     className="euiFormControlLayoutCustomIcon__icon"
+                                    size="m"
                                     type="arrowDown"
                                   >
                                     <span
                                       aria-hidden="true"
                                       className="euiFormControlLayoutCustomIcon__icon"
                                       data-euiicon-type="arrowDown"
+                                      size="m"
                                     />
                                   </EuiIcon>
                                 </span>
@@ -1607,6 +1615,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                             </select>
                           </EuiValidatableControl>
                           <EuiFormControlLayoutIcons
+                            compressed={false}
                             icon={
                               Object {
                                 "side": "right",
@@ -1619,6 +1628,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                               className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                             >
                               <EuiFormControlLayoutCustomIcon
+                                size="m"
                                 type="arrowDown"
                               >
                                 <span
@@ -1627,12 +1637,14 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                                   <EuiIcon
                                     aria-hidden="true"
                                     className="euiFormControlLayoutCustomIcon__icon"
+                                    size="m"
                                     type="arrowDown"
                                   >
                                     <span
                                       aria-hidden="true"
                                       className="euiFormControlLayoutCustomIcon__icon"
                                       data-euiicon-type="arrowDown"
+                                      size="m"
                                     />
                                   </EuiIcon>
                                 </span>
@@ -1824,6 +1836,7 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
                   </select>
                 </EuiValidatableControl>
                 <EuiFormControlLayoutIcons
+                  compressed={false}
                   icon={
                     Object {
                       "side": "right",
@@ -1836,6 +1849,7 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
                     className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                   >
                     <EuiFormControlLayoutCustomIcon
+                      size="m"
                       type="arrowDown"
                     >
                       <span
@@ -1844,12 +1858,14 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
                         <EuiIcon
                           aria-hidden="true"
                           className="euiFormControlLayoutCustomIcon__icon"
+                          size="m"
                           type="arrowDown"
                         >
                           <span
                             aria-hidden="true"
                             className="euiFormControlLayoutCustomIcon__icon"
                             data-euiicon-type="arrowDown"
+                            size="m"
                           />
                         </EuiIcon>
                       </span>
@@ -2816,6 +2832,7 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
                     </select>
                   </EuiValidatableControl>
                   <EuiFormControlLayoutIcons
+                    compressed={false}
                     icon={
                       Object {
                         "side": "right",
@@ -2828,6 +2845,7 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
                       className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                     >
                       <EuiFormControlLayoutCustomIcon
+                        size="m"
                         type="arrowDown"
                       >
                         <span
@@ -2836,12 +2854,14 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
                           <EuiIcon
                             aria-hidden="true"
                             className="euiFormControlLayoutCustomIcon__icon"
+                            size="m"
                             type="arrowDown"
                           >
                             <span
                               aria-hidden="true"
                               className="euiFormControlLayoutCustomIcon__icon"
                               data-euiicon-type="arrowDown"
+                              size="m"
                             />
                           </EuiIcon>
                         </span>
@@ -3029,6 +3049,7 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
                   </select>
                 </EuiValidatableControl>
                 <EuiFormControlLayoutIcons
+                  compressed={false}
                   icon={
                     Object {
                       "side": "right",
@@ -3041,6 +3062,7 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
                     className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                   >
                     <EuiFormControlLayoutCustomIcon
+                      size="m"
                       type="arrowDown"
                     >
                       <span
@@ -3049,12 +3071,14 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
                         <EuiIcon
                           aria-hidden="true"
                           className="euiFormControlLayoutCustomIcon__icon"
+                          size="m"
                           type="arrowDown"
                         >
                           <span
                             aria-hidden="true"
                             className="euiFormControlLayoutCustomIcon__icon"
                             data-euiicon-type="arrowDown"
+                            size="m"
                           />
                         </EuiIcon>
                       </span>
@@ -3241,6 +3265,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                   </select>
                 </EuiValidatableControl>
                 <EuiFormControlLayoutIcons
+                  compressed={false}
                   icon={
                     Object {
                       "side": "right",
@@ -3253,6 +3278,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                     className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                   >
                     <EuiFormControlLayoutCustomIcon
+                      size="m"
                       type="arrowDown"
                     >
                       <span
@@ -3261,12 +3287,14 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                         <EuiIcon
                           aria-hidden="true"
                           className="euiFormControlLayoutCustomIcon__icon"
+                          size="m"
                           type="arrowDown"
                         >
                           <span
                             aria-hidden="true"
                             className="euiFormControlLayoutCustomIcon__icon"
                             data-euiicon-type="arrowDown"
+                            size="m"
                           />
                         </EuiIcon>
                       </span>
@@ -4173,6 +4201,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                     </select>
                   </EuiValidatableControl>
                   <EuiFormControlLayoutIcons
+                    compressed={false}
                     icon={
                       Object {
                         "side": "right",
@@ -4185,6 +4214,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                       className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                     >
                       <EuiFormControlLayoutCustomIcon
+                        size="m"
                         type="arrowDown"
                       >
                         <span
@@ -4193,12 +4223,14 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                           <EuiIcon
                             aria-hidden="true"
                             className="euiFormControlLayoutCustomIcon__icon"
+                            size="m"
                             type="arrowDown"
                           >
                             <span
                               aria-hidden="true"
                               className="euiFormControlLayoutCustomIcon__icon"
                               data-euiicon-type="arrowDown"
+                              size="m"
                             />
                           </EuiIcon>
                         </span>
@@ -4568,6 +4600,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                             </select>
                           </EuiValidatableControl>
                           <EuiFormControlLayoutIcons
+                            compressed={false}
                             icon={
                               Object {
                                 "side": "right",
@@ -4580,6 +4613,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                               className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                             >
                               <EuiFormControlLayoutCustomIcon
+                                size="m"
                                 type="arrowDown"
                               >
                                 <span
@@ -4588,12 +4622,14 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                                   <EuiIcon
                                     aria-hidden="true"
                                     className="euiFormControlLayoutCustomIcon__icon"
+                                    size="m"
                                     type="arrowDown"
                                   >
                                     <span
                                       aria-hidden="true"
                                       className="euiFormControlLayoutCustomIcon__icon"
                                       data-euiicon-type="arrowDown"
+                                      size="m"
                                     />
                                   </EuiIcon>
                                 </span>
@@ -5261,6 +5297,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                             </select>
                           </EuiValidatableControl>
                           <EuiFormControlLayoutIcons
+                            compressed={false}
                             icon={
                               Object {
                                 "side": "right",
@@ -5273,6 +5310,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                               className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                             >
                               <EuiFormControlLayoutCustomIcon
+                                size="m"
                                 type="arrowDown"
                               >
                                 <span
@@ -5281,12 +5319,14 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                                   <EuiIcon
                                     aria-hidden="true"
                                     className="euiFormControlLayoutCustomIcon__icon"
+                                    size="m"
                                     type="arrowDown"
                                   >
                                     <span
                                       aria-hidden="true"
                                       className="euiFormControlLayoutCustomIcon__icon"
                                       data-euiicon-type="arrowDown"
+                                      size="m"
                                     />
                                   </EuiIcon>
                                 </span>
@@ -5478,6 +5518,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                   </select>
                 </EuiValidatableControl>
                 <EuiFormControlLayoutIcons
+                  compressed={false}
                   icon={
                     Object {
                       "side": "right",
@@ -5490,6 +5531,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                     className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                   >
                     <EuiFormControlLayoutCustomIcon
+                      size="m"
                       type="arrowDown"
                     >
                       <span
@@ -5498,12 +5540,14 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                         <EuiIcon
                           aria-hidden="true"
                           className="euiFormControlLayoutCustomIcon__icon"
+                          size="m"
                           type="arrowDown"
                         >
                           <span
                             aria-hidden="true"
                             className="euiFormControlLayoutCustomIcon__icon"
                             data-euiicon-type="arrowDown"
+                            size="m"
                           />
                         </EuiIcon>
                       </span>
@@ -6074,6 +6118,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                     </select>
                   </EuiValidatableControl>
                   <EuiFormControlLayoutIcons
+                    compressed={false}
                     icon={
                       Object {
                         "side": "right",
@@ -6086,6 +6131,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                       className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                     >
                       <EuiFormControlLayoutCustomIcon
+                        size="m"
                         type="arrowDown"
                       >
                         <span
@@ -6094,12 +6140,14 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                           <EuiIcon
                             aria-hidden="true"
                             className="euiFormControlLayoutCustomIcon__icon"
+                            size="m"
                             type="arrowDown"
                           >
                             <span
                               aria-hidden="true"
                               className="euiFormControlLayoutCustomIcon__icon"
                               data-euiicon-type="arrowDown"
+                              size="m"
                             />
                           </EuiIcon>
                         </span>
@@ -6469,6 +6517,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                             </select>
                           </EuiValidatableControl>
                           <EuiFormControlLayoutIcons
+                            compressed={false}
                             icon={
                               Object {
                                 "side": "right",
@@ -6481,6 +6530,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                               className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                             >
                               <EuiFormControlLayoutCustomIcon
+                                size="m"
                                 type="arrowDown"
                               >
                                 <span
@@ -6489,12 +6539,14 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                                   <EuiIcon
                                     aria-hidden="true"
                                     className="euiFormControlLayoutCustomIcon__icon"
+                                    size="m"
                                     type="arrowDown"
                                   >
                                     <span
                                       aria-hidden="true"
                                       className="euiFormControlLayoutCustomIcon__icon"
                                       data-euiicon-type="arrowDown"
+                                      size="m"
                                     />
                                   </EuiIcon>
                                 </span>
@@ -7162,6 +7214,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                             </select>
                           </EuiValidatableControl>
                           <EuiFormControlLayoutIcons
+                            compressed={false}
                             icon={
                               Object {
                                 "side": "right",
@@ -7174,6 +7227,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                               className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                             >
                               <EuiFormControlLayoutCustomIcon
+                                size="m"
                                 type="arrowDown"
                               >
                                 <span
@@ -7182,12 +7236,14 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                                   <EuiIcon
                                     aria-hidden="true"
                                     className="euiFormControlLayoutCustomIcon__icon"
+                                    size="m"
                                     type="arrowDown"
                                   >
                                     <span
                                       aria-hidden="true"
                                       className="euiFormControlLayoutCustomIcon__icon"
                                       data-euiicon-type="arrowDown"
+                                      size="m"
                                     />
                                   </EuiIcon>
                                 </span>
@@ -7379,6 +7435,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                   </select>
                 </EuiValidatableControl>
                 <EuiFormControlLayoutIcons
+                  compressed={false}
                   icon={
                     Object {
                       "side": "right",
@@ -7391,6 +7448,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                     className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                   >
                     <EuiFormControlLayoutCustomIcon
+                      size="m"
                       type="arrowDown"
                     >
                       <span
@@ -7399,12 +7457,14 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                         <EuiIcon
                           aria-hidden="true"
                           className="euiFormControlLayoutCustomIcon__icon"
+                          size="m"
                           type="arrowDown"
                         >
                           <span
                             aria-hidden="true"
                             className="euiFormControlLayoutCustomIcon__icon"
                             data-euiicon-type="arrowDown"
+                            size="m"
                           />
                         </EuiIcon>
                       </span>
@@ -8174,6 +8234,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                     </select>
                   </EuiValidatableControl>
                   <EuiFormControlLayoutIcons
+                    compressed={false}
                     icon={
                       Object {
                         "side": "right",
@@ -8186,6 +8247,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                       className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                     >
                       <EuiFormControlLayoutCustomIcon
+                        size="m"
                         type="arrowDown"
                       >
                         <span
@@ -8194,12 +8256,14 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                           <EuiIcon
                             aria-hidden="true"
                             className="euiFormControlLayoutCustomIcon__icon"
+                            size="m"
                             type="arrowDown"
                           >
                             <span
                               aria-hidden="true"
                               className="euiFormControlLayoutCustomIcon__icon"
                               data-euiicon-type="arrowDown"
+                              size="m"
                             />
                           </EuiIcon>
                         </span>
@@ -8628,6 +8692,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                     </select>
                   </EuiValidatableControl>
                   <EuiFormControlLayoutIcons
+                    compressed={false}
                     icon={
                       Object {
                         "side": "right",
@@ -8640,6 +8705,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                       className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                     >
                       <EuiFormControlLayoutCustomIcon
+                        size="m"
                         type="arrowDown"
                       >
                         <span
@@ -8648,12 +8714,14 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                           <EuiIcon
                             aria-hidden="true"
                             className="euiFormControlLayoutCustomIcon__icon"
+                            size="m"
                             type="arrowDown"
                           >
                             <span
                               aria-hidden="true"
                               className="euiFormControlLayoutCustomIcon__icon"
                               data-euiicon-type="arrowDown"
+                              size="m"
                             />
                           </EuiIcon>
                         </span>
@@ -9023,6 +9091,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                             </select>
                           </EuiValidatableControl>
                           <EuiFormControlLayoutIcons
+                            compressed={false}
                             icon={
                               Object {
                                 "side": "right",
@@ -9035,6 +9104,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                               className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                             >
                               <EuiFormControlLayoutCustomIcon
+                                size="m"
                                 type="arrowDown"
                               >
                                 <span
@@ -9043,12 +9113,14 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                                   <EuiIcon
                                     aria-hidden="true"
                                     className="euiFormControlLayoutCustomIcon__icon"
+                                    size="m"
                                     type="arrowDown"
                                   >
                                     <span
                                       aria-hidden="true"
                                       className="euiFormControlLayoutCustomIcon__icon"
                                       data-euiicon-type="arrowDown"
+                                      size="m"
                                     />
                                   </EuiIcon>
                                 </span>
@@ -9716,6 +9788,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                             </select>
                           </EuiValidatableControl>
                           <EuiFormControlLayoutIcons
+                            compressed={false}
                             icon={
                               Object {
                                 "side": "right",
@@ -9728,6 +9801,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                               className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                             >
                               <EuiFormControlLayoutCustomIcon
+                                size="m"
                                 type="arrowDown"
                               >
                                 <span
@@ -9736,12 +9810,14 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                                   <EuiIcon
                                     aria-hidden="true"
                                     className="euiFormControlLayoutCustomIcon__icon"
+                                    size="m"
                                     type="arrowDown"
                                   >
                                     <span
                                       aria-hidden="true"
                                       className="euiFormControlLayoutCustomIcon__icon"
                                       data-euiicon-type="arrowDown"
+                                      size="m"
                                     />
                                   </EuiIcon>
                                 </span>

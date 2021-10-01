@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useContext } from 'react';
 import {
   EuiDescriptionList,
   EuiFlexGroup,
@@ -13,6 +14,7 @@ import {
   EuiI18nNumber,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ThemeContext } from 'styled-components';
 
 export interface AgentsSummaryProps {
   total: number;
@@ -34,7 +36,7 @@ export const AgentsSummary = memo<AgentsSummaryProps>((props) => {
         title: i18n.translate(
           'xpack.securitySolution.endpoint.policyDetails.agentsSummary.totalTitle',
           {
-            defaultMessage: 'Endpoints',
+            defaultMessage: 'Total agents',
           }
         ),
         health: '',
@@ -44,10 +46,20 @@ export const AgentsSummary = memo<AgentsSummaryProps>((props) => {
         title: i18n.translate(
           'xpack.securitySolution.endpoint.policyDetails.agentsSummary.onlineTitle',
           {
-            defaultMessage: 'Online',
+            defaultMessage: 'Healthy',
           }
         ),
         health: 'success',
+      },
+      {
+        key: 'error',
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.policyDetails.agentsSummary.errorTitle',
+          {
+            defaultMessage: 'Unhealthy',
+          }
+        ),
+        health: 'warning',
       },
       {
         key: 'offline',
@@ -57,35 +69,38 @@ export const AgentsSummary = memo<AgentsSummaryProps>((props) => {
             defaultMessage: 'Offline',
           }
         ),
-        health: 'warning',
-      },
-      {
-        key: 'error',
-        title: i18n.translate(
-          'xpack.securitySolution.endpoint.policyDetails.agentsSummary.errorTitle',
-          {
-            defaultMessage: 'Error',
-          }
-        ),
-        health: 'danger',
+        health: 'subdued',
       },
     ];
   }, []);
 
+  const theme = useContext(ThemeContext);
+
   return (
-    <EuiFlexGroup gutterSize="xl" responsive={false} data-test-subj="policyAgentsSummary">
+    <EuiFlexGroup gutterSize="l" responsive={false} data-test-subj="policyAgentsSummary">
       {stats.map(({ key, title, health }) => {
         return (
-          <EuiFlexItem grow={false} key={key}>
+          <EuiFlexItem
+            grow={false}
+            key={key}
+            style={{
+              marginRight: key === 'total' ? theme.eui.gutterTypes.gutterExtraLarge : undefined,
+            }}
+          >
             <EuiDescriptionList
               textStyle="reverse"
-              align="center"
+              style={{ textAlign: 'right' }}
               listItems={[
                 {
                   title,
                   description: (
                     <>
-                      {health && <EuiHealth color={health} className="eui-alignMiddle" />}
+                      {health && (
+                        <EuiHealth
+                          color={health === 'warning' ? theme.eui.euiColorWarning : health}
+                          className="eui-alignMiddle"
+                        />
+                      )}
                       <EuiI18nNumber value={props[key]} />
                     </>
                   ),

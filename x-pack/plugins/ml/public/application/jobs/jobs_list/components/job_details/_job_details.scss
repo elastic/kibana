@@ -22,20 +22,20 @@
     background-color: $euiColorLightestShade;
     border: 1px solid $euiColorLightShade;
     border-radius: $euiBorderRadius;
-    margin: $euiSizeXS 0px;
+    margin: $euiSizeXS 0;
 
     .euiTable {
       background-color: transparent;
 
       .euiTableRow:first-child {
         .euiTableRowCell {
-          border-top: 0px;
+          border-top: 0;
         }
       }
 
       .euiTableRow:last-child {
         .euiTableRowCell {
-          border-bottom: 0px;
+          border-bottom: 0;
         }
       }
 

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { UiSettingsParams } from '../../../types';
@@ -46,12 +35,66 @@ describe('theme settings', () => {
 
     it('should only accept valid values', () => {
       expect(() => validate('v7')).not.toThrow();
-      expect(() => validate('v8 (beta)')).not.toThrow();
+      expect(() => validate('v8')).not.toThrow();
       expect(() => validate('v12')).toThrowErrorMatchingInlineSnapshot(`
 "types that failed validation:
 - [0]: expected value to equal [v7]
-- [1]: expected value to equal [v8 (beta)]"
+- [1]: expected value to equal [v8]"
 `);
     });
+  });
+});
+
+describe('process.env.KBN_OPTIMIZER_THEMES handling', () => {
+  it('provides valid options based on tags', () => {
+    process.env.KBN_OPTIMIZER_THEMES = 'v7light,v8dark';
+    let settings = getThemeSettings({ isDist: false });
+    expect(settings['theme:version'].options).toEqual(['v7', 'v8']);
+
+    process.env.KBN_OPTIMIZER_THEMES = 'v8dark,v7light';
+    settings = getThemeSettings({ isDist: false });
+    expect(settings['theme:version'].options).toEqual(['v7', 'v8']);
+
+    process.env.KBN_OPTIMIZER_THEMES = 'v8dark,v7light,v7dark,v8light';
+    settings = getThemeSettings({ isDist: false });
+    expect(settings['theme:version'].options).toEqual(['v7', 'v8']);
+
+    process.env.KBN_OPTIMIZER_THEMES = '*';
+    settings = getThemeSettings({ isDist: false });
+    expect(settings['theme:version'].options).toEqual(['v7', 'v8']);
+
+    process.env.KBN_OPTIMIZER_THEMES = 'v7light';
+    settings = getThemeSettings({ isDist: false });
+    expect(settings['theme:version'].options).toEqual(['v7']);
+
+    process.env.KBN_OPTIMIZER_THEMES = 'v8light';
+    settings = getThemeSettings({ isDist: false });
+    expect(settings['theme:version'].options).toEqual(['v8']);
+  });
+
+  it('defaults to properties of first tag', () => {
+    process.env.KBN_OPTIMIZER_THEMES = 'v8dark,v7light';
+    let settings = getThemeSettings({ isDist: false });
+    expect(settings['theme:darkMode'].value).toBe(true);
+    expect(settings['theme:version'].value).toBe('v8');
+
+    process.env.KBN_OPTIMIZER_THEMES = 'v7light,v8dark';
+    settings = getThemeSettings({ isDist: false });
+    expect(settings['theme:darkMode'].value).toBe(false);
+    expect(settings['theme:version'].value).toBe('v7');
+  });
+
+  it('ignores the value when isDist is undefined', () => {
+    process.env.KBN_OPTIMIZER_THEMES = 'v7light';
+    const settings = getThemeSettings({ isDist: undefined });
+    expect(settings['theme:darkMode'].value).toBe(false);
+    expect(settings['theme:version'].options).toEqual(['v7', 'v8']);
+  });
+
+  it('ignores the value when isDist is true', () => {
+    process.env.KBN_OPTIMIZER_THEMES = 'v7light';
+    const settings = getThemeSettings({ isDist: true });
+    expect(settings['theme:darkMode'].value).toBe(false);
+    expect(settings['theme:version'].options).toEqual(['v7', 'v8']);
   });
 });

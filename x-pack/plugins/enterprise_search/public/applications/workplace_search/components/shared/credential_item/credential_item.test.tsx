@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiCopy, EuiButtonIcon, EuiFieldText } from '@elastic/eui';
@@ -18,18 +20,6 @@ const value = 'foo';
 const props = { label, testSubj, value };
 
 describe('CredentialItem', () => {
-  const setState = jest.fn();
-  const useStateMock: any = (initState: any) => [initState, setState];
-
-  beforeEach(() => {
-    jest.spyOn(React, 'useState').mockImplementation(useStateMock);
-    setState(false);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('renders', () => {
     const wrapper = shallow(<CredentialItem {...props} />);
 
@@ -55,7 +45,6 @@ describe('CredentialItem', () => {
     const button = wrapper.find(EuiButtonIcon).dive().find('button');
     button.simulate('click');
 
-    expect(setState).toHaveBeenCalled();
     expect(wrapper.find(EuiFieldText)).toHaveLength(1);
   });
 

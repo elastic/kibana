@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -26,12 +15,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const inspector = getService('inspector');
+  const testSubjects = getService('testSubjects');
 
   const STATS_ROW_NAME_INDEX = 0;
   const STATS_ROW_VALUE_INDEX = 1;
   function getHitCount(requestStats: string[][]): string | undefined {
     const hitsCountStatsRow = requestStats.find((statsRow) => {
-      return statsRow[STATS_ROW_NAME_INDEX] === 'Hits (total)';
+      return statsRow[STATS_ROW_NAME_INDEX] === 'Hits';
     });
 
     if (!hitsCountStatsRow) {
@@ -43,8 +33,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('inspect', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('discover');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
@@ -59,18 +51,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should display request stats with no results', async () => {
       await inspector.open();
-      const requestStats = await inspector.getTableData();
-
-      expect(getHitCount(requestStats)).to.be('0');
+      await testSubjects.click('inspectorRequestChooser');
+      let foundZero = false;
+      for (const subj of ['Documents', 'Total hits', 'Charts']) {
+        await testSubjects.click(`inspectorRequestChooser${subj}`);
+        if (testSubjects.exists('inspectorRequestDetailStatistics', { timeout: 500 })) {
+          await testSubjects.click(`inspectorRequestDetailStatistics`);
+          const requestStatsTotalHits = getHitCount(await inspector.getTableData());
+          if (requestStatsTotalHits === '0') {
+            foundZero = true;
+            break;
+          }
+        }
+      }
+      expect(foundZero).to.be(true);
     });
 
     it('should display request stats with results', async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
-
       await inspector.open();
+      await testSubjects.click('inspectorRequestChooser');
+      await testSubjects.click(`inspectorRequestChooserDocuments`);
+      await testSubjects.click(`inspectorRequestDetailStatistics`);
       const requestStats = await inspector.getTableData();
 
-      expect(getHitCount(requestStats)).to.be('14004');
+      expect(getHitCount(requestStats)).to.be('500');
     });
   });
 }

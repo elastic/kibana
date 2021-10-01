@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ExampleContext } from '../../test/context_example';
 
-import { image } from '../../../canvas_plugin_src/renderers/image';
+import { imageFunction } from '../../../../../../src/plugins/expression_image/__fixtures__';
 import { sharedWorkpads } from '../../test';
 import { RenderedElement, RenderedElementComponent } from '../rendered_element';
 
@@ -28,7 +30,7 @@ storiesOf('shareables/RenderedElement', module)
     <ExampleContext style={{ height: 100, width: 100 }}>
       <RenderedElementComponent
         index={0}
-        fn={image()}
+        fn={imageFunction()}
         element={{
           id: '123',
           position: {

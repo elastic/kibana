@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createSelector, defaultMemoize } from 'reselect';
@@ -18,7 +19,7 @@ import {
 import * as scalingConstants from './scaling_constants';
 import { Vector2, CameraState, AABB, Matrix3, CameraAnimationState } from '../../types';
 
-interface ClippingPlanes {
+export interface ClippingPlanes {
   renderWidth: number;
   renderHeight: number;
   clippingPlaneRight: number;
@@ -274,32 +275,31 @@ export const scale: (state: CameraState) => (time: number) => Vector2 = createSe
 /**
  * The 2D clipping planes used for the orthographic projection. See https://en.wikipedia.org/wiki/Orthographic_projection
  */
-export const clippingPlanes: (
-  state: CameraState
-) => (time: number) => ClippingPlanes = createSelector(
-  (state) => state.rasterSize,
-  scale,
-  (rasterSize, scaleAtTime) =>
-    /**
-     * memoizing this for object reference equality.
-     */
-    defaultMemoize((time: number) => {
-      const [scaleX, scaleY] = scaleAtTime(time);
-      const renderWidth = rasterSize[0];
-      const renderHeight = rasterSize[1];
-      const clippingPlaneRight = renderWidth / 2 / scaleX;
-      const clippingPlaneTop = renderHeight / 2 / scaleY;
+export const clippingPlanes: (state: CameraState) => (time: number) => ClippingPlanes =
+  createSelector(
+    (state) => state.rasterSize,
+    scale,
+    (rasterSize, scaleAtTime) =>
+      /**
+       * memoizing this for object reference equality.
+       */
+      defaultMemoize((time: number) => {
+        const [scaleX, scaleY] = scaleAtTime(time);
+        const renderWidth = rasterSize[0];
+        const renderHeight = rasterSize[1];
+        const clippingPlaneRight = renderWidth / 2 / scaleX;
+        const clippingPlaneTop = renderHeight / 2 / scaleY;
 
-      return {
-        renderWidth,
-        renderHeight,
-        clippingPlaneRight,
-        clippingPlaneTop,
-        clippingPlaneLeft: -clippingPlaneRight,
-        clippingPlaneBottom: -clippingPlaneTop,
-      };
-    })
-);
+        return {
+          renderWidth,
+          renderHeight,
+          clippingPlaneRight,
+          clippingPlaneTop,
+          clippingPlaneLeft: -clippingPlaneRight,
+          clippingPlaneBottom: -clippingPlaneTop,
+        };
+      })
+  );
 
 /**
  * Whether or not the camera is animating, at a given time.
@@ -360,12 +360,8 @@ export const translation: (state: CameraState) => (time: number) => Vector2 = cr
  * A matrix that when applied to a Vector2 converts it from screen coordinates to world coordinates.
  * See https://en.wikipedia.org/wiki/Orthographic_projection
  */
-export const inverseProjectionMatrix: (
-  state: CameraState
-) => (time: number) => Matrix3 = createSelector(
-  clippingPlanes,
-  translation,
-  (clippingPlanesAtTime, translationAtTime) => {
+export const inverseProjectionMatrix: (state: CameraState) => (time: number) => Matrix3 =
+  createSelector(clippingPlanes, translation, (clippingPlanesAtTime, translationAtTime) => {
     /**
      * Memoizing this for object reference equality (and reduced memory churn.)
      */
@@ -417,8 +413,7 @@ export const inverseProjectionMatrix: (
         multiply(scaleToClippingPlaneDimensions, multiply(invertY, screenToNDC))
       );
     });
-  }
-);
+  });
 
 /**
  * The viewable area in the Resolver map, in world coordinates.

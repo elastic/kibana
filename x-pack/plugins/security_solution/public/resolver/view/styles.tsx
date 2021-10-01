@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiPanel, EuiCallOut } from '@elastic/eui';
@@ -94,6 +95,11 @@ export const StyledMapContainer = styled.div<{ backgroundColor: string }>`
     justify-content: center;
     flex-grow: 1;
   }
+  /**
+  * Set to force base-height necessary for resolver to show up in timeline.
+  * Was previously set in events_viewer.tsx, but more appropriate here
+   */
+  min-height: 652px;
   /**
    * The placeholder components use absolute positioning.
    */

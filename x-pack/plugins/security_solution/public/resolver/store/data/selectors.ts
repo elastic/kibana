@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import rbush from 'rbush';
@@ -63,11 +64,30 @@ export function resolverComponentInstanceID(state: DataState): string {
 }
 
 /**
+ * The indices resolver should use, passed in as external props.
+ */
+const currentIndices = (state: DataState): string[] => {
+  return state.indices;
+};
+
+/**
  * The last NewResolverTree we received, if any. It may be stale (it might not be for the same databaseDocumentID that
  * we're currently interested in.
  */
 const resolverTreeResponse = (state: DataState): NewResolverTree | undefined => {
   return state.tree?.lastResponse?.successful ? state.tree?.lastResponse.result : undefined;
+};
+
+export const resolverTreeHasNodes = (state: DataState): boolean => {
+  return state.tree?.lastResponse?.successful
+    ? state.tree?.lastResponse?.result?.nodes.length > 0
+    : false;
+};
+
+const lastResponseIndices = (state: DataState): string[] | undefined => {
+  return state.tree?.lastResponse?.successful
+    ? state.tree?.lastResponse?.parameters?.indices
+    : undefined;
 };
 
 /**
@@ -106,14 +126,13 @@ const nodeData = (state: DataState): Map<string, NodeData> | undefined => {
 /**
  * Returns a function that can be called to retrieve the node data for a specific node ID.
  */
-export const nodeDataForID: (
-  state: DataState
-) => (id: string) => NodeData | undefined = createSelector(nodeData, (nodeInfo) => {
-  return (id: string) => {
-    const info = nodeInfo?.get(id);
-    return info;
-  };
-});
+export const nodeDataForID: (state: DataState) => (id: string) => NodeData | undefined =
+  createSelector(nodeData, (nodeInfo) => {
+    return (id: string) => {
+      const info = nodeInfo?.get(id);
+      return info;
+    };
+  });
 
 /**
  * Returns a function that can be called to retrieve the state of the node, running, loading, or terminated.
@@ -151,30 +170,30 @@ export const graphableNodes = createSelector(resolverTreeResponse, function (tre
   }
 });
 
-const tree = createSelector(graphableNodes, originID, function indexedProcessTree(
-  // eslint-disable-next-line @typescript-eslint/no-shadow
+const tree = createSelector(
   graphableNodes,
-  currentOriginID
-) {
-  return indexedProcessTreeModel.factory(graphableNodes, currentOriginID);
-});
+  originID,
+  function indexedProcessTree(
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    graphableNodes,
+    currentOriginID
+  ) {
+    return indexedProcessTreeModel.factory(graphableNodes, currentOriginID);
+  }
+);
 
 /**
  * This returns a map of nodeIDs to the associated stats provided by the datasource.
  */
-export const nodeStats: (
-  state: DataState
-) => (nodeID: string) => EventStats | undefined = createSelector(
-  resolverTreeResponse,
-  (resolverTree?: NewResolverTree) => {
+export const nodeStats: (state: DataState) => (nodeID: string) => EventStats | undefined =
+  createSelector(resolverTreeResponse, (resolverTree?: NewResolverTree) => {
     if (resolverTree) {
       const map = resolverTreeModel.nodeStats(resolverTree);
       return (nodeID: string) => map.get(nodeID);
     } else {
       return () => undefined;
     }
-  }
-);
+  });
 
 /**
  * The total number of events related to a node.
@@ -335,9 +354,21 @@ export const timeRangeFilters = createSelector(
 /**
  * The indices to use for the requests with the backend.
  */
-export const treeParamterIndices = createSelector(treeParametersToFetch, (parameters) => {
+export const treeParameterIndices = createSelector(treeParametersToFetch, (parameters) => {
   return parameters?.indices ?? [];
 });
+
+/**
+ * Panel requests should not use indices derived from the tree parameter selector, as this is only defined briefly while the resolver_tree_fetcher middleware is running.
+ * Instead, panel requests should use the indices used by the last good request, falling back to the indices passed as external props.
+ */
+export const eventIndices = createSelector(
+  lastResponseIndices,
+  currentIndices,
+  function eventIndices(lastIndices, current): string[] {
+    return lastIndices ?? current ?? [];
+  }
+);
 
 export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
   tree,
@@ -376,14 +407,10 @@ export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
  * Legacy functions take process events instead of nodeID, use this to get
  * process events for them.
  */
-export const graphNodeForID: (
-  state: DataState
-) => (nodeID: string) => ResolverNode | null = createSelector(
-  tree,
-  (indexedProcessTree) => (nodeID: string) => {
+export const graphNodeForID: (state: DataState) => (nodeID: string) => ResolverNode | null =
+  createSelector(tree, (indexedProcessTree) => (nodeID: string) => {
     return indexedProcessTreeModel.treeNode(indexedProcessTree, nodeID);
-  }
-);
+  });
 
 /**
  * Takes a nodeID (aka entity_id) and returns the associated aria level as a number or null if the node ID isn't in the tree.
@@ -391,10 +418,11 @@ export const graphNodeForID: (
 export const ariaLevel: (state: DataState) => (nodeID: string) => number | null = createSelector(
   layout,
   graphNodeForID,
-  ({ ariaLevels }, graphNodeGetter) => (nodeID: string) => {
-    const node = graphNodeGetter(nodeID);
-    return node ? ariaLevels.get(node) ?? null : null;
-  }
+  ({ ariaLevels }, graphNodeGetter) =>
+    (nodeID: string) => {
+      const node = graphNodeGetter(nodeID);
+      return node ? ariaLevels.get(node) ?? null : null;
+    }
 );
 
 /**
@@ -402,12 +430,8 @@ export const ariaLevel: (state: DataState) => (nodeID: string) => number | null 
  * For root nodes, other root nodes are treated as siblings.
  * This is used to calculate the `aria-flowto` attribute.
  */
-export const ariaFlowtoCandidate: (
-  state: DataState
-) => (nodeID: string) => string | null = createSelector(
-  tree,
-  graphNodeForID,
-  (indexedProcessTree, nodeGetter) => {
+export const ariaFlowtoCandidate: (state: DataState) => (nodeID: string) => string | null =
+  createSelector(tree, graphNodeForID, (indexedProcessTree, nodeGetter) => {
     // A map of preceding sibling IDs to following sibling IDs or `null`, if there is no following sibling
     const memo: Map<string, string | null> = new Map();
 
@@ -466,8 +490,7 @@ export const ariaFlowtoCandidate: (
 
       return memoizedGetter(nodeID);
     };
-  }
-);
+  });
 
 const spatiallyIndexedLayout: (state: DataState) => rbush<IndexedEntity> = createSelector(
   layout,
@@ -516,9 +539,7 @@ const spatiallyIndexedLayout: (state: DataState) => rbush<IndexedEntity> = creat
 /**
  * Returns nodes and edge lines that could be visible in the `query`.
  */
-export const nodesAndEdgelines: (
-  state: DataState
-) => (
+export const nodesAndEdgelines: (state: DataState) => (
   /**
    * An axis aligned bounding box (in world corrdinates) to search in. Any entities that might collide with this box will be returned.
    */
@@ -595,21 +616,20 @@ export function treeRequestParametersToAbort(state: DataState): TreeFetcherParam
 /**
  * The sum of all related event categories for a process.
  */
-export const statsTotalForNode: (
-  state: DataState
-) => (event: ResolverNode) => number | null = createSelector(nodeStats, (getNodeStats) => {
-  return (node: ResolverNode) => {
-    const nodeID = nodeModel.nodeID(node);
-    if (nodeID === undefined) {
-      return null;
-    }
-    const stats = getNodeStats(nodeID);
-    if (!stats) {
-      return null;
-    }
-    return stats.total;
-  };
-});
+export const statsTotalForNode: (state: DataState) => (event: ResolverNode) => number | null =
+  createSelector(nodeStats, (getNodeStats) => {
+    return (node: ResolverNode) => {
+      const nodeID = nodeModel.nodeID(node);
+      if (nodeID === undefined) {
+        return null;
+      }
+      const stats = getNodeStats(nodeID);
+      if (!stats) {
+        return null;
+      }
+      return stats.total;
+    };
+  });
 
 /**
  * Total count of events related to `node`.

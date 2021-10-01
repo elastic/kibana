@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -14,12 +15,11 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalFooter,
-  EuiOverlayMask,
   EuiSpacer,
   EuiTabbedContent,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import React, { ReactNode } from 'react';
+import React, { Fragment, ReactNode } from 'react';
 import styled from 'styled-components';
 
 import { NO_ALERT_INDEX } from '../../../../common/constants';
@@ -44,6 +44,8 @@ interface ModalInspectProps {
   isShowing: boolean;
   request: string | null;
   response: string | null;
+  additionalRequests?: string[] | null;
+  additionalResponses?: string[] | null;
   title: string | React.ReactElement | React.ReactNode;
 }
 
@@ -73,11 +75,11 @@ const MyEuiModal = styled(EuiModal)`
 `;
 
 MyEuiModal.displayName = 'MyEuiModal';
-const parseInspectString = function <T>(objectStringify: string): T | null {
+const parseInspectStrings = function <T>(stringsArray: string[]): T[] {
   try {
-    return JSON.parse(objectStringify);
+    return stringsArray.map((objectStringify) => JSON.parse(objectStringify));
   } catch {
-    return null;
+    return [];
   }
 };
 
@@ -103,13 +105,23 @@ export const ModalInspectQuery = ({
   isShowing = false,
   request,
   response,
+  additionalRequests,
+  additionalResponses,
   title,
 }: ModalInspectProps) => {
   if (!isShowing || request == null || response == null) {
     return null;
   }
-  const inspectRequest: Request | null = parseInspectString(request);
-  const inspectResponse: Response | null = parseInspectString(response);
+
+  const requests: string[] = [request, ...(additionalRequests != null ? additionalRequests : [])];
+  const responses: string[] = [
+    response,
+    ...(additionalResponses != null ? additionalResponses : []),
+  ];
+
+  const inspectRequests: Request[] = parseInspectStrings(requests);
+  const inspectResponses: Response[] = parseInspectStrings(responses);
+
   const statistics: Array<{
     title: NonNullable<ReactNode | string>;
     description: NonNullable<ReactNode | string>;
@@ -123,7 +135,7 @@ export const ModalInspectQuery = ({
       ),
       description: (
         <span data-test-subj="index-pattern-description">
-          {formatIndexPatternRequested(inspectRequest?.index ?? [])}
+          {formatIndexPatternRequested(inspectRequests[0]?.index ?? [])}
         </span>
       ),
     },
@@ -137,8 +149,8 @@ export const ModalInspectQuery = ({
       ),
       description: (
         <span data-test-subj="query-time-description">
-          {inspectResponse != null
-            ? `${numeral(inspectResponse.took).format('0,0')}ms`
+          {inspectResponses[0]?.took
+            ? `${numeral(inspectResponses[0].took).format('0,0')}ms`
             : i18n.SOMETHING_WENT_WRONG}
         </span>
       ),
@@ -170,64 +182,70 @@ export const ModalInspectQuery = ({
     {
       id: 'request',
       name: 'Request',
-      content: (
-        <>
-          <EuiSpacer />
-          <EuiCodeBlock
-            language="js"
-            fontSize="m"
-            paddingSize="m"
-            color="dark"
-            overflowHeight={300}
-            isCopyable
-          >
-            {inspectRequest != null
-              ? manageStringify(inspectRequest.body)
-              : i18n.SOMETHING_WENT_WRONG}
-          </EuiCodeBlock>
-        </>
-      ),
+      content:
+        inspectRequests.length > 0 ? (
+          inspectRequests.map((inspectRequest, index) => (
+            <Fragment key={index}>
+              <EuiSpacer />
+              <EuiCodeBlock
+                language="js"
+                fontSize="m"
+                paddingSize="m"
+                color="dark"
+                overflowHeight={300}
+                isCopyable
+              >
+                {manageStringify(inspectRequest.body)}
+              </EuiCodeBlock>
+            </Fragment>
+          ))
+        ) : (
+          <EuiCodeBlock>{i18n.SOMETHING_WENT_WRONG}</EuiCodeBlock>
+        ),
     },
     {
       id: 'response',
       name: 'Response',
-      content: (
-        <>
-          <EuiSpacer />
-          <EuiCodeBlock
-            language="js"
-            fontSize="m"
-            paddingSize="m"
-            color="dark"
-            overflowHeight={300}
-            isCopyable
-          >
-            {response}
-          </EuiCodeBlock>
-        </>
-      ),
+      content:
+        inspectResponses.length > 0 ? (
+          responses.map((responseText, index) => (
+            <Fragment key={index}>
+              <EuiSpacer />
+              <EuiCodeBlock
+                language="js"
+                fontSize="m"
+                paddingSize="m"
+                color="dark"
+                overflowHeight={300}
+                isCopyable
+              >
+                {responseText}
+              </EuiCodeBlock>
+            </Fragment>
+          ))
+        ) : (
+          <EuiCodeBlock>{i18n.SOMETHING_WENT_WRONG}</EuiCodeBlock>
+        ),
     },
   ];
 
   return (
-    <EuiOverlayMask>
-      <MyEuiModal onClose={closeModal} data-test-subj="modal-inspect-euiModal">
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            {i18n.INSPECT} {title}
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
+    <MyEuiModal onClose={closeModal} data-test-subj="modal-inspect-euiModal">
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          {i18n.INSPECT} {title}
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
 
-        <EuiModalBody>
-          <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
-        </EuiModalBody>
+      <EuiModalBody>
+        <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
+      </EuiModalBody>
 
-        <EuiModalFooter>
-          <EuiButton onClick={closeModal} fill data-test-subj="modal-inspect-close">
-            {i18n.CLOSE}
-          </EuiButton>
-        </EuiModalFooter>
-      </MyEuiModal>
-    </EuiOverlayMask>
+      <EuiModalFooter>
+        <EuiButton onClick={closeModal} fill data-test-subj="modal-inspect-close">
+          {i18n.CLOSE}
+        </EuiButton>
+      </EuiModalFooter>
+    </MyEuiModal>
   );
 };

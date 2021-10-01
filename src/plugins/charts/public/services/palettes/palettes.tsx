@@ -1,26 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 // @ts-ignore
 import chroma from 'chroma-js';
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from 'src/core/public';
 import {
   euiPaletteColorBlind,
   euiPaletteCool,
@@ -42,6 +30,7 @@ import { lightenColor } from './lighten_color';
 import { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from './types';
 import { LegacyColorsService } from '../legacy_colors';
 import { MappedColors } from '../mapped_colors';
+import { workoutColorForValue } from './helpers';
 
 function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, 'title'> {
   const colors = euiPaletteColorBlind({ rotations: 2 });
@@ -76,8 +65,8 @@ function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, '
   }
   return {
     id: 'default',
-    getColor,
-    getColors: () => euiPaletteColorBlind(),
+    getCategoricalColor: getColor,
+    getCategoricalColors: () => euiPaletteColorBlind(),
     toExpression: () => ({
       type: 'expression',
       chain: [
@@ -114,8 +103,9 @@ function buildGradient(
   }
   return {
     id,
-    getColor,
-    getColors: colors,
+    getCategoricalColor: getColor,
+    getCategoricalColors: colors,
+    canDynamicColoring: true,
     toExpression: () => ({
       type: 'expression',
       chain: [
@@ -141,7 +131,8 @@ function buildSyncedKibanaPalette(
       colors.mappedColors.mapKeys([series[0].name]);
       outputColor = colors.mappedColors.get(series[0].name);
     } else {
-      outputColor = staticColors[series[0].rankAtDepth % staticColors.length];
+      const configColor = colors.mappedColors.getColorFromConfig(series[0].name);
+      outputColor = configColor || staticColors[series[0].rankAtDepth % staticColors.length];
     }
 
     if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
@@ -152,8 +143,8 @@ function buildSyncedKibanaPalette(
   }
   return {
     id: 'kibana_palette',
-    getColor,
-    getColors: () => colors.seedColors.slice(0, 10),
+    getCategoricalColor: getColor,
+    getCategoricalColors: () => colors.seedColors.slice(0, 10),
     toExpression: () => ({
       type: 'expression',
       chain: [
@@ -172,7 +163,24 @@ function buildSyncedKibanaPalette(
 function buildCustomPalette(): PaletteDefinition {
   return {
     id: 'custom',
-    getColor: (
+    getColorForValue: (
+      value,
+      params: {
+        colors: string[];
+        range: 'number' | 'percent';
+        continuity: 'above' | 'below' | 'none' | 'all';
+        gradient: boolean;
+        /** Stops values mark where colors end (non-inclusive value) */
+        stops: number[];
+        /** Important: specify rangeMin/rangeMax if custom stops are defined! */
+        rangeMax: number;
+        rangeMin: number;
+      },
+      dataBounds
+    ) => {
+      return workoutColorForValue(value, params, dataBounds);
+    },
+    getCategoricalColor: (
       series: SeriesLayer[],
       chartConfiguration: ChartColorConfiguration = { behindText: false },
       { colors, gradient }: { colors: string[]; gradient: boolean }
@@ -190,10 +198,48 @@ function buildCustomPalette(): PaletteDefinition {
     },
     internal: true,
     title: i18n.translate('charts.palettes.customLabel', { defaultMessage: 'Custom' }),
-    getColors: (size: number, { colors, gradient }: { colors: string[]; gradient: boolean }) => {
+    getCategoricalColors: (
+      size: number,
+      {
+        colors,
+        gradient,
+        stepped,
+        stops,
+      }: { colors: string[]; gradient: boolean; stepped: boolean; stops: number[] } = {
+        colors: [],
+        gradient: false,
+        stepped: false,
+        stops: [],
+      }
+    ) => {
+      if (stepped) {
+        const range = stops[stops.length - 1] - stops[0];
+        const offset = stops[0];
+        const finalStops = [...stops.map((stop) => (stop - offset) / range)];
+        return chroma.scale(colors).domain(finalStops).colors(size);
+      }
       return gradient ? chroma.scale(colors).colors(size) : colors;
     },
-    toExpression: ({ colors, gradient }: { colors: string[]; gradient: boolean }) => ({
+    canDynamicColoring: false,
+    toExpression: ({
+      colors,
+      gradient,
+      stops = [],
+      rangeMax,
+      rangeMin,
+      rangeType = 'percent',
+      continuity = 'above',
+      reverse = false,
+    }: {
+      colors: string[];
+      gradient: boolean;
+      stops: number[];
+      rangeMax?: number;
+      rangeMin?: number;
+      rangeType: 'percent' | 'number';
+      continuity?: 'all' | 'none' | 'above' | 'below';
+      reverse?: boolean;
+    }) => ({
       type: 'expression',
       chain: [
         {
@@ -202,6 +248,12 @@ function buildCustomPalette(): PaletteDefinition {
           arguments: {
             color: colors,
             gradient: [gradient],
+            reverse: [reverse],
+            continuity: [continuity],
+            stop: stops,
+            range: [rangeType],
+            rangeMax: rangeMax == null ? [] : [rangeMax],
+            rangeMin: rangeMin == null ? [] : [rangeMin],
           },
         },
       ],
@@ -210,9 +262,8 @@ function buildCustomPalette(): PaletteDefinition {
 }
 
 export const buildPalettes: (
-  uiSettings: IUiSettingsClient,
   legacyColorsService: LegacyColorsService
-) => Record<string, PaletteDefinition> = (uiSettings, legacyColorsService) => {
+) => Record<string, PaletteDefinition> = (legacyColorsService) => {
   return {
     default: {
       title: i18n.translate('charts.palettes.defaultPaletteLabel', {

@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isBoolean, isNumber, isObject } from 'lodash';
 import React from 'react';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 
-const EmptyValue = styled.span`
+const EmptyValue = euiStyled.span`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
   text-align: left;
 `;

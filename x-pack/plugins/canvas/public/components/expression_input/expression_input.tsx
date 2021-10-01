@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -317,13 +318,12 @@ export class ExpressionInput extends React.Component<Props> {
                 provideHover: this.providerHover,
               }}
               options={{
-                fontSize: isCompact ? 12 : 16,
+                fontSize: isCompact ? 12 : 14,
                 scrollBeyondLastLine: false,
                 quickSuggestions: true,
                 minimap: {
                   enabled: false,
                 },
-                wordBasedSuggestions: false,
                 wordWrap: 'on',
                 wrappingIndent: 'indent',
               }}

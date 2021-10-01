@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, useCallback, useEffect } from 'react';
@@ -18,6 +19,7 @@ import {
   TooltipValue,
   niceTimeFormatter,
   ElementClickListener,
+  GeometryValue,
   RectAnnotation,
   RectAnnotationDatum,
 } from '@elastic/charts';
@@ -28,7 +30,7 @@ import { useUiSetting } from '../../../../../../../../../src/plugins/kibana_reac
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
-import { useSourceContext } from '../../../../../containers/source';
+import { useSourceContext } from '../../../../../containers/metrics_source';
 import { useTimeline } from '../../hooks/use_timeline';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
@@ -38,7 +40,7 @@ import { MetricsExplorerChartType } from '../../../metrics_explorer/hooks/use_me
 import { getTimelineChartTheme } from '../../../metrics_explorer/components/helpers/get_chart_theme';
 import { calculateDomain } from '../../../metrics_explorer/components/helpers/calculate_domain';
 
-import { euiStyled } from '../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { InfraFormatter } from '../../../../../lib/lib';
 import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
 import { useMetricsK8sAnomaliesResults } from '../../hooks/use_metrics_k8s_anomalies';
@@ -50,7 +52,7 @@ interface Props {
 }
 
 export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible }) => {
-  const { sourceId } = useSourceContext();
+  const { sourceId, source } = useSourceContext();
   const { metric, nodeType, accountId, region } = useWaffleOptionsContext();
   const { currentTime, jumpToTime, stopAutoReload } = useWaffleTimeContext();
   const { filterQueryAsJson } = useWaffleFiltersContext();
@@ -69,6 +71,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
 
   const anomalyParams = {
     sourceId: 'default',
+    anomalyThreshold: source?.configuration.anomalyThreshold || 0,
     startTime,
     endTime,
     defaultSortOptions: {
@@ -78,12 +81,10 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     defaultPaginationOptions: { pageSize: 100 },
   };
 
-  const { metricsHostsAnomalies, getMetricsHostsAnomalies } = useMetricsHostsAnomaliesResults(
-    anomalyParams
-  );
-  const { metricsK8sAnomalies, getMetricsK8sAnomalies } = useMetricsK8sAnomaliesResults(
-    anomalyParams
-  );
+  const { metricsHostsAnomalies, getMetricsHostsAnomalies } =
+    useMetricsHostsAnomaliesResults(anomalyParams);
+  const { metricsK8sAnomalies, getMetricsK8sAnomalies } =
+    useMetricsK8sAnomaliesResults(anomalyParams);
 
   const getAnomalies = useMemo(() => {
     if (nodeType === 'host') {
@@ -139,7 +140,8 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   const onClickPoint: ElementClickListener = useCallback(
     ([[geometryValue]]) => {
       if (!Array.isArray(geometryValue)) {
-        const { x: timestamp } = geometryValue;
+        // casting to GeometryValue as we are using cartesian charts
+        const { x: timestamp } = geometryValue as GeometryValue;
         jumpToTime(timestamp);
         stopAutoReload();
       }
@@ -222,9 +224,9 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems={'center'}>
+          <EuiFlexGroup alignItems={'center'} responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+              <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiIcon color={colorTransformer(chartMetric.color)} type={'dot'} />
                 </EuiFlexItem>
@@ -240,7 +242,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+              <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
                 <EuiFlexItem
                   grow={false}
                   style={{ backgroundColor: '#D36086', height: 5, width: 10 }}
@@ -317,6 +319,9 @@ const TimelineHeader = euiStyled.div`
   width: 100%;
   padding: ${(props) => props.theme.eui.paddingSizes.s} ${(props) =>
   props.theme.eui.paddingSizes.m};
+  @media only screen and (max-width: 767px) {
+      margin-top: 30px;
+  }
 `;
 
 const TimelineChartContainer = euiStyled.div`

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { handleActions, Action } from 'redux-actions';
@@ -18,8 +19,10 @@ export interface NetworkEventsState {
   [checkGroup: string]: {
     [stepIndex: number]: {
       events: NetworkEvent[];
+      total: number;
       loading: boolean;
       error?: Error;
+      isWaterfallSupported: boolean;
     };
   };
 }
@@ -45,16 +48,22 @@ export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
                   ...state[checkGroup][stepIndex],
                   loading: true,
                   events: [],
+                  total: 0,
+                  isWaterfallSupported: true,
                 }
               : {
                   loading: true,
                   events: [],
+                  total: 0,
+                  isWaterfallSupported: true,
                 },
           }
         : {
             [stepIndex]: {
               loading: true,
               events: [],
+              total: 0,
+              isWaterfallSupported: true,
             },
           },
     }),
@@ -62,7 +71,7 @@ export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
     [String(getNetworkEventsSuccess)]: (
       state: NetworkEventsState,
       {
-        payload: { events, checkGroup, stepIndex },
+        payload: { events, total, checkGroup, stepIndex, isWaterfallSupported },
       }: Action<SyntheticsNetworkEventsApiResponse & FetchNetworkEventsParams>
     ) => {
       return {
@@ -74,16 +83,22 @@ export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
                     ...state[checkGroup][stepIndex],
                     loading: false,
                     events,
+                    total,
+                    isWaterfallSupported,
                   }
                 : {
                     loading: false,
                     events,
+                    total,
+                    isWaterfallSupported,
                   },
             }
           : {
               [stepIndex]: {
                 loading: false,
                 events,
+                total,
+                isWaterfallSupported,
               },
             },
       };
@@ -101,19 +116,25 @@ export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
                   ...state[checkGroup][stepIndex],
                   loading: false,
                   events: [],
+                  total: 0,
                   error,
+                  isWaterfallSupported: true,
                 }
               : {
                   loading: false,
                   events: [],
+                  total: 0,
                   error,
+                  isWaterfallSupported: true,
                 },
           }
         : {
             [stepIndex]: {
               loading: false,
               events: [],
+              total: 0,
               error,
+              isWaterfallSupported: true,
             },
           },
     }),

@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { History } from 'history';
 
 import {
@@ -26,6 +16,7 @@ import {
   ToastsStart,
   IUiSettingsClient,
   PluginInitializerContext,
+  HttpStart,
 } from 'kibana/public';
 import {
   FilterManager,
@@ -44,6 +35,7 @@ import { getHistory } from './kibana_services';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
+import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -64,19 +56,19 @@ export interface DiscoverServices {
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
-  getSavedSearchById: (id: string) => Promise<SavedSearch>;
+  getSavedSearchById: (id?: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
-  getEmbeddableInjector: any;
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  http: HttpStart;
 }
 
-export async function buildServices(
+export function buildServices(
   core: CoreStart,
   plugins: DiscoverStartPlugins,
-  context: PluginInitializerContext,
-  getEmbeddableInjector: any
-): Promise<DiscoverServices> {
+  context: PluginInitializerContext
+): DiscoverServices {
   const services = {
     savedObjectsClient: core.savedObjects.client,
     savedObjects: plugins.savedObjects,
@@ -93,8 +85,7 @@ export async function buildServices(
     docLinks: core.docLinks,
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
-    getEmbeddableInjector,
-    getSavedSearchById: async (id: string) => savedObjectService.get(id),
+    getSavedSearchById: async (id?: string) => savedObjectService.get(id),
     getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),
     history: getHistory,
     indexPatterns: plugins.data.indexPatterns,
@@ -110,5 +101,7 @@ export async function buildServices(
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
+    indexPatternFieldEditor: plugins.indexPatternFieldEditor,
+    http: core.http,
   };
 }

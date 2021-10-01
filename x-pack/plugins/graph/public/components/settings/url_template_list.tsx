@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
 import { EuiText, EuiSpacer, EuiTextAlign, EuiButton, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SettingsProps } from './settings';
+import { SettingsStateProps } from './settings';
 import { UrlTemplateForm } from './url_template_form';
 import { useListKeys } from './use_list_keys';
 
@@ -17,7 +18,7 @@ export function UrlTemplateList({
   removeTemplate,
   saveTemplate,
   urlTemplates,
-}: Pick<SettingsProps, 'removeTemplate' | 'saveTemplate' | 'urlTemplates'>) {
+}: Pick<SettingsStateProps, 'removeTemplate' | 'saveTemplate' | 'urlTemplates'>) {
   const [uncommittedForms, setUncommittedForms] = useState<string[]>([]);
   const getListKey = useListKeys(urlTemplates);
 

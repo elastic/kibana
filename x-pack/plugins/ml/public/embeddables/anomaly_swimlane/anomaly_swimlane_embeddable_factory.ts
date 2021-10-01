@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 
 import type { StartServicesAccessor } from 'kibana/public';
 
+import { PLUGIN_ID, PLUGIN_ICON, ML_APP_NAME } from '../../../common/constants/app';
 import type {
   EmbeddableFactoryDefinition,
   IContainer,
@@ -22,8 +24,17 @@ import {
 } from '..';
 
 export class AnomalySwimlaneEmbeddableFactory
-  implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput> {
+  implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput>
+{
   public readonly type = ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
+
+  public readonly grouping = [
+    {
+      id: PLUGIN_ID,
+      getDisplayName: () => ML_APP_NAME,
+      getIconType: () => PLUGIN_ICON,
+    },
+  ];
 
   constructor(
     private getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
@@ -35,7 +46,13 @@ export class AnomalySwimlaneEmbeddableFactory
 
   public getDisplayName() {
     return i18n.translate('xpack.ml.components.jobAnomalyScoreEmbeddable.displayName', {
-      defaultMessage: 'ML Anomaly Swim Lane',
+      defaultMessage: 'Anomaly swim lane',
+    });
+  }
+
+  public getDescription() {
+    return i18n.translate('xpack.ml.components.jobAnomalyScoreEmbeddable.description', {
+      defaultMessage: 'View anomaly detection results in a timeline.',
     });
   }
 

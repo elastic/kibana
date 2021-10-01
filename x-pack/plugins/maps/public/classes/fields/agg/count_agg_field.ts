@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IndexPattern } from 'src/plugins/data/public';
@@ -61,7 +62,13 @@ export class CountAggField implements IESAggField {
   async createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty> {
     const indexPattern = await this._source.getIndexPattern();
     const tooltipProperty = new TooltipProperty(this.getName(), await this.getLabel(), value);
-    return new ESAggTooltipProperty(tooltipProperty, indexPattern, this, this._getAggType());
+    return new ESAggTooltipProperty(
+      tooltipProperty,
+      indexPattern,
+      this,
+      this._getAggType(),
+      this._source.getApplyGlobalQuery()
+    );
   }
 
   getValueAggDsl(indexPattern: IndexPattern): unknown | null {
@@ -93,7 +100,7 @@ export class CountAggField implements IESAggField {
   }
 
   supportsAutoDomain(): boolean {
-    return this._canReadFromGeoJson ? true : this.supportsFieldMeta();
+    return true;
   }
 
   canReadFromGeoJson(): boolean {

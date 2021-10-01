@@ -1,23 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
-import moment from 'moment';
 import { useValues, useActions } from 'kea';
+import moment from 'moment';
 
-import { EuiEmptyPrompt, EuiLink, EuiPanel, EuiSpacer, EuiLinkProps } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ContentSection } from '../../components/shared/content_section';
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
-import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
+import { AppLogic } from '../../app_logic';
+import { ContentSection } from '../../components/shared/content_section';
+import { RECENT_ACTIVITY_TITLE } from '../../constants';
 import { SOURCE_DETAILS_PATH, getContentSourcePath } from '../../routes';
 
-import { AppLogic } from '../../app_logic';
 import { OverviewLogic } from './overview_logic';
 
 import './recent_activity.scss';
@@ -27,7 +29,7 @@ export interface FeedActivity {
   id: string;
   message: string;
   timestamp: string;
-  sourceId: string;
+  sourceId?: string;
 }
 
 export const RecentActivity: React.FC = () => {
@@ -38,16 +40,8 @@ export const RecentActivity: React.FC = () => {
   const { activityFeed } = useValues(OverviewLogic);
 
   return (
-    <ContentSection
-      title={
-        <FormattedMessage
-          id="xpack.enterpriseSearch.workplaceSearch.recentActivity.title"
-          defaultMessage="Recent activity"
-        />
-      }
-      headerSpacer="m"
-    >
-      <EuiPanel>
+    <ContentSection title={RECENT_ACTIVITY_TITLE} headerSpacer="m">
+      <EuiPanel color="subdued" hasShadow={false}>
         {activityFeed.length > 0 ? (
           <>
             {activityFeed.map((props: FeedActivity, index) => (
@@ -101,30 +95,32 @@ export const RecentActivityItem: React.FC<FeedActivity> = ({
       metric: 'recent_activity_source_details_link',
     });
 
-  const linkProps = {
-    onClick,
-    target: '_blank',
-    href: getWorkplaceSearchUrl(getContentSourcePath(SOURCE_DETAILS_PATH, sourceId, true)),
-    external: true,
-    color: status === 'error' ? 'danger' : 'primary',
-    'data-test-subj': 'viewSourceDetailsLink',
-  } as EuiLinkProps;
-
   return (
     <div className={`activity ${status ? `activity--${status}` : ''}`}>
       <div className="activity__message">
-        <EuiLink {...linkProps}>
-          {id} {message}
-          {status === 'error' && (
-            <span className="activity--error__label">
-              {' '}
-              <FormattedMessage
-                id="xpack.enterpriseSearch.workplaceSearch.recentActivitySourceLink.linkLabel"
-                defaultMessage="View Source"
-              />
-            </span>
-          )}
-        </EuiLink>
+        {sourceId ? (
+          <EuiLinkTo
+            onClick={onClick}
+            color={status === 'error' ? 'danger' : 'primary'}
+            to={getContentSourcePath(SOURCE_DETAILS_PATH, sourceId, true)}
+            data-test-subj="viewSourceDetailsLink"
+          >
+            {id} {message}
+            {status === 'error' && (
+              <span className="activity--error__label">
+                {' '}
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.workplaceSearch.recentActivitySourceLink.linkLabel"
+                  defaultMessage="View Source"
+                />
+              </span>
+            )}
+          </EuiLinkTo>
+        ) : (
+          <div data-test-subj="newUserTextWrapper">
+            {id} {message}
+          </div>
+        )}
       </div>
       <div className="activity__date">{moment.utc(timestamp).fromNow()}</div>
     </div>

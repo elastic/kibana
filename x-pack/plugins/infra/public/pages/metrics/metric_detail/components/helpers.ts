@@ -1,34 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ReactText } from 'react';
 import Color from 'color';
 import { get, first, last, min, max } from 'lodash';
 import { createFormatter } from '../../../../../common/formatters';
-import { InfraDataSeries } from '../../../../graphql/types';
 import {
   InventoryVisTypeRT,
   InventoryFormatterType,
   InventoryVisType,
 } from '../../../../../common/inventory_models/types';
 import { SeriesOverrides } from '../types';
-import { NodeDetailsMetricData } from '../../../../../common/http_api/node_details_api';
+import {
+  NodeDetailsDataSeries,
+  NodeDetailsMetricData,
+} from '../../../../../common/http_api/node_details_api';
 
 /**
  * Returns a formatter
  */
-export const getFormatter = (
-  formatter: InventoryFormatterType = 'number',
-  template: string = '{{value}}'
-) => (val: ReactText) => (val != null ? createFormatter(formatter, template)(val) : '');
+export const getFormatter =
+  (formatter: InventoryFormatterType = 'number', template: string = '{{value}}') =>
+  (val: ReactText) =>
+    val != null ? createFormatter(formatter, template)(val) : '';
 
 /**
  * Does a series have more then two points?
  */
-export const seriesHasLessThen2DataPoints = (series: InfraDataSeries): boolean => {
+export const seriesHasLessThen2DataPoints = (series: NodeDetailsDataSeries): boolean => {
   return series.data.length < 2;
 };
 

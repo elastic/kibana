@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IEventLogConfig } from './types';
@@ -29,6 +30,7 @@ describe('EventLogService', () => {
         logEntries,
         indexEntries,
       },
+      kibanaVersion: '1.0.1',
     });
   }
 
@@ -74,6 +76,7 @@ describe('EventLogService', () => {
         logEntries: true,
         indexEntries: true,
       },
+      kibanaVersion: '1.0.1',
     };
 
     const service = new EventLogService(params);
@@ -112,6 +115,7 @@ describe('EventLogService', () => {
         logEntries: true,
         indexEntries: true,
       },
+      kibanaVersion: '1.0.1',
     };
     const service = new EventLogService(params);
     const eventLogger = service.getLogger({});
@@ -130,6 +134,7 @@ describe('EventLogService', () => {
           logEntries: true,
           indexEntries: true,
         },
+        kibanaVersion: '1.0.1',
       };
       const service = new EventLogService(params);
       const provider = jest.fn();

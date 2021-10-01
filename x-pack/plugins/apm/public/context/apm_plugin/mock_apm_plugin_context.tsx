@@ -1,15 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { ReactNode } from 'react';
+
+import React, { ReactNode, useMemo } from 'react';
 import { Observable, of } from 'rxjs';
+import { RouterProvider } from '@kbn/typed-react-router-config';
+import { useHistory } from 'react-router-dom';
+import { createMemoryHistory, History } from 'history';
+import { UrlService } from '../../../../../../src/plugins/share/common/url_service';
+import { createObservabilityRuleTypeRegistryMock } from '../../../../observability/public';
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
 import { ConfigSchema } from '../..';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { createCallApmApi } from '../../services/rest/createCallApmApi';
-import { MlUrlGenerator } from '../../../../ml/public';
+import { apmRouter } from '../../components/routing/apm_route_config';
+import { MlLocatorDefinition } from '../../../../ml/public';
 
 const uiSettings: Record<string, unknown> = {
   [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
@@ -41,6 +49,7 @@ const mockCore = {
       ml: {},
     },
     currentAppId$: new Observable(),
+    getUrlForApp: (appId: string) => '',
     navigateToUrl: (url: string) => {},
   },
   chrome: {
@@ -52,6 +61,9 @@ const mockCore = {
   docLinks: {
     DOC_LINK_VERSION: '0',
     ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+    links: {
+      apm: {},
+    },
   },
   http: {
     basePath: {
@@ -79,19 +91,29 @@ const mockConfig: ConfigSchema = {
   ui: {
     enabled: false,
   },
+  profilingEnabled: false,
 };
+
+const urlService = new UrlService({
+  navigate: async () => {},
+  getUrl: async ({ app, path }, { absolute }) => {
+    return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
+  },
+  shortUrls: {} as any,
+});
+const locator = urlService.locators.create(new MlLocatorDefinition());
 
 const mockPlugin = {
   ml: {
-    urlGenerator: new MlUrlGenerator({
-      appBasePath: '/app/ml',
-      useHash: false,
-    }),
+    locator,
   },
   data: {
     query: {
       timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
     },
+  },
+  observability: {
+    isAlertingExperienceEnabled: () => false,
   },
 };
 
@@ -104,26 +126,37 @@ export const mockApmPluginContextValue = {
   config: mockConfig,
   core: mockCore,
   plugins: mockPlugin,
+  observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
 };
 
 export function MockApmPluginContextWrapper({
   children,
   value = {} as ApmPluginContextValue,
+  history,
 }: {
   children?: React.ReactNode;
   value?: ApmPluginContextValue;
+  history?: History;
 }) {
-  if (value.core?.http) {
-    createCallApmApi(value.core?.http);
+  if (value.core) {
+    createCallApmApi(value.core);
   }
+
+  const contextHistory = useHistory();
+
+  const usedHistory = useMemo(() => {
+    return history || contextHistory || createMemoryHistory();
+  }, [history, contextHistory]);
   return (
-    <ApmPluginContext.Provider
-      value={{
-        ...mockApmPluginContextValue,
-        ...value,
-      }}
-    >
-      {children}
-    </ApmPluginContext.Provider>
+    <RouterProvider router={apmRouter as any} history={usedHistory}>
+      <ApmPluginContext.Provider
+        value={{
+          ...mockApmPluginContextValue,
+          ...value,
+        }}
+      >
+        {children}
+      </ApmPluginContext.Provider>
+    </RouterProvider>
   );
 }

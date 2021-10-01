@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { UserInputError } from 'apollo-server-errors';
 import { isEmpty, isPlainObject, isString } from 'lodash/fp';
 
-import { JsonObject } from '../../../../../src/plugins/kibana_utils/common';
+import { JsonObject } from '@kbn/utility-types';
 
 export const parseFilterQuery = (filterQuery: string): JsonObject => {
   try {
@@ -24,9 +24,8 @@ export const parseFilterQuery = (filterQuery: string): JsonObject => {
     }
     return {};
   } catch (err) {
-    throw new UserInputError(`Failed to parse query: ${err}`, {
-      query: filterQuery,
-      originalError: err,
-    });
+    throw new Error(
+      `Failed to parse query: ${JSON.stringify(err)}, query: ${JSON.stringify(filterQuery)}`
+    );
   }
 };

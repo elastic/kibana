@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { EuiCodeEditor, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { CodeEditor } from '../../../../../../../../../../../../src/plugins/kibana_react/public';
 import { FilterAggConfigEditor } from '../types';
 
 export const FilterEditorForm: FilterAggConfigEditor['aggTypeConfig']['FilterAggFormComponent'] = ({
@@ -15,15 +17,24 @@ export const FilterEditorForm: FilterAggConfigEditor['aggTypeConfig']['FilterAgg
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiCodeEditor
-        value={config}
+      <CodeEditor
+        height={300}
+        languageId={'json'}
         onChange={(d) => {
           onChange({ config: d });
         }}
-        mode="json"
-        style={{ width: '100%' }}
-        theme="textmate"
-        height="300px"
+        options={{
+          automaticLayout: true,
+          fontSize: 12,
+          scrollBeyondLastLine: false,
+          quickSuggestions: true,
+          minimap: {
+            enabled: false,
+          },
+          wordWrap: 'on',
+          wrappingIndent: 'indent',
+        }}
+        value={config || ''}
       />
     </>
   );

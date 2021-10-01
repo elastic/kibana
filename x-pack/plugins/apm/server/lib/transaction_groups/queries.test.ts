@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { transactionGroupsFetcher } from './fetcher';
+import { topTransactionGroupsFetcher } from './fetcher';
 import {
   SearchParamsMock,
   inspectSearchParams,
 } from '../../utils/test_helpers';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 describe('transaction group queries', () => {
   let mock: SearchParamsMock;
@@ -17,40 +19,39 @@ describe('transaction group queries', () => {
     mock.teardown();
   });
 
-  it('fetches top transactions', async () => {
-    const bucketSize = 100;
+  it('fetches top traces', async () => {
     mock = await inspectSearchParams((setup) =>
-      transactionGroupsFetcher(
+      topTransactionGroupsFetcher(
         {
-          type: 'top_transactions',
-          serviceName: 'foo',
-          transactionType: 'bar',
           searchAggregatedTransactions: false,
+          environment: ENVIRONMENT_ALL.value,
+          kuery: '',
+          start: 0,
+          end: 50000,
         },
-        setup,
-        bucketSize
+        setup
       )
     );
 
-    const allParams = mock.spy.mock.calls.map((call) => call[0]);
+    const allParams = mock.spy.mock.calls.map((call) => call[1]);
 
     expect(allParams).toMatchSnapshot();
   });
-
-  it('fetches top traces', async () => {
-    const bucketSize = 100;
+  it('fetches metrics top traces', async () => {
     mock = await inspectSearchParams((setup) =>
-      transactionGroupsFetcher(
+      topTransactionGroupsFetcher(
         {
-          type: 'top_traces',
-          searchAggregatedTransactions: false,
+          searchAggregatedTransactions: true,
+          environment: ENVIRONMENT_ALL.value,
+          kuery: '',
+          start: 0,
+          end: 50000,
         },
-        setup,
-        bucketSize
+        setup
       )
     );
 
-    const allParams = mock.spy.mock.calls.map((call) => call[0]);
+    const allParams = mock.spy.mock.calls.map((call) => call[1]);
 
     expect(allParams).toMatchSnapshot();
   });

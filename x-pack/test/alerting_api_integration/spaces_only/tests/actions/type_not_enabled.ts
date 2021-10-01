@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -17,8 +18,8 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
 
   describe('actionType not enabled', () => {
     // loads action PREWRITTEN_ACTION_ID with actionType DISABLED_ACTION_TYPE
-    before(() => esArchiver.load('actions'));
-    after(() => esArchiver.unload('actions'));
+    before(() => esArchiver.load('x-pack/test/functional/es_archives/actions'));
+    after(() => esArchiver.unload('x-pack/test/functional/es_archives/actions'));
 
     it('should handle create action with disabled actionType request appropriately', async () => {
       const response = await supertest.post(`/api/actions/action`).set('kbn-xsrf', 'foo').send({
@@ -61,6 +62,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
         config: {},
         id: 'uuid-actionId',
         isPreconfigured: false,
+        isMissingSecrets: false,
         name: 'an action created before test.not-enabled was disabled',
       });
     });
@@ -88,6 +90,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
         config: {},
         id: 'uuid-actionId',
         isPreconfigured: false,
+        isMissingSecrets: false,
         name: 'an action created before test.not-enabled was disabled',
       });
     });

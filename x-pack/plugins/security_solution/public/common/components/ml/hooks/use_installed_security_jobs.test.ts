@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { renderHook } from '@testing-library/react-hooks';
@@ -43,6 +44,7 @@ describe('useInstalledSecurityJobs', () => {
       expect(result.current.jobs).toEqual(
         expect.arrayContaining([
           {
+            awaitingNodeAssignment: false,
             datafeedId: 'datafeed-siem-api-rare_process_linux_ecs',
             datafeedIndices: ['auditbeat-*'],
             datafeedState: 'stopped',
@@ -53,6 +55,7 @@ describe('useInstalledSecurityJobs', () => {
             id: 'siem-api-rare_process_linux_ecs',
             isSingleMetricViewerJob: true,
             jobState: 'closed',
+            jobTags: {},
             latestTimestampMs: 1557434782207,
             memory_status: 'hard_limit',
             processed_record_count: 582251,

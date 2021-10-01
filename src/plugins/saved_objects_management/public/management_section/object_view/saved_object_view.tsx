@@ -1,55 +1,52 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiPageContent } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { get } from 'lodash';
+import { KibanaContextProvider } from '../../../../kibana_react/public';
 import {
   Capabilities,
   SavedObjectsClientContract,
   OverlayStart,
   NotificationsStart,
-  SimpleSavedObject,
   ScopedHistory,
+  HttpSetup,
+  IUiSettingsClient,
+  DocLinksStart,
 } from '../../../../../core/public';
-import { ISavedObjectsManagementServiceRegistry } from '../../services';
-import { Header, NotFoundErrors, Intro, Form } from './components';
-import { canViewInApp } from '../../lib';
-import { SubmittedFormData } from '../types';
-
-interface SavedObjectEditionProps {
+import { Header, Inspect, NotFoundErrors } from './components';
+import { bulkGetObjects } from '../../lib/bulk_get_objects';
+import { SavedObjectWithMetadata } from '../../types';
+import './saved_object_view.scss';
+export interface SavedObjectEditionProps {
   id: string;
-  serviceName: string;
-  serviceRegistry: ISavedObjectsManagementServiceRegistry;
+  savedObjectType: string;
+  http: HttpSetup;
   capabilities: Capabilities;
   overlays: OverlayStart;
   notifications: NotificationsStart;
   notFoundType?: string;
   savedObjectsClient: SavedObjectsClientContract;
   history: ScopedHistory;
+  uiSettings: IUiSettingsClient;
+  docLinks: DocLinksStart['links'];
 }
-
-interface SavedObjectEditionState {
+export interface SavedObjectEditionState {
   type: string;
-  object?: SimpleSavedObject<any>;
+  object?: SavedObjectWithMetadata<any>;
 }
 
+const unableFindSavedObjectNotificationMessage = i18n.translate(
+  'savedObjectsManagement.objectView.unableFindSavedObjectNotificationMessage',
+  { defaultMessage: 'Unable to find saved object' }
+);
 export class SavedObjectEdition extends Component<
   SavedObjectEditionProps,
   SavedObjectEditionState
@@ -57,8 +54,7 @@ export class SavedObjectEdition extends Component<
   constructor(props: SavedObjectEditionProps) {
     super(props);
 
-    const { serviceRegistry, serviceName } = props;
-    const type = serviceRegistry.get(serviceName)!.service.type;
+    const { savedObjectType: type } = props;
 
     this.state = {
       object: undefined,
@@ -67,68 +63,68 @@ export class SavedObjectEdition extends Component<
   }
 
   componentDidMount() {
-    const { id, savedObjectsClient } = this.props;
+    const { http, id, notifications } = this.props;
     const { type } = this.state;
-    savedObjectsClient.get(type, id).then((object) => {
-      this.setState({
-        object,
+    bulkGetObjects(http, [{ type, id }])
+      .then(([object]) => {
+        if (object.error) {
+          const { message } = object.error;
+          notifications.toasts.addDanger({
+            title: unableFindSavedObjectNotificationMessage,
+            text: message,
+          });
+        } else {
+          this.setState({ object });
+        }
+      })
+      .catch((err) => {
+        notifications.toasts.addDanger({
+          title: unableFindSavedObjectNotificationMessage,
+          text: err.message ?? 'Unknown error',
+        });
       });
-    });
+  }
+
+  canViewInApp(capabilities: Capabilities, obj?: SavedObjectWithMetadata<any>) {
+    return obj && obj.meta.inAppUrl
+      ? get(capabilities, obj?.meta.inAppUrl?.uiCapabilitiesPath, false) &&
+          Boolean(obj?.meta.inAppUrl?.path)
+      : false;
   }
 
   render() {
-    const {
-      capabilities,
-      notFoundType,
-      serviceRegistry,
-      id,
-      serviceName,
-      savedObjectsClient,
-    } = this.props;
-    const { type } = this.state;
+    const { capabilities, notFoundType, http, uiSettings, docLinks } = this.props;
     const { object } = this.state;
-    const { edit: canEdit, delete: canDelete } = capabilities.savedObjectsManagement as Record<
-      string,
-      boolean
-    >;
-    const canView = canViewInApp(capabilities, type);
-    const service = serviceRegistry.get(serviceName)!.service;
-
+    const { delete: canDelete } = capabilities.savedObjectsManagement as Record<string, boolean>;
+    const canView = this.canViewInApp(capabilities, object);
     return (
-      <EuiPageContent horizontalPosition="center" data-test-subj="savedObjectsEdit">
-        <Header
-          canEdit={canEdit}
-          canDelete={canDelete}
-          canViewInApp={canView}
-          type={type}
-          onDeleteClick={() => this.delete()}
-          viewUrl={service.urlFor(id)}
-        />
-        {notFoundType && (
-          <>
-            <EuiSpacer size="s" />
-            <NotFoundErrors type={notFoundType} />
-          </>
-        )}
-        {canEdit && (
-          <>
-            <EuiSpacer size="s" />
-            <Intro />
-          </>
-        )}
-        {object && (
-          <>
-            <EuiSpacer size="m" />
-            <Form
-              object={object}
-              savedObjectsClient={savedObjectsClient}
-              service={service}
-              editionEnabled={canEdit}
-              onSave={this.saveChanges}
+      <KibanaContextProvider services={{ uiSettings }}>
+        <EuiFlexGroup
+          direction="column"
+          data-test-subject="savedObjectsEdit"
+          className="savedObjectsManagementObjectView"
+        >
+          <EuiFlexItem grow={false}>
+            <Header
+              canDelete={canDelete && !object?.meta.hiddenType}
+              canViewInApp={canView}
+              onDeleteClick={() => this.delete()}
+              viewUrl={http.basePath.prepend(object?.meta.inAppUrl?.path || '')}
+              title={object?.meta.title}
             />
-          </>
-        )}
-      </EuiPageContent>
+          </EuiFlexItem>
+          {notFoundType && (
+            <EuiFlexItem grow={false}>
+              <NotFoundErrors type={notFoundType} docLinks={docLinks} />
+            </EuiFlexItem>
+          )}
+          {object && (
+            <EuiFlexItem grow={true}>
+              <Inspect object={object} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </KibanaContextProvider>
     );
   }
 
@@ -162,15 +158,6 @@ export class SavedObjectEdition extends Component<
       this.redirectToListing();
     }
   }
-
-  saveChanges = async ({ attributes, references }: SubmittedFormData) => {
-    const { savedObjectsClient, notifications } = this.props;
-    const { object, type } = this.state;
-
-    await savedObjectsClient.update(object!.type, object!.id, attributes, { references });
-    notifications.toasts.addSuccess(`Updated '${attributes.title}' ${type} object`);
-    this.redirectToListing();
-  };
 
   redirectToListing() {
     this.props.history.push('/');

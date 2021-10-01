@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -18,21 +19,22 @@ import {
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import * as i18n from './translations';
-import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
-import { SeverityOptionItem } from '../step_about_rule/data';
-import { AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
-import {
-  IFieldType,
-  IIndexPattern,
-} from '../../../../../../../../src/plugins/data/common/index_patterns';
-import { FieldComponent } from '../../../../common/components/autocomplete/field';
-import { AutocompleteFieldMatchComponent } from '../../../../common/components/autocomplete/field_value_match';
 import {
   Severity,
   SeverityMapping,
   SeverityMappingItem,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import {
+  FieldComponent,
+  AutocompleteFieldMatchComponent,
+} from '@kbn/securitysolution-autocomplete';
+
+import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
+import * as i18n from './translations';
+import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+import { SeverityOptionItem } from '../step_about_rule/data';
+import { AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const NestedContent = styled.div`
   margin-left: 24px;
@@ -52,9 +54,9 @@ const EuiFlexItemSeverityColumn = styled(EuiFlexItem)`
 
 interface SeverityFieldProps {
   dataTestSubj: string;
-  field: FieldHook;
+  field: FieldHook<AboutStepSeverity>;
   idAria: string;
-  indices: IIndexPattern;
+  indices: IndexPatternBase;
   isDisabled: boolean;
   options: SeverityOptionItem[];
 }
@@ -67,8 +69,9 @@ export const SeverityField = ({
   isDisabled,
   options,
 }: SeverityFieldProps) => {
+  const { services } = useKibana();
+  const { value, isMappingChecked, mapping } = field.value;
   const { setValue } = field;
-  const { value, isMappingChecked, mapping } = field.value as AboutStepSeverity;
 
   const handleFieldValueChange = useCallback(
     (newMappingItems: SeverityMapping, index: number): void => {
@@ -82,7 +85,7 @@ export const SeverityField = ({
   );
 
   const handleFieldChange = useCallback(
-    (index: number, severity: Severity, [newField]: IFieldType[]): void => {
+    (index: number, severity: Severity, [newField]: IndexPatternFieldBase[]): void => {
       const newMappingItems: SeverityMapping = [
         {
           ...mapping[index],
@@ -97,8 +100,8 @@ export const SeverityField = ({
     [mapping, handleFieldValueChange]
   );
 
-  const handleSecurityLevelChange = useCallback(
-    (newValue: string) => {
+  const handleDefaultSeverityChange = useCallback(
+    (newValue: Severity) => {
       setValue({
         value: newValue,
         isMappingChecked,
@@ -123,14 +126,6 @@ export const SeverityField = ({
     },
     [mapping, handleFieldValueChange]
   );
-
-  const getIFieldTypeFromFieldName = (
-    fieldName: string | undefined,
-    iIndexPattern: IIndexPattern
-  ): IFieldType | undefined => {
-    const [iFieldType] = iIndexPattern.fields.filter(({ name }) => fieldName === name);
-    return iFieldType;
-  };
 
   const handleSeverityMappingChecked = useCallback(() => {
     setValue({
@@ -195,7 +190,7 @@ export const SeverityField = ({
             fullWidth={false}
             disabled={false}
             valueOfSelected={value}
-            onChange={handleSecurityLevelChange}
+            onChange={handleDefaultSeverityChange}
             options={options}
             data-test-subj="select"
           />
@@ -244,10 +239,7 @@ export const SeverityField = ({
                       <EuiFlexItemComboBoxColumn>
                         <FieldComponent
                           placeholder={''}
-                          selectedField={getIFieldTypeFromFieldName(
-                            severityMappingItem.field,
-                            indices
-                          )}
+                          selectedField={getFieldTypeByMapping(severityMappingItem, indices)}
                           isLoading={false}
                           isDisabled={isDisabled}
                           isClearable={false}
@@ -264,11 +256,9 @@ export const SeverityField = ({
 
                       <EuiFlexItemComboBoxColumn>
                         <AutocompleteFieldMatchComponent
+                          autocompleteService={services.data.autocomplete}
                           placeholder={''}
-                          selectedField={getIFieldTypeFromFieldName(
-                            severityMappingItem.field,
-                            indices
-                          )}
+                          selectedField={getFieldTypeByMapping(severityMappingItem, indices)}
                           selectedValue={severityMappingItem.value}
                           isClearable={false}
                           isDisabled={isDisabled}
@@ -302,4 +292,21 @@ export const SeverityField = ({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+};
+
+/**
+ * Looks for field metadata (IndexPatternFieldBase) in existing index pattern.
+ * If specified field doesn't exist, returns a stub IndexPatternFieldBase created based on the mapping --
+ * because the field might not have been indexed yet, but we still need to display the mapping.
+ *
+ * @param mapping Mapping of a specified field name + value to a certain severity value.
+ * @param pattern Existing index pattern.
+ */
+const getFieldTypeByMapping = (
+  mapping: SeverityMappingItem,
+  pattern: IndexPatternBase
+): IndexPatternFieldBase => {
+  const { field } = mapping;
+  const [knownFieldType] = pattern.fields.filter(({ name }) => field === name);
+  return knownFieldType ?? { name: field, type: 'string' };
 };

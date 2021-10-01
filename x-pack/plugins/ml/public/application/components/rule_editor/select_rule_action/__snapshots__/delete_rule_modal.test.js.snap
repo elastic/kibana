@@ -42,34 +42,32 @@ exports[`DeleteRuleModal renders modal after clicking delete rule link 1`] = `
       values={Object {}}
     />
   </EuiLink>
-  <EuiOverlayMask>
-    <EuiConfirmModal
-      buttonColor="danger"
-      cancelButtonText={
-        <FormattedMessage
-          defaultMessage="Cancel"
-          id="xpack.ml.ruleEditor.deleteRuleModal.cancelButtonLabel"
-          values={Object {}}
-        />
-      }
-      confirmButtonText={
-        <FormattedMessage
-          defaultMessage="Delete"
-          id="xpack.ml.ruleEditor.deleteRuleModal.deleteButtonLabel"
-          values={Object {}}
-        />
-      }
-      defaultFocusedButton="confirm"
-      onCancel={[Function]}
-      onConfirm={[Function]}
-      title={
-        <FormattedMessage
-          defaultMessage="Delete rule?"
-          id="xpack.ml.ruleEditor.deleteRuleModal.deleteRuleTitle"
-          values={Object {}}
-        />
-      }
-    />
-  </EuiOverlayMask>
+  <EuiConfirmModal
+    buttonColor="danger"
+    cancelButtonText={
+      <FormattedMessage
+        defaultMessage="Cancel"
+        id="xpack.ml.ruleEditor.deleteRuleModal.cancelButtonLabel"
+        values={Object {}}
+      />
+    }
+    confirmButtonText={
+      <FormattedMessage
+        defaultMessage="Delete"
+        id="xpack.ml.ruleEditor.deleteRuleModal.deleteButtonLabel"
+        values={Object {}}
+      />
+    }
+    defaultFocusedButton="confirm"
+    onCancel={[Function]}
+    onConfirm={[Function]}
+    title={
+      <FormattedMessage
+        defaultMessage="Delete rule?"
+        id="xpack.ml.ruleEditor.deleteRuleModal.deleteRuleTitle"
+        values={Object {}}
+      />
+    }
+  />
 </Fragment>
 `;

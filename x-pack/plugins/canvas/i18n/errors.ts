@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import { CANVAS, JSON } from './constants';
 
 export const ErrorStrings = {
   actionsElements: {
@@ -16,30 +16,6 @@ export const ErrorStrings = {
           index,
         },
       }),
-  },
-  downloadWorkpad: {
-    getDownloadFailureErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.downloadWorkpad.downloadFailureErrorMessage', {
-        defaultMessage: "Couldn't download workpad",
-      }),
-    getDownloadRenderedWorkpadFailureErrorMessage: () =>
-      i18n.translate(
-        'xpack.canvas.error.downloadWorkpad.downloadRenderedWorkpadFailureErrorMessage',
-        {
-          defaultMessage: "Couldn't download rendered workpad",
-        }
-      ),
-    getDownloadRuntimeFailureErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.downloadWorkpad.downloadRuntimeFailureErrorMessage', {
-        defaultMessage: "Couldn't download Shareable Runtime",
-      }),
-    getDownloadZippedRuntimeFailureErrorMessage: () =>
-      i18n.translate(
-        'xpack.canvas.error.downloadWorkpad.downloadZippedRuntimeFailureErrorMessage',
-        {
-          defaultMessage: "Couldn't download ZIP file",
-        }
-      ),
   },
   esPersist: {
     getSaveFailureTitle: () =>
@@ -82,64 +58,10 @@ export const ErrorStrings = {
         },
       }),
   },
-  RepeatImage: {
-    getMissingMaxArgumentErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.repeatImage.missingMaxArgument', {
-        defaultMessage: '{maxArgument} must be set if providing an {emptyImageArgument}',
-        values: {
-          maxArgument: '`max`',
-          emptyImageArgument: '`emptyImage`',
-        },
-      }),
-  },
-  WorkpadFileUpload: {
-    getAcceptJSONOnlyErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.workpadUpload.acceptJSONOnlyErrorMessage', {
-        defaultMessage: 'Only {JSON} files are accepted',
-        values: {
-          JSON,
-        },
-      }),
-    getFileUploadFailureWithFileNameErrorMessage: (fileName: string) =>
-      i18n.translate('xpack.canvas.errors.workpadUpload.fileUploadFileWithFileNameErrorMessage', {
-        defaultMessage: `Couldn't upload '{fileName}'`,
-        values: {
-          fileName,
-        },
-      }),
-    getFileUploadFailureWithoutFileNameErrorMessage: () =>
-      i18n.translate(
-        'xpack.canvas.error.workpadUpload.fileUploadFailureWithoutFileNameErrorMessage',
-        {
-          defaultMessage: `Couldn't upload file`,
-        }
-      ),
-    getMissingPropertiesErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.workpadUpload.missingPropertiesErrorMessage', {
-        defaultMessage:
-          'Some properties required for a {CANVAS} workpad are missing.  Edit your {JSON} file to provide the correct property values, and try again.',
-        values: {
-          CANVAS,
-          JSON,
-        },
-      }),
-  },
-  WorkpadLoader: {
-    getCloneFailureErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.workpadLoader.cloneFailureErrorMessage', {
-        defaultMessage: `Couldn't clone workpad`,
-      }),
-    getDeleteFailureErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.workpadLoader.deleteFailureErrorMessage', {
-        defaultMessage: `Couldn't delete all workpads`,
-      }),
-    getFindFailureErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.workpadLoader.findFailureErrorMessage', {
-        defaultMessage: `Couldn't find workpad`,
-      }),
-    getUploadFailureErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.workpadLoader.uploadFailureErrorMessage', {
-        defaultMessage: `Couldn't upload workpad`,
+  WorkpadDropzone: {
+    getTooManyFilesErrorMessage: () =>
+      i18n.translate('xpack.canvas.error.workpadDropzone.tooManyFilesErrorMessage', {
+        defaultMessage: 'One one file can be uploaded at a time',
       }),
   },
   workpadRoutes: {

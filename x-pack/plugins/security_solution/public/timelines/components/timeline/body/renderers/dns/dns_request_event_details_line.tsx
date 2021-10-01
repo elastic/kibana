@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
@@ -23,6 +24,7 @@ interface Props {
   eventCode: string | null | undefined;
   hostName: string | null | undefined;
   id: string;
+  isDraggable?: boolean;
   processExecutable: string | null | undefined;
   processName: string | null | undefined;
   processPid: number | null | undefined;
@@ -41,6 +43,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
     eventCode,
     hostName,
     id,
+    isDraggable,
     processExecutable,
     processName,
     processPid,
@@ -55,6 +58,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
             contextId={contextId}
             eventId={id}
             hostName={hostName}
+            isDraggable={isDraggable}
             userDomain={userDomain}
             userName={userName}
             workingDirectory={undefined}
@@ -70,6 +74,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
                   contextId={contextId}
                   eventId={id}
                   field="dns.question.name"
+                  isDraggable={isDraggable}
                   value={dnsQuestionName}
                 />
               </TokensFlexItem>
@@ -86,6 +91,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
                   contextId={contextId}
                   eventId={id}
                   field="dns.question.type"
+                  isDraggable={isDraggable}
                   value={dnsQuestionType}
                 />
               </TokensFlexItem>
@@ -102,6 +108,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
                   contextId={contextId}
                   eventId={id}
                   field="dns.resolved_ip"
+                  isDraggable={isDraggable}
                   value={dnsResolvedIp}
                 />
               </TokensFlexItem>
@@ -121,6 +128,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
                   contextId={contextId}
                   eventId={id}
                   field="dns.response_code"
+                  isDraggable={isDraggable}
                   value={dnsResponseCode}
                 />
               </TokensFlexItem>
@@ -140,6 +148,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
               endgamePid={undefined}
               endgameProcessName={undefined}
               eventId={id}
+              isDraggable={isDraggable}
               processPid={processPid}
               processName={processName}
               processExecutable={processExecutable}
@@ -154,6 +163,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
                     contextId={contextId}
                     eventId={id}
                     field="event.code"
+                    isDraggable={isDraggable}
                     value={eventCode}
                   />
                 </TokensFlexItem>
@@ -164,6 +174,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
                     eventId={id}
                     iconType="logoWindows"
                     field="winlog.event_id"
+                    isDraggable={isDraggable}
                     value={winlogEventId}
                   />
                 </TokensFlexItem>

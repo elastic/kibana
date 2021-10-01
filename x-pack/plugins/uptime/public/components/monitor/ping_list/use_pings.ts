@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -34,15 +35,19 @@ export const usePingsList = ({ pageSize, pageIndex }: Props) => {
 
   const { statusFilter } = useGetUrlParams();
 
-  const { selectedLocations } = useSelectedFilters();
+  const selectedFilters = useSelectedFilters();
 
   const dispatch = useDispatch();
 
   const monitorId = useMonitorId();
 
-  const getPings = useCallback((params: GetPingsParams) => dispatch(getPingsAction(params)), [
-    dispatch,
-  ]);
+  const getPings = useCallback(
+    (params: GetPingsParams) => dispatch(getPingsAction(params)),
+    [dispatch]
+  );
+
+  const locations = JSON.stringify(selectedFilters.selectedLocations);
+  const excludedLocations = JSON.stringify(selectedFilters.excludedLocations);
 
   useEffect(() => {
     getPings({
@@ -51,7 +56,8 @@ export const usePingsList = ({ pageSize, pageIndex }: Props) => {
         from,
         to,
       },
-      locations: JSON.stringify(selectedLocations),
+      excludedLocations,
+      locations,
       index: pageIndex,
       size: pageSize,
       status: statusFilter !== 'all' ? statusFilter : '',
@@ -65,7 +71,8 @@ export const usePingsList = ({ pageSize, pageIndex }: Props) => {
     pageIndex,
     pageSize,
     statusFilter,
-    selectedLocations,
+    locations,
+    excludedLocations,
   ]);
 
   const { data } = useFetcher(() => {

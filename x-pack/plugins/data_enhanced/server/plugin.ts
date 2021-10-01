@@ -1,74 +1,66 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
-import {
-  PluginSetup as DataPluginSetup,
-  PluginStart as DataPluginStart,
-  usageProvider,
-} from '../../../../src/plugins/data/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY } from '../common';
 import { registerSessionRoutes } from './routes';
-import { backgroundSessionMapping } from './saved_objects';
-import {
-  BackgroundSessionService,
-  enhancedEsSearchStrategyProvider,
-  eqlSearchStrategyProvider,
-} from './search';
-import { getUiSettings } from './ui_settings';
+import { searchSessionSavedObjectType } from './saved_objects';
+import type {
+  DataEnhancedRequestHandlerContext,
+  DataEnhancedSetupDependencies as SetupDependencies,
+  DataEnhancedStartDependencies as StartDependencies,
+} from './type';
+import { ConfigSchema } from '../config';
+import { registerUsageCollector } from './collectors';
+import { SearchSessionService } from './search';
 
-interface SetupDependencies {
-  data: DataPluginSetup;
-  usageCollection?: UsageCollectionSetup;
-}
-
-export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDependencies> {
+export class EnhancedDataServerPlugin
+  implements Plugin<void, void, SetupDependencies, StartDependencies>
+{
   private readonly logger: Logger;
-  private sessionService!: BackgroundSessionService;
+  private sessionService!: SearchSessionService;
+  private config: ConfigSchema;
 
-  constructor(private initializerContext: PluginInitializerContext) {
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.logger = initializerContext.logger.get('data_enhanced');
+    this.config = this.initializerContext.config.get<ConfigSchema>();
   }
 
-  public setup(core: CoreSetup<DataPluginStart>, deps: SetupDependencies) {
-    const usage = deps.usageCollection ? usageProvider(core) : undefined;
+  public setup(core: CoreSetup<StartDependencies>, deps: SetupDependencies) {
+    core.savedObjects.registerType(searchSessionSavedObjectType);
 
-    core.uiSettings.register(getUiSettings());
-    core.savedObjects.registerType(backgroundSessionMapping);
-
-    deps.data.search.registerSearchStrategy(
-      ENHANCED_ES_SEARCH_STRATEGY,
-      enhancedEsSearchStrategyProvider(
-        this.initializerContext.config.legacy.globalConfig$,
-        this.logger,
-        usage
-      )
+    this.sessionService = new SearchSessionService(
+      this.logger,
+      this.config,
+      this.initializerContext.env.packageInfo.version,
+      deps.security
     );
-
-    deps.data.search.registerSearchStrategy(
-      EQL_SEARCH_STRATEGY,
-      eqlSearchStrategyProvider(this.logger)
-    );
-
-    this.sessionService = new BackgroundSessionService(this.logger);
 
     deps.data.__enhance({
       search: {
-        defaultStrategy: ENHANCED_ES_SEARCH_STRATEGY,
         sessionService: this.sessionService,
       },
     });
 
-    const router = core.http.createRouter();
-    registerSessionRoutes(router);
+    const router = core.http.createRouter<DataEnhancedRequestHandlerContext>();
+    registerSessionRoutes(router, this.logger);
+
+    this.sessionService.setup(core, {
+      taskManager: deps.taskManager,
+    });
+
+    if (deps.usageCollection) {
+      registerUsageCollector(deps.usageCollection, this.initializerContext, this.logger);
+    }
   }
 
-  public start(core: CoreStart) {
-    this.sessionService.start(core, this.initializerContext.config.create());
+  public start(core: CoreStart, { taskManager }: StartDependencies) {
+    this.sessionService.start(core, {
+      taskManager,
+    });
   }
 
   public stop() {

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { loggingSystemMock, savedObjectsRepositoryMock } from '../../../../../core/server/mocks';
@@ -22,7 +11,7 @@ import {
   Collector,
   createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
-} from '../../../../usage_collection/server/usage_collection.mock';
+} from '../../../../usage_collection/server/mocks';
 
 import { registerUiMetricUsageCollector } from './';
 
@@ -41,6 +30,8 @@ describe('telemetry_ui_metric', () => {
   const registerType = jest.fn();
   const mockedFetchContext = createCollectorFetchContextMock();
 
+  const commonSavedObjectsAttributes = { score: 0, references: [], type: 'ui-metric' };
+
   beforeAll(() =>
     registerUiMetricUsageCollector(usageCollectionMock, registerType, getUsageCollector)
   );
@@ -55,13 +46,12 @@ describe('telemetry_ui_metric', () => {
 
   test('when savedObjectClient is initialised, return something', async () => {
     const savedObjectClient = savedObjectsRepositoryMock.create();
-    savedObjectClient.find.mockImplementation(
-      async () =>
-        ({
-          saved_objects: [],
-          total: 0,
-        } as any)
-    );
+    savedObjectClient.find.mockImplementation(async () => ({
+      saved_objects: [],
+      total: 0,
+      per_page: 10,
+      page: 1,
+    }));
     getUsageCollector.mockImplementation(() => savedObjectClient);
 
     expect(await collector.fetch(mockedFetchContext)).toStrictEqual({});
@@ -70,20 +60,32 @@ describe('telemetry_ui_metric', () => {
 
   test('results grouped by appName', async () => {
     const savedObjectClient = savedObjectsRepositoryMock.create();
-    savedObjectClient.find.mockImplementation(async () => {
-      return {
-        saved_objects: [
-          { id: 'testAppName:testKeyName1', attributes: { count: 3 } },
-          { id: 'testAppName:testKeyName2', attributes: { count: 5 } },
-          { id: 'testAppName2:testKeyName3', attributes: { count: 1 } },
-          {
-            id:
-              'kibana-user_agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:80.0) Gecko/20100101 Firefox/80.0',
-            attributes: { count: 1 },
-          },
-        ],
-        total: 3,
-      } as any;
+    savedObjectClient.find.mockResolvedValue({
+      saved_objects: [
+        {
+          ...commonSavedObjectsAttributes,
+          id: 'testAppName:testKeyName1',
+          attributes: { count: 3 },
+        },
+        {
+          ...commonSavedObjectsAttributes,
+          id: 'testAppName:testKeyName2',
+          attributes: { count: 5 },
+        },
+        {
+          ...commonSavedObjectsAttributes,
+          id: 'testAppName2:testKeyName3',
+          attributes: { count: 1 },
+        },
+        {
+          ...commonSavedObjectsAttributes,
+          id: 'kibana-user_agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:80.0) Gecko/20100101 Firefox/80.0',
+          attributes: { count: 1 },
+        },
+      ],
+      total: 3,
+      per_page: 3,
+      page: 1,
     });
 
     getUsageCollector.mockImplementation(() => savedObjectClient);

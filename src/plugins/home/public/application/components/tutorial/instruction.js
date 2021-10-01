@@ -1,23 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { Suspense, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Content } from './content';
 
@@ -28,11 +17,26 @@ import {
   EuiSpacer,
   EuiCopy,
   EuiButton,
+  EuiLoadingSpinner,
+  EuiErrorBoundary,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export function Instruction({ commands, paramValues, textPost, textPre, replaceTemplateStrings }) {
+import { getServices } from '../../kibana_services';
+
+export function Instruction({
+  commands,
+  paramValues,
+  textPost,
+  textPre,
+  replaceTemplateStrings,
+  customComponentName,
+  variantId,
+  isCloudEnabled,
+}) {
+  const { tutorialService, http, uiSettings, getBasePath } = getServices();
+
   let pre;
   if (textPre) {
     pre = <Content text={replaceTemplateStrings(textPre)} />;
@@ -47,6 +51,13 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
       </div>
     );
   }
+  const customComponent = tutorialService.getCustomComponent(customComponentName);
+  //Memoize the custom component so it wont rerender everytime
+  const LazyCustomComponent = useMemo(() => {
+    if (customComponent) {
+      return React.lazy(() => customComponent());
+    }
+  }, [customComponent]);
 
   let copyButton;
   let commandBlock;
@@ -71,7 +82,7 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
     commandBlock = (
       <div>
         <EuiSpacer size="m" />
-        <EuiCodeBlock language="sh">{cmdText}</EuiCodeBlock>
+        <EuiCodeBlock language="bash">{cmdText}</EuiCodeBlock>
       </div>
     );
   }
@@ -88,6 +99,20 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
 
       {commandBlock}
 
+      {LazyCustomComponent && (
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <EuiErrorBoundary>
+            <LazyCustomComponent
+              basePath={getBasePath()}
+              isDarkTheme={uiSettings.get('theme:darkMode')}
+              http={http}
+              variantId={variantId}
+              isCloudEnabled={isCloudEnabled}
+            />
+          </EuiErrorBoundary>
+        </Suspense>
+      )}
+
       {post}
 
       <EuiSpacer />
@@ -101,4 +126,7 @@ Instruction.propTypes = {
   textPost: PropTypes.string,
   textPre: PropTypes.string,
   replaceTemplateStrings: PropTypes.func.isRequired,
+  customComponentName: PropTypes.string,
+  variantId: PropTypes.string,
+  isCloudEnabled: PropTypes.bool.isRequired,
 };

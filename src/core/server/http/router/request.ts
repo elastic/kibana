@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { URL } from 'url';
@@ -142,7 +131,6 @@ export class KibanaRequest<
     const params = routeValidator.getParams(req.params, 'request params');
     const query = routeValidator.getQuery(req.query, 'request query');
     const body = routeValidator.getBody(req.payload, 'request body');
-
     return { query, params, body };
   }
   /**
@@ -214,10 +202,7 @@ export class KibanaRequest<
 
     this.url = request.url;
     this.headers = deepFreeze({ ...request.headers });
-    this.isSystemRequest =
-      request.headers['kbn-system-request'] === 'true' ||
-      // Remove support for `kbn-system-api` in 8.x. Used only by legacy platform.
-      request.headers['kbn-system-api'] === 'true';
+    this.isSystemRequest = request.headers['kbn-system-request'] === 'true';
 
     // prevent Symbol exposure via Object.getOwnPropertySymbols()
     Object.defineProperty(this, requestSymbol, {
@@ -252,13 +237,18 @@ export class KibanaRequest<
 
   private getRouteInfo(request: Request): KibanaRequestRoute<Method> {
     const method = request.method as Method;
-    const { parse, maxBytes, allow, output, timeout: payloadTimeout } =
-      request.route.settings.payload || {};
+    const {
+      parse,
+      maxBytes,
+      allow,
+      output,
+      timeout: payloadTimeout,
+    } = request.route.settings.payload || {};
 
     // net.Socket#timeout isn't documented, yet, and isn't part of the types... https://github.com/nodejs/node/pull/34543
     // the socket is also undefined when using @hapi/shot, or when a "fake request" is used
     const socketTimeout = (request.raw.req.socket as any)?.timeout;
-    const options = ({
+    const options = {
       authRequired: this.getAuthRequired(request),
       // TypeScript note: Casting to `RouterOptions` to fix the following error:
       //
@@ -283,7 +273,7 @@ export class KibanaRequest<
             accepts: allow,
             output: output as typeof validBodyOutput[number], // We do not support all the HAPI-supported outputs and TS complains
           },
-    } as unknown) as KibanaRequestRouteOptions<Method>; // TS does not understand this is OK so I'm enforced to do this enforced casting
+    } as unknown as KibanaRequestRouteOptions<Method>; // TS does not understand this is OK so I'm enforced to do this enforced casting
 
     return {
       path: request.path,

@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiFocusTrap } from '@elastic/eui';
-import React, { useEffect, useMemo } from 'react';
+import { EuiFocusTrap, EuiOutsideClickDetector } from '@elastic/eui';
+import React, { useEffect, useMemo, useCallback, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
 
 import { AppLeaveHandler } from '../../../../../../../src/core/public';
 import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
@@ -18,23 +18,61 @@ import { FlyoutBottomBar } from './bottom_bar';
 import { Pane } from './pane';
 import { getTimelineShowStatusByIdSelector } from './selectors';
 
-const Visible = styled.div<{ show?: boolean }>`
-  visibility: ${({ show }) => (show ? 'visible' : 'hidden')};
-`;
-
-Visible.displayName = 'Visible';
-
 interface OwnProps {
-  timelineId: string;
+  timelineId: TimelineId;
   onAppLeave: (handler: AppLeaveHandler) => void;
 }
+
+type VoidFunc = () => void;
 
 const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
   const dispatch = useDispatch();
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
-  const { activeTab, show, status: timelineStatus, updated } = useDeepEqualSelector((state) =>
-    getTimelineShowStatus(state, timelineId)
-  );
+  const {
+    activeTab,
+    show,
+    status: timelineStatus,
+    updated,
+  } = useDeepEqualSelector((state) => getTimelineShowStatus(state, timelineId));
+
+  const [focusOwnership, setFocusOwnership] = useState(true);
+  const [triggerOnBlur, setTriggerOnBlur] = useState(true);
+  const callbackRef = useRef<VoidFunc | null>(null);
+  const searchRef = useRef<HTMLElement | null>(null);
+
+  const handleSearch = useCallback(() => {
+    if (show && focusOwnership === false) {
+      setFocusOwnership(true);
+    }
+  }, [show, focusOwnership]);
+  const onOutsideClick = useCallback((event) => {
+    setFocusOwnership(false);
+    const classes = event.target.classList;
+    if (classes.contains('kbnSearchBar')) {
+      searchRef.current = event.target;
+      setTriggerOnBlur((prev) => !prev);
+      window.setTimeout(() => {
+        if (searchRef.current !== null) {
+          searchRef.current.focus();
+        }
+      }, 0);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (searchRef.current != null) {
+      if (callbackRef.current !== null) {
+        searchRef.current.removeEventListener('blur', callbackRef.current);
+      }
+      searchRef.current.addEventListener('blur', handleSearch);
+      callbackRef.current = handleSearch;
+    }
+    return () => {
+      if (searchRef.current != null && callbackRef.current !== null) {
+        searchRef.current.removeEventListener('blur', callbackRef.current);
+      }
+    };
+  }, [handleSearch, triggerOnBlur]);
 
   useEffect(() => {
     onAppLeave((actions, nextAppId) => {
@@ -77,15 +115,16 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
       }
     });
   }, [dispatch, onAppLeave, show, timelineStatus, updated]);
+
   return (
-    <>
-      <EuiFocusTrap disabled={!show}>
-        <Visible show={show}>
-          <Pane timelineId={timelineId} />
-        </Visible>
-      </EuiFocusTrap>
-      <FlyoutBottomBar activeTab={activeTab} timelineId={timelineId} showDataproviders={!show} />
-    </>
+    <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
+      <>
+        <EuiFocusTrap disabled={!focusOwnership}>
+          <Pane timelineId={timelineId} visible={show} />
+        </EuiFocusTrap>
+        <FlyoutBottomBar activeTab={activeTab} timelineId={timelineId} showDataproviders={!show} />
+      </>
+    </EuiOutsideClickDetector>
   );
 };
 

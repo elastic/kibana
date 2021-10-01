@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, pick, isEmpty } from 'lodash';
@@ -20,11 +21,10 @@ export const getSectionsWithRows = (
   return sections
     .map((section) => {
       const sectionData: Record<string, unknown> = get(apmDoc, section.key);
-      const filteredData:
-        | Record<string, unknown>
-        | undefined = section.properties
-        ? pick(sectionData, section.properties)
-        : sectionData;
+      const filteredData: Record<string, unknown> | undefined =
+        section.properties
+          ? pick(sectionData, section.properties)
+          : sectionData;
 
       const rows: KeyValuePair[] = flattenObject(filteredData, section.key);
       return { ...section, rows };

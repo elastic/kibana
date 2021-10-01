@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { expectFixtureEql } from './helper/expect_fixture_eql';
@@ -33,8 +34,8 @@ export default function ({ getService }: FtrProviderContext) {
       const scheduleEvery = 10000; // fake monitor checks every 10s
       let dateRange: { start: string; end: string };
 
-      [true, false].forEach(async (includeTimespan: boolean) => {
-        [true, false].forEach(async (includeObserver: boolean) => {
+      [true, false].forEach((includeTimespan: boolean) => {
+        [true, false].forEach((includeObserver: boolean) => {
           describe(`with timespans=${includeTimespan} and observer=${includeObserver}`, async () => {
             before(async () => {
               const promises: Array<Promise<any>> = [];
@@ -51,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
 
               const makeMonitorChecks = async (monitorId: string, status: 'up' | 'down') => {
                 return makeChecksWithStatus(
-                  getService('legacyEs'),
+                  getService('es'),
                   monitorId,
                   checksPerMonitor,
                   numIps,

@@ -1,29 +1,21 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 import { IAggConfig } from '../agg_config';
-import { SavedObjectNotFound } from '../../../../../../plugins/kibana_utils/common';
+import {
+  SavedFieldNotFound,
+  SavedFieldTypeInvalidForAgg,
+} from '../../../../../../plugins/kibana_utils/common';
 import { BaseParamType } from './base';
 import { propFilter } from '../utils';
 import { KBN_FIELD_TYPES } from '../../../kbn_field_types/types';
-import { isNestedField, IndexPatternField } from '../../../index_patterns/fields';
+import { isNestedField, IndexPatternField } from '../../../data_views/fields';
 
 const filterByType = propFilter('type');
 
@@ -58,13 +50,49 @@ export class FieldParamType extends BaseParamType {
           );
         }
 
-        if (field.scripted) {
+        if (field.type === KBN_FIELD_TYPES.MISSING) {
+          throw new SavedFieldNotFound(
+            i18n.translate(
+              'data.search.aggs.paramTypes.field.notFoundSavedFieldParameterErrorMessage',
+              {
+                defaultMessage:
+                  'The field "{fieldParameter}" associated with this object no longer exists in the index pattern. Please use another field.',
+                values: {
+                  fieldParameter: field.name,
+                },
+              }
+            )
+          );
+        }
+
+        const validField = this.getAvailableFields(aggConfig).find(
+          (f: any) => f.name === field.name
+        );
+
+        if (!validField) {
+          throw new SavedFieldTypeInvalidForAgg(
+            i18n.translate(
+              'data.search.aggs.paramTypes.field.invalidSavedFieldParameterErrorMessage',
+              {
+                defaultMessage:
+                  'Saved field "{fieldParameter}" of index pattern "{indexPatternTitle}" is invalid for use with the "{aggType}" aggregation. Please select a new field.',
+                values: {
+                  fieldParameter: field.name,
+                  aggType: aggConfig?.type?.title,
+                  indexPatternTitle: aggConfig.getIndexPattern().title,
+                },
+              }
+            )
+          );
+        }
+
+        if (validField.scripted) {
           output.params.script = {
-            source: field.script,
-            lang: field.lang,
+            source: validField.script,
+            lang: validField.lang,
           };
         } else {
-          output.params.field = field.name;
+          output.params.field = validField.name;
         }
       };
     }
@@ -80,28 +108,15 @@ export class FieldParamType extends BaseParamType {
       const field = aggConfig.getIndexPattern().fields.getByName(fieldName);
 
       if (!field) {
-        throw new SavedObjectNotFound('index-pattern-field', fieldName);
+        return new IndexPatternField({
+          type: KBN_FIELD_TYPES.MISSING,
+          name: fieldName,
+          searchable: false,
+          aggregatable: false,
+        });
       }
 
-      const validField = this.getAvailableFields(aggConfig).find((f: any) => f.name === fieldName);
-      if (!validField) {
-        throw new Error(
-          i18n.translate(
-            'data.search.aggs.paramTypes.field.invalidSavedFieldParameterErrorMessage',
-            {
-              defaultMessage:
-                'Saved field "{fieldParameter}" of index pattern "{indexPatternTitle}" is invalid for use with the "{aggType}" aggregation. Please select a new field.',
-              values: {
-                fieldParameter: fieldName,
-                aggType: aggConfig?.type?.title,
-                indexPatternTitle: aggConfig.getIndexPattern().title,
-              },
-            }
-          )
-        );
-      }
-
-      return validField;
+      return field;
     };
   }
 

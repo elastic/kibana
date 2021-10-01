@@ -1,23 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { of } from 'rxjs';
 import { first, skip, toArray } from 'rxjs/operators';
+import { TestScheduler } from 'rxjs/testing';
 import { loader, ExpressionLoader } from './loader';
 import { Observable } from 'rxjs';
 import {
@@ -31,6 +22,8 @@ import {
 const { __getLastExecution, __getLastRenderMode } = require('./services');
 
 const element: HTMLElement = null as any;
+
+let testScheduler: TestScheduler;
 
 jest.mock('./services', () => {
   let renderMode: RenderMode | undefined;
@@ -53,6 +46,13 @@ jest.mock('./services', () => {
     help: '',
   };
   service.registerFunction(testFn);
+
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  for (const func of require('../common/test_helpers/expression_functions').functionTestSpecs) {
+    service.registerFunction(func);
+  }
+
+  service.start();
 
   const moduleMock = {
     __execution: undefined,
@@ -93,6 +93,10 @@ describe('execute helper function', () => {
 describe('ExpressionLoader', () => {
   const expressionString = 'demodata';
 
+  beforeEach(() => {
+    testScheduler = new TestScheduler((actual, expected) => expect(actual).toStrictEqual(expected));
+  });
+
   describe('constructor', () => {
     it('accepts expression string', () => {
       const expressionLoader = new ExpressionLoader(element, expressionString, {});
@@ -117,8 +121,46 @@ describe('ExpressionLoader', () => {
 
   it('emits on $data when data is available', async () => {
     const expressionLoader = new ExpressionLoader(element, 'var foo', { variables: { foo: 123 } });
-    const response = await expressionLoader.data$.pipe(first()).toPromise();
-    expect(response).toBe(123);
+    const { result } = await expressionLoader.data$.pipe(first()).toPromise();
+    expect(result).toBe(123);
+  });
+
+  it('ignores partial results by default', async () => {
+    const expressionLoader = new ExpressionLoader(element, 'var foo', {
+      variables: { foo: of(1, 2) },
+    });
+    const { result, partial } = await expressionLoader.data$.pipe(first()).toPromise();
+
+    expect(partial).toBe(false);
+    expect(result).toBe(2);
+  });
+
+  it('emits partial results if enabled', async () => {
+    const expressionLoader = new ExpressionLoader(element, 'var foo', {
+      variables: { foo: of(1, 2) },
+      partial: true,
+      throttle: 0,
+    });
+    const { result, partial } = await expressionLoader.data$.pipe(first()).toPromise();
+
+    expect(partial).toBe(true);
+    expect(result).toBe(1);
+  });
+
+  it('throttles partial results', async () => {
+    testScheduler.run(({ cold, expectObservable }) => {
+      const expressionLoader = new ExpressionLoader(element, 'var foo', {
+        variables: { foo: cold('a 5ms b 5ms c 10ms d', { a: 1, b: 2, c: 3, d: 4 }) },
+        partial: true,
+        throttle: 20,
+      });
+
+      expectObservable(expressionLoader.data$).toBe('a 19ms c 2ms d', {
+        a: expect.objectContaining({ result: 1 }),
+        c: expect.objectContaining({ result: 3 }),
+        d: expect.objectContaining({ result: 4 }),
+      });
+    });
   });
 
   it('emits on loading$ on initial load and on updates', async () => {
@@ -155,7 +197,7 @@ describe('ExpressionLoader', () => {
   });
 
   it('cancels the previous request when the expression is updated', () => {
-    const expressionLoader = new ExpressionLoader(element, 'var foo', {});
+    const expressionLoader = new ExpressionLoader(element, 'sleep 10', {});
     const execution = __getLastExecution();
     jest.spyOn(execution, 'cancel');
 

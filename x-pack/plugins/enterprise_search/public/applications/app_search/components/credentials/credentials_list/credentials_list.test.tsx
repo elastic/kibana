@@ -1,23 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiBasicTable, EuiCopy, EuiEmptyPrompt } from '@elastic/eui';
 
-import { ApiToken } from '../types';
-import { ApiTokenTypes } from '../constants';
-
 import { HiddenText } from '../../../../shared/hidden_text';
-import { Key } from './key';
-import { CredentialsList } from './credentials_list';
+import { ApiTokenTypes } from '../constants';
+import { ApiToken } from '../types';
 
-describe('Credentials', () => {
+import { Key } from './key';
+
+import { CredentialsList } from './';
+
+describe('CredentialsList', () => {
   const apiToken: ApiToken = {
     name: '',
     type: ApiTokenTypes.Private,
@@ -38,10 +42,11 @@ describe('Credentials', () => {
         total_results: 1,
       },
     },
+    isCredentialsDataComplete: true,
   };
   const actions = {
     deleteApiKey: jest.fn(),
-    fetchCredentials: jest.fn(),
+    onPaginate: jest.fn(),
     showCredentialsForm: jest.fn(),
   };
 
@@ -82,15 +87,28 @@ describe('Credentials', () => {
   });
 
   describe('empty state', () => {
-    it('renders an EuiEmptyState when no credentials are available', () => {
+    it('renders an EuiEmptyPrompt when no credentials are available', () => {
       setMockValues({
         ...values,
         apiTokens: [],
       });
 
+      const wrapper = shallow(<CredentialsList />)
+        .find(EuiBasicTable)
+        .dive();
+      expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+    });
+  });
+
+  describe('loading state', () => {
+    it('renders as loading when isCredentialsDataComplete is false', () => {
+      setMockValues({
+        ...values,
+        isCredentialsDataComplete: false,
+      });
+
       const wrapper = shallow(<CredentialsList />);
-      expect(wrapper.exists(EuiEmptyPrompt)).toBe(true);
-      expect(wrapper.exists(EuiBasicTable)).toBe(false);
+      expect(wrapper.find(EuiBasicTable).prop('loading')).toBe(true);
     });
   });
 
@@ -116,24 +134,13 @@ describe('Credentials', () => {
         hidePerPageOptions: true,
       });
     });
-
-    it('will default pagination values if `page` is not available', () => {
-      setMockValues({ ...values, meta: {} });
-      const wrapper = shallow(<CredentialsList />);
-      const { pagination } = wrapper.find(EuiBasicTable).props();
-      expect(pagination).toEqual({
-        pageIndex: 0,
-        pageSize: 0,
-        totalItemCount: 0,
-        hidePerPageOptions: true,
-      });
-    });
   });
 
   describe('columns', () => {
     let columns: any[];
 
     beforeAll(() => {
+      setMockValues(values);
       const wrapper = shallow(<CredentialsList />);
       columns = wrapper.find(EuiBasicTable).props().columns;
     });
@@ -206,7 +213,7 @@ describe('Credentials', () => {
           isHidden: expect.any(Boolean),
           text: (
             <span aria-label="Hidden text">
-              <span aria-hidden={true}>•••••••</span>
+              <span aria-hidden>•••••••</span>
             </span>
           ),
         });
@@ -265,18 +272,16 @@ describe('Credentials', () => {
   });
 
   describe('onChange', () => {
-    it('will handle pagination by calling `fetchCredentials`', () => {
+    it('will handle pagination by calling `onPaginate`', () => {
       const wrapper = shallow(<CredentialsList />);
-      const { onChange } = wrapper.find(EuiBasicTable).props();
-
-      onChange({
+      wrapper.find(EuiBasicTable).simulate('change', {
         page: {
           size: 10,
           index: 2,
         },
       });
 
-      expect(actions.fetchCredentials).toHaveBeenCalledWith(3);
+      expect(actions.onPaginate).toHaveBeenCalledWith(3);
     });
   });
 });

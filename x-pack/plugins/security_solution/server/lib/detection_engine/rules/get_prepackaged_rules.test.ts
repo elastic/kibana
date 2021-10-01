@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getPrepackagedRules } from './get_prepackaged_rules';
@@ -40,8 +41,10 @@ describe('get_existing_prepackaged_rules', () => {
   });
 
   test('should throw an exception with a message having rule_id and name in it', () => {
-    // @ts-expect-error intentionally invalid argument
-    expect(() => getPrepackagedRules([{ name: 'rule name', rule_id: 'id-123' }])).toThrow(
+    expect(() =>
+      // @ts-expect-error intentionally invalid argument
+      getPrepackagedRules([{ name: 'rule name', rule_id: 'id-123' }])
+    ).toThrow(
       'name: "rule name", rule_id: "id-123" within the folder rules/prepackaged_rules is not a valid detection engine rule. Expect the system to not work with pre-packaged rules until this rule is fixed or the file is removed. Error is: Invalid value "undefined" supplied to "description",Invalid value "undefined" supplied to "risk_score",Invalid value "undefined" supplied to "severity",Invalid value "undefined" supplied to "type",Invalid value "undefined" supplied to "version", Full rule contents are:\n{\n  "name": "rule name",\n  "rule_id": "id-123"\n}'
     );
   });

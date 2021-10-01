@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -15,8 +16,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Overview Host', () => {
     describe('With auditbeat', () => {
-      before(() => esArchiver.load('auditbeat/overview'));
-      after(() => esArchiver.unload('auditbeat/overview'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/auditbeat/overview'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/overview'));
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
@@ -36,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
         endgameSecurity: 4,
         filebeatSystemModule: 0,
         winlogbeatSecurity: 0,
-        winlogbeatMWSysmonOperational: null,
+        winlogbeatMWSysmonOperational: 0,
       };
 
       it('Make sure that we get OverviewHost data', async () => {
@@ -46,15 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
-            defaultIndex: [
-              'apm-*-transaction*',
-              'auditbeat-*',
-              'endgame-*',
-              'filebeat-*',
-              'logs-*',
-              'packetbeat-*',
-              'winlogbeat-*',
-            ],
+            defaultIndex: ['auditbeat-*'],
             factoryQueryType: HostsQueries.overview,
             timerange: {
               interval: '12h',
@@ -63,6 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(overviewHost).to.eql(expectedResult);

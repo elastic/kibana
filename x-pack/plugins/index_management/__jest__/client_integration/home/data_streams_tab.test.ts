@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from 'react-dom/test-utils';
@@ -21,6 +22,21 @@ import {
 
 const nonBreakingSpace = ' ';
 
+const urlServiceMock = {
+  locators: {
+    get: () => ({
+      getLocation: async () => ({
+        app: '',
+        path: '',
+        state: {},
+      }),
+      getUrl: async ({ policyName }: { policyName: string }) => `/test/${policyName}`,
+      navigate: async () => {},
+      useUrl: () => '',
+    }),
+  },
+};
+
 describe('Data Streams tab', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: DataStreamsTabTestBed;
@@ -37,7 +53,9 @@ describe('Data Streams tab', () => {
     });
 
     test('displays an empty prompt', async () => {
-      testBed = await setup();
+      testBed = await setup({
+        url: urlServiceMock,
+      });
 
       await act(async () => {
         testBed.actions.goToDataStreamsList();
@@ -53,6 +71,7 @@ describe('Data Streams tab', () => {
     test('when Ingest Manager is disabled, goes to index templates tab when "Get started" link is clicked', async () => {
       testBed = await setup({
         plugins: {},
+        url: urlServiceMock,
       });
 
       await act(async () => {
@@ -71,7 +90,8 @@ describe('Data Streams tab', () => {
 
     test('when Fleet is enabled, links to Fleet', async () => {
       testBed = await setup({
-        plugins: { fleet: { hi: 'ok' } },
+        plugins: { isFleetEnabled: true },
+        url: urlServiceMock,
       });
 
       await act(async () => {
@@ -94,6 +114,7 @@ describe('Data Streams tab', () => {
 
       testBed = await setup({
         plugins: {},
+        url: urlServiceMock,
       });
 
       await act(async () => {
@@ -327,11 +348,8 @@ describe('Data Streams tab', () => {
 
   describe('when there are special characters', () => {
     beforeEach(async () => {
-      const {
-        setLoadIndicesResponse,
-        setLoadDataStreamsResponse,
-        setLoadDataStreamResponse,
-      } = httpRequestsMockHelpers;
+      const { setLoadIndicesResponse, setLoadDataStreamsResponse, setLoadDataStreamResponse } =
+        httpRequestsMockHelpers;
 
       setLoadIndicesResponse([
         createDataStreamBackingIndex('data-stream-index', '%dataStream'),
@@ -344,6 +362,7 @@ describe('Data Streams tab', () => {
 
       testBed = await setup({
         history: createMemoryHistory(),
+        url: urlServiceMock,
       });
       await act(async () => {
         testBed.actions.goToDataStreamsList();
@@ -369,13 +388,8 @@ describe('Data Streams tab', () => {
     });
   });
 
-  describe('url generators', () => {
-    const mockIlmUrlGenerator = {
-      getUrlGenerator: () => ({
-        createUrl: ({ policyName }: { policyName: string }) => `/test/${policyName}`,
-      }),
-    };
-    test('with an ILM url generator and an ILM policy', async () => {
+  describe('url locators', () => {
+    test('with an ILM url locator and an ILM policy', async () => {
       const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
 
       const dataStreamForDetailPanel = createDataStreamPayload({
@@ -387,7 +401,7 @@ describe('Data Streams tab', () => {
 
       testBed = await setup({
         history: createMemoryHistory(),
-        urlGenerators: mockIlmUrlGenerator,
+        url: urlServiceMock,
       });
       await act(async () => {
         testBed.actions.goToDataStreamsList();
@@ -399,7 +413,7 @@ describe('Data Streams tab', () => {
       expect(findDetailPanelIlmPolicyLink().prop('href')).toBe('/test/my_ilm_policy');
     });
 
-    test('with an ILM url generator and no ILM policy', async () => {
+    test('with an ILM url locator and no ILM policy', async () => {
       const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
 
       const dataStreamForDetailPanel = createDataStreamPayload({ name: 'dataStream1' });
@@ -408,7 +422,7 @@ describe('Data Streams tab', () => {
 
       testBed = await setup({
         history: createMemoryHistory(),
-        urlGenerators: mockIlmUrlGenerator,
+        url: urlServiceMock,
       });
       await act(async () => {
         testBed.actions.goToDataStreamsList();
@@ -421,7 +435,7 @@ describe('Data Streams tab', () => {
       expect(findDetailPanelIlmPolicyName().contains('None')).toBeTruthy();
     });
 
-    test('without an ILM url generator and with an ILM policy', async () => {
+    test('without an ILM url locator and with an ILM policy', async () => {
       const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
 
       const dataStreamForDetailPanel = createDataStreamPayload({
@@ -433,7 +447,11 @@ describe('Data Streams tab', () => {
 
       testBed = await setup({
         history: createMemoryHistory(),
-        urlGenerators: { getUrlGenerator: () => {} },
+        url: {
+          locators: {
+            get: () => undefined,
+          },
+        },
       });
       await act(async () => {
         testBed.actions.goToDataStreamsList();
@@ -462,6 +480,7 @@ describe('Data Streams tab', () => {
 
       testBed = await setup({
         history: createMemoryHistory(),
+        url: urlServiceMock,
       });
       await act(async () => {
         testBed.actions.goToDataStreamsList();
@@ -505,6 +524,7 @@ describe('Data Streams tab', () => {
 
       testBed = await setup({
         history: createMemoryHistory(),
+        url: urlServiceMock,
       });
       await act(async () => {
         testBed.actions.goToDataStreamsList();
@@ -541,7 +561,7 @@ describe('Data Streams tab', () => {
       beforeEach(async () => {
         setLoadDataStreamsResponse([dataStreamWithDelete, dataStreamNoDelete]);
 
-        testBed = await setup({ history: createMemoryHistory() });
+        testBed = await setup({ history: createMemoryHistory(), url: urlServiceMock });
         await act(async () => {
           testBed.actions.goToDataStreamsList();
         });

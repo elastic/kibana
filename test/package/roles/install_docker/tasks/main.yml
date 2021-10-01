@@ -1,0 +1,39 @@
+- name: install dependencies
+  become: yes
+  apt:
+    name: '{{ docker_dependencies }}'
+    state: present
+    update_cache: yes
+
+- name: add docker gpg key
+  become: yes
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: fetch ubuntu version
+  shell: lsb_release -cs
+  register: ubuntu_version
+  changed_when: false
+
+- name: add docker repository
+  become: yes
+  apt_repository:
+    repo: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ubuntu_version.stdout }} stable'
+    state: present
+
+- name: update apt packages
+  become: yes
+  apt:
+    update_cache: yes
+
+- name: install docker
+  become: yes
+  apt:
+    name: 'docker-ce'
+    state: present
+
+- name: install docker sdk
+  become: yes
+  pip:
+    name: docker

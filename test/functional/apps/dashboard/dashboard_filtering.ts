@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -39,11 +28,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
 
-  describe('dashboard filtering', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/92522
+  describe.skip('dashboard filtering', function () {
     this.tags('includeFirefox');
 
+    const populateDashboard = async () => {
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.timePicker.setDefaultDataRange();
+      await dashboardAddPanel.addEveryVisualization('"Filter Bytes Test"');
+      await dashboardAddPanel.addEverySavedSearch('"Filter Bytes Test"');
+
+      await dashboardAddPanel.closeAddPanel();
+    };
+
+    const addFilterAndRefresh = async () => {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
+      await filterBar.addFilter('bytes', 'is', '12345678');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
+      // first round of requests sometimes times out, refresh all visualizations to fetch again
+      await queryBar.clickQuerySubmitButton();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
+    };
+
     before(async () => {
-      await esArchiver.load('dashboard/current/kibana');
+      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
@@ -59,22 +70,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('adding a filter that excludes all data', () => {
       before(async () => {
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.timePicker.setDefaultDataRange();
-        await dashboardAddPanel.addEveryVisualization('"Filter Bytes Test"');
-        await dashboardAddPanel.addEverySavedSearch('"Filter Bytes Test"');
+        await populateDashboard();
+        await addFilterAndRefresh();
+      });
 
-        await dashboardAddPanel.closeAddPanel();
-
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
-        await filterBar.addFilter('bytes', 'is', '12345678');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
-        // first round of requests sometimes times out, refresh all visualizations to fetch again
-        await queryBar.clickQuerySubmitButton();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
+      after(async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
       });
 
       it('filters on pie charts', async () => {
@@ -110,7 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('tsvb top n is filtered', async () => {
-        await dashboardExpect.tsvbTopNValuesExist(['0', '0']);
+        await dashboardExpect.tsvbTopNValuesExist(['-', '-']);
       });
 
       it('saved search is filtered', async () => {
@@ -129,6 +130,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('using a pinned filter that excludes all data', () => {
       before(async () => {
+        // Functional tests clear session storage after each suite, so it is important to repopulate unsaved panels
+        await populateDashboard();
+        await addFilterAndRefresh();
+
         await filterBar.toggleFilterPinned('bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
@@ -136,6 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await filterBar.toggleFilterPinned('bytes');
+        await PageObjects.dashboard.gotoDashboardLandingPage();
       });
 
       it('filters on pie charts', async () => {
@@ -167,7 +173,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('tsvb top n is filtered', async () => {
-        await dashboardExpect.tsvbTopNValuesExist(['0', '0']);
+        await dashboardExpect.tsvbTopNValuesExist(['-', '-']);
       });
 
       it('saved search is filtered', async () => {
@@ -186,6 +192,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('disabling a filter unfilters the data on', function () {
       before(async () => {
+        // Functional tests clear session storage after each suite, so it is important to repopulate unsaved panels
+        await populateDashboard();
+        await addFilterAndRefresh();
+
         await filterBar.toggleFilterEnabled('bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();

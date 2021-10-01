@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -25,10 +26,15 @@ export const getScreenshots = async (
   for (let i = 0; i < elementsPositionAndAttributes.length; i++) {
     const endTrace = startTrace('get_screenshots', 'read');
     const item = elementsPositionAndAttributes[i];
-    const base64EncodedData = await browser.screenshot(item.position);
+
+    const data = await browser.screenshot(item.position);
+
+    if (!data?.byteLength) {
+      throw new Error(`Failure in getScreenshots! Screenshot data is void`);
+    }
 
     screenshots.push({
-      base64EncodedData,
+      data,
       title: item.attributes.title,
       description: item.attributes.description,
     });

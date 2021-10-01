@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious Endpoint Security Parent Process",
   "query": "process where event.type in (\"start\", \"process_started\", \"info\") and\n process.name : (\"esensor.exe\", \"elastic-endpoint.exe\") and\n process.parent.executable != null and\n  /* add FPs here */\n not process.parent.executable : (\"C:\\\\Program Files\\\\Elastic\\\\*\", \n                                  \"C:\\\\Windows\\\\System32\\\\services.exe\", \n                                  \"C:\\\\Windows\\\\System32\\\\WerFault*.exe\", \n                                  \"C:\\\\Windows\\\\System32\\\\wermgr.exe\")\n",
   "risk_score": 47,
@@ -39,6 +40,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 4
 }

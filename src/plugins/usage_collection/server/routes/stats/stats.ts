@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -26,9 +15,7 @@ import { first } from 'rxjs/operators';
 import {
   ElasticsearchClient,
   IRouter,
-  ISavedObjectsRepository,
   KibanaRequest,
-  LegacyAPICaller,
   MetricsServiceSetup,
   SavedObjectsClientContract,
   ServiceStatus,
@@ -41,6 +28,12 @@ const STATS_NOT_READY_MESSAGE = i18n.translate('usageCollection.stats.notReadyMe
 });
 
 const SNAPSHOT_REGEX = /-snapshot/i;
+
+interface UsageObject {
+  kibana?: UsageObject;
+  xpack?: UsageObject;
+  [key: string]: unknown | UsageObject;
+}
 
 export function registerStatsRoute({
   router,
@@ -66,17 +59,11 @@ export function registerStatsRoute({
   overallStatus$: Observable<ServiceStatus>;
 }) {
   const getUsage = async (
-    callCluster: LegacyAPICaller,
     esClient: ElasticsearchClient,
-    savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository,
+    savedObjectsClient: SavedObjectsClientContract,
     kibanaRequest: KibanaRequest
-  ): Promise<any> => {
-    const usage = await collectorSet.bulkFetchUsage(
-      callCluster,
-      esClient,
-      savedObjectsClient,
-      kibanaRequest
-    );
+  ): Promise<UsageObject> => {
+    const usage = await collectorSet.bulkFetchUsage(esClient, savedObjectsClient, kibanaRequest);
     return collectorSet.toObject(usage);
   };
 
@@ -110,7 +97,6 @@ export function registerStatsRoute({
 
       let extended;
       if (isExtended) {
-        const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
         const { asCurrentUser } = context.core.elasticsearch.client;
         const savedObjectsClient = context.core.savedObjects.client;
 
@@ -122,8 +108,8 @@ export function registerStatsRoute({
         }
 
         const usagePromise = shouldGetUsage
-          ? getUsage(callCluster, asCurrentUser, savedObjectsClient, req)
-          : Promise.resolve({});
+          ? getUsage(asCurrentUser, savedObjectsClient, req)
+          : Promise.resolve<UsageObject>({});
         const [usage, clusterUuid] = await Promise.all([
           usagePromise,
           getClusterUuid(asCurrentUser),
@@ -157,7 +143,7 @@ export function registerStatsRoute({
             }
 
             return accum;
-          }, {} as any);
+          }, {} as UsageObject);
 
           extended = {
             usage: modifiedUsage,

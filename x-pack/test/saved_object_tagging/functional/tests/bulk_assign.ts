@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -18,12 +19,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       assignFlyout = tagManagementPage.assignFlyout;
-      await esArchiver.load('bulk_assign');
+      await esArchiver.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/bulk_assign'
+      );
       await tagManagementPage.navigateTo();
     });
 
     afterEach(async () => {
-      await esArchiver.unload('bulk_assign');
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/bulk_assign'
+      );
     });
 
     it('can bulk assign tags to objects', async () => {

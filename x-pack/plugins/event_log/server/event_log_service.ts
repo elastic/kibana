@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable } from 'rxjs';
-import { LegacyClusterClient } from 'src/core/server';
+import { IClusterClient, PluginInitializerContext } from 'src/core/server';
 
 import { Plugin } from './plugin';
 import { EsContext } from './es';
 import { IEvent, IEventLogger, IEventLogService, IEventLogConfig } from './types';
 import { EventLogger } from './event_logger';
 import { SavedObjectProvider, SavedObjectProviderRegistry } from './saved_object_provider_registry';
-export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
 type SystemLogger = Plugin['systemLogger'];
@@ -23,6 +24,7 @@ interface EventLogServiceCtorParams {
   kibanaUUID: string;
   systemLogger: SystemLogger;
   savedObjectProviderRegistry: SavedObjectProviderRegistry;
+  kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 }
 
 // note that clusterClient may be null, indicating we can't write to ES
@@ -33,6 +35,7 @@ export class EventLogService implements IEventLogService {
   private registeredProviderActions: Map<string, Set<string>>;
   private savedObjectProviderRegistry: SavedObjectProviderRegistry;
 
+  public readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   public readonly kibanaUUID: string;
 
   constructor({
@@ -41,6 +44,7 @@ export class EventLogService implements IEventLogService {
     kibanaUUID,
     systemLogger,
     savedObjectProviderRegistry,
+    kibanaVersion,
   }: EventLogServiceCtorParams) {
     this.config = config;
     this.esContext = esContext;
@@ -48,6 +52,7 @@ export class EventLogService implements IEventLogService {
     this.systemLogger = systemLogger;
     this.registeredProviderActions = new Map<string, Set<string>>();
     this.savedObjectProviderRegistry = savedObjectProviderRegistry;
+    this.kibanaVersion = kibanaVersion;
   }
 
   public isEnabled(): boolean {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -14,55 +15,45 @@ import { saveTemplate, doesTemplateExist } from './lib';
 
 const bodySchema = templateSchema;
 
-export function registerCreateRoute({ router, license, lib }: RouteDependencies) {
+export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
     { path: addBasePath('/index_templates'), validate: { body: bodySchema } },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
-      const template = req.body as TemplateDeserialized;
-      const {
-        _kbnMeta: { isLegacy },
-      } = template;
-
-      // Check that template with the same name doesn't already exist
-      const templateExists = await doesTemplateExist({
-        name: template.name,
-        callAsCurrentUser,
-        isLegacy,
-      });
-
-      if (templateExists) {
-        return res.conflict({
-          body: new Error(
-            i18n.translate('xpack.idxMgmt.createRoute.duplicateTemplateIdErrorMessage', {
-              defaultMessage: "There is already a template with name '{name}'.",
-              values: {
-                name: template.name,
-              },
-            })
-          ),
-        });
-      }
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const template = request.body as TemplateDeserialized;
 
       try {
-        // Otherwise create new index template
-        const response = await saveTemplate({ template, callAsCurrentUser, isLegacy });
+        const {
+          _kbnMeta: { isLegacy },
+        } = template;
 
-        return res.ok({ body: response });
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          const error = lib.parseEsError(e.response);
-          return res.customError({
-            statusCode: e.statusCode,
-            body: {
-              message: error.message,
-              attributes: error,
-            },
+        // Check that template with the same name doesn't already exist
+        const { body: templateExists } = await doesTemplateExist({
+          name: template.name,
+          client,
+          isLegacy,
+        });
+
+        if (templateExists) {
+          return response.conflict({
+            body: new Error(
+              i18n.translate('xpack.idxMgmt.createRoute.duplicateTemplateIdErrorMessage', {
+                defaultMessage: "There is already a template with name '{name}'.",
+                values: {
+                  name: template.name,
+                },
+              })
+            ),
           });
         }
-        // Case: default
-        return res.internalError({ body: e });
+
+        // Otherwise create new index template
+        const { body: responseBody } = await saveTemplate({ template, client, isLegacy });
+
+        return response.ok({ body: responseBody });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
-    })
+    }
   );
 }

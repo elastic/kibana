@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -151,7 +152,10 @@ export class AnomaliesTableInternal extends Component {
     const result = {
       pageIndex: page && page.index !== undefined ? page.index : tableState.pageIndex,
       pageSize: page && page.size !== undefined ? page.size : tableState.pageSize,
-      sortField: sort && sort.field !== undefined ? sort.field : tableState.sortField,
+      sortField:
+        sort && sort.field !== undefined && typeof sort.field === 'string'
+          ? sort.field
+          : tableState.sortField,
       sortDirection:
         sort && sort.direction !== undefined ? sort.direction : tableState.sortDirection,
     };

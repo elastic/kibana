@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
 import { MockRouter, mockLogger, mockDependencies } from '../../__mocks__';
+
+import { savedObjectsServiceMock } from 'src/core/server/mocks';
 
 jest.mock('../../collectors/lib/telemetry', () => ({
   incrementUICounter: jest.fn(),
@@ -27,8 +29,7 @@ describe('Enterprise Search Telemetry API', () => {
     jest.clearAllMocks();
     mockRouter = new MockRouter({
       method: 'put',
-      path: '/api/enterprise_search/stats',
-      payload: 'body',
+      path: '/internal/enterprise_search/stats',
     });
 
     registerTelemetryRoute({
@@ -39,7 +40,7 @@ describe('Enterprise Search Telemetry API', () => {
     });
   });
 
-  describe('PUT /api/enterprise_search/stats', () => {
+  describe('PUT /internal/enterprise_search/stats', () => {
     it('increments the saved objects counter for App Search', async () => {
       (incrementUICounter as jest.Mock).mockImplementation(jest.fn(() => successResponse));
 
@@ -83,17 +84,17 @@ describe('Enterprise Search Telemetry API', () => {
     it('throws an error when incrementing fails', async () => {
       (incrementUICounter as jest.Mock).mockImplementation(jest.fn(() => Promise.reject('Failed')));
 
-      await mockRouter.callRoute({
-        body: {
-          product: 'enterprise_search',
-          action: 'error',
-          metric: 'error',
-        },
-      });
+      await expect(
+        mockRouter.callRoute({
+          body: {
+            product: 'enterprise_search',
+            action: 'error',
+            metric: 'error',
+          },
+        })
+      ).rejects.toEqual('Failed');
 
       expect(incrementUICounter).toHaveBeenCalled();
-      expect(mockLogger.error).toHaveBeenCalled();
-      expect(mockRouter.response.internalError).toHaveBeenCalled();
     });
 
     it('throws an error if the Saved Objects service is unavailable', async () => {
@@ -103,16 +104,9 @@ describe('Enterprise Search Telemetry API', () => {
         getSavedObjectsService: null,
         log: mockLogger,
       } as any);
-      await mockRouter.callRoute({});
+      await expect(mockRouter.callRoute({})).rejects.toThrow();
 
       expect(incrementUICounter).not.toHaveBeenCalled();
-      expect(mockLogger.error).toHaveBeenCalled();
-      expect(mockRouter.response.internalError).toHaveBeenCalled();
-      expect(loggingSystemMock.collect(mockLogger).error[0][0]).toEqual(
-        expect.stringContaining(
-          'Enterprise Search UI telemetry error: Error: Could not find Saved Objects service'
-        )
-      );
     });
 
     describe('validates', () => {

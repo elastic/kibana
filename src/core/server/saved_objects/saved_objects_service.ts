@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Subject, Observable } from 'rxjs';
@@ -27,12 +16,13 @@ import {
 } from './';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
-import { CoreUsageDataSetup } from '../core_usage_data';
+import { InternalCoreUsageDataSetup } from '../core_usage_data';
 import {
   ElasticsearchClient,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from '../elasticsearch';
+import { InternalDeprecationsServiceSetup } from '../deprecations';
 import { KibanaConfigType } from '../kibana_config';
 import {
   SavedObjectsConfigType,
@@ -49,9 +39,14 @@ import {
 import { Logger } from '../logging';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { SavedObjectsSerializer } from './serialization';
+import { SavedObjectsExporter, ISavedObjectsExporter } from './export';
+import { SavedObjectsImporter, ISavedObjectsImporter } from './import';
 import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
+import { registerCoreObjectTypes } from './object_types';
+import { getSavedObjectsDeprecationsProvider } from './deprecations';
+
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
  * use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
@@ -148,12 +143,7 @@ export interface SavedObjectsServiceSetup {
    * }
    * ```
    */
-  registerType: (type: SavedObjectsType) => void;
-
-  /**
-   * Returns the maximum number of objects allowed for import or export operations.
-   */
-  getImportExportObjectLimit: () => number;
+  registerType: <Attributes = any>(type: SavedObjectsType<Attributes>) => void;
 }
 
 /**
@@ -161,6 +151,8 @@ export interface SavedObjectsServiceSetup {
  */
 export interface InternalSavedObjectsServiceSetup extends SavedObjectsServiceSetup {
   status$: Observable<ServiceStatus<SavedObjectStatusMeta>>;
+  /** Note: this must be called after server.setup to get all plugin SO types */
+  getTypeRegistry: () => ISavedObjectTypeRegistry;
 }
 
 /**
@@ -213,6 +205,14 @@ export interface SavedObjectsServiceStart {
    */
   createSerializer: () => SavedObjectsSerializer;
   /**
+   * Creates an {@link ISavedObjectsExporter | exporter} bound to given client.
+   */
+  createExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
+  /**
+   * Creates an {@link ISavedObjectsImporter | importer} bound to given client.
+   */
+  createImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
+  /**
    * Returns the {@link ISavedObjectTypeRegistry | registry} containing all registered
    * {@link SavedObjectsType | saved object types}
    */
@@ -252,7 +252,8 @@ export interface SavedObjectsRepositoryFactory {
 export interface SavedObjectsSetupDeps {
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
-  coreUsageData: CoreUsageDataSetup;
+  coreUsageData: InternalCoreUsageDataSetup;
+  deprecations: InternalDeprecationsServiceSetup;
 }
 
 interface WrappedClientFactoryWrapper {
@@ -268,7 +269,8 @@ export interface SavedObjectsStartDeps {
 }
 
 export class SavedObjectsService
-  implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart> {
+  implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart>
+{
   private logger: Logger;
 
   private setupDeps?: SavedObjectsSetupDeps;
@@ -288,7 +290,7 @@ export class SavedObjectsService
     this.logger.debug('Setting up SavedObjects service');
 
     this.setupDeps = setupDeps;
-    const { http, elasticsearch, coreUsageData } = setupDeps;
+    const { http, elasticsearch, coreUsageData, deprecations } = setupDeps;
 
     const savedObjectsConfig = await this.coreContext.configService
       .atPath<SavedObjectsConfigType>('savedObjects')
@@ -300,6 +302,20 @@ export class SavedObjectsService
       .toPromise();
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
 
+    const kibanaConfig = await this.coreContext.configService
+      .atPath<KibanaConfigType>('kibana')
+      .pipe(first())
+      .toPromise();
+
+    deprecations.getRegistry('savedObjects').registerDeprecations(
+      getSavedObjectsDeprecationsProvider({
+        kibanaConfig,
+        savedObjectsConfig: this.config,
+        kibanaVersion: this.coreContext.env.packageInfo.version,
+        typeRegistry: this.typeRegistry,
+      })
+    );
+
     coreUsageData.registerType(this.typeRegistry);
 
     registerRoutes({
@@ -308,7 +324,11 @@ export class SavedObjectsService
       logger: this.logger,
       config: this.config,
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
+      kibanaConfig,
+      kibanaVersion: this.coreContext.env.packageInfo.version,
     });
+
+    registerCoreObjectTypes(this.typeRegistry);
 
     return {
       status$: calculateStatus$(
@@ -340,7 +360,7 @@ export class SavedObjectsService
         }
         this.typeRegistry.registerType(type);
       },
-      getImportExportObjectLimit: () => this.config!.maxImportExportSize,
+      getTypeRegistry: () => this.typeRegistry,
     };
   }
 
@@ -384,6 +404,12 @@ export class SavedObjectsService
      */
     const skipMigrations = this.config.migration.skip || !pluginsInitialized;
 
+    /**
+     * Note: Prepares all migrations maps. If a saved object type was registered with property `migrations`
+     * of type function; this function will be called to get the type's SavedObjectMigrationMap.
+     */
+    migrator.prepareMigrations();
+
     if (skipMigrations) {
       this.logger.warn(
         'Skipping Saved Object migrations on startup. Note: Individual documents will still be migrated when read or written.'
@@ -393,20 +419,20 @@ export class SavedObjectsService
         'Waiting until all Elasticsearch nodes are compatible with Kibana before starting saved objects migrations...'
       );
 
-      // TODO: Move to Status Service https://github.com/elastic/kibana/issues/41983
-      this.setupDeps!.elasticsearch.esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
-        if (!isCompatible && message) {
-          this.logger.error(message);
-        }
-      });
-
-      await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
+      // The Elasticsearch service should already ensure that, but let's double check just in case.
+      // Should it be replaced with elasticsearch.status$ API instead?
+      const compatibleNodes = await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
         filter((nodes) => nodes.isCompatible),
         take(1)
       ).toPromise();
 
-      this.logger.info('Starting saved objects migrations');
-      await migrator.runMigrations();
+      // Running migrations only if we got compatible nodes.
+      // It may happen that the observable completes due to Kibana shutting down
+      // and the promise above fulfils as undefined. We shouldn't trigger migrations at that point.
+      if (compatibleNodes) {
+        this.logger.info('Starting saved objects migrations');
+        await migrator.runMigrations();
+      }
     }
 
     const createRepository = (
@@ -418,6 +444,7 @@ export class SavedObjectsService
         this.typeRegistry,
         kibanaConfig.index,
         esClient,
+        this.logger.get('repository'),
         includedHiddenTypes
       );
     };
@@ -451,6 +478,19 @@ export class SavedObjectsService
       createScopedRepository: repositoryFactory.createScopedRepository,
       createInternalRepository: repositoryFactory.createInternalRepository,
       createSerializer: () => new SavedObjectsSerializer(this.typeRegistry),
+      createExporter: (savedObjectsClient) =>
+        new SavedObjectsExporter({
+          savedObjectsClient,
+          typeRegistry: this.typeRegistry,
+          exportSizeLimit: this.config!.maxImportExportSize,
+          logger: this.logger.get('exporter'),
+        }),
+      createImporter: (savedObjectsClient) =>
+        new SavedObjectsImporter({
+          savedObjectsClient,
+          typeRegistry: this.typeRegistry,
+          importSizeLimit: this.config!.maxImportExportSize,
+        }),
       getTypeRegistry: () => this.typeRegistry,
     };
   }
@@ -459,7 +499,7 @@ export class SavedObjectsService
 
   private createMigrator(
     kibanaConfig: KibanaConfigType,
-    savedObjectsConfig: SavedObjectsMigrationConfigType,
+    soMigrationsConfig: SavedObjectsMigrationConfigType,
     client: ElasticsearchClient,
     migrationsRetryDelay?: number
   ): IKibanaMigrator {
@@ -467,7 +507,7 @@ export class SavedObjectsService
       typeRegistry: this.typeRegistry,
       logger: this.logger,
       kibanaVersion: this.coreContext.env.packageInfo.version,
-      savedObjectsConfig,
+      soMigrationsConfig,
       kibanaConfig,
       client,
       migrationsRetryDelay,

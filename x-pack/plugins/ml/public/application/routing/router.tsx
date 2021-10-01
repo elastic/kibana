@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, FC } from 'react';
@@ -17,6 +18,7 @@ import { MlContext, MlContextValue } from '../contexts/ml';
 import { UrlStateProvider } from '../util/url_state';
 
 import * as routes from './routes';
+import { MlPageWrapper } from './ml_page_wrapper';
 
 // custom RouteProps making location non-optional
 interface MlRouteProps extends RouteProps {
@@ -96,7 +98,9 @@ const MlRoutes: FC<{
               window.setTimeout(() => {
                 pageDeps.setBreadcrumbs(route.breadcrumbs);
               });
-              return route.render(props, pageDeps);
+              return (
+                <MlPageWrapper path={route.path}>{route.render(props, pageDeps)}</MlPageWrapper>
+              );
             }}
           />
         );

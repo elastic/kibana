@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
+import React from 'react';
 import { EuiFieldText, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useDebouncedValue } from '../../../../shared_components';
 
 export const LabelInput = ({
   value,
@@ -26,20 +27,13 @@ export const LabelInput = ({
   dataTestSubj?: string;
   compressed?: boolean;
 }) => {
-  const [inputValue, setInputValue] = useState(value);
-
-  useDebounce(() => onChange(inputValue), 256, [inputValue]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = String(e.target.value);
-    setInputValue(val);
-  };
+  const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange });
 
   return (
     <EuiFieldText
       data-test-subj={dataTestSubj || 'lens-labelInput'}
       value={inputValue}
-      onChange={handleInputChange}
+      onChange={(e) => handleInputChange(e.target.value)}
       fullWidth
       placeholder={placeholder || ''}
       inputRef={(node) => {

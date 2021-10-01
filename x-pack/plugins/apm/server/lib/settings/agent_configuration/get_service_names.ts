@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ProcessorEvent } from '../../../../common/processor_event';
@@ -14,15 +15,17 @@ import { getProcessorEventForAggregatedTransactions } from '../../helpers/aggreg
 export type AgentConfigurationServicesAPIResponse = PromiseReturnType<
   typeof getServiceNames
 >;
+
 export async function getServiceNames({
   setup,
   searchAggregatedTransactions,
+  size,
 }: {
   setup: Setup;
   searchAggregatedTransactions: boolean;
+  size: number;
 }) {
-  const { apmEventClient, config } = setup;
-  const maxServiceSelection = config['xpack.apm.maxServiceSelection'];
+  const { apmEventClient } = setup;
 
   const params = {
     apm: {
@@ -41,15 +44,18 @@ export async function getServiceNames({
         services: {
           terms: {
             field: SERVICE_NAME,
-            size: maxServiceSelection,
             min_doc_count: 0,
+            size,
           },
         },
       },
     },
   };
 
-  const resp = await apmEventClient.search(params);
+  const resp = await apmEventClient.search(
+    'get_service_names_for_agent_config',
+    params
+  );
   const serviceNames =
     resp.aggregations?.services.buckets
       .map((bucket) => bucket.key as string)

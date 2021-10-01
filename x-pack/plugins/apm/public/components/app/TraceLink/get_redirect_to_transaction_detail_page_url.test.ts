@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getRedirectToTransactionDetailPageUrl } from './get_redirect_to_transaction_detail_page_url';
 import { parse } from 'url';
 
 describe('getRedirectToTransactionDetailPageUrl', () => {
-  const transaction = ({
+  const transaction = {
     '@timestamp': '2020-01-01T00:01:00.000Z',
     service: { name: 'opbeans-node' },
     trace: { id: 'trace_id' },
@@ -18,7 +19,7 @@ describe('getRedirectToTransactionDetailPageUrl', () => {
       type: 'request',
       duration: { us: 5000 },
     },
-  } as unknown) as any;
+  } as unknown as any;
 
   const url = getRedirectToTransactionDetailPageUrl({ transaction });
 

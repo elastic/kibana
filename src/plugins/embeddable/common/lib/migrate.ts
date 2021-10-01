@@ -1,47 +1,48 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import { CommonEmbeddableStartContract } from '../types';
 import { baseEmbeddableMigrations } from './migrate_base_input';
-import { SerializableState } from '../../../kibana_utils/common/persistable_state';
+
+export type MigrateFunction = (state: SerializableRecord, version: string) => SerializableRecord;
 
 export const getMigrateFunction = (embeddables: CommonEmbeddableStartContract) => {
-  return (state: SerializableState, version: string) => {
-    const enhancements = (state.enhancements as SerializableState) || {};
+  const migrateFn: MigrateFunction = (state: SerializableRecord, version: string) => {
+    const enhancements = (state.enhancements as SerializableRecord) || {};
     const factory = embeddables.getEmbeddableFactory(state.type as string);
 
     let updatedInput = baseEmbeddableMigrations[version]
       ? baseEmbeddableMigrations[version](state)
       : state;
 
-    if (factory && factory.migrations[version]) {
+    if (factory?.migrations[version]) {
       updatedInput = factory.migrations[version](updatedInput);
+    }
+
+    if (factory?.isContainerType) {
+      updatedInput.panels = ((state.panels as SerializableRecord[]) || []).map((panel) => {
+        return migrateFn(panel, version);
+      });
     }
 
     updatedInput.enhancements = {};
     Object.keys(enhancements).forEach((key) => {
       if (!enhancements[key]) return;
-      (updatedInput.enhancements! as Record<string, any>)[key] = embeddables
-        .getEnhancement(key)
-        .migrations[version](enhancements[key] as SerializableState);
+      const enhancementDefinition = embeddables.getEnhancement(key);
+      const migratedEnhancement = enhancementDefinition?.migrations?.[version]
+        ? enhancementDefinition.migrations[version](enhancements[key] as SerializableRecord)
+        : enhancements[key];
+      (updatedInput.enhancements! as Record<string, {}>)[key] = migratedEnhancement;
     });
 
     return updatedInput;
   };
+
+  return migrateFn;
 };

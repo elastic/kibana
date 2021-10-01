@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -13,6 +14,7 @@ import {
   InitializeSavedObjectResponse,
 } from '../../common/types/saved_objects';
 import { checksFactory } from './checks';
+import type { JobStatus } from './checks';
 import { getSavedObjectClientError } from './util';
 
 import { Datafeed } from '../../common/types/anomaly_detection_jobs';
@@ -44,6 +46,12 @@ export function syncSavedObjectsFactory(
     const tasks: Array<() => Promise<void>> = [];
 
     const status = await checkStatus();
+
+    const adJobsById = status.jobs['anomaly-detector'].reduce((acc, j) => {
+      acc[j.jobId] = j;
+      return acc;
+    }, {} as Record<string, JobStatus>);
+
     for (const job of status.jobs['anomaly-detector']) {
       if (job.checks.savedObjectExits === false) {
         if (simulate === true) {
@@ -140,8 +148,16 @@ export function syncSavedObjectsFactory(
     }
 
     for (const job of status.savedObjects['anomaly-detector']) {
-      if (job.checks.datafeedExists === true && job.datafeedId === null) {
+      if (
+        (job.checks.datafeedExists === true && job.datafeedId === null) ||
+        (job.checks.datafeedExists === false &&
+          job.datafeedId === null &&
+          job.checks.datafeedExists === false &&
+          adJobsById[job.jobId] &&
+          adJobsById[job.jobId].datafeedId !== job.datafeedId)
+      ) {
         // add datafeed id for jobs where the datafeed exists but the id is missing from the saved object
+        // or if the datafeed id in the saved object is not the same as the one attached to the job in es
         if (simulate === true) {
           results.datafeedsAdded[job.jobId] = { success: true };
         } else {

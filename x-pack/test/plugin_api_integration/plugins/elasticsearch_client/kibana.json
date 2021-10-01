@@ -1,5 +1,6 @@
 {
-  "id": "elasticsearch_client_xpack",
+  "id": "elasticsearchClientXpack",
+  "owner": { "name": "Core", "githubTeam": "kibana-core" },
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "server": true,

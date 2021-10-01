@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '.././index';
 import { ActionTypeModel } from '../../../../types';
@@ -27,7 +29,7 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('resilient connector validation', () => {
-  test('connector validation succeeds when connector config is valid', () => {
+  test('connector validation succeeds when connector config is valid', async () => {
     const actionConnector = {
       secrets: {
         apiKeyId: 'email',
@@ -43,18 +45,24 @@ describe('resilient connector validation', () => {
       },
     } as ResilientActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiUrl: [],
-        apiKeyId: [],
-        apiKeySecret: [],
-        orgId: [],
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
+      config: {
+        errors: {
+          apiUrl: [],
+          orgId: [],
+        },
+      },
+      secrets: {
+        errors: {
+          apiKeySecret: [],
+          apiKeyId: [],
+        },
       },
     });
   });
 
-  test('connector validation fails when connector config is not valid', () => {
-    const actionConnector = ({
+  test('connector validation fails when connector config is not valid', async () => {
+    const actionConnector = {
       secrets: {
         apiKeyId: 'user',
       },
@@ -62,38 +70,44 @@ describe('resilient connector validation', () => {
       actionTypeId: '.jira',
       name: 'jira',
       config: {},
-    } as unknown) as ResilientActionConnector;
+    } as unknown as ResilientActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiUrl: ['URL is required.'],
-        apiKeyId: [],
-        apiKeySecret: ['Secret is required'],
-        orgId: ['Organization ID is required'],
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
+      config: {
+        errors: {
+          apiUrl: ['URL is required.'],
+          orgId: ['Organization ID is required'],
+        },
+      },
+      secrets: {
+        errors: {
+          apiKeySecret: ['Secret is required'],
+          apiKeyId: [],
+        },
       },
     });
   });
 });
 
 describe('resilient action params validation', () => {
-  test('action params validation succeeds when action params is valid', () => {
+  test('action params validation succeeds when action params is valid', async () => {
     const actionParams = {
       subActionParams: { incident: { name: 'some title {{test}}' }, comments: [] },
     };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { name: [] },
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: { 'subActionParams.incident.name': [] },
     });
   });
 
-  test('params validation fails when body is not valid', () => {
+  test('params validation fails when body is not valid', async () => {
     const actionParams = {
       subActionParams: { incident: { name: '' }, comments: [] },
     };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        name: ['Name is required.'],
+        'subActionParams.incident.name': ['Name is required.'],
       },
     });
   });

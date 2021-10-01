@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
@@ -32,6 +33,7 @@ export const formattedAlertsSearchStrategyResponse: MatrixHistogramStrategyRespo
         {
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -41,6 +43,7 @@ export const formattedAlertsSearchStrategyResponse: MatrixHistogramStrategyRespo
           ],
           allowNoIndices: true,
           ignoreUnavailable: true,
+          track_total_hits: true,
           body: {
             aggregations: {
               alertsGroup: {
@@ -112,7 +115,6 @@ export const formattedAlertsSearchStrategyResponse: MatrixHistogramStrategyRespo
               },
             },
             size: 0,
-            track_total_hits: true,
           },
         },
         null,
@@ -126,6 +128,7 @@ export const formattedAlertsSearchStrategyResponse: MatrixHistogramStrategyRespo
 
 export const expectedDsl = {
   allowNoIndices: true,
+  track_total_hits: false,
   body: {
     aggregations: {
       host_count: { cardinality: { field: 'host.name' } },
@@ -160,11 +163,11 @@ export const expectedDsl = {
       },
     },
     size: 0,
-    track_total_hits: false,
   },
   ignoreUnavailable: true,
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -198,6 +201,7 @@ export const formattedAnomaliesSearchStrategyResponse: MatrixHistogramStrategyRe
         {
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -207,6 +211,7 @@ export const formattedAnomaliesSearchStrategyResponse: MatrixHistogramStrategyRe
           ],
           allowNoIndices: true,
           ignoreUnavailable: true,
+          track_total_hits: true,
           body: {
             aggs: {
               anomalyActionGroup: {
@@ -257,7 +262,6 @@ export const formattedAnomaliesSearchStrategyResponse: MatrixHistogramStrategyRe
               },
             },
             size: 0,
-            track_total_hits: true,
           },
         },
         null,
@@ -380,6 +384,7 @@ export const formattedAuthenticationsSearchStrategyResponse: MatrixHistogramStra
         {
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -389,6 +394,7 @@ export const formattedAuthenticationsSearchStrategyResponse: MatrixHistogramStra
           ],
           allowNoIndices: true,
           ignoreUnavailable: true,
+          track_total_hits: true,
           body: {
             aggregations: {
               eventActionGroup: {
@@ -428,7 +434,6 @@ export const formattedAuthenticationsSearchStrategyResponse: MatrixHistogramStra
               },
             },
             size: 0,
-            track_total_hits: true,
           },
         },
         null,
@@ -946,6 +951,7 @@ export const formattedEventsSearchStrategyResponse: MatrixHistogramStrategyRespo
         {
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -955,6 +961,7 @@ export const formattedEventsSearchStrategyResponse: MatrixHistogramStrategyRespo
           ],
           allowNoIndices: true,
           ignoreUnavailable: true,
+          track_total_hits: true,
           body: {
             aggregations: {
               eventActionGroup: {
@@ -993,7 +1000,6 @@ export const formattedEventsSearchStrategyResponse: MatrixHistogramStrategyRespo
               },
             },
             size: 0,
-            track_total_hits: true,
           },
         },
         null,
@@ -1924,6 +1930,7 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
           allowNoIndices: true,
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -1934,17 +1941,15 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
           ignoreUnavailable: true,
           body: {
             aggregations: {
-              dns_count: {
-                cardinality: {
-                  field: 'dns.question.registered_domain',
-                },
-              },
+              dns_count: { cardinality: { field: 'dns.question.registered_domain' } },
               dns_name_query_count: {
                 terms: {
                   field: 'dns.question.registered_domain',
-                  size: 1000000,
+                  order: { unique_domains: 'desc' },
+                  size: 10,
                 },
                 aggs: {
+                  unique_domains: { cardinality: { field: 'dns.question.name' } },
                   dns_question_name: {
                     date_histogram: {
                       field: '@timestamp',
@@ -1953,47 +1958,13 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
                       extended_bounds: { min: 1599579675528, max: 1599666075529 },
                     },
                   },
-                  bucket_sort: {
-                    bucket_sort: {
-                      sort: [
-                        {
-                          unique_domains: {
-                            order: 'desc',
-                          },
-                        },
-                        {
-                          _key: {
-                            order: 'asc',
-                          },
-                        },
-                      ],
-                      from: 0,
-                      size: 10,
-                    },
-                  },
-                  unique_domains: {
-                    cardinality: {
-                      field: 'dns.question.name',
-                    },
-                  },
                 },
               },
             },
             query: {
               bool: {
                 filter: [
-                  {
-                    bool: {
-                      must: [],
-                      filter: [
-                        {
-                          match_all: {},
-                        },
-                      ],
-                      should: [],
-                      must_not: [],
-                    },
-                  },
+                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
                   {
                     range: {
                       '@timestamp': {
@@ -2004,15 +1975,7 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
                     },
                   },
                 ],
-                must_not: [
-                  {
-                    term: {
-                      'dns.question.type': {
-                        value: 'PTR',
-                      },
-                    },
-                  },
-                ],
+                must_not: [{ term: { 'dns.question.type': { value: 'PTR' } } }],
               },
             },
           },

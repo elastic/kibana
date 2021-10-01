@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 
 import type { PutTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/transforms';
@@ -10,6 +12,9 @@ import { TransformState, TRANSFORM_STATE } from '../../../../plugins/transform/c
 import type { TransformStats } from '../../../../plugins/transform/common/types/transform_stats';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { GetTransformsResponseSchema } from '../../../../plugins/transform/common/api_schemas/transforms';
+import { PostTransformsUpdateRequestSchema } from '../../../../plugins/transform/common/api_schemas/update_transforms';
+import { TransformPivotConfig } from '../../../../plugins/transform/common/types/transform';
 
 export async function asyncForEach(array: any[], callback: Function) {
   for (let index = 0; index < array.length; index++) {
@@ -18,20 +23,21 @@ export async function asyncForEach(array: any[], callback: Function) {
 }
 
 export function TransformAPIProvider({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const log = getService('log');
   const retry = getService('retry');
   const esSupertest = getService('esSupertest');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   return {
     async createIndices(indices: string) {
       log.debug(`Creating indices: '${indices}'...`);
-      if ((await es.indices.exists({ index: indices, allowNoIndices: false })) === true) {
+      if ((await es.indices.exists({ index: indices, allow_no_indices: false })).body === true) {
         log.debug(`Indices '${indices}' already exist. Nothing to create.`);
         return;
       }
 
-      const createResponse = await es.indices.create({ index: indices });
+      const createResponse = (await es.indices.create({ index: indices })).body;
       expect(createResponse)
         .to.have.property('acknowledged')
         .eql(true, 'Response for create request indices should be acknowledged.');
@@ -41,14 +47,16 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
 
     async deleteIndices(indices: string, skipWaitForIndicesNotToExist?: boolean) {
       log.debug(`Deleting indices: '${indices}'...`);
-      if ((await es.indices.exists({ index: indices, allowNoIndices: false })) === false) {
+      if ((await es.indices.exists({ index: indices, allow_no_indices: false })).body === false) {
         log.debug(`Indices '${indices}' don't exist. Nothing to delete.`);
         return;
       }
 
-      const deleteResponse = await es.indices.delete({
-        index: indices,
-      });
+      const deleteResponse = (
+        await es.indices.delete({
+          index: indices,
+        })
+      ).body;
       expect(deleteResponse)
         .to.have.property('acknowledged')
         .eql(true, 'Response for delete request should be acknowledged');
@@ -64,7 +72,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
 
     async waitForIndicesToExist(indices: string, errorMsg?: string) {
       await retry.tryForTime(30 * 1000, async () => {
-        if ((await es.indices.exists({ index: indices, allowNoIndices: false })) === true) {
+        if ((await es.indices.exists({ index: indices, allow_no_indices: false })).body === true) {
           return true;
         } else {
           throw new Error(errorMsg || `indices '${indices}' should exist`);
@@ -74,7 +82,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
 
     async waitForIndicesNotToExist(indices: string, errorMsg?: string) {
       await retry.tryForTime(30 * 1000, async () => {
-        if ((await es.indices.exists({ index: indices, allowNoIndices: false })) === false) {
+        if ((await es.indices.exists({ index: indices, allow_no_indices: false })).body === false) {
           return true;
         } else {
           throw new Error(errorMsg || `indices '${indices}' should not exist`);
@@ -102,7 +110,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
 
       // Delete all transform related notifications to clear messages tabs
       // in the transforms list expanded rows.
-      await this.deleteIndices('.transform-notifications-*');
+      await esDeleteAllIndices('.transform-notifications-*');
     },
 
     async getTransformStats(transformId: string): Promise<TransformStats> {
@@ -169,8 +177,26 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
+    async getTransformList(size: number = 10): Promise<GetTransformsResponseSchema> {
+      return (await esSupertest
+        .get(`/_transform`)
+        .expect(200)
+        .then((response) => response.body)) as GetTransformsResponseSchema;
+    },
+
     async getTransform(transformId: string, expectedCode = 200) {
       return await esSupertest.get(`/_transform/${transformId}`).expect(expectedCode);
+    },
+
+    async updateTransform(
+      transformId: string,
+      updates: Partial<PostTransformsUpdateRequestSchema>
+    ): Promise<TransformPivotConfig> {
+      return await esSupertest
+        .post(`/_transform/${transformId}/_update`)
+        .send(updates)
+        .expect(200)
+        .then((response: { body: TransformPivotConfig }) => response.body);
     },
 
     async createTransform(transformId: string, transformConfig: PutTransformsRequestSchema) {

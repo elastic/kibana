@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { get } from 'lodash';
 import {
   EuiPage,
   EuiPageContent,
@@ -33,6 +33,8 @@ export const Node = ({
   scope,
   ...props
 }) => {
+  /*
+  // This isn't doing anything due to a possible bug.  https://github.com/elastic/kibana/issues/106309
   if (alerts) {
     for (const alertTypeId of Object.keys(alerts)) {
       const alertInstance = alerts[alertTypeId];
@@ -47,7 +49,7 @@ export const Node = ({
       }
     }
   }
-
+ */
   const metricsToShow = [
     metrics.node_jvm_mem,
     metrics.node_mem,

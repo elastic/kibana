@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FleetStart } from '../../../../../fleet/public';
@@ -41,7 +42,7 @@ export interface DepsStartMock {
  * Returns a mock of our app's depsStart (plugin start dependencies)
  */
 export const depsStartMock: () => DepsStartMock = () => {
-  const dataMock: DataMock = (dataPluginMock.createStartContract() as unknown) as DataMock;
+  const dataMock: DataMock = dataPluginMock.createStartContract() as unknown as DataMock;
   dataMock.indexPatterns.getFieldsForWildcard = jest.fn();
   dataMock.query.filterManager.setFilters = jest.fn();
   dataMock.query.filterManager.getUpdates$ = jest.fn(() => {

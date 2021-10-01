@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { get } from 'lodash/fp';
 import { set } from '@elastic/safer-lodash-set/fp';
 
@@ -12,7 +14,7 @@ import {
   HostsUncommonProcessesEdges,
   HostsUncommonProcessHit,
 } from '../../../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
-import { toStringArray } from '../../../../helpers/to_array';
+import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import { HostHits } from '../../../../../../common/search_strategy';
 
 export const uncommonProcessesFields = [
@@ -80,7 +82,11 @@ export const formatUncommonProcessesData = (
         fieldPath = `node.hosts.0.name`;
         fieldValue = get(fieldPath, mergedResult);
       }
-      return set(fieldPath, toStringArray(fieldValue), mergedResult);
+      return set(
+        fieldPath,
+        toObjectArrayOfStrings(fieldValue).map(({ str }) => str),
+        mergedResult
+      );
     },
     {
       node: {

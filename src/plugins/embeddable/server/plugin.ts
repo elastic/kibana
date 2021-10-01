@@ -1,22 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
 import { identity } from 'lodash';
 import {
@@ -32,12 +22,18 @@ import {
   getMigrateFunction,
   getTelemetryFunction,
 } from '../common/lib';
-import { PersistableStateService, SerializableState } from '../../kibana_utils/common';
-import { EmbeddableStateWithType } from '../common/types';
+import {
+  PersistableStateService,
+  PersistableStateMigrateFn,
+  MigrateFunctionsObject,
+} from '../../kibana_utils/common';
+import { EmbeddableStateWithType, CommonEmbeddableStartContract } from '../common/types';
+import { getAllMigrations } from '../common/lib/get_all_migrations';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
+  getAllMigrations: () => MigrateFunctionsObject;
 }
 
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType>;
@@ -45,25 +41,35 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType>;
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private readonly enhancements: EnhancementsRegistry = new Map();
+  private migrateFn: PersistableStateMigrateFn | undefined;
 
   public setup(core: CoreSetup) {
-    const commonContract = {
-      getEmbeddableFactory: this.getEmbeddableFactory,
+    const commonContract: CommonEmbeddableStartContract = {
+      getEmbeddableFactory: this
+        .getEmbeddableFactory as unknown as CommonEmbeddableStartContract['getEmbeddableFactory'],
       getEnhancement: this.getEnhancement,
     };
+
+    this.migrateFn = getMigrateFunction(commonContract);
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
       registerEnhancement: this.registerEnhancement,
       telemetry: getTelemetryFunction(commonContract),
       extract: getExtractFunction(commonContract),
       inject: getInjectFunction(commonContract),
-      migrate: getMigrateFunction(commonContract),
+      getAllMigrations: () =>
+        getAllMigrations(
+          Array.from(this.embeddableFactories.values()),
+          Array.from(this.enhancements.values()),
+          this.migrateFn!
+        ),
     };
   }
 
   public start(core: CoreStart) {
-    const commonContract = {
-      getEmbeddableFactory: this.getEmbeddableFactory,
+    const commonContract: CommonEmbeddableStartContract = {
+      getEmbeddableFactory: this
+        .getEmbeddableFactory as unknown as CommonEmbeddableStartContract['getEmbeddableFactory'],
       getEnhancement: this.getEnhancement,
     };
 
@@ -71,7 +77,12 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       telemetry: getTelemetryFunction(commonContract),
       extract: getExtractFunction(commonContract),
       inject: getInjectFunction(commonContract),
-      migrate: getMigrateFunction(commonContract),
+      getAllMigrations: () =>
+        getAllMigrations(
+          Array.from(this.embeddableFactories.values()),
+          Array.from(this.enhancements.values()),
+          this.migrateFn!
+        ),
     };
   }
 
@@ -87,7 +98,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       inject: enhancement.inject || identity,
       extract:
         enhancement.extract ||
-        ((state: SerializableState) => {
+        ((state: SerializableRecord) => {
           return { state, references: [] };
         }),
       migrations: enhancement.migrations || {},
@@ -98,9 +109,9 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return (
       this.enhancements.get(id) || {
         id: 'unknown',
-        telemetry: () => ({}),
+        telemetry: (state, stats) => stats,
         inject: identity,
-        extract: (state: SerializableState) => {
+        extract: (state: SerializableRecord) => {
           return { state, references: [] };
         },
         migrations: {},
@@ -127,7 +138,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return (
       this.embeddableFactories.get(embeddableFactoryId) || {
         id: 'unknown',
-        telemetry: () => ({}),
+        telemetry: (state, stats) => stats,
         inject: (state: EmbeddableStateWithType) => state,
         extract: (state: EmbeddableStateWithType) => {
           return { state, references: [] };

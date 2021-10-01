@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -26,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const log = getService('log');
   const security = getService('security');
-  const pieChart = getService('pieChart');
+  const elasticChart = getService('elasticChart');
   const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
@@ -100,26 +89,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const toTime = `${todayYearMonthDay} @ 23:59:59.999`;
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(18);
+        expect(panelCount).to.be(17);
       });
 
       it('should render visualizations', async () => {
         await PageObjects.home.launchSampleDashboard('flights');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
-        log.debug('Checking pie charts rendered');
-        await pieChart.expectPieSliceCount(4);
-        log.debug('Checking area, bar and heatmap charts rendered');
-        await dashboardExpect.seriesElementCount(15);
+        log.debug('Checking charts rendered');
+        await elasticChart.waitForRenderComplete('lnsVisualizationContainer');
         log.debug('Checking saved searches rendered');
-        await dashboardExpect.savedSearchRowCount(50);
+        await dashboardExpect.savedSearchRowCount(10);
         log.debug('Checking input controls rendered');
         await dashboardExpect.inputControlItemCount(3);
         log.debug('Checking tag cloud rendered');
         await dashboardExpect.tagCloudWithValuesFound(['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail']);
         log.debug('Checking vega chart rendered');
-        const tsvb = await find.existsByCssSelector('.vgaVis__view');
-        expect(tsvb).to.be(true);
+        expect(await find.existsByCssSelector('.vgaVis__view')).to.be(true);
       });
 
       it('should launch sample logs data set dashboard', async () => {
@@ -131,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const toTime = `${todayYearMonthDay} @ 23:59:59.999`;
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(11);
+        expect(panelCount).to.be(13);
       });
 
       it('should launch sample ecommerce data set dashboard', async () => {
@@ -143,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const toTime = `${todayYearMonthDay} @ 23:59:59.999`;
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(12);
+        expect(panelCount).to.be(15);
       });
     });
 

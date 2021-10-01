@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaContext } from 'src/plugins/data/common';
@@ -15,6 +16,7 @@ import {
   Style,
   Range,
 } from 'src/plugins/expressions';
+import { Datasource, Model, Transform, View } from '../public/expression_types';
 import { AssetType } from './assets';
 import { CanvasWorkpad } from './canvas';
 
@@ -50,18 +52,22 @@ type ExpressionType =
   | KibanaContext
   | PointSeries
   | Style
-  | Range;
+  | Range
+  | View
+  | Model
+  | Datasource
+  | Transform;
 
-interface ExpressionRenderable {
+export interface ExpressionRenderable {
   state: 'ready' | 'pending';
   value: Render<ExpressionType> | null;
   error: null;
 }
 
 export interface ExpressionContext {
-  state: 'ready' | 'pending';
+  state: 'ready' | 'pending' | 'error';
   value: ExpressionType;
-  error: null;
+  error: null | string;
 }
 
 export interface ResolvedArgType {
@@ -93,7 +99,7 @@ interface PersistentState {
 
 export interface State {
   app: StoreAppState;
-  assets: { [assetKey: string]: AssetType | undefined };
+  assets: { [assetKey: string]: AssetType };
   transient: TransientState;
   persistent: PersistentState;
 }

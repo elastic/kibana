@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "InstallUtil Process Making Network Connections",
   "query": "/* the benefit of doing this as an eql sequence vs kql is this will limit to alerting only on the first network connection */\n\nsequence by process.entity_id\n  [process where event.type in (\"start\", \"process_started\") and process.name : \"installutil.exe\"]\n  [network where process.name : \"installutil.exe\" and network.direction == \"outgoing\"]\n",
   "risk_score": 21,
@@ -32,13 +33,20 @@
       },
       "technique": [
         {
-          "id": "T1118",
-          "name": "InstallUtil",
-          "reference": "https://attack.mitre.org/techniques/T1118/"
+          "id": "T1218",
+          "name": "Signed Binary Proxy Execution",
+          "reference": "https://attack.mitre.org/techniques/T1218/",
+          "subtechnique": [
+            {
+              "id": "T1218.004",
+              "name": "InstallUtil",
+              "reference": "https://attack.mitre.org/techniques/T1218/004/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 3
 }

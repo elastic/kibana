@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { MouseEventHandler, FC, useContext, useState } from 'react';
@@ -9,13 +10,15 @@ import React, { MouseEventHandler, FC, useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPageContent,
   EuiPopover,
+  EuiSpacer,
   EuiTitle,
   EuiInMemoryTable,
   EuiSearchBarProps,
@@ -61,18 +64,16 @@ function getItemIdToExpandedRowMap(
   }, {} as ItemIdToExpandedRowMap);
 }
 
-interface Props {
-  errorMessage: any;
-  isInitialized: boolean;
+interface TransformListProps {
   onCreateTransform: MouseEventHandler<HTMLButtonElement>;
+  transformNodes: number;
   transforms: TransformListRow[];
   transformsLoading: boolean;
 }
 
-export const TransformList: FC<Props> = ({
-  errorMessage,
-  isInitialized,
+export const TransformList: FC<TransformListProps> = ({
   onCreateTransform,
+  transformNodes,
   transforms,
   transformsLoading,
 }) => {
@@ -85,7 +86,7 @@ export const TransformList: FC<Props> = ({
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<TransformId[]>([]);
   const [transformSelection, setTransformSelection] = useState<TransformListRow[]>([]);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
-  const bulkStartAction = useStartAction(false);
+  const bulkStartAction = useStartAction(false, transformNodes);
   const bulkDeleteAction = useDeleteAction(false);
 
   const [searchError, setSearchError] = useState<any>(undefined);
@@ -105,6 +106,7 @@ export const TransformList: FC<Props> = ({
   const { columns, modals: singleActionModals } = useColumns(
     expandedRowItemIds,
     setExpandedRowItemIds,
+    transformNodes,
     transformSelection
   );
 
@@ -130,49 +132,42 @@ export const TransformList: FC<Props> = ({
     }
   };
 
-  // Before the transforms have been loaded for the first time, display the loading indicator only.
-  // Otherwise a user would see 'No transforms found' during the initial loading.
-  if (!isInitialized) {
+  if (transforms.length === 0 && transformNodes === 0) {
     return null;
-  }
-
-  if (typeof errorMessage !== 'undefined') {
-    return (
-      <EuiCallOut
-        title={i18n.translate('xpack.transform.list.errorPromptTitle', {
-          defaultMessage: 'An error occurred getting the transform list.',
-        })}
-        color="danger"
-        iconType="alert"
-      >
-        <pre>{JSON.stringify(errorMessage)}</pre>
-      </EuiCallOut>
-    );
   }
 
   if (transforms.length === 0) {
     return (
-      <EuiEmptyPrompt
-        title={
-          <h2>
-            {i18n.translate('xpack.transform.list.emptyPromptTitle', {
-              defaultMessage: 'No transforms found',
-            })}
-          </h2>
-        }
-        actions={[
-          <EuiButtonEmpty
-            onClick={onCreateTransform}
-            isDisabled={disabled}
-            data-test-subj="transformCreateFirstButton"
-          >
-            {i18n.translate('xpack.transform.list.emptyPromptButtonText', {
-              defaultMessage: 'Create your first transform',
-            })}
-          </EuiButtonEmpty>,
-        ]}
-        data-test-subj="transformNoTransformsFound"
-      />
+      <EuiFlexGroup justifyContent="spaceAround">
+        <EuiFlexItem grow={false}>
+          <EuiSpacer size="l" />
+          <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+            <EuiEmptyPrompt
+              title={
+                <h2>
+                  {i18n.translate('xpack.transform.list.emptyPromptTitle', {
+                    defaultMessage: 'No transforms found',
+                  })}
+                </h2>
+              }
+              actions={[
+                <EuiButton
+                  color="primary"
+                  fill
+                  onClick={onCreateTransform}
+                  isDisabled={disabled}
+                  data-test-subj="transformCreateFirstButton"
+                >
+                  {i18n.translate('xpack.transform.list.emptyPromptButtonText', {
+                    defaultMessage: 'Create your first transform',
+                  })}
+                </EuiButton>,
+              ]}
+              data-test-subj="transformNoTransformsFound"
+            />
+          </EuiPageContent>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -181,7 +176,7 @@ export const TransformList: FC<Props> = ({
   const bulkActionMenuItems = [
     <div key="startAction" className="transform__BulkActionItem">
       <EuiButtonEmpty onClick={() => bulkStartAction.openModal(transformSelection)}>
-        <StartActionName items={transformSelection} />
+        <StartActionName items={transformSelection} transformNodes={transformNodes} />
       </EuiButtonEmpty>
     </div>,
     <div key="stopAction" className="transform__BulkActionItem">
@@ -256,7 +251,7 @@ export const TransformList: FC<Props> = ({
         <RefreshTransformListButton onClick={refresh} isLoading={isLoading} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <CreateTransformButton onClick={onCreateTransform} />
+        <CreateTransformButton onClick={onCreateTransform} transformNodes={transformNodes} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

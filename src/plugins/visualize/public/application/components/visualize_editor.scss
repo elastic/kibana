@@ -1,5 +1,5 @@
 .visEditor {
-  @include flex-parent();
+  @include flexParent();
 
   height: 100%;
 
@@ -23,7 +23,7 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
 }
 
 .visEditor__content {
-  @include flex-parent();
+  @include flexParent();
   width: 100%;
   z-index: 0;
 }

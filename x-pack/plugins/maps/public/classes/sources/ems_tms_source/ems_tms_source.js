@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
-import { getEmsTmsServices } from '../../../meta';
+import { getEmsTmsServices } from '../../../util';
 import { UpdateSourceEditor } from './update_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -100,7 +101,7 @@ export class EMSTMSSource extends AbstractTMSSource {
       return tmsService;
     }
 
-    throw new Error(getErrorInfo());
+    throw new Error(getErrorInfo(emsTileLayerId));
   }
 
   async getDisplayName() {
@@ -112,13 +113,15 @@ export class EMSTMSSource extends AbstractTMSSource {
     }
   }
 
-  async getAttributions() {
-    const emsTMSService = await this._getEMSTMSService();
-    const markdown = emsTMSService.getMarkdownAttribution();
-    if (!markdown) {
-      return [];
-    }
-    return this.convertMarkdownLinkToObjectArr(markdown);
+  getAttributionProvider() {
+    return async () => {
+      const emsTMSService = await this._getEMSTMSService();
+      const markdown = emsTMSService.getMarkdownAttribution();
+      if (!markdown) {
+        return [];
+      }
+      return this.convertMarkdownLinkToObjectArr(markdown);
+    };
   }
 
   async getUrlTemplate() {

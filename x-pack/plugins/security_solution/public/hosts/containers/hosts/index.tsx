@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Subscription } from 'rxjs';
 
 import { inputsModel, State } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
@@ -26,11 +28,12 @@ import { ESTermQuery } from '../../../../common/typed_json';
 
 import * as i18n from './translations';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
+import { useTransforms } from '../../../transforms/containers/use_transforms';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-const ID = 'hostsAllQuery';
+export const ID = 'hostsAllQuery';
 
 type LoadPage = (newActivePage: number) => void;
 export interface HostsArgs {
@@ -69,11 +72,14 @@ export const useAllHost = ({
   const { activePage, direction, limit, sortField } = useDeepEqualSelector((state: State) =>
     getHostsSelector(state, type)
   );
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const searchSubscription = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [hostsRequest, setHostRequest] = useState<HostsRequestOptions | null>(null);
+  const { getTransformChangesIfTheyExist } = useTransforms();
+  const { addError, addWarning } = useAppToasts();
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -117,12 +123,11 @@ export const useAllHost = ({
         return;
       }
 
-      let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
-        const searchSubscription$ = data.search
+        searchSubscription.current = data.search
           .search<HostsRequestOptions, HostsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
@@ -130,59 +135,57 @@ export const useAllHost = ({
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                  setHostsResponse((prevResponse) => ({
-                    ...prevResponse,
-                    hosts: response.edges,
-                    inspect: getInspectResponse(response, prevResponse.inspect),
-                    pageInfo: response.pageInfo,
-                    refetch: refetch.current,
-                    totalCount: response.totalCount,
-                  }));
-                }
-                searchSubscription$.unsubscribe();
+                setLoading(false);
+                setHostsResponse((prevResponse) => ({
+                  ...prevResponse,
+                  hosts: response.edges,
+                  inspect: getInspectResponse(response, prevResponse.inspect),
+                  pageInfo: response.pageInfo,
+                  refetch: refetch.current,
+                  totalCount: response.totalCount,
+                }));
+                searchSubscription.current.unsubscribe();
               } else if (isErrorResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                }
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_ALL_HOST);
-                searchSubscription$.unsubscribe();
+                setLoading(false);
+                addWarning(i18n.ERROR_ALL_HOST);
+                searchSubscription.current.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({ title: i18n.FAIL_ALL_HOST, text: msg.message });
-              }
+              setLoading(false);
+              addError(msg, { title: i18n.FAIL_ALL_HOST });
+              searchSubscription.current.unsubscribe();
             },
           });
       };
+      searchSubscription.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {
     setHostRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
+      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
         factoryQueryType: HostsQueries.hosts,
-        filterQuery: createFilter(filterQuery),
-        pagination: generateTablePaginationOptions(activePage, limit),
+        indices: indexNames,
+        filterQuery,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
+      });
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indices,
+        docValueFields: docValueFields ?? [],
+        factoryQueryType,
+        filterQuery: createFilter(filterQuery),
+        pagination: generateTablePaginationOptions(activePage, limit),
+        timerange,
         sort: {
           direction,
           field: sortField,
@@ -203,10 +206,15 @@ export const useAllHost = ({
     limit,
     startDate,
     sortField,
+    getTransformChangesIfTheyExist,
   ]);
 
   useEffect(() => {
     hostsSearch(hostsRequest);
+    return () => {
+      searchSubscription.current.unsubscribe();
+      abortCtrl.current.abort();
+    };
   }, [hostsRequest, hostsSearch]);
 
   return [loading, hostsResponse];

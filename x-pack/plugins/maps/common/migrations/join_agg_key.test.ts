@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { LAYER_TYPE } from '../constants';
@@ -74,8 +75,7 @@ describe('migrateJoinAggKey', () => {
                 color: 'Blues',
                 colorCategory: 'palette_0',
                 field: {
-                  name:
-                    '__kbnjoin__avg_of_bytes_groupby_kibana_sample_data_logs.machine.os.keyword',
+                  name: '__kbnjoin__avg_of_bytes_groupby_kibana_sample_data_logs.machine.os.keyword',
                   origin: 'join',
                 },
                 fieldMetaOptions: {

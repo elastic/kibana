@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -28,7 +29,7 @@ const learnMoreLabel = () =>
   });
 
 const showIfLegacyOnlyIndices = () => {
-  const { ELASTIC_WEBSITE_URL } = Legacy.shims.docLinks;
+  const blogUrl = Legacy.shims.docLinks.links.monitoring.metricbeatBlog;
   const toast = Legacy.shims.toastNotifications.addWarning({
     title: toMountPoint(
       <FormattedMessage
@@ -55,11 +56,7 @@ const showIfLegacyOnlyIndices = () => {
         </EuiLink>
 
         <EuiSpacer />
-        <EuiLink
-          href={`${ELASTIC_WEBSITE_URL}blog/external-collection-for-elastic-stack-monitoring-is-now-available-via-metricbeat`}
-          external
-          target="_blank"
-        >
+        <EuiLink href={blogUrl} external target="_blank">
           {learnMoreLabel()}
         </EuiLink>
       </div>
@@ -68,7 +65,7 @@ const showIfLegacyOnlyIndices = () => {
 };
 
 const showIfLegacyAndMetricbeatIndices = () => {
-  const { ELASTIC_WEBSITE_URL } = Legacy.shims.docLinks;
+  const blogUrl = Legacy.shims.docLinks.links.monitoring.metricbeatBlog;
   const toast = Legacy.shims.toastNotifications.addWarning({
     title: toMountPoint(
       <FormattedMessage
@@ -95,11 +92,7 @@ const showIfLegacyAndMetricbeatIndices = () => {
         </EuiLink>
 
         <EuiSpacer />
-        <EuiLink
-          href={`${ELASTIC_WEBSITE_URL}blog/external-collection-for-elastic-stack-monitoring-is-now-available-via-metricbeat`}
-          external
-          target="_blank"
-        >
+        <EuiLink href={blogUrl} external target="_blank">
           {learnMoreLabel()}
         </EuiLink>
       </div>

@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import useObservable from 'react-use/lib/useObservable';
 import mockAnnotations from '../annotations_table/__mocks__/mock_annotations.json';
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
 
 import { Annotation } from '../../../../../common/types/annotations';
 import { AnnotationUpdatesService } from '../../../services/annotations_service';
@@ -65,7 +66,7 @@ describe('AnnotationFlyout', () => {
         <ObservableComponent annotationUpdatesService={annotationUpdatesService!} />
       </MlAnnotationUpdatesContextProvider>
     );
-    const updateBtn = getByTestId('annotationFlyoutUpdateButton');
+    const updateBtn = getByTestId('annotationFlyoutUpdateOrCreateButton');
     expect(updateBtn).toBeDisabled();
   });
 
@@ -78,7 +79,7 @@ describe('AnnotationFlyout', () => {
         <ObservableComponent annotationUpdatesService={annotationUpdatesService!} />
       </MlAnnotationUpdatesContextProvider>
     );
-    const updateBtn = getByTestId('annotationFlyoutUpdateButton');
+    const updateBtn = getByTestId('annotationFlyoutUpdateOrCreateButton');
     expect(updateBtn).toBeDisabled();
     await waitFor(() => {
       const errorText = screen.queryByText(/characters above maximum length/);
@@ -96,7 +97,7 @@ describe('AnnotationFlyout', () => {
         <ObservableComponent annotationUpdatesService={annotationUpdatesService!} />
       </MlAnnotationUpdatesContextProvider>
     );
-    const updateBtn = getByTestId('annotationFlyoutUpdateButton');
+    const updateBtn = getByTestId('annotationFlyoutUpdateOrCreateButton');
     expect(updateBtn).not.toBeDisabled();
     expect(screen.queryByTestId('mlAnnotationFlyout')).toBeInTheDocument();
 

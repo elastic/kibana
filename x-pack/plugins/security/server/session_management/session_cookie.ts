@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
+import type {
   HttpServiceSetup,
   KibanaRequest,
   Logger,
   SessionStorageFactory,
-} from '../../../../../src/core/server';
-import { ConfigType } from '../config';
+} from 'src/core/server';
+
+import type { ConfigType } from '../config';
 
 /**
  * Represents shape of the session value stored in the cookie.
@@ -87,9 +89,8 @@ export class SessionCookie {
       sameSite: config.sameSiteCookies,
       validate: (sessionValue: SessionCookieValue | SessionCookieValue[]) => {
         // ensure that this cookie was created with the current Kibana configuration
-        const invalidSessionValue = (Array.isArray(sessionValue)
-          ? sessionValue
-          : [sessionValue]
+        const invalidSessionValue = (
+          Array.isArray(sessionValue) ? sessionValue : [sessionValue]
         ).find((sess) => sess.path !== undefined && sess.path !== serverBasePath);
 
         if (invalidSessionValue) {

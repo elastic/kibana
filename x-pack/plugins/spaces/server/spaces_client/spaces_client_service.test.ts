@@ -1,13 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as Rx from 'rxjs';
+
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
-import { ConfigType } from '../config';
+
+import type { ConfigType } from '../config';
 import { spacesConfig } from '../lib/__fixtures__';
-import { ISpacesClient, SpacesClient } from './spaces_client';
+import type { ISpacesClient } from './spaces_client';
+import { SpacesClient } from './spaces_client';
 import { SpacesClientService } from './spaces_client_service';
 
 const debugLogger = jest.fn();
@@ -96,7 +101,7 @@ describe('SpacesClientService', () => {
       const service = new SpacesClientService(debugLogger);
       const setup = service.setup({ config$: Rx.of(spacesConfig) });
 
-      const wrapper = (Symbol() as unknown) as ISpacesClient;
+      const wrapper = Symbol() as unknown as ISpacesClient;
 
       const clientWrapper = jest.fn().mockReturnValue(wrapper);
       setup.registerClientWrapper(clientWrapper);
@@ -124,7 +129,7 @@ describe('SpacesClientService', () => {
       const customRepositoryFactory = jest.fn();
       setup.setClientRepositoryFactory(customRepositoryFactory);
 
-      const wrapper = (Symbol() as unknown) as ISpacesClient;
+      const wrapper = Symbol() as unknown as ISpacesClient;
 
       const clientWrapper = jest.fn().mockReturnValue(wrapper);
       setup.registerClientWrapper(clientWrapper);

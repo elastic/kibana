@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getAllEnvironments } from './get_all_environments';
@@ -20,9 +21,10 @@ describe('getAllEnvironments', () => {
   it('fetches all environments', async () => {
     mock = await inspectSearchParams((setup) =>
       getAllEnvironments({
-        serviceName: 'test',
         searchAggregatedTransactions: false,
+        serviceName: 'test',
         setup,
+        size: 50,
       })
     );
 
@@ -32,10 +34,11 @@ describe('getAllEnvironments', () => {
   it('fetches all environments with includeMissing', async () => {
     mock = await inspectSearchParams((setup) =>
       getAllEnvironments({
+        includeMissing: true,
+        searchAggregatedTransactions: false,
         serviceName: 'test',
         setup,
-        searchAggregatedTransactions: false,
-        includeMissing: true,
+        size: 50,
       })
     );
 

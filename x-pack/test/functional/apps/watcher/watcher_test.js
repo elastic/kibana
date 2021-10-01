@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -15,16 +16,15 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
+  const security = getService('security');
   const esSupertest = getService('esSupertest');
   const PageObjects = getPageObjects(['security', 'common', 'header', 'settings', 'watcher']);
 
-  // Still flaky test :c
-  // https://github.com/elastic/kibana/pull/56361
-  // https://github.com/elastic/kibana/pull/56304
-  describe.skip('watcher_test', function () {
+  describe('watcher_test', function () {
     before('initialize tests', async () => {
       // There may be system watches if monitoring was previously enabled
       // These cannot be deleted via the UI, so we need to delete via the API
+      await security.testUser.setRoles(['kibana_admin', 'watcher_admin'], false);
       const watches = await esSupertest.get('/.watches/_search');
 
       if (watches.status === 200) {
@@ -54,6 +54,10 @@ export default function ({ getService, getPageObjects }) {
         }
         return true;
       });
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('create and save a new watch', async () => {

@@ -1,31 +1,32 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import v8 from 'v8';
-import { Bench } from '@hapi/hoek';
 import { OpsProcessMetrics, MetricsCollector } from './types';
+import { EventLoopDelaysMonitor } from '../event_loop_delays';
 
-export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetrics> {
-  public async collect(): Promise<OpsProcessMetrics> {
+export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetrics[]> {
+  static getMainThreadMetrics(processes: OpsProcessMetrics[]): undefined | OpsProcessMetrics {
+    /**
+     * Currently Kibana does not support multi-processes.
+     * Once we have multiple processes we can add a `name` field
+     * and filter on `name === 'server_worker'` to get the main thread.
+     */
+    return processes[0];
+  }
+
+  private readonly eventLoopDelayMonitor = new EventLoopDelaysMonitor();
+
+  private getCurrentPidMetrics(): OpsProcessMetrics {
+    const eventLoopDelayHistogram = this.eventLoopDelayMonitor.collect();
     const heapStats = v8.getHeapStatistics();
     const memoryUsage = process.memoryUsage();
-    const [eventLoopDelay] = await Promise.all([getEventLoopDelay()]);
+
     return {
       memory: {
         heap: {
@@ -36,19 +37,17 @@ export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetri
         resident_set_size_in_bytes: memoryUsage.rss,
       },
       pid: process.pid,
-      event_loop_delay: eventLoopDelay,
+      event_loop_delay: eventLoopDelayHistogram.mean,
+      event_loop_delay_histogram: eventLoopDelayHistogram,
       uptime_in_millis: process.uptime() * 1000,
     };
   }
 
-  public reset() {}
-}
+  public collect(): OpsProcessMetrics[] {
+    return [this.getCurrentPidMetrics()];
+  }
 
-const getEventLoopDelay = (): Promise<number> => {
-  const bench = new Bench();
-  return new Promise((resolve) => {
-    setImmediate(() => {
-      return resolve(bench.elapsed());
-    });
-  });
-};
+  public reset() {
+    this.eventLoopDelayMonitor.reset();
+  }
+}

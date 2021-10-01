@@ -1,0 +1,91 @@
+[role="xpack"]
+[[correlations]]
+=== Find transaction latency and failure correlations
+
+Correlations surface attributes of your data that are potentially correlated
+with high-latency or erroneous transactions. For example, if you are a site
+reliability engineer who is responsible for keeping production systems up and
+running, you want to understand what is causing slow transactions. Identifying
+attributes that are responsible for higher latency transactions can potentially
+point you toward the root cause. You may find a correlation with a particular
+piece of hardware, like a host or pod. Or, perhaps a set of users, based on IP
+address or region, is facing increased latency due to local data center issues.
+
+To find correlations, select a service on the *Services* page in the {apm-app}
+then select a transaction group from the *Transactions* tab.
+
+NOTE: Queries within the {apm-app} are also applied to the correlations.
+
+[discrete]
+[[correlations-latency]]
+==== Find high transaction latency correlations
+
+The correlations on the *Latency correlations* tab help you discover which
+attributes are contributing to increased transaction latency. 
+
+[role="screenshot"]
+image::apm/images/correlations-hover.png[Latency correlations]
+
+The progress bar indicates the status of the asynchronous analysis, which
+performs statistical searches across a large number of attributes. For large
+time ranges and services with high transaction throughput, this might take some
+time. To improve performance, reduce the time range.
+
+The latency distribution chart visualizes the overall latency of the
+transactions in the transaction group. If there are attributes that have a
+statistically significant correlation with slow response times, they are listed
+in a table below the chart. The table is sorted by correlation coefficients that
+range from 0 to 1. Attributes with higher correlation values are more likely to
+contribute to high latency transactions. By default, the attribute with the
+highest correlation value is added to the chart. To see the latency distribution
+for other attributes, hover over their row in the table.
+
+If a correlated attribute seems noteworthy, use the **Filter** quick links:
+
+* `+` creates a new query in the {apm-app} for filtering transactions containing
+the selected value.
+* `-` creates a new query in the {apm-app} to filter out transactions containing
+the selected value.
+
+In this example screenshot, transactions with the field
+`labels.orderPriceRange` and value `large` are skewed to the right with slower
+response times than the overall latency distribution. If you select the `+`
+filter in the appropriate row of the table, it creates a new query in the
+{apm-app} for transactions with this attribute. With the "noise" now filtered
+out, you can begin viewing sample traces to continue your investigation.
+
+[discrete]
+[[correlations-error-rate]]
+==== Find failed transaction correlations
+
+beta::[]
+
+The correlations on the *Failed transaction correlations* tab help you discover
+which attributes are most influential in distinguishing between transaction
+failures and successes. In this context, the success or failure of a transaction
+is determined by its {ecs-ref}/ecs-event.html#field-event-outcome[event.outcome]
+value. For example, APM agents set the `event.outcome` to `failure` when an HTTP
+transaction returns a `5xx` status code.
+
+// The chart highlights the failed transactions in the overall latency distribution for the transaction group. 
+If there are attributes that have a statistically significant correlation with
+failed transactions, they are listed in a table. The table is sorted by scores,
+which are mapped to high, medium, or low impact levels. Attributes with high
+impact levels are more likely to contribute to failed transactions.
+//  By default, the attribute with the highest score is added to the chart. To see a different attribute in the chart, hover over its row in the table.
+
+For example, in the screenshot below, the field
+`kubernetes.pod.name` and value `frontend-node-59dff47885-fl5lb` has a medium
+impact level and existed in 19% of the failed transactions.
+
+[role="screenshot"]
+image::apm/images/correlations-failed-transactions.png[Failed transaction correlations]
+
+TIP: Some details, such as the failure and success percentages, are available
+only when the
+<<observability-enable-inspect-es-queries,observability:enableInspectEsQueries>>
+advanced setting is enabled.
+
+Select the `+` filter to create a new query in the {apm-app} for transactions
+with this attribute. You might do his for multiple attributes--each time
+filtering out more and more noise and bringing you closer to a diagnosis.

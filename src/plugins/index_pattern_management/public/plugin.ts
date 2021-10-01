@@ -1,33 +1,19 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { PluginInitializerContext, CoreSetup, Plugin } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
-import {
-  IndexPatternManagementService,
-  IndexPatternManagementServiceSetup,
-  IndexPatternManagementServiceStart,
-} from './service';
 
 import { ManagementSetup } from '../../management/public';
+import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
+import { IndexPatternEditorStart } from '../../index_pattern_editor/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -36,11 +22,15 @@ export interface IndexPatternManagementSetupDependencies {
 
 export interface IndexPatternManagementStartDependencies {
   data: DataPublicPluginStart;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  indexPatternEditor: IndexPatternEditorStart;
 }
 
-export type IndexPatternManagementSetup = IndexPatternManagementServiceSetup;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IndexPatternManagementSetup {}
 
-export type IndexPatternManagementStart = IndexPatternManagementServiceStart;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IndexPatternManagementStart {}
 
 const sectionsHeader = i18n.translate('indexPatternManagement.indexPattern.sectionsHeader', {
   defaultMessage: 'Index Patterns',
@@ -55,9 +45,8 @@ export class IndexPatternManagementPlugin
       IndexPatternManagementStart,
       IndexPatternManagementSetupDependencies,
       IndexPatternManagementStartDependencies
-    > {
-  private readonly indexPatternManagementService = new IndexPatternManagementService();
-
+    >
+{
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(
@@ -86,20 +75,15 @@ export class IndexPatternManagementPlugin
       mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
 
-        return mountManagementSection(core.getStartServices, params, () =>
-          this.indexPatternManagementService.environmentService.getEnvironment().ml()
-        );
+        return mountManagementSection(core.getStartServices, params);
       },
     });
-
-    return this.indexPatternManagementService.setup({ httpClient: core.http });
+    return {};
   }
 
-  public start(core: CoreStart, plugins: IndexPatternManagementStartDependencies) {
-    return this.indexPatternManagementService.start();
+  public start() {
+    return {};
   }
 
-  public stop() {
-    this.indexPatternManagementService.stop();
-  }
+  public stop() {}
 }

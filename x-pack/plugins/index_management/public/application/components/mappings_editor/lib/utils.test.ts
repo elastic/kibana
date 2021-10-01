@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('../constants', () => {
@@ -9,7 +10,7 @@ jest.mock('../constants', () => {
   return { MAIN_DATA_TYPE_DEFINITION: {}, TYPE_DEFINITION };
 });
 
-import { stripUndefinedValues, getTypeLabelFromField } from './utils';
+import { stripUndefinedValues, getTypeLabelFromField, getFieldMeta } from './utils';
 
 describe('utils', () => {
   describe('stripUndefinedValues()', () => {
@@ -74,6 +75,19 @@ describe('utils', () => {
           type: 'hyperdrive',
         })
       ).toBe('Other: hyperdrive');
+    });
+  });
+
+  describe('getFieldMeta', () => {
+    test('returns "canHaveMultiFields:true" for IP data type', () => {
+      expect(getFieldMeta({ name: 'ip_field', type: 'ip' })).toEqual({
+        canHaveChildFields: false,
+        canHaveMultiFields: true,
+        childFieldsName: 'fields',
+        hasChildFields: false,
+        hasMultiFields: false,
+        isExpanded: false,
+      });
     });
   });
 });

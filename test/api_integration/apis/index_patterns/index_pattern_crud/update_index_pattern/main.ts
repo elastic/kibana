@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -262,44 +251,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response3.body.index_pattern.typeMeta).to.eql({ foo: 'baz' });
     });
 
-    it('can update index_pattern fields', async () => {
-      const title = `foo-${Date.now()}-${Math.random()}*`;
-      const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
-        index_pattern: {
-          title,
-          fields: {
-            foo: {
-              name: 'foo',
-              type: 'string',
-            },
-          },
-        },
-      });
-
-      expect(response1.body.index_pattern.fields.foo.name).to.be('foo');
-      expect(response1.body.index_pattern.fields.foo.type).to.be('string');
-
-      const id = response1.body.index_pattern.id;
-      const response2 = await supertest.post('/api/index_patterns/index_pattern/' + id).send({
-        index_pattern: {
-          fields: {
-            bar: {
-              name: 'bar',
-              type: 'number',
-            },
-          },
-        },
-      });
-
-      expect(response2.body.index_pattern.fields.bar.name).to.be('bar');
-      expect(response2.body.index_pattern.fields.bar.type).to.be('number');
-
-      const response3 = await supertest.get('/api/index_patterns/index_pattern/' + id);
-
-      expect(response3.body.index_pattern.fields.bar.name).to.be('bar');
-      expect(response3.body.index_pattern.fields.bar.type).to.be('number');
-    });
-
     it('can update multiple index pattern fields at once', async () => {
       const title = `foo-${Date.now()}-${Math.random()}*`;
       const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
@@ -332,6 +283,54 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response3.body.index_pattern.timeFieldName).to.be('timeFieldName2');
       expect(response3.body.index_pattern.intervalName).to.be('intervalName2');
       expect(response3.body.index_pattern.typeMeta.baz).to.be('qux');
+    });
+
+    it('can update runtime fields', async () => {
+      const title = `basic_index*`;
+      const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
+        override: true,
+        index_pattern: {
+          title,
+          runtimeFieldMap: {
+            runtimeFoo: {
+              type: 'keyword',
+              script: {
+                source: 'emit(doc["foo"].value)',
+              },
+            },
+          },
+        },
+      });
+
+      expect(response1.status).to.be(200);
+      expect(response1.body.index_pattern.title).to.be(title);
+
+      expect(response1.body.index_pattern.runtimeFieldMap.runtimeFoo.type).to.be('keyword');
+      expect(response1.body.index_pattern.runtimeFieldMap.runtimeFoo.script.source).to.be(
+        'emit(doc["foo"].value)'
+      );
+
+      const id = response1.body.index_pattern.id;
+      const response2 = await supertest.post('/api/index_patterns/index_pattern/' + id).send({
+        index_pattern: {
+          runtimeFieldMap: {
+            runtimeBar: {
+              type: 'keyword',
+              script: {
+                source: 'emit(doc["foo"].value)',
+              },
+            },
+          },
+        },
+      });
+
+      expect(response2.body.index_pattern.runtimeFieldMap.runtimeBar.type).to.be('keyword');
+      expect(response2.body.index_pattern.runtimeFieldMap.runtimeFoo).to.be(undefined);
+
+      const response3 = await supertest.get('/api/index_patterns/index_pattern/' + id);
+
+      expect(response3.body.index_pattern.runtimeFieldMap.runtimeBar.type).to.be('keyword');
+      expect(response3.body.index_pattern.runtimeFieldMap.runtimeFoo).to.be(undefined);
     });
   });
 }

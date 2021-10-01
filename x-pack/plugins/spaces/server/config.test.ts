@@ -1,23 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { configDeprecationFactory, applyDeprecations } from '@kbn/config';
+import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
 import { deepFreeze } from '@kbn/std';
+
 import { spacesConfigDeprecationProvider } from './config';
 
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = spacesConfigDeprecationProvider(configDeprecationFactory);
   const deprecationMessages: string[] = [];
-  const migrated = applyDeprecations(
+  const { config: migrated } = applyDeprecations(
     settings,
     deprecations.map((deprecation) => ({
       deprecation,
       path: '',
     })),
-    (msg) => deprecationMessages.push(msg)
+    () =>
+      ({ message }) =>
+        deprecationMessages.push(message)
   );
   return {
     messages: deprecationMessages,
@@ -35,7 +39,7 @@ describe('spaces config', () => {
 
         expect(messages).toMatchInlineSnapshot(`
         Array [
-          "Disabling the spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)",
+          "Disabling the Spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)",
         ]
       `);
         expect(migrated).toEqual(originalConfig);

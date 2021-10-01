@@ -1,57 +1,58 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { registryForTutorialsMock, registryForSampleDataMock } from './plugin.test.mocks';
-import { HomeServerPlugin } from './plugin';
+import { HomeServerPlugin, HomeServerPluginSetupDependencies } from './plugin';
 import { coreMock, httpServiceMock } from '../../../core/server/mocks';
+import { customIntegrationsMock } from '../../custom_integrations/server/mocks';
 
 describe('HomeServerPlugin', () => {
+  let homeServerPluginSetupDependenciesMock: HomeServerPluginSetupDependencies;
+  let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;
+
   beforeEach(() => {
     registryForTutorialsMock.setup.mockClear();
     registryForTutorialsMock.start.mockClear();
     registryForSampleDataMock.setup.mockClear();
     registryForSampleDataMock.start.mockClear();
+
+    homeServerPluginSetupDependenciesMock = {
+      customIntegrations: customIntegrationsMock.createSetup(),
+    };
+    mockCoreSetup = coreMock.createSetup();
   });
 
   describe('setup', () => {
-    let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;
     let initContext: ReturnType<typeof coreMock.createPluginInitializerContext>;
     let routerMock: ReturnType<typeof httpServiceMock.createRouter>;
 
     beforeEach(() => {
-      mockCoreSetup = coreMock.createSetup();
       routerMock = httpServiceMock.createRouter();
       mockCoreSetup.http.createRouter.mockReturnValue(routerMock);
       initContext = coreMock.createPluginInitializerContext();
     });
 
     test('wires up tutorials provider service and returns registerTutorial and addScopedTutorialContextFactory', () => {
-      const setup = new HomeServerPlugin(initContext).setup(mockCoreSetup, {});
+      const setup = new HomeServerPlugin(initContext).setup(
+        mockCoreSetup,
+        homeServerPluginSetupDependenciesMock
+      );
       expect(setup).toHaveProperty('tutorials');
       expect(setup.tutorials).toHaveProperty('registerTutorial');
       expect(setup.tutorials).toHaveProperty('addScopedTutorialContextFactory');
     });
 
     test('wires up sample data provider service and returns registerTutorial and addScopedTutorialContextFactory', () => {
-      const setup = new HomeServerPlugin(initContext).setup(mockCoreSetup, {});
+      const setup = new HomeServerPlugin(initContext).setup(
+        mockCoreSetup,
+        homeServerPluginSetupDependenciesMock
+      );
       expect(setup).toHaveProperty('sampleData');
-      expect(setup.sampleData).toHaveProperty('registerSampleDataset');
       expect(setup.sampleData).toHaveProperty('getSampleDatasets');
       expect(setup.sampleData).toHaveProperty('addSavedObjectsToSampleDataset');
       expect(setup.sampleData).toHaveProperty('addAppLinksToSampleDataset');
@@ -59,7 +60,7 @@ describe('HomeServerPlugin', () => {
     });
 
     test('registers the `/api/home/hits_status` route', () => {
-      new HomeServerPlugin(initContext).setup(mockCoreSetup, {});
+      new HomeServerPlugin(initContext).setup(mockCoreSetup, homeServerPluginSetupDependenciesMock);
 
       expect(routerMock.post).toHaveBeenCalledTimes(1);
       expect(routerMock.post).toHaveBeenCalledWith(
@@ -74,7 +75,9 @@ describe('HomeServerPlugin', () => {
   describe('start', () => {
     const initContext = coreMock.createPluginInitializerContext();
     test('is defined', () => {
-      const start = new HomeServerPlugin(initContext).start();
+      const plugin = new HomeServerPlugin(initContext);
+      plugin.setup(mockCoreSetup, homeServerPluginSetupDependenciesMock); // setup() must always be called before start()
+      const start = plugin.start();
       expect(start).toBeDefined();
       expect(start).toHaveProperty('tutorials');
       expect(start).toHaveProperty('sampleData');

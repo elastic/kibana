@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { checkReferences } from './utils';
+import { checkReferences, checkForDataLayerType } from './utils';
 import { operationDefinitionMap } from '..';
-import { createMockedReferenceOperation } from '../../mocks';
+import { createMockedFullReference } from '../../mocks';
+import { layerTypes } from '../../../../../common';
 
 // Mock prevents issue with circular loading
 jest.mock('..');
@@ -14,7 +16,15 @@ jest.mock('..');
 describe('utils', () => {
   beforeEach(() => {
     // @ts-expect-error test-only operation type
-    operationDefinitionMap.testReference = createMockedReferenceOperation();
+    operationDefinitionMap.testReference = createMockedFullReference();
+  });
+
+  describe('checkForDataLayerType', () => {
+    it('should return an error if the layer is of the wrong type', () => {
+      expect(checkForDataLayerType(layerTypes.THRESHOLD, 'Operation')).toEqual([
+        'Operation is disabled for this type of layer.',
+      ]);
+    });
   });
 
   describe('checkReferences', () => {

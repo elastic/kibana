@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiHorizontalRule, EuiSpacer, EuiFlexItem } from '@elastic/eui';
@@ -10,7 +11,11 @@ import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { FlowTarget, LastEventIndexKey } from '../../../../common/search_strategy';
+import {
+  FlowTarget,
+  FlowTargetSourceDest,
+  LastEventIndexKey,
+} from '../../../../common/search_strategy';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
@@ -23,9 +28,8 @@ import { manageQuery } from '../../../common/components/page/manage_query';
 import { FlowTargetSelectConnected } from '../../components/flow_target_select_connected';
 import { IpOverview } from '../../components/details';
 import { SiemSearchBar } from '../../../common/components/search_bar';
-import { WrapperPage } from '../../../common/components/wrapper_page';
-import { useNetworkDetails } from '../../containers/details';
-import { FlowTargetSourceDest } from '../../../graphql/types';
+import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
+import { useNetworkDetails, ID } from '../../containers/details';
 import { useKibana } from '../../../common/lib/kibana';
 import { decodeIpv6 } from '../../../common/lib/helpers';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
@@ -45,6 +49,7 @@ import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { networkModel } from '../../store';
 import { SecurityPageName } from '../../../app/types';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 export { getBreadcrumbs } from './utils';
 
 const NetworkDetailsManage = manageQuery(IpOverview);
@@ -89,12 +94,14 @@ const NetworkDetailsComponent: React.FC = () => {
 
   const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
   const ip = decodeIpv6(detailName);
-  const filterQuery = convertToBuildEsQuery({
+  const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: esQuery.getEsQueryConfig(uiSettings),
     indexPattern,
     queries: [query],
     filters,
   });
+
+  useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
   const [loading, { id, inspect, networkDetails, refetch }] = useNetworkDetails({
     docValueFields,
@@ -111,10 +118,16 @@ const NetworkDetailsComponent: React.FC = () => {
     skip: isInitializing,
   });
 
-  const headerDraggableArguments = useMemo(() => ({ field: `${flowTarget}.ip`, value: ip }), [
-    flowTarget,
-    ip,
-  ]);
+  const headerDraggableArguments = useMemo(
+    () => ({ field: `${flowTarget}.ip`, value: ip }),
+    [flowTarget, ip]
+  );
+
+  // When the filterQuery comes back as undefined, it means an error has been thrown and the request should be skipped
+  const shouldSkip = useMemo(
+    () => isInitializing || filterQuery === undefined,
+    [isInitializing, filterQuery]
+  );
 
   return (
     <div data-test-subj="network-details-page">
@@ -124,7 +137,7 @@ const NetworkDetailsComponent: React.FC = () => {
             <SiemSearchBar indexPattern={indexPattern} id="global" />
           </FiltersGlobal>
 
-          <WrapperPage>
+          <SecuritySolutionPageWrapper>
             <HeaderPage
               border
               data-test-subj="network-details-headline"
@@ -146,6 +159,7 @@ const NetworkDetailsComponent: React.FC = () => {
               id={id}
               inspect={inspect}
               ip={ip}
+              isInDetailsSidePanel={false}
               data={networkDetails}
               anomaliesData={anomaliesData}
               loading={loading}
@@ -169,7 +183,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   flowTarget={FlowTargetSourceDest.source}
                   indexNames={selectedPatterns}
                   ip={ip}
-                  skip={isInitializing}
+                  skip={shouldSkip}
                   startDate={from}
                   type={type}
                   setQuery={setQuery}
@@ -184,7 +198,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   filterQuery={filterQuery}
                   indexNames={selectedPatterns}
                   ip={ip}
-                  skip={isInitializing}
+                  skip={shouldSkip}
                   startDate={from}
                   type={type}
                   setQuery={setQuery}
@@ -203,7 +217,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   flowTarget={FlowTargetSourceDest.source}
                   indexNames={selectedPatterns}
                   ip={ip}
-                  skip={isInitializing}
+                  skip={shouldSkip}
                   startDate={from}
                   type={type}
                   setQuery={setQuery}
@@ -218,7 +232,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   filterQuery={filterQuery}
                   indexNames={selectedPatterns}
                   ip={ip}
-                  skip={isInitializing}
+                  skip={shouldSkip}
                   startDate={from}
                   type={type}
                   setQuery={setQuery}
@@ -235,7 +249,7 @@ const NetworkDetailsComponent: React.FC = () => {
               flowTarget={flowTarget}
               indexNames={selectedPatterns}
               ip={ip}
-              skip={isInitializing}
+              skip={shouldSkip}
               startDate={from}
               type={type}
               setQuery={setQuery}
@@ -248,7 +262,7 @@ const NetworkDetailsComponent: React.FC = () => {
               filterQuery={filterQuery}
               indexNames={selectedPatterns}
               ip={ip}
-              skip={isInitializing}
+              skip={shouldSkip}
               startDate={from}
               type={type}
               setQuery={setQuery}
@@ -259,11 +273,11 @@ const NetworkDetailsComponent: React.FC = () => {
             <TlsQueryTable
               endDate={to}
               filterQuery={filterQuery}
-              flowTarget={(flowTarget as unknown) as FlowTargetSourceDest}
+              flowTarget={flowTarget as unknown as FlowTargetSourceDest}
               indexNames={selectedPatterns}
               ip={ip}
               setQuery={setQuery}
-              skip={isInitializing}
+              skip={shouldSkip}
               startDate={from}
               type={type}
             />
@@ -275,7 +289,7 @@ const NetworkDetailsComponent: React.FC = () => {
               setQuery={setQuery}
               startDate={from}
               endDate={to}
-              skip={isInitializing}
+              skip={shouldSkip}
               indexNames={selectedPatterns}
               ip={ip}
               type={type}
@@ -284,14 +298,14 @@ const NetworkDetailsComponent: React.FC = () => {
               hideHistogramIfEmpty={true}
               AnomaliesTableComponent={AnomaliesNetworkTable}
             />
-          </WrapperPage>
+          </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <WrapperPage>
+        <SecuritySolutionPageWrapper>
           <HeaderPage border title={ip} />
 
           <OverviewEmpty />
-        </WrapperPage>
+        </SecuritySolutionPageWrapper>
       )}
 
       <SpyRoute pageName={SecurityPageName.network} />

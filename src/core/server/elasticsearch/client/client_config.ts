@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ConnectionOptions as TlsConnectionOptions } from 'tls';
@@ -33,7 +22,6 @@ import { DEFAULT_HEADERS } from '../default_headers';
 export type ElasticsearchClientConfig = Pick<
   ElasticsearchConfig,
   | 'customHeaders'
-  | 'logQueries'
   | 'sniffOnStart'
   | 'sniffOnConnectionFault'
   | 'requestHeadersWhitelist'
@@ -41,11 +29,13 @@ export type ElasticsearchClientConfig = Pick<
   | 'hosts'
   | 'username'
   | 'password'
+  | 'serviceAccountToken'
 > & {
   pingTimeout?: ElasticsearchConfig['pingTimeout'] | ClientOptions['pingTimeout'];
   requestTimeout?: ElasticsearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
   ssl?: Partial<ElasticsearchConfig['ssl']>;
   keepAlive?: boolean;
+  caFingerprint?: ClientOptions['caFingerprint'];
 };
 
 /**
@@ -66,6 +56,9 @@ export function parseClientOptions(
       ...DEFAULT_HEADERS,
       ...config.customHeaders,
     },
+    // do not make assumption on user-supplied data content
+    // fixes https://github.com/elastic/kibana/issues/101944
+    disablePrototypePoisoningProtection: true,
   };
 
   if (config.pingTimeout != null) {
@@ -86,11 +79,16 @@ export function parseClientOptions(
     };
   }
 
-  if (config.username && config.password && !scoped) {
-    clientOptions.auth = {
-      username: config.username,
-      password: config.password,
-    };
+  if (!scoped) {
+    if (config.username && config.password) {
+      clientOptions.auth = {
+        username: config.username,
+        password: config.password,
+      };
+    } else if (config.serviceAccountToken) {
+      // TODO: change once ES client has native support for service account tokens: https://github.com/elastic/elasticsearch-js/issues/1477
+      clientOptions.headers!.authorization = `Bearer ${config.serviceAccountToken}`;
+    }
   }
 
   clientOptions.nodes = config.hosts.map((host) => convertHost(host));
@@ -100,6 +98,10 @@ export function parseClientOptions(
       config.ssl,
       scoped && !config.ssl.alwaysPresentCertificate
     );
+  }
+
+  if (config.caFingerprint != null) {
+    clientOptions.caFingerprint = config.caFingerprint;
   }
 
   return clientOptions;

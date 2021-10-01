@@ -1,32 +1,24 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { DataTableFormat } from './data_table';
 import { IUiSettingsClient } from '../../../../../../core/public';
 import { InspectorViewProps, Adapters } from '../../../../../inspector/public';
 import { UiActionsStart } from '../../../../../ui_actions/public';
-import { FieldFormatsStart } from '../../../field_formats';
+import { FieldFormatsStart } from '../../../../../field_formats/public';
 import { TablesAdapter, Datatable, DatatableColumn } from '../../../../../expressions/public';
+import { TableSelector } from './data_table_selector';
+import { DataDownloadOptions } from './download_options';
 
 interface DataViewComponentState {
   datatable: Datatable;
@@ -38,6 +30,7 @@ interface DataViewComponentProps extends InspectorViewProps {
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
   isFilterable: (column: DatatableColumn) => boolean;
+  options: { fileName?: string };
 }
 
 class DataViewComponent extends Component<DataViewComponentProps, DataViewComponentState> {
@@ -81,6 +74,12 @@ class DataViewComponent extends Component<DataViewComponentProps, DataViewCompon
     }
   };
 
+  selectTable = (datatable: Datatable) => {
+    if (datatable !== this.state.datatable) {
+      this.setState({ datatable });
+    }
+  };
+
   componentDidMount() {
     this.props.adapters.tables!.on('change', this.onUpdateData);
   }
@@ -119,15 +118,54 @@ class DataViewComponent extends Component<DataViewComponentProps, DataViewCompon
       return DataViewComponent.renderNoData();
     }
 
+    const datatables = Object.values(this.state.adapters.tables.tables) as Datatable[];
+
     return (
-      <DataTableFormat
-        data={this.state.datatable}
-        exportTitle={this.props.title}
-        uiSettings={this.props.uiSettings}
-        fieldFormats={this.props.fieldFormats}
-        uiActions={this.props.uiActions}
-        isFilterable={this.props.isFilterable}
-      />
+      <>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={true}>
+            {datatables.length > 1 ? (
+              <>
+                <EuiText size="xs">
+                  <p role="status" aria-live="polite" aria-atomic="true">
+                    <FormattedMessage
+                      data-test-subj="inspectorDataViewSelectorLabel"
+                      id="data.inspector.table.tablesDescription"
+                      defaultMessage="There are {tablesCount, plural, one {# table} other {# tables} } in total"
+                      values={{
+                        tablesCount: datatables.length,
+                      }}
+                    />
+                  </p>
+                </EuiText>
+                <EuiSpacer size="xs" />
+                <TableSelector
+                  tables={datatables}
+                  selectedTable={this.state.datatable}
+                  onTableChanged={this.selectTable}
+                />
+              </>
+            ) : null}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <DataDownloadOptions
+              title={this.props.options?.fileName || this.props.title}
+              uiSettings={this.props.uiSettings}
+              datatables={datatables}
+              fieldFormats={this.props.fieldFormats}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+
+        <DataTableFormat
+          data={this.state.datatable}
+          uiSettings={this.props.uiSettings}
+          fieldFormats={this.props.fieldFormats}
+          uiActions={this.props.uiActions}
+          isFilterable={this.props.isFilterable}
+        />
+      </>
     );
   }
 }

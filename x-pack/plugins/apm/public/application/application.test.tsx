@@ -1,20 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import React from 'react';
 import { act } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Observable } from 'rxjs';
-import { AppMountParameters, CoreStart, HttpSetup } from 'src/core/public';
+import { CoreStart, DocLinksStart, HttpStart } from 'src/core/public';
 import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
-import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { renderApp } from './';
 import { disableConsoleWarning } from '../utils/testHelpers';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { ApmPluginStartDeps } from '../plugin';
 
 jest.mock('../services/rest/index_pattern', () => ({
   createStaticIndexPattern: () => Promise.resolve(undefined),
@@ -39,11 +41,12 @@ describe('renderApp', () => {
   });
 
   it('renders the app', () => {
-    const { core, config } = mockApmPluginContextValue;
+    const { core, config, observabilityRuleTypeRegistry } =
+      mockApmPluginContextValue;
+
     const plugins = {
       licensing: { license$: new Observable() },
-      triggersActionsUi: { actionTypeRegistry: {}, alertTypeRegistry: {} },
-      usageCollection: { reportUiCounter: () => {} },
+      triggersActionsUi: { actionTypeRegistry: {}, ruleTypeRegistry: {} },
       data: {
         query: {
           timefilter: {
@@ -52,7 +55,7 @@ describe('renderApp', () => {
         },
       },
     };
-    const params = {
+    const appMountParameters = {
       element: document.createElement('div'),
       history: createMemoryHistory(),
       setHeaderActionMenu: () => {},
@@ -60,18 +63,43 @@ describe('renderApp', () => {
 
     const data = dataPluginMock.createStartContract();
     const embeddable = embeddablePluginMock.createStartContract();
-    const startDeps = {
+
+    const pluginsStart = {
+      data,
+      embeddable,
+      observability: {
+        navigation: {
+          registerSections: () => jest.fn(),
+          PageTemplate: ({ children }: { children: React.ReactNode }) => (
+            <div>hello worlds {children}</div>
+          ),
+        },
+      },
       triggersActionsUi: {
         actionTypeRegistry: {},
-        alertTypeRegistry: {},
+        ruleTypeRegistry: {},
         getAddAlertFlyout: jest.fn(),
         getEditAlertFlyout: jest.fn(),
       },
-      data,
-      embeddable,
-    };
+      usageCollection: { reportUiCounter: () => {} },
+      http: {
+        basePath: {
+          prepend: (path: string) => `/basepath${path}`,
+          get: () => `/basepath`,
+        },
+      } as HttpStart,
+      docLinks: {
+        DOC_LINK_VERSION: '0',
+        ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+        links: {
+          apm: {},
+          observability: { guide: '' },
+        },
+      } as unknown as DocLinksStart,
+    } as unknown as ApmPluginStartDeps;
+
     jest.spyOn(window, 'scrollTo').mockReturnValueOnce(undefined);
-    createCallApmApi((core.http as unknown) as HttpSetup);
+    createCallApmApi(core as unknown as CoreStart);
 
     jest
       .spyOn(window.console, 'warn')
@@ -86,13 +114,14 @@ describe('renderApp', () => {
     let unmount: () => void;
 
     act(() => {
-      unmount = renderApp(
-        (core as unknown) as CoreStart,
-        (plugins as unknown) as ApmPluginSetupDeps,
-        (params as unknown) as AppMountParameters,
+      unmount = renderApp({
+        coreStart: core as any,
+        pluginsSetup: plugins as any,
+        appMountParameters: appMountParameters as any,
+        pluginsStart,
         config,
-        (startDeps as unknown) as ApmPluginStartDeps
-      );
+        observabilityRuleTypeRegistry,
+      });
     });
 
     expect(() => {

@@ -1,25 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiToolTip, EuiFlexItem, EuiTitle, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiPageHeader, EuiToolTip } from '@elastic/eui';
 import { IIndexPattern } from 'src/plugins/data/public';
 
 interface IndexHeaderProps {
@@ -51,50 +40,42 @@ const removeTooltip = i18n.translate('indexPatternManagement.editIndexPattern.re
   defaultMessage: 'Remove index pattern.',
 });
 
-export function IndexHeader({
+export const IndexHeader: React.FC<IndexHeaderProps> = ({
   defaultIndex,
   indexPattern,
   setDefault,
   deleteIndexPatternClick,
-}: IndexHeaderProps) {
+  children,
+}) => {
   return (
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-      <EuiFlexItem>
-        <EuiTitle>
-          <h1 data-test-subj="indexPatternTitle">{indexPattern.title}</h1>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup responsive={false}>
-          {defaultIndex !== indexPattern.id && setDefault && (
-            <EuiFlexItem>
-              <EuiToolTip content={setDefaultTooltip}>
-                <EuiButtonIcon
-                  color="text"
-                  onClick={setDefault}
-                  iconType="starFilled"
-                  aria-label={setDefaultAriaLabel}
-                  data-test-subj="setDefaultIndexPatternButton"
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
-
-          {deleteIndexPatternClick && (
-            <EuiFlexItem>
-              <EuiToolTip content={removeTooltip}>
-                <EuiButtonIcon
-                  color="danger"
-                  onClick={deleteIndexPatternClick}
-                  iconType="trash"
-                  aria-label={removeAriaLabel}
-                  data-test-subj="deleteIndexPatternButton"
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiPageHeader
+      pageTitle={<span data-test-subj="indexPatternTitle">{indexPattern.title}</span>}
+      rightSideItems={[
+        defaultIndex !== indexPattern.id && setDefault && (
+          <EuiToolTip content={setDefaultTooltip}>
+            <EuiButtonIcon
+              color="text"
+              onClick={setDefault}
+              iconType="starFilled"
+              aria-label={setDefaultAriaLabel}
+              data-test-subj="setDefaultIndexPatternButton"
+            />
+          </EuiToolTip>
+        ),
+        deleteIndexPatternClick && (
+          <EuiToolTip content={removeTooltip}>
+            <EuiButtonIcon
+              color="danger"
+              onClick={deleteIndexPatternClick}
+              iconType="trash"
+              aria-label={removeAriaLabel}
+              data-test-subj="deleteIndexPatternButton"
+            />
+          </EuiToolTip>
+        ),
+      ].filter(Boolean)}
+    >
+      {children}
+    </EuiPageHeader>
   );
-}
+};

@@ -1,12 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import { ValuesType } from 'utility-types';
-import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from '../../ml/common';
+import type { ValuesType } from 'utility-types';
+import type { AsDuration, AsPercent } from '../../observability/common';
+import type { ActionGroup } from '../../alerting/common';
+import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from './ml_constants';
+
+export const APM_SERVER_FEATURE_ID = 'apm';
 
 export enum AlertType {
   ErrorCount = 'apm.error_rate', // ErrorRate was renamed to ErrorCount but the key is kept as `error_rate` for backwards-compat.
@@ -15,49 +20,148 @@ export enum AlertType {
   TransactionDurationAnomaly = 'apm.transaction_duration_anomaly',
 }
 
-const THRESHOLD_MET_GROUP = {
-  id: 'threshold_met',
+export const THRESHOLD_MET_GROUP_ID = 'threshold_met';
+export type ThresholdMetActionGroupId = typeof THRESHOLD_MET_GROUP_ID;
+const THRESHOLD_MET_GROUP: ActionGroup<ThresholdMetActionGroupId> = {
+  id: THRESHOLD_MET_GROUP_ID,
   name: i18n.translate('xpack.apm.a.thresholdMet', {
     defaultMessage: 'Threshold met',
   }),
 };
 
-export const ALERT_TYPES_CONFIG = {
+export function formatErrorCountReason({
+  threshold,
+  measured,
+  serviceName,
+}: {
+  threshold: number;
+  measured: number;
+  serviceName: string;
+}) {
+  return i18n.translate('xpack.apm.alertTypes.errorCount.reason', {
+    defaultMessage: `Error count is greater than {threshold} (current value is {measured}) for {serviceName}`,
+    values: {
+      threshold,
+      measured,
+      serviceName,
+    },
+  });
+}
+
+export function formatTransactionDurationReason({
+  threshold,
+  measured,
+  serviceName,
+  asDuration,
+}: {
+  threshold: number;
+  measured: number;
+  serviceName: string;
+  asDuration: AsDuration;
+}) {
+  return i18n.translate('xpack.apm.alertTypes.transactionDuration.reason', {
+    defaultMessage: `Latency is above {threshold} (current value is {measured}) for {serviceName}`,
+    values: {
+      threshold: asDuration(threshold),
+      measured: asDuration(measured),
+      serviceName,
+    },
+  });
+}
+
+export function formatTransactionErrorRateReason({
+  threshold,
+  measured,
+  serviceName,
+  asPercent,
+}: {
+  threshold: number;
+  measured: number;
+  serviceName: string;
+  asPercent: AsPercent;
+}) {
+  return i18n.translate('xpack.apm.alertTypes.transactionErrorRate.reason', {
+    defaultMessage: `Failed transactions rate is greater than {threshold} (current value is {measured}) for {serviceName}`,
+    values: {
+      threshold: asPercent(threshold, 100),
+      measured: asPercent(measured, 100),
+      serviceName,
+    },
+  });
+}
+
+export function formatTransactionDurationAnomalyReason({
+  serviceName,
+  severityLevel,
+  measured,
+}: {
+  serviceName: string;
+  severityLevel: string;
+  measured: number;
+}) {
+  return i18n.translate(
+    'xpack.apm.alertTypes.transactionDurationAnomaly.reason',
+    {
+      defaultMessage: `{severityLevel} anomaly detected for {serviceName} (score was {measured})`,
+      values: {
+        serviceName,
+        severityLevel,
+        measured,
+      },
+    }
+  );
+}
+
+export const ALERT_TYPES_CONFIG: Record<
+  AlertType,
+  {
+    name: string;
+    actionGroups: Array<ActionGroup<ThresholdMetActionGroupId>>;
+    defaultActionGroupId: ThresholdMetActionGroupId;
+    minimumLicenseRequired: string;
+    isExportable: boolean;
+    producer: string;
+  }
+> = {
   [AlertType.ErrorCount]: {
     name: i18n.translate('xpack.apm.errorCountAlert.name', {
       defaultMessage: 'Error count threshold',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
-    defaultActionGroupId: 'threshold_met',
+    defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
     minimumLicenseRequired: 'basic',
-    producer: 'apm',
+    producer: APM_SERVER_FEATURE_ID,
+    isExportable: true,
   },
   [AlertType.TransactionDuration]: {
     name: i18n.translate('xpack.apm.transactionDurationAlert.name', {
-      defaultMessage: 'Transaction duration threshold',
+      defaultMessage: 'Latency threshold',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
-    defaultActionGroupId: 'threshold_met',
+    defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
     minimumLicenseRequired: 'basic',
-    producer: 'apm',
+    producer: APM_SERVER_FEATURE_ID,
+    isExportable: true,
   },
   [AlertType.TransactionDurationAnomaly]: {
     name: i18n.translate('xpack.apm.transactionDurationAnomalyAlert.name', {
-      defaultMessage: 'Transaction duration anomaly',
+      defaultMessage: 'Latency anomaly',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
-    defaultActionGroupId: 'threshold_met',
+    defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
     minimumLicenseRequired: 'basic',
-    producer: 'apm',
+    producer: APM_SERVER_FEATURE_ID,
+    isExportable: true,
   },
   [AlertType.TransactionErrorRate]: {
     name: i18n.translate('xpack.apm.transactionErrorRateAlert.name', {
-      defaultMessage: 'Transaction error rate threshold',
+      defaultMessage: 'Failed transaction rate threshold',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
-    defaultActionGroupId: 'threshold_met',
+    defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
     minimumLicenseRequired: 'basic',
-    producer: 'apm',
+    producer: APM_SERVER_FEATURE_ID,
+    isExportable: true,
   },
 };
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -14,7 +15,7 @@ import { Ccr } from '../../../components/elasticsearch/ccr';
 import { MonitoringViewBaseController } from '../../base_controller';
 import {
   CODE_PATH_ELASTICSEARCH,
-  ALERT_CCR_READ_EXCEPTIONS,
+  RULE_CCR_READ_EXCEPTIONS,
   ELASTICSEARCH_SYSTEM_ID,
 } from '../../../../common/constants';
 import { SetupModeRenderer } from '../../../components/renderers';
@@ -46,7 +47,7 @@ uiRoutes.when('/elasticsearch/ccr', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_CCR_READ_EXCEPTIONS],
+            alertTypeIds: [RULE_CCR_READ_EXCEPTIONS],
           },
         },
       });

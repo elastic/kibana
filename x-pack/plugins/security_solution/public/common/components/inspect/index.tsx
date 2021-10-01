@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
@@ -58,6 +59,7 @@ interface OwnProps {
   isDisabled?: boolean;
   onCloseInspect?: () => void;
   title: string | React.ReactElement | React.ReactNode;
+  multiple?: boolean;
 }
 
 type InspectButtonProps = OwnProps & PropsFromRedux;
@@ -70,6 +72,7 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
   isInspected,
   loading,
   inspectIndex = 0,
+  multiple = false, // If multiple = true we ignore the inspectIndex and pass all requests and responses to the inspect modal
   onCloseInspect,
   queryId = '',
   selectedInspectIndex,
@@ -98,6 +101,26 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
     });
   }, [onCloseInspect, setIsInspected, queryId, inputId, inspectIndex]);
 
+  let request: string | null = null;
+  let additionalRequests: string[] | null = null;
+  if (inspect != null && inspect.dsl.length > 0) {
+    if (multiple) {
+      [request, ...additionalRequests] = inspect.dsl;
+    } else {
+      request = inspect.dsl[inspectIndex];
+    }
+  }
+
+  let response: string | null = null;
+  let additionalResponses: string[] | null = null;
+  if (inspect != null && inspect.response.length > 0) {
+    if (multiple) {
+      [response, ...additionalResponses] = inspect.response;
+    } else {
+      response = inspect.response[inspectIndex];
+    }
+  }
+
   return (
     <>
       {inputId === 'timeline' && !compact && (
@@ -108,7 +131,7 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
           color="text"
           iconSide="left"
           iconType="inspect"
-          isDisabled={loading || isDisabled}
+          isDisabled={loading || isDisabled || false}
           isLoading={loading}
           onClick={handleClick}
         >
@@ -122,7 +145,7 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
           data-test-subj="inspect-icon-button"
           iconSize="m"
           iconType="inspect"
-          isDisabled={loading || isDisabled}
+          isDisabled={loading || isDisabled || false}
           title={i18n.INSPECT}
           onClick={handleClick}
         />
@@ -130,10 +153,10 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
       <ModalInspectQuery
         closeModal={handleCloseModal}
         isShowing={isShowingModal}
-        request={inspect != null && inspect.dsl.length > 0 ? inspect.dsl[inspectIndex] : null}
-        response={
-          inspect != null && inspect.response.length > 0 ? inspect.response[inspectIndex] : null
-        }
+        request={request}
+        response={response}
+        additionalRequests={additionalRequests}
+        additionalResponses={additionalResponses}
         title={title}
         data-test-subj="inspect-modal"
       />

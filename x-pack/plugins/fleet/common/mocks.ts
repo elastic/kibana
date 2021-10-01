@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { NewPackagePolicy, PackagePolicy } from './types';
+import type { NewPackagePolicy, PackagePolicy, DeletePackagePoliciesResponse } from './types';
 
 export const createNewPackagePolicyMock = (): NewPackagePolicy => {
   return {
@@ -43,4 +44,15 @@ export const createPackagePolicyMock = (): PackagePolicy => {
       },
     ],
   };
+};
+
+export const deletePackagePolicyMock = (): DeletePackagePoliciesResponse => {
+  const newPackagePolicy = createNewPackagePolicyMock();
+  return [
+    {
+      id: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1',
+      success: true,
+      package: newPackagePolicy.package,
+    },
+  ];
 };

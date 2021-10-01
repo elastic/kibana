@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
@@ -11,6 +12,8 @@ import { TestProviders } from '../../../../../common/mock';
 import '../../../../../common/mock/match_media';
 import { UserHostWorkingDir } from './user_host_working_dir';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
+
+jest.mock('../../../../../common/lib/kibana');
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -239,6 +242,7 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              isDraggable={false}
               userDomain="[user-domain-123]"
               userName={undefined}
               hostName={undefined}
@@ -248,7 +252,7 @@ describe('UserHostWorkingDir', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="draggable-content-user.domain"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="render-content-user.domain"]').exists()).toBe(true);
     });
 
     test('it renders a draggable with an overridden field name when userDomain is provided, and userDomainField is also specified as a prop', () => {
@@ -258,6 +262,7 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              isDraggable={false}
               userDomain="[user-domain-123]"
               userDomainField="overridden.field.name"
               userName={undefined}
@@ -268,9 +273,9 @@ describe('UserHostWorkingDir', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper.find('[data-test-subj="draggable-content-overridden.field.name"]').exists()
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="render-content-overridden.field.name"]').exists()).toBe(
+        true
+      );
     });
 
     test('it renders a draggable `user.name` field (by default) when userName is provided, and userNameField is NOT specified as a prop', () => {
@@ -280,6 +285,7 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              isDraggable={false}
               userDomain={undefined}
               userName="[user-name-123]"
               hostName={undefined}
@@ -289,7 +295,7 @@ describe('UserHostWorkingDir', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="draggable-content-user.name"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="render-content-user.name"]').exists()).toBe(true);
     });
 
     test('it renders a draggable with an overridden field name when userName is provided, and userNameField is also specified as a prop', () => {
@@ -299,6 +305,7 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              isDraggable={false}
               userDomain={undefined}
               userName="[user-name-123]"
               userNameField="overridden.field.name"
@@ -309,9 +316,9 @@ describe('UserHostWorkingDir', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper.find('[data-test-subj="draggable-content-overridden.field.name"]').exists()
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="render-content-overridden.field.name"]').exists()).toBe(
+        true
+      );
     });
   });
 });

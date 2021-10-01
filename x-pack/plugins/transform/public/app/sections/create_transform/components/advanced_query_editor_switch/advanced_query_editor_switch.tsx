@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -26,6 +27,8 @@ export const AdvancedQueryEditorSwitch: FC<StepDefineFormHook> = ({
       isAdvancedSourceEditorEnabled,
       isAdvancedSourceEditorSwitchModalVisible,
       sourceConfigUpdated,
+      advancedEditorSourceConfigLastApplied,
+      advancedEditorSourceConfig,
     },
   },
   searchBar: {
@@ -52,7 +55,11 @@ export const AdvancedQueryEditorSwitch: FC<StepDefineFormHook> = ({
         )}
         checked={isAdvancedSourceEditorEnabled}
         onChange={() => {
-          if (isAdvancedSourceEditorEnabled && sourceConfigUpdated) {
+          if (
+            isAdvancedSourceEditorEnabled &&
+            (sourceConfigUpdated ||
+              advancedEditorSourceConfig !== advancedEditorSourceConfigLastApplied)
+          ) {
             setAdvancedSourceEditorSwitchModalVisible(true);
             return;
           }

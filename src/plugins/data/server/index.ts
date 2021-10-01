@@ -1,53 +1,20 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
+// TODO: https://github.com/elastic/kibana/issues/109904
+/* eslint-disable @kbn/eslint/no_export_all */
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/server';
 import { ConfigSchema, configSchema } from '../config';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
-import {
-  buildQueryFilter,
-  buildCustomFilter,
-  buildEmptyFilter,
-  buildExistsFilter,
-  buildFilter,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  buildRangeFilter,
-  isFilterDisabled,
-} from '../common';
-
-/*
- * Filter helper namespace:
- */
-
-export const esFilters = {
-  buildQueryFilter,
-  buildCustomFilter,
-  buildEmptyFilter,
-  buildExistsFilter,
-  buildFilter,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  buildRangeFilter,
-  isFilterDisabled,
-};
+export * from './deprecated';
+export { getEsQueryConfig } from '../common';
 
 /**
  * Exporters (CSV)
@@ -60,103 +27,34 @@ export const exporters = {
 };
 
 /*
- * esQuery and esKuery:
- */
-
-import {
-  nodeTypes,
-  fromKueryExpression,
-  toElasticsearchQuery,
-  buildEsQuery,
-  buildQueryFromFilters,
-  getEsQueryConfig,
-} from '../common';
-
-export const esKuery = {
-  nodeTypes,
-  fromKueryExpression,
-  toElasticsearchQuery,
-};
-
-export const esQuery = {
-  buildQueryFromFilters,
-  getEsQueryConfig,
-  buildEsQuery,
-};
-
-export { EsQueryConfig, KueryNode } from '../common';
-
-/*
  * Field Formats:
  */
 
-import {
-  FieldFormatsRegistry,
-  FieldFormat,
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  UrlFormat,
-  StringFormat,
-  TruncateFormat,
-} from '../common/field_formats';
-
-export const fieldFormats = {
-  FieldFormatsRegistry,
-  FieldFormat,
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  UrlFormat,
-  StringFormat,
-  TruncateFormat,
-};
-
-export { IFieldFormatsRegistry, FieldFormatsGetConfigFn, FieldFormatConfig } from '../common';
+export { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../common';
 
 /*
  * Index patterns:
  */
 
-import { isNestedField, isFilterable } from '../common';
-
-export const indexPatterns = {
-  isFilterable,
-  isNestedField,
-};
-
 export {
   IndexPatternsFetcher,
-  FieldDescriptor as IndexPatternFieldDescriptor,
   shouldReadFieldFromDocValues, // used only in logstash_fields fixture
   FieldDescriptor,
-  mergeCapabilitiesWithFields,
   getCapabilitiesForRollupIndices,
-} from './index_patterns';
+  IndexPatternsServiceStart,
+} from './data_views';
 
 export {
+  IndexPatternField,
   IFieldType,
-  IFieldSubType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
   UI_SETTINGS,
   IndexPattern,
-  IndexPatternLoadExpressionFunctionDefinition,
+  IndexPatternsService,
+  IndexPatternsService as IndexPatternsCommonService,
+  DataView,
 } from '../common';
 
 /**
@@ -166,86 +64,36 @@ export {
 import {
   // aggs
   CidrMask,
-  intervalOptions,
-  isNumberType,
-  isStringType,
-  isType,
-  parentPipelineType,
-  propFilter,
-  siblingPipelineType,
-  termsAggFilter,
   dateHistogramInterval,
-  InvalidEsCalendarIntervalError,
-  InvalidEsIntervalFormatError,
-  Ipv4Address,
-  isValidEsInterval,
-  isValidInterval,
-  parseEsInterval,
+  IpAddress,
   parseInterval,
-  toAbsoluteDates,
-  // expressions utils
-  getRequestInspectorStats,
-  getResponseInspectorStats,
   // tabify
-  tabifyAggResponse,
-  tabifyGetColumns,
   calcAutoIntervalLessThan,
 } from '../common';
+import { autocompleteConfigDeprecationProvider } from './config_deprecations';
 
 export {
   // aggs
-  AggGroupLabels,
-  AggGroupName,
-  AggGroupNames,
-  AggFunctionsMapping,
-  AggParam,
-  AggParamOption,
-  AggParamType,
-  AggConfigOptions,
-  BUCKET_TYPES,
-  EsaggsExpressionFunctionDefinition,
-  IAggConfig,
-  IAggConfigs,
-  IAggType,
-  IFieldParamType,
-  IMetricAggType,
   METRIC_TYPES,
-  OptionedParamType,
-  OptionedValueProp,
   ParsedInterval,
-  // expressions
-  ExecutionContextSearch,
-  ExpressionFunctionKibana,
-  ExpressionFunctionKibanaContext,
-  ExpressionValueSearchContext,
-  KibanaContext,
   // search
   ISearchOptions,
   IEsSearchRequest,
   IEsSearchResponse,
   ES_SEARCH_STRATEGY,
-  // tabify
-  TabbedAggColumn,
-  TabbedAggRow,
-  TabbedTable,
 } from '../common';
 
 export {
+  IScopedSearchClient,
   ISearchStrategy,
-  ISearchSetup,
-  ISearchStart,
   SearchStrategyDependencies,
-  getDefaultSearchParams,
-  getShardTimeout,
-  getTotalLoaded,
-  toKibanaSearchResponse,
   shimHitsTotal,
-  usageProvider,
-  searchUsageObserver,
-  shimAbortSignal,
-  SearchUsage,
-  SessionService,
-  ISessionService,
+  SearchSessionService,
+  ISearchSessionService,
+  SearchRequestHandlerContext,
+  DataRequestHandlerContext,
+  AsyncSearchStatusResponse,
+  NoSearchIdInSessionError,
 } from './search';
 
 // Search namespace
@@ -253,28 +101,10 @@ export const search = {
   aggs: {
     CidrMask,
     dateHistogramInterval,
-    intervalOptions,
-    InvalidEsCalendarIntervalError,
-    InvalidEsIntervalFormatError,
-    Ipv4Address,
-    isNumberType,
-    isStringType,
-    isType,
-    isValidEsInterval,
-    isValidInterval,
-    parentPipelineType,
-    parseEsInterval,
+    IpAddress,
     parseInterval,
-    propFilter,
-    siblingPipelineType,
-    termsAggFilter,
-    toAbsoluteDates,
     calcAutoIntervalLessThan,
   },
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-  tabifyAggResponse,
-  tabifyGetColumns,
 };
 
 /**
@@ -283,14 +113,9 @@ export const search = {
  */
 
 export {
-  // kbn field types
   castEsToKbnFieldTypeName,
-  // query
-  Filter,
   getTime,
-  Query,
   // timefilter
-  RefreshInterval,
   TimeRange,
   // utils
   parseInterval,
@@ -312,11 +137,10 @@ export {
 };
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
+  deprecations: autocompleteConfigDeprecationProvider,
   exposeToBrowser: {
     autocomplete: true,
     search: true,
   },
   schema: configSchema,
 };
-
-export type { IndexPatternsServiceProvider as IndexPatternsService } from './index_patterns';

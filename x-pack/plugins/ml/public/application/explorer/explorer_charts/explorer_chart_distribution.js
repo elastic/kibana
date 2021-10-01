@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -19,7 +20,11 @@ import moment from 'moment';
 
 import { formatHumanReadableDateTime } from '../../../../common/util/date_utils';
 import { formatValue } from '../../formatters/format_value';
-import { getSeverityColor, getSeverityWithLow } from '../../../../common/util/anomaly_utils';
+import {
+  getFormattedSeverityScore,
+  getSeverityColor,
+  getSeverityWithLow,
+} from '../../../../common/util/anomaly_utils';
 import {
   getChartType,
   getTickValues,
@@ -28,7 +33,6 @@ import {
   chartExtendedLimits,
 } from '../../util/chart_utils';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
-import { getTimeBucketsFromCache } from '../../util/time_buckets';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { CHART_TYPE } from '../explorer_constants';
@@ -58,7 +62,7 @@ export class ExplorerChartDistribution extends React.Component {
   }
 
   renderChart() {
-    const { tooManyBuckets, tooltipService } = this.props;
+    const { tooManyBuckets, tooltipService, timeBuckets, showSelectedInterval } = this.props;
 
     const element = this.rootNode;
     const config = this.props.seriesConfig;
@@ -258,7 +262,6 @@ export class ExplorerChartDistribution extends React.Component {
 
     function drawRareChartAxes() {
       // Get the scaled date format to use for x axis tick labels.
-      const timeBuckets = getTimeBucketsFromCache();
       const bounds = { min: moment(config.plotEarliest), max: moment(config.plotLatest) };
       timeBuckets.setBounds(bounds);
       timeBuckets.setInterval('auto');
@@ -267,12 +270,6 @@ export class ExplorerChartDistribution extends React.Component {
       const tickValuesStart = Math.max(config.selectedEarliest, config.plotEarliest);
       // +1 ms to account for the ms that was subtracted for query aggregations.
       const interval = config.selectedLatest - config.selectedEarliest + 1;
-      const tickValues = getTickValues(
-        tickValuesStart,
-        interval,
-        config.plotEarliest,
-        config.plotLatest
-      );
 
       const xAxis = d3.svg
         .axis()
@@ -283,10 +280,18 @@ export class ExplorerChartDistribution extends React.Component {
         .tickPadding(10)
         .tickFormat((d) => moment(d).format(xAxisTickFormat));
 
-      // With tooManyBuckets the chart would end up with no x-axis labels
-      // because the ticks are based on the span of the emphasis section,
-      // and the highlighted area spans the whole chart.
-      if (tooManyBuckets === false) {
+      // With tooManyBuckets, or when the chart is used as an embeddable,
+      // the chart would end up with no x-axis labels because the ticks are based on the span of the
+      // emphasis section, and the selected area spans the whole chart.
+      const useAutoTicks =
+        tooManyBuckets === true || interval >= config.plotLatest - config.plotEarliest;
+      if (useAutoTicks === false) {
+        const tickValues = getTickValues(
+          tickValuesStart,
+          interval,
+          config.plotEarliest,
+          config.plotLatest
+        );
         xAxis.tickValues(tickValues);
       } else {
         xAxis.ticks(numTicksForDateFormat(vizWidth, xAxisTickFormat));
@@ -324,7 +329,7 @@ export class ExplorerChartDistribution extends React.Component {
           });
       }
 
-      if (tooManyBuckets === false) {
+      if (useAutoTicks === false) {
         removeLabelOverlap(gAxis, tickValuesStart, interval, vizWidth);
       }
     }
@@ -354,6 +359,7 @@ export class ExplorerChartDistribution extends React.Component {
     }
 
     function drawRareChartHighlightedSpan() {
+      if (showSelectedInterval === false) return;
       // Draws a rectangle which highlights the time span that has been selected for view.
       // Note depending on the overall time range and the bucket span, the selected time
       // span may be longer than the range actually being plotted.
@@ -457,7 +463,7 @@ export class ExplorerChartDistribution extends React.Component {
 
       if (marker.anomalyScore !== undefined) {
         const score = parseInt(marker.anomalyScore);
-        const displayScore = score > 0 ? score : '< 1';
+        const displayScore = getFormattedSeverityScore(score);
         tooltipData.push({
           label: i18n.translate('xpack.ml.explorer.distributionChart.anomalyScoreLabel', {
             defaultMessage: 'anomaly score',

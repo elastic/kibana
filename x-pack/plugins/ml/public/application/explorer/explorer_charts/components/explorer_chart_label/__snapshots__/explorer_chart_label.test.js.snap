@@ -19,7 +19,6 @@ exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
           "fieldValue": "72.57.0.53",
         }
       }
-      key="nginx.access.remote_ip 72.57.0.53"
     />
      
     <span
@@ -97,7 +96,6 @@ exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
           "fieldValue": "72.57.0.53",
         }
       }
-      key="nginx.access.remote_ip 72.57.0.53"
     />
   </span>
 </Fragment>

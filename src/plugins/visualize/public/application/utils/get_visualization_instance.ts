@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -29,28 +18,34 @@ import { SavedObject } from 'src/plugins/saved_objects/public';
 import { cloneDeep } from 'lodash';
 import { ExpressionValueError } from 'src/plugins/expressions/public';
 import { createSavedSearchesLoader } from '../../../../discover/public';
+import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '../../../../kibana_utils/common';
 import { VisualizeServices } from '../types';
+
+function isErrorRelatedToRuntimeFields(error: ExpressionValueError['error']) {
+  const originalError = error.original || error;
+  return (
+    originalError instanceof SavedFieldNotFound ||
+    originalError instanceof SavedFieldTypeInvalidForAgg
+  );
+}
 
 const createVisualizeEmbeddableAndLinkSavedSearch = async (
   vis: Vis,
   visualizeServices: VisualizeServices
 ) => {
-  const {
-    data,
-    createVisEmbeddableFromObject,
-    savedObjects,
-    savedObjectsPublic,
-  } = visualizeServices;
+  const { data, createVisEmbeddableFromObject, savedObjects, savedObjectsPublic } =
+    visualizeServices;
   const embeddableHandler = (await createVisEmbeddableFromObject(vis, {
+    id: '',
     timeRange: data.query.timefilter.timefilter.getTime(),
     filters: data.query.filterManager.getFilters(),
-    id: '',
+    searchSessionId: data.search.session.getSessionId(),
   })) as VisualizeEmbeddableContract;
 
   embeddableHandler.getOutput$().subscribe((output) => {
-    if (output.error) {
+    if (output.error && !isErrorRelatedToRuntimeFields(output.error)) {
       data.search.showError(
-        ((output.error as unknown) as ExpressionValueError['error']).original || output.error
+        (output.error as unknown as ExpressionValueError['error']).original || output.error
       );
     }
   });
@@ -71,8 +66,18 @@ export const getVisualizationInstanceFromInput = async (
   visualizeServices: VisualizeServices,
   input: VisualizeInput
 ) => {
-  const { visualizations } = visualizeServices;
+  const { visualizations, savedVisualizations } = visualizeServices;
   const visState = input.savedVis as SerializedVis;
+
+  /**
+   * A saved vis is needed even in by value mode to support 'save to library' which converts the 'by value'
+   * state of the visualization, into a new saved object.
+   */
+  const savedVis: VisSavedObject = await savedVisualizations.get();
+  if (visState.uiState && Object.keys(visState.uiState).length !== 0) {
+    savedVis.uiStateJSON = JSON.stringify(visState.uiState);
+  }
+
   let vis = await visualizations.createVis(visState.type, cloneDeep(visState));
   if (vis.type.setup) {
     try {
@@ -87,6 +92,7 @@ export const getVisualizationInstanceFromInput = async (
   );
   return {
     vis,
+    savedVis,
     embeddableHandler,
     savedSearch,
   };

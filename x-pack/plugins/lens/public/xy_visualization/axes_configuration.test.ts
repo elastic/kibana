@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { LayerArgs } from './types';
+import { LayerArgs } from '../../common/expressions';
+import { layerTypes } from '../../common';
 import { Datatable } from '../../../../../src/plugins/expressions/public';
 import { getAxesConfiguration } from './axes_configuration';
 
@@ -219,6 +221,7 @@ describe('axes_configuration', () => {
 
   const sampleLayer: LayerArgs = {
     layerId: 'first',
+    layerType: layerTypes.DATA,
     seriesType: 'line',
     xAccessor: 'c',
     accessors: ['yAccessorId'],

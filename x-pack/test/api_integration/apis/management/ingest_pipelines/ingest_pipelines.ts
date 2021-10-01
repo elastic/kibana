@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -14,13 +15,8 @@ const API_BASE_PATH = '/api/ingest_pipelines';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  const {
-    createPipeline,
-    deletePipeline,
-    cleanupPipelines,
-    createIndex,
-    deleteIndex,
-  } = registerEsHelpers(getService);
+  const { createPipeline, deletePipeline, cleanupPipelines, createIndex, deleteIndex } =
+    registerEsHelpers(getService);
 
   describe('Pipelines', function () {
     after(async () => {
@@ -203,7 +199,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body).to.eql({
           statusCode: 404,
           error: 'Not Found',
-          message: 'Not Found',
+          message: '{}',
+          attributes: {},
         });
       });
     });
@@ -338,24 +335,16 @@ export default function ({ getService }: FtrProviderContext) {
             {
               name: PIPELINE_DOES_NOT_EXIST,
               error: {
-                msg: '[resource_not_found_exception] pipeline [pipeline_does_not_exist] is missing',
-                path: '/_ingest/pipeline/pipeline_does_not_exist',
-                query: {},
-                statusCode: 404,
-                response: JSON.stringify({
-                  error: {
-                    root_cause: [
-                      {
-                        type: 'resource_not_found_exception',
-                        reason: 'pipeline [pipeline_does_not_exist] is missing',
-                      },
-                    ],
+                root_cause: [
+                  {
                     type: 'resource_not_found_exception',
                     reason: 'pipeline [pipeline_does_not_exist] is missing',
                   },
-                  status: 404,
-                }),
+                ],
+                type: 'resource_not_found_exception',
+                reason: 'pipeline [pipeline_does_not_exist] is missing',
               },
+              status: 404,
             },
           ],
         });
@@ -500,8 +489,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body).to.eql({
           error: 'Not Found',
-          message: 'Not Found',
+          message: '{"_index":"test_index","_id":"2","found":false}',
           statusCode: 404,
+          attributes: {},
         });
       });
     });

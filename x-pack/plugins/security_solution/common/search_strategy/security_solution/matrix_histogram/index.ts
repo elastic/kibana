@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
@@ -22,22 +23,43 @@ export * from './dns';
 export * from './events';
 
 export const MatrixHistogramQuery = 'matrixHistogram';
+export const MatrixHistogramQueryEntities = 'matrixHistogramEntities';
 
 export enum MatrixHistogramType {
   authentications = 'authentications',
+  authenticationsEntities = 'authenticationsEntities',
   anomalies = 'anomalies',
   events = 'events',
   alerts = 'alerts',
   dns = 'dns',
 }
 
+export const MatrixHistogramTypeToAggName = {
+  [MatrixHistogramType.alerts]: 'aggregations.alertsGroup.buckets',
+  [MatrixHistogramType.anomalies]: 'aggregations.anomalyActionGroup.buckets',
+  [MatrixHistogramType.authentications]: 'aggregations.eventActionGroup.buckets',
+  [MatrixHistogramType.authenticationsEntities]: 'aggregations.events.buckets',
+  [MatrixHistogramType.dns]: 'aggregations.dns_name_query_count.buckets',
+  [MatrixHistogramType.events]: 'aggregations.eventActionGroup.buckets',
+};
+
 export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
   timerange: TimerangeInput;
   histogramType: MatrixHistogramType;
   stackByField: string;
-  threshold?: { field: string | undefined; value: number } | undefined;
+  threshold?:
+    | {
+        field: string[];
+        value: string;
+        cardinality?: {
+          field: string[];
+          value: string;
+        };
+      }
+    | undefined;
   inspect?: Maybe<Inspect>;
   isPtrIncluded?: boolean;
+  includeMissingData?: boolean;
 }
 
 export interface MatrixHistogramStrategyResponse extends IEsSearchResponse {

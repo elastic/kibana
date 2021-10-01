@@ -1,12 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import sinon, { stub } from 'sinon';
 import { NotificationsStart } from 'src/core/public';
-import { JobSummary, ReportDocument } from '../../common/types';
+import { coreMock } from '../../../../../src/core/public/mocks';
+import { JobSummary, ReportApiJSON } from '../../common/types';
+import { Job } from './job';
 import { ReportingAPIClient } from './reporting_api_client';
 import { ReportingNotifierStreamHandler } from './stream_handler';
 
@@ -17,54 +20,31 @@ Object.defineProperty(window, 'sessionStorage', {
   writable: true,
 });
 
-const mockJobsFound = [
-  {
-    _id: 'job-source-mock1',
-    _source: {
-      status: 'completed',
-      output: { max_size_reached: false, csv_contains_formulas: false },
-      payload: { title: 'specimen' },
-    },
-  },
-  {
-    _id: 'job-source-mock2',
-    _source: {
-      status: 'failed',
-      output: { max_size_reached: false, csv_contains_formulas: false },
-      payload: { title: 'specimen' },
-    },
-  },
-  {
-    _id: 'job-source-mock3',
-    _source: {
-      status: 'pending',
-      output: { max_size_reached: false, csv_contains_formulas: false },
-      payload: { title: 'specimen' },
-    },
-  },
-];
+const mockJobsFound: Job[] = [
+  { id: 'job-source-mock1', status: 'completed', output: { csv_contains_formulas: false, max_size_reached: false }, payload: { title: 'specimen' } },
+  { id: 'job-source-mock2', status: 'failed', output: { csv_contains_formulas: false, max_size_reached: false }, payload: { title: 'specimen' } },
+  { id: 'job-source-mock3', status: 'pending', output: { csv_contains_formulas: false, max_size_reached: false }, payload: { title: 'specimen' } },
+].map((j) => new Job(j as ReportApiJSON)); // prettier-ignore
 
-const jobQueueClientMock: ReportingAPIClient = {
-  findForJobIds: async (jobIds: string[]) => {
-    return mockJobsFound as ReportDocument[];
-  },
-  getContent: (): Promise<any> => {
-    return Promise.resolve({ content: 'this is the completed report data' });
-  },
-  getManagementLink: () => '/#management',
-  getDownloadLink: () => '/reporting/download/job-123',
-} as any;
+const coreSetup = coreMock.createSetup();
+const jobQueueClientMock = new ReportingAPIClient(coreSetup.http, coreSetup.uiSettings, '7.15.0');
+jobQueueClientMock.findForJobIds = async () => mockJobsFound;
+jobQueueClientMock.getInfo = () =>
+  Promise.resolve({ content: 'this is the completed report data' } as unknown as Job);
+jobQueueClientMock.getError = () => Promise.resolve('this is the failed report error');
+jobQueueClientMock.getManagementLink = () => '/#management';
+jobQueueClientMock.getDownloadLink = () => '/reporting/download/job-123';
 
 const mockShowDanger = stub();
 const mockShowSuccess = stub();
 const mockShowWarning = stub();
-const notificationsMock = ({
+const notificationsMock = {
   toasts: {
     addDanger: mockShowDanger,
     addSuccess: mockShowSuccess,
     addWarning: mockShowWarning,
   },
-} as unknown) as NotificationsStart;
+} as unknown as NotificationsStart;
 
 describe('stream handler', () => {
   afterEach(() => {

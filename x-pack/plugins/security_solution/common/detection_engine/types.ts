@@ -1,25 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { AlertAction } from '../../../alerts/common';
+import { AlertAction } from '../../../alerting/common';
 
 export type RuleAlertAction = Omit<AlertAction, 'actionTypeId'> & {
   action_type_id: string;
 };
 
-export type SearchTypes =
-  | string
-  | string[]
-  | number
-  | number[]
-  | boolean
-  | boolean[]
-  | object
-  | object[]
-  | undefined;
+/**
+ * Defines the search types you can have from Elasticsearch within a
+ * doc._source. It uses recursive types of "| SearchTypes[]" to designate
+ * anything can also be of a type array, and it uses the recursive type of
+ * "| { [property: string]: SearchTypes }" to designate you can can sub-objects
+ * or sub-sub-objects, etc...
+ */
+export type SearchTypes = string | number | boolean | object | SearchTypes[] | undefined;
 
 export interface Explanation {
   value: number;
@@ -53,23 +52,5 @@ export interface EqlSearchResponse<T> {
     total: TotalValue;
     sequences?: Array<EqlSequence<T>>;
     events?: Array<BaseHit<T>>;
-  };
-}
-
-export interface BooleanFilter {
-  bool: {
-    must?: unknown | unknown[];
-    must_not?: unknown | unknown[];
-    should?: unknown[];
-    filter?: unknown | unknown[];
-    minimum_should_match?: number;
-  };
-}
-
-export interface NestedFilter {
-  nested: {
-    path: string;
-    query: unknown | unknown[];
-    score_mode: string;
   };
 }

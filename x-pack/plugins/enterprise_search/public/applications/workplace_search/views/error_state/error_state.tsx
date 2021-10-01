@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-// TODO: Remove EuiPage & EuiPageBody before exposing full app
-
 import React from 'react';
-import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
+
+import { KibanaPageTemplate } from '../../../../../../../../src/plugins/kibana_react/public';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { ErrorStatePrompt } from '../../../shared/error_state';
@@ -17,16 +17,14 @@ import { ViewContentHeader } from '../../components/shared/view_content_header';
 
 export const ErrorState: React.FC = () => {
   return (
-    <EuiPage restrictWidth>
+    <>
       <SetPageChrome />
       <SendTelemetry action="error" metric="cannot_connect" />
 
-      <EuiPageBody>
+      <KibanaPageTemplate isEmptyState>
         <ViewContentHeader title={WORKPLACE_SEARCH_PLUGIN.NAME} />
-        <EuiPageContent>
-          <ErrorStatePrompt />
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+        <ErrorStatePrompt />
+      </KibanaPageTemplate>
+    </>
   );
 };

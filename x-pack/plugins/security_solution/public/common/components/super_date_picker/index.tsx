@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import dateMath from '@elastic/datemath';
@@ -46,13 +47,13 @@ interface Range {
   display: string;
 }
 
-interface UpdateReduxTime extends OnTimeChangeProps {
+export interface UpdateReduxTime extends OnTimeChangeProps {
   id: InputsModelId;
   kql?: inputsModel.GlobalKqlQuery | undefined;
   timelineId?: string;
 }
 
-interface ReturnUpdateReduxTime {
+export interface ReturnUpdateReduxTime {
   kqlHaveBeenUpdated: boolean;
 }
 
@@ -90,6 +91,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     timelineId,
     toStr,
     updateReduxTime,
+    disabled,
   }) => {
     const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<EuiSuperDatePickerRecentRange[]>(
       []
@@ -200,6 +202,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
         refreshInterval={duration}
         showUpdateButton={true}
         start={startDate}
+        isDisabled={disabled}
       />
     );
   },
@@ -215,6 +218,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     prevProps.startAutoReload === nextProps.startAutoReload &&
     prevProps.stopAutoReload === nextProps.stopAutoReload &&
     prevProps.timelineId === nextProps.timelineId &&
+    prevProps.disabled === nextProps.disabled &&
     prevProps.toStr === nextProps.toStr &&
     prevProps.updateReduxTime === nextProps.updateReduxTime &&
     deepEqual(prevProps.kqlQuery, nextProps.kqlQuery) &&
@@ -231,67 +235,69 @@ export const formatDate = (
   return momentDate != null && momentDate.isValid() ? momentDate.toISOString() : '';
 };
 
-export const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({
-  end,
-  id,
-  isQuickSelection,
-  kql,
-  start,
-  timelineId,
-}: UpdateReduxTime): ReturnUpdateReduxTime => {
-  const fromDate = formatDate(start);
-  let toDate = formatDate(end, { roundUp: true });
-  if (isQuickSelection) {
-    if (end === start) {
+export const dispatchUpdateReduxTime =
+  (dispatch: Dispatch) =>
+  ({
+    end,
+    id,
+    isQuickSelection,
+    kql,
+    start,
+    timelineId,
+  }: UpdateReduxTime): ReturnUpdateReduxTime => {
+    const fromDate = formatDate(start);
+    let toDate = formatDate(end, { roundUp: true });
+    if (isQuickSelection) {
+      if (end === start) {
+        dispatch(
+          inputsActions.setAbsoluteRangeDatePicker({
+            id,
+            fromStr: start,
+            toStr: end,
+            from: fromDate,
+            to: toDate,
+          })
+        );
+      } else {
+        dispatch(
+          inputsActions.setRelativeRangeDatePicker({
+            id,
+            fromStr: start,
+            toStr: end,
+            from: fromDate,
+            to: toDate,
+          })
+        );
+      }
+    } else {
+      toDate = formatDate(end);
       dispatch(
         inputsActions.setAbsoluteRangeDatePicker({
           id,
-          fromStr: start,
-          toStr: end,
-          from: fromDate,
-          to: toDate,
-        })
-      );
-    } else {
-      dispatch(
-        inputsActions.setRelativeRangeDatePicker({
-          id,
-          fromStr: start,
-          toStr: end,
-          from: fromDate,
-          to: toDate,
+          from: formatDate(start),
+          to: formatDate(end),
         })
       );
     }
-  } else {
-    toDate = formatDate(end);
-    dispatch(
-      inputsActions.setAbsoluteRangeDatePicker({
-        id,
-        from: formatDate(start),
-        to: formatDate(end),
-      })
-    );
-  }
-  if (timelineId != null) {
-    dispatch(
-      timelineActions.updateRange({
-        id: timelineId,
-        start: fromDate,
-        end: toDate,
-      })
-    );
-  }
-  if (kql) {
-    return {
-      kqlHaveBeenUpdated: kql.refetch(dispatch),
-    };
-  }
+    if (timelineId != null) {
+      dispatch(
+        timelineActions.updateRange({
+          id: timelineId,
+          start: fromDate,
+          end: toDate,
+        })
+      );
+    }
+    if (kql) {
+      return {
+        kqlHaveBeenUpdated: kql.refetch(dispatch),
+      };
+    }
 
-  return {
-    kqlHaveBeenUpdated: false,
+    return {
+      kqlHaveBeenUpdated: false,
+    };
   };
-};
 
 export const makeMapStateToProps = () => {
   const getDurationSelector = durationSelector();

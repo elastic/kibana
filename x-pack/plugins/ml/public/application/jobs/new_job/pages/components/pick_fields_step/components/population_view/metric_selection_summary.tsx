@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
@@ -20,9 +21,12 @@ import { getToastNotificationService } from '../../../../../../../services/toast
 type DetectorFieldValues = Record<number, string[]>;
 
 export const PopulationDetectorsSummary: FC = () => {
-  const { jobCreator: jc, chartLoader, resultsLoader, chartInterval } = useContext(
-    JobCreatorContext
-  );
+  const {
+    jobCreator: jc,
+    chartLoader,
+    resultsLoader,
+    chartInterval,
+  } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator;
 
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>(
@@ -56,14 +60,14 @@ export const PopulationDetectorsSummary: FC = () => {
     if (allDataReady()) {
       loadCharts();
     }
-  }, [JSON.stringify(fieldValuesPerDetector), jobCreator.splitField]);
+  }, [JSON.stringify(fieldValuesPerDetector), jobCreator.populationField]);
 
   // watch for changes in split field or by fields.
   // load example field values
   // changes to fieldValues here will trigger the card effect via setFieldValuesPerDetector
   useEffect(() => {
     loadFieldExamples();
-  }, [jobCreator.splitField]);
+  }, [jobCreator.populationField]);
 
   async function loadCharts() {
     if (allDataReady()) {
@@ -75,8 +79,10 @@ export const PopulationDetectorsSummary: FC = () => {
           jobCreator.start,
           jobCreator.end,
           aggFieldPairList,
-          jobCreator.splitField,
-          cs.intervalMs
+          jobCreator.populationField,
+          cs.intervalMs,
+          jobCreator.runtimeMappings,
+          jobCreator.datafeedConfig.indices_options
         );
 
         setLineChartsData(resp);
@@ -96,7 +102,11 @@ export const PopulationDetectorsSummary: FC = () => {
           (async (index: number, field: Field) => {
             return {
               index,
-              fields: await chartLoader.loadFieldExampleValues(field),
+              fields: await chartLoader.loadFieldExampleValues(
+                field,
+                jobCreator.runtimeMappings,
+                jobCreator.datafeedConfig.indices_options
+              ),
             };
           })(i, af.by.field)
         );
@@ -136,18 +146,18 @@ export const PopulationDetectorsSummary: FC = () => {
 
   return (
     <Fragment>
-      {jobCreator.splitField !== null && (
+      {jobCreator.populationField !== null && (
         <Fragment>
           <FormattedMessage
             id="xpack.ml.newJob.wizard.pickFieldsStep.populationView.splitFieldTitle"
             defaultMessage="Population split by {field}"
-            values={{ field: jobCreator.splitField.name }}
+            values={{ field: jobCreator.populationField.name }}
           />
           <EuiSpacer />
           <ChartGrid
             aggFieldPairList={jobCreator.aggFieldPairs}
             chartSettings={chartSettings}
-            splitField={jobCreator.splitField}
+            splitField={jobCreator.populationField}
             lineChartsData={lineChartsData}
             modelData={modelData}
             anomalyData={anomalyData}

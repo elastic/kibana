@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -24,7 +13,12 @@ import { DashboardPanelState, DASHBOARD_GRID_COLUMN_COUNT } from '..';
 
 export type PanelPlacementMethod<PlacementArgs extends IPanelPlacementArgs> = (
   args: PlacementArgs
-) => Omit<GridData, 'i'>;
+) => PanelPlacementMethodReturn;
+
+interface PanelPlacementMethodReturn {
+  newPanelPlacement: Omit<GridData, 'i'>;
+  otherPanels: { [key: string]: DashboardPanelState };
+}
 
 export interface IPanelPlacementArgs {
   width: number;
@@ -41,7 +35,7 @@ export function findTopLeftMostOpenSpace({
   width,
   height,
   currentPanels,
-}: IPanelPlacementArgs): Omit<GridData, 'i'> {
+}: IPanelPlacementArgs): PanelPlacementMethodReturn {
   let maxY = -1;
 
   const currentPanelsArray = Object.values(currentPanels);
@@ -51,7 +45,7 @@ export function findTopLeftMostOpenSpace({
 
   // Handle case of empty grid.
   if (maxY < 0) {
-    return { x: 0, y: 0, w: width, h: height };
+    return { newPanelPlacement: { x: 0, y: 0, w: width, h: height }, otherPanels: currentPanels };
   }
 
   const grid = new Array(maxY);
@@ -91,7 +85,10 @@ export function findTopLeftMostOpenSpace({
 
             if (spaceIsEmpty && fitsPanelWidth && fitsPanelHeight) {
               // Found space
-              return { x, y, w: width, h: height };
+              return {
+                newPanelPlacement: { x, y, w: width, h: height },
+                otherPanels: currentPanels,
+              };
             } else if (grid[h][w] === 1) {
               // x, y spot doesn't work, break.
               break;
@@ -101,7 +98,7 @@ export function findTopLeftMostOpenSpace({
       }
     }
   }
-  return { x: 0, y: maxY, w: width, h: height };
+  return { newPanelPlacement: { x: 0, y: maxY, w: width, h: height }, otherPanels: currentPanels };
 }
 
 interface IplacementDirection {
@@ -134,15 +131,15 @@ export function placePanelBeside({
   height,
   currentPanels,
   placeBesideId,
-}: IPanelPlacementBesideArgs): Omit<GridData, 'i'> {
+}: IPanelPlacementBesideArgs): PanelPlacementMethodReturn {
   const panelToPlaceBeside = currentPanels[placeBesideId];
   if (!panelToPlaceBeside) {
     throw new PanelNotFoundError();
   }
   const beside = panelToPlaceBeside.gridData;
-  const otherPanels: GridData[] = [];
+  const otherPanelGridData: GridData[] = [];
   _.forOwn(currentPanels, (panel: DashboardPanelState, key: string | undefined) => {
-    otherPanels.push(panel.gridData);
+    otherPanelGridData.push(panel.gridData);
   });
 
   const possiblePlacementDirections: IplacementDirection[] = [
@@ -158,7 +155,7 @@ export function placePanelBeside({
       direction.grid.x + direction.grid.w <= DASHBOARD_GRID_COLUMN_COUNT &&
       direction.grid.y >= 0
     ) {
-      const intersection = otherPanels.some((currentPanelGrid: GridData) => {
+      const intersection = otherPanelGridData.some((currentPanelGrid: GridData) => {
         return (
           direction.grid.x + direction.grid.w > currentPanelGrid.x &&
           direction.grid.x < currentPanelGrid.x + currentPanelGrid.w &&
@@ -167,7 +164,7 @@ export function placePanelBeside({
         );
       });
       if (!intersection) {
-        return direction.grid;
+        return { newPanelPlacement: direction.grid, otherPanels: currentPanels };
       }
     } else {
       direction.fits = false;
@@ -179,7 +176,8 @@ export function placePanelBeside({
    * 2. place the cloned panel to the bottom
    * 3. reposition the panels after the cloned panel in the grid
    */
-  const grid = otherPanels.sort(comparePanels);
+  const otherPanels = { ...currentPanels };
+  const grid = otherPanelGridData.sort(comparePanels);
 
   let position = 0;
   for (position; position < grid.length; position++) {
@@ -193,13 +191,13 @@ export function placePanelBeside({
   const diff =
     bottomPlacement.grid.y +
     bottomPlacement.grid.h -
-    currentPanels[originalPositionInTheGrid].gridData.y;
+    otherPanels[originalPositionInTheGrid].gridData.y;
 
   for (let j = position + 1; j < grid.length; j++) {
     originalPositionInTheGrid = grid[j].i;
-    const movedPanel = _.cloneDeep(currentPanels[originalPositionInTheGrid]);
+    const movedPanel = _.cloneDeep(otherPanels[originalPositionInTheGrid]);
     movedPanel.gridData.y = movedPanel.gridData.y + diff;
-    currentPanels[originalPositionInTheGrid] = movedPanel;
+    otherPanels[originalPositionInTheGrid] = movedPanel;
   }
-  return bottomPlacement.grid;
+  return { newPanelPlacement: bottomPlacement.grid, otherPanels };
 }

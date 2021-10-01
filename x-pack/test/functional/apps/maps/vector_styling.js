@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -33,7 +34,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.maps.setStyleByValue('fillColor', 'machine.os.raw');
         await PageObjects.maps.selectCustomColorRamp('fillColor');
         const suggestions = await PageObjects.maps.getCategorySuggestions();
-        expect(suggestions.trim().split('\n').join()).to.equal('win 8,win xp,win 7,ios,osx');
+        expect(suggestions.trim().split('\n').join()).to.equal('ios,osx,win 7,win 8,win xp');
       });
     });
   });

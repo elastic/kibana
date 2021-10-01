@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { HttpStart } from 'src/core/public';
-import { Role, RoleIndexPrivilege, copyRole } from '../../../common/model';
+import type { HttpStart } from 'src/core/public';
+
+import type { Role, RoleIndexPrivilege } from '../../../common/model';
+import { copyRole } from '../../../common/model';
 import { isGlobalPrivilegeDefinition } from './edit_role/privilege_utils';
 
 export class RolesAPIClient {

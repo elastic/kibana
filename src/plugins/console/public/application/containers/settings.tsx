@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import React from 'react';
 
 import { AutocompleteOptions, DevToolsSettingsModal } from '../components';
@@ -25,14 +15,20 @@ import { retrieveAutoCompleteInfo } from '../../lib/mappings/mappings';
 import { useServicesContext, useEditorActionContext } from '../contexts';
 import { DevToolsSettings, Settings as SettingsService } from '../../services';
 
-const getAutocompleteDiff = (newSettings: DevToolsSettings, prevSettings: DevToolsSettings) => {
+const getAutocompleteDiff = (
+  newSettings: DevToolsSettings,
+  prevSettings: DevToolsSettings
+): AutocompleteOptions[] => {
   return Object.keys(newSettings.autocomplete).filter((key) => {
     // @ts-ignore
     return prevSettings.autocomplete[key] !== newSettings.autocomplete[key];
-  });
+  }) as AutocompleteOptions[];
 };
 
-const refreshAutocompleteSettings = (settings: SettingsService, selectedSettings: any) => {
+const refreshAutocompleteSettings = (
+  settings: SettingsService,
+  selectedSettings: DevToolsSettings['autocomplete']
+) => {
   retrieveAutoCompleteInfo(settings, selectedSettings);
 };
 
@@ -54,12 +50,12 @@ const fetchAutocompleteSettingsIfNeeded = (
     if (isSettingsChanged) {
       // If the user has changed one of the autocomplete settings, then we'll fetch just the
       // ones which have changed.
-      const changedSettings: any = autocompleteDiff.reduce(
-        (changedSettingsAccum: any, setting: string): any => {
-          changedSettingsAccum[setting] = newSettings.autocomplete[setting as AutocompleteOptions];
+      const changedSettings: DevToolsSettings['autocomplete'] = autocompleteDiff.reduce(
+        (changedSettingsAccum, setting) => {
+          changedSettingsAccum[setting] = newSettings.autocomplete[setting];
           return changedSettingsAccum;
         },
-        {}
+        {} as DevToolsSettings['autocomplete']
       );
       retrieveAutoCompleteInfo(settings, changedSettings);
     } else if (isPollingChanged && newSettings.polling) {
@@ -99,7 +95,7 @@ export function Settings({ onClose }: Props) {
     <DevToolsSettingsModal
       onClose={onClose}
       onSaveSettings={onSaveSettings}
-      refreshAutocompleteSettings={(selectedSettings: any) =>
+      refreshAutocompleteSettings={(selectedSettings) =>
         refreshAutocompleteSettings(settings, selectedSettings)
       }
       settings={settings.toJSON()}

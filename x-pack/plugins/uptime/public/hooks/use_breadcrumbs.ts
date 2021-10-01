@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ChromeBreadcrumb } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { useEffect } from 'react';
+import { MouseEvent, useEffect } from 'react';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { UptimeUrlParams } from '../lib/helper';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
@@ -16,44 +17,71 @@ import { PLUGIN } from '../../common/constants/plugin';
 
 const EMPTY_QUERY = '?';
 
+function handleBreadcrumbClick(
+  breadcrumbs: ChromeBreadcrumb[],
+  navigateToHref?: (url: string) => Promise<void>
+) {
+  return breadcrumbs.map((bc) => ({
+    ...bc,
+    ...(bc.href
+      ? {
+          onClick: (event: MouseEvent) => {
+            if (navigateToHref && bc.href) {
+              event.preventDefault();
+              navigateToHref(bc.href);
+            }
+          },
+        }
+      : {}),
+  }));
+}
+
 export const makeBaseBreadcrumb = (
-  href: string,
-  navigateToHref?: (url: string) => Promise<void>,
+  uptimePath: string,
+  observabilityPath: string,
   params?: UptimeUrlParams
-): EuiBreadcrumb => {
+): [EuiBreadcrumb, EuiBreadcrumb] => {
   if (params) {
     const crumbParams: Partial<UptimeUrlParams> = { ...params };
-    // We don't want to encode this values because they are often set to Date.now(), the relative
-    // values in dateRangeStart are better for a URL.
-    delete crumbParams.absoluteDateRangeStart;
-    delete crumbParams.absoluteDateRangeEnd;
+
     delete crumbParams.statusFilter;
     const query = stringifyUrlParams(crumbParams, true);
-    href += query === EMPTY_QUERY ? '' : query;
+    uptimePath += query === EMPTY_QUERY ? '' : query;
   }
-  return {
-    text: i18n.translate('xpack.uptime.breadcrumbs.overviewBreadcrumbText', {
-      defaultMessage: 'Uptime',
-    }),
-    href,
-    onClick: (event) => {
-      if (href && navigateToHref) {
-        event.preventDefault();
-        navigateToHref(href);
-      }
+
+  return [
+    {
+      text: i18n.translate('xpack.uptime.breadcrumbs.observabilityText', {
+        defaultMessage: 'Observability',
+      }),
+      href: observabilityPath,
     },
-  };
+    {
+      text: i18n.translate('xpack.uptime.breadcrumbs.overviewBreadcrumbText', {
+        defaultMessage: 'Uptime',
+      }),
+      href: uptimePath,
+    },
+  ];
 };
 
 export const useBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
   const params = useUrlParams()[0]();
   const kibana = useKibana();
   const setBreadcrumbs = kibana.services.chrome?.setBreadcrumbs;
-  const appPath = kibana.services.application?.getUrlForApp(PLUGIN.ID) ?? '';
+  const uptimePath = kibana.services.application?.getUrlForApp(PLUGIN.ID) ?? '';
+  const observabilityPath =
+    kibana.services.application?.getUrlForApp('observability-overview') ?? '';
   const navigate = kibana.services.application?.navigateToUrl;
+
   useEffect(() => {
     if (setBreadcrumbs) {
-      setBreadcrumbs([makeBaseBreadcrumb(appPath, navigate, params)].concat(extraCrumbs));
+      setBreadcrumbs(
+        handleBreadcrumbClick(
+          makeBaseBreadcrumb(uptimePath, observabilityPath, params).concat(extraCrumbs),
+          navigate
+        )
+      );
     }
-  }, [appPath, extraCrumbs, navigate, params, setBreadcrumbs]);
+  }, [uptimePath, observabilityPath, extraCrumbs, navigate, params, setBreadcrumbs]);
 };

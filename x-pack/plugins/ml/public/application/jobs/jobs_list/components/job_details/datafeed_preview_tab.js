@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -9,7 +10,7 @@ import React, { Component } from 'react';
 
 import { EuiSpacer, EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 
-import { mlJobService } from '../../../../services/job_service';
+import { ml } from '../../../../services/ml_api_service';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { ML_DATA_PREVIEW_COUNT } from '../../../../../../common/util/job_utils';
 import { MLJobEditor } from '../ml_job_editor';
@@ -87,8 +88,8 @@ DatafeedPreviewPane.propTypes = {
 function updateDatafeedPreview(job, canPreviewDatafeed) {
   return new Promise((resolve, reject) => {
     if (canPreviewDatafeed) {
-      mlJobService
-        .getDatafeedPreview(job.datafeed_config.datafeed_id)
+      ml.jobs
+        .datafeedPreview(job.datafeed_config.datafeed_id)
         .then((resp) => {
           if (Array.isArray(resp)) {
             resolve(JSON.stringify(resp.slice(0, ML_DATA_PREVIEW_COUNT), null, 2));

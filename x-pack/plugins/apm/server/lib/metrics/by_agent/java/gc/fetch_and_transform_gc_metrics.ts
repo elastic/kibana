@@ -1,17 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { sum, round } from 'lodash';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
+import { isFiniteNumber } from '../../../../../../common/utils/is_finite_number';
+import { Setup } from '../../../../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 import { ChartBase } from '../../../types';
 import { getMetricsProjection } from '../../../../../projections/metrics';
@@ -24,28 +21,42 @@ import {
 } from '../../../../../../common/elasticsearch_fieldnames';
 import { getBucketSize } from '../../../../helpers/get_bucket_size';
 import { getVizColorForIndex } from '../../../../../../common/viz_colors';
+import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
 
 export async function fetchAndTransformGcMetrics({
+  environment,
+  kuery,
   setup,
   serviceName,
   serviceNodeName,
   chartBase,
   fieldName,
+  operationName,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  environment: string;
+  kuery: string;
+  setup: Setup;
   serviceName: string;
   serviceNodeName?: string;
+  start: number;
+  end: number;
   chartBase: ChartBase;
   fieldName: typeof METRIC_JAVA_GC_COUNT | typeof METRIC_JAVA_GC_TIME;
+  operationName: string;
 }) {
-  const { start, end, apmEventClient, config } = setup;
+  const { apmEventClient, config } = setup;
 
   const { bucketSize } = getBucketSize({ start, end });
 
   const projection = getMetricsProjection({
-    setup,
+    environment,
+    kuery,
     serviceName,
     serviceNodeName,
+    start,
+    end,
   });
 
   // GC rate and time are reported by the agents as monotonically
@@ -60,7 +71,7 @@ export async function fetchAndTransformGcMetrics({
           filter: [
             ...projection.body.query.bool.filter,
             { exists: { field: fieldName } },
-            { term: { [AGENT_NAME]: 'java' } },
+            { terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } },
           ],
         },
       },
@@ -71,11 +82,11 @@ export async function fetchAndTransformGcMetrics({
           },
           aggs: {
             timeseries: {
-              date_histogram: getMetricsDateHistogramParams(
+              date_histogram: getMetricsDateHistogramParams({
                 start,
                 end,
-                config['xpack.apm.metricsInterval']
-              ),
+                metricsInterval: config['xpack.apm.metricsInterval'],
+              }),
               aggs: {
                 // get the max value
                 max: {
@@ -105,7 +116,7 @@ export async function fetchAndTransformGcMetrics({
     },
   });
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search(operationName, params);
 
   const { aggregations } = response;
 
@@ -124,10 +135,9 @@ export async function fetchAndTransformGcMetrics({
     const data = timeseriesData.buckets.map((bucket) => {
       // derivative/value will be undefined for the first hit and if the `max` value is null
       const bucketValue = bucket.value?.value;
-      const y =
-        bucketValue !== null && bucketValue !== undefined && bucket.value
-          ? round(bucketValue * (60 / bucketSize), 1)
-          : null;
+      const y = isFiniteNumber(bucketValue)
+        ? round(bucketValue * (60 / bucketSize), 1)
+        : null;
 
       return {
         y,

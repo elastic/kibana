@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageContent } from '@elastic/eui';
 import React from 'react';
 
 interface Props {
@@ -22,9 +23,17 @@ export const SectionError: React.FunctionComponent<Props> = ({
   const errorMessage = error?.message ?? JSON.stringify(error, null, 2);
 
   return (
-    <EuiCallOut title={title} color="danger" iconType="alert" {...rest}>
-      <pre>{errorMessage}</pre>
-      {actions ? actions : null}
-    </EuiCallOut>
+    <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+      <EuiEmptyPrompt
+        iconType="alert"
+        title={<h2>{title}</h2>}
+        body={
+          <p>
+            <pre>{errorMessage}</pre>
+            {actions ? actions : null}
+          </p>
+        }
+      />
+    </EuiPageContent>
   );
 };

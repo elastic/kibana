@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState, useCallback, useEffect } from 'react';
-import uuid from 'uuid';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
 
@@ -35,11 +36,6 @@ export const SimulateTemplate = React.memo(({ template, filters }: Props) => {
     }
 
     const indexTemplate = serializeTemplate(stripEmptyFields(template) as TemplateDeserialized);
-
-    // Until ES fixes a bug on their side we will send a random index pattern to the simulate API.
-    // Issue: https://github.com/elastic/elasticsearch/issues/59152
-    indexTemplate.index_patterns = [uuid.v4()];
-
     const { data, error } = await simulateIndexTemplate(indexTemplate);
     let filteredTemplate = data;
 

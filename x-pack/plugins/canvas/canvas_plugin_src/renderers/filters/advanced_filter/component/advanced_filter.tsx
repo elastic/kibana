@@ -1,15 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import PropTypes from 'prop-types';
 import React, { FunctionComponent } from 'react';
-import { ComponentStrings } from '../../../../../i18n';
+import PropTypes from 'prop-types';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-const { AdvancedFilter: strings } = ComponentStrings;
+const strings = {
+  getApplyButtonLabel: () =>
+    i18n.translate('xpack.canvas.renderer.advancedFilter.applyButtonLabel', {
+      defaultMessage: 'Apply',
+      description: 'This refers to applying the filter to the Canvas workpad',
+    }),
+  getInputPlaceholder: () =>
+    i18n.translate('xpack.canvas.renderer.advancedFilter.inputPlaceholder', {
+      defaultMessage: 'Enter filter expression',
+    }),
+};
 
 export interface Props {
   /** Optional value for the component */

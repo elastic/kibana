@@ -1,29 +1,27 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { BehaviorSubject, Observable, combineLatest, of } from 'rxjs';
-import { map, distinctUntilChanged, switchMap, debounceTime } from 'rxjs/operators';
+import {
+  map,
+  distinctUntilChanged,
+  switchMap,
+  debounceTime,
+  timeoutWith,
+  startWith,
+} from 'rxjs/operators';
 import { isDeepStrictEqual } from 'util';
 
 import { PluginName } from '../plugins';
-import { ServiceStatus, CoreStatus } from './types';
+import { ServiceStatus, CoreStatus, ServiceStatusLevels } from './types';
 import { getSummaryStatus } from './get_summary_status';
+
+const STATUS_TIMEOUT_MS = 30 * 1000; // 30 seconds
 
 interface Deps {
   core$: Observable<CoreStatus>;
@@ -34,6 +32,7 @@ export class PluginsStatusService {
   private readonly pluginStatuses = new Map<PluginName, Observable<ServiceStatus>>();
   private readonly update$ = new BehaviorSubject(true);
   private readonly defaultInheritedStatus$: Observable<ServiceStatus>;
+  private newRegistrationsAllowed = true;
 
   constructor(private readonly deps: Deps) {
     this.defaultInheritedStatus$ = this.deps.core$.pipe(
@@ -46,8 +45,17 @@ export class PluginsStatusService {
   }
 
   public set(plugin: PluginName, status$: Observable<ServiceStatus>) {
+    if (!this.newRegistrationsAllowed) {
+      throw new Error(
+        `Custom statuses cannot be registered after setup, plugin [${plugin}] attempted`
+      );
+    }
     this.pluginStatuses.set(plugin, status$);
     this.update$.next(true); // trigger all existing Observables to update from the new source Observable
+  }
+
+  public blockNewRegistrations() {
+    this.newRegistrationsAllowed = false;
   }
 
   public getAll$(): Observable<Record<PluginName, ServiceStatus>> {
@@ -62,12 +70,13 @@ export class PluginsStatusService {
 
     return this.getPluginStatuses$(dependencies).pipe(
       // Prevent many emissions at once from dependency status resolution from making this too noisy
-      debounceTime(500)
+      debounceTime(25)
     );
   }
 
   public getDerivedStatus$(plugin: PluginName): Observable<ServiceStatus> {
     return this.update$.pipe(
+      debounceTime(25), // Avoid calling the plugin's custom status logic for every plugin that depends on it.
       switchMap(() => {
         // Only go up the dependency tree if any of this plugin's dependencies have a custom status
         // Helps eliminate memory overhead of creating thousands of Observables unnecessarily.
@@ -97,13 +106,22 @@ export class PluginsStatusService {
     return this.update$.pipe(
       switchMap(() => {
         const pluginStatuses = plugins
-          .map(
-            (depName) =>
-              [depName, this.pluginStatuses.get(depName) ?? this.getDerivedStatus$(depName)] as [
-                PluginName,
-                Observable<ServiceStatus>
-              ]
-          )
+          .map((depName) => {
+            const pluginStatus = this.pluginStatuses.get(depName)
+              ? this.pluginStatuses.get(depName)!.pipe(
+                  timeoutWith(
+                    STATUS_TIMEOUT_MS,
+                    this.pluginStatuses.get(depName)!.pipe(
+                      startWith({
+                        level: ServiceStatusLevels.unavailable,
+                        summary: `Status check timed out after ${STATUS_TIMEOUT_MS / 1000}s`,
+                      })
+                    )
+                  )
+                )
+              : this.getDerivedStatus$(depName);
+            return [depName, pluginStatus] as [PluginName, Observable<ServiceStatus>];
+          })
           .map(([pName, status$]) =>
             status$.pipe(map((status) => [pName, status] as [PluginName, ServiceStatus]))
           );

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Boom from '@hapi/boom';
@@ -447,6 +436,47 @@ describe('savedObjectsClient/errorTypes', () => {
           SavedObjectsErrorHelpers.decorateGeneralError(error);
           expect(error.output).toHaveProperty('statusCode', 404);
         });
+      });
+    });
+  });
+
+  describe('NotFoundEsUnavailableError', () => {
+    it('makes an error identifiable as an EsUnavailable error', () => {
+      const error = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('foo', 'bar');
+      expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(true);
+    });
+
+    it('returns a boom error', () => {
+      const error = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('foo', 'bar');
+      expect(error).toHaveProperty('isBoom', true);
+    });
+
+    it('decorates the error message with the saved object that was not found', () => {
+      const error = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('foo', 'bar');
+      expect(error.output.payload).toHaveProperty(
+        'message',
+        'x-elastic-product not present or not recognized: Saved object [foo/bar] not found'
+      );
+    });
+
+    describe('error.output', () => {
+      it('specifies the saved object that was not found', () => {
+        const error = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(
+          'foo',
+          'bar'
+        );
+        expect(error.output.payload).toHaveProperty(
+          'message',
+          'x-elastic-product not present or not recognized: Saved object [foo/bar] not found'
+        );
+      });
+
+      it('sets statusCode to 503', () => {
+        const error = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(
+          'foo',
+          'bar'
+        );
+        expect(error.output).toHaveProperty('statusCode', 503);
       });
     });
   });

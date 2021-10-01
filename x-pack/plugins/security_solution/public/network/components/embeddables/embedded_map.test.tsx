@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount, ReactWrapper, shallow } from 'enzyme';
@@ -31,7 +32,12 @@ jest.mock('../../../common/lib/kibana', () => {
         embeddable: {
           EmbeddablePanel: jest.fn(() => <div data-test-subj="EmbeddablePanel" />),
         },
-        docLinks: { ELASTIC_WEBSITE_URL: 'ELASTIC_WEBSITE_URL' },
+        docLinks: {
+          ELASTIC_WEBSITE_URL: 'ELASTIC_WEBSITE_URL',
+          links: {
+            siem: { networkMap: '' },
+          },
+        },
       },
     }),
   };

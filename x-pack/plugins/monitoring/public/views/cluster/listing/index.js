@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -12,12 +13,17 @@ import { MonitoringViewBaseEuiTableController } from '../../';
 import template from './index.html';
 import { Listing } from '../../../components/cluster/listing';
 import { CODE_PATH_ALL } from '../../../../common/constants';
+import { EnableAlertsModal } from '../../../alerts/enable_alerts_modal.tsx';
 
 const CODE_PATHS = [CODE_PATH_ALL];
 
 const getPageData = ($injector) => {
   const monitoringClusters = $injector.get('monitoringClusters');
   return monitoringClusters(undefined, undefined, CODE_PATHS);
+};
+
+const getAlerts = (clusters) => {
+  return clusters.reduce((alerts, cluster) => ({ ...alerts, ...cluster.alerts.list }), {});
 };
 
 uiRoutes
@@ -70,18 +76,21 @@ uiRoutes
           () => this.data,
           (data) => {
             this.renderReact(
-              <Listing
-                clusters={data}
-                angular={{
-                  scope: $scope,
-                  globalState,
-                  storage,
-                  showLicenseExpiration,
-                }}
-                sorting={this.sorting}
-                pagination={this.pagination}
-                onTableChange={this.onTableChange}
-              />
+              <>
+                <Listing
+                  clusters={data}
+                  angular={{
+                    scope: $scope,
+                    globalState,
+                    storage,
+                    showLicenseExpiration,
+                  }}
+                  sorting={this.sorting}
+                  pagination={this.pagination}
+                  onTableChange={this.onTableChange}
+                />
+                <EnableAlertsModal alerts={getAlerts(this.data)} />
+              </>
             );
           }
         );

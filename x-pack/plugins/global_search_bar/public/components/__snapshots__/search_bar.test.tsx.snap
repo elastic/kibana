@@ -33,7 +33,7 @@ exports[`SearchBar supports keyboard shortcuts 1`] = `
 <input
   aria-activedescendant=""
   aria-haspopup="listbox"
-  aria-label="Filter options"
+  aria-label="Search Elastic"
   autocomplete="off"
   class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch euiSelectableTemplateSitewide__search kbnSearchBar"
   data-test-subj="nav-search-input"

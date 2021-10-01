@@ -1,16 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useRule, ReturnRule } from './use_rule';
 import * as api from './api';
+import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
 jest.mock('./api');
+jest.mock('../../../../common/hooks/use_app_toasts');
 
 describe('useRule', () => {
+  (useAppToasts as jest.Mock).mockReturnValue(useAppToastsMock.create());
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('init', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, ReturnRule>(() =>
@@ -44,6 +54,7 @@ describe('useRule', () => {
           immutable: false,
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',

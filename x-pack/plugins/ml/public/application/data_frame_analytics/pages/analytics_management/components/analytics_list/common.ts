@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiTableActionsColumnType, Query, Ast } from '@elastic/eui';
@@ -70,9 +71,11 @@ export function getDataFrameAnalyticsProgress(stats: DataFrameAnalyticsStats) {
   return undefined;
 }
 
-export function getDataFrameAnalyticsProgressPhase(
-  stats: DataFrameAnalyticsStats
-): { currentPhase: number; progress: number; totalPhases: number } {
+export function getDataFrameAnalyticsProgressPhase(stats: DataFrameAnalyticsStats): {
+  currentPhase: number;
+  progress: number;
+  totalPhases: number;
+} {
   let phase = 0;
   let progress = 0;
 

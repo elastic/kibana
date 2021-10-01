@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -37,7 +26,7 @@ import {
 
 import { InternalApplicationStart } from '../../../application';
 import { GITHUB_CREATE_ISSUE_LINK, KIBANA_FEEDBACK_LINK } from '../../constants';
-import { ChromeHelpExtension } from '../../chrome_service';
+import { ChromeHelpExtension } from '../../types';
 import { HeaderExtension } from './header_extension';
 import { isModifiedOrPrevented } from './nav_link';
 
@@ -222,7 +211,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
 
     return (
       <Fragment>
-        <EuiButtonEmpty href={kibanaDocLink} target="_blank" size="xs" flush="left">
+        <EuiButtonEmpty href={kibanaDocLink} target="_blank" size="s" flush="left">
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle"
             defaultMessage="Kibana documentation"
@@ -231,7 +220,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
 
         <EuiSpacer size="xs" />
 
-        <EuiButtonEmpty href={helpSupportUrl} target="_blank" size="xs" flush="left">
+        <EuiButtonEmpty href={helpSupportUrl} target="_blank" size="s" flush="left">
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle"
             defaultMessage="Ask Elastic"
@@ -240,7 +229,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
 
         <EuiSpacer size="xs" />
 
-        <EuiButtonEmpty href={KIBANA_FEEDBACK_LINK} target="_blank" size="xs" flush="left">
+        <EuiButtonEmpty href={KIBANA_FEEDBACK_LINK} target="_blank" size="s" flush="left">
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle"
             defaultMessage="Give feedback"
@@ -252,7 +241,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
         <EuiButtonEmpty
           href={GITHUB_CREATE_ISSUE_LINK}
           target="_blank"
-          size="xs"
+          size="s"
           iconType="logoGithub"
           flush="left"
         >
@@ -341,7 +330,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
         {customLinks}
         {content && (
           <>
-            {customLinks && <EuiSpacer size="s" />}
+            {customLinks && <EuiSpacer size="xs" />}
             <HeaderExtension extension={content} />
           </>
         )}
@@ -394,7 +383,7 @@ const createCustomLink = (
 ) => {
   return (
     <Fragment key={`helpButton${index}`}>
-      <EuiButtonEmpty {...buttonProps} size="xs" flush="left">
+      <EuiButtonEmpty {...buttonProps} size="s" flush="left">
         {text}
       </EuiButtonEmpty>
       {addSpacer && <EuiSpacer size="xs" />}

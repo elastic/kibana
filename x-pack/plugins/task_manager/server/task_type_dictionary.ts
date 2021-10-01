@@ -1,25 +1,67 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import Joi from 'joi';
-import { TaskDefinition, validateTaskDefinition } from './task';
+
+import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction } from './task';
 import { Logger } from '../../../../src/core/server';
 
-/*
- * The TaskManager is the public interface into the task manager system. This glues together
- * all of the disparate modules in one integration point. The task manager operates in two different ways:
- *
- * - pre-init, it allows middleware registration, but disallows task manipulation
- * - post-init, it disallows middleware registration, but allows task manipulation
- *
- * Due to its complexity, this is mostly tested by integration tests (see readme).
+/**
+ * Defines a task which can be scheduled and run by the Kibana
+ * task manager.
  */
+export interface TaskRegisterDefinition {
+  /**
+   * A brief, human-friendly title for this task.
+   */
+  title?: string;
+  /**
+   * How long, in minutes or seconds, the system should wait for the task to complete
+   * before it is considered to be timed out. (e.g. '5m', the default). If
+   * the task takes longer than this, Kibana will send it a kill command and
+   * the task will be re-attempted.
+   */
+  timeout?: string;
+  /**
+   * An optional more detailed description of what this task does.
+   */
+  description?: string;
+  /**
+   * Function that customizes how the task should behave when the task fails. This
+   * function can return `true`, `false` or a Date. True will tell task manager
+   * to retry using default delay logic. False will tell task manager to stop retrying
+   * this task. Date will suggest when to the task manager the task should retry.
+   * This function isn't used for recurring tasks, those retry as per their configured recurring schedule.
+   */
+  getRetry?: (attempts: number, error: object) => boolean | Date;
+
+  /**
+   * Creates an object that has a run function which performs the task's work,
+   * and an optional cancel function which cancels the task.
+   */
+  createTaskRunner: TaskRunCreatorFunction;
+
+  /**
+   * Up to how many times the task should retry when it fails to run. This will
+   * default to the global variable. The default value, if not specified, is 1.
+   */
+  maxAttempts?: number;
+  /**
+   * The maximum number tasks of this type that can be run concurrently per Kibana instance.
+   * Setting this value will force Task Manager to poll for this task type separately from other task types
+   * which can add significant load to the ES cluster, so please use this configuration only when absolutely necessary.
+   * The default value, if not given, is 0.
+   */
+  maxConcurrency?: number;
+}
 
 /**
- * The public interface into the task manager system.
+ * A mapping of task type id to the task definition.
  */
+export type TaskDefinitionRegistry = Record<string, TaskRegisterDefinition>;
+
 export class TaskTypeDictionary {
   private definitions = new Map<string, TaskDefinition>();
   private logger: Logger;
@@ -34,6 +76,10 @@ export class TaskTypeDictionary {
 
   public getAllTypes() {
     return [...this.definitions.keys()];
+  }
+
+  public getAllDefinitions() {
+    return [...this.definitions.values()];
   }
 
   public has(type: string) {
@@ -57,7 +103,7 @@ export class TaskTypeDictionary {
    * Method for allowing consumers to register task definitions into the system.
    * @param taskDefinitions - The Kibana task definitions dictionary
    */
-  public registerTaskDefinitions(taskDefinitions: Record<string, Omit<TaskDefinition, 'type'>>) {
+  public registerTaskDefinitions(taskDefinitions: TaskDefinitionRegistry) {
     const duplicate = Object.keys(taskDefinitions).find((type) => this.definitions.has(type));
     if (duplicate) {
       throw new Error(`Task ${duplicate} is already defined!`);
@@ -79,10 +125,8 @@ export class TaskTypeDictionary {
  *
  * @param taskDefinitions - The Kibana task definitions dictionary
  */
-export function sanitizeTaskDefinitions(
-  taskDefinitions: Record<string, Omit<TaskDefinition, 'type'>>
-): TaskDefinition[] {
-  return Object.entries(taskDefinitions).map(([type, rawDefinition]) =>
-    Joi.attempt<TaskDefinition>({ type, ...rawDefinition }, validateTaskDefinition)
-  );
+export function sanitizeTaskDefinitions(taskDefinitions: TaskDefinitionRegistry): TaskDefinition[] {
+  return Object.entries(taskDefinitions).map(([type, rawDefinition]) => {
+    return taskDefinitionSchema.validate({ type, ...rawDefinition }) as TaskDefinition;
+  });
 }

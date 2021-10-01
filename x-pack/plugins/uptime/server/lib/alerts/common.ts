@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isRight } from 'fp-ts/lib/Either';
+import Mustache from 'mustache';
 import { UptimeCommonState, UptimeCommonStateType } from '../../../common/runtime_types';
 
 export type UpdateUptimeAlertState = (
@@ -53,4 +55,8 @@ export const updateState: UpdateUptimeAlertState = (state, isTriggeredNow) => {
     lastResolvedAt: !isTriggeredNow && wasTriggered ? now : lastResolvedAt,
     isTriggered: isTriggeredNow,
   };
+};
+
+export const generateAlertMessage = (messageTemplate: string, fields: Record<string, any>) => {
+  return Mustache.render(messageTemplate, { state: { ...fields } });
 };

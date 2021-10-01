@@ -6,46 +6,45 @@
   @include euiFlyout;
   // But with custom positioning to keep it within the sidebar contents
   position: absolute;
-  right: 0;
   left: 0;
-  top: 0;
-  bottom: 0;
   animation: euiFlyout $euiAnimSpeedNormal $euiAnimSlightResistance;
-}
 
-.lnsDimensionContainer__footer {
-  padding: $euiSizeS;
+  @include euiBreakpoint('l', 'xl') {
+    top: 0 !important;
+    height: 100% !important;
+  }
+
+  @include euiBreakpoint('xs', 's', 'm') {
+    @include euiFlyout;
+  }
+
+  .lnsFrameLayout__sidebar-isFullscreen & {
+    border-left: $euiBorderThin; // Force border regardless of theme in fullscreen
+    box-shadow: none;
+  }
 }
 
 .lnsDimensionContainer__header {
-  padding: $euiSizeS $euiSizeXS;
-}
+  padding: $euiSize;
 
-.lnsDimensionContainer__headerTitle {
-  padding: $euiSizeS $euiSizeXS;
-  cursor: pointer;
-
-  &:hover {
-    text-decoration: underline;
+  .lnsFrameLayout__sidebar-isFullscreen & {
+    display: none;
   }
 }
 
-.lnsDimensionContainer__headerLink {
-  &:focus-within {
-    background-color: transparentize($euiColorVis1, .9);
+.lnsDimensionContainer__content {
+  @include euiYScroll;
+  flex: 1;
+}
 
-    .lnsDimensionContainer__headerTitle {
-      text-decoration: underline;
-    }
+.lnsDimensionContainer__footer {
+  padding: $euiSize;
+
+  .lnsFrameLayout__sidebar-isFullscreen & {
+    display: none;
   }
 }
 
-.lnsDimensionContainer__backIcon {
-  &:hover {
-    transform: none !important; // sass-lint:disable-line no-important
-  }
-
-  &:focus {
-    background-color: transparent;
-  }
+.lnsBody--overflowHidden {
+  overflow: hidden;
 }

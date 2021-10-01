@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonIcon, EuiFormRow, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -10,7 +11,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { isEqual } from 'lodash';
-import { Threat, Threats } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import { tacticsOptions } from '../../../mitre/mitre_tactics_techniques';
 import * as Rulei18n from '../../../pages/detection_engine/rules/translations';
 import { FieldHook } from '../../../../shared_imports';

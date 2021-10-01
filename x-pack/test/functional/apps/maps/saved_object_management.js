@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -81,7 +82,7 @@ export default function ({ getPageObjects, getService }) {
           const requestStats = await inspector.getTableData();
           const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
           await inspector.close();
-          expect(hits).to.equal('2');
+          expect(hits).to.equal('1');
         });
 
         it('should override query stored with map when query is provided in app state', async () => {
@@ -129,7 +130,7 @@ export default function ({ getPageObjects, getService }) {
           const requestStats = await inspector.getTableData();
           const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
           await inspector.close();
-          expect(hits).to.equal('2');
+          expect(hits).to.equal('1');
         });
       });
     });

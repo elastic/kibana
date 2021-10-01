@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ESTermQuery } from '../../../../common/typed_json';
@@ -46,7 +47,6 @@ export type HttpQueryTabBodyProps = QueryTabBodyProps & {
 
 export type NetworkRoutesProps = GlobalTimeArgs & {
   docValueFields: DocValueFields[];
-  networkPagePath: string;
   type: networkModel.NetworkType;
   filterQuery?: string | ESTermQuery;
   indexPattern: IIndexPattern;

@@ -1,15 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 import { RouteInitializerDeps } from '../';
-import { CANVAS_TYPE, API_ROUTE_WORKPAD, TEMPLATE_TYPE } from '../../../common/lib/constants';
+import { API_ROUTE_WORKPAD, TEMPLATE_TYPE } from '../../../common/lib/constants';
 import { CanvasWorkpad } from '../../../types';
-import { getId } from '../../../common/lib/get_id';
-import { WorkpadAttributes } from './workpad_attributes';
 import { WorkpadSchema } from './workpad_schema';
 import { okResponse } from '../ok_response';
 import { catchErrorHandler } from '../catch_error_handler';
@@ -58,23 +57,10 @@ export function initializeCreateWorkpadRoute(deps: RouteInitializerDeps) {
         workpad = templateSavedObject.attributes.template;
       }
 
-      const now = new Date().toISOString();
-      const { id: maybeId, ...payload } = workpad;
-
-      const id = maybeId ? maybeId : getId('workpad');
-
-      await context.core.savedObjects.client.create<WorkpadAttributes>(
-        CANVAS_TYPE,
-        {
-          ...payload,
-          '@timestamp': now,
-          '@created': now,
-        },
-        { id }
-      );
+      const createdObject = await context.canvas.workpad.create(workpad);
 
       return response.ok({
-        body: { ...okResponse, id },
+        body: { ...okResponse, id: createdObject.id },
       });
     })
   );

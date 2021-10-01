@@ -1,25 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 
-import { EuiTextColor, EuiOverlayMask } from '@elastic/eui';
 import { useActions, useValues } from 'kea';
 
-import { GenericConfirmationModal } from './generic_confirmation_modal';
-import { LogRetentionLogic } from './log_retention_logic';
+import { EuiTextColor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { LogRetentionOptions } from './types';
+import { LogRetentionLogic, LogRetentionOptions } from '../../log_retention';
+
+import { GenericConfirmationModal } from './generic_confirmation_modal';
 
 export const LogRetentionConfirmationModal: React.FC = () => {
   const CANNOT_BE_RECOVERED_TEXT = i18n.translate(
     'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.recovery',
     {
-      defaultMessage: 'Once your data has been removed, it cannot be recovered.',
+      defaultMessage: 'You cannot recover deleted data.',
     }
   );
 
@@ -39,7 +40,7 @@ export const LogRetentionConfirmationModal: React.FC = () => {
   }
 
   return (
-    <EuiOverlayMask>
+    <>
       {openedModal === LogRetentionOptions.Analytics && (
         <GenericConfirmationModal
           data-test-subj="AnalyticsLogRetentionConfirmationModal"
@@ -71,7 +72,7 @@ export const LogRetentionConfirmationModal: React.FC = () => {
                   'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.analytics.description',
                   {
                     defaultMessage:
-                      'When disabling Analytics Logs, all your engines will immediately stop indexing Analytics Logs. Your existing data will be deleted in accordance with the storage timeframes outlined above.',
+                      'When you disable writing, engines stop logging analytics events. Your existing data is deleted according to the storage time frame.',
                   }
                 )}
               </p>
@@ -116,7 +117,7 @@ export const LogRetentionConfirmationModal: React.FC = () => {
                   'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.api.description',
                   {
                     defaultMessage:
-                      'When disabling API Logs, all your engines will immediately stop indexing API Logs. Your existing data will be deleted in accordance with the storage timeframes outlined above.',
+                      'When you disable writing, engines stop logging API events. Your existing data is deleted according to the storage time frame.',
                   }
                 )}
               </p>
@@ -132,6 +133,6 @@ export const LogRetentionConfirmationModal: React.FC = () => {
           onSave={() => saveLogRetention(LogRetentionOptions.API, false)}
         />
       )}
-    </EuiOverlayMask>
+    </>
   );
 };

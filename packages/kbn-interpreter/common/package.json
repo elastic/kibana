@@ -1,5 +1,5 @@
 {
   "private": true,
-  "main": "../target/common/index.js",
-  "jsnext:main": "../src/common/index.js"
+  "main": "../target_node/common/index.js",
+  "types": "../target_types/common/index.d.ts"
 }

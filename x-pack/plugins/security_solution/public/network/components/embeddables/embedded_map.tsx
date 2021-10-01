@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiLink, EuiText } from '@elastic/eui';
@@ -220,10 +221,7 @@ export const EmbeddedMapComponent = ({
     <Embeddable>
       <EmbeddableHeader title={i18n.EMBEDDABLE_HEADER_TITLE}>
         <EuiText size="xs">
-          <EuiLink
-            href={`${services.docLinks.ELASTIC_WEBSITE_URL}guide/en/security/${services.docLinks.DOC_LINK_VERSION}/conf-map-ui.html`}
-            target="_blank"
-          >
+          <EuiLink href={`${services.docLinks.links.siem.networkMap}`} target="_blank">
             {i18n.EMBEDDABLE_HEADER_HELP}
           </EuiLink>
         </EuiText>

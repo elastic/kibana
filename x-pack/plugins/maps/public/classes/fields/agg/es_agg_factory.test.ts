@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { esAggFieldsFactory } from './es_agg_factory';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
 import { IESAggSource } from '../../sources/es_agg_source';
 
-const mockEsAggSource = ({
+const mockEsAggSource = {
   getAggKey() {
     return 'foobar';
   },
-} as unknown) as IESAggSource;
+} as unknown as IESAggSource;
 
 describe('esAggFieldsFactory', () => {
   test('Should only create top terms field when term field is not provided', () => {

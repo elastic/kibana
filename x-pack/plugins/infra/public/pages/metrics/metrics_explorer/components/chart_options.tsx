@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useCallback } from 'react';
@@ -38,7 +39,12 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
   }, []);
 
   const button = (
-    <EuiButtonEmpty iconSide="left" iconType="eye" onClick={handleOpenPopover}>
+    <EuiButtonEmpty
+      iconSide="left"
+      iconType="eye"
+      onClick={handleOpenPopover}
+      data-test-subj="metricsExplorer-customize"
+    >
       <FormattedMessage
         id="xpack.infra.metricsExplorer.customizeChartOptions"
         defaultMessage="Customize"
@@ -63,18 +69,21 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
 
   const typeRadios = [
     {
+      'data-test-subj': 'metricsExplorer-chartRadio-line',
       id: MetricsExplorerChartType.line,
       label: i18n.translate('xpack.infra.metricsExplorer.chartOptions.lineLabel', {
         defaultMessage: 'Line',
       }),
     },
     {
+      'data-test-subj': 'metricsExplorer-chartRadio-area',
       id: MetricsExplorerChartType.area,
       label: i18n.translate('xpack.infra.metricsExplorer.chartOptions.areaLabel', {
         defaultMessage: 'Area',
       }),
     },
     {
+      'data-test-subj': 'metricsExplorer-chartRadio-bar',
       id: MetricsExplorerChartType.bar,
       label: i18n.translate('xpack.infra.metricsExplorer.chartOptions.barLabel', {
         defaultMessage: 'Bar',

@@ -1,26 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { IContextProvider, IContextContainer } from '../context';
 import { ICspConfig } from '../csp';
 import { GetAuthState, IsAuthenticated } from './auth_state_storage';
 import { GetAuthHeaders } from './auth_headers_storage';
-import { RequestHandler, IRouter } from './router';
+import { IRouter } from './router';
 import { HttpServerSetup } from './http_server';
 import { SessionStorageCookieOptions } from './cookie_session_storage';
 import { SessionStorageFactory } from './session_storage';
@@ -31,13 +21,13 @@ import { OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { OnPreResponseHandler } from './lifecycle/on_pre_response';
 import { IBasePath } from './base_path_service';
 import { ExternalUrlConfig } from '../external_url';
-import { PluginOpaqueId, RequestHandlerContext } from '..';
+import type { PluginOpaqueId, RequestHandlerContext } from '..';
 
 /**
  * An object that handles registration of http request context providers.
  * @public
  */
-export type RequestHandlerContextContainer = IContextContainer<RequestHandler<any, any, any>>;
+export type RequestHandlerContextContainer = IContextContainer;
 
 /**
  * Context provider for request handler.
@@ -46,8 +36,9 @@ export type RequestHandlerContextContainer = IContextContainer<RequestHandler<an
  * @public
  */
 export type RequestHandlerContextProvider<
-  TContextName extends keyof RequestHandlerContext
-> = IContextProvider<RequestHandler<any, any, any>, TContextName>;
+  Context extends RequestHandlerContext,
+  ContextName extends keyof Context
+> = IContextProvider<Context, ContextName>;
 
 /**
  * @public
@@ -63,6 +54,115 @@ export interface HttpAuth {
    * {@link IsAuthenticated}
    */
   isAuthenticated: IsAuthenticated;
+}
+
+/**
+ * Kibana HTTP Service provides an abstraction to work with the HTTP stack at the `preboot` stage. This functionality
+ * allows Kibana to serve user requests even before Kibana becomes fully operational. Only Core and `preboot` plugins
+ * can define HTTP routes at this stage.
+ *
+ * @example
+ * To handle an incoming request in your preboot plugin you should:
+ * - Use `@kbn/config-schema` package to create a schema to validate the request `params`, `query`, and `body`. Every incoming request will be validated against the created schema. If validation failed, the request is rejected with `400` status and `Bad request` error without calling the route's handler.
+ * To opt out of validating the request, specify `false`.
+ * ```ts
+ * import { schema, TypeOf } from '@kbn/config-schema';
+ * const validate = {
+ *   params: schema.object({
+ *     id: schema.string(),
+ *   }),
+ * };
+ * ```
+ *
+ * - Declare a function to respond to incoming request.
+ * The function will receive `request` object containing request details: url, headers, matched route, as well as validated `params`, `query`, `body`.
+ * And `response` object instructing HTTP server to create HTTP response with information sent back to the client as the response body, headers, and HTTP status.
+ * Any exception raised during the handler call will generate `500 Server error` response and log error details for further investigation. See below for returning custom error responses.
+ * ```ts
+ * const handler = async (context: RequestHandlerContext, request: KibanaRequest, response: ResponseFactory) => {
+ *   const data = await findObject(request.params.id);
+ *   // creates a command to respond with 'not found' error
+ *   if (!data) {
+ *     return response.notFound();
+ *   }
+ *   // creates a command to send found data to the client and set response headers
+ *   return response.ok({
+ *     body: data,
+ *     headers: { 'content-type': 'application/json' }
+ *   });
+ * }
+ * ```
+ * * - Acquire `preboot` {@link IRouter} instance and register route handler for GET request to 'path/{id}' path.
+ * ```ts
+ * import { schema, TypeOf } from '@kbn/config-schema';
+ *
+ * const validate = {
+ *   params: schema.object({
+ *     id: schema.string(),
+ *   }),
+ * };
+ *
+ * httpPreboot.registerRoutes('my-plugin', (router) => {
+ *   router.get({ path: 'path/{id}', validate }, async (context, request, response) => {
+ *     const data = await findObject(request.params.id);
+ *     if (!data) {
+ *       return response.notFound();
+ *     }
+ *     return response.ok({
+ *       body: data,
+ *       headers: { 'content-type': 'application/json' }
+ *     });
+ *   });
+ * });
+ * ```
+ * @public
+ */
+export interface HttpServicePreboot {
+  /**
+   * Provides ability to acquire `preboot` {@link IRouter} instance for a particular top-level path and register handler
+   * functions for any number of nested routes.
+   *
+   * @remarks
+   * Each route can have only one handler function, which is executed when the route is matched.
+   * See the {@link IRouter} documentation for more information.
+   *
+   * @example
+   * ```ts
+   * registerRoutes('my-plugin', (router) => {
+   *   // handler is called when '/my-plugin/path' resource is requested with `GET` method
+   *   router.get({ path: '/path', validate: false }, (context, req, res) => res.ok({ content: 'ok' }));
+   * });
+   * ```
+   * @public
+   */
+  registerRoutes(path: string, callback: (router: IRouter) => void): void;
+
+  /**
+   * Access or manipulate the Kibana base path
+   * See {@link IBasePath}.
+   */
+  basePath: IBasePath;
+
+  /**
+   * Provides common {@link HttpServerInfo | information} about the running preboot http server.
+   */
+  getServerInfo: () => HttpServerInfo;
+}
+
+/** @internal */
+export interface InternalHttpServicePreboot
+  extends Pick<
+    InternalHttpServiceSetup,
+    | 'auth'
+    | 'csp'
+    | 'basePath'
+    | 'externalUrl'
+    | 'registerStaticDir'
+    | 'registerRouteHandlerContext'
+    | 'server'
+    | 'getServerInfo'
+  > {
+  registerRoutes(path: string, callback: (router: IRouter) => void): void;
 }
 
 /**
@@ -240,14 +340,19 @@ export interface HttpServiceSetup {
    * ```
    * @public
    */
-  createRouter: () => IRouter;
+  createRouter: <
+    Context extends RequestHandlerContext = RequestHandlerContext
+  >() => IRouter<Context>;
 
   /**
    * Register a context provider for a route handler.
    * @example
    * ```ts
    *  // my-plugin.ts
-   *  deps.http.registerRouteHandlerContext(
+   *  interface MyRequestHandlerContext extends RequestHandlerContext {
+   *    myApp: { search(id: string): Promise<Result> };
+   *  }
+   *  deps.http.registerRouteHandlerContext<MyRequestHandlerContext, 'myApp'>(
    *    'myApp',
    *    (context, req) => {
    *     async function search (id: string) {
@@ -258,6 +363,8 @@ export interface HttpServiceSetup {
    *  );
    *
    * // my-route-handler.ts
+   *  import type { MyRequestHandlerContext } from './my-plugin.ts';
+   *  const router = createRouter<MyRequestHandlerContext>();
    *  router.get({ path: '/', validate: false }, async (context, req, res) => {
    *    const response = await context.myApp.search(...);
    *    return res.ok(response);
@@ -265,9 +372,12 @@ export interface HttpServiceSetup {
    * ```
    * @public
    */
-  registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
-    contextName: T,
-    provider: RequestHandlerContextProvider<T>
+  registerRouteHandlerContext: <
+    Context extends RequestHandlerContext,
+    ContextName extends keyof Context
+  >(
+    contextName: ContextName,
+    provider: RequestHandlerContextProvider<Context, ContextName>
   ) => RequestHandlerContextContainer;
 
   /**
@@ -282,14 +392,22 @@ export interface InternalHttpServiceSetup
   auth: HttpServerSetup['auth'];
   server: HttpServerSetup['server'];
   externalUrl: ExternalUrlConfig;
-  createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
+  createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>(
+    path: string,
+    plugin?: PluginOpaqueId
+  ) => IRouter<Context>;
+  registerRouterAfterListening: (router: IRouter) => void;
   registerStaticDir: (path: string, dirPath: string) => void;
   getAuthHeaders: GetAuthHeaders;
-  registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
+  registerRouteHandlerContext: <
+    Context extends RequestHandlerContext,
+    ContextName extends keyof Context
+  >(
     pluginOpaqueId: PluginOpaqueId,
-    contextName: T,
-    provider: RequestHandlerContextProvider<T>
+    contextName: ContextName,
+    provider: RequestHandlerContextProvider<Context, ContextName>
   ) => RequestHandlerContextContainer;
+  registerPrebootRoutes(path: string, callback: (router: IRouter) => void): void;
 }
 
 /** @public */

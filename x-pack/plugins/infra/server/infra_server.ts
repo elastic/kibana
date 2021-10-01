@@ -1,21 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { initIpToHostName } from './routes/ip_to_hostname';
-import { schemas } from './graphql';
-import { createSourceStatusResolvers } from './graphql/source_status';
-import { createSourcesResolvers } from './graphql/sources';
 import { InfraBackendLibs } from './lib/infra_types';
 import {
   initGetLogEntryCategoriesRoute,
   initGetLogEntryCategoryDatasetsRoute,
   initGetLogEntryCategoryDatasetsStatsRoute,
   initGetLogEntryCategoryExamplesRoute,
-  initGetLogEntryRateRoute,
   initGetLogEntryExamplesRoute,
   initValidateLogAnalysisDatasetsRoute,
   initValidateLogAnalysisIndicesRoute,
@@ -30,46 +26,32 @@ import { initMetadataRoute } from './routes/metadata';
 import { initSnapshotRoute } from './routes/snapshot';
 import { initNodeDetailsRoute } from './routes/node_details';
 import {
-  initLogEntriesRoute,
   initLogEntriesHighlightsRoute,
   initLogEntriesSummaryRoute,
   initLogEntriesSummaryHighlightsRoute,
 } from './routes/log_entries';
 import { initInventoryMetaRoute } from './routes/inventory_metadata';
 import { initLogSourceConfigurationRoutes, initLogSourceStatusRoutes } from './routes/log_sources';
-import { initSourceRoute } from './routes/source';
+import { initMetricsSourceConfigurationRoutes } from './routes/metrics_sources';
 import { initOverviewRoute } from './routes/overview';
-import { initAlertPreviewRoute } from './routes/alerting';
 import { initGetLogAlertsChartPreviewDataRoute } from './routes/log_alerts';
 import { initProcessListRoute } from './routes/process_list';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
-  const schema = makeExecutableSchema({
-    resolvers: [
-      createSourcesResolvers(libs) as IResolvers,
-      createSourceStatusResolvers(libs) as IResolvers,
-    ],
-    typeDefs: schemas,
-  });
-
-  libs.framework.registerGraphQLEndpoint('/graphql', schema);
-
   initIpToHostName(libs);
   initGetLogEntryCategoriesRoute(libs);
   initGetLogEntryCategoryDatasetsRoute(libs);
   initGetLogEntryCategoryDatasetsStatsRoute(libs);
   initGetLogEntryCategoryExamplesRoute(libs);
-  initGetLogEntryRateRoute(libs);
   initGetLogEntryAnomaliesRoute(libs);
   initGetLogEntryAnomaliesDatasetsRoute(libs);
   initGetK8sAnomaliesRoute(libs);
   initGetHostsAnomaliesRoute(libs);
   initSnapshotRoute(libs);
   initNodeDetailsRoute(libs);
-  initSourceRoute(libs);
+  initMetricsSourceConfigurationRoutes(libs);
   initValidateLogAnalysisDatasetsRoute(libs);
   initValidateLogAnalysisIndicesRoute(libs);
-  initLogEntriesRoute(libs);
   initGetLogEntryExamplesRoute(libs);
   initLogEntriesHighlightsRoute(libs);
   initLogEntriesSummaryRoute(libs);
@@ -80,7 +62,6 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initInventoryMetaRoute(libs);
   initLogSourceConfigurationRoutes(libs);
   initLogSourceStatusRoutes(libs);
-  initAlertPreviewRoute(libs);
   initGetLogAlertsChartPreviewDataRoute(libs);
   initProcessListRoute(libs);
   initOverviewRoute(libs);

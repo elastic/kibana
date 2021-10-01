@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -16,11 +17,14 @@ const PIPELINE = {
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'ingestPipelines']);
   const log = getService('log');
-  const es = getService('legacyEs');
+  const es = getService('es');
+  const security = getService('security');
 
-  describe('Ingest Pipelines', function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/113439
+  describe.skip('Ingest Pipelines', function () {
     this.tags('smoke');
     before(async () => {
+      await security.testUser.setRoles(['ingest_pipelines_user']);
       await pageObjects.common.navigateToApp('ingestPipelines');
     });
 
@@ -45,6 +49,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     after(async () => {
       // Delete the pipeline that was created
       await es.ingest.deletePipeline({ id: PIPELINE.name });
+      await security.testUser.restoreDefaults();
     });
   });
 };

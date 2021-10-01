@@ -1,0 +1,46 @@
+{
+  "author": [
+    "Elastic",
+    "Anabella Cristaldi"
+  ],
+  "description": "Identifies attempts to clear Windows event log stores. This is often done by attackers in an attempt to evade detection or destroy forensic evidence on a system.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Windows Event Logs Cleared",
+  "query": "event.action:(\"audit-log-cleared\" or \"Log clear\")\n",
+  "risk_score": 21,
+  "rule_id": "45ac4800-840f-414c-b221-53dd36a5aaf7",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1070",
+          "name": "Indicator Removal on Host",
+          "reference": "https://attack.mitre.org/techniques/T1070/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}

@@ -1,13 +1,38 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-export { createActionRoute } from './create';
-export { deleteActionRoute } from './delete';
-export { getAllActionRoute } from './get_all';
-export { getActionRoute } from './get';
-export { updateActionRoute } from './update';
-export { listActionTypesRoute } from './list_action_types';
-export { executeActionRoute } from './execute';
+import { IRouter } from 'kibana/server';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { ILicenseState } from '../lib';
+import { ActionsRequestHandlerContext } from '../types';
+import { createActionRoute } from './create';
+import { deleteActionRoute } from './delete';
+import { executeActionRoute } from './execute';
+import { getActionRoute } from './get';
+import { getAllActionRoute } from './get_all';
+import { connectorTypesRoute } from './connector_types';
+import { updateActionRoute } from './update';
+import { getWellKnownEmailServiceRoute } from './get_well_known_email_service';
+import { defineLegacyRoutes } from './legacy';
+
+export function defineRoutes(
+  router: IRouter<ActionsRequestHandlerContext>,
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
+) {
+  defineLegacyRoutes(router, licenseState, usageCounter);
+
+  createActionRoute(router, licenseState);
+  deleteActionRoute(router, licenseState);
+  getActionRoute(router, licenseState);
+  getAllActionRoute(router, licenseState);
+  updateActionRoute(router, licenseState);
+  connectorTypesRoute(router, licenseState);
+  executeActionRoute(router, licenseState);
+
+  getWellKnownEmailServiceRoute(router, licenseState);
+}

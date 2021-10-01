@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -13,6 +14,8 @@ import { useUserData } from '../../../components/user_info';
 import { waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { getPrePackagedRulesStatus } from '../../../containers/detection_engine/rules/api';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
 
@@ -27,6 +30,8 @@ jest.mock('react-router-dom', () => {
 jest.mock('../../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../../../common/components/link_to');
 jest.mock('../../../components/user_info');
+
+jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/components/toasters', () => {
   const actual = jest.requireActual('../../../../common/components/toasters');
   return {
@@ -72,10 +77,15 @@ jest.mock('../../../components/rules/pre_packaged_rules/update_callout', () => {
     UpdatePrePackagedRulesCallOut: jest.fn().mockReturnValue(<div />),
   };
 });
+jest.mock('../../../../common/hooks/use_app_toasts');
 
 describe('RulesPage', () => {
+  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+
   beforeAll(() => {
     (useUserData as jest.Mock).mockReturnValue([{}]);
+    appToastsMock = useAppToastsMock.create();
+    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
   });
 
   it('renders AllRules', () => {

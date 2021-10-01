@@ -1,22 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { coreMock } from 'src/core/public/mocks';
-import { SpacesPlugin } from './plugin';
-import { homePluginMock } from '../../../../src/plugins/home/public/mocks';
+import { advancedSettingsMock } from 'src/plugins/advanced_settings/public/mocks';
+import { homePluginMock } from 'src/plugins/home/public/mocks';
 import {
-  managementPluginMock,
   createManagementSectionMock,
-} from '../../../../src/plugins/management/public/mocks';
-import { advancedSettingsMock } from '../../../../src/plugins/advanced_settings/public/mocks';
-import { featuresPluginMock } from '../../features/public/mocks';
+  managementPluginMock,
+} from 'src/plugins/management/public/mocks';
+
+import { SpacesPlugin } from './plugin';
 
 describe('Spaces plugin', () => {
   describe('#setup', () => {
-    it('should register the space selector app', () => {
+    it('should register the spaces API and the space selector app', () => {
       const coreSetup = coreMock.createSetup();
 
       const plugin = new SpacesPlugin();
@@ -94,7 +95,7 @@ describe('Spaces plugin', () => {
       const plugin = new SpacesPlugin();
       plugin.setup(coreSetup, {});
 
-      plugin.start(coreStart, { features: featuresPluginMock.createStart() });
+      plugin.start(coreStart);
 
       expect(coreStart.chrome.navControls.registerLeft).toHaveBeenCalled();
     });

@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { TelemetryEventsSender, TelemetryEvent } from '../../telemetry/sender';
-import { RuleTypeParams } from '../types';
+import { TelemetryEventsSender } from '../../telemetry/sender';
+import { TelemetryEvent } from '../../telemetry/types';
 import { BuildRuleMessage } from './rule_messages';
 import { SignalSearchResponse, SignalSource } from './types';
 import { Logger } from '../../../../../../../src/core/server';
@@ -15,7 +16,8 @@ export interface SearchResultWithSource {
 }
 
 export function selectEvents(filteredEvents: SignalSearchResponse): TelemetryEvent[] {
-  const sources = filteredEvents.hits.hits.map(function (
+  // @ts-expect-error @elastic/elasticsearch _source is optional
+  const sources: TelemetryEvent[] = filteredEvents.hits.hits.map(function (
     obj: SearchResultWithSource
   ): TelemetryEvent {
     return obj._source;
@@ -29,7 +31,6 @@ export function sendAlertTelemetryEvents(
   logger: Logger,
   eventsTelemetry: TelemetryEventsSender | undefined,
   filteredEvents: SignalSearchResponse,
-  ruleParams: RuleTypeParams,
   buildRuleMessage: BuildRuleMessage
 ) {
   if (eventsTelemetry === undefined) {

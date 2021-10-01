@@ -1,17 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mapKeys, snakeCase } from 'lodash/fp';
-import { AlertInstance } from '../../../../../alerts/server';
-import { SignalSource } from '../signals/types';
-import { RuleTypeParams } from '../types';
+import { AlertInstance } from '../../../../../alerting/server';
+import { RuleParams } from '../schemas/rule_schemas';
 
-export type NotificationRuleTypeParams = RuleTypeParams & {
-  name: string;
+export type NotificationRuleTypeParams = RuleParams & {
   id: string;
+  name: string;
 };
 
 interface ScheduleNotificationActions {
@@ -19,7 +19,7 @@ interface ScheduleNotificationActions {
   signalsCount: number;
   resultsLink: string;
   ruleParams: NotificationRuleTypeParams;
-  signals: SignalSource[];
+  signals: unknown[];
 }
 
 export const scheduleNotificationActions = ({

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /*
@@ -35,11 +24,16 @@
  */
 
 import _ from 'lodash';
+import { KibanaMigratorStatus } from '../kibana';
 import { SavedObjectsMigrationLogger } from './migration_logger';
 
 const DEFAULT_POLL_INTERVAL = 15000;
 
-export type MigrationStatus = 'waiting' | 'running' | 'completed';
+export type MigrationStatus =
+  | 'waiting_to_start'
+  | 'waiting_for_other_nodes'
+  | 'running'
+  | 'completed';
 
 export type MigrationResult =
   | { status: 'skipped' }
@@ -54,6 +48,7 @@ export type MigrationResult =
 interface Opts {
   runMigration: () => Promise<MigrationResult>;
   isMigrated: () => Promise<boolean>;
+  setStatus: (status: KibanaMigratorStatus) => void;
   log: SavedObjectsMigrationLogger;
   pollInterval?: number;
 }
@@ -75,7 +70,9 @@ export async function coordinateMigration(opts: Opts): Promise<MigrationResult> 
   try {
     return await opts.runMigration();
   } catch (error) {
-    if (handleIndexExists(error, opts.log)) {
+    const waitingIndex = handleIndexExists(error, opts.log);
+    if (waitingIndex) {
+      opts.setStatus({ status: 'waiting_for_other_nodes', waitingIndex });
       await waitForMigration(opts.isMigrated, opts.pollInterval);
       return { status: 'skipped' };
     }
@@ -88,11 +85,11 @@ export async function coordinateMigration(opts: Opts): Promise<MigrationResult> 
  * and is the cue for us to fall into a polling loop, waiting for some
  * other Kibana instance to complete the migration.
  */
-function handleIndexExists(error: any, log: SavedObjectsMigrationLogger) {
+function handleIndexExists(error: any, log: SavedObjectsMigrationLogger): string | undefined {
   const isIndexExistsError =
     _.get(error, 'body.error.type') === 'resource_already_exists_exception';
   if (!isIndexExistsError) {
-    return false;
+    return undefined;
   }
 
   const index = _.get(error, 'body.error.index');
@@ -104,7 +101,7 @@ function handleIndexExists(error: any, log: SavedObjectsMigrationLogger) {
       `restarting Kibana.`
   );
 
-  return true;
+  return index;
 }
 
 /**

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -25,7 +14,6 @@ import {
   PluginInitializerContext,
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { first } from 'rxjs/operators';
 
 import {
   EnvironmentService,
@@ -35,6 +23,8 @@ import {
   FeatureCatalogueRegistrySetup,
   TutorialService,
   TutorialServiceSetup,
+  AddDataService,
+  AddDataServiceSetup,
 } from './services';
 import { ConfigSchema } from '../config';
 import { setServices } from './application/kibana_services';
@@ -44,6 +34,7 @@ import { UsageCollectionSetup } from '../../usage_collection/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
 import { AppNavLinkStatus } from '../../../core/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
+import { SharePluginSetup } from '../../share/public';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -52,6 +43,7 @@ export interface HomePluginStartDependencies {
 }
 
 export interface HomePluginSetupDependencies {
+  share: SharePluginSetup;
   usageCollection?: UsageCollectionSetup;
   urlForwarding: UrlForwardingSetup;
 }
@@ -63,16 +55,18 @@ export class HomePublicPlugin
       HomePublicPluginStart,
       HomePluginSetupDependencies,
       HomePluginStartDependencies
-    > {
+    >
+{
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
   private readonly environmentService = new EnvironmentService();
   private readonly tutorialService = new TutorialService();
+  private readonly addDataService = new AddDataService();
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
     core: CoreSetup<HomePluginStartDependencies>,
-    { urlForwarding, usageCollection }: HomePluginSetupDependencies
+    { share, urlForwarding, usageCollection }: HomePluginSetupDependencies
   ): HomePublicPluginSetup {
     core.application.register({
       id: PLUGIN_ID,
@@ -82,11 +76,10 @@ export class HomePublicPlugin
         const trackUiMetric = usageCollection
           ? usageCollection.reportUiCounter.bind(usageCollection, 'Kibana_home')
           : () => {};
-        const [
-          coreStart,
-          { telemetry, data, urlForwarding: urlForwardingStart },
-        ] = await core.getStartServices();
+        const [coreStart, { telemetry, data, urlForwarding: urlForwardingStart }] =
+          await core.getStartServices();
         setServices({
+          share,
           trackUiMetric,
           kibanaVersion: this.initializerContext.env.packageInfo.version,
           http: coreStart.http,
@@ -105,6 +98,7 @@ export class HomePublicPlugin
           urlForwarding: urlForwardingStart,
           homeConfig: this.initializerContext.config.get(),
           tutorialService: this.tutorialService,
+          addDataService: this.addDataService,
           featureCatalogue: this.featuresCatalogueRegistry,
         });
         coreStart.chrome.docTitle.change(
@@ -137,29 +131,12 @@ export class HomePublicPlugin
       featureCatalogue,
       environment: { ...this.environmentService.setup() },
       tutorials: { ...this.tutorialService.setup() },
+      addData: { ...this.addDataService.setup() },
     };
   }
 
-  public start(
-    { application: { capabilities, currentAppId$ }, http }: CoreStart,
-    { urlForwarding }: HomePluginStartDependencies
-  ) {
+  public start({ application: { capabilities } }: CoreStart) {
     this.featuresCatalogueRegistry.start({ capabilities });
-
-    // If the home app is the initial location when loading Kibana...
-    if (
-      window.location.pathname === http.basePath.prepend(HOME_APP_BASE_PATH) &&
-      window.location.hash === ''
-    ) {
-      // ...wait for the app to mount initially and then...
-      currentAppId$.pipe(first()).subscribe((appId) => {
-        if (appId === 'home') {
-          // ...navigate to default app set by `kibana.defaultAppId`.
-          // This doesn't do anything as along as the default settings are kept.
-          urlForwarding.navigateToDefaultApp({ overwriteHash: false });
-        }
-      });
-    }
 
     return { featureCatalogue: this.featuresCatalogueRegistry };
   }
@@ -175,8 +152,12 @@ export type EnvironmentSetup = EnvironmentServiceSetup;
 export type TutorialSetup = TutorialServiceSetup;
 
 /** @public */
+export type AddDataSetup = AddDataServiceSetup;
+
+/** @public */
 export interface HomePublicPluginSetup {
   tutorials: TutorialServiceSetup;
+  addData: AddDataServiceSetup;
   featureCatalogue: FeatureCatalogueSetup;
   /**
    * The environment service is only available for a transition period and will

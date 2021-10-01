@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { makeDecorator } from '@storybook/addons';
@@ -13,8 +14,7 @@ import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { HasDataContextProvider } from '../../context/has_data_context';
 import { PluginContext } from '../../context/plugin_context';
 import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
-import { ObservabilityPluginSetupDeps } from '../../plugin';
-import { EuiThemeProvider } from '../../typings';
+import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { OverviewPage } from './';
 import { alertsFetchData } from './mock/alerts.mock';
 import { emptyResponse as emptyAPMResponse, fetchApmData } from './mock/apm.mock';
@@ -22,13 +22,24 @@ import { emptyResponse as emptyLogsResponse, fetchLogsData } from './mock/logs.m
 import { emptyResponse as emptyMetricsResponse, fetchMetricsData } from './mock/metrics.mock';
 import { newsFeedFetchData } from './mock/news_feed.mock';
 import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
+import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
+import {
+  createKibanaReactContext,
+  KibanaPageTemplate,
+} from '../../../../../../src/plugins/kibana_react/public';
+import { ApmIndicesConfig } from '../../../common/typings';
 
 function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });
   unregisterDataHandler({ appName: 'infra_logs' });
   unregisterDataHandler({ appName: 'infra_metrics' });
-  unregisterDataHandler({ appName: 'uptime' });
+  unregisterDataHandler({ appName: 'synthetics' });
 }
+
+const sampleAPMIndices = {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  'apm_oss.transactionIndices': 'apm-*',
+} as ApmIndicesConfig;
 
 const withCore = makeDecorator({
   name: 'withCore',
@@ -36,33 +47,45 @@ const withCore = makeDecorator({
   wrapper: (storyFn, context, { options }) => {
     unregisterAll();
 
+    const KibanaReactContext = createKibanaReactContext({
+      application: { getUrlForApp: () => '' },
+      chrome: { docTitle: { change: () => {} } },
+      uiSettings: { get: () => [] },
+      usageCollection: { reportUiCounter: () => {} },
+    } as unknown as Partial<CoreStart>);
+
     return (
       <MemoryRouter>
-        <PluginContext.Provider
-          value={{
-            appMountParameters: ({
-              setHeaderActionMenu: () => {},
-            } as unknown) as AppMountParameters,
-            core: options as CoreStart,
-            plugins: ({
-              data: {
-                query: {
-                  timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
-                },
+        <KibanaReactContext.Provider>
+          <PluginContext.Provider
+            value={{
+              appMountParameters: {
+                setHeaderActionMenu: () => {},
+              } as unknown as AppMountParameters,
+              config: {
+                unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } },
               },
-            } as unknown) as ObservabilityPluginSetupDeps,
-          }}
-        >
-          <EuiThemeProvider>
+              core: options as CoreStart,
+              plugins: {
+                data: {
+                  query: {
+                    timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
+                  },
+                },
+              } as unknown as ObservabilityPublicPluginsStart,
+              observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+              ObservabilityPageTemplate: KibanaPageTemplate,
+            }}
+          >
             <HasDataContextProvider>{storyFn(context)}</HasDataContextProvider>
-          </EuiThemeProvider>
-        </PluginContext.Provider>
+          </PluginContext.Provider>
+        </KibanaReactContext.Provider>
       </MemoryRouter>
     );
   },
 });
 
-const core = ({
+const core = {
   http: {
     basePath: {
       prepend: (link: string) => `http://localhost:5601${link}`,
@@ -137,25 +160,25 @@ const core = ({
       return euiSettings[key];
     },
   },
-} as unknown) as CoreStart;
+} as unknown as CoreStart;
 
-const coreWithAlerts = ({
+const coreWithAlerts = {
   ...core,
   http: {
     ...core.http,
     get: alertsFetchData,
   },
-} as unknown) as CoreStart;
+} as unknown as CoreStart;
 
-const coreWithNewsFeed = ({
+const coreWithNewsFeed = {
   ...core,
   http: {
     ...core.http,
     get: newsFeedFetchData,
   },
-} as unknown) as CoreStart;
+} as unknown as CoreStart;
 
-const coreAlertsThrowsError = ({
+const coreAlertsThrowsError = {
   ...core,
   http: {
     ...core.http,
@@ -163,7 +186,7 @@ const coreAlertsThrowsError = ({
       throw new Error('Error fetching Alerts data');
     },
   },
-} as unknown) as CoreStart;
+} as unknown as CoreStart;
 
 storiesOf('app/Overview', module)
   .addDecorator(withCore(core))
@@ -171,7 +194,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'apm',
       fetchData: fetchApmData,
-      hasData: async () => false,
+      hasData: async () => ({ hasData: false, indices: sampleAPMIndices }),
     });
     registerDataHandler({
       appName: 'infra_logs',
@@ -184,9 +207,9 @@ storiesOf('app/Overview', module)
       hasData: async () => false,
     });
     registerDataHandler({
-      appName: 'uptime',
+      appName: 'synthetics',
       fetchData: fetchUptimeData,
-      hasData: async () => false,
+      hasData: async () => ({ hasData: false, indices: 'heartbeat-*,synthetics-*' }),
     });
 
     return <OverviewPage routeParams={{ query: {} }} />;
@@ -266,7 +289,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'apm',
         fetchData: fetchApmData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
       });
 
       return (
@@ -283,7 +306,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'apm',
       fetchData: fetchApmData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
     });
     registerDataHandler({
       appName: 'infra_logs',
@@ -296,9 +319,9 @@ storiesOf('app/Overview', module)
       hasData: async () => true,
     });
     registerDataHandler({
-      appName: 'uptime',
+      appName: 'synthetics',
       fetchData: fetchUptimeData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
     });
 
     return (
@@ -315,7 +338,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'apm',
         fetchData: fetchApmData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
       });
       registerDataHandler({
         appName: 'infra_logs',
@@ -328,9 +351,9 @@ storiesOf('app/Overview', module)
         hasData: async () => true,
       });
       registerDataHandler({
-        appName: 'uptime',
+        appName: 'synthetics',
         fetchData: fetchUptimeData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
       });
 
       return (
@@ -349,7 +372,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'apm',
         fetchData: fetchApmData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
       });
       registerDataHandler({
         appName: 'infra_logs',
@@ -362,9 +385,9 @@ storiesOf('app/Overview', module)
         hasData: async () => true,
       });
       registerDataHandler({
-        appName: 'uptime',
+        appName: 'synthetics',
         fetchData: fetchUptimeData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
       });
       return (
         <OverviewPage
@@ -380,7 +403,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'apm',
       fetchData: async () => emptyAPMResponse,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
     });
     registerDataHandler({
       appName: 'infra_logs',
@@ -393,9 +416,9 @@ storiesOf('app/Overview', module)
       hasData: async () => true,
     });
     registerDataHandler({
-      appName: 'uptime',
+      appName: 'synthetics',
       fetchData: async () => emptyUptimeResponse,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
     });
 
     return (
@@ -414,7 +437,7 @@ storiesOf('app/Overview', module)
         fetchData: async () => {
           throw new Error('Error fetching APM data');
         },
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
       });
       registerDataHandler({
         appName: 'infra_logs',
@@ -431,11 +454,11 @@ storiesOf('app/Overview', module)
         hasData: async () => true,
       });
       registerDataHandler({
-        appName: 'uptime',
+        appName: 'synthetics',
         fetchData: async () => {
           throw new Error('Error fetching Uptime data');
         },
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
       });
       return (
         <OverviewPage
@@ -453,7 +476,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'apm',
         fetchData: fetchApmData,
-        // @ts-ignore thows an error instead
+        // @ts-ignore throws an error instead
         hasData: async () => {
           throw new Error('Error has data');
         },
@@ -461,7 +484,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_logs',
         fetchData: fetchLogsData,
-        // @ts-ignore thows an error instead
+        // @ts-ignore throws an error instead
         hasData: async () => {
           throw new Error('Error has data');
         },
@@ -469,15 +492,15 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_metrics',
         fetchData: fetchMetricsData,
-        // @ts-ignore thows an error instead
+        // @ts-ignore throws an error instead
         hasData: async () => {
           throw new Error('Error has data');
         },
       });
       registerDataHandler({
-        appName: 'uptime',
+        appName: 'synthetics',
         fetchData: fetchUptimeData,
-        // @ts-ignore thows an error instead
+        // @ts-ignore throws an error instead
         hasData: async () => {
           throw new Error('Error has data');
         },
@@ -496,7 +519,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'apm',
       fetchData: fetchApmData,
-      // @ts-ignore thows an error instead
+      // @ts-ignore throws an error instead
       hasData: async () => {
         throw new Error('Error has data');
       },
@@ -504,7 +527,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      // @ts-ignore thows an error instead
+      // @ts-ignore throws an error instead
       hasData: async () => {
         throw new Error('Error has data');
       },
@@ -512,15 +535,15 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: fetchMetricsData,
-      // @ts-ignore thows an error instead
+      // @ts-ignore throws an error instead
       hasData: async () => {
         throw new Error('Error has data');
       },
     });
     registerDataHandler({
-      appName: 'uptime',
+      appName: 'synthetics',
       fetchData: fetchUptimeData,
-      // @ts-ignore thows an error instead
+      // @ts-ignore throws an error instead
       hasData: async () => {
         throw new Error('Error has data');
       },

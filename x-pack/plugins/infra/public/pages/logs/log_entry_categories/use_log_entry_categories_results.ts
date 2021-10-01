@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useMemo, useState } from 'react';
@@ -10,13 +11,18 @@ import {
   GetLogEntryCategoriesSuccessResponsePayload,
   GetLogEntryCategoryDatasetsSuccessResponsePayload,
 } from '../../../../common/http_api/log_analysis';
+import { CategoriesSort } from '../../../../common/log_analysis';
 import { useTrackedPromise, CanceledPromiseError } from '../../../utils/use_tracked_promise';
 import { callGetTopLogEntryCategoriesAPI } from './service_calls/get_top_log_entry_categories';
 import { callGetLogEntryCategoryDatasetsAPI } from './service_calls/get_log_entry_category_datasets';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 type TopLogEntryCategories = GetLogEntryCategoriesSuccessResponsePayload['data']['categories'];
-type LogEntryCategoryDatasets = GetLogEntryCategoryDatasetsSuccessResponsePayload['data']['datasets'];
+type LogEntryCategoryDatasets =
+  GetLogEntryCategoryDatasetsSuccessResponsePayload['data']['datasets'];
+
+export type SortOptions = CategoriesSort;
+export type ChangeSortOptions = (sortOptions: CategoriesSort) => void;
 
 export const useLogEntryCategoriesResults = ({
   categoriesCount,
@@ -35,12 +41,14 @@ export const useLogEntryCategoriesResults = ({
   sourceId: string;
   startTime: number;
 }) => {
+  const [sortOptions, setSortOptions] = useState<SortOptions>({
+    field: 'maximumAnomalyScore',
+    direction: 'desc',
+  });
   const { services } = useKibanaContextForPlugin();
   const [topLogEntryCategories, setTopLogEntryCategories] = useState<TopLogEntryCategories>([]);
-  const [
-    logEntryCategoryDatasets,
-    setLogEntryCategoryDatasets,
-  ] = useState<LogEntryCategoryDatasets>([]);
+  const [logEntryCategoryDatasets, setLogEntryCategoryDatasets] =
+    useState<LogEntryCategoryDatasets>([]);
 
   const [getTopLogEntryCategoriesRequest, getTopLogEntryCategories] = useTrackedPromise(
     {
@@ -53,6 +61,7 @@ export const useLogEntryCategoriesResults = ({
             endTime,
             categoryCount: categoriesCount,
             datasets: filteredDatasets,
+            sort: sortOptions,
           },
           services.http.fetch
         );
@@ -70,7 +79,7 @@ export const useLogEntryCategoriesResults = ({
         }
       },
     },
-    [categoriesCount, endTime, filteredDatasets, sourceId, startTime]
+    [categoriesCount, endTime, filteredDatasets, sourceId, startTime, sortOptions]
   );
 
   const [getLogEntryCategoryDatasetsRequest, getLogEntryCategoryDatasets] = useTrackedPromise(
@@ -121,5 +130,7 @@ export const useLogEntryCategoriesResults = ({
     isLoadingTopLogEntryCategories,
     logEntryCategoryDatasets,
     topLogEntryCategories,
+    sortOptions,
+    changeSortOptions: setSortOptions,
   };
 };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -25,7 +26,7 @@ import { EventsTable } from '../events_table';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 
 function EditHeader({ calendarId, description }) {
@@ -68,6 +69,7 @@ export const CalendarForm = ({
   showImportModal,
   onJobSelection,
   saving,
+  loading,
   selectedGroupOptions,
   selectedJobOptions,
   showNewEventModal,
@@ -82,7 +84,11 @@ export const CalendarForm = ({
   const helpText = isNewCalendarIdValid === true && !isEdit ? msg : undefined;
   const error = isNewCalendarIdValid === false && !isEdit ? [msg] : undefined;
   const saveButtonDisabled =
-    canCreateCalendar === false || saving || !isNewCalendarIdValid || calendarId === '';
+    canCreateCalendar === false ||
+    saving ||
+    !isNewCalendarIdValid ||
+    calendarId === '' ||
+    loading === true;
   const redirectToCalendarsManagementPage = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_MANAGE);
 
   return (
@@ -115,7 +121,7 @@ export const CalendarForm = ({
               name="calendarId"
               value={calendarId}
               onChange={onCalendarIdChange}
-              disabled={isEdit === true || saving === true}
+              disabled={isEdit === true || saving === true || loading === true}
               data-test-subj="mlCalendarIdInput"
             />
           </EuiFormRow>
@@ -132,7 +138,7 @@ export const CalendarForm = ({
               name="description"
               value={description}
               onChange={onDescriptionChange}
-              disabled={isEdit === true || saving === true}
+              disabled={isEdit === true || saving === true || loading === true}
               data-test-subj="mlCalendarDescriptionInput"
             />
           </EuiFormRow>
@@ -151,7 +157,7 @@ export const CalendarForm = ({
         }
         checked={isGlobalCalendar}
         onChange={onGlobalCalendarChange}
-        disabled={saving === true || canCreateCalendar === false}
+        disabled={saving === true || canCreateCalendar === false || loading === true}
         data-test-subj="mlCalendarApplyToAllJobsSwitch"
       />
 
@@ -171,7 +177,7 @@ export const CalendarForm = ({
               options={jobIds}
               selectedOptions={selectedJobOptions}
               onChange={onJobSelection}
-              isDisabled={saving === true || canCreateCalendar === false}
+              isDisabled={saving === true || canCreateCalendar === false || loading === true}
               data-test-subj="mlCalendarJobSelection"
             />
           </EuiFormRow>
@@ -189,7 +195,7 @@ export const CalendarForm = ({
               options={groupIds}
               selectedOptions={selectedGroupOptions}
               onChange={onGroupSelection}
-              isDisabled={saving === true || canCreateCalendar === false}
+              isDisabled={saving === true || canCreateCalendar === false || loading === true}
               data-test-subj="mlCalendarJobGroupSelection"
             />
           </EuiFormRow>
@@ -214,6 +220,8 @@ export const CalendarForm = ({
           onDeleteClick={onEventDelete}
           showImportModal={showImportModal}
           showNewEventModal={showNewEventModal}
+          loading={loading}
+          saving={saving}
           showSearchBar
         />
       </EuiFormRow>
@@ -271,6 +279,7 @@ CalendarForm.propTypes = {
   showImportModal: PropTypes.func.isRequired,
   onJobSelection: PropTypes.func.isRequired,
   saving: PropTypes.bool.isRequired,
+  loading: PropTypes.bool.isRequired,
   selectedGroupOptions: PropTypes.array.isRequired,
   selectedJobOptions: PropTypes.array.isRequired,
   showNewEventModal: PropTypes.func.isRequired,

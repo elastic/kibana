@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -27,15 +28,19 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
     it('should be "pending" for newly created alert', async () => {
       const dateStart = Date.now();
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData());
       const dateEnd = Date.now();
       expect(response.status).to.eql(200);
-      objectRemover.add(Spaces.space1.id, response.body.id, 'alert', 'alerts');
+      objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
 
-      expect(response.body.executionStatus).to.be.ok();
-      const { status, lastExecutionDate, error } = response.body.executionStatus;
+      expect(response.body.execution_status).to.be.ok();
+      const {
+        error,
+        status,
+        last_execution_date: lastExecutionDate,
+      } = response.body.execution_status;
       expect(status).to.be('pending');
       ensureDatetimesAreOrdered([dateStart, lastExecutionDate, dateEnd]);
       expect(error).not.to.be.ok();
@@ -53,25 +58,25 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       const dates = [];
       dates.push(Date.now());
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            alertTypeId: 'test.noop',
+            rule_type_id: 'test.noop',
             schedule: { interval: '1s' },
           })
         );
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
-      const alertUpdatedAt = response.body.updatedAt;
-      dates.push(response.body.executionStatus.lastExecutionDate);
-      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
+      const alertUpdatedAt = response.body.updated_at;
+      dates.push(response.body.execution_status.last_execution_date);
+      objectRemover.add(Spaces.space1.id, alertId, 'rule', 'alerting');
 
       const executionStatus = await waitForStatus(alertId, new Set(['ok']));
-      dates.push(executionStatus.lastExecutionDate);
+      dates.push(executionStatus.last_execution_date);
       dates.push(Date.now());
       ensureDatetimesAreOrdered(dates);
-      ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
+      await ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
 
       // Ensure AAD isn't broken
       await checkAAD({
@@ -86,11 +91,11 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       const dates = [];
       dates.push(Date.now());
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            alertTypeId: 'test.patternFiring',
+            rule_type_id: 'test.patternFiring',
             schedule: { interval: '1s' },
             params: {
               pattern: { instance: trues(100) },
@@ -99,15 +104,15 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         );
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
-      const alertUpdatedAt = response.body.updatedAt;
-      dates.push(response.body.executionStatus.lastExecutionDate);
-      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
+      const alertUpdatedAt = response.body.updated_at;
+      dates.push(response.body.execution_status.last_execution_date);
+      objectRemover.add(Spaces.space1.id, alertId, 'rule', 'alerting');
 
       const executionStatus = await waitForStatus(alertId, new Set(['active']));
-      dates.push(executionStatus.lastExecutionDate);
+      dates.push(executionStatus.last_execution_date);
       dates.push(Date.now());
       ensureDatetimesAreOrdered(dates);
-      ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
+      await ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
 
       // Ensure AAD isn't broken
       await checkAAD({
@@ -122,25 +127,25 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       const dates = [];
       dates.push(Date.now());
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            alertTypeId: 'test.throw',
+            rule_type_id: 'test.throw',
             schedule: { interval: '1s' },
           })
         );
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
-      const alertUpdatedAt = response.body.updatedAt;
-      dates.push(response.body.executionStatus.lastExecutionDate);
-      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
+      const alertUpdatedAt = response.body.updated_at;
+      dates.push(response.body.execution_status.last_execution_date);
+      objectRemover.add(Spaces.space1.id, alertId, 'rule', 'alerting');
 
       const executionStatus = await waitForStatus(alertId, new Set(['error']));
-      dates.push(executionStatus.lastExecutionDate);
+      dates.push(executionStatus.last_execution_date);
       dates.push(Date.now());
       ensureDatetimesAreOrdered(dates);
-      ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
+      await ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
 
       // Ensure AAD isn't broken
       await checkAAD({
@@ -158,41 +163,41 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 
     it('should eventually have error reason "execute" when appropriate', async () => {
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            alertTypeId: 'test.throw',
+            rule_type_id: 'test.throw',
             schedule: { interval: '1s' },
           })
         );
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
-      const alertUpdatedAt = response.body.updatedAt;
-      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
+      const alertUpdatedAt = response.body.updated_at;
+      objectRemover.add(Spaces.space1.id, alertId, 'rule', 'alerting');
 
       const executionStatus = await waitForStatus(alertId, new Set(['error']));
       expect(executionStatus.error).to.be.ok();
       expect(executionStatus.error.reason).to.be('execute');
       expect(executionStatus.error.message).to.be('this alert is intended to fail');
-      ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
+      await ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
     });
 
     it('should eventually have error reason "unknown" when appropriate', async () => {
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            alertTypeId: 'test.validation',
+            rule_type_id: 'test.validation',
             schedule: { interval: '1s' },
             params: { param1: 'valid now, but will change to a number soon!' },
           })
         );
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
-      const alertUpdatedAt = response.body.updatedAt;
-      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
+      const alertUpdatedAt = response.body.updated_at;
+      objectRemover.add(Spaces.space1.id, alertId, 'rule', 'alerting');
 
       let executionStatus = await waitForStatus(alertId, new Set(['ok']));
 
@@ -210,7 +215,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       executionStatus = await waitForStatus(alertId, new Set(['error']));
       expect(executionStatus.error).to.be.ok();
       expect(executionStatus.error.reason).to.be('unknown');
-      ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
+      await ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
 
       const message = 'params invalid: [param1]: expected value of type [string] but got [number]';
       expect(executionStatus.error.message).to.be(message);
@@ -219,17 +224,17 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
     it('should be able to find over all the fields', async () => {
       const startDate = Date.now();
       const createResponse = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            alertTypeId: 'test.throw',
+            rule_type_id: 'test.throw',
             schedule: { interval: '1s' },
           })
         );
       expect(createResponse.status).to.eql(200);
       const alertId = createResponse.body.id;
-      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
+      objectRemover.add(Spaces.space1.id, alertId, 'rule', 'alerting');
 
       await waitForStatus(alertId, new Set(['error']));
 
@@ -263,11 +268,11 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
     }
 
     const response = await supertest.get(
-      `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${id}`
+      `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${id}`
     );
     expect(response.status).to.eql(200);
 
-    const { executionStatus } = response.body || {};
+    const { execution_status: executionStatus } = response.body || {};
     const { status } = executionStatus || {};
 
     const message = `waitForStatus(${Array.from(statuses)}): got ${JSON.stringify(
@@ -299,7 +304,8 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
     const response = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/${findUri}`);
 
     expect(response.status).to.eql(200);
-    const { executionStatus } = response.body.data.find((obj: any) => obj.id === id) || {};
+    const { execution_status: executionStatus } =
+      response.body.data.find((obj: any) => obj.id === id) || {};
     const { status } = executionStatus || {};
 
     const message = `waitForFindStatus(${Array.from(statuses)}): got ${JSON.stringify(
@@ -319,12 +325,12 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 
   async function ensureAlertUpdatedAtHasNotChanged(alertId: string, originalUpdatedAt: string) {
     const response = await supertest.get(
-      `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${alertId}`
+      `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${alertId}`
     );
-    const { updatedAt, executionStatus } = response.body;
+    const { updated_at: updatedAt, execution_status: executionStatus } = response.body;
     expect(Date.parse(updatedAt)).to.be.greaterThan(0);
     expect(Date.parse(updatedAt)).to.eql(Date.parse(originalUpdatedAt));
-    expect(Date.parse(executionStatus.lastExecutionDate)).to.be.greaterThan(
+    expect(Date.parse(executionStatus.last_execution_date)).to.be.greaterThan(
       Date.parse(originalUpdatedAt)
     );
   }
@@ -334,7 +340,7 @@ function expectErrorExecutionStatus(executionStatus: Record<string, any>, startD
   expect(executionStatus).to.be.ok();
   expect(executionStatus.status).to.equal('error');
 
-  const statusDate = Date.parse(executionStatus.lastExecutionDate);
+  const statusDate = Date.parse(executionStatus.last_execution_date);
   const stopDate = Date.now();
   expect(startDate).to.be.lessThan(statusDate);
   expect(stopDate).to.be.greaterThan(statusDate);
@@ -344,7 +350,7 @@ function expectErrorExecutionStatus(executionStatus: Record<string, any>, startD
 }
 
 function getFindUri(filter: string) {
-  return `api/alerts/_find?filter=alert.attributes.executionStatus.${filter}`;
+  return `api/alerting/rules/_find?filter=alert.attributes.executionStatus.${filter}`;
 }
 
 function trues(length: number): boolean[] {

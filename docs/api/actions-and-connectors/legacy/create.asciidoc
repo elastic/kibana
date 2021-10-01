@@ -1,0 +1,81 @@
+[[actions-and-connectors-legacy-api-create]]
+==== Legacy Create connector API
+++++
+<titleabbrev>Legacy Create connector</titleabbrev>
+++++
+
+deprecated::[7.13.0,Use <<create-connector-api>> instead.]
+
+Creates a connector.
+
+[[actions-and-connectors-legacy-api-create-request]]
+===== Request
+
+`POST <kibana host>:<port>/api/actions/action`
+
+`POST <kibana host>:<port>/s/<space_id>/api/actions/action`
+
+[[actions-and-connectors-legacy-api-create-path-params]]
+===== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[actions-and-connectors-legacy-api-create-request-body]]
+===== Request body
+
+`name`::
+  (Required, string) The display name for the connector.
+
+`actionTypeId`::
+  (Required, string) The connector type ID for the connector.
+
+`config`::
+  (Required, object) The configuration for the connector. Configuration properties vary depending on
+  the connector type. For information about the configuration properties, refer to <<action-types,Action and connector types>>.
+
+`secrets`::
+  (Required, object) The secrets configuration for the connector. Secrets configuration properties vary
+  depending on the connector type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
++
+WARNING: Remember these values. You must provide them each time you call the <<actions-and-connectors-legacy-api-update, update>> API.
+
+[[actions-and-connectors-legacy-api-create-request-codes]]
+===== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[actions-and-connectors-legacy-api-create-example]]
+===== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/actions/action  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+{
+  "name": "my-connector",
+  "actionTypeId": ".index",
+  "config": {
+    "index": "test-index"
+  }
+}'
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "id": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad",
+  "actionTypeId": ".index",
+  "name": "my-connector",
+  "config": {
+    "index": "test-index",
+    "refresh": false,
+    "executionTimeField": null
+  },
+  "isPreconfigured": false,
+  "isMissingSecrets": false
+}
+--------------------------------------------------

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
@@ -19,58 +20,28 @@ const HashFlexGroup = styled(EuiFlexGroup)`
 interface Props {
   contextId: string;
   eventId: string;
-  processHashMd5: string | null | undefined;
-  processHashSha1: string | null | undefined;
+  isDraggable?: boolean;
   processHashSha256: string | null | undefined;
 }
 
 export const ProcessHash = React.memo<Props>(
-  ({ contextId, eventId, processHashMd5, processHashSha1, processHashSha256 }) => {
-    if (
-      isNillEmptyOrNotFinite(processHashSha256) &&
-      isNillEmptyOrNotFinite(processHashSha1) &&
-      isNillEmptyOrNotFinite(processHashMd5)
-    ) {
+  ({ contextId, eventId, isDraggable, processHashSha256 }) => {
+    if (isNillEmptyOrNotFinite(processHashSha256)) {
       return null;
     }
 
     return (
       <HashFlexGroup alignItems="center" direction="column" gutterSize="none">
-        {!isNillEmptyOrNotFinite(processHashSha256) && (
-          <TokensFlexItem grow={false} component="div">
-            <DraggableBadge
-              contextId={contextId}
-              eventId={eventId}
-              field="process.hash.sha256"
-              iconType="number"
-              value={processHashSha256}
-            />
-          </TokensFlexItem>
-        )}
-
-        {!isNillEmptyOrNotFinite(processHashSha1) && (
-          <TokensFlexItem grow={false} component="div">
-            <DraggableBadge
-              contextId={contextId}
-              eventId={eventId}
-              field="process.hash.sha1"
-              iconType="number"
-              value={processHashSha1}
-            />
-          </TokensFlexItem>
-        )}
-
-        {!isNillEmptyOrNotFinite(processHashMd5) && (
-          <TokensFlexItem grow={false} component="div">
-            <DraggableBadge
-              contextId={contextId}
-              eventId={eventId}
-              field="process.hash.md5"
-              iconType="number"
-              value={processHashMd5}
-            />
-          </TokensFlexItem>
-        )}
+        <TokensFlexItem grow={false} component="div">
+          <DraggableBadge
+            contextId={contextId}
+            eventId={eventId}
+            field="process.hash.sha256"
+            iconType="number"
+            isDraggable={isDraggable}
+            value={processHashSha256}
+          />
+        </TokensFlexItem>
       </HashFlexGroup>
     );
   }

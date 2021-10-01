@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SPACES } from '../../common/lib/spaces';
@@ -35,6 +36,11 @@ const createTestCases = (spaceId: string) => {
     },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail404(spaceId !== SPACE_2_ID) },
+    {
+      ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE,
+      ...fail404(spaceId !== DEFAULT_SPACE_ID),
+    },
+    { ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
     CASES.NAMESPACE_AGNOSTIC,
     { ...CASES.DOES_NOT_EXIST, ...fail404() },
   ];
@@ -59,11 +65,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const {
-    addTests,
-    createTestDefinitions,
-    expectSavedObjectForbidden,
-  } = bulkUpdateTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions, expectSavedObjectForbidden } =
+    bulkUpdateTestSuiteFactory(esArchiver, supertest);
   const createTests = (spaceId: string) => {
     const { normalTypes, hiddenType, allTypes, withObjectNamespaces } = createTestCases(spaceId);
     // use singleRequest to reduce execution time and/or test combined cases
@@ -98,9 +101,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('_bulk_update', () => {
     getTestScenarios().securityAndSpaces.forEach(({ spaceId, users }) => {
       const suffix = ` within the ${spaceId} space`;
-      const { unauthorized, authorizedAtSpace, authorizedAllSpaces, superuser } = createTests(
-        spaceId
-      );
+      const { unauthorized, authorizedAtSpace, authorizedAllSpaces, superuser } =
+        createTests(spaceId);
       const _addTests = (user: TestUser, tests: BulkUpdateTestDefinition[]) => {
         addTests(`${user.description}${suffix}`, { user, spaceId, tests });
       };

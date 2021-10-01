@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 test.skip('requires one test', () => {});
@@ -18,7 +19,6 @@ import * as kbnTestServer from '../../../../../src/test_utils/kbn_server';
 function createXPackRoot(config: {} = {}) {
   return kbnTestServer.createRoot({
     plugins: {
-      scanDirs: [],
       paths: [
         resolve(__dirname, '../../../../../x-pack/plugins/encrypted_saved_objects'),
         resolve(__dirname, '../../../../../x-pack/plugins/fleet'),
@@ -36,6 +36,7 @@ describe('ingestManager', () => {
 
     beforeAll(async () => {
       root = createXPackRoot();
+      await root.preboot();
       await root.setup();
       await root.start();
     }, 30000);
@@ -69,6 +70,7 @@ describe('ingestManager', () => {
       root = createXPackRoot({
         ingestManager: ingestManagerConfig,
       });
+      await root.preboot();
       await root.setup();
       await root.start();
     }, 30000);
@@ -108,6 +110,7 @@ describe('ingestManager', () => {
       root = createXPackRoot({
         ingestManager: ingestManagerConfig,
       });
+      await root.preboot();
       await root.setup();
       await root.start();
     }, 30000);
@@ -142,6 +145,7 @@ describe('ingestManager', () => {
       root = createXPackRoot({
         ingestManager: ingestManagerConfig,
       });
+      await root.preboot();
       await root.setup();
       await root.start();
     }, 30000);
@@ -177,6 +181,7 @@ describe('ingestManager', () => {
       root = createXPackRoot({
         ingestManager: ingestManagerConfig,
       });
+      await root.preboot();
       await root.setup();
       await root.start();
     }, 30000);

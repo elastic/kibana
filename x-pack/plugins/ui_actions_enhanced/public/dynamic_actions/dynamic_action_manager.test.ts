@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DynamicActionManager } from './dynamic_action_manager';
@@ -17,10 +18,10 @@ import { dynamicActionGrouping } from './dynamic_action_grouping';
 
 const actionFactoryDefinition1: ActionFactoryDefinition = {
   id: 'ACTION_FACTORY_1',
-  CollectConfig: {} as any,
+  CollectConfig: {},
   createConfig: () => ({}),
-  isConfigValid: (() => true) as any,
-  create: ({ name }) => ({
+  isConfigValid: () => true,
+  create: ({ name }: { name: string }) => ({
     id: '',
     execute: async () => {},
     getDisplayName: () => name,
@@ -28,14 +29,14 @@ const actionFactoryDefinition1: ActionFactoryDefinition = {
   supportedTriggers() {
     return ['VALUE_CLICK_TRIGGER'];
   },
-};
+} as unknown as ActionFactoryDefinition;
 
 const actionFactoryDefinition2: ActionFactoryDefinition = {
   id: 'ACTION_FACTORY_2',
-  CollectConfig: {} as any,
+  CollectConfig: {},
   createConfig: () => ({}),
-  isConfigValid: (() => true) as any,
-  create: ({ name }) => ({
+  isConfigValid: () => true,
+  create: ({ name }: { name: string }) => ({
     id: '',
     execute: async () => {},
     getDisplayName: () => name,
@@ -43,7 +44,7 @@ const actionFactoryDefinition2: ActionFactoryDefinition = {
   supportedTriggers() {
     return ['VALUE_CLICK_TRIGGER'];
   },
-};
+} as unknown as ActionFactoryDefinition;
 
 const event1: SerializedEvent = {
   eventId: 'EVENT_ID_1',
@@ -708,10 +709,7 @@ describe('DynamicActionManager', () => {
 
     await manager.start();
 
-    const basicActions = await uiActions.getTriggerCompatibleActions(
-      'VALUE_CLICK_TRIGGER',
-      {} as any
-    );
+    const basicActions = await uiActions.getTriggerCompatibleActions('VALUE_CLICK_TRIGGER', {});
     expect(basicActions).toHaveLength(1);
 
     getLicenseInfo.mockImplementation(() =>
@@ -720,7 +718,7 @@ describe('DynamicActionManager', () => {
 
     const basicAndGoldActions = await uiActions.getTriggerCompatibleActions(
       'VALUE_CLICK_TRIGGER',
-      {} as any
+      {}
     );
 
     expect(basicAndGoldActions).toHaveLength(2);

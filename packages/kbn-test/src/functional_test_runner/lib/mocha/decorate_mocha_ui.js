@@ -1,28 +1,27 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { relative } from 'path';
 import { REPO_ROOT } from '@kbn/utils';
 import { createAssignmentProxy } from './assignment_proxy';
 import { wrapFunction } from './wrap_function';
 import { wrapRunnableArgs } from './wrap_runnable_args';
 
-export function decorateMochaUi(lifecycle, context) {
+function split(arr, fn) {
+  const a = [];
+  const b = [];
+  for (const i of arr) {
+    (fn(i) ? a : b).push(i);
+  }
+  return [a, b];
+}
+
+export function decorateMochaUi(log, lifecycle, context, { isDockerGroup, rootTags }) {
   // incremented at the start of each suite, decremented after
   // so that in each non-suite call we can know if we are within
   // a suite, or that when a suite is defined it is within a suite
@@ -62,13 +61,29 @@ export function decorateMochaUi(lifecycle, context) {
             await lifecycle.beforeTestSuite.trigger(this);
           });
 
-          this.tags = (tags) => {
-            this._tags = [].concat(this._tags || [], tags);
-          };
-
           const relativeFilePath = relative(REPO_ROOT, this.file);
-          this.tags(relativeFilePath);
+          this._tags = [
+            ...(isDockerGroup ? ['ciGroupDocker', relativeFilePath] : [relativeFilePath]),
+            // we attach the "root tags" to all the child suites of the root suite, so that if they
+            // need to be excluded they can be removed from the root suite without removing the entire
+            // root suite
+            ...(this.parent.root ? [...(rootTags ?? [])] : []),
+          ];
           this.suiteTag = relativeFilePath; // The tag that uniquely targets this suite/file
+          this.tags = (tags) => {
+            const newTags = Array.isArray(tags) ? tags : [tags];
+            const [tagsToAdd, tagsToIgnore] = split(newTags, (t) =>
+              !isDockerGroup ? true : !t.startsWith('ciGroup')
+            );
+
+            if (tagsToIgnore.length) {
+              log.warning(
+                `ignoring ciGroup tags because test is being run by a config using 'dockerServers', tags: ${tagsToIgnore}`
+              );
+            }
+
+            this._tags = [...this._tags, ...tagsToAdd];
+          };
 
           provider.call(this);
 

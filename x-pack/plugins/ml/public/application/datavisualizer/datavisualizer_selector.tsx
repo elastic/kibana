@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment } from 'react';
@@ -19,14 +20,12 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isFullLicense } from '../license';
 import { useTimefilter, useMlKibana, useNavigateToPath } from '../contexts/kibana';
-
 import { NavigationMenu } from '../components/navigation_menu';
-import { getMaxBytesFormatted } from './file_based/components/utils';
+import { HelpMenu } from '../components/help_menu';
 
 function startTrialDescription() {
   return (
@@ -55,8 +54,12 @@ export const DatavisualizerSelector: FC = () => {
     services: {
       licenseManagement,
       http: { basePath },
+      docLinks,
+      dataVisualizer,
     },
   } = useMlKibana();
+
+  const helpLink = docLinks.links.ml.guide;
   const navigateToPath = useNavigateToPath();
 
   const startTrialVisible =
@@ -64,7 +67,12 @@ export const DatavisualizerSelector: FC = () => {
     licenseManagement.enabled === true &&
     isFullLicense() === false;
 
-  const maxFileSize = getMaxBytesFormatted();
+  if (dataVisualizer === undefined) {
+    // eslint-disable-next-line no-console
+    console.error('File data visualizer plugin not available');
+    return null;
+  }
+  const maxFileSize = dataVisualizer.getMaxBytesFormatted();
 
   return (
     <Fragment>
@@ -113,18 +121,6 @@ export const DatavisualizerSelector: FC = () => {
                     values={{ maxFileSize }}
                   />
                 }
-                betaBadgeLabel={i18n.translate(
-                  'xpack.ml.datavisualizer.selector.experimentalBadgeLabel',
-                  {
-                    defaultMessage: 'Experimental',
-                  }
-                )}
-                betaBadgeTooltipContent={
-                  <FormattedMessage
-                    id="xpack.ml.datavisualizer.selector.experimentalBadgeTooltipLabel"
-                    defaultMessage="Experimental feature. We'd love to hear your feedback."
-                  />
-                }
                 footer={
                   <EuiButton
                     target="_self"
@@ -133,7 +129,7 @@ export const DatavisualizerSelector: FC = () => {
                   >
                     <FormattedMessage
                       id="xpack.ml.datavisualizer.selector.uploadFileButtonLabel"
-                      defaultMessage="Upload file"
+                      defaultMessage="Select file"
                     />
                   </EuiButton>
                 }
@@ -163,7 +159,7 @@ export const DatavisualizerSelector: FC = () => {
                   >
                     <FormattedMessage
                       id="xpack.ml.datavisualizer.selector.selectIndexButtonLabel"
-                      defaultMessage="Select index"
+                      defaultMessage="Select index pattern"
                     />
                   </EuiButton>
                 }
@@ -205,6 +201,7 @@ export const DatavisualizerSelector: FC = () => {
           )}
         </EuiPageBody>
       </EuiPage>
+      <HelpMenu docLink={helpLink} />
     </Fragment>
   );
 };

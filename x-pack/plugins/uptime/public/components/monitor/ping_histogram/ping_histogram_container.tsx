@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useContext, useEffect } from 'react';
@@ -20,6 +21,7 @@ interface Props {
 
 const Container: React.FC<Props & ResponsiveWrapperProps> = ({ height }) => {
   const {
+    query,
     absoluteDateRangeStart,
     absoluteDateRangeEnd,
     dateRangeStart: dateStart,
@@ -36,8 +38,8 @@ const Container: React.FC<Props & ResponsiveWrapperProps> = ({ height }) => {
   const { loading, pingHistogram: data } = useSelector(selectPingHistogram);
 
   useEffect(() => {
-    dispatch(getPingHistogram({ monitorId, dateStart, dateEnd, filters: esKuery }));
-  }, [dateStart, dateEnd, monitorId, lastRefresh, esKuery, dispatch]);
+    dispatch(getPingHistogram.get({ monitorId, dateStart, dateEnd, query, filters: esKuery }));
+  }, [dateStart, dateEnd, monitorId, lastRefresh, esKuery, dispatch, query]);
   return (
     <PingHistogramComponent
       data={data}

@@ -1,24 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import { KibanaFeatureConfig } from '../common';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import type { KibanaFeatureConfig, SubFeatureConfig } from '../common';
 
 export interface BuildOSSFeaturesParams {
   savedObjectTypes: string[];
-  includeTimelion: boolean;
+  includeReporting: boolean;
 }
 
-export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSSFeaturesParams) => {
+export const buildOSSFeatures = ({
+  savedObjectTypes,
+  includeReporting,
+}: BuildOSSFeaturesParams): KibanaFeatureConfig[] => {
   return [
     {
       id: 'discover',
       name: i18n.translate('xpack.features.discoverFeatureName', {
         defaultMessage: 'Discover',
       }),
+      management: {
+        kibana: ['search_sessions'],
+        ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
+      },
       order: 100,
       category: DEFAULT_APP_CATEGORIES.kibana,
       app: ['discover', 'kibana'],
@@ -26,10 +35,11 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       privileges: {
         all: {
           app: ['discover', 'kibana'],
+          api: ['fileUpload:analyzeFile'],
           catalogue: ['discover'],
           savedObject: {
-            all: ['search', 'query', 'index-pattern', 'background-session'],
-            read: [],
+            all: ['search', 'query'],
+            read: ['index-pattern'],
           },
           ui: ['show', 'save', 'saveQuery'],
         },
@@ -71,13 +81,48 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
             },
           ],
         },
+        {
+          name: i18n.translate('xpack.features.ossFeatures.discoverSearchSessionsFeatureName', {
+            defaultMessage: 'Store Search Sessions',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'store_search_session',
+                  name: i18n.translate(
+                    'xpack.features.ossFeatures.discoverStoreSearchSessionsPrivilegeName',
+                    {
+                      defaultMessage: 'Store Search Sessions',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: ['search-session'],
+                    read: [],
+                  },
+                  ui: ['storeSearchSession'],
+                  management: {
+                    kibana: ['search_sessions'],
+                  },
+                  api: ['store_search_session'],
+                },
+              ],
+            },
+          ],
+        },
+        ...(includeReporting ? [reportingFeatures.discoverReporting] : []),
       ],
     },
     {
       id: 'visualize',
       name: i18n.translate('xpack.features.visualizeFeatureName', {
-        defaultMessage: 'Visualize',
+        defaultMessage: 'Visualize Library',
       }),
+      management: {
+        ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
+      },
       order: 700,
       category: DEFAULT_APP_CATEGORIES.kibana,
       app: ['visualize', 'lens', 'kibana'],
@@ -130,6 +175,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
             },
           ],
         },
+        ...(includeReporting ? [reportingFeatures.visualizeReporting] : []),
       ],
     },
     {
@@ -137,6 +183,10 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       name: i18n.translate('xpack.features.dashboardFeatureName', {
         defaultMessage: 'Dashboard',
       }),
+      management: {
+        kibana: ['search_sessions'],
+        ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
+      },
       order: 200,
       category: DEFAULT_APP_CATEGORIES.kibana,
       app: ['dashboards', 'kibana'],
@@ -151,12 +201,10 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
               'index-pattern',
               'search',
               'visualization',
-              'timelion-sheet',
               'canvas-workpad',
               'lens',
               'map',
               'tag',
-              'background-session',
             ],
           },
           ui: ['createNew', 'show', 'showWriteControls', 'saveQuery'],
@@ -170,7 +218,6 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
               'index-pattern',
               'search',
               'visualization',
-              'timelion-sheet',
               'canvas-workpad',
               'lens',
               'map',
@@ -210,6 +257,38 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
             },
           ],
         },
+        {
+          name: i18n.translate('xpack.features.ossFeatures.dashboardSearchSessionsFeatureName', {
+            defaultMessage: 'Store Search Sessions',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'store_search_session',
+                  name: i18n.translate(
+                    'xpack.features.ossFeatures.dashboardStoreSearchSessionsPrivilegeName',
+                    {
+                      defaultMessage: 'Store Search Sessions',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: ['search-session'],
+                    read: [],
+                  },
+                  ui: ['storeSearchSession'],
+                  management: {
+                    kibana: ['search_sessions'],
+                  },
+                  api: ['store_search_session'],
+                },
+              ],
+            },
+          ],
+        },
+        ...(includeReporting ? [reportingFeatures.dashboardReporting] : []),
       ],
     },
     {
@@ -367,35 +446,101 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
         },
       },
     },
-    ...(includeTimelion ? [timelionFeature] : []),
   ] as KibanaFeatureConfig[];
 };
 
-const timelionFeature: KibanaFeatureConfig = {
-  id: 'timelion',
-  name: 'Timelion',
-  order: 350,
-  category: DEFAULT_APP_CATEGORIES.kibana,
-  app: ['timelion', 'kibana'],
-  catalogue: ['timelion'],
-  privileges: {
-    all: {
-      app: ['timelion', 'kibana'],
-      catalogue: ['timelion'],
-      savedObject: {
-        all: ['timelion-sheet'],
-        read: ['index-pattern'],
+const reportingPrivilegeGroupName = i18n.translate(
+  'xpack.features.ossFeatures.reporting.reportingTitle',
+  {
+    defaultMessage: 'Reporting',
+  }
+);
+
+const reportingFeatures: {
+  discoverReporting: SubFeatureConfig;
+  dashboardReporting: SubFeatureConfig;
+  visualizeReporting: SubFeatureConfig;
+} = {
+  discoverReporting: {
+    name: reportingPrivilegeGroupName,
+    privilegeGroups: [
+      {
+        groupType: 'independent',
+        privileges: [
+          {
+            id: 'generate_report',
+            name: i18n.translate('xpack.features.ossFeatures.reporting.discoverGenerateCSV', {
+              defaultMessage: 'Generate CSV reports',
+            }),
+            includeIn: 'all',
+            savedObject: { all: [], read: [] },
+            management: { insightsAndAlerting: ['reporting'] },
+            api: ['generateReport'],
+            ui: ['generateCsv'],
+          },
+        ],
       },
-      ui: ['save'],
-    },
-    read: {
-      app: ['timelion', 'kibana'],
-      catalogue: ['timelion'],
-      savedObject: {
-        all: [],
-        read: ['index-pattern', 'timelion-sheet'],
+    ],
+  },
+  dashboardReporting: {
+    name: reportingPrivilegeGroupName,
+    privilegeGroups: [
+      {
+        groupType: 'independent',
+        privileges: [
+          {
+            id: 'generate_report',
+            name: i18n.translate(
+              'xpack.features.ossFeatures.reporting.dashboardGenerateScreenshot',
+              {
+                defaultMessage: 'Generate PDF or PNG reports',
+              }
+            ),
+            includeIn: 'all',
+            minimumLicense: 'platinum',
+            savedObject: { all: [], read: [] },
+            management: { insightsAndAlerting: ['reporting'] },
+            api: ['generateReport'],
+            ui: ['generateScreenshot'],
+          },
+          {
+            id: 'download_csv_report',
+            name: i18n.translate('xpack.features.ossFeatures.reporting.dashboardDownloadCSV', {
+              defaultMessage: 'Download CSV reports from Saved Search panels',
+            }),
+            includeIn: 'all',
+            savedObject: { all: [], read: [] },
+            management: { insightsAndAlerting: ['reporting'] },
+            api: ['downloadCsv'],
+            ui: ['downloadCsv'],
+          },
+        ],
       },
-      ui: [],
-    },
+    ],
+  },
+  visualizeReporting: {
+    name: reportingPrivilegeGroupName,
+    privilegeGroups: [
+      {
+        groupType: 'independent',
+        privileges: [
+          {
+            id: 'generate_report',
+            name: i18n.translate(
+              'xpack.features.ossFeatures.reporting.visualizeGenerateScreenshot',
+              {
+                defaultMessage: 'Generate PDF or PNG reports',
+              }
+            ),
+            includeIn: 'all',
+            minimumLicense: 'platinum',
+            savedObject: { all: [], read: [] },
+            management: { insightsAndAlerting: ['reporting'] },
+            api: ['generateReport'],
+            ui: ['generateScreenshot'],
+          },
+        ],
+      },
+    ],
   },
 };

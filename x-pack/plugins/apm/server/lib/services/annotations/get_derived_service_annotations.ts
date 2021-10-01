@@ -1,47 +1,53 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { isNumber } from 'lodash';
-import { ESFilter } from '../../../../../../typings/elasticsearch';
+
+import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
+import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import {
   SERVICE_NAME,
   SERVICE_VERSION,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
-import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 
 export async function getDerivedServiceAnnotations({
   setup,
   serviceName,
   environment,
   searchAggregatedTransactions,
+  start,
+  end,
 }: {
   serviceName: string;
-  environment?: string;
-  setup: Setup & SetupTimeRange;
+  environment: string;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
-    ...getEnvironmentUiFilterES(environment),
+    ...environmentQuery(environment),
   ];
 
   const versions =
     (
-      await apmEventClient.search({
+      await apmEventClient.search('get_derived_service_annotations', {
         apm: {
           events: [
             getProcessorEventForAggregatedTransactions(
@@ -53,7 +59,7 @@ export async function getDerivedServiceAnnotations({
           size: 0,
           query: {
             bool: {
-              filter: [...filter, { range: rangeFilter(start, end) }],
+              filter: [...filter, ...rangeQuery(start, end)],
             },
           },
           aggs: {
@@ -72,34 +78,35 @@ export async function getDerivedServiceAnnotations({
   }
   const annotations = await Promise.all(
     versions.map(async (version) => {
-      const response = await apmEventClient.search({
-        apm: {
-          events: [
-            getProcessorEventForAggregatedTransactions(
-              searchAggregatedTransactions
-            ),
-          ],
-        },
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              filter: [...filter, { term: { [SERVICE_VERSION]: version } }],
-            },
+      const response = await apmEventClient.search(
+        'get_first_seen_of_version',
+        {
+          apm: {
+            events: [
+              getProcessorEventForAggregatedTransactions(
+                searchAggregatedTransactions
+              ),
+            ],
           },
-          aggs: {
-            first_seen: {
-              min: {
-                field: '@timestamp',
+          body: {
+            size: 1,
+            query: {
+              bool: {
+                filter: [...filter, { term: { [SERVICE_VERSION]: version } }],
               },
             },
+            sort: {
+              '@timestamp': 'asc',
+            },
           },
-        },
-      });
+        }
+      );
 
-      const firstSeen = response.aggregations?.first_seen.value;
+      const firstSeen = new Date(
+        response.hits.hits[0]._source['@timestamp']
+      ).getTime();
 
-      if (!isNumber(firstSeen)) {
+      if (!isFiniteNumber(firstSeen)) {
         throw new Error(
           'First seen for version was unexpectedly undefined or null.'
         );

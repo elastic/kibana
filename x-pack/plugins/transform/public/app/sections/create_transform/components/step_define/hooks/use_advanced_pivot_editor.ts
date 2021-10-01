@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect, useState } from 'react';
@@ -25,18 +26,15 @@ export const useAdvancedPivotEditor = (
   // Advanced editor for pivot config state
   const [isAdvancedEditorSwitchModalVisible, setAdvancedEditorSwitchModalVisible] = useState(false);
 
-  const [
-    isAdvancedPivotEditorApplyButtonEnabled,
-    setAdvancedPivotEditorApplyButtonEnabled,
-  ] = useState(false);
+  const [isAdvancedPivotEditorApplyButtonEnabled, setAdvancedPivotEditorApplyButtonEnabled] =
+    useState(false);
 
   const [isAdvancedPivotEditorEnabled, setAdvancedPivotEditorEnabled] = useState(
     defaults.isAdvancedPivotEditorEnabled
   );
 
-  const [advancedEditorConfigLastApplied, setAdvancedEditorConfigLastApplied] = useState(
-    stringifiedPivotConfig
-  );
+  const [advancedEditorConfigLastApplied, setAdvancedEditorConfigLastApplied] =
+    useState(stringifiedPivotConfig);
 
   const {
     convertToJson,

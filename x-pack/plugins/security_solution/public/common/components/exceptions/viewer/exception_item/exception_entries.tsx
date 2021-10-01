@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -14,6 +15,7 @@ import {
   EuiHideFor,
   EuiBadge,
   EuiBadgeGroup,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled, { css } from 'styled-components';
@@ -25,7 +27,12 @@ import * as i18n from '../../translations';
 import { FormattedEntry } from '../../types';
 
 const MyEntriesDetails = styled(EuiFlexItem)`
-  padding: ${({ theme }) => theme.eui.euiSize};
+  ${({ theme }) => css`
+    padding: ${theme.eui.euiSize} ${theme.eui.euiSizeL} ${theme.eui.euiSizeL} ${theme.eui.euiSizeXS};
+    &&& {
+      margin-left: 0;
+    }
+  `}
 `;
 
 const MyEditButton = styled(EuiButton)`
@@ -45,8 +52,9 @@ const MyRemoveButton = styled(EuiButton)`
 `;
 
 const MyAndOrBadgeContainer = styled(EuiFlexItem)`
-  padding-top: ${({ theme }) => theme.eui.euiSizeXL};
-  padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
+  ${({ theme }) => css`
+    padding: ${theme.eui.euiSizeXL} ${theme.eui.euiSize} ${theme.eui.euiSizeS} 0;
+  `}
 `;
 
 const MyActionButton = styled(EuiFlexItem)`
@@ -131,7 +139,13 @@ const ExceptionEntriesComponent = ({
               </ValueBadgeGroup>
             );
           } else {
-            return values ?? getEmptyValue();
+            return values ? (
+              <EuiToolTip content={values} anchorClassName="eui-textTruncate">
+                <span>{values}</span>
+              </EuiToolTip>
+            ) : (
+              getEmptyValue()
+            );
           }
         },
       },

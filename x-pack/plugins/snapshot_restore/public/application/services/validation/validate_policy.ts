@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { SlmPolicyPayload } from '../../../../common/types';
 import { textService } from '../text';
 
@@ -26,12 +28,6 @@ const isSnapshotNameNotLowerCase = (str: string): boolean => {
 };
 
 export interface ValidatePolicyHelperData {
-  managedRepository?: {
-    name: string;
-    policy: string;
-  };
-  isEditing?: boolean;
-  policyName?: string;
   /**
    * Whether to block on the indices configured for this snapshot.
    *
@@ -56,13 +52,7 @@ export const validatePolicy = (
   const i18n = textService.i18n;
 
   const { name, snapshotName, schedule, repository, config, retention } = policy;
-  const {
-    managedRepository,
-    isEditing,
-    policyName,
-    validateIndicesCount,
-    repositoryDoesNotExist,
-  } = validationHelperData;
+  const { validateIndicesCount, repositoryDoesNotExist } = validationHelperData;
 
   const validation: PolicyValidation = {
     isValid: true,
@@ -154,22 +144,6 @@ export const validatePolicy = (
     validation.errors.minCount.push(
       i18n.translate('xpack.snapshotRestore.policyValidation.invalidMinCountErrorMessage', {
         defaultMessage: 'Minimum count cannot be greater than maximum count.',
-      })
-    );
-  }
-
-  if (
-    managedRepository &&
-    managedRepository.name === repository &&
-    managedRepository.policy &&
-    !(isEditing && managedRepository.policy === policyName)
-  ) {
-    validation.errors.repository.push(
-      i18n.translate('xpack.snapshotRestore.policyValidation.invalidRepoErrorMessage', {
-        defaultMessage: 'Policy "{policyName}" is already associated with this repository.',
-        values: {
-          policyName: managedRepository.policy,
-        },
       })
     );
   }

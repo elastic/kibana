@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { I18nStart, OverlayStart, SavedObjectsClientContract } from 'src/core/public';
 import { SaveResult } from 'src/plugins/saved_objects/public';
 import { GraphWorkspaceSavedObject, GraphSavePolicy } from '../types';
@@ -38,7 +39,7 @@ export function openSaveModal({
   hasData: boolean;
   workspace: GraphWorkspaceSavedObject;
   saveWorkspace: SaveWorkspaceHandler;
-  showSaveModal: (el: React.ReactNode, I18nContext: I18nStart['Context']) => void;
+  showSaveModal: (el: ReactElement, I18nContext: I18nStart['Context']) => void;
   I18nContext: I18nStart['Context'];
   services: SaveWorkspaceServices;
 }) {

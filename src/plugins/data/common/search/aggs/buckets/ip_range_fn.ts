@@ -1,34 +1,27 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { groupBy, isEmpty, isNil, map, mapValues, omit, omitBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
+import { CidrOutput, IpRangeOutput } from '../../expressions';
 
 export const aggIpRangeFnName = 'aggIpRange';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.IP_RANGE>;
 
-type Arguments = Assign<AggArgs, { ranges?: string; ipRangeType?: string }>;
+type Arguments = Assign<
+  AggArgs,
+  { ranges?: Array<CidrOutput | IpRangeOutput>; ipRangeType?: string }
+>;
 
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<
@@ -80,9 +73,10 @@ export const aggIpRange = (): FunctionDefinition => ({
       }),
     },
     ranges: {
-      types: ['string'],
+      types: ['cidr', 'ip_range'],
+      multi: true,
       help: i18n.translate('data.search.aggs.buckets.ipRange.ranges.help', {
-        defaultMessage: 'Serialized ranges to use for this aggregation.',
+        defaultMessage: 'Ranges to use for this aggregation.',
       }),
     },
     json: {
@@ -98,8 +92,11 @@ export const aggIpRange = (): FunctionDefinition => ({
       }),
     },
   },
-  fn: (input, args) => {
-    const { id, enabled, schema, ...rest } = args;
+  fn: (input, { id, enabled, schema, ranges, ...params }) => {
+    const { ip_range: fromTo, cidr: mask } = mapValues(groupBy(ranges, 'type'), (items) =>
+      map(items, (item) => omit(item, 'type'))
+    );
+    const rangesParam = omitBy({ fromTo, mask }, isNil);
 
     return {
       type: 'agg_type',
@@ -109,9 +106,8 @@ export const aggIpRange = (): FunctionDefinition => ({
         schema,
         type: BUCKET_TYPES.IP_RANGE,
         params: {
-          ...rest,
-          json: getParsedValue(args, 'json'),
-          ranges: getParsedValue(args, 'ranges'),
+          ...params,
+          ranges: isEmpty(rangesParam) ? undefined : rangesParam,
         },
       },
     };

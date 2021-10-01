@@ -1,27 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
+import { SubFeaturePrivilegeGroupType } from '../../features/common';
 import { LicenseType } from '../../licensing/common/types';
-import { AlertType } from '../common/alert_types';
+import { AlertType, APM_SERVER_FEATURE_ID } from '../common/alert_types';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import {
   LicensingPluginSetup,
-  LicensingRequestHandlerContext,
+  LicensingApiRequestHandlerContext,
 } from '../../licensing/server';
 
 export const APM_FEATURE = {
-  id: 'apm',
+  id: APM_SERVER_FEATURE_ID,
   name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
     defaultMessage: 'APM and User Experience',
   }),
   order: 900,
   category: DEFAULT_APP_CATEGORIES.observability,
-  app: ['apm', 'ux', 'kibana'],
-  catalogue: ['apm'],
+  app: [APM_SERVER_FEATURE_ID, 'ux', 'kibana'],
+  catalogue: [APM_SERVER_FEATURE_ID],
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
@@ -29,15 +31,17 @@ export const APM_FEATURE = {
   // see x-pack/plugins/features/common/feature_kibana_privileges.ts
   privileges: {
     all: {
-      app: ['apm', 'ux', 'kibana'],
-      api: ['apm', 'apm_write'],
-      catalogue: ['apm'],
+      app: [APM_SERVER_FEATURE_ID, 'ux', 'kibana'],
+      api: [APM_SERVER_FEATURE_ID, 'apm_write', 'rac'],
+      catalogue: [APM_SERVER_FEATURE_ID],
       savedObject: {
         all: [],
         read: [],
       },
       alerting: {
-        all: Object.values(AlertType),
+        rule: {
+          all: Object.values(AlertType),
+        },
       },
       management: {
         insightsAndAlerting: ['triggersActions'],
@@ -45,22 +49,78 @@ export const APM_FEATURE = {
       ui: ['show', 'save', 'alerting:show', 'alerting:save'],
     },
     read: {
-      app: ['apm', 'ux', 'kibana'],
-      api: ['apm'],
-      catalogue: ['apm'],
+      app: [APM_SERVER_FEATURE_ID, 'ux', 'kibana'],
+      api: [APM_SERVER_FEATURE_ID, 'rac'],
+      catalogue: [APM_SERVER_FEATURE_ID],
       savedObject: {
         all: [],
         read: [],
       },
       alerting: {
-        read: Object.values(AlertType),
+        rule: {
+          read: Object.values(AlertType),
+        },
       },
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
-      ui: ['show', 'alerting:show', 'alerting:save'],
+      ui: ['show', 'alerting:show'],
     },
   },
+  subFeatures: [
+    {
+      name: i18n.translate('xpack.apm.featureRegistry.manageAlertsName', {
+        defaultMessage: 'Alerts',
+      }),
+      privilegeGroups: [
+        {
+          groupType: 'mutually_exclusive' as SubFeaturePrivilegeGroupType,
+          privileges: [
+            {
+              id: 'alerts_all',
+              name: i18n.translate(
+                'xpack.apm.featureRegistry.subfeature.alertsAllName',
+                {
+                  defaultMessage: 'All',
+                }
+              ),
+              includeIn: 'all' as 'all',
+              alerting: {
+                alert: {
+                  all: Object.values(AlertType),
+                },
+              },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+            },
+            {
+              id: 'alerts_read',
+              name: i18n.translate(
+                'xpack.apm.featureRegistry.subfeature.alertsReadName',
+                {
+                  defaultMessage: 'Read',
+                }
+              ),
+              includeIn: 'read' as 'read',
+              alerting: {
+                alert: {
+                  read: Object.values(AlertType),
+                },
+              },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+            },
+          ],
+        },
+      ],
+    },
+  ],
 };
 
 interface Feature {
@@ -97,7 +157,7 @@ export function notifyFeatureUsage({
   licensingPlugin,
   featureName,
 }: {
-  licensingPlugin: LicensingRequestHandlerContext;
+  licensingPlugin: LicensingApiRequestHandlerContext;
   featureName: FeatureName;
 }) {
   const feature = features[featureName];

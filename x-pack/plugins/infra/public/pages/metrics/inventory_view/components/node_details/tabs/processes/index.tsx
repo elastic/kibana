@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, useState, useCallback } from 'react';
@@ -45,13 +46,12 @@ const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
     return { [field]: node.name };
   }, [options, node, nodeType]);
 
-  const { loading, error, response, makeRequest: reload } = useProcessList(
-    hostTerm,
-    timefield,
-    currentTime,
-    sortBy,
-    parseSearchString(searchFilter)
-  );
+  const {
+    loading,
+    error,
+    response,
+    makeRequest: reload,
+  } = useProcessList(hostTerm, timefield, currentTime, sortBy, parseSearchString(searchFilter));
 
   const debouncedSearchOnChange = useMemo(
     () => debounce<(queryText: string) => void>((queryText) => setSearchFilter(queryText), 500),

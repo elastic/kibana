@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { merge } from 'lodash';
@@ -123,7 +124,7 @@ describe('useCreateAnalyticsForm', () => {
     // invalid formats ("fake" TS casting to get valid TS and be able to run the tests)
     expect(validateAdvancedEditor(getMockState({ index: {} as SourceIndex })).isValid).toBe(false);
     expect(
-      validateAdvancedEditor(getMockState({ index: (undefined as unknown) as SourceIndex })).isValid
+      validateAdvancedEditor(getMockState({ index: undefined as unknown as SourceIndex })).isValid
     ).toBe(false);
   });
 
@@ -208,7 +209,7 @@ describe('validateMinMML', () => {
   });
 
   test('should ignore empty parameters', () => {
-    expect(validateMinMML((undefined as unknown) as string)('')).toEqual(null);
+    expect(validateMinMML(undefined as unknown as string)('')).toEqual(null);
   });
 });
 

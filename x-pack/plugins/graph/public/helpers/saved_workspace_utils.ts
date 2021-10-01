@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep, assign, defaults, forOwn } from 'lodash';
@@ -48,7 +49,7 @@ const defaultsProps = {
 const urlFor = (basePath: IBasePath, id: string) =>
   basePath.prepend(`/app/graph#/workspace/${encodeURIComponent(id)}`);
 
-function mapHits(hit: { id: string; attributes: Record<string, unknown> }, url: string) {
+function mapHits(hit: any, url: string): GraphWorkspaceSavedObject {
   const source = hit.attributes;
   source.id = hit.id;
   source.url = url;
@@ -81,27 +82,37 @@ export function findSavedWorkspace(
     });
 }
 
+export function getEmptyWorkspace() {
+  return {
+    savedObject: {
+      displayName: 'graph workspace',
+      getEsType: () => savedWorkspaceType,
+      ...defaultsProps,
+    } as GraphWorkspaceSavedObject,
+  };
+}
+
 export async function getSavedWorkspace(
   savedObjectsClient: SavedObjectsClientContract,
-  id?: string
+  id: string
 ) {
-  const savedObject = {
-    id,
-    displayName: 'graph workspace',
-    getEsType: () => savedWorkspaceType,
-  } as { [key: string]: any };
+  const resolveResult = await savedObjectsClient.resolve<Record<string, unknown>>(
+    savedWorkspaceType,
+    id
+  );
 
-  if (!id) {
-    assign(savedObject, defaultsProps);
-    return Promise.resolve(savedObject);
-  }
-
-  const resp = await savedObjectsClient.get<Record<string, unknown>>(savedWorkspaceType, id);
-  savedObject._source = cloneDeep(resp.attributes);
+  const resp = resolveResult.saved_object;
 
   if (!resp._version) {
     throw new SavedObjectNotFound(savedWorkspaceType, id || '');
   }
+
+  const savedObject = {
+    id,
+    displayName: 'graph workspace',
+    getEsType: () => savedWorkspaceType,
+    _source: cloneDeep(resp.attributes),
+  } as GraphWorkspaceSavedObject;
 
   // assign the defaults to the response
   defaults(savedObject._source, defaultsProps);
@@ -119,7 +130,15 @@ export async function getSavedWorkspace(
     injectReferences(savedObject, resp.references);
   }
 
-  return savedObject as GraphWorkspaceSavedObject;
+  const sharingSavedObjectProps = {
+    outcome: resolveResult.outcome,
+    aliasTargetId: resolveResult.alias_target_id,
+  };
+
+  return {
+    savedObject,
+    sharingSavedObjectProps,
+  };
 }
 
 export function deleteSavedWorkspace(

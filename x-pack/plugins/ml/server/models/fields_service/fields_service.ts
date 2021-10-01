@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -12,7 +13,9 @@ import { initCardinalityFieldsCache } from './fields_aggs_cache';
 import { AggCardinality } from '../../../common/types/fields';
 import { isValidAggregationField } from '../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
-import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
+import { Datafeed, IndicesOptions } from '../../../common/types/anomaly_detection_jobs';
+import { RuntimeMappings } from '../../../common/types/fields';
+import { isPopulatedObject } from '../../../common/util/object_utils';
 
 /**
  * Service for carrying out queries to obtain data
@@ -182,6 +185,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     } = await asCurrentUser.search({
       index,
       body,
+      ...(datafeedConfig?.indices_options ?? {}),
     });
 
     if (!aggregations) {
@@ -189,6 +193,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     }
 
     const aggResult = fieldsToAgg.reduce((obj, field) => {
+      // @ts-expect-error incorrect search response type
       obj[field] = (aggregations[field] || { value: 0 }).value;
       return obj;
     }, {} as { [field: string]: number });
@@ -209,7 +214,9 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
   async function getTimeFieldRange(
     index: string[] | string,
     timeFieldName: string,
-    query: any
+    query: any,
+    runtimeMappings?: RuntimeMappings,
+    indicesOptions?: IndicesOptions
   ): Promise<{
     success: boolean;
     start: { epoch: number; string: string };
@@ -236,14 +243,20 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
             },
           },
         },
+        ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
       },
+      ...(indicesOptions ?? {}),
     });
 
     if (aggregations && aggregations.earliest && aggregations.latest) {
+      // @ts-expect-error incorrect search response type
       obj.start.epoch = aggregations.earliest.value;
+      // @ts-expect-error incorrect search response type
       obj.start.string = aggregations.earliest.value_as_string;
 
+      // @ts-expect-error incorrect search response type
       obj.end.epoch = aggregations.latest.value;
+      // @ts-expect-error incorrect search response type
       obj.end.string = aggregations.latest.value_as_string;
     }
     return obj;
@@ -297,13 +310,14 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
-    interval: string | undefined
+    interval: string | undefined,
+    datafeedConfig?: Datafeed
   ): Promise<{ [key: string]: number }> {
     if (!interval) {
       throw Boom.badRequest('Interval is required to retrieve max bucket cardinalities.');
     }
 
-    const aggregatableFields = await getAggregatableFields(index, fieldNames);
+    const aggregatableFields = await getAggregatableFields(index, fieldNames, datafeedConfig);
 
     if (aggregatableFields.length === 0) {
       return {};
@@ -392,6 +406,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     } = await asCurrentUser.search({
       index,
       body,
+      ...(datafeedConfig?.indices_options ?? {}),
     });
 
     if (!aggregations) {
@@ -399,6 +414,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     }
 
     const aggResult = fieldsToAgg.reduce((obj, field) => {
+      // @ts-expect-error incorrect search response type
       obj[field] = (aggregations[getMaxBucketAggKey(field)] || { value: 0 }).value ?? 0;
       return obj;
     }, {} as { [field: string]: number });

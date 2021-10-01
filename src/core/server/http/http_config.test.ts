@@ -1,29 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import uuid from 'uuid';
 import { config, HttpConfig } from './http_config';
-import { CspConfig } from '../csp';
+import { config as cspConfig } from '../csp';
 import { ExternalUrlConfig } from '../external_url';
 
-const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost'];
-const invalidHostname = 'asdf$%^';
+const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost', '0.0.0.0'];
+const invalidHostnames = ['asdf$%^', '0'];
 
 jest.mock('os', () => {
   const original = jest.requireActual('os');
@@ -48,11 +37,10 @@ test('accepts valid hostnames', () => {
 });
 
 test('throws if invalid hostname', () => {
-  const httpSchema = config.schema;
-  const obj = {
-    host: invalidHostname,
-  };
-  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+  for (const host of invalidHostnames) {
+    const httpSchema = config.schema;
+    expect(() => httpSchema.validate({ host })).toThrowErrorMatchingSnapshot();
+  }
 });
 
 describe('requestId', () => {
@@ -118,6 +106,35 @@ test('can specify max payload as string', () => {
   };
   const configValue = config.schema.validate(obj);
   expect(configValue.maxPayload.getValueInBytes()).toBe(2 * 1024 * 1024);
+});
+
+describe('shutdownTimeout', () => {
+  test('can specify a valid shutdownTimeout', () => {
+    const configValue = config.schema.validate({ shutdownTimeout: '5s' });
+    expect(configValue.shutdownTimeout.asMilliseconds()).toBe(5000);
+  });
+
+  test('can specify a valid shutdownTimeout (lower-edge of 1 second)', () => {
+    const configValue = config.schema.validate({ shutdownTimeout: '1s' });
+    expect(configValue.shutdownTimeout.asMilliseconds()).toBe(1000);
+  });
+
+  test('can specify a valid shutdownTimeout (upper-edge of 2 minutes)', () => {
+    const configValue = config.schema.validate({ shutdownTimeout: '2m' });
+    expect(configValue.shutdownTimeout.asMilliseconds()).toBe(120000);
+  });
+
+  test('should error if below 1s', () => {
+    expect(() => config.schema.validate({ shutdownTimeout: '100ms' })).toThrow(
+      '[shutdownTimeout]: the value should be between 1 second and 2 minutes'
+    );
+  });
+
+  test('should error if over 2 minutes', () => {
+    expect(() => config.schema.validate({ shutdownTimeout: '3m' })).toThrow(
+      '[shutdownTimeout]: the value should be between 1 second and 2 minutes'
+    );
+  });
 });
 
 describe('basePath', () => {
@@ -263,6 +280,34 @@ test('accepts any type of objects for custom headers', () => {
   expect(() => httpSchema.validate(obj)).not.toThrow();
 });
 
+test('forbids the "location" custom response header', () => {
+  const httpSchema = config.schema;
+  const obj = {
+    customResponseHeaders: {
+      location: 'string',
+      Location: 'string',
+      lOcAtIoN: 'string',
+    },
+  };
+  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
+    `"[customResponseHeaders]: The following custom response headers are not allowed to be set: location, Location, lOcAtIoN"`
+  );
+});
+
+test('forbids the "refresh" custom response header', () => {
+  const httpSchema = config.schema;
+  const obj = {
+    customResponseHeaders: {
+      refresh: 'string',
+      Refresh: 'string',
+      rEfReSh: 'string',
+    },
+  };
+  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
+    `"[customResponseHeaders]: The following custom response headers are not allowed to be set: refresh, Refresh, rEfReSh"`
+  );
+});
+
 describe('with TLS', () => {
   test('throws if TLS is enabled but `redirectHttpFromPort` is equal to `port`', () => {
     const httpSchema = config.schema;
@@ -304,9 +349,9 @@ describe('with compression', () => {
 
   test('throws if invalid referrer whitelist', () => {
     const httpSchema = config.schema;
-    const invalidHostnames = {
+    const nonEmptyArray = {
       compression: {
-        referrerWhitelist: [invalidHostname],
+        referrerWhitelist: invalidHostnames,
       },
     };
     const emptyArray = {
@@ -314,7 +359,7 @@ describe('with compression', () => {
         referrerWhitelist: [],
       },
     };
-    expect(() => httpSchema.validate(invalidHostnames)).toThrowErrorMatchingSnapshot();
+    expect(() => httpSchema.validate(nonEmptyArray)).toThrowErrorMatchingSnapshot();
     expect(() => httpSchema.validate(emptyArray)).toThrowErrorMatchingSnapshot();
   });
 
@@ -414,7 +459,8 @@ describe('HttpConfig', () => {
         },
       },
     });
-    const httpConfig = new HttpConfig(rawConfig, CspConfig.DEFAULT, ExternalUrlConfig.DEFAULT);
+    const rawCspConfig = cspConfig.schema.validate({});
+    const httpConfig = new HttpConfig(rawConfig, rawCspConfig, ExternalUrlConfig.DEFAULT);
 
     expect(httpConfig.customResponseHeaders).toEqual({
       string: 'string',

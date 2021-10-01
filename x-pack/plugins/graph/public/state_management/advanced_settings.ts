@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import actionCreatorFactory, { Action } from 'typescript-fsa';
@@ -42,14 +43,14 @@ export const settingsSelector = (state: GraphState) => state.advancedSettings;
  *
  * Won't be necessary once the workspace is moved to redux
  */
-export const syncSettingsSaga = ({ getWorkspace, notifyAngular }: GraphStoreDependencies) => {
+export const syncSettingsSaga = ({ getWorkspace, notifyReact }: GraphStoreDependencies) => {
   function* syncSettings(action: Action<AdvancedSettingsState>): IterableIterator<void> {
     const workspace = getWorkspace();
     if (!workspace) {
       return;
     }
     workspace.options.exploreControls = action.payload;
-    notifyAngular();
+    notifyReact();
   }
 
   return function* () {

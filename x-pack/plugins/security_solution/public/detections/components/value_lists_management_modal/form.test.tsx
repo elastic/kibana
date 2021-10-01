@@ -1,23 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { FormEvent } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
 import { TestProviders } from '../../../common/mock';
 import { ValueListsForm } from './form';
-import { useImportList } from '../../../shared_imports';
+import { useImportList } from '@kbn/securitysolution-list-hooks';
 
-jest.mock('../../../shared_imports');
+jest.mock('@kbn/securitysolution-list-hooks');
 const mockUseImportList = useImportList as jest.Mock;
 
-const mockFile = ({
+const mockFile = {
   name: 'foo.csv',
   type: 'text/csv',
-} as unknown) as File;
+} as unknown as File;
 
 const mockSelectFile: <P>(container: ReactWrapper<P>, file: File) => Promise<void> = async (
   container,
@@ -26,7 +28,7 @@ const mockSelectFile: <P>(container: ReactWrapper<P>, file: File) => Promise<voi
   const fileChange = container.find('EuiFilePicker').prop('onChange');
   await waitFor(() => {
     if (fileChange) {
-      fileChange(({ item: () => file } as unknown) as FormEvent);
+      fileChange({ item: () => file } as unknown as FormEvent);
     }
   });
 };
@@ -84,10 +86,10 @@ describe('ValueListsForm', () => {
   });
 
   it('disables upload and displays an error if file has invalid extension', async () => {
-    const badMockFile = ({
+    const badMockFile = {
       name: 'foo.pdf',
       type: 'application/pdf',
-    } as unknown) as File;
+    } as unknown as File;
 
     const container = mount(
       <TestProviders>

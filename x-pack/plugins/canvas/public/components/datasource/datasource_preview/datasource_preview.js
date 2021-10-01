@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiOverlayMask,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
@@ -18,56 +19,76 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { withSuspense } from '../../../../../../../src/plugins/presentation_util/public';
+import { LazyErrorComponent } from '../../../../../../../src/plugins/expression_error/public';
 import { Datatable } from '../../datatable';
-import { Error } from '../../error';
-import { ComponentStrings } from '../../../../i18n';
 
-const { DatasourceDatasourcePreview: strings } = ComponentStrings;
-const { DatasourceDatasourceComponent: datasourceStrings } = ComponentStrings;
+const Error = withSuspense(LazyErrorComponent);
+
+const strings = {
+  getEmptyFirstLineDescription: () =>
+    i18n.translate('xpack.canvas.datasourceDatasourcePreview.emptyFirstLineDescription', {
+      defaultMessage: "We couldn't find any documents matching your search criteria.",
+    }),
+  getEmptySecondLineDescription: () =>
+    i18n.translate('xpack.canvas.datasourceDatasourcePreview.emptySecondLineDescription', {
+      defaultMessage: 'Check your datasource settings and try again.',
+    }),
+  getEmptyTitle: () =>
+    i18n.translate('xpack.canvas.datasourceDatasourcePreview.emptyTitle', {
+      defaultMessage: 'No documents found',
+    }),
+  getModalTitle: () =>
+    i18n.translate('xpack.canvas.datasourceDatasourcePreview.modalTitle', {
+      defaultMessage: 'Datasource preview',
+    }),
+  getSaveButtonLabel: () =>
+    i18n.translate('xpack.canvas.datasourceDatasourcePreview.saveButtonLabel', {
+      defaultMessage: 'Save',
+    }),
+};
 
 export const DatasourcePreview = ({ done, datatable }) => (
-  <EuiOverlayMask>
-    <EuiModal onClose={done} maxWidth="1000px" className="canvasModal--fixedSize">
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>{strings.getModalTitle()}</EuiModalHeaderTitle>
-      </EuiModalHeader>
-      <EuiModalBody className="canvasDatasourcePreview">
-        <EuiText size="s">
-          <p>
-            <FormattedMessage
-              id="xpack.canvas.datasourceDatasourcePreview.modalDescription"
-              defaultMessage="The following data will be available to the selected element upon clicking {saveLabel} in the sidebar."
-              values={{
-                saveLabel: <strong>{datasourceStrings.getSaveButtonLabel()}</strong>,
-              }}
+  <EuiModal onClose={done} maxWidth="1000px" className="canvasModal--fixedSize">
+    <EuiModalHeader>
+      <EuiModalHeaderTitle>{strings.getModalTitle()}</EuiModalHeaderTitle>
+    </EuiModalHeader>
+    <EuiModalBody className="canvasDatasourcePreview">
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            id="xpack.canvas.datasourceDatasourcePreview.modalDescription"
+            defaultMessage="The following data will be available to the selected element upon clicking {saveLabel} in the sidebar."
+            values={{
+              saveLabel: <strong>{strings.getSaveButtonLabel()}</strong>,
+            }}
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer />
+      {datatable.type === 'error' ? (
+        <Error payload={datatable} />
+      ) : (
+        <EuiPanel className="canvasDatasourcePreview__panel" paddingSize="none">
+          {datatable.rows.length > 0 ? (
+            <Datatable datatable={datatable} showHeader paginate />
+          ) : (
+            <EuiEmptyPrompt
+              title={<h2>{strings.getEmptyTitle()}</h2>}
+              titleSize="s"
+              body={
+                <p>
+                  {strings.getEmptyFirstLineDescription()}
+                  <br />
+                  {strings.getEmptySecondLineDescription()}
+                </p>
+              }
             />
-          </p>
-        </EuiText>
-        <EuiSpacer />
-        {datatable.type === 'error' ? (
-          <Error payload={datatable} />
-        ) : (
-          <EuiPanel className="canvasDatasourcePreview__panel" paddingSize="none">
-            {datatable.rows.length > 0 ? (
-              <Datatable datatable={datatable} showHeader paginate />
-            ) : (
-              <EuiEmptyPrompt
-                title={<h2>{strings.getEmptyTitle()}</h2>}
-                titleSize="s"
-                body={
-                  <p>
-                    {strings.getEmptyFirstLineDescription()}
-                    <br />
-                    {strings.getEmptySecondLineDescription()}
-                  </p>
-                }
-              />
-            )}
-          </EuiPanel>
-        )}
-      </EuiModalBody>
-    </EuiModal>
-  </EuiOverlayMask>
+          )}
+        </EuiPanel>
+      )}
+    </EuiModalBody>
+  </EuiModal>
 );
 
 DatasourcePreview.propTypes = {

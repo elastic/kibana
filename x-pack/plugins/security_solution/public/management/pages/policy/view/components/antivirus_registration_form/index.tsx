@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, useCallback } from 'react';
@@ -12,7 +13,7 @@ import { EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 import { OperatingSystem } from '../../../../../../../common/endpoint/types';
 import { isAntivirusRegistrationEnabled } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
-import { ConfigForm } from '../../components/config_form';
+import { ConfigForm } from '../config_form';
 
 const TRANSLATIONS: Readonly<{ [K in 'title' | 'description' | 'label']: string }> = {
   title: i18n.translate(
@@ -53,7 +54,14 @@ export const AntivirusRegistrationForm = memo(() => {
   );
 
   return (
-    <ConfigForm type={TRANSLATIONS.title} supportedOss={[OperatingSystem.WINDOWS]}>
+    <ConfigForm
+      type={TRANSLATIONS.title}
+      supportedOss={[OperatingSystem.WINDOWS]}
+      osRestriction={i18n.translate(
+        'xpack.securitySolution.endpoint.policy.details.av.windowsServerNotSupported',
+        { defaultMessage: 'Windows Server operating systems unsupported' }
+      )}
+    >
       <EuiText size="s">{TRANSLATIONS.description}</EuiText>
       <EuiSpacer size="s" />
       <EuiSwitch

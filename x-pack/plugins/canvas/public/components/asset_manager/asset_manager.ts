@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { get } from 'lodash';
-
-import { getId } from '../../lib/get_id';
 // @ts-expect-error untyped local
 import { findExistingAsset } from '../../lib/find_existing_asset';
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
-import { encode } from '../../../common/lib/dataurl';
+import { encode } from '../../../../../../src/plugins/presentation_util/public';
+import { getId } from '../../lib/get_id';
 // @ts-expect-error untyped local
 import { elementsRegistry } from '../../lib/elements_registry';
 // @ts-expect-error untyped local

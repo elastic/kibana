@@ -1,26 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
   EuiIcon,
-  EuiLink,
   EuiSpacer,
   EuiPageContent,
   EuiPageBody,
@@ -34,7 +23,6 @@ import { emptyScreenStrings } from '../../../dashboard_strings';
 
 export interface DashboardEmptyScreenProps {
   isEditMode?: boolean;
-  onLinkClick: () => void;
   uiSettings: IUiSettingsClient;
   http: HttpStart;
   isReadonlyMode?: boolean;
@@ -42,7 +30,6 @@ export interface DashboardEmptyScreenProps {
 
 export function DashboardEmptyScreen({
   isEditMode,
-  onLinkClick,
   uiSettings,
   http,
   isReadonlyMode,
@@ -51,36 +38,14 @@ export function DashboardEmptyScreen({
   const emptyStateGraphicURL = IS_DARK_THEME
     ? '/plugins/home/assets/welcome_graphic_dark_2x.png'
     : '/plugins/home/assets/welcome_graphic_light_2x.png';
-  const paragraph = (
-    description1: string | null,
-    description2: string,
-    linkText: string,
-    ariaLabel: string,
-    dataTestSubj?: string
-  ) => {
-    return (
-      <EuiText size="m" color="subdued">
-        <p>
-          {description1}
-          {description1 && <span>&nbsp;</span>}
-          <EuiLink onClick={onLinkClick} aria-label={ariaLabel} data-test-subj={dataTestSubj || ''}>
-            {linkText}
-          </EuiLink>
-          <span>&nbsp;</span>
-          {description2}
-        </p>
-      </EuiText>
-    );
-  };
-  const enterEditModeParagraph = paragraph(
-    emptyScreenStrings.getHowToStartWorkingOnNewDashboardDescription1(),
-    emptyScreenStrings.getHowToStartWorkingOnNewDashboardDescription2(),
-    emptyScreenStrings.getHowToStartWorkingOnNewDashboardEditLinkText(),
-    emptyScreenStrings.getHowToStartWorkingOnNewDashboardEditLinkAriaLabel()
-  );
+
   const page = (mainText: string, showAdditionalParagraph?: boolean, additionalText?: string) => {
     return (
-      <EuiPage className="dshStartScreen" restrictWidth="500px">
+      <EuiPage
+        data-test-subj={isReadonlyMode ? 'dashboardEmptyReadOnly' : 'dashboardEmptyReadWrite'}
+        className="dshStartScreen"
+        restrictWidth="500px"
+      >
         <EuiPageBody>
           <EuiPageContent
             verticalPosition="center"
@@ -100,7 +65,11 @@ export function DashboardEmptyScreen({
             {showAdditionalParagraph ? (
               <React.Fragment>
                 <EuiSpacer size="m" />
-                <div className="dshStartScreen__panelDesc">{enterEditModeParagraph}</div>
+                <div className="dshStartScreen__panelDesc">
+                  <EuiText size="m" color="subdued">
+                    <p>{emptyScreenStrings.getHowToStartWorkingOnNewDashboardDescription()}</p>
+                  </EuiText>
+                </div>
               </React.Fragment>
             ) : null}
           </EuiPageContent>

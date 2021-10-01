@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, useMemo } from 'react';
@@ -55,10 +56,7 @@ const UpdatePrePackagedRulesCallOutComponent: React.FC<UpdatePrePackagedRulesCal
       <p>
         {prepackagedRulesOrTimelines?.callOutMessage}
         <br />
-        <EuiLink
-          href={`${services.docLinks.ELASTIC_WEBSITE_URL}guide/en/security/${services.docLinks.DOC_LINK_VERSION}/prebuilt-rules-changelog.html`}
-          target="_blank"
-        >
+        <EuiLink href={`${services.docLinks.links.siem.ruleChangeLog}`} target="_blank">
           {i18n.RELEASE_NOTES_HELP}
         </EuiLink>
       </p>

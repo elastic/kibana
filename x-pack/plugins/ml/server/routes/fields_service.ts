@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IScopedClusterClient } from 'kibana/server';
@@ -21,8 +22,8 @@ function getCardinalityOfFields(client: IScopedClusterClient, payload: any) {
 
 function getTimeFieldRange(client: IScopedClusterClient, payload: any) {
   const fs = fieldsServiceProvider(client);
-  const { index, timeFieldName, query } = payload;
-  return fs.getTimeFieldRange(index, timeFieldName, query);
+  const { index, timeFieldName, query, runtimeMappings, indicesOptions } = payload;
+  return fs.getTimeFieldRange(index, timeFieldName, query, runtimeMappings, indicesOptions);
 }
 
 /**

@@ -1,14 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import {
-  ILegacyClusterClient,
-  Logger,
-  SavedObjectsClientContract,
-  FakeRequest,
-} from 'src/core/server';
+
+import { IClusterClient, Logger, SavedObjectsClientContract, FakeRequest } from 'src/core/server';
 import moment from 'moment';
 import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
 import { Credential, CredentialStore } from './credential_store';
@@ -53,7 +50,7 @@ export class ReindexWorker {
   constructor(
     private client: SavedObjectsClientContract,
     private credentialStore: CredentialStore,
-    private clusterClient: ILegacyClusterClient,
+    private clusterClient: IClusterClient,
     log: Logger,
     private licensing: LicensingPluginSetup
   ) {
@@ -62,7 +59,7 @@ export class ReindexWorker {
       throw new Error(`More than one ReindexWorker cannot be created.`);
     }
 
-    const callAsInternalUser = this.clusterClient.callAsInternalUser.bind(this.clusterClient);
+    const callAsInternalUser = this.clusterClient.asInternalUser;
 
     this.reindexService = reindexServiceFactory(
       callAsInternalUser,
@@ -151,7 +148,7 @@ export class ReindexWorker {
   private getCredentialScopedReindexService = (credential: Credential) => {
     const fakeRequest: FakeRequest = { headers: credential };
     const scopedClusterClient = this.clusterClient.asScoped(fakeRequest);
-    const callAsCurrentUser = scopedClusterClient.callAsCurrentUser.bind(scopedClusterClient);
+    const callAsCurrentUser = scopedClusterClient.asCurrentUser;
     const actions = reindexActionsFactory(this.client, callAsCurrentUser);
     return reindexServiceFactory(callAsCurrentUser, actions, this.log, this.licensing);
   };
@@ -234,19 +231,18 @@ export class ReindexWorker {
  * Swallows any exceptions that may occur during the reindex process. This prevents any errors from
  * stopping the worker from continuing to process more jobs.
  */
-const swallowExceptions = (
-  func: (reindexOp: ReindexSavedObject) => Promise<ReindexSavedObject>,
-  log: Logger
-) => async (reindexOp: ReindexSavedObject) => {
-  try {
-    return await func(reindexOp);
-  } catch (e) {
-    if (reindexOp.attributes.locked) {
-      log.debug(`Skipping reindexOp with unexpired lock: ${reindexOp.id}`);
-    } else {
-      log.warn(`Error when trying to process reindexOp (${reindexOp.id}): ${e.toString()}`);
-    }
+const swallowExceptions =
+  (func: (reindexOp: ReindexSavedObject) => Promise<ReindexSavedObject>, log: Logger) =>
+  async (reindexOp: ReindexSavedObject) => {
+    try {
+      return await func(reindexOp);
+    } catch (e) {
+      if (reindexOp.attributes.locked) {
+        log.debug(`Skipping reindexOp with unexpired lock: ${reindexOp.id}`);
+      } else {
+        log.warn(`Error when trying to process reindexOp (${reindexOp.id}): ${e.toString()}`);
+      }
 
-    return reindexOp;
-  }
-};
+      return reindexOp;
+    }
+  };

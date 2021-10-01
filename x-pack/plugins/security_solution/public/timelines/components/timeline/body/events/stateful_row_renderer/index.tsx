@@ -1,22 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { noop } from 'lodash/fp';
 import { EuiFocusTrap, EuiOutsideClickDetector, EuiScreenReaderOnly } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { BrowserFields } from '../../../../../../common/containers/source';
 import {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   getRowRendererClassName,
-} from '../../../../../../common/components/accessibility/helpers';
+} from '../../../../../../../../timelines/public';
+import { RowRenderer } from '../../../../../../../common';
+import { BrowserFields } from '../../../../../../common/containers/source';
 import { TimelineItem } from '../../../../../../../common/search_strategy/timeline';
 import { getRowRenderer } from '../../renderers/get_row_renderer';
-import { RowRenderer } from '../../renderers/row_renderer';
 import { useStatefulEventFocus } from '../use_stateful_event_focus';
 
 import * as i18n from '../translations';
@@ -60,10 +61,10 @@ export const StatefulRowRenderer = ({
     rowindexAttribute: ARIA_ROWINDEX_ATTRIBUTE,
   });
 
-  const rowRenderer = useMemo(() => getRowRenderer(event.ecs, rowRenderers), [
-    event.ecs,
-    rowRenderers,
-  ]);
+  const rowRenderer = useMemo(
+    () => getRowRenderer(event.ecs, rowRenderers),
+    [event.ecs, rowRenderers]
+  );
 
   const content = useMemo(
     () =>
@@ -79,6 +80,7 @@ export const StatefulRowRenderer = ({
                 {rowRenderer.renderRow({
                   browserFields,
                   data: event.ecs,
+                  isDraggable: true,
                   timelineId,
                 })}
               </div>

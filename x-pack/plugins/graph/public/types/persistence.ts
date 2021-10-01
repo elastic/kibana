@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AdvancedSettings, UrlTemplate, WorkspaceField } from './app_state';
@@ -52,15 +53,15 @@ export interface SerializedField extends Omit<WorkspaceField, 'icon' | 'type' | 
   iconClass: string;
 }
 
-export interface SerializedNode
-  extends Omit<WorkspaceNode, 'icon' | 'data' | 'parent' | 'scaledSize'> {
+export interface SerializedNode extends Pick<WorkspaceNode, 'x' | 'y' | 'label' | 'color'> {
   field: string;
   term: string;
   parent: number | null;
   size: number;
 }
 
-export interface SerializedEdge extends Omit<WorkspaceEdge, 'source' | 'target'> {
+export interface SerializedEdge
+  extends Omit<WorkspaceEdge, 'source' | 'target' | 'topTarget' | 'topSrc'> {
   source: number;
   target: number;
 }

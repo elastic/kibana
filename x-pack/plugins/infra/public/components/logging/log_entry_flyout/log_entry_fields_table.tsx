@@ -1,28 +1,43 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiBasicTableColumn, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import * as rt from 'io-ts';
 import React, { useMemo } from 'react';
-import {
-  LogEntry,
-  LogEntryField,
-} from '../../../../common/search_strategies/log_entries/log_entry';
+import { Query } from '../../../../../../../src/plugins/data/public';
+import { LogEntryField } from '../../../../common/log_entry';
+import { LogEntry } from '../../../../common/search_strategies/log_entries/log_entry';
 import { TimeKey } from '../../../../common/time';
+import { JsonScalar, jsonScalarRT } from '../../../../common/typed_json';
 import { FieldValue } from '../log_text_stream/field_value';
 
 export const LogEntryFieldsTable: React.FC<{
   logEntry: LogEntry;
-  onSetFieldFilter?: (filter: string, logEntryId: string, timeKey?: TimeKey) => void;
+  onSetFieldFilter?: (filter: Query, logEntryId: string, timeKey?: TimeKey) => void;
 }> = ({ logEntry, onSetFieldFilter }) => {
   const createSetFilterHandler = useMemo(
     () =>
       onSetFieldFilter
         ? (field: LogEntryField) => () => {
-            onSetFieldFilter?.(`${field.field}:"${field.value}"`, logEntry.id, logEntry.key);
+            if (!rt.array(jsonScalarRT).is(field.value)) {
+              return;
+            }
+
+            onSetFieldFilter?.(
+              {
+                language: 'kuery',
+                query: `${escapeKueryLiteral(field.field)}:${field.value
+                  .map(escapeKueryLiteral)
+                  .join(' OR ')}`,
+              },
+              logEntry.id,
+              logEntry.cursor
+            );
           }
         : undefined,
     [logEntry, onSetFieldFilter]
@@ -99,3 +114,8 @@ const setFilterButtonLabel = i18n.translate('xpack.infra.logFlyout.filterAriaLab
 const setFilterButtonDescription = i18n.translate('xpack.infra.logFlyout.setFilterTooltip', {
   defaultMessage: 'View event with filter',
 });
+
+const escapeKueryLiteral = (unquotedLiteral: JsonScalar): JsonScalar =>
+  typeof unquotedLiteral === 'string'
+    ? `"${unquotedLiteral.replace(/"/g, '\\"')}"`
+    : unquotedLiteral;

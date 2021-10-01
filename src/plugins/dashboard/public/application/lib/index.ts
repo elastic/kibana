@@ -1,26 +1,34 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-export { saveDashboard } from './save_dashboard';
-export { getAppStateDefaults } from './get_app_state_defaults';
-export { migrateAppState } from './migrate_app_state';
+export * from './filter_utils';
 export { getDashboardIdFromUrl } from './url';
-export { createSessionRestorationDataProvider } from './session_restoration';
+export { saveDashboard } from './save_dashboard';
+export { migrateAppState } from './migrate_app_state';
 export { addHelpMenuToAppChrome } from './help_menu_util';
+export { getTagsFromSavedDashboard } from './dashboard_tagging';
+export { syncDashboardUrlState } from './sync_dashboard_url_state';
+export { DashboardSessionStorage } from './dashboard_session_storage';
+export { loadSavedDashboardState } from './load_saved_dashboard_state';
 export { attemptLoadDashboardByTitle } from './load_dashboard_by_title';
+export { syncDashboardFilterState } from './sync_dashboard_filter_state';
+export { syncDashboardIndexPatterns } from './sync_dashboard_index_patterns';
+export { syncDashboardContainerInput } from './sync_dashboard_container_input';
+export { diffDashboardContainerInput, diffDashboardState } from './diff_dashboard_state';
+export { loadDashboardHistoryLocationState } from './load_dashboard_history_location_state';
+export { buildDashboardContainer, tryDestroyDashboardContainer } from './build_dashboard_container';
+export {
+  stateToDashboardContainerInput,
+  savedObjectToDashboardState,
+} from './convert_dashboard_state';
+export {
+  createSessionRestorationDataProvider,
+  enableDashboardSearchSessions,
+  getSearchSessionIdFromURL,
+  getSessionURLObservable,
+} from './dashboard_session_restoration';

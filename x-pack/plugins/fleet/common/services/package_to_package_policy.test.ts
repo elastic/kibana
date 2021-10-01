@@ -1,10 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { PackageInfo } from '../types';
+
+import type { PackageInfo } from '../types';
+
 import { packageToPackagePolicy, packageToPackagePolicyInputs } from './package_to_package_policy';
+import { AWS_PACKAGE } from './fixtures/aws_package';
 
 describe('Fleet - packageToPackagePolicy', () => {
   const mockPackage: PackageInfo = {
@@ -26,6 +30,17 @@ describe('Fleet - packageToPackagePolicy', () => {
         search: [],
         index_pattern: [],
         map: [],
+        lens: [],
+        ml_module: [],
+        security_rule: [],
+      },
+      elasticsearch: {
+        ingest_pipeline: [],
+        component_template: [],
+        index_template: [],
+        transform: [],
+        ilm_policy: [],
+        data_stream_ilm_policy: [],
       },
     },
     status: 'not_installed',
@@ -43,58 +58,68 @@ describe('Fleet - packageToPackagePolicy', () => {
 
     it('returns empty array for packages with a config template but no inputs', () => {
       expect(
-        packageToPackagePolicyInputs(({
+        packageToPackagePolicyInputs({
           ...mockPackage,
-          policy_templates: [{ inputs: [] }],
-        } as unknown) as PackageInfo)
+          policy_templates: [{ name: 'test_template', inputs: [] }],
+        } as unknown as PackageInfo)
       ).toEqual([]);
     });
 
     it('returns inputs with no streams for packages with no streams', () => {
       expect(
-        packageToPackagePolicyInputs(({
+        packageToPackagePolicyInputs({
           ...mockPackage,
-          policy_templates: [{ inputs: [{ type: 'foo' }] }],
-        } as unknown) as PackageInfo)
-      ).toEqual([{ type: 'foo', enabled: true, streams: [] }]);
+          policy_templates: [{ name: 'test_template', inputs: [{ type: 'foo' }] }],
+        } as unknown as PackageInfo)
+      ).toEqual([{ type: 'foo', enabled: true, policy_template: 'test_template', streams: [] }]);
       expect(
-        packageToPackagePolicyInputs(({
+        packageToPackagePolicyInputs({
           ...mockPackage,
-          policy_templates: [{ inputs: [{ type: 'foo' }, { type: 'bar' }] }],
-        } as unknown) as PackageInfo)
+          policy_templates: [{ name: 'test_template', inputs: [{ type: 'foo' }, { type: 'bar' }] }],
+        } as unknown as PackageInfo)
       ).toEqual([
-        { type: 'foo', enabled: true, streams: [] },
-        { type: 'bar', enabled: true, streams: [] },
+        { type: 'foo', enabled: true, policy_template: 'test_template', streams: [] },
+        { type: 'bar', enabled: true, policy_template: 'test_template', streams: [] },
       ]);
     });
 
     it('returns inputs with streams for packages with streams', () => {
       expect(
-        packageToPackagePolicyInputs(({
+        packageToPackagePolicyInputs({
           ...mockPackage,
           data_streams: [
             { type: 'logs', dataset: 'foo', streams: [{ input: 'foo' }] },
             { type: 'logs', dataset: 'bar', streams: [{ input: 'bar' }] },
             { type: 'logs', dataset: 'bar2', streams: [{ input: 'bar' }] },
           ],
-          policy_templates: [
-            {
-              inputs: [{ type: 'foo' }, { type: 'bar' }],
-            },
-          ],
-        } as unknown) as PackageInfo)
+          policy_templates: [{ name: 'test_template', inputs: [{ type: 'foo' }, { type: 'bar' }] }],
+        } as unknown as PackageInfo)
       ).toEqual([
         {
           type: 'foo',
+          policy_template: 'test_template',
           enabled: true,
-          streams: [{ enabled: true, data_stream: { dataset: 'foo', type: 'logs' } }],
+          streams: [
+            {
+              enabled: true,
+              data_stream: { dataset: 'foo', type: 'logs' },
+            },
+          ],
         },
         {
           type: 'bar',
+          policy_template: 'test_template',
+
           enabled: true,
           streams: [
-            { enabled: true, data_stream: { dataset: 'bar', type: 'logs' } },
-            { enabled: true, data_stream: { dataset: 'bar2', type: 'logs' } },
+            {
+              enabled: true,
+              data_stream: { dataset: 'bar', type: 'logs' },
+            },
+            {
+              enabled: true,
+              data_stream: { dataset: 'bar2', type: 'logs' },
+            },
           ],
         },
       ]);
@@ -102,7 +127,7 @@ describe('Fleet - packageToPackagePolicy', () => {
 
     it('returns inputs with streams configurations for packages with stream vars', () => {
       expect(
-        packageToPackagePolicyInputs(({
+        packageToPackagePolicyInputs({
           ...mockPackage,
           data_streams: [
             {
@@ -131,15 +156,12 @@ describe('Fleet - packageToPackagePolicy', () => {
               ],
             },
           ],
-          policy_templates: [
-            {
-              inputs: [{ type: 'foo' }, { type: 'bar' }],
-            },
-          ],
-        } as unknown) as PackageInfo)
+          policy_templates: [{ name: 'test_template', inputs: [{ type: 'foo' }, { type: 'bar' }] }],
+        } as unknown as PackageInfo)
       ).toEqual([
         {
           type: 'foo',
+          policy_template: 'test_template',
           enabled: true,
           streams: [
             {
@@ -151,6 +173,7 @@ describe('Fleet - packageToPackagePolicy', () => {
         },
         {
           type: 'bar',
+          policy_template: 'test_template',
           enabled: true,
           streams: [
             {
@@ -170,7 +193,7 @@ describe('Fleet - packageToPackagePolicy', () => {
 
     it('returns inputs with streams configurations for packages with stream and input vars', () => {
       expect(
-        packageToPackagePolicyInputs(({
+        packageToPackagePolicyInputs({
           ...mockPackage,
           data_streams: [
             {
@@ -222,6 +245,7 @@ describe('Fleet - packageToPackagePolicy', () => {
           ],
           policy_templates: [
             {
+              name: 'test_template',
               inputs: [
                 {
                   type: 'foo',
@@ -244,10 +268,12 @@ describe('Fleet - packageToPackagePolicy', () => {
               ],
             },
           ],
-        } as unknown) as PackageInfo)
+        } as unknown as PackageInfo)
       ).toEqual([
         {
           type: 'foo',
+          policy_template: 'test_template',
+
           enabled: true,
           vars: {
             'foo-input-var-name': { value: 'foo-input-var-value' },
@@ -266,6 +292,8 @@ describe('Fleet - packageToPackagePolicy', () => {
         },
         {
           type: 'bar',
+          policy_template: 'test_template',
+
           enabled: true,
           vars: {
             'bar-input-var-name': { value: ['value1', 'value2'] },
@@ -290,6 +318,8 @@ describe('Fleet - packageToPackagePolicy', () => {
         },
         {
           type: 'with-disabled-streams',
+          policy_template: 'test_template',
+
           enabled: false,
           streams: [
             {
@@ -325,6 +355,7 @@ describe('Fleet - packageToPackagePolicy', () => {
         },
       });
     });
+
     it('returns package policy with custom name', () => {
       expect(packageToPackagePolicy(mockPackage, '1', '2', 'default', 'pkgPolicy-1')).toEqual({
         policy_id: '1',
@@ -340,6 +371,7 @@ describe('Fleet - packageToPackagePolicy', () => {
         },
       });
     });
+
     it('returns package policy with namespace and description', () => {
       expect(
         packageToPackagePolicy(
@@ -365,11 +397,12 @@ describe('Fleet - packageToPackagePolicy', () => {
         },
       });
     });
+
     it('returns package policy with inputs', () => {
-      const mockPackageWithPolicyTemplates = ({
+      const mockPackageWithPolicyTemplates = {
         ...mockPackage,
         policy_templates: [{ inputs: [{ type: 'foo' }] }],
-      } as unknown) as PackageInfo;
+      } as unknown as PackageInfo;
 
       expect(
         packageToPackagePolicy(mockPackageWithPolicyTemplates, '1', '2', 'default', 'pkgPolicy-1')
@@ -386,6 +419,18 @@ describe('Fleet - packageToPackagePolicy', () => {
           version: '0.0.0',
         },
       });
+    });
+
+    it('returns package policy with multiple policy templates (aka has integrations', () => {
+      expect(
+        packageToPackagePolicy(
+          AWS_PACKAGE as unknown as PackageInfo,
+          'some-agent-policy-id',
+          'some-output-id',
+          'default',
+          'aws-1'
+        )
+      ).toMatchSnapshot();
     });
   });
 });

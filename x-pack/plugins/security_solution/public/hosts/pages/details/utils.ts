@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, isEmpty } from 'lodash/fp';
@@ -36,8 +37,9 @@ export const getBreadcrumbs = (
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
-      href: getUrlForApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+      href: getUrlForApp(APP_ID, {
         path: !isEmpty(search[0]) ? search[0] : '',
+        deepLinkId: SecurityPageName.hosts,
       }),
     },
   ];
@@ -47,12 +49,14 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: params.detailName,
-        href: getUrlForApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+        href: getUrlForApp(APP_ID, {
           path: getHostDetailsUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
+          deepLinkId: SecurityPageName.hosts,
         }),
       },
     ];
   }
+
   if (params.tabName != null) {
     const tabName = get('tabName', params);
     if (!tabName) return breadcrumb;

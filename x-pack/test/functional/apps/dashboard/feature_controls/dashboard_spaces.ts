@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import {
   createDashboardEditUrl,
@@ -20,14 +22,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('spaces', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     describe('space with no features disabled', () => {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('dashboard/feature_controls/spaces');
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/dashboard/feature_controls/spaces'
+        );
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -37,7 +41,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('dashboard/feature_controls/spaces');
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/dashboard/feature_controls/spaces'
+        );
       });
 
       it('shows dashboard navlink', async () => {
@@ -99,7 +105,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('dashboard/feature_controls/spaces');
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/dashboard/feature_controls/spaces'
+        );
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -109,7 +117,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('dashboard/feature_controls/spaces');
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/dashboard/feature_controls/spaces'
+        );
       });
 
       it(`doesn't show dashboard navlink`, async () => {

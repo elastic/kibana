@@ -1,31 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { UiComponent } from 'src/plugins/kibana_utils/public';
-import { ActionType, ActionContextMapping, BaseContext } from '../types';
 import { Presentable } from '../util/presentable';
 import { Trigger } from '../triggers';
-
-export type ActionByType<T extends ActionType> = Action<ActionContextMapping[T], T>;
-export type ActionDefinitionByType<T extends ActionType> = ActionDefinition<
-  ActionContextMapping[T]
->;
 
 /**
  * During action execution we can provide additional information,
@@ -41,19 +24,18 @@ export interface ActionExecutionMeta {
 /**
  * Action methods are executed with Context from trigger + {@link ActionExecutionMeta}
  */
-export type ActionExecutionContext<Context extends BaseContext = BaseContext> = Context &
-  ActionExecutionMeta;
+export type ActionExecutionContext<Context extends object = object> = Context & ActionExecutionMeta;
 
 /**
  * Simplified action context for {@link ActionDefinition}
  * When defining action consumer may use either it's own Context
  * or an ActionExecutionContext<Context> to get access to {@link ActionExecutionMeta} params
  */
-export type ActionDefinitionContext<Context extends BaseContext = BaseContext> =
+export type ActionDefinitionContext<Context extends object = object> =
   | Context
   | ActionExecutionContext<Context>;
 
-export interface Action<Context extends BaseContext = {}, T = ActionType>
+export interface Action<Context extends object = object>
   extends Partial<Presentable<ActionExecutionContext<Context>>> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
@@ -69,7 +51,7 @@ export interface Action<Context extends BaseContext = {}, T = ActionType>
   /**
    * The action type is what determines the context shape.
    */
-  readonly type: T;
+  readonly type: string;
 
   /**
    * Optional EUI icon type that can be displayed along with the title.
@@ -117,7 +99,7 @@ export interface Action<Context extends BaseContext = {}, T = ActionType>
 /**
  * A convenience interface used to register an action.
  */
-export interface ActionDefinition<Context extends BaseContext = {}>
+export interface ActionDefinition<Context extends object = object>
   extends Partial<Presentable<ActionDefinitionContext<Context>>> {
   /**
    * ID of the action that uniquely identifies this action in the actions registry.
@@ -127,7 +109,7 @@ export interface ActionDefinition<Context extends BaseContext = {}>
   /**
    * ID of the factory for this action. Used to construct dynamic actions.
    */
-  readonly type?: ActionType;
+  readonly type?: string;
 
   /**
    * Returns a promise that resolves to true if this item is compatible given

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('../components/vector_style_editor', () => ({
@@ -17,10 +18,10 @@ import { shallow } from 'enzyme';
 import { DynamicSizeProperty } from './dynamic_size_property';
 import { RawValue, VECTOR_STYLES } from '../../../../../common/constants';
 import { IField } from '../../../fields/field';
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { SizeDynamicOptions } from '../../../../../common/descriptor_types';
-import { mockField, MockLayer, MockStyle } from './__tests__/test_util';
-import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
+import { mockField, MockLayer, MockStyle } from './test_helpers/test_util';
+import { IVectorLayer } from '../../../layers/vector_layer';
 
 export class MockMbMap {
   _paintPropertyCalls: unknown[];
@@ -46,7 +47,7 @@ const makeProperty = (
     options,
     VECTOR_STYLES.ICON_SIZE,
     field,
-    (new MockLayer(mockStyle) as unknown) as IVectorLayer,
+    new MockLayer(mockStyle) as unknown as IVectorLayer,
     () => {
       return (value: RawValue) => value + '_format';
     },
@@ -79,7 +80,7 @@ describe('syncSize', () => {
       { minSize: 8, maxSize: 32, fieldMetaOptions },
       new MockStyle({ min: 0, max: 100 })
     );
-    const mockMbMap = (new MockMbMap() as unknown) as MbMap;
+    const mockMbMap = new MockMbMap() as unknown as MbMap;
 
     sizeProp.syncCircleRadiusWithMb('foobar', mockMbMap);
 
@@ -115,7 +116,7 @@ describe('syncSize', () => {
       { minSize: 8, maxSize: 32, fieldMetaOptions },
       new MockStyle({ min: 100, max: 100 })
     );
-    const mockMbMap = (new MockMbMap() as unknown) as MbMap;
+    const mockMbMap = new MockMbMap() as unknown as MbMap;
 
     sizeProp.syncCircleRadiusWithMb('foobar', mockMbMap);
 

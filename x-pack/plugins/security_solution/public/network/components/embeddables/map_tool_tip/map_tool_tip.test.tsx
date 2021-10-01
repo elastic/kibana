@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
 import React from 'react';
 import '../../../../common/mock/match_media';
 import { MapToolTipComponent } from './map_tool_tip';
-import { TooltipFeature } from '../../../../../../maps/common/descriptor_types';
+import { TooltipFeature } from '../../../../../../maps/common';
 
 describe('MapToolTip', () => {
   test('placeholder component renders correctly against snapshot', () => {
@@ -24,6 +25,7 @@ describe('MapToolTip', () => {
         id: 1,
         layerId: 'layerId',
         mbProperties: {},
+        actions: [],
       },
     ];
     const getLayerName = jest.fn();

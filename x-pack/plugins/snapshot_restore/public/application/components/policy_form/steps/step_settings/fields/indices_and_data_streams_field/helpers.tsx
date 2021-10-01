@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -21,23 +22,19 @@ export const mapSelectionToIndicesOptions = ({
   indices: string[];
 }): EuiSelectableOption[] => {
   return orderDataStreamsAndIndices<EuiSelectableOption>({
-    dataStreams: dataStreams.map(
-      (dataStream): EuiSelectableOption => {
-        return {
-          label: dataStream,
-          append: <DataStreamBadge />,
-          checked: allSelected || selection.includes(dataStream) ? 'on' : undefined,
-        };
-      }
-    ),
-    indices: indices.map(
-      (index): EuiSelectableOption => {
-        return {
-          label: index,
-          checked: allSelected || selection.includes(index) ? 'on' : undefined,
-        };
-      }
-    ),
+    dataStreams: dataStreams.map((dataStream): EuiSelectableOption => {
+      return {
+        label: dataStream,
+        append: <DataStreamBadge />,
+        checked: allSelected || selection.includes(dataStream) ? 'on' : undefined,
+      };
+    }),
+    indices: indices.map((index): EuiSelectableOption => {
+      return {
+        label: index,
+        checked: allSelected || selection.includes(index) ? 'on' : undefined,
+      };
+    }),
   });
 };
 

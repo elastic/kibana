@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -14,12 +15,29 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { CanvasVariable } from '../../../types';
 
-import { ComponentStrings } from '../../../i18n';
-const { VarConfigDeleteVar: strings } = ComponentStrings;
-
-import './var_panel.scss';
+const strings = {
+  getCancelButtonLabel: () =>
+    i18n.translate('xpack.canvas.varConfigDeleteVar.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+  getDeleteButtonLabel: () =>
+    i18n.translate('xpack.canvas.varConfigDeleteVar.deleteButtonLabel', {
+      defaultMessage: 'Delete variable',
+    }),
+  getTitle: () =>
+    i18n.translate('xpack.canvas.varConfigDeleteVar.titleLabel', {
+      defaultMessage: 'Delete variable?',
+    }),
+  getWarningDescription: () =>
+    i18n.translate('xpack.canvas.varConfigDeleteVar.warningDescription', {
+      defaultMessage:
+        'Deleting this variable may adversely affect the workpad. Are you sure you wish to continue?',
+    }),
+};
 
 interface Props {
   selectedVar: CanvasVariable;

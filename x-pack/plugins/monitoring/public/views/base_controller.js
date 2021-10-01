@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -15,6 +16,8 @@ import { SetupModeFeature } from '../../common/enums';
 import { updateSetupModeData, isSetupModeFeatureEnabled } from '../lib/setup_mode';
 import { AlertsContext } from '../alerts/context';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { AlertsDropdown } from '../alerts/alerts_dropdown';
+import { HeaderMenuPortal } from '../../../observability/public';
 
 /**
  * Given a timezone, this function will calculate the offset in milliseconds
@@ -245,6 +248,11 @@ export class MonitoringViewBaseController {
       <KibanaContextProvider services={Legacy.shims.kibanaServices}>
         <I18nContext>
           <AlertsContext.Provider value={{ allAlerts: this.alerts }}>
+            <HeaderMenuPortal
+              setHeaderActionMenu={Legacy.shims.appMountParameters.setHeaderActionMenu}
+            >
+              <AlertsDropdown />
+            </HeaderMenuPortal>
             {!this._isDataInitialized ? (
               <PageLoading pageViewTitle={trackPageView ? this.telemetryPageViewTitle : null} />
             ) : (

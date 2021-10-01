@@ -1,24 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
+import type {
   EncryptedSavedObjectsService,
   EncryptedSavedObjectTypeRegistration,
   SavedObjectDescriptor,
 } from './encrypted_saved_objects_service';
 
 function createEncryptedSavedObjectsServiceMock() {
-  return ({
+  return {
     isRegistered: jest.fn(),
     stripOrDecryptAttributes: jest.fn(),
     encryptAttributes: jest.fn(),
     decryptAttributes: jest.fn(),
     encryptAttributesSync: jest.fn(),
     decryptAttributesSync: jest.fn(),
-  } as unknown) as jest.Mocked<EncryptedSavedObjectsService>;
+    stripOrDecryptAttributesSync: jest.fn(),
+  } as unknown as jest.Mocked<EncryptedSavedObjectsService>;
 }
 
 export const encryptedSavedObjectsServiceMock = {

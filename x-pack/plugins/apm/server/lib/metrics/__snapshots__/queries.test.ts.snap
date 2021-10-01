@@ -54,11 +54,11 @@ Object {
         },
         "date_histogram": Object {
           "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
+            "max": 50000,
+            "min": 0,
           },
           "field": "@timestamp",
-          "fixed_interval": "10800s",
+          "fixed_interval": "30s",
           "min_doc_count": 0,
         },
       },
@@ -72,22 +72,17 @@ Object {
             },
           },
           Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
-            },
-          },
-          Object {
             "term": Object {
               "service.node.name": "bar",
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
             },
           },
         ],
@@ -142,11 +137,11 @@ Object {
         },
         "date_histogram": Object {
           "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
+            "max": 50000,
+            "min": 0,
           },
           "field": "@timestamp",
-          "fixed_interval": "10800s",
+          "fixed_interval": "30s",
           "min_doc_count": 0,
         },
       },
@@ -160,27 +155,25 @@ Object {
             },
           },
           Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
-            },
-          },
-          Object {
             "term": Object {
               "service.node.name": "bar",
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
             },
           },
           Object {
-            "term": Object {
-              "agent.name": "java",
+            "terms": Object {
+              "agent.name": Array [
+                "java",
+                "opentelemetry/java",
+              ],
             },
           },
         ],
@@ -305,11 +298,11 @@ Object {
         },
         "date_histogram": Object {
           "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
+            "max": 50000,
+            "min": 0,
           },
           "field": "@timestamp",
-          "fixed_interval": "10800s",
+          "fixed_interval": "30s",
           "min_doc_count": 0,
         },
       },
@@ -323,22 +316,17 @@ Object {
             },
           },
           Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
-            },
-          },
-          Object {
             "term": Object {
               "service.node.name": "bar",
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
             },
           },
           Object {
@@ -398,11 +386,11 @@ Object {
         },
         "date_histogram": Object {
           "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
+            "max": 50000,
+            "min": 0,
           },
           "field": "@timestamp",
-          "fixed_interval": "10800s",
+          "fixed_interval": "30s",
           "min_doc_count": 0,
         },
       },
@@ -416,27 +404,25 @@ Object {
             },
           },
           Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
-            },
-          },
-          Object {
             "term": Object {
               "service.node.name": "bar",
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
             },
           },
           Object {
-            "term": Object {
-              "agent.name": "java",
+            "terms": Object {
+              "agent.name": Array [
+                "java",
+                "opentelemetry/java",
+              ],
             },
           },
         ],
@@ -481,11 +467,11 @@ Object {
         },
         "date_histogram": Object {
           "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
+            "max": 50000,
+            "min": 0,
           },
           "field": "@timestamp",
-          "fixed_interval": "10800s",
+          "fixed_interval": "30s",
           "min_doc_count": 0,
         },
       },
@@ -499,27 +485,25 @@ Object {
             },
           },
           Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
-            },
-          },
-          Object {
             "term": Object {
               "service.node.name": "bar",
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
             },
           },
           Object {
-            "term": Object {
-              "agent.name": "java",
+            "terms": Object {
+              "agent.name": Array [
+                "java",
+                "opentelemetry/java",
+              ],
             },
           },
         ],
@@ -584,11 +568,11 @@ Object {
         },
         "date_histogram": Object {
           "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
+            "max": 50000,
+            "min": 0,
           },
           "field": "@timestamp",
-          "fixed_interval": "10800s",
+          "fixed_interval": "30s",
           "min_doc_count": 0,
         },
       },
@@ -599,15 +583,6 @@ Object {
           Object {
             "term": Object {
               "service.name": "foo",
-            },
-          },
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
             },
           },
           Object {
@@ -622,8 +597,12 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
             },
           },
         ],
@@ -678,11 +657,11 @@ Object {
         },
         "date_histogram": Object {
           "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
+            "max": 50000,
+            "min": 0,
           },
           "field": "@timestamp",
-          "fixed_interval": "10800s",
+          "fixed_interval": "30s",
           "min_doc_count": 0,
         },
       },
@@ -693,15 +672,6 @@ Object {
           Object {
             "term": Object {
               "service.name": "foo",
-            },
-          },
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
             },
           },
           Object {
@@ -716,13 +686,20 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
             },
           },
           Object {
-            "term": Object {
-              "agent.name": "java",
+            "terms": Object {
+              "agent.name": Array [
+                "java",
+                "opentelemetry/java",
+              ],
             },
           },
         ],
@@ -847,11 +824,11 @@ Object {
         },
         "date_histogram": Object {
           "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
+            "max": 50000,
+            "min": 0,
           },
           "field": "@timestamp",
-          "fixed_interval": "10800s",
+          "fixed_interval": "30s",
           "min_doc_count": 0,
         },
       },
@@ -862,15 +839,6 @@ Object {
           Object {
             "term": Object {
               "service.name": "foo",
-            },
-          },
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
             },
           },
           Object {
@@ -885,8 +853,12 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
             },
           },
           Object {
@@ -946,11 +918,11 @@ Object {
         },
         "date_histogram": Object {
           "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
+            "max": 50000,
+            "min": 0,
           },
           "field": "@timestamp",
-          "fixed_interval": "10800s",
+          "fixed_interval": "30s",
           "min_doc_count": 0,
         },
       },
@@ -961,15 +933,6 @@ Object {
           Object {
             "term": Object {
               "service.name": "foo",
-            },
-          },
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
             },
           },
           Object {
@@ -984,13 +947,20 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
             },
           },
           Object {
-            "term": Object {
-              "agent.name": "java",
+            "terms": Object {
+              "agent.name": Array [
+                "java",
+                "opentelemetry/java",
+              ],
             },
           },
         ],
@@ -1035,11 +1005,11 @@ Object {
         },
         "date_histogram": Object {
           "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
+            "max": 50000,
+            "min": 0,
           },
           "field": "@timestamp",
-          "fixed_interval": "10800s",
+          "fixed_interval": "30s",
           "min_doc_count": 0,
         },
       },
@@ -1050,15 +1020,6 @@ Object {
           Object {
             "term": Object {
               "service.name": "foo",
-            },
-          },
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
             },
           },
           Object {
@@ -1073,13 +1034,20 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
             },
           },
           Object {
-            "term": Object {
-              "agent.name": "java",
+            "terms": Object {
+              "agent.name": Array [
+                "java",
+                "opentelemetry/java",
+              ],
             },
           },
         ],
@@ -1144,11 +1112,11 @@ Object {
         },
         "date_histogram": Object {
           "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
+            "max": 50000,
+            "min": 0,
           },
           "field": "@timestamp",
-          "fixed_interval": "10800s",
+          "fixed_interval": "30s",
           "min_doc_count": 0,
         },
       },
@@ -1165,14 +1133,9 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "test",
             },
           },
         ],
@@ -1227,11 +1190,11 @@ Object {
         },
         "date_histogram": Object {
           "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
+            "max": 50000,
+            "min": 0,
           },
           "field": "@timestamp",
-          "fixed_interval": "10800s",
+          "fixed_interval": "30s",
           "min_doc_count": 0,
         },
       },
@@ -1248,19 +1211,17 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
-          Object {
-            "term": Object {
-              "agent.name": "java",
+            "terms": Object {
+              "agent.name": Array [
+                "java",
+                "opentelemetry/java",
+              ],
             },
           },
         ],
@@ -1385,11 +1346,11 @@ Object {
         },
         "date_histogram": Object {
           "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
+            "max": 50000,
+            "min": 0,
           },
           "field": "@timestamp",
-          "fixed_interval": "10800s",
+          "fixed_interval": "30s",
           "min_doc_count": 0,
         },
       },
@@ -1406,14 +1367,9 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "test",
             },
           },
           Object {
@@ -1473,11 +1429,11 @@ Object {
         },
         "date_histogram": Object {
           "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
+            "max": 50000,
+            "min": 0,
           },
           "field": "@timestamp",
-          "fixed_interval": "10800s",
+          "fixed_interval": "30s",
           "min_doc_count": 0,
         },
       },
@@ -1494,19 +1450,17 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
-          Object {
-            "term": Object {
-              "agent.name": "java",
+            "terms": Object {
+              "agent.name": Array [
+                "java",
+                "opentelemetry/java",
+              ],
             },
           },
         ],
@@ -1551,11 +1505,11 @@ Object {
         },
         "date_histogram": Object {
           "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
+            "max": 50000,
+            "min": 0,
           },
           "field": "@timestamp",
-          "fixed_interval": "10800s",
+          "fixed_interval": "30s",
           "min_doc_count": 0,
         },
       },
@@ -1572,19 +1526,17 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
-          Object {
-            "term": Object {
-              "agent.name": "java",
+            "terms": Object {
+              "agent.name": Array [
+                "java",
+                "opentelemetry/java",
+              ],
             },
           },
         ],

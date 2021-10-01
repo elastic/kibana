@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -27,7 +28,7 @@ import {
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { DetailStatus } from '../../../components/kibana/detail_status';
 import { MonitoringViewBaseController } from '../../base_controller';
-import { CODE_PATH_KIBANA, ALERT_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
+import { CODE_PATH_KIBANA, RULE_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
 import { AlertsCallout } from '../../../alerts/callout';
 
 function getPageData($injector) {
@@ -76,7 +77,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_KIBANA_VERSION_MISMATCH],
+            alertTypeIds: [RULE_KIBANA_VERSION_MISMATCH],
           },
         },
       });

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 type Validator<T> = (value: unknown) => value is T;
 type TypeOf<V extends Validator<unknown>> = V extends Validator<infer T> ? T : never;
 
@@ -74,10 +76,9 @@ type KeysWithOptionalValues<T extends { [key: string]: unknown }> = {
  */
 type OptionalKeyWhenValueAcceptsUndefined<T extends { [key: string]: unknown }> = {
   [K in Exclude<keyof T, KeysWithOptionalValues<T>>]: T[K];
-} &
-  {
-    [K in KeysWithOptionalValues<T>]?: Exclude<T[K], undefined>;
-  };
+} & {
+  [K in KeysWithOptionalValues<T>]?: Exclude<T[K], undefined>;
+};
 
 /**
  * Validate that `value` is an object with string keys. The value at each key is tested against its own validator.
@@ -97,11 +98,9 @@ export function object<
 >(validatorDictionary: ValidatorDictionary) {
   return function (
     value: unknown
-  ): value is /** If a key can point to `undefined`, then instead make the key optional and exclude `undefined` from the value type. */ OptionalKeyWhenValueAcceptsUndefined<
-    {
-      [K in keyof ValidatorDictionary]: TypeOf<ValidatorDictionary[K]>;
-    }
-  > {
+  ): value is /** If a key can point to `undefined`, then instead make the key optional and exclude `undefined` from the value type. */ OptionalKeyWhenValueAcceptsUndefined<{
+    [K in keyof ValidatorDictionary]: TypeOf<ValidatorDictionary[K]>;
+  }> {
     // This only validates non-null objects
     if (typeof value !== 'object' || value === null) {
       return false;

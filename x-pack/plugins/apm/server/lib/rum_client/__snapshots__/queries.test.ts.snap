@@ -48,8 +48,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
@@ -60,10 +60,11 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "test",
+              "service.environment": "staging",
             },
           },
         ],
+        "must_not": Array [],
       },
     },
     "size": 0,
@@ -87,6 +88,20 @@ Object {
             "bucket_sort": Object {
               "from": 0,
               "size": 5,
+            },
+          },
+          "impactedPages": Object {
+            "aggs": Object {
+              "pageCount": Object {
+                "cardinality": Object {
+                  "field": "transaction.id",
+                },
+              },
+            },
+            "filter": Object {
+              "term": Object {
+                "transaction.type": "page-load",
+              },
             },
           },
           "sample": Object {
@@ -129,8 +144,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
@@ -144,12 +159,8 @@ Object {
               "service.language.name": "javascript",
             },
           },
-          Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
         ],
+        "must_not": Array [],
       },
     },
     "size": 0,
@@ -208,8 +219,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
@@ -223,12 +234,8 @@ Object {
               "field": "transaction.marks.navigationTiming.fetchStart",
             },
           },
-          Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
         ],
+        "must_not": Array [],
       },
     },
     "size": 0,
@@ -478,8 +485,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
@@ -495,10 +502,11 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "test",
+              "service.environment": "staging",
             },
           },
         ],
+        "must_not": Array [],
       },
     },
     "size": 0,
@@ -530,8 +538,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
@@ -542,10 +550,11 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "test",
+              "service.environment": "staging",
             },
           },
         ],
+        "must_not": Array [],
       },
     },
     "size": 0,
@@ -647,8 +656,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
@@ -662,12 +671,8 @@ Object {
               "field": "transaction.marks.navigationTiming.fetchStart",
             },
           },
-          Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
         ],
+        "must_not": Array [],
       },
     },
     "size": 0,
@@ -698,8 +703,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
@@ -713,12 +718,8 @@ Object {
               "field": "transaction.marks.navigationTiming.fetchStart",
             },
           },
-          Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
         ],
+        "must_not": Array [],
       },
     },
     "size": 0,

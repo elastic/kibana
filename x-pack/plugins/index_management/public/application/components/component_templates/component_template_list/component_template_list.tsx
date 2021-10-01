@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -12,8 +13,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ScopedHistory } from 'kibana/public';
 import { EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
-import { attemptToURIDecode } from '../../../../shared_imports';
-import { SectionLoading, ComponentTemplateDeserialized, GlobalFlyout } from '../shared_imports';
+import {
+  APP_WRAPPER_CLASS,
+  PageLoading,
+  PageError,
+  attemptToURIDecode,
+} from '../../../../shared_imports';
+import { ComponentTemplateDeserialized, GlobalFlyout } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import {
@@ -23,7 +29,6 @@ import {
 } from '../component_template_details';
 import { EmptyPrompt } from './empty_prompt';
 import { ComponentTable } from './table';
-import { LoadError } from './error';
 import { ComponentTemplatesDeleteModal } from './delete_modal';
 
 interface Props {
@@ -37,10 +42,8 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   componentTemplateName,
   history,
 }) => {
-  const {
-    addContent: addContentToGlobalFlyout,
-    removeContent: removeContentFromGlobalFlyout,
-  } = useGlobalFlyout();
+  const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
+    useGlobalFlyout();
   const { api, trackMetric, documentation } = useComponentTemplatesContext();
 
   const { data, isLoading, error, resendRequest } = api.useLoadComponentTemplates();
@@ -137,18 +140,20 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
     }
   }, [componentTemplateName, removeContentFromGlobalFlyout]);
 
-  let content: React.ReactNode;
-
   if (isLoading) {
-    content = (
-      <SectionLoading data-test-subj="sectionLoading">
+    return (
+      <PageLoading data-test-subj="sectionLoading">
         <FormattedMessage
           id="xpack.idxMgmt.home.componentTemplates.list.loadingMessage"
           defaultMessage="Loading component templates…"
         />
-      </SectionLoading>
+      </PageLoading>
     );
-  } else if (data?.length) {
+  }
+
+  let content: React.ReactNode;
+
+  if (data?.length) {
     content = (
       <>
         <EuiText color="subdued">
@@ -182,11 +187,22 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   } else if (data && data.length === 0) {
     content = <EmptyPrompt history={history} />;
   } else if (error) {
-    content = <LoadError onReloadClick={resendRequest} />;
+    content = (
+      <PageError
+        title={
+          <FormattedMessage
+            id="xpack.idxMgmt.home.componentTemplates.list.loadingErrorMessage"
+            defaultMessage="Error loading component templates"
+          />
+        }
+        error={error}
+        data-test-subj="componentTemplatesLoadError"
+      />
+    );
   }
 
   return (
-    <div data-test-subj="componentTemplateList">
+    <div className={APP_WRAPPER_CLASS} data-test-subj="componentTemplateList">
       {content}
 
       {/* delete modal */}

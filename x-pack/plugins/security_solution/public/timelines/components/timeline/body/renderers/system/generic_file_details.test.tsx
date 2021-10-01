@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
@@ -14,6 +15,8 @@ import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { mockEndgameCreationEvent } from '../../../../../../common/mock/mock_endgame_ecs_data';
 import { SystemGenericFileDetails, SystemGenericFileLine } from './generic_file_details';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
+
+jest.mock('../../../../../../common/lib/kibana');
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -105,6 +108,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={789}
               endgameProcessName="[endgameProcessName-123]"
               eventAction="[eventAction-123]"
+              fileExtOriginalPath="[fileExtOriginalPath]"
+              fileHashSha256="[fileHashSha256-123]"
               fileName="[fileName-123]"
               filePath="[filePath-123]"
               hostName="[hostname-123]"
@@ -115,10 +120,11 @@ describe('SystemGenericFileDetails', () => {
               packageName="[packageName-123]"
               packageSummary="[packageSummary-123]"
               packageVersion="[packageVersion-123]"
-              processExecutable="[packageExecutable=123]"
-              processHashMd5="[processHashMd5-123]"
-              processHashSha1="[processHashSha1-123]"
+              processExecutable="[processExecutable=123]"
+              processExitCode={-1}
               processHashSha256="[processHashSha256-123]"
+              processParentName="[processParentName-123]"
+              processParentPid={789}
               processPid={123}
               processPpid={456}
               processName="[processName-123]"
@@ -134,7 +140,7 @@ describe('SystemGenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][generic-text-123][fileName-123]in[filePath-123][processName-123](123)[arg-1][arg-2][arg-3][some-title-123]with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
+        '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][generic-text-123][fileName-123]in[filePath-123]from its original path[fileExtOriginalPath][processName-123](123)[arg-1][arg-2][arg-3][some-title-123]with exit code-1[endgameExitCode-123]via parent process[processParentName-123][endgameParentProcessName-123](789)(456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][fileHashSha256-123][processHashSha256-123][message-123]'
       );
     });
 
@@ -151,6 +157,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={null}
               endgameProcessName={null}
               eventAction={null}
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
               fileName={null}
               filePath={null}
               hostName={null}
@@ -161,9 +169,10 @@ describe('SystemGenericFileDetails', () => {
               packageSummary={null}
               packageVersion={null}
               processExecutable={null}
-              processHashMd5={null}
-              processHashSha1={null}
+              processExitCode={null}
               processHashSha256={null}
+              processParentName={null}
+              processParentPid={null}
               processPid={null}
               processPpid={null}
               processName={null}
@@ -196,6 +205,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={null}
               endgameProcessName={null}
               eventAction={null}
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
               fileName={null}
               filePath={null}
               hostName="[hostname-123]"
@@ -206,9 +217,10 @@ describe('SystemGenericFileDetails', () => {
               packageSummary={null}
               packageVersion={null}
               processExecutable={null}
-              processHashMd5={null}
-              processHashSha1={null}
+              processExitCode={null}
               processHashSha256={null}
+              processParentName={null}
+              processParentPid={null}
               processPid={null}
               processPpid={null}
               processName={null}
@@ -241,6 +253,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={null}
               endgameProcessName={null}
               eventAction={null}
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
               fileName={null}
               filePath={null}
               hostName="[hostname-123]"
@@ -251,9 +265,10 @@ describe('SystemGenericFileDetails', () => {
               packageSummary={null}
               packageVersion={null}
               processExecutable={null}
-              processHashMd5={null}
-              processHashSha1={null}
+              processExitCode={null}
               processHashSha256={null}
+              processParentName={null}
+              processParentPid={null}
               processPid={null}
               processPpid={null}
               processName={null}
@@ -286,6 +301,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={null}
               endgameProcessName={null}
               eventAction={null}
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
               fileName={null}
               filePath={null}
               hostName="[hostname-123]"
@@ -296,9 +313,10 @@ describe('SystemGenericFileDetails', () => {
               packageSummary={null}
               packageVersion={null}
               processExecutable={null}
-              processHashMd5={null}
-              processHashSha1={null}
+              processExitCode={null}
               processHashSha256={null}
+              processParentName={null}
+              processParentPid={null}
               processPid={null}
               processPpid={null}
               processName={null}
@@ -333,6 +351,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={null}
               endgameProcessName={null}
               eventAction={null}
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
               fileName={null}
               filePath={null}
               hostName="[hostname-123]"
@@ -343,9 +363,10 @@ describe('SystemGenericFileDetails', () => {
               packageSummary={null}
               packageVersion={null}
               processExecutable={null}
-              processHashMd5={null}
-              processHashSha1={null}
+              processExitCode={null}
               processHashSha256={null}
+              processParentName={null}
+              processParentPid={null}
               processPid={null}
               processPpid={null}
               processName={null}
@@ -380,6 +401,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={null}
               endgameProcessName={null}
               eventAction={null}
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
               fileName={null}
               filePath={null}
               hostName="[hostname-123]"
@@ -390,9 +413,10 @@ describe('SystemGenericFileDetails', () => {
               packageSummary="[packageSummary-123]"
               packageVersion={null}
               processExecutable={null}
-              processHashMd5={null}
-              processHashSha1={null}
+              processExitCode={null}
               processHashSha256={null}
+              processParentName={null}
+              processParentPid={null}
               processPid={null}
               processPpid={null}
               processName={null}
@@ -427,6 +451,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={null}
               endgameProcessName={null}
               eventAction={null}
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
               fileName={null}
               filePath={null}
               hostName="[hostname-123]"
@@ -437,9 +463,10 @@ describe('SystemGenericFileDetails', () => {
               packageSummary="[packageSummary-123]"
               packageVersion="[packageVersion-123]"
               processExecutable={null}
-              processHashMd5={null}
-              processHashSha1={null}
+              processExitCode={null}
               processHashSha256={null}
+              processParentName={null}
+              processParentPid={null}
               processPid={null}
               processPpid={null}
               processName={null}
@@ -461,7 +488,7 @@ describe('SystemGenericFileDetails', () => {
       );
     });
 
-    test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable', () => {
+    test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processExitCode', () => {
       const wrapper = mount(
         <TestProviders>
           <div>
@@ -474,194 +501,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={null}
               endgameProcessName={null}
               eventAction={null}
-              fileName={null}
-              filePath={null}
-              hostName="[hostname-123]"
-              id="[id-123]"
-              message="[message-123]"
-              outcome="[outcome-123]"
-              packageName="[packageName-123]"
-              packageSummary="[packageSummary-123]"
-              packageVersion="[packageVersion-123]"
-              processExecutable="[packageVersion-123]"
-              processHashMd5={null}
-              processHashSha1={null}
-              processHashSha256={null}
-              processPid={null}
-              processPpid={null}
-              processName={null}
-              showMessage={true}
-              sshMethod={null}
-              sshSignature={null}
-              text={null}
-              userDomain={null}
-              userName={null}
-              workingDirectory={null}
-              processTitle={null}
-              args={null}
-            />
-          </div>
-        </TestProviders>
-      );
-      expect(wrapper.text()).toEqual(
-        '[hostname-123][packageVersion-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
-      );
-    });
-
-    test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <div>
-            <SystemGenericFileLine
-              contextId="[context-123]"
-              endgameExitCode={null}
-              endgameFileName={null}
-              endgameFilePath={null}
-              endgameParentProcessName={null}
-              endgamePid={null}
-              endgameProcessName={null}
-              eventAction={null}
-              fileName={null}
-              filePath={null}
-              hostName="[hostname-123]"
-              id="[id-123]"
-              message="[message-123]"
-              outcome="[outcome-123]"
-              packageName="[packageName-123]"
-              packageSummary="[packageSummary-123]"
-              packageVersion="[packageVersion-123]"
-              processExecutable="[packageVersion-123]"
-              processHashMd5="[processHashMd5-123]"
-              processHashSha1={null}
-              processHashSha256={null}
-              processPid={null}
-              processPpid={null}
-              processName={null}
-              showMessage={true}
-              sshMethod={null}
-              sshSignature={null}
-              text={null}
-              userDomain={null}
-              userName={null}
-              workingDirectory={null}
-              processTitle={null}
-              args={null}
-            />
-          </div>
-        </TestProviders>
-      );
-      expect(wrapper.text()).toEqual(
-        '[hostname-123][packageVersion-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashMd5-123][message-123]'
-      );
-    });
-
-    test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <div>
-            <SystemGenericFileLine
-              contextId="[context-123]"
-              endgameExitCode={null}
-              endgameFileName={null}
-              endgameFilePath={null}
-              endgameParentProcessName={null}
-              endgamePid={null}
-              endgameProcessName={null}
-              eventAction={null}
-              fileName={null}
-              filePath={null}
-              hostName="[hostname-123]"
-              id="[id-123]"
-              message="[message-123]"
-              outcome="[outcome-123]"
-              packageName="[packageName-123]"
-              packageSummary="[packageSummary-123]"
-              packageVersion="[packageVersion-123]"
-              processExecutable="[packageVersion-123]"
-              processHashMd5="[processHashMd5-123]"
-              processHashSha1="[processHashSha1-123]"
-              processHashSha256={null}
-              processPid={null}
-              processPpid={null}
-              processName={null}
-              showMessage={true}
-              sshMethod={null}
-              sshSignature={null}
-              text={null}
-              userDomain={null}
-              userName={null}
-              workingDirectory={null}
-              processTitle={null}
-              args={null}
-            />
-          </div>
-        </TestProviders>
-      );
-      expect(wrapper.text()).toEqual(
-        '[hostname-123][packageVersion-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha1-123][processHashMd5-123][message-123]'
-      );
-    });
-
-    test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <div>
-            <SystemGenericFileLine
-              contextId="[context-123]"
-              endgameExitCode={null}
-              endgameFileName={null}
-              endgameFilePath={null}
-              endgameParentProcessName={null}
-              endgamePid={null}
-              endgameProcessName={null}
-              eventAction={null}
-              fileName={null}
-              filePath={null}
-              hostName="[hostname-123]"
-              id="[id-123]"
-              message="[message-123]"
-              outcome="[outcome-123]"
-              packageName="[packageName-123]"
-              packageSummary="[packageSummary-123]"
-              packageVersion="[packageVersion-123]"
-              processExecutable="[packageVersion-123]"
-              processHashMd5="[processHashMd5-123]"
-              processHashSha1="[processHashSha1-123]"
-              processHashSha256="[processHashSha256-123]"
-              processPid={null}
-              processPpid={null}
-              processName={null}
-              showMessage={true}
-              sshMethod={null}
-              sshSignature={null}
-              text={null}
-              userDomain={null}
-              userName={null}
-              workingDirectory={null}
-              processTitle={null}
-              args={null}
-            />
-          </div>
-        </TestProviders>
-      );
-      expect(wrapper.text()).toEqual(
-        '[hostname-123][packageVersion-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
-      );
-    });
-
-    test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <div>
-            <SystemGenericFileLine
-              contextId="[context-123]"
-              endgameExitCode={null}
-              endgameFileName={null}
-              endgameFilePath={null}
-              endgameParentProcessName={null}
-              endgamePid={null}
-              endgameProcessName={null}
-              eventAction={null}
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
               fileName={null}
               filePath={null}
               hostName="[hostname-123]"
@@ -672,9 +513,260 @@ describe('SystemGenericFileDetails', () => {
               packageSummary="[packageSummary-123]"
               packageVersion="[packageVersion-123]"
               processExecutable="[processExecutable-123]"
-              processHashMd5="[processHashMd5-123]"
-              processHashSha1="[processHashSha1-123]"
+              processExitCode={-1}
+              processHashSha256={null}
+              processParentName={null}
+              processParentPid={null}
+              processPid={null}
+              processPpid={null}
+              processName={null}
+              showMessage={true}
+              sshMethod={null}
+              sshSignature={null}
+              text={null}
+              userDomain={null}
+              userName={null}
+              workingDirectory={null}
+              processTitle={null}
+              args={null}
+            />
+          </div>
+        </TestProviders>
+      );
+      expect(wrapper.text()).toEqual(
+        '[hostname-123][processExecutable-123]with exit code-1with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
+      );
+    });
+
+    test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <div>
+            <SystemGenericFileLine
+              contextId="[context-123]"
+              endgameExitCode={null}
+              endgameFileName={null}
+              endgameFilePath={null}
+              endgameParentProcessName={null}
+              endgamePid={null}
+              endgameProcessName={null}
+              eventAction={null}
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
+              fileName={null}
+              filePath={null}
+              hostName="[hostname-123]"
+              id="[id-123]"
+              message="[message-123]"
+              outcome="[outcome-123]"
+              packageName="[packageName-123]"
+              packageSummary="[packageSummary-123]"
+              packageVersion="[packageVersion-123]"
+              processExecutable="[processExecutable-123]"
+              processExitCode={-1}
+              processHashSha256={null}
+              processParentName={null}
+              processParentPid={null}
+              processPid={null}
+              processPpid={null}
+              processName={null}
+              showMessage={true}
+              sshMethod={null}
+              sshSignature={null}
+              text={null}
+              userDomain={null}
+              userName={null}
+              workingDirectory={null}
+              processTitle={null}
+              args={null}
+            />
+          </div>
+        </TestProviders>
+      );
+      expect(wrapper.text()).toEqual(
+        '[hostname-123][processExecutable-123]with exit code-1with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
+      );
+    });
+
+    test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <div>
+            <SystemGenericFileLine
+              contextId="[context-123]"
+              endgameExitCode={null}
+              endgameFileName={null}
+              endgameFilePath={null}
+              endgameParentProcessName={null}
+              endgamePid={null}
+              endgameProcessName={null}
+              eventAction={null}
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
+              fileName={null}
+              filePath={null}
+              hostName="[hostname-123]"
+              id="[id-123]"
+              message="[message-123]"
+              outcome="[outcome-123]"
+              packageName="[packageName-123]"
+              packageSummary="[packageSummary-123]"
+              packageVersion="[packageVersion-123]"
+              processExecutable="[processExecutable-123]"
+              processExitCode={-1}
               processHashSha256="[processHashSha256-123]"
+              processParentName={null}
+              processParentPid={null}
+              processPid={null}
+              processPpid={null}
+              processName={null}
+              showMessage={true}
+              sshMethod={null}
+              sshSignature={null}
+              text={null}
+              userDomain={null}
+              userName={null}
+              workingDirectory={null}
+              processTitle={null}
+              args={null}
+            />
+          </div>
+        </TestProviders>
+      );
+      expect(wrapper.text()).toEqual(
+        '[hostname-123][processExecutable-123]with exit code-1with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
+      );
+    });
+
+    test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <div>
+            <SystemGenericFileLine
+              contextId="[context-123]"
+              endgameExitCode={null}
+              endgameFileName={null}
+              endgameFilePath={null}
+              endgameParentProcessName={null}
+              endgamePid={null}
+              endgameProcessName={null}
+              eventAction={null}
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
+              fileName={null}
+              filePath={null}
+              hostName="[hostname-123]"
+              id="[id-123]"
+              message="[message-123]"
+              outcome="[outcome-123]"
+              packageName="[packageName-123]"
+              packageSummary="[packageSummary-123]"
+              packageVersion="[packageVersion-123]"
+              processExecutable="[processExecutable-123]"
+              processExitCode={-1}
+              processHashSha256="[processHashSha256-123]"
+              processParentName="[processParentName-123]"
+              processParentPid={null}
+              processPid={null}
+              processPpid={null}
+              processName={null}
+              showMessage={true}
+              sshMethod={null}
+              sshSignature={null}
+              text={null}
+              userDomain={null}
+              userName={null}
+              workingDirectory={null}
+              processTitle={null}
+              args={null}
+            />
+          </div>
+        </TestProviders>
+      );
+      expect(wrapper.text()).toEqual(
+        '[hostname-123][processExecutable-123]with exit code-1via parent process[processParentName-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
+      );
+    });
+
+    test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <div>
+            <SystemGenericFileLine
+              contextId="[context-123]"
+              endgameExitCode={null}
+              endgameFileName={null}
+              endgameFilePath={null}
+              endgameParentProcessName={null}
+              endgamePid={null}
+              endgameProcessName={null}
+              eventAction={null}
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
+              fileName={null}
+              filePath={null}
+              hostName="[hostname-123]"
+              id="[id-123]"
+              message="[message-123]"
+              outcome="[outcome-123]"
+              packageName="[packageName-123]"
+              packageSummary="[packageSummary-123]"
+              packageVersion="[packageVersion-123]"
+              processExecutable="[processExecutable-123]"
+              processExitCode={-1}
+              processHashSha256="[processHashSha256-123]"
+              processParentName="[processParentName-123]"
+              processParentPid={789}
+              processPid={null}
+              processPpid={null}
+              processName={null}
+              showMessage={true}
+              sshMethod={null}
+              sshSignature={null}
+              text={null}
+              userDomain={null}
+              userName={null}
+              workingDirectory={null}
+              processTitle={null}
+              args={null}
+            />
+          </div>
+        </TestProviders>
+      );
+      expect(wrapper.text()).toEqual(
+        '[hostname-123][processExecutable-123]with exit code-1via parent process[processParentName-123](789)with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
+      );
+    });
+
+    test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid, processPid', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <div>
+            <SystemGenericFileLine
+              contextId="[context-123]"
+              endgameExitCode={null}
+              endgameFileName={null}
+              endgameFilePath={null}
+              endgameParentProcessName={null}
+              endgamePid={null}
+              endgameProcessName={null}
+              eventAction={null}
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
+              fileName={null}
+              filePath={null}
+              hostName="[hostname-123]"
+              id="[id-123]"
+              message="[message-123]"
+              outcome="[outcome-123]"
+              packageName="[packageName-123]"
+              packageSummary="[packageSummary-123]"
+              packageVersion="[packageVersion-123]"
+              processExecutable="[processExecutable-123]"
+              processExitCode={-1}
+              processHashSha256="[processHashSha256-123]"
+              processParentName="[processParentName-123]"
+              processParentPid={789}
               processPid={123}
               processPpid={null}
               processName={null}
@@ -692,11 +784,11 @@ describe('SystemGenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        '[hostname-123][processExecutable-123](123)with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
+        '[hostname-123][processExecutable-123](123)with exit code-1via parent process[processParentName-123](789)with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
-    test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName', () => {
+    test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid, processPid, processPpid, processName', () => {
       const wrapper = mount(
         <TestProviders>
           <div>
@@ -709,6 +801,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={null}
               endgameProcessName={null}
               eventAction={null}
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
               fileName={null}
               filePath={null}
               hostName="[hostname-123]"
@@ -718,10 +812,11 @@ describe('SystemGenericFileDetails', () => {
               packageName="[packageName-123]"
               packageSummary="[packageSummary-123]"
               packageVersion="[packageVersion-123]"
-              processExecutable="[packageVersion-123]"
-              processHashMd5="[processHashMd5-123]"
-              processHashSha1="[processHashSha1-123]"
+              processExecutable="[processExecutable-123]"
+              processExitCode={-1}
               processHashSha256="[processHashSha256-123]"
+              processParentName="[processParentName-123]"
+              processParentPid={789}
               processPid={123}
               processPpid={456}
               processName="[processName-123]"
@@ -739,11 +834,11 @@ describe('SystemGenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        '[hostname-123][processName-123](123)via parent process(456)with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
+        '[hostname-123][processName-123](123)with exit code-1via parent process[processParentName-123](789)(456)with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
-    test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod', () => {
+    test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid, processPid, processPpid, processName, sshMethod', () => {
       const wrapper = mount(
         <TestProviders>
           <div>
@@ -756,6 +851,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={null}
               endgameProcessName={null}
               eventAction="[eventAction-123]"
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
               fileName={null}
               filePath={null}
               hostName="[hostname-123]"
@@ -765,10 +862,11 @@ describe('SystemGenericFileDetails', () => {
               packageName="[packageName-123]"
               packageSummary="[packageSummary-123]"
               packageVersion="[packageVersion-123]"
-              processExecutable="[packageVersion-123]"
-              processHashMd5="[processHashMd5-123]"
-              processHashSha1="[processHashSha1-123]"
+              processExecutable="[processExecutable-123]"
+              processExitCode={-1}
               processHashSha256="[processHashSha256-123]"
+              processParentName="[processParentName-123]"
+              processParentPid={789}
               processPid={123}
               processPpid={456}
               processName="[processName-123]"
@@ -786,11 +884,11 @@ describe('SystemGenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        '[hostname-123][processName-123](123)with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
+        '[hostname-123][processName-123](123)with exit code-1[endgameExitCode-123]via parent process[processParentName-123][endgameParentProcessName-123](789)(456)with result[outcome-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
-    test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod, sshSignature', () => {
+    test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid, processPid, processPpid, processName, sshMethod, sshSignature', () => {
       const wrapper = mount(
         <TestProviders>
           <div>
@@ -803,6 +901,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={null}
               endgameProcessName={null}
               eventAction="[eventAction-123]"
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
               fileName={null}
               filePath={null}
               hostName="[hostname-123]"
@@ -812,10 +912,11 @@ describe('SystemGenericFileDetails', () => {
               packageName="[packageName-123]"
               packageSummary="[packageSummary-123]"
               packageVersion="[packageVersion-123]"
-              processExecutable="[packageVersion-123]"
-              processHashMd5="[processHashMd5-123]"
-              processHashSha1="[processHashSha1-123]"
+              processExecutable="[processExecutable-123]"
+              processExitCode={-1}
               processHashSha256="[processHashSha256-123]"
+              processParentName="[processParentName-123]"
+              processParentPid={789}
               processPid={123}
               processPpid={456}
               processName="[processName-123]"
@@ -833,11 +934,11 @@ describe('SystemGenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        '[hostname-123][processName-123](123)with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
+        '[hostname-123][processName-123](123)with exit code-1[endgameExitCode-123]via parent process[processParentName-123][endgameParentProcessName-123](789)(456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
-    test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod, sshSignature, text', () => {
+    test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid, processPid, processPpid, processName, sshMethod, sshSignature, text', () => {
       const wrapper = mount(
         <TestProviders>
           <div>
@@ -850,6 +951,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={null}
               endgameProcessName={null}
               eventAction="[eventAction-123]"
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
               fileName={null}
               filePath={null}
               hostName="[hostname-123]"
@@ -859,10 +962,11 @@ describe('SystemGenericFileDetails', () => {
               packageName="[packageName-123]"
               packageSummary="[packageSummary-123]"
               packageVersion="[packageVersion-123]"
-              processExecutable="[packageVersion-123]"
-              processHashMd5="[processHashMd5-123]"
-              processHashSha1="[processHashSha1-123]"
+              processExecutable="[processExecutable-123]"
+              processExitCode={-1}
               processHashSha256="[processHashSha256-123]"
+              processParentName="[processParentName-123]"
+              processParentPid={789}
               processPid={123}
               processPpid={456}
               processName="[processName-123]"
@@ -880,11 +984,11 @@ describe('SystemGenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        '[hostname-123][text-123][processName-123](123)with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
+        '[hostname-123][text-123][processName-123](123)with exit code-1[endgameExitCode-123]via parent process[processParentName-123][endgameParentProcessName-123](789)(456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
-    test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain', () => {
+    test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain', () => {
       const wrapper = mount(
         <TestProviders>
           <div>
@@ -897,6 +1001,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={null}
               endgameProcessName={null}
               eventAction="[eventAction-123]"
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
               fileName={null}
               filePath={null}
               hostName="[hostname-123]"
@@ -906,10 +1012,11 @@ describe('SystemGenericFileDetails', () => {
               packageName="[packageName-123]"
               packageSummary="[packageSummary-123]"
               packageVersion="[packageVersion-123]"
-              processExecutable="[packageVersion-123]"
-              processHashMd5="[processHashMd5-123]"
-              processHashSha1="[processHashSha1-123]"
+              processExecutable="[processExecutable-123]"
+              processExitCode={-1}
               processHashSha256="[processHashSha256-123]"
+              processParentName="[processParentName-123]"
+              processParentPid={789}
               processPid={123}
               processPpid={456}
               processName="[processName-123]"
@@ -927,11 +1034,11 @@ describe('SystemGenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        '\\[userDomain-123][hostname-123][text-123][processName-123](123)with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
+        '\\[userDomain-123][hostname-123][text-123][processName-123](123)with exit code-1[endgameExitCode-123]via parent process[processParentName-123][endgameParentProcessName-123](789)(456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
-    test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain, username', () => {
+    test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain, username', () => {
       const wrapper = mount(
         <TestProviders>
           <div>
@@ -944,6 +1051,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={null}
               endgameProcessName={null}
               eventAction="[eventAction-123]"
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
               fileName={null}
               filePath={null}
               hostName="[hostname-123]"
@@ -953,10 +1062,11 @@ describe('SystemGenericFileDetails', () => {
               packageName="[packageName-123]"
               packageSummary="[packageSummary-123]"
               packageVersion="[packageVersion-123]"
-              processExecutable="[packageVersion-123]"
-              processHashMd5="[processHashMd5-123]"
-              processHashSha1="[processHashSha1-123]"
+              processExecutable="[processExecutable-123]"
+              processExitCode={-1}
               processHashSha256="[processHashSha256-123]"
+              processParentName="[processParentName-123]"
+              processParentPid={789}
               processPid={123}
               processPpid={456}
               processName="[processName-123]"
@@ -974,11 +1084,11 @@ describe('SystemGenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        '[username-123]\\[userDomain-123]@[hostname-123][text-123][processName-123](123)with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
+        '[username-123]\\[userDomain-123]@[hostname-123][text-123][processName-123](123)with exit code-1[endgameExitCode-123]via parent process[processParentName-123][endgameParentProcessName-123](789)(456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
-    test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain, username, working-directory', () => {
+    test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain, username, working-directory', () => {
       const wrapper = mount(
         <TestProviders>
           <div>
@@ -991,6 +1101,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={null}
               endgameProcessName={null}
               eventAction="[eventAction-123]"
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
               fileName={null}
               filePath={null}
               hostName="[hostname-123]"
@@ -1000,10 +1112,11 @@ describe('SystemGenericFileDetails', () => {
               packageName="[packageName-123]"
               packageSummary="[packageSummary-123]"
               packageVersion="[packageVersion-123]"
-              processExecutable="[packageVersion-123]"
-              processHashMd5="[processHashMd5-123]"
-              processHashSha1="[processHashSha1-123]"
+              processExecutable="[processExecutable-123]"
+              processExitCode={-1}
               processHashSha256="[processHashSha256-123]"
+              processParentName="[processParentName-123]"
+              processParentPid={789}
               processPid={123}
               processPpid={456}
               processName="[processName-123]"
@@ -1021,11 +1134,11 @@ describe('SystemGenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][text-123][processName-123](123)with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
+        '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][text-123][processName-123](123)with exit code-1[endgameExitCode-123]via parent process[processParentName-123][endgameParentProcessName-123](789)(456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
-    test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain, username, working-directory, process-title', () => {
+    test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain, username, working-directory, process-title', () => {
       const wrapper = mount(
         <TestProviders>
           <div>
@@ -1038,6 +1151,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={null}
               endgameProcessName={null}
               eventAction="[eventAction-123]"
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
               fileName={null}
               filePath={null}
               hostName="[hostname-123]"
@@ -1047,10 +1162,11 @@ describe('SystemGenericFileDetails', () => {
               packageName="[packageName-123]"
               packageSummary="[packageSummary-123]"
               packageVersion="[packageVersion-123]"
-              processExecutable="[packageVersion-123]"
-              processHashMd5="[processHashMd5-123]"
-              processHashSha1="[processHashSha1-123]"
+              processExecutable="[processExecutable-123]"
+              processExitCode={-1}
               processHashSha256="[processHashSha256-123]"
+              processParentName="[processParentName-123]"
+              processParentPid={789}
               processPid={123}
               processPpid={456}
               processName="[processName-123]"
@@ -1068,11 +1184,11 @@ describe('SystemGenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][text-123][processName-123](123)[process-title-123]with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
+        '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][text-123][processName-123](123)[process-title-123]with exit code-1[endgameExitCode-123]via parent process[processParentName-123][endgameParentProcessName-123](789)(456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
-    test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain, username, working-directory, process-title, args', () => {
+    test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain, username, working-directory, process-title, args', () => {
       const wrapper = mount(
         <TestProviders>
           <div>
@@ -1085,6 +1201,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={null}
               endgameProcessName={null}
               eventAction="[eventAction-123]"
+              fileExtOriginalPath={null}
+              fileHashSha256={null}
               fileName={null}
               filePath={null}
               hostName="[hostname-123]"
@@ -1094,10 +1212,11 @@ describe('SystemGenericFileDetails', () => {
               packageName="[packageName-123]"
               packageSummary="[packageSummary-123]"
               packageVersion="[packageVersion-123]"
-              processExecutable="[packageVersion-123]"
-              processHashMd5="[processHashMd5-123]"
-              processHashSha1="[processHashSha1-123]"
+              processExecutable="[processExecutable-123]"
+              processExitCode={-1}
               processHashSha256="[processHashSha256-123]"
+              processParentName="[processParentName-123]"
+              processParentPid={789}
               processPid={123}
               processPpid={456}
               processName="[processName-123]"
@@ -1115,7 +1234,7 @@ describe('SystemGenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][text-123][processName-123](123)[arg-1][arg-2][arg-3][process-title-123]with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
+        '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][text-123][processName-123](123)[arg-1][arg-2][arg-3][process-title-123]with exit code-1[endgameExitCode-123]via parent process[processParentName-123][endgameParentProcessName-123](789)(456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
@@ -1132,6 +1251,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={undefined}
               endgameProcessName={undefined}
               eventAction={undefined}
+              fileExtOriginalPath={undefined}
+              fileHashSha256={undefined}
               fileName={undefined}
               filePath={undefined}
               hostName={undefined}
@@ -1142,9 +1263,10 @@ describe('SystemGenericFileDetails', () => {
               packageSummary={undefined}
               packageVersion={undefined}
               processExecutable={undefined}
-              processHashMd5={undefined}
-              processHashSha1={undefined}
+              processExitCode={undefined}
               processHashSha256={undefined}
+              processParentName={undefined}
+              processParentPid={undefined}
               processPid={undefined}
               processPpid={undefined}
               processName={undefined}
@@ -1177,6 +1299,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={undefined}
               endgameProcessName={undefined}
               eventAction={undefined}
+              fileExtOriginalPath={undefined}
+              fileHashSha256={undefined}
               fileName="[fileName]"
               filePath="[filePath]"
               hostName={undefined}
@@ -1187,9 +1311,10 @@ describe('SystemGenericFileDetails', () => {
               packageSummary={undefined}
               packageVersion={undefined}
               processExecutable={undefined}
-              processHashMd5={undefined}
-              processHashSha1={undefined}
+              processExitCode={undefined}
               processHashSha256={undefined}
+              processParentName={undefined}
+              processParentPid={undefined}
               processPid={undefined}
               processPpid={undefined}
               processName={undefined}
@@ -1224,6 +1349,8 @@ describe('SystemGenericFileDetails', () => {
                 endgamePid={undefined}
                 endgameProcessName={undefined}
                 eventAction={eventAction}
+                fileExtOriginalPath={undefined}
+                fileHashSha256={undefined}
                 fileName={undefined}
                 filePath={undefined}
                 hostName={undefined}
@@ -1234,9 +1361,10 @@ describe('SystemGenericFileDetails', () => {
                 packageSummary={undefined}
                 packageVersion={undefined}
                 processExecutable={undefined}
-                processHashMd5={undefined}
-                processHashSha1={undefined}
+                processExitCode={undefined}
                 processHashSha256={undefined}
+                processParentName={undefined}
+                processParentPid={undefined}
                 processPid={undefined}
                 processPpid={undefined}
                 processName={undefined}
@@ -1273,6 +1401,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={undefined}
               endgameProcessName={undefined}
               eventAction={eventAction}
+              fileExtOriginalPath={undefined}
+              fileHashSha256={undefined}
               fileName={undefined}
               filePath={undefined}
               hostName={undefined}
@@ -1283,9 +1413,10 @@ describe('SystemGenericFileDetails', () => {
               packageSummary={undefined}
               packageVersion={undefined}
               processExecutable={undefined}
-              processHashMd5={undefined}
-              processHashSha1={undefined}
+              processExitCode={undefined}
               processHashSha256={undefined}
+              processParentName={undefined}
+              processParentPid={undefined}
               processPid={undefined}
               processPpid={undefined}
               processName={undefined}
@@ -1321,6 +1452,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={undefined}
               endgameProcessName={undefined}
               eventAction={eventAction}
+              fileExtOriginalPath={undefined}
+              fileHashSha256={undefined}
               fileName={undefined}
               filePath={undefined}
               hostName={undefined}
@@ -1331,9 +1464,10 @@ describe('SystemGenericFileDetails', () => {
               packageSummary={undefined}
               packageVersion={undefined}
               processExecutable={undefined}
-              processHashMd5={undefined}
-              processHashSha1={undefined}
+              processExitCode={undefined}
               processHashSha256={undefined}
+              processParentName={undefined}
+              processParentPid={undefined}
               processPid={undefined}
               processPpid={456}
               processName={undefined}
@@ -1371,6 +1505,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={undefined}
               endgameProcessName={undefined}
               eventAction={eventAction}
+              fileExtOriginalPath={undefined}
+              fileHashSha256={undefined}
               fileName={undefined}
               filePath={undefined}
               hostName={undefined}
@@ -1381,9 +1517,10 @@ describe('SystemGenericFileDetails', () => {
               packageSummary={undefined}
               packageVersion={undefined}
               processExecutable={undefined}
-              processHashMd5={undefined}
-              processHashSha1={undefined}
+              processExitCode={undefined}
               processHashSha256={undefined}
+              processParentName={undefined}
+              processParentPid={undefined}
               processPid={undefined}
               processPpid={456}
               processName={undefined}
@@ -1419,6 +1556,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={undefined}
               endgameProcessName={undefined}
               eventAction={eventAction}
+              fileExtOriginalPath={undefined}
+              fileHashSha256={undefined}
               fileName={undefined}
               filePath={undefined}
               hostName={undefined}
@@ -1429,9 +1568,10 @@ describe('SystemGenericFileDetails', () => {
               packageSummary={undefined}
               packageVersion={undefined}
               processExecutable={undefined}
-              processHashMd5={undefined}
-              processHashSha1={undefined}
+              processExitCode={undefined}
               processHashSha256={undefined}
+              processParentName={undefined}
+              processParentPid={undefined}
               processPid={undefined}
               processPpid={456}
               processName={undefined}
@@ -1465,6 +1605,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={undefined}
               endgameProcessName={undefined}
               eventAction={undefined}
+              fileExtOriginalPath={undefined}
+              fileHashSha256={undefined}
               fileName={undefined}
               filePath={undefined}
               hostName={undefined}
@@ -1475,9 +1617,10 @@ describe('SystemGenericFileDetails', () => {
               packageSummary={undefined}
               packageVersion={undefined}
               processExecutable={undefined}
-              processHashMd5={undefined}
-              processHashSha1={undefined}
+              processExitCode={undefined}
               processHashSha256={undefined}
+              processParentName={undefined}
+              processParentPid={undefined}
               processPid={undefined}
               processPpid={undefined}
               processName={undefined}
@@ -1511,6 +1654,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={undefined}
               endgameProcessName={undefined}
               eventAction={undefined}
+              fileExtOriginalPath={undefined}
+              fileHashSha256={undefined}
               fileName={undefined}
               filePath={undefined}
               hostName={undefined}
@@ -1521,9 +1666,10 @@ describe('SystemGenericFileDetails', () => {
               packageSummary={undefined}
               packageVersion={undefined}
               processExecutable={undefined}
-              processHashMd5={undefined}
-              processHashSha1={undefined}
+              processExitCode={undefined}
               processHashSha256={undefined}
+              processParentName={undefined}
+              processParentPid={undefined}
               processPid={undefined}
               processPpid={undefined}
               processName={undefined}
@@ -1557,6 +1703,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={789}
               endgameProcessName="[endgameProcessName]"
               eventAction={undefined}
+              fileExtOriginalPath={undefined}
+              fileHashSha256={undefined}
               fileName={undefined}
               filePath={undefined}
               hostName={undefined}
@@ -1567,9 +1715,10 @@ describe('SystemGenericFileDetails', () => {
               packageSummary={undefined}
               packageVersion={undefined}
               processExecutable={undefined}
-              processHashMd5={undefined}
-              processHashSha1={undefined}
+              processExitCode={undefined}
               processHashSha256={undefined}
+              processParentName={undefined}
+              processParentPid={undefined}
               processPid={undefined}
               processPpid={undefined}
               processName={undefined}
@@ -1603,6 +1752,8 @@ describe('SystemGenericFileDetails', () => {
               endgamePid={789}
               endgameProcessName="[endgameProcessName]"
               eventAction={undefined}
+              fileExtOriginalPath={undefined}
+              fileHashSha256={undefined}
               fileName={undefined}
               filePath={undefined}
               hostName={undefined}
@@ -1613,9 +1764,10 @@ describe('SystemGenericFileDetails', () => {
               packageSummary={undefined}
               packageVersion={undefined}
               processExecutable={undefined}
-              processHashMd5={undefined}
-              processHashSha1={undefined}
+              processExitCode={undefined}
               processHashSha256={undefined}
+              processParentName={undefined}
+              processParentPid={undefined}
               processPid={123}
               processPpid={undefined}
               processName="[processName]"

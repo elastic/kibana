@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { noop } from 'lodash';
@@ -24,7 +13,7 @@ import { UsageCollector } from './usage_collector';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
-  savedObjectsRepositoryMock,
+  savedObjectsClientMock,
 } from '../../../../core/server/mocks';
 
 const logger = loggingSystemMock.createLogger();
@@ -36,17 +25,14 @@ const loggerSpies = {
 
 describe('CollectorSet', () => {
   describe('registers a collector set and runs lifecycle events', () => {
-    let init: Function;
     let fetch: Function;
     beforeEach(() => {
-      init = noop;
       fetch = noop;
       loggerSpies.debug.mockRestore();
       loggerSpies.warn.mockRestore();
     });
-    const mockCallCluster = jest.fn().mockResolvedValue({ passTest: 1000 });
     const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    const mockSoClient = savedObjectsRepositoryMock.create();
+    const mockSoClient = savedObjectsClientMock.create();
     const req = void 0; // No need to instantiate any KibanaRequest in these tests
 
     it('should throw an error if non-Collector type of object is registered', () => {
@@ -54,9 +40,9 @@ describe('CollectorSet', () => {
       const registerPojo = () => {
         collectors.registerCollector({
           type: 'type_collector_test',
-          init,
+          // @ts-expect-error we are intentionally sending it wrong.
           fetch,
-        } as any); // We are intentionally sending it wrong.
+        });
       };
 
       expect(registerPojo).toThrowError(
@@ -83,18 +69,20 @@ describe('CollectorSet', () => {
     });
 
     it('should log debug status of fetching from the collector', async () => {
+      // @ts-expect-error we are just mocking the output of any call
+      mockEsClient.ping.mockResolvedValue({ passTest: 1000 });
       const collectors = new CollectorSet({ logger });
       collectors.registerCollector(
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
-          fetch: (collectorFetchContext: any) => {
-            return collectorFetchContext.callCluster();
+          fetch: (collectorFetchContext) => {
+            return collectorFetchContext.esClient.ping();
           },
           isReady: () => true,
         })
       );
 
-      const result = await collectors.bulkFetch(mockCallCluster, mockEsClient, mockSoClient, req);
+      const result = await collectors.bulkFetch(mockEsClient, mockSoClient, req);
       expect(loggerSpies.debug).toHaveBeenCalledTimes(1);
       expect(loggerSpies.debug).toHaveBeenCalledWith(
         'Fetching data from MY_TEST_COLLECTOR collector'
@@ -119,7 +107,7 @@ describe('CollectorSet', () => {
 
       let result;
       try {
-        result = await collectors.bulkFetch(mockCallCluster, mockEsClient, mockSoClient, req);
+        result = await collectors.bulkFetch(mockEsClient, mockSoClient, req);
       } catch (err) {
         // Do nothing
       }
@@ -133,11 +121,12 @@ describe('CollectorSet', () => {
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
           fetch: () => ({ test: 1 }),
-          isReady: true as any,
+          // @ts-expect-error we are intentionally sending it wrong
+          isReady: true,
         })
       );
 
-      const result = await collectors.bulkFetch(mockCallCluster, mockEsClient, mockSoClient, req);
+      const result = await collectors.bulkFetch(mockEsClient, mockSoClient, req);
       expect(result).toStrictEqual([
         {
           type: 'MY_TEST_COLLECTOR',
@@ -149,13 +138,14 @@ describe('CollectorSet', () => {
     it('should not break if isReady is not provided', async () => {
       const collectors = new CollectorSet({ logger });
       collectors.registerCollector(
+        // @ts-expect-error we are intentionally sending it wrong.
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
           fetch: () => ({ test: 1 }),
-        } as any)
+        })
       );
 
-      const result = await collectors.bulkFetch(mockCallCluster, mockEsClient, mockSoClient, req);
+      const result = await collectors.bulkFetch(mockEsClient, mockSoClient, req);
       expect(result).toStrictEqual([
         {
           type: 'MY_TEST_COLLECTOR',

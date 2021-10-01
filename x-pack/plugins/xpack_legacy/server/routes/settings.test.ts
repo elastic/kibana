@@ -1,22 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { BehaviorSubject } from 'rxjs';
 import { UnwrapPromise } from '@kbn/utility-types';
 import supertest from 'supertest';
 
-import {
-  LegacyAPICaller,
-  ServiceStatus,
-  ServiceStatusLevels,
-} from '../../../../../src/core/server';
+import { ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
 import {
   contextServiceMock,
   elasticsearchServiceMock,
   savedObjectsServiceMock,
+  executionContextServiceMock,
 } from '../../../../../src/core/server/mocks';
 import { createHttpServer } from '../../../../../src/core/server/test_utils';
 import { registerSettingsRoute } from './settings';
@@ -30,24 +28,19 @@ export function mockGetClusterInfo(clusterInfo: any) {
   esClient.info.mockResolvedValue({ body: { ...clusterInfo } });
   return esClient;
 }
+
 describe('/api/settings', () => {
   let server: HttpService;
   let httpSetup: HttpSetup;
   let overallStatus$: BehaviorSubject<ServiceStatus>;
-  let mockApiCaller: jest.Mocked<LegacyAPICaller>;
 
   beforeEach(async () => {
-    mockApiCaller = jest.fn();
     server = createHttpServer();
+    await server.preboot({ context: contextServiceMock.createPrebootContract() });
     httpSetup = await server.setup({
       context: contextServiceMock.createSetupContract({
         core: {
           elasticsearch: {
-            legacy: {
-              client: {
-                callAsCurrentUser: mockApiCaller,
-              },
-            },
             client: {
               asCurrentUser: mockGetClusterInfo({ cluster_uuid: 'yyy-yyyyy' }),
             },
@@ -57,6 +50,7 @@ describe('/api/settings', () => {
           },
         },
       }),
+      executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
 
     overallStatus$ = new BehaviorSubject<ServiceStatus>({

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,12 +24,10 @@ export const getElementPositionAndAttributes = async (
     elementsPositionAndAttributes = await browser.evaluate(
       {
         fn: (selector, attributes) => {
-          const elements: NodeListOf<Element> = document.querySelectorAll(selector);
-
-          // NodeList isn't an array, just an iterator, unable to use .map/.forEach
+          const elements = Array.from(document.querySelectorAll<Element>(selector));
           const results: ElementsPositionAndAttribute[] = [];
-          for (let i = 0; i < elements.length; i++) {
-            const element = elements[i];
+
+          for (const element of elements) {
             const boundingClientRect = element.getBoundingClientRect() as DOMRect;
             results.push({
               position: {
@@ -46,7 +45,7 @@ export const getElementPositionAndAttributes = async (
               },
               attributes: Object.keys(attributes).reduce((result: AttributesMap, key) => {
                 const attribute = attributes[key];
-                (result as any)[key] = element.getAttribute(attribute);
+                result[key] = element.getAttribute(attribute);
                 return result;
               }, {} as AttributesMap),
             });
@@ -59,7 +58,7 @@ export const getElementPositionAndAttributes = async (
       logger
     );
 
-    if (!elementsPositionAndAttributes || elementsPositionAndAttributes.length === 0) {
+    if (!elementsPositionAndAttributes?.length) {
       throw new Error(
         i18n.translate('xpack.reporting.screencapture.noElements', {
           defaultMessage: `An error occurred while reading the page for visualization panels: no panels were found.`,

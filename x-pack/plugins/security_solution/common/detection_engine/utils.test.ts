@@ -1,11 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { hasEqlSequenceQuery, hasLargeValueList, hasNestedEntry, isThreatMatchRule } from './utils';
-import { EntriesArray } from '../shared_imports';
+import {
+  hasEqlSequenceQuery,
+  hasNestedEntry,
+  isThreatMatchRule,
+  normalizeMachineLearningJobIds,
+  normalizeThresholdField,
+} from './utils';
+
+import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
+
+import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 
 describe('#hasLargeValueList', () => {
   test('it returns false if empty array', () => {
@@ -148,5 +158,40 @@ describe('#hasEqlSequenceQuery', () => {
     it('should return false', () => {
       expect(hasEqlSequenceQuery(query)).toEqual(false);
     });
+  });
+});
+
+describe('normalizeThresholdField', () => {
+  it('converts a string to a string array', () => {
+    expect(normalizeThresholdField('host.name')).toEqual(['host.name']);
+  });
+  it('returns a string array when a string array is passed in', () => {
+    expect(normalizeThresholdField(['host.name'])).toEqual(['host.name']);
+  });
+  it('converts undefined to an empty array', () => {
+    expect(normalizeThresholdField(undefined)).toEqual([]);
+  });
+  it('converts null to an empty array', () => {
+    expect(normalizeThresholdField(null)).toEqual([]);
+  });
+  it('converts an empty string to an empty array', () => {
+    expect(normalizeThresholdField('')).toEqual([]);
+  });
+});
+
+describe('normalizeMachineLearningJobIds', () => {
+  it('converts a string to a string array', () => {
+    expect(normalizeMachineLearningJobIds('ml_job_id')).toEqual(['ml_job_id']);
+  });
+
+  it('preserves a single-valued array ', () => {
+    expect(normalizeMachineLearningJobIds(['ml_job_id'])).toEqual(['ml_job_id']);
+  });
+
+  it('preserves a multi-valued array ', () => {
+    expect(normalizeMachineLearningJobIds(['ml_job_id', 'other_ml_job_id'])).toEqual([
+      'ml_job_id',
+      'other_ml_job_id',
+    ]);
   });
 });

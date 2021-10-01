@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -15,12 +16,12 @@ import {
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionDetails } from './exception_details';
 import { ExceptionEntries } from './exception_entries';
 import { getFormattedComments } from '../../helpers';
 import { getFormattedEntries } from '../helpers';
-import { FormattedEntry, ExceptionListItemIdentifiers } from '../../types';
-import { ExceptionListItemSchema } from '../../../../../../public/lists_plugin_deps';
+import type { FormattedEntry, ExceptionListItemIdentifiers } from '../../types';
 
 const MyFlexItem = styled(EuiFlexItem)`
   &.comments--show {
@@ -29,12 +30,15 @@ const MyFlexItem = styled(EuiFlexItem)`
   }
 `;
 
-interface ExceptionItemProps {
+export interface ExceptionItemProps {
   loadingItemIds: ExceptionListItemIdentifiers[];
   exceptionItem: ExceptionListItemSchema;
   commentsAccordionId: string;
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditException: (item: ExceptionListItemSchema) => void;
+  showName?: boolean;
+  showModified?: boolean;
+  'data-test-subj'?: string;
 }
 
 const ExceptionItemComponent = ({
@@ -43,6 +47,9 @@ const ExceptionItemComponent = ({
   commentsAccordionId,
   onDeleteException,
   onEditException,
+  showModified = false,
+  showName = false,
+  'data-test-subj': dataTestSubj,
 }: ExceptionItemProps): JSX.Element => {
   const [entryItems, setEntryItems] = useState<FormattedEntry[]>([]);
   const [showComments, setShowComments] = useState(false);
@@ -77,7 +84,7 @@ const ExceptionItemComponent = ({
   }, [loadingItemIds, exceptionItem.id]);
 
   return (
-    <EuiPanel paddingSize="none">
+    <EuiPanel paddingSize="none" data-test-subj={dataTestSubj} hasBorder hasShadow={false}>
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           <EuiFlexGroup direction="row">
@@ -85,6 +92,8 @@ const ExceptionItemComponent = ({
               showComments={showComments}
               exceptionItem={exceptionItem}
               onCommentsClick={onCommentsClick}
+              showModified={showModified}
+              showName={showName}
             />
             <ExceptionEntries
               disableDelete={disableDelete}

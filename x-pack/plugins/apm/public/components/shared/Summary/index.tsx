@@ -1,22 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React from 'react';
+
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
-import { px, units } from '../../../../public/style/variables';
+import React from 'react';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { Maybe } from '../../../../typings/common';
 
 interface Props {
   items: Array<Maybe<React.ReactElement>>;
 }
 
-const Item = styled(EuiFlexItem)`
+const Item = euiStyled(EuiFlexItem)`
   flex-wrap: nowrap;
   border-right: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  padding-right: ${px(units.half)};
+  padding-right: ${({ theme }) => theme.eui.paddingSizes.s};
   flex-flow: row nowrap;
   line-height: 1.5;
   align-items: center !important;

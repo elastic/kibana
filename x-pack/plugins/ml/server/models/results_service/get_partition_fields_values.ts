@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -9,7 +10,6 @@ import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
 import { PartitionFieldsType } from '../../../common/types/anomalies';
 import { CriteriaField } from './results_service';
 import { FieldConfig, FieldsConfig } from '../../routes/schemas/results_service_schema';
-import { Job } from '../../../common/types/anomaly_detection_jobs';
 import type { MlClient } from '../../lib/ml_client';
 
 type SearchTerm =
@@ -150,7 +150,7 @@ export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
       throw Boom.notFound(`Job with the id "${jobId}" not found`);
     }
 
-    const job: Job = jobsResponse.jobs[0];
+    const job = jobsResponse.jobs[0];
 
     const isModelPlotEnabled = job?.model_plot_config?.enabled;
     const isAnomalousOnly = (Object.entries(fieldsConfig) as Array<[string, FieldConfig]>).some(

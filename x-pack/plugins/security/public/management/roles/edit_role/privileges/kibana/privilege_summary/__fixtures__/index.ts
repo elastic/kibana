@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ReactWrapper } from 'enzyme';
-
 import { EuiTableRow } from '@elastic/eui';
+import type { ReactWrapper } from 'enzyme';
 
 import { findTestSubject } from '@kbn/test/jest';
-import { Role, RoleKibanaPrivilege } from '../../../../../../../../common/model';
-import { PrivilegeSummaryExpandedRow } from '../privilege_summary_expanded_row';
+
+import type { Role, RoleKibanaPrivilege } from '../../../../../../../../common/model';
 import { FeatureTableCell } from '../../feature_table_cell';
+import { PrivilegeSummaryExpandedRow } from '../privilege_summary_expanded_row';
 
 interface DisplayedFeaturePrivileges {
   [featureId: string]: {

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { WebhookActionConnector } from '../types';
@@ -94,5 +96,35 @@ describe('WebhookActionConnectorFields renders', () => {
     );
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
+  });
+
+  test('should display a message for missing secrets after import', () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.webhook',
+      isPreconfigured: false,
+      isMissingSecrets: true,
+      name: 'webhook',
+      config: {
+        method: 'PUT',
+        url: 'http:\\test',
+        headers: { 'content-type': 'text' },
+        hasAuth: true,
+      },
+    } as WebhookActionConnector;
+    const wrapper = mountWithIntl(
+      <WebhookActionConnectorFields
+        action={actionConnector}
+        errors={{ url: [], method: [], user: [], password: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
   });
 });

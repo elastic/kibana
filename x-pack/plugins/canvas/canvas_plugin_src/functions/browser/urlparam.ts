@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { parse } from 'url';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
@@ -42,8 +42,9 @@ export function urlparam(): ExpressionFunctionDefinition<
       },
     },
     fn: (input, args) => {
-      const query = parse(window.location.href, true).query;
-      return query[args.param] || args.default;
+      const url = new URL(window.location.href);
+      const query = url.searchParams;
+      return query.get(args.param) || args.default;
     },
   };
 }

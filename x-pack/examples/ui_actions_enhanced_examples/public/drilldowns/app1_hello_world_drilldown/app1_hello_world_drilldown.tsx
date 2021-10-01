@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../../plugins/ui_actions_enhanced/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
 import { SAMPLE_APP1_CLICK_TRIGGER, SampleApp1ClickContext } from '../../triggers';
-import { SerializableState } from '../../../../../../src/plugins/kibana_utils/common';
 
-export interface Config extends SerializableState {
+export interface Config extends SerializableRecord {
   name: string;
 }
 
@@ -23,7 +24,7 @@ export type CollectConfigProps = CollectConfigPropsBase<Config, { triggers: Trig
 
 export const APP1_HELLO_WORLD_DRILLDOWN = 'APP1_HELLO_WORLD_DRILLDOWN';
 
-export class App1HelloWorldDrilldown implements Drilldown<Config, Trigger> {
+export class App1HelloWorldDrilldown implements Drilldown<Config, Context> {
   public readonly id = APP1_HELLO_WORLD_DRILLDOWN;
 
   public readonly order = 8;

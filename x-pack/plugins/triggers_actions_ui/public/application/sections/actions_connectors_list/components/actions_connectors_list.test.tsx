@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 
-import { ActionsConnectorsList } from './actions_connectors_list';
+import ActionsConnectorsList from './actions_connectors_list';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
@@ -14,7 +16,11 @@ import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { useKibana } from '../../../../common/lib/kibana';
 
 jest.mock('../../../../common/lib/kibana');
-import { ActionConnector } from '../../../../types';
+import {
+  ActionConnector,
+  ConnectorValidationResult,
+  GenericValidationResult,
+} from '../../../../types';
 import { times } from 'lodash';
 
 jest.mock('../../../lib/action_connector_api', () => ({
@@ -112,8 +118,17 @@ describe('actions_connectors_list component with items', () => {
           id: '3',
           actionTypeId: 'test2',
           description: 'My preconfigured test 2',
+          isMissingSecrets: true,
           referencedByCount: 1,
           isPreconfigured: true,
+          config: {},
+        },
+        {
+          id: '4',
+          actionTypeId: 'nonexistent',
+          description: 'My invalid connector type',
+          referencedByCount: 1,
+          isPreconfigured: false,
           config: {},
         },
       ]
@@ -137,6 +152,26 @@ describe('actions_connectors_list component with items', () => {
       },
     ] = await mocks.getStartServices();
 
+    const mockedActionParamsFields = React.lazy(async () => ({
+      default() {
+        return <></>;
+      },
+    }));
+
+    actionTypeRegistry.get.mockReturnValue({
+      id: 'test',
+      iconClass: 'test',
+      selectMessage: 'test',
+      validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+        return Promise.resolve({});
+      },
+      validateParams: (): Promise<GenericValidationResult<unknown>> => {
+        const validationResult = { errors: {} };
+        return Promise.resolve(validationResult);
+      },
+      actionConnectorFields: null,
+      actionParamsFields: mockedActionParamsFields,
+    });
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
     // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -162,12 +197,33 @@ describe('actions_connectors_list component with items', () => {
   it('renders table of connectors', async () => {
     await setup();
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
-    expect(wrapper.find('EuiTableRow')).toHaveLength(3);
+    expect(wrapper.find('EuiTableRow')).toHaveLength(4);
   });
 
   it('renders table with preconfigured connectors', async () => {
     await setup();
     expect(wrapper.find('[data-test-subj="preConfiguredTitleMessage"]')).toHaveLength(2);
+  });
+
+  it('renders unknown connector type as disabled', async () => {
+    await setup();
+    expect(wrapper.find('button[data-test-subj="edit4"]').getDOMNode()).toBeDisabled();
+    expect(
+      wrapper.find('button[data-test-subj="deleteConnector"]').last().getDOMNode()
+    ).not.toBeDisabled();
+    expect(
+      wrapper.find('button[data-test-subj="runConnector"]').last().getDOMNode()
+    ).toBeDisabled();
+  });
+
+  it('renders fix button when connector secrets is missing', async () => {
+    await setup();
+    expect(
+      wrapper.find('button[data-test-subj="deleteConnector"]').last().getDOMNode()
+    ).not.toBeDisabled();
+    expect(
+      wrapper.find('button[data-test-subj="fixConnectorButton"]').last().getDOMNode()
+    ).not.toBeDisabled();
   });
 
   it('supports pagination', async () => {
@@ -204,7 +260,8 @@ describe('actions_connectors_list component with items', () => {
     await setup();
     await wrapper.find('[data-test-subj="edit1"]').first().simulate('click');
 
-    expect(wrapper.find('ConnectorEditFlyout')).toHaveLength(1);
+    const edit = await wrapper.find('ConnectorEditFlyout');
+    expect(edit).toHaveLength(1);
   });
 });
 

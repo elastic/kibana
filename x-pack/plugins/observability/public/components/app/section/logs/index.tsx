@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Axis, BarSeries, niceTimeFormatter, Position, ScaleType, Settings } from '@elastic/charts';
@@ -46,7 +47,7 @@ function getColorPerItem(series?: LogsFetchDataResponse['series']) {
 export function LogsSection({ bucketSize }: Props) {
   const history = useHistory();
   const chartTheme = useChartTheme();
-  const { forceUpdate, hasData } = useHasData();
+  const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
 
   const { data, status } = useFetcher(
@@ -64,7 +65,7 @@ export function LogsSection({ bucketSize }: Props) {
     [bucketSize, relativeStart, relativeEnd, forceUpdate]
   );
 
-  if (!hasData.infra_logs?.hasData) {
+  if (!hasDataMap.infra_logs?.hasData) {
     return null;
   }
 

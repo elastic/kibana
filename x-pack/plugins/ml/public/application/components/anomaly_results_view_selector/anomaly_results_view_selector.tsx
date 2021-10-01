@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useMemo } from 'react';
@@ -11,8 +12,8 @@ import { EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useUrlState } from '../../util/url_state';
-import { useMlUrlGenerator, useNavigateToPath } from '../../contexts/kibana';
-import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
+import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import { ML_PAGES } from '../../../../common/constants/locator';
 
 interface Props {
   viewId: typeof ML_PAGES.SINGLE_METRIC_VIEWER | typeof ML_PAGES.ANOMALY_EXPLORER;
@@ -21,7 +22,7 @@ interface Props {
 // Component for rendering a set of buttons for switching between the Anomaly Detection results views.
 
 export const AnomalyResultsViewSelector: FC<Props> = ({ viewId }) => {
-  const urlGenerator = useMlUrlGenerator();
+  const locator = useMlLocator()!;
   const navigateToPath = useNavigateToPath();
 
   const toggleButtonsIcons = useMemo(
@@ -51,7 +52,7 @@ export const AnomalyResultsViewSelector: FC<Props> = ({ viewId }) => {
   const [globalState] = useUrlState('_g');
 
   const onChangeView = async (newViewId: Props['viewId']) => {
-    const url = await urlGenerator.createUrl({
+    const url = await locator.getUrl({
       page: newViewId,
       pageState: {
         globalState,

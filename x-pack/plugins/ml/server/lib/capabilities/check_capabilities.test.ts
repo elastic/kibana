@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getAdminCapabilities, getUserCapabilities } from './__mocks__/ml_capabilities';
@@ -23,21 +24,21 @@ const mlLicenseBasic = {
 const mlIsEnabled = async () => true;
 const mlIsNotEnabled = async () => false;
 
-const mlClientNonUpgrade = ({
+const mlClientNonUpgrade = {
   info: async () => ({
     body: {
       upgrade_mode: false,
     },
   }),
-} as unknown) as MlClient;
+} as unknown as MlClient;
 
-const mlClientUpgrade = ({
+const mlClientUpgrade = {
   info: async () => ({
     body: {
       upgrade_mode: true,
     },
   }),
-} as unknown) as MlClient;
+} as unknown as MlClient;
 
 describe('check_capabilities', () => {
   describe('getCapabilities() - right number of capabilities', () => {
@@ -50,7 +51,7 @@ describe('check_capabilities', () => {
       );
       const { capabilities } = await getCapabilities();
       const count = Object.keys(capabilities).length;
-      expect(count).toBe(28);
+      expect(count).toBe(31);
     });
   });
 
@@ -62,12 +63,8 @@ describe('check_capabilities', () => {
         mlLicense,
         mlIsEnabled
       );
-      const {
-        capabilities,
-        upgradeInProgress,
-        mlFeatureEnabledInSpace,
-        isPlatinumOrTrialLicense,
-      } = await getCapabilities();
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace, isPlatinumOrTrialLicense } =
+        await getCapabilities();
       expect(upgradeInProgress).toBe(false);
       expect(mlFeatureEnabledInSpace).toBe(true);
       expect(isPlatinumOrTrialLicense).toBe(true);
@@ -81,11 +78,13 @@ describe('check_capabilities', () => {
       expect(capabilities.canGetAnnotations).toBe(true);
       expect(capabilities.canCreateAnnotation).toBe(true);
       expect(capabilities.canDeleteAnnotation).toBe(true);
+      expect(capabilities.canUseMlAlerts).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
       expect(capabilities.canOpenJob).toBe(false);
       expect(capabilities.canCloseJob).toBe(false);
+      expect(capabilities.canResetJob).toBe(false);
       expect(capabilities.canForecastJob).toBe(false);
       expect(capabilities.canStartStopDatafeed).toBe(false);
       expect(capabilities.canUpdateJob).toBe(false);
@@ -101,6 +100,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteDataFrameAnalytics).toBe(false);
       expect(capabilities.canCreateDataFrameAnalytics).toBe(false);
       expect(capabilities.canStartStopDataFrameAnalytics).toBe(false);
+      expect(capabilities.canCreateMlAlerts).toBe(false);
     });
 
     test('full capabilities', async () => {
@@ -110,12 +110,8 @@ describe('check_capabilities', () => {
         mlLicense,
         mlIsEnabled
       );
-      const {
-        capabilities,
-        upgradeInProgress,
-        mlFeatureEnabledInSpace,
-        isPlatinumOrTrialLicense,
-      } = await getCapabilities();
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace, isPlatinumOrTrialLicense } =
+        await getCapabilities();
       expect(upgradeInProgress).toBe(false);
       expect(mlFeatureEnabledInSpace).toBe(true);
       expect(isPlatinumOrTrialLicense).toBe(true);
@@ -134,6 +130,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteJob).toBe(true);
       expect(capabilities.canOpenJob).toBe(true);
       expect(capabilities.canCloseJob).toBe(true);
+      expect(capabilities.canResetJob).toBe(true);
       expect(capabilities.canForecastJob).toBe(true);
       expect(capabilities.canStartStopDatafeed).toBe(true);
       expect(capabilities.canUpdateJob).toBe(true);
@@ -158,12 +155,8 @@ describe('check_capabilities', () => {
         mlLicense,
         mlIsEnabled
       );
-      const {
-        capabilities,
-        upgradeInProgress,
-        mlFeatureEnabledInSpace,
-        isPlatinumOrTrialLicense,
-      } = await getCapabilities();
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace, isPlatinumOrTrialLicense } =
+        await getCapabilities();
       expect(upgradeInProgress).toBe(true);
       expect(mlFeatureEnabledInSpace).toBe(true);
       expect(isPlatinumOrTrialLicense).toBe(true);
@@ -182,6 +175,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteJob).toBe(false);
       expect(capabilities.canOpenJob).toBe(false);
       expect(capabilities.canCloseJob).toBe(false);
+      expect(capabilities.canResetJob).toBe(false);
       expect(capabilities.canForecastJob).toBe(false);
       expect(capabilities.canStartStopDatafeed).toBe(false);
       expect(capabilities.canUpdateJob).toBe(false);
@@ -206,12 +200,8 @@ describe('check_capabilities', () => {
         mlLicense,
         mlIsEnabled
       );
-      const {
-        capabilities,
-        upgradeInProgress,
-        mlFeatureEnabledInSpace,
-        isPlatinumOrTrialLicense,
-      } = await getCapabilities();
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace, isPlatinumOrTrialLicense } =
+        await getCapabilities();
       expect(upgradeInProgress).toBe(true);
       expect(mlFeatureEnabledInSpace).toBe(true);
       expect(isPlatinumOrTrialLicense).toBe(true);
@@ -230,6 +220,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteJob).toBe(false);
       expect(capabilities.canOpenJob).toBe(false);
       expect(capabilities.canCloseJob).toBe(false);
+      expect(capabilities.canResetJob).toBe(false);
       expect(capabilities.canForecastJob).toBe(false);
       expect(capabilities.canStartStopDatafeed).toBe(false);
       expect(capabilities.canUpdateJob).toBe(false);
@@ -254,12 +245,8 @@ describe('check_capabilities', () => {
         mlLicense,
         mlIsNotEnabled
       );
-      const {
-        capabilities,
-        upgradeInProgress,
-        mlFeatureEnabledInSpace,
-        isPlatinumOrTrialLicense,
-      } = await getCapabilities();
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace, isPlatinumOrTrialLicense } =
+        await getCapabilities();
       expect(upgradeInProgress).toBe(false);
       expect(mlFeatureEnabledInSpace).toBe(false);
       expect(isPlatinumOrTrialLicense).toBe(true);
@@ -278,6 +265,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteJob).toBe(false);
       expect(capabilities.canOpenJob).toBe(false);
       expect(capabilities.canCloseJob).toBe(false);
+      expect(capabilities.canResetJob).toBe(false);
       expect(capabilities.canForecastJob).toBe(false);
       expect(capabilities.canStartStopDatafeed).toBe(false);
       expect(capabilities.canUpdateJob).toBe(false);
@@ -303,12 +291,8 @@ describe('check_capabilities', () => {
       mlLicenseBasic,
       mlIsNotEnabled
     );
-    const {
-      capabilities,
-      upgradeInProgress,
-      mlFeatureEnabledInSpace,
-      isPlatinumOrTrialLicense,
-    } = await getCapabilities();
+    const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace, isPlatinumOrTrialLicense } =
+      await getCapabilities();
 
     expect(upgradeInProgress).toBe(false);
     expect(mlFeatureEnabledInSpace).toBe(false);
@@ -328,6 +312,7 @@ describe('check_capabilities', () => {
     expect(capabilities.canDeleteJob).toBe(false);
     expect(capabilities.canOpenJob).toBe(false);
     expect(capabilities.canCloseJob).toBe(false);
+    expect(capabilities.canResetJob).toBe(false);
     expect(capabilities.canForecastJob).toBe(false);
     expect(capabilities.canStartStopDatafeed).toBe(false);
     expect(capabilities.canUpdateJob).toBe(false);

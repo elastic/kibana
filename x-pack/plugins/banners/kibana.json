@@ -1,0 +1,15 @@
+{
+  "id": "banners",
+  "owner": {
+    "name": "Kibana Core",
+    "githubTeam": "kibana-core"
+  },
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["licensing"],
+  "optionalPlugins": [],
+  "requiredBundles": ["kibanaReact"],
+  "configPath": ["xpack", "banners"]
+}

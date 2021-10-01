@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component } from 'react';
@@ -13,7 +14,6 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiOverlayMask,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
@@ -37,7 +37,7 @@ import { loadSavedDashboards, loadIndexPatterns } from '../edit_utils';
 import { openCustomUrlWindow } from '../../../../../util/custom_url_utils';
 import { Job } from '../../../../../../../common/types/anomaly_detection_jobs';
 import { UrlConfig } from '../../../../../../../common/types/custom_urls';
-import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
+import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common';
 import { MlKibanaReactContextValue } from '../../../../../contexts/kibana';
 
 const MAX_NUMBER_DASHBOARDS = 1000;
@@ -281,30 +281,28 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
         </EuiFlexGroup>
       </EuiPanel>
     ) : (
-      <EuiOverlayMask>
-        <EuiModal
-          onClose={this.closeEditor}
-          initialFocus="[name=label]"
-          style={{ width: 500 }}
-          data-test-subj="mlJobNewCustomUrlFormModal"
-        >
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              <FormattedMessage
-                id="xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel"
-                defaultMessage="Add custom URL"
-              />
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
+      <EuiModal
+        onClose={this.closeEditor}
+        initialFocus="[name=label]"
+        style={{ width: 500 }}
+        data-test-subj="mlJobNewCustomUrlFormModal"
+      >
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>
+            <FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel"
+              defaultMessage="Add custom URL"
+            />
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
 
-          <EuiModalBody>{editor}</EuiModalBody>
+        <EuiModalBody>{editor}</EuiModalBody>
 
-          <EuiModalFooter>
-            {testButton}
-            {addButton}
-          </EuiModalFooter>
-        </EuiModal>
-      </EuiOverlayMask>
+        <EuiModalFooter>
+          {testButton}
+          {addButton}
+        </EuiModalFooter>
+      </EuiModal>
     );
   }
 

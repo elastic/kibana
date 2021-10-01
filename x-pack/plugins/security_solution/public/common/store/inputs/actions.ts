@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import actionCreatorFactory from 'typescript-fsa';
@@ -66,9 +67,8 @@ export const setInspectionParameter = actionCreator<{
 
 export const deleteAllQuery = actionCreator<{ id: InputsModelId }>('DELETE_ALL_QUERY');
 
-export const toggleTimelineLinkTo = actionCreator<{ linkToId: InputsModelId }>(
-  'TOGGLE_TIMELINE_LINK_TO'
-);
+export const toggleTimelineLinkTo =
+  actionCreator<{ linkToId: InputsModelId }>('TOGGLE_TIMELINE_LINK_TO');
 
 export const removeTimelineLinkTo = actionCreator('REMOVE_TIMELINE_LINK_TO');
 export const addTimelineLinkTo = actionCreator<{ linkToId: InputsModelId }>('ADD_TIMELINE_LINK_TO');

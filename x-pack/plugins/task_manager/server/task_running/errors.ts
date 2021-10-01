@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+import { EphemeralTask } from '../task';
 
 // Unrecoverable
 const CODE_UNRECOVERABLE = 'TaskManager/unrecoverable';
@@ -11,6 +13,19 @@ const code = Symbol('TaskManagerErrorCode');
 
 export interface DecoratedError extends Error {
   [code]?: string;
+}
+
+export class EphemeralTaskRejectedDueToCapacityError extends Error {
+  private _task: EphemeralTask;
+
+  constructor(message: string, task: EphemeralTask) {
+    super(message);
+    this._task = task;
+  }
+
+  public get task() {
+    return this._task;
+  }
 }
 
 function isTaskManagerError(error: unknown): error is DecoratedError {
@@ -24,4 +39,10 @@ export function isUnrecoverableError(error: Error | DecoratedError) {
 export function throwUnrecoverableError(error: Error) {
   (error as DecoratedError)[code] = CODE_UNRECOVERABLE;
   throw error;
+}
+
+export function isEphemeralTaskRejectedDueToCapacityError(
+  error: Error | EphemeralTaskRejectedDueToCapacityError
+) {
+  return Boolean(error && error instanceof EphemeralTaskRejectedDueToCapacityError);
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { sampleDocNoSortId } from './__mocks__/es_results';
@@ -19,6 +20,7 @@ import {
 } from '../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { SIGNALS_TEMPLATE_VERSION } from '../routes/index/get_signals_template';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 
 describe('buildSignal', () => {
   beforeEach(() => {
@@ -29,8 +31,10 @@ describe('buildSignal', () => {
     const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
     delete doc._source.event;
     const rule = getRulesSchemaMock();
+    const reason = 'signal reasonable reason';
+
     const signal = {
-      ...buildSignal([doc], rule),
+      ...buildSignal([doc], rule, reason),
       ...additionalSignalFields(doc),
     };
     const expected: Signal = {
@@ -59,7 +63,8 @@ describe('buildSignal', () => {
           depth: 0,
         },
       ],
-      original_time: '2020-04-20T21:27:45+0000',
+      original_time: '2020-04-20T21:27:45.000Z',
+      reason: 'signal reasonable reason',
       status: 'open',
       rule: {
         author: [],
@@ -83,7 +88,7 @@ describe('buildSignal', () => {
         type: 'query',
         threat: [],
         version: 1,
-        status: 'succeeded',
+        status: RuleExecutionStatus.succeeded,
         status_date: '2020-02-22T16:47:50.047Z',
         last_success_at: '2020-02-22T16:47:50.047Z',
         last_success_message: 'succeeded',
@@ -110,8 +115,9 @@ describe('buildSignal', () => {
       module: 'system',
     };
     const rule = getRulesSchemaMock();
+    const reason = 'signal reasonable reason';
     const signal = {
-      ...buildSignal([doc], rule),
+      ...buildSignal([doc], rule, reason),
       ...additionalSignalFields(doc),
     };
     const expected: Signal = {
@@ -140,7 +146,8 @@ describe('buildSignal', () => {
           depth: 0,
         },
       ],
-      original_time: '2020-04-20T21:27:45+0000',
+      original_time: '2020-04-20T21:27:45.000Z',
+      reason: 'signal reasonable reason',
       original_event: {
         action: 'socket_opened',
         dataset: 'socket',
@@ -170,7 +177,7 @@ describe('buildSignal', () => {
         type: 'query',
         threat: [],
         version: 1,
-        status: 'succeeded',
+        status: RuleExecutionStatus.succeeded,
         status_date: '2020-02-22T16:47:50.047Z',
         last_success_at: '2020-02-22T16:47:50.047Z',
         last_success_message: 'succeeded',
@@ -331,39 +338,39 @@ describe('buildSignal', () => {
 
     test('it will remove a "signal" numeric clash', () => {
       const sampleDoc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-      const doc = ({
+      const doc = {
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
           signal: 127,
         },
-      } as unknown) as BaseSignalHit;
+      } as unknown as BaseSignalHit;
       const output = removeClashes(doc);
       expect(output).toEqual(sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71'));
     });
 
     test('it will remove a "signal" object clash', () => {
       const sampleDoc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-      const doc = ({
+      const doc = {
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
           signal: { child_1: { child_2: 'Test nesting' } },
         },
-      } as unknown) as BaseSignalHit;
+      } as unknown as BaseSignalHit;
       const output = removeClashes(doc);
       expect(output).toEqual(sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71'));
     });
 
     test('it will not remove a "signal" if that is signal is one of our signals', () => {
       const sampleDoc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-      const doc = ({
+      const doc = {
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
           signal: { rule: { id: '123' } },
         },
-      } as unknown) as BaseSignalHit;
+      } as unknown as BaseSignalHit;
       const output = removeClashes(doc);
       const expected = {
         ...sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71'),

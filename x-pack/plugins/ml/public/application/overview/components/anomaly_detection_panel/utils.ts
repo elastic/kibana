@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -9,9 +10,10 @@ import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/state
 import { Group, GroupsDictionary } from './anomaly_detection_panel';
 import { MlSummaryJobs, MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
 
-export function getGroupsFromJobs(
-  jobs: MlSummaryJobs
-): { groups: GroupsDictionary; count: number } {
+export function getGroupsFromJobs(jobs: MlSummaryJobs): {
+  groups: GroupsDictionary;
+  count: number;
+} {
   const groups: any = {
     ungrouped: {
       id: 'ungrouped',

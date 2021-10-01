@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Path from 'path';
@@ -28,6 +17,9 @@ export interface Answers {
   internalLocation: string;
   ui: boolean;
   server: boolean;
+  githubTeam?: string;
+  ownerName: string;
+  description?: string;
 }
 
 export const INTERNAL_PLUGIN_LOCATIONS: Array<{ name: string; value: string }> = [
@@ -61,6 +53,11 @@ export const QUESTIONS = [
     validate: (name: string) => (!name ? 'name is required' : true),
   },
   {
+    name: 'description',
+    message: 'Provide a description for your plugin.',
+    default: undefined,
+  },
+  {
     name: 'internal',
     type: 'confirm',
     message: 'Will this plugin be part of the Kibana repository?',
@@ -72,6 +69,24 @@ export const QUESTIONS = [
     message: 'What type of internal plugin would you like to create',
     choices: INTERNAL_PLUGIN_LOCATIONS,
     default: INTERNAL_PLUGIN_LOCATIONS[0].value,
+    when: ({ internal }: Answers) => internal,
+  },
+  {
+    name: 'ownerName',
+    message: 'Who is developing and maintaining this plugin?',
+    default: undefined,
+    when: ({ internal }: Answers) => !internal,
+  },
+  {
+    name: 'ownerName',
+    message: 'What team will maintain this plugin?',
+    default: undefined,
+    when: ({ internal }: Answers) => internal,
+  },
+  {
+    name: 'githubTeam',
+    message: 'What is your gitHub team alias?',
+    default: undefined,
     when: ({ internal }: Answers) => internal,
   },
   {

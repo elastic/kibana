@@ -1,21 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 
-import { HostStatus, MetadataQueryStrategyVersions } from '../../../../common/endpoint/types';
+import { HostStatus } from '../../../../common/endpoint/types';
 import { EndpointAppContext } from '../../types';
 import { getLogger, getMetadataListRequestHandler, getMetadataRequestHandler } from './handlers';
-
-export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
-export const METADATA_REQUEST_V1_ROUTE = `${BASE_ENDPOINT_ROUTE}/v1/metadata`;
-export const GET_METADATA_REQUEST_V1_ROUTE = `${METADATA_REQUEST_V1_ROUTE}/{id}`;
-export const METADATA_REQUEST_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata`;
-export const GET_METADATA_REQUEST_ROUTE = `${METADATA_REQUEST_ROUTE}/{id}`;
+import type { SecuritySolutionPluginRouter } from '../../../types';
+import {
+  HOST_METADATA_GET_ROUTE,
+  HOST_METADATA_LIST_ROUTE,
+} from '../../../../common/endpoint/constants';
 
 /* Filters that can be applied to the endpoint fetch route */
 export const endpointFilters = schema.object({
@@ -23,10 +22,11 @@ export const endpointFilters = schema.object({
   host_status: schema.nullable(
     schema.arrayOf(
       schema.oneOf([
-        schema.literal(HostStatus.ONLINE.toString()),
+        schema.literal(HostStatus.HEALTHY.toString()),
         schema.literal(HostStatus.OFFLINE.toString()),
-        schema.literal(HostStatus.UNENROLLING.toString()),
-        schema.literal(HostStatus.ERROR.toString()),
+        schema.literal(HostStatus.UPDATING.toString()),
+        schema.literal(HostStatus.UNHEALTHY.toString()),
+        schema.literal(HostStatus.INACTIVE.toString()),
       ])
     )
   ),
@@ -60,24 +60,15 @@ export const GetMetadataListRequestSchema = {
   ),
 };
 
-export function registerEndpointRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
+export function registerEndpointRoutes(
+  router: SecuritySolutionPluginRouter,
+  endpointAppContext: EndpointAppContext
+) {
   const logger = getLogger(endpointAppContext);
-  router.post(
-    {
-      path: `${METADATA_REQUEST_V1_ROUTE}`,
-      validate: GetMetadataListRequestSchema,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    getMetadataListRequestHandler(
-      endpointAppContext,
-      logger,
-      MetadataQueryStrategyVersions.VERSION_1
-    )
-  );
 
   router.post(
     {
-      path: `${METADATA_REQUEST_ROUTE}`,
+      path: `${HOST_METADATA_LIST_ROUTE}`,
       validate: GetMetadataListRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
@@ -86,16 +77,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
 
   router.get(
     {
-      path: `${GET_METADATA_REQUEST_V1_ROUTE}`,
-      validate: GetMetadataRequestSchema,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    getMetadataRequestHandler(endpointAppContext, logger, MetadataQueryStrategyVersions.VERSION_1)
-  );
-
-  router.get(
-    {
-      path: `${GET_METADATA_REQUEST_ROUTE}`,
+      path: `${HOST_METADATA_GET_ROUTE}`,
       validate: GetMetadataRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },

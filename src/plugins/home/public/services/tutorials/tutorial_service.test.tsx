@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import React from 'react';
 import { TutorialService } from './tutorial_service';
 
@@ -146,6 +136,46 @@ describe('TutorialService', () => {
       setup.registerModuleNotice('abc', notices[0]);
       setup.registerModuleNotice('def', notices[1]);
       expect(service.getModuleNotices()).toEqual(notices);
+    });
+  });
+
+  describe('custom status check', () => {
+    test('returns undefined when name is customStatusCheckName is empty', () => {
+      const service = new TutorialService();
+      expect(service.getCustomStatusCheck('')).toBeUndefined();
+    });
+    test('returns undefined when custom status check was not registered', () => {
+      const service = new TutorialService();
+      expect(service.getCustomStatusCheck('foo')).toBeUndefined();
+    });
+    test('returns custom status check', () => {
+      const service = new TutorialService();
+      const callback = jest.fn();
+      service.setup().registerCustomStatusCheck('foo', callback);
+      const customStatusCheckCallback = service.getCustomStatusCheck('foo');
+      expect(customStatusCheckCallback).toBeDefined();
+      customStatusCheckCallback();
+      expect(callback).toHaveBeenCalled();
+    });
+  });
+
+  describe('custom component', () => {
+    test('returns undefined when name is customComponentName is empty', () => {
+      const service = new TutorialService();
+      expect(service.getCustomComponent('')).toBeUndefined();
+    });
+    test('returns undefined when custom component was not registered', () => {
+      const service = new TutorialService();
+      expect(service.getCustomComponent('foo')).toBeUndefined();
+    });
+    test('returns custom component', async () => {
+      const service = new TutorialService();
+      const customComponent = <div>foo</div>;
+      service.setup().registerCustomComponent('foo', async () => customComponent);
+      const customStatusCheckCallback = service.getCustomComponent('foo');
+      expect(customStatusCheckCallback).toBeDefined();
+      const result = await customStatusCheckCallback();
+      expect(result).toEqual(customComponent);
     });
   });
 });

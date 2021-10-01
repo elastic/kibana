@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo } from 'react';
@@ -39,20 +40,20 @@ const getSuggestedFields = (
     }))
     .sort((a, b) => (a.label > b.label ? 1 : a.label < b.label ? -1 : 0));
 
-const getDeserializer = (allFields: NormalizedFields['byId']): SerializerFunc => (
-  value: string | object
-): AliasOption[] => {
-  if (typeof value === 'string' && Boolean(value)) {
-    return [
-      {
-        id: value,
-        label: allFields[value].path.join(' > '),
-      },
-    ];
-  }
+const getDeserializer =
+  (allFields: NormalizedFields['byId']): SerializerFunc =>
+  (value: string | object): AliasOption[] => {
+    if (typeof value === 'string' && Boolean(value)) {
+      return [
+        {
+          id: value,
+          label: allFields[value].path.join(' > '),
+        },
+      ];
+    }
 
-  return [];
-};
+    return [];
+  };
 
 interface Props {
   allFields: NormalizedFields['byId'];
@@ -85,7 +86,7 @@ export const PathParameter = ({ field, allFields }: Props) => {
               'xpack.idxMgmt.mappingsEditor.aliasType.aliasTargetFieldDescription',
               {
                 defaultMessage:
-                  'Select the field you want your alias to point to. You will then be able to use the alias instead of the target field in search requests, and selected other APIs like field capabilities.',
+                  'Select the field you want your alias to point to. You will then be able to use the alias instead of the target field in search requests and select other APIs like field capabilities.',
               }
             )}
             withToggle={false}

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable react/display-name */
@@ -47,15 +48,15 @@ export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
   const nodeStatus = useSelector((state: ResolverState) => selectors.nodeDataStatus(state)(nodeID));
 
   return nodeStatus === 'loading' ? (
-    <StyledPanel>
+    <StyledPanel hasBorder>
       <PanelLoading />
     </StyledPanel>
   ) : processEvent ? (
-    <StyledPanel data-test-subj="resolver:panel:node-detail">
+    <StyledPanel hasBorder data-test-subj="resolver:panel:node-detail">
       <NodeDetailView nodeID={nodeID} processEvent={processEvent} />
     </StyledPanel>
   ) : (
-    <StyledPanel>
+    <StyledPanel hasBorder>
       <PanelContentError translatedErrorMessage={nodeDetailError} />
     </StyledPanel>
   );
@@ -121,8 +122,12 @@ const NodeDetailView = memo(function ({
       description: eventModel.argsForProcess(processEvent),
     };
 
-    // This is the data in {title, description} form for the EuiDescriptionList to display
-    const processDescriptionListData = [
+    const flattenedEntries: Array<{
+      title: string;
+      description: string | string[] | number | undefined;
+    }> = [];
+
+    const flattenedDescriptionListData = [
       createdEntry,
       pathEntry,
       pidEntry,
@@ -131,7 +136,21 @@ const NodeDetailView = memo(function ({
       parentPidEntry,
       md5Entry,
       commandLineEntry,
-    ]
+    ].reduce((flattenedList, entry) => {
+      if (Array.isArray(entry.description)) {
+        return [
+          ...flattenedList,
+          ...entry.description.map((value) => {
+            return { title: entry.title, description: value };
+          }),
+        ];
+      } else {
+        return [...flattenedList, entry];
+      }
+    }, flattenedEntries);
+
+    // This is the data in {title, description} form for the EuiDescriptionList to display
+    const processDescriptionListData = flattenedDescriptionListData
       .filter((entry) => {
         return entry.description !== undefined;
       })

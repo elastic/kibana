@@ -14,8 +14,8 @@ You can use the <<automatic-plugin-generator>> to get a basic structure for a ne
 {kib} repo should be developed inside the `plugins` folder.  If you are building a new plugin to check in to the {kib} repo,
 you will choose between a few locations:
 
- - {kib-repo}tree/{branch}/x-pack/plugins[x-pack/plugins] for commercially licensed plugins
- - {kib-repo}tree/{branch}/src/plugins[src/plugins] for open source licensed plugins
+ - {kib-repo}tree/{branch}/x-pack/plugins[x-pack/plugins] for plugins related to subscription features
+ - {kib-repo}tree/{branch}/src/plugins[src/plugins] for plugins related to free features
  - {kib-repo}tree/{branch}/examples[examples] for developer example plugins (these will not be included in the distributables)
 
 [discrete]

@@ -1,22 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { NormalizedCacheObject } from 'apollo-cache-inmemory';
-import { ApolloClient } from 'apollo-client';
 import { get, omit } from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
 import { from, Observable, empty } from 'rxjs';
 import { filter, mergeMap, startWith, withLatestFrom, takeUntil } from 'rxjs/operators';
 
-import { persistTimelinePinnedEventMutation } from '../../../timelines/containers/pinned_event/persist.gql_query';
-import { PersistTimelinePinnedEventMutation, PinnedEvent } from '../../../graphql/types';
 import { addError } from '../../../common/store/app/actions';
 import { inputsModel } from '../../../common/store/inputs';
-
+import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
 import {
   pinEvent,
   endTimelineSaving,
@@ -26,14 +23,13 @@ import {
   showCallOutUnauthorizedMsg,
 } from './actions';
 import { myEpicTimelineId } from './my_epic_timeline_id';
-import { refetchQueries } from './refetch_queries';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { ActionTimeline, TimelineById } from './types';
+import { persistPinnedEvent } from '../../containers/pinned_event/api';
 
 export const timelinePinnedEventActionsType = [pinEvent.type, unPinEvent.type];
 
 export const epicPersistPinnedEvent = (
-  apolloClient: ApolloClient<NormalizedCacheObject>,
   action: ActionTimeline,
   timeline: TimelineById,
   action$: Observable<Action>,
@@ -42,22 +38,13 @@ export const epicPersistPinnedEvent = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Observable<any> =>
   from(
-    apolloClient.mutate<
-      PersistTimelinePinnedEventMutation.Mutation,
-      PersistTimelinePinnedEventMutation.Variables
-    >({
-      mutation: persistTimelinePinnedEventMutation,
-      fetchPolicy: 'no-cache',
-      variables: {
-        pinnedEventId:
-          timeline[action.payload.id].pinnedEventsSaveObject[action.payload.eventId] != null
-            ? timeline[action.payload.id].pinnedEventsSaveObject[action.payload.eventId]
-                .pinnedEventId
-            : null,
-        eventId: action.payload.eventId,
-        timelineId: myEpicTimelineId.getTimelineId(),
-      },
-      refetchQueries,
+    persistPinnedEvent({
+      pinnedEventId:
+        timeline[action.payload.id].pinnedEventsSaveObject[action.payload.eventId] != null
+          ? timeline[action.payload.id].pinnedEventsSaveObject[action.payload.eventId].pinnedEventId
+          : null,
+      eventId: action.payload.eventId,
+      timelineId: myEpicTimelineId.getTimelineId(),
     })
   ).pipe(
     withLatestFrom(timeline$, allTimelineQuery$),
@@ -137,11 +124,13 @@ export const epicPersistPinnedEvent = (
     )
   );
 
-export const createTimelinePinnedEventEpic = <State>(): Epic<Action, Action, State> => (action$) =>
-  action$.pipe(
-    filter((action) => timelinePinnedEventActionsType.includes(action.type)),
-    mergeMap((action) => {
-      dispatcherTimelinePersistQueue.next({ action });
-      return empty();
-    })
-  );
+export const createTimelinePinnedEventEpic =
+  <State>(): Epic<Action, Action, State> =>
+  (action$) =>
+    action$.pipe(
+      filter((action) => timelinePinnedEventActionsType.includes(action.type)),
+      mergeMap((action) => {
+        dispatcherTimelinePersistQueue.next({ action });
+        return empty();
+      })
+    );

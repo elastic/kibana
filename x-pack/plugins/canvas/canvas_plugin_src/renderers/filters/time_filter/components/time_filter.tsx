@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { EuiSuperDatePicker, OnTimeChangeProps, EuiSuperDatePickerCommonRange } from '@elastic/eui';
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -52,9 +54,11 @@ export interface Props {
 }
 
 export const TimeFilter = ({ filter, commit, dateFormat, commonlyUsedRanges = [] }: Props) => {
-  const setFilter = (column: string) => ({ start, end }: OnTimeChangeProps) => {
-    commit(`timefilter from="${start}" to=${end} column=${column}`);
-  };
+  const setFilter =
+    (column: string) =>
+    ({ start, end }: OnTimeChangeProps) => {
+      commit(`timefilter from="${start}" to=${end} column=${column}`);
+    };
 
   const { column, start, end } = getFilterMeta(filter);
 

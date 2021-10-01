@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
-import { getIndexCount } from '../index/get_index_count';
+import { getIndexCount } from '@kbn/securitysolution-es-utils';
 import { updateMigrationSavedObject } from './update_migration_saved_object';
 import { getSignalsMigrationSavedObjectMock } from './saved_objects_schema.mock';
 import { finalizeMigration } from './finalize_migration';
 
 jest.mock('./update_migration_saved_object');
-jest.mock('../index/get_index_count');
+jest.mock('@kbn/securitysolution-es-utils');
 
 describe('finalizeMigration', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;

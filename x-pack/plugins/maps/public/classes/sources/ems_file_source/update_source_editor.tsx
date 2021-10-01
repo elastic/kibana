@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
 import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TooltipSelector } from '../../../components/tooltip_selector';
-import { getEmsFileLayers } from '../../../meta';
+import { getEmsFileLayers } from '../../../util';
 import { IEmsFileSource } from './ems_file_source';
 import { IField } from '../../fields/field';
-import { OnSourceChangeArgs } from '../../../connected_components/layer_panel/view';
+import { OnSourceChangeArgs } from '../source';
 
 interface Props {
   layerId: string;

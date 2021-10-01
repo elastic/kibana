@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Direction, HostsFields } from '../../graphql/types';
+import { Direction } from '../../../common/search_strategy';
+import { HostsFields } from '../../../common/search_strategy/security_solution';
 
 export enum HostsType {
   page = 'page',
@@ -17,7 +19,7 @@ export enum HostsTableType {
   events = 'events',
   uncommonProcesses = 'uncommonProcesses',
   anomalies = 'anomalies',
-  alerts = 'alerts',
+  alerts = 'externalAlerts',
 }
 
 export interface BasicQueryPaginated {

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, Component } from 'react';
 import {
   EuiFlyout,
@@ -223,13 +225,12 @@ export class Flyout extends Component {
 
   getDocumentationTitle() {
     const { productName } = this.props;
-    const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = Legacy.shims.docLinks;
 
     let documentationUrl = null;
     if (productName === KIBANA_SYSTEM_ID) {
-      documentationUrl = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/monitoring-metricbeat.html`;
+      documentationUrl = Legacy.shims.docLinks.links.monitoring.monitorKibana;
     } else if (productName === ELASTICSEARCH_SYSTEM_ID) {
-      documentationUrl = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`;
+      documentationUrl = Legacy.shims.docLinks.links.monitoring.monitorElasticsearch;
     }
 
     if (!documentationUrl) {

@@ -1,0 +1,84 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getEnvironments fetches environments 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+      "metric",
+      "error",
+    ],
+  },
+  "body": Object {
+    "aggs": Object {
+      "environments": Object {
+        "terms": Object {
+          "field": "service.environment",
+          "missing": "ENVIRONMENT_NOT_DEFINED",
+          "size": 50,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+}
+`;
+
+exports[`getEnvironments fetches environments without a service name 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+      "metric",
+      "error",
+    ],
+  },
+  "body": Object {
+    "aggs": Object {
+      "environments": Object {
+        "terms": Object {
+          "field": "service.environment",
+          "missing": "ENVIRONMENT_NOT_DEFINED",
+          "size": 50,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+}
+`;

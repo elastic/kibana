@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Legacy } from '../../legacy_shims';
@@ -9,8 +10,17 @@ import { merge } from 'lodash';
 import { CHART_LINE_COLOR, CHART_TEXT_COLOR } from '../../../common/constants';
 
 export async function getChartOptions(axisOptions) {
-  const $injector = Legacy.shims.getAngularInjector();
-  const timezone = $injector.get('config').get('dateFormat:tz');
+  let timezone;
+  try {
+    const $injector = Legacy.shims.getAngularInjector();
+    timezone = $injector.get('config').get('dateFormat:tz');
+  } catch (error) {
+    if (error.message === 'Angular has been removed.') {
+      timezone = Legacy.shims.uiSettings?.get('dateFormat:tz');
+    } else {
+      throw error;
+    }
+  }
   const opts = {
     legend: {
       show: false,

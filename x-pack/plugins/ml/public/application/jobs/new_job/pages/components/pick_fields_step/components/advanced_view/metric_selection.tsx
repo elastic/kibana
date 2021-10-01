@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useState } from 'react';
+import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator } from '../../../../../common/job_creator';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
+import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { Aggregation, Field } from '../../../../../../../../../common/types/fields';
 import { MetricSelector } from './metric_selector';
 import { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
@@ -28,14 +29,19 @@ const emptyRichDetector: RichDetector = {
   excludeFrequent: null,
   description: null,
   customRules: null,
+  useNull: null,
 };
 
 export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
-  const { jobCreator: jc, jobCreatorUpdate } = useContext(JobCreatorContext);
+  const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator;
 
   const { fields, aggs } = newJobCapsService;
   const [modalPayload, setModalPayload] = useState<ModalPayload | null>(null);
+
+  useEffect(() => {
+    setIsValid(jobCreator.detectors.length > 0);
+  }, [jobCreatorUpdated]);
 
   function closeModal() {
     setModalPayload(null);
@@ -50,7 +56,8 @@ export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
         dtr.overField,
         dtr.partitionField,
         dtr.excludeFrequent,
-        dtr.description
+        dtr.description,
+        dtr.useNull
       );
     } else {
       jobCreator.editDetector(
@@ -61,7 +68,8 @@ export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
         dtr.partitionField,
         dtr.excludeFrequent,
         dtr.description,
-        index
+        index,
+        dtr.useNull
       );
     }
     jobCreatorUpdate();

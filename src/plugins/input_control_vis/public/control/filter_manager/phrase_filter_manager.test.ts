@@ -1,26 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { Filter } from '@kbn/es-query';
 import expect from '@kbn/expect';
 
 import {
-  Filter,
   IndexPattern,
   FilterManager as QueryFilterManager,
   IndexPatternsContract,
@@ -47,9 +36,9 @@ describe('PhraseFilterManager', function () {
         },
       },
     } as IndexPattern;
-    const indexPatternsServiceMock = ({
+    const indexPatternsServiceMock = {
       get: jest.fn().mockReturnValue(Promise.resolve(indexPatternMock)),
-    } as unknown) as jest.Mocked<IndexPatternsContract>;
+    } as unknown as jest.Mocked<IndexPatternsContract>;
     const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: PhraseFilterManager;
     beforeEach(async () => {
@@ -80,7 +69,7 @@ describe('PhraseFilterManager', function () {
       expect(newFilter.meta.controlledBy).to.be(controlId);
       expect(newFilter.meta.key).to.be('field1');
       expect(newFilter).to.have.property('query');
-      const query = newFilter.query;
+      const query = newFilter.query!;
       expect(query).to.have.property('bool');
       expect(query.bool.should.length).to.be(2);
       expect(JSON.stringify(query.bool.should[0], null, '')).to.be(
@@ -132,6 +121,7 @@ describe('PhraseFilterManager', function () {
     test('should extract value from match phrase filter', function () {
       filterManager.setMockFilters([
         {
+          meta: {},
           query: {
             match: {
               field1: {
@@ -148,6 +138,7 @@ describe('PhraseFilterManager', function () {
     test('should extract value from multiple filters', function () {
       filterManager.setMockFilters([
         {
+          meta: {},
           query: {
             match: {
               field1: {
@@ -174,6 +165,7 @@ describe('PhraseFilterManager', function () {
     test('should extract value from bool filter', function () {
       filterManager.setMockFilters([
         {
+          meta: {},
           query: {
             bool: {
               should: [
@@ -198,6 +190,7 @@ describe('PhraseFilterManager', function () {
     test('should return undefined when filter value can not be extracted from Kibana filter', function () {
       filterManager.setMockFilters([
         {
+          meta: {},
           query: {
             match: {
               myFieldWhichIsNotField1: {

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
-import { euiStyled } from '../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import {
   InfraWaffleMapBounds,
   InfraFormatter,
@@ -16,13 +18,12 @@ interface Props {
   bounds: InfraWaffleMapBounds;
   formatter: InfraFormatter;
 }
-
+type TickValue = 0 | 1;
 export const SteppedGradientLegend: React.FC<Props> = ({ legend, bounds, formatter }) => {
   return (
     <LegendContainer>
       <Ticks>
         <TickLabel value={0} bounds={bounds} formatter={formatter} />
-        <TickLabel value={0.5} bounds={bounds} formatter={formatter} />
         <TickLabel value={1} bounds={bounds} formatter={formatter} />
       </Ticks>
       <GradientContainer>
@@ -39,7 +40,7 @@ export const SteppedGradientLegend: React.FC<Props> = ({ legend, bounds, formatt
 
 interface TickProps {
   bounds: InfraWaffleMapBounds;
-  value: number;
+  value: TickValue;
   formatter: InfraFormatter;
 }
 

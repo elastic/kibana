@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -24,7 +13,7 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
-import { Action, UiActionsStart, ActionType } from '../../../../ui_actions/public';
+import { Action, UiActionsStart } from '../../../../ui_actions/public';
 import { Trigger, ViewMode } from '../types';
 import { isErrorEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from './embeddable_panel';
@@ -216,7 +205,7 @@ const renderInEditModeAndOpenContextMenu = async (
 test('HelloWorldContainer in edit mode hides disabledActions', async () => {
   const action = {
     id: 'FOO',
-    type: 'FOO' as ActionType,
+    type: 'FOO',
     getIconType: () => undefined,
     getDisplayName: () => 'foo',
     isCompatible: async () => true,
@@ -252,7 +241,7 @@ test('HelloWorldContainer in edit mode hides disabledActions', async () => {
 test('HelloWorldContainer hides disabled badges', async () => {
   const action = {
     id: 'BAR',
-    type: 'BAR' as ActionType,
+    type: 'BAR',
     getIconType: () => undefined,
     getDisplayName: () => 'bar',
     isCompatible: async () => true,
@@ -552,4 +541,41 @@ test('Check when hide header option is true', async () => {
 
   const title = findTestSubject(component, `embeddablePanelHeading-HelloAryaStark`);
   expect(title.length).toBe(0);
+});
+
+test('Should work in minimal way rendering only the inspector action', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+  inspector.isAvailable = jest.fn(() => true);
+
+  const container = new HelloWorldContainer({ id: '123', panels: {}, viewMode: ViewMode.VIEW }, {
+    getEmbeddableFactory,
+  } as any);
+
+  const embeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Arya',
+    lastName: 'Stark',
+  });
+
+  const component = mount(
+    <I18nProvider>
+      <EmbeddablePanel
+        embeddable={embeddable}
+        getActions={() => Promise.resolve([])}
+        inspector={inspector}
+        hideHeader={false}
+      />
+    </I18nProvider>
+  );
+
+  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+  expect(findTestSubject(component, `embeddablePanelContextMenuOpen`).length).toBe(1);
+  await nextTick();
+  component.update();
+  expect(findTestSubject(component, `embeddablePanelAction-openInspector`).length).toBe(1);
+  const action = findTestSubject(component, `embeddablePanelAction-ACTION_CUSTOMIZE_PANEL`);
+  expect(action.length).toBe(0);
 });

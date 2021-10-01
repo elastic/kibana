@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { EuiThemeProvider } from '../../../../../observability/public';
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { QualityWarning } from '../../../../common/log_analysis';
 import { CategoryQualityWarnings } from './quality_warning_notices';
 

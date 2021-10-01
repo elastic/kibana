@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 
 import type { GetTransformsResponseSchema } from '../../../../plugins/transform/common/api_schemas/transforms';
@@ -80,7 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('/api/transform/transforms', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
       await createTransform('transform-test-get-1');
       await createTransform('transform-test-get-2');

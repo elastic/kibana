@@ -1,16 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { omit } from 'lodash';
-import { KibanaResponseFactory, SavedObjectsClientContract } from 'src/core/server';
+import { schema } from '@kbn/config-schema';
 import { CanvasWorkpad } from '../../../types';
 import { RouteInitializerDeps } from '../';
 import {
-  CANVAS_TYPE,
   API_ROUTE_WORKPAD,
   API_ROUTE_WORKPAD_STRUCTURES,
   API_ROUTE_WORKPAD_ASSETS,
@@ -20,35 +18,6 @@ import { okResponse } from '../ok_response';
 import { catchErrorHandler } from '../catch_error_handler';
 
 const AssetsRecordSchema = schema.recordOf(schema.string(), WorkpadAssetSchema);
-
-const AssetPayloadSchema = schema.object({
-  assets: AssetsRecordSchema,
-});
-
-const workpadUpdateHandler = async (
-  payload: TypeOf<typeof WorkpadSchema> | TypeOf<typeof AssetPayloadSchema>,
-  id: string,
-  savedObjectsClient: SavedObjectsClientContract,
-  response: KibanaResponseFactory
-) => {
-  const now = new Date().toISOString();
-
-  const workpadObject = await savedObjectsClient.get<CanvasWorkpad>(CANVAS_TYPE, id);
-  await savedObjectsClient.create(
-    CANVAS_TYPE,
-    {
-      ...workpadObject.attributes,
-      ...omit(payload, 'id'), // never write the id property
-      '@timestamp': now, // always update the modified time
-      '@created': workpadObject.attributes['@created'], // ensure created is not modified
-    },
-    { overwrite: true, id }
-  );
-
-  return response.ok({
-    body: okResponse,
-  });
-};
 
 export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
   const { router } = deps;
@@ -71,12 +40,11 @@ export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      return workpadUpdateHandler(
-        request.body,
-        request.params.id,
-        context.core.savedObjects.client,
-        response
-      );
+      await context.canvas.workpad.update(request.params.id, request.body as CanvasWorkpad);
+
+      return response.ok({
+        body: okResponse,
+      });
     })
   );
 
@@ -97,12 +65,11 @@ export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      return workpadUpdateHandler(
-        request.body,
-        request.params.id,
-        context.core.savedObjects.client,
-        response
-      );
+      await context.canvas.workpad.update(request.params.id, request.body as CanvasWorkpad);
+
+      return response.ok({
+        body: okResponse,
+      });
     })
   );
 }
@@ -130,12 +97,15 @@ export function initializeUpdateWorkpadAssetsRoute(deps: RouteInitializerDeps) {
       },
     },
     async (context, request, response) => {
-      return workpadUpdateHandler(
-        { assets: AssetsRecordSchema.validate(request.body) },
-        request.params.id,
-        context.core.savedObjects.client,
-        response
-      );
+      const workpadAssets = {
+        assets: AssetsRecordSchema.validate(request.body),
+      };
+
+      await context.canvas.workpad.update(request.params.id, workpadAssets as CanvasWorkpad);
+
+      return response.ok({
+        body: okResponse,
+      });
     }
   );
 }

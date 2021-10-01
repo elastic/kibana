@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { parseIsPaused } from './parse_is_paused';
@@ -18,9 +19,11 @@ export interface UptimeUrlParams {
   dateRangeEnd: string;
   pagination?: string;
   filters: string;
+  excludedFilters: string;
   search: string;
   statusFilter: string;
   focusConnectorField?: boolean;
+  query?: string;
 }
 
 const {
@@ -70,10 +73,12 @@ export const getSupportedUrlParams = (params: {
     dateRangeStart,
     dateRangeEnd,
     filters,
+    excludedFilters,
     search,
     statusFilter,
     pagination,
     focusConnectorField,
+    query,
   } = filteredParams;
 
   return {
@@ -92,8 +97,10 @@ export const getSupportedUrlParams = (params: {
     dateRangeStart: dateRangeStart || DATE_RANGE_START,
     dateRangeEnd: dateRangeEnd || DATE_RANGE_END,
     filters: filters || FILTERS,
+    excludedFilters: excludedFilters || '',
     search: search || SEARCH,
     statusFilter: statusFilter || STATUS_FILTER,
     focusConnectorField: !!focusConnectorField,
+    query: query || '',
   };
 };
