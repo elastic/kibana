@@ -29,7 +29,7 @@ const handler = async (request: http.IncomingMessage, response: http.ServerRespo
 
   const pathName = request.url!;
 
-  if (pathName === '/api/x_elas2_inc_int/elastic_api/health') {
+  if (pathName.includes('elastic_api/health')) {
     return sendResponse(response, {
       result: {
         name: 'Elastic',
@@ -40,7 +40,10 @@ const handler = async (request: http.IncomingMessage, response: http.ServerRespo
   }
 
   // Import Set API: Create or update incident
-  if (pathName === '/api/now/import/x_elas2_inc_int_elastic_incident') {
+  if (
+    pathName.includes('x_elas2_inc_int_elastic_incident') ||
+    pathName.includes('x_elas2_inc_int_elastic_incident')
+  ) {
     const update = data?.elastic_incident_id != null;
     return sendResponse(response, {
       import_set: 'ISET01',
@@ -60,7 +63,10 @@ const handler = async (request: http.IncomingMessage, response: http.ServerRespo
   }
 
   // Create incident
-  if (pathName === '/api/now/v2/table/incident') {
+  if (
+    pathName === '/api/now/v2/table/incident' ||
+    pathName === '/api/now/v2/table/sn_si_incident'
+  ) {
     return sendResponse(response, {
       result: { sys_id: '123', number: 'INC01', sys_created_on: '2020-03-10 12:24:20' },
     });
@@ -68,13 +74,46 @@ const handler = async (request: http.IncomingMessage, response: http.ServerRespo
 
   // URLs of type /api/now/v2/table/incident/{id}
   // GET incident, PATCH incident
-  if (pathName.includes('/api/now/v2/table/incident')) {
+  if (
+    pathName.includes('/api/now/v2/table/incident') ||
+    pathName.includes('/api/now/v2/table/sn_si_incident')
+  ) {
     return sendResponse(response, {
       result: {
         sys_id: '123',
         number: 'INC01',
         sys_created_on: '2020-03-10 12:24:20',
         sys_updated_on: '2020-03-10 12:24:20',
+      },
+    });
+  }
+
+  // Add multiple observables
+  if (pathName.includes('/observables/bulk')) {
+    return sendResponse(response, {
+      result: [
+        {
+          value: '5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9',
+          observable_sys_id: '1',
+        },
+        {
+          value: '127.0.0.1',
+          observable_sys_id: '2',
+        },
+        {
+          value: 'https://example.com',
+          observable_sys_id: '3',
+        },
+      ],
+    });
+  }
+
+  // Add single observables
+  if (pathName.includes('/observables')) {
+    return sendResponse(response, {
+      result: {
+        value: '127.0.0.1',
+        observable_sys_id: '2',
       },
     });
   }

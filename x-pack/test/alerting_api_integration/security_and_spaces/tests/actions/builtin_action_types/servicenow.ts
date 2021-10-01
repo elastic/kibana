@@ -15,44 +15,11 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getServiceNowServer } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
-export default function servicenowTest({ getService }: FtrProviderContext) {
+export default function serviceNowTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
 
-  const mockServiceNow = {
-    config: {
-      apiUrl: 'www.servicenowisinkibanaactions.com',
-      isLegacy: false,
-    },
-    secrets: {
-      password: 'elastic',
-      username: 'changeme',
-    },
-    params: {
-      subAction: 'pushToService',
-      subActionParams: {
-        incident: {
-          description: 'a description',
-          externalId: null,
-          impact: '1',
-          severity: '1',
-          short_description: 'a title',
-          urgency: '1',
-          category: 'software',
-          subcategory: 'software',
-        },
-        comments: [
-          {
-            comment: 'first comment',
-            commentId: '456',
-          },
-        ],
-      },
-    },
-  };
-
   describe('ServiceNow', () => {
-    let simulatedActionId = '';
     let serviceNowSimulatorURL: string = '';
     let serviceNowServer: http.Server;
     let proxyServer: httpProxy | undefined;
@@ -81,18 +48,21 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
       }
     });
 
-    describe('ServiceNow - Action Creation', () => {
+    const testConnectorCreation = (
+      connectorWithParams: Record<string, any>,
+      connectorType: string
+    ) => {
       it('should return 200 when creating a servicenow action successfully', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A servicenow action',
-            connector_type_id: '.servicenow',
+            connector_type_id: connectorType,
             config: {
               apiUrl: serviceNowSimulatorURL,
             },
-            secrets: mockServiceNow.secrets,
+            secrets: connectorWithParams.secrets,
           })
           .expect(200);
 
@@ -100,7 +70,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           id: createdAction.id,
           is_preconfigured: false,
           name: 'A servicenow action',
-          connector_type_id: '.servicenow',
+          connector_type_id: connectorType,
           is_missing_secrets: false,
           config: {
             apiUrl: serviceNowSimulatorURL,
@@ -116,7 +86,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           id: fetchedAction.id,
           is_preconfigured: false,
           name: 'A servicenow action',
-          connector_type_id: '.servicenow',
+          connector_type_id: connectorType,
           is_missing_secrets: false,
           config: {
             apiUrl: serviceNowSimulatorURL,
@@ -131,11 +101,11 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A servicenow action',
-            connector_type_id: '.servicenow',
+            connector_type_id: connectorType,
             config: {
               apiUrl: serviceNowSimulatorURL,
             },
-            secrets: mockServiceNow.secrets,
+            secrets: connectorWithParams.secrets,
           })
           .expect(200);
 
@@ -152,7 +122,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A servicenow action',
-            connector_type_id: '.servicenow',
+            connector_type_id: connectorType,
             config: {},
           })
           .expect(400)
@@ -172,11 +142,11 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A servicenow action',
-            connector_type_id: '.servicenow',
+            connector_type_id: connectorType,
             config: {
               apiUrl: 'http://servicenow.mynonexistent.com',
             },
-            secrets: mockServiceNow.secrets,
+            secrets: connectorWithParams.secrets,
           })
           .expect(400)
           .then((resp: any) => {
@@ -195,7 +165,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A servicenow action',
-            connector_type_id: '.servicenow',
+            connector_type_id: connectorType,
             config: {
               apiUrl: serviceNowSimulatorURL,
             },
@@ -210,331 +180,412 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             });
           });
       });
-    });
+    };
 
-    describe('ServiceNow - Executor', () => {
+    const testExecuteValidation = (
+      connectorWithParams: Record<string, any>,
+      connectorType: string
+    ) => {
+      let connectorId: string = '';
+
       before(async () => {
         const { body } = await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A servicenow simulator',
-            connector_type_id: '.servicenow',
+            connector_type_id: connectorType,
             config: {
               apiUrl: serviceNowSimulatorURL,
               isLegacy: false,
             },
-            secrets: mockServiceNow.secrets,
+            secrets: connectorWithParams.secrets,
           });
-        simulatedActionId = body.id;
+
+        connectorId = body.id;
       });
 
-      describe('Validation', () => {
-        it('should handle failing with a simulated success without action', async () => {
-          await supertest
-            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: {},
-            })
-            .then((resp: any) => {
-              expect(Object.keys(resp.body)).to.eql(['status', 'message', 'retry', 'connector_id']);
-              expect(resp.body.connector_id).to.eql(simulatedActionId);
-              expect(resp.body.status).to.eql('error');
-              expect(resp.body.retry).to.eql(false);
-              // Node.js 12 oddity:
-              //
-              // The first time after the server is booted, the error message will be:
-              //
-              //     undefined is not iterable (cannot read property Symbol(Symbol.iterator))
-              //
-              // After this, the error will be:
-              //
-              //     Cannot destructure property 'value' of 'undefined' as it is undefined.
-              //
-              // The error seems to come from the exact same place in the code based on the
-              // exact same circumstances:
-              //
-              //     https://github.com/elastic/kibana/blob/b0a223ebcbac7e404e8ae6da23b2cc6a4b509ff1/packages/kbn-config-schema/src/types/literal_type.ts#L28
-              //
-              // What triggers the error is that the `handleError` function expects its 2nd
-              // argument to be an object containing a `valids` property of type array.
-              //
-              // In this test the object does not contain a `valids` property, so hence the
-              // error.
-              //
-              // Why the error message isn't the same in all scenarios is unknown to me and
-              // could be a bug in V8.
-              expect(resp.body.message).to.match(
-                /^error validating action params: (undefined is not iterable \(cannot read property Symbol\(Symbol.iterator\)\)|Cannot destructure property 'value' of 'undefined' as it is undefined\.)$/
-              );
-            });
-        });
+      it('should handle failing with a simulated success without action', async () => {
+        await supertest
+          .post(`/api/actions/connector/${connectorId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            params: {},
+          })
+          .then((resp: any) => {
+            expect(Object.keys(resp.body)).to.eql(['status', 'message', 'retry', 'connector_id']);
+            expect(resp.body.connector_id).to.eql(connectorId);
+            expect(resp.body.status).to.eql('error');
+            expect(resp.body.retry).to.eql(false);
+            // Node.js 12 oddity:
+            //
+            // The first time after the server is booted, the error message will be:
+            //
+            //     undefined is not iterable (cannot read property Symbol(Symbol.iterator))
+            //
+            // After this, the error will be:
+            //
+            //     Cannot destructure property 'value' of 'undefined' as it is undefined.
+            //
+            // The error seems to come from the exact same place in the code based on the
+            // exact same circumstances:
+            //
+            //     https://github.com/elastic/kibana/blob/b0a223ebcbac7e404e8ae6da23b2cc6a4b509ff1/packages/kbn-config-schema/src/types/literal_type.ts#L28
+            //
+            // What triggers the error is that the `handleError` function expects its 2nd
+            // argument to be an object containing a `valids` property of type array.
+            //
+            // In this test the object does not contain a `valids` property, so hence the
+            // error.
+            //
+            // Why the error message isn't the same in all scenarios is unknown to me and
+            // could be a bug in V8.
+            expect(resp.body.message).to.match(
+              /^error validating action params: (undefined is not iterable \(cannot read property Symbol\(Symbol.iterator\)\)|Cannot destructure property 'value' of 'undefined' as it is undefined\.)$/
+            );
+          });
+      });
 
-        it('should handle failing with a simulated success without unsupported action', async () => {
-          await supertest
-            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: { subAction: 'non-supported' },
-            })
-            .then((resp: any) => {
-              expect(resp.body).to.eql({
-                connector_id: simulatedActionId,
-                status: 'error',
-                retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]\n- [4.subAction]: expected value to equal [getChoices]',
-              });
+      it('should handle failing with a simulated success without unsupported action', async () => {
+        await supertest
+          .post(`/api/actions/connector/${connectorId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            params: { subAction: 'non-supported' },
+          })
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              connector_id: connectorId,
+              status: 'error',
+              retry: false,
+              message:
+                'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]\n- [4.subAction]: expected value to equal [getChoices]',
             });
-        });
+          });
+      });
 
-        it('should handle failing with a simulated success without subActionParams', async () => {
-          await supertest
-            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: { subAction: 'pushToService' },
-            })
-            .then((resp: any) => {
-              expect(resp.body).to.eql({
-                connector_id: simulatedActionId,
-                status: 'error',
-                retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.short_description]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [getChoices]',
-              });
+      it('should handle failing with a simulated success without subActionParams', async () => {
+        await supertest
+          .post(`/api/actions/connector/${connectorId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            params: { subAction: 'pushToService' },
+          })
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              connector_id: connectorId,
+              status: 'error',
+              retry: false,
+              message:
+                'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.short_description]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [getChoices]',
             });
-        });
+          });
+      });
 
-        it('should handle failing with a simulated success without title', async () => {
-          await supertest
-            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+      it('should handle failing with a simulated success without title', async () => {
+        await supertest
+          .post(`/api/actions/connector/${connectorId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            params: {
+              ...connectorWithParams.params,
+              subActionParams: {
+                savedObjectId: 'success',
+              },
+            },
+          })
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              connector_id: connectorId,
+              status: 'error',
+              retry: false,
+              message:
+                'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.short_description]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [getChoices]',
+            });
+          });
+      });
+
+      it('should handle failing with a simulated success without commentId', async () => {
+        await supertest
+          .post(`/api/actions/connector/${connectorId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            params: {
+              ...connectorWithParams.params,
+              subActionParams: {
+                incident: {
+                  ...connectorWithParams.params.subActionParams.incident,
+                  short_description: 'success',
+                },
+                comments: [{ comment: 'boo' }],
+              },
+            },
+          })
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              connector_id: connectorId,
+              status: 'error',
+              retry: false,
+              message:
+                'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [getChoices]',
+            });
+          });
+      });
+
+      it('should handle failing with a simulated success without comment message', async () => {
+        await supertest
+          .post(`/api/actions/connector/${connectorId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            params: {
+              ...connectorWithParams.params,
+              subActionParams: {
+                incident: {
+                  ...connectorWithParams.params.subActionParams.incident,
+                  short_description: 'success',
+                },
+                comments: [{ commentId: 'success' }],
+              },
+            },
+          })
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              connector_id: connectorId,
+              status: 'error',
+              retry: false,
+              message:
+                'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [getChoices]',
+            });
+          });
+      });
+    };
+
+    const testExecute = (connectorWithParams: Record<string, any>, connectorType: string) => {
+      const tableName = connectorType === '.servicenow-sir' ? 'sn_si_incident' : 'incident';
+      let connectorId: string = '';
+
+      before(async () => {
+        const { body } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A servicenow simulator',
+            connector_type_id: connectorType,
+            config: {
+              apiUrl: serviceNowSimulatorURL,
+              isLegacy: true,
+            },
+            secrets: connectorWithParams.secrets,
+          });
+
+        connectorId = body.id;
+      });
+
+      describe('Import set API', () => {
+        it('should handle creating an incident without comments', async () => {
+          const { body: result } = await supertest
+            .post(`/api/actions/connector/${connectorId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
-                ...mockServiceNow.params,
+                ...connectorWithParams.params,
                 subActionParams: {
-                  savedObjectId: 'success',
+                  incident: connectorWithParams.params.subActionParams.incident,
+                  comments: [],
                 },
               },
             })
-            .then((resp: any) => {
-              expect(resp.body).to.eql({
-                connector_id: simulatedActionId,
-                status: 'error',
-                retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.short_description]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [getChoices]',
-              });
-            });
-        });
+            .expect(200);
 
-        it('should handle failing with a simulated success without commentId', async () => {
-          await supertest
-            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: {
-                ...mockServiceNow.params,
-                subActionParams: {
-                  incident: {
-                    ...mockServiceNow.params.subActionParams.incident,
-                    short_description: 'success',
-                  },
-                  comments: [{ comment: 'boo' }],
-                },
-              },
-            })
-            .then((resp: any) => {
-              expect(resp.body).to.eql({
-                connector_id: simulatedActionId,
-                status: 'error',
-                retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [getChoices]',
-              });
-            });
-        });
-
-        it('should handle failing with a simulated success without comment message', async () => {
-          await supertest
-            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: {
-                ...mockServiceNow.params,
-                subActionParams: {
-                  incident: {
-                    ...mockServiceNow.params.subActionParams.incident,
-                    short_description: 'success',
-                  },
-                  comments: [{ commentId: 'success' }],
-                },
-              },
-            })
-            .then((resp: any) => {
-              expect(resp.body).to.eql({
-                connector_id: simulatedActionId,
-                status: 'error',
-                retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [getChoices]',
-              });
-            });
-        });
-
-        describe('getChoices', () => {
-          it('should fail when field is not provided', async () => {
-            await supertest
-              .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                params: {
-                  subAction: 'getChoices',
-                  subActionParams: {},
-                },
-              })
-              .then((resp: any) => {
-                expect(resp.body).to.eql({
-                  connector_id: simulatedActionId,
-                  status: 'error',
-                  retry: false,
-                  message:
-                    'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]\n- [4.subActionParams.fields]: expected value of type [array] but got [undefined]',
-                });
-              });
+          expect(proxyHaveBeenCalled).to.equal(true);
+          expect(result).to.eql({
+            status: 'ok',
+            connector_id: connectorId,
+            data: {
+              id: '123',
+              title: 'INC01',
+              pushedDate: '2020-03-10T12:24:20.000Z',
+              url: `${serviceNowSimulatorURL}/nav_to.do?uri=${tableName}.do?sys_id=123`,
+            },
           });
         });
       });
 
-      describe('Execution', () => {
-        // New connectors
-        describe('Import set API', () => {
-          it('should handle creating an incident without comments', async () => {
-            const { body: result } = await supertest
-              .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                params: {
-                  ...mockServiceNow.params,
-                  subActionParams: {
-                    incident: mockServiceNow.params.subActionParams.incident,
-                    comments: [],
-                  },
-                },
-              })
-              .expect(200);
-
-            expect(proxyHaveBeenCalled).to.equal(true);
-            expect(result).to.eql({
-              status: 'ok',
-              connector_id: simulatedActionId,
-              data: {
-                id: '123',
-                title: 'INC01',
-                pushedDate: '2020-03-10T12:24:20.000Z',
-                url: `${serviceNowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
+      // Legacy connectors
+      describe('Table API', () => {
+        before(async () => {
+          const { body } = await supertest
+            .post('/api/actions/connector')
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'A servicenow simulator',
+              connector_type_id: connectorType,
+              config: {
+                apiUrl: serviceNowSimulatorURL,
+                isLegacy: true,
               },
+              secrets: connectorWithParams.secrets,
             });
-          });
+
+          connectorId = body.id;
         });
 
-        // Legacy connectors
-        describe('Table API', () => {
-          before(async () => {
-            const { body } = await supertest
-              .post('/api/actions/connector')
-              .set('kbn-xsrf', 'foo')
-              .send({
-                name: 'A servicenow simulator',
-                connector_type_id: '.servicenow',
-                config: {
-                  apiUrl: serviceNowSimulatorURL,
-                  isLegacy: true,
+        it('should handle creating an incident without comments', async () => {
+          const { body: result } = await supertest
+            .post(`/api/actions/connector/${connectorId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...connectorWithParams.params,
+                subActionParams: {
+                  incident: connectorWithParams.params.subActionParams.incident,
+                  comments: [],
                 },
-                secrets: mockServiceNow.secrets,
-              });
-            simulatedActionId = body.id;
-          });
-
-          it('should handle creating an incident without comments', async () => {
-            const { body: result } = await supertest
-              .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                params: {
-                  ...mockServiceNow.params,
-                  subActionParams: {
-                    incident: mockServiceNow.params.subActionParams.incident,
-                    comments: [],
-                  },
-                },
-              })
-              .expect(200);
-
-            expect(proxyHaveBeenCalled).to.equal(true);
-            expect(result).to.eql({
-              status: 'ok',
-              connector_id: simulatedActionId,
-              data: {
-                id: '123',
-                title: 'INC01',
-                pushedDate: '2020-03-10T12:24:20.000Z',
-                url: `${serviceNowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
               },
-            });
-          });
-        });
+            })
+            .expect(200);
 
-        describe('getChoices', () => {
-          it('should get choices', async () => {
-            const { body: result } = await supertest
-              .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                params: {
-                  subAction: 'getChoices',
-                  subActionParams: { fields: ['priority'] },
-                },
-              })
-              .expect(200);
-
-            expect(proxyHaveBeenCalled).to.equal(true);
-            expect(result).to.eql({
-              status: 'ok',
-              connector_id: simulatedActionId,
-              data: [
-                {
-                  dependent_value: '',
-                  label: '1 - Critical',
-                  value: '1',
-                },
-                {
-                  dependent_value: '',
-                  label: '2 - High',
-                  value: '2',
-                },
-                {
-                  dependent_value: '',
-                  label: '3 - Moderate',
-                  value: '3',
-                },
-                {
-                  dependent_value: '',
-                  label: '4 - Low',
-                  value: '4',
-                },
-                {
-                  dependent_value: '',
-                  label: '5 - Planning',
-                  value: '5',
-                },
-              ],
-            });
+          expect(proxyHaveBeenCalled).to.equal(true);
+          expect(result).to.eql({
+            status: 'ok',
+            connector_id: connectorId,
+            data: {
+              id: '123',
+              title: 'INC01',
+              pushedDate: '2020-03-10T12:24:20.000Z',
+              url: `${serviceNowSimulatorURL}/nav_to.do?uri=${tableName}.do?sys_id=123`,
+            },
           });
         });
       });
+
+      describe('getChoices', () => {
+        it('should get choices', async () => {
+          const { body: result } = await supertest
+            .post(`/api/actions/connector/${connectorId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                subAction: 'getChoices',
+                subActionParams: { fields: ['priority'] },
+              },
+            })
+            .expect(200);
+
+          expect(proxyHaveBeenCalled).to.equal(true);
+          expect(result).to.eql({
+            status: 'ok',
+            connector_id: connectorId,
+            data: [
+              {
+                dependent_value: '',
+                label: '1 - Critical',
+                value: '1',
+              },
+              {
+                dependent_value: '',
+                label: '2 - High',
+                value: '2',
+              },
+              {
+                dependent_value: '',
+                label: '3 - Moderate',
+                value: '3',
+              },
+              {
+                dependent_value: '',
+                label: '4 - Low',
+                value: '4',
+              },
+              {
+                dependent_value: '',
+                label: '5 - Planning',
+                value: '5',
+              },
+            ],
+          });
+        });
+      });
+    };
+
+    describe('ServiceNow ITSM', () => {
+      const connectorWithParams = {
+        config: {
+          apiUrl: 'www.servicenowisinkibanaactions.com',
+          isLegacy: false,
+        },
+        secrets: {
+          password: 'elastic',
+          username: 'changeme',
+        },
+        params: {
+          subAction: 'pushToService',
+          subActionParams: {
+            incident: {
+              description: 'a description',
+              externalId: null,
+              impact: '1',
+              severity: '1',
+              short_description: 'a title',
+              urgency: '1',
+              category: 'software',
+              subcategory: 'software',
+            },
+            comments: [
+              {
+                comment: 'first comment',
+                commentId: '456',
+              },
+            ],
+          },
+        },
+      };
+
+      testConnectorCreation(connectorWithParams, '.servicenow');
+      testExecuteValidation(connectorWithParams, '.servicenow');
+      testExecute(connectorWithParams, '.servicenow');
+    });
+
+    describe('ServiceNow SecOps', () => {
+      const connectorWithParams = {
+        config: {
+          apiUrl: 'www.servicenowisinkibanaactions.com',
+          isLegacy: false,
+        },
+        secrets: {
+          password: 'elastic',
+          username: 'changeme',
+        },
+        params: {
+          subAction: 'pushToService',
+          subActionParams: {
+            incident: {
+              externalId: null,
+              short_description: 'Incident title',
+              description: 'Incident description',
+              dest_ip: ['192.168.1.1', '192.168.1.3'],
+              source_ip: ['192.168.1.2', '192.168.1.4'],
+              malware_hash: ['5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9'],
+              malware_url: ['https://example.com'],
+              category: 'software',
+              subcategory: 'os',
+              correlation_id: 'alertID',
+              correlation_display: 'Alerting',
+              priority: '1',
+            },
+            comments: [
+              {
+                comment: 'first comment',
+                commentId: '456',
+              },
+            ],
+          },
+        },
+      };
+
+      testConnectorCreation(connectorWithParams, '.servicenow-sir');
+      testExecuteValidation(connectorWithParams, '.servicenow-sir');
+      testExecute(connectorWithParams, '.servicenow-sir');
     });
   });
 }
