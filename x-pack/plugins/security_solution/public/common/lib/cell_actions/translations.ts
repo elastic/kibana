@@ -8,49 +8,49 @@
 import { i18n } from '@kbn/i18n';
 
 export const VIEW_HOST_SUMMARY = i18n.translate(
-  'xpack.timelines.expandedValue.links.viewHostSummary',
+  'xpack.securitySolution.expandedValue.links.viewHostSummary',
   {
     defaultMessage: 'View host summary',
   }
 );
 
 export const EXPAND_IP_DETAILS = i18n.translate(
-  'xpack.timelines.expandedValue.links.expandIpDetails',
+  'xpack.securitySolution.expandedValue.links.expandIpDetails',
   {
     defaultMessage: 'Expand ip details',
   }
 );
 
 export const VIEW_RULE_DETAILS = i18n.translate(
-  'xpack.timelines.expandedValue.links.viewRuleDetails',
+  'xpack.securitySolution.expandedValue.links.viewRuleDetails',
   {
     defaultMessage: 'View rule details',
   }
 );
 
 export const VIEW_PORT_DETAILS = i18n.translate(
-  'xpack.timelines.expandedValue.links.viewPortDetails',
+  'xpack.securitySolution.expandedValue.links.viewPortDetails',
   {
     defaultMessage: 'View port details',
   }
 );
 
 export const VIEW_RULE_REFERENCE = i18n.translate(
-  'xpack.timelines.expandedValue.links.viewRuleReference',
+  'xpack.securitySolution.expandedValue.links.viewRuleReference',
   {
     defaultMessage: 'View rule reference',
   }
 );
 
 export const VIEW_EVENT_REFERENCE = i18n.translate(
-  'xpack.timelines.expandedValue.links.viewEventReference',
+  'xpack.securitySolution.expandedValue.links.viewEventReference',
   {
     defaultMessage: 'View event reference',
   }
 );
 
 export const VIEW_INDICATOR_REFERENCE = i18n.translate(
-  'xpack.timelines.expandedValue.links.viewIndicatorReference',
+  'xpack.securitySolution.expandedValue.links.viewIndicatorReference',
   {
     defaultMessage: 'View indicator reference',
   }
