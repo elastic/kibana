@@ -11,9 +11,68 @@
 
 export * from './constants';
 export * from './es_query';
-export * from '../../data_views/common';
 export * from './kbn_field_types';
 export * from './query';
 export * from './search';
 export * from './types';
 export * from './exports';
+export type {
+  IFieldType,
+  IIndexPatternFieldList,
+  FieldFormatMap,
+  RuntimeType,
+  RuntimeField,
+  IIndexPattern,
+  DataViewAttributes,
+  IndexPatternAttributes,
+  FieldAttrs,
+  FieldAttrSet,
+  OnNotification,
+  OnError,
+  UiSettingsCommon,
+  SavedObjectsClientCommonFindArgs,
+  SavedObjectsClientCommon,
+  GetFieldsOptions,
+  GetFieldsOptionsTimePattern,
+  IDataViewsApiClient,
+  IIndexPatternsApiClient,
+  SavedObject,
+  AggregationRestrictions,
+  TypeMeta,
+  FieldSpecConflictDescriptions,
+  FieldSpecExportFmt,
+  FieldSpec,
+  DataViewFieldMap,
+  IndexPatternFieldMap,
+  DataViewSpec,
+  IndexPatternSpec,
+  SourceFilter,
+  IndexPatternExpressionType,
+  IndexPatternLoadStartDependencies,
+  IndexPatternLoadExpressionFunctionDefinition,
+} from '../../data_views/common';
+export {
+  RUNTIME_FIELD_TYPES,
+  FLEET_ASSETS_TO_IGNORE,
+  META_FIELDS,
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+  INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  isFilterable,
+  isNestedField,
+  fieldList,
+  DataViewField,
+  IndexPatternField,
+  DataViewType,
+  IndexPatternType,
+  IndexPatternsService,
+  IndexPatternsContract,
+  DataViewsService,
+  DataViewsContract,
+  IndexPattern,
+  IndexPatternListItem,
+  DataView,
+  DataViewListItem,
+  DuplicateDataViewError,
+  DataViewSavedObjectConflictError,
+  getIndexPatternLoadMeta,
+} from '../../data_views/common';
