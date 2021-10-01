@@ -13,7 +13,7 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/xpack_cigroup.sh
     label: 'Default CI Group'
-    parallelism: 13
+    parallelism: 25
     agents:
       queue: ci-group-6
     depends_on: build
