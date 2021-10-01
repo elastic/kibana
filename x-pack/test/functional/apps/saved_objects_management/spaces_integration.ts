@@ -21,7 +21,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'spaceSelector',
     'settings',
   ]);
-  const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const spacesService = getService('spaces');
 
