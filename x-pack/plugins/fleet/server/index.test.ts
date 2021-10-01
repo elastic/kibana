@@ -6,8 +6,14 @@
  */
 
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import type { ConfigDeprecationContext } from '@kbn/config';
 
 import { config } from '.';
+
+const deprecationContext: ConfigDeprecationContext = {
+  version: '8.0.0',
+  branch: 'master',
+};
 
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   if (!config.deprecations) {
@@ -20,6 +26,7 @@ const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
     deprecations.map((deprecation) => ({
       deprecation,
       path: '',
+      context: deprecationContext,
     })),
     () =>
       ({ message }) =>

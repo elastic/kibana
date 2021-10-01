@@ -6,9 +6,14 @@
  */
 
 import { config } from './index';
-import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import { applyDeprecations, ConfigDeprecationContext, configDeprecationFactory } from '@kbn/config';
 
 const CONFIG_PATH = 'xpack.reporting';
+
+const deprecationContext: ConfigDeprecationContext = {
+  version: '8.0.0',
+  branch: 'master',
+};
 
 const applyReportingDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = config.deprecations!(configDeprecationFactory);
@@ -20,6 +25,7 @@ const applyReportingDeprecations = (settings: Record<string, any> = {}) => {
     deprecations.map((deprecation) => ({
       deprecation,
       path: CONFIG_PATH,
+      context: deprecationContext,
     })),
     () =>
       ({ message }) =>
