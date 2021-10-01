@@ -11,7 +11,7 @@ import { EffectScope, MaybeImmutable } from '../../../../../common/endpoint/type
 import { tagsToEffectScope } from '../../../../../common/endpoint/service/trusted_apps/mapping';
 import { isTrustedApp } from './is_trusted_app';
 
-export const toArtifactInfo = (_item: MaybeImmutable<AnyArtifact>): ArtifactInfo => {
+export const mapToArtifactInfo = (_item: MaybeImmutable<AnyArtifact>): ArtifactInfo => {
   const item = _item as AnyArtifact;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention

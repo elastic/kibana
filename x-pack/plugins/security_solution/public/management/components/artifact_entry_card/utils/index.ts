@@ -6,4 +6,4 @@
  */
 
 export * from './is_trusted_app';
-export * from './to_artifact_info';
+export * from './map_to_artifact_info';

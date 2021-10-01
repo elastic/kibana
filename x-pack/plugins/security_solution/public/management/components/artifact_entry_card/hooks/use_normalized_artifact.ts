@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { AnyArtifact, ArtifactInfo } from '../types';
-import { toArtifactInfo } from '../utils';
+import { mapToArtifactInfo } from '../utils';
 import { MaybeImmutable } from '../../../../../common/endpoint/types';
 
 /**
@@ -17,6 +17,6 @@ import { MaybeImmutable } from '../../../../../common/endpoint/types';
  */
 export const useNormalizedArtifact = (item: MaybeImmutable<AnyArtifact>): ArtifactInfo => {
   return useMemo(() => {
-    return toArtifactInfo(item);
+    return mapToArtifactInfo(item);
   }, [item]);
 };
