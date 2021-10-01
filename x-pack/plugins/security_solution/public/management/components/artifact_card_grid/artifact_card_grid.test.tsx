@@ -18,7 +18,7 @@ import { AnyArtifact } from '../artifact_entry_card';
 describe.each([
   ['trusted apps', getTrustedAppProviderMock],
   ['exceptions/event filters', getExceptionProviderMock],
-])('when using the ArtifactCardGrid component %s', (_, generateItem) => {
+])('when using the ArtifactCardGrid component with %s', (_, generateItem) => {
   let appTestContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let render: (
@@ -73,8 +73,8 @@ describe.each([
   it.each([
     ['header', 'testGrid-header'],
     ['expand/collapse placeholder', 'testGrid-header-expandCollapsePlaceHolder'],
-    ['name column', 'testGrid-header-layout-title'],
-    ['description column', 'testGrid-header-layout-description'],
+    ['name column', 'testGrid-header-layout-titleHolder'],
+    ['description column', 'testGrid-header-layout-descriptionHolder'],
     ['description column', 'testGrid-header-layout-cardActionsPlaceholder'],
   ])('should display the Grid Header - %s', (__, testSubjId) => {
     render();
@@ -82,10 +82,10 @@ describe.each([
     expect(renderResult.getByTestId(testSubjId)).not.toBeNull();
   });
 
-  it('should call onPageChange callback when paginating', async () => {
+  it('should call onPageChange callback when paginating', () => {
     items = Array.from({ length: 15 }, () => generateItem());
     render();
-    await act(async () => {
+    act(() => {
       fireEvent.click(renderResult.getByTestId('pagination-button-next'));
     });
 
@@ -100,9 +100,9 @@ describe.each([
   });
 
   describe('and when cards are expanded/collapsed', () => {
-    it('should call onExpandCollapse callback', async () => {
+    it('should call onExpandCollapse callback', () => {
       render();
-      await act(async () => {
+      act(() => {
         fireEvent.click(renderResult.getByTestId('card-0-header-expandCollapse'));
       });
 
