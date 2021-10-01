@@ -46,11 +46,6 @@ export const findRulesStatusesRoute = (router: SecuritySolutionPluginRouter) => 
       }
 
       const ids = body.ids;
-      const resolveSomeIds = await rulesClient.resolve({ id: ids[0] });
-      const getSomeIds = await rulesClient.get({ id: ids[0], includeLegacyId: true });
-
-      console.error('RESOLVE SOME IDS', JSON.stringify(resolveSomeIds, null, 2));
-      console.error('GET SOME IDS', JSON.stringify(getSomeIds, null, 2));
 
       try {
         const ruleStatusClient = context.securitySolution.getExecutionLogClient();
