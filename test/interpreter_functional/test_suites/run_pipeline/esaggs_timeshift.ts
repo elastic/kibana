@@ -37,7 +37,8 @@ export default function ({
 }: FtrProviderContext & { updateBaselines: boolean }) {
   let expectExpression: ExpectExpression;
 
-  describe('esaggs timeshift tests', () => {
+  // FLAKY https://github.com/elastic/kibana/issues/107028
+  describe.skip('esaggs timeshift tests', () => {
     before(() => {
       expectExpression = expectExpressionProvider({ getService, updateBaselines });
     });

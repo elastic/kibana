@@ -6,7 +6,6 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import { EuiFlexItem } from '@elastic/eui';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/common';
 import { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
@@ -17,6 +16,7 @@ import { useDataVisualizerKibana } from '../../../../kibana_context';
 import { JOB_FIELD_TYPES } from '../../../../../../common';
 import { ES_GEO_FIELD_TYPE, LayerDescriptor } from '../../../../../../../maps/common';
 import { EmbeddedMapComponent } from '../../embedded_map';
+import { ExpandedRowPanel } from '../../stats_table/components/field_data_expanded_row/expanded_row_panel';
 
 export const GeoPointContentWithMap: FC<{
   config: FieldVisConfig;
@@ -26,7 +26,7 @@ export const GeoPointContentWithMap: FC<{
   const { stats } = config;
   const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
   const {
-    services: { maps: mapsPlugin },
+    services: { maps: mapsPlugin, data },
   } = useDataVisualizerKibana();
 
   // Update the layer list  with updated geo points upon refresh
@@ -42,6 +42,7 @@ export const GeoPointContentWithMap: FC<{
           indexPatternId: indexPattern.id,
           geoFieldName: config.fieldName,
           geoFieldType: config.type as ES_GEO_FIELD_TYPE,
+          filters: data.query.filterManager.getFilters() ?? [],
           query: {
             query: combinedQuery.searchString,
             language: combinedQuery.searchQueryLanguage,
@@ -57,19 +58,16 @@ export const GeoPointContentWithMap: FC<{
     }
     updateIndexPatternSearchLayer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indexPattern, combinedQuery, config, mapsPlugin]);
+  }, [indexPattern, combinedQuery, config, mapsPlugin, data.query]);
 
   if (stats?.examples === undefined) return null;
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerIndexBasedMapContent'}>
       <DocumentStatsTable config={config} />
-
-      <EuiFlexItem style={{ maxWidth: '50%' }}>
-        <ExamplesList examples={stats.examples} />
-      </EuiFlexItem>
-      <EuiFlexItem className={'dataVisualizerMapWrapper'}>
+      <ExamplesList examples={stats.examples} />
+      <ExpandedRowPanel className={'dvPanel__wrapper dvMap__wrapper'} grow={true}>
         <EmbeddedMapComponent layerList={layerList} />
-      </EuiFlexItem>
+      </ExpandedRowPanel>
     </ExpandedRowContent>
   );
 };
