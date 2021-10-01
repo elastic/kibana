@@ -878,7 +878,6 @@ export function XYChart({
         <ThresholdAnnotations
           thresholdLayers={thresholdLayers}
           data={data}
-          colorAssignments={colorAssignments}
           syncColors={syncColors}
           paletteService={paletteService}
           formatters={{
