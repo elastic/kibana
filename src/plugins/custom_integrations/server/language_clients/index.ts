@@ -136,7 +136,7 @@ export const integrations: LanguageIntegration[] = [
     title: i18n.translate('customIntegrations.languageclients.JavaTitle', {
       defaultMessage: 'Elasticsearch Java Client',
     }),
-    euiIconName: 'logoElasticsearch', // don't have a java-icon just yet
+    icon: 'java.svg',
     description: i18n.translate('customIntegrations.languageclients.JavaDescription', {
       defaultMessage:
         'Start building your custom application on top of Elasticsearch with the official Java client.',
