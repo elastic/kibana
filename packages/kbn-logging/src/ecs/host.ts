@@ -8,13 +8,10 @@
 
 import { EcsGeo } from './geo';
 import { EcsOs } from './os';
-import { EcsNestedUser } from './user';
 
 interface NestedFields {
   geo?: EcsGeo;
   os?: EcsOs;
-  /** @deprecated */
-  user?: EcsNestedUser;
 }
 
 /**
