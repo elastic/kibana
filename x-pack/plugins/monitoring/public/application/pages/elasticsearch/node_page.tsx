@@ -7,8 +7,7 @@
 import React, { useContext, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { find } from 'lodash';
-import { ElasticsearchTemplate } from './elasticsearch_template';
+import { ItemTemplate } from './item_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../global_state_context';
 import { NodeReact } from '../../../components/elasticsearch';
@@ -38,9 +37,6 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
 
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
-  const cluster = find(clusters, {
-    cluster_uuid: clusterUuid,
-  });
   const [data, setData] = useState({} as any);
   const [nodesByIndicesData, setNodesByIndicesData] = useState([]);
 
@@ -92,11 +88,12 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
   }, [showSystemIndices, setShowSystemIndices]);
 
   return (
-    <ElasticsearchTemplate
+    <ItemTemplate
       title={title}
       pageTitle={pageTitle}
       getPageData={getPageData}
-      cluster={cluster}
+      id={node}
+      pageType="nodes"
     >
       <div data-test-subj="elasticsearchNodeListingPage">
         <SetupModeRenderer
@@ -119,6 +116,6 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
           )}
         />
       </div>
-    </ElasticsearchTemplate>
+    </ItemTemplate>
   );
 };
