@@ -41,7 +41,7 @@ import type {
   OutdatedDocumentsRefresh,
   CheckUnknownDocumentsState,
   CalculateExcludeFiltersState,
-} from './state';
+} from './types';
 import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
 

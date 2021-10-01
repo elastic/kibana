@@ -7,7 +7,7 @@
  */
 
 import { resetRetryState, delayRetryState } from './retry_state';
-import { State } from '../state';
+import { State } from '../types';
 
 const createState = (parts: Record<string, any>) => {
   return parts as State;

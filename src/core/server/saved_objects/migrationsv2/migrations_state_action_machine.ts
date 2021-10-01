@@ -13,7 +13,7 @@ import type { ElasticsearchClient } from '../../elasticsearch';
 import { getErrorMessage, getRequestDebugMeta } from '../../elasticsearch';
 import { Model, Next, stateActionMachine } from './state_action_machine';
 import { cleanup } from './migrations_state_machine_cleanup';
-import { ReindexSourceToTempTransform, ReindexSourceToTempIndexBulk, State } from './state';
+import { ReindexSourceToTempTransform, ReindexSourceToTempIndexBulk, State } from './types';
 import { SavedObjectsRawDoc } from '../serialization';
 
 interface StateTransitionLogMeta extends LogMeta {

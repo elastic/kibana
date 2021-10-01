@@ -40,7 +40,7 @@ import type {
   ReindexSourceToTempIndexBulk,
   CheckUnknownDocumentsState,
   CalculateExcludeFiltersState,
-} from '../state';
+} from '../types';
 import { SavedObjectsRawDoc } from '../../serialization';
 import { TransformErrorObjects, TransformSavedObjectDocumentError } from '../../migrations/core';
 import { AliasAction, RetryableEsClientError } from '../actions';

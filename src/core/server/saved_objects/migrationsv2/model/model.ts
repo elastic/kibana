@@ -11,7 +11,7 @@ import * as Option from 'fp-ts/lib/Option';
 
 import { estypes } from '@elastic/elasticsearch';
 import { AliasAction, isLeftTypeof } from '../actions';
-import { AllActionStates, MigrationLog, State } from '../state';
+import { AllActionStates, MigrationLog, State } from '../types';
 import type { ResponseType } from '../next';
 import { disableUnknownTypeMappingFields } from '../../migrations/core/migration_context';
 import {

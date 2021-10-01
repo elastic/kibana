@@ -11,7 +11,7 @@ import { IndexMapping } from '../mappings';
 import { SavedObjectsMigrationVersion } from '../../../types';
 import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { InitState } from './state';
+import { InitState } from './types';
 import { excludeUnusedTypesQuery } from '../migrations/core';
 
 /**

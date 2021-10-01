@@ -10,7 +10,7 @@ import { ElasticsearchClient } from '../../elasticsearch';
 import { IndexMapping } from '../mappings';
 import { Logger } from '../../logging';
 import type { SavedObjectsMigrationVersion } from '../types';
-import type { TransformRawDocs } from './state';
+import type { TransformRawDocs } from './types';
 import { MigrationResult } from '../migrations/core';
 import { next } from './next';
 import { model } from './model';

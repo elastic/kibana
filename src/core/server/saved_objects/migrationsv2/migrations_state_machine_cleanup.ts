@@ -8,7 +8,7 @@
 
 import type { ElasticsearchClient } from '../../elasticsearch';
 import * as Actions from './actions';
-import type { State } from './state';
+import type { State } from './types';
 
 export async function cleanup(client: ElasticsearchClient, state?: State) {
   if (!state) return;

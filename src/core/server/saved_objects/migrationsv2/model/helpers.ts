@@ -7,7 +7,7 @@
  */
 
 import { gt, valid } from 'semver';
-import { State } from '../state';
+import { State } from '../types';
 import { IndexMapping } from '../../mappings';
 import { FetchIndexResponse } from '../actions';
 
