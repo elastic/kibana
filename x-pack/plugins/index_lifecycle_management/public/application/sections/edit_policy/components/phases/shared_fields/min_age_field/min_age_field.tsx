@@ -25,43 +25,10 @@ import { PhaseWithTiming } from '../../../../../../../../common/types';
 import { getFieldValidityAndErrorMessage, useFormData } from '../../../../../../../shared_imports';
 import { UseField, useConfiguration, useGlobalFields } from '../../../../form';
 import { getPhaseMinAgeInMilliseconds } from '../../../../lib';
+import { timeUnits } from '../../../../constants';
 import { getUnitsAriaLabelForPhase, getTimingLabelForPhase } from './util';
 
 const i18nTexts = {
-  daysOptionLabel: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.daysOptionLabel', {
-    defaultMessage: 'days',
-  }),
-
-  hoursOptionLabel: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.hoursOptionLabel', {
-    defaultMessage: 'hours',
-  }),
-  minutesOptionLabel: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.minutesOptionLabel', {
-    defaultMessage: 'minutes',
-  }),
-
-  secondsOptionLabel: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.secondsOptionLabel', {
-    defaultMessage: 'seconds',
-  }),
-  millisecondsOptionLabel: i18n.translate(
-    'xpack.indexLifecycleMgmt.editPolicy.milliSecondsOptionLabel',
-    {
-      defaultMessage: 'milliseconds',
-    }
-  ),
-
-  microsecondsOptionLabel: i18n.translate(
-    'xpack.indexLifecycleMgmt.editPolicy.microSecondsOptionLabel',
-    {
-      defaultMessage: 'microseconds',
-    }
-  ),
-
-  nanosecondsOptionLabel: i18n.translate(
-    'xpack.indexLifecycleMgmt.editPolicy.nanoSecondsOptionLabel',
-    {
-      defaultMessage: 'nanoseconds',
-    }
-  ),
   rolloverToolTipDescription: i18n.translate(
     'xpack.indexLifecycleMgmt.editPolicy.minimumAge.rolloverToolTipDescription',
     {
@@ -180,36 +147,7 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                             append={selectAppendValue}
                             data-test-subj={`${phase}-selectedMinimumAgeUnits`}
                             aria-label={getUnitsAriaLabelForPhase(phase)}
-                            options={[
-                              {
-                                value: 'd',
-                                text: i18nTexts.daysOptionLabel,
-                              },
-                              {
-                                value: 'h',
-                                text: i18nTexts.hoursOptionLabel,
-                              },
-                              {
-                                value: 'm',
-                                text: i18nTexts.minutesOptionLabel,
-                              },
-                              {
-                                value: 's',
-                                text: i18nTexts.secondsOptionLabel,
-                              },
-                              {
-                                value: 'ms',
-                                text: i18nTexts.millisecondsOptionLabel,
-                              },
-                              {
-                                value: 'micros',
-                                text: i18nTexts.microsecondsOptionLabel,
-                              },
-                              {
-                                value: 'nanos',
-                                text: i18nTexts.nanosecondsOptionLabel,
-                              },
-                            ]}
+                            options={timeUnits}
                           />
                         );
                       }}
