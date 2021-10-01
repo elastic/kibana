@@ -339,7 +339,6 @@ export const getTimelineTemplate = async (templateTimelineId: string) => {
   return decodeSingleTimelineResponse(response);
 };
 
-// TODO: See if this is necessary
 export const getResolvedTimelineTemplate = async (templateTimelineId: string) => {
   const response = await KibanaServices.get().http.get<SingleTimelineResponse>(
     TIMELINE_RESOLVE_URL,

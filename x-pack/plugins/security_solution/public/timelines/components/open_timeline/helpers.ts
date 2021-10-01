@@ -60,7 +60,7 @@ import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
-import { getTimeline, resolveTimeline } from '../../containers/api';
+import { getTimeline } from '../../containers/api';
 import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
 import { NoteResult } from '../../../../common/types/timeline/note';
 
@@ -337,7 +337,7 @@ export const queryTimelineById = <TCache>({
   updateTimeline,
 }: QueryTimelineById<TCache>) => {
   updateIsLoading({ id: TimelineId.active, isLoading: true });
-  Promise.resolve(resolveTimeline(timelineId))
+  Promise.resolve(getTimeline(timelineId))
     .then((result) => {
       const timelineToOpen: TimelineResult = omitTypenameInTimeline(
         getOr({}, 'data.getOneTimeline', result)
