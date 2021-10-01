@@ -113,13 +113,6 @@ export function mergeConfigs(apmConfig: APMXPackConfig) {
     'xpack.apm.metricsIndices': apmConfig.metricsIndices,
     'xpack.apm.sourcemapIndices': apmConfig.sourcemapIndices,
     'xpack.apm.onboardingIndices': apmConfig.onboardingIndices,
-    // TODO: Remove all apm_oss options by 8.0
-    'apm_oss.transactionIndices': apmConfig.transactionIndices,
-    'apm_oss.spanIndices': apmConfig.spanIndices,
-    'apm_oss.errorIndices': apmConfig.errorIndices,
-    'apm_oss.metricsIndices': apmConfig.metricsIndices,
-    'apm_oss.sourcemapIndices': apmConfig.sourcemapIndices,
-    'apm_oss.onboardingIndices': apmConfig.onboardingIndices,
     /* eslint-enable @typescript-eslint/naming-convention */
     'xpack.apm.serviceMapEnabled': apmConfig.serviceMapEnabled,
     'xpack.apm.serviceMapFingerprintBucketSize':

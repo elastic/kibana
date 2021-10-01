@@ -13,10 +13,10 @@ import { mergeConfigs } from './index';
 describe('mergeConfigs', () => {
   it('merges the configs', () => {
     const apmConfig = {
-      transactionIndices: 'apm-*-transaction-*',
-      spanIndices: 'apm-*-span-*',
-      errorIndices: 'apm-*-error-*',
-      metricsIndices: 'apm-*-metric-*',
+      transactionIndices: 'traces-apm*,apm-*-transaction-*',
+      spanIndices: 'traces-apm*,apm-*-span-*',
+      errorIndices: 'logs-apm*,apm-*-error-*',
+      metricsIndices: 'metrics-apm*,apm-*-metric-*',
       ui: { enabled: false },
       enabled: true,
       metricsInterval: 2000,
@@ -28,10 +28,6 @@ describe('mergeConfigs', () => {
       'xpack.apm.metricsIndices': 'metrics-apm*,apm-*-metric-*',
       'xpack.apm.spanIndices': 'traces-apm*,apm-*-span-*',
       'xpack.apm.transactionIndices': 'traces-apm*,apm-*-transaction-*',
-      'apm_oss.errorIndices': 'logs-apm*,apm-*-error-*',
-      'apm_oss.metricsIndices': 'metrics-apm*,apm-*-metric-*',
-      'apm_oss.spanIndices': 'traces-apm*,apm-*-span-*',
-      'apm_oss.transactionIndices': 'traces-apm*,apm-*-transaction-*',
       'xpack.apm.metricsInterval': 2000,
       'xpack.apm.ui.enabled': false,
       'xpack.apm.agent.migrations.enabled': true,

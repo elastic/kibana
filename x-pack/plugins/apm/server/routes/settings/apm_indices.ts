@@ -52,13 +52,6 @@ const saveApmIndicesRoute = createApmServerRoute({
       'xpack.apm.spanIndices': t.string,
       'xpack.apm.transactionIndices': t.string,
       'xpack.apm.metricsIndices': t.string,
-      'apm_oss.sourcemapIndices': t.string,
-      'apm_oss.errorIndices': t.string,
-      'apm_oss.onboardingIndices': t.string,
-      'apm_oss.spanIndices': t.string,
-      'apm_oss.transactionIndices': t.string,
-      'apm_oss.metricsIndices': t.string,
-      /* eslint-enable @typescript-eslint/naming-convention */
     }),
   }),
   handler: async (resources) => {

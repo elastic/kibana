@@ -50,12 +50,6 @@ describe('get buckets', () => {
           'xpack.apm.spanIndices': 'apm-*',
           'xpack.apm.transactionIndices': 'apm-*',
           'xpack.apm.metricsIndices': 'apm-*',
-          'apm_oss.sourcemapIndices': 'apm-*',
-          'apm_oss.errorIndices': 'apm-*',
-          'apm_oss.onboardingIndices': 'apm-*',
-          'apm_oss.spanIndices': 'apm-*',
-          'apm_oss.transactionIndices': 'apm-*',
-          'apm_oss.metricsIndices': 'apm-*',
           /* eslint-enable @typescript-eslint/naming-convention */
           apmAgentConfigurationIndex: '.apm-agent-configuration',
           apmCustomLinkIndex: '.apm-custom-link',

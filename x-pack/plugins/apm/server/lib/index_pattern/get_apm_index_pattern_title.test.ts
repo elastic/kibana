@@ -17,10 +17,6 @@ describe('getApmIndexPatternTitle', () => {
       'xpack.apm.spanIndices': 'apm-*-span-*',
       'xpack.apm.errorIndices': 'apm-*-error-*',
       'xpack.apm.metricsIndices': 'apm-*-metrics-*',
-      'apm_oss.transactionIndices': 'apm-*-transaction-*',
-      'apm_oss.spanIndices': 'apm-*-span-*',
-      'apm_oss.errorIndices': 'apm-*-error-*',
-      'apm_oss.metricsIndices': 'apm-*-metrics-*',
     } as ApmIndicesConfig);
     expect(title).toBe(
       'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*'
@@ -33,10 +29,6 @@ describe('getApmIndexPatternTitle', () => {
       'xpack.apm.spanIndices': 'apm-*',
       'xpack.apm.errorIndices': 'apm-*',
       'xpack.apm.metricsIndices': 'apm-*',
-      'apm_oss.transactionIndices': 'apm-*',
-      'apm_oss.spanIndices': 'apm-*',
-      'apm_oss.errorIndices': 'apm-*',
-      'apm_oss.metricsIndices': 'apm-*',
     } as ApmIndicesConfig);
     expect(title).toBe('apm-*');
   });

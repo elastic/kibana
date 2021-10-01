@@ -99,7 +99,7 @@ export function registerErrorCountAlertType({
         });
 
         const searchParams = {
-          index: indices['apm_oss.errorIndices'],
+          index: indices['xpack.apm.errorIndices'],
           size: 0,
           body: {
             query: {

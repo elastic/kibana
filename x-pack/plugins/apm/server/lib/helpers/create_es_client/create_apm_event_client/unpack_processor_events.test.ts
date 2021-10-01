@@ -25,12 +25,6 @@ describe('unpackProcessorEvents', () => {
       'xpack.apm.spanIndices': 'my-apm-*-span-*',
       'xpack.apm.onboardingIndices': 'my-apm-*-onboarding-',
       'xpack.apm.sourcemapIndices': 'my-apm-*-sourcemap-*',
-      'apm_oss.transactionIndices': 'my-apm-*-transaction-*',
-      'apm_oss.metricsIndices': 'my-apm-*-metric-*',
-      'apm_oss.errorIndices': 'my-apm-*-error-*',
-      'apm_oss.spanIndices': 'my-apm-*-span-*',
-      'apm_oss.onboardingIndices': 'my-apm-*-onboarding-',
-      'apm_oss.sourcemapIndices': 'my-apm-*-sourcemap-*',
     } as ApmIndicesConfig;
 
     res = unpackProcessorEvents(request, indices);

@@ -18,8 +18,8 @@ export const createRuleTypeMocks = () => {
 
   const mockedConfig$ = of({
     /* eslint-disable @typescript-eslint/naming-convention */
-    'apm_oss.errorIndices': 'apm-*',
-    'apm_oss.transactionIndices': 'apm-*',
+    'xpack.apm.errorIndices': 'apm-*',
+    'xpack.apm.transactionIndices': 'apm-*',
     /* eslint-enable @typescript-eslint/naming-convention */
   } as APMConfig);
 

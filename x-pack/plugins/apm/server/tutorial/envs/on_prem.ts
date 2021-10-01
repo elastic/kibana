@@ -39,10 +39,10 @@ export function onPremInstructions({
 }: {
   apmConfig: Pick<
     APMConfig,
-    | 'apm_oss.errorIndices'
-    | 'apm_oss.transactionIndices'
-    | 'apm_oss.metricsIndices'
-    | 'apm_oss.onboardingIndices'
+    | 'xpack.apm.errorIndices'
+    | 'xpack.apm.transactionIndices'
+    | 'xpack.apm.metricsIndices'
+    | 'xpack.apm.onboardingIndices'
   >;
   isFleetPluginEnabled: boolean;
 }): InstructionsSchema {
@@ -144,7 +144,7 @@ export function onPremInstructions({
             }
           ),
           esHitsCheck: {
-            index: apmConfig['apm_oss.onboardingIndices'],
+            index: apmConfig['xpack.apm.onboardingIndices'],
             query: {
               bool: {
                 filter: [
@@ -237,9 +237,9 @@ export function onPremInstructions({
           ),
           esHitsCheck: {
             index: [
-              apmConfig['apm_oss.errorIndices'],
-              apmConfig['apm_oss.transactionIndices'],
-              apmConfig['apm_oss.metricsIndices'],
+              apmConfig['xpack.apm.errorIndices'],
+              apmConfig['xpack.apm.transactionIndices'],
+              apmConfig['xpack.apm.metricsIndices'],
             ],
             query: {
               bool: {

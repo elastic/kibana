@@ -20,8 +20,6 @@ export { ApmIndicesConfig };
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'get'>;
 
-export type ApmIndicesName = keyof ApmIndicesConfig;
-
 async function getApmIndicesSavedObject(
   savedObjectsClient: ISavedObjectsClient
 ) {
@@ -43,12 +41,6 @@ export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {
     'xpack.apm.spanIndices': config['xpack.apm.spanIndices'],
     'xpack.apm.transactionIndices': config['xpack.apm.transactionIndices'],
     'xpack.apm.metricsIndices': config['xpack.apm.metricsIndices'],
-    'apm_oss.sourcemapIndices': config['apm_oss.sourcemapIndices'],
-    'apm_oss.errorIndices': config['apm_oss.errorIndices'],
-    'apm_oss.onboardingIndices': config['apm_oss.onboardingIndices'],
-    'apm_oss.spanIndices': config['apm_oss.spanIndices'],
-    'apm_oss.transactionIndices': config['apm_oss.transactionIndices'],
-    'apm_oss.metricsIndices': config['apm_oss.metricsIndices'],
     /* eslint-enable @typescript-eslint/naming-convention */
     // system indices, not configurable
     apmAgentConfigurationIndex: '.apm-agent-configuration',
@@ -68,38 +60,19 @@ export async function getApmIndices({
       savedObjectsClient
     );
     const apmIndicesConfig = getApmIndicesConfig(config);
-    return mergeApmIndicesConfigs(apmIndicesConfig, apmIndicesSavedObject);
+    return { ...apmIndicesConfig, ...apmIndicesSavedObject };
   } catch (error) {
     return getApmIndicesConfig(config);
   }
 }
 
-function mergeApmIndicesConfigs(
-  apmIndicesConfig: ApmIndicesConfig,
-  apmIndicesSavedObject: PromiseReturnType<typeof getApmIndicesSavedObject>
-) {
-  return APM_UI_INDICES.reduce(
-    (mergedConfigs, savedIndexConfig) => {
-      const savedApmIndex =
-        apmIndicesSavedObject[savedIndexConfig[0]] ||
-        apmIndicesSavedObject[savedIndexConfig[1]]; // TODO remove deprecated apm_oss support in 8.0
-      return {
-        ...mergedConfigs,
-        [savedIndexConfig[0]]: savedApmIndex,
-        [savedIndexConfig[1]]: savedApmIndex,
-      };
-    },
-    { ...apmIndicesConfig }
-  );
-}
-
-const APM_UI_INDICES: Array<[ApmIndicesName, ApmIndicesName]> = [
-  ['xpack.apm.sourcemapIndices', 'apm_oss.sourcemapIndices'],
-  ['xpack.apm.errorIndices', 'apm_oss.errorIndices'],
-  ['xpack.apm.onboardingIndices', 'apm_oss.onboardingIndices'],
-  ['xpack.apm.spanIndices', 'apm_oss.spanIndices'],
-  ['xpack.apm.transactionIndices', 'apm_oss.transactionIndices'],
-  ['xpack.apm.metricsIndices', 'apm_oss.metricsIndices'],
+const APM_UI_INDICES: Array<keyof ApmIndicesConfig> = [
+  'xpack.apm.sourcemapIndices',
+  'xpack.apm.errorIndices',
+  'xpack.apm.onboardingIndices',
+  'xpack.apm.spanIndices',
+  'xpack.apm.transactionIndices',
+  'xpack.apm.metricsIndices',
 ];
 
 export async function getApmIndexSettings({
@@ -120,13 +93,9 @@ export async function getApmIndexSettings({
   }
   const apmIndicesConfig = getApmIndicesConfig(config);
 
-  return APM_UI_INDICES.map(
-    ([configurationName, deprecatedConfigurationName]) => ({
-      configurationName,
-      defaultValue: apmIndicesConfig[configurationName], // value defined in kibana[.dev].yml
-      savedValue:
-        apmIndicesSavedObject[configurationName] ||
-        apmIndicesSavedObject[deprecatedConfigurationName], // value saved via Saved Objects service
-    })
-  );
+  return APM_UI_INDICES.map((configurationName) => ({
+    configurationName,
+    defaultValue: apmIndicesConfig[configurationName], // value defined in kibana[.dev].yml
+    savedValue: apmIndicesSavedObject[configurationName], // value saved via Saved Objects service
+  }));
 }

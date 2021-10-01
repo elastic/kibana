@@ -119,8 +119,8 @@ export function registerTransactionDurationAlertType({
         SearchAggregatedTransactionSetting.never;
 
       const index = searchAggregatedTransactions
-        ? indices['apm_oss.metricsIndices']
-        : indices['apm_oss.transactionIndices'];
+        ? indices['xpack.apm.metricsIndices']
+        : indices['xpack.apm.transactionIndices'];
 
       const field = getTransactionDurationFieldForAggregatedTransactions(
         searchAggregatedTransactions

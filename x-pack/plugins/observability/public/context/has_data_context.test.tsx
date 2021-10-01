@@ -26,7 +26,7 @@ const relativeEnd = '2020-10-08T07:00:00.000Z';
 
 const sampleAPMIndices = {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  'apm_oss.transactionIndices': 'apm-*',
+  'xpack.apm.transactionIndices': 'apm-*',
 } as ApmIndicesConfig;
 
 function wrapper({ children }: { children: React.ReactElement }) {

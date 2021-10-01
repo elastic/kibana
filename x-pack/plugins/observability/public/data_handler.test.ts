@@ -11,7 +11,7 @@ import { ApmIndicesConfig } from '../common/typings';
 
 const sampleAPMIndices = {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  'apm_oss.transactionIndices': 'apm-*',
+  'xpack.apm.transactionIndices': 'apm-*',
 } as ApmIndicesConfig;
 
 const params = {

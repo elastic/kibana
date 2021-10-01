@@ -20,12 +20,6 @@ const mockIndices = {
   'xpack.apm.spanIndices': 'myIndex',
   'xpack.apm.transactionIndices': 'myIndex',
   'xpack.apm.metricsIndices': 'myIndex',
-  'apm_oss.sourcemapIndices': 'myIndex',
-  'apm_oss.errorIndices': 'myIndex',
-  'apm_oss.onboardingIndices': 'myIndex',
-  'apm_oss.spanIndices': 'myIndex',
-  'apm_oss.transactionIndices': 'myIndex',
-  'apm_oss.metricsIndices': 'myIndex',
   /* eslint-enable @typescript-eslint/naming-convention */
   apmAgentConfigurationIndex: 'myIndex',
   apmCustomLinkIndex: 'myIndex',

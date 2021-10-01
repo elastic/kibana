@@ -65,7 +65,7 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
             case 'mobile':
               const resultApm = await getDataHandler('apm')?.hasData();
               hasDataT = Boolean(resultApm?.hasData);
-              indices = resultApm?.indices['apm_oss.transactionIndices'];
+              indices = resultApm?.indices['xpack.apm.transactionIndices'];
               break;
           }
           setHasAppData((prevState) => ({ ...prevState, [dataType]: hasDataT }));

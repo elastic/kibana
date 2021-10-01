@@ -120,12 +120,12 @@ interface MockSetup {
   uiFilters: UxUIFilters;
   indices: {
     /* eslint-disable @typescript-eslint/naming-convention */
-    'apm_oss.sourcemapIndices': string;
-    'apm_oss.errorIndices': string;
-    'apm_oss.onboardingIndices': string;
-    'apm_oss.spanIndices': string;
-    'apm_oss.transactionIndices': string;
-    'apm_oss.metricsIndices': string;
+    'xpack.apm.sourcemapIndices': string;
+    'xpack.apm.errorIndices': string;
+    'xpack.apm.onboardingIndices': string;
+    'xpack.apm.spanIndices': string;
+    'xpack.apm.transactionIndices': string;
+    'xpack.apm.metricsIndices': string;
     /* eslint-enable @typescript-eslint/naming-convention */
     apmAgentConfigurationIndex: string;
     apmCustomLinkIndex: string;
@@ -179,12 +179,12 @@ export async function inspectSearchParams(
     uiFilters: {},
     indices: {
       /* eslint-disable @typescript-eslint/naming-convention */
-      'apm_oss.sourcemapIndices': 'myIndex',
-      'apm_oss.errorIndices': 'myIndex',
-      'apm_oss.onboardingIndices': 'myIndex',
-      'apm_oss.spanIndices': 'myIndex',
-      'apm_oss.transactionIndices': 'myIndex',
-      'apm_oss.metricsIndices': 'myIndex',
+      'xpack.apm.sourcemapIndices': 'myIndex',
+      'xpack.apm.errorIndices': 'myIndex',
+      'xpack.apm.onboardingIndices': 'myIndex',
+      'xpack.apm.spanIndices': 'myIndex',
+      'xpack.apm.transactionIndices': 'myIndex',
+      'xpack.apm.metricsIndices': 'myIndex',
       /* eslint-enable @typescript-eslint/naming-convention */
       apmAgentConfigurationIndex: 'myIndex',
       apmCustomLinkIndex: 'myIndex',

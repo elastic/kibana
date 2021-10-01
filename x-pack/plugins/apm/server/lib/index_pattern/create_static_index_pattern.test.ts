@@ -29,10 +29,6 @@ const setup = {
     'xpack.apm.spanIndices': 'apm-*-span-*',
     'xpack.apm.errorIndices': 'apm-*-error-*',
     'xpack.apm.metricsIndices': 'apm-*-metrics-*',
-    'apm_oss.transactionIndices': 'apm-*-transaction-*',
-    'apm_oss.spanIndices': 'apm-*-span-*',
-    'apm_oss.errorIndices': 'apm-*-error-*',
-    'apm_oss.metricsIndices': 'apm-*-metrics-*',
   },
 } as unknown as Setup;
 
