@@ -44,7 +44,7 @@ Rx.merge(
   .subscribe(exitSignal$);
 
 // timeout where the server is allowed to exit gracefully
-const GRACEFUL_TIMEOUT = 5000;
+const GRACEFUL_TIMEOUT = 30000;
 
 export type SomeCliArgs = Pick<
   CliArgs,
@@ -77,8 +77,11 @@ export interface CliDevModeOptions {
   cache: boolean;
 }
 
-const firstAllTrue = (...sources: Array<Rx.Observable<boolean>>) =>
-  Rx.combineLatest(sources).pipe(
+const getValue$ = <T>(source: Rx.BehaviorSubject<T>): Rx.Observable<T> =>
+  source.isStopped ? Rx.of(source.getValue()) : source;
+
+const firstAllTrue = (...sources: Array<Rx.BehaviorSubject<boolean>>) =>
+  Rx.combineLatest(sources.map(getValue$)).pipe(
     filter((values) => values.every((v) => v === true)),
     take(1),
     mapTo(undefined)
@@ -198,11 +201,24 @@ export class CliDevMode {
                 ? Rx.EMPTY
                 : Rx.timer(1000).pipe(
                     tap(() => {
-                      this.log.warn(
-                        'please hold',
-                        !optimizerReady$.getValue()
-                          ? 'optimizer is still bundling so requests have been paused'
-                          : 'server is not ready so requests have been paused'
+                      if (!optimizerReady$.getValue()) {
+                        this.log.warn(
+                          'please hold',
+                          'optimizer is still bundling so requests have been paused'
+                        );
+                        return;
+                      }
+
+                      if (!serverReady$.getValue()) {
+                        this.log.warn(
+                          'please hold',
+                          'Kibana server is not ready so requests have been paused'
+                        );
+                        return;
+                      }
+
+                      throw new Error(
+                        'user is waiting for over 1 second and neither serverReady$ or optimizerReady$ is false'
                       );
                     })
                   )

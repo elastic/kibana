@@ -89,7 +89,8 @@ export const mockRefOrValEmbeddable = <
     mockedByValueInput: ValTypeInput;
   }
 ): OriginalEmbeddableType & ReferenceOrValueEmbeddable => {
-  const newEmbeddable: ReferenceOrValueEmbeddable = (embeddable as unknown) as ReferenceOrValueEmbeddable;
+  const newEmbeddable: ReferenceOrValueEmbeddable =
+    embeddable as unknown as ReferenceOrValueEmbeddable;
   newEmbeddable.inputIsRefType = (input: unknown): input is RefTypeInput =>
     !!(input as RefTypeInput).savedObjectId;
   newEmbeddable.getInputAsRefType = () => Promise.resolve(options.mockedByReferenceInput);
@@ -113,7 +114,7 @@ const createStartContract = (): Start => {
     telemetry: jest.fn(),
     extract: jest.fn(),
     inject: jest.fn(),
-    migrate: jest.fn(),
+    getAllMigrations: jest.fn(),
     EmbeddablePanel: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
     getAttributeService: jest.fn(),

@@ -13,21 +13,25 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../..
 import { PluginSetupContract as ActionsPluginSetupContract } from '../../../../../../../plugins/actions/server/plugin';
 import { ActionType } from '../../../../../../../plugins/actions/server';
 import { initPlugin as initPagerduty } from './pagerduty_simulation';
+import { initPlugin as initSwimlane } from './swimlane_simulation';
 import { initPlugin as initServiceNow } from './servicenow_simulation';
 import { initPlugin as initJira } from './jira_simulation';
 import { initPlugin as initResilient } from './resilient_simulation';
 import { initPlugin as initSlack } from './slack_simulation';
 import { initPlugin as initWebhook } from './webhook_simulation';
+import { initPlugin as initMSExchange } from './ms_exchage_server_simulation';
 
 export const NAME = 'actions-FTS-external-service-simulators';
 
 export enum ExternalServiceSimulator {
   PAGERDUTY = 'pagerduty',
+  SWIMLANE = 'swimlane',
   SERVICENOW = 'servicenow',
   SLACK = 'slack',
   JIRA = 'jira',
   RESILIENT = 'resilient',
   WEBHOOK = 'webhook',
+  MS_EXCHANGE = 'exchange',
 }
 
 export function getExternalServiceSimulatorPath(service: ExternalServiceSimulator): string {
@@ -49,6 +53,8 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.JIRA}/rest/api/2/issue`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.JIRA}/rest/api/2/createmeta`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.RESILIENT}/rest/orgs/201/incidents`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.MS_EXCHANGE}/users/test@/sendMail`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.MS_EXCHANGE}/1234567/oauth2/v2.0/token`);
   return allPaths;
 }
 
@@ -64,6 +70,10 @@ export async function getHttpsWebhookServer(): Promise<https.Server> {
 
 export async function getSlackServer(): Promise<http.Server> {
   return await initSlack();
+}
+
+export async function getSwimlaneServer(): Promise<http.Server> {
+  return await initSwimlane();
 }
 
 interface FixtureSetupDeps {
@@ -120,6 +130,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     initServiceNow(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW));
     initJira(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA));
     initResilient(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT));
+    initMSExchange(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.MS_EXCHANGE));
   }
 
   public start() {}

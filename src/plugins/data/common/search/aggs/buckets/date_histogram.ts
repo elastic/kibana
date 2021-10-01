@@ -11,14 +11,14 @@ import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 
 import { KBN_FIELD_TYPES, TimeRange, TimeRangeBounds, UI_SETTINGS } from '../../../../common';
-import { IFieldType } from '../../../index_patterns';
+import { IFieldType } from '../../..';
 
+import { ExtendedBounds, extendedBoundsToAst, timerangeToAst } from '../../expressions';
 import { intervalOptions, autoInterval, isAutoInterval } from './_interval_options';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { aggDateHistogramFnName } from './date_histogram_fn';
-import { ExtendedBounds } from './lib/extended_bounds';
 import { TimeBuckets } from './lib/time_buckets';
 
 import { writeParams } from '../agg_params';
@@ -135,6 +135,17 @@ export const getDateHistogramBucketAgg = ({
         },
       };
     },
+    getShiftedKey(agg, key, timeShift) {
+      return moment(key).add(timeShift).valueOf();
+    },
+    splitForTimeShift(agg, aggs) {
+      return aggs.hasTimeShifts() && Boolean(aggs.timeFields?.includes(agg.fieldName()));
+    },
+    getTimeShiftInterval(agg) {
+      const { useNormalizedEsInterval } = agg.params;
+      const interval = agg.buckets.getInterval(useNormalizedEsInterval);
+      return interval;
+    },
     params: [
       {
         name: 'field',
@@ -153,6 +164,7 @@ export const getDateHistogramBucketAgg = ({
         name: 'timeRange',
         default: null,
         write: noop,
+        toExpressionAst: timerangeToAst,
       },
       {
         name: 'useNormalizedEsInterval',
@@ -292,6 +304,7 @@ export const getDateHistogramBucketAgg = ({
             return;
           }
         },
+        toExpressionAst: extendedBoundsToAst,
       },
     ],
   });

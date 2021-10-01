@@ -8,14 +8,17 @@
 import { isEmpty } from 'lodash/fp';
 import { AuthenticatedUser } from '../../../../../../security/common/model';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
-import { SavedTimeline, TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
+import {
+  TimelineType,
+  TimelineStatus,
+  SavedTimelineWithSavedObjectId,
+} from '../../../../../common/types/timeline';
 
 export const pickSavedTimeline = (
   timelineId: string | null,
-  savedTimeline: SavedTimeline,
+  savedTimeline: SavedTimelineWithSavedObjectId,
   userInfo: AuthenticatedUser | null
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): any => {
+): SavedTimelineWithSavedObjectId => {
   const dateNow = new Date().valueOf();
 
   if (timelineId == null) {

@@ -7,7 +7,7 @@
 
 import { useEffect, useState, Dispatch } from 'react';
 
-import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { CreateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 
 import { createRule } from './api';
@@ -25,7 +25,7 @@ export const useCreateRule = (): ReturnCreateRule => {
   const [rule, setRule] = useState<CreateRulesSchema | null>(null);
   const [ruleId, setRuleId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [, dispatchToaster] = useStateToaster();
+  const { addError } = useAppToasts();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -44,7 +44,7 @@ export const useCreateRule = (): ReturnCreateRule => {
           }
         } catch (error) {
           if (isSubscribed) {
-            errorToToaster({ title: i18n.RULE_ADD_FAILURE, error, dispatchToaster });
+            addError(error, { title: i18n.RULE_ADD_FAILURE });
           }
         }
         if (isSubscribed) {
@@ -58,7 +58,7 @@ export const useCreateRule = (): ReturnCreateRule => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rule, dispatchToaster]);
+  }, [rule, addError]);
 
   return [{ isLoading, ruleId }, setRule];
 };

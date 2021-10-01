@@ -97,4 +97,34 @@ describe('WebhookActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
   });
+
+  test('should display a message for missing secrets after import', () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.webhook',
+      isPreconfigured: false,
+      isMissingSecrets: true,
+      name: 'webhook',
+      config: {
+        method: 'PUT',
+        url: 'http:\\test',
+        headers: { 'content-type': 'text' },
+        hasAuth: true,
+      },
+    } as WebhookActionConnector;
+    const wrapper = mountWithIntl(
+      <WebhookActionConnectorFields
+        action={actionConnector}
+        errors={{ url: [], method: [], user: [], password: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
+  });
 });

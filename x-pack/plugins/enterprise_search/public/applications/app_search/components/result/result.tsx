@@ -15,7 +15,7 @@ import { EuiPanel, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaLogic } from '../../../shared/kibana';
-import { Schema } from '../../../shared/types';
+import { Schema } from '../../../shared/schema/types';
 
 import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../routes';
 import { generateEncodedPath } from '../../utils/encode_path_params';
@@ -28,6 +28,7 @@ interface Props {
   result: ResultType;
   isMetaEngine: boolean;
   showScore?: boolean;
+  resultPosition?: number;
   shouldLinkToDetailPage?: boolean;
   schemaForTypeHighlights?: Schema;
   actions?: ResultAction[];
@@ -44,6 +45,7 @@ export const Result: React.FC<Props> = ({
   schemaForTypeHighlights,
   actions = [],
   dragHandleProps,
+  resultPosition,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -100,6 +102,7 @@ export const Result: React.FC<Props> = ({
           isMetaEngine={isMetaEngine}
           documentLink={documentLink}
           actions={actions}
+          resultPosition={resultPosition}
         />
         {resultFields
           .slice(0, isOpen ? resultFields.length : RESULT_CUTOFF)

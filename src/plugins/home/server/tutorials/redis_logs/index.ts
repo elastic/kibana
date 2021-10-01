@@ -65,5 +65,6 @@ Note that the `slowlog` fileset is experimental. \
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['datastore', 'message_queue'],
   };
 }

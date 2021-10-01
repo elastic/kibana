@@ -13,6 +13,7 @@ import {
 } from '../../../../plugins/security_solution/common/constants';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { SIGNALS_TEMPLATE_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
+import { Signal } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -21,7 +22,7 @@ import {
   getIndexNameFromLoad,
   waitForIndexToPopulate,
 } from '../../utils';
-import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 interface CreateResponse {
   index: string;
@@ -47,16 +48,16 @@ export default ({ getService }: FtrProviderContext): void => {
       await createSignalsIndex(supertest);
 
       legacySignalsIndexName = getIndexNameFromLoad(
-        await esArchiver.load('signals/legacy_signals_index')
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/legacy_signals_index')
       );
       outdatedSignalsIndexName = getIndexNameFromLoad(
-        await esArchiver.load('signals/outdated_signals_index')
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
     });
 
     afterEach(async () => {
-      await esArchiver.unload('signals/outdated_signals_index');
-      await esArchiver.unload('signals/legacy_signals_index');
+      await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
+      await esArchiver.unload('x-pack/test/functional/es_archives/signals/legacy_signals_index');
       await deleteMigrations({
         kbnClient,
         ids: createdMigrations.filter((m) => m?.migration_id).map((m) => m.migration_id),
@@ -96,12 +97,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const [{ migration_index: newIndex }] = createResponses;
       await waitForIndexToPopulate(es, newIndex);
-      const { body: migrationResults } = await es.search({ index: newIndex });
+      const { body: migrationResults } = await es.search<{ signal: Signal }>({ index: newIndex });
 
       expect(migrationResults.hits.hits).length(1);
-      // @ts-expect-error _source has unknown type
-      const migratedSignal = migrationResults.hits.hits[0]._source.signal;
-      expect(migratedSignal._meta.version).to.equal(SIGNALS_TEMPLATE_VERSION);
+      const migratedSignal = migrationResults.hits.hits[0]._source?.signal;
+      expect(migratedSignal?._meta?.version).to.equal(SIGNALS_TEMPLATE_VERSION);
     });
 
     it('specifying the signals alias itself is a bad request', async () => {

@@ -19,7 +19,7 @@ import {
   PushToServiceApiParamsSIR as ServiceNowSIRPushToServiceApiParams,
   ServiceNowITSMIncident,
 } from '../../../../actions/server/builtin_action_types/servicenow/types';
-import { CaseResponse, ConnectorMappingsAttributes } from '../../../common/api';
+import { CaseResponse, ConnectorMappingsAttributes } from '../../../common';
 
 export type Incident = JiraIncident | ResilientIncident | ServiceNowITSMIncident;
 export type PushToServiceApiParams =

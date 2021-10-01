@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { EuiTitle } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
-import { EuiFormRow } from '@elastic/eui';
-import { EuiRange } from '@elastic/eui';
-import { EuiDescribedFormGroup } from '@elastic/eui';
-import { EuiForm } from '@elastic/eui';
+import {
+  EuiDescribedFormGroup,
+  EuiForm,
+  EuiFormRow,
+  EuiRange,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
-import { InputRangeFieldProps } from '../../../components/source_configuration/input_fields';
+import { InputRangeFieldProps } from './input_fields';
 
 interface MLConfigurationPanelProps {
   isLoading: boolean;

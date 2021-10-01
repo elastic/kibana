@@ -131,6 +131,13 @@ password: {{password}}
 hidden_password: {{password}}
 {{/if}}
       `;
+    const streamTemplateWithString = `
+{{#if (contains ".pcap" file)}}
+pcap: true
+{{else}}
+pcap: false
+{{/if}}
+      `;
 
     it('should support when a value is not contained in the array', () => {
       const vars = {
@@ -166,6 +173,28 @@ hidden_password: {{password}}
         processors: [{ add_locale: null }],
         password: '',
         tags: ['foo', 'bar'],
+      });
+    });
+
+    it('should support strings', () => {
+      const vars = {
+        file: { value: 'foo.pcap' },
+      };
+
+      const output = compileTemplate(vars, streamTemplateWithString);
+      expect(output).toEqual({
+        pcap: true,
+      });
+    });
+
+    it('should support strings with no match', () => {
+      const vars = {
+        file: { value: 'file' },
+      };
+
+      const output = compileTemplate(vars, streamTemplateWithString);
+      expect(output).toEqual({
+        pcap: false,
       });
     });
   });

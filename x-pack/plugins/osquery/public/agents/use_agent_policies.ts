@@ -5,34 +5,35 @@
  * 2.0.
  */
 
+import { mapKeys } from 'lodash';
 import { useQueries, UseQueryResult } from 'react-query';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../common/lib/kibana';
-import {
-  AgentPolicy,
-  agentPolicyRouteService,
-  GetOneAgentPolicyResponse,
-} from '../../../fleet/common';
+import { GetOneAgentPolicyResponse } from '../../../fleet/common';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export const useAgentPolicies = (policyIds: string[] = []) => {
   const { http } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   const agentResponse = useQueries(
     policyIds.map((policyId) => ({
       queryKey: ['agentPolicy', policyId],
-      queryFn: () => http.get(agentPolicyRouteService.getInfoPath(policyId)),
+      queryFn: () => http.get(`/internal/osquery/fleet_wrapper/agent_policies/${policyId}`),
       enabled: policyIds.length > 0,
+      onSuccess: () => setErrorToast(),
+      onError: (error) =>
+        setErrorToast(error as Error, {
+          title: i18n.translate('xpack.osquery.action_policy_details.fetchError', {
+            defaultMessage: 'Error while fetching policy details',
+          }),
+        }),
     }))
   ) as Array<UseQueryResult<GetOneAgentPolicyResponse>>;
 
   const agentPoliciesLoading = agentResponse.some((p) => p.isLoading);
   const agentPolicies = agentResponse.map((p) => p.data?.item);
-  const agentPolicyById = agentPolicies.reduce((acc, p) => {
-    if (!p) {
-      return acc;
-    }
-    acc[p.id] = p;
-    return acc;
-  }, {} as { [key: string]: AgentPolicy });
+  const agentPolicyById = mapKeys(agentPolicies, 'id');
 
   return { agentPoliciesLoading, agentPolicies, agentPolicyById };
 };

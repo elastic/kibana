@@ -31,13 +31,8 @@ export function extractImportReferences(
   log: ToolingLog
 ): TextWithLinks {
   const texts: TextWithLinks = [];
-  let pos = 0;
   let textSegment: string | undefined = text;
-  const max = 5;
   while (textSegment) {
-    pos++;
-    if (pos > max) break;
-
     const ref = extractImportRef(textSegment);
     if (ref) {
       const { name, path, index, length } = ref;
@@ -61,14 +56,13 @@ export function extractImportReferences(
         }
       } else {
         const section = getApiSectionId({
-          pluginName: plugin.manifest.id,
           scope: getScopeFromPath(path, plugin, log),
-          apiName: name,
+          id: name,
         });
         texts.push({
           pluginId: plugin.manifest.id,
           scope: getScopeFromPath(path, plugin, log),
-          docId: getPluginApiDocId(plugin.manifest.id, log, {
+          docId: getPluginApiDocId(plugin.manifest.id, {
             serviceFolders: plugin.manifest.serviceFolders,
             apiPath: path,
             directory: plugin.directory,

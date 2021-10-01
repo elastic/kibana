@@ -30,7 +30,7 @@ async function runBazelCommandWithRunner(
   };
 
   if (offline) {
-    bazelArgs.push('--config=offline');
+    bazelArgs = [...bazelArgs, '--config=offline'];
   }
 
   const bazelProc = spawn(bazelCommandRunner, bazelArgs, bazelOpts);
@@ -71,5 +71,6 @@ export async function runIBazel(
   offline: boolean = false,
   runOpts: execa.Options = {}
 ) {
-  await runBazelCommandWithRunner('ibazel', bazelArgs, offline, runOpts);
+  const extendedEnv = { IBAZEL_USE_LEGACY_WATCHER: '0', ...runOpts?.env };
+  await runBazelCommandWithRunner('ibazel', bazelArgs, offline, { ...runOpts, env: extendedEnv });
 }

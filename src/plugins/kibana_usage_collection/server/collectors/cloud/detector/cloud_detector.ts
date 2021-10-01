@@ -37,9 +37,9 @@ export class CloudDetector {
   /**
    * Get any cloud details that we have detected.
    */
-  getCloudDetails() {
+  public getCloudDetails = () => {
     return this.cloudDetails;
-  }
+  };
 
   /**
    * Asynchronously detect the cloud service.
@@ -48,9 +48,9 @@ export class CloudDetector {
    * caller to trigger the lookup and then simply use it whenever we
    * determine it.
    */
-  async detectCloudService() {
+  public detectCloudService = async () => {
     this.cloudDetails = await this.getCloudService();
-  }
+  };
 
   /**
    * Check every cloud service until the first one reports success from detection.

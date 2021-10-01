@@ -128,3 +128,38 @@ describe('ui_settings 7.13.0 migrations', () => {
     });
   });
 });
+
+describe('ui_settings 8.0.0 migrations', () => {
+  const migration = migrations['8.0.0'];
+
+  test('returns doc on empty object', () => {
+    expect(migration({} as SavedObjectUnsanitizedDoc)).toEqual({
+      references: [],
+    });
+  });
+  test('removes ui_settings from deleted region_map and tile_map plugins', () => {
+    const doc = {
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'visualization:regionmap:showWarnings': false,
+        'visualization:tileMap:WMSdefaults': '{}',
+        'visualization:tileMap:maxPrecision': 10,
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    };
+    expect(migration(doc)).toEqual({
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    });
+  });
+});

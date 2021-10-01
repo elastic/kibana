@@ -5,19 +5,14 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import type Boom from '@hapi/boom';
 import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'src/core/server';
 
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 
-import { defaultPackages } from '../../../../common';
-import type {
-  BulkInstallPackageInfo,
-  InstallablePackage,
-  InstallSource,
-  DefaultPackagesInstallationError,
-} from '../../../../common';
+import type { BulkInstallPackageInfo, InstallablePackage, InstallSource } from '../../../../common';
 import {
   IngestManagerError,
   PackageOperationNotSupportedError,
@@ -39,71 +34,39 @@ import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 
-import {
-  isRequiredPackage,
-  getInstallation,
-  getInstallationObject,
-  bulkInstallPackages,
-  isBulkInstallError,
-} from './index';
+import { isUnremovablePackage, getInstallation, getInstallationObject } from './index';
 import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
+import { removeOldAssets } from './cleanup';
 
-export interface DefaultPackagesInstallationResult {
-  installations: Installation[];
-  nonFatalPackageUpgradeErrors: DefaultPackagesInstallationError[];
+export async function isPackageInstalled(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+}): Promise<boolean> {
+  const installedPackage = await getInstallation(options);
+  return installedPackage !== undefined;
 }
 
-export async function ensureInstalledDefaultPackages(
-  savedObjectsClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
-): Promise<DefaultPackagesInstallationResult> {
-  const installations = [];
-  const nonFatalPackageUpgradeErrors = [];
-  const bulkResponse = await bulkInstallPackages({
-    savedObjectsClient,
-    packagesToInstall: Object.values(defaultPackages),
-    esClient,
-  });
-
-  for (const resp of bulkResponse) {
-    if (isBulkInstallError(resp)) {
-      if (resp.installType && (resp.installType === 'update' || resp.installType === 'reupdate')) {
-        nonFatalPackageUpgradeErrors.push({ installType: resp.installType, error: resp.error });
-      } else {
-        throw resp.error;
-      }
-    } else {
-      installations.push(getInstallation({ savedObjectsClient, pkgName: resp.name }));
-    }
-  }
-
-  const retrievedInstallations = await Promise.all(installations);
-  const verifiedInstallations = retrievedInstallations.map((installation, index) => {
-    if (!installation) {
-      throw new Error(`could not get installation ${bulkResponse[index].name}`);
-    }
-    return installation;
-  });
-  return {
-    installations: verifiedInstallations,
-    nonFatalPackageUpgradeErrors,
-  };
-}
-
-async function isPackageVersionOrLaterInstalled(options: {
+export async function isPackageVersionOrLaterInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   pkgVersion: string;
-}): Promise<Installation | false> {
+}): Promise<{ package: Installation; installType: InstallType } | false> {
   const { savedObjectsClient, pkgName, pkgVersion } = options;
-  const installedPackage = await getInstallation({ savedObjectsClient, pkgName });
+  const installedPackageObject = await getInstallationObject({ savedObjectsClient, pkgName });
+  const installedPackage = installedPackageObject?.attributes;
   if (
     installedPackage &&
     (installedPackage.version === pkgVersion || semverLt(pkgVersion, installedPackage.version))
   ) {
-    return installedPackage;
+    let installType: InstallType;
+    try {
+      installType = getInstallType({ pkgVersion, installedPkg: installedPackageObject });
+    } catch (e) {
+      installType = 'unknown';
+    }
+    return { package: installedPackage, installType };
   }
   return false;
 }
@@ -121,22 +84,42 @@ export async function ensureInstalledPackage(options: {
     ? { name: pkgName, version: pkgVersion }
     : await Registry.fetchFindLatestPackage(pkgName);
 
-  const installedPackage = await isPackageVersionOrLaterInstalled({
+  const installedPackageResult = await isPackageVersionOrLaterInstalled({
     savedObjectsClient,
     pkgName: pkgKeyProps.name,
     pkgVersion: pkgKeyProps.version,
   });
-  if (installedPackage) {
-    return installedPackage;
+  if (installedPackageResult) {
+    return installedPackageResult.package;
   }
   const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
-  await installPackage({
+  const installResult = await installPackage({
     installSource: 'registry',
     savedObjectsClient,
     pkgkey,
     esClient,
     force: true, // Always force outdated packages to be installed if a later version isn't installed
   });
+
+  if (installResult.error) {
+    const errorPrefix =
+      installResult.installType === 'update' || installResult.installType === 'reupdate'
+        ? i18n.translate('xpack.fleet.epm.install.packageUpdateError', {
+            defaultMessage: 'Error updating {pkgName} to {pkgVersion}',
+            values: {
+              pkgName: pkgKeyProps.name,
+              pkgVersion: pkgKeyProps.version,
+            },
+          })
+        : i18n.translate('xpack.fleet.epm.install.packageInstallError', {
+            defaultMessage: 'Error installing {pkgName} {pkgVersion}',
+            values: {
+              pkgName: pkgKeyProps.name,
+              pkgVersion: pkgKeyProps.version,
+            },
+          });
+    throw new Error(`${errorPrefix}: ${installResult.error.message}`);
+  }
 
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw new Error(`could not get installation ${pkgName}`);
@@ -171,7 +154,7 @@ export async function handleInstallPackageFailure({
   try {
     const installType = getInstallType({ pkgVersion, installedPkg });
     if (installType === 'install' || installType === 'reinstall') {
-      logger.error(`uninstalling ${pkgkey} after error installing`);
+      logger.error(`uninstalling ${pkgkey} after error installing: [${error.toString()}]`);
       await removeInstallation({ savedObjectsClient, pkgkey, esClient });
     }
 
@@ -275,8 +258,7 @@ async function installPackageFromRegistry({
     const { paths, packageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
 
     // try installing the package, if there was an error, call error handler and rethrow
-    // TODO: without the ts-ignore, TS complains about the type of the value of the returned InstallResult.status
-    // @ts-ignore
+    // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return _installPackage({
       savedObjectsClient,
       esClient,
@@ -286,10 +268,16 @@ async function installPackageFromRegistry({
       installType,
       installSource: 'registry',
     })
-      .then((assets) => {
+      .then(async (assets) => {
+        await removeOldAssets({
+          soClient: savedObjectsClient,
+          pkgName: packageInfo.name,
+          currentVersion: packageInfo.version,
+        });
         return { assets, status: 'installed', installType };
       })
       .catch(async (err: Error) => {
+        logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`);
         await handleInstallPackageFailure({
           savedObjectsClient,
           error: err,
@@ -352,8 +340,7 @@ async function installPackageByUpload({
       version: packageInfo.version,
       packageInfo,
     });
-    // TODO: without the ts-ignore, TS complains about the type of the value of the returned InstallResult.status
-    // @ts-ignore
+    // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return _installPackage({
       savedObjectsClient,
       esClient,
@@ -452,7 +439,7 @@ export async function createInstallation(options: {
 }) {
   const { savedObjectsClient, packageInfo, installSource } = options;
   const { internal = false, name: pkgName, version: pkgVersion } = packageInfo;
-  const removable = !isRequiredPackage(pkgName);
+  const removable = !isUnremovablePackage(pkgName);
   const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
 
   const created = await savedObjectsClient.create<Installation>(
@@ -502,17 +489,17 @@ export const saveInstalledEsRefs = async (
   return installedAssets;
 };
 
-export const removeAssetsFromInstalledEsByType = async (
+export const removeAssetTypesFromInstalledEs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
-  assetType: AssetType
+  assetTypes: AssetType[]
 ) => {
   const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
   const installedAssets = installedPkg?.attributes.installed_es;
   if (!installedAssets?.length) return;
-  const installedAssetsToSave = installedAssets?.filter(({ id, type }) => {
-    return type !== assetType;
-  });
+  const installedAssetsToSave = installedAssets?.filter(
+    (asset) => !assetTypes.includes(asset.type)
+  );
 
   return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     installed_es: installedAssetsToSave,

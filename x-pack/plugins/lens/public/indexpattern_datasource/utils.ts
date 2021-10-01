@@ -15,6 +15,7 @@ import type {
 import { operationDefinitionMap, IndexPatternColumn } from './operations';
 
 import { getInvalidFieldMessage } from './operations/definitions/helpers';
+import { isQueryValid } from './operations/definitions/filters';
 
 /**
  * Normalizes the specified operation type. (e.g. document operations
@@ -61,8 +62,19 @@ export function isColumnInvalid(
     'references' in column &&
     Boolean(getReferencesErrors(layer, column, indexPattern).filter(Boolean).length);
 
+  const operationErrorMessages = operationDefinition.getErrorMessage?.(
+    layer,
+    columnId,
+    indexPattern,
+    operationDefinitionMap
+  );
+
+  const filterHasError = column.filter ? !isQueryValid(column.filter, indexPattern) : false;
+
   return (
-    !!operationDefinition.getErrorMessage?.(layer, columnId, indexPattern) || referencesHaveErrors
+    (operationErrorMessages && operationErrorMessages.length > 0) ||
+    referencesHaveErrors ||
+    filterHasError
   );
 }
 
@@ -74,7 +86,12 @@ function getReferencesErrors(
   return column.references?.map((referenceId: string) => {
     const referencedOperation = layer.columns[referenceId]?.operationType;
     const referencedDefinition = operationDefinitionMap[referencedOperation];
-    return referencedDefinition?.getErrorMessage?.(layer, referenceId, indexPattern);
+    return referencedDefinition?.getErrorMessage?.(
+      layer,
+      referenceId,
+      indexPattern,
+      operationDefinitionMap
+    );
   });
 }
 

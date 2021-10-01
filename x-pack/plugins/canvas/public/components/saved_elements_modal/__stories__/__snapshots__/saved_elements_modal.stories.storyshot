@@ -24,6 +24,7 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
       <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
+        color="inherit"
         data-euiicon-type="cross"
         size="m"
       />
@@ -93,16 +94,17 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
               size="xxl"
             />
             <div
-              className="euiSpacer euiSpacer--s"
+              className="euiSpacer euiSpacer--m"
             />
+            <h2
+              className="euiTitle euiTitle--small"
+            >
+              Add new elements
+            </h2>
             <span
               className="euiTextColor euiTextColor--subdued"
+              style={Object {}}
             >
-              <h2
-                className="euiTitle euiTitle--small"
-              >
-                Add new elements
-              </h2>
               <div
                 className="euiSpacer euiSpacer--m"
               />
@@ -172,6 +174,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
       <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
+        color="inherit"
         data-euiicon-type="cross"
         size="m"
       />
@@ -291,7 +294,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                 >
                   <span
                     className="euiToolTipAnchor"
-                    onKeyUp={[Function]}
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
@@ -308,6 +310,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
+                        color="inherit"
                         data-euiicon-type="pencil"
                         size="m"
                       />
@@ -319,7 +322,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                 >
                   <span
                     className="euiToolTipAnchor"
-                    onKeyUp={[Function]}
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
@@ -336,6 +338,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
+                        color="inherit"
                         data-euiicon-type="trash"
                         size="m"
                       />
@@ -400,7 +403,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                 >
                   <span
                     className="euiToolTipAnchor"
-                    onKeyUp={[Function]}
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
@@ -417,6 +419,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
+                        color="inherit"
                         data-euiicon-type="pencil"
                         size="m"
                       />
@@ -428,7 +431,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                 >
                   <span
                     className="euiToolTipAnchor"
-                    onKeyUp={[Function]}
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
@@ -445,6 +447,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
+                        color="inherit"
                         data-euiicon-type="trash"
                         size="m"
                       />
@@ -509,7 +512,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                 >
                   <span
                     className="euiToolTipAnchor"
-                    onKeyUp={[Function]}
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
@@ -526,6 +528,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
+                        color="inherit"
                         data-euiicon-type="pencil"
                         size="m"
                       />
@@ -537,7 +540,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                 >
                   <span
                     className="euiToolTipAnchor"
-                    onKeyUp={[Function]}
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
@@ -554,6 +556,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
+                        color="inherit"
                         data-euiicon-type="trash"
                         size="m"
                       />
@@ -620,6 +623,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
       <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
+        color="inherit"
         data-euiicon-type="cross"
         size="m"
       />
@@ -754,7 +758,6 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                 >
                   <span
                     className="euiToolTipAnchor"
-                    onKeyUp={[Function]}
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
@@ -771,6 +774,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                       <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
+                        color="inherit"
                         data-euiicon-type="pencil"
                         size="m"
                       />
@@ -782,7 +786,6 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                 >
                   <span
                     className="euiToolTipAnchor"
-                    onKeyUp={[Function]}
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
@@ -799,6 +802,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                       <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
+                        color="inherit"
                         data-euiicon-type="trash"
                         size="m"
                       />

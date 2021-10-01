@@ -9,17 +9,18 @@ jest.mock('./generate_csv/generate_csv', () => ({
   CsvGenerator: class CsvGeneratorMock {
     generateData() {
       return {
-        content: 'test\n123',
+        size: 123,
+        content_type: 'text/csv',
       };
     }
   },
 }));
 
+import { Writable } from 'stream';
 import nodeCrypto from '@elastic/node-crypto';
 import { ReportingCore } from '../../';
 import { CancellationToken } from '../../../common';
 import {
-  createMockConfig,
   createMockConfigSchema,
   createMockLevelLogger,
   createMockReportingCore,
@@ -31,10 +32,13 @@ const encryptionKey = 'tetkey';
 const headers = { sid: 'cooltestheaders' };
 let encryptedHeaders: string;
 let reportingCore: ReportingCore;
+let stream: jest.Mocked<Writable>;
 
 beforeAll(async () => {
   const crypto = nodeCrypto({ encryptionKey });
-  const config = createMockConfig(
+
+  encryptedHeaders = await crypto.encrypt(headers);
+  reportingCore = await createMockReportingCore(
     createMockConfigSchema({
       encryptionKey,
       csv: {
@@ -45,10 +49,10 @@ beforeAll(async () => {
       },
     })
   );
+});
 
-  encryptedHeaders = await crypto.encrypt(headers);
-
-  reportingCore = await createMockReportingCore(config);
+beforeEach(() => {
+  stream = {} as typeof stream;
 });
 
 test('gets the csv content from job parameters', async () => {
@@ -62,14 +66,16 @@ test('gets the csv content from job parameters', async () => {
       searchSource: {},
       objectType: 'search',
       title: 'Test Search',
+      version: '7.13.0',
     },
-    new CancellationToken()
+    new CancellationToken(),
+    stream
   );
 
   expect(payload).toMatchInlineSnapshot(`
     Object {
-      "content": "test
-    123",
+      "content_type": "text/csv",
+      "size": 123,
     }
   `);
 });

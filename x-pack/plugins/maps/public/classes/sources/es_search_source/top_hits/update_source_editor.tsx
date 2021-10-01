@@ -9,14 +9,15 @@ import React, { Component, Fragment } from 'react';
 import { EuiFormRow, EuiTitle, EuiPanel, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { IndexPatternField } from 'src/plugins/data/public';
 import { FIELD_ORIGIN } from '../../../../../common/constants';
 import { TooltipSelector } from '../../../../components/tooltip_selector';
 
 import { getIndexPatternService } from '../../../../kibana_services';
 import { getTermsFields, getSortFields, getSourceFields } from '../../../../index_pattern_util';
-import { SortDirection, IFieldType } from '../../../../../../../../src/plugins/data/public';
+import { SortDirection } from '../../../../../../../../src/plugins/data/public';
 import { ESDocField } from '../../../fields/es_doc_field';
-import { OnSourceChangeArgs } from '../../../../connected_components/layer_panel/view';
+import { OnSourceChangeArgs } from '../../source';
 import { TopHitsForm } from './top_hits_form';
 import { ESSearchSource } from '../es_search_source';
 import { IField } from '../../../fields/field';
@@ -36,8 +37,8 @@ interface Props {
 interface State {
   loadError?: string;
   sourceFields: IField[];
-  termFields: IFieldType[];
-  sortFields: IFieldType[];
+  termFields: IndexPatternField[];
+  sortFields: IndexPatternField[];
 }
 
 export class TopHitsUpdateSourceEditor extends Component<Props, State> {

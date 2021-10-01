@@ -9,5 +9,5 @@ logger instance to be used by the migration handler
 <b>Signature:</b>
 
 ```typescript
-log: SavedObjectsMigrationLogger;
+readonly log: SavedObjectsMigrationLogger;
 ```

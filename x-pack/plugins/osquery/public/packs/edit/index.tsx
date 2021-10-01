@@ -26,6 +26,7 @@ const EditPackPageComponent: React.FC<EditPackPageProps> = ({ onSuccess, packId 
       queries: [],
     },
   } = useQuery(['pack', { id: packId }], ({ queryKey }) => {
+    // @ts-expect-error update types
     return http.get(`/internal/osquery/pack/${queryKey[1].id}`);
   });
 

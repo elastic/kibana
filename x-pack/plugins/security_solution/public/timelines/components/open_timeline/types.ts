@@ -8,7 +8,7 @@
 import type React from 'react';
 import { AllTimelinesVariables } from '../../containers/all';
 import { TimelineModel } from '../../store/timeline/model';
-import { NoteResult } from '../../../graphql/types';
+import { NoteResult } from '../../../../common/types/timeline/note';
 import {
   TimelineTypeLiteral,
   TimelineTypeLiteralWithNull,

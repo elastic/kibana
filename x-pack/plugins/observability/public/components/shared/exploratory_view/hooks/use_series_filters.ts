@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useUrlStorage } from './use_url_storage';
+import { useSeriesStorage } from './use_series_storage';
 import { UrlFilter } from '../types';
 
 export interface UpdateFilter {
@@ -15,24 +15,28 @@ export interface UpdateFilter {
 }
 
 export const useSeriesFilters = ({ seriesId }: { seriesId: string }) => {
-  const { series, setSeries } = useUrlStorage(seriesId);
+  const { getSeries, setSeries } = useSeriesStorage();
+
+  const series = getSeries(seriesId);
 
   const filters = series.filters ?? [];
 
   const removeFilter = ({ field, value, negate }: UpdateFilter) => {
-    const filtersN = filters.map((filter) => {
-      if (filter.field === field) {
-        if (negate) {
-          const notValuesN = filter.notValues?.filter((val) => val !== value);
-          return { ...filter, notValues: notValuesN };
-        } else {
-          const valuesN = filter.values?.filter((val) => val !== value);
-          return { ...filter, values: valuesN };
+    const filtersN = filters
+      .map((filter) => {
+        if (filter.field === field) {
+          if (negate) {
+            const notValuesN = filter.notValues?.filter((val) => val !== value);
+            return { ...filter, notValues: notValuesN };
+          } else {
+            const valuesN = filter.values?.filter((val) => val !== value);
+            return { ...filter, values: valuesN };
+          }
         }
-      }
 
-      return filter;
-    });
+        return filter;
+      })
+      .filter(({ values = [], notValues = [] }) => values.length > 0 || notValues.length > 0);
     setSeries(seriesId, { ...series, filters: filtersN });
   };
 

@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardPanelActions = getService('dashboardPanelActions');
+  const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const find = getService('find');
   const esArchiver = getService('esArchiver');
@@ -19,9 +20,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard saved search embeddable', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('dashboard/current/data');
-      await esArchiver.loadIfNeeded('dashboard/current/kibana');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
+      await esArchiver.loadIfNeeded(
+        'test/functional/fixtures/es_archiver/dashboard/current/kibana'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -45,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const marks = $('mark')
         .toArray()
         .map((mark) => $(mark).text());
-      expect(marks.length).to.be(50);
+      expect(marks.length).to.above(10);
     });
 
     it('removing a filter removes highlights', async function () {
@@ -58,6 +61,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         .toArray()
         .map((mark) => $(mark).text());
       expect(marks.length).to.be(0);
+    });
+
+    it('view action leads to a saved search', async function () {
+      await filterBar.removeAllFilters();
+      await PageObjects.dashboard.saveDashboard('Dashboard With Saved Search');
+      await PageObjects.dashboard.clickCancelOutOfEditMode(false);
+      const inViewMode = await PageObjects.dashboard.getIsInViewMode();
+      expect(inViewMode).to.equal(true);
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
+
+      await dashboardPanelActions.openContextMenu();
+      const actionExists = await testSubjects.exists(
+        'embeddablePanelAction-ACTION_VIEW_SAVED_SEARCH'
+      );
+      if (!actionExists) {
+        await dashboardPanelActions.clickContextMenuMoreItem();
+      }
+      const actionElement = await testSubjects.find(
+        'embeddablePanelAction-ACTION_VIEW_SAVED_SEARCH'
+      );
+      await actionElement.click();
+
+      await PageObjects.discover.waitForDiscoverAppOnScreen();
+      expect(await PageObjects.discover.getSavedSearchTitle()).to.equal(
+        'Rendering Test: saved search'
+      );
     });
   });
 }

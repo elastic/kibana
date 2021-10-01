@@ -28,7 +28,6 @@ import './index.scss';
 
 import {
   ChromeBadge,
-  ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeHelpExtensionMenuLink,
@@ -41,7 +40,6 @@ import {
   ChromeNavControls,
   ChromeNavLink,
   ChromeNavLinks,
-  ChromeNavLinkUpdateableFields,
   ChromeDocTitle,
   ChromeStart,
   ChromeRecentlyAccessed,
@@ -74,17 +72,8 @@ export type {
   DomainDeprecationDetails,
 } from '../server/types';
 export type { CoreContext, CoreSystem } from './core_system';
-export { DEFAULT_APP_CATEGORIES } from '../utils';
-export type {
-  AppCategory,
-  UiSettingsParams,
-  UserProvidedValues,
-  UiSettingsType,
-  ImageValidation,
-  StringValidation,
-  StringValidationRegex,
-  StringValidationRegexString,
-} from '../types';
+export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
+export type { AppCategory, UiSettingsParams, UserProvidedValues, UiSettingsType } from '../types';
 
 export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
 export type {
@@ -99,25 +88,28 @@ export type {
   AppLeaveAction,
   AppLeaveDefaultAction,
   AppLeaveConfirmAction,
-  AppMeta,
   AppUpdatableFields,
   AppUpdater,
-  AppSearchDeepLink,
+  AppNavOptions,
+  AppDeepLink,
   PublicAppInfo,
-  PublicAppMetaInfo,
-  PublicAppSearchDeepLinkInfo,
+  PublicAppDeepLinkInfo,
   NavigateToAppOptions,
 } from './application';
 
 export { SimpleSavedObject } from './saved_objects';
+export type { ResolvedSimpleSavedObject } from './saved_objects';
 export type {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkResolveObject,
+  SavedObjectsBulkResolveResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponsePublic,
+  SavedObjectsResolveResponse,
   SavedObjectsUpdateOptions,
   SavedObject,
   SavedObjectAttribute,
@@ -144,6 +136,8 @@ export type {
   SavedObjectsImportSimpleWarning,
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportWarning,
+  SavedObjectReferenceWithContext,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
 } from './saved_objects';
 
 export { HttpFetchError } from './http';
@@ -195,6 +189,8 @@ export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './dep
 export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
 export { URL_MAX_LENGTH } from './core_app';
+
+export type { KibanaExecutionContext } from './execution_context';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -292,7 +288,6 @@ export interface CoreStart {
 export type {
   Capabilities,
   ChromeBadge,
-  ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeHelpExtensionMenuLink,
@@ -305,7 +300,6 @@ export type {
   ChromeNavControls,
   ChromeNavLink,
   ChromeNavLinks,
-  ChromeNavLinkUpdateableFields,
   ChromeDocTitle,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,

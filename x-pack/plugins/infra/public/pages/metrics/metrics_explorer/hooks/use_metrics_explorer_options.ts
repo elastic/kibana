@@ -99,7 +99,7 @@ export const DEFAULT_CHART_OPTIONS: MetricsExplorerChartOptions = {
 export const DEFAULT_METRICS: MetricsExplorerOptionsMetric[] = [
   {
     aggregation: 'avg',
-    field: 'system.cpu.user.pct',
+    field: 'system.cpu.total.norm.pct',
     color: Color.color0,
   },
   {

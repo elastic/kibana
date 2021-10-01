@@ -1,8 +1,7 @@
 {
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target",
-    "skipLibCheck": true
+    "outDir": "./target/types"
   },
   "include": [
     "index.ts",
@@ -12,6 +11,9 @@
   ],
   "exclude": [],
   "references": [
-    { "path": "../../../../src/core/tsconfig.json" }
+    { "path": "../../../../src/core/tsconfig.json" },
+    { "path": "../../../../src/plugins/ui_actions/tsconfig.json" },
+    { "path": "../../../../src/plugins/embeddable/tsconfig.json" },
+    { "path": "../../../../src/plugins/kibana_react/tsconfig.json" },
   ]
 }

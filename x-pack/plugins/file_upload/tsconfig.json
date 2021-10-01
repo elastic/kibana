@@ -1,7 +1,6 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
@@ -13,5 +12,6 @@
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
+    { "path": "../../../src/plugins/embeddable/tsconfig.json" },
   ]
 }

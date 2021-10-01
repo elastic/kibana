@@ -11,13 +11,15 @@ import { UseMultiFields, FieldHook, FieldConfig } from '../../../../shared_impor
 /**
  * Those are the fields that we always want present in our form.
  */
-interface GlobalFieldsTypes {
+export interface GlobalFieldsTypes {
   deleteEnabled: boolean;
   searchableSnapshotRepo: string;
   warmMinAgeMilliSeconds: number;
   coldMinAgeMilliSeconds: number;
   frozenMinAgeMilliSeconds: number;
   deleteMinAgeMilliSeconds: number;
+  hotIsUsingShardSize: boolean;
+  warmIsUsingShardSize: boolean;
 }
 
 type GlobalFields = {
@@ -26,29 +28,33 @@ type GlobalFields = {
 
 const GlobalFieldsContext = createContext<GlobalFields | null>(null);
 
-export const globalFields: Record<
-  keyof GlobalFields,
-  { path: string; config?: FieldConfig<any> }
-> = {
-  deleteEnabled: {
-    path: '_meta.delete.enabled',
-  },
-  searchableSnapshotRepo: {
-    path: '_meta.searchableSnapshot.repository',
-  },
-  warmMinAgeMilliSeconds: {
-    path: '_meta.warm.minAgeToMilliSeconds',
-  },
-  coldMinAgeMilliSeconds: {
-    path: '_meta.cold.minAgeToMilliSeconds',
-  },
-  frozenMinAgeMilliSeconds: {
-    path: '_meta.frozen.minAgeToMilliSeconds',
-  },
-  deleteMinAgeMilliSeconds: {
-    path: '_meta.delete.minAgeToMilliSeconds',
-  },
-};
+export const globalFields: Record<keyof GlobalFields, { path: string; config?: FieldConfig<any> }> =
+  {
+    deleteEnabled: {
+      path: '_meta.delete.enabled',
+    },
+    searchableSnapshotRepo: {
+      path: '_meta.searchableSnapshot.repository',
+    },
+    warmMinAgeMilliSeconds: {
+      path: '_meta.warm.minAgeToMilliSeconds',
+    },
+    coldMinAgeMilliSeconds: {
+      path: '_meta.cold.minAgeToMilliSeconds',
+    },
+    frozenMinAgeMilliSeconds: {
+      path: '_meta.frozen.minAgeToMilliSeconds',
+    },
+    deleteMinAgeMilliSeconds: {
+      path: '_meta.delete.minAgeToMilliSeconds',
+    },
+    hotIsUsingShardSize: {
+      path: '_meta.hot.shrink.isUsingShardSize',
+    },
+    warmIsUsingShardSize: {
+      path: '_meta.warm.shrink.isUsingShardSize',
+    },
+  };
 
 export const GlobalFieldsProvider: FunctionComponent = ({ children }) => {
   return (

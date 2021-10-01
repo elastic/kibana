@@ -46,7 +46,7 @@ export const evaluateCondition = async ({
   condition: InventoryMetricConditions;
   nodeType: InventoryItemType;
   source: InfraSource;
-  logQueryFields: LogQueryFields;
+  logQueryFields: LogQueryFields | undefined;
   esClient: ElasticsearchClient;
   compositeSize: number;
   filterQuery?: string;
@@ -115,7 +115,7 @@ const getData = async (
   metric: SnapshotMetricType,
   timerange: InfraTimerangeInput,
   source: InfraSource,
-  logQueryFields: LogQueryFields,
+  logQueryFields: LogQueryFields | undefined,
   compositeSize: number,
   filterQuery?: string,
   customMetric?: SnapshotCustomMetricInput
@@ -123,7 +123,7 @@ const getData = async (
   const client = async <Hit = {}, Aggregation = undefined>(
     options: CallWithRequestParams
   ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> =>
-    // @ts-expect-error @elastic/elasticsearch SearchResponse.body.timeout is not required
+    // @ts-expect-error SearchResponse.body.timeout is optional
     (await esClient.search(options)).body as InfraDatabaseSearchResponse<Hit, Aggregation>;
 
   const metrics = [
@@ -144,8 +144,8 @@ const getData = async (
       client,
       snapshotRequest,
       source,
-      logQueryFields,
-      compositeSize
+      compositeSize,
+      logQueryFields
     );
 
     if (!nodes.length) return { [UNGROUPED_FACTORY_KEY]: null }; // No Data state

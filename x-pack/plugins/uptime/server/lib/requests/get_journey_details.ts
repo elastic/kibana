@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
-import { SyntheticsJourneyApiResponse } from '../../../common/runtime_types';
+import {
+  JourneyStep,
+  SyntheticsJourneyApiResponse,
+} from '../../../common/runtime_types/ping/synthetics';
 
 export interface GetJourneyDetails {
   checkGroup: string;
@@ -31,7 +34,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
               'synthetics.type': 'journey/start',
             },
           },
-        ] as QueryContainer[],
+        ] as QueryDslQueryContainer[],
       },
     },
     size: 1,
@@ -39,8 +42,9 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
 
   const { body: thisJourney } = await uptimeEsClient.search({ body: baseParams });
 
-  if (thisJourney?.hits?.hits.length > 0) {
-    const thisJourneySource: any = thisJourney.hits.hits[0]._source;
+  if (thisJourney.hits.hits.length > 0) {
+    const { _id, _source } = thisJourney.hits.hits[0];
+    const thisJourneySource = Object.assign({ _id }, _source) as JourneyStep;
 
     const baseSiblingParams = {
       query: {
@@ -56,7 +60,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
                 'synthetics.type': 'journey/start',
               },
             },
-          ] as QueryContainer[],
+          ] as QueryDslQueryContainer[],
         },
       },
       _source: ['@timestamp', 'monitor.check_group'],

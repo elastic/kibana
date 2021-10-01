@@ -8,8 +8,8 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
-import { getSearchListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
 import { LIST_ID, LIST_ITEM_INDEX } from '../../../common/constants.mock';
+import { getSearchListItemMock } from '../../schemas/elastic_response/search_es_list_item_schema.mock';
 
 import {
   getExportListItemsToStreamOptionsMock,
@@ -106,7 +106,9 @@ describe('write_list_items_to_stream', () => {
       firstResponse.hits.hits[0].sort = ['some-sort-value'];
 
       const secondResponse = getSearchListItemMock();
-      secondResponse.hits.hits[0]._source.ip = '255.255.255.255';
+      if (secondResponse.hits.hits[0]._source) {
+        secondResponse.hits.hits[0]._source.ip = '255.255.255.255';
+      }
 
       const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
       esClient.search.mockResolvedValueOnce(

@@ -9,6 +9,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import type { ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_TYPED } from '@kbn/rule-data-utils';
+// @ts-expect-error
+import { ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_NON_TYPED } from '@kbn/rule-data-utils/target_node/technical_field_names';
+import { AlertType } from '../../../../../common/alert_types';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
@@ -24,8 +29,13 @@ import { MLHeader } from '../../../shared/charts/transaction_charts/ml_header';
 import * as urlHelpers from '../../../shared/Links/url_helpers';
 import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
 
+const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED =
+  ALERT_RULE_TYPE_ID_NON_TYPED;
+
 interface Props {
   height?: number;
+  kuery: string;
+  environment: string;
 }
 
 const options: Array<{ value: LatencyAggregationType; text: string }> = [
@@ -38,7 +48,7 @@ function filterNil<T>(value: T | null | undefined): value is T {
   return value != null;
 }
 
-export function LatencyChart({ height }: Props) {
+export function LatencyChart({ height, kuery, environment }: Props) {
   const history = useHistory();
   const theme = useTheme();
   const comparisonChartTheme = getComparisonChartTheme(theme);
@@ -46,17 +56,16 @@ export function LatencyChart({ height }: Props) {
   const { latencyAggregationType, comparisonEnabled } = urlParams;
   const license = useLicenseContext();
 
-  const {
-    latencyChartsData,
-    latencyChartsStatus,
-  } = useTransactionLatencyChartsFetcher();
+  const { latencyChartsData, latencyChartsStatus } =
+    useTransactionLatencyChartsFetcher({
+      kuery,
+      environment,
+    });
 
-  const {
-    currentPeriod,
-    previousPeriod,
-    anomalyTimeseries,
-    mlJobId,
-  } = latencyChartsData;
+  const { currentPeriod, previousPeriod, anomalyTimeseries, mlJobId } =
+    latencyChartsData;
+
+  const { alerts } = useApmServiceContext();
 
   const timeseries = [
     currentPeriod,
@@ -121,6 +130,13 @@ export function LatencyChart({ height }: Props) {
           timeseries={timeseries}
           yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
           anomalyTimeseries={anomalyTimeseries}
+          alerts={alerts.filter(
+            (alert) =>
+              alert[ALERT_RULE_TYPE_ID]?.[0] ===
+                AlertType.TransactionDuration ||
+              alert[ALERT_RULE_TYPE_ID]?.[0] ===
+                AlertType.TransactionDurationAnomaly
+          )}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

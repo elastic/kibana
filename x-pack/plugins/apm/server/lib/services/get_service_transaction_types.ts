@@ -9,58 +9,62 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../../server/utils/queries';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { rangeQuery } from '../../../../observability/server';
+import { Setup } from '../helpers/setup_request';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import { withApmSpan } from '../../utils/with_apm_span';
 
-export function getServiceTransactionTypes({
+export async function getServiceTransactionTypes({
   setup,
   serviceName,
   searchAggregatedTransactions,
+  start,
+  end,
 }: {
   serviceName: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
 }) {
-  return withApmSpan('get_service_transaction_types', async () => {
-    const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
 
-    const params = {
-      apm: {
-        events: [
-          getProcessorEventForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
-        ],
-      },
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...getDocumentTypeFilterForAggregatedTransactions(
-                searchAggregatedTransactions
-              ),
-              { term: { [SERVICE_NAME]: serviceName } },
-              ...rangeQuery(start, end),
-            ],
-          },
-        },
-        aggs: {
-          types: {
-            terms: { field: TRANSACTION_TYPE, size: 100 },
-          },
+  const params = {
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...getDocumentTypeFilterForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
+            { term: { [SERVICE_NAME]: serviceName } },
+            ...rangeQuery(start, end),
+          ],
         },
       },
-    };
+      aggs: {
+        types: {
+          terms: { field: TRANSACTION_TYPE, size: 100 },
+        },
+      },
+    },
+  };
 
-    const { aggregations } = await apmEventClient.search(params);
-    const transactionTypes =
-      aggregations?.types.buckets.map((bucket) => bucket.key as string) || [];
-    return { transactionTypes };
-  });
+  const { aggregations } = await apmEventClient.search(
+    'get_service_transaction_types',
+    params
+  );
+  const transactionTypes =
+    aggregations?.types.buckets.map((bucket) => bucket.key as string) || [];
+  return { transactionTypes };
 }

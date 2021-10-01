@@ -15,7 +15,7 @@ import {
 } from 'src/core/public';
 import { BehaviorSubject } from 'rxjs';
 import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
-import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
+import { ISearchSetup, ISearchStart } from './types';
 
 import { handleResponse } from './fetch';
 import {
@@ -24,20 +24,27 @@ import {
   ISearchGeneric,
   SearchSourceDependencies,
   SearchSourceService,
+  extendedBoundsFunction,
+  ipRangeFunction,
   kibanaTimerangeFunction,
   luceneFunction,
   kqlFunction,
   fieldFunction,
+  numericalRangeFunction,
   rangeFunction,
+  cidrFunction,
+  dateRangeFunction,
   existsFilterFunction,
+  geoBoundingBoxFunction,
+  geoPointFunction,
+  queryFilterFunction,
   rangeFilterFunction,
   kibanaFilterFunction,
   phraseFilterFunction,
   esRawResponse,
 } from '../../common/search';
-import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
-import { IndexPatternsContract } from '../index_patterns/index_patterns';
+import { IndexPatternsContract } from '..';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
@@ -116,13 +123,21 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
       })
     );
+    expressions.registerFunction(cidrFunction);
+    expressions.registerFunction(dateRangeFunction);
+    expressions.registerFunction(extendedBoundsFunction);
+    expressions.registerFunction(ipRangeFunction);
     expressions.registerFunction(luceneFunction);
     expressions.registerFunction(kqlFunction);
     expressions.registerFunction(kibanaTimerangeFunction);
     expressions.registerFunction(fieldFunction);
+    expressions.registerFunction(numericalRangeFunction);
+    expressions.registerFunction(geoBoundingBoxFunction);
+    expressions.registerFunction(geoPointFunction);
     expressions.registerFunction(rangeFunction);
     expressions.registerFunction(kibanaFilterFunction);
     expressions.registerFunction(existsFilterFunction);
+    expressions.registerFunction(queryFilterFunction);
     expressions.registerFunction(rangeFilterFunction);
     expressions.registerFunction(phraseFilterFunction);
     expressions.registerType(kibanaContext);
@@ -148,19 +163,16 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return {
       aggs,
       usageCollector: this.usageCollector!,
-      __enhance: (enhancements: SearchEnhancements) => {
-        this.searchInterceptor = enhancements.searchInterceptor;
-      },
       session: this.sessionService,
       sessionsClient: this.sessionsClient,
     };
   }
 
   public start(
-    { application, http, notifications, uiSettings }: CoreStart,
+    { http, uiSettings }: CoreStart,
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
-    const search = ((request, options) => {
+    const search = ((request, options = {}) => {
       return this.searchInterceptor.search(request, options);
     }) as ISearchGeneric;
 
@@ -171,10 +183,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       getConfig: uiSettings.get.bind(uiSettings),
       search,
       onResponse: handleResponse,
-      legacy: {
-        callMsearch: getCallMsearch({ http }),
-        loadingCount$,
-      },
     };
 
     return {
@@ -192,5 +200,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   public stop() {
     this.aggsService.stop();
     this.searchSourceService.stop();
+    this.searchInterceptor.stop();
   }
 }

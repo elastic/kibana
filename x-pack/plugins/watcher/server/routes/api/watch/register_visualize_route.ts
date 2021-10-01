@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { RouteDependencies } from '../../../types';
 
 // @ts-ignore
@@ -19,19 +19,25 @@ const bodySchema = schema.object({
   options: schema.object({}, { unknowns: 'allow' }),
 });
 
-function fetchVisualizeData(dataClient: ILegacyScopedClusterClient, index: any, body: any) {
-  const params = {
-    index,
-    body,
-    ignoreUnavailable: true,
-    allowNoIndices: true,
-    ignore: [404],
-  };
-
-  return dataClient.callAsCurrentUser('search', params);
+function fetchVisualizeData(dataClient: IScopedClusterClient, index: any, body: any) {
+  return dataClient.asCurrentUser
+    .search(
+      {
+        index,
+        body,
+        allow_no_indices: true,
+        ignore_unavailable: true,
+      },
+      { ignore: [404] }
+    )
+    .then(({ body: result }) => result);
 }
 
-export function registerVisualizeRoute({ router, license, lib: { isEsError } }: RouteDependencies) {
+export function registerVisualizeRoute({
+  router,
+  license,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.post(
     {
       path: '/api/watcher/watch/visualize',
@@ -45,7 +51,7 @@ export function registerVisualizeRoute({ router, license, lib: { isEsError } }: 
       const body = watch.getVisualizeQuery(options);
 
       try {
-        const hits = await fetchVisualizeData(ctx.watcher!.client, watch.index, body);
+        const hits = await fetchVisualizeData(ctx.core.elasticsearch.client, watch.index, body);
         const visualizeData = watch.formatVisualizeData(hits);
 
         return response.ok({
@@ -54,13 +60,7 @@ export function registerVisualizeRoute({ router, license, lib: { isEsError } }: 
           },
         });
       } catch (e) {
-        // Case: Error from Elasticsearch JS client
-        if (isEsError(e)) {
-          return response.customError({ statusCode: e.statusCode, body: e });
-        }
-
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response });
       }
     })
   );

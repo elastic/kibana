@@ -11,7 +11,7 @@ import {
   loggingSystemMock,
   savedObjectsServiceMock,
 } from 'src/core/server/mocks';
-import { LicenseService } from '../../../../common/license/license';
+import { LicenseService } from '../../../../common/license';
 import { createPackagePolicyServiceMock } from '../../../../../fleet/server/mocks';
 import { PolicyWatcher } from './license_watch';
 import { ILicense } from '../../../../../licensing/common/types';
@@ -113,12 +113,10 @@ describe('Policy-Changing license watcher', () => {
     // mock a Policy with a higher-tiered feature enabled
     packagePolicySvcMock.list.mockResolvedValueOnce({
       items: [
-        MockPPWithEndpointPolicy(
-          (pc: PolicyConfig): PolicyConfig => {
-            pc.windows.popup.malware.message = CustomMessage;
-            return pc;
-          }
-        ),
+        MockPPWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
+          pc.windows.popup.malware.message = CustomMessage;
+          return pc;
+        }),
       ],
       total: 1,
       page: 1,

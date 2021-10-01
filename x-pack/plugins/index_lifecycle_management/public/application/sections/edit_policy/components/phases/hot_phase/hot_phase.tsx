@@ -135,6 +135,7 @@ export const HotPhase: FunctionComponent = () => {
                 {showEmptyRolloverFieldsError && (
                   <>
                     <EuiCallOut
+                      size="s"
                       title={i18nTexts.editPolicy.errors.rollOverConfigurationCallout.title}
                       data-test-subj="rolloverSettingsRequired"
                       color="danger"
@@ -167,7 +168,7 @@ export const HotPhase: FunctionComponent = () => {
         <>
           {<ForcemergeField phase={'hot'} />}
           <ShrinkField phase={'hot'} />
-          {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase={'hot'} />}
+          {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase="hot" />}
           <ReadonlyField phase={'hot'} />
         </>
       )}

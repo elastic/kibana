@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
 import { SwitchOption } from './switch';
 import { useKibana } from '../../../../kibana_react/public';
-import { UI_SETTINGS } from '../../../../data/public';
+import { FORMATS_UI_SETTINGS } from '../../../../field_formats/common';
 
 export interface PercentageModeOptionProps {
   setValue: (
@@ -31,7 +31,9 @@ function PercentageModeOption({
   formatPattern,
 }: PercentageModeOptionProps) {
   const { services } = useKibana();
-  const defaultPattern = services.uiSettings?.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN);
+  const defaultPattern = services.uiSettings?.get(
+    FORMATS_UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN
+  );
 
   return (
     <>

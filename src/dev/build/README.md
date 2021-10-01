@@ -12,8 +12,8 @@ node scripts/build --help
 # build a release version
 node scripts/build --release
 
-# reuse already downloaded node executables, turn on debug logging, and only build the default distributable
-node scripts/build --skip-node-download --debug --no-oss
+# reuse already downloaded node executables, turn on debug logging
+node scripts/build --skip-node-download --debug
 ```
 
 # Fixing out of memory issues
@@ -28,7 +28,7 @@ NODE_OPTIONS="--max-old-space-size=4096" node scripts/build --release
 
 # Structure
 
-The majority of this logic is extracted from the grunt build that has existed forever, and is designed to maintain the general structure grunt provides including tasks and config. The [build_distributables.js] file defines which tasks are run.
+The majority of this logic is extracted from the legacy grunt build, and is designed to maintain the general structure grunt provides including tasks and config. The [build_distributables.js] file defines which tasks are run.
 
 **Task**: [tasks/\*] define individual parts of the build. Each task is an object with a `run()` method, a `description` property, and optionally a `global` property. They are executed with the runner either once (if they are global) or once for each build. Non-global/local tasks are called once for each build, meaning they will be called twice be default, once for the OSS build and once for the default build and receive a build object as the third argument to `run()` which can be used to determine paths and properties for that build.
 

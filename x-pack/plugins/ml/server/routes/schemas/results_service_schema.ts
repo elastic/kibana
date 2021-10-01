@@ -103,3 +103,12 @@ export const getCategorizerStoppedPartitionsSchema = schema.object({
    */
   fieldToBucket: schema.maybe(schema.string()),
 });
+
+export const getDatafeedResultsChartDataSchema = schema.object({
+  /**
+   * Job id to fetch the bucket results for
+   */
+  jobId: schema.string(),
+  start: schema.number(),
+  end: schema.number(),
+});

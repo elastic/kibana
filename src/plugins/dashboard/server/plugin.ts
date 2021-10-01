@@ -22,6 +22,7 @@ import { EmbeddableSetup } from '../../embeddable/server';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './embeddable/dashboard_container_embeddable_factory';
+import { getUISettings } from './ui_settings';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -29,7 +30,8 @@ interface SetupDeps {
 }
 
 export class DashboardPlugin
-  implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps> {
+  implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps>
+{
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -53,6 +55,8 @@ export class DashboardPlugin
     plugins.embeddable.registerEmbeddableFactory(
       dashboardPersistableStateServiceFactory(plugins.embeddable)
     );
+
+    core.uiSettings.register(getUISettings());
 
     return {};
   }

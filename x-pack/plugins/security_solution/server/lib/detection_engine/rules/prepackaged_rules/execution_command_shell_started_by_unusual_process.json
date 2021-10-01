@@ -9,10 +9,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Unusual Parent Process for cmd.exe",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:cmd.exe and process.parent.name:(lsass.exe or csrss.exe or notepad.exe or regsvr32.exe or dllhost.exe or LogonUI.exe or wermgr.exe or spoolsv.exe or jucheck.exe or jusched.exe or ctfmon.exe or taskhostw.exe or GoogleUpdate.exe or sppsvc.exe or sihost.exe or slui.exe or SIHClient.exe or SearchIndexer.exe or SearchProtocolHost.exe or FlashPlayerUpdateService.exe or WerFault.exe or WUDFHost.exe or unsecapp.exe or wlanext.exe)",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : \"cmd.exe\" and\n  process.parent.name : (\"lsass.exe\",\n                         \"csrss.exe\",\n                         \"epad.exe\",\n                         \"regsvr32.exe\",\n                         \"dllhost.exe\",\n                         \"LogonUI.exe\",\n                         \"wermgr.exe\",\n                         \"spoolsv.exe\",\n                         \"jucheck.exe\",\n                         \"jusched.exe\",\n                         \"ctfmon.exe\",\n                         \"taskhostw.exe\",\n                         \"GoogleUpdate.exe\",\n                         \"sppsvc.exe\",\n                         \"sihost.exe\",\n                         \"slui.exe\",\n                         \"SIHClient.exe\",\n                         \"SearchIndexer.exe\",\n                         \"SearchProtocolHost.exe\",\n                         \"FlashPlayerUpdateService.exe\",\n                         \"WerFault.exe\",\n                         \"WUDFHost.exe\",\n                         \"unsecapp.exe\",\n                         \"wlanext.exe\" )\n",
   "risk_score": 47,
   "rule_id": "3b47900d-e793-49e8-968f-c90dc3526aa1",
   "severity": "medium",
@@ -41,6 +41,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 3
+  "type": "eql",
+  "version": 4
 }

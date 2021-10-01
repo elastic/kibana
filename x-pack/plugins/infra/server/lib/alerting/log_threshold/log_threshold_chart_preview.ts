@@ -23,6 +23,7 @@ import {
   UngroupedSearchQueryResponse,
   GroupedSearchQueryResponse,
   GroupedSearchQueryResponseRT,
+  isOptimizedGroupedSearchQueryResponse,
 } from '../../../../common/alerting/logs/log_threshold/types';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { ResolvedLogSourceConfiguration } from '../../../../common/log_sources';
@@ -36,9 +37,7 @@ export async function getChartPreviewData(
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset,
   buckets: number
 ) {
-  const indexPattern = resolvedLogSourceConfiguration.indices;
-  const timestampField = resolvedLogSourceConfiguration.timestampField;
-
+  const { indices, timestampField, runtimeMappings } = resolvedLogSourceConfiguration;
   const { groupBy, timeSize, timeUnit } = alertParams;
   const isGrouped = groupBy && groupBy.length > 0 ? true : false;
 
@@ -51,8 +50,8 @@ export async function getChartPreviewData(
   const { rangeFilter } = buildFiltersFromCriteria(expandedAlertParams, timestampField);
 
   const query = isGrouped
-    ? getGroupedESQuery(expandedAlertParams, timestampField, indexPattern)
-    : getUngroupedESQuery(expandedAlertParams, timestampField, indexPattern);
+    ? getGroupedESQuery(expandedAlertParams, timestampField, indices, runtimeMappings)
+    : getUngroupedESQuery(expandedAlertParams, timestampField, indices, runtimeMappings);
 
   if (!query) {
     throw new Error('ES query could not be built from the provided alert params');
@@ -99,10 +98,19 @@ const addHistogramAggregationToQuery = (
   };
 
   if (isGrouped) {
-    query.body.aggregations.groups.aggregations.filtered_results = {
-      ...query.body.aggregations.groups.aggregations.filtered_results,
-      aggregations: histogramAggregation,
-    };
+    const isOptimizedQuery = !query.body.aggregations.groups.aggregations?.filtered_results;
+
+    if (isOptimizedQuery) {
+      query.body.aggregations.groups.aggregations = {
+        ...query.body.aggregations.groups.aggregations,
+        ...histogramAggregation,
+      };
+    } else {
+      query.body.aggregations.groups.aggregations.filtered_results = {
+        ...query.body.aggregations.groups.aggregations.filtered_results,
+        aggregations: histogramAggregation,
+      };
+    }
   } else {
     query.body = {
       ...query.body,
@@ -153,18 +161,34 @@ const getGroupedResults = async (
 const processGroupedResults = (
   results: GroupedSearchQueryResponse['aggregations']['groups']['buckets']
 ): Series => {
-  return results.reduce<Series>((series, group) => {
-    if (!group.filtered_results.histogramBuckets) return series;
-    const groupName = Object.values(group.key).join(', ');
-    const points = group.filtered_results.histogramBuckets.buckets.reduce<Point[]>(
-      (pointsAcc, bucket) => {
+  const getGroupName = (
+    key: GroupedSearchQueryResponse['aggregations']['groups']['buckets'][0]['key']
+  ) => Object.values(key).join(', ');
+
+  if (isOptimizedGroupedSearchQueryResponse(results)) {
+    return results.reduce<Series>((series, group) => {
+      if (!group.histogramBuckets) return series;
+      const groupName = getGroupName(group.key);
+      const points = group.histogramBuckets.buckets.reduce<Point[]>((pointsAcc, bucket) => {
         const { key, doc_count: count } = bucket;
         return [...pointsAcc, { timestamp: key, value: count }];
-      },
-      []
-    );
-    return [...series, { id: groupName, points }];
-  }, []);
+      }, []);
+      return [...series, { id: groupName, points }];
+    }, []);
+  } else {
+    return results.reduce<Series>((series, group) => {
+      if (!group.filtered_results.histogramBuckets) return series;
+      const groupName = getGroupName(group.key);
+      const points = group.filtered_results.histogramBuckets.buckets.reduce<Point[]>(
+        (pointsAcc, bucket) => {
+          const { key, doc_count: count } = bucket;
+          return [...pointsAcc, { timestamp: key, value: count }];
+        },
+        []
+      );
+      return [...series, { id: groupName, points }];
+    }, []);
+  }
 };
 
 const processUngroupedResults = (results: UngroupedSearchQueryResponse): Series => {

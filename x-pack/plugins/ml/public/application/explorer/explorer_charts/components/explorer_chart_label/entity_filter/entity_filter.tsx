@@ -12,7 +12,7 @@ import {
   ENTITY_FIELD_OPERATIONS,
   EntityFieldOperation,
 } from '../../../../../../../common/util/anomaly_utils';
-import './entity_filter.scss';
+import './_entity_filter.scss';
 
 interface EntityFilterProps {
   onFilter: (params: {
@@ -39,7 +39,6 @@ export const EntityFilter: FC<EntityFilterProps> = ({
         }
       >
         <EuiButtonIcon
-          /* change to 'xs' after eui 31.9.0*/
           size="s"
           className="filter-button"
           onClick={() =>
@@ -65,7 +64,6 @@ export const EntityFilter: FC<EntityFilterProps> = ({
         }
       >
         <EuiButtonIcon
-          /* change to 'xs' after eui 31.9.0*/
           size="s"
           className="filter-button"
           onClick={() =>

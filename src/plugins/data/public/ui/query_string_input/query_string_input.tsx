@@ -76,6 +76,11 @@ export interface QueryStringInputProps {
    * @param storageKey this key is used to use user preference between kql and non-kql mode
    */
   storageKey?: string;
+
+  /**
+   * Override whether autocomplete suggestions are restricted by time range.
+   */
+  timeRangeForSuggestionsOverride?: boolean;
 }
 
 interface Props extends QueryStringInputProps {
@@ -211,6 +216,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
           selectionStart,
           selectionEnd,
           signal: this.abortController.signal,
+          useTimeRange: this.props.timeRangeForSuggestionsOverride,
         })) || [];
       return [...suggestions, ...recentSearchSuggestions];
     } catch (e) {

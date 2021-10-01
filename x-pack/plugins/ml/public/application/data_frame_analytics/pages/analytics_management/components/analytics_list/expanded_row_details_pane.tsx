@@ -19,6 +19,7 @@ export interface SectionConfig {
   title: string;
   position: 'left' | 'right';
   items: SectionItem[];
+  dataTestSubj: string;
 }
 
 interface SectionProps {
@@ -44,7 +45,7 @@ export const Section: FC<SectionProps> = ({ section }) => {
   ];
 
   return (
-    <>
+    <div data-test-subj={section.dataTestSubj}>
       <EuiTitle size="xs">
         <span>{section.title}</span>
       </EuiTitle>
@@ -55,18 +56,23 @@ export const Section: FC<SectionProps> = ({ section }) => {
         tableCaption={section.title}
         tableLayout="auto"
         className="mlExpandedRowDetailsSection"
+        data-test-subj={`${section.dataTestSubj}-table`}
       />
-    </>
+    </div>
   );
 };
 
 interface ExpandedRowDetailsPaneProps {
   sections: SectionConfig[];
+  dataTestSubj: string;
 }
 
-export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ sections }) => {
+export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({
+  sections,
+  dataTestSubj,
+}) => {
   return (
-    <EuiFlexGroup className="mlExpandedRowDetails">
+    <EuiFlexGroup className="mlExpandedRowDetails" data-test-subj={dataTestSubj}>
       <EuiFlexItem style={{ width: '50%' }}>
         {sections
           .filter((s) => s.position === 'left')

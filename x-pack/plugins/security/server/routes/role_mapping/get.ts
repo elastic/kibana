@@ -28,15 +28,16 @@ export function defineRoleMappingGetRoutes(params: RouteDefinitionParams) {
       const expectSingleEntity = typeof request.params.name === 'string';
 
       try {
-        const roleMappingsResponse = await context.core.elasticsearch.client.asCurrentUser.security.getRoleMapping(
-          { name: request.params.name }
-        );
+        const roleMappingsResponse =
+          await context.core.elasticsearch.client.asCurrentUser.security.getRoleMapping({
+            name: request.params.name,
+          });
 
         const mappings = Object.entries(roleMappingsResponse.body).map(([name, mapping]) => {
           return {
             name,
             ...mapping,
-            // @ts-expect-error @elastic/elasticsearch `XPackRoleMapping` type doesn't define `role_templates` property.
+            // @ts-expect-error @elastic/elasticsearch `SecurityRoleMapping` doeesn't contain `role_templates`
             role_templates: (mapping.role_templates || []).map((entry: RoleTemplate) => {
               return {
                 ...entry,

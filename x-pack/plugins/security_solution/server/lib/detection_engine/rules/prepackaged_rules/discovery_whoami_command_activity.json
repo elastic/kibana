@@ -12,10 +12,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Whoami Process Activity",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:whoami.exe",
+  "query": "process where event.type in (\"start\", \"process_started\") and process.name : \"whoami.exe\"\n",
   "risk_score": 21,
   "rule_id": "ef862985-3f13-4262-a686-5f357bbb9bc2",
   "severity": "low",
@@ -44,6 +44,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 6
+  "type": "eql",
+  "version": 7
 }

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { mountAsync, setMockValues } from '../../../../../__mocks__';
+import { setMockValues } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { EuiPanel } from '@elastic/eui';
+
+import { mountWithIntl } from '../../../../../test_helpers';
 
 import { staticSourceData } from '../../source_data';
 
@@ -26,7 +28,7 @@ describe('SourceFeatures', () => {
 
   it('renders hasPlatinumLicense & isOrganization', async () => {
     setMockValues({ hasPlatinumLicense: true, isOrganization: true });
-    const wrapper = await mountAsync(<SourceFeatures {...props} />, { i18n: true });
+    const wrapper = await mountWithIntl(<SourceFeatures {...props} />);
 
     expect(wrapper.find('FeaturesRouter[featureId="SyncFrequency"]')).toHaveLength(1);
     expect(wrapper.find('FeaturesRouter[featureId="SyncedItems"]')).toHaveLength(1);
@@ -34,7 +36,7 @@ describe('SourceFeatures', () => {
 
   it('renders !hasPlatinumLicense & isOrganization', async () => {
     setMockValues({ hasPlatinumLicense: false, isOrganization: true });
-    const wrapper = await mountAsync(<SourceFeatures {...props} />, { i18n: true });
+    const wrapper = await mountWithIntl(<SourceFeatures {...props} />);
 
     expect(wrapper.find('FeaturesRouter[featureId="SyncFrequency"]')).toHaveLength(1);
     expect(wrapper.find('FeaturesRouter[featureId="SyncedItems"]')).toHaveLength(1);
@@ -43,7 +45,7 @@ describe('SourceFeatures', () => {
 
   it('renders hasPlatinumLicense & !isOrganization', async () => {
     setMockValues({ hasPlatinumLicense: true, isOrganization: false });
-    const wrapper = await mountAsync(<SourceFeatures {...props} />, { i18n: true });
+    const wrapper = await mountWithIntl(<SourceFeatures {...props} />);
 
     expect(wrapper.find('FeaturesRouter[featureId="Private"]')).toHaveLength(1);
     expect(wrapper.find('FeaturesRouter[featureId="SyncedItems"]')).toHaveLength(1);
@@ -52,7 +54,7 @@ describe('SourceFeatures', () => {
 
   it('renders !hasPlatinumLicense & !isOrganization', async () => {
     setMockValues({ hasPlatinumLicense: false, isOrganization: false });
-    const wrapper = await mountAsync(<SourceFeatures {...props} />, { i18n: true });
+    const wrapper = await mountWithIntl(<SourceFeatures {...props} />);
 
     expect(wrapper.find('IncludedFeatures').find(EuiPanel)).toHaveLength(0);
   });

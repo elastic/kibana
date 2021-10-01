@@ -28,9 +28,11 @@ import { isPopulatedObject } from '../../../../common/util/object_utils';
 import { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import { RecordForInfluencer } from './results_service';
 import { isRuntimeMappings } from '../../../../common';
+import { ErrorType } from '../../../../common/util/errors';
 
-interface ResultResponse {
+export interface ResultResponse {
   success: boolean;
+  error?: ErrorType;
 }
 
 export interface MetricData extends ResultResponse {

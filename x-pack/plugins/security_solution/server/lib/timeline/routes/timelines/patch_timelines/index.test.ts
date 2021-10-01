@@ -48,12 +48,12 @@ describe('update timelines', () => {
     server = serverMock.create();
     context = requestContextMock.createTools().context;
 
-    securitySetup = ({
+    securitySetup = {
       authc: {
         getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
       },
       authz: {},
-    } as unknown) as SecurityPluginSetup;
+    } as unknown as SecurityPluginSetup;
 
     mockGetTimeline = jest.fn();
     mockGetTemplateTimeline = jest.fn();
@@ -86,8 +86,8 @@ describe('update timelines', () => {
           };
         });
 
-        const updateTimelinesRoute = jest.requireActual('./index').updateTimelinesRoute;
-        updateTimelinesRoute(server.router, createMockConfig(), securitySetup);
+        const patchTimelinesRoute = jest.requireActual('./index').patchTimelinesRoute;
+        patchTimelinesRoute(server.router, createMockConfig(), securitySetup);
 
         const mockRequest = getUpdateTimelinesRequest(updateTimelineWithTimelineId);
         await server.inject(mockRequest, context);
@@ -150,8 +150,8 @@ describe('update timelines', () => {
           };
         });
 
-        const updateTimelinesRoute = jest.requireActual('./index').updateTimelinesRoute;
-        updateTimelinesRoute(server.router, createMockConfig(), securitySetup);
+        const patchTimelinesRoute = jest.requireActual('./index').patchTimelinesRoute;
+        patchTimelinesRoute(server.router, createMockConfig(), securitySetup);
       });
 
       test('returns error message', async () => {
@@ -194,8 +194,8 @@ describe('update timelines', () => {
           };
         });
 
-        const updateTimelinesRoute = jest.requireActual('./index').updateTimelinesRoute;
-        updateTimelinesRoute(server.router, createMockConfig(), securitySetup);
+        const patchTimelinesRoute = jest.requireActual('./index').patchTimelinesRoute;
+        patchTimelinesRoute(server.router, createMockConfig(), securitySetup);
 
         const mockRequest = getUpdateTimelinesRequest(updateTemplateTimelineWithTimelineId);
         await server.inject(mockRequest, context);
@@ -270,8 +270,8 @@ describe('update timelines', () => {
           };
         });
 
-        const updateTimelinesRoute = jest.requireActual('./index').updateTimelinesRoute;
-        updateTimelinesRoute(server.router, createMockConfig(), securitySetup);
+        const patchTimelinesRoute = jest.requireActual('./index').patchTimelinesRoute;
+        patchTimelinesRoute(server.router, createMockConfig(), securitySetup);
       });
 
       test('returns error message', async () => {

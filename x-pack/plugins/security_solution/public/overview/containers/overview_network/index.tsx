@@ -23,6 +23,7 @@ import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/pl
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 export const ID = 'overviewNetworkQuery';
 
@@ -49,15 +50,13 @@ export const useNetworkOverview = ({
   skip = false,
   startDate,
 }: UseNetworkOverview): [boolean, NetworkOverviewArgs] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    overviewNetworkRequest,
-    setNetworkRequest,
-  ] = useState<NetworkOverviewRequestOptions | null>(null);
+  const [overviewNetworkRequest, setNetworkRequest] =
+    useState<NetworkOverviewRequestOptions | null>(null);
 
   const [overviewNetworkResponse, setNetworkOverviewResponse] = useState<NetworkOverviewArgs>({
     overviewNetwork: {},
@@ -69,10 +68,11 @@ export const useNetworkOverview = ({
     isInspected: false,
     refetch: refetch.current,
   });
+  const { addError, addWarning } = useAppToasts();
 
   const overviewNetworkSearch = useCallback(
     (request: NetworkOverviewRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -98,16 +98,14 @@ export const useNetworkOverview = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_NETWORK_OVERVIEW);
+                addWarning(i18n.ERROR_NETWORK_OVERVIEW);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger({
+              addError(msg, {
                 title: i18n.FAIL_NETWORK_OVERVIEW,
-                text: msg.message,
               });
               searchSubscription$.current.unsubscribe();
             },
@@ -118,7 +116,7 @@ export const useNetworkOverview = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, notifications.toasts]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {

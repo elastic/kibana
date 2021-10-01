@@ -11,8 +11,6 @@ export type {
   PublicUiSettingsParams,
   UserProvidedValues,
   UiSettingsType,
-  ImageValidation,
-  StringValidationRegex,
 } from '../../core/types';
 
 /**

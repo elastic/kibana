@@ -18,7 +18,7 @@ import { RouteDependencies } from '../../../types';
 export const registerCreateRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   const bodySchema = schema.object({
     name: schema.string(),
@@ -44,22 +44,21 @@ export const registerCreateRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
       const { name, ...rest } = request.body;
       const body = removeEmptyFields(serializeFollowerIndex(rest as FollowerIndex));
 
       try {
-        return response.ok({
-          body: await context.crossClusterReplication!.client.callAsCurrentUser(
-            'ccr.saveFollowerIndex',
-            { name, body }
-          ),
+        const { body: responseBody } = await client.asCurrentUser.ccr.follow({
+          index: name,
+          body,
         });
-      } catch (err) {
-        if (isEsError(err)) {
-          return response.customError(formatEsError(err));
-        }
-        // Case: default
-        throw err;
+
+        return response.ok({
+          body: responseBody,
+        });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     })
   );

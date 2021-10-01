@@ -5,38 +5,40 @@
  * 2.0.
  */
 
+import { compact } from 'lodash';
+
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import { i18n } from '@kbn/i18n';
 
-import { DEFAULT_AGENT_POLICIES_PACKAGES, FLEET_SERVER_PACKAGE } from '../../common';
-
-import type { PackagePolicy, DefaultPackagesInstallationError } from '../../common';
-
-import { SO_SEARCH_LIMIT } from '../constants';
+import { AUTO_UPDATE_PACKAGES } from '../../common';
+import type { DefaultPackagesInstallationError, PreconfigurationError } from '../../common';
+import { SO_SEARCH_LIMIT, DEFAULT_PACKAGES } from '../constants';
 
 import { appContextService } from './app_context';
-import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
-import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
-import { outputService } from './output';
+import { agentPolicyService } from './agent_policy';
 import {
-  ensureInstalledDefaultPackages,
-  ensureInstalledPackage,
-  ensurePackagesCompletedInstall,
-} from './epm/packages/install';
+  cleanPreconfiguredOutputs,
+  ensurePreconfiguredOutputs,
+  ensurePreconfiguredPackagesAndPolicies,
+} from './preconfiguration';
+import { outputService } from './output';
+
 import { generateEnrollmentAPIKey, hasEnrollementAPIKeysForPolicy } from './api_keys';
 import { settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
-import { createDefaultSettings } from './settings';
-import { ensureAgentActionPolicyChangeExists } from './agents';
+import { ensureFleetServerAgentPoliciesExists } from './agents';
 import { awaitIfFleetServerSetupPending } from './fleet_server';
+import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
+import { ensureDefaultComponentTemplate } from './epm/elasticsearch/template/install';
+import { getInstallations, installPackage } from './epm/packages';
+import { isPackageInstalled } from './epm/packages/install';
+import { pkgToPkgKey } from './epm/registry';
 
 export interface SetupStatus {
   isInitialized: boolean;
-  preconfigurationError: { name: string; message: string } | undefined;
-  nonFatalPackageUpgradeErrors: DefaultPackagesInstallationError[];
+  nonFatalErrors: Array<PreconfigurationError | DefaultPackagesInstallationError>;
 }
 
-export async function setupIngestManager(
+export async function setupFleet(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
@@ -47,137 +49,107 @@ async function createSetupSideEffects(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
-  const [defaultPackagesResult, defaultOutput] = await Promise.all([
-    // packages installed by default
-    ensureInstalledDefaultPackages(soClient, esClient),
-    outputService.ensureDefaultOutput(soClient),
-    settingsService.getSettings(soClient).catch((e: any) => {
-      if (e.isBoom && e.output.statusCode === 404) {
-        const defaultSettings = createDefaultSettings();
-        return settingsService.saveSettings(soClient, defaultSettings);
-      }
-
-      return Promise.reject(e);
-    }),
-  ]);
-
-  // Keeping this outside of the Promise.all because it introduces a race condition.
-  // If one of the required packages fails to install/upgrade it might get stuck in the installing state.
-  // On the next call to the /setup API, if there is a upgrade available for one of the required packages a race condition
-  // will occur between upgrading the package and reinstalling the previously failed package.
-  // By moving this outside of the Promise.all, the upgrade will occur first, and then we'll attempt to reinstall any
-  // packages that are stuck in the installing state.
-  await ensurePackagesCompletedInstall(soClient, esClient);
-
-  await awaitIfFleetServerSetupPending();
-
-  const fleetServerPackage = await ensureInstalledPackage({
-    savedObjectsClient: soClient,
-    pkgName: FLEET_SERVER_PACKAGE,
-    esClient,
-  });
-
-  const { agentPolicies: policiesOrUndefined, packages: packagesOrUndefined } =
-    appContextService.getConfig() ?? {};
+  const {
+    agentPolicies: policiesOrUndefined,
+    packages: packagesOrUndefined,
+    outputs: outputsOrUndefined,
+  } = appContextService.getConfig() ?? {};
 
   const policies = policiesOrUndefined ?? [];
-  const packages = packagesOrUndefined ?? [];
-  let preconfigurationError;
+  let packages = packagesOrUndefined ?? [];
 
-  try {
-    await ensurePreconfiguredPackagesAndPolicies(
-      soClient,
-      esClient,
-      policies,
-      packages,
-      defaultOutput
-    );
-  } catch (e) {
-    preconfigurationError = { name: e.name, message: e.message };
-  }
-
-  // Ensure the predefined default policies AFTER loading preconfigured policies. This allows the kibana config
-  // to override the default agent policies.
-
-  const [
-    { created: defaultAgentPolicyCreated, policy: defaultAgentPolicy },
-    { created: defaultFleetServerPolicyCreated, policy: defaultFleetServerPolicy },
-  ] = await Promise.all([
-    agentPolicyService.ensureDefaultAgentPolicy(soClient, esClient),
-    agentPolicyService.ensureDefaultFleetServerAgentPolicy(soClient, esClient),
+  await Promise.all([
+    ensurePreconfiguredOutputs(soClient, esClient, outputsOrUndefined ?? []),
+    settingsService.settingsSetup(soClient),
   ]);
 
-  // If we just created the default fleet server policy add the fleet server package
-  if (defaultFleetServerPolicyCreated) {
-    await addPackageToAgentPolicy(
-      soClient,
-      esClient,
-      fleetServerPackage,
-      defaultFleetServerPolicy,
-      defaultOutput
-    );
+  const defaultOutput = await outputService.ensureDefaultOutput(soClient);
+
+  await awaitIfFleetServerSetupPending();
+  if (appContextService.getConfig()?.agentIdVerificationEnabled) {
+    await ensureFleetGlobalEsAssets(soClient, esClient);
   }
 
-  // If we just created the default policy, ensure default packages are added to it
-  if (defaultAgentPolicyCreated) {
-    const agentPolicyWithPackagePolicies = await agentPolicyService.get(
-      soClient,
-      defaultAgentPolicy.id,
-      true
-    );
-    if (!agentPolicyWithPackagePolicies) {
-      throw new Error(
-        i18n.translate('xpack.fleet.setup.policyNotFoundError', {
-          defaultMessage: 'Policy not found',
-        })
-      );
-    }
-    if (
-      agentPolicyWithPackagePolicies.package_policies.length &&
-      typeof agentPolicyWithPackagePolicies.package_policies[0] === 'string'
-    ) {
-      throw new Error(
-        i18n.translate('xpack.fleet.setup.policyNotFoundError', {
-          defaultMessage: 'Policy not found',
-        })
-      );
-    }
+  // Ensure that required packages are always installed even if they're left out of the config
+  const preconfiguredPackageNames = new Set(packages.map((pkg) => pkg.name));
 
-    for (const installedPackage of defaultPackagesResult.installations) {
-      const packageShouldBeInstalled = DEFAULT_AGENT_POLICIES_PACKAGES.some(
-        (packageName) => installedPackage.name === packageName
-      );
-      if (!packageShouldBeInstalled) {
-        continue;
-      }
+  const autoUpdateablePackages = compact(
+    await Promise.all(
+      AUTO_UPDATE_PACKAGES.map((pkg) =>
+        isPackageInstalled({
+          savedObjectsClient: soClient,
+          pkgName: pkg.name,
+        }).then((installed) => (installed ? pkg : undefined))
+      )
+    )
+  );
 
-      const isInstalled = agentPolicyWithPackagePolicies.package_policies.some(
-        (d: PackagePolicy | string) => {
-          return typeof d !== 'string' && d.package?.name === installedPackage.name;
-        }
-      );
+  packages = [
+    ...packages,
+    ...DEFAULT_PACKAGES.filter((pkg) => !preconfiguredPackageNames.has(pkg.name)),
+    ...autoUpdateablePackages.filter((pkg) => !preconfiguredPackageNames.has(pkg.name)),
+  ];
 
-      if (!isInstalled) {
-        await addPackageToAgentPolicy(
-          soClient,
-          esClient,
-          installedPackage,
-          agentPolicyWithPackagePolicies,
-          defaultOutput
-        );
-      }
-    }
-  }
+  const { nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
+    soClient,
+    esClient,
+    policies,
+    packages,
+    defaultOutput
+  );
+
+  await cleanPreconfiguredOutputs(soClient, outputsOrUndefined ?? []);
 
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
-
-  await ensureAgentActionPolicyChangeExists(soClient, esClient);
+  await ensureFleetServerAgentPoliciesExists(soClient, esClient);
 
   return {
     isInitialized: true,
-    preconfigurationError,
-    nonFatalPackageUpgradeErrors: defaultPackagesResult.nonFatalPackageUpgradeErrors,
+    nonFatalErrors,
   };
+}
+
+/**
+ * Ensure ES assets shared by all Fleet index template are installed
+ */
+export async function ensureFleetGlobalEsAssets(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient
+) {
+  const logger = appContextService.getLogger();
+  // Ensure Global Fleet ES assets are installed
+  const globalAssetsRes = await Promise.all([
+    ensureDefaultComponentTemplate(esClient),
+    ensureFleetFinalPipelineIsInstalled(esClient),
+  ]);
+
+  if (globalAssetsRes.some((asset) => asset.isCreated)) {
+    // Update existing index template
+    const packages = await getInstallations(soClient);
+
+    await Promise.all(
+      packages.saved_objects.map(async ({ attributes: installation }) => {
+        if (installation.install_source !== 'registry') {
+          logger.error(
+            `Package needs to be manually reinstalled ${installation.name} after installing Fleet global assets`
+          );
+          return;
+        }
+        await installPackage({
+          installSource: installation.install_source,
+          savedObjectsClient: soClient,
+          pkgkey: pkgToPkgKey({ name: installation.name, version: installation.version }),
+          esClient,
+          // Force install the pacakge will update the index template and the datastream write indices
+          force: true,
+        }).catch((err) => {
+          logger.error(
+            `Package needs to be manually reinstalled ${installation.name} after installing Fleet global assets: ${err.message}`
+          );
+        });
+      })
+    );
+  }
 }
 
 export async function ensureDefaultEnrollmentAPIKeysExists(

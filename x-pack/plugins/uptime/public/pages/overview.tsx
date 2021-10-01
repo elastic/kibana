@@ -6,22 +6,20 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { useDispatch } from 'react-redux';
 
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { useTrackPageview } from '../../../observability/public';
 import { MonitorList } from '../components/overview/monitor_list/monitor_list_container';
-import { EmptyState, FilterGroup } from '../components/overview';
 import { StatusPanel } from '../components/overview/status_panel';
-import { getConnectorsAction, getMonitorAlertsAction } from '../state/alerts/alerts';
-import { useInitApp } from '../hooks/use_init_app';
 import { QueryBar } from '../components/overview/query_bar/query_bar';
+import { MONITORING_OVERVIEW_LABEL } from '../routes';
+import { FilterGroup } from '../components/overview/filter_group/filter_group';
 
 const EuiFlexItemStyled = styled(EuiFlexItem)`
   && {
-    min-width: 598px;
+    min-width: 800px;
     @media only screen and (max-width: 1128px) {
       min-width: 500px;
     }
@@ -35,19 +33,10 @@ export const OverviewPageComponent = () => {
   useTrackPageview({ app: 'uptime', path: 'overview' });
   useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
 
-  useInitApp();
-
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(getConnectorsAction.get());
-    dispatch(getMonitorAlertsAction.get());
-  }, [dispatch]);
-
-  useBreadcrumbs([]); // No extra breadcrumbs on overview
+  useBreadcrumbs([{ text: MONITORING_OVERVIEW_LABEL }]); // No extra breadcrumbs on overview
 
   return (
-    <EmptyState>
+    <>
       <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
         <QueryBar />
         <EuiFlexItemStyled grow={true}>
@@ -58,6 +47,6 @@ export const OverviewPageComponent = () => {
       <StatusPanel />
       <EuiSpacer size="s" />
       <MonitorList />
-    </EmptyState>
+    </>
   );
 };

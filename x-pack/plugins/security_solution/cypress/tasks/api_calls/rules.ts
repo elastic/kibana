@@ -19,7 +19,7 @@ export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing', inte
       name: rule.name,
       severity: rule.severity.toLocaleLowerCase(),
       type: 'query',
-      from: 'now-17520h',
+      from: 'now-50000h',
       index: ['exceptions-*'],
       query: rule.customQuery,
       language: 'kuery',
@@ -41,6 +41,8 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
       name: rule.name,
       severity: rule.severity.toLocaleLowerCase(),
       type: 'threat_match',
+      timeline_id: rule.timeline.templateTimelineId,
+      timeline_title: rule.timeline.title,
       threat_mapping: [
         {
           entries: [
@@ -57,7 +59,7 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
       threat_filters: [],
       threat_index: rule.indicatorIndexPattern,
       threat_indicator_path: '',
-      from: 'now-17520h',
+      from: 'now-50000h',
       index: rule.index,
       query: rule.customQuery || '*:*',
       language: 'kuery',
@@ -84,8 +86,8 @@ export const createCustomRuleActivated = (
       name: rule.name,
       severity: rule.severity.toLocaleLowerCase(),
       type: 'query',
-      from: 'now-17520h',
-      index: ['auditbeat-*'],
+      from: 'now-50000h',
+      index: rule.index,
       query: rule.customQuery,
       language: 'kuery',
       enabled: true,

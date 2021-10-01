@@ -18,11 +18,16 @@ export const RunCommand: ICommand = {
     'Run script defined in package.json in each package that contains that script (only works on packages not using Bazel yet)',
   name: 'run',
 
+  reportTiming: {
+    group: 'scripts/kbn run',
+    id: 'total',
+  },
+
   async run(projects, projectGraph, { extraArgs, options }) {
     log.warning(dedent`
       We are migrating packages into the Bazel build system and we will no longer support running npm scripts on
       packages using 'yarn kbn run' on Bazel built packages. If the package you are trying to act on contains a
-      BUILD.bazel file please just use 'yarn kbn build-bazel' to build it or 'yarn kbn watch-bazel' to watch it
+      BUILD.bazel file please just use 'yarn kbn build' to build it or 'yarn kbn watch' to watch it
     `);
 
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);

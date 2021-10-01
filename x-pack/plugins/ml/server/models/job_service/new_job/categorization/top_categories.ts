@@ -81,7 +81,7 @@ export function topCategoriesProvider(mlClient: MlClient) {
     const catCounts: Array<{
       id: CategoryId;
       count: number;
-      // @ts-expect-error
+      // @ts-expect-error incorrect search response type
     }> = body.aggregations?.cat_count?.buckets.map((c: any) => ({
       id: c.key,
       count: c.doc_count,
@@ -126,7 +126,7 @@ export function topCategoriesProvider(mlClient: MlClient) {
       []
     );
 
-    // @ts-expect-error
+    // @ts-expect-error incorrect search response type
     return body.hits.hits?.map((c: { _source: Category }) => c._source) || [];
   }
 

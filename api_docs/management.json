@@ -3,6 +3,7 @@
   "client": {
     "classes": [
       {
+        "parentPluginId": "management",
         "id": "def-public.ManagementApp",
         "type": "Class",
         "tags": [],
@@ -19,66 +20,99 @@
           " extends ",
           "ManagementItem"
         ],
+        "path": "src/plugins/management/public/utils/management_app.ts",
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "management",
             "id": "def-public.ManagementApp.mount",
             "type": "Function",
+            "tags": [],
             "label": "mount",
             "description": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_app.ts",
-              "lineNumber": 20
-            },
             "signature": [
-              "Mount"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ManagementApp.basePath",
-            "type": "string",
-            "label": "basePath",
-            "description": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_app.ts",
-              "lineNumber": 21
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.ManagementApp.meta",
-            "type": "Object",
-            "label": "meta",
-            "description": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_app.ts",
-              "lineNumber": 22
-            },
-            "signature": [
+              "(params: ",
               {
-                "pluginId": "core",
+                "pluginId": "management",
                 "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.AppMeta",
-                "text": "AppMeta"
+                "docId": "kibManagementPluginApi",
+                "section": "def-public.ManagementAppMountParams",
+                "text": "ManagementAppMountParams"
+              },
+              ") => ",
+              "Unmount",
+              " | Promise<",
+              "Unmount",
+              ">"
+            ],
+            "path": "src/plugins/management/public/utils/management_app.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "management",
+                "id": "def-public.ManagementApp.mount.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "management",
+                    "scope": "public",
+                    "docId": "kibManagementPluginApi",
+                    "section": "def-public.ManagementAppMountParams",
+                    "text": "ManagementAppMountParams"
+                  }
+                ],
+                "path": "src/plugins/management/public/types.ts",
+                "deprecated": false
               }
             ]
           },
           {
+            "parentPluginId": "management",
+            "id": "def-public.ManagementApp.basePath",
+            "type": "string",
+            "tags": [],
+            "label": "basePath",
+            "description": [],
+            "path": "src/plugins/management/public/utils/management_app.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "management",
+            "id": "def-public.ManagementApp.keywords",
+            "type": "Array",
+            "tags": [],
+            "label": "keywords",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/management/public/utils/management_app.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "management",
             "id": "def-public.ManagementApp.Unnamed",
             "type": "Function",
+            "tags": [],
             "label": "Constructor",
+            "description": [],
             "signature": [
               "any"
             ],
-            "description": [],
+            "path": "src/plugins/management/public/utils/management_app.ts",
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "management",
                 "id": "def-public.ManagementApp.Unnamed.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "args",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "management",
@@ -88,28 +122,18 @@
                     "text": "RegisterManagementAppArgs"
                   }
                 ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/management/public/utils/management_app.ts",
-                  "lineNumber": 24
-                }
+                "path": "src/plugins/management/public/utils/management_app.ts",
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_app.ts",
-              "lineNumber": 24
-            }
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "src/plugins/management/public/utils/management_app.ts",
-          "lineNumber": 19
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "management",
         "id": "def-public.ManagementSection",
         "type": "Class",
         "tags": [],
@@ -126,17 +150,16 @@
           " extends ",
           "ManagementItem"
         ],
+        "path": "src/plugins/management/public/utils/management_section.ts",
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "management",
             "id": "def-public.ManagementSection.apps",
             "type": "Array",
+            "tags": [],
             "label": "apps",
             "description": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_section.ts",
-              "lineNumber": 20
-            },
             "signature": [
               {
                 "pluginId": "management",
@@ -146,45 +169,49 @@
                 "text": "ManagementApp"
               },
               "[]"
-            ]
+            ],
+            "path": "src/plugins/management/public/utils/management_section.ts",
+            "deprecated": false
           },
           {
+            "parentPluginId": "management",
             "id": "def-public.ManagementSection.Unnamed",
             "type": "Function",
+            "tags": [],
             "label": "Constructor",
+            "description": [],
             "signature": [
               "any"
             ],
-            "description": [],
+            "path": "src/plugins/management/public/utils/management_section.ts",
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "management",
                 "id": "def-public.ManagementSection.Unnamed.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "args",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "Pick<Pick<",
                   "CreateManagementItemArgs",
-                  ", \"title\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\"> & Pick<{ id: string; }, \"id\"> & Pick<{ id: string; }, never>, \"title\" | \"id\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\">"
+                  ", \"title\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\"> & Pick<{ id: string; }, \"id\"> & Pick<{ id: string; }, never>, \"id\" | \"title\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\">"
                 ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/management/public/utils/management_section.ts",
-                  "lineNumber": 22
-                }
+                "path": "src/plugins/management/public/utils/management_section.ts",
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_section.ts",
-              "lineNumber": 22
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "management",
             "id": "def-public.ManagementSection.registerApp",
             "type": "Function",
+            "tags": [],
             "label": "registerApp",
+            "description": [],
             "signature": [
               "(args: Pick<",
               {
@@ -194,7 +221,7 @@
                 "section": "def-public.RegisterManagementAppArgs",
                 "text": "RegisterManagementAppArgs"
               },
-              ", \"title\" | \"id\" | \"order\" | \"meta\" | \"mount\" | \"euiIconType\" | \"icon\" | \"tip\">) => ",
+              ", \"id\" | \"title\" | \"order\" | \"mount\" | \"keywords\" | \"euiIconType\" | \"icon\" | \"tip\">) => ",
               {
                 "pluginId": "management",
                 "scope": "public",
@@ -203,13 +230,16 @@
                 "text": "ManagementApp"
               }
             ],
-            "description": [],
+            "path": "src/plugins/management/public/utils/management_section.ts",
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "management",
                 "id": "def-public.ManagementSection.registerApp.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "args",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "Pick<",
                   {
@@ -219,26 +249,22 @@
                     "section": "def-public.RegisterManagementAppArgs",
                     "text": "RegisterManagementAppArgs"
                   },
-                  ", \"title\" | \"id\" | \"order\" | \"meta\" | \"mount\" | \"euiIconType\" | \"icon\" | \"tip\">"
+                  ", \"id\" | \"title\" | \"order\" | \"mount\" | \"keywords\" | \"euiIconType\" | \"icon\" | \"tip\">"
                 ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/management/public/utils/management_section.ts",
-                  "lineNumber": 26
-                }
+                "path": "src/plugins/management/public/utils/management_section.ts",
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_section.ts",
-              "lineNumber": 26
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "management",
             "id": "def-public.ManagementSection.getApp",
             "type": "Function",
+            "tags": [],
             "label": "getApp",
+            "description": [],
             "signature": [
               "(id: string) => ",
               {
@@ -250,34 +276,33 @@
               },
               " | undefined"
             ],
-            "description": [],
+            "path": "src/plugins/management/public/utils/management_section.ts",
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "management",
                 "id": "def-public.ManagementSection.getApp.$1",
                 "type": "string",
+                "tags": [],
                 "label": "id",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "string"
                 ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/management/public/utils/management_section.ts",
-                  "lineNumber": 41
-                }
+                "path": "src/plugins/management/public/utils/management_section.ts",
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_section.ts",
-              "lineNumber": 41
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "management",
             "id": "def-public.ManagementSection.getAppsEnabled",
             "type": "Function",
+            "tags": [],
             "label": "getAppsEnabled",
+            "description": [],
             "signature": [
               "() => ",
               {
@@ -289,42 +314,34 @@
               },
               "[]"
             ],
-            "description": [],
+            "path": "src/plugins/management/public/utils/management_section.ts",
+            "deprecated": false,
             "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_section.ts",
-              "lineNumber": 45
-            }
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "src/plugins/management/public/utils/management_section.ts",
-          "lineNumber": 19
-        },
         "initialIsOpen": false
       }
     ],
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "management",
         "id": "def-public.DefinedSections",
         "type": "Interface",
+        "tags": [],
         "label": "DefinedSections",
         "description": [],
-        "tags": [],
+        "path": "src/plugins/management/public/types.ts",
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "management",
             "id": "def-public.DefinedSections.ingest",
             "type": "Object",
+            "tags": [],
             "label": "ingest",
             "description": [],
-            "source": {
-              "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 18
-            },
             "signature": [
               {
                 "pluginId": "management",
@@ -333,18 +350,17 @@
                 "section": "def-public.ManagementSection",
                 "text": "ManagementSection"
               }
-            ]
+            ],
+            "path": "src/plugins/management/public/types.ts",
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "management",
             "id": "def-public.DefinedSections.data",
             "type": "Object",
+            "tags": [],
             "label": "data",
             "description": [],
-            "source": {
-              "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 19
-            },
             "signature": [
               {
                 "pluginId": "management",
@@ -353,18 +369,17 @@
                 "section": "def-public.ManagementSection",
                 "text": "ManagementSection"
               }
-            ]
+            ],
+            "path": "src/plugins/management/public/types.ts",
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "management",
             "id": "def-public.DefinedSections.insightsAndAlerting",
             "type": "Object",
+            "tags": [],
             "label": "insightsAndAlerting",
             "description": [],
-            "source": {
-              "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 20
-            },
             "signature": [
               {
                 "pluginId": "management",
@@ -373,18 +388,17 @@
                 "section": "def-public.ManagementSection",
                 "text": "ManagementSection"
               }
-            ]
+            ],
+            "path": "src/plugins/management/public/types.ts",
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "management",
             "id": "def-public.DefinedSections.security",
             "type": "Object",
+            "tags": [],
             "label": "security",
             "description": [],
-            "source": {
-              "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 21
-            },
             "signature": [
               {
                 "pluginId": "management",
@@ -393,18 +407,17 @@
                 "section": "def-public.ManagementSection",
                 "text": "ManagementSection"
               }
-            ]
+            ],
+            "path": "src/plugins/management/public/types.ts",
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "management",
             "id": "def-public.DefinedSections.kibana",
             "type": "Object",
+            "tags": [],
             "label": "kibana",
             "description": [],
-            "source": {
-              "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 22
-            },
             "signature": [
               {
                 "pluginId": "management",
@@ -413,18 +426,17 @@
                 "section": "def-public.ManagementSection",
                 "text": "ManagementSection"
               }
-            ]
+            ],
+            "path": "src/plugins/management/public/types.ts",
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "management",
             "id": "def-public.DefinedSections.stack",
             "type": "Object",
+            "tags": [],
             "label": "stack",
             "description": [],
-            "source": {
-              "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 23
-            },
             "signature": [
               {
                 "pluginId": "management",
@@ -433,73 +445,86 @@
                 "section": "def-public.ManagementSection",
                 "text": "ManagementSection"
               }
-            ]
+            ],
+            "path": "src/plugins/management/public/types.ts",
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/management/public/types.ts",
-          "lineNumber": 17
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "management",
         "id": "def-public.ManagementAppMountParams",
         "type": "Interface",
+        "tags": [],
         "label": "ManagementAppMountParams",
         "description": [],
-        "tags": [],
+        "path": "src/plugins/management/public/types.ts",
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "management",
             "id": "def-public.ManagementAppMountParams.basePath",
             "type": "string",
+            "tags": [],
             "label": "basePath",
             "description": [],
-            "source": {
-              "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 59
-            }
+            "path": "src/plugins/management/public/types.ts",
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "management",
             "id": "def-public.ManagementAppMountParams.element",
             "type": "Object",
+            "tags": [],
             "label": "element",
             "description": [],
-            "source": {
-              "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 60
-            },
             "signature": [
               "HTMLElement"
-            ]
+            ],
+            "path": "src/plugins/management/public/types.ts",
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "management",
             "id": "def-public.ManagementAppMountParams.setBreadcrumbs",
             "type": "Function",
+            "tags": [],
             "label": "setBreadcrumbs",
             "description": [],
-            "source": {
-              "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 61
-            },
             "signature": [
               "(crumbs: ",
               "EuiBreadcrumb",
               "[]) => void"
-            ]
+            ],
+            "path": "src/plugins/management/public/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "management",
+                "id": "def-public.ManagementAppMountParams.setBreadcrumbs.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "crumbs",
+                "description": [],
+                "signature": [
+                  "EuiBreadcrumb",
+                  "[]"
+                ],
+                "path": "src/plugins/management/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
-            "tags": [],
+            "parentPluginId": "management",
             "id": "def-public.ManagementAppMountParams.history",
             "type": "Object",
+            "tags": [],
             "label": "history",
             "description": [],
-            "source": {
-              "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 62
-            },
             "signature": [
               {
                 "pluginId": "core",
@@ -509,19 +534,20 @@
                 "text": "ScopedHistory"
               },
               "<unknown>"
-            ]
+            ],
+            "path": "src/plugins/management/public/types.ts",
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/management/public/types.ts",
-          "lineNumber": 58
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "management",
         "id": "def-public.RegisterManagementAppArgs",
         "type": "Interface",
+        "tags": [],
         "label": "RegisterManagementAppArgs",
+        "description": [],
         "signature": [
           {
             "pluginId": "management",
@@ -533,122 +559,160 @@
           " extends ",
           "CreateManagementItemArgs"
         ],
-        "description": [],
-        "tags": [],
+        "path": "src/plugins/management/public/utils/management_app.ts",
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "management",
             "id": "def-public.RegisterManagementAppArgs.mount",
             "type": "Function",
+            "tags": [],
             "label": "mount",
             "description": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_app.ts",
-              "lineNumber": 14
-            },
             "signature": [
-              "Mount"
+              "(params: ",
+              {
+                "pluginId": "management",
+                "scope": "public",
+                "docId": "kibManagementPluginApi",
+                "section": "def-public.ManagementAppMountParams",
+                "text": "ManagementAppMountParams"
+              },
+              ") => ",
+              "Unmount",
+              " | Promise<",
+              "Unmount",
+              ">"
+            ],
+            "path": "src/plugins/management/public/utils/management_app.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "management",
+                "id": "def-public.RegisterManagementAppArgs.mount.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "management",
+                    "scope": "public",
+                    "docId": "kibManagementPluginApi",
+                    "section": "def-public.ManagementAppMountParams",
+                    "text": "ManagementAppMountParams"
+                  }
+                ],
+                "path": "src/plugins/management/public/types.ts",
+                "deprecated": false
+              }
             ]
           },
           {
-            "tags": [],
+            "parentPluginId": "management",
             "id": "def-public.RegisterManagementAppArgs.basePath",
             "type": "string",
+            "tags": [],
             "label": "basePath",
             "description": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_app.ts",
-              "lineNumber": 15
-            }
+            "path": "src/plugins/management/public/utils/management_app.ts",
+            "deprecated": false
           },
           {
+            "parentPluginId": "management",
+            "id": "def-public.RegisterManagementAppArgs.keywords",
+            "type": "Array",
             "tags": [],
-            "id": "def-public.RegisterManagementAppArgs.meta",
-            "type": "Object",
-            "label": "meta",
+            "label": "keywords",
             "description": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_app.ts",
-              "lineNumber": 16
-            },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.AppMeta",
-                "text": "AppMeta"
-              },
-              " | undefined"
-            ]
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/management/public/utils/management_app.ts",
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/management/public/utils/management_app.ts",
-          "lineNumber": 13
-        },
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
-        "tags": [],
+        "parentPluginId": "management",
         "id": "def-public.MANAGEMENT_APP_ID",
         "type": "string",
+        "tags": [],
         "label": "MANAGEMENT_APP_ID",
         "description": [],
-        "source": {
-          "path": "src/plugins/management/common/contants.ts",
-          "lineNumber": 9
-        },
         "signature": [
           "\"management\""
         ],
+        "path": "src/plugins/management/common/contants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [],
     "setup": {
+      "parentPluginId": "management",
       "id": "def-public.ManagementSetup",
       "type": "Interface",
+      "tags": [],
       "label": "ManagementSetup",
       "description": [],
-      "tags": [],
+      "path": "src/plugins/management/public/types.ts",
+      "deprecated": false,
       "children": [
         {
-          "tags": [],
+          "parentPluginId": "management",
           "id": "def-public.ManagementSetup.sections",
           "type": "Object",
+          "tags": [],
           "label": "sections",
           "description": [],
-          "source": {
-            "path": "src/plugins/management/public/types.ts",
-            "lineNumber": 14
-          },
           "signature": [
             "SectionsServiceSetup"
-          ]
+          ],
+          "path": "src/plugins/management/public/types.ts",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "management",
+          "id": "def-public.ManagementSetup.locator",
+          "type": "Object",
+          "tags": [],
+          "label": "locator",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "share",
+              "scope": "common",
+              "docId": "kibSharePluginApi",
+              "section": "def-common.LocatorPublic",
+              "text": "LocatorPublic"
+            },
+            "<",
+            "ManagementAppLocatorParams",
+            ">"
+          ],
+          "path": "src/plugins/management/public/types.ts",
+          "deprecated": false
         }
       ],
-      "source": {
-        "path": "src/plugins/management/public/types.ts",
-        "lineNumber": 13
-      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "management",
       "id": "def-public.ManagementStart",
       "type": "Interface",
+      "tags": [],
       "label": "ManagementStart",
       "description": [],
-      "tags": [],
+      "path": "src/plugins/management/public/types.ts",
+      "deprecated": false,
       "children": [],
-      "source": {
-        "path": "src/plugins/management/public/types.ts",
-        "lineNumber": 27
-      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -666,7 +730,31 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "management",
+        "id": "def-common.ManagementAppLocator",
+        "type": "Type",
+        "tags": [],
+        "label": "ManagementAppLocator",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          "ManagementAppLocatorParams",
+          ">"
+        ],
+        "path": "src/plugins/management/common/locator.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

@@ -100,9 +100,9 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
     //
     // create index
     //
-    const settings = ({
+    const settings = {
       number_of_shards: 1,
-    } as unknown) as Settings;
+    } as unknown as Settings;
     const mappings = {
       properties: {
         coordinates: {
@@ -274,7 +274,11 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
     });
 
     const isReadyToImport = !!name && error === undefined;
-    this.props.onIndexReady(isReadyToImport);
+    if (isReadyToImport) {
+      this.props.enableImportBtn();
+    } else {
+      this.props.disableImportBtn();
+    }
   };
 
   render() {
@@ -309,6 +313,8 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
         onFileSelect={this._onFileSelect}
         onGeoFieldTypeSelect={this._onGeoFieldTypeSelect}
         onIndexNameChange={this._onIndexNameChange}
+        onIndexNameValidationStart={this.props.disableImportBtn}
+        onIndexNameValidationEnd={this.props.enableImportBtn}
       />
     );
   }

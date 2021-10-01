@@ -44,6 +44,7 @@ Array [
           <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
+            color="inherit"
             data-euiicon-type="alert"
             size="m"
           />
@@ -163,7 +164,6 @@ Array [
                 className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isSelected"
                 disabled={false}
                 htmlFor="generated-id"
-                onClick={[Function]}
                 style={
                   Object {
                     "minWidth": undefined,
@@ -194,7 +194,6 @@ Array [
                 className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
                 disabled={false}
                 htmlFor="generated-id"
-                onClick={[Function]}
                 style={
                   Object {
                     "minWidth": undefined,
@@ -250,6 +249,7 @@ Array [
             >
               <span
                 className="euiButtonContent__icon"
+                color="inherit"
                 data-euiicon-type="save"
                 size="m"
               />
@@ -331,6 +331,7 @@ Array [
           <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
+            color="inherit"
             data-euiicon-type="alert"
             size="m"
           />
@@ -476,6 +477,7 @@ Array [
             >
               <span
                 className="euiButtonContent__icon"
+                color="inherit"
                 data-euiicon-type="save"
                 size="m"
               />
@@ -557,6 +559,7 @@ Array [
           <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
+            color="inherit"
             data-euiicon-type="alert"
             size="m"
           />
@@ -702,6 +705,7 @@ Array [
             >
               <span
                 className="euiButtonContent__icon"
+                color="inherit"
                 data-euiicon-type="save"
                 size="m"
               />
@@ -904,6 +908,7 @@ Array [
             >
               <span
                 className="euiButtonContent__icon"
+                color="inherit"
                 data-euiicon-type="save"
                 size="m"
               />

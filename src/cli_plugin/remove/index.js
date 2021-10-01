@@ -24,7 +24,7 @@ function processCommand(command, options) {
 
   const logger = new Logger(settings);
 
-  logWarnings(settings, logger);
+  logWarnings(logger);
   remove(settings, logger);
 }
 

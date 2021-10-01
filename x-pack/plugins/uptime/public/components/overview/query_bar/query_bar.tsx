@@ -9,10 +9,9 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem } from '@elastic/eui';
 import { QueryStringInput } from '../../../../../../../src/plugins/data/public/';
-import { useIndexPattern } from './use_index_pattern';
 import { SyntaxType, useQueryBar } from './use_query_bar';
 import { KQL_PLACE_HOLDER, SIMPLE_SEARCH_PLACEHOLDER } from './translations';
-import { useGetUrlParams } from '../../../hooks';
+import { useGetUrlParams, useIndexPattern } from '../../../hooks';
 
 const SYNTAX_STORAGE = 'uptime:queryBarSyntax';
 
@@ -32,13 +31,13 @@ export const isValidKuery = (query: string) => {
 };
 
 export const QueryBar = () => {
-  const { index_pattern: indexPattern } = useIndexPattern();
-
   const { search: urlValue } = useGetUrlParams();
 
-  const { query, setQuery } = useQueryBar();
+  const { query, setQuery, submitImmediately } = useQueryBar();
 
-  const [inputVal, setInputVal] = useState<string>(query.query);
+  const indexPattern = useIndexPattern();
+
+  const [inputVal, setInputVal] = useState<string>(query.query as string);
 
   const isInValid = () => {
     if (query.language === SyntaxType.text) {
@@ -66,6 +65,7 @@ export const QueryBar = () => {
         }}
         onSubmit={(queryN) => {
           if (queryN) setQuery({ query: queryN.query as string, language: queryN.language });
+          submitImmediately();
         }}
         query={{ ...query, query: inputVal }}
         aria-label={i18n.translate('xpack.uptime.filterBar.ariaLabel', {

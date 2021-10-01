@@ -8,21 +8,19 @@
 import { schema } from '@kbn/config-schema';
 
 export const calendarSchema = schema.object({
-  calendar_id: schema.maybe(schema.string()),
   calendarId: schema.string(),
-  job_ids: schema.arrayOf(schema.maybe(schema.string())),
+  calendar_id: schema.maybe(schema.string()),
+  job_ids: schema.arrayOf(schema.string()),
   description: schema.maybe(schema.string()),
   total_job_count: schema.maybe(schema.number()),
   events: schema.arrayOf(
-    schema.maybe(
-      schema.object({
-        event_id: schema.maybe(schema.string()),
-        calendar_id: schema.maybe(schema.string()),
-        description: schema.maybe(schema.string()),
-        start_time: schema.any(),
-        end_time: schema.any(),
-      })
-    )
+    schema.object({
+      event_id: schema.maybe(schema.string()),
+      calendar_id: schema.maybe(schema.string()),
+      description: schema.maybe(schema.string()),
+      start_time: schema.oneOf([schema.string(), schema.number()]),
+      end_time: schema.oneOf([schema.string(), schema.number()]),
+    })
   ),
 });
 

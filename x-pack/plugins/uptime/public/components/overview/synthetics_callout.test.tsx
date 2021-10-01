@@ -55,6 +55,7 @@ describe('SyntheticsCallout', () => {
               grow={false}
             >
               <EuiButtonEmpty
+                data-test-subj="uptimeDismissSyntheticsCallout"
                 onClick={[Function]}
               >
                 <FormattedMessage
@@ -66,9 +67,6 @@ describe('SyntheticsCallout', () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiCallOut>
-        <EuiSpacer
-          size="s"
-        />
       </Fragment>
     `);
   });
@@ -115,6 +113,7 @@ describe('SyntheticsCallout', () => {
               grow={false}
             >
               <EuiButtonEmpty
+                data-test-subj="uptimeDismissSyntheticsCallout"
                 onClick={[Function]}
               >
                 <FormattedMessage
@@ -126,9 +125,6 @@ describe('SyntheticsCallout', () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiCallOut>
-        <EuiSpacer
-          size="s"
-        />
       </Fragment>
     `);
     wrapper.find('EuiButton').simulate('click');

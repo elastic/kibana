@@ -16,6 +16,6 @@ export async function loadAlert({
   http: HttpSetup;
   alertId: string;
 }): Promise<Alert> {
-  const res = await http.get(`${BASE_ALERTING_API_PATH}/rule/${alertId}`);
+  const res = await http.get(`${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(alertId)}`);
   return transformAlert(res);
 }

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
-import deepEqual from 'fast-deep-equal';
 
+import { i18n } from '@kbn/i18n';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
@@ -22,6 +21,7 @@ import {
 import { ESTermQuery } from '../../common/typed_json';
 
 import { generateTablePaginationOptions, getInspectResponse, InspectResponse } from './helpers';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export interface ActionsArgs {
   actions: ActionEdges;
@@ -50,18 +50,26 @@ export const useAllActions = ({
   skip = false,
 }: UseAllActions) => {
   const { data } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
-  const [actionsRequest, setHostRequest] = useState<ActionsRequestOptions | null>(null);
-
-  const response = useQuery(
+  return useQuery(
     ['actions', { activePage, direction, limit, sortField }],
     async () => {
-      if (!actionsRequest) return Promise.resolve();
-
       const responseData = await data.search
-        .search<ActionsRequestOptions, ActionsStrategyResponse>(actionsRequest, {
-          strategy: 'osquerySearchStrategy',
-        })
+        .search<ActionsRequestOptions, ActionsStrategyResponse>(
+          {
+            factoryQueryType: OsqueryQueries.actions,
+            filterQuery: createFilter(filterQuery),
+            pagination: generateTablePaginationOptions(activePage, limit),
+            sort: {
+              direction,
+              field: sortField,
+            },
+          },
+          {
+            strategy: 'osquerySearchStrategy',
+          }
+        )
         .toPromise();
 
       return {
@@ -71,28 +79,15 @@ export const useAllActions = ({
       };
     },
     {
-      enabled: !skip && !!actionsRequest,
+      keepPreviousData: true,
+      enabled: !skip,
+      onSuccess: () => setErrorToast(),
+      onError: (error: Error) =>
+        setErrorToast(error, {
+          title: i18n.translate('xpack.osquery.all_actions.fetchError', {
+            defaultMessage: 'Error while fetching actions',
+          }),
+        }),
     }
   );
-
-  useEffect(() => {
-    setHostRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        factoryQueryType: OsqueryQueries.actions,
-        filterQuery: createFilter(filterQuery),
-        pagination: generateTablePaginationOptions(activePage, limit),
-        sort: {
-          direction,
-          field: sortField,
-        },
-      };
-      if (!deepEqual(prevRequest, myRequest)) {
-        return myRequest;
-      }
-      return prevRequest;
-    });
-  }, [activePage, direction, filterQuery, limit, sortField]);
-
-  return response;
 };

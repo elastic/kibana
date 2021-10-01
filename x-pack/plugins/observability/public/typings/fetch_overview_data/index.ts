@@ -7,6 +7,8 @@
 
 import { ObservabilityApp } from '../../../typings/common';
 import { UXMetrics } from '../../components/shared/core_web_vitals';
+import { ApmIndicesConfig } from '../../../common/typings';
+
 export interface Stat {
   type: 'number' | 'percent' | 'bytesPerSecond';
   value: number;
@@ -32,9 +34,22 @@ export interface HasDataParams {
   absoluteTime: { start: number; end: number };
 }
 
-export interface UXHasDataResponse {
+export interface HasDataResponse {
   hasData: boolean;
-  serviceName: string | number | undefined;
+}
+
+export interface UXHasDataResponse extends HasDataResponse {
+  serviceName?: string | number;
+  indices?: string;
+}
+
+export interface SyntheticsHasDataResponse extends HasDataResponse {
+  indices: string;
+}
+
+export interface APMHasDataResponse {
+  hasData: boolean;
+  indices: ApmIndicesConfig;
 }
 
 export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
@@ -47,7 +62,7 @@ export type HasData<T extends ObservabilityFetchDataPlugins> = (
 
 export type ObservabilityFetchDataPlugins = Exclude<
   ObservabilityApp,
-  'observability-overview' | 'stack_monitoring'
+  'observability-overview' | 'stack_monitoring' | 'uptime' | 'fleet'
 >;
 
 export interface DataHandler<
@@ -126,15 +141,13 @@ export interface ObservabilityFetchDataResponse {
   infra_metrics: MetricsFetchDataResponse;
   infra_logs: LogsFetchDataResponse;
   synthetics: UptimeFetchDataResponse;
-  uptime: UptimeFetchDataResponse;
   ux: UxFetchDataResponse;
 }
 
 export interface ObservabilityHasDataResponse {
-  apm: boolean;
+  apm: APMHasDataResponse;
   infra_metrics: boolean;
   infra_logs: boolean;
-  uptime: boolean;
-  synthetics: boolean;
+  synthetics: SyntheticsHasDataResponse;
   ux: UXHasDataResponse;
 }

@@ -6,11 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ES_FIELD_TYPES } from '../../../../src/plugins/data/common';
-
-export interface HasImportPermission {
-  hasImportPermission: boolean;
-}
+import { ES_FIELD_TYPES } from 'src/plugins/data/common';
 
 export interface InputOverrides {
   [key: string]: string | undefined;
@@ -75,6 +71,28 @@ export interface FindFileStructureResponse {
   should_trim_fields?: boolean;
 }
 
+export interface FindFileStructureErrorResponse {
+  body: {
+    statusCode: number;
+    error: string;
+    message: string;
+    attributes?: ErrorAttribute;
+  };
+  name: string;
+}
+
+interface ErrorAttribute {
+  body: {
+    error: {
+      suppressed: Array<{ reason: string }>;
+    };
+  };
+}
+
+export interface HasImportPermission {
+  hasImportPermission: boolean;
+}
+
 export type InputData = any[];
 
 export interface ImportResponse {
@@ -93,6 +111,10 @@ export interface ImportResponse {
 export interface ImportFailure {
   item: number;
   reason: string;
+  caused_by?: {
+    type: string;
+    reason: string;
+  };
   doc: ImportDoc;
 }
 

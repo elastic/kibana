@@ -17,13 +17,13 @@ export interface NewOutput {
   hosts?: string[];
   ca_sha256?: string;
   api_key?: string;
-  fleet_enroll_username?: string;
-  fleet_enroll_password?: string;
-  config?: Record<string, any>;
   config_yaml?: string;
+  is_preconfigured?: boolean;
 }
 
-export type OutputSOAttributes = NewOutput;
+export type OutputSOAttributes = NewOutput & {
+  output_id?: string;
+};
 
 export type Output = NewOutput & {
   id: string;

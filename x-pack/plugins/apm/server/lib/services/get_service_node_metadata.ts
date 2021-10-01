@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import {
   HOST_NAME,
   CONTAINER_ID,
@@ -13,57 +13,63 @@ import {
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { getServiceNodesProjection } from '../../projections/service_nodes';
-import { withApmSpan } from '../../utils/with_apm_span';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
-export function getServiceNodeMetadata({
+export async function getServiceNodeMetadata({
   kuery,
   serviceName,
   serviceNodeName,
   setup,
+  start,
+  end,
 }: {
-  kuery?: string;
+  kuery: string;
   serviceName: string;
   serviceNodeName: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
+  start: number;
+  end: number;
 }) {
-  return withApmSpan('get_service_node_metadata', async () => {
-    const { apmEventClient } = setup;
+  const { apmEventClient } = setup;
 
-    const query = mergeProjection(
-      getServiceNodesProjection({
-        kuery,
-        setup,
-        serviceName,
-        serviceNodeName,
-      }),
-      {
-        body: {
-          size: 0,
-          aggs: {
-            host: {
-              terms: {
-                field: HOST_NAME,
-                size: 1,
-              },
+  const query = mergeProjection(
+    getServiceNodesProjection({
+      kuery,
+      serviceName,
+      serviceNodeName,
+      environment: ENVIRONMENT_ALL.value,
+      start,
+      end,
+    }),
+    {
+      body: {
+        size: 0,
+        aggs: {
+          host: {
+            terms: {
+              field: HOST_NAME,
+              size: 1,
             },
-            containerId: {
-              terms: {
-                field: CONTAINER_ID,
-                size: 1,
-              },
+          },
+          containerId: {
+            terms: {
+              field: CONTAINER_ID,
+              size: 1,
             },
           },
         },
-      }
-    );
+      },
+    }
+  );
 
-    const response = await apmEventClient.search(query);
+  const response = await apmEventClient.search(
+    'get_service_node_metadata',
+    query
+  );
 
-    return {
-      host: response.aggregations?.host.buckets[0]?.key || NOT_AVAILABLE_LABEL,
-      containerId:
-        response.aggregations?.containerId.buckets[0]?.key ||
-        NOT_AVAILABLE_LABEL,
-    };
-  });
+  return {
+    host: response.aggregations?.host.buckets[0]?.key || NOT_AVAILABLE_LABEL,
+    containerId:
+      response.aggregations?.containerId.buckets[0]?.key || NOT_AVAILABLE_LABEL,
+  };
 }

@@ -15,10 +15,6 @@ import type { SecurityLicense } from '../../../common/licensing';
 import type { RawKibanaPrivileges } from '../../../common/model';
 import type { Actions } from '../actions';
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
-import {
-  featurePrivilegeIterator,
-  subFeaturePrivilegeIterator,
-} from './feature_privilege_iterator';
 
 export interface PrivilegesService {
   get(): RawKibanaPrivileges;
@@ -27,7 +23,7 @@ export interface PrivilegesService {
 export function privilegesFactory(
   actions: Actions,
   featuresService: FeaturesPluginSetup,
-  licenseService: Pick<SecurityLicense, 'getFeatures' | 'getType'>
+  licenseService: Pick<SecurityLicense, 'getFeatures' | 'hasAtLeast'>
 ) {
   const featurePrivilegeBuilder = featurePrivilegeBuilderFactory(actions);
 
@@ -35,7 +31,7 @@ export function privilegesFactory(
     get() {
       const features = featuresService.getKibanaFeatures();
       const { allowSubFeaturePrivileges } = licenseService.getFeatures();
-      const licenseType = licenseService.getType()!;
+      const { hasAtLeast: licenseHasAtLeast } = licenseService;
       const basePrivilegeFeatures = features.filter(
         (feature) => !feature.excludeFromBasePrivileges
       );
@@ -44,9 +40,9 @@ export function privilegesFactory(
       let readActions: string[] = [];
 
       basePrivilegeFeatures.forEach((feature) => {
-        for (const { privilegeId, privilege } of featurePrivilegeIterator(feature, {
+        for (const { privilegeId, privilege } of featuresService.featurePrivilegeIterator(feature, {
           augmentWithSubFeaturePrivileges: true,
-          licenseType,
+          licenseHasAtLeast,
           predicate: (pId, featurePrivilege) => !featurePrivilege.excludeFromBasePrivileges,
         })) {
           const privilegeActions = featurePrivilegeBuilder.getActions(privilege, feature);
@@ -63,9 +59,9 @@ export function privilegesFactory(
       const featurePrivileges: Record<string, Record<string, string[]>> = {};
       for (const feature of features) {
         featurePrivileges[feature.id] = {};
-        for (const featurePrivilege of featurePrivilegeIterator(feature, {
+        for (const featurePrivilege of featuresService.featurePrivilegeIterator(feature, {
           augmentWithSubFeaturePrivileges: true,
-          licenseType,
+          licenseHasAtLeast,
         })) {
           featurePrivileges[feature.id][featurePrivilege.privilegeId] = [
             actions.login,
@@ -75,9 +71,9 @@ export function privilegesFactory(
         }
 
         if (allowSubFeaturePrivileges && feature.subFeatures?.length > 0) {
-          for (const featurePrivilege of featurePrivilegeIterator(feature, {
+          for (const featurePrivilege of featuresService.featurePrivilegeIterator(feature, {
             augmentWithSubFeaturePrivileges: false,
-            licenseType,
+            licenseHasAtLeast,
           })) {
             featurePrivileges[feature.id][`minimal_${featurePrivilege.privilegeId}`] = [
               actions.login,
@@ -86,7 +82,10 @@ export function privilegesFactory(
             ];
           }
 
-          for (const subFeaturePrivilege of subFeaturePrivilegeIterator(feature, licenseType)) {
+          for (const subFeaturePrivilege of featuresService.subFeaturePrivilegeIterator(
+            feature,
+            licenseHasAtLeast
+          )) {
             featurePrivileges[feature.id][subFeaturePrivilege.id] = [
               actions.login,
               actions.version,
@@ -105,6 +104,7 @@ export function privilegesFactory(
           all: [
             actions.login,
             actions.version,
+            actions.api.get('decryptedTelemetry'),
             actions.api.get('features'),
             actions.space.manage,
             actions.ui.get('spaces', 'manage'),
@@ -113,7 +113,12 @@ export function privilegesFactory(
             actions.ui.get('enterpriseSearch', 'all'),
             ...allActions,
           ],
-          read: [actions.login, actions.version, ...readActions],
+          read: [
+            actions.login,
+            actions.version,
+            actions.api.get('decryptedTelemetry'),
+            ...readActions,
+          ],
         },
         space: {
           all: [actions.login, actions.version, ...allActions],

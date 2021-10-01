@@ -44,3 +44,12 @@ export const CLOSE_BUTTON_LABEL = i18n.translate(
   'xpack.enterpriseSearch.actions.closeButtonLabel',
   { defaultMessage: 'Close' }
 );
+
+export const RESET_DEFAULT_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.actions.resetDefaultButtonLabel',
+  { defaultMessage: 'Reset to default' }
+);
+
+export const VIEW_BUTTON_LABEL = i18n.translate('xpack.enterpriseSearch.actions.viewButtonLabel', {
+  defaultMessage: 'View',
+});

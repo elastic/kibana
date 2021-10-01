@@ -40,7 +40,11 @@ export abstract class Importer implements IImporter {
     let remainder = 0;
     for (let i = 0; i < parts; i++) {
       const byteArray = decoder.decode(data.slice(i * size - remainder, (i + 1) * size));
-      const { success, docs, remainder: tempRemainder } = this._createDocs(byteArray);
+      const {
+        success,
+        docs,
+        remainder: tempRemainder,
+      } = this._createDocs(byteArray, i === parts - 1);
       if (success) {
         this._docArray = this._docArray.concat(docs);
         remainder = tempRemainder;
@@ -52,7 +56,7 @@ export abstract class Importer implements IImporter {
     return { success: true };
   }
 
-  protected abstract _createDocs(t: string): CreateDocsResponse;
+  protected abstract _createDocs(t: string, isLastPart: boolean): CreateDocsResponse;
 
   public async initializeImport(
     index: string,
@@ -260,7 +264,7 @@ export function callImportRoute({
   });
 
   return getHttp().fetch<ImportResponse>({
-    path: `/api/file_upload/import`,
+    path: `/internal/file_upload/import`,
     method: 'POST',
     query,
     body,

@@ -15,11 +15,13 @@ describe('Core app routes', () => {
   beforeAll(async function () {
     root = kbnTestServer.createRoot({
       plugins: { initialize: false },
+      elasticsearch: { skipStartupConnectionCheck: true },
       server: {
         basePath: '/base-path',
       },
     });
 
+    await root.preboot();
     await root.setup();
     await root.start();
   });
@@ -37,6 +39,10 @@ describe('Core app routes', () => {
     it('includes the query in the redirect', async () => {
       const response = await kbnTestServer.request.get(root, '/some-path/?foo=bar').expect(302);
       expect(response.get('location')).toEqual('/base-path/some-path?foo=bar');
+    });
+
+    it('does not redirect if the path starts with `//`', async () => {
+      await kbnTestServer.request.get(root, '//some-path/').expect(404);
     });
 
     it('does not redirect if the path does not end with `/`', async () => {

@@ -80,6 +80,7 @@ async function updateIndexTemplate(
   if (isLegacy) {
     return client.indices.putTemplate({ name: templateName, body: indexTemplate });
   }
+  // @ts-expect-error Type 'IndexSettings' is not assignable to type 'IndicesIndexSettings'.
   return client.indices.putIndexTemplate({ name: templateName, body: indexTemplate });
 }
 

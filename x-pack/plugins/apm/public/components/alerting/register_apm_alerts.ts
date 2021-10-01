@@ -8,9 +8,37 @@
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
 import { stringify } from 'querystring';
+import type {
+  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
+  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
+  ALERT_SEVERITY as ALERT_SEVERITY_TYPED,
+} from '@kbn/rule-data-utils';
+import {
+  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_NON_TYPED,
+  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_NON_TYPED,
+  ALERT_SEVERITY as ALERT_SEVERITY_NON_TYPED,
+  // @ts-expect-error
+} from '@kbn/rule-data-utils/target_node/technical_field_names';
+import type { ObservabilityRuleTypeRegistry } from '../../../../observability/public';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { AlertType } from '../../../common/alert_types';
-import type { ApmRuleRegistry } from '../../plugin';
+import {
+  AlertType,
+  formatErrorCountReason,
+  formatTransactionDurationAnomalyReason,
+  formatTransactionDurationReason,
+  formatTransactionErrorRateReason,
+} from '../../../common/alert_types';
+
+// copied from elasticsearch_fieldnames.ts to limit page load bundle size
+const SERVICE_ENVIRONMENT = 'service.environment';
+const SERVICE_NAME = 'service.name';
+const TRANSACTION_TYPE = 'transaction.type';
+
+const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED =
+  ALERT_EVALUATION_THRESHOLD_NON_TYPED;
+const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED =
+  ALERT_EVALUATION_VALUE_NON_TYPED;
+const ALERT_SEVERITY: typeof ALERT_SEVERITY_TYPED = ALERT_SEVERITY_NON_TYPED;
 
 const format = ({
   pathname,
@@ -22,28 +50,29 @@ const format = ({
   return `${pathname}?${stringify(query)}`;
 };
 
-export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
-  apmRuleRegistry.registerType({
+export function registerApmAlerts(
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
+) {
+  observabilityRuleTypeRegistry.register({
     id: AlertType.ErrorCount,
     description: i18n.translate('xpack.apm.alertTypes.errorCount.description', {
       defaultMessage:
         'Alert when the number of errors in a service exceeds a defined threshold.',
     }),
-    format: ({ alert }) => {
+    format: ({ fields }) => {
       return {
-        reason: i18n.translate('xpack.apm.alertTypes.errorCount.reason', {
-          defaultMessage: `Error count is greater than {threshold} (current value is {measured}) for {serviceName}`,
-          values: {
-            threshold: alert['kibana.observability.evaluation.threshold'],
-            measured: alert['kibana.observability.evaluation.value'],
-            serviceName: alert['service.name']!,
-          },
+        reason: formatErrorCountReason({
+          threshold: fields[ALERT_EVALUATION_THRESHOLD]!,
+          measured: fields[ALERT_EVALUATION_VALUE]!,
+          serviceName: String(fields[SERVICE_NAME][0]),
         }),
         link: format({
-          pathname: `/app/apm/services/${alert['service.name']!}`,
+          pathname: `/app/apm/services/${String(
+            fields[SERVICE_NAME][0]
+          )}/errors`,
           query: {
-            ...(alert['service.environment']
-              ? { environment: alert['service.environment'] }
+            ...(fields[SERVICE_ENVIRONMENT]?.[0]
+              ? { environment: String(fields[SERVICE_ENVIRONMENT][0]) }
               : { environment: ENVIRONMENT_ALL.value }),
           },
         }),
@@ -51,13 +80,13 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
     },
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+      return `${docLinks.links.alerting.apmRules}`;
     },
     alertParamsExpression: lazy(() => import('./error_count_alert_trigger')),
     validate: () => ({
       errors: [],
     }),
-    requiresAppContext: true,
+    requiresAppContext: false,
     defaultActionMessage: i18n.translate(
       'xpack.apm.alertTypes.errorCount.defaultActionMessage',
       {
@@ -71,7 +100,7 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
     ),
   });
 
-  apmRuleRegistry.registerType({
+  observabilityRuleTypeRegistry.register({
     id: AlertType.TransactionDuration,
     description: i18n.translate(
       'xpack.apm.alertTypes.transactionDuration.description',
@@ -80,35 +109,26 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
           'Alert when the latency of a specific transaction type in a service exceeds a defined threshold.',
       }
     ),
-    format: ({ alert, formatters: { asDuration } }) => ({
-      reason: i18n.translate(
-        'xpack.apm.alertTypes.transactionDuration.reason',
-        {
-          defaultMessage: `Latency is above {threshold} (current value is {measured}) for {serviceName}`,
-          values: {
-            threshold: asDuration(
-              alert['kibana.observability.evaluation.threshold']
-            ),
-            measured: asDuration(
-              alert['kibana.observability.evaluation.value']
-            ),
-            serviceName: alert['service.name']!,
-          },
-        }
-      ),
+    format: ({ fields, formatters: { asDuration } }) => ({
+      reason: formatTransactionDurationReason({
+        threshold: fields[ALERT_EVALUATION_THRESHOLD]!,
+        measured: fields[ALERT_EVALUATION_VALUE]!,
+        serviceName: String(fields[SERVICE_NAME][0]),
+        asDuration,
+      }),
       link: format({
-        pathname: `/app/apm/services/${alert['service.name']!}`,
+        pathname: `/app/apm/services/${fields[SERVICE_NAME][0]!}`,
         query: {
-          transactionType: alert['transaction.type']!,
-          ...(alert['service.environment']
-            ? { environment: alert['service.environment'] }
+          transactionType: fields[TRANSACTION_TYPE][0]!,
+          ...(fields[SERVICE_ENVIRONMENT]?.[0]
+            ? { environment: String(fields[SERVICE_ENVIRONMENT][0]) }
             : { environment: ENVIRONMENT_ALL.value }),
         },
       }),
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+      return `${docLinks.links.alerting.apmRules}`;
     },
     alertParamsExpression: lazy(
       () => import('./transaction_duration_alert_trigger')
@@ -116,7 +136,7 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
     validate: () => ({
       errors: [],
     }),
-    requiresAppContext: true,
+    requiresAppContext: false,
     defaultActionMessage: i18n.translate(
       'xpack.apm.alertTypes.transactionDuration.defaultActionMessage',
       {
@@ -131,7 +151,7 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
     ),
   });
 
-  apmRuleRegistry.registerType({
+  observabilityRuleTypeRegistry.register({
     id: AlertType.TransactionErrorRate,
     description: i18n.translate(
       'xpack.apm.alertTypes.transactionErrorRate.description',
@@ -140,37 +160,26 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
           'Alert when the rate of transaction errors in a service exceeds a defined threshold.',
       }
     ),
-    format: ({ alert, formatters: { asPercent } }) => ({
-      reason: i18n.translate(
-        'xpack.apm.alertTypes.transactionErrorRate.reason',
-        {
-          defaultMessage: `Transaction error rate is greater than {threshold} (current value is {measured}) for {serviceName}`,
-          values: {
-            threshold: asPercent(
-              alert['kibana.observability.evaluation.threshold'],
-              100
-            ),
-            measured: asPercent(
-              alert['kibana.observability.evaluation.value'],
-              100
-            ),
-            serviceName: alert['service.name']!,
-          },
-        }
-      ),
+    format: ({ fields, formatters: { asPercent } }) => ({
+      reason: formatTransactionErrorRateReason({
+        threshold: fields[ALERT_EVALUATION_THRESHOLD]!,
+        measured: fields[ALERT_EVALUATION_VALUE]!,
+        serviceName: String(fields[SERVICE_NAME][0]),
+        asPercent,
+      }),
       link: format({
-        pathname: `/app/apm/services/${alert['service.name']!}`,
+        pathname: `/app/apm/services/${String(fields[SERVICE_NAME][0]!)}`,
         query: {
-          transactionType: alert['transaction.type']!,
-          ...(alert['service.environment']
-            ? { environment: alert['service.environment'] }
+          transactionType: String(fields[TRANSACTION_TYPE][0]!),
+          ...(fields[SERVICE_ENVIRONMENT]?.[0]
+            ? { environment: String(fields[SERVICE_ENVIRONMENT][0]) }
             : { environment: ENVIRONMENT_ALL.value }),
         },
       }),
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+      return `${docLinks.links.alerting.apmRules}`;
     },
     alertParamsExpression: lazy(
       () => import('./transaction_error_rate_alert_trigger')
@@ -178,7 +187,7 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
     validate: () => ({
       errors: [],
     }),
-    requiresAppContext: true,
+    requiresAppContext: false,
     defaultActionMessage: i18n.translate(
       'xpack.apm.alertTypes.transactionErrorRate.defaultActionMessage',
       {
@@ -193,7 +202,7 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
     ),
   });
 
-  apmRuleRegistry.registerType({
+  observabilityRuleTypeRegistry.register({
     id: AlertType.TransactionDurationAnomaly,
     description: i18n.translate(
       'xpack.apm.alertTypes.transactionDurationAnomaly.description',
@@ -201,31 +210,25 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
         defaultMessage: 'Alert when the latency of a service is abnormal.',
       }
     ),
-    format: ({ alert }) => ({
-      reason: i18n.translate(
-        'xpack.apm.alertTypes.transactionDurationAnomaly.reason',
-        {
-          defaultMessage: `{severityLevel} anomaly detected for {serviceName} (score was {measured})`,
-          values: {
-            serviceName: alert['service.name'],
-            severityLevel: alert['kibana.rac.alert.severity.level'],
-            measured: alert['kibana.observability.evaluation.value'],
-          },
-        }
-      ),
+    format: ({ fields }) => ({
+      reason: formatTransactionDurationAnomalyReason({
+        serviceName: String(fields[SERVICE_NAME][0]),
+        severityLevel: String(fields[ALERT_SEVERITY]),
+        measured: Number(fields[ALERT_EVALUATION_VALUE]),
+      }),
       link: format({
-        pathname: `/app/apm/services/${alert['service.name']!}`,
+        pathname: `/app/apm/services/${String(fields[SERVICE_NAME][0])}`,
         query: {
-          transactionType: alert['transaction.type']!,
-          ...(alert['service.environment']
-            ? { environment: alert['service.environment'] }
+          transactionType: String(fields[TRANSACTION_TYPE][0]),
+          ...(fields[SERVICE_ENVIRONMENT]?.[0]
+            ? { environment: String(fields[SERVICE_ENVIRONMENT][0]) }
             : { environment: ENVIRONMENT_ALL.value }),
         },
       }),
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+      return `${docLinks.links.alerting.apmRules}`;
     },
     alertParamsExpression: lazy(
       () => import('./transaction_duration_anomaly_alert_trigger')
@@ -233,7 +236,7 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
     validate: () => ({
       errors: [],
     }),
-    requiresAppContext: true,
+    requiresAppContext: false,
     defaultActionMessage: i18n.translate(
       'xpack.apm.alertTypes.transactionDurationAnomaly.defaultActionMessage',
       {

@@ -8,6 +8,9 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlCommonUI } from './common_ui';
+import { ML_ALERT_TYPES } from '../../../../plugins/ml/common/constants/alerts';
+import { Alert } from '../../../../plugins/alerting/common';
+import { MlAnomalyDetectionAlertParams } from '../../../../plugins/ml/common/types/alerts';
 
 export function MachineLearningAlertingProvider(
   { getService }: FtrProviderContext,
@@ -16,6 +19,8 @@ export function MachineLearningAlertingProvider(
   const retry = getService('retry');
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
+  const supertest = getService('supertest');
 
   return {
     async selectAnomalyDetectionAlertType() {
@@ -89,16 +94,76 @@ export function MachineLearningAlertingProvider(
       await this.assertPreviewCalloutVisible();
     },
 
-    async checkPreview(expectedMessage: string) {
+    async checkPreview(expectedMessagePattern: RegExp) {
       await this.clickPreviewButton();
       const previewMessage = await testSubjects.getVisibleText('mlAnomalyAlertPreviewMessage');
-      expect(previewMessage).to.eql(expectedMessage);
+      expect(previewMessage).to.match(expectedMessagePattern);
     },
 
     async assertPreviewCalloutVisible() {
       await retry.tryForTime(5000, async () => {
         await testSubjects.existOrFail(`mlAnomalyAlertPreviewCallout`);
       });
+    },
+
+    async assertLookbackInterval(expectedValue: string) {
+      await this.ensureAdvancedSectionOpen();
+      const actualValue = await testSubjects.getAttribute(
+        'mlAnomalyAlertLookbackInterval',
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Expected lookback interval to equal ${expectedValue}, got ${actualValue}`
+      );
+    },
+
+    async assertTopNBuckets(expectedNumberOfBuckets: number) {
+      await this.ensureAdvancedSectionOpen();
+      const actualValue = await testSubjects.getAttribute('mlAnomalyAlertTopNBuckets', 'value');
+      expect(actualValue).to.eql(
+        expectedNumberOfBuckets,
+        `Expected number of buckets to equal ${expectedNumberOfBuckets}, got ${actualValue}`
+      );
+    },
+
+    async setLookbackInterval(interval: string) {
+      await this.ensureAdvancedSectionOpen();
+      await testSubjects.setValue('mlAnomalyAlertLookbackInterval', interval);
+      await this.assertLookbackInterval(interval);
+    },
+
+    async setTopNBuckets(numberOfBuckets: number) {
+      await this.ensureAdvancedSectionOpen();
+      await testSubjects.setValue('mlAnomalyAlertTopNBuckets', numberOfBuckets.toString());
+      await this.assertTopNBuckets(numberOfBuckets);
+    },
+
+    async isAdvancedSectionOpened() {
+      return await find.existsByDisplayedByCssSelector('#mlAnomalyAlertAdvancedSettings');
+    },
+
+    async ensureAdvancedSectionOpen() {
+      await retry.tryForTime(5000, async () => {
+        if (!(await this.isAdvancedSectionOpened())) {
+          await testSubjects.click('mlAnomalyAlertAdvancedSettingsTrigger');
+          expect(await this.isAdvancedSectionOpened()).to.eql(true);
+        }
+      });
+    },
+
+    async cleanAnomalyDetectionRules() {
+      const { body: anomalyDetectionRules } = await supertest
+        .get(`/api/alerting/rules/_find`)
+        .query({ filter: `alert.attributes.alertTypeId:${ML_ALERT_TYPES.ANOMALY_DETECTION}` })
+        .set('kbn-xsrf', 'foo')
+        .expect(200);
+
+      for (const rule of anomalyDetectionRules.data as Array<
+        Alert<MlAnomalyDetectionAlertParams>
+      >) {
+        await supertest.delete(`/api/alerting/rule/${rule.id}`).set('kbn-xsrf', 'foo').expect(204);
+      }
     },
   };
 }

@@ -9,7 +9,6 @@ import { ReactWrapper, mount } from 'enzyme';
 import React from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { waitFor } from '@testing-library/dom';
-
 import {
   doesNotExistOperator,
   existsOperator,
@@ -19,19 +18,18 @@ import {
   isNotOperator,
   isOneOfOperator,
   isOperator,
-} from '../autocomplete/operators';
-import {
-  fields,
-  getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+} from '@kbn/securitysolution-list-utils';
+import { useFindLists } from '@kbn/securitysolution-list-hooks';
+import { FieldSpec } from 'src/plugins/data/common';
+
+import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { getFoundListSchemaMock } from '../../../../common/schemas/response/found_list_schema.mock';
-import { useFindLists } from '../../../lists/hooks/use_find_lists';
 
 import { BuilderEntryItem } from './entry_renderer';
 
-jest.mock('../../../lists/hooks/use_find_lists');
+jest.mock('@kbn/securitysolution-list-hooks');
 
 const mockKibanaHttpService = coreMock.createStart().http;
 const { autocomplete: autocompleteStartMock } = dataPluginMock.createStartContract();
@@ -228,6 +226,7 @@ describe('BuilderEntryItem', () => {
   test('it renders field values correctly when operator is "isInListOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
+        allowLargeValueLists
         autocompleteService={autocompleteStartMock}
         entry={{
           correspondingKeywordField: undefined,
@@ -264,6 +263,7 @@ describe('BuilderEntryItem', () => {
   test('it renders field values correctly when operator is "isNotInListOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
+        allowLargeValueLists
         autocompleteService={autocompleteStartMock}
         entry={{
           correspondingKeywordField: undefined,
@@ -372,31 +372,33 @@ describe('BuilderEntryItem', () => {
   });
 
   test('it uses "correspondingKeywordField" if it exists', () => {
+    const correspondingKeywordField: FieldSpec = {
+      aggregatable: true,
+      count: 0,
+      esTypes: ['keyword'],
+      name: 'extension',
+      readFromDocValues: true,
+      scripted: false,
+      searchable: true,
+      type: 'string',
+    };
+    const field: FieldSpec = {
+      aggregatable: false,
+      count: 0,
+      esTypes: ['text'],
+      name: 'extension.text',
+      readFromDocValues: true,
+      scripted: false,
+      searchable: false,
+      type: 'string',
+    };
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
         entry={{
-          correspondingKeywordField: {
-            aggregatable: true,
-            count: 0,
-            esTypes: ['keyword'],
-            name: 'extension',
-            readFromDocValues: true,
-            scripted: false,
-            searchable: true,
-            type: 'string',
-          },
+          correspondingKeywordField,
           entryIndex: 0,
-          field: {
-            aggregatable: false,
-            count: 0,
-            esTypes: ['text'],
-            name: 'extension.text',
-            readFromDocValues: true,
-            scripted: false,
-            searchable: false,
-            type: 'string',
-          },
+          field,
           id: '123',
           nested: undefined,
           operator: isOneOfOperator,
@@ -458,9 +460,11 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(0).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange([{ label: 'machine.os' }]);
+    (
+      wrapper.find(EuiComboBox).at(0).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange([{ label: 'machine.os' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
       { field: 'machine.os', id: '123', operator: 'included', type: 'match', value: '' },
@@ -496,9 +500,11 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(1).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange([{ label: 'is not' }]);
+    (
+      wrapper.find(EuiComboBox).at(1).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange([{ label: 'is not' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
       { field: 'ip', id: '123', operator: 'excluded', type: 'match', value: '1234' },
@@ -534,12 +540,14 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
-      onCreateOption: (a: string) => void;
-    }).onCreateOption('126.45.211.34');
+    (
+      wrapper.find(EuiComboBox).at(2).props() as unknown as {
+        onCreateOption: (a: string) => void;
+      }
+    ).onCreateOption('127.0.0.1');
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { field: 'ip', id: '123', operator: 'excluded', type: 'match', value: '126.45.211.34' },
+      { field: 'ip', id: '123', operator: 'excluded', type: 'match', value: '127.0.0.1' },
       0
     );
   });
@@ -572,12 +580,14 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
-      onCreateOption: (a: string) => void;
-    }).onCreateOption('126.45.211.34');
+    (
+      wrapper.find(EuiComboBox).at(2).props() as unknown as {
+        onCreateOption: (a: string) => void;
+      }
+    ).onCreateOption('127.0.0.1');
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { field: 'ip', id: '123', operator: 'included', type: 'match_any', value: ['126.45.211.34'] },
+      { field: 'ip', id: '123', operator: 'included', type: 'match_any', value: ['127.0.0.1'] },
       0
     );
   });
@@ -610,9 +620,11 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange([{ label: 'some name' }]);
+    (
+      wrapper.find(EuiComboBox).at(2).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange([{ label: 'some name' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
       {
@@ -655,9 +667,11 @@ describe('BuilderEntryItem', () => {
     );
 
     await waitFor(() => {
-      ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
-        onBlur: () => void;
-      }).onBlur();
+      (
+        wrapper.find(EuiComboBox).at(2).props() as unknown as {
+          onBlur: () => void;
+        }
+      ).onBlur();
     });
 
     expect(mockSetErrorExists).toHaveBeenCalledWith(true);
@@ -692,16 +706,59 @@ describe('BuilderEntryItem', () => {
     );
 
     await waitFor(() => {
-      ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
-        onBlur: () => void;
-      }).onBlur();
+      (
+        wrapper.find(EuiComboBox).at(2).props() as unknown as {
+          onBlur: () => void;
+        }
+      ).onBlur();
 
       // Invalid input because field type is number
-      ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
-        onSearchChange: (arg: string) => void;
-      }).onSearchChange('hellooo');
+      (
+        wrapper.find(EuiComboBox).at(2).props() as unknown as {
+          onSearchChange: (arg: string) => void;
+        }
+      ).onSearchChange('hellooo');
     });
 
     expect(mockSetErrorExists).toHaveBeenCalledWith(true);
+  });
+
+  test('it disabled field inputs correctly when passed "isDisabled=true"', () => {
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: isOneOfOperator,
+          parent: undefined,
+          value: ['1234'],
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        listType="detection"
+        onChange={jest.fn()}
+        setErrorsExist={jest.fn()}
+        osTypes={['windows']}
+        showLabel={false}
+        isDisabled={true}
+      />
+    );
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().disabled
+    ).toBeTruthy();
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"] input').props().disabled
+    ).toBeTruthy();
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatchAny"] input').props().disabled
+    ).toBeTruthy();
   });
 });

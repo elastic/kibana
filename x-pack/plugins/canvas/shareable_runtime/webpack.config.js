@@ -33,13 +33,12 @@ module.exports = {
   // Include a require alias for legacy UI code and styles
   resolve: {
     alias: {
-      ui: path.resolve(KIBANA_ROOT, 'src/legacy/ui/public'),
       'data/interpreter': path.resolve(
         KIBANA_ROOT,
         'src/plugins/data/public/expressions/interpreter'
       ),
       'kbn/interpreter': path.resolve(KIBANA_ROOT, 'packages/kbn-interpreter/target/common'),
-      tinymath: path.resolve(KIBANA_ROOT, 'node_modules/tinymath/lib/tinymath.es5.js'),
+      tinymath: path.resolve(KIBANA_ROOT, 'node_modules/tinymath/lib/tinymath.min.js'),
       core_app_image_assets: path.resolve(KIBANA_ROOT, 'src/core/public/core_app/images'),
     },
     extensions: ['.js', '.json', '.ts', '.tsx', '.scss'],
@@ -117,6 +116,7 @@ module.exports = {
           {
             loader: 'sass-loader',
             options: {
+              implementation: require('node-sass'),
               sourceMap: !isProd,
             },
           },
@@ -147,12 +147,13 @@ module.exports = {
           {
             loader: 'sass-loader',
             options: {
-              prependData(loaderContext) {
+              additionalData(content, loaderContext) {
                 return `@import ${stringifyRequest(
                   loaderContext,
                   path.resolve(KIBANA_ROOT, 'src/core/public/core_app/styles/_globals_v7light.scss')
-                )};\n`;
+                )};\n${content}`;
               },
+              implementation: require('node-sass'),
               webpackImporter: false,
               sassOptions: {
                 outputStyle: 'nested',

@@ -20,9 +20,6 @@ export const searchSavedObjectType: SavedObjectsType = {
     getTitle(obj) {
       return obj.attributes.title;
     },
-    getEditUrl(obj) {
-      return `/management/kibana/objects/savedSearches/${encodeURIComponent(obj.id)}`;
-    },
     getInAppUrl(obj) {
       return {
         path: `/app/discover#/view/${encodeURIComponent(obj.id)}`,
@@ -47,5 +44,5 @@ export const searchSavedObjectType: SavedObjectsType = {
       version: { type: 'integer' },
     },
   },
-  migrations: searchMigrations as any,
+  migrations: searchMigrations,
 };

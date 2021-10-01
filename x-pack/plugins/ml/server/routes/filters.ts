@@ -8,7 +8,7 @@
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import { createFilterSchema, filterIdSchema, updateFilterSchema } from './schemas/filters_schema';
-import { FilterManager, FormFilter } from '../models/filter';
+import { FilterManager, FormFilter, UpdateFilter } from '../models/filter';
 import type { MlClient } from '../lib/ml_client';
 
 // TODO - add function for returning a list of just the filter IDs.
@@ -33,7 +33,7 @@ function newFilter(mlClient: MlClient, filter: FormFilter) {
   return mgr.newFilter(filter);
 }
 
-function updateFilter(mlClient: MlClient, filterId: string, filter: FormFilter) {
+function updateFilter(mlClient: MlClient, filterId: string, filter: UpdateFilter) {
   const mgr = new FilterManager(mlClient);
   return mgr.updateFilter(filterId, filter);
 }
@@ -47,9 +47,9 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup Filters
    *
-   * @api {get} /api/ml/filters Gets filters - size limit has been explicitly set to 1000
+   * @api {get} /api/ml/filters Get filters
    * @apiName GetFilters
-   * @apiDescription Retrieves the list of filters which are used for custom rules in anomaly detection.
+   * @apiDescription Retrieves the list of filters which are used for custom rules in anomaly detection. Sets the size limit explicitly to return a maximum of 1000.
    *
    * @apiSuccess {Boolean} success
    * @apiSuccess {Object[]} filters list of filters

@@ -24,3 +24,7 @@ export {
 } from './types';
 
 export { migratePanelsTo730 } from './migrate_to_730_panels';
+
+export const UI_SETTINGS = {
+  ENABLE_LABS_UI: 'labs:dashboard:enable_ui',
+};

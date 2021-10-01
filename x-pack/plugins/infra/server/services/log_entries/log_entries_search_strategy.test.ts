@@ -9,6 +9,7 @@ import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { of, throwError } from 'rxjs';
 import {
   elasticsearchServiceMock,
+  httpServerMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from 'src/core/server/mocks';
@@ -19,13 +20,16 @@ import {
   SearchStrategyDependencies,
 } from 'src/plugins/data/server';
 import { createSearchSessionsClientMock } from '../../../../../../src/plugins/data/server/search/mocks';
+import {
+  createIndexPatternMock,
+  createIndexPatternsStartMock,
+} from '../../../common/dependency_mocks/index_patterns';
 import { InfraSource } from '../../lib/sources';
 import { createInfraSourcesMock } from '../../lib/sources/mocks';
 import {
   logEntriesSearchRequestStateRT,
   logEntriesSearchStrategyProvider,
 } from './log_entries_search_strategy';
-import { getIndexPatternsMock } from './mocks';
 
 describe('LogEntries search strategy', () => {
   it('handles initial search requests', async () => {
@@ -72,6 +76,15 @@ describe('LogEntries search strategy', () => {
           index: 'log-indices-*',
           body: expect.objectContaining({
             fields: expect.arrayContaining(['event.dataset', 'message']),
+            runtime_mappings: {
+              runtime_field: {
+                type: 'keyword',
+                script: {
+                  lang: 'painless',
+                  source: 'emit("runtime value")',
+                },
+              },
+            },
           }),
         }),
       }),
@@ -258,7 +271,7 @@ const createSourceConfigurationMock = (): InfraSource => ({
     description: 'SOURCE_DESCRIPTION',
     logIndices: {
       type: 'index_pattern',
-      indexPatternId: 'some-test-id',
+      indexPatternId: 'test-index-pattern',
     },
     metricAlias: 'metric-indices-*',
     inventoryDefaultView: 'DEFAULT_VIEW',
@@ -315,6 +328,7 @@ const createSearchStrategyDependenciesMock = (): SearchStrategyDependencies => (
   esClient: elasticsearchServiceMock.createScopedClusterClient(),
   savedObjectsClient: savedObjectsClientMock.create(),
   searchSessionsClient: createSearchSessionsClientMock(),
+  request: httpServerMock.createKibanaRequest(),
 });
 
 // using the official data mock from within x-pack doesn't type-check successfully,
@@ -323,5 +337,33 @@ const createDataPluginMock = (esSearchStrategyMock: ISearchStrategy): any => ({
   search: {
     getSearchStrategy: jest.fn().mockReturnValue(esSearchStrategyMock),
   },
-  indexPatterns: getIndexPatternsMock(),
+  indexPatterns: createIndexPatternsStartMock(0, [
+    createIndexPatternMock({
+      id: 'test-index-pattern',
+      title: 'log-indices-*',
+      timeFieldName: '@timestamp',
+      fields: [
+        {
+          name: 'event.dataset',
+          type: 'string',
+          esTypes: ['keyword'],
+          aggregatable: true,
+          searchable: true,
+        },
+        {
+          name: 'runtime_field',
+          type: 'string',
+          runtimeField: {
+            type: 'keyword',
+            script: {
+              source: 'emit("runtime value")',
+            },
+          },
+          esTypes: ['keyword'],
+          aggregatable: true,
+          searchable: true,
+        },
+      ],
+    }),
+  ]),
 });

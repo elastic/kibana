@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 import '../../../__mocks__/shallow_useeffect.mock';
 import '../../__mocks__/engine_logic.mock';
 
@@ -13,7 +13,8 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiPageHeader, EuiEmptyPrompt } from '@elastic/eui';
+import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
+import { getPageHeaderActions } from '../../../test_helpers';
 
 import { ResultSettings } from './result_settings';
 import { ResultSettingsTable } from './result_settings_table';
@@ -43,8 +44,6 @@ describe('ResultSettings', () => {
   });
 
   const subject = () => shallow(<ResultSettings />);
-  const findButtons = (wrapper: ShallowWrapper) =>
-    wrapper.find(EuiPageHeader).prop('rightSideItems') as React.ReactElement[];
 
   it('renders', () => {
     const wrapper = subject();
@@ -57,19 +56,10 @@ describe('ResultSettings', () => {
     expect(actions.initializeResultSettingsData).toHaveBeenCalled();
   });
 
-  it('renders a loading screen if data has not loaded yet', () => {
-    setMockValues({
-      dataLoading: true,
-    });
-    const wrapper = subject();
-    expect(wrapper.find(ResultSettingsTable).exists()).toBe(false);
-    expect(wrapper.find(SampleResponse).exists()).toBe(false);
-  });
-
   it('renders a "save" button that will save the current changes', () => {
-    const buttons = findButtons(subject());
-    expect(buttons.length).toBe(3);
-    const saveButton = shallow(buttons[0]);
+    const buttons = getPageHeaderActions(subject());
+    expect(buttons.children().length).toBe(3);
+    const saveButton = buttons.find('[data-test-subj="SaveResultSettings"]');
     saveButton.simulate('click');
     expect(actions.saveResultSettings).toHaveBeenCalled();
   });
@@ -79,15 +69,26 @@ describe('ResultSettings', () => {
       ...values,
       stagedUpdates: false,
     });
-    const buttons = findButtons(subject());
-    const saveButton = shallow(buttons[0]);
+    const buttons = getPageHeaderActions(subject());
+    const saveButton = buttons.find('[data-test-subj="SaveResultSettings"]');
+    expect(saveButton.prop('disabled')).toBe(true);
+  });
+
+  it('renders the "save" button as disabled if everything is disabled', () => {
+    setMockValues({
+      ...values,
+      stagedUpdates: true,
+      resultFieldsEmpty: true,
+    });
+    const buttons = getPageHeaderActions(subject());
+    const saveButton = buttons.find('[data-test-subj="SaveResultSettings"]');
     expect(saveButton.prop('disabled')).toBe(true);
   });
 
   it('renders a "restore defaults" button that will reset all values to their defaults', () => {
-    const buttons = findButtons(subject());
-    expect(buttons.length).toBe(3);
-    const resetButton = shallow(buttons[1]);
+    const buttons = getPageHeaderActions(subject());
+    expect(buttons.children().length).toBe(3);
+    const resetButton = buttons.find('[data-test-subj="ResetResultSettings"]');
     resetButton.simulate('click');
     expect(actions.confirmResetAllFields).toHaveBeenCalled();
   });
@@ -97,17 +98,25 @@ describe('ResultSettings', () => {
       ...values,
       resultFieldsAtDefaultSettings: true,
     });
-    const buttons = findButtons(subject());
-    const resetButton = shallow(buttons[1]);
+    const buttons = getPageHeaderActions(subject());
+    const resetButton = buttons.find('[data-test-subj="ResetResultSettings"]');
     expect(resetButton.prop('disabled')).toBe(true);
   });
 
   it('renders a "clear" button that will remove all selected options', () => {
-    const buttons = findButtons(subject());
-    expect(buttons.length).toBe(3);
-    const clearButton = shallow(buttons[2]);
+    const buttons = getPageHeaderActions(subject());
+    expect(buttons.children().length).toBe(3);
+    const clearButton = buttons.find('[data-test-subj="ClearResultSettings"]');
     clearButton.simulate('click');
     expect(actions.clearAllFields).toHaveBeenCalled();
+  });
+
+  it('will prevent user from leaving the page if there are unsaved changes', () => {
+    setMockValues({
+      ...values,
+      stagedUpdates: true,
+    });
+    expect(subject().find(UnsavedChangesPrompt).prop('hasUnsavedChanges')).toBe(true);
   });
 
   describe('when there is no schema yet', () => {
@@ -121,17 +130,12 @@ describe('ResultSettings', () => {
     });
 
     it('will not render action buttons', () => {
-      const buttons = findButtons(wrapper);
-      expect(buttons.length).toBe(0);
+      const buttons = getPageHeaderActions(wrapper);
+      expect(buttons.children().length).toBe(0);
     });
 
-    it('will not render the main page content', () => {
-      expect(wrapper.find(ResultSettingsTable).exists()).toBe(false);
-      expect(wrapper.find(SampleResponse).exists()).toBe(false);
-    });
-
-    it('will render an "empty" message', () => {
-      expect(wrapper.find(EuiEmptyPrompt).exists()).toBe(true);
+    it('will render an empty state', () => {
+      expect(wrapper.prop('isEmptyState')).toBe(true);
     });
   });
 });

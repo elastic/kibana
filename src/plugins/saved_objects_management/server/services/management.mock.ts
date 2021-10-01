@@ -19,6 +19,7 @@ const createManagementMock = () => {
     getEditUrl: jest.fn(),
     getInAppUrl: jest.fn(),
     getNamespaceType: jest.fn(),
+    isHidden: jest.fn().mockReturnValue(false),
   };
   return mocked;
 };

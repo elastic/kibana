@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { Dispatch, useMemo, useReducer, useEffect, useRef } from 'react';
-import { EuiBasicTable } from '@elastic/eui';
-
-import { errorToToaster, useStateToaster } from '../../../../../common/components/toasters';
+import { Dispatch, useReducer, useEffect, useRef } from 'react';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
-
 import { fetchRules } from '../api';
-import { createRulesTableReducer, RulesTableState, RulesTableAction } from './rules_table_reducer';
+import { rulesTableReducer, RulesTableState, RulesTableAction } from './rules_table_reducer';
 import { createRulesTableFacade, RulesTableFacade } from './rules_table_facade';
 
 const INITIAL_SORT_FIELD = 'enabled';
@@ -35,15 +32,14 @@ const initialStateDefaults: RulesTableState = {
   loadingRulesAction: null,
   loadingRuleIds: [],
   selectedRuleIds: [],
-  exportRuleIds: [],
   lastUpdated: 0,
   isRefreshOn: true,
   isRefreshing: false,
+  isAllSelected: false,
   showIdleModal: false,
 };
 
 export interface UseRulesTableParams {
-  tableRef: React.MutableRefObject<EuiBasicTable<unknown> | undefined>;
   initialStateOverride?: Partial<RulesTableState>;
 }
 
@@ -54,7 +50,7 @@ export interface UseRulesTableReturn extends RulesTableFacade {
 }
 
 export const useRulesTable = (params: UseRulesTableParams): UseRulesTableReturn => {
-  const { tableRef, initialStateOverride } = params;
+  const { initialStateOverride } = params;
 
   const initialState: RulesTableState = {
     ...initialStateDefaults,
@@ -62,12 +58,11 @@ export const useRulesTable = (params: UseRulesTableParams): UseRulesTableReturn 
     ...initialStateOverride,
   };
 
-  const reducer = useMemo(() => createRulesTableReducer(tableRef), [tableRef]);
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(rulesTableReducer, initialState);
   const facade = useRef(createRulesTableFacade(dispatch));
+  const { addError } = useAppToasts();
 
   const reFetchRules = useRef<() => Promise<void>>(() => Promise.resolve());
-  const [, dispatchToaster] = useStateToaster();
 
   const { pagination, filterOptions } = state;
   const filterTags = filterOptions.tags.sort().join();
@@ -95,7 +90,7 @@ export const useRulesTable = (params: UseRulesTableParams): UseRulesTableReturn 
         }
       } catch (error) {
         if (isSubscribed) {
-          errorToToaster({ title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE, error, dispatchToaster });
+          addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE });
           facade.current.setRules([], {});
         }
       }

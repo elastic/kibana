@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Map as MapboxMap, MapSourceDataEvent } from 'mapbox-gl';
+import type { Map as MapboxMap, MapSourceDataEvent } from '@kbn/mapbox-gl';
 import _ from 'lodash';
 import { ILayer } from '../../classes/layers/layer';
 import { SPATIAL_FILTERS_LAYER_ID } from '../../../common/constants';
@@ -24,7 +24,7 @@ interface Tile {
 export class TileStatusTracker {
   private _tileCache: Tile[];
   private readonly _mbMap: MapboxMap;
-  private readonly _setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
+  private readonly _updateTileStatus: (layer: ILayer, areTilesLoaded: boolean) => void;
   private readonly _getCurrentLayerList: () => ILayer[];
   private readonly _onSourceDataLoading = (e: MapSourceDataEvent) => {
     if (
@@ -36,18 +36,17 @@ export class TileStatusTracker {
     ) {
       const tracked = this._tileCache.find((tile) => {
         return (
-          tile.mbKey === ((e.tile.tileID.key as unknown) as string) &&
-          tile.mbSourceId === e.sourceId
+          tile.mbKey === (e.tile.tileID.key as unknown as string) && tile.mbSourceId === e.sourceId
         );
       });
 
       if (!tracked) {
         this._tileCache.push({
-          mbKey: (e.tile.tileID.key as unknown) as string,
+          mbKey: e.tile.tileID.key as unknown as string,
           mbSourceId: e.sourceId,
           mbTile: e.tile,
         });
-        this._updateTileStatus();
+        this._updateTileStatusForAllLayers();
       }
     }
   };
@@ -59,7 +58,7 @@ export class TileStatusTracker {
       e.tile &&
       (e.source.type === 'vector' || e.source.type === 'raster')
     ) {
-      this._removeTileFromCache(e.sourceId, (e.tile.tileID.key as unknown) as string);
+      this._removeTileFromCache(e.sourceId, e.tile.tileID.key as unknown as string);
     }
   };
   private readonly _onSourceData = (e: MapSourceDataEvent) => {
@@ -70,21 +69,21 @@ export class TileStatusTracker {
       e.tile &&
       (e.source.type === 'vector' || e.source.type === 'raster')
     ) {
-      this._removeTileFromCache(e.sourceId, (e.tile.tileID.key as unknown) as string);
+      this._removeTileFromCache(e.sourceId, e.tile.tileID.key as unknown as string);
     }
   };
 
   constructor({
     mbMap,
-    setAreTilesLoaded,
+    updateTileStatus,
     getCurrentLayerList,
   }: {
     mbMap: MapboxMap;
-    setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
+    updateTileStatus: (layer: ILayer, areTilesLoaded: boolean) => void;
     getCurrentLayerList: () => ILayer[];
   }) {
     this._tileCache = [];
-    this._setAreTilesLoaded = setAreTilesLoaded;
+    this._updateTileStatus = updateTileStatus;
     this._getCurrentLayerList = getCurrentLayerList;
 
     this._mbMap = mbMap;
@@ -93,7 +92,7 @@ export class TileStatusTracker {
     this._mbMap.on('sourcedata', this._onSourceData);
   }
 
-  _updateTileStatus = _.debounce(() => {
+  _updateTileStatusForAllLayers = _.debounce(() => {
     this._tileCache = this._tileCache.filter((tile) => {
       return typeof tile.mbTile.aborted === 'boolean' ? !tile.mbTile.aborted : true;
     });
@@ -108,18 +107,18 @@ export class TileStatusTracker {
           break;
         }
       }
-      this._setAreTilesLoaded(layer.getId(), !atLeastOnePendingTile);
+      this._updateTileStatus(layer, !atLeastOnePendingTile);
     }
   }, 100);
 
   _removeTileFromCache = (mbSourceId: string, mbKey: string) => {
     const trackedIndex = this._tileCache.findIndex((tile) => {
-      return tile.mbKey === ((mbKey as unknown) as string) && tile.mbSourceId === mbSourceId;
+      return tile.mbKey === (mbKey as unknown as string) && tile.mbSourceId === mbSourceId;
     });
 
     if (trackedIndex >= 0) {
       this._tileCache.splice(trackedIndex, 1);
-      this._updateTileStatus();
+      this._updateTileStatusForAllLayers();
     }
   };
 

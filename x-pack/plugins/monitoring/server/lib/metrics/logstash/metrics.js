@@ -430,6 +430,7 @@ export const metrics = {
     units: 'B',
   }),
   logstash_cluster_pipeline_throughput: new LogstashPipelineThroughputMetric({
+    mbField: 'logstash.node.stats.pipelines.events.out',
     field: 'logstash_stats.pipelines.events.out',
     label: pipelineThroughputLabel,
     description: pipelineThroughputDescription,
@@ -438,6 +439,7 @@ export const metrics = {
   }),
   logstash_node_pipeline_throughput: new LogstashPipelineThroughputMetric({
     uuidField: 'logstash_stats.logstash.uuid', // TODO: add comment explaining why
+    mbField: 'logstash.node.stats.pipelines.events.out',
     field: 'logstash_stats.pipelines.events.out',
     label: pipelineThroughputLabel,
     description: pipelineThroughputDescription,

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-
 import { useValues } from 'kea';
 
-import { SideNavLink } from '../../../../shared/layout';
+import { EuiSideNavItemType } from '@elastic/eui';
+
+import { generateNavLink } from '../../../../shared/layout';
 import { AppLogic } from '../../../app_logic';
 import { NAV, CUSTOM_SERVICE_TYPE } from '../../../constants';
 import {
@@ -22,40 +22,52 @@ import {
 } from '../../../routes';
 import { SourceLogic } from '../source_logic';
 
-export const SourceSubNav: React.FC = () => {
+export const useSourceSubNav = () => {
   const { isOrganization } = useValues(AppLogic);
   const {
     contentSource: { id, serviceType },
   } = useValues(SourceLogic);
 
-  if (!id) return null;
+  if (!id) return undefined;
+
+  const navItems: Array<EuiSideNavItemType<unknown>> = [
+    {
+      id: 'sourceOverview',
+      name: NAV.OVERVIEW,
+      ...generateNavLink({ to: getContentSourcePath(SOURCE_DETAILS_PATH, id, isOrganization) }),
+    },
+    {
+      id: 'sourceContent',
+      name: NAV.CONTENT,
+      ...generateNavLink({ to: getContentSourcePath(SOURCE_CONTENT_PATH, id, isOrganization) }),
+    },
+  ];
 
   const isCustom = serviceType === CUSTOM_SERVICE_TYPE;
+  if (isCustom) {
+    navItems.push({
+      id: 'sourceSchema',
+      name: NAV.SCHEMA,
+      ...generateNavLink({
+        to: getContentSourcePath(SOURCE_SCHEMAS_PATH, id, isOrganization),
+        shouldShowActiveForSubroutes: true,
+      }),
+    });
+    navItems.push({
+      id: 'sourceDisplaySettings',
+      name: NAV.DISPLAY_SETTINGS,
+      ...generateNavLink({
+        to: getContentSourcePath(SOURCE_DISPLAY_SETTINGS_PATH, id, isOrganization),
+        shouldShowActiveForSubroutes: true,
+      }),
+    });
+  }
 
-  return (
-    <div className="sourcesSubNav">
-      <SideNavLink to={getContentSourcePath(SOURCE_DETAILS_PATH, id, isOrganization)}>
-        {NAV.OVERVIEW}
-      </SideNavLink>
-      <SideNavLink to={getContentSourcePath(SOURCE_CONTENT_PATH, id, isOrganization)}>
-        {NAV.CONTENT}
-      </SideNavLink>
-      {isCustom && (
-        <>
-          <SideNavLink to={getContentSourcePath(SOURCE_SCHEMAS_PATH, id, isOrganization)}>
-            {NAV.SCHEMA}
-          </SideNavLink>
-          <SideNavLink
-            shouldShowActiveForSubroutes
-            to={getContentSourcePath(SOURCE_DISPLAY_SETTINGS_PATH, id, isOrganization)}
-          >
-            {NAV.DISPLAY_SETTINGS}
-          </SideNavLink>
-        </>
-      )}
-      <SideNavLink to={getContentSourcePath(SOURCE_SETTINGS_PATH, id, isOrganization)}>
-        {NAV.SETTINGS}
-      </SideNavLink>
-    </div>
-  );
+  navItems.push({
+    id: 'sourceSettings',
+    name: NAV.SETTINGS,
+    ...generateNavLink({ to: getContentSourcePath(SOURCE_SETTINGS_PATH, id, isOrganization) }),
+  });
+
+  return navItems;
 };

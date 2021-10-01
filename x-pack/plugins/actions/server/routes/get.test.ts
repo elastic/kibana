@@ -38,6 +38,7 @@ describe('getActionRoute', () => {
       name: 'action name',
       config: {},
       isPreconfigured: false,
+      isMissingSecrets: false,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -57,6 +58,7 @@ describe('getActionRoute', () => {
           "config": Object {},
           "connector_type_id": "2",
           "id": "1",
+          "is_missing_secrets": false,
           "is_preconfigured": false,
           "name": "action name",
         },
@@ -73,6 +75,7 @@ describe('getActionRoute', () => {
         name: 'action name',
         config: {},
         is_preconfigured: false,
+        is_missing_secrets: false,
       },
     });
   });

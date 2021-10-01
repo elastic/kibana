@@ -7,27 +7,38 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { map } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
-import { ReportViewTypeId, SeriesUrl } from '../../types';
-import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_storage';
+import { ReportViewType, SeriesUrl } from '../../types';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { DEFAULT_TIME } from '../../configurations/constants';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
+import { ReportTypeItem } from '../series_builder';
 
 interface Props {
-  reportTypes: Array<{ id: ReportViewTypeId; label: string }>;
+  seriesId: string;
+  reportTypes: ReportTypeItem[];
 }
 
-export function ReportTypesCol({ reportTypes }: Props) {
-  const {
-    series: { reportType: selectedReportType, ...restSeries },
-    setSeries,
-  } = useUrlStorage(NEW_SERIES_KEY);
+export function ReportTypesCol({ seriesId, reportTypes }: Props) {
+  const { setSeries, getSeries, firstSeries, firstSeriesId } = useSeriesStorage();
 
-  const { loading, hasData, selectedApp } = useAppIndexPatternContext();
+  const { reportType: selectedReportType, ...restSeries } = getSeries(seriesId);
 
-  if (!loading && !hasData && selectedApp) {
+  const { loading, hasData } = useAppIndexPatternContext(restSeries.dataType);
+
+  if (!restSeries.dataType) {
+    return (
+      <FormattedMessage
+        id="xpack.observability.expView.seriesBuilder.selectDataType"
+        defaultMessage="No data type selected"
+      />
+    );
+  }
+
+  if (!loading && !hasData) {
     return (
       <FormattedMessage
         id="xpack.observability.reportTypeCol.nodata"
@@ -36,36 +47,45 @@ export function ReportTypesCol({ reportTypes }: Props) {
     );
   }
 
+  const disabledReportTypes: ReportViewType[] = map(
+    reportTypes.filter(
+      ({ reportType }) => firstSeriesId !== seriesId && reportType !== firstSeries.reportType
+    ),
+    'reportType'
+  );
+
   return reportTypes?.length > 0 ? (
     <FlexGroup direction="column" gutterSize="xs">
-      {reportTypes.map(({ id: reportType, label }) => (
+      {reportTypes.map(({ reportType, label }) => (
         <EuiFlexItem key={reportType}>
-          <EuiButton
+          <Button
             fullWidth
             size="s"
             iconSide="right"
             iconType="arrowRight"
             color={selectedReportType === reportType ? 'primary' : 'text'}
             fill={selectedReportType === reportType}
-            isDisabled={loading}
+            isDisabled={loading || disabledReportTypes.includes(reportType)}
             onClick={() => {
               if (reportType === selectedReportType) {
-                setSeries(NEW_SERIES_KEY, {
+                setSeries(seriesId, {
                   dataType: restSeries.dataType,
                   time: DEFAULT_TIME,
+                  isNew: true,
                 } as SeriesUrl);
               } else {
-                setSeries(NEW_SERIES_KEY, {
+                setSeries(seriesId, {
                   ...restSeries,
                   reportType,
-                  reportDefinitions: {},
+                  selectedMetricField: undefined,
+                  breakdown: undefined,
                   time: restSeries?.time ?? DEFAULT_TIME,
                 });
               }
             }}
           >
             {label}
-          </EuiButton>
+          </Button>
         </EuiFlexItem>
       ))}
     </FlexGroup>
@@ -76,9 +96,13 @@ export function ReportTypesCol({ reportTypes }: Props) {
 
 export const SELECTED_DATA_TYPE_FOR_REPORT = i18n.translate(
   'xpack.observability.expView.reportType.noDataType',
-  { defaultMessage: 'Select a data type to start building a series.' }
+  { defaultMessage: 'No data type selected.' }
 );
 
 const FlexGroup = styled(EuiFlexGroup)`
   width: 100%;
+`;
+
+const Button = styled(EuiButton)`
+  will-change: transform;
 `;

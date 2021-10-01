@@ -52,7 +52,7 @@ export const setWorkpad = createThunk(
   'setWorkpad',
   (
     { dispatch, type },
-    workpad: CanvasWorkpad,
+    workpad: Omit<CanvasWorkpad, 'assets'>,
     { loadPages = true }: { loadPages?: boolean } = {}
   ) => {
     dispatch(createAction(type)(workpad)); // set the workpad object in state

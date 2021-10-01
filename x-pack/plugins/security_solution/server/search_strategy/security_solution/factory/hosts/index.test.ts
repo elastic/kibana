@@ -10,12 +10,13 @@ import { HostsQueries, HostsKpiQueries } from '../../../../../common/search_stra
 import { allHosts } from './all';
 import { hostDetails } from './details';
 import { hostOverview } from './overview';
+import { riskyHosts } from './risky_hosts';
 import { firstOrLastSeenHost } from './last_first_seen';
 import { uncommonProcesses } from './uncommon_processes';
-import { authentications } from './authentications';
-import { hostsKpiAuthentications } from './kpi/authentications';
-import { hostsKpiHosts } from './kpi/hosts';
-import { hostsKpiUniqueIps } from './kpi/unique_ips';
+import { authentications, authenticationsEntities } from './authentications';
+import { hostsKpiAuthentications, hostsKpiAuthenticationsEntities } from './kpi/authentications';
+import { hostsKpiHosts, hostsKpiHostsEntities } from './kpi/hosts';
+import { hostsKpiUniqueIps, hostsKpiUniqueIpsEntities } from './kpi/unique_ips';
 
 jest.mock('./all');
 jest.mock('./details');
@@ -26,6 +27,7 @@ jest.mock('./authentications');
 jest.mock('./kpi/authentications');
 jest.mock('./kpi/hosts');
 jest.mock('./kpi/unique_ips');
+jest.mock('./risky_hosts');
 
 describe('hostsFactory', () => {
   test('should include correct apis', () => {
@@ -36,8 +38,13 @@ describe('hostsFactory', () => {
       [HostsQueries.firstOrLastSeen]: firstOrLastSeenHost,
       [HostsQueries.uncommonProcesses]: uncommonProcesses,
       [HostsQueries.authentications]: authentications,
+      [HostsQueries.authenticationsEntities]: authenticationsEntities,
+      [HostsQueries.riskyHosts]: riskyHosts,
       [HostsKpiQueries.kpiAuthentications]: hostsKpiAuthentications,
+      [HostsKpiQueries.kpiAuthenticationsEntities]: hostsKpiAuthenticationsEntities,
       [HostsKpiQueries.kpiHosts]: hostsKpiHosts,
+      [HostsKpiQueries.kpiHostsEntities]: hostsKpiHostsEntities,
+      [HostsKpiQueries.kpiUniqueIpsEntities]: hostsKpiUniqueIpsEntities,
       [HostsKpiQueries.kpiUniqueIps]: hostsKpiUniqueIps,
     };
     expect(hostsFactory).toEqual(expectedHostsFactory);

@@ -26,8 +26,10 @@ import { SerializedPolicy } from '../../../../../common/types';
 
 import { useFormContext, useFormData } from '../../../../shared_imports';
 
+import { i18nTexts } from '../i18n_texts';
 import { FormInternal } from '../types';
 
+type PolicyJson = Omit<SerializedPolicy, 'name'>;
 interface Props {
   close: () => void;
   policyName: string;
@@ -36,49 +38,57 @@ interface Props {
 /**
  * Ensure that the JSON we get from the from has phases in the correct order.
  */
-const prettifyFormJson = (policy: SerializedPolicy): SerializedPolicy => ({
-  ...policy,
-  phases: {
-    hot: policy.phases.hot,
-    warm: policy.phases.warm,
-    cold: policy.phases.cold,
-    frozen: policy.phases.frozen,
-    delete: policy.phases.delete,
-  },
-});
+const prettifyFormJson = (policy: SerializedPolicy): PolicyJson => {
+  return {
+    phases: {
+      hot: policy.phases.hot,
+      warm: policy.phases.warm,
+      cold: policy.phases.cold,
+      frozen: policy.phases.frozen,
+      delete: policy.phases.delete,
+    },
+    _meta: policy._meta,
+  };
+};
 
 export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, close }) => {
   /**
    * policy === undefined: we are checking validity
    * policy === null: we have determined the policy is invalid
-   * policy === {@link SerializedPolicy} we have determined the policy is valid
+   * policy === {@link PolicyJson} we have determined the policy is valid
    */
-  const [policy, setPolicy] = useState<undefined | null | SerializedPolicy>(undefined);
+  const [policyJson, setPolicyJson] = useState<undefined | null | PolicyJson>(undefined);
 
-  const { validate: validateForm } = useFormContext();
+  const { validate: validateForm, getErrors } = useFormContext();
   const [, getFormData] = useFormData<FormInternal>();
 
   const updatePolicy = useCallback(async () => {
-    setPolicy(undefined);
-    if (await validateForm()) {
-      setPolicy(prettifyFormJson(getFormData()));
+    setPolicyJson(undefined);
+    const isFormValid = await validateForm();
+    const errorMessages = getErrors();
+    const isOnlyMissingPolicyName =
+      errorMessages.length === 1 &&
+      errorMessages[0] === i18nTexts.editPolicy.errors.policyNameRequiredMessage;
+    if (isFormValid || isOnlyMissingPolicyName) {
+      setPolicyJson(prettifyFormJson(getFormData()));
     } else {
-      setPolicy(null);
+      setPolicyJson(null);
     }
-  }, [setPolicy, getFormData, validateForm]);
+  }, [setPolicyJson, getFormData, validateForm, getErrors]);
 
   useEffect(() => {
     updatePolicy();
   }, [updatePolicy]);
 
   let content: React.ReactNode;
-  switch (policy) {
+  switch (policyJson) {
     case undefined:
       content = <EuiLoadingSpinner />;
       break;
     case null:
       content = (
         <EuiCallOut
+          data-test-subj="policyRequestInvalidAlert"
           iconType="alert"
           color="danger"
           title={i18n.translate(
@@ -93,12 +103,10 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, c
       );
       break;
     default:
-      const { phases } = policy;
-
       const json = JSON.stringify(
         {
           policy: {
-            phases,
+            ...policyJson,
           },
         },
         null,
@@ -118,7 +126,7 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, c
             </p>
           </EuiText>
           <EuiSpacer />
-          <EuiCodeBlock language="json" isCopyable>
+          <EuiCodeBlock language="json" isCopyable data-test-subj="policyRequestJson">
             {request}
           </EuiCodeBlock>
         </>
@@ -150,7 +158,12 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, c
       <EuiFlyoutBody>{content}</EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <EuiButtonEmpty iconType="cross" onClick={close} flush="left">
+        <EuiButtonEmpty
+          iconType="cross"
+          onClick={close}
+          flush="left"
+          data-test-subj="policyRequestClose"
+        >
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.policyJsonFlyout.closeButtonLabel"
             defaultMessage="Close"

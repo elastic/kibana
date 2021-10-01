@@ -286,7 +286,7 @@ describe('createChunks', () => {
     expect(chunks[1].length).toBe(2);
   });
 
-  test('should break features into chunks containing only single feature when feature size is greater then maxChunkCharCount', () => {
+  test('should break features into chunks containing only single feature when feature size is greater than maxChunkCharCount', () => {
     const maxChunkCharCount = GEOMETRY_COLLECTION_DOC_CHARS * 0.8;
     const chunks = createChunks(features, ES_FIELD_TYPES.GEO_SHAPE, maxChunkCharCount);
     expect(chunks.length).toBe(5);

@@ -94,6 +94,12 @@ build --nolegacy_external_runfiles
 run --nolegacy_external_runfiles
 test --nolegacy_external_runfiles
 
+# Runfiles should be enabled un order to use `exports_directories_only` in the yarn_install rule
+# https://bazelbuild.github.io/rules_nodejs/Built-ins.html#yarn_install-exports_directories_only
+build --enable_runfiles
+run --enable_runfiles
+test --enable_runfiles
+
 # Turn on --incompatible_strict_action_env which was on by default
 # in Bazel 0.21.0 but turned off again in 0.22.0. Follow
 # https://github.com/bazelbuild/bazel/issues/7026 for more details.
@@ -104,10 +110,11 @@ build --incompatible_strict_action_env
 run --incompatible_strict_action_env
 test --incompatible_strict_action_env
 
+# DISABLED for now due to https://bazelbuild.github.io/rules_nodejs/Built-ins.html#yarn_install-exports_directories_only
 # Do not build runfile trees by default. If an execution strategy relies on runfile
 # symlink tree, the tree is created on-demand. See: https://github.com/bazelbuild/bazel/issues/6627
 # and https://github.com/bazelbuild/bazel/commit/03246077f948f2790a83520e7dccc2625650e6df
-build --nobuild_runfile_links
+# build --nobuild_runfile_links
 
 # When running `bazel coverage` --instrument_test_targets needs to be set in order to
 # collect coverage information from test targets

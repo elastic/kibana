@@ -51,6 +51,7 @@ exports[`Storyshots shareables/Footer/Title component 1`] = `
       >
         <div
           className="euiTextColor euiTextColor--ghost"
+          style={Object {}}
         >
           <div
             className="eui-textTruncate"
@@ -115,6 +116,7 @@ exports[`Storyshots shareables/Footer/Title contextual: austin 1`] = `
       >
         <div
           className="euiTextColor euiTextColor--ghost"
+          style={Object {}}
         >
           <div
             className="eui-textTruncate"
@@ -179,6 +181,7 @@ exports[`Storyshots shareables/Footer/Title contextual: hello 1`] = `
       >
         <div
           className="euiTextColor euiTextColor--ghost"
+          style={Object {}}
         >
           <div
             className="eui-textTruncate"

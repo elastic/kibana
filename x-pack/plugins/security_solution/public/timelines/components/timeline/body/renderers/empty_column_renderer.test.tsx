@@ -18,6 +18,8 @@ import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { deleteItemIdx, findItem } from './helpers';
 import { emptyColumnRenderer } from './empty_column_renderer';
 
+jest.mock('../../../../../common/lib/kibana');
+
 describe('empty_column_renderer', () => {
   let mockDatum: TimelineNonEcsData[];
   const _id = mockTimelineData[0]._id;

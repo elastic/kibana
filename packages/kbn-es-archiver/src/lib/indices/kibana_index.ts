@@ -35,7 +35,7 @@ export async function deleteKibanaIndices({
   await client.indices.putSettings(
     {
       index: indexNames,
-      body: { index: { blocks: { read_only: false } } },
+      body: { settings: { blocks: { read_only: false } } },
     },
     {
       headers: ES_CLIENT_HEADERS,
@@ -96,21 +96,11 @@ export async function cleanKibanaIndices({
   client,
   stats,
   log,
-  kibanaPluginIds,
 }: {
   client: KibanaClient;
   stats: Stats;
   log: ToolingLog;
-  kibanaPluginIds: string[];
 }) {
-  if (!kibanaPluginIds.includes('spaces')) {
-    return await deleteKibanaIndices({
-      client,
-      stats,
-      log,
-    });
-  }
-
   while (true) {
     const resp = await client.deleteByQuery(
       {
@@ -165,6 +155,7 @@ export async function createDefaultSpace({
     {
       index,
       id: 'space:default',
+      refresh: 'wait_for',
       body: {
         type: 'space',
         updated_at: new Date().toISOString(),

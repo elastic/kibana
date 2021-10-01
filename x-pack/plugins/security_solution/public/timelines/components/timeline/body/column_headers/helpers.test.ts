@@ -12,8 +12,7 @@ import { getActionsColumnWidth, getColumnWidthFromType, getColumnHeaders } from 
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
-  DEFAULT_ACTIONS_COLUMN_WIDTH,
-  EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH,
+  MINIMUM_ACTIONS_COLUMN_WIDTH,
   SHOW_CHECK_BOXES_COLUMN_WIDTH,
 } from '../constants';
 import '../../../../../common/mock/match_media';
@@ -31,22 +30,22 @@ describe('helpers', () => {
 
   describe('getActionsColumnWidth', () => {
     test('returns the default actions column width when isEventViewer is false', () => {
-      expect(getActionsColumnWidth(false)).toEqual(DEFAULT_ACTIONS_COLUMN_WIDTH);
+      expect(getActionsColumnWidth(false)).toEqual(MINIMUM_ACTIONS_COLUMN_WIDTH);
     });
 
-    test('returns the default actions column width + checkbox width when isEventViewer is false and showCheckboxes is true', () => {
+    test('returns the minimum actions column width + checkbox width when isEventViewer is false and showCheckboxes is true', () => {
       expect(getActionsColumnWidth(false, true)).toEqual(
-        DEFAULT_ACTIONS_COLUMN_WIDTH + SHOW_CHECK_BOXES_COLUMN_WIDTH
+        MINIMUM_ACTIONS_COLUMN_WIDTH + SHOW_CHECK_BOXES_COLUMN_WIDTH
       );
     });
 
-    test('returns the events viewer actions column width when isEventViewer is true', () => {
-      expect(getActionsColumnWidth(true)).toEqual(EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH);
+    test('returns the minimum actions column width when isEventViewer is true', () => {
+      expect(getActionsColumnWidth(true)).toEqual(MINIMUM_ACTIONS_COLUMN_WIDTH);
     });
 
-    test('returns the events viewer actions column width + checkbox width when isEventViewer is true and showCheckboxes is true', () => {
+    test('returns the minimum actions column width + checkbox width when isEventViewer is true and showCheckboxes is true', () => {
       expect(getActionsColumnWidth(true, true)).toEqual(
-        EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH + SHOW_CHECK_BOXES_COLUMN_WIDTH
+        MINIMUM_ACTIONS_COLUMN_WIDTH + SHOW_CHECK_BOXES_COLUMN_WIDTH
       );
     });
   });
@@ -67,7 +66,7 @@ describe('helpers', () => {
           name: '@timestamp',
           searchable: true,
           type: 'date',
-          width: 190,
+          initialWidth: 190,
         },
         {
           aggregatable: true,
@@ -81,7 +80,7 @@ describe('helpers', () => {
           name: 'source.ip',
           searchable: true,
           type: 'ip',
-          width: 180,
+          initialWidth: 180,
         },
         {
           aggregatable: true,
@@ -96,7 +95,7 @@ describe('helpers', () => {
           name: 'destination.ip',
           searchable: true,
           type: 'ip',
-          width: 180,
+          initialWidth: 180,
         },
       ];
       const mockHeader = defaultHeaders.filter((h) =>

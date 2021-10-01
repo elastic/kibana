@@ -8,36 +8,33 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { UiSettingsParams } from '../../../../src/core/types';
-import { enableAlertingExperience, enableInspectEsQueries } from '../common/ui_settings_keys';
+import { observabilityFeatureId } from '../common';
+import { enableInspectEsQueries, maxSuggestions } from '../common/ui_settings_keys';
 
 /**
  * uiSettings definitions for Observability.
  */
-export const uiSettings: Record<string, UiSettingsParams<boolean>> = {
-  [enableAlertingExperience]: {
-    category: ['observability'],
-    name: i18n.translate('xpack.observability.enableAlertingExperienceExperimentName', {
-      defaultMessage: 'Observability alerting experience',
-    }),
-    value: false,
-    description: i18n.translate(
-      'xpack.observability.enableAlertingExperienceExperimentDescription',
-      {
-        defaultMessage:
-          'Enable the experimental alerting experience for Observability. Adds the Alerts and Cases pages.',
-      }
-    ),
-    schema: schema.boolean(),
-  },
+export const uiSettings: Record<string, UiSettingsParams<boolean | number>> = {
   [enableInspectEsQueries]: {
-    category: ['observability'],
+    category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableInspectEsQueriesExperimentName', {
-      defaultMessage: 'inspect ES queries',
+      defaultMessage: 'Inspect ES queries',
     }),
     value: false,
     description: i18n.translate('xpack.observability.enableInspectEsQueriesExperimentDescription', {
       defaultMessage: 'Inspect Elasticsearch queries in API responses.',
     }),
     schema: schema.boolean(),
+  },
+  [maxSuggestions]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.maxSuggestionsUiSettingName', {
+      defaultMessage: 'Maximum suggestions',
+    }),
+    value: 100,
+    description: i18n.translate('xpack.observability.maxSuggestionsUiSettingDescription', {
+      defaultMessage: 'Maximum number of suggestions fetched in autocomplete selection boxes.',
+    }),
+    schema: schema.number(),
   },
 };

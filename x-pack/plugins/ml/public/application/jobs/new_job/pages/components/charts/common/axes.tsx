@@ -22,7 +22,7 @@ function tickFormatter(d: number): string {
 }
 
 export const Axes: FC<Props> = ({ chartData }) => {
-  const yDomain = chartData !== undefined ? getYRange(chartData) : undefined;
+  const yDomain = getYRange(chartData);
 
   return (
     <Fragment>

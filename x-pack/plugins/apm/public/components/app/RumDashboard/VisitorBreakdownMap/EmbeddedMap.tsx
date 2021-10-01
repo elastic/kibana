@@ -12,9 +12,8 @@ import styled from 'styled-components';
 import {
   MapEmbeddable,
   MapEmbeddableInput,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../maps/public/embeddable';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/common/constants';
+} from '../../../../../../maps/public';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/common';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
   ErrorEmbeddable,
@@ -64,9 +63,8 @@ export function EmbeddedMapComponent() {
     MapEmbeddable | ErrorEmbeddable | undefined
   >();
 
-  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(
-    null
-  );
+  const embeddableRoot: React.RefObject<HTMLDivElement> =
+    useRef<HTMLDivElement>(null);
 
   const {
     services: { embeddable: embeddablePlugin },
@@ -83,10 +81,6 @@ export function EmbeddedMapComponent() {
     attributes: { title: '' },
     id: uuid.v4(),
     filters: mapFilters,
-    refreshConfig: {
-      value: 0,
-      pause: false,
-    },
     viewMode: ViewMode.VIEW,
     isLayerTOCOpen: false,
     query: {
@@ -109,7 +103,6 @@ export function EmbeddedMapComponent() {
     isLocked,
     getLayerName,
     loadFeatureProperties,
-    loadFeatureGeometry,
   }: RenderTooltipContentParams) {
     const props = {
       addFilters,
@@ -117,7 +110,6 @@ export function EmbeddedMapComponent() {
       isLocked,
       getLayerName,
       loadFeatureProperties,
-      loadFeatureGeometry,
     };
 
     return <MapToolTip {...props} features={features} />;
@@ -126,6 +118,7 @@ export function EmbeddedMapComponent() {
   useEffect(() => {
     if (embeddable != null && serviceName) {
       embeddable.updateInput({ filters: mapFilters });
+      embeddable.reload();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapFilters]);
@@ -138,6 +131,7 @@ export function EmbeddedMapComponent() {
         to: new Date(end).toISOString(),
       };
       embeddable.updateInput({ timeRange });
+      embeddable.reload();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [start, end]);

@@ -22,13 +22,11 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./logstash'));
     loadTestFile(require.resolve('./kibana'));
     loadTestFile(require.resolve('./metrics_ui'));
-    loadTestFile(require.resolve('./beats'));
     loadTestFile(require.resolve('./console'));
     loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./uptime'));
     loadTestFile(require.resolve('./maps'));
     loadTestFile(require.resolve('./security_solution'));
-    loadTestFile(require.resolve('./short_urls'));
     loadTestFile(require.resolve('./lens'));
     loadTestFile(require.resolve('./ml'));
     loadTestFile(require.resolve('./transform'));

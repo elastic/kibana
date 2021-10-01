@@ -8,15 +8,11 @@
 import { FrameworkRequest } from '../../../framework';
 import { mockGetTimelineValue, mockSavedObject } from '../../__mocks__/import_timelines';
 
-import {
-  convertStringToBase64,
-  getExistingPrepackagedTimelines,
-  getAllTimeline,
-  AllTimelinesResponse,
-} from '.';
+import { convertStringToBase64, getExistingPrepackagedTimelines, getAllTimeline } from '.';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { getNotesByTimelineId } from '../notes/saved_object';
 import { getAllPinnedEventsByTimelineId } from '../pinned_events';
+import { AllTimelinesResponse } from '../../../../../common/types/timeline';
 
 jest.mock('./convert_saved_object_to_savedtimeline', () => ({
   convertSavedObjectToSavedTimeline: jest.fn(),
@@ -53,7 +49,7 @@ describe('saved_object', () => {
 
     beforeEach(() => {
       mockFindSavedObject = jest.fn().mockResolvedValue({ saved_objects: [], total: 0 });
-      mockRequest = ({
+      mockRequest = {
         user: {
           username: 'username',
         },
@@ -66,7 +62,7 @@ describe('saved_object', () => {
             },
           },
         },
-      } as unknown) as FrameworkRequest;
+      } as unknown as FrameworkRequest;
     });
 
     afterEach(() => {
@@ -121,7 +117,7 @@ describe('saved_object', () => {
       pageSize: 10,
       pageIndex: 1,
     };
-    let result = (null as unknown) as AllTimelinesResponse;
+    let result = null as unknown as AllTimelinesResponse;
     beforeEach(async () => {
       (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(mockGetTimelineValue);
       mockFindSavedObject = jest
@@ -131,7 +127,7 @@ describe('saved_object', () => {
         .mockResolvedValueOnce({ saved_objects: [mockSavedObject], total: 1 })
         .mockResolvedValueOnce({ saved_objects: [mockSavedObject], total: 1 })
         .mockResolvedValue({ saved_objects: [], total: 0 });
-      mockRequest = ({
+      mockRequest = {
         user: {
           username: 'username',
         },
@@ -144,7 +140,7 @@ describe('saved_object', () => {
             },
           },
         },
-      } as unknown) as FrameworkRequest;
+      } as unknown as FrameworkRequest;
 
       result = await getAllTimeline(mockRequest, false, pageInfo, null, null, null, null);
     });

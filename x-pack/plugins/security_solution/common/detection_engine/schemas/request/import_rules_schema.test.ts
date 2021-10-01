@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { exactCheck } from '../../../exact_check';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { foldLeftRight, getPaths } from '../../../test_utils';
 import { left } from 'fp-ts/lib/Either';
 import {
   ImportRulesSchema,
@@ -695,10 +694,8 @@ describe('import rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
 
-    const {
-      max_signals: expectedMaxSignals,
-      ...expectedNoMaxSignals
-    } = getImportRulesSchemaDecodedMock();
+    const { max_signals: expectedMaxSignals, ...expectedNoMaxSignals } =
+      getImportRulesSchemaDecodedMock();
     const expected: ImportRulesSchemaDecoded = {
       ...expectedNoMaxSignals,
       max_signals: 100,

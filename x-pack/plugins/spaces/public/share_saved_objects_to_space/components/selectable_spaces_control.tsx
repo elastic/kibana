@@ -17,7 +17,6 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiSelectable,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
@@ -25,11 +24,12 @@ import React, { lazy, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { DocumentationLinksService } from '../../lib';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { useSpaces } from '../../spaces_context';
-import type { ShareToSpaceTarget } from '../../types';
+import type { SpacesDataEntry } from '../../types';
 import type { ShareOptions } from '../types';
 import { NoSpacesAvailable } from './no_spaces_available';
 
@@ -39,7 +39,7 @@ const LazySpaceAvatar = lazy(() =>
 );
 
 interface Props {
-  spaces: ShareToSpaceTarget[];
+  spaces: SpacesDataEntry[];
   shareOptions: ShareOptions;
   onChange: (selectedSpaceIds: string[]) => void;
   enableCreateNewSpaceLink: boolean;
@@ -84,13 +84,8 @@ const APPEND_FEATURE_IS_DISABLED = (
 );
 
 export const SelectableSpacesControl = (props: Props) => {
-  const {
-    spaces,
-    shareOptions,
-    onChange,
-    enableCreateNewSpaceLink,
-    enableSpaceAgnosticBehavior,
-  } = props;
+  const { spaces, shareOptions, onChange, enableCreateNewSpaceLink, enableSpaceAgnosticBehavior } =
+    props;
   const { services } = useSpaces();
   const { application, docLinks } = services;
   const { selectedSpaceIds, initiallySelectedSpaceIds } = shareOptions;
@@ -106,10 +101,14 @@ export const SelectableSpacesControl = (props: Props) => {
     .sort(createSpacesComparator(activeSpaceId))
     .map<SpaceOption>((space) => {
       const checked = selectedSpaceIds.includes(space.id);
-      const additionalProps = getAdditionalProps(space, activeSpaceId, checked);
+      const { isAvatarDisabled, ...additionalProps } = getAdditionalProps(
+        space,
+        activeSpaceId,
+        checked
+      );
       return {
         label: space.name,
-        prepend: <LazySpaceAvatar space={space} size={'s'} />, // wrapped in a Suspense below
+        prepend: <LazySpaceAvatar space={space} isDisabled={isAvatarDisabled} size={'s'} />, // wrapped in a Suspense below
         checked: checked ? 'on' : undefined,
         ['data-space-id']: space.id,
         ['data-test-subj']: `sts-space-selector-row-${space.id}`,
@@ -140,8 +139,7 @@ export const SelectableSpacesControl = (props: Props) => {
       docLinks!
     ).getKibanaPrivilegesDocUrl();
     return (
-      <>
-        <EuiSpacer size="xs" />
+      <EuiFlexItem grow={false}>
         <EuiText size="s" color="subdued">
           <FormattedMessage
             id="xpack.spaces.shareToSpace.unknownSpacesLabel.text"
@@ -158,12 +156,16 @@ export const SelectableSpacesControl = (props: Props) => {
             }}
           />
         </EuiText>
-      </>
+      </EuiFlexItem>
     );
   };
   const getNoSpacesAvailable = () => {
     if (enableCreateNewSpaceLink && spaces.length < 2) {
-      return <NoSpacesAvailable application={application!} />;
+      return (
+        <EuiFlexItem grow={false}>
+          <NoSpacesAvailable application={application!} />
+        </EuiFlexItem>
+      );
     }
     return null;
   };
@@ -188,46 +190,52 @@ export const SelectableSpacesControl = (props: Props) => {
   );
   const hiddenSpaces = hiddenCount ? <EuiText size="xs">{hiddenSpacesLabel}</EuiText> : null;
   return (
-    <EuiFormRow
-      label={selectSpacesLabel}
-      labelAppend={
-        <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs">{selectedSpacesLabel}</EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{hiddenSpaces}</EuiFlexItem>
-        </EuiFlexGroup>
-      }
-      fullWidth
-    >
-      <>
-        <Suspense fallback={<EuiLoadingSpinner />}>
-          <EuiSelectable
-            options={options}
-            onChange={(newOptions) => updateSelectedSpaces(newOptions as SpaceOption[])}
-            listProps={{
-              bordered: true,
-              rowHeight: ROW_HEIGHT,
-              className: 'spcShareToSpace__spacesList',
-              'data-test-subj': 'sts-form-space-selector',
-            }}
-            height={ROW_HEIGHT * 3.5}
-            searchable={options.length > 6}
-          >
-            {(list, search) => {
-              return (
-                <>
-                  {search}
-                  {list}
-                </>
-              );
-            }}
-          </EuiSelectable>
-        </Suspense>
+    <>
+      <EuiFormRow
+        label={selectSpacesLabel}
+        labelAppend={
+          <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">{selectedSpacesLabel}</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{hiddenSpaces}</EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        fullWidth
+      >
+        <></>
+      </EuiFormRow>
+
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexItem>
+          <Suspense fallback={<EuiLoadingSpinner />}>
+            <EuiSelectable
+              options={options}
+              onChange={(newOptions) => updateSelectedSpaces(newOptions as SpaceOption[])}
+              listProps={{
+                bordered: true,
+                rowHeight: ROW_HEIGHT,
+                className: 'spcShareToSpace__spacesList',
+                'data-test-subj': 'sts-form-space-selector',
+              }}
+              height="full"
+              searchable={options.length > SPACE_SEARCH_COUNT_THRESHOLD}
+            >
+              {(list, search) => {
+                return (
+                  <>
+                    {search}
+                    {list}
+                  </>
+                );
+              }}
+            </EuiSelectable>
+          </Suspense>
+        </EuiFlexItem>
         {getUnknownSpacesLabel()}
         {getNoSpacesAvailable()}
-      </>
-    </EuiFormRow>
+      </EuiFlexGroup>
+    </>
   );
 };
 
@@ -235,7 +243,7 @@ export const SelectableSpacesControl = (props: Props) => {
  * Gets additional props for the selection option.
  */
 function getAdditionalProps(
-  space: ShareToSpaceTarget,
+  space: SpacesDataEntry,
   activeSpaceId: string | false,
   checked: boolean
 ) {
@@ -246,7 +254,7 @@ function getAdditionalProps(
       checked: 'on' as 'on',
     };
   }
-  if (space.cannotShareToSpace) {
+  if (!space.isAuthorizedForPurpose('shareSavedObjectsIntoSpace')) {
     return {
       append: (
         <>
@@ -260,16 +268,18 @@ function getAdditionalProps(
   if (space.isFeatureDisabled) {
     return {
       append: APPEND_FEATURE_IS_DISABLED,
+      isAvatarDisabled: true,
     };
   }
+  return {};
 }
 
 /**
- * Given the active space, create a comparator to sort a ShareToSpaceTarget array so that the active space is at the beginning, and space(s) for
+ * Given the active space, create a comparator to sort a SpacesDataEntry array so that the active space is at the beginning, and space(s) for
  * which the current feature is disabled are all at the end.
  */
 function createSpacesComparator(activeSpaceId: string | false) {
-  return (a: ShareToSpaceTarget, b: ShareToSpaceTarget) => {
+  return (a: SpacesDataEntry, b: SpacesDataEntry) => {
     if (a.id === activeSpaceId) {
       return -1;
     }

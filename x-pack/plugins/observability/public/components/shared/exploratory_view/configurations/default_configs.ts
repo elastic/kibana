@@ -5,48 +5,47 @@
  * 2.0.
  */
 
-import { ReportViewTypes } from '../types';
-import { getPerformanceDistLensConfig } from './rum/performance_dist_config';
-import { getMonitorDurationConfig } from './synthetics/monitor_duration_config';
-import { getServiceLatencyLensConfig } from './apm/service_latency_config';
-import { getMonitorPingsConfig } from './synthetics/monitor_pings_config';
-import { getServiceThroughputLensConfig } from './apm/service_throughput_config';
-import { getKPITrendsLensConfig } from './rum/kpi_trends_config';
-import { getCPUUsageLensConfig } from './metrics/cpu_usage_config';
-import { getMemoryUsageLensConfig } from './metrics/memory_usage_config';
-import { getNetworkActivityLensConfig } from './metrics/network_activity_config';
-import { getLogsFrequencyLensConfig } from './logs/logs_frequency_config';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { AppDataType, ReportViewType } from '../types';
+import { getRumDistributionConfig } from './rum/data_distribution_config';
+import { getSyntheticsDistributionConfig } from './synthetics/data_distribution_config';
+import { getSyntheticsKPIConfig } from './synthetics/kpi_over_time_config';
+import { getKPITrendsLensConfig } from './rum/kpi_over_time_config';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { getCoreWebVitalsConfig } from './rum/core_web_vitals_config';
+import { getMobileKPIConfig } from './mobile/kpi_over_time_config';
+import { getMobileKPIDistributionConfig } from './mobile/distribution_config';
+import { getMobileDeviceDistributionConfig } from './mobile/device_distribution_config';
 
 interface Props {
-  reportType: keyof typeof ReportViewTypes;
-  seriesId: string;
-  indexPattern: IIndexPattern;
+  reportType: ReportViewType;
+  indexPattern: IndexPattern;
+  dataType: AppDataType;
 }
 
-export const getDefaultConfigs = ({ reportType, seriesId, indexPattern }: Props) => {
-  switch (ReportViewTypes[reportType]) {
-    case 'page-load-dist':
-      return getPerformanceDistLensConfig({ seriesId, indexPattern });
-    case 'kpi-trends':
-      return getKPITrendsLensConfig({ seriesId, indexPattern });
-    case 'uptime-duration':
-      return getMonitorDurationConfig({ seriesId });
-    case 'uptime-pings':
-      return getMonitorPingsConfig({ seriesId });
-    case 'service-latency':
-      return getServiceLatencyLensConfig({ seriesId, indexPattern });
-    case 'service-throughput':
-      return getServiceThroughputLensConfig({ seriesId, indexPattern });
-    case 'cpu-usage':
-      return getCPUUsageLensConfig({ seriesId });
-    case 'memory-usage':
-      return getMemoryUsageLensConfig({ seriesId });
-    case 'network-activity':
-      return getNetworkActivityLensConfig({ seriesId });
-    case 'logs-frequency':
-      return getLogsFrequencyLensConfig({ seriesId });
+export const getDefaultConfigs = ({ reportType, dataType, indexPattern }: Props) => {
+  switch (dataType) {
+    case 'ux':
+      if (reportType === 'data-distribution') {
+        return getRumDistributionConfig({ indexPattern });
+      }
+      if (reportType === 'core-web-vitals') {
+        return getCoreWebVitalsConfig({ indexPattern });
+      }
+      return getKPITrendsLensConfig({ indexPattern });
+    case 'synthetics':
+      if (reportType === 'data-distribution') {
+        return getSyntheticsDistributionConfig({ indexPattern });
+      }
+      return getSyntheticsKPIConfig({ indexPattern });
+    case 'mobile':
+      if (reportType === 'data-distribution') {
+        return getMobileKPIDistributionConfig({ indexPattern });
+      }
+      if (reportType === 'device-data-distribution') {
+        return getMobileDeviceDistributionConfig({ indexPattern });
+      }
+      return getMobileKPIConfig({ indexPattern });
     default:
-      return getKPITrendsLensConfig({ seriesId, indexPattern });
+      return getKPITrendsLensConfig({ indexPattern });
   }
 };

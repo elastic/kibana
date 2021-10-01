@@ -7,8 +7,8 @@
 
 import { useEffect, useState, useRef } from 'react';
 
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { FetchRulesResponse, FilterOptions, PaginationOptions, Rule } from '../types';
-import { errorToToaster, useStateToaster } from '../../../../../common/components/toasters';
 import { fetchRules } from '../api';
 import * as i18n from '../translations';
 
@@ -34,7 +34,7 @@ export const useRules = ({
   const [rules, setRules] = useState<FetchRulesResponse | null>(null);
   const reFetchRules = useRef<() => Promise<void>>(() => Promise.resolve());
   const [loading, setLoading] = useState(true);
-  const [, dispatchToaster] = useStateToaster();
+  const { addError } = useAppToasts();
 
   const filterTags = filterOptions.tags.sort().join();
   useEffect(() => {
@@ -62,7 +62,7 @@ export const useRules = ({
         }
       } catch (error) {
         if (isSubscribed) {
-          errorToToaster({ title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE, error, dispatchToaster });
+          addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE });
           if (dispatchRulesInReducer != null) {
             dispatchRulesInReducer([], {});
           }

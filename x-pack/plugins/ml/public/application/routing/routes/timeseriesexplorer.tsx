@@ -43,7 +43,7 @@ import { useToastNotificationService } from '../../services/toast_notification_s
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 import { useTimeSeriesExplorerUrlState } from '../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state';
-import type { TimeSeriesExplorerAppState } from '../../../../common/types/ml_url_generator';
+import type { TimeSeriesExplorerAppState } from '../../../../common/types/locator';
 import type { TimeRangeBounds } from '../../util/time_buckets';
 
 export const timeSeriesExplorerRouteFactory = (
@@ -97,10 +97,8 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 }) => {
   const { toasts } = useNotifications();
   const toastNotificationService = useToastNotificationService();
-  const [
-    timeSeriesExplorerUrlState,
-    setTimeSeriesExplorerUrlState,
-  ] = useTimeSeriesExplorerUrlState();
+  const [timeSeriesExplorerUrlState, setTimeSeriesExplorerUrlState] =
+    useTimeSeriesExplorerUrlState();
   const [globalState, setGlobalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
   const previousRefresh = usePrevious(lastRefresh);
@@ -118,6 +116,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         setGlobalState('time', {
           from: start,
           to: end,
+          ...(start === 'now' || end === 'now' ? { ts: Date.now() } : {}),
         });
       }
     }
@@ -145,7 +144,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         setBounds(timefilter.getBounds());
       }
     }
-  }, [globalState?.time?.from, globalState?.time?.to]);
+  }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
 
   const selectedJobIds = globalState?.ml?.jobIds;
   // Sort selectedJobIds so we can be sure comparison works when stringifying.

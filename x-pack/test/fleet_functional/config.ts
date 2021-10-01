@@ -6,7 +6,7 @@
  */
 
 import { resolve } from 'path';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from './page_objects';
 import { services } from './services';
 
@@ -16,7 +16,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...xpackFunctionalConfig.getAll(),
     pageObjects,
-    testFiles: [resolve(__dirname, './apps/fleet')],
+    testFiles: [resolve(__dirname, './apps/fleet'), resolve(__dirname, './apps/home')],
     junit: {
       reportName: 'X-Pack Fleet Functional Tests',
     },

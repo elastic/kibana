@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { Space } from 'src/plugins/spaces_oss/common';
-
+import type { Space } from '../../common';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import type { SpacesClient } from './spaces_client';
 
 const createSpacesClientMock = () =>
-  (({
+  ({
     getAll: jest.fn().mockResolvedValue([
       {
         id: DEFAULT_SPACE_ID,
@@ -30,7 +29,8 @@ const createSpacesClientMock = () =>
     create: jest.fn().mockImplementation((space: Space) => Promise.resolve(space)),
     update: jest.fn().mockImplementation((space: Space) => Promise.resolve(space)),
     delete: jest.fn(),
-  } as unknown) as jest.Mocked<SpacesClient>);
+    disableLegacyUrlAliases: jest.fn(),
+  } as unknown as jest.Mocked<SpacesClient>);
 
 export const spacesClientMock = {
   create: createSpacesClientMock,

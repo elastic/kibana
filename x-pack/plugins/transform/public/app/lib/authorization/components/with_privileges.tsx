@@ -7,7 +7,7 @@
 
 import React, { useContext, FC } from 'react';
 
-import { EuiPageContent } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiPageContent } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -74,27 +74,31 @@ const MissingClusterPrivileges: FC<MissingClusterPrivilegesProps> = ({
   missingPrivileges,
   privilegesCount,
 }) => (
-  <EuiPageContent>
-    <NotAuthorizedSection
-      title={
-        <FormattedMessage
-          id="xpack.transform.app.deniedPrivilegeTitle"
-          defaultMessage="You're missing cluster privileges"
-        />
-      }
-      message={
-        <FormattedMessage
-          id="xpack.transform.app.deniedPrivilegeDescription"
-          defaultMessage="To use this section of Transforms, you must have {privilegesCount,
+  <EuiFlexGroup justifyContent="spaceAround">
+    <EuiFlexItem grow={false}>
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+        <NotAuthorizedSection
+          title={
+            <FormattedMessage
+              id="xpack.transform.app.deniedPrivilegeTitle"
+              defaultMessage="You're missing cluster privileges"
+            />
+          }
+          message={
+            <FormattedMessage
+              id="xpack.transform.app.deniedPrivilegeDescription"
+              defaultMessage="To use this section of Transforms, you must have {privilegesCount,
           plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
-          values={{
-            missingPrivileges,
-            privilegesCount,
-          }}
+              values={{
+                missingPrivileges,
+                privilegesCount,
+              }}
+            />
+          }
         />
-      }
-    />
-  </EuiPageContent>
+      </EuiPageContent>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 );
 
 export const PrivilegesWrapper: FC<{ privileges: string | string[] }> = ({

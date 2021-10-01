@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
+import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 import { INITIAL_LOCATION, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 import { MapSettings } from './types';
 
@@ -25,6 +25,7 @@ export function getDefaultMapSettings(): MapSettings {
     minZoom: MIN_ZOOM,
     showScaleControl: false,
     showSpatialFilters: true,
+    showTimesliderToggleButton: true,
     spatialFiltersAlpa: 0.3,
     spatialFiltersFillColor: '#DA8B45',
     spatialFiltersLineColor: '#DA8B45',

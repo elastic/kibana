@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CollectorSet, UsageCollector } from '../../plugins/usage_collection/server/collector';
+import { CollectorSet, Collector } from '../../plugins/usage_collection/server/collector';
 import { loggerMock } from '../../core/server/logging/logger.mock';
 
 const collectorSet = new CollectorSet({
@@ -19,7 +19,7 @@ interface Usage {
 }
 
 export class NestedInside {
-  collector?: UsageCollector<Usage>;
+  collector?: Collector<Usage>;
   createMyCollector() {
     this.collector = collectorSet.makeUsageCollector<Usage>({
       type: 'my_nested_collector',

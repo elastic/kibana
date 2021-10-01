@@ -7,7 +7,7 @@
 
 import { noop } from 'lodash/fp';
 import { useEffect, useState, useRef } from 'react';
-import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { fetchTags } from './api';
 import * as i18n from './translations';
 
@@ -20,8 +20,8 @@ export type ReturnTags = [boolean, string[], () => void];
 export const useTags = (): ReturnTags => {
   const [tags, setTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [, dispatchToaster] = useStateToaster();
   const reFetchTags = useRef<() => void>(noop);
+  const { addError } = useAppToasts();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -39,7 +39,7 @@ export const useTags = (): ReturnTags => {
         }
       } catch (error) {
         if (isSubscribed) {
-          errorToToaster({ title: i18n.TAG_FETCH_FAILURE, error, dispatchToaster });
+          addError(error, { title: i18n.TAG_FETCH_FAILURE });
         }
       }
       if (isSubscribed) {
@@ -54,7 +54,7 @@ export const useTags = (): ReturnTags => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [dispatchToaster]);
+  }, [addError]);
 
   return [loading, tags, reFetchTags.current];
 };

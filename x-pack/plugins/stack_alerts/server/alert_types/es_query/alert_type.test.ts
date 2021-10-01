@@ -17,7 +17,7 @@ import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { getAlertType, ConditionMetAlertInstanceId, ActionGroupId } from './alert_type';
 import { EsQueryAlertParams, EsQueryAlertState } from './alert_type_params';
 import { ActionContext } from './action_context';
-import { ESSearchResponse, ESSearchRequest } from '../../../../../../typings/elasticsearch';
+import { ESSearchResponse, ESSearchRequest } from '../../../../../../src/core/types/elasticsearch';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 
@@ -143,7 +143,7 @@ describe('alertType', () => {
       alertId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: (alertServices as unknown) as AlertServices<
+      services: alertServices as unknown as AlertServices<
         EsQueryAlertState,
         ActionContext,
         typeof ActionGroupId
@@ -157,6 +157,25 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
+      rule: {
+        name: uuid.v4(),
+        tags: [],
+        consumer: '',
+        producer: '',
+        ruleTypeId: '',
+        ruleTypeName: '',
+        enabled: true,
+        schedule: {
+          interval: '1h',
+        },
+        actions: [],
+        createdBy: null,
+        updatedBy: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        throttle: null,
+        notifyWhen: null,
+      },
     });
 
     expect(alertServices.alertInstanceFactory).not.toHaveBeenCalled();
@@ -203,7 +222,7 @@ describe('alertType', () => {
       alertId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: (alertServices as unknown) as AlertServices<
+      services: alertServices as unknown as AlertServices<
         EsQueryAlertState,
         ActionContext,
         typeof ActionGroupId
@@ -217,6 +236,25 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
+      rule: {
+        name: uuid.v4(),
+        tags: [],
+        consumer: '',
+        producer: '',
+        ruleTypeId: '',
+        ruleTypeName: '',
+        enabled: true,
+        schedule: {
+          interval: '1h',
+        },
+        actions: [],
+        createdBy: null,
+        updatedBy: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        throttle: null,
+        notifyWhen: null,
+      },
     });
 
     expect(alertServices.alertInstanceFactory).toHaveBeenCalledWith(ConditionMetAlertInstanceId);
@@ -263,7 +301,7 @@ describe('alertType', () => {
       alertId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: (alertServices as unknown) as AlertServices<
+      services: alertServices as unknown as AlertServices<
         EsQueryAlertState,
         ActionContext,
         typeof ActionGroupId
@@ -274,6 +312,14 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      consumer: '',
+      throttle: null,
+      notifyWhen: null,
+      schedule: {
+        interval: '1h',
+      },
     };
     const result = await alertType.executor({
       ...executorOptions,
@@ -329,7 +375,7 @@ describe('alertType', () => {
       alertId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: (alertServices as unknown) as AlertServices<
+      services: alertServices as unknown as AlertServices<
         EsQueryAlertState,
         ActionContext,
         typeof ActionGroupId
@@ -344,6 +390,25 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
+      rule: {
+        name: uuid.v4(),
+        tags: [],
+        consumer: '',
+        producer: '',
+        ruleTypeId: '',
+        ruleTypeName: '',
+        enabled: true,
+        schedule: {
+          interval: '1h',
+        },
+        actions: [],
+        createdBy: null,
+        updatedBy: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        throttle: null,
+        notifyWhen: null,
+      },
     });
 
     const instance: AlertInstanceMock = alertServices.alertInstanceFactory.mock.results[0].value;
@@ -388,7 +453,7 @@ describe('alertType', () => {
       alertId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: (alertServices as unknown) as AlertServices<
+      services: alertServices as unknown as AlertServices<
         EsQueryAlertState,
         ActionContext,
         typeof ActionGroupId
@@ -402,6 +467,25 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
+      rule: {
+        name: uuid.v4(),
+        tags: [],
+        consumer: '',
+        producer: '',
+        ruleTypeId: '',
+        ruleTypeName: '',
+        enabled: true,
+        schedule: {
+          interval: '1h',
+        },
+        actions: [],
+        createdBy: null,
+        updatedBy: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        throttle: null,
+        notifyWhen: null,
+      },
     };
     const result = await alertType.executor(executorOptions);
 
@@ -484,7 +568,7 @@ describe('alertType', () => {
       alertId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: (alertServices as unknown) as AlertServices<
+      services: alertServices as unknown as AlertServices<
         EsQueryAlertState,
         ActionContext,
         typeof ActionGroupId
@@ -498,6 +582,25 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
+      rule: {
+        name: uuid.v4(),
+        tags: [],
+        consumer: '',
+        producer: '',
+        ruleTypeId: '',
+        ruleTypeName: '',
+        enabled: true,
+        schedule: {
+          interval: '1h',
+        },
+        actions: [],
+        createdBy: null,
+        updatedBy: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        throttle: null,
+        notifyWhen: null,
+      },
     });
 
     const instance: AlertInstanceMock = alertServices.alertInstanceFactory.mock.results[0].value;
@@ -549,7 +652,7 @@ describe('alertType', () => {
       alertId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: (alertServices as unknown) as AlertServices<
+      services: alertServices as unknown as AlertServices<
         EsQueryAlertState,
         ActionContext,
         typeof ActionGroupId
@@ -563,6 +666,25 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
+      rule: {
+        name: uuid.v4(),
+        tags: [],
+        consumer: '',
+        producer: '',
+        ruleTypeId: '',
+        ruleTypeName: '',
+        enabled: true,
+        schedule: {
+          interval: '1h',
+        },
+        actions: [],
+        createdBy: null,
+        updatedBy: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        throttle: null,
+        notifyWhen: null,
+      },
     });
 
     const instance: AlertInstanceMock = alertServices.alertInstanceFactory.mock.results[0].value;

@@ -7,8 +7,10 @@
  */
 
 import { SavedObjectReference } from 'src/core/types';
-import { Filter } from '../../es_query/filters';
+import { Filter } from '@kbn/es-query';
 import { SearchSourceFields } from './types';
+
+import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../constants';
 
 export const extractReferences = (
   state: SearchSourceFields
@@ -16,11 +18,11 @@ export const extractReferences = (
   let searchSourceFields: SearchSourceFields & { indexRefName?: string } = { ...state };
   const references: SavedObjectReference[] = [];
   if (searchSourceFields.index) {
-    const indexId = searchSourceFields.index.id || ((searchSourceFields.index as any) as string);
+    const indexId = searchSourceFields.index.id || (searchSourceFields.index as any as string);
     const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
     references.push({
       name: refName,
-      type: 'index-pattern',
+      type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
       id: indexId,
     });
     searchSourceFields = {
@@ -40,7 +42,7 @@ export const extractReferences = (
         const refName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
         references.push({
           name: refName,
-          type: 'index-pattern',
+          type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
           id: filterRow.meta.index,
         });
         return {

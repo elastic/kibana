@@ -6,13 +6,14 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
+import type { SearchListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 
-import { SearchEsListItemSchema, SearchListItemArraySchema, Type } from '../../../common/schemas';
 import {
   TransformElasticMSearchToListItemOptions,
   getQueryFilterFromTypeValue,
   transformElasticNamedSearchToListItem,
 } from '../utils';
+import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 
 export interface SearchListItemByValuesOptions {
   listId: string;
@@ -41,9 +42,9 @@ export const searchListItemByValues = async ({
     index: listItemIndex,
     size: 10000, // TODO: This has a limit on the number which is 10,000 the default of Elastic but we might want to provide a way to increase that number
   });
-  return transformElasticNamedSearchToListItem(({
+  return transformElasticNamedSearchToListItem({
     response,
     type,
     value,
-  } as unknown) as TransformElasticMSearchToListItemOptions);
+  } as unknown as TransformElasticMSearchToListItemOptions);
 };

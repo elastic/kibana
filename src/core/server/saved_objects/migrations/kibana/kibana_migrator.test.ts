@@ -15,6 +15,7 @@ import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
 import { DocumentMigrator } from '../core/document_migrator';
+import { ByteSizeValue } from '@kbn/config-schema';
 jest.mock('../core/document_migrator', () => {
   return {
     // Create a mock for spying on the constructor
@@ -229,48 +230,6 @@ describe('KibanaMigrator', () => {
         jest.clearAllMocks();
       });
 
-      it('creates a V2 migrator that initializes a new index and migrates an existing index', async () => {
-        const options = mockV2MigrationOptions();
-        const migrator = new KibanaMigrator(options);
-        const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
-        migrator.prepareMigrations();
-        await migrator.runMigrations();
-
-        // Basic assertions that we're creating and reindexing the expected indices
-        expect(options.client.indices.create).toHaveBeenCalledTimes(3);
-        expect(options.client.indices.create.mock.calls).toEqual(
-          expect.arrayContaining([
-            // LEGACY_CREATE_REINDEX_TARGET
-            expect.arrayContaining([expect.objectContaining({ index: '.my-index_pre8.2.3_001' })]),
-            // CREATE_REINDEX_TEMP
-            expect.arrayContaining([
-              expect.objectContaining({ index: '.my-index_8.2.3_reindex_temp' }),
-            ]),
-            // CREATE_NEW_TARGET
-            expect.arrayContaining([expect.objectContaining({ index: 'other-index_8.2.3_001' })]),
-          ])
-        );
-        // LEGACY_REINDEX
-        expect(options.client.reindex.mock.calls[0][0]).toEqual(
-          expect.objectContaining({
-            body: expect.objectContaining({
-              source: expect.objectContaining({ index: '.my-index' }),
-              dest: expect.objectContaining({ index: '.my-index_pre8.2.3_001' }),
-            }),
-          })
-        );
-        // REINDEX_SOURCE_TO_TEMP
-        expect(options.client.reindex.mock.calls[1][0]).toEqual(
-          expect.objectContaining({
-            body: expect.objectContaining({
-              source: expect.objectContaining({ index: '.my-index_pre8.2.3_001' }),
-              dest: expect.objectContaining({ index: '.my-index_8.2.3_reindex_temp' }),
-            }),
-          })
-        );
-        const { status } = await migratorStatus;
-        return expect(status).toEqual('completed');
-      });
       it('emits results on getMigratorResult$()', async () => {
         const options = mockV2MigrationOptions();
         const migrator = new KibanaMigrator(options);
@@ -362,7 +321,11 @@ const mockV2MigrationOptions = () => {
     )
   );
   options.client.indices.addBlock.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise({ acknowledged: true })
+    elasticsearchClientMock.createSuccessTransportRequestPromise({
+      acknowledged: true,
+      shards_acknowledged: true,
+      indices: [],
+    })
   );
   options.client.reindex.mockReturnValue(
     elasticsearchClientMock.createSuccessTransportRequestPromise({
@@ -375,8 +338,26 @@ const mockV2MigrationOptions = () => {
       error: undefined,
       failures: [],
       task: { description: 'task description' } as any,
-    } as estypes.GetTaskResponse)
+    } as estypes.TaskGetResponse)
   );
+
+  options.client.search = jest
+    .fn()
+    .mockImplementation(() =>
+      elasticsearchClientMock.createSuccessTransportRequestPromise({ hits: { hits: [] } })
+    );
+
+  options.client.openPointInTime = jest
+    .fn()
+    .mockImplementation(() =>
+      elasticsearchClientMock.createSuccessTransportRequestPromise({ id: 'pit_id' })
+    );
+
+  options.client.closePointInTime = jest
+    .fn()
+    .mockImplementation(() =>
+      elasticsearchClientMock.createSuccessTransportRequestPromise({ succeeded: true })
+    );
 
   return options;
 };
@@ -416,6 +397,7 @@ const mockOptions = ({ enableV2 }: { enableV2: boolean } = { enableV2: false }) 
     } as KibanaMigratorOptions['kibanaConfig'],
     soMigrationsConfig: {
       batchSize: 20,
+      maxBatchSizeBytes: ByteSizeValue.parse('20mb'),
       pollInterval: 20000,
       scrollDuration: '10m',
       skip: false,

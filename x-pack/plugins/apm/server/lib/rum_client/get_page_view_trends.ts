@@ -7,22 +7,28 @@
 
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { SetupUX } from '../../routes/rum_client';
 import { BreakdownItem } from '../../../typings/ui_filters';
 
 export async function getPageViewTrends({
   setup,
   breakdowns,
   urlQuery,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX;
   breakdowns?: string;
   urlQuery?: string;
+  start: number;
+  end: number;
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
     urlQuery,
     checkFetchStartFieldExists: false,
+    start,
+    end,
   });
   let breakdownItem: BreakdownItem | null = null;
   if (breakdowns) {
@@ -69,7 +75,7 @@ export async function getPageViewTrends({
 
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search('get_page_view_trends', params);
 
   const { topBreakdowns } = response.aggregations ?? {};
 

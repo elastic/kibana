@@ -12,3 +12,5 @@ export {
   patternValidator,
   ChartData,
 } from '../../ml/common';
+
+export { RUNTIME_FIELD_TYPES } from '../../../../src/plugins/data/common';

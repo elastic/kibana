@@ -51,20 +51,47 @@ export interface PluginsStart {
   features: FeaturesPluginStart;
 }
 
+/**
+ * Setup contract for the Spaces plugin.
+ */
 export interface SpacesPluginSetup {
+  /**
+   * Service for interacting with spaces.
+   *
+   * @deprecated Please use the `spacesService` available on this plugin's start contract.
+   * @removeBy 7.16
+   */
   spacesService: SpacesServiceSetup;
+
+  /**
+   * Registries exposed for the security plugin to transparently provide authorization and audit logging.
+   * @private
+   */
   spacesClient: {
+    /**
+     * Sets the client repository factory.
+     * @private
+     */
     setClientRepositoryFactory: (factory: SpacesClientRepositoryFactory) => void;
+    /**
+     * Registers a client wrapper.
+     * @private
+     */
     registerClientWrapper: (wrapper: SpacesClientWrapper) => void;
   };
 }
 
+/**
+ * Start contract for the Spaces plugin.
+ */
 export interface SpacesPluginStart {
+  /** Service for interacting with spaces. */
   spacesService: SpacesServiceStart;
 }
 
 export class SpacesPlugin
-  implements Plugin<SpacesPluginSetup, SpacesPluginStart, PluginsSetup, PluginsStart> {
+  implements Plugin<SpacesPluginSetup, SpacesPluginStart, PluginsSetup, PluginsStart>
+{
   private readonly config$: Observable<ConfigType>;
 
   private readonly kibanaIndexConfig$: Observable<{ kibana: { index: string } }>;

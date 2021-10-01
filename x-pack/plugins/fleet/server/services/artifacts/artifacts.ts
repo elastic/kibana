@@ -87,6 +87,7 @@ export const deleteArtifact = async (esClient: ElasticsearchClient, id: string):
     await esClient.delete({
       index: FLEET_SERVER_ARTIFACTS_INDEX,
       id,
+      refresh: 'wait_for',
     });
   } catch (e) {
     throw new ArtifactsElasticsearchError(e);

@@ -6,8 +6,8 @@
  */
 
 import { get, omit } from 'lodash';
-// @ts-expect-error untyped local
 import { safeElementFromExpression, fromExpression } from '@kbn/interpreter/common';
+import { CanvasRenderedWorkpad } from '../../../shareable_runtime/types';
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
 import {
@@ -355,11 +355,13 @@ export function getElements(
   return elements.map(elementAppendAst);
 }
 
-const augment = (type: string) => <T extends CanvasElement | CanvasGroup>(n: T): T => ({
-  ...n,
-  position: { ...n.position, type },
-  ...(type === 'group' && { expression: 'shape fill="rgba(255,255,255,0)" | render' }), // fixme unify with mw/aeroelastic
-});
+const augment =
+  (type: string) =>
+  <T extends CanvasElement | CanvasGroup>(n: T): T => ({
+    ...n,
+    position: { ...n.position, type },
+    ...(type === 'group' && { expression: 'shape fill="rgba(255,255,255,0)" | render' }), // fixme unify with mw/aeroelastic
+  });
 
 const getNodesOfPage = (page: CanvasPage): Array<CanvasElement | CanvasGroup> => {
   const elements: Array<CanvasElement | CanvasGroup> = get(page, 'elements').map(
@@ -501,7 +503,7 @@ export function getRenderedWorkpad(state: State) {
   return {
     pages: renderedPages,
     ...rest,
-  };
+  } as CanvasRenderedWorkpad;
 }
 
 export function getRenderedWorkpadExpressions(state: State) {

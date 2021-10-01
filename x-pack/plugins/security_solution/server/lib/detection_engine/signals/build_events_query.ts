@@ -5,22 +5,20 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import {
-  SortOrderOrUndefined,
-  TimestampOverrideOrUndefined,
-} from '../../../../common/detection_engine/schemas/common/schemas';
+import { isEmpty } from 'lodash';
+import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 
 interface BuildEventsSearchQuery {
-  aggregations?: Record<string, estypes.AggregationContainer>;
+  aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
   index: string[];
   from: string;
   to: string;
-  filter?: estypes.QueryContainer;
+  filter: estypes.QueryDslQueryContainer;
   size: number;
-  sortOrder?: SortOrderOrUndefined;
-  searchAfterSortId: string | number | undefined;
+  sortOrder?: estypes.SearchSortOrder;
+  searchAfterSortIds: estypes.SearchSortResults | undefined;
   timestampOverride: TimestampOverrideOrUndefined;
-  excludeDocsWithTimestampOverride: boolean;
+  trackTotalHits?: boolean;
 }
 
 export const buildEventsSearchQuery = ({
@@ -30,10 +28,10 @@ export const buildEventsSearchQuery = ({
   to,
   filter,
   size,
-  searchAfterSortId,
+  searchAfterSortIds,
   sortOrder,
   timestampOverride,
-  excludeDocsWithTimestampOverride,
+  trackTotalHits,
 }: BuildEventsSearchQuery) => {
   const defaultTimeFields = ['@timestamp'];
   const timestamps =
@@ -43,44 +41,83 @@ export const buildEventsSearchQuery = ({
     format: 'strict_date_optional_time',
   }));
 
-  const sortField =
-    timestampOverride != null && !excludeDocsWithTimestampOverride
-      ? timestampOverride
-      : '@timestamp';
-
-  const rangeFilter: estypes.QueryContainer[] = [
-    {
-      range: {
-        [sortField]: {
-          lte: to,
-          gte: from,
-          format: 'strict_date_optional_time',
-        },
-      },
-    },
-  ];
-  if (excludeDocsWithTimestampOverride) {
-    rangeFilter.push({
-      bool: {
-        must_not: {
-          exists: {
-            field: timestampOverride,
+  const rangeFilter: estypes.QueryDslQueryContainer[] =
+    timestampOverride != null
+      ? [
+          {
+            range: {
+              [timestampOverride]: {
+                lte: to,
+                gte: from,
+                format: 'strict_date_optional_time',
+              },
+            },
           },
-        },
+          {
+            bool: {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      lte: to,
+                      gte: from,
+                      format: 'strict_date_optional_time',
+                    },
+                  },
+                },
+                {
+                  bool: {
+                    must_not: {
+                      exists: {
+                        field: timestampOverride,
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ]
+      : [
+          {
+            range: {
+              '@timestamp': {
+                lte: to,
+                gte: from,
+                format: 'strict_date_optional_time',
+              },
+            },
+          },
+        ];
+
+  const filterWithTime: estypes.QueryDslQueryContainer[] = [
+    filter,
+    { bool: { filter: [{ bool: { should: [...rangeFilter], minimum_should_match: 1 } }] } },
+  ];
+
+  const sort: estypes.SearchSort = [];
+  if (timestampOverride) {
+    sort.push({
+      [timestampOverride]: {
+        order: sortOrder ?? 'asc',
+        unmapped_type: 'date',
       },
     });
   }
-  // @ts-expect-error undefined in not assignable to QueryContainer
-  // but tests contain undefined, so I suppose it's desired behaviour
-  const filterWithTime: estypes.QueryContainer[] = [filter, { bool: { filter: rangeFilter } }];
+  sort.push({
+    '@timestamp': {
+      order: sortOrder ?? 'asc',
+      unmapped_type: 'date',
+    },
+  });
 
   const searchQuery = {
     allow_no_indices: true,
     index,
     size,
     ignore_unavailable: true,
+    track_total_hits: trackTotalHits,
     body: {
-      docvalue_fields: docFields,
       query: {
         bool: {
           filter: [
@@ -96,25 +133,19 @@ export const buildEventsSearchQuery = ({
           field: '*',
           include_unmapped: true,
         },
+        ...docFields,
       ],
       ...(aggregations ? { aggregations } : {}),
-      sort: [
-        {
-          [sortField]: {
-            order: sortOrder ?? 'asc',
-            unmapped_type: 'date',
-          },
-        },
-      ],
+      sort,
     },
   };
 
-  if (searchAfterSortId) {
+  if (searchAfterSortIds != null && !isEmpty(searchAfterSortIds)) {
     return {
       ...searchQuery,
       body: {
         ...searchQuery.body,
-        search_after: [searchAfterSortId],
+        search_after: searchAfterSortIds,
       },
     };
   }

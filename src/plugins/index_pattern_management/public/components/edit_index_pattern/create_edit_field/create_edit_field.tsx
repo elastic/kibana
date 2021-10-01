@@ -7,15 +7,15 @@
  */
 
 import React from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IndexPattern, IndexPatternField } from '../../../../../../plugins/data/public';
 import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../../types';
 import { IndexHeader } from '../index_header';
-import { TAB_SCRIPTED_FIELDS, TAB_INDEXED_FIELDS } from '../constants';
+import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS } from '../constants';
 
 import { FieldEditor } from '../../field_editor';
 
@@ -34,20 +34,16 @@ const newFieldPlaceholder = i18n.translate(
 
 export const CreateEditField = withRouter(
   ({ indexPattern, mode, fieldName, history }: CreateEditFieldProps) => {
-    const {
-      uiSettings,
-      chrome,
-      notifications,
-      data,
-    } = useKibana<IndexPatternManagmentContext>().services;
+    const { uiSettings, chrome, notifications, data } =
+      useKibana<IndexPatternManagmentContext>().services;
     const spec =
       mode === 'edit' && fieldName
         ? indexPattern.fields.getByName(fieldName)?.spec
-        : (({
+        : ({
             scripted: true,
             type: 'number',
             name: undefined,
-          } as unknown) as IndexPatternField);
+          } as unknown as IndexPatternField);
 
     const url = `/patterns/${indexPattern.id}`;
 
@@ -76,26 +72,18 @@ export const CreateEditField = withRouter(
 
     if (spec) {
       return (
-        <EuiPanel paddingSize={'l'}>
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem>
-              <IndexHeader
-                indexPattern={indexPattern}
-                defaultIndex={uiSettings.get('defaultIndex')}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <FieldEditor
-                indexPattern={indexPattern}
-                spec={spec}
-                services={{
-                  indexPatternService: data.indexPatterns,
-                  redirectAway,
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+        <>
+          <IndexHeader indexPattern={indexPattern} defaultIndex={uiSettings.get('defaultIndex')} />
+          <EuiSpacer size={'l'} />
+          <FieldEditor
+            indexPattern={indexPattern}
+            spec={spec}
+            services={{
+              indexPatternService: data.indexPatterns,
+              redirectAway,
+            }}
+          />
+        </>
       );
     } else {
       return <></>;

@@ -12,6 +12,7 @@ import type { ConfigDeprecationProvider } from '../config';
 
 const migrationSchema = schema.object({
   batchSize: schema.number({ defaultValue: 1_000 }),
+  maxBatchSizeBytes: schema.byteSize({ defaultValue: '100mb' }), // 100mb is the default http.max_content_length Elasticsearch config value
   scrollDuration: schema.string({ defaultValue: '15m' }),
   pollInterval: schema.number({ defaultValue: 1_500 }),
   skip: schema.boolean({ defaultValue: false }),
@@ -29,17 +30,21 @@ const migrationDeprecations: ConfigDeprecationProvider = () => [
         message:
           '"migrations.enableV2" is deprecated and will be removed in an upcoming release without any further notice.',
         documentationUrl: 'https://ela.st/kbn-so-migration-v2',
+        correctiveActions: {
+          manualSteps: [`Remove "migrations.enableV2" from your kibana configs.`],
+        },
       });
     }
     return settings;
   },
 ];
 
-export const savedObjectsMigrationConfig: ServiceConfigDescriptor<SavedObjectsMigrationConfigType> = {
-  path: 'migrations',
-  schema: migrationSchema,
-  deprecations: migrationDeprecations,
-};
+export const savedObjectsMigrationConfig: ServiceConfigDescriptor<SavedObjectsMigrationConfigType> =
+  {
+    path: 'migrations',
+    schema: migrationSchema,
+    deprecations: migrationDeprecations,
+  };
 
 const soSchema = schema.object({
   maxImportPayloadBytes: schema.byteSize({ defaultValue: 26_214_400 }),

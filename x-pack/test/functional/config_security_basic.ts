@@ -9,7 +9,7 @@
 
 import { resolve } from 'path';
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
@@ -58,11 +58,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     // Kibana's config in order to use this helper
     apps: {
       ...kibanaFunctionalConfig.get('apps'),
-    },
-
-    // choose where esArchiver should load archives from
-    esArchiver: {
-      directory: resolve(__dirname, 'es_archives'),
     },
 
     // choose where screenshots should be saved

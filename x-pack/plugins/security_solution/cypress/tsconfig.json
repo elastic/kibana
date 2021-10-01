@@ -1,11 +1,16 @@
 {
   "extends": "../../../../tsconfig.base.json",
-  "exclude": [],
   "include": [
-    "./**/*"
+    "**/*",
+    "fixtures/**/*.json"
+  ],
+  "exclude": [
+    "target/**/*"
   ],
   "compilerOptions": {
-    "tsBuildInfoFile": "../../../../build/tsbuildinfo/security_solution/cypress",
+    "target": "es5",
+    "lib": ["es5", "dom"],
+    "outDir": "target/types",
     "types": [
       "cypress",
       "cypress-pipe",
@@ -13,4 +18,7 @@
     ],
     "resolveJsonModule": true,
   },
+  "references": [
+    { "path": "../tsconfig.json" }
+  ]
 }

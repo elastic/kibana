@@ -1,5 +1,5 @@
 get:
-  summary: Fleet - Agent - List
+  summary: Agents - List
   tags: []
   responses:
     '200':
@@ -12,7 +12,7 @@ get:
               list:
                 type: array
                 items:
-                  type: object
+                  $ref: ../components/schemas/agent.yaml
               total:
                 type: number
               page:
@@ -24,6 +24,6 @@ get:
               - total
               - page
               - perPage
-  operationId: get-fleet-agents
+  operationId: get-agents
   security:
     - basicAuth: []

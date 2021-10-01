@@ -64,12 +64,12 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should not show legacy region map visualizion in create menu', async () => {
-        const hasLegecyViz = await PageObjects.visualize.hasRegionMap();
+        const hasLegecyViz = await PageObjects.visualize.hasVisType('region_map');
         expect(hasLegecyViz).to.equal(false);
       });
 
       it('should not show legacy tilemap map visualizion in create menu', async () => {
-        const hasLegecyViz = await PageObjects.visualize.hasTileMap();
+        const hasLegecyViz = await PageObjects.visualize.hasVisType('tile_map');
         expect(hasLegecyViz).to.equal(false);
       });
     });

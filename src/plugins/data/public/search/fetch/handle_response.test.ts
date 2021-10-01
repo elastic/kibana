@@ -12,7 +12,7 @@ import { handleResponse } from './handle_response';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { notificationServiceMock } from '../../../../../core/public/notifications/notifications_service.mock';
 import { setNotifications } from '../../services';
-import { SearchResponse } from 'elasticsearch';
+import { IKibanaSearchResponse } from 'src/plugins/data/common';
 
 jest.mock('@kbn/i18n', () => {
   return {
@@ -33,8 +33,10 @@ describe('handleResponse', () => {
   test('should notify if timed out', () => {
     const request = { body: {} };
     const response = {
-      timed_out: true,
-    } as SearchResponse<any>;
+      rawResponse: {
+        timed_out: true,
+      },
+    } as IKibanaSearchResponse<any>;
     const result = handleResponse(request, response);
     expect(result).toBe(response);
     expect(notifications.toasts.addWarning).toBeCalled();
@@ -46,13 +48,15 @@ describe('handleResponse', () => {
   test('should notify if shards failed', () => {
     const request = { body: {} };
     const response = {
-      _shards: {
-        failed: 1,
-        total: 2,
-        successful: 1,
-        skipped: 1,
+      rawResponse: {
+        _shards: {
+          failed: 1,
+          total: 2,
+          successful: 1,
+          skipped: 1,
+        },
       },
-    } as SearchResponse<any>;
+    } as IKibanaSearchResponse<any>;
     const result = handleResponse(request, response);
     expect(result).toBe(response);
     expect(notifications.toasts.addWarning).toBeCalled();
@@ -63,7 +67,9 @@ describe('handleResponse', () => {
 
   test('returns the response', () => {
     const request = {};
-    const response = {} as SearchResponse<any>;
+    const response = {
+      rawResponse: {},
+    } as IKibanaSearchResponse<any>;
     const result = handleResponse(request, response);
     expect(result).toBe(response);
   });

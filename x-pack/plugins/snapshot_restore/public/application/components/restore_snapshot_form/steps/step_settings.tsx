@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiCode,
-  EuiCodeEditor,
   EuiComboBox,
   EuiDescribedFormGroup,
   EuiFlexGroup,
@@ -23,6 +22,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { RestoreSettings } from '../../../../../common/types';
+import { EuiCodeEditor } from '../../../../shared_imports';
 import { REMOVE_INDEX_SETTINGS_SUGGESTIONS } from '../../../constants';
 import { useCore, useServices } from '../../../app_context';
 import { StepProps } from './';

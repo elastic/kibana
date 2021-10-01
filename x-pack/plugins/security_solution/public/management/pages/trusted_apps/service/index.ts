@@ -28,9 +28,10 @@ import {
   PutTrustedAppsRequestParams,
   GetOneTrustedAppRequestParams,
   GetOneTrustedAppResponse,
+  GetTrustedAppsSummaryRequest,
 } from '../../../../../common/endpoint/types/trusted_apps';
+import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 
-import { resolvePathVariables } from './utils';
 import { sendGetEndpointSpecificPackagePolicies } from '../../policy/store/services/ingest';
 
 export interface TrustedAppsService {
@@ -82,8 +83,10 @@ export class TrustedAppsHttpService implements TrustedAppsService {
     );
   }
 
-  async getTrustedAppsSummary() {
-    return this.http.get<GetTrustedAppsSummaryResponse>(TRUSTED_APPS_SUMMARY_API);
+  async getTrustedAppsSummary(request: GetTrustedAppsSummaryRequest) {
+    return this.http.get<GetTrustedAppsSummaryResponse>(TRUSTED_APPS_SUMMARY_API, {
+      query: request,
+    });
   }
 
   getPolicyList(options?: Parameters<typeof sendGetEndpointSpecificPackagePolicies>[1]) {

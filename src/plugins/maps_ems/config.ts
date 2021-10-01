@@ -13,6 +13,9 @@ import {
   DEFAULT_EMS_LANDING_PAGE_URL,
   DEFAULT_EMS_TILE_API_URL,
   DEFAULT_EMS_FILE_API_URL,
+  DEFAULT_EMS_ROADMAP_ID,
+  DEFAULT_EMS_ROADMAP_DESATURATED_ID,
+  DEFAULT_EMS_DARKMAP_ID,
 } from './common';
 
 const tileMapConfigOptionsSchema = schema.object({
@@ -33,37 +36,10 @@ export const tilemapConfigSchema = schema.object({
   options: tileMapConfigOptionsSchema,
 });
 
-const layerConfigSchema = schema.object({
-  url: schema.string(),
-  format: schema.object({
-    type: schema.string({ defaultValue: 'geojson' }),
-  }),
-  meta: schema.object({
-    feature_collection_path: schema.string({ defaultValue: 'data' }),
-  }),
-  attribution: schema.string(),
-  name: schema.string(),
-  fields: schema.arrayOf(
-    schema.object({
-      name: schema.string(),
-      description: schema.string(),
-    })
-  ),
-});
-
-export type LayerConfig = TypeOf<typeof layerConfigSchema>;
-
-const regionmapConfigSchema = schema.object({
-  includeElasticMapsService: schema.boolean({ defaultValue: true }),
-  layers: schema.arrayOf(layerConfigSchema, { defaultValue: [] }),
-});
-
 export const emsConfigSchema = schema.object({
-  regionmap: regionmapConfigSchema,
   tilemap: tilemapConfigSchema,
   includeElasticMapsService: schema.boolean({ defaultValue: true }),
   proxyElasticMapsServiceInMaps: schema.boolean({ defaultValue: false }),
-  manifestServiceUrl: schema.string({ defaultValue: '' }),
   emsUrl: schema.conditional(
     schema.siblingRef('proxyElasticMapsServiceInMaps'),
     true,
@@ -77,9 +53,9 @@ export const emsConfigSchema = schema.object({
     defaultValue: DEFAULT_EMS_FONT_LIBRARY_URL,
   }),
   emsTileLayerId: schema.object({
-    bright: schema.string({ defaultValue: 'road_map' }),
-    desaturated: schema.string({ defaultValue: 'road_map_desaturated' }),
-    dark: schema.string({ defaultValue: 'dark_map' }),
+    bright: schema.string({ defaultValue: DEFAULT_EMS_ROADMAP_ID }),
+    desaturated: schema.string({ defaultValue: DEFAULT_EMS_ROADMAP_DESATURATED_ID }),
+    dark: schema.string({ defaultValue: DEFAULT_EMS_DARKMAP_ID }),
   }),
 });
 

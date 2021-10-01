@@ -83,6 +83,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
             <EuiFlexItem grow={5}>
               <EuiSwitch
                 label={packageInputStream.title}
+                disabled={packagePolicyInputStream.keep_enabled}
                 checked={packagePolicyInputStream.enabled}
                 onChange={(e) => {
                   const enabled = e.target.checked;

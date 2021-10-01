@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+export type { FailedImport, ProcessedImportResponse } from './process_import_response';
+export { processImportResponse } from './process_import_response';
+
 export type {
   SummarizedCopyToSpaceResult,
   SummarizedSavedObjectResult,

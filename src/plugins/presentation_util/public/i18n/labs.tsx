@@ -9,6 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCode } from '@elastic/eui';
 
 export const LabsStrings = {
   Components: {
@@ -18,7 +19,7 @@ export const LabsStrings = {
           defaultMessage: 'Kibana',
         }),
         help: i18n.translate('presentationUtil.labs.components.kibanaSwitchHelp', {
-          defaultMessage: 'Sets the corresponding Advanced Setting for this lab project in Kibana',
+          defaultMessage: 'Enables this lab for all Kibana users.',
         }),
       }),
       getBrowserSwitchText: () => ({
@@ -26,8 +27,7 @@ export const LabsStrings = {
           defaultMessage: 'Browser',
         }),
         help: i18n.translate('presentationUtil.labs.components.browserSwitchHelp', {
-          defaultMessage:
-            'Enables or disables the lab project for the browser; persists between browser instances',
+          defaultMessage: 'Enables the lab for this browser and persists after it closes.',
         }),
       }),
       getSessionSwitchText: () => ({
@@ -35,47 +35,61 @@ export const LabsStrings = {
           defaultMessage: 'Session',
         }),
         help: i18n.translate('presentationUtil.labs.components.sessionSwitchHelp', {
-          defaultMessage:
-            'Enables or disables the lab project for this tab; resets when the browser tab is closed',
+          defaultMessage: 'Enables the lab for this browser session, so it resets when it closes.',
         }),
       }),
     },
     List: {
       getNoProjectsMessage: () =>
         i18n.translate('presentationUtil.labs.components.noProjectsMessage', {
-          defaultMessage: 'No available lab projects',
+          defaultMessage: 'No labs currently available.',
+        }),
+      getNoProjectsInSolutionMessage: (solutionName: string) =>
+        i18n.translate('presentationUtil.labs.components.noProjectsinSolutionMessage', {
+          defaultMessage: 'No labs currently in {solutionName}.',
+          values: {
+            solutionName,
+          },
         }),
     },
     ListItem: {
       getOverrideLegend: () =>
         i18n.translate('presentationUtil.labs.components.overrideFlagsLabel', {
-          defaultMessage: 'Override flags',
+          defaultMessage: 'Overrides',
+        }),
+      getOverriddenIconTipLabel: () =>
+        i18n.translate('presentationUtil.labs.components.overridenIconTipLabel', {
+          defaultMessage: 'Default overridden',
         }),
       getEnabledStatusMessage: () => (
         <FormattedMessage
-          id="presentationUtil.labs.components.defaultStatusMessage"
-          defaultMessage="{status} by default"
+          id="presentationUtil.labs.components.enabledStatusMessage"
+          defaultMessage="Default: {status}"
           values={{
-            status: <strong>Enabled</strong>,
+            status: <EuiCode>Enabled</EuiCode>,
           }}
-          description="Displays the current status of a lab project"
+          description="Displays the enabled status of a lab project"
         />
       ),
       getDisabledStatusMessage: () => (
         <FormattedMessage
-          id="presentationUtil.labs.components.defaultStatusMessage"
-          defaultMessage="{status} by default"
+          id="presentationUtil.labs.components.disabledStatusMessage"
+          defaultMessage="Default: {status}"
           values={{
-            status: <strong>Disabled</strong>,
+            status: <EuiCode>Disabled</EuiCode>,
           }}
-          description="Displays the current status of a lab project"
+          description="Displays the disabled status of a lab project"
         />
       ),
     },
     Flyout: {
       getTitleLabel: () =>
         i18n.translate('presentationUtil.labs.components.titleLabel', {
-          defaultMessage: 'Lab projects',
+          defaultMessage: 'Labs',
+        }),
+      getDescriptionMessage: () =>
+        i18n.translate('presentationUtil.labs.components.descriptionMessage', {
+          defaultMessage: 'Try out our features that are in progress or experimental.',
         }),
       getResetToDefaultLabel: () =>
         i18n.translate('presentationUtil.labs.components.resetToDefaultLabel', {
@@ -88,6 +102,10 @@ export const LabsStrings = {
       getRefreshLabel: () =>
         i18n.translate('presentationUtil.labs.components.calloutHelp', {
           defaultMessage: 'Refresh to apply changes',
+        }),
+      getCloseButtonLabel: () =>
+        i18n.translate('presentationUtil.labs.components.closeButtonLabel', {
+          defaultMessage: 'Close',
         }),
     },
   },

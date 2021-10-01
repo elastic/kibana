@@ -1,0 +1,66 @@
+---
+id: formLibExampleStyleFields
+slug: /form-lib/examples/styles-fields
+title: Style fields
+summary: Customize your fields however you want
+tags: ['forms', 'kibana', 'dev']
+date: 2021-04-14
+---
+
+The `<UseField />` is a render prop component that returns a <DocLink id="formLibCoreFieldHook" text="Field hook"/>.  
+You can then connect its states and handlers to any UI.
+
+```js
+export const MyComponent = () => {
+  const { form } = useForm();
+
+  // Notice how we have typed the value of the field with <UseField<string> ...>
+  return (
+    <Form form={form}>
+      <UseField<string> path="firstname" config={{ label: 'First name' }}>
+        {(field) => {
+          const {
+            isChangingValue,
+            errors,
+            label,
+            helpText,
+            value,
+            onChange,
+            isValidating
+          } = field;
+
+          const isInvalid = !isChangingValue && errors.length > 0;
+          const errorMessage = !isChangingValue && errors.length ? errors[0].message : null;
+
+          return (
+            <EuiFormRow
+              label={label}
+              helpText={typeof helpText === 'function' ? helpText() : helpText}
+              error={errorMessage}
+              isInvalid={isInvalid}
+            >
+              <EuiFieldText
+                isInvalid={isInvalid}
+                value={value}
+                onChange={onChange}
+                isLoading={isValidating}
+              />
+            </EuiFormRow>
+          );
+        }}
+      </UseField>
+    </Form>
+  );
+};
+```
+
+## Using the `component` prop
+
+The above example can be simplified by extracting the children into its own component and by using the `component` prop on `<UseField />`.  
+The component will receive the `field` hook as a prop and any other props you pass to `componentProps`.
+
+```js
+<UseField path="name" component={MyTextField} componentProps={{ foo: 'bar' }}>
+```
+
+**Note:** Before creating your own reusable component have a look at <DocLink id="formLibHelpersComponents" text="the helper components"/> which handle most of the form inputs of [the EUI framework](https://elastic.github.io/eui).

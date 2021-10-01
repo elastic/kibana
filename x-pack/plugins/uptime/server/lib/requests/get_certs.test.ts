@@ -94,7 +94,7 @@ describe('getCerts', () => {
 
     const result = await getCerts({
       uptimeEsClient,
-      index: 1,
+      pageIndex: 1,
       from: 'now-2d',
       to: 'now+1h',
       search: 'my_common_name',
@@ -173,7 +173,7 @@ describe('getCerts', () => {
                   "filter": Array [
                     Object {
                       "exists": Object {
-                        "field": "tls.server",
+                        "field": "tls.server.hash.sha256",
                       },
                     },
                     Object {

@@ -1,0 +1,56 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies use of the netsh.exe program to enable host discovery via the network. Attackers can use this command-line tool to weaken the host firewall settings.",
+  "false_positives": [
+    "Host Windows Firewall planned system administration changes."
+  ],
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Enable Host Network Discovery via Netsh",
+  "query": "process where event.type == \"start\" and\nprocess.name : \"netsh.exe\" and\nprocess.args : (\"firewall\", \"advfirewall\") and process.args : \"group=Network Discovery\" and process.args : \"enable=Yes\"\n",
+  "risk_score": 47,
+  "rule_id": "8b4f0816-6a65-4630-86a6-c21c179c0d09",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/",
+          "subtechnique": [
+            {
+              "id": "T1562.001",
+              "name": "Disable or Modify Tools",
+              "reference": "https://attack.mitre.org/techniques/T1562/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

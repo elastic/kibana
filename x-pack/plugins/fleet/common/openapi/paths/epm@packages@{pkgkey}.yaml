@@ -1,5 +1,5 @@
 get:
-  summary: EPM - Packages - Info
+  summary: Packages - Info
   tags: []
   responses:
     '200':
@@ -23,7 +23,7 @@ get:
                 required:
                   - status
                   - savedObject
-  operationId: get-epm-package-pkgkey
+  operationId: get-package
   security:
     - basicAuth: []
 parameters:
@@ -33,7 +33,7 @@ parameters:
     in: path
     required: true
 post:
-  summary: EPM - Packages - Install
+  summary: Packages - Install
   tags: []
   responses:
     '200':
@@ -51,18 +51,28 @@ post:
                     id:
                       type: string
                     type:
-                      type: string
+                      oneOf:
+                        - $ref: ../components/schemas/kibana_saved_object_type.yaml
+                        - $ref: ../components/schemas/elasticsearch_asset_type.yaml
                   required:
                     - id
                     - type
             required:
               - response
-  operationId: post-epm-install-pkgkey
+  operationId: install-package
   description: ''
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            force:
+              type: boolean
 delete:
-  summary: EPM - Packages - Delete
+  summary: Packages - Delete
   tags: []
   responses:
     '200':
@@ -80,13 +90,15 @@ delete:
                     id:
                       type: string
                     type:
-                      type: string
+                      oneOf:
+                        - $ref: ../components/schemas/kibana_saved_object_type.yaml
+                        - $ref: ../components/schemas/elasticsearch_asset_type.yaml
                   required:
                     - id
                     - type
             required:
               - response
-  operationId: post-epm-delete-pkgkey
+  operationId: delete-package
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
   requestBody:

@@ -343,6 +343,7 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
               onChange={this.annotationTextChangeHandler}
               placeholder="..."
               value={annotationState.annotation}
+              data-test-subj={'mlAnnotationsFlyoutTextInput'}
             />
           </EuiFormRow>
           <EuiFormRow>
@@ -360,13 +361,18 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
                   applyAnnotationToSeries: !this.state.applyAnnotationToSeries,
                 })
               }
+              data-test-subj={'mlAnnotationsFlyoutApplyToSeriesButton'}
             />
           </EuiFormRow>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={this.cancelEditingHandler} flush="left">
+              <EuiButtonEmpty
+                onClick={this.cancelEditingHandler}
+                flush="left"
+                data-test-subj={'mlAnnotationsFlyoutCancelButton'}
+              >
                 <FormattedMessage
                   id="xpack.ml.timeSeriesExplorer.annotationFlyout.cancelButtonLabel"
                   defaultMessage="Cancel"
@@ -375,7 +381,11 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
             </EuiFlexItem>
             <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
               {isExistingAnnotation && (
-                <EuiButtonEmpty color="danger" onClick={this.deleteConfirmHandler}>
+                <EuiButtonEmpty
+                  color="danger"
+                  onClick={this.deleteConfirmHandler}
+                  data-test-subj={'mlAnnotationsFlyoutDeleteButton'}
+                >
                   <FormattedMessage
                     id="xpack.ml.timeSeriesExplorer.annotationFlyout.deleteButtonLabel"
                     defaultMessage="Delete"
@@ -388,7 +398,7 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
                 fill
                 isDisabled={isInvalid === true}
                 onClick={this.saveOrUpdateAnnotation}
-                data-test-subj={'annotationFlyoutUpdateButton'}
+                data-test-subj={'annotationFlyoutUpdateOrCreateButton'}
               >
                 {isExistingAnnotation ? (
                   <FormattedMessage
@@ -435,9 +445,10 @@ export const AnnotationFlyout: FC<any> = (props) => {
       size="m"
       aria-labelledby="Add annotation"
       data-test-subj={'mlAnnotationFlyout'}
+      className={'mlAnnotationFlyout'}
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
+        <EuiTitle size="s" data-test-subj={'mlAnnotationFlyoutTitle'}>
           <h2 id="mlAnnotationFlyoutTitle">
             {isExistingAnnotation ? (
               <FormattedMessage

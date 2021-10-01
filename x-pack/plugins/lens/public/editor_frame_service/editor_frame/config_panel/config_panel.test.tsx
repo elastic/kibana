@@ -12,15 +12,19 @@ import {
   createMockFramePublicAPI,
   createMockDatasource,
   DatasourceMock,
-} from '../../mocks';
+} from '../../../mocks';
 import { Visualization } from '../../../types';
-import { mountWithIntl } from '@kbn/test/jest';
 import { LayerPanels } from './config_panel';
 import { LayerPanel } from './layer_panel';
 import { coreMock } from 'src/core/public/mocks';
 import { generateId } from '../../../id_generator';
+import { mountWithProvider } from '../../../mocks';
+import { layerTypes } from '../../../../common';
+import { ReactWrapper } from 'enzyme';
 
 jest.mock('../../../id_generator');
+
+const waitMs = (time: number) => new Promise((r) => setTimeout(r, time));
 
 let container: HTMLDivElement | undefined;
 
@@ -54,17 +58,17 @@ describe('ConfigPanel', () => {
         vis1: mockVisualization,
         vis2: mockVisualization2,
       },
-      activeDatasourceId: 'ds1',
+      activeDatasourceId: 'mockindexpattern',
       datasourceMap: {
-        ds1: mockDatasource,
+        mockindexpattern: mockDatasource,
       },
-      activeVisualization: ({
+      activeVisualization: {
         ...mockVisualization,
         getLayerIds: () => Object.keys(frame.datasourceLayers),
-        appendLayer: true,
-      } as unknown) as Visualization,
+        appendLayer: jest.fn(),
+      } as unknown as Visualization,
       datasourceStates: {
-        ds1: {
+        mockindexpattern: {
           isLoading: false,
           state: 'state',
         },
@@ -76,6 +80,8 @@ describe('ConfigPanel', () => {
       framePublicAPI: frame,
       dispatch: jest.fn(),
       core: coreMock.createStart(),
+      isFullscreen: false,
+      toggleFullscreen: jest.fn(),
     };
   }
 
@@ -108,93 +114,347 @@ describe('ConfigPanel', () => {
     };
 
     mockVisualization.getLayerIds.mockReturnValue(Object.keys(frame.datasourceLayers));
-    mockDatasource = createMockDatasource('ds1');
+    mockDatasource = createMockDatasource('mockindexpattern');
   });
 
   // in what case is this test needed?
-  it('should fail to render layerPanels if the public API is out of date', () => {
+  it('should fail to render layerPanels if the public API is out of date', async () => {
     const props = getDefaultProps();
     props.framePublicAPI.datasourceLayers = {};
-    const component = mountWithIntl(<LayerPanels {...props} />);
-    expect(component.find(LayerPanel).exists()).toBe(false);
+    const { instance } = await mountWithProvider(<LayerPanels {...props} />);
+    expect(instance.find(LayerPanel).exists()).toBe(false);
+  });
+
+  it('allow datasources and visualizations to use setters', async () => {
+    const props = getDefaultProps();
+    const { instance, lensStore } = await mountWithProvider(<LayerPanels {...props} />, {
+      preloadedState: {
+        datasourceStates: {
+          mockindexpattern: {
+            isLoading: false,
+            state: 'state',
+          },
+        },
+      },
+    });
+    const { updateDatasource, updateAll } = instance.find(LayerPanel).props();
+
+    const updater = () => 'updated';
+    updateDatasource('mockindexpattern', updater);
+    await waitMs(0);
+    expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
+    expect(
+      (lensStore.dispatch as jest.Mock).mock.calls[0][0].payload.updater(
+        props.datasourceStates.mockindexpattern.state
+      )
+    ).toEqual('updated');
+
+    updateAll('mockindexpattern', updater, props.visualizationState);
+    // wait for one tick so async updater has a chance to trigger
+    await waitMs(0);
+    expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
+    expect(
+      (lensStore.dispatch as jest.Mock).mock.calls[0][0].payload.updater(
+        props.datasourceStates.mockindexpattern.state
+      )
+    ).toEqual('updated');
   });
 
   describe('focus behavior when adding or removing layers', () => {
-    it('should focus the only layer when resetting the layer', () => {
-      const component = mountWithIntl(<LayerPanels {...getDefaultProps()} />, {
-        attachTo: container,
-      });
-      const firstLayerFocusable = component
+    it('should focus the only layer when resetting the layer', async () => {
+      const { instance } = await mountWithProvider(
+        <LayerPanels {...getDefaultProps()} />,
+        {
+          preloadedState: {
+            datasourceStates: {
+              mockindexpattern: {
+                isLoading: false,
+                state: 'state',
+              },
+            },
+          },
+        },
+        {
+          attachTo: container,
+        }
+      );
+      const firstLayerFocusable = instance
         .find(LayerPanel)
         .first()
         .find('section')
         .first()
         .instance();
       act(() => {
-        component.find('[data-test-subj="lnsLayerRemove"]').first().simulate('click');
+        instance.find('[data-test-subj="lnsLayerRemove"]').first().simulate('click');
       });
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(firstLayerFocusable);
     });
 
-    it('should focus the second layer when removing the first layer', () => {
+    it('should focus the second layer when removing the first layer', async () => {
       const defaultProps = getDefaultProps();
       // overwriting datasourceLayers to test two layers
       frame.datasourceLayers = {
         first: mockDatasource.publicAPIMock,
         second: mockDatasource.publicAPIMock,
       };
-      const component = mountWithIntl(<LayerPanels {...defaultProps} />, { attachTo: container });
-      const secondLayerFocusable = component
+      const { instance } = await mountWithProvider(
+        <LayerPanels {...defaultProps} />,
+        {
+          preloadedState: {
+            datasourceStates: {
+              mockindexpattern: {
+                isLoading: false,
+                state: 'state',
+              },
+            },
+          },
+        },
+        {
+          attachTo: container,
+        }
+      );
+
+      const secondLayerFocusable = instance
         .find(LayerPanel)
         .at(1)
         .find('section')
         .first()
         .instance();
       act(() => {
-        component.find('[data-test-subj="lnsLayerRemove"]').at(0).simulate('click');
+        instance.find('[data-test-subj="lnsLayerRemove"]').at(0).simulate('click');
       });
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(secondLayerFocusable);
     });
 
-    it('should focus the first layer when removing the second layer', () => {
+    it('should focus the first layer when removing the second layer', async () => {
       const defaultProps = getDefaultProps();
       // overwriting datasourceLayers to test two layers
       frame.datasourceLayers = {
         first: mockDatasource.publicAPIMock,
         second: mockDatasource.publicAPIMock,
       };
-      const component = mountWithIntl(<LayerPanels {...defaultProps} />, { attachTo: container });
-      const firstLayerFocusable = component
+      const { instance } = await mountWithProvider(
+        <LayerPanels {...defaultProps} />,
+        {
+          preloadedState: {
+            datasourceStates: {
+              mockindexpattern: {
+                isLoading: false,
+                state: 'state',
+              },
+            },
+          },
+        },
+        {
+          attachTo: container,
+        }
+      );
+      const firstLayerFocusable = instance
         .find(LayerPanel)
         .first()
         .find('section')
         .first()
         .instance();
       act(() => {
-        component.find('[data-test-subj="lnsLayerRemove"]').at(2).simulate('click');
+        instance.find('[data-test-subj="lnsLayerRemove"]').at(2).simulate('click');
       });
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(firstLayerFocusable);
     });
 
-    it('should focus the added layer', () => {
+    it('should focus the added layer', async () => {
       (generateId as jest.Mock).mockReturnValue(`second`);
-      const dispatch = jest.fn((x) => {
-        if (x.subType === 'ADD_LAYER') {
-          frame.datasourceLayers.second = mockDatasource.publicAPIMock;
-        }
-      });
 
-      const component = mountWithIntl(<LayerPanels {...getDefaultProps()} dispatch={dispatch} />, {
-        attachTo: container,
-      });
+      const { instance } = await mountWithProvider(
+        <LayerPanels {...getDefaultProps()} />,
+
+        {
+          preloadedState: {
+            datasourceStates: {
+              mockindexpattern: {
+                isLoading: false,
+                state: 'state',
+              },
+            },
+            activeDatasourceId: 'mockindexpattern',
+          },
+          dispatch: jest.fn((x) => {
+            if (x.payload.subType === 'ADD_LAYER') {
+              frame.datasourceLayers.second = mockDatasource.publicAPIMock;
+            }
+          }),
+        },
+        {
+          attachTo: container,
+        }
+      );
       act(() => {
-        component.find('[data-test-subj="lnsLayerAddButton"]').first().simulate('click');
+        instance.find('[data-test-subj="lnsLayerAddButton"]').first().simulate('click');
       });
       const focusedEl = document.activeElement;
       expect(focusedEl?.children[0].getAttribute('data-test-subj')).toEqual('lns-layerPanel-1');
+    });
+  });
+
+  describe('initial default value', () => {
+    function prepareAndMountComponent(props: ReturnType<typeof getDefaultProps>) {
+      (generateId as jest.Mock).mockReturnValue(`newId`);
+      return mountWithProvider(
+        <LayerPanels {...props} />,
+
+        {
+          preloadedState: {
+            datasourceStates: {
+              mockindexpattern: {
+                isLoading: false,
+                state: 'state',
+              },
+            },
+            activeDatasourceId: 'mockindexpattern',
+          },
+        },
+        {
+          attachTo: container,
+        }
+      );
+    }
+    function clickToAddLayer(instance: ReactWrapper) {
+      act(() => {
+        instance.find('[data-test-subj="lnsLayerAddButton"]').first().simulate('click');
+      });
+      instance.update();
+      act(() => {
+        instance
+          .find(`[data-test-subj="lnsLayerAddButton-${layerTypes.THRESHOLD}"]`)
+          .first()
+          .simulate('click');
+      });
+      instance.update();
+
+      return waitMs(0);
+    }
+
+    function clickToAddDimension(instance: ReactWrapper) {
+      act(() => {
+        instance.find('[data-test-subj="lns-empty-dimension"]').last().simulate('click');
+      });
+      return waitMs(0);
+    }
+
+    it('should not add an initial dimension when not specified', async () => {
+      const props = getDefaultProps();
+      props.activeVisualization.getSupportedLayers = jest.fn(() => [
+        { type: layerTypes.DATA, label: 'Data Layer' },
+        {
+          type: layerTypes.THRESHOLD,
+          label: 'Threshold layer',
+        },
+      ]);
+      mockDatasource.initializeDimension = jest.fn();
+
+      const { instance, lensStore } = await prepareAndMountComponent(props);
+      await clickToAddLayer(instance);
+
+      expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
+      expect(mockDatasource.initializeDimension).not.toHaveBeenCalled();
+    });
+
+    it('should not add an initial dimension when initialDimensions are not available for the given layer type', async () => {
+      const props = getDefaultProps();
+      props.activeVisualization.getSupportedLayers = jest.fn(() => [
+        {
+          type: layerTypes.DATA,
+          label: 'Data Layer',
+          initialDimensions: [
+            {
+              groupId: 'testGroup',
+              columnId: 'myColumn',
+              dataType: 'number',
+              label: 'Initial value',
+              staticValue: 100,
+            },
+          ],
+        },
+        {
+          type: layerTypes.THRESHOLD,
+          label: 'Threshold layer',
+        },
+      ]);
+      mockDatasource.initializeDimension = jest.fn();
+
+      const { instance, lensStore } = await prepareAndMountComponent(props);
+      await clickToAddLayer(instance);
+
+      expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
+      expect(mockDatasource.initializeDimension).not.toHaveBeenCalled();
+    });
+
+    it('should use group initial dimension value when adding a new layer if available', async () => {
+      const props = getDefaultProps();
+      props.activeVisualization.getSupportedLayers = jest.fn(() => [
+        { type: layerTypes.DATA, label: 'Data Layer' },
+        {
+          type: layerTypes.THRESHOLD,
+          label: 'Threshold layer',
+          initialDimensions: [
+            {
+              groupId: 'testGroup',
+              columnId: 'myColumn',
+              dataType: 'number',
+              label: 'Initial value',
+              staticValue: 100,
+            },
+          ],
+        },
+      ]);
+      mockDatasource.initializeDimension = jest.fn();
+
+      const { instance, lensStore } = await prepareAndMountComponent(props);
+      await clickToAddLayer(instance);
+
+      expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
+      expect(mockDatasource.initializeDimension).toHaveBeenCalledWith(undefined, 'newId', {
+        columnId: 'myColumn',
+        dataType: 'number',
+        groupId: 'testGroup',
+        label: 'Initial value',
+        staticValue: 100,
+      });
+    });
+
+    it('should add an initial dimension value when clicking on the empty dimension button', async () => {
+      const props = getDefaultProps();
+      props.activeVisualization.getSupportedLayers = jest.fn(() => [
+        {
+          type: layerTypes.DATA,
+          label: 'Data Layer',
+          initialDimensions: [
+            {
+              groupId: 'a',
+              columnId: 'newId',
+              dataType: 'number',
+              label: 'Initial value',
+              staticValue: 100,
+            },
+          ],
+        },
+      ]);
+      mockDatasource.initializeDimension = jest.fn();
+
+      const { instance, lensStore } = await prepareAndMountComponent(props);
+
+      await clickToAddDimension(instance);
+      expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
+
+      expect(mockDatasource.initializeDimension).toHaveBeenCalledWith('state', 'first', {
+        groupId: 'a',
+        columnId: 'newId',
+        dataType: 'number',
+        label: 'Initial value',
+        staticValue: 100,
+      });
     });
   });
 });

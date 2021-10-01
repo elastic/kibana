@@ -79,8 +79,8 @@ async function readUuidFromFile(filepath: string, logger: Logger): Promise<strin
       return undefined;
     }
     throw new Error(
-      'Unable to read Kibana UUID file, please check the uuid.server configuration ' +
-        'value in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. ' +
+      `Unable to read UUID file at ${filepath}.  ` +
+        'Ensure Kibana has sufficient permissions to read / write to this file.  ' +
         `Error was: ${e.code}`
     );
   }
@@ -91,8 +91,8 @@ async function writeUuidToFile(filepath: string, uuidValue: string) {
     return await writeFile(filepath, uuidValue, { encoding: FILE_ENCODING });
   } catch (e) {
     throw new Error(
-      'Unable to write Kibana UUID file, please check the uuid.server configuration ' +
-        'value in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. ' +
+      `Unable to write to UUID file at ${filepath}. ` +
+        'Ensure Kibana has sufficient permissions to read / write to this file.  ' +
         `Error was: ${e.code}`
     );
   }

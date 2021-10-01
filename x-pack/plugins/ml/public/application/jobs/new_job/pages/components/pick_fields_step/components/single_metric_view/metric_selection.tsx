@@ -94,7 +94,6 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
           null,
           cs.intervalMs,
           jobCreator.runtimeMappings,
-          // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
           jobCreator.datafeedConfig.indices_options
         );
         if (resp[DTR_IDX] !== undefined) {

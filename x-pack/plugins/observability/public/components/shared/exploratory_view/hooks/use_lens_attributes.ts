@@ -6,82 +6,73 @@
  */
 
 import { useMemo } from 'react';
+import { isEmpty } from 'lodash';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
-import { LensAttributes } from '../configurations/lens_attributes';
-import { useUrlStorage } from './use_url_storage';
+import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
+import { useSeriesStorage } from './use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 
-import { DataSeries, SeriesUrl, UrlFilter } from '../types';
+import { SeriesUrl, UrlFilter } from '../types';
 import { useAppIndexPatternContext } from './use_app_index_pattern';
+import { ALL_VALUES_SELECTED } from '../../field_value_suggestions/field_value_combobox';
 
-interface Props {
-  seriesId: string;
-}
-
-export const getFiltersFromDefs = (
-  reportDefinitions: SeriesUrl['reportDefinitions'],
-  dataViewConfig: DataSeries
-) => {
-  const rdfFilters = Object.entries(reportDefinitions ?? {}).map(([field, value]) => {
-    return {
-      field,
-      values: [value],
-    };
-  }) as UrlFilter[];
-
-  // let's filter out custom fields
-  return rdfFilters.filter(({ field }) => {
-    const rdf = dataViewConfig.reportDefinitions.find(({ field: fd }) => field === fd);
-    return !rdf?.custom;
-  });
+export const getFiltersFromDefs = (reportDefinitions: SeriesUrl['reportDefinitions']) => {
+  return Object.entries(reportDefinitions ?? {})
+    .map(([field, value]) => {
+      return {
+        field,
+        values: value,
+      };
+    })
+    .filter(({ values }) => !values.includes(ALL_VALUES_SELECTED)) as UrlFilter[];
 };
 
-export const useLensAttributes = ({
-  seriesId,
-}: Props): TypedLensByValueInput['attributes'] | null => {
-  const { series } = useUrlStorage(seriesId);
+export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null => {
+  const { allSeriesIds, allSeries } = useSeriesStorage();
 
-  const { breakdown, seriesType, operationType, reportType, reportDefinitions = {} } = series ?? {};
-
-  const { indexPattern } = useAppIndexPatternContext();
+  const { indexPatterns } = useAppIndexPatternContext();
 
   return useMemo(() => {
-    if (!indexPattern || !reportType) {
+    if (isEmpty(indexPatterns) || isEmpty(allSeriesIds)) {
       return null;
     }
 
-    const dataViewConfig = getDefaultConfigs({
-      seriesId,
-      reportType,
-      indexPattern,
+    const layerConfigs: LayerConfig[] = [];
+
+    allSeriesIds.forEach((seriesIdT) => {
+      const seriesT = allSeries[seriesIdT];
+      const indexPattern = indexPatterns?.[seriesT?.dataType];
+      if (indexPattern && seriesT.reportType && !isEmpty(seriesT.reportDefinitions)) {
+        const seriesConfig = getDefaultConfigs({
+          reportType: seriesT.reportType,
+          dataType: seriesT.dataType,
+          indexPattern,
+        });
+
+        const filters: UrlFilter[] = (seriesT.filters ?? []).concat(
+          getFiltersFromDefs(seriesT.reportDefinitions)
+        );
+
+        layerConfigs.push({
+          filters,
+          indexPattern,
+          seriesConfig,
+          time: seriesT.time,
+          breakdown: seriesT.breakdown,
+          seriesType: seriesT.seriesType,
+          operationType: seriesT.operationType,
+          reportDefinitions: seriesT.reportDefinitions ?? {},
+          selectedMetricField: seriesT.selectedMetricField,
+        });
+      }
     });
 
-    const filters: UrlFilter[] = (series.filters ?? []).concat(
-      getFiltersFromDefs(reportDefinitions, dataViewConfig)
-    );
-
-    const lensAttributes = new LensAttributes(
-      indexPattern,
-      dataViewConfig,
-      seriesType,
-      filters,
-      operationType,
-      reportDefinitions
-    );
-
-    if (breakdown) {
-      lensAttributes.addBreakdown(breakdown);
+    if (layerConfigs.length < 1) {
+      return null;
     }
 
+    const lensAttributes = new LensAttributes(layerConfigs);
+
     return lensAttributes.getJSON();
-  }, [
-    indexPattern,
-    breakdown,
-    seriesType,
-    operationType,
-    reportType,
-    reportDefinitions,
-    seriesId,
-    series.filters,
-  ]);
+  }, [indexPatterns, allSeriesIds, allSeries]);
 };

@@ -16,7 +16,6 @@ import {
   createUsageCollectionSetupMock,
 } from '../../usage_collection/server/mocks';
 import { cloudDetailsMock } from './mocks';
-
 import { plugin } from './';
 
 describe('kibana_usage_collection', () => {
@@ -42,6 +41,8 @@ describe('kibana_usage_collection', () => {
     const coreSetup = coreMock.createSetup();
 
     expect(pluginInstance.setup(coreSetup, { usageCollection })).toBe(undefined);
+
+    expect(coreSetup.coreUsageData.registerUsageCounter).toHaveBeenCalled();
 
     await expect(
       Promise.all(
@@ -70,6 +71,10 @@ describe('kibana_usage_collection', () => {
           "type": "kibana",
         },
         Object {
+          "isReady": true,
+          "type": "saved_objects_counts",
+        },
+        Object {
           "isReady": false,
           "type": "stack_management",
         },
@@ -94,8 +99,16 @@ describe('kibana_usage_collection', () => {
           "type": "core",
         },
         Object {
+          "isReady": false,
+          "type": "kibana_config_usage",
+        },
+        Object {
           "isReady": true,
           "type": "localization",
+        },
+        Object {
+          "isReady": false,
+          "type": "event_loop_delays",
         },
       ]
     `);

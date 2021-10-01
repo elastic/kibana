@@ -10,7 +10,7 @@ import { OBSERVER_VERSION_MAJOR } from '../../../../../common/elasticsearch_fiel
 import {
   ESSearchRequest,
   ESFilter,
-} from '../../../../../../../../typings/elasticsearch';
+} from '../../../../../../../../src/core/types/elasticsearch';
 
 /*
   Adds a range query to the ES request to exclude legacy data

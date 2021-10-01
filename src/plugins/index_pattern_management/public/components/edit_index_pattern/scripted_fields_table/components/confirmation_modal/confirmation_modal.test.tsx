@@ -15,6 +15,7 @@ describe('DeleteScritpedFieldConfirmationModal', () => {
   test('should render normally', () => {
     const component = shallow(
       <DeleteScritpedFieldConfirmationModal
+        // @ts-expect-error invalid lang
         field={{ name: '', script: '', lang: '' }}
         deleteField={() => {}}
         hideDeleteConfirmationModal={() => {}}

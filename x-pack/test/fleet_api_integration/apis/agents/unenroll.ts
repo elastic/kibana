@@ -23,12 +23,12 @@ export default function (providerContext: FtrProviderContext) {
     let accessAPIKeyId: string;
     let outputAPIKeyId: string;
     before(async () => {
-      await esArchiver.load('fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
     setupFleetAndAgents(providerContext);
     beforeEach(async () => {
-      await esArchiver.unload('fleet/empty_fleet_server');
-      await esArchiver.load('fleet/agents');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
       await getService('supertest').post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
       const { body: accessAPIKeyBody } = await esClient.security.createApiKey({
         body: {
@@ -67,11 +67,11 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
     afterEach(async () => {
-      await esArchiver.unload('fleet/agents');
-      await esArchiver.load('fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
     after(async () => {
-      await esArchiver.unload('fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
     it('/agents/{agent_id}/unenroll should fail for hosted agent policy', async () => {
@@ -138,11 +138,13 @@ export default function (providerContext: FtrProviderContext) {
       expect(unenrolledBody).to.eql({
         agent2: {
           success: false,
-          error: 'Cannot unenroll agent2 from a hosted agent policy policy1',
+          error:
+            'Cannot unenroll agent2 from a hosted agent policy policy1 in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
         },
         agent3: {
           success: false,
-          error: 'Cannot unenroll agent3 from a hosted agent policy policy1',
+          error:
+            'Cannot unenroll agent3 from a hosted agent policy policy1 in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
         },
       });
       // but agents are still enrolled

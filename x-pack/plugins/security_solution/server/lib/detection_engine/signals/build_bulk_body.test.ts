@@ -24,6 +24,11 @@ import { SignalHit, SignalSourceHit } from './types';
 import { SIGNALS_TEMPLATE_VERSION } from '../routes/index/get_signals_template';
 import { getQueryRuleParams, getThresholdRuleParams } from '../schemas/rule_schemas.mock';
 
+// This allows us to not have to use ts-expect-error with delete in the code.
+type SignalHitOptionalTimestamp = Omit<SignalHit, '@timestamp'> & {
+  '@timestamp'?: SignalHit['@timestamp'];
+};
+
 describe('buildBulkBody', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -32,11 +37,16 @@ describe('buildBulkBody', () => {
   test('bulk body builds well-defined body', () => {
     const ruleSO = sampleRuleSO(getQueryRuleParams());
     const doc = sampleDocNoSortId();
-    // @ts-expect-error @elastic/elasticsearch _source is optional
+    const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     delete doc._source.source;
-    const fakeSignalSourceHit = buildBulkBody(ruleSO, doc);
+    const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
+      ruleSO,
+      doc,
+      'missingFields',
+      [],
+      buildReasonMessage
+    );
     // Timestamp will potentially always be different so remove it for the test
-    // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
@@ -69,10 +79,14 @@ describe('buildBulkBody', () => {
             depth: 0,
           },
         ],
-        original_time: '2020-04-20T21:27:45+0000',
+        original_time: '2020-04-20T21:27:45.000Z',
+        reason: 'reasonable reason',
         status: 'open',
         rule: expectedRule(),
         depth: 1,
+      },
+      source: {
+        ip: '127.0.0.1',
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
@@ -81,9 +95,9 @@ describe('buildBulkBody', () => {
   test('bulk body builds well-defined body with threshold results', () => {
     const ruleSO = sampleRuleSO(getThresholdRuleParams());
     const baseDoc = sampleDocNoSortId();
-    const doc: SignalSourceHit = {
+    const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
+    const doc: SignalSourceHit & { _source: Required<SignalSourceHit>['_source'] } = {
       ...baseDoc,
-      // @ts-expect-error @elastic/elasticsearch _source is optional
       _source: {
         ...baseDoc._source,
         threshold_result: {
@@ -96,11 +110,15 @@ describe('buildBulkBody', () => {
         },
       },
     };
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     delete doc._source.source;
-    const fakeSignalSourceHit = buildBulkBody(ruleSO, doc);
+    const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
+      ruleSO,
+      doc,
+      'missingFields',
+      [],
+      buildReasonMessage
+    );
     // Timestamp will potentially always be different so remove it for the test
-    // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
@@ -133,7 +151,8 @@ describe('buildBulkBody', () => {
             depth: 0,
           },
         ],
-        original_time: '2020-04-20T21:27:45+0000',
+        original_time: '2020-04-20T21:27:45.000Z',
+        reason: 'reasonable reason',
         status: 'open',
         rule: {
           ...expectedRule(),
@@ -160,6 +179,9 @@ describe('buildBulkBody', () => {
         },
         depth: 1,
       },
+      source: {
+        ip: '127.0.0.1',
+      },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
   });
@@ -167,18 +189,22 @@ describe('buildBulkBody', () => {
   test('bulk body builds original_event if it exists on the event to begin with', () => {
     const ruleSO = sampleRuleSO(getQueryRuleParams());
     const doc = sampleDocNoSortId();
-    // @ts-expect-error @elastic/elasticsearch _source is optional
+    const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     delete doc._source.source;
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.event = {
       action: 'socket_opened',
       module: 'system',
       dataset: 'socket',
       kind: 'event',
     };
-    const fakeSignalSourceHit = buildBulkBody(ruleSO, doc);
+    const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
+      ruleSO,
+      doc,
+      'missingFields',
+      [],
+      buildReasonMessage
+    );
     // Timestamp will potentially always be different so remove it for the test
-    // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
@@ -212,6 +238,7 @@ describe('buildBulkBody', () => {
             depth: 0,
           },
         ],
+        reason: 'reasonable reason',
         ancestors: [
           {
             id: sampleIdGuid,
@@ -220,10 +247,13 @@ describe('buildBulkBody', () => {
             depth: 0,
           },
         ],
-        original_time: '2020-04-20T21:27:45+0000',
+        original_time: '2020-04-20T21:27:45.000Z',
         status: 'open',
         rule: expectedRule(),
         depth: 1,
+      },
+      source: {
+        ip: '127.0.0.1',
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
@@ -232,17 +262,21 @@ describe('buildBulkBody', () => {
   test('bulk body builds original_event if it exists on the event to begin with but no kind information', () => {
     const ruleSO = sampleRuleSO(getQueryRuleParams());
     const doc = sampleDocNoSortId();
-    // @ts-expect-error @elastic/elasticsearch _source is optional
+    const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     delete doc._source.source;
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.event = {
       action: 'socket_opened',
       module: 'system',
       dataset: 'socket',
     };
-    const fakeSignalSourceHit = buildBulkBody(ruleSO, doc);
+    const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
+      ruleSO,
+      doc,
+      'missingFields',
+      [],
+      buildReasonMessage
+    );
     // Timestamp will potentially always be different so remove it for the test
-    // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
@@ -283,10 +317,14 @@ describe('buildBulkBody', () => {
             depth: 0,
           },
         ],
-        original_time: '2020-04-20T21:27:45+0000',
+        original_time: '2020-04-20T21:27:45.000Z',
+        reason: 'reasonable reason',
         status: 'open',
         rule: expectedRule(),
         depth: 1,
+      },
+      source: {
+        ip: '127.0.0.1',
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
@@ -295,15 +333,19 @@ describe('buildBulkBody', () => {
   test('bulk body builds original_event if it exists on the event to begin with with only kind information', () => {
     const ruleSO = sampleRuleSO(getQueryRuleParams());
     const doc = sampleDocNoSortId();
-    // @ts-expect-error @elastic/elasticsearch _source is optional
+    const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     delete doc._source.source;
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.event = {
       kind: 'event',
     };
-    const fakeSignalSourceHit = buildBulkBody(ruleSO, doc);
+    const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
+      ruleSO,
+      doc,
+      'missingFields',
+      [],
+      buildReasonMessage
+    );
     // Timestamp will potentially always be different so remove it for the test
-    // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
@@ -339,10 +381,14 @@ describe('buildBulkBody', () => {
             depth: 0,
           },
         ],
-        original_time: '2020-04-20T21:27:45+0000',
+        original_time: '2020-04-20T21:27:45.000Z',
+        reason: 'reasonable reason',
         status: 'open',
         rule: expectedRule(),
         depth: 1,
+      },
+      source: {
+        ip: '127.0.0.1',
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
@@ -351,16 +397,22 @@ describe('buildBulkBody', () => {
   test('bulk body builds "original_signal" if it exists already as a numeric', () => {
     const ruleSO = sampleRuleSO(getQueryRuleParams());
     const sampleDoc = sampleDocNoSortId();
-    // @ts-expect-error @elastic/elasticsearch _source is optional
+    const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     delete sampleDoc._source.source;
-    const doc = ({
+    const doc = {
       ...sampleDoc,
       _source: {
         ...sampleDoc._source,
         signal: 123,
       },
-    } as unknown) as SignalSourceHit;
-    const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody(ruleSO, doc);
+    } as unknown as SignalSourceHit;
+    const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody(
+      ruleSO,
+      doc,
+      'missingFields',
+      [],
+      buildReasonMessage
+    );
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: string } = {
       someKey: 'someValue',
       event: {
@@ -393,10 +445,14 @@ describe('buildBulkBody', () => {
             depth: 0,
           },
         ],
-        original_time: '2020-04-20T21:27:45+0000',
+        original_time: '2020-04-20T21:27:45.000Z',
+        reason: 'reasonable reason',
         status: 'open',
         rule: expectedRule(),
         depth: 1,
+      },
+      source: {
+        ip: '127.0.0.1',
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
@@ -405,16 +461,22 @@ describe('buildBulkBody', () => {
   test('bulk body builds "original_signal" if it exists already as an object', () => {
     const ruleSO = sampleRuleSO(getQueryRuleParams());
     const sampleDoc = sampleDocNoSortId();
-    // @ts-expect-error @elastic/elasticsearch _source is optional
+    const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     delete sampleDoc._source.source;
-    const doc = ({
+    const doc = {
       ...sampleDoc,
       _source: {
         ...sampleDoc._source,
         signal: { child_1: { child_2: 'nested data' } },
       },
-    } as unknown) as SignalSourceHit;
-    const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody(ruleSO, doc);
+    } as unknown as SignalSourceHit;
+    const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody(
+      ruleSO,
+      doc,
+      'missingFields',
+      [],
+      buildReasonMessage
+    );
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: string } = {
       someKey: 'someValue',
       event: {
@@ -447,10 +509,14 @@ describe('buildBulkBody', () => {
             depth: 0,
           },
         ],
-        original_time: '2020-04-20T21:27:45+0000',
+        original_time: '2020-04-20T21:27:45.000Z',
+        reason: 'reasonable reason',
         status: 'open',
         rule: expectedRule(),
         depth: 1,
+      },
+      source: {
+        ip: '127.0.0.1',
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
@@ -466,9 +532,13 @@ describe('buildSignalFromSequence', () => {
     block2._source.new_key = 'new_key_value';
     const blocks = [block1, block2];
     const ruleSO = sampleRuleSO(getQueryRuleParams());
-    const signal = buildSignalFromSequence(blocks, ruleSO);
+    const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
+    const signal: SignalHitOptionalTimestamp = buildSignalFromSequence(
+      blocks,
+      ruleSO,
+      buildReasonMessage
+    );
     // Timestamp will potentially always be different so remove it for the test
-    // @ts-expect-error
     delete signal['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { new_key: string } = {
       new_key: 'new_key_value',
@@ -536,6 +606,7 @@ describe('buildSignalFromSequence', () => {
           },
         ],
         status: 'open',
+        reason: 'reasonable reason',
         rule: expectedRule(),
         depth: 2,
         group: {
@@ -552,9 +623,13 @@ describe('buildSignalFromSequence', () => {
     block2._source['@timestamp'] = '2021-05-20T22:28:46+0000';
     block2._source.someKey = 'someOtherValue';
     const ruleSO = sampleRuleSO(getQueryRuleParams());
-    const signal = buildSignalFromSequence([block1, block2], ruleSO);
+    const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
+    const signal: SignalHitOptionalTimestamp = buildSignalFromSequence(
+      [block1, block2],
+      ruleSO,
+      buildReasonMessage
+    );
     // Timestamp will potentially always be different so remove it for the test
-    // @ts-expect-error
     delete signal['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> = {
       event: {
@@ -621,6 +696,7 @@ describe('buildSignalFromSequence', () => {
           },
         ],
         status: 'open',
+        reason: 'reasonable reason',
         rule: expectedRule(),
         depth: 2,
         group: {
@@ -635,12 +711,19 @@ describe('buildSignalFromSequence', () => {
 describe('buildSignalFromEvent', () => {
   test('builds a basic signal from a single event', () => {
     const ancestor = sampleDocWithAncestors().hits.hits[0];
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     delete ancestor._source.source;
     const ruleSO = sampleRuleSO(getQueryRuleParams());
-    const signal = buildSignalFromEvent(ancestor, ruleSO, true);
+    const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
+    const signal: SignalHitOptionalTimestamp = buildSignalFromEvent(
+      ancestor,
+      ruleSO,
+      true,
+      'missingFields',
+      [],
+      buildReasonMessage
+    );
+
     // Timestamp will potentially always be different so remove it for the test
-    // @ts-expect-error
     delete signal['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
@@ -651,7 +734,7 @@ describe('buildSignalFromEvent', () => {
         _meta: {
           version: SIGNALS_TEMPLATE_VERSION,
         },
-        original_time: '2020-04-20T21:27:45+0000',
+        original_time: '2020-04-20T21:27:45.000Z',
         parent: {
           id: sampleIdGuid,
           rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
@@ -684,8 +767,12 @@ describe('buildSignalFromEvent', () => {
           },
         ],
         status: 'open',
+        reason: 'reasonable reason',
         rule: expectedRule(),
         depth: 2,
+      },
+      source: {
+        ip: '127.0.0.1',
       },
     };
     expect(signal).toEqual(expected);

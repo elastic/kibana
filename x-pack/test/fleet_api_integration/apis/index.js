@@ -7,7 +7,6 @@
 
 export default function ({ loadTestFile }) {
   describe('Fleet Endpoints', function () {
-    this.tags('ciGroup10');
     // EPM
     loadTestFile(require.resolve('./epm/index'));
 
@@ -31,6 +30,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./package_policy/update'));
     loadTestFile(require.resolve('./package_policy/get'));
     loadTestFile(require.resolve('./package_policy/delete'));
+    loadTestFile(require.resolve('./package_policy/upgrade'));
 
     // Agent policies
     loadTestFile(require.resolve('./agent_policy/index'));
@@ -43,5 +43,14 @@ export default function ({ loadTestFile }) {
 
     // Preconfiguration
     loadTestFile(require.resolve('./preconfiguration/index'));
+
+    // Service tokens
+    loadTestFile(require.resolve('./service_tokens'));
+
+    // Outputs
+    loadTestFile(require.resolve('./outputs'));
+
+    // Telemetry
+    loadTestFile(require.resolve('./fleet_telemetry'));
   });
 }

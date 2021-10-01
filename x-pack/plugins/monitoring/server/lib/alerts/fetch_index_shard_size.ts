@@ -16,7 +16,7 @@ interface SourceNode {
   uuid: string;
 }
 type TopHitType = ElasticsearchResponseHit & {
-  _source: { index_stats: Partial<ElasticsearchIndexStats>; source_node: SourceNode };
+  _source: { index_stats?: Partial<ElasticsearchIndexStats>; source_node?: SourceNode };
 };
 
 const memoizedIndexPatterns = (globPatterns: string) => {
@@ -35,11 +35,12 @@ export async function fetchIndexShardSize(
   index: string,
   threshold: number,
   shardIndexPatterns: string,
-  size: number
+  size: number,
+  filterQuery?: string
 ): Promise<IndexShardSizeStats[]> {
   const params = {
     index,
-    filterPath: ['aggregations.clusters.buckets'],
+    filter_path: ['aggregations.clusters.buckets'],
     body: {
       size: 0,
       query: {
@@ -68,36 +69,32 @@ export async function fetchIndexShardSize(
             size,
           },
           aggs: {
-            over_threshold: {
+            index: {
+              terms: {
+                field: 'index_stats.index',
+                size,
+              },
               aggs: {
-                index: {
-                  terms: {
-                    field: 'index_stats.index',
-                    size,
-                  },
-                  aggs: {
-                    hits: {
-                      top_hits: {
-                        sort: [
-                          {
-                            timestamp: {
-                              order: 'desc' as const,
-                              unmapped_type: 'long' as const,
-                            },
-                          },
-                        ],
-                        _source: {
-                          includes: [
-                            '_index',
-                            'index_stats.shards.primaries',
-                            'index_stats.primaries.store.size_in_bytes',
-                            'source_node.name',
-                            'source_node.uuid',
-                          ],
+                hits: {
+                  top_hits: {
+                    sort: [
+                      {
+                        timestamp: {
+                          order: 'desc' as const,
+                          unmapped_type: 'long' as const,
                         },
-                        size: 1,
                       },
+                    ],
+                    _source: {
+                      includes: [
+                        '_index',
+                        'index_stats.shards.primaries',
+                        'index_stats.primaries.store.size_in_bytes',
+                        'source_node.name',
+                        'source_node.uuid',
+                      ],
                     },
+                    size: 1,
                   },
                 },
               },
@@ -108,28 +105,32 @@ export async function fetchIndexShardSize(
     },
   };
 
-  const { body: response } = await esClient.search(params);
-  const stats: IndexShardSizeStats[] = [];
-  // @ts-expect-error @elastic/elasticsearch Aggregate does not specify buckets
-  const { buckets: clusterBuckets = [] } = response.aggregations.clusters;
-  const validIndexPatterns = memoizedIndexPatterns(shardIndexPatterns);
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.must.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
 
-  if (!clusterBuckets.length) {
+  const { body: response } = await esClient.search(params);
+  // @ts-expect-error declare aggegations type explicitly
+  const { buckets: clusterBuckets } = response.aggregations?.clusters;
+  const stats: IndexShardSizeStats[] = [];
+  if (!clusterBuckets?.length) {
     return stats;
   }
+  const validIndexPatterns = memoizedIndexPatterns(shardIndexPatterns);
   const thresholdBytes = threshold * gbMultiplier;
   for (const clusterBucket of clusterBuckets) {
-    const indexBuckets = clusterBucket.over_threshold.index.buckets;
+    const indexBuckets = clusterBucket.index.buckets;
     const clusterUuid = clusterBucket.key;
 
     for (const indexBucket of indexBuckets) {
       const shardIndex = indexBucket.key;
       const topHit = indexBucket.hits?.hits?.hits[0] as TopHitType;
-      if (
-        !topHit ||
-        shardIndex.charAt() === '.' ||
-        !ESGlobPatterns.isValid(shardIndex, validIndexPatterns)
-      ) {
+      if (!topHit || !ESGlobPatterns.isValid(shardIndex, validIndexPatterns)) {
         continue;
       }
       const {
@@ -137,7 +138,7 @@ export async function fetchIndexShardSize(
         _source: { source_node: sourceNode, index_stats: indexStats },
       } = topHit;
 
-      if (!indexStats || !indexStats.primaries) {
+      if (!indexStats || !indexStats.primaries || !sourceNode) {
         continue;
       }
 

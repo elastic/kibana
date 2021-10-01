@@ -7,7 +7,6 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { first } from 'rxjs/operators';
 import { kibanaPackageJson } from '@kbn/utils';
 import type { KibanaRequest } from 'src/core/server';
 import type {
@@ -22,9 +21,17 @@ import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
 } from '../../../encrypted_saved_objects/server';
+
 import type { SecurityPluginStart } from '../../../security/server';
 import type { FleetConfigType } from '../../common';
-import type { ExternalCallback, ExternalCallbacksStorage, FleetAppContext } from '../plugin';
+import type {
+  ExternalCallback,
+  ExternalCallbacksStorage,
+  PostPackagePolicyCreateCallback,
+  PostPackagePolicyDeleteCallback,
+  PutPackagePolicyUpdateCallback,
+} from '../types';
+import type { FleetAppContext } from '../plugin';
 import type { CloudSetup } from '../../../cloud/server';
 
 class AppContextService {
@@ -44,7 +51,7 @@ class AppContextService {
   private httpSetup?: HttpServiceSetup;
   private externalCallbacks: ExternalCallbacksStorage = new Map();
 
-  public async start(appContext: FleetAppContext) {
+  public start(appContext: FleetAppContext) {
     this.data = appContext.data;
     this.esClient = appContext.elasticsearch.client.asInternalUser;
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
@@ -60,7 +67,7 @@ class AppContextService {
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
-      const initialValue = await this.config$.pipe(first()).toPromise();
+      const initialValue = appContext.configInitialValue;
       this.configSubject$ = new BehaviorSubject(initialValue);
       this.config$.subscribe(this.configSubject$);
     }
@@ -166,9 +173,25 @@ class AppContextService {
     this.externalCallbacks.get(type)!.add(callback);
   }
 
-  public getExternalCallbacks(type: ExternalCallback[0]) {
+  public getExternalCallbacks<T extends ExternalCallback[0]>(
+    type: T
+  ):
+    | Set<
+        T extends 'packagePolicyCreate'
+          ? PostPackagePolicyCreateCallback
+          : T extends 'postPackagePolicyDelete'
+          ? PostPackagePolicyDeleteCallback
+          : PutPackagePolicyUpdateCallback
+      >
+    | undefined {
     if (this.externalCallbacks) {
-      return this.externalCallbacks.get(type);
+      return this.externalCallbacks.get(type) as Set<
+        T extends 'packagePolicyCreate'
+          ? PostPackagePolicyCreateCallback
+          : T extends 'postPackagePolicyDelete'
+          ? PostPackagePolicyDeleteCallback
+          : PutPackagePolicyUpdateCallback
+      >;
     }
   }
 }

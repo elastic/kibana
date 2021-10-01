@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { getFunctionErrors } from '../../../i18n';
 import { emptyFilter } from './__fixtures__/test_filters';
 import { timefilter } from './timefilter';
@@ -15,7 +15,7 @@ const errors = getFunctionErrors().timefilter;
 
 let clock = null;
 
-beforeEach(function () {
+beforeEach(async function () {
   clock = sinon.useFakeTimers();
 });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect.js';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -15,10 +15,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Index Fields', () => {
     before(async () => {
-      await esArchiver.load('security/flstest/data');
+      await esArchiver.load('x-pack/test/functional/es_archives/security/flstest/data');
     });
     after(async () => {
-      await esArchiver.unload('security/flstest/data');
+      await esArchiver.unload('x-pack/test/functional/es_archives/security/flstest/data');
     });
 
     describe('GET /internal/security/fields/{query}', () => {
@@ -70,6 +70,14 @@ export default function ({ getService }: FtrProviderContext) {
         expectedFields.sort();
 
         expect(actualFields).to.eql(expectedFields);
+      });
+
+      it('should return an empty result for indices that do not exist', async () => {
+        await supertest
+          .get('/internal/security/fields/this-index-name-definitely-does-not-exist-*')
+          .set('kbn-xsrf', 'xxx')
+          .send()
+          .expect(200, []);
       });
     });
   });

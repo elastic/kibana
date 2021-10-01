@@ -11,7 +11,7 @@ import {
   settingsObjectType,
 } from '../../../../plugins/uptime/server/lib/saved_objects';
 
-const ARCHIVE = 'uptime/full_heartbeat';
+const ARCHIVE = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
 
 export const deleteUptimeSettingsObject = async (server: any) => {
   // delete the saved object
@@ -42,7 +42,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const uptime = getService('uptime');
 
   describe('Uptime app', function () {
-    this.tags('ciGroup6');
+    this.tags('ciGroup10');
 
     beforeEach('delete settings', async () => {
       await deleteUptimeSettingsObject(server);
@@ -50,15 +50,16 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
 
     describe('with generated data', () => {
       beforeEach('load heartbeat data', async () => {
-        await esArchiver.load('uptime/blank');
+        await esArchiver.load('x-pack/test/functional/es_archives/uptime/blank');
       });
       afterEach('unload', async () => {
-        await esArchiver.unload('uptime/blank');
+        await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
       });
 
       loadTestFile(require.resolve('./locations'));
       loadTestFile(require.resolve('./settings'));
       loadTestFile(require.resolve('./certificates'));
+      loadTestFile(require.resolve('./synthetics_integration'));
     });
 
     describe('with generated data but no data reset', () => {
@@ -78,6 +79,10 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       loadTestFile(require.resolve('./monitor'));
       loadTestFile(require.resolve('./ml_anomaly'));
       loadTestFile(require.resolve('./feature_controls'));
+    });
+
+    describe('mappings error state', () => {
+      loadTestFile(require.resolve('./missing_mappings'));
     });
   });
 };

@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import { useDebounce } from 'react-use';
+import React, { useCallback, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useDispatch } from 'react-redux';
-import { useGetUrlParams, useUpdateKueryString, useUrlParams } from '../../../hooks';
+import { Query } from 'src/plugins/data/common';
+import {
+  useGetUrlParams,
+  useIndexPattern,
+  useUpdateKueryString,
+  useUrlParams,
+} from '../../../hooks';
 import { setEsKueryString } from '../../../state/actions';
-import { useIndexPattern } from './use_index_pattern';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { UptimePluginServices } from '../../../apps/plugin';
 
@@ -20,19 +25,38 @@ export enum SyntaxType {
 }
 const SYNTAX_STORAGE = 'uptime:queryBarSyntax';
 
-export const useQueryBar = () => {
-  const { index_pattern: indexPattern } = useIndexPattern();
+const DEFAULT_QUERY_UPDATE_DEBOUNCE_INTERVAL = 800;
 
+interface UseQueryBarUtils {
+  // The Query object used by the search bar
+  query: Query;
+  // Update the Query object
+  setQuery: React.Dispatch<React.SetStateAction<Query>>;
+  /**
+   * By default the search bar uses a debounce to delay submitting input;
+   * this function will cancel the debounce and submit immediately.
+   */
+  submitImmediately: () => void;
+}
+
+export const DEBOUNCE_INTERVAL = 250;
+
+/**
+ * Provides state management and automatic dispatching of a Query object.
+ *
+ * @returns {UseQueryBarUtils}
+ */
+export const useQueryBar = (): UseQueryBarUtils => {
   const dispatch = useDispatch();
 
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
-  const { search, query: queryParam, filters: paramFilters } = params;
+  const { search, query: queryParam, filters: paramFilters, excludedFilters } = params;
 
   const {
     services: { storage },
   } = useKibana<UptimePluginServices>();
 
-  const [query, setQuery] = useState(
+  const [query, setQuery] = useState<Query>(
     queryParam
       ? {
           query: queryParam,
@@ -46,12 +70,15 @@ export const useQueryBar = () => {
         }
   );
 
-  const updateUrlParams = useUrlParams()[1];
+  const indexPattern = useIndexPattern();
+
+  const [, updateUrlParams] = useUrlParams();
 
   const [esFilters, error] = useUpdateKueryString(
     indexPattern,
     query.language === SyntaxType.kuery ? (query.query as string) : undefined,
-    paramFilters
+    paramFilters,
+    excludedFilters
   );
 
   const setEsKueryFilters = useCallback(
@@ -59,38 +86,53 @@ export const useQueryBar = () => {
     [dispatch]
   );
 
-  useEffect(() => {
-    setEsKueryFilters(esFilters ?? '');
-  }, [esFilters, setEsKueryFilters]);
+  const setEs = useCallback(
+    () => setEsKueryFilters(esFilters ?? ''),
+    [esFilters, setEsKueryFilters]
+  );
+  const [, cancelEsKueryUpdate] = useDebounce(setEs, DEFAULT_QUERY_UPDATE_DEBOUNCE_INTERVAL, [
+    esFilters,
+    setEsKueryFilters,
+  ]);
 
-  useDebounce(
-    () => {
-      if (query.language === SyntaxType.text && queryParam !== query.query) {
-        updateUrlParams({ query: query.query as string });
-      }
-      if (query.language === SyntaxType.kuery) {
-        updateUrlParams({ query: '' });
-      }
-    },
-    350,
+  const handleQueryUpdate = useCallback(() => {
+    if (query.language === SyntaxType.text && queryParam !== query.query) {
+      updateUrlParams({ query: query.query as string });
+    }
+    if (query.language === SyntaxType.kuery && queryParam !== '') {
+      updateUrlParams({ query: '' });
+    }
+  }, [query.language, query.query, queryParam, updateUrlParams]);
+
+  const [, cancelQueryUpdate] = useDebounce(
+    handleQueryUpdate,
+    DEFAULT_QUERY_UPDATE_DEBOUNCE_INTERVAL,
     [query]
   );
 
+  const submitImmediately = useCallback(() => {
+    cancelQueryUpdate();
+    cancelEsKueryUpdate();
+    handleQueryUpdate();
+    setEs();
+  }, [cancelEsKueryUpdate, cancelQueryUpdate, handleQueryUpdate, setEs]);
+
   useDebounce(
     () => {
-      if (query.language === SyntaxType.kuery && !error && esFilters) {
+      if (query.language === SyntaxType.kuery && !error && esFilters && search !== query.query) {
         updateUrlParams({ search: query.query as string });
       }
-      if (query.language === SyntaxType.text) {
+      if (query.language === SyntaxType.text && search !== '') {
         updateUrlParams({ search: '' });
       }
-      if (query.language === SyntaxType.kuery && query.query === '') {
+      // this calls when it probably doesn't need to
+      if (query.language === SyntaxType.kuery && query.query === '' && search !== '') {
         updateUrlParams({ search: '' });
       }
     },
-    250,
+    DEBOUNCE_INTERVAL,
     [esFilters, error]
   );
 
-  return { query, setQuery };
+  return { query, setQuery, submitImmediately };
 };

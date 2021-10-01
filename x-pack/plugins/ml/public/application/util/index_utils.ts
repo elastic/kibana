@@ -146,3 +146,11 @@ export function timeBasedIndexCheck(indexPattern: IndexPattern, showNotification
     return true;
   }
 }
+
+/**
+ * Returns true if the index pattern contains a :
+ * which means it is cross-cluster
+ */
+export function isCcsIndexPattern(indexPatternTitle: string) {
+  return indexPatternTitle.includes(':');
+}

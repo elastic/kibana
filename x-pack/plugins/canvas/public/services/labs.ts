@@ -7,23 +7,10 @@
 
 import {
   projectIDs,
-  Project,
-  ProjectID,
+  PresentationLabsService,
 } from '../../../../../src/plugins/presentation_util/public';
 
-import { CanvasServiceFactory } from '.';
-
-export interface CanvasLabsService {
-  getProject: (id: ProjectID) => Project;
-  getProjects: () => Record<ProjectID, Project>;
+export interface CanvasLabsService extends PresentationLabsService {
+  projectIDs: typeof projectIDs;
+  isLabsEnabled: () => boolean;
 }
-
-export const labsServiceFactory: CanvasServiceFactory<CanvasLabsService> = async (
-  _coreSetup,
-  _coreStart,
-  _setupPlugins,
-  startPlugins
-) => ({
-  projectIDs,
-  ...startPlugins.presentationUtil.labsService,
-});

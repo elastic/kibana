@@ -10,9 +10,6 @@ import { Route, Switch } from 'react-router-dom';
 
 import { useActions } from 'kea';
 
-import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
-import { NAV } from '../../constants';
 import { GROUP_PATH, GROUPS_PATH } from '../../routes';
 
 import { GroupRouter } from './group_router';
@@ -31,8 +28,6 @@ export const GroupsRouter: React.FC = () => {
   return (
     <Switch>
       <Route exact path={GROUPS_PATH}>
-        <SetPageChrome trail={[NAV.GROUPS]} />
-        <SendTelemetry action="viewed" metric="groups" />
         <Groups />
       </Route>
       <Route path={GROUP_PATH}>

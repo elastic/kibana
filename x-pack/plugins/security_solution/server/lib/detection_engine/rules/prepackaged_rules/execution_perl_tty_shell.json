@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Interactive Terminal Spawned via Perl",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:perl and process.args:(\"exec \\\"/bin/sh\\\";\" or \"exec \\\"/bin/dash\\\";\" or \"exec \\\"/bin/bash\\\";\")",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:perl and\n  process.args:(\"exec \\\"/bin/sh\\\";\" or \"exec \\\"/bin/dash\\\";\" or \"exec \\\"/bin/bash\\\";\")\n",
   "risk_score": 73,
   "rule_id": "05e5a668-7b51-4a67-93ab-e9af405c9ef3",
   "severity": "high",

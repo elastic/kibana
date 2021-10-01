@@ -75,6 +75,7 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
           )}`}
           title={i18n.ANOMALIES}
           tooltip={i18n.TOOLTIP}
+          isInspectDisabled={skip}
         />
 
         <BasicTable

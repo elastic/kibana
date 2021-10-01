@@ -74,12 +74,6 @@ export interface UiSettingsParams<T = unknown> {
    */
   order?: number;
   /*
-   * Allows defining a custom validation applicable to value change on the client.
-   * @deprecated
-   * Use schema instead.
-   */
-  validation?: ImageValidation | StringValidation;
-  /*
    * Value validation schema
    * Used to validate value on write and read.
    */
@@ -100,40 +94,6 @@ export interface UiSettingsParams<T = unknown> {
  * @public
  * */
 export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
-
-/**
- * Allows regex objects or a regex string
- * @public
- * */
-export type StringValidation = StringValidationRegex | StringValidationRegexString;
-
-/**
- * StringValidation with regex object
- * @public
- * */
-export interface StringValidationRegex {
-  regex: RegExp;
-  message: string;
-}
-
-/**
- * StringValidation as regex string
- * @public
- * */
-export interface StringValidationRegexString {
-  regexString: string;
-  message: string;
-}
-
-/**
- * @public
- * */
-export interface ImageValidation {
-  maxSize: {
-    length: number;
-    description: string;
-  };
-}
 
 /**
  * Describes the values explicitly set by user.

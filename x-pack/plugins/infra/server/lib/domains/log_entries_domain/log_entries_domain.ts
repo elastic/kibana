@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/common';
+import type { estypes } from '@elastic/elasticsearch';
+import { JsonObject } from '@kbn/utility-types';
+
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 
 import {
@@ -38,7 +40,6 @@ import {
   CompositeDatasetKey,
   createLogEntryDatasetsQuery,
 } from './queries/log_entry_datasets';
-
 export interface LogEntriesParams {
   startTimestamp: number;
   endTimestamp: number;
@@ -165,28 +166,26 @@ export class InfraLogEntriesDomain {
         id: doc.id,
         index: doc.index,
         cursor: doc.cursor,
-        columns: columnDefinitions.map(
-          (column): LogColumn => {
-            if ('timestampColumn' in column) {
-              return {
-                columnId: column.timestampColumn.id,
-                timestamp: doc.cursor.time,
-              };
-            } else if ('messageColumn' in column) {
-              return {
-                columnId: column.messageColumn.id,
-                message: messageFormattingRules.format(doc.fields, doc.highlights),
-              };
-            } else {
-              return {
-                columnId: column.fieldColumn.id,
-                field: column.fieldColumn.field,
-                value: doc.fields[column.fieldColumn.field] ?? [],
-                highlights: doc.highlights[column.fieldColumn.field] ?? [],
-              };
-            }
+        columns: columnDefinitions.map((column): LogColumn => {
+          if ('timestampColumn' in column) {
+            return {
+              columnId: column.timestampColumn.id,
+              timestamp: doc.cursor.time,
+            };
+          } else if ('messageColumn' in column) {
+            return {
+              columnId: column.messageColumn.id,
+              message: messageFormattingRules.format(doc.fields, doc.highlights),
+            };
+          } else {
+            return {
+              columnId: column.fieldColumn.id,
+              field: column.fieldColumn.field,
+              value: doc.fields[column.fieldColumn.field] ?? [],
+              highlights: doc.highlights[column.fieldColumn.field] ?? [],
+            };
           }
-        ),
+        }),
         context: getContextFromDoc(doc),
       };
     });
@@ -276,7 +275,8 @@ export class InfraLogEntriesDomain {
     timestampField: string,
     indexName: string,
     startTime: number,
-    endTime: number
+    endTime: number,
+    runtimeMappings: estypes.MappingRuntimeFields
   ) {
     let datasetBuckets: LogEntryDatasetBucket[] = [];
     let afterLatestBatchKey: CompositeDatasetKey | undefined;
@@ -290,6 +290,7 @@ export class InfraLogEntriesDomain {
           timestampField,
           startTime,
           endTime,
+          runtimeMappings,
           COMPOSITE_AGGREGATION_BATCH_SIZE,
           afterLatestBatchKey
         )

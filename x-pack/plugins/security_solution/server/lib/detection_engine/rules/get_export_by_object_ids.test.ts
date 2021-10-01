@@ -11,13 +11,15 @@ import {
   getFindResultWithSingleHit,
   FindHit,
 } from '../routes/__mocks__/request_responses';
-import * as readRules from './read_rules';
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
-describe('get_export_by_object_ids', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('get_export_by_object_ids - %s', (_, isRuleRegistryEnabled) => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.restoreAllMocks();
@@ -25,11 +27,11 @@ describe('get_export_by_object_ids', () => {
   });
   describe('getExportByObjectIds', () => {
     test('it exports object ids into an expected string with new line characters', async () => {
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      const rulesClient = rulesClientMock.create();
+      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
 
       const objects = [{ rule_id: 'rule-1' }];
-      const exports = await getExportByObjectIds(alertsClient, objects);
+      const exports = await getExportByObjectIds(rulesClient, objects, isRuleRegistryEnabled);
       const exportsObj = {
         rulesNdjson: JSON.parse(exports.rulesNdjson),
         exportDetails: JSON.parse(exports.exportDetails),
@@ -85,8 +87,8 @@ describe('get_export_by_object_ids', () => {
     });
 
     test('it does not export immutable rules', async () => {
-      const alertsClient = alertsClientMock.create();
-      const result = getAlertMock(getQueryRuleParams());
+      const rulesClient = rulesClientMock.create();
+      const result = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       result.params.immutable = true;
 
       const findResult: FindHit = {
@@ -96,11 +98,11 @@ describe('get_export_by_object_ids', () => {
         data: [result],
       };
 
-      alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
-      alertsClient.find.mockResolvedValue(findResult);
+      rulesClient.get.mockResolvedValue(getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()));
+      rulesClient.find.mockResolvedValue(findResult);
 
       const objects = [{ rule_id: 'rule-1' }];
-      const exports = await getExportByObjectIds(alertsClient, objects);
+      const exports = await getExportByObjectIds(rulesClient, objects, isRuleRegistryEnabled);
       expect(exports).toEqual({
         rulesNdjson: '',
         exportDetails:
@@ -111,11 +113,11 @@ describe('get_export_by_object_ids', () => {
 
   describe('getRulesFromObjects', () => {
     test('it returns transformed rules from objects sent in', async () => {
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      const rulesClient = rulesClientMock.create();
+      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
 
       const objects = [{ rule_id: 'rule-1' }];
-      const exports = await getRulesFromObjects(alertsClient, objects);
+      const exports = await getRulesFromObjects(rulesClient, objects, isRuleRegistryEnabled);
       const expected: RulesErrors = {
         exportedCount: 1,
         missingRules: [],
@@ -174,26 +176,9 @@ describe('get_export_by_object_ids', () => {
       expect(exports).toEqual(expected);
     });
 
-    test('it returns error when readRules throws error', async () => {
-      const alertsClient = alertsClientMock.create();
-      alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
-      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      jest.spyOn(readRules, 'readRules').mockImplementation(async () => {
-        throw new Error('Test error');
-      });
-      const objects = [{ rule_id: 'rule-1' }];
-      const exports = await getRulesFromObjects(alertsClient, objects);
-      const expected: RulesErrors = {
-        exportedCount: 0,
-        missingRules: [{ rule_id: objects[0].rule_id }],
-        rules: [],
-      };
-      expect(exports).toEqual(expected);
-    });
-
     test('it does not transform the rule if the rule is an immutable rule and designates it as a missing rule', async () => {
-      const alertsClient = alertsClientMock.create();
-      const result = getAlertMock(getQueryRuleParams());
+      const rulesClient = rulesClientMock.create();
+      const result = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       result.params.immutable = true;
 
       const findResult: FindHit = {
@@ -203,11 +188,11 @@ describe('get_export_by_object_ids', () => {
         data: [result],
       };
 
-      alertsClient.get.mockResolvedValue(result);
-      alertsClient.find.mockResolvedValue(findResult);
+      rulesClient.get.mockResolvedValue(result);
+      rulesClient.find.mockResolvedValue(findResult);
 
       const objects = [{ rule_id: 'rule-1' }];
-      const exports = await getRulesFromObjects(alertsClient, objects);
+      const exports = await getRulesFromObjects(rulesClient, objects, isRuleRegistryEnabled);
       const expected: RulesErrors = {
         exportedCount: 0,
         missingRules: [{ rule_id: 'rule-1' }],
@@ -217,7 +202,7 @@ describe('get_export_by_object_ids', () => {
     });
 
     test('it exports missing rules', async () => {
-      const alertsClient = alertsClientMock.create();
+      const rulesClient = rulesClientMock.create();
 
       const findResult: FindHit = {
         page: 1,
@@ -226,11 +211,11 @@ describe('get_export_by_object_ids', () => {
         data: [],
       };
 
-      alertsClient.get.mockRejectedValue({ output: { statusCode: 404 } });
-      alertsClient.find.mockResolvedValue(findResult);
+      rulesClient.get.mockRejectedValue({ output: { statusCode: 404 } });
+      rulesClient.find.mockResolvedValue(findResult);
 
       const objects = [{ rule_id: 'rule-1' }];
-      const exports = await getRulesFromObjects(alertsClient, objects);
+      const exports = await getRulesFromObjects(rulesClient, objects, isRuleRegistryEnabled);
       const expected: RulesErrors = {
         exportedCount: 0,
         missingRules: [{ rule_id: 'rule-1' }],

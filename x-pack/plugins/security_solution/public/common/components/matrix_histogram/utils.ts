@@ -82,6 +82,7 @@ export const defaultLegendColors = [
   '#B0916F',
   '#7B000B',
   '#34130C',
+  '#GGGGGG',
 ];
 
 export const formatToChartDataItem = ([key, value]: [
@@ -100,11 +101,8 @@ export const getCustomChartData = (
   const dataGroupedByEvent = groupBy('g', data);
   const dataGroupedEntries = toPairs(dataGroupedByEvent);
   const formattedChartData = map(formatToChartDataItem, dataGroupedEntries);
-
-  if (mapping)
-    return map((item: ChartSeriesData) => {
-      const mapItem = get(item.key, mapping);
-      return { ...item, color: mapItem?.color };
-    }, formattedChartData);
-  else return formattedChartData;
+  return formattedChartData.map((item: ChartSeriesData, idx: number) => {
+    const mapItem = get(item.key, mapping);
+    return { ...item, color: mapItem?.color ?? defaultLegendColors[idx] };
+  });
 };

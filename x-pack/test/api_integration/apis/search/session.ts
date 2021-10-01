@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { SearchSessionStatus } from '../../../../plugins/data_enhanced/common';
+import { SearchSessionStatus } from '../../../../../src/plugins/data/common';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -403,7 +403,12 @@ export default function ({ getService }: FtrProviderContext) {
       const { id: id1 } = searchRes1.body;
 
       // it might take the session a moment to be created
-      await new Promise((resolve) => setTimeout(resolve, 2500));
+      await retry.waitFor('search session created', async () => {
+        const response = await supertest
+          .get(`/internal/session/${sessionId}`)
+          .set('kbn-xsrf', 'foo');
+        return response.body.statusCode === undefined;
+      });
 
       const getSessionFirstTime = await supertest
         .get(`/internal/session/${sessionId}`)

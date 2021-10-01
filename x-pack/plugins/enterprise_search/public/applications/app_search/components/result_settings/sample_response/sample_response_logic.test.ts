@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues } from '../../../../__mocks__';
+import { LogicMounter, mockHttpValues } from '../../../../__mocks__/kea_logic';
 import '../../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
@@ -196,18 +196,6 @@ describe('SampleResponseLogic', () => {
         expect(SampleResponseLogic.actions.getSearchResultsFailure).toHaveBeenCalledWith(
           'An error occured.'
         );
-      });
-
-      it('does nothing if an empty object is passed for the resultFields parameter', async () => {
-        mount();
-        jest.spyOn(SampleResponseLogic.actions, 'getSearchResultsSuccess');
-
-        SampleResponseLogic.actions.getSearchResults('foo', {});
-
-        jest.runAllTimers();
-        await nextTick();
-
-        expect(SampleResponseLogic.actions.getSearchResultsSuccess).not.toHaveBeenCalled();
       });
     });
   });

@@ -7,9 +7,7 @@
 
 import React from 'react';
 
-import { RowRendererId } from '../../../../../../common/types/timeline';
-
-import { RowRenderer } from './row_renderer';
+import { RowRendererId, RowRenderer } from '../../../../../../common/types/timeline';
 
 const PlainRowRenderer = () => <></>;
 

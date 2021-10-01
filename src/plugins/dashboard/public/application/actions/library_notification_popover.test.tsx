@@ -27,6 +27,7 @@ import {
   ContactCardEmbeddableOutput,
   ContactCardEmbeddable,
 } from '../../services/embeddable_test_samples';
+import { getStubPluginServices } from '../../../../presentation_util/public';
 
 describe('LibraryNotificationPopover', () => {
   const { setup, doStart } = embeddablePluginMock.createInstance();
@@ -55,6 +56,7 @@ describe('LibraryNotificationPopover', () => {
       uiActions: {} as any,
       uiSettings: uiSettingsServiceMock.createStartContract(),
       http: coreStart.http,
+      presentationUtil: getStubPluginServices(),
     };
 
     container = new DashboardContainer(getSampleDashboardInput(), containerOptions);
@@ -71,10 +73,10 @@ describe('LibraryNotificationPopover', () => {
     }
 
     defaultProps = {
-      unlinkAction: ({
+      unlinkAction: {
         execute: jest.fn(),
         getDisplayName: () => 'test unlink',
-      } as unknown) as LibraryNotificationProps['unlinkAction'],
+      } as unknown as LibraryNotificationProps['unlinkAction'],
       displayName: 'test display',
       context: { embeddable: contactCardEmbeddable },
       icon: 'testIcon',

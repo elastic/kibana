@@ -60,12 +60,14 @@ export function createHitIterator(logger: LevelLogger) {
       );
     }
 
-    async function scroll(scrollId: string | undefined) {
+    async function scroll(scrollId: string) {
       logger.debug('executing scroll request');
       return parseResponse(
         await elasticsearchClient.scroll({
-          scroll_id: scrollId,
-          scroll: scrollSettings.duration,
+          body: {
+            scroll_id: scrollId,
+            scroll: scrollSettings.duration,
+          },
         })
       );
     }
@@ -74,7 +76,7 @@ export function createHitIterator(logger: LevelLogger) {
       logger.debug('executing clearScroll request');
       try {
         await elasticsearchClient.clearScroll({
-          scroll_id: scrollId,
+          body: { scroll_id: scrollId },
         });
       } catch (err) {
         // Do not throw the error, as the job can still be completed successfully

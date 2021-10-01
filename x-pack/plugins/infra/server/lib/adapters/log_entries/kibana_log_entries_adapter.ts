@@ -11,7 +11,7 @@ import { constant, identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as runtimeTypes from 'io-ts';
 import { compact } from 'lodash';
-import { JsonArray } from '../../../../../../../src/plugins/kibana_utils/common';
+import { JsonArray } from '@kbn/utility-types';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   LogEntriesAdapter,
@@ -93,6 +93,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
             ],
           },
         },
+        runtime_mappings: resolvedLogSourceConfiguration.runtimeMappings,
         sort,
         ...highlightClause,
         ...searchAfterClause,
@@ -182,6 +183,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
             ],
           },
         },
+        runtime_mappings: resolvedLogSourceConfiguration.runtimeMappings,
         size: 0,
         track_total_hits: false,
       },
@@ -266,9 +268,7 @@ const createFilterClauses = (
 const createQueryFilterClauses = (filterQuery: LogEntryQuery | undefined) =>
   filterQuery ? [filterQuery] : [];
 
-function processCursor(
-  cursor: LogEntriesParams['cursor']
-): {
+function processCursor(cursor: LogEntriesParams['cursor']): {
   sortDirection: 'asc' | 'desc';
   searchAfterClause: { search_after?: readonly [number, number] };
 } {

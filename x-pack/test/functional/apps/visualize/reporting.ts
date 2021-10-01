@@ -13,10 +13,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
+  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
+
   const PageObjects = getPageObjects([
     'reporting',
     'common',
     'dashboard',
+    'timePicker',
     'visualize',
     'visEditor',
   ]);
@@ -24,13 +28,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Visualize Reporting Screenshots', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
-      await esArchiver.loadIfNeeded('reporting/ecommerce');
-      await esArchiver.loadIfNeeded('reporting/ecommerce_kibana');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await kibanaServer.importExport.load(ecommerceSOPath);
       await browser.setWindowSize(1600, 850);
     });
     after('clean up archives', async () => {
-      await esArchiver.unload('reporting/ecommerce');
-      await esArchiver.unload('reporting/ecommerce_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await kibanaServer.importExport.unload(ecommerceSOPath);
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
@@ -38,18 +42,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Print PDF button', () => {
-      it('is not available if new', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/113496
+    describe.skip('Print PDF button', () => {
+      it('is available if new', async () => {
         await PageObjects.common.navigateToUrl('visualize', 'new', { useActualUrl: true });
         await PageObjects.visualize.clickAggBasedVisualizations();
         await PageObjects.visualize.clickAreaChart();
         await PageObjects.visualize.clickNewSearch('ecommerce');
         await PageObjects.reporting.openPdfReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
 
       it('becomes available when saved', async () => {
-        await PageObjects.reporting.setTimepickerInDataRange();
+        const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
+        const toTime = 'Aug 23, 2019 @ 16:18:51.821';
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+
         await PageObjects.visEditor.clickBucket('X-axis');
         await PageObjects.visEditor.selectAggregation('Date Histogram');
         await PageObjects.visEditor.clickGo();
