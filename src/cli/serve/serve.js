@@ -52,7 +52,6 @@ const pathCollector = function () {
 };
 
 const configPathCollector = pathCollector();
-const pluginDirCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
 function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
@@ -138,7 +137,6 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     }
   }
 
-  set('plugins.scanDirs', _.compact([].concat(get('plugins.scanDirs'), opts.pluginDir)));
   set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));
 
   merge(extraCliOptions);
@@ -170,20 +168,12 @@ export default function (program) {
       'Deprecated, set logging file destination in your configuration'
     )
     .option(
-      '--plugin-dir <path>',
-      'A path to scan for plugins, this can be specified multiple ' +
-        'times to specify multiple directories',
-      pluginDirCollector,
-      [fromRoot('plugins')]
-    )
-    .option(
       '--plugin-path <path>',
       'A path to a plugin which should be included by the server, ' +
         'this can be specified multiple times to specify multiple paths',
       pluginPathCollector,
       []
     )
-    .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
     .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
   if (!isKibanaDistributable()) {
