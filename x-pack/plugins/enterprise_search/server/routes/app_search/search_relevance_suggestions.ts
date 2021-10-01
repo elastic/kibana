@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { skipBodyValidation } from '../../lib/route_config_helpers';
+
 import { RouteDependencies } from '../../plugin';
 
 export function registerSearchRelevanceSuggestionsRoutes({
@@ -34,6 +36,34 @@ export function registerSearchRelevanceSuggestionsRoutes({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/api/as/v0/engines/:engineName/search_relevance_suggestions',
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions/settings',
+      validate: {
+        params: schema.object({
+          engineName: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:engineName/search_relevance_suggestions/settings',
+    })
+  );
+
+  router.put(
+    skipBodyValidation({
+      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions/settings',
+      validate: {
+        params: schema.object({
+          engineName: schema.string(),
+        }),
+      },
+    }),
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:engineName/search_relevance_suggestions/settings',
     })
   );
 }
