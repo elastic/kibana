@@ -10,6 +10,7 @@ import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
 import { metadataTransformPattern } from './endpoint/constants';
 
 export const APP_ID = 'securitySolution';
+export const CASES_FEATURE_ID = 'securitySolutionCases';
 export const SERVER_APP_ID = 'siem';
 export const APP_NAME = 'Security';
 export const APP_ICON = 'securityAnalyticsApp';

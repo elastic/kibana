@@ -38,6 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
             osquery: ['all', 'read'],
             ml: ['all', 'read'],
             siem: ['all', 'read'],
+            securitySolutionCases: ['all', 'read'],
             fleet: ['all', 'read'],
             stackAlerts: ['all', 'read'],
             actions: ['all', 'read'],
