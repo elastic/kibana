@@ -52,7 +52,5 @@ export const useLogSourceConfigurationFormState = (
     logColumnsFormElement,
     nameFormElement,
     sourceConfigurationFormElement,
-    tiebreakerFieldFormElement,
-    timestampFieldFormElement,
   };
 };

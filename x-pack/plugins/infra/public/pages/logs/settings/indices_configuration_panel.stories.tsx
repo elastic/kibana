@@ -15,12 +15,7 @@ import {
   MockIndexPatternsKibanaContextProvider,
   MockIndexPatternSpec,
 } from '../../../hooks/use_kibana_index_patterns.mock';
-import {
-  FieldsFormState,
-  LogIndicesFormState,
-  useFieldsFormElement,
-  useLogIndicesFormElement,
-} from './indices_configuration_form_state';
+import { LogIndicesFormState, useLogIndicesFormElement } from './indices_configuration_form_state';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 
 export default {
@@ -69,17 +64,14 @@ type IndicesConfigurationPanelStoryArgs = Pick<
 > & {
   availableIndexPatterns: MockIndexPatternSpec[];
   logIndices: LogIndicesFormState;
-  fields: FieldsFormState;
 };
 
 const IndicesConfigurationPanelTemplate: Story<IndicesConfigurationPanelStoryArgs> = ({
   isLoading,
   isReadOnly,
   logIndices,
-  fields,
 }) => {
   const logIndicesFormElement = useLogIndicesFormElement(logIndices);
-  const { tiebreakerFieldFormElement, timestampFieldFormElement } = useFieldsFormElement(fields);
 
   return (
     <>
@@ -87,8 +79,6 @@ const IndicesConfigurationPanelTemplate: Story<IndicesConfigurationPanelStoryArg
         isLoading={isLoading}
         isReadOnly={isReadOnly}
         indicesFormElement={logIndicesFormElement}
-        tiebreakerFieldFormElement={tiebreakerFieldFormElement}
-        timestampFieldFormElement={timestampFieldFormElement}
       />
       <EuiCodeBlock language="json">
         // field states{'\n'}
@@ -97,14 +87,6 @@ const IndicesConfigurationPanelTemplate: Story<IndicesConfigurationPanelStoryArg
             logIndices: {
               value: logIndicesFormElement.value,
               validity: logIndicesFormElement.validity,
-            },
-            tiebreakerField: {
-              value: tiebreakerFieldFormElement.value,
-              validity: tiebreakerFieldFormElement.validity,
-            },
-            timestampField: {
-              value: timestampFieldFormElement.value,
-              validity: timestampFieldFormElement.validity,
             },
           },
           null,
@@ -121,10 +103,6 @@ const defaultArgs: IndicesConfigurationPanelStoryArgs = {
   logIndices: {
     type: 'index_name' as const,
     indexName: 'logs-*',
-  },
-  fields: {
-    tiebreakerField: '_doc',
-    timestampField: '@timestamp',
   },
   availableIndexPatterns: [
     {
