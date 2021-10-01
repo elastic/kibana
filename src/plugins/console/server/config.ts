@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf, ObjectType } from '@kbn/config-schema';
 import { SemVer } from 'semver';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from 'kibana/server';
 
 import { MAJOR_VERSION } from '../common/constants';
-
-export type ConfigType = TypeOf<typeof config>;
 
 const kibanaVersion = new SemVer(MAJOR_VERSION);
 
@@ -47,7 +46,7 @@ const deprecatedSettings = {
   ),
 };
 
-export let config: ObjectType = schema.object(
+let configSchema = schema.object(
   {
     ...baseSettings,
   },
@@ -56,7 +55,7 @@ export let config: ObjectType = schema.object(
 
 if (kibanaVersion.major < 8) {
   // In 7.x we still support the "console.proxyFilter" and "console.proxyConfig" settings
-  config = schema.object(
+  configSchema = schema.object(
     {
       ...baseSettings,
       ...deprecatedSettings,
@@ -64,3 +63,15 @@ if (kibanaVersion.major < 8) {
     { defaultValue: undefined }
   );
 }
+
+type ConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<ConfigType> = {
+  schema: configSchema,
+  deprecations: ({ deprecate, unused }) => [
+    deprecate('enabled', '8.0.0'),
+    deprecate('proxyFilter', '8.0.0'),
+    deprecate('proxyConfig', '8.0.0'),
+    unused('ssl'),
+  ],
+};
