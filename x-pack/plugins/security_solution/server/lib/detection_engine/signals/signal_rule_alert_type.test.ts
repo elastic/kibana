@@ -69,6 +69,7 @@ const getPayload = (
   services: AlertServicesMock
 ): RuleExecutorOptions => ({
   alertId: ruleAlert.id,
+  executionId: '',
   services,
   name: ruleAlert.name,
   tags: ruleAlert.tags,

@@ -306,6 +306,13 @@ describe('Task Runner', () => {
           "kind": "alert",
         },
         "kibana": Object {
+          "alert": Object {
+            "rule": Object {
+              "execution": Object {
+                "uuid": undefined,
+              },
+            },
+          },
           "saved_objects": Array [
             Object {
               "id": "1",
@@ -453,6 +460,13 @@ describe('Task Runner', () => {
             kind: 'alert',
           },
           kibana: {
+            alert: {
+              rule: {
+                execution: {
+                  uuid: undefined,
+                },
+              },
+            },
             task: {
               schedule_delay: 0,
               scheduled: '1970-01-01T00:00:00.000Z',
@@ -581,6 +595,13 @@ describe('Task Runner', () => {
           '@timestamp': '1970-01-01T00:00:00.000Z',
           event: { action: 'execute', category: ['alerts'], kind: 'alert', outcome: 'success' },
           kibana: {
+            alert: {
+              rule: {
+                execution: {
+                  uuid: undefined,
+                },
+              },
+            },
             alerting: {
               status: 'active',
             },
@@ -677,6 +698,13 @@ describe('Task Runner', () => {
           schedule_delay: 0,
           scheduled: '1970-01-01T00:00:00.000Z',
         },
+        alert: {
+          rule: {
+            execution: {
+              uuid: undefined,
+            },
+          },
+        },
         saved_objects: [
           {
             id: '1',
@@ -770,6 +798,13 @@ describe('Task Runner', () => {
         outcome: 'success',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: undefined,
+            },
+          },
+        },
         alerting: {
           status: 'active',
         },
@@ -920,6 +955,7 @@ describe('Task Runner', () => {
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
     expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
+    // TODO: Necessary for "action": "active-instance" alert as well too?
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -933,6 +969,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -1004,6 +1047,13 @@ describe('Task Runner', () => {
               "outcome": "success",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "active",
               },
@@ -1271,6 +1321,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -1419,6 +1476,13 @@ describe('Task Runner', () => {
               "outcome": "success",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "active",
               },
@@ -1568,6 +1632,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -1757,6 +1828,13 @@ describe('Task Runner', () => {
               "outcome": "success",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "active",
               },
@@ -2137,6 +2215,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2245,6 +2330,13 @@ describe('Task Runner', () => {
               "outcome": "success",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "active",
               },
@@ -2473,6 +2565,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2512,6 +2611,13 @@ describe('Task Runner', () => {
               "reason": "execute",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "error",
               },
@@ -2582,6 +2688,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2621,6 +2734,13 @@ describe('Task Runner', () => {
               "reason": "decrypt",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "error",
               },
@@ -2699,6 +2819,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2738,6 +2865,13 @@ describe('Task Runner', () => {
               "reason": "license",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "error",
               },
@@ -2816,6 +2950,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2855,6 +2996,13 @@ describe('Task Runner', () => {
               "reason": "unknown",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "error",
               },
@@ -2932,6 +3080,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2971,6 +3126,13 @@ describe('Task Runner', () => {
               "reason": "read",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "error",
               },
@@ -3222,6 +3384,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -3401,6 +3570,13 @@ describe('Task Runner', () => {
               "outcome": "success",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "active",
               },
@@ -3508,6 +3684,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -3615,6 +3798,13 @@ describe('Task Runner', () => {
               "outcome": "success",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "active",
               },
@@ -3714,6 +3904,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -3817,6 +4014,13 @@ describe('Task Runner', () => {
               "outcome": "success",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "active",
               },
@@ -3911,6 +4115,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -4018,6 +4229,13 @@ describe('Task Runner', () => {
               "outcome": "success",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "ok",
               },
@@ -4114,6 +4332,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -4215,6 +4440,13 @@ describe('Task Runner', () => {
               "outcome": "success",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "ok",
               },
@@ -4362,6 +4594,13 @@ describe('Task Runner', () => {
           "kind": "alert",
         },
         "kibana": Object {
+          "alert": Object {
+            "rule": Object {
+              "execution": Object {
+                "uuid": undefined,
+              },
+            },
+          },
           "saved_objects": Array [
             Object {
               "id": "1",

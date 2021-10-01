@@ -39,6 +39,7 @@ describe('legacyRules_notification_alert_type', () => {
 
     payload = {
       alertId: '1111',
+      executionId: '',
       services: alertServices,
       params: { ruleAlertId: '2222' },
       state: {},
