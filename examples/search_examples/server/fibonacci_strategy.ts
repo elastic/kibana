@@ -15,7 +15,7 @@ export const fibonacciStrategyProvider = (): ISearchStrategy<
   FibonacciResponse
 > => {
   const responseMap = new Map<string, [number[], number, number]>();
-  return ({
+  return {
     search: (request: FibonacciRequest) => {
       const id = request.id ?? uuid();
       const [sequence, total, started] = responseMap.get(id) ?? [
@@ -48,5 +48,5 @@ export const fibonacciStrategyProvider = (): ISearchStrategy<
     cancel: async (id: string) => {
       responseMap.delete(id);
     },
-  } as unknown) as ISearchStrategy<FibonacciRequest, FibonacciResponse>;
+  } as unknown as ISearchStrategy<FibonacciRequest, FibonacciResponse>;
 };

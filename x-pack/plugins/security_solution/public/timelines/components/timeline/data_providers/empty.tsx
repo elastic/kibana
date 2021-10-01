@@ -26,12 +26,12 @@ const Text = styled(EuiText)`
 
 Text.displayName = 'Text';
 
-const BadgeHighlighted = (styled(EuiBadge)`
+const BadgeHighlighted = styled(EuiBadge)`
   height: 20px;
   margin: 0 5px 0 5px;
   maxwidth: 85px;
   minwidth: 85px;
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 
 BadgeHighlighted.displayName = 'BadgeHighlighted';
 

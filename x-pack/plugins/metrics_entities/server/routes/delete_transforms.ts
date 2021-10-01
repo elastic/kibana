@@ -34,7 +34,11 @@ export const deleteTransforms = (router: IRouter): void => {
       // TODO: Validate for runtime that the module exists or not and throw before pushing the module name lower
       // TODO: Change modules to be part of the body and become an array of values
       // TODO: Wrap this in a try catch block and report errors
-      const { modules, prefix = '', suffix = '' } = request.body as {
+      const {
+        modules,
+        prefix = '',
+        suffix = '',
+      } = request.body as {
         modules: ModuleNames[];
         prefix: string;
         suffix: string;

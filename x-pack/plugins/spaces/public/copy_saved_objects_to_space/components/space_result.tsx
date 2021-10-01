@@ -74,13 +74,8 @@ export const SpaceResultProcessing = (props: Pick<Props, 'space'>) => {
 };
 
 export const SpaceResult = (props: Props) => {
-  const {
-    space,
-    summarizedCopyResult,
-    retries,
-    onRetriesChange,
-    conflictResolutionInProgress,
-  } = props;
+  const { space, summarizedCopyResult, retries, onRetriesChange, conflictResolutionInProgress } =
+    props;
   const { objects } = summarizedCopyResult;
   const spaceHasPendingOverwrites = retries.some((r) => r.overwrite);
   const [destinationMap, setDestinationMap] = useState(getInitialDestinationMap(objects));

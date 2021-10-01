@@ -88,13 +88,13 @@ describe('helpers', () => {
     });
 
     test('it should trace an error if the value is not a string', () => {
-      const mockConsole: Console = ({ trace: jest.fn() } as unknown) as Console;
+      const mockConsole: Console = { trace: jest.fn() } as unknown as Console;
       const value = getStringArray(
         'a',
         [
           {
             field: 'a',
-            values: (5 as unknown) as string[],
+            values: 5 as unknown as string[],
             isObjectArray: false,
             originalValue: 'zed',
           },
@@ -102,9 +102,7 @@ describe('helpers', () => {
         mockConsole
       );
       expect(value).toEqual([]);
-      expect(
-        mockConsole.trace
-      ).toHaveBeenCalledWith(
+      expect(mockConsole.trace).toHaveBeenCalledWith(
         'Data type that is not a string or string array detected:',
         5,
         'when trying to access field:',
@@ -115,13 +113,13 @@ describe('helpers', () => {
     });
 
     test('it should trace an error if the value is an array of mixed values', () => {
-      const mockConsole: Console = ({ trace: jest.fn() } as unknown) as Console;
+      const mockConsole: Console = { trace: jest.fn() } as unknown as Console;
       const value = getStringArray(
         'a',
         [
           {
             field: 'a',
-            values: (['hi', 5] as unknown) as string[],
+            values: ['hi', 5] as unknown as string[],
             isObjectArray: false,
             originalValue: 'zed',
           },
@@ -129,9 +127,7 @@ describe('helpers', () => {
         mockConsole
       );
       expect(value).toEqual([]);
-      expect(
-        mockConsole.trace
-      ).toHaveBeenCalledWith(
+      expect(mockConsole.trace).toHaveBeenCalledWith(
         'Data type that is not a string or string array detected:',
         ['hi', 5],
         'when trying to access field:',
@@ -175,7 +171,7 @@ describe('helpers', () => {
         const dupTimelineDetails = [...mockTimelineDetails];
         dupTimelineDetails[0] = {
           ...dupTimelineDetails[0],
-          values: ('apache' as unknown) as string[],
+          values: 'apache' as unknown as string[],
         }; // very unsafe cast for this test case
         const replacement = replaceTemplateFieldFromQuery(
           'host.name: *',
@@ -227,7 +223,7 @@ describe('helpers', () => {
         const dupTimelineDetails = [...mockTimelineDetails];
         dupTimelineDetails[0] = {
           ...dupTimelineDetails[0],
-          values: ('apache' as unknown) as string[],
+          values: 'apache' as unknown as string[],
         }; // very unsafe cast for this test case
         const replacement = replaceTemplateFieldFromQuery(
           'host.name: *',
@@ -352,7 +348,7 @@ describe('helpers', () => {
         const dupTimelineDetails = [...mockTimelineDetails];
         dupTimelineDetails[0] = {
           ...dupTimelineDetails[0],
-          values: ('apache' as unknown) as string[],
+          values: 'apache' as unknown as string[],
         }; // very unsafe cast for this test case
         const mockDataProvider: DataProvider = mockDataProviders[0];
         mockDataProvider.queryMatch.field = 'host.name';
@@ -477,7 +473,7 @@ describe('helpers', () => {
         const dupTimelineDetails = [...mockTimelineDetails];
         dupTimelineDetails[0] = {
           ...dupTimelineDetails[0],
-          values: ('apache' as unknown) as string[],
+          values: 'apache' as unknown as string[],
         }; // very unsafe cast for this test case
         const mockDataProvider: DataProvider = mockDataProviders[0];
         mockDataProvider.queryMatch.field = 'host.name';

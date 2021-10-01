@@ -34,9 +34,9 @@ describe('getDocumentPayload', () => {
       }) as ContentStream
     );
 
-    (jobsQueryFactory as jest.MockedFunction<typeof jobsQueryFactory>).mockReturnValue(({
+    (jobsQueryFactory as jest.MockedFunction<typeof jobsQueryFactory>).mockReturnValue({
       getError: jest.fn(async () => 'Some error'),
-    } as unknown) as ReturnType<typeof jobsQueryFactory>);
+    } as unknown as ReturnType<typeof jobsQueryFactory>);
   });
 
   describe('when the report is completed', () => {

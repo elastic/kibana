@@ -312,7 +312,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
         <WithHeaderLayout
           leftColumn={headerLeftContent}
           rightColumn={headerRightContent}
-          tabs={(headerTabs as unknown) as EuiTabProps[]}
+          tabs={headerTabs as unknown as EuiTabProps[]}
         >
           {content}
         </WithHeaderLayout>

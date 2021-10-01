@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { externals } from '@kbn/ui-shared-deps';
+import { externals } from '@kbn/ui-shared-deps-src';
 import { stringifyRequest } from 'loader-utils';
 import { resolve } from 'path';
 import { Configuration, Stats } from 'webpack';

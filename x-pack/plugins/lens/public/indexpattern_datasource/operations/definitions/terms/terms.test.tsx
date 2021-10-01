@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
-import { EuiFieldNumber, EuiSelect, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiFieldNumber, EuiSelect, EuiSwitch } from '@elastic/eui';
 import type {
   IUiSettingsClient,
   SavedObjectsClientContract,
@@ -813,11 +813,11 @@ describe('terms', () => {
       instance
         .find('[data-test-subj="indexPattern-terms-other-bucket"]')
         .find(EuiSwitch)
-        .prop('onChange')!({
-        target: {
-          checked: true,
-        },
-      } as EuiSwitchEvent);
+        .simulate('change', {
+          target: {
+            checked: true,
+          },
+        });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -871,11 +871,11 @@ describe('terms', () => {
       instance
         .find(EuiSelect)
         .find('[data-test-subj="indexPattern-terms-orderBy"]')
-        .prop('onChange')!({
-        target: {
-          value: 'column$$$col2',
-        },
-      } as React.ChangeEvent<HTMLSelectElement>);
+        .simulate('change', {
+          target: {
+            value: 'column$$$col2',
+          },
+        });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -931,11 +931,11 @@ describe('terms', () => {
       instance
         .find('[data-test-subj="indexPattern-terms-orderDirection"]')
         .find(EuiSelect)
-        .prop('onChange')!({
-        target: {
-          value: 'desc',
-        },
-      } as React.ChangeEvent<HTMLSelectElement>);
+        .simulate('change', {
+          target: {
+            value: 'desc',
+          },
+        });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -1077,10 +1077,10 @@ describe('terms', () => {
       });
       it('returns fix action which calls field information endpoint and creates a pinned top values', async () => {
         const errorMessage = termsOperation.getErrorMessage!(layer, 'col1', indexPattern)![0];
-        const fixAction = (typeof errorMessage === 'object'
-          ? errorMessage.fixAction!.newState
-          : undefined)!;
-        const coreMock = ({
+        const fixAction = (
+          typeof errorMessage === 'object' ? errorMessage.fixAction!.newState : undefined
+        )!;
+        const coreMock = {
           uiSettings: {
             get: () => undefined,
           },
@@ -1100,17 +1100,17 @@ describe('terms', () => {
               })
             ),
           },
-        } as unknown) as CoreStart;
+        } as unknown as CoreStart;
         const newLayer = await fixAction(
           coreMock,
-          ({
+          {
             query: { language: 'kuery', query: 'a: b' },
             filters: [],
             dateRange: {
               fromDate: '2020',
               toDate: '2021',
             },
-          } as unknown) as FrameDatasourceAPI,
+          } as unknown as FrameDatasourceAPI,
           'first'
         );
         expect(newLayer.columns.col1).toEqual(

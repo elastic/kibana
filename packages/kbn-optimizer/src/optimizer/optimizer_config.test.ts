@@ -380,10 +380,12 @@ describe('OptimizerConfig::parseOptions()', () => {
  * and just making sure that the arguments are coming from where we expect
  */
 describe('OptimizerConfig::create()', () => {
-  const assignBundlesToWorkers: jest.Mock = jest.requireMock('./assign_bundles_to_workers.ts')
-    .assignBundlesToWorkers;
-  const findKibanaPlatformPlugins: jest.Mock = jest.requireMock('./kibana_platform_plugins.ts')
-    .findKibanaPlatformPlugins;
+  const assignBundlesToWorkers: jest.Mock = jest.requireMock(
+    './assign_bundles_to_workers.ts'
+  ).assignBundlesToWorkers;
+  const findKibanaPlatformPlugins: jest.Mock = jest.requireMock(
+    './kibana_platform_plugins.ts'
+  ).findKibanaPlatformPlugins;
   const getPluginBundles: jest.Mock = jest.requireMock('./get_plugin_bundles.ts').getPluginBundles;
   const filterById: jest.Mock = jest.requireMock('./filter_by_id.ts').filterById;
   const focusBundles: jest.Mock = jest.requireMock('./focus_bundles').focusBundles;
@@ -404,24 +406,26 @@ describe('OptimizerConfig::create()', () => {
     focusBundles.mockReturnValue(Symbol('focused bundles'));
     readLimits.mockReturnValue(Symbol('limits'));
 
-    jest.spyOn(OptimizerConfig, 'parseOptions').mockImplementation((): {
-      [key in keyof ParsedOptions]: any;
-    } => ({
-      cache: Symbol('parsed cache'),
-      dist: Symbol('parsed dist'),
-      maxWorkerCount: Symbol('parsed max worker count'),
-      pluginPaths: Symbol('parsed plugin paths'),
-      pluginScanDirs: Symbol('parsed plugin scan dirs'),
-      repoRoot: Symbol('parsed repo root'),
-      outputRoot: Symbol('parsed output root'),
-      watch: Symbol('parsed watch'),
-      themeTags: Symbol('theme tags'),
-      inspectWorkers: Symbol('parsed inspect workers'),
-      profileWebpack: Symbol('parsed profile webpack'),
-      filters: [],
-      focus: [],
-      includeCoreBundle: false,
-    }));
+    jest.spyOn(OptimizerConfig, 'parseOptions').mockImplementation(
+      (): {
+        [key in keyof ParsedOptions]: any;
+      } => ({
+        cache: Symbol('parsed cache'),
+        dist: Symbol('parsed dist'),
+        maxWorkerCount: Symbol('parsed max worker count'),
+        pluginPaths: Symbol('parsed plugin paths'),
+        pluginScanDirs: Symbol('parsed plugin scan dirs'),
+        repoRoot: Symbol('parsed repo root'),
+        outputRoot: Symbol('parsed output root'),
+        watch: Symbol('parsed watch'),
+        themeTags: Symbol('theme tags'),
+        inspectWorkers: Symbol('parsed inspect workers'),
+        profileWebpack: Symbol('parsed profile webpack'),
+        filters: [],
+        focus: [],
+        includeCoreBundle: false,
+      })
+    );
   });
 
   it('passes parsed options to findKibanaPlatformPlugins, getBundles, and assignBundlesToWorkers', () => {

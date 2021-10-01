@@ -50,25 +50,27 @@ export const BorderForm: FunctionComponent<Props> = ({
   const borderWidthVal = borderWidth ? borderWidth.replace('px', '') : '';
   const radiusVal = typeof radius === 'string' ? radius.replace('px', '') : radius;
 
-  const namedChange = <T extends keyof Arguments>(name: T) => (val: Arguments[T]) => {
-    if (name === 'borderWidth') {
-      return onChange('border', `${val}px ${borderStyle} ${borderColor}`);
-    }
-    if (name === 'borderStyle') {
-      if (val === '') {
-        return onChange('border', `0px`);
+  const namedChange =
+    <T extends keyof Arguments>(name: T) =>
+    (val: Arguments[T]) => {
+      if (name === 'borderWidth') {
+        return onChange('border', `${val}px ${borderStyle} ${borderColor}`);
       }
-      return onChange('border', `${borderWidth} ${val} ${borderColor}`);
-    }
-    if (name === 'borderRadius') {
-      if (val === '') {
-        return onChange('borderRadius', `0px`);
+      if (name === 'borderStyle') {
+        if (val === '') {
+          return onChange('border', `0px`);
+        }
+        return onChange('border', `${borderWidth} ${val} ${borderColor}`);
       }
-      return onChange('borderRadius', `${val}px`);
-    }
+      if (name === 'borderRadius') {
+        if (val === '') {
+          return onChange('borderRadius', `0px`);
+        }
+        return onChange('borderRadius', `${val}px`);
+      }
 
-    onChange(name, val);
-  };
+      onChange(name, val);
+    };
 
   const borderColorChange = (color: string) =>
     onChange('border', `${borderWidth} ${borderStyle} ${color}`);

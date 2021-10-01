@@ -62,8 +62,8 @@ export const setupKqlQuerySuggestionProvider = (
       selectionEnd
     )}`;
 
-    return Promise.all(
-      getSuggestionsByType(cursoredQuery, querySuggestionsArgs)
-    ).then((suggestionsByType) => dedup(flatten(suggestionsByType)));
+    return Promise.all(getSuggestionsByType(cursoredQuery, querySuggestionsArgs)).then(
+      (suggestionsByType) => dedup(flatten(suggestionsByType))
+    );
   };
 };

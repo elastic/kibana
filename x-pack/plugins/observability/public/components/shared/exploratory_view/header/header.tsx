@@ -14,6 +14,7 @@ import { DataViewLabels } from '../configurations/constants';
 import { ObservabilityAppServices } from '../../../../application/types';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { combineTimeRanges } from '../exploratory_view';
+import { AddToCaseAction } from './add_to_case_action';
 
 interface Props {
   seriesId: string;
@@ -55,6 +56,9 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
               />
             </h2>
           </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <AddToCaseAction lensAttributes={lensAttributes} timeRange={timeRange} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -101,7 +105,7 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
 
       {isSaveOpen && lensAttributes && (
         <LensSaveModalComponent
-          initialInput={(lensAttributes as unknown) as LensEmbeddableInput}
+          initialInput={lensAttributes as unknown as LensEmbeddableInput}
           onClose={() => setIsSaveOpen(false)}
           onSave={() => {}}
         />

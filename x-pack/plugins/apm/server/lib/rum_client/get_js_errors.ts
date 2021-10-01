@@ -6,7 +6,6 @@
  */
 
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { SetupTimeRange } from '../helpers/setup_request';
 import { SetupUX } from '../../routes/rum_client';
 import { getRumErrorsProjection } from '../../projections/rum_page_load_transactions';
 import {
@@ -23,15 +22,21 @@ export async function getJSErrors({
   pageSize,
   pageIndex,
   urlQuery,
+  start,
+  end,
 }: {
-  setup: SetupUX & SetupTimeRange;
+  setup: SetupUX;
   pageSize: number;
   pageIndex: number;
   urlQuery?: string;
+  start: number;
+  end: number;
 }) {
   const projection = getRumErrorsProjection({
     setup,
     urlQuery,
+    start,
+    end,
   });
 
   const params = mergeProjection(projection, {
@@ -108,9 +113,11 @@ export async function getJSErrors({
       return {
         count: impactedPages.pageCount.value,
         errorGroupId: key,
-        errorMessage: (sample.hits.hits[0]._source as {
-          error: { exception: Array<{ message: string }> };
-        }).error.exception?.[0].message,
+        errorMessage: (
+          sample.hits.hits[0]._source as {
+            error: { exception: Array<{ message: string }> };
+          }
+        ).error.exception?.[0].message,
       };
     }),
   };

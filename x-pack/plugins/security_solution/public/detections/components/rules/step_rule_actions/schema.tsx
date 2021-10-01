@@ -37,31 +37,33 @@ export const validateSingleAction = async (
   return [...actionParamsErrors, ...mustacheErrors];
 };
 
-export const validateRuleActionsField = (actionTypeRegistry: ActionTypeRegistryContract) => async (
-  ...data: Parameters<ValidationFunc>
-): Promise<ValidationError<ERROR_CODE> | void | undefined> => {
-  const [{ value, path }] = data as [{ value: AlertAction[]; path: string }];
+export const validateRuleActionsField =
+  (actionTypeRegistry: ActionTypeRegistryContract) =>
+  async (
+    ...data: Parameters<ValidationFunc>
+  ): Promise<ValidationError<ERROR_CODE> | void | undefined> => {
+    const [{ value, path }] = data as [{ value: AlertAction[]; path: string }];
 
-  const errors = [];
-  for (const actionItem of value) {
-    const errorsArray = await validateSingleAction(actionItem, actionTypeRegistry);
+    const errors = [];
+    for (const actionItem of value) {
+      const errorsArray = await validateSingleAction(actionItem, actionTypeRegistry);
 
-    if (errorsArray.length) {
-      const actionTypeName = getActionTypeName(actionItem.actionTypeId);
-      const errorsListItems = errorsArray.map((error) => `*   ${error}\n`);
+      if (errorsArray.length) {
+        const actionTypeName = getActionTypeName(actionItem.actionTypeId);
+        const errorsListItems = errorsArray.map((error) => `*   ${error}\n`);
 
-      errors.push(`\n**${actionTypeName}:**\n${errorsListItems.join('')}`);
+        errors.push(`\n**${actionTypeName}:**\n${errorsListItems.join('')}`);
+      }
     }
-  }
 
-  if (errors.length) {
-    return {
-      code: 'ERR_FIELD_FORMAT',
-      path,
-      message: `${errors.join('\n')}`,
-    };
-  }
-};
+    if (errors.length) {
+      return {
+        code: 'ERR_FIELD_FORMAT',
+        path,
+        message: `${errors.join('\n')}`,
+      };
+    }
+  };
 
 export const getSchema = ({
   actionTypeRegistry,

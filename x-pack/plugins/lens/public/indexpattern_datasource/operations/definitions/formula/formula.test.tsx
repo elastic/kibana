@@ -22,7 +22,7 @@ jest.mock('../../layer_helpers', () => {
 });
 
 const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
-  average: ({
+  average: {
     input: 'field',
     buildColumn: ({ field }: { field: IndexPatternField }) => ({
       label: 'avg',
@@ -33,12 +33,12 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       scale: 'ratio',
       timeScale: false,
     }),
-  } as unknown) as GenericOperationDefinition,
+  } as unknown as GenericOperationDefinition,
   terms: { input: 'field' } as GenericOperationDefinition,
   sum: { input: 'field', filterable: true } as GenericOperationDefinition,
   last_value: { input: 'field' } as GenericOperationDefinition,
   max: { input: 'field' } as GenericOperationDefinition,
-  count: ({
+  count: {
     input: 'field',
     filterable: true,
     buildColumn: ({ field }: { field: IndexPatternField }) => ({
@@ -50,9 +50,9 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       scale: 'ratio',
       timeScale: false,
     }),
-  } as unknown) as GenericOperationDefinition,
+  } as unknown as GenericOperationDefinition,
   derivative: { input: 'fullReference' } as GenericOperationDefinition,
-  moving_average: ({
+  moving_average: {
     input: 'fullReference',
     operationParams: [{ name: 'window', type: 'number', required: true }],
     buildColumn: ({ references }: { references: string[] }) => ({
@@ -66,7 +66,7 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       references,
     }),
     getErrorMessage: () => ['mock error'],
-  } as unknown) as GenericOperationDefinition,
+  } as unknown as GenericOperationDefinition,
   cumulative_sum: { input: 'fullReference' } as GenericOperationDefinition,
 };
 
@@ -352,6 +352,33 @@ describe('formula', () => {
         isBucketed: false,
         scale: 'ratio',
         params: {},
+        references: [],
+      });
+    });
+
+    it('should move into Formula previous static_value operation', () => {
+      expect(
+        formulaOperation.buildColumn({
+          previousColumn: {
+            label: 'Static value: 0',
+            dataType: 'number',
+            isBucketed: false,
+            operationType: 'static_value',
+            references: [],
+            params: {
+              value: '0',
+            },
+          },
+          layer,
+          indexPattern,
+        })
+      ).toEqual({
+        label: '0',
+        dataType: 'number',
+        operationType: 'formula',
+        isBucketed: false,
+        scale: 'ratio',
+        params: { isFormulaBroken: false, formula: '0' },
         references: [],
       });
     });

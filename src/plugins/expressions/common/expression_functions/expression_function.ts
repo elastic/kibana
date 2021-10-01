@@ -58,9 +58,10 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     state: ExpressionAstFunction['arguments'],
     telemetryData: Record<string, any>
   ) => Record<string, any>;
-  extract: (
-    state: ExpressionAstFunction['arguments']
-  ) => { state: ExpressionAstFunction['arguments']; references: SavedObjectReference[] };
+  extract: (state: ExpressionAstFunction['arguments']) => {
+    state: ExpressionAstFunction['arguments'];
+    references: SavedObjectReference[];
+  };
   inject: (
     state: ExpressionAstFunction['arguments'],
     references: SavedObjectReference[]

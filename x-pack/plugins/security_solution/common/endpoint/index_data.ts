@@ -57,6 +57,7 @@ export async function indexHostsAndAlerts(
   alertIndex: string,
   alertsPerHost: number,
   fleet: boolean,
+  logsEndpoint: boolean,
   options: TreeOptions = {}
 ): Promise<IndexedHostsAndAlertsResponse> {
   const random = seedrandom(seed);
@@ -72,11 +73,15 @@ export async function indexHostsAndAlerts(
     responsesIndex: '',
     actions: [],
     actionsIndex: '',
+    endpointActions: [],
+    endpointActionsIndex: '',
+    endpointActionResponses: [],
+    endpointActionResponsesIndex: '',
     integrationPolicies: [],
     agentPolicies: [],
   };
 
-  // Ensure fleet is setup and endpint package installed
+  // Ensure fleet is setup and endpoint package installed
   await setupFleetForEndpoint(kbnClient);
 
   // If `fleet` integration is true, then ensure a (fake) fleet-server is connected
@@ -98,6 +103,7 @@ export async function indexHostsAndAlerts(
       metadataIndex,
       policyResponseIndex,
       enrollFleet: fleet,
+      addEndpointActions: logsEndpoint,
       generator,
     });
 
@@ -119,12 +125,12 @@ export async function indexHostsAndAlerts(
 const getEndpointPackageInfo = async (
   kbnClient: KbnClient
 ): Promise<GetPackagesResponse['response'][0]> => {
-  const endpointPackage = ((await kbnClient.request({
-    path: `${EPM_API_ROUTES.LIST_PATTERN}?category=security`,
-    method: 'GET',
-  })) as AxiosResponse<GetPackagesResponse>).data.response.find(
-    (epmPackage) => epmPackage.name === 'endpoint'
-  );
+  const endpointPackage = (
+    (await kbnClient.request({
+      path: `${EPM_API_ROUTES.LIST_PATTERN}?category=security`,
+      method: 'GET',
+    })) as AxiosResponse<GetPackagesResponse>
+  ).data.response.find((epmPackage) => epmPackage.name === 'endpoint');
 
   if (!endpointPackage) {
     throw new Error('EPM Endpoint package was not found!');

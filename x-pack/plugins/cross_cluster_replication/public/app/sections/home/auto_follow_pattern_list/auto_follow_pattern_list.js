@@ -50,12 +50,8 @@ export class AutoFollowPatternList extends PureComponent {
   };
 
   componentDidMount() {
-    const {
-      loadAutoFollowPatterns,
-      loadAutoFollowStats,
-      selectAutoFollowPattern,
-      history,
-    } = this.props;
+    const { loadAutoFollowPatterns, loadAutoFollowStats, selectAutoFollowPattern, history } =
+      this.props;
 
     trackUiMetric(METRIC_TYPE.LOADED, UIM_AUTO_FOLLOW_PATTERN_LIST_LOAD);
     loadAutoFollowPatterns();

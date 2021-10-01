@@ -23,7 +23,8 @@ export class PresentationUtilPlugin
       PresentationUtilPluginStart,
       PresentationUtilPluginSetupDeps,
       PresentationUtilPluginStartDeps
-    > {
+    >
+{
   public setup(
     _coreSetup: CoreSetup<PresentationUtilPluginSetup>,
     _setupPlugins: PresentationUtilPluginSetupDeps
