@@ -422,8 +422,7 @@ describe('migration actions', () => {
 
   // Reindex doesn't return any errors on it's own, so we have to test
   // together with waitForReindexTask
-  // FLAKY: https://github.com/elastic/kibana/issues/103231
-  describe.skip('reindex & waitForReindexTask', () => {
+  describe('reindex & waitForReindexTask', () => {
     it('resolves right when reindex succeeds without reindex script', async () => {
       const res = (await reindex({
         client,
@@ -792,6 +791,11 @@ describe('migration actions', () => {
               `);
     });
     it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
+      await waitForIndexStatusYellow({
+        client,
+        index: '.kibana_1',
+      })();
+
       const res = (await reindex({
         client,
         sourceIndex: '.kibana_1',
