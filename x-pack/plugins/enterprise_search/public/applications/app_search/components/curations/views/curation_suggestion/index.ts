@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import React from 'react';
-
-export const CurationsSettings: React.FC = () => {
-  return null;
-};
+export { CurationSuggestion } from './curation_suggestion';
