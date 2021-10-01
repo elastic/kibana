@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { matchPath } from 'react-router-dom';
 import { createSelector } from 'reselect';
 import { Pagination } from '@elastic/eui';
 import {
@@ -22,10 +21,7 @@ import {
   GetTrustedAppsListResponse,
   PolicyData,
 } from '../../../../../../../common/endpoint/types';
-import {
-  MANAGEMENT_PAGE_SIZE_OPTIONS,
-  MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
-} from '../../../../../common/constants';
+import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../../../common/constants';
 import {
   getLastLoadedResourceState,
   isFailedResourceState,
@@ -107,16 +103,6 @@ export const getUpdateArtifacts = (
   return state.artifacts.trustedAppsToUpdate.type === 'LoadedResourceState'
     ? state.artifacts.trustedAppsToUpdate.data
     : undefined;
-};
-
-/** Returns a boolean of whether the user is on the policy details page or not */
-export const isOnPolicyTrustedAppsPage = (state: Immutable<PolicyDetailsState>) => {
-  return (
-    matchPath(state.location?.pathname ?? '', {
-      path: MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
-      exact: true,
-    }) !== null
-  );
 };
 
 export const getCurrentPolicyAssignedTrustedAppsState: PolicyDetailsSelector<
