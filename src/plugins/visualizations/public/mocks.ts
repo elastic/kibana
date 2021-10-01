@@ -36,6 +36,9 @@ const createStartContract = (): VisualizationsStart => ({
   savedVisualizationsLoader: {
     get: jest.fn(),
   } as any,
+  getSavedVisualization: jest.fn(),
+  saveVisualization: jest.fn(),
+  findListItems: jest.fn(),
   showNewVisModal: jest.fn(),
   createVis: jest.fn(),
   convertFromSerializedVis: jest.fn(),

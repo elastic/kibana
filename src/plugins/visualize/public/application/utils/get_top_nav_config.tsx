@@ -105,6 +105,7 @@ export const getTopNavConfig = (
     usageCollection,
     getKibanaVersion,
     savedObjects,
+    visualizations,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
@@ -135,12 +136,7 @@ export const getTopNavConfig = (
     setHasUnsavedChanges(false);
 
     try {
-      const id = await saveVisualization(savedVis, saveOptions, {
-        savedObjectsClient: savedObjects.client,
-        chrome,
-        overlays,
-        savedObjectsTagging,
-      });
+      const id = await visualizations.saveVisualization(savedVis, saveOptions);
 
       if (id) {
         toastNotifications.addSuccess({

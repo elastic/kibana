@@ -67,20 +67,14 @@ export const getVisualizationInstanceFromInput = async (
   visualizeServices: VisualizeServices,
   input: VisualizeInput
 ) => {
-  const { visualizations, savedObjects, data, spaces, savedObjectsTagging } = visualizeServices;
+  const { visualizations } = visualizeServices;
   const visState = input.savedVis as SerializedVis;
 
   /**
    * A saved vis is needed even in by value mode to support 'save to library' which converts the 'by value'
    * state of the visualization, into a new saved object.
    */
-  const savedVis: VisSavedObject = await getSavedVisualization({
-    search: data.search,
-    savedObjectsClient: savedObjects.client,
-    dataViews: data.dataViews,
-    spaces,
-    savedObjectsTagging,
-  });
+  const savedVis: VisSavedObject = await visualizations.getSavedVisualization();
 
   if (visState.uiState && Object.keys(visState.uiState).length !== 0) {
     savedVis.uiStateJSON = JSON.stringify(visState.uiState);
@@ -115,17 +109,8 @@ export const getVisualizationInstance = async (
    */
   opts?: Record<string, unknown> | string
 ) => {
-  const { visualizations, data, savedObjects, spaces, savedObjectsTagging } = visualizeServices;
-  const savedVis: VisSavedObject = await getSavedVisualization(
-    {
-      search: data.search,
-      savedObjectsClient: savedObjects.client,
-      dataViews: data.dataViews,
-      spaces,
-      savedObjectsTagging,
-    },
-    opts
-  );
+  const { visualizations } = visualizeServices;
+  const savedVis: VisSavedObject = await visualizations.getSavedVisualization(opts);
 
   if (typeof opts !== 'string') {
     savedVis.searchSourceFields = { index: opts?.indexPattern } as SearchSourceFields;

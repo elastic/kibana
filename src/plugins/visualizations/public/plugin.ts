@@ -5,6 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import type { SavedObjectsFindOptionsReference } from 'kibana/public';
 import {
   setUISettings,
   setTypes,
@@ -42,7 +44,13 @@ import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visuali
 import type { SerializedVis, Vis } from './vis';
 import { showNewVisModal } from './wizard';
 
-import { convertFromSerializedVis, convertToSerializedVis } from './utils/saved_visualize_utils';
+import {
+  convertFromSerializedVis,
+  convertToSerializedVis,
+  getSavedVisualization,
+  saveVisualization,
+  findListItems,
+} from './utils/saved_visualize_utils';
 
 import { createSavedSearchesLoader } from '../../discover/public';
 
@@ -67,6 +75,7 @@ import type { ExpressionsSetup, ExpressionsStart } from '../../expressions/publi
 import type { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
 import { createVisAsync } from './vis_async';
+import type { VisSavedObject } from './types';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -82,6 +91,13 @@ export interface VisualizationsStart extends TypesStart {
   convertToSerializedVis: typeof convertToSerializedVis;
   convertFromSerializedVis: typeof convertFromSerializedVis;
   showNewVisModal: typeof showNewVisModal;
+  getSavedVisualization: (opts?: any) => Promise<VisSavedObject>;
+  saveVisualization: (savedVis: VisSavedObject, saveOptions: any) => Promise<string>;
+  findListItems: (
+    searchTerm: string,
+    listingLimit: number,
+    references?: SavedObjectsFindOptionsReference[]
+  ) => Promise<{ hits: any[]; total: number }>;
   __LEGACY: { createVisEmbeddableFromObject: ReturnType<typeof createVisEmbeddableFromObject> };
 }
 
@@ -151,7 +167,15 @@ export class VisualizationsPlugin
 
   public start(
     core: CoreStart,
-    { data, expressions, uiActions, embeddable, savedObjects, spaces }: VisualizationsStartDeps
+    {
+      data,
+      expressions,
+      uiActions,
+      embeddable,
+      savedObjects,
+      spaces,
+      savedObjectsTaggingOss,
+    }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
     setTypes(types);
@@ -184,6 +208,29 @@ export class VisualizationsPlugin
     return {
       ...types,
       showNewVisModal,
+      getSavedVisualization: async (opts) => {
+        return getSavedVisualization(
+          {
+            search: data.search,
+            savedObjectsClient: core.savedObjects.client,
+            dataViews: data.dataViews,
+            spaces,
+            savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
+          },
+          opts
+        );
+      },
+      saveVisualization: async (savedVis, saveOptions) => {
+        return saveVisualization(savedVis, saveOptions, {
+          savedObjectsClient: core.savedObjects.client,
+          chrome: core.chrome,
+          overlays: core.overlays,
+          savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
+        });
+      },
+      findListItems: async (searchTerm, listingLimit, references) => {
+        return findListItems(core.savedObjects.client, types, searchTerm, listingLimit, references);
+      },
       /**
        * creates new instance of Vis
        * @param {IndexPattern} indexPattern - index pattern to use
