@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { AxiosResponse } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
 import { TypeOf } from '@kbn/config-schema';
 import {
   ExecutorParamsSchemaITSM,
@@ -195,7 +195,7 @@ export interface ExternalServiceCommentResponse {
 }
 
 type TypeNullOrUndefined<T> = T | null | undefined;
-export interface ResponseError {
+export interface ResponseError extends AxiosError {
   error: TypeNullOrUndefined<{
     message: TypeNullOrUndefined<string>;
     detail: TypeNullOrUndefined<string>;

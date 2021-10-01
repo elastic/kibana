@@ -27,8 +27,7 @@ const createErrorMessage = (errorResponse: ResponseError): string => {
   return error != null ? `${error?.message}: ${error?.detail}` : 'unknown';
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const createServiceError = (error: any, message: string) =>
+export const createServiceError = (error: ResponseError, message: string) =>
   new Error(
     getErrorMessage(
       i18n.SERVICENOW,
