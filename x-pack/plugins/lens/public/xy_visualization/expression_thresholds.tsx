@@ -57,18 +57,30 @@ export const getThresholdRequiredPaddings = (
   thresholdLayers: LayerArgs[],
   axesMap: Record<'left' | 'right', unknown>
 ) => {
-  return thresholdLayers.reduce((memo, layer) => {
+  // collect all paddings for the 4 axis: if any text is detected double it.
+  const paddings: Partial<Record<Position, number>> = {};
+  const icons: Partial<Record<Position, number>> = {};
+  thresholdLayers.forEach((layer) => {
     layer.yConfig?.forEach(({ axisMode, icon, iconPosition, textVisibility }) => {
       if (axisMode && (hasIcon(icon) || textVisibility)) {
         const placement = getBaseIconPlacement(iconPosition, axisMode, axesMap);
-        memo[placement] = Math.max(
-          memo[placement] || 0,
+        paddings[placement] = Math.max(
+          paddings[placement] || 0,
           THRESHOLD_MARKER_SIZE * (textVisibility ? 2 : 1) // double the padding size if there's text
         );
+        icons[placement] = (icons[placement] || 0) + (hasIcon(icon) ? 1 : 0);
       }
     });
-    return memo;
-  }, {} as Partial<Record<Position, number>>);
+  });
+  // post-process the padding based on the icon presence:
+  // if no icon is present for the placement, just reduce the padding
+  (Object.keys(paddings) as Position[]).forEach((placement) => {
+    if (!icons[placement]) {
+      paddings[placement] = THRESHOLD_MARKER_SIZE;
+    }
+  });
+
+  return paddings;
 };
 
 function mapVerticalToHorizontalPlacement(placement: Position) {
@@ -114,19 +126,6 @@ function getBaseIconPlacement(
   return Position.Top;
 }
 
-function getMarkerPosition(
-  iconPosition: YConfig['iconPosition'],
-  axisMode: YConfig['axisMode'],
-  axesMap: Record<string, unknown>,
-  isHorizontal: boolean
-) {
-  const vPosition = getBaseIconPlacement(iconPosition, axisMode, axesMap);
-  if (isHorizontal) {
-    return mapVerticalToHorizontalPlacement(vPosition);
-  }
-  return vPosition;
-}
-
 function getMarkerBody(label: string | undefined, isHorizontal: boolean) {
   if (!label) {
     return;
@@ -167,6 +166,29 @@ function getMarkerBody(label: string | undefined, isHorizontal: boolean) {
   );
 }
 
+function getMarkerToShow(
+  yConfig: YConfig,
+  label: string | undefined,
+  isHorizontal: boolean,
+  hasReducedPadding: boolean
+) {
+  // show an icon if present
+  if (hasIcon(yConfig.icon)) {
+    return <EuiIcon type={yConfig.icon} />;
+  }
+  // if there's some text, check whether to show it as marker, or just show some padding for the icon
+  if (yConfig.textVisibility) {
+    if (hasReducedPadding) {
+      return getMarkerBody(
+        label,
+        (!isHorizontal && yConfig.axisMode === 'bottom') ||
+          (isHorizontal && yConfig.axisMode !== 'bottom')
+      );
+    }
+    return <EuiIcon type="empty" />;
+  }
+}
+
 export const ThresholdAnnotations = ({
   thresholdLayers,
   data,
@@ -175,6 +197,7 @@ export const ThresholdAnnotations = ({
   syncColors,
   axesMap,
   isHorizontal,
+  thresholdPaddingMap,
 }: {
   thresholdLayers: LayerArgs[];
   data: LensMultiTable;
@@ -183,6 +206,7 @@ export const ThresholdAnnotations = ({
   syncColors: boolean;
   axesMap: Record<'left' | 'right', boolean>;
   isHorizontal: boolean;
+  thresholdPaddingMap: Partial<Record<Position, number>>;
 }) => {
   return (
     <>
@@ -217,24 +241,35 @@ export const ThresholdAnnotations = ({
 
           const defaultColor = euiLightVars.euiColorDarkShade;
 
+          // get the position for vertical chart
+          const markerPositionVertical = getBaseIconPlacement(
+            yConfig.iconPosition,
+            yConfig.axisMode,
+            axesMap
+          );
+          // the padding map is built for vertical chart
+          const hasReducedPadding =
+            thresholdPaddingMap[markerPositionVertical] === THRESHOLD_MARKER_SIZE;
+
           const props = {
             groupId,
-            marker: hasIcon(yConfig.icon) ? (
-              <EuiIcon type={yConfig.icon} />
-            ) : yConfig.textVisibility ? (
-              <EuiIcon type="empty" />
-            ) : undefined,
+            marker: getMarkerToShow(
+              yConfig,
+              columnToLabelMap[yConfig.forAccessor],
+              isHorizontal,
+              hasReducedPadding
+            ),
             markerBody: getMarkerBody(
-              yConfig.textVisibility ? columnToLabelMap[yConfig.forAccessor] : undefined,
+              yConfig.textVisibility && !hasReducedPadding
+                ? columnToLabelMap[yConfig.forAccessor]
+                : undefined,
               (!isHorizontal && yConfig.axisMode === 'bottom') ||
                 (isHorizontal && yConfig.axisMode !== 'bottom')
             ),
-            markerPosition: getMarkerPosition(
-              yConfig.iconPosition,
-              yConfig.axisMode,
-              axesMap,
-              isHorizontal
-            ),
+            // rotate the position if required
+            markerPosition: isHorizontal
+              ? mapVerticalToHorizontalPlacement(markerPositionVertical)
+              : markerPositionVertical,
           };
           const annotations = [];
 
