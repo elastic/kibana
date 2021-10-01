@@ -57,7 +57,7 @@ export async function initializeDatasources(
   return states;
 }
 
-export const createDatasourceLayers = memoizeOne(function createDatasourceLayers(
+export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
   datasourceStates: DatasourceStates,
   datasourceMap: DatasourceMap
 ) {
@@ -111,7 +111,7 @@ export async function persistedStateToExpression(
     { isFullEditor: false }
   );
 
-  const datasourceLayers = createDatasourceLayers(datasourceStates, datasourceMap);
+  const datasourceLayers = getDatasourceLayers(datasourceStates, datasourceMap);
 
   const datasourceId = getActiveDatasourceIdFromDoc(doc);
   if (datasourceId == null) {
