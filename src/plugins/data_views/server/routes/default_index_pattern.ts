@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter, StartServicesAccessor } from '../../../../core/server';
-import type { DataViewPluginStart, DataViewPluginStartDependencies } from '../plugin';
+import type { DataViewPluginStart, DataViewPluginStartDependencies } from '../types';
 import { handleErrors } from './util/handle_errors';
 
 export const registerManageDefaultIndexPatternRoutes = (

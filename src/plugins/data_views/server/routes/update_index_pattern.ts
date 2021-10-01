@@ -14,7 +14,7 @@ import {
   serializedFieldFormatSchema,
 } from './util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../core/server';
-import type { DataViewPluginStart, DataViewPluginStartDependencies } from '../plugin';
+import type { DataViewPluginStart, DataViewPluginStartDependencies } from '../types';
 
 const indexPatternUpdateSchema = schema.object({
   title: schema.maybe(schema.string()),

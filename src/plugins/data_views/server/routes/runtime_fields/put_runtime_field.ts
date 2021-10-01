@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { handleErrors } from '../util/handle_errors';
 import { runtimeFieldSpecSchema } from '../util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../../core/server';
-import type { DataViewPluginStart, DataViewPluginStartDependencies } from '../../plugin';
+import type { DataViewPluginStart, DataViewPluginStartDependencies } from '../../types';
 
 export const registerPutRuntimeFieldRoute = (
   router: IRouter,
