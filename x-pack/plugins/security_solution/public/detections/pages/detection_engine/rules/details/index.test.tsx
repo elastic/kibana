@@ -92,6 +92,34 @@ const mockGetLegacyUrlConflict = jest.fn();
 const state: State = {
   ...mockGlobalState,
 };
+
+const mockRule = {
+  id: 'myfakeruleid',
+  author: [],
+  severity_mapping: [],
+  risk_score_mapping: [],
+  rule_id: 'rule-1',
+  risk_score: 50,
+  description: 'some description',
+  from: 'now-5m',
+  to: 'now',
+  name: 'some-name',
+  severity: 'low',
+  type: 'query',
+  query: 'some query',
+  index: ['index-1'],
+  interval: '5m',
+  references: [],
+  actions: [],
+  enabled: false,
+  false_positives: [],
+  max_signals: 100,
+  tags: [],
+  threat: [],
+  throttle: null,
+  version: 1,
+  exceptions_list: [],
+};
 const { storage } = createSecuritySolutionStorageMock();
 const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
@@ -117,34 +145,7 @@ describe('RuleDetailsPageComponent', () => {
       loading: false,
       isExistingRule: true,
       refresh: jest.fn(),
-      rule: {
-        id: 'myfakeruleid',
-        outcome: 'aliasMatch',
-        author: [],
-        severity_mapping: [],
-        risk_score_mapping: [],
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        query: 'some query',
-        index: ['index-1'],
-        interval: '5m',
-        references: [],
-        actions: [],
-        enabled: false,
-        false_positives: [],
-        max_signals: 100,
-        tags: [],
-        threat: [],
-        throttle: null,
-        version: 1,
-        exceptions_list: [],
-      },
+      rule: { ...mockRule },
     });
     (fillEmptySeverityMappings as jest.Mock).mockReturnValue([]);
   });
@@ -162,8 +163,54 @@ describe('RuleDetailsPageComponent', () => {
     };
   }
 
-  it('renders correctly', async () => {
+  it('renders correctly with no outcome property on rule', async () => {
     await setup();
+
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Router history={mockHistory}>
+          <RuleDetailsPage />
+        </Router>
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
+      expect(mockRedirectLegacyUrl).not.toHaveBeenCalled();
+    });
+  });
+
+  it('renders correctly with outcome === "exactMatch"', async () => {
+    await setup();
+    (useRuleWithFallback as jest.Mock).mockReturnValue({
+      error: null,
+      loading: false,
+      isExistingRule: true,
+      refresh: jest.fn(),
+      rule: { ...mockRule, outcome: 'exactMatch' },
+    });
+
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Router history={mockHistory}>
+          <RuleDetailsPage />
+        </Router>
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
+      expect(mockRedirectLegacyUrl).not.toHaveBeenCalled();
+    });
+  });
+
+  it('renders correctly with outcome === "aliasMatch"', async () => {
+    await setup();
+    (useRuleWithFallback as jest.Mock).mockReturnValue({
+      error: null,
+      loading: false,
+      isExistingRule: true,
+      refresh: jest.fn(),
+      rule: { ...mockRule, outcome: 'aliasMatch' },
+    });
     const wrapper = mount(
       <TestProviders store={store}>
         <Router history={mockHistory}>
@@ -184,35 +231,7 @@ describe('RuleDetailsPageComponent', () => {
       loading: false,
       isExistingRule: true,
       refresh: jest.fn(),
-      rule: {
-        id: 'myfakeruleid',
-        outcome: 'conflict',
-        alias_target_id: 'aliased_rule_id',
-        author: [],
-        severity_mapping: [],
-        risk_score_mapping: [],
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        query: 'some query',
-        index: ['index-1'],
-        interval: '5m',
-        references: [],
-        actions: [],
-        enabled: false,
-        false_positives: [],
-        max_signals: 100,
-        tags: [],
-        threat: [],
-        throttle: null,
-        version: 1,
-        exceptions_list: [],
-      },
+      rule: { ...mockRule, outcome: 'conflict', alias_target_id: 'aliased_rule_id' },
     });
     const wrapper = mount(
       <TestProviders store={store}>
