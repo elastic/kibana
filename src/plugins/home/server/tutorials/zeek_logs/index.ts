@@ -60,5 +60,6 @@ export function zeekLogsSpecProvider(context: TutorialContext): TutorialSchema {
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['network', 'monitoring', 'security'],
   };
 }

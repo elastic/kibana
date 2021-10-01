@@ -61,5 +61,6 @@ export function gcpLogsSpecProvider(context: TutorialContext): TutorialSchema {
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['google_cloud', 'cloud', 'network', 'security'],
   };
 }
