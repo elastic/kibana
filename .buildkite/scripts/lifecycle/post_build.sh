@@ -9,7 +9,7 @@ export BUILD_SUCCESSFUL
 
 node "$(dirname "${0}")/ci_stats_complete.js"
 
-if [[ "$GITHUB_PR_NUMBER" ]]; then
+if [[ "${GITHUB_PR_NUMBER:-}" ]]; then
   DOCS_CHANGES_URL="https://kibana_$GITHUB_PR_NUMBER}.docs-preview.app.elstc.co/diff"
   DOCS_CHANGES=$(curl --connect-timeout 10 -m 10 -sf "$DOCS_CHANGES_URL" || echo '')
 
