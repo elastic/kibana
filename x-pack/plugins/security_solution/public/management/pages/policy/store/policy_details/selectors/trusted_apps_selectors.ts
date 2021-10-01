@@ -92,6 +92,16 @@ export const getUpdateArtifacts = (
     : undefined;
 };
 
+/**
+ * Returns does any TA exists
+ */
+export const getDoesTrustedAppExists = (state: Immutable<PolicyDetailsState>): boolean => {
+  return (
+    isLoadedResourceState(state.artifacts.doesAnyTrustedApp) &&
+    state.artifacts.doesAnyTrustedApp.data
+  );
+};
+
 /** Returns a boolean of whether the user is on the policy details page or not */
 export const isOnPolicyTrustedAppsPage = (state: Immutable<PolicyDetailsState>) => {
   return (

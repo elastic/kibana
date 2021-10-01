@@ -27,6 +27,7 @@ import {
   createLoadingResourceState,
   createUninitialisedResourceState,
   createFailedResourceState,
+  isLoadingResourceState,
 } from '../../../../../state';
 import { parseQueryFilterToKQL } from '../../../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../../../../trusted_apps/constants';
@@ -59,6 +60,40 @@ const checkIfThereAreAssignableTrustedApps = async (
   } catch (err) {
     store.dispatch({
       type: 'policyArtifactsAssignableListExistDataChanged',
+      // Ignore will be fixed with when AsyncResourceState is refactored (#830)
+      // @ts-ignore
+      payload: createFailedResourceState(err.body ?? err),
+    });
+  }
+};
+
+const checkIfAnyTrustedApp = async (
+  store: ImmutableMiddlewareAPI<PolicyDetailsState, PolicyDetailsAction>,
+  trustedAppsService: TrustedAppsService
+) => {
+  const state = store.getState();
+  if (isLoadingResourceState(state.artifacts.doesAnyTrustedApp)) {
+    return;
+  }
+  store.dispatch({
+    type: 'policyArtifactsDeosAnyTrustedApp',
+    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
+    // @ts-ignore
+    payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
+  });
+  try {
+    const trustedApps = await trustedAppsService.getTrustedAppsList({
+      page: 1,
+      per_page: 100,
+    });
+
+    store.dispatch({
+      type: 'policyArtifactsDeosAnyTrustedApp',
+      payload: createLoadedResourceState(!isEmpty(trustedApps.data)),
+    });
+  } catch (err) {
+    store.dispatch({
+      type: 'policyArtifactsDeosAnyTrustedApp',
       // Ignore will be fixed with when AsyncResourceState is refactored (#830)
       // @ts-ignore
       payload: createFailedResourceState(err.body ?? err),
@@ -196,6 +231,9 @@ export const policyTrustedAppsMiddlewareRunner: MiddlewareRunner = async (
     getCurrentArtifactsLocation(state).show === 'list'
   ) {
     await searchTrustedApps(store, trustedAppsService);
+  } else if (action.type === 'userChangedUrl' && isOnPolicyTrustedAppsPage(state)) {
+    // TODO: Change this action when list is merged into this branch
+    await checkIfAnyTrustedApp(store, trustedAppsService);
   } else if (
     action.type === 'policyArtifactsUpdateTrustedApps' &&
     isOnPolicyTrustedAppsPage(state) &&

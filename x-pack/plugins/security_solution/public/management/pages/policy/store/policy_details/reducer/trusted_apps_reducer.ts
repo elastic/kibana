@@ -44,5 +44,15 @@ export const policyTrustedAppsReducer: ImmutableReducer<PolicyDetailsState, AppA
     };
   }
 
+  if (action.type === 'policyArtifactsDeosAnyTrustedApp') {
+    return {
+      ...state,
+      artifacts: {
+        ...state.artifacts,
+        doesAnyTrustedApp: action.payload,
+      },
+    };
+  }
+
   return state;
 };

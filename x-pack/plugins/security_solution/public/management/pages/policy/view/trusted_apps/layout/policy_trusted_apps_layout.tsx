@@ -15,12 +15,16 @@ import {
   EuiPageContent,
 } from '@elastic/eui';
 import { PolicyTrustedAppsEmptyUnassigned, PolicyTrustedAppsEmptyUnexisting } from '../empty';
-import { getCurrentArtifactsLocation } from '../../../store/policy_details/selectors';
+import {
+  getCurrentArtifactsLocation,
+  getDoesTrustedAppExists,
+} from '../../../store/policy_details/selectors';
 import { usePolicyDetailsNavigateCallback, usePolicyDetailsSelector } from '../../policy_hooks';
 import { PolicyTrustedAppsFlyout } from '../flyout';
 
 export const PolicyTrustedAppsLayout = React.memo(() => {
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
+  const doesTrustedAppExists = usePolicyDetailsSelector(getDoesTrustedAppExists);
   const navigateCallback = usePolicyDetailsNavigateCallback();
 
   const showListFlyout = location.show === 'list';
@@ -70,7 +74,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
         color="transparent"
         borderRadius="none"
       >
-        {true ? (
+        {doesTrustedAppExists ? (
           <PolicyTrustedAppsEmptyUnassigned
             policyId={'bf16726e-f863-41db-ae8e-b5fd88aa1e5f'}
             policyName={'With eventing'}

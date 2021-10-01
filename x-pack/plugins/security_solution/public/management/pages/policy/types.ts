@@ -102,6 +102,8 @@ export interface PolicyArtifactsState {
   assignableListEntriesExist: AsyncResourceState<boolean>;
   /** A list of trusted apps going to be updated  */
   trustedAppsToUpdate: AsyncResourceState<PostTrustedAppCreateResponse[]>;
+  /** Represents if there is any trusted app existing  */
+  doesAnyTrustedApp: AsyncResourceState<boolean>;
 }
 
 export enum OS {
