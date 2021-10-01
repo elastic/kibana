@@ -54,9 +54,10 @@ export class EnvironmentService {
       this.configService.atPath<PidConfigType>(pidConfigDef.path).pipe(take(1)).toPromise(),
     ]);
 
-    // was present in the legacy `pid` file.
+    // Log unhandled rejections so that we can fix them in preparation for https://github.com/elastic/kibana/issues/77469
     process.on('unhandledRejection', (reason) => {
-      this.log.warn(`Detected an unhandled Promise rejection.\n${reason}`);
+      const message = (reason as Error)?.stack ?? JSON.stringify(reason);
+      this.log.warn(`Detected an unhandled Promise rejection: ${message}`);
     });
 
     process.on('warning', (warning) => {

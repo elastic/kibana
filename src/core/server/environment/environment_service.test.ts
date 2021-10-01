@@ -17,6 +17,7 @@ import { CoreContext } from '../core_context';
 import { configServiceMock } from '../config/mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { mockCoreContext } from '../core_context.mock';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 
 jest.mock('./resolve_uuid', () => ({
   resolveInstanceUuid: jest.fn().mockResolvedValue('SOME_UUID'),
@@ -133,6 +134,32 @@ describe('UuidService', () => {
         process.emit('warning', warning);
 
         expect(logger.get('process').warn).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('unhandledRejection warnings', () => {
+      it('logs warn for an unhandeld promise rejected with an Error', async () => {
+        await service.preboot();
+
+        const err = new Error('something went wrong');
+        process.emit('unhandledRejection', err, new Promise((res, rej) => rej(err)));
+
+        expect(logger.get('process').warn).toHaveBeenCalledTimes(1);
+        expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
+          /Detected an unhandled Promise rejection: Error: something went wrong\n.*at Object.<anonymous> \(/
+        );
+      });
+
+      it('logs warn for an unhandeld promise rejected with a string', async () => {
+        await service.preboot();
+
+        const err = 'something went wrong';
+        process.emit('unhandledRejection', err, new Promise((res, rej) => rej(err)));
+
+        expect(logger.get('process').warn).toHaveBeenCalledTimes(1);
+        expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
+          /Detected an unhandled Promise rejection: "something went wrong"/
+        );
       });
     });
   });
