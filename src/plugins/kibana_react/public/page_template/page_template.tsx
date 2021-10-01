@@ -142,6 +142,7 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
           className: classNames(sideBarClasses, pageSideBarProps?.className),
         }}
         {...NO_DATA_PAGE_TEMPLATE_PROPS}
+        {...rest}
       >
         <NoDataPage {...noDataConfig} />
       </EuiPageTemplate>
