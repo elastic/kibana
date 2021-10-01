@@ -77,6 +77,10 @@ export const policyTrustedAppsMiddlewareRunner: MiddlewareRunner = async (
 
       break;
 
+    case 'policyDetailsTrustedAppsForceListDataRefresh':
+      fetchPolicyTrustedAppsIfNeeded(context, store, true);
+      break;
+
     case 'policyArtifactsUpdateTrustedApps':
       if (getCurrentArtifactsLocation(state).show === 'list') {
         await updateTrustedApps(store, trustedAppsService, action.payload.trustedAppIds);
@@ -233,6 +237,8 @@ const updateTrustedApps = async (
       type: 'policyArtifactsUpdateTrustedAppsChanged',
       payload: createLoadedResourceState(updatedTrustedApps),
     });
+
+    store.dispatch({ type: 'policyDetailsTrustedAppsForceListDataRefresh' });
   } catch (err) {
     store.dispatch({
       type: 'policyArtifactsUpdateTrustedAppsChanged',
@@ -245,7 +251,8 @@ const updateTrustedApps = async (
 
 const fetchPolicyTrustedAppsIfNeeded = async (
   { trustedAppsService }: MiddlewareRunnerContext,
-  { getState, dispatch }: PolicyDetailsStore
+  { getState, dispatch }: PolicyDetailsStore,
+  forceFetch: boolean = false
 ) => {
   const state = getState();
 
@@ -253,7 +260,7 @@ const fetchPolicyTrustedAppsIfNeeded = async (
     return;
   }
 
-  if (doesPolicyTrustedAppsListNeedUpdate(state)) {
+  if (forceFetch || doesPolicyTrustedAppsListNeedUpdate(state)) {
     dispatch({
       type: 'assignedTrustedAppsListStateChanged',
       // @ts-ignore will be fixed when AsyncResourceState is refactored (#830)

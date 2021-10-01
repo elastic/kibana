@@ -50,6 +50,9 @@ export interface PolicyDetailsListOfAllPoliciesStateChanged
   payload: PolicyArtifactsState['policies'];
 }
 
+export type PolicyDetailsTrustedAppsForceListDataRefresh =
+  Action<'policyDetailsTrustedAppsForceListDataRefresh'>;
+
 /**
  * All of the possible actions for Trusted Apps under the Policy Details store
  */
@@ -60,4 +63,5 @@ export type PolicyTrustedAppsAction =
   | PolicyArtifactsAssignableListExistDataChanged
   | PolicyArtifactsAssignableListPageDataFilter
   | AssignedTrustedAppsListStateChanged
-  | PolicyDetailsListOfAllPoliciesStateChanged;
+  | PolicyDetailsListOfAllPoliciesStateChanged
+  | PolicyDetailsTrustedAppsForceListDataRefresh;
