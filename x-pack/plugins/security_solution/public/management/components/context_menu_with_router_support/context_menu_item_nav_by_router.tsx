@@ -15,7 +15,11 @@ export interface ContextMenuItemNavByRouterProps extends EuiContextMenuItemProps
   navigateAppId?: string;
   /** Additional options for the navigation action via react-router */
   navigateOptions?: NavigateToAppOptions;
-  /** if `true`, the `children` will be wrapped in a `div` that contains CSS Classname `eui-textTruncate` */
+  /**
+   * if `true`, the `children` will be wrapped in a `div` that contains CSS Classname `eui-textTruncate`.
+   * **NOTE**: When this component is used in combination with `ContextMenuWithRouterSupport` and `maxWidth`
+   * is set on the menu component, this prop will be overridden
+   */
   textTruncate?: boolean;
   children: React.ReactNode;
 }
