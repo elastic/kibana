@@ -791,6 +791,11 @@ describe('migration actions', () => {
               `);
     });
     it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
+      await waitForIndexStatusYellow({
+        client,
+        index: '.kibana_1',
+      })();
+
       const res = (await reindex({
         client,
         sourceIndex: '.kibana_1',
