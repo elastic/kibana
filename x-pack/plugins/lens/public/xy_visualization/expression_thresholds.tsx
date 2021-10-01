@@ -9,23 +9,21 @@ import React from 'react';
 import { groupBy } from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import { RectAnnotation, AnnotationDomainType, LineAnnotation } from '@elastic/charts';
-import type { PaletteRegistry, SeriesLayer } from 'src/plugins/charts/public';
+import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { FieldFormat } from 'src/plugins/field_formats/common';
+import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
 import type { LayerArgs } from '../../common/expressions';
 import type { LensMultiTable } from '../../common/types';
-import type { ColorAssignments } from './color_assignment';
 
 export const ThresholdAnnotations = ({
   thresholdLayers,
   data,
-  colorAssignments,
   formatters,
   paletteService,
   syncColors,
 }: {
   thresholdLayers: LayerArgs[];
   data: LensMultiTable;
-  colorAssignments: ColorAssignments;
   formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
   paletteService: PaletteRegistry;
   syncColors: boolean;
@@ -36,12 +34,11 @@ export const ThresholdAnnotations = ({
         if (!thresholdLayer.yConfig) {
           return [];
         }
-        const { columnToLabel, palette, yConfig: yConfigs, layerId } = thresholdLayer;
+        const { columnToLabel, yConfig: yConfigs, layerId } = thresholdLayer;
         const columnToLabelMap: Record<string, string> = columnToLabel
           ? JSON.parse(columnToLabel)
           : {};
         const table = data.tables[layerId];
-        const colorAssignment = colorAssignments[palette.name];
 
         const row = table.rows[0];
 
@@ -62,27 +59,7 @@ export const ThresholdAnnotations = ({
 
           const formatter = formatters[groupId || 'bottom'];
 
-          const seriesLayers: SeriesLayer[] = [
-            {
-              name: columnToLabelMap[yConfig.forAccessor],
-              totalSeriesAtDepth: colorAssignment.totalSeriesCount,
-              rankAtDepth: colorAssignment.getRank(
-                thresholdLayer,
-                String(yConfig.forAccessor),
-                String(yConfig.forAccessor)
-              ),
-            },
-          ];
-          const defaultColor = paletteService.get(palette.name).getCategoricalColor(
-            seriesLayers,
-            {
-              maxDepth: 1,
-              behindText: false,
-              totalSeries: colorAssignment.totalSeriesCount,
-              syncColors,
-            },
-            palette.params
-          );
+          const defaultColor = euiLightVars.euiColorDarkShade;
 
           const props = {
             groupId,
@@ -99,7 +76,7 @@ export const ThresholdAnnotations = ({
 
           const sharedStyle = {
             strokeWidth: yConfig.lineWidth || 1,
-            stroke: (yConfig.color || defaultColor) ?? '#f00',
+            stroke: yConfig.color || defaultColor,
             dash: dashStyle,
           };
 
@@ -179,7 +156,7 @@ export const ThresholdAnnotations = ({
                 })}
                 style={{
                   ...sharedStyle,
-                  fill: (yConfig.color || defaultColor) ?? '#f00',
+                  fill: yConfig.color || defaultColor,
                   opacity: 0.1,
                 }}
               />

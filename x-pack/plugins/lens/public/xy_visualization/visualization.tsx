@@ -448,12 +448,7 @@ export const getXyVisualization = ({
       if (!hasYConfig) {
         newLayer.yConfig = [
           ...(newLayer.yConfig || []),
-          // TODO: move this
-          // add a default config if none is available
           {
-            icon: undefined,
-            lineStyle: 'solid',
-            lineWidth: 1,
             // override with previous styling,
             ...previousYConfig,
             // but keep the new group & id config
