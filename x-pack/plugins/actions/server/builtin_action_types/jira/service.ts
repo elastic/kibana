@@ -107,8 +107,8 @@ export const createExternalService = (
   const trimAndRemoveNewlines = (str: string) =>
     str
       .split(/[\n\r]/gm)
-      .filter((item) => !isEmpty(item.trim()))
       .map((item) => item.trim())
+      .filter((item) => !isEmpty(item))
       .join(', ');
 
   const createErrorMessage = (errorResponse: ResponseError | string | null | undefined): string => {
