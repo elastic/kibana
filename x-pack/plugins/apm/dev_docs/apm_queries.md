@@ -244,6 +244,38 @@ Note-worthy fields: `span.type`, `span.subtype`, `span.self_time.*`
 }
 ```
 
+#### Query
+
+```json
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        { "terms": { "processor.event": ["metric"] } },
+        { "terms": { "metricset.name": ["span_breakdown"] } }
+      ]
+    }
+  },
+  "aggs": {
+    "total_self_time": { "sum": { "field": "span.self_time.sum.us" } },
+    "types": {
+      "terms": { "field": "span.type" },
+      "aggs": {
+        "subtypes": {
+          "terms": { "field": "span.subtype" },
+          "aggs": {
+            "self_time_per_subtype": {
+              "sum": { "field": "span.self_time.sum.us" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
 # Service destination metrics
 
 Pre-aggregations of span documents, where `span.destination.service.response_time.count` is the number of original spans.
