@@ -38,7 +38,7 @@ describe('Add Integration', () => {
     navigateTo(INTEGRATIONS);
     cy.get(INTEGRATIONS_CARD).contains(integration).click();
     addIntegration();
-    cy.get(INTEGRATION_NAME_LINK).contains('apache-');
+    cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-');
   }
 
   it('[Mocked requests] should display Apache integration in the Policies list once installed ', () => {
@@ -56,6 +56,7 @@ describe('Add Integration', () => {
     cy.intercept('GET', '/api/fleet/agent_policies/30e16140-2106-11ec-a289-25321523992d', {
       fixture: 'integrations/agent_policy.json',
     });
+    // TODO fixture includes 1 package policy, should be empty initially
     cy.intercept('GET', '/api/fleet/epm/packages/apache-1.1.0', {
       fixture: 'integrations/apache.json',
     });
@@ -69,17 +70,17 @@ describe('Add Integration', () => {
 
     addIntegration();
 
-    cy.get(INTEGRATION_NAME_LINK).contains('apache-');
-    cy.get(PACKAGE_VERSION).contains(oldVersion);
+    cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-');
+    cy.getBySel(PACKAGE_VERSION).contains(oldVersion);
 
-    cy.get(SETTINGS_TAB).click();
-    cy.get(UPDATE_PACKAGE_BTN).click();
-    cy.get(CONFIRM_MODAL_BTN).click();
-    cy.get(LATEST_VERSION).then(($title) => {
+    cy.getBySel(SETTINGS_TAB).click();
+    cy.getBySel(UPDATE_PACKAGE_BTN).click();
+    cy.getBySel(CONFIRM_MODAL_BTN).click();
+    cy.getBySel(LATEST_VERSION).then(($title) => {
       const newVersion = $title.text();
-      cy.get(POLICIES_TAB).click();
-      cy.get(PACKAGE_VERSION).contains(oldVersion).should('not.exist');
-      cy.get(PACKAGE_VERSION).contains(newVersion);
+      cy.getBySel(POLICIES_TAB).click();
+      cy.getBySel(PACKAGE_VERSION).contains(oldVersion).should('not.exist');
+      cy.getBySel(PACKAGE_VERSION).contains(newVersion);
     });
   });
 });

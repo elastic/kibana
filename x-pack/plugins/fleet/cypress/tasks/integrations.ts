@@ -13,25 +13,25 @@ import {
 } from '../screens/integrations';
 
 export const addIntegration = () => {
-  cy.get(ADD_POLICY_BTN).click();
-  cy.get(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
+  cy.getBySel(ADD_POLICY_BTN).click();
+  cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
   // sometimes agent is assigned to default policy, sometimes not
   closeModalIfVisible();
 
-  cy.get(CREATE_PACKAGE_POLICY_SAVE_BTN).should('not.exist');
+  cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).should('not.exist');
 };
 
 function closeModalIfVisible() {
   cy.get('body').then(($body) => {
     if ($body.find(CONFIRM_MODAL_BTN).length) {
-      cy.get(CONFIRM_MODAL_BTN).click();
+      cy.getBySel(CONFIRM_MODAL_BTN).click();
     }
   });
 }
 
 export const deleteIntegrations = async (integration: string) => {
   const ids: string[] = [];
-  cy.get(INTEGRATION_NAME_LINK)
+  cy.getBySel(INTEGRATION_NAME_LINK)
     .each(($a) => {
       const href = $a.attr('href') as string;
       ids.push(href.substr(href.lastIndexOf('/') + 1));

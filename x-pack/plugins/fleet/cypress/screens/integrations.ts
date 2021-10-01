@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-export const ADD_POLICY_BTN = '[data-test-subj="addIntegrationPolicyButton"]';
-export const CREATE_PACKAGE_POLICY_SAVE_BTN = '[data-test-subj="createPackagePolicySaveButton"]';
+export const ADD_POLICY_BTN = 'addIntegrationPolicyButton';
+export const CREATE_PACKAGE_POLICY_SAVE_BTN = 'createPackagePolicySaveButton';
 export const INTEGRATIONS_CARD = '.euiCard__titleAnchor';
 
-export const INTEGRATION_NAME_LINK = '[data-test-subj="integrationNameLink"]';
+export const INTEGRATION_NAME_LINK = 'integrationNameLink';
 
-export const CONFIRM_MODAL_BTN = '[data-test-subj="confirmModalConfirmButton"]';
+export const CONFIRM_MODAL_BTN = 'confirmModalConfirmButton';
 
-export const SETTINGS_TAB = '[data-test-subj="tab-settings"]';
-export const POLICIES_TAB = '[data-test-subj="tab-policies"]';
+export const SETTINGS_TAB = 'tab-settings';
+export const POLICIES_TAB = 'tab-policies';
 
-export const UPDATE_PACKAGE_BTN = '[data-test-subj="updatePackageBtn"]';
-export const LATEST_VERSION = '[data-test-subj="latestVersion"]';
+export const UPDATE_PACKAGE_BTN = 'updatePackageBtn';
+export const LATEST_VERSION = 'latestVersion';
 
-export const PACKAGE_VERSION = '[data-test-subj="packageVersionText"]';
+export const PACKAGE_VERSION = 'packageVersionText';
