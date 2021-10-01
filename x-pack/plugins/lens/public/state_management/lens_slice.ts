@@ -99,18 +99,14 @@ export const updateLayer = createAction<{
 }>('lens/updateLayer');
 
 export const switchVisualization = createAction<{
-  newVisualizationId: string;
-  initialState: unknown;
-  datasourceState?: unknown;
-  datasourceId?: string;
+  suggestion: {
+    newVisualizationId: string;
+    visualizationState: unknown;
+    datasourceState?: unknown;
+    datasourceId?: string;
+  };
+  clearStagedPreview?: boolean;
 }>('lens/switchVisualization');
-
-export const selectSuggestion = createAction<{
-  newVisualizationId: string;
-  initialState: unknown;
-  datasourceState?: unknown;
-  datasourceId?: string;
-}>('lens/selectSuggestion');
 export const rollbackSuggestion = createAction<void>('lens/rollbackSuggestion');
 export const setToggleFullscreen = createAction<void>('lens/setToggleFullscreen');
 export const submitSuggestion = createAction<void>('lens/submitSuggestion');
@@ -149,7 +145,6 @@ export const lensActions = {
   rollbackSuggestion,
   setToggleFullscreen,
   submitSuggestion,
-  selectSuggestion,
   switchDatasource,
   navigateAway,
   loadInitial,
@@ -281,67 +276,40 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         payload,
       }: {
         payload: {
-          newVisualizationId: string;
-          initialState: unknown;
-          datasourceState?: unknown;
-          datasourceId?: string;
+          suggestion: {
+            newVisualizationId: string;
+            visualizationState: unknown;
+            datasourceState?: unknown;
+            datasourceId?: string;
+          };
+          clearStagedPreview?: boolean;
         };
       }
     ) => {
+      const { newVisualizationId, visualizationState, datasourceState, datasourceId } =
+        payload.suggestion;
       return {
         ...state,
-        datasourceStates:
-          'datasourceId' in payload && payload.datasourceId
-            ? {
-                ...state.datasourceStates,
-                [payload.datasourceId]: {
-                  ...state.datasourceStates[payload.datasourceId],
-                  state: payload.datasourceState,
-                },
-              }
-            : state.datasourceStates,
+        datasourceStates: datasourceId
+          ? {
+              ...state.datasourceStates,
+              [datasourceId]: {
+                ...state.datasourceStates[datasourceId],
+                state: datasourceState,
+              },
+            }
+          : state.datasourceStates,
         visualization: {
           ...state.visualization,
-          activeId: payload.newVisualizationId,
-          state: payload.initialState,
+          activeId: newVisualizationId,
+          state: visualizationState,
         },
-        stagedPreview: undefined,
-      };
-    },
-    [selectSuggestion.type]: (
-      state,
-      {
-        payload,
-      }: {
-        payload: {
-          newVisualizationId: string;
-          initialState: unknown;
-          datasourceState: unknown;
-          datasourceId: string;
-        };
-      }
-    ) => {
-      return {
-        ...state,
-        datasourceStates:
-          'datasourceId' in payload && payload.datasourceId
-            ? {
-                ...state.datasourceStates,
-                [payload.datasourceId]: {
-                  ...state.datasourceStates[payload.datasourceId],
-                  state: payload.datasourceState,
-                },
-              }
-            : state.datasourceStates,
-        visualization: {
-          ...state.visualization,
-          activeId: payload.newVisualizationId,
-          state: payload.initialState,
-        },
-        stagedPreview: state.stagedPreview || {
-          datasourceStates: state.datasourceStates,
-          visualization: state.visualization,
-        },
+        stagedPreview: payload.clearStagedPreview
+          ? undefined
+          : state.stagedPreview || {
+              datasourceStates: state.datasourceStates,
+              visualization: state.visualization,
+            },
       };
     },
     [rollbackSuggestion.type]: (state) => {

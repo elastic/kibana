@@ -343,7 +343,7 @@ describe('Lens App', () => {
       );
     });
     it('handles rejected index pattern', async () => {
-      const customServices = makeDefaultServices(sessionIdSubject);
+      const customServices = makeDefaultServices(sessionIdSubject, 'sessionId-1');
       customServices.data.indexPatterns.get = jest
         .fn()
         .mockImplementation((id) => Promise.reject({ reason: 'Could not locate that data view' }));

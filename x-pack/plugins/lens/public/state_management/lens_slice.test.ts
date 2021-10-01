@@ -75,8 +75,11 @@ describe('lensSlice', () => {
       const newVisState = {};
       store.dispatch(
         switchVisualization({
-          newVisualizationId: 'testVis2',
-          initialState: newVisState,
+          suggestion: {
+            newVisualizationId: 'testVis2',
+            visualizationState: newVisState,
+          },
+          clearStagedPreview: true,
         })
       );
 
@@ -89,10 +92,13 @@ describe('lensSlice', () => {
 
       store.dispatch(
         switchVisualization({
-          newVisualizationId: 'testVis2',
-          initialState: newVisState,
-          datasourceState: newDatasourceState,
-          datasourceId: 'testDatasource',
+          suggestion: {
+            newVisualizationId: 'testVis2',
+            visualizationState: newVisState,
+            datasourceState: newDatasourceState,
+            datasourceId: 'testDatasource',
+          },
+          clearStagedPreview: true,
         })
       );
 
