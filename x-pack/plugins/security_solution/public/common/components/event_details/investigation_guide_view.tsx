@@ -31,6 +31,7 @@ const InvestigationGuideViewComponent: React.FC<{
       : item?.originalValue ?? null;
   }, [data]);
   const { rule: maybeRule } = useRuleWithFallback(ruleId);
+
   if (!maybeRule?.note) {
     return null;
   }

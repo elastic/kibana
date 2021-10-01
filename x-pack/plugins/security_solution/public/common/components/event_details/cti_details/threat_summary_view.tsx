@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { get } from 'lodash/fp';
 import React from 'react';
 import {
@@ -42,27 +42,11 @@ export interface ThreatSummaryDescription {
   provider: string | undefined;
   timelineId: string;
   value: string | undefined;
+  isDraggable?: boolean;
 }
-
-const rightMargin = css`
-  margin-right: ${({ theme }) => theme.eui.paddingSizes.xs};
-  min-width: 30px;
-`;
-
-const tableCell = css`
-  display: table-cell;
-  vertical-align: middle;
-  line-height: 24px;
-  height: 24px;
-`;
-
-const RightMargin = styled.span`
-  ${rightMargin}
-`;
 
 const UppercaseEuiTitle = styled(EuiTitle)`
   text-transform: uppercase;
-  ${tableCell}
 `;
 
 const ThreatSummaryPanelTitle: React.FC = ({ children }) => (
@@ -72,15 +56,13 @@ const ThreatSummaryPanelTitle: React.FC = ({ children }) => (
 );
 
 const EnrichmentFieldProvider = styled.span`
-  ${rightMargin}
+  margin-left: ${({ theme }) => theme.eui.paddingSizes.xs};
   white-space: nowrap;
   font-style: italic;
 `;
 
 const StyledEnrichmentFieldTitle = styled(EuiTitle)`
   width: 220px;
-  ${rightMargin}
-  ${tableCell}
 `;
 
 const EnrichmentFieldTitle: React.FC<{
@@ -91,10 +73,6 @@ const EnrichmentFieldTitle: React.FC<{
   </StyledEnrichmentFieldTitle>
 );
 
-const EnrichmentFieldValue = styled.span`
-  ${tableCell}
-`;
-
 const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
   browserField,
   data,
@@ -103,62 +81,69 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
   provider,
   timelineId,
   value,
+  isDraggable,
 }) => {
   if (!data || !value) return null;
   const key = `alert-details-value-formatted-field-value-${timelineId}-${eventId}-${data.field}-${value}-${index}-${provider}`;
   return (
-    <EuiFlexGroup key={key} direction={'row'} gutterSize={'none'}>
-      <RightMargin>
-        <FormattedFieldValue
-          contextId={timelineId}
-          eventId={key}
-          fieldFormat={data.format}
-          fieldName={data.field}
-          fieldType={data.type}
-          isDraggable={false}
-          isObjectArray={data.isObjectArray}
-          value={value}
-        />
-      </RightMargin>
-      {provider && (
-        <EnrichmentFieldProvider>
-          {i18n.PROVIDER_PREPOSITION} {provider}
-        </EnrichmentFieldProvider>
-      )}
-
-      {value && (
-        <ActionCell
-          data={data}
-          contextId={timelineId}
-          eventId={key}
-          fieldFromBrowserField={browserField}
-          timelineId={timelineId}
-          values={[value]}
-        />
-      )}
+    <EuiFlexGroup key={key} direction={'row'} gutterSize={'none'} alignItems="center">
+      <EuiFlexItem grow={false}>
+        <div className="eui-textBreakAll">
+          <FormattedFieldValue
+            contextId={timelineId}
+            eventId={key}
+            fieldFormat={data.format}
+            fieldName={data.field}
+            fieldType={data.type}
+            isDraggable={isDraggable}
+            isObjectArray={data.isObjectArray}
+            value={value}
+          />
+          {provider && (
+            <EnrichmentFieldProvider>
+              {i18n.PROVIDER_PREPOSITION} {provider}
+            </EnrichmentFieldProvider>
+          )}
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        {value && (
+          <ActionCell
+            data={data}
+            contextId={timelineId}
+            eventId={key}
+            fieldFromBrowserField={browserField}
+            timelineId={timelineId}
+            values={[value]}
+          />
+        )}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
+
+const StyledEuiFlexGroup = styled(EuiFlexGroup)`
+  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+  margin-top: ${({ theme }) => theme.eui.euiSizeS};
+`;
 
 const EnrichedDataRow: React.FC<{ field: string | undefined; value: React.ReactNode }> = ({
   field,
   value,
 }) => (
-  <EuiFlexGroup direction="row" gutterSize="none" responsive>
+  <StyledEuiFlexGroup direction="row" gutterSize="none" responsive alignItems="center">
     <EuiFlexItem style={{ flexShrink: 0 }} grow={false}>
       <EnrichmentFieldTitle title={field} />
     </EuiFlexItem>
-    <EuiFlexItem>
-      <EnrichmentFieldValue>{value}</EnrichmentFieldValue>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+    <EuiFlexItem>{value}</EuiFlexItem>
+  </StyledEuiFlexGroup>
 );
 
 const ThreatSummaryPanelHeader: React.FC<{ title: string; toolTipContent: React.ReactNode }> = ({
   title,
   toolTipContent,
 }) => (
-  <EuiFlexGroup direction="row" gutterSize="none">
+  <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
     <EuiFlexItem>
       <ThreatSummaryPanelTitle>{title}</ThreatSummaryPanelTitle>
     </EuiFlexItem>
@@ -176,7 +161,8 @@ const ThreatSummaryEnrichmentData: React.FC<{
   enrichments: CtiEnrichment[];
   timelineId: string;
   eventId: string;
-}> = ({ browserFields, data, enrichments, timelineId, eventId }) => {
+  isDraggable?: boolean;
+}> = ({ browserFields, data, enrichments, timelineId, eventId, isDraggable }) => {
   const parsedEnrichments = enrichments.map((enrichment, index) => {
     const { field, type, provider, value } = getEnrichmentIdentifiers(enrichment);
     const eventData = data.find((item) => item.field === field);
@@ -228,6 +214,7 @@ const ThreatSummaryEnrichmentData: React.FC<{
                     value={value}
                     data={fieldsData}
                     browserField={browserField}
+                    isDraggable={isDraggable}
                   />
                 }
               />
@@ -259,6 +246,7 @@ const ThreatSummaryEnrichmentData: React.FC<{
                     value={value}
                     data={fieldsData}
                     browserField={browserField}
+                    isDraggable={isDraggable}
                   />
                 }
               />
@@ -272,50 +260,46 @@ const ThreatSummaryEnrichmentData: React.FC<{
 
 const HostRiskDataBlock: React.FC<{
   hostRisk: HostRisk;
-}> = ({ hostRisk }) => {
-  return (
-    <>
-      <EuiPanel hasBorder paddingSize="s" grow={false}>
-        <ThreatSummaryPanelHeader
-          title={i18n.HOST_RISK_DATA_TITLE}
-          toolTipContent={
-            <FormattedMessage
-              id="xpack.securitySolution.alertDetails.overview.hostDataTooltipContent"
-              defaultMessage="Risk classification is displayed only when available for a host. Ensure {hostRiskScoreDocumentationLink} is enabled within your environment."
-              values={{
-                hostRiskScoreDocumentationLink: (
-                  <EuiLink href={RISKY_HOSTS_DOC_LINK} target="_blank">
-                    <FormattedMessage
-                      id="xpack.securitySolution.alertDetails.overview.hostRiskScoreLink"
-                      defaultMessage="Host Risk Score"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          }
-        />
+}> = ({ hostRisk }) => (
+  <>
+    <EuiPanel hasBorder paddingSize="s" grow={false}>
+      <ThreatSummaryPanelHeader
+        title={i18n.HOST_RISK_DATA_TITLE}
+        toolTipContent={
+          <FormattedMessage
+            id="xpack.securitySolution.alertDetails.overview.hostDataTooltipContent"
+            defaultMessage="Risk classification is displayed only when available for a host. Ensure {hostRiskScoreDocumentationLink} is enabled within your environment."
+            values={{
+              hostRiskScoreDocumentationLink: (
+                <EuiLink href={RISKY_HOSTS_DOC_LINK} target="_blank">
+                  <FormattedMessage
+                    id="xpack.securitySolution.alertDetails.overview.hostRiskScoreLink"
+                    defaultMessage="Host Risk Score"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        }
+      />
 
-        {hostRisk.loading && <EuiLoadingSpinner />}
+      {hostRisk.loading && <EuiLoadingSpinner />}
 
-        {!hostRisk.loading && (!hostRisk.isModuleEnabled || !hostRisk.hostRiskScore) && (
-          <EnrichmentFieldValue>
-            <EuiText color="subdued" size="xs">
-              {i18n.NO_HOST_RISK_DATA_DESCRIPTION}
-            </EuiText>
-          </EnrichmentFieldValue>
-        )}
+      {!hostRisk.loading && (!hostRisk.isModuleEnabled || !hostRisk.hostRiskScore) && (
+        <EuiText color="subdued" size="xs">
+          {i18n.NO_HOST_RISK_DATA_DESCRIPTION}
+        </EuiText>
+      )}
 
-        {hostRisk.isModuleEnabled && hostRisk.hostRiskScore && (
-          <>
-            <EnrichedDataRow field={'host.risk.keyword'} value={hostRisk.hostRiskScore.risk} />
-            <EnrichedDataRow field={'host.risk_score'} value={hostRisk.hostRiskScore.riskScore} />
-          </>
-        )}
-      </EuiPanel>
-    </>
-  );
-};
+      {hostRisk.isModuleEnabled && hostRisk.hostRiskScore && (
+        <>
+          <EnrichedDataRow field={'host.risk.keyword'} value={hostRisk.hostRiskScore.risk} />
+          <EnrichedDataRow field={'host.risk_score'} value={hostRisk.hostRiskScore.riskScore} />
+        </>
+      )}
+    </EuiPanel>
+  </>
+);
 
 const ThreatSummaryViewComponent: React.FC<{
   browserFields: BrowserFields;
@@ -324,7 +308,8 @@ const ThreatSummaryViewComponent: React.FC<{
   eventId: string;
   timelineId: string;
   hostRisk?: HostRisk;
-}> = ({ browserFields, data, enrichments, eventId, timelineId, hostRisk }) => {
+  isDraggable?: boolean;
+}> = ({ browserFields, data, enrichments, eventId, timelineId, hostRisk, isDraggable }) => {
   if (!hostRisk && enrichments.length === 0) {
     return null;
   }
@@ -336,7 +321,7 @@ const ThreatSummaryViewComponent: React.FC<{
       <EuiTitle size="xxxs">
         <h5>{i18n.ENRICHED_DATA}</h5>
       </EuiTitle>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
 
       {hostRisk && <HostRiskDataBlock hostRisk={hostRisk} />}
 
@@ -348,6 +333,7 @@ const ThreatSummaryViewComponent: React.FC<{
         enrichments={enrichments}
         timelineId={timelineId}
         eventId={eventId}
+        isDraggable={isDraggable}
       />
     </>
   );

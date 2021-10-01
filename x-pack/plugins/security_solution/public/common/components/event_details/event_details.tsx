@@ -164,6 +164,7 @@ const EventDetailsComponent: React.FC<Props> = ({
 
                 {(enrichmentCount > 0 || hostRisk) && (
                   <ThreatSummaryView
+                    isDraggable={isDraggable}
                     hostRisk={hostRisk}
                     browserFields={browserFields}
                     data={data}
