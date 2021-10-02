@@ -46,28 +46,26 @@ const deprecatedSettings = {
   ),
 };
 
-let configSchema = schema.object(
+const configSchema = schema.object(
   {
     ...baseSettings,
   },
   { defaultValue: undefined }
 );
 
-if (kibanaVersion.major < 8) {
-  // In 7.x we still support the "console.proxyFilter" and "console.proxyConfig" settings
-  configSchema = schema.object(
-    {
-      ...baseSettings,
-      ...deprecatedSettings,
-    },
-    { defaultValue: undefined }
-  );
-}
+const configSchema7x = schema.object(
+  {
+    ...baseSettings,
+    ...deprecatedSettings,
+  },
+  { defaultValue: undefined }
+);
 
-type ConfigType = TypeOf<typeof configSchema>;
+export type ConfigType = TypeOf<typeof configSchema>;
+export type ConfigType7x = TypeOf<typeof configSchema7x>;
 
-export const config: PluginConfigDescriptor<ConfigType> = {
-  schema: configSchema,
+export const config: PluginConfigDescriptor<ConfigType | ConfigType7x> = {
+  schema: kibanaVersion.major < 8 ? configSchema7x : configSchema,
   deprecations: ({ deprecate, unused }) => [
     deprecate('enabled', '8.0.0'),
     deprecate('proxyFilter', '8.0.0'),

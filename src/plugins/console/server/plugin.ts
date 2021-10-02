@@ -11,7 +11,7 @@ import { SemVer } from 'semver';
 
 import { ProxyConfigCollection } from './lib';
 import { SpecDefinitionsService, EsLegacyConfigService } from './services';
-import { ConfigType } from './config';
+import { ConfigType, ConfigType7x } from './config';
 
 import { registerRoutes } from './routes';
 
@@ -24,7 +24,7 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
 
   esLegacyConfigService = new EsLegacyConfigService();
 
-  constructor(private readonly ctx: PluginInitializerContext<ConfigType>) {
+  constructor(private readonly ctx: PluginInitializerContext<ConfigType | ConfigType7x>) {
     this.log = this.ctx.logger.get();
   }
 
@@ -43,8 +43,8 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
     let proxyConfigCollection: ProxyConfigCollection | undefined;
     if (kibanaVersion.major < 8) {
       // "pathFilters" and "proxyConfig" are only used in 7.x
-      pathFilters = config.proxyFilter.map((str: string) => new RegExp(str));
-      proxyConfigCollection = new ProxyConfigCollection(config.proxyConfig);
+      pathFilters = (config as ConfigType7x).proxyFilter.map((str: string) => new RegExp(str));
+      proxyConfigCollection = new ProxyConfigCollection((config as ConfigType7x).proxyConfig);
     }
 
     this.esLegacyConfigService.setup(elasticsearch.legacy.config$);
