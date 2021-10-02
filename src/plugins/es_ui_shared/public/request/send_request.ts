@@ -8,7 +8,7 @@
 
 import { HttpSetup, HttpFetchQuery } from '../../../../../src/core/public';
 
-export type ResponseInterceptor = (response: any) => any;
+export type ResponseInterceptor = ({ data, error }: { data: any; error: any }) => void;
 
 export interface SendRequestConfig {
   path: string;
@@ -20,7 +20,7 @@ export interface SendRequestConfig {
    * HttpFetchOptions#asSystemRequest.
    */
   asSystemRequest?: boolean;
-  errorInterceptors?: ResponseInterceptor[];
+  responseInterceptors?: ResponseInterceptor[];
 }
 
 export interface SendRequestResponse<D = any, E = any> {
@@ -28,37 +28,41 @@ export interface SendRequestResponse<D = any, E = any> {
   error: E | null;
 }
 
-// Pass the response sequentially through each interceptor, providing
-// the output of one interceptor as the input of the next interceptor.
-const applyInterceptors = (response: any, interceptors: ResponseInterceptor[] = []): any => {
-  return interceptors.reduce(
-    (interceptedResponse, interceptor) => interceptor(interceptedResponse),
-    response
-  );
+// Pass the response sequentially through each interceptor, allowing for
+// side effects to be run.
+const updateResponseInterceptors = (
+  response: any,
+  responseInterceptors: ResponseInterceptor[] = []
+) => {
+  responseInterceptors.forEach((interceptor) => interceptor(response));
 };
 
 export const sendRequest = async <D = any, E = any>(
   httpClient: HttpSetup,
-  { path, method, body, query, asSystemRequest, errorInterceptors }: SendRequestConfig
+  { path, method, body, query, asSystemRequest, responseInterceptors }: SendRequestConfig
 ): Promise<SendRequestResponse<D, E>> => {
   try {
     const stringifiedBody = typeof body === 'string' ? body : JSON.stringify(body);
-    const response = await httpClient[method](path, {
+    const rawResponse = await httpClient[method](path, {
       body: stringifiedBody,
       query,
       asSystemRequest,
     });
 
-    return {
-      data: response.data ? response.data : response,
+    const response = {
+      data: rawResponse.data ? rawResponse.data : rawResponse,
       error: null,
     };
+
+    updateResponseInterceptors(response, responseInterceptors);
+    return response;
   } catch (e) {
-    const responseError = e.response?.data ?? e.body;
-    const interceptedError = applyInterceptors(responseError, errorInterceptors);
-    return {
+    const response = {
       data: null,
-      error: interceptedError,
+      error: e.response?.data ?? e.body,
     };
+
+    updateResponseInterceptors(response, responseInterceptors);
+    return response;
   }
 };

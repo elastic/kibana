@@ -117,18 +117,6 @@ describe('useRequest hook', () => {
         expect(hookResult.error).toBe(getErrorResponse().error);
       });
 
-      it('applies errorInterceptors to errors', async () => {
-        const { setupErrorRequest, completeRequest, hookResult } = helpers;
-        const errorInterceptors = [
-          (error: any) => ['Error is:', error.statusText],
-          (interceptedError: string[]) => interceptedError.join(' '),
-        ];
-
-        setupErrorRequest({ errorInterceptors });
-        await completeRequest();
-        expect(hookResult.error).toBe('Error is: Error message');
-      });
-
       it('surfaces body-shaped errors from requests', async () => {
         const { setupErrorWithBodyRequest, completeRequest, hookResult, getErrorWithBodyResponse } =
           helpers;
