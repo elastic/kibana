@@ -82,7 +82,7 @@ export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }
     services.http,
     getPaginationRouteOptions,
     updateTotalItemCount,
-    match.params.uuid
+    match.params.uuid,
   ]);
 
   return (

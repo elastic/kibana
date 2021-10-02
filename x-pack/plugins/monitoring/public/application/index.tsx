@@ -26,7 +26,6 @@ import {
   CODE_PATH_BEATS,
   CODE_PATH_LOGSTASH,
 } from '../../common/constants';
-import { BeatsInstancesPage } from './pages/beats/instances';
 import { BeatsInstancePage } from './pages/beats/instance';
 import { ElasticsearchNodesPage } from './pages/elasticsearch/nodes_page';
 import { ElasticsearchIndicesPage } from './pages/elasticsearch/indices_page';
