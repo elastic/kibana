@@ -31,6 +31,7 @@ import './index.scss';
 import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
 import { GraphSavePolicy } from './types';
 import { graphRouter } from './router';
+import { SpacesApi } from '../../spaces/public';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies
@@ -63,6 +64,7 @@ export interface GraphDependencies {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   uiSettings: IUiSettingsClient;
   history: ScopedHistory<unknown>;
+  spaces?: SpacesApi;
 }
 
 export type GraphServices = Omit<GraphDependencies, 'kibanaLegacy' | 'element' | 'history'>;

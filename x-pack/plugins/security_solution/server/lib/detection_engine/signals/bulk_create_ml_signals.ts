@@ -54,8 +54,8 @@ export const transformAnomalyFieldsToEcs = (anomaly: Anomaly): EcsAnomaly => {
   }
 
   const omitDottedFields = omit(errantFields.map((field) => field.name));
-  const setNestedFields = errantFields.map((field) => (_anomaly: Anomaly) =>
-    set(_anomaly, field.name, field.value)
+  const setNestedFields = errantFields.map(
+    (field) => (_anomaly: Anomaly) => set(_anomaly, field.name, field.value)
   );
   const setTimestamp = (_anomaly: Anomaly) =>
     set(_anomaly, '@timestamp', new Date(timestamp).toISOString());

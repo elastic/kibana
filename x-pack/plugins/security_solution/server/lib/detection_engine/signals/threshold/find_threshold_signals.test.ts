@@ -227,6 +227,7 @@ describe('findThresholdSignals', () => {
               'threshold_1:user.name': {
                 terms: {
                   field: 'user.name',
+                  order: { cardinality_count: 'desc' },
                   min_doc_count: 100,
                   size: 10000,
                 },
@@ -302,6 +303,7 @@ describe('findThresholdSignals', () => {
                 lang: 'painless',
               },
               min_doc_count: 200,
+              order: { cardinality_count: 'desc' },
             },
             aggs: {
               cardinality_count: {

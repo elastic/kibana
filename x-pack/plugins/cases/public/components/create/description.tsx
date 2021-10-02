@@ -7,7 +7,7 @@
 
 import React, { memo, useEffect, useRef } from 'react';
 import { MarkdownEditorForm } from '../markdown_editor';
-import { UseField, useFormContext } from '../../common/shared_imports';
+import { UseField, useFormContext, useFormData } from '../../common/shared_imports';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 
 interface Props {
@@ -17,18 +17,23 @@ interface Props {
 export const fieldName = 'description';
 
 const DescriptionComponent: React.FC<Props> = ({ isLoading }) => {
-  const {
-    draftComment,
-    hasIncomingLensState,
-    openLensModal,
-    clearDraftComment,
-  } = useLensDraftComment();
+  const { draftComment, hasIncomingLensState, openLensModal, clearDraftComment } =
+    useLensDraftComment();
   const { setFieldValue } = useFormContext();
+  const [{ title, tags }] = useFormData({ watch: ['title', 'tags'] });
   const editorRef = useRef<Record<string, any>>();
 
   useEffect(() => {
     if (draftComment?.commentId === fieldName && editorRef.current) {
       setFieldValue(fieldName, draftComment.comment);
+
+      if (draftComment.caseTitle) {
+        setFieldValue('title', draftComment.caseTitle);
+      }
+
+      if (draftComment.caseTags && draftComment.caseTags.length > 0) {
+        setFieldValue('tags', draftComment.caseTags);
+      }
 
       if (hasIncomingLensState) {
         openLensModal({ editorRef: editorRef.current });
@@ -48,6 +53,8 @@ const DescriptionComponent: React.FC<Props> = ({ isLoading }) => {
         dataTestSubj: 'caseDescription',
         idAria: 'caseDescription',
         isDisabled: isLoading,
+        caseTitle: title,
+        caseTags: tags,
       }}
     />
   );

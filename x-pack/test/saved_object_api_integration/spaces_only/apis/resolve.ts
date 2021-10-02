@@ -13,7 +13,7 @@ import { resolveTestSuiteFactory, TEST_CASES as CASES } from '../../common/suite
 const {
   SPACE_1: { spaceId: SPACE_1_ID },
 } = SPACES;
-const { fail404 } = testCaseFailures;
+const { fail400, fail404 } = testCaseFailures;
 
 const createTestCases = (spaceId: string) => [
   // for each outcome, if failure !== undefined then we expect to receive
@@ -22,10 +22,10 @@ const createTestCases = (spaceId: string) => [
   { ...CASES.ALIAS_MATCH, ...fail404(spaceId !== SPACE_1_ID) },
   {
     ...CASES.CONFLICT,
-    ...(spaceId !== SPACE_1_ID && { expectedOutcome: 'exactMatch' as 'exactMatch' }),
+    ...(spaceId !== SPACE_1_ID && { expectedOutcome: 'exactMatch' as const }),
   },
   { ...CASES.DISABLED, ...fail404() },
-  { ...CASES.HIDDEN, ...fail404() },
+  { ...CASES.HIDDEN, ...fail400() },
   { ...CASES.DOES_NOT_EXIST, ...fail404() },
 ];
 

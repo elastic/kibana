@@ -42,7 +42,8 @@ export class TodoRefEmbeddableFactoryDefinition
       TodoRefOutput,
       TodoRefEmbeddable,
       TodoSavedObjectAttributes
-    > {
+    >
+{
   public readonly type = TODO_REF_EMBEDDABLE;
   public readonly savedObjectMetaData = {
     name: 'Todo',

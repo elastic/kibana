@@ -11,7 +11,7 @@ import { RouteDependencies } from '../../plugin';
 export function registerConfigDataRoute({ router, config, log }: RouteDependencies) {
   router.get(
     {
-      path: '/api/enterprise_search/config_data',
+      path: '/internal/enterprise_search/config_data',
       validate: false,
     },
     async (context, request, response) => {

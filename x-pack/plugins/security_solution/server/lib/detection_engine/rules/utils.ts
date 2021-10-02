@@ -27,7 +27,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 import type { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
-import { AlertNotifyWhenType, SanitizedAlert } from '../../../../../alerting/common';
+import { AlertAction, AlertNotifyWhenType, SanitizedAlert } from '../../../../../alerting/common';
 import {
   DescriptionOrUndefined,
   AnomalyThresholdOrUndefined,
@@ -52,6 +52,7 @@ import {
   RuleNameOverrideOrUndefined,
   TimestampOverrideOrUndefined,
   EventCategoryOverrideOrUndefined,
+  NamespaceOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
@@ -60,6 +61,10 @@ import {
   NOTIFICATION_THROTTLE_RULE,
 } from '../../../../common/constants';
 import { RulesClient } from '../../../../../alerting/server';
+// eslint-disable-next-line no-restricted-imports
+import { LegacyRuleActions } from '../rule_actions/legacy_types';
+import { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
+import { transformAlertToRuleAction } from '../../../../common/detection_engine/transform_actions';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -118,6 +123,7 @@ export interface UpdateProperties {
   version: VersionOrUndefined;
   exceptionsList: ListArrayOrUndefined;
   anomalyThreshold: AnomalyThresholdOrUndefined;
+  namespace: NamespaceOrUndefined;
 }
 
 export const calculateVersion = (
@@ -212,23 +218,55 @@ export const transformToAlertThrottle = (throttle: string | null | undefined): s
 };
 
 /**
+ * Given a set of actions from an "alerting" Saved Object (SO) this will transform it into a "security_solution" alert action.
+ * If this detects any legacy rule actions it will transform it. If both are sent in which is not typical but possible due to
+ * the split nature of the API's this will prefer the usage of the non-legacy version. Eventually the "legacyRuleActions" should
+ * be removed.
+ * @param alertAction The alert action form a "alerting" Saved Object (SO).
+ * @param legacyRuleActions Legacy "side car" rule actions that if it detects it being passed it in will transform using it.
+ * @returns The actions of the FullResponseSchema
+ */
+export const transformActions = (
+  alertAction: AlertAction[] | undefined,
+  legacyRuleActions: LegacyRuleActions | null | undefined
+): FullResponseSchema['actions'] => {
+  if (alertAction != null && alertAction.length !== 0) {
+    return alertAction.map((action) => transformAlertToRuleAction(action));
+  } else if (legacyRuleActions != null) {
+    return legacyRuleActions.actions;
+  } else {
+    return [];
+  }
+};
+
+/**
  * Given a throttle from an "alerting" Saved Object (SO) this will transform it into a "security_solution"
- * throttle type.
- * @params throttle The throttle from a  "alerting" Saved Object (SO)
+ * throttle type. If given the "legacyRuleActions" but we detect that the rule for an unknown reason has actions
+ * on it to which should not be typical but possible due to the split nature of the API's, this will prefer the
+ * usage of the non-legacy version. Eventually the "legacyRuleActions" should be removed.
+ * @param throttle The throttle from a  "alerting" Saved Object (SO)
+ * @param legacyRuleActions Legacy "side car" rule actions that if it detects it being passed it in will transform using it.
  * @returns The "security_solution" throttle
  */
-export const transformFromAlertThrottle = (rule: SanitizedAlert<RuleParams>): string => {
-  if (rule.muteAll || rule.actions.length === 0) {
-    return NOTIFICATION_THROTTLE_NO_ACTIONS;
-  } else if (
-    rule.notifyWhen === 'onActiveAlert' ||
-    (rule.throttle == null && rule.notifyWhen == null)
-  ) {
-    return NOTIFICATION_THROTTLE_RULE;
-  } else if (rule.throttle == null) {
-    return NOTIFICATION_THROTTLE_NO_ACTIONS;
+export const transformFromAlertThrottle = (
+  rule: SanitizedAlert<RuleParams>,
+  legacyRuleActions: LegacyRuleActions | null | undefined
+): string => {
+  if (legacyRuleActions == null || (rule.actions != null && rule.actions.length > 0)) {
+    if (rule.muteAll || rule.actions.length === 0) {
+      return NOTIFICATION_THROTTLE_NO_ACTIONS;
+    } else if (
+      rule.notifyWhen === 'onActiveAlert' ||
+      (rule.throttle == null && rule.notifyWhen == null)
+    ) {
+      return NOTIFICATION_THROTTLE_RULE;
+    } else if (rule.throttle == null) {
+      return NOTIFICATION_THROTTLE_NO_ACTIONS;
+    } else {
+      return rule.throttle;
+    }
   } else {
-    return rule.throttle;
+    return legacyRuleActions.ruleThrottle;
   }
 };
 

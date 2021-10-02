@@ -889,14 +889,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
         const { revertModelSnapshot } = jobServiceProvider(client, mlClient);
-        const {
-          jobId,
-          snapshotId,
-          replay,
-          end,
-          deleteInterveningResults,
-          calendarEvents,
-        } = request.body;
+        const { jobId, snapshotId, replay, end, deleteInterveningResults, calendarEvents } =
+          request.body;
         const resp = await revertModelSnapshot(
           jobId,
           snapshotId,

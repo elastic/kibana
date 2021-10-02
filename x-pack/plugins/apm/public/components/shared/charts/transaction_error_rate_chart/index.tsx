@@ -35,7 +35,8 @@ interface Props {
   environment: string;
 }
 
-type ErrorRate = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/error_rate'>;
+type ErrorRate =
+  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/error_rate'>;
 
 const INITIAL_STATE: ErrorRate = {
   currentPeriod: {
@@ -63,7 +64,7 @@ export function TransactionErrorRateChart({
 
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName');
+  } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

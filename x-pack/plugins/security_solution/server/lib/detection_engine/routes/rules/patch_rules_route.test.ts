@@ -25,7 +25,10 @@ import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
-describe('patch_rules', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('patch_rules - %s', (_, isRuleRegistryEnabled) => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -35,14 +38,18 @@ describe('patch_rules', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams())); // existing rule
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // existing rule
-    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful update
+    clients.rulesClient.get.mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    ); // existing rule
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // existing rule
+    clients.rulesClient.update.mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    ); // successful update
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // successful transform
     clients.savedObjectsClient.create.mockResolvedValue(getRuleExecutionStatuses()[0]); // successful transform
     clients.ruleExecutionLogClient.find.mockResolvedValue(getRuleExecutionStatuses());
 
-    patchRulesRoute(server.router, ml);
+    patchRulesRoute(server.router, ml, isRuleRegistryEnabled);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -69,7 +76,7 @@ describe('patch_rules', () => {
     });
 
     test('returns error if requesting a non-rule', async () => {
-      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult());
+      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult(isRuleRegistryEnabled));
       const response = await server.inject(getPatchRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({

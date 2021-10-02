@@ -278,7 +278,8 @@ exports.Cluster = class Cluster {
     // especially because we currently run many instances of ES on the same machine during CI
     // inital and max must be the same, so we only need to check the max
     if (!esJavaOpts.includes('Xmx')) {
-      esJavaOpts += ' -Xms1g -Xmx1g';
+      // 1536m === 1.5g
+      esJavaOpts += ' -Xms1536m -Xmx1536m';
     }
 
     this._log.debug('ES_JAVA_OPTS: %s', esJavaOpts.trim());

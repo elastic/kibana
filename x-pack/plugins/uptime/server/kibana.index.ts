@@ -46,7 +46,11 @@ export const initServerWithKibana = (
     management: {
       insightsAndAlerting: ['triggersActions'],
     },
-    alerting: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+    alerting: [
+      'xpack.uptime.alerts.tls',
+      'xpack.uptime.alerts.monitorStatus',
+      'xpack.uptime.alerts.durationAnomaly',
+    ],
     privileges: {
       all: {
         app: ['uptime', 'kibana'],
@@ -58,10 +62,18 @@ export const initServerWithKibana = (
         },
         alerting: {
           rule: {
-            all: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+            all: [
+              'xpack.uptime.alerts.tls',
+              'xpack.uptime.alerts.monitorStatus',
+              'xpack.uptime.alerts.durationAnomaly',
+            ],
           },
           alert: {
-            all: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+            all: [
+              'xpack.uptime.alerts.tls',
+              'xpack.uptime.alerts.monitorStatus',
+              'xpack.uptime.alerts.durationAnomaly',
+            ],
           },
         },
         management: {
@@ -79,10 +91,18 @@ export const initServerWithKibana = (
         },
         alerting: {
           rule: {
-            read: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+            read: [
+              'xpack.uptime.alerts.tls',
+              'xpack.uptime.alerts.monitorStatus',
+              'xpack.uptime.alerts.durationAnomaly',
+            ],
           },
           alert: {
-            read: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+            read: [
+              'xpack.uptime.alerts.tls',
+              'xpack.uptime.alerts.monitorStatus',
+              'xpack.uptime.alerts.durationAnomaly',
+            ],
           },
         },
         management: {

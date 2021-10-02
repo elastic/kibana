@@ -25,7 +25,7 @@ setHeaderActionMenuMounter(jest.fn());
 function getProps(timefield?: string) {
   const searchSourceMock = createSearchSourceMock({});
   const services = discoverServiceMock;
-  services.data.query.timefilter.timefilter.getTime = () => {
+  services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
 
@@ -34,23 +34,11 @@ function getProps(timefield?: string) {
     result: Number(esHits.length),
   }) as DataTotalHits$;
 
-  const chartData = ({
+  const chartData = {
     xAxisOrderedValues: [
-      1623880800000,
-      1623967200000,
-      1624053600000,
-      1624140000000,
-      1624226400000,
-      1624312800000,
-      1624399200000,
-      1624485600000,
-      1624572000000,
-      1624658400000,
-      1624744800000,
-      1624831200000,
-      1624917600000,
-      1625004000000,
-      1625090400000,
+      1623880800000, 1623967200000, 1624053600000, 1624140000000, 1624226400000, 1624312800000,
+      1624399200000, 1624485600000, 1624572000000, 1624658400000, 1624744800000, 1624831200000,
+      1624917600000, 1625004000000, 1625090400000,
     ],
     xAxisFormat: { id: 'date', params: { pattern: 'YYYY-MM-DD' } },
     xAxisLabel: 'order_date per day',
@@ -83,7 +71,7 @@ function getProps(timefield?: string) {
       { x: 1625004000000, y: 137 },
       { x: 1625090400000, y: 66 },
     ],
-  } as unknown) as Chart;
+  } as unknown as Chart;
 
   const charts$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
@@ -96,7 +84,7 @@ function getProps(timefield?: string) {
   }) as DataCharts$;
 
   return {
-    resetQuery: jest.fn(),
+    resetSavedSearch: jest.fn(),
     savedSearch: savedSearchMock,
     savedSearchDataChart$: charts$,
     savedSearchDataTotalHits$: totalHits$,
@@ -112,10 +100,10 @@ function getProps(timefield?: string) {
 describe('Discover chart', () => {
   test('render without timefield', () => {
     const component = mountWithIntl(<DiscoverChart {...getProps()} />);
-    expect(component.find('[data-test-subj="discoverChartToggle"]').exists()).toBeFalsy();
+    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
   });
   test('render with filefield', () => {
     const component = mountWithIntl(<DiscoverChart {...getProps('timefield')} />);
-    expect(component.find('[data-test-subj="discoverChartToggle"]').exists()).toBeTruthy();
+    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
   });
 });

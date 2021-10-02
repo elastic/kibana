@@ -402,7 +402,7 @@ export class SavedMap {
         isPaused: getTimeFilter().getRefreshInterval().pause,
         interval: getTimeFilter().getRefreshInterval().value,
       },
-      query: _.omit(getQuery(state), 'queryLastTriggeredAt'),
+      query: getQuery(state),
       filters: getFilters(state),
       settings: getMapSettings(state),
     });

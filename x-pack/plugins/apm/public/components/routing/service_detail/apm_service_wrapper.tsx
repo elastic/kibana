@@ -15,7 +15,7 @@ export function ApmServiceWrapper() {
   const {
     path: { serviceName },
     query,
-  } = useApmParams('/services/:serviceName');
+  } = useApmParams('/services/{serviceName}');
 
   const router = useApmRouter();
 
@@ -26,7 +26,7 @@ export function ApmServiceWrapper() {
     },
     {
       title: serviceName,
-      href: router.link('/services/:serviceName', {
+      href: router.link('/services/{serviceName}', {
         query,
         path: { serviceName },
       }),

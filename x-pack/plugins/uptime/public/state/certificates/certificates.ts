@@ -5,40 +5,27 @@
  * 2.0.
  */
 
-import { handleActions } from 'redux-actions';
-import { takeLatest } from 'redux-saga/effects';
-import { createAsyncAction } from '../actions/utils';
-import { asyncInitState, handleAsyncAction } from '../reducers/utils';
-import { CertResult, GetCertsParams } from '../../../common/runtime_types';
+import { Action, createAction, handleActions } from 'redux-actions';
 import { AppState } from '../index';
-import { AsyncInitState } from '../reducers/types';
-import { fetchEffectFactory } from '../effects/fetch_effect';
-import { fetchCertificates } from '../api/certificates';
 
-export const getCertificatesAction = createAsyncAction<GetCertsParams, CertResult>(
-  'GET_CERTIFICATES'
-);
+export const setCertificatesTotalAction = createAction<CertificatesState>('SET_CERTIFICATES_TOTAL');
 
 export interface CertificatesState {
-  certs: AsyncInitState<CertResult>;
+  total: number;
 }
 
 const initialState = {
-  certs: asyncInitState(),
+  total: 0,
 };
 
 export const certificatesReducer = handleActions<CertificatesState>(
   {
-    ...handleAsyncAction<CertificatesState>('certs', getCertificatesAction),
+    [String(setCertificatesTotalAction)]: (state, action: Action<CertificatesState>) => ({
+      ...state,
+      total: action.payload.total,
+    }),
   },
   initialState
 );
 
-export function* fetchCertificatesEffect() {
-  yield takeLatest(
-    getCertificatesAction.get,
-    fetchEffectFactory(fetchCertificates, getCertificatesAction.success, getCertificatesAction.fail)
-  );
-}
-
-export const certificatesSelector = ({ certificates }: AppState) => certificates.certs;
+export const certificatesSelector = ({ certificates }: AppState) => certificates.total;

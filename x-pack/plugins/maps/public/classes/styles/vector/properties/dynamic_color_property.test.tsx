@@ -32,7 +32,7 @@ const makeProperty = (options: ColorDynamicOptions, style?: MockStyle, field?: I
     options,
     VECTOR_STYLES.LINE_COLOR,
     field ? field : mockField,
-    (new MockLayer(style ? style : new MockStyle()) as unknown) as IVectorLayer,
+    new MockLayer(style ? style : new MockStyle()) as unknown as IVectorLayer,
     () => {
       return (value: RawValue) => value + '_format';
     }
@@ -316,7 +316,7 @@ describe('supportsFieldMeta', () => {
       dynamicStyleOptions,
       VECTOR_STYLES.LINE_COLOR,
       null,
-      (new MockLayer(new MockStyle()) as unknown) as IVectorLayer,
+      new MockLayer(new MockStyle()) as unknown as IVectorLayer,
       () => {
         return (value: RawValue) => value + '_format';
       }

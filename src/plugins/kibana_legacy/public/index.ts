@@ -9,15 +9,12 @@
 // TODO: https://github.com/elastic/kibana/issues/110891
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { PluginInitializerContext } from 'kibana/public';
 import { KibanaLegacyPlugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new KibanaLegacyPlugin(initializerContext);
+export const plugin = () => new KibanaLegacyPlugin();
 
 export * from './plugin';
 
-export { PaginateDirectiveProvider, PaginateControlsDirectiveProvider } from './paginate/paginate';
 export * from './angular';
 export * from './notify';
 export * from './utils';

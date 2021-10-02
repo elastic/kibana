@@ -1009,7 +1009,7 @@
         "signature": [
           "\"search\""
         ],
-        "path": "src/plugins/discover/public/application/embeddable/constants.ts",
+        "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1121,7 +1121,7 @@
           "references": [
             {
               "plugin": "osquery",
-              "path": "x-pack/plugins/osquery/public/scheduled_query_groups/scheduled_query_group_queries_table.tsx"
+              "path": "x-pack/plugins/osquery/public/scheduled_query_groups/scheduled_query_group_queries_status_table.tsx"
             },
             {
               "plugin": "osquery",
@@ -1305,6 +1305,20 @@
         "description": [],
         "signature": [
           "\"discover:sampleSize\""
+        ],
+        "path": "src/plugins/discover/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-common.SEARCH_EMBEDDABLE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_EMBEDDABLE_TYPE",
+        "description": [],
+        "signature": [
+          "\"search\""
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,

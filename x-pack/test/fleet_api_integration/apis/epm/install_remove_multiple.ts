@@ -10,6 +10,7 @@ import path from 'path';
 import fs from 'fs';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -70,6 +71,7 @@ export default function (providerContext: FtrProviderContext) {
   };
   describe('installs and uninstalls multiple packages side effects', async () => {
     skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
     before(async () => {
       if (!server.enabled) return;
       await installPackages([pkgKey, experimentalPkgKey, experimental2PkgKey]);

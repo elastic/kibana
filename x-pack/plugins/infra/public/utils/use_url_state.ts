@@ -105,21 +105,20 @@ const getParamFromQueryString = (queryString: string, key: string) => {
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
 };
 
-export const replaceStateKeyInQueryString = <UrlState extends any>(
-  stateKey: string,
-  urlState: UrlState | undefined
-) => (queryString: string) => {
-  const previousQueryValues = parse(queryString, { sort: false });
-  const newValue =
-    typeof urlState === 'undefined'
-      ? previousQueryValues
-      : {
-          ...previousQueryValues,
-          [stateKey]: encodeRisonUrlState(urlState),
-        };
+export const replaceStateKeyInQueryString =
+  <UrlState extends any>(stateKey: string, urlState: UrlState | undefined) =>
+  (queryString: string) => {
+    const previousQueryValues = parse(queryString, { sort: false });
+    const newValue =
+      typeof urlState === 'undefined'
+        ? previousQueryValues
+        : {
+            ...previousQueryValues,
+            [stateKey]: encodeRisonUrlState(urlState),
+          };
 
-  return stringify(url.encodeQuery(newValue), { sort: false, encode: false });
-};
+    return stringify(url.encodeQuery(newValue), { sort: false, encode: false });
+  };
 
 const replaceQueryStringInLocation = (location: Location, queryString: string): Location => {
   if (queryString === getQueryStringFromLocation(location)) {

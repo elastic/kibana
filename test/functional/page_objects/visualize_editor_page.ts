@@ -63,8 +63,8 @@ export class VisualizeEditorPageObject extends FtrService {
     await this.visChart.waitForVisualizationRenderingStabilized();
   }
 
-  public async clickGo() {
-    if (await this.visChart.isNewChartsLibraryEnabled()) {
+  public async clickGo(isNewChartLibrary = false) {
+    if ((await this.visChart.isNewChartsLibraryEnabled()) || isNewChartLibrary) {
       await this.elasticChart.setNewChartUiDebugFlag();
     }
 
@@ -413,9 +413,9 @@ export class VisualizeEditorPageObject extends FtrService {
   }
 
   public async selectXAxisPosition(position: string) {
-    const option = await (await this.testSubjects.find('categoryAxisPosition')).findByCssSelector(
-      `option[value="${position}"]`
-    );
+    const option = await (
+      await this.testSubjects.find('categoryAxisPosition')
+    ).findByCssSelector(`option[value="${position}"]`);
     await option.click();
   }
 

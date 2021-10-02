@@ -25,6 +25,7 @@ import { formatId } from './constants';
 
 import { context as contextType } from '../../../../../../kibana_react/public';
 import { FormatEditorProps } from '../types';
+import { UrlFormat } from '../../../../../../field_formats/common';
 
 interface OnChangeParam {
   type: string;
@@ -144,9 +145,10 @@ export class UrlFormatEditor extends DefaultFormatEditor<
   };
 
   render() {
-    const { format, formatParams } = this.props;
+    const { formatParams, format } = this.props;
     const { error, samples, sampleConverterType } = this.state;
 
+    const urlType = formatParams.type ?? format.getParamDefaults().type;
     return (
       <Fragment>
         <EuiFormRow
@@ -156,8 +158,8 @@ export class UrlFormatEditor extends DefaultFormatEditor<
         >
           <EuiSelect
             data-test-subj="urlEditorType"
-            value={formatParams.type}
-            options={format.type.urlTypes.map((type: UrlType) => {
+            value={urlType}
+            options={(format.type as typeof UrlFormat).urlTypes.map((type: UrlType) => {
               return {
                 value: type.kind,
                 text: type.text,
@@ -169,7 +171,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           />
         </EuiFormRow>
 
-        {formatParams.type === 'a' ? (
+        {urlType === 'a' ? (
           <EuiFormRow
             label={
               <FormattedMessage
@@ -257,7 +259,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           />
         </EuiFormRow>
 
-        {formatParams.type === 'img' && this.renderWidthHeightParameters()}
+        {urlType === 'img' && this.renderWidthHeightParameters()}
 
         <FormatEditorSamples samples={samples} sampleType={sampleConverterType} />
       </Fragment>

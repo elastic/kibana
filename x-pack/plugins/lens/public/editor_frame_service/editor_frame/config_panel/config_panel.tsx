@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './config_panel.scss';
-
 import React, { useMemo, memo } from 'react';
 import { EuiForm } from '@elastic/eui';
 import { mapValues } from 'lodash';
@@ -26,8 +24,9 @@ import {
   useLensSelector,
   selectVisualization,
   VisualizationState,
+  LensAppState,
 } from '../../../state_management';
-import { AddLayerButton } from './add_layer';
+import { AddLayerButton, getLayerType } from './add_layer';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const visualization = useLensSelector(selectVisualization);
@@ -177,6 +176,33 @@ export function LayerPanels(
                 layerIds.length
               ) === 'clear'
             }
+            onEmptyDimensionAdd={(columnId, { groupId }) => {
+              // avoid state update if the datasource does not support initializeDimension
+              if (
+                activeDatasourceId != null &&
+                datasourceMap[activeDatasourceId]?.initializeDimension
+              ) {
+                dispatchLens(
+                  updateState({
+                    subType: 'LAYER_DEFAULT_DIMENSION',
+                    updater: (state) =>
+                      addInitialValueIfAvailable({
+                        ...props,
+                        state,
+                        activeDatasourceId,
+                        layerId,
+                        layerType: getLayerType(
+                          activeVisualization,
+                          state.visualization.state,
+                          layerId
+                        ),
+                        columnId,
+                        groupId,
+                      }),
+                  })
+                );
+              }
+            }}
             onRemoveLayer={() => {
               dispatchLens(
                 updateState({
@@ -232,21 +258,92 @@ export function LayerPanels(
           dispatchLens(
             updateState({
               subType: 'ADD_LAYER',
-              updater: (state) =>
-                appendLayer({
+              updater: (state) => {
+                const newState = appendLayer({
                   activeVisualization,
                   generateId: () => id,
                   trackUiEvent,
                   activeDatasource: datasourceMap[activeDatasourceId!],
                   state,
                   layerType,
-                }),
+                });
+                return addInitialValueIfAvailable({
+                  ...props,
+                  activeDatasourceId: activeDatasourceId!,
+                  state: newState,
+                  layerId: id,
+                  layerType,
+                });
+              },
             })
           );
-
           setNextFocusedLayerId(id);
         }}
       />
     </EuiForm>
   );
+}
+
+function addInitialValueIfAvailable({
+  state,
+  activeVisualization,
+  framePublicAPI,
+  layerType,
+  activeDatasourceId,
+  datasourceMap,
+  layerId,
+  columnId,
+  groupId,
+}: ConfigPanelWrapperProps & {
+  state: LensAppState;
+  activeDatasourceId: string;
+  activeVisualization: Visualization;
+  layerId: string;
+  layerType: string;
+  columnId?: string;
+  groupId?: string;
+}) {
+  const layerInfo = activeVisualization
+    .getSupportedLayers(state.visualization.state, framePublicAPI)
+    .find(({ type }) => type === layerType);
+
+  const activeDatasource = datasourceMap[activeDatasourceId];
+
+  if (layerInfo?.initialDimensions && activeDatasource?.initializeDimension) {
+    const info = groupId
+      ? layerInfo.initialDimensions.find(({ groupId: id }) => id === groupId)
+      : // pick the first available one if not passed
+        layerInfo.initialDimensions[0];
+
+    if (info) {
+      return {
+        ...state,
+        datasourceStates: {
+          ...state.datasourceStates,
+          [activeDatasourceId]: {
+            ...state.datasourceStates[activeDatasourceId],
+            state: activeDatasource.initializeDimension(
+              state.datasourceStates[activeDatasourceId].state,
+              layerId,
+              {
+                ...info,
+                columnId: columnId || info.columnId,
+              }
+            ),
+          },
+        },
+        visualization: {
+          ...state.visualization,
+          state: activeVisualization.setDimension({
+            groupId: info.groupId,
+            layerId,
+            columnId: columnId || info.columnId,
+            prevState: state.visualization.state,
+            frame: framePublicAPI,
+          }),
+        },
+      };
+    }
+  }
+  return state;
 }

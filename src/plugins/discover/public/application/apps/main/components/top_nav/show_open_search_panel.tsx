@@ -14,11 +14,11 @@ import { OpenSearchPanel } from './open_search_panel';
 let isOpen = false;
 
 export function showOpenSearchPanel({
-  makeUrl,
   I18nContext,
+  onOpenSavedSearch,
 }: {
-  makeUrl: (path: string) => string;
   I18nContext: I18nStart['Context'];
+  onOpenSavedSearch: (id: string) => void;
 }) {
   if (isOpen) {
     return;
@@ -35,7 +35,7 @@ export function showOpenSearchPanel({
   document.body.appendChild(container);
   const element = (
     <I18nContext>
-      <OpenSearchPanel onClose={onClose} makeUrl={makeUrl} />
+      <OpenSearchPanel onClose={onClose} onOpenSavedSearch={onOpenSavedSearch} />
     </I18nContext>
   );
   ReactDOM.render(element, container);

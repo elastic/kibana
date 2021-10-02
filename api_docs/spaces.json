@@ -1173,7 +1173,7 @@
             "children": [
               {
                 "parentPluginId": "spaces",
-                "id": "def-public.props",
+                "id": "def-public.SpacesApiUiComponent.getSpacesContextProvider.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
@@ -1212,7 +1212,7 @@
             "children": [
               {
                 "parentPluginId": "spaces",
-                "id": "def-public.props",
+                "id": "def-public.SpacesApiUiComponent.getShareToSpaceFlyout.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
@@ -1251,7 +1251,7 @@
             "children": [
               {
                 "parentPluginId": "spaces",
-                "id": "def-public.props",
+                "id": "def-public.SpacesApiUiComponent.getCopyToSpaceFlyout.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
@@ -1290,7 +1290,7 @@
             "children": [
               {
                 "parentPluginId": "spaces",
-                "id": "def-public.props",
+                "id": "def-public.SpacesApiUiComponent.getSpaceList.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
@@ -1329,7 +1329,7 @@
             "children": [
               {
                 "parentPluginId": "spaces",
-                "id": "def-public.props",
+                "id": "def-public.SpacesApiUiComponent.getLegacyUrlConflict.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
@@ -1368,7 +1368,7 @@
             "children": [
               {
                 "parentPluginId": "spaces",
-                "id": "def-public.props",
+                "id": "def-public.SpacesApiUiComponent.getSpaceAvatar.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
@@ -1489,7 +1489,7 @@
             "section": "def-common.GetSpaceResult",
             "text": "GetSpaceResult"
           },
-          ", \"color\" | \"description\" | \"id\" | \"name\" | \"initials\" | \"imageUrl\" | \"_reserved\">"
+          ", \"color\" | \"id\" | \"description\" | \"name\" | \"initials\" | \"imageUrl\" | \"_reserved\">"
         ],
         "path": "x-pack/plugins/spaces/public/types.ts",
         "deprecated": false,
@@ -1680,7 +1680,7 @@
         "children": [
           {
             "parentPluginId": "spaces",
-            "id": "def-public.props",
+            "id": "def-public.LazyComponentFn.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -2672,6 +2672,10 @@
               },
               {
                 "plugin": "security",
+                "path": "x-pack/plugins/security/server/saved_objects/secure_saved_objects_client_wrapper.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/plugins/security/server/authorization/check_privileges_dynamically.test.ts"
               },
               {
@@ -3103,7 +3107,7 @@
             "section": "def-server.SavedObjectsRepository",
             "text": "SavedObjectsRepository"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
         ],
         "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
         "deprecated": false,
@@ -3111,7 +3115,7 @@
         "children": [
           {
             "parentPluginId": "spaces",
-            "id": "def-server.request",
+            "id": "def-server.SpacesClientRepositoryFactory.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -3131,7 +3135,7 @@
           },
           {
             "parentPluginId": "spaces",
-            "id": "def-server.savedObjectsStart",
+            "id": "def-server.SpacesClientRepositoryFactory.$2",
             "type": "Object",
             "tags": [],
             "label": "savedObjectsStart",
@@ -3194,7 +3198,7 @@
         "children": [
           {
             "parentPluginId": "spaces",
-            "id": "def-server.request",
+            "id": "def-server.SpacesClientWrapper.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -3214,7 +3218,7 @@
           },
           {
             "parentPluginId": "spaces",
-            "id": "def-server.baseClient",
+            "id": "def-server.SpacesClientWrapper.$2",
             "type": "Object",
             "tags": [],
             "label": "baseClient",

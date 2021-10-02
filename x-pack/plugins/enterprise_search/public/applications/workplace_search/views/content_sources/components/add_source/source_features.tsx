@@ -26,10 +26,17 @@ import { Features, FeatureIds } from '../../../../types';
 
 import {
   INCLUDED_FEATURES_TITLE,
-  SOURCE_FEATURES_SEARCHABLE,
-  SOURCE_FEATURES_REMOTE_FEATURE,
-  SOURCE_FEATURES_PRIVATE_FEATURE,
-  SOURCE_FEATURES_GLOBAL_ACCESS_PERMISSIONS_FEATURE,
+  SOURCE_FEATURES_SYNC_FREQUENCY_TITLE,
+  SOURCE_FEATURES_SYNC_FREQUENCY_TIME,
+  SOURCE_FEATURES_SYNCED_ITEMS_TITLE,
+  SOURCE_FEATURES_SEARCHABLE_TITLE,
+  SOURCE_FEATURES_SEARCHABLE_DESCRIPTION,
+  SOURCE_FEATURES_REMOTE_FEATURE_TITLE,
+  SOURCE_FEATURES_REMOTE_FEATURE_DESCRIPTION,
+  SOURCE_FEATURES_PRIVATE_FEATURE_TITLE,
+  SOURCE_FEATURES_PRIVATE_FEATURE_DESCRIPTION,
+  SOURCE_FEATURES_GLOBAL_ACCESS_PERMISSIONS_FEATURE_TITLE,
+  SOURCE_FEATURES_GLOBAL_ACCESS_PERMISSIONS_FEATURE_DESCRIPTION,
 } from './constants';
 
 interface ConnectInstanceProps {
@@ -76,7 +83,7 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
   };
 
   const SyncFrequencyFeature = (
-    <Feature icon="clock" title="Syncs every 2 hours">
+    <Feature icon="clock" title={SOURCE_FEATURES_SYNC_FREQUENCY_TITLE}>
       <EuiText size="s">
         <p>
           <FormattedMessage
@@ -84,7 +91,7 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
             defaultMessage="This source gets new content from {name} every {duration} (following the initial sync)."
             values={{
               name,
-              duration: <strong>2 hours</strong>,
+              duration: <strong>{SOURCE_FEATURES_SYNC_FREQUENCY_TIME}</strong>,
             }}
           />
         </p>
@@ -93,10 +100,10 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
   );
 
   const SyncedItemsFeature = (
-    <Feature icon="documents" title="Synced items">
+    <Feature icon="documents" title={SOURCE_FEATURES_SYNCED_ITEMS_TITLE}>
       <>
         <EuiText size="s">
-          <p>{SOURCE_FEATURES_SEARCHABLE}</p>
+          <p>{SOURCE_FEATURES_SEARCHABLE_DESCRIPTION}</p>
         </EuiText>
         <EuiSpacer size="xs" />
         <EuiText size="s">
@@ -111,10 +118,10 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
   );
 
   const SearchableContentFeature = (
-    <Feature icon="search" title="Searchable content">
+    <Feature icon="search" title={SOURCE_FEATURES_SEARCHABLE_TITLE}>
       <EuiText size="xs">
         <EuiText size="xs">
-          <p>{SOURCE_FEATURES_SEARCHABLE}</p>
+          <p>{SOURCE_FEATURES_SEARCHABLE_DESCRIPTION}</p>
         </EuiText>
         <EuiSpacer size="xs" />
         <ul>
@@ -127,25 +134,25 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
   );
 
   const RemoteFeature = (
-    <Feature icon="calendar" title="Always up-to-date">
+    <Feature icon="calendar" title={SOURCE_FEATURES_REMOTE_FEATURE_TITLE}>
       <EuiText size="xs">
-        <p>{SOURCE_FEATURES_REMOTE_FEATURE}</p>
+        <p>{SOURCE_FEATURES_REMOTE_FEATURE_DESCRIPTION}</p>
       </EuiText>
     </Feature>
   );
 
   const PrivateFeature = (
-    <Feature icon="lock" title="Always private">
+    <Feature icon="lock" title={SOURCE_FEATURES_PRIVATE_FEATURE_TITLE}>
       <EuiText size="xs">
-        <p>{SOURCE_FEATURES_PRIVATE_FEATURE}</p>
+        <p>{SOURCE_FEATURES_PRIVATE_FEATURE_DESCRIPTION}</p>
       </EuiText>
     </Feature>
   );
 
   const GlobalAccessPermissionsFeature = (
-    <Feature icon="globe" title="Global access permissions">
+    <Feature icon="globe" title={SOURCE_FEATURES_GLOBAL_ACCESS_PERMISSIONS_FEATURE_TITLE}>
       <EuiText size="xs">
-        <p>{SOURCE_FEATURES_GLOBAL_ACCESS_PERMISSIONS_FEATURE}</p>
+        <p>{SOURCE_FEATURES_GLOBAL_ACCESS_PERMISSIONS_FEATURE_DESCRIPTION}</p>
       </EuiText>
     </Feature>
   );

@@ -16,6 +16,7 @@ import {
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AppMountParameters } from '../../../../../../../../src/core/public';
+import { InspectorHeaderLink } from '../../../shared/apm_header_action_menu/inspector_header_link';
 
 const ANALYZE_DATA = i18n.translate('xpack.apm.analyzeDataButtonLabel', {
   defaultMessage: 'Analyze data',
@@ -42,11 +43,11 @@ export function UXActionMenu({
 
   const uxExploratoryViewLink = createExploratoryViewUrl(
     {
-      'ux-series': ({
+      'ux-series': {
         dataType: 'ux',
         isNew: true,
         time: { from: rangeFrom, to: rangeTo },
-      } as unknown) as SeriesUrl,
+      } as unknown as SeriesUrl,
     },
     http?.basePath.get()
   );
@@ -79,6 +80,7 @@ export function UXActionMenu({
             defaultMessage: 'Add data',
           })}
         </EuiHeaderLink>
+        <InspectorHeaderLink />
       </EuiHeaderLinks>
     </HeaderMenuPortal>
   );

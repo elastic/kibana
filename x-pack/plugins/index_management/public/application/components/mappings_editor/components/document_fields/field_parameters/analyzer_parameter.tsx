@@ -33,9 +33,9 @@ interface Props {
 const ANALYZER_OPTIONS = PARAMETERS_OPTIONS.analyzer!;
 
 // token_count requires a value for "analyzer", therefore, we cannot not allow "index_default"
-const ANALYZER_OPTIONS_WITHOUT_DEFAULT = (PARAMETERS_OPTIONS.analyzer as SuperSelectOption[]).filter(
-  ({ value }) => value !== INDEX_DEFAULT
-);
+const ANALYZER_OPTIONS_WITHOUT_DEFAULT = (
+  PARAMETERS_OPTIONS.analyzer as SuperSelectOption[]
+).filter(({ value }) => value !== INDEX_DEFAULT);
 
 const getCustomAnalyzers = (indexSettings: IndexSettings): SelectOption[] | undefined => {
   const settings: IndexSettingsInterface = {}.hasOwnProperty.call(indexSettings, 'index')

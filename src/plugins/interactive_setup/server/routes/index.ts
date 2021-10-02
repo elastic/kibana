@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
 import type { IBasePath, IRouter, Logger, PrebootServicePreboot } from 'src/core/server';
 
 import type { ConfigType } from '../config';
 import type { ElasticsearchServiceSetup } from '../elasticsearch_service';
 import type { KibanaConfigWriter } from '../kibana_config_writer';
+import type { VerificationCode } from '../verification_code';
 import { defineConfigureRoute } from './configure';
 import { defineEnrollRoutes } from './enroll';
 import { definePingRoute } from './ping';
+import { defineVerifyRoute } from './verify';
 
 /**
  * Describes parameters used to define HTTP routes.
@@ -28,11 +30,13 @@ export interface RouteDefinitionParams {
   };
   readonly kibanaConfigWriter: PublicMethodsOf<KibanaConfigWriter>;
   readonly elasticsearch: ElasticsearchServiceSetup;
+  readonly verificationCode: PublicContract<VerificationCode>;
   readonly getConfig: () => ConfigType;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {
-  defineEnrollRoutes(params);
   defineConfigureRoute(params);
+  defineEnrollRoutes(params);
   definePingRoute(params);
+  defineVerifyRoute(params);
 }

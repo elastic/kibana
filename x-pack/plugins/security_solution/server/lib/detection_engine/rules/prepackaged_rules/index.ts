@@ -580,8 +580,7 @@ import rule567 from './defense_evasion_parent_process_pid_spoofing.json';
 import rule568 from './defense_evasion_defender_exclusion_via_powershell.json';
 import rule569 from './defense_evasion_whitespace_padding_in_command_line.json';
 import rule570 from './persistence_webshell_detection.json';
-import rule571 from './elastic_endpoint_security_behavior_protection.json';
-import rule572 from './persistence_via_bits_job_notify_command.json';
+import rule571 from './persistence_via_bits_job_notify_command.json';
 
 export const rawRules = [
   rule1,
@@ -1155,5 +1154,4 @@ export const rawRules = [
   rule569,
   rule570,
   rule571,
-  rule572,
 ];

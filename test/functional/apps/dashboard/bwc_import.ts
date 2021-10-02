@@ -12,8 +12,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'settings', 'savedObjects', 'common']);
   const dashboardExpect = getService('dashboardExpect');
-
-  describe('bwc import', function describeIndexTests() {
+  // Legacy imports are no longer supported https://github.com/elastic/kibana/issues/103921
+  describe.skip('bwc import', function describeIndexTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.settings.navigateTo();

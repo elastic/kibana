@@ -23,6 +23,7 @@ export function defineEnrollRoutes({
   logger,
   kibanaConfigWriter,
   elasticsearch,
+  verificationCode,
   preboot,
 }: RouteDefinitionParams) {
   router.post(
@@ -35,11 +36,16 @@ export function defineEnrollRoutes({
           }),
           apiKey: schema.string({ minLength: 1 }),
           caFingerprint: schema.string({ maxLength: 64, minLength: 64 }),
+          code: schema.maybe(schema.string()),
         }),
       },
       options: { authRequired: false },
     },
     async (context, request, response) => {
+      if (!verificationCode.verify(request.body.code)) {
+        return response.forbidden();
+      }
+
       if (!preboot.isSetupOnHold()) {
         logger.error(`Invalid request to [path=${request.url.pathname}] outside of preboot stage`);
         return response.badRequest({ body: 'Cannot process request outside of preboot stage.' });

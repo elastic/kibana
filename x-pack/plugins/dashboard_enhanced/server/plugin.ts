@@ -24,7 +24,8 @@ export interface SetupContract {}
 export interface StartContract {}
 
 export class DashboardEnhancedPlugin
-  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
+  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies>
+{
   constructor(protected readonly context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {

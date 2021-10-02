@@ -32,6 +32,7 @@ Be sure to back up the encryption key value somewhere safe, as your alerting rul
 ==== Action settings
 
 `xpack.actions.enabled`::
+deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
 Feature toggle that enables Actions in {kib}.
 If `false`, all features dependent on Actions are disabled, including the *Observability* and *Security* apps.  Default: `true`.
 
@@ -106,7 +107,7 @@ Overrides the general `xpack.actions.rejectUnauthorized` configuration
 for requests made for this hostname/port.
 
 [[action-config-custom-host-verification-mode]] `xpack.actions.customHostSettings[n].ssl.verificationMode` {ess-icon}::
-Controls the verification of the server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection to the host server. Valid values are `full`, `certificate`, and `none`.
+Controls the verification of the server certificate that {kib} receives when making an outbound SSL/TLS connection to the host server. Valid values are `full`, `certificate`, and `none`.
 Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>. Overrides the general `xpack.actions.ssl.verificationMode` configuration
 for requests made for this hostname/port.
 

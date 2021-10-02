@@ -22,7 +22,7 @@ import { TopNavMenu } from '../../../navigation/public';
 import { FORMATS_UI_SETTINGS } from 'src/plugins/field_formats/common';
 const dataPlugin = dataPluginMock.createStartContract();
 
-export const discoverServiceMock = ({
+export const discoverServiceMock = {
   core: coreMock.createStart(),
   chrome: chromeServiceMock.createStartContract(),
   history: () => ({
@@ -89,4 +89,7 @@ export const discoverServiceMock = ({
     useChartsTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
     useChartsBaseTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
   },
-} as unknown) as DiscoverServices;
+  storage: {
+    get: jest.fn(),
+  },
+} as unknown as DiscoverServices;

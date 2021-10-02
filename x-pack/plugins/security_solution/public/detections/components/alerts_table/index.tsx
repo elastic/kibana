@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiLoadingContent, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
@@ -173,6 +172,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
             title = i18n.OPENED_ALERT_SUCCESS_TOAST(updated);
             break;
           case 'acknowledged':
+          case 'in-progress':
             title = i18n.ACKNOWLEDGED_ALERT_SUCCESS_TOAST(updated);
         }
         displaySuccessToast(title, dispatchToaster);
@@ -192,6 +192,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           title = i18n.OPENED_ALERT_FAILED_TOAST;
           break;
         case 'acknowledged':
+        case 'in-progress':
           title = i18n.ACKNOWLEDGED_ALERT_FAILED_TOAST;
       }
       displayErrorToast(title, [error.message], dispatchToaster);
@@ -369,11 +370,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   }, [dispatch, defaultTimelineModel, filterManager, tGridEnabled, timelineId]);
 
   if (loading || indexPatternsLoading || isEmpty(selectedPatterns)) {
-    return (
-      <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
-        <EuiLoadingContent data-test-subj="loading-alerts-panel" />
-      </EuiPanel>
-    );
+    return null;
   }
 
   return (
