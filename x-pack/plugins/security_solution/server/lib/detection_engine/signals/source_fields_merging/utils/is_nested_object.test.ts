@@ -38,7 +38,6 @@ describe('is_nested_object', () => {
    * Simple table test of values of primitive arrays which should all return true
    */
   test.each([[[{}]], [[{ a: 'foo' }]]])(
-    // eslint-disable-next-line jest/no-identical-title
     'returns false when a primitive array of %o is passed in',
     (arrayValues) => {
       expect(isNestedObject(arrayValues)).toEqual(true);

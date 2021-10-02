@@ -40,7 +40,6 @@ describe('is_objectlike_or_array_of_objectlikes', () => {
    * Simple table test of values of primitives which should all fail
    */
   test.each([[null], [1], ['string'], [null], [String('hi')], [Boolean(true)], [undefined]])(
-    // eslint-disable-next-line jest/no-identical-title
     'returns true when a primitive array of %o is passed in',
     (arrayValue) => {
       expect(isObjectLikeOrArrayOfObjectLikes(arrayValue)).toEqual(false);
@@ -64,7 +63,6 @@ describe('is_objectlike_or_array_of_objectlikes', () => {
    * Simple table test of objects which should pass
    */
   test.each([[{}], [{ a: 1 }]])(
-    // eslint-disable-next-line jest/no-identical-title
     'returns false when the array of %o contains an object is passed in',
     (arrayValue) => {
       expect(isObjectLikeOrArrayOfObjectLikes(arrayValue)).toEqual(true);
