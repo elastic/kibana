@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mapKeys, reduce } from 'lodash';
+import { mapKeys, reduce, transform } from 'lodash';
 import { merge } from 'lodash/fp';
 import {
   EuiFlexGroup,
@@ -132,18 +132,28 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     deserializer: (payload) => ({
       ...payload,
       policy_ids: payload.policy_ids ?? [],
+
+      queries:
+        (payload?.queries &&
+          Object.entries(payload.queries).map(([id, query]) => ({ ...query, id }))) ??
+        [],
     }),
     serializer: (payload) => ({
       ...payload,
-      // policy_id: payload.policy_id[0],
+      queries: transform(
+        payload.queries,
+        (result, query) => {
+          const { id: queryId, ...rest } = query;
+          result[queryId] = rest;
+        },
+        {}
+      ),
     }),
     defaultValue: merge(
       {
         name: '',
         description: '',
         enabled: true,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        package: packageInfo!,
         queries: [],
         policy_ids: [],
       },
@@ -158,14 +168,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     [agentPolicyOptions]
   );
 
-  const [
-    {
-      package: { version: integrationPackageVersion } = { version: undefined },
-      policy_ids: policyIds,
-    },
-  ] = useFormData({
+  const [{ policy_ids: policyIds }] = useFormData({
     form,
-    watch: ['package', 'policy_ids'],
+    watch: ['policy_ids'],
   });
 
   const currentPolicy = useMemo(() => {
@@ -253,12 +258,11 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           path="queries"
           component={QueriesField}
           packId={defaultValue?.id ?? null}
-          integrationPackageVersion={integrationPackageVersion}
+          integrationPackageVersion={packageInfo?.version}
           handleNameChange={handleNameChange}
         />
 
         <CommonUseField path="enabled" component={GhostFormField} />
-        <CommonUseField path="package" component={GhostFormField} />
       </Form>
       <EuiSpacer size="xxl" />
       <EuiSpacer size="xxl" />

@@ -41,7 +41,7 @@ const PacksTableComponent = () => {
   );
 
   const renderQueries = useCallback(
-    (queries: PackagePolicy['inputs'][0]['streams']) => <>{queries?.length ?? 0}</>,
+    (queries) => <>{(queries && Object.keys(queries).length) ?? 0}</>,
     []
   );
 

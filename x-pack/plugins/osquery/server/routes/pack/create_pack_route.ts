@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
 import { compact, transform, set, unset, has, difference, filter, find, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
@@ -14,7 +15,6 @@ import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 
 import { PLUGIN_ID } from '../../../common';
-
 
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
 
@@ -31,6 +31,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       const esClient = context.core.elasticsearch.client.asCurrentUser;
       const savedObjectsClient = context.core.savedObjects.client;
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
+      const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
 
       const { name, description, queries, enabled, policy_ids } = request.body;
 
@@ -47,6 +48,10 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           description,
           queries,
           enabled,
+          created_at: moment().toISOString(),
+          created_by: currentUser,
+          updated_at: moment().toISOString(),
+          updated_by: currentUser,
         },
         {
           refresh: 'wait_for',
@@ -63,14 +68,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             produce(packagePolicy, (draft) => {
               delete packagePolicy.id;
               set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
-                queries: transform(
-                  queries,
-                  (result, query) => {
-                    const { id: queryId, ...rest } = query;
-                    result[queryId] = rest;
-                  },
-                  {}
-                ),
+                queries,
               });
               return draft;
             })

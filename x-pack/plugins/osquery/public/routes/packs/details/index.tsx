@@ -50,6 +50,13 @@ const PackDetailsPageComponent = () => {
 
   useBreadcrumbs('pack_details', { packName: data?.name ?? '' });
 
+  const queriesArray = useMemo(
+    () =>
+      (data?.queries && Object.entries(data.queries).map(([id, query]) => ({ ...query, id }))) ??
+      [],
+    [data]
+  );
+
   const LeftColumn = useMemo(
     () => (
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
@@ -136,10 +143,12 @@ const PackDetailsPageComponent = () => {
     [data?.policy_ids, editQueryLinkProps, permissions]
   );
 
+  console.error('queriesArray', queriesArray);
+
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
       {data && (
-        <PackQueriesStatusTable agentIds={agentIds} packName={data.name} data={data.queries} />
+        <PackQueriesStatusTable agentIds={agentIds} packName={data.name} data={queriesArray} />
       )}
     </WithHeaderLayout>
   );

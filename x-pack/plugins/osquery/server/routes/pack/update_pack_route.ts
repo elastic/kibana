@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
 import { transform, set, unset, has, difference, filter, find, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
@@ -30,6 +31,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       const esClient = context.core.elasticsearch.client.asCurrentUser;
       const savedObjectsClient = context.core.savedObjects.client;
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
+      const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
 
       const { name, description, queries, enabled, policy_ids } = request.body;
 
@@ -71,7 +73,16 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       const updatedPackSO = await savedObjectsClient.update(
         packSavedObjectType,
         request.params.id,
-        { name, description, queries, enabled }
+        {
+          name,
+          description,
+          queries,
+          enabled,
+          created_at: currentPackSO.attributes.created_at,
+          created_by: currentPackSO.attributes.created_by,
+          updated_at: moment().toISOString(),
+          updated_by: currentUser,
+        }
       );
 
       await Promise.all(
@@ -122,14 +133,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                 set(draft, 'inputs[0].streams', []);
               }
               set(draft, `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`, {
-                queries: transform(
-                  queries,
-                  (result, query) => {
-                    const { id: queryId, ...rest } = query;
-                    result[queryId] = rest;
-                  },
-                  {}
-                ),
+                queries,
               });
               return draft;
             })

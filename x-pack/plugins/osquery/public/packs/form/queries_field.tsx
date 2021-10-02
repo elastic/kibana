@@ -27,38 +27,12 @@ interface QueriesFieldProps {
   handleNameChange: (name: string) => void;
   field: FieldHook<OsqueryManagerPackagePolicyInput[]>;
   integrationPackageVersion?: string | undefined;
-  packId: string;
 }
-
-interface GetNewQueryProps {
-  id: string;
-  interval: string;
-  query: string;
-  platform?: string | undefined;
-  version?: string | undefined;
-  ecs_mapping?: Record<
-    string,
-    {
-      field: string;
-    }
-  >;
-}
-
-const getNewQuery = (payload: GetNewQueryProps) => ({
-  id: payload.id,
-  interval: payload.interval,
-  query: payload.query,
-  ecs_mapping: payload.ecs_mapping,
-  enabled: true,
-  platform: payload.platform,
-  version: payload.version,
-});
 
 const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
   field,
   handleNameChange,
   integrationPackageVersion,
-  packId,
 }) => {
   const [showAddQueryFlyout, setShowAddQueryFlyout] = useState(false);
   const [showEditQueryFlyout, setShowEditQueryFlyout] = useState<number>(-1);
@@ -150,19 +124,14 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       new Promise<void>((resolve) => {
         setValue(
           produce((draft) => {
-            draft.push(
-              getNewQuery({
-                ...newQuery,
-                packId,
-              })
-            );
+            draft.push(newQuery);
             return draft;
           })
         );
         handleHideAddFlyout();
         resolve();
       }),
-    [handleHideAddFlyout, packId, setValue]
+    [handleHideAddFlyout, setValue]
   );
 
   const handleDeleteQueries = useCallback(() => {
@@ -181,15 +150,13 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       setValue(
         produce((draft) => {
           forEach(parsedContent.queries, (newQuery, newQueryId) => {
-            draft.push(
-              getNewQuery({
-                id: newQueryId,
-                interval: newQuery.interval ?? parsedContent.interval,
-                query: newQuery.query,
-                version: newQuery.version ?? parsedContent.version,
-                platform: getSupportedPlatforms(newQuery.platform ?? parsedContent.platform),
-              })
-            );
+            draft.push({
+              id: newQueryId,
+              interval: newQuery.interval ?? parsedContent.interval,
+              query: newQuery.query,
+              version: newQuery.version ?? parsedContent.version,
+              platform: getSupportedPlatforms(newQuery.platform ?? parsedContent.platform),
+            });
           });
 
           return draft;
