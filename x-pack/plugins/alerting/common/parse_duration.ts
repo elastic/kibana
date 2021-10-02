@@ -28,7 +28,7 @@ export function parseDuration(duration: string): number {
 }
 
 export function getDurationNumberInItsUnit(duration: string): number {
-  return parseInt(duration.replace(/[^0-9.]/g, ''), 0);
+  return parseInt(duration.replace(/[^0-9.]/g, ''), 10);
 }
 
 export function getDurationUnitValue(duration: string): string {

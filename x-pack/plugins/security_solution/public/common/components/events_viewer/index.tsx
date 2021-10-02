@@ -37,7 +37,6 @@ const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 const leadingControlColumns: ControlColumnProps[] = [
   {
     ...defaultControlColumn,
-    // eslint-disable-next-line react/display-name
     headerCellRender: () => <>{i18n.ACTIONS}</>,
   },
 ];

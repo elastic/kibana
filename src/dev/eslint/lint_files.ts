@@ -20,18 +20,13 @@ function lintFilesOnFS(cli: CLIEngine, files: File[]) {
 
 // For files living somewhere else (ie. git object)
 async function lintFilesOnContent(cli: CLIEngine, files: File[]) {
-  const report: {
-    results: any[];
-    errorCount: number;
-    warningCount: number;
-    fixableErrorCount: number;
-    fixableWarningCount: number;
-  } = {
+  const report: CLIEngine.LintReport = {
     results: [],
     errorCount: 0,
     warningCount: 0,
     fixableErrorCount: 0,
     fixableWarningCount: 0,
+    usedDeprecatedRules: [],
   };
 
   for (let i = 0; i < files.length; i++) {
@@ -46,6 +41,7 @@ async function lintFilesOnContent(cli: CLIEngine, files: File[]) {
     report.warningCount += r.warningCount;
     report.fixableErrorCount += r.fixableErrorCount;
     report.fixableWarningCount += r.fixableWarningCount;
+    report.usedDeprecatedRules.push(...r.usedDeprecatedRules);
   }
 
   return report;

@@ -68,7 +68,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
-  const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
+  const { timelineFullScreen } = useTimelineFullScreen();
 
   useEffect(() => {
     if (!savedObjectId) {
@@ -145,7 +145,6 @@ const StatefulTimelineComponent: React.FC<Props> = ({
           graphEventId={graphEventId}
           renderCellValue={renderCellValue}
           rowRenderers={rowRenderers}
-          setTimelineFullScreen={setTimelineFullScreen}
           timelineId={timelineId}
           timelineType={timelineType}
           timelineDescription={description}

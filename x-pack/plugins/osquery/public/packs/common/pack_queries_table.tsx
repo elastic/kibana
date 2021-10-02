@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-shadow, react-perf/jsx-no-new-object-as-prop, react/jsx-no-bind, react/display-name, react-perf/jsx-no-new-function-as-prop, react-perf/jsx-no-new-array-as-prop */
+/* eslint-disable @typescript-eslint/no-shadow, react-perf/jsx-no-new-object-as-prop, react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop, react-perf/jsx-no-new-array-as-prop */
 
 import { find } from 'lodash/fp';
 import React, { useState } from 'react';

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { get } from 'lodash';
 import memoizeOne from 'memoize-one';

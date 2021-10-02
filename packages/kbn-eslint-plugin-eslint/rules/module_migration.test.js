@@ -11,9 +11,10 @@ const rule = require('./module_migration');
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({
-  parser: require.resolve('babel-eslint'),
+  parser: require.resolve('@babel/eslint-parser'),
   parserOptions: {
     ecmaVersion: 2018,
+    requireConfigFile: false,
   },
 });
 
@@ -69,6 +70,12 @@ ruleTester.run('@kbn/eslint/module-migration', rule, {
           message: 'Re-exported module "foo" should be "bar"',
         },
       ],
+      output: dedent`
+        import 'bar'
+        require('bar/foo2')
+        export { foo } from 'bar'
+        export const foo2 = 'bar'
+      `,
     },
   ],
 });

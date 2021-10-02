@@ -50,6 +50,7 @@ function ListItem({
   children: ReactNode;
 }) {
   return (
+    // eslint-disable-next-line jsx-a11y/role-supports-aria-props
     <li
       className={classNames('gphGuidancePanel__item', {
         // eslint-disable-next-line @typescript-eslint/naming-convention

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
