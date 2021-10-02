@@ -38,7 +38,6 @@ import {
   createSelectRangeAction,
 } from './actions';
 import { APPLY_FILTER_TRIGGER, applyFilterTrigger } from './triggers';
-// import { getIndexPatternLoad } from './data_views/expressions';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { getTableViewDescription } from './utils/table_inspector_view';
 import { NowProvider, NowProviderInternalContract } from './now_provider';
@@ -81,8 +80,6 @@ export class DataPublicPlugin
     }: DataSetupDependencies
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
-
-    // expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
 
     this.usageCollection = usageCollection;
 
