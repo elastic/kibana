@@ -1069,7 +1069,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               listItems={
                                 Array [
                                   Object {
-                                    "data-test-subj": "collapsibleNavAppLink-discover",
+                                    "data-test-subj": "collapsibleNavAppLinks",
                                     "href": "discover",
                                     "isActive": false,
                                     "isDisabled": undefined,
@@ -1077,7 +1077,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                     "onClick": [Function],
                                   },
                                   Object {
-                                    "data-test-subj": "collapsibleNavAppLink-visualize",
+                                    "data-test-subj": "collapsibleNavAppLinks",
                                     "href": "visualize",
                                     "isActive": false,
                                     "isDisabled": undefined,
@@ -1085,7 +1085,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                     "onClick": [Function],
                                   },
                                   Object {
-                                    "data-test-subj": "collapsibleNavAppLink-dashboard",
+                                    "data-test-subj": "collapsibleNavAppLinks",
                                     "href": "dashboard",
                                     "isActive": false,
                                     "isDisabled": undefined,
@@ -1108,7 +1108,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               >
                                 <EuiListGroupItem
                                   color="subdued"
-                                  data-test-subj="collapsibleNavAppLink-discover"
+                                  data-test-subj="collapsibleNavAppLinks"
                                   href="discover"
                                   isActive={false}
                                   key="title-0"
@@ -1123,7 +1123,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                   >
                                     <a
                                       className="euiListGroupItem__button"
-                                      data-test-subj="collapsibleNavAppLink-discover"
+                                      data-test-subj="collapsibleNavAppLinks"
                                       href="discover"
                                       onClick={[Function]}
                                       rel="noreferrer"
@@ -1139,7 +1139,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                 </EuiListGroupItem>
                                 <EuiListGroupItem
                                   color="subdued"
-                                  data-test-subj="collapsibleNavAppLink-visualize"
+                                  data-test-subj="collapsibleNavAppLinks"
                                   href="visualize"
                                   isActive={false}
                                   key="title-1"
@@ -1154,7 +1154,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                   >
                                     <a
                                       className="euiListGroupItem__button"
-                                      data-test-subj="collapsibleNavAppLink-visualize"
+                                      data-test-subj="collapsibleNavAppLinks"
                                       href="visualize"
                                       onClick={[Function]}
                                       rel="noreferrer"
@@ -1170,7 +1170,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                 </EuiListGroupItem>
                                 <EuiListGroupItem
                                   color="subdued"
-                                  data-test-subj="collapsibleNavAppLink-dashboard"
+                                  data-test-subj="collapsibleNavAppLinks"
                                   href="dashboard"
                                   isActive={false}
                                   key="title-2"
@@ -1185,7 +1185,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                   >
                                     <a
                                       className="euiListGroupItem__button"
-                                      data-test-subj="collapsibleNavAppLink-dashboard"
+                                      data-test-subj="collapsibleNavAppLinks"
                                       href="dashboard"
                                       onClick={[Function]}
                                       rel="noreferrer"
@@ -1361,7 +1361,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               listItems={
                                 Array [
                                   Object {
-                                    "data-test-subj": "collapsibleNavAppLink-metrics",
+                                    "data-test-subj": "collapsibleNavAppLinks",
                                     "href": "metrics",
                                     "isActive": false,
                                     "isDisabled": undefined,
@@ -1369,7 +1369,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                     "onClick": [Function],
                                   },
                                   Object {
-                                    "data-test-subj": "collapsibleNavAppLink-logs",
+                                    "data-test-subj": "collapsibleNavAppLinks",
                                     "href": "logs",
                                     "isActive": false,
                                     "isDisabled": undefined,
@@ -1392,7 +1392,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               >
                                 <EuiListGroupItem
                                   color="subdued"
-                                  data-test-subj="collapsibleNavAppLink-metrics"
+                                  data-test-subj="collapsibleNavAppLinks"
                                   href="metrics"
                                   isActive={false}
                                   key="title-0"
@@ -1407,7 +1407,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                   >
                                     <a
                                       className="euiListGroupItem__button"
-                                      data-test-subj="collapsibleNavAppLink-metrics"
+                                      data-test-subj="collapsibleNavAppLinks"
                                       href="metrics"
                                       onClick={[Function]}
                                       rel="noreferrer"
@@ -1423,7 +1423,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                 </EuiListGroupItem>
                                 <EuiListGroupItem
                                   color="subdued"
-                                  data-test-subj="collapsibleNavAppLink-logs"
+                                  data-test-subj="collapsibleNavAppLinks"
                                   href="logs"
                                   isActive={false}
                                   key="title-1"
@@ -1438,7 +1438,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                   >
                                     <a
                                       className="euiListGroupItem__button"
-                                      data-test-subj="collapsibleNavAppLink-logs"
+                                      data-test-subj="collapsibleNavAppLinks"
                                       href="logs"
                                       onClick={[Function]}
                                       rel="noreferrer"
@@ -1614,7 +1614,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               listItems={
                                 Array [
                                   Object {
-                                    "data-test-subj": "collapsibleNavAppLink-siem",
+                                    "data-test-subj": "collapsibleNavAppLinks",
                                     "href": "siem",
                                     "isActive": false,
                                     "isDisabled": undefined,
@@ -1637,7 +1637,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               >
                                 <EuiListGroupItem
                                   color="subdued"
-                                  data-test-subj="collapsibleNavAppLink-siem"
+                                  data-test-subj="collapsibleNavAppLinks"
                                   href="siem"
                                   isActive={false}
                                   key="title-0"
@@ -1652,7 +1652,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                   >
                                     <a
                                       className="euiListGroupItem__button"
-                                      data-test-subj="collapsibleNavAppLink-siem"
+                                      data-test-subj="collapsibleNavAppLinks"
                                       href="siem"
                                       onClick={[Function]}
                                       rel="noreferrer"
@@ -1828,7 +1828,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               listItems={
                                 Array [
                                   Object {
-                                    "data-test-subj": "collapsibleNavAppLink-monitoring",
+                                    "data-test-subj": "collapsibleNavAppLinks",
                                     "href": "monitoring",
                                     "isActive": false,
                                     "isDisabled": undefined,
@@ -1851,7 +1851,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               >
                                 <EuiListGroupItem
                                   color="subdued"
-                                  data-test-subj="collapsibleNavAppLink-monitoring"
+                                  data-test-subj="collapsibleNavAppLinks"
                                   href="monitoring"
                                   isActive={false}
                                   key="title-0"
@@ -1866,7 +1866,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                   >
                                     <a
                                       className="euiListGroupItem__button"
-                                      data-test-subj="collapsibleNavAppLink-monitoring"
+                                      data-test-subj="collapsibleNavAppLinks"
                                       href="monitoring"
                                       onClick={[Function]}
                                       rel="noreferrer"
@@ -1910,7 +1910,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     >
                       <EuiListGroupItem
                         color="text"
-                        data-test-subj="collapsibleNavAppLink-canvas"
+                        data-test-subj="collapsibleNavAppLinks"
                         href="canvas"
                         isActive={false}
                         label="canvas"
@@ -1922,7 +1922,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         >
                           <a
                             className="euiListGroupItem__button"
-                            data-test-subj="collapsibleNavAppLink-canvas"
+                            data-test-subj="collapsibleNavAppLinks"
                             href="canvas"
                             onClick={[Function]}
                             rel="noreferrer"
