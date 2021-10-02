@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { findIndex, set, unset, has, filter } from 'lodash';
+import { set, unset, has, filter, pickBy } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
 
@@ -59,7 +59,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
         savedQuerySavedObjectType,
         // @ts-expect-error update types
         request.params.id,
-        {
+        pickBy({
           id: queryId,
           description,
           platform,
@@ -67,7 +67,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           version,
           interval,
           ecs_mapping,
-        }
+        })
       );
 
       const { saved_objects: packs } = await savedObjectsClient.find({
@@ -98,85 +98,92 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
             )
           );
 
-          // console.log('currentPackSO', JSON.stringify(currentPackSO, null, 2));
-          // @ts-expect-error update types
-          const savedQueryIndex = findIndex(currentPackSO.attributes.queries, [
-            'id',
-            // @ts-expect-error update types
-            currentSavedQuerySO.attributes.id,
-          ]);
-          // console.log('savedQueryIndex', savedQueryIndex);
-
-          await savedObjectsClient.update(
-            packSavedObjectType,
-            currentPackSO.id,
-            // @ts-expect-error update types
-            produce(currentPackSO.attributes, (draftPack) => {
+          if (currentPackSO.attributes.queries[currentSavedQuerySO.attributes.id]) {
+            await savedObjectsClient.update(
+              packSavedObjectType,
+              currentPackSO.id,
               // @ts-expect-error update types
-              draftPack.queries[savedQueryIndex] = {
-                id: queryId,
-                platform,
-                query,
-                version,
-                interval,
-                ecs_mapping,
-              };
-
-              return draftPack;
-            }),
-            {
-              references: produce(currentPackSO.references, (draft) => {
-                // @ts-expect-error update types
-                if (currentSavedQuerySO.attributes.id !== queryId) {
-                  // @ts-expect-error update types
-                  draft = filter(draft, (reference) => reference.id === request.params.id);
-                  draft.push({
-                    // @ts-expect-error update types
-                    id: request.params.id,
-                    name: queryId,
-                    type: savedQuerySavedObjectType,
-                  });
+              produce(currentPackSO.attributes, (draftPack) => {
+                if (queryId !== currentSavedQuerySO.attributes.id) {
+                  delete draftPack.queries[currentSavedQuerySO.attributes.id];
                 }
-                return draft;
-              }),
-            }
-          );
-
-          await Promise.all(
-            currentPackagePolicies.map((packagePolicy) =>
-              packagePolicyService?.update(
-                savedObjectsClient,
-                esClient,
-                packagePolicy.id,
                 // @ts-expect-error update types
-                produce(packagePolicy, (draft) => {
-                  delete packagePolicy.id;
+                draftPack.queries[queryId] = pickBy({
+                  platform,
+                  query,
+                  version,
+                  interval,
+                  ecs_mapping,
+                });
+
+                return draftPack;
+              }),
+              {
+                references: produce(currentPackSO.references, (draft) => {
                   // @ts-expect-error update types
                   if (currentSavedQuerySO.attributes.id !== queryId) {
-                    unset(
+                    // @ts-expect-error update types
+                    draft = filter(draft, (reference) => reference.id === request.params.id);
+                    draft.push({
+                      // @ts-expect-error update types
+                      id: request.params.id,
+                      name: queryId,
+                      type: savedQuerySavedObjectType,
+                    });
+                  }
+                  return draft;
+                }),
+              }
+            );
+
+            await Promise.all(
+              currentPackagePolicies.map((packagePolicy) =>
+                packagePolicyService?.update(
+                  savedObjectsClient,
+                  esClient,
+                  packagePolicy.id,
+                  // @ts-expect-error update types
+                  produce(packagePolicy, (draft) => {
+                    delete packagePolicy.id;
+                    // @ts-expect-error update types
+                    if (currentSavedQuerySO.attributes.id !== queryId) {
+                      unset(
+                        draft,
+                        // @ts-expect-error update types
+                        `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}.${currentSavedQuerySO.attributes.id}`
+                      );
+                    }
+
+                    set(
                       draft,
                       // @ts-expect-error update types
-                      `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}.${currentSavedQuerySO.attributes.id}`
+                      `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}.${currentSavedQuerySO.attributes.id}`,
+                      pickBy({
+                        platform,
+                        query,
+                        version,
+                        interval,
+                        ecs_mapping,
+                      })
                     );
-                  }
-
-                  set(
-                    draft,
-                    // @ts-expect-error update types
-                    `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}.${currentSavedQuerySO.attributes.id}`,
-                    {
-                      platform,
-                      query,
-                      version,
-                      interval,
-                      ecs_mapping,
-                    }
-                  );
-                  return draft;
-                })
+                    return draft;
+                  })
+                )
               )
-            )
-          );
+            );
+          } else {
+            await savedObjectsClient.update(
+              packSavedObjectType,
+              currentPackSO.id,
+              {},
+              {
+                references: produce(currentPackSO.references, (draft) => {
+                  draft = filter(draft, (reference) => reference.id === request.params.id);
+                  return draft;
+                }),
+              }
+            );
+          }
         })
       );
 

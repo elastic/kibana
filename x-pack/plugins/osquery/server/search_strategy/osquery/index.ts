@@ -48,14 +48,12 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
           deps
         )
         .pipe(
-          map((response) => {
-            return {
-              ...response,
-              ...{
-                rawResponse: shimHitsTotal(response.rawResponse),
-              },
-            };
-          }),
+          map((response) => ({
+            ...response,
+            ...{
+              rawResponse: shimHitsTotal(response.rawResponse),
+            },
+          })),
           mergeMap((esSearchRes) => queryFactory.parse(request, esSearchRes))
         );
     },

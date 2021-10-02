@@ -143,8 +143,6 @@ const PackDetailsPageComponent = () => {
     [data?.policy_ids, editQueryLinkProps, permissions]
   );
 
-  console.error('queriesArray', queriesArray);
-
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
       {data && (

@@ -83,8 +83,6 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         return reset();
       }
 
-      console.error('savedQuery', savedQuery);
-
       setFieldValue('id', savedQuery.id);
       setFieldValue('query', savedQuery.query);
       setFieldValue('savedObjectId', savedQuery.savedObjectId);

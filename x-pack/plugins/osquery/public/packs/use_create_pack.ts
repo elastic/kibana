@@ -28,11 +28,10 @@ export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
   const setErrorToast = useErrorToast();
 
   return useMutation(
-    async (payload) => {
-      return http.post('/internal/osquery/packs', {
+    async (payload) =>
+      http.post('/internal/osquery/packs', {
         body: JSON.stringify(payload),
-      });
-    },
+      }),
     {
       onError: (error) => {
         if (error instanceof Error) {

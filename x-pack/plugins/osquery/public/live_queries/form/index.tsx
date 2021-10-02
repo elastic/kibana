@@ -94,9 +94,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const { form } = useForm({
     id: FORM_ID,
     schema: formSchema,
-    onSubmit: (payload) => {
-      return mutateAsync(payload);
-    },
+    onSubmit: (payload) => mutateAsync(payload),
     options: {
       stripEmptyFields: false,
     },

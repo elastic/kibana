@@ -6,17 +6,15 @@
  */
 
 import moment from 'moment-timezone';
-import { compact, transform, set, unset, has, difference, filter, find, map } from 'lodash';
+import { set, find } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../fleet/common';
 import { IRouter } from '../../../../../../src/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
-
 import { PLUGIN_ID } from '../../../common';
-
-import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
+import { packSavedObjectType } from '../../../common/types';
 
 export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(

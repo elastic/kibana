@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compact, transform, set, unset, has, difference, filter, find, map } from 'lodash';
+import { has, filter } from 'lodash';
 import { produce } from 'immer';
 import { schema } from '@kbn/config-schema';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../fleet/common';

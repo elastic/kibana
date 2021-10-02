@@ -10,13 +10,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
 import { produce } from 'immer';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { satisfies } from 'semver';
 
 import {
   OsqueryManagerPackagePolicyInputStream,
   OsqueryManagerPackagePolicyInput,
 } from '../../../common/types';
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { FieldHook } from '../../shared_imports';
 import { PackQueriesTable } from '../pack_queries_table';
 import { QueryFlyout } from '../queries/query_flyout';
