@@ -20,24 +20,32 @@ import type { RequestStatistics } from 'src/plugins/inspector/common';
 
 /** @public */
 export function getRequestInspectorStats(searchSource: ISearchSource) {
-  const stats: RequestStatistics = {};
   const index = searchSource.getField('index');
 
-  if (index) {
+  return getRequestInspectorStatsFromIndex(index?.title, index?.id);
+}
+
+/** @public */
+export function getRequestInspectorStatsFromIndex(dataViewTitle?: string, dataViewId?: string) {
+  const stats: RequestStatistics = {};
+
+  if (dataViewTitle) {
     stats.indexPattern = {
       label: i18n.translate('data.search.searchSource.indexPatternLabel', {
         defaultMessage: 'Index pattern',
       }),
-      value: index.title,
+      value: dataViewTitle,
       description: i18n.translate('data.search.searchSource.indexPatternDescription', {
         defaultMessage: 'The index pattern that connected to the Elasticsearch indices.',
       }),
     };
+  }
+  if (dataViewId) {
     stats.indexPatternId = {
       label: i18n.translate('data.search.searchSource.indexPatternIdLabel', {
         defaultMessage: 'Index pattern ID',
       }),
-      value: index.id!,
+      value: dataViewId,
       description: i18n.translate('data.search.searchSource.indexPatternIdDescription', {
         defaultMessage: 'The ID in the {kibanaIndexPattern} index.',
         values: { kibanaIndexPattern: '.kibana' },
