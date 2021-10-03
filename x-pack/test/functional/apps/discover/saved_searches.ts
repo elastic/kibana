@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.importExport.load(ecommerceSOPath);
-      await kibanaServer.uiSettings.replace(defaultSettings);
+      await kibanaServer.uiSettings.update(defaultSettings);
     });
 
     after('clean up archives', async () => {
@@ -67,10 +67,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it(`should unselect saved search when navigating to a 'new'`, async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('ecommerce');
-      await filterBar.addFilter('category', 'is', `Men's Shoes`);
       await setTimeRange();
-
+      await filterBar.addFilter('category', 'is', `Men's Shoes`);
       await queryBar.setQuery('customer_gender:MALE');
+
       await PageObjects.discover.saveSearch('test-unselect-saved-search');
 
       await queryBar.submitQuery();
