@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { pickBy } from 'lodash';
 import { useMutation, useQueryClient } from 'react-query';
 import { i18n } from '@kbn/i18n';
 
@@ -16,9 +17,10 @@ import { useErrorToast } from '../common/hooks/use_error_toast';
 
 interface UseUpdatePackProps {
   withRedirect?: boolean;
+  options: any;
 }
 
-export const useUpdatePack = ({ withRedirect }: UseUpdatePackProps) => {
+export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => {
   const queryClient = useQueryClient();
   const {
     application: { navigateToApp },
@@ -28,10 +30,13 @@ export const useUpdatePack = ({ withRedirect }: UseUpdatePackProps) => {
   const setErrorToast = useErrorToast();
 
   return useMutation(
-    async ({ id, ...payload }) =>
-      http.put(`/internal/osquery/packs/${id}`, {
-        body: JSON.stringify(payload),
-      }),
+    async ({ id, ...payload }) => {
+      console.error('daa', payload);
+      // return http.put(`/internal/osquery/packs/${id}`, {
+      //   body: JSON.stringify(payload),
+      // });
+      return;
+    },
     {
       onError: (error) => {
         if (error instanceof Error) {
@@ -57,6 +62,7 @@ export const useUpdatePack = ({ withRedirect }: UseUpdatePackProps) => {
           })
         );
       },
+      ...options,
     }
   );
 };

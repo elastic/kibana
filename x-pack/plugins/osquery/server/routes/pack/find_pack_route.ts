@@ -9,7 +9,10 @@ import { filter, has, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../fleet/common';
+import {
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../../../../fleet/common';
 import { IRouter } from '../../../../../../src/core/server';
 import { packSavedObjectType } from '../../../common/types';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -28,12 +31,6 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
       const savedObjectsClient = context.core.savedObjects.client;
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
 
-      const { items: packagePolicies } = await packagePolicyService?.list(savedObjectsClient, {
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-        perPage: 1000,
-        page: 1,
-      });
-
       const soClientResponse = await savedObjectsClient.find<{
         name: string;
         description: string;
@@ -51,71 +48,14 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
       });
 
       soClientResponse.saved_objects.map((pack) => {
-        const packName = pack.attributes.name;
-
         const policyIds = map(
-          filter(packagePolicies, (packagePolicy) =>
-            has(packagePolicy, `inputs[0].config.osquery.value.packs.${packName}`)
-          ),
-          'policy_id'
+          filter(pack.references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]),
+          'id'
         );
 
         pack.policy_ids = policyIds;
         return pack;
       });
-
-      // const packs = soClientResponse.saved_objects.map(({ attributes, references, ...rest }) => ({
-      //   ...rest,
-      //   ...attributes,
-      //   queries:
-      //     attributes.queries?.map((packQuery) => {
-      //       const queryReference = find(['name', packQuery.name], references);
-
-      //       if (queryReference) {
-      //         return {
-      //           ...packQuery,
-      //           id: queryReference?.id,
-      //         };
-      //       }
-
-      //       return packQuery;
-      //     }) ?? [],
-      // }));
-
-      // const savedQueriesIds = uniq<string>(
-      //   // @ts-expect-error update types
-      //   packs.reduce((acc, savedQuery) => [...acc, ...map('id', savedQuery.queries)], [])
-      // );
-
-      // const { saved_objects: savedQueries } = await savedObjectsClient.bulkGet(
-      //   savedQueriesIds.map((queryId) => ({
-      //     type: savedQuerySavedObjectType,
-      //     id: queryId,
-      //   }))
-      // );
-
-      // const packsWithSavedQueriesQueries = packs.map((pack) => ({
-      //   ...pack,
-      //   // @ts-expect-error update types
-      //   queries: pack.queries.reduce((acc, packQuery) => {
-      //     // @ts-expect-error update types
-      //     const savedQuerySO = find(['id', packQuery.id], savedQueries);
-
-      //     // @ts-expect-error update types
-      //     if (savedQuerySO?.attributes?.query) {
-      //       return [
-      //         ...acc,
-      //         {
-      //           ...packQuery,
-      //           // @ts-expect-error update types
-      //           query: find(['id', packQuery.id], savedQueries).attributes.query,
-      //         },
-      //       ];
-      //     }
-
-      //     return acc;
-      //   }, []),
-      // }));
 
       return response.ok({
         body: {

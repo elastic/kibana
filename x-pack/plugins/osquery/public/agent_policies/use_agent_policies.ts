@@ -18,7 +18,7 @@ export const useAgentPolicies = () => {
 
   return useQuery<GetAgentPoliciesResponse, unknown, GetAgentPoliciesResponseItem[]>(
     ['agentPolicies'],
-    () => http.get('/internal/osquery/fleet_wrapper/agent_policies/'),
+    () => http.get('/internal/osquery/fleet_wrapper/agent_policies'),
     {
       initialData: { items: [], total: 0, page: 1, perPage: 100 },
       keepPreviousData: true,

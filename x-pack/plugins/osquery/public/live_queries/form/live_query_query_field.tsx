@@ -25,9 +25,14 @@ const StyledEuiCodeBlock = styled(EuiCodeBlock)`
 interface LiveQueryQueryFieldProps {
   disabled?: boolean;
   field: FieldHook<string>;
+  handleSavedQueryIdChange?: (savedQueryId: string) => void;
 }
 
-const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ disabled, field }) => {
+const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
+  disabled,
+  field,
+  handleSavedQueryIdChange,
+}) => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const { value, setValue, errors } = field;
   const error = errors[0]?.message;
@@ -36,8 +41,12 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ disa
   const handleSavedQueryChange = useCallback(
     (savedQuery) => {
       setValue(savedQuery?.query ?? '');
+
+      if (handleSavedQueryIdChange) {
+        handleSavedQueryIdChange(savedQuery?.savedQueryId ?? null);
+      }
     },
-    [setValue]
+    [handleSavedQueryIdChange, setValue]
   );
 
   const handleEditorChange = useCallback(

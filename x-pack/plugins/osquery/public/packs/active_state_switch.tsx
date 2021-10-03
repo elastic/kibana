@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import { produce } from 'immer';
 import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-import { useMutation, useQueryClient } from 'react-query';
+import { useQueryClient } from 'react-query';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
-import {
-  PackagePolicy,
-  UpdatePackagePolicy,
-  packagePolicyRouteService,
-} from '../../../fleet/common';
+import { PackagePolicy } from '../../../fleet/common';
 import { useKibana } from '../common/lib/kibana';
 import { useAgentStatus } from '../agents/use_agent_status';
 import { useAgentPolicy } from '../agent_policies/use_agent_policy';
 import { ConfirmDeployAgentPolicyModal } from './form/confirmation_modal';
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import { useUpdatePack } from './use_update_pack';
 
 const StyledEuiLoadingSpinner = styled(EuiLoadingSpinner)`
   margin-right: ${({ theme }) => theme.eui.paddingSizes.s};
@@ -38,7 +34,6 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
     application: {
       capabilities: { osquery: permissions },
     },
-    http,
     notifications: { toasts },
   } = useKibana().services;
   const setErrorToast = useErrorToast();
@@ -49,64 +44,38 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
   const { data: agentStatus } = useAgentStatus({ policyId: item.policy_id });
   const { data: agentPolicy } = useAgentPolicy({ policyId: item.policy_id });
 
-  const { isLoading, mutate } = useMutation(
-    ({ id, ...payload }: UpdatePackagePolicy & { id: string }) =>
-      http.put(packagePolicyRouteService.getUpdatePath(id), {
-        body: JSON.stringify(payload),
-      }),
-    {
+  const { isLoading, mutateAsync } = useUpdatePack({
+    options: {
       onSuccess: (response) => {
         queryClient.invalidateQueries('packList');
         setErrorToast();
         toasts.addSuccess(
-          response.item.enabled
+          response.attributes.enabled
             ? i18n.translate('xpack.osquery.pack.table.activatedSuccessToastMessageText', {
                 defaultMessage: 'Successfully activated {packName}',
                 values: {
-                  packName: response.item.name,
+                  packName: response.attributes.name,
                 },
               })
             : i18n.translate('xpack.osquery.pack.table.deactivatedSuccessToastMessageText', {
                 defaultMessage: 'Successfully deactivated {packName}',
                 values: {
-                  packName: response.item.name,
+                  packName: response.attributes.name,
                 },
               })
         );
       },
+      // @ts-expect-error update types
       onError: (error) => {
-        // @ts-expect-error update types
         setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
       },
-    }
-  );
+    },
+  });
 
   const handleToggleActive = useCallback(() => {
-    const updatedPolicy = produce<
-      UpdatePackagePolicy & { id: string },
-      Omit<PackagePolicy, 'revision' | 'updated_at' | 'updated_by' | 'created_at' | 'created_by'> &
-        Partial<{
-          revision: number;
-          updated_at: string;
-          updated_by: string;
-          created_at: string;
-          created_by: string;
-        }>
-    >(item, (draft) => {
-      delete draft.revision;
-      delete draft.updated_at;
-      delete draft.updated_by;
-      delete draft.created_at;
-      delete draft.created_by;
-
-      draft.enabled = !item.enabled;
-
-      return draft;
-    });
-
-    mutate(updatedPolicy);
+    mutateAsync({ id: item.id, enabled: !item.attributes.enabled });
     hideConfirmationModal();
-  }, [hideConfirmationModal, item, mutate]);
+  }, [hideConfirmationModal, item, mutateAsync]);
 
   const handleToggleActiveClick = useCallback(() => {
     if (agentStatus?.total) {

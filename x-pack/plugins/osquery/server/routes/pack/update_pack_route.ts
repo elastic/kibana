@@ -6,10 +6,14 @@
  */
 
 import moment from 'moment-timezone';
-import { transform, set, unset, has, difference, filter, find, map } from 'lodash';
+import { set, unset, has, difference, filter, find, map, mapKeys, pickBy, uniq } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../fleet/common';
+import {
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PackagePolicy,
+} from '../../../../fleet/common';
 import { IRouter } from '../../../../../../src/core/server';
 
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
@@ -22,124 +26,256 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
     {
       path: '/internal/osquery/packs/{id}',
       validate: {
-        params: schema.object({}, { unknowns: 'allow' }),
-        body: schema.object({}, { unknowns: 'allow' }),
+        params: schema.object(
+          {
+            id: schema.string(),
+          },
+          { unknowns: 'allow' }
+        ),
+        body: schema.object(
+          {
+            name: schema.string(),
+            description: schema.maybe(schema.string()),
+            enabled: schema.maybe(schema.boolean()),
+            policy_ids: schema.maybe(schema.arrayOf(schema.string())),
+            queries: schema.recordOf(
+              schema.string(),
+              schema.object({
+                query: schema.string(),
+                interval: schema.maybe(schema.string()),
+                platform: schema.maybe(schema.string()),
+                version: schema.maybe(schema.string()),
+                ecs_mapping: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+              })
+            ),
+          },
+          { unknowns: 'allow' }
+        ),
       },
       options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
     },
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asCurrentUser;
       const savedObjectsClient = context.core.savedObjects.client;
+      const agentPolicyService = osqueryContext.service.getAgentPolicyService();
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
       const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
 
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { name, description, queries, enabled, policy_ids } = request.body;
 
-      const currentPackSO = await savedObjectsClient.get(packSavedObjectType, request.params.id);
-      const { items: packagePolicies } = await packagePolicyService?.list(savedObjectsClient, {
+      const currentPackSO = await savedObjectsClient.get<{ name: string; enabled: boolean }>(
+        packSavedObjectType,
+        request.params.id
+      );
+      const { items: packagePolicies } = (await packagePolicyService?.list(savedObjectsClient, {
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
         perPage: 1000,
         page: 1,
-      });
+      })) ?? { items: [] };
       const currentPackagePolicies = filter(packagePolicies, (packagePolicy) =>
         has(packagePolicy, `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}`)
       );
+      const agentPolicies = policy_ids
+        ? mapKeys(await agentPolicyService?.getByIds(savedObjectsClient, policy_ids), 'id')
+        : {};
+      const agentPolicyIds = Object.keys(agentPolicies);
 
-      const currentAgentPolicyIds = map(currentPackagePolicies, 'policy_id');
-      const agentPolicyIdsToRemove = difference(currentAgentPolicyIds, policy_ids);
-      const agentPolicyIdsToUpdate = difference(currentAgentPolicyIds, agentPolicyIdsToRemove);
-      const agentPolicyIdsToAdd = difference(policy_ids, currentAgentPolicyIds);
-
-      console.log('agentPolicyToRemove', agentPolicyIdsToRemove);
-      console.log('agentPolicyIdsToUpdate', agentPolicyIdsToUpdate);
-      console.log('agentPolicyToAdd', agentPolicyIdsToAdd);
-
-      await Promise.all(
-        agentPolicyIdsToRemove.map((agentPolicyId) => {
-          const packagePolicy = find(currentPackagePolicies, ['policy_id', agentPolicyId]);
-          return packagePolicyService?.update(
-            savedObjectsClient,
-            esClient,
-            packagePolicy.id,
-            produce(packagePolicy, (draft) => {
-              delete packagePolicy.id;
-              delete draft.inputs[0].config.osquery.value.packs[currentPackSO.attributes.name];
-              return draft;
-            })
-          );
-        })
-      );
-
-      const updatedPackSO = await savedObjectsClient.update(
+      await savedObjectsClient.update(
         packSavedObjectType,
         request.params.id,
         {
-          name,
-          description,
-          queries,
           enabled,
-          created_at: currentPackSO.attributes.created_at,
-          created_by: currentPackSO.attributes.created_by,
-          updated_at: moment().toISOString(),
-          updated_by: currentUser,
-        }
+          ...pickBy({
+            name,
+            description,
+            queries,
+            updated_at: moment().toISOString(),
+            updated_by: currentUser,
+          }),
+        },
+        policy_ids
+          ? {
+              refresh: 'wait_for',
+              references: produce(currentPackSO.references, (draft) => {
+                const nonAgentPolicyReferences = filter(
+                  draft,
+                  (reference) => reference.type !== AGENT_POLICY_SAVED_OBJECT_TYPE
+                );
+
+                draft = [
+                  ...nonAgentPolicyReferences,
+                  ...agentPolicyIds.map((id) => ({
+                    id,
+                    name: agentPolicies[id].name,
+                    type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+                  })),
+                ];
+
+                return draft;
+              }),
+            }
+          : {
+              refresh: 'wait_for',
+            }
       );
 
-      await Promise.all(
-        agentPolicyIdsToUpdate.map((agentPolicyId) => {
-          const packagePolicy = find(packagePolicies, ['policy_id', agentPolicyId]);
-          return packagePolicyService?.update(
-            savedObjectsClient,
-            esClient,
-            packagePolicy.id,
-            produce(packagePolicy, (draft) => {
-              delete packagePolicy.id;
-              if (updatedPackSO.attributes.name !== currentPackSO.attributes.name) {
-                unset(
-                  draft,
-                  `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}`
+      const currentAgentPolicyIds = map(
+        filter(currentPackSO.references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]),
+        'id'
+      );
+
+      const updatedPackSO = await savedObjectsClient.get<{
+        name: string;
+        queries: unknown;
+        enabled: boolean;
+      }>(packSavedObjectType, request.params.id);
+
+      if (enabled != null && enabled !== currentPackSO.attributes.enabled) {
+        if (enabled) {
+          const policyIds = policy_ids ? agentPolicyIds : currentAgentPolicyIds;
+
+          await Promise.all(
+            policyIds.map((agentPolicyId) => {
+              const packagePolicy = find(packagePolicies, ['policy_id', agentPolicyId]);
+
+              if (packagePolicy) {
+                return packagePolicyService?.update(
+                  savedObjectsClient,
+                  esClient,
+                  packagePolicy.id,
+                  produce<PackagePolicy>(packagePolicy, (draft) => {
+                    unset(draft, 'id');
+                    if (!(draft.inputs.length && draft.inputs[0].streams.length)) {
+                      set(draft, 'inputs[0].streams', []);
+                    }
+                    set(
+                      draft,
+                      `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
+                      {
+                        queries: updatedPackSO.attributes.queries,
+                      }
+                    );
+                    return draft;
+                  })
                 );
               }
-
-              set(draft, `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`, {
-                queries: transform(
-                  queries,
-                  (result, query) => {
-                    const { id: queryId, ...rest } = query;
-                    result[queryId] = rest;
-                  },
-                  {}
-                ),
-              });
-              return draft;
             })
           );
-        })
-      );
+        } else {
+          await Promise.all(
+            currentAgentPolicyIds.map((agentPolicyId) => {
+              const packagePolicy = find(currentPackagePolicies, ['policy_id', agentPolicyId]);
+              if (!packagePolicy) return;
 
-      await Promise.all(
-        agentPolicyIdsToAdd.map((agentPolicyId) => {
-          const packagePolicy = find(packagePolicies, ['policy_id', agentPolicyId]);
-
-          console.log('packagePolicy', JSON.stringify(packagePolicy));
-
-          return packagePolicyService?.update(
-            savedObjectsClient,
-            esClient,
-            packagePolicy.id,
-            produce(packagePolicy, (draft) => {
-              delete packagePolicy.id;
-              if (!(draft.inputs.length && draft.inputs[0].streams.length)) {
-                set(draft, 'inputs[0].streams', []);
-              }
-              set(draft, `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`, {
-                queries,
-              });
-              return draft;
+              return packagePolicyService?.update(
+                savedObjectsClient,
+                esClient,
+                packagePolicy.id,
+                produce<PackagePolicy>(packagePolicy, (draft) => {
+                  unset(draft, 'id');
+                  unset(
+                    draft,
+                    `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}`
+                  );
+                  return draft;
+                })
+              );
             })
           );
-        })
-      );
+        }
+      } else {
+        const agentPolicyIdsToRemove = uniq(difference(currentAgentPolicyIds, agentPolicyIds));
+        const agentPolicyIdsToUpdate = uniq(
+          difference(currentAgentPolicyIds, agentPolicyIdsToRemove)
+        );
+        const agentPolicyIdsToAdd = uniq(difference(agentPolicyIds, currentAgentPolicyIds));
+
+        // console.log('agentPolicyToRemove', agentPolicyIdsToRemove);
+        // console.log('agentPolicyIdsToUpdate', agentPolicyIdsToUpdate);
+        // console.log('agentPolicyToAdd', agentPolicyIdsToAdd);
+
+        await Promise.all(
+          agentPolicyIdsToRemove.map((agentPolicyId) => {
+            const packagePolicy = find(currentPackagePolicies, ['policy_id', agentPolicyId]);
+            if (packagePolicy) {
+              return packagePolicyService?.update(
+                savedObjectsClient,
+                esClient,
+                packagePolicy.id,
+                produce<PackagePolicy>(packagePolicy, (draft) => {
+                  unset(draft, 'id');
+                  unset(
+                    draft,
+                    `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}`
+                  );
+                  return draft;
+                })
+              );
+            }
+          })
+        );
+
+        await Promise.all(
+          agentPolicyIdsToUpdate.map((agentPolicyId) => {
+            const packagePolicy = find(packagePolicies, ['policy_id', agentPolicyId]);
+
+            if (packagePolicy) {
+              return packagePolicyService?.update(
+                savedObjectsClient,
+                esClient,
+                packagePolicy.id,
+                produce<PackagePolicy>(packagePolicy, (draft) => {
+                  unset(draft, 'id');
+                  if (updatedPackSO.attributes.name !== currentPackSO.attributes.name) {
+                    unset(
+                      draft,
+                      `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}`
+                    );
+                  }
+
+                  set(
+                    draft,
+                    `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
+                    {
+                      queries: updatedPackSO.attributes.queries,
+                    }
+                  );
+                  return draft;
+                })
+              );
+            }
+          })
+        );
+
+        await Promise.all(
+          agentPolicyIdsToAdd.map((agentPolicyId) => {
+            const packagePolicy = find(packagePolicies, ['policy_id', agentPolicyId]);
+
+            if (packagePolicy) {
+              return packagePolicyService?.update(
+                savedObjectsClient,
+                esClient,
+                packagePolicy.id,
+                produce<PackagePolicy>(packagePolicy, (draft) => {
+                  unset(draft, 'id');
+                  if (!(draft.inputs.length && draft.inputs[0].streams.length)) {
+                    set(draft, 'inputs[0].streams', []);
+                  }
+                  set(
+                    draft,
+                    `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
+                    {
+                      queries: updatedPackSO.attributes.queries,
+                    }
+                  );
+                  return draft;
+                })
+              );
+            }
+          })
+        );
+      }
 
       return response.ok({ body: updatedPackSO });
     }

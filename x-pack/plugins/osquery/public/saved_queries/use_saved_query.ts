@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isArray, mapValues, mapKeys } from 'lodash';
 import { useQuery } from 'react-query';
 
 import { PLUGIN_ID } from '../../common';
@@ -28,6 +29,21 @@ export const useSavedQuery = ({ savedQueryId }: UseSavedQueryProps) => {
     [SAVED_QUERY_ID, { savedQueryId }],
     () => http.get(`/internal/osquery/saved_query/${savedQueryId}`),
     {
+      select: (data) => {
+        console.error('data', data);
+
+        const ecsMapping = isArray(data.attributes.ecs_mapping)
+          ? mapValues(mapKeys(data.attributes.ecs_mapping, 'value'), (item) => ({
+              field: item.field,
+            }))
+          : data.attributes.ecs_mapping;
+
+        data.attributes.ecs_mapping = ecsMapping;
+
+        console.error('data2', data);
+
+        return data;
+      },
       keepPreviousData: true,
       onSuccess: (data) => {
         if (data.error) {

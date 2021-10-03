@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { filter, has, map } from 'lodash';
+import { filter, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { PLUGIN_ID } from '../../../common';
 
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../fleet/common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../fleet/common';
 import { IRouter } from '../../../../../../src/core/server';
 import { packSavedObjectType } from '../../../common/types';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
     {
@@ -26,13 +26,6 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
     },
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
-      const packagePolicyService = osqueryContext.service.getPackagePolicyService();
-
-      const packagePolicies = await packagePolicyService?.list(savedObjectsClient, {
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-        perPage: 1000,
-        page: 1,
-      });
 
       const { attributes, references, ...rest } = await savedObjectsClient.get<{
         name: string;
@@ -44,12 +37,7 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
         request.params.id
       );
 
-      const policyIds = map(
-        filter(packagePolicies?.items, (packagePolicy) =>
-          has(packagePolicy, `inputs[0].config.osquery.value.packs.${attributes.name}`)
-        ),
-        'policy_id'
-      );
+      const policyIds = map(filter(references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]), 'id');
 
       return response.ok({
         body: {

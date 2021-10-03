@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { reduce, pick } from 'lodash';
 import uuid from 'uuid';
 import moment from 'moment-timezone';
 
+import { savedQuerySavedObjectType } from '../../../common/types';
 import { PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -59,6 +61,23 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       // TODO: Add check for `runSavedQueries` only
 
       try {
+        // TODO: Move to the SavedQueryService
+        const savedQuery =
+          request.body.savedQueryId &&
+          (await soClient.get(savedQuerySavedObjectType, request.body.savedQueryId));
+        const ecsMappingObject = savedQuery?.attributes.ecs_mapping
+          ? {
+              ecs_mapping: reduce(
+                savedQuery?.attributes.ecs_mapping,
+                (acc, value) => {
+                  acc[value.value] = pick(value, ['field']);
+                  return acc;
+                },
+                {}
+              ),
+            }
+          : {};
+
         const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
         const action = {
           action_id: uuid.v4(),
@@ -71,6 +90,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           data: {
             id: uuid.v4(),
             query: request.body.query,
+            ...ecsMappingObject,
           },
         };
         const actionResponse = await esClient.index<{}, {}>({

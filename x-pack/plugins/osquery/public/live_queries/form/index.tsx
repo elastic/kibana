@@ -74,6 +74,10 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
 
   const formSchema = {
+    savedQueryId: {
+      type: FIELD_TYPES.TEXT,
+      validations: [],
+    },
     query: {
       type: FIELD_TYPES.TEXT,
       validations: [
@@ -107,6 +111,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           policiesSelected: [],
         },
         query: '',
+        savedQueryId: null,
       },
       defaultValue ?? {}
     ),
@@ -146,11 +151,17 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [queryStatus]
   );
 
+  const handleSavedQueryIdChange = useCallback(
+    (savedQueryId) => setFieldValue('savedQueryId', savedQueryId),
+    [setFieldValue]
+  );
+
   const queryComponentProps = useMemo(
     () => ({
       disabled: queryStatus === 'disabled',
+      handleSavedQueryIdChange,
     }),
-    [queryStatus]
+    [handleSavedQueryIdChange, queryStatus]
   );
 
   const flyoutFormDefaultValue = useMemo(() => ({ query }), [query]);
@@ -263,11 +274,18 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     if (defaultValue?.query) {
       setFieldValue('query', defaultValue?.query);
     }
+    // TODO: Set query and ECS mapping from savedQueryId object
+    if (defaultValue?.savedQueryId) {
+      setFieldValue('savedQueryId', defaultValue?.savedQueryId);
+    }
   }, [defaultValue, setFieldValue]);
 
   return (
     <>
-      <Form form={form}>{singleAgentMode ? singleAgentForm : <EuiSteps steps={formSteps} />}</Form>
+      <Form form={form}>
+        {singleAgentMode ? singleAgentForm : <EuiSteps steps={formSteps} />}
+        <UseField path="savedQueryId" component={GhostFormField} />
+      </Form>
       {showSavedQueryFlyout ? (
         <SavedQueryFlyout
           onClose={handleCloseSaveQueryFlout}

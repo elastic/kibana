@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { reduce, pick } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
@@ -34,8 +35,28 @@ export const findSavedQueryRoute = (router: IRouter) => {
         sortOrder: request.query.sortDirection,
       });
 
+      const savedObjects = savedQueries.saved_objects.map((savedObject) => {
+        const ecs_mapping = savedObject.attributes.ecs_mapping;
+
+        if (ecs_mapping) {
+          savedObject.attributes.ecs_mapping = reduce(
+            savedObject.attributes.ecs_mapping,
+            (acc, value) => {
+              acc[value.value] = pick(value, 'field');
+              return acc;
+            },
+            {}
+          );
+        }
+
+        return savedObject;
+      });
+
       return response.ok({
-        body: savedQueries,
+        body: {
+          ...savedQueries,
+          saved_objects: savedObjects,
+        },
       });
     }
   );

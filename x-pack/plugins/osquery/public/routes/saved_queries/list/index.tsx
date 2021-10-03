@@ -249,9 +249,9 @@ const SavedQueriesPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
-      {data?.savedObjects && (
+      {data?.saved_objects && (
         <EuiInMemoryTable
-          items={data?.savedObjects}
+          items={data?.saved_objects}
           itemId="id"
           // @ts-expect-error update types
           columns={columns}

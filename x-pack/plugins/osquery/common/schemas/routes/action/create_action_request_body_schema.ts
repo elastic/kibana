@@ -12,6 +12,7 @@ import { query, agentSelection } from '../../common/schemas';
 export const createActionRequestBodySchema = t.type({
   agentSelection,
   query,
+  savedQueryId: t.string,
 });
 
 export type CreateActionRequestBodySchema = t.OutputOf<typeof createActionRequestBodySchema>;

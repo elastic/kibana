@@ -200,6 +200,7 @@ export const ECSComboboxField: React.FC<ECSComboboxFieldProps> = ({
       isInvalid={isInvalid}
       fullWidth
       describedByIds={describedByIds}
+      isDisabled={euiFieldProps.isDisabled}
       {...rest}
     >
       <EuiComboBox
@@ -287,6 +288,7 @@ export const OsqueryColumnField: React.FC<OsqueryColumnFieldProps> = ({
       isInvalid={isInvalid}
       fullWidth
       describedByIds={describedByIds}
+      isDisabled={euiFieldProps.isDisabled}
       {...rest}
     >
       <EuiComboBox
@@ -320,9 +322,11 @@ export interface ECSMappingEditorFieldProps {
   field: FieldHook<string>;
   query: string;
   fieldRef: MutableRefObject<ECSMappingEditorFieldRef>;
+  euiFieldProps: EuiComboBoxProps;
 }
 
 interface ECSMappingEditorFormProps {
+  isDisabled?: boolean;
   osquerySchemaOptions: OsquerySchemaOption[];
   defaultValue?: FormData;
   onAdd?: (payload: FormData) => void;
@@ -409,7 +413,7 @@ interface ECSMappingEditorFormRef {
 }
 
 export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappingEditorFormProps>(
-  ({ osquerySchemaOptions, defaultValue, onAdd, onChange, onDelete }, ref) => {
+  ({ isDisabled, osquerySchemaOptions, defaultValue, onAdd, onChange, onDelete }, ref) => {
     const editForm = !!defaultValue;
     const currentFormData = useRef(defaultValue);
     const formSchema = {
@@ -513,6 +517,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
               euiFieldProps={{
                 label: 'Osquery result',
                 options: osquerySchemaOptions,
+                isDisabled,
               }}
             />
           </EuiFlexItem>
@@ -524,37 +529,44 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
                 </StyledButtonWrapper>
               </EuiFlexItem>
               <ECSFieldWrapper>
-                <CommonUseField path="key" component={ECSComboboxField} />
+                <CommonUseField
+                  path="key"
+                  component={ECSComboboxField}
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                  euiFieldProps={{ isDisabled }}
+                />
               </ECSFieldWrapper>
-              <EuiFlexItem grow={false}>
-                <StyledButtonWrapper>
-                  {defaultValue ? (
-                    <EuiButtonIcon
-                      aria-label={i18n.translate(
-                        'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.deleteECSMappingRowButtonAriaLabel',
-                        {
-                          defaultMessage: 'Delete ECS mapping row',
-                        }
-                      )}
-                      iconType="trash"
-                      color="danger"
-                      onClick={handleDeleteClick}
-                    />
-                  ) : (
-                    <EuiButtonIcon
-                      aria-label={i18n.translate(
-                        'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.addECSMappingRowButtonAriaLabel',
-                        {
-                          defaultMessage: 'Add ECS mapping row',
-                        }
-                      )}
-                      iconType="plus"
-                      color="primary"
-                      onClick={handleSubmit}
-                    />
-                  )}
-                </StyledButtonWrapper>
-              </EuiFlexItem>
+              {!isDisabled && (
+                <EuiFlexItem grow={false}>
+                  <StyledButtonWrapper>
+                    {defaultValue ? (
+                      <EuiButtonIcon
+                        aria-label={i18n.translate(
+                          'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.deleteECSMappingRowButtonAriaLabel',
+                          {
+                            defaultMessage: 'Delete ECS mapping row',
+                          }
+                        )}
+                        iconType="trash"
+                        color="danger"
+                        onClick={handleDeleteClick}
+                      />
+                    ) : (
+                      <EuiButtonIcon
+                        aria-label={i18n.translate(
+                          'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.addECSMappingRowButtonAriaLabel',
+                          {
+                            defaultMessage: 'Add ECS mapping row',
+                          }
+                        )}
+                        iconType="plus"
+                        color="primary"
+                        onClick={handleSubmit}
+                      />
+                    )}
+                  </StyledButtonWrapper>
+                </EuiFlexItem>
+              )}
             </ECSFieldColumn>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -583,7 +595,12 @@ interface OsqueryColumn {
   index: boolean;
 }
 
-export const ECSMappingEditorField = ({ field, query, fieldRef }: ECSMappingEditorFieldProps) => {
+export const ECSMappingEditorField = ({
+  field,
+  query,
+  fieldRef,
+  euiFieldProps,
+}: ECSMappingEditorFieldProps) => {
   const { setValue, value = {} } = field;
   const [osquerySchemaOptions, setOsquerySchemaOptions] = useState<OsquerySchemaOption[]>([]);
   const formRefs = useRef<Record<string, ECSMappingEditorFormRef>>({});
@@ -833,18 +850,21 @@ export const ECSMappingEditorField = ({ field, query, fieldRef }: ECSMappingEdit
           }}
           onChange={handleUpdateRow(ecsKey)}
           onDelete={handleDeleteRow}
+          isDisabled={!!euiFieldProps?.isDisabled}
         />
       ))}
-      <ECSMappingEditorForm
-        // eslint-disable-next-line
-        ref={(formRef) => {
-          if (formRef) {
-            formRefs.current.new = formRef;
-          }
-        }}
-        osquerySchemaOptions={osquerySchemaOptions}
-        onAdd={handleAddRow}
-      />
+      {!euiFieldProps?.isDisabled && (
+        <ECSMappingEditorForm
+          // eslint-disable-next-line
+          ref={(formRef) => {
+            if (formRef) {
+              formRefs.current.new = formRef;
+            }
+          }}
+          osquerySchemaOptions={osquerySchemaOptions}
+          onAdd={handleAddRow}
+        />
+      )}
     </>
   );
 };

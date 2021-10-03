@@ -82,7 +82,6 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'keyword',
     },
     queries: {
-      dynamic: true,
       properties: {
         id: {
           type: 'keyword',

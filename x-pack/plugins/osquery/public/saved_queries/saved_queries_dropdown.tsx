@@ -63,16 +63,16 @@ const SavedQueriesDropdownComponent = forwardRef<
 
   const queryOptions = useMemo(
     () =>
-      data?.savedObjects?.map((savedQuery) => ({
+      data?.saved_objects?.map((savedQuery) => ({
         label: savedQuery.attributes.id ?? '',
         value: {
-          savedObjectId: savedQuery.id,
+          savedQueryId: savedQuery.id,
           id: savedQuery.attributes.id,
           description: savedQuery.attributes.description,
           query: savedQuery.attributes.query,
         },
       })) ?? [],
-    [data?.savedObjects]
+    [data?.saved_objects]
   );
 
   const handleSavedQueryChange = useCallback(
@@ -85,15 +85,15 @@ const SavedQueriesDropdownComponent = forwardRef<
 
       const selectedSavedQuery = find(
         ['attributes.id', newSelectedOptions[0].value.id],
-        data?.savedObjects
+        data?.saved_objects
       );
 
       if (selectedSavedQuery) {
-        onChange({ ...selectedSavedQuery.attributes, savedObjectId: selectedSavedQuery.id });
+        onChange({ ...selectedSavedQuery.attributes, savedQueryId: selectedSavedQuery.id });
       }
       setSelectedOptions(newSelectedOptions);
     },
-    [data?.savedObjects, onChange]
+    [data?.saved_objects, onChange]
   );
 
   const renderOption = useCallback(
@@ -117,7 +117,7 @@ const SavedQueriesDropdownComponent = forwardRef<
     const savedQueryId = location.state?.form?.savedQueryId;
 
     if (savedQueryId) {
-      const savedQueryOption = find(['value.savedObjectId', savedQueryId], queryOptions);
+      const savedQueryOption = find(['value.savedQueryId', savedQueryId], queryOptions);
 
       if (savedQueryOption) {
         handleSavedQueryChange([savedQueryOption]);

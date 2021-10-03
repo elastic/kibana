@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isObject, isArray } from 'lodash';
 import { useMutation, useQueryClient } from 'react-query';
 import { i18n } from '@kbn/i18n';
 
@@ -31,6 +32,14 @@ export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) 
 
   return useMutation(
     async (payload) => {
+      console.error('payload', payload);
+      const ecsMapping =
+        isObject(payload.ecs_mapping) && !isArray(payload.ecs_mapping)
+          ? Object.entries(payload.ecs_mapping).map((item) => ({ value: item[0], ...item[1] }))
+          : payload.ecs_mapping;
+
+      console.error('ecsMapping', ecsMapping);
+
       const currentUser = await security.authc.getCurrentUser();
 
       if (!currentUser) {
@@ -49,6 +58,7 @@ export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) 
       return savedObjects.client.create(savedQuerySavedObjectType, {
         // @ts-expect-error update types
         ...payload,
+        ecs_mapping: ecsMapping,
         created_by: currentUser.username,
         created_at: new Date(Date.now()).toISOString(),
         updated_by: currentUser.username,

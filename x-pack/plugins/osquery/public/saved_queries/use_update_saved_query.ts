@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isObject, isArray } from 'lodash';
 import { useMutation, useQueryClient } from 'react-query';
 import { i18n } from '@kbn/i18n';
 
@@ -28,10 +29,16 @@ export const useUpdateSavedQuery = ({ savedQueryId }: UseUpdateSavedQueryProps) 
   const setErrorToast = useErrorToast();
 
   return useMutation(
-    (payload) =>
-      http.put(`/internal/osquery/saved_query/${savedQueryId}`, {
-        body: JSON.stringify(payload),
-      }),
+    (payload) => {
+      const ecsMapping =
+        isObject(payload.ecs_mapping) && !isArray(payload.ecs_mapping)
+          ? Object.entries(payload.ecs_mapping).map((item) => ({ value: item[0], ...item[1] }))
+          : payload.ecs_mapping;
+
+      return http.put(`/internal/osquery/saved_query/${savedQueryId}`, {
+        body: JSON.stringify({ ...payload, ecs_mapping: ecsMapping }),
+      });
+    },
     {
       onError: (error) => {
         if (error instanceof Error) {
