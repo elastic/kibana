@@ -8,6 +8,7 @@
 
 import path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
+import normalizePath from 'normalize-path';
 import { CiStatsReporter } from '../ci_stats_reporter';
 import { ToolingLog } from '../tooling_log';
 
@@ -23,39 +24,39 @@ export class Metrics {
     this.reporter = CiStatsReporter.fromEnv(log);
     this.meta = new Map();
     this.startTime = Date.now();
-    this.filePath = path.relative(REPO_ROOT, process.argv[1]).replace('.js', '');
+
+    // standardize to unix path
+    this.filePath = normalizePath(path.relative(REPO_ROOT, process.argv[1]).replace('.js', ''));
+  }
+
+  createTiming(meta: object, command?: string) {
+    return {
+      group: `${command ? `${this.filePath} ${command}` : this.filePath}`,
+      id: 'total',
+      ms: Date.now() - this.startTime,
+      meta: {
+        nestedTiming: process.env.CI_STATS_NESTED_TIMING,
+        ...Object.fromEntries(this.meta),
+        ...meta,
+      },
+    };
+  }
+
+  async reportCancelled(command?: string) {
+    return await this.reporter.timings({
+      timings: [this.createTiming({ cancelled: true }, command)],
+    });
   }
 
   async reportSuccess(command?: string) {
     return await this.reporter.timings({
-      timings: [
-        {
-          group: `${command ? `${this.filePath} ${command}` : this.filePath}`,
-          id: 'total',
-          ms: Date.now() - this.startTime,
-          meta: {
-            success: true,
-            ...Object.fromEntries(this.meta),
-          },
-        },
-      ],
+      timings: [this.createTiming({ success: true }, command)],
     });
   }
 
   async reportError(errorMessage?: string, command?: string) {
     return await this.reporter.timings({
-      timings: [
-        {
-          group: `${command ? `${this.filePath} ${command}` : this.filePath}`,
-          id: 'total',
-          ms: Date.now() - this.startTime,
-          meta: {
-            success: false,
-            errorMessage,
-            ...Object.fromEntries(this.meta),
-          },
-        },
-      ],
+      timings: [this.createTiming({ success: false, errorMessage }, command)],
     });
   }
 }
