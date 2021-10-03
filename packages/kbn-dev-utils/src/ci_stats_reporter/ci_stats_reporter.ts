@@ -99,6 +99,17 @@ export class CiStatsReporter {
     }
 
     const memUsage = process.memoryUsage();
+    const isElasticCommitter = email ? email.endsWith('@elastic.co') : undefined;
+
+    const getReportValue = (value?: string) => {
+      if (value) {
+        return isElasticCommitter
+          ? value
+          : crypto.createHash('sha256').update(value).digest('hex').substring(0, 20);
+      } else {
+        return undefined;
+      }
+    };
     const defaultMetadata = {
       osPlatform: Os.platform(),
       osRelease: Os.release(),
@@ -113,13 +124,9 @@ export class CiStatsReporter {
       memoryUsageHeapUsed: memUsage.heapUsed,
       memoryUsageExternal: memUsage.external,
       memoryUsageArrayBuffers: memUsage.arrayBuffers,
-      branchHash: branch
-        ? crypto.createHash('sha256').update(branch).digest('hex').substring(0, 20)
-        : undefined,
-      committerHash: email
-        ? crypto.createHash('sha256').update(email).digest('hex').substring(0, 20)
-        : undefined,
-      isElasticCommitter: email ? email.endsWith('@elastic.co') : undefined,
+      branchHash: getReportValue(branch),
+      committerHash: getReportValue(email),
+      isElasticCommitter,
       kibanaUuid,
     };
 

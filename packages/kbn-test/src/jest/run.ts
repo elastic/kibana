@@ -22,6 +22,7 @@ import { existsSync } from 'fs';
 import { run } from 'jest';
 import { buildArgv } from 'jest-cli/build/cli';
 import { ToolingLog, getTimeReporter } from '@kbn/dev-utils';
+import { map } from 'lodash';
 
 // yarn test:jest src/core/server/saved_objects
 // yarn test:jest src/core/public/core_system.test.ts
@@ -82,8 +83,8 @@ export function runJest(configName = 'jest.config.js') {
     // Success means that tests finished, doesn't mean they passed.
     reportTime(runStartTime, 'total', {
       success: true,
-      cwd,
-      testFiles,
+      isXpack: cwd.includes('x-pack'),
+      testFiles: map(testFiles, (testFile) => relative(testFile, cwd)),
     });
   });
 }

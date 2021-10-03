@@ -321,11 +321,13 @@ exports.Cluster = class Cluster {
       await nativeRealm.setPasswords(options);
     });
 
+    let reportSent = false;
     // parse and forward es stdout to the log
     this._process.stdout.on('data', (data) => {
       const lines = parseEsLog(data.toString());
       lines.forEach((line) => {
-        if (line.message.includes('license mode is')) {
+        if (!reportSent && line.message.includes('publish_address')) {
+          reportSent = true;
           reportTime(startTime, 'ready', {
             success: true,
           });

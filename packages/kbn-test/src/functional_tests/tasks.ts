@@ -145,15 +145,16 @@ interface StartServerOptions {
   createLogger: () => ToolingLog;
   extraKbnOpts: string[];
   useDefaultConfig?: boolean;
-  reportTime?: ReturnType<typeof getTimeReporter>;
-  runStartTime?: number;
 }
 
-export async function startServers({
-  reportTime = async () => {},
-  runStartTime = 0,
-  ...options
-}: StartServerOptions) {
+export async function startServers({ ...options }: StartServerOptions) {
+  const runStartTime = Date.now();
+  const toolingLog = new ToolingLog({
+    level: 'info',
+    writeTo: process.stdout,
+  });
+  const reportTime = getTimeReporter(toolingLog, 'scripts/functional_tests_server');
+
   const log = options.createLogger();
   const opts = {
     ...options,

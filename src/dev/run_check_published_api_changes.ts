@@ -279,7 +279,7 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
   }
 })().catch((e) => {
   reportTime(runStartTime, 'error', {
-    success: true,
+    success: false,
     error: e.message,
   });
   log.error(e);
