@@ -59,5 +59,6 @@ export function iisMetricsSpecProvider(context: TutorialContext): TutorialSchema
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['web'],
   };
 }
