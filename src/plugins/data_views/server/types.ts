@@ -16,7 +16,7 @@ type ServiceFactory = (
   savedObjectsClient: SavedObjectsClientContract,
   elasticsearchClient: ElasticsearchClient
 ) => Promise<DataViewsService>;
-export interface DataViewPluginStart {
+export interface DataViewsServerPluginStart {
   dataViewsServiceFactory: ServiceFactory;
   /**
    * @deprecated Renamed to dataViewsServiceFactory
@@ -35,17 +35,17 @@ export interface IndexPatternsServiceStartDeps {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DataViewPluginSetup {}
+export interface DataViewsServerPluginSetup {}
 
-export type IndexPatternsServiceStart = DataViewPluginStart;
+export type IndexPatternsServiceStart = DataViewsServerPluginStart;
 
-export interface DataViewPluginSetupDependencies {
+export interface DataViewsServerPluginSetupDependencies {
   fieldFormats: FieldFormatsSetup;
   expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
-export interface DataViewPluginStartDependencies {
+export interface DataViewsServerPluginStartDependencies {
   fieldFormats: FieldFormatsStart;
   logger: Logger;
 }

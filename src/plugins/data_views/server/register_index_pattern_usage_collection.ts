@@ -10,7 +10,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { StartServicesAccessor } from 'src/core/server';
 import { DataViewsService } from '../common';
 import { SavedObjectsClient } from '../../../core/server';
-import { DataViewPluginStartDependencies, DataViewPluginStart } from './types';
+import { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from './types';
 
 interface CountSummary {
   min?: number;
@@ -139,7 +139,10 @@ export async function getIndexPatternTelemetry(indexPatterns: DataViewsService) 
 }
 
 export function registerIndexPatternsUsageCollector(
-  getStartServices: StartServicesAccessor<DataViewPluginStartDependencies, DataViewPluginStart>,
+  getStartServices: StartServicesAccessor<
+    DataViewsServerPluginStartDependencies,
+    DataViewsServerPluginStart
+  >,
   usageCollection?: UsageCollectionSetup
 ): void {
   if (!usageCollection) {

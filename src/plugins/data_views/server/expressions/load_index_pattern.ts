@@ -14,7 +14,7 @@ import {
   IndexPatternLoadExpressionFunctionDefinition,
   IndexPatternLoadStartDependencies,
 } from '../../common/expressions';
-import { DataViewPluginStartDependencies, DataViewPluginStart } from '../types';
+import { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 
 /**
  * Returns the expression function definition. Any stateful dependencies are accessed
@@ -73,7 +73,10 @@ export function getFunctionDefinition({
 export function getIndexPatternLoad({
   getStartServices,
 }: {
-  getStartServices: StartServicesAccessor<DataViewPluginStartDependencies, DataViewPluginStart>;
+  getStartServices: StartServicesAccessor<
+    DataViewsServerPluginStartDependencies,
+    DataViewsServerPluginStart
+  >;
 }) {
   return getFunctionDefinition({
     getStartDependencies: async (request: KibanaRequest) => {

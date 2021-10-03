@@ -9,8 +9,7 @@
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
-// todo rename this
-import { IndexPatternsServiceStart } from 'src/plugins/data_views/server';
+import { PluginStart as DataViewsServerPluginStart } from 'src/plugins/data_views/server';
 import { ConfigSchema } from '../config';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { SearchService } from './search/search_service';
@@ -44,7 +43,7 @@ export interface DataPluginStart {
    * @deprecated - use "fieldFormats" plugin directly instead
    */
   fieldFormats: FieldFormatsStart;
-  indexPatterns: IndexPatternsServiceStart;
+  indexPatterns: DataViewsServerPluginStart;
 }
 
 export interface DataPluginSetupDependencies {
@@ -57,7 +56,7 @@ export interface DataPluginSetupDependencies {
 export interface DataPluginStartDependencies {
   fieldFormats: FieldFormatsStart;
   logger: Logger;
-  dataViews: IndexPatternsServiceStart;
+  dataViews: DataViewsServerPluginStart;
 }
 
 export class DataServerPlugin

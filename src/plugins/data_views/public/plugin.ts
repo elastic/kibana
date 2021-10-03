@@ -9,10 +9,10 @@
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { getIndexPatternLoad } from './expressions';
 import {
-  DataViewPublicPluginSetup,
-  DataViewPublicPluginStart,
-  DataViewSetupDependencies,
-  DataViewStartDependencies,
+  DataViewsPublicPluginSetup,
+  DataViewsPublicPluginStart,
+  DataViewsPublicSetupDependencies,
+  DataViewsPublicStartDependencies,
 } from './types';
 
 import {
@@ -23,20 +23,19 @@ import {
   SavedObjectsClientPublicToCommon,
 } from '.';
 
-// todo review file
-export class DataViewPublicPlugin
+export class DataViewsPublicPlugin
   implements
     Plugin<
-      DataViewPublicPluginSetup,
-      DataViewPublicPluginStart,
-      DataViewSetupDependencies,
-      DataViewStartDependencies
+      DataViewsPublicPluginSetup,
+      DataViewsPublicPluginStart,
+      DataViewsPublicSetupDependencies,
+      DataViewsPublicStartDependencies
     >
 {
   public setup(
-    core: CoreSetup<DataViewStartDependencies, DataViewPublicPluginStart>,
-    { expressions }: DataViewSetupDependencies
-  ): DataViewPublicPluginSetup {
+    core: CoreSetup<DataViewsPublicStartDependencies, DataViewsPublicPluginStart>,
+    { expressions }: DataViewsPublicSetupDependencies
+  ): DataViewsPublicPluginSetup {
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
 
     return {};
@@ -44,8 +43,8 @@ export class DataViewPublicPlugin
 
   public start(
     core: CoreStart,
-    { fieldFormats }: DataViewStartDependencies
-  ): DataViewPublicPluginStart {
+    { fieldFormats }: DataViewsPublicStartDependencies
+  ): DataViewsPublicPluginStart {
     const { uiSettings, http, notifications, savedObjects, overlays, application } = core;
 
     return new DataViewsService({

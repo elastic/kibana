@@ -14,7 +14,7 @@ import {
   serializedFieldFormatSchema,
 } from './util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../core/server';
-import type { DataViewPluginStart, DataViewPluginStartDependencies } from '../types';
+import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
 
 const indexPatternUpdateSchema = schema.object({
   title: schema.maybe(schema.string()),
@@ -37,7 +37,10 @@ const indexPatternUpdateSchema = schema.object({
 
 export const registerUpdateIndexPatternRoute = (
   router: IRouter,
-  getStartServices: StartServicesAccessor<DataViewPluginStartDependencies, DataViewPluginStart>
+  getStartServices: StartServicesAccessor<
+    DataViewsServerPluginStartDependencies,
+    DataViewsServerPluginStart
+  >
 ) => {
   router.post(
     {

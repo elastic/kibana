@@ -11,12 +11,12 @@ import { FieldFormatsSetup, FieldFormatsStart } from 'src/plugins/field_formats/
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { DataViewsService } from './data_views';
 
-export interface DataViewSetupDependencies {
+export interface DataViewsPublicSetupDependencies {
   expressions: ExpressionsSetup;
   fieldFormats: FieldFormatsSetup;
 }
 
-export interface DataViewStartDependencies {
+export interface DataViewsPublicStartDependencies {
   fieldFormats: FieldFormatsStart;
 }
 
@@ -24,9 +24,9 @@ export interface DataViewStartDependencies {
  * Data plugin public Setup contract
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DataViewPublicPluginSetup {}
+export interface DataViewsPublicPluginSetup {}
 
 /**
  * Data plugin public Start contract
  */
-export type DataViewPublicPluginStart = PublicMethodsOf<DataViewsService>;
+export type DataViewsPublicPluginStart = PublicMethodsOf<DataViewsService>;

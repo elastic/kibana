@@ -15,19 +15,19 @@ import { getIndexPatternLoad } from './expressions';
 import { registerIndexPatternsUsageCollector } from './register_index_pattern_usage_collection';
 import { createScriptedFieldsDeprecationsConfig } from './deprecations';
 import {
-  DataViewPluginSetup,
-  DataViewPluginStart,
-  DataViewPluginSetupDependencies,
-  DataViewPluginStartDependencies,
+  DataViewsServerPluginSetup,
+  DataViewsServerPluginStart,
+  DataViewsServerPluginSetupDependencies,
+  DataViewsServerPluginStartDependencies,
 } from './types';
 
-export class DataViewServerPlugin
+export class DataViewsServerPlugin
   implements
     Plugin<
-      DataViewPluginSetup,
-      DataViewPluginStart,
-      DataViewPluginSetupDependencies,
-      DataViewPluginStartDependencies
+      DataViewsServerPluginSetup,
+      DataViewsServerPluginStart,
+      DataViewsServerPluginSetupDependencies,
+      DataViewsServerPluginStartDependencies
     >
 {
   private readonly logger: Logger;
@@ -37,8 +37,8 @@ export class DataViewServerPlugin
   }
 
   public setup(
-    core: CoreSetup<DataViewPluginStartDependencies, DataViewPluginStart>,
-    { expressions, usageCollection }: DataViewPluginSetupDependencies
+    core: CoreSetup<DataViewsServerPluginStartDependencies, DataViewsServerPluginStart>,
+    { expressions, usageCollection }: DataViewsServerPluginSetupDependencies
   ) {
     core.savedObjects.registerType(dataViewSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
@@ -52,7 +52,10 @@ export class DataViewServerPlugin
     return {};
   }
 
-  public start({ uiSettings }: CoreStart, { fieldFormats }: DataViewPluginStartDependencies) {
+  public start(
+    { uiSettings }: CoreStart,
+    { fieldFormats }: DataViewsServerPluginStartDependencies
+  ) {
     const serviceFactory = dataViewsServiceFactory({
       logger: this.logger.get('indexPatterns'),
       uiSettings,
@@ -68,4 +71,4 @@ export class DataViewServerPlugin
   public stop() {}
 }
 
-export { DataViewServerPlugin as Plugin };
+export { DataViewsServerPlugin as Plugin };

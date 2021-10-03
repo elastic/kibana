@@ -17,8 +17,8 @@ export {
 export { IndexPatternsServiceStart } from './types';
 
 import { PluginInitializerContext } from 'src/core/server';
-import { DataViewServerPlugin } from './plugin';
-import { DataViewPluginSetup, DataViewPluginStart } from './types';
+import { DataViewsServerPlugin } from './plugin';
+import { DataViewsServerPluginSetup, DataViewsServerPluginStart } from './types';
 export type { dataViewsServiceFactory } from './data_views_service_factory';
 
 /**
@@ -27,11 +27,11 @@ export type { dataViewsServiceFactory } from './data_views_service_factory';
  */
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new DataViewServerPlugin(initializerContext);
+  return new DataViewsServerPlugin(initializerContext);
 }
 
 export {
-  DataViewServerPlugin as Plugin,
-  DataViewPluginSetup as PluginSetup,
-  DataViewPluginStart as PluginStart,
+  DataViewsServerPlugin as Plugin,
+  DataViewsServerPluginSetup as PluginSetup,
+  DataViewsServerPluginStart as PluginStart,
 };

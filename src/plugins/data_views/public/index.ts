@@ -33,13 +33,13 @@ export { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper
  * Plugin setup
  */
 
-import { DataViewPublicPlugin } from './plugin';
+import { DataViewsPublicPlugin } from './plugin';
 
 export function plugin() {
-  return new DataViewPublicPlugin();
+  return new DataViewsPublicPlugin();
 }
 
-export type { DataViewPublicPluginSetup, DataViewPublicPluginStart } from './types';
+export type { DataViewsPublicPluginSetup, DataViewsPublicPluginStart } from './types';
 
 // Export plugin after all other imports
-export type { DataViewPublicPlugin as DataPlugin };
+export type { DataViewsPublicPlugin as DataPlugin };

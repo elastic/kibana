@@ -12,7 +12,7 @@ import {
   IndexPatternLoadExpressionFunctionDefinition,
   IndexPatternLoadStartDependencies,
 } from '../../common/expressions';
-import { DataViewPublicPluginStart, DataViewStartDependencies } from '../types';
+import { DataViewsPublicPluginStart, DataViewsPublicStartDependencies } from '../types';
 
 /**
  * Returns the expression function definition. Any stateful dependencies are accessed
@@ -60,7 +60,10 @@ export function getFunctionDefinition({
 export function getIndexPatternLoad({
   getStartServices,
 }: {
-  getStartServices: StartServicesAccessor<DataViewStartDependencies, DataViewPublicPluginStart>;
+  getStartServices: StartServicesAccessor<
+    DataViewsPublicStartDependencies,
+    DataViewsPublicPluginStart
+  >;
 }) {
   return getFunctionDefinition({
     getStartDependencies: async () => {
