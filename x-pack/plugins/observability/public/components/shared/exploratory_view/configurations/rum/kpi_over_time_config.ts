@@ -11,6 +11,7 @@ import {
   OPERATION_COLUMN,
   RECORDS_FIELD,
   REPORT_METRIC_FIELD,
+  PERCENTILE,
   ReportTypes,
 } from '../constants';
 import { buildPhraseFilter } from '../utils';
@@ -73,7 +74,13 @@ export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): SeriesCon
         nested: USER_AGENT_VERSION,
       },
     ],
-    breakdownFields: [USER_AGENT_NAME, USER_AGENT_OS, CLIENT_GEO_COUNTRY_NAME, USER_AGENT_DEVICE],
+    breakdownFields: [
+      USER_AGENT_NAME,
+      USER_AGENT_OS,
+      CLIENT_GEO_COUNTRY_NAME,
+      USER_AGENT_DEVICE,
+      PERCENTILE,
+    ],
     baseFilters: [
       ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
       ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
