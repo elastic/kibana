@@ -16,7 +16,7 @@ import { getLink } from '../../../../common/lib/cell_actions/default_cell_action
 import {
   ExpandedCellValueActions,
   StyledContent,
-} from '../../../../common/lib/cell_actions/expand_top_value';
+} from '../../../../common/lib/cell_actions/expanded_cell_value_actions';
 
 const FIELDS_WITHOUT_CELL_ACTIONS = ['@timestamp', 'signal.rule.risk_score', 'signal.reason'];
 const hasCellActions = (columnId?: string) => {
