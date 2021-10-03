@@ -99,7 +99,7 @@ Object {
         "terms": Object {
           "field": "service.environment",
           "missing": undefined,
-          "size": 100,
+          "size": 50,
         },
       },
     },
@@ -127,7 +127,7 @@ Object {
         "terms": Object {
           "field": "service.environment",
           "missing": "ALL_OPTION_VALUE",
-          "size": 100,
+          "size": 50,
         },
       },
     },

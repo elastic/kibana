@@ -24,6 +24,7 @@ describe('getEnvironments', () => {
         setup,
         serviceName: 'foo',
         searchAggregatedTransactions: false,
+        size: 50,
         start: 0,
         end: 50000,
       })
@@ -37,6 +38,7 @@ describe('getEnvironments', () => {
       getEnvironments({
         setup,
         searchAggregatedTransactions: false,
+        size: 50,
         start: 0,
         end: 50000,
       })
