@@ -42,7 +42,7 @@ exports.run = async (defaults = {}) => {
     level: 'info',
     writeTo: process.stdout,
   });
-  const reportTime = getTimeReporter(log, 'es snapshot');
+  const reportTime = getTimeReporter(log, 'scripts/es snapshot');
 
   const argv = process.argv.slice(2);
   const options = getopts(argv, {
