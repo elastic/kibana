@@ -32,7 +32,7 @@ export function runFtrCli() {
     level: 'info',
     writeTo: process.stdout,
   });
-  const reportTime = getTimeReporter(toolingLog, 'functional_test_runner');
+  const reportTime = getTimeReporter(toolingLog, 'scripts/functional_test_runner');
   run(
     async ({ flags, log }) => {
       const functionalTestRunner = new FunctionalTestRunner(
