@@ -49,6 +49,7 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
       },
     } = useDataVisualizerKibana();
     const history = useHistory();
+    const { search: searchString } = useLocation();
 
     const [currentIndexPattern, setCurrentIndexPattern] = useState<IndexPattern | undefined>(
       undefined
@@ -56,7 +57,6 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
     const [currentSavedSearch, setCurrentSavedSearch] = useState<SimpleSavedObject<unknown> | null>(
       null
     );
-    const { search: searchString } = useLocation();
 
     useEffect(() => {
       const prevSearchString = searchString;
