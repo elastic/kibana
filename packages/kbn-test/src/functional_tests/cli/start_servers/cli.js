@@ -22,7 +22,7 @@ export async function startServersCli(defaultConfigPath) {
     level: 'info',
     writeTo: process.stdout,
   });
-  const reportTime = getTimeReporter(log, 'functional_tests_server');
+  const reportTime = getTimeReporter(log, 'scripts/functional_tests_server');
 
   await runCli(displayHelp, async (userOptions) => {
     const options = processOptions(userOptions, defaultConfigPath);
