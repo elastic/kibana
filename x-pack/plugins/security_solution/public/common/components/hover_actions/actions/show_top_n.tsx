@@ -48,6 +48,7 @@ interface Props {
   showTooltip?: boolean;
   showTopN: boolean;
   timelineId?: string | null;
+  title?: string;
   value?: string[] | string | null;
 }
 
@@ -67,6 +68,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
     showTooltip = true,
     showTopN,
     timelineId,
+    title,
     value,
     globalFilters,
   }) => {
@@ -82,11 +84,12 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
     const { browserFields, indexPattern } = useSourcererScope(activeScope);
     const icon = iconType ?? 'visBarVertical';
     const side = iconSide ?? 'left';
+    const buttonTitle = title ?? SHOW_TOP(field);
     const basicButton = useMemo(
       () =>
         Component ? (
           <Component
-            aria-label={SHOW_TOP(field)}
+            aria-label={buttonTitle}
             className={className}
             data-test-subj="show-top-field"
             icon={icon}
@@ -94,13 +97,13 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
             iconSide={side}
             flush={flush}
             onClick={onClick}
-            title={SHOW_TOP(field)}
+            title={buttonTitle}
           >
-            {SHOW_TOP(field)}
+            {buttonTitle}
           </Component>
         ) : (
           <EuiButtonIcon
-            aria-label={SHOW_TOP(field)}
+            aria-label={buttonTitle}
             className="securitySolution__hoverActionButton"
             data-test-subj="show-top-field"
             iconSize="s"
@@ -108,7 +111,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
             onClick={onClick}
           />
         ),
-      [Component, className, field, flush, icon, onClick, side]
+      [Component, buttonTitle, className, flush, icon, onClick, side]
     );
 
     const button = useMemo(
@@ -121,7 +124,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
                   field,
                   value,
                 })}
-                content={SHOW_TOP(field)}
+                content={buttonTitle}
                 shortcut={SHOW_TOP_N_KEYBOARD_SHORTCUT}
                 showShortcut={ownFocus}
               />
@@ -132,7 +135,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
         ) : (
           basicButton
         ),
-      [basicButton, field, ownFocus, showTooltip, showTopN, value]
+      [basicButton, buttonTitle, field, ownFocus, showTooltip, showTopN, value]
     );
 
     const topNPannel = useMemo(

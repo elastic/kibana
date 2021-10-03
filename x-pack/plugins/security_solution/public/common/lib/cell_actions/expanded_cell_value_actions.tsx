@@ -15,6 +15,7 @@ import { allowTopN } from '../../components/drag_and_drop/helpers';
 import { ShowTopNButton } from '../../components/hover_actions/actions/show_top_n';
 import { getAllFieldsByName } from '../../containers/source';
 import { useKibana } from '../kibana';
+import { SHOW_TOP_VALUES, HIDE_TOP_VALUES } from './translations';
 
 interface Props {
   browserFields: BrowserFields;
@@ -74,7 +75,7 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
             flush="both"
             globalFilters={globalFilters}
             iconSide="right"
-            iconType="arrowDown"
+            iconType={showTopN ? 'arrowUp' : 'arrowDown'}
             isExpandable
             onClick={onClick}
             onFilterAdded={onFilterAdded ?? noop}
@@ -82,6 +83,7 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
             showTopN={showTopN}
             showTooltip={false}
             timelineId={timelineId}
+            title={showTopN ? HIDE_TOP_VALUES : SHOW_TOP_VALUES}
             value={value}
           />
         ) : null}
