@@ -72,13 +72,16 @@ export const duplicateFirstRule = () => {
  * flake.
  */
 export const duplicateRuleFromMenu = () => {
-  cy.get(LOADING_INDICATOR).should('not.exist');
-  cy.root()
-    .pipe(($el) => {
-      $el.find(ALL_ACTIONS).trigger('click');
-      return $el.find(DUPLICATE_RULE_MENU_PANEL_BTN);
-    })
-    .should(($el) => expect($el).to.be.visible);
+  cy.waitUntil(() => {
+    cy.get(LOADING_INDICATOR).should('not.exist');
+    return cy
+      .root()
+      .pipe(($el) => {
+        $el.find(ALL_ACTIONS).trigger('click');
+        return $el.find(DUPLICATE_RULE_MENU_PANEL_BTN);
+      })
+      .should(($el) => expect($el).to.be.visible);
+  });
   // Because of a fade effect and fast clicking this can produce more than one click
   cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).pipe(($el) => $el.trigger('click'));
 };
