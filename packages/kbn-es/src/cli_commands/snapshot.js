@@ -64,7 +64,7 @@ exports.run = async (defaults = {}) => {
   if (options['download-only']) {
     await cluster.downloadSnapshot(options);
   } else {
-    const installStartTime = new Date();
+    const installStartTime = new Date.now();
     const { installPath } = await cluster.installSnapshot(options);
 
     if (options.dataArchive) {
