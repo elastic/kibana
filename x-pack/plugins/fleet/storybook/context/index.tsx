@@ -62,6 +62,7 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
   setHttpClient(startServices.http);
   setCustomIntegrations({
     getAppendCustomIntegrations: async () => [],
+    getReplacementCustomIntegrations: async () => [],
   });
 
   const config = {
