@@ -36,7 +36,7 @@ export function runJest(configName = 'jest.config.js') {
   });
 
   const runStartTime = Date.now();
-  const reportTime = getTimeReporter(log, 'jest');
+  const reportTime = getTimeReporter(log, 'scripts/jest');
   let cwd: string;
   let testFiles: string[];
 

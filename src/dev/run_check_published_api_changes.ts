@@ -28,7 +28,7 @@ const log = new ToolingLog({
 });
 
 const runStartTime = Date.now();
-const reportTime = getTimeReporter(log, 'check_published_api_changes');
+const reportTime = getTimeReporter(log, 'scripts/check_published_api_changes');
 
 /*
  * Step 1: execute build:types

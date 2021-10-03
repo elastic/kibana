@@ -354,7 +354,7 @@ exports.Cluster = class Cluster {
       } else {
         reportTime(startTime, 'error', {
           success: false,
-          error: code,
+          error: `exited with ${code}`,
         });
       }
     });

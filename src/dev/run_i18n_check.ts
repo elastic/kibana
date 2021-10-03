@@ -25,7 +25,7 @@ const toolingLog = new ToolingLog({
 });
 
 const runStartTime = Date.now();
-const reportTime = getTimeReporter(toolingLog, 'i18n_check');
+const reportTime = getTimeReporter(toolingLog, 'scripts/i18n_check');
 
 const skipOnNoTranslations = ({ config }: { config: I18nConfig }) =>
   !config.translations.length && 'No translations found.';

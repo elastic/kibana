@@ -42,7 +42,7 @@ exports.run = async (defaults = {}) => {
     level: 'info',
     writeTo: process.stdout,
   });
-  const reportTime = getTimeReporter(log, 'es snapshot');
+  const reportTime = getTimeReporter(log, 'scripts/es snapshot');
 
   const argv = process.argv.slice(2);
   const options = getopts(argv, {
@@ -64,7 +64,7 @@ exports.run = async (defaults = {}) => {
   if (options['download-only']) {
     await cluster.downloadSnapshot(options);
   } else {
-    const installStartTime = new Date();
+    const installStartTime = new Date.now();
     const { installPath } = await cluster.installSnapshot(options);
 
     if (options.dataArchive) {
