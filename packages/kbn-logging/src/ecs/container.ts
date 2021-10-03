@@ -7,14 +7,21 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.9/ecs-container.html
+ * https://www.elastic.co/guide/en/ecs/1.12/ecs-container.html
  *
  * @internal
  */
 export interface EcsContainer {
+  cpu?: { usage?: number };
+  disk?: Disk;
   id?: string;
   image?: { name?: string; tag?: string[] };
   labels?: Record<string, unknown>;
   name?: string;
   runtime?: string;
+}
+
+interface Disk {
+  read?: { bytes?: number };
+  write?: { bytes?: number };
 }
