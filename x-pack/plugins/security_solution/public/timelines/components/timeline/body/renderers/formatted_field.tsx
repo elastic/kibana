@@ -78,7 +78,7 @@ const FormattedFieldValueComponent: React.FC<{
   linkValue,
 }) => {
   if (isObjectArray || asPlainText) {
-    return <>{value}</>;
+    return <span>{value}</span>;
   } else if (fieldType === IP_FIELD_TYPE) {
     return (
       <FormattedIp
@@ -105,10 +105,18 @@ const FormattedFieldValueComponent: React.FC<{
         tooltipContent={null}
         value={`${value}`}
       >
-        <FormattedDate fieldName={fieldName} value={value} />
+        <FormattedDate
+          className={truncate ? 'eui-textTruncate eui-alignMiddle' : undefined}
+          fieldName={fieldName}
+          value={value}
+        />
       </DefaultDraggable>
     ) : (
-      <FormattedDate fieldName={fieldName} value={value} />
+      <FormattedDate
+        className={truncate ? 'eui-textTruncate eui-alignMiddle' : undefined}
+        fieldName={fieldName}
+        value={value}
+      />
     );
   } else if (PORT_NAMES.some((portName) => fieldName === portName)) {
     return (

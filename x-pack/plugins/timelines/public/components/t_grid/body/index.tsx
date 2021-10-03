@@ -710,6 +710,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           rowRenderers,
           setCellProps,
           timelineId: tabType != null ? `${id}-${tabType}` : id,
+          truncate: isDetails ? false : true,
         }) as React.ReactElement;
       };
       return Cell;

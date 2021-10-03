@@ -36,12 +36,15 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   rowRenderers,
   setCellProps,
   timelineId,
+  truncate,
 }) => {
   const values = getMappedNonEcsValue({
     data,
     fieldName: header.id,
   });
-  const styledContentClassName = isDetails ? 'eui-textBreakWord' : '';
+  const styledContentClassName = isDetails
+    ? 'eui-textBreakWord'
+    : 'eui-displayInlineBlock eui-textTruncate';
   return (
     <>
       <StyledContent className={styledContentClassName} $isDetails={isDetails}>
@@ -57,7 +60,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
           linkValues,
           rowRenderers,
           timelineId,
-          truncate: isDetails ? false : true,
+          truncate,
           values: getMappedNonEcsValue({
             data,
             fieldName: header.id,
