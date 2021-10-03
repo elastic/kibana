@@ -60680,6 +60680,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
+process.env.CI_STATS_NESTED_TIMING = 'true';
 async function runCommand(command, config) {
   const runStartTime = Date.now();
   let kbn;

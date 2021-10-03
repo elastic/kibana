@@ -99,7 +99,7 @@ export class CiStatsReporter {
     }
 
     const memUsage = process.memoryUsage();
-    const isElasticCommitter = email ? email.endsWith('@elastic.co') : undefined;
+    const isElasticCommitter = email && email.endsWith('@elastic.co') ? true : false;
 
     const getReportValue = (value?: string) => {
       if (value) {
@@ -110,13 +110,12 @@ export class CiStatsReporter {
         return undefined;
       }
     };
+
     const defaultMetadata = {
-      osPlatform: Os.platform(),
-      osRelease: Os.release(),
-      osArch: Os.arch(),
       cpuCount: Os.cpus()?.length,
       cpuModel: Os.cpus()[0]?.model,
       cpuSpeed: Os.cpus()[0]?.speed,
+      email: isElasticCommitter ? email : undefined,
       freeMem: Os.freemem(),
       totalMem: Os.totalmem(),
       memoryUsageRss: memUsage.rss,
@@ -128,6 +127,11 @@ export class CiStatsReporter {
       committerHash: getReportValue(email),
       isElasticCommitter,
       kibanaUuid,
+      nestedTiming: process.env.CI_STATS_NESTED_TIMING ? true : false,
+      osArch: Os.arch(),
+      osPlatform: Os.platform(),
+      osRelease: Os.release(),
+      totalMem: Os.totalmem(),
     };
 
     this.log.debug('CIStatsReporter committerHash: %s', defaultMetadata.committerHash);
