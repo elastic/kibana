@@ -101,32 +101,23 @@ export class CiStatsReporter {
     const memUsage = process.memoryUsage();
     const isElasticCommitter = email && email.endsWith('@elastic.co') ? true : false;
 
-    const getReportValue = (value?: string) => {
-      if (value) {
-        return isElasticCommitter
-          ? value
-          : crypto.createHash('sha256').update(value).digest('hex').substring(0, 20);
-      } else {
-        return undefined;
-      }
-    };
-
     const defaultMetadata = {
+      kibanaUuid,
+      isElasticCommitter,
+      committerHash: email
+        ? crypto.createHash('sha256').update(email).digest('hex').substring(0, 20)
+        : undefined,
+      email: isElasticCommitter ? email : undefined,
+      branch: isElasticCommitter ? branch : undefined,
       cpuCount: Os.cpus()?.length,
       cpuModel: Os.cpus()[0]?.model,
       cpuSpeed: Os.cpus()[0]?.speed,
-      email: isElasticCommitter ? email : undefined,
       freeMem: Os.freemem(),
-      totalMem: Os.totalmem(),
       memoryUsageRss: memUsage.rss,
       memoryUsageHeapTotal: memUsage.heapTotal,
       memoryUsageHeapUsed: memUsage.heapUsed,
       memoryUsageExternal: memUsage.external,
       memoryUsageArrayBuffers: memUsage.arrayBuffers,
-      branchHash: getReportValue(branch),
-      committerHash: getReportValue(email),
-      isElasticCommitter,
-      kibanaUuid,
       nestedTiming: process.env.CI_STATS_NESTED_TIMING ? true : false,
       osArch: Os.arch(),
       osPlatform: Os.platform(),
