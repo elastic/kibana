@@ -8,7 +8,14 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { generateSlug } from 'random-word-slugs';
-import type { IShortUrlClient, ShortUrl, ShortUrlCreateParams } from '../../../common/url_service';
+import { ShortUrlRecord } from '.';
+import type {
+  IShortUrlClient,
+  ShortUrl,
+  ShortUrlCreateParams,
+  ILocatorClient,
+  ShortUrlData,
+} from '../../../common/url_service';
 import type { ShortUrlStorage } from './types';
 import { validateSlug } from './util';
 
@@ -36,6 +43,11 @@ export interface ServerShortUrlClientDependencies {
    * Storage provider for short URLs.
    */
   storage: ShortUrlStorage;
+
+  /**
+   * Part of locators service necessary for short URLs.
+   */
+  locators?: Pick<ILocatorClient, 'get'>;
 }
 
 export class ServerShortUrlClient implements IShortUrlClient {
@@ -64,27 +76,57 @@ export class ServerShortUrlClient implements IShortUrlClient {
       }
     }
 
+    const { state, references } = locator.extract(params);
     const now = Date.now();
-    const data = await storage.create({
-      accessCount: 0,
-      accessDate: now,
-      createDate: now,
-      slug,
-      locator: {
-        id: locator.id,
-        version: currentVersion,
-        state: params,
+    const data = await storage.create(
+      {
+        accessCount: 0,
+        accessDate: now,
+        createDate: now,
+        slug,
+        locator: {
+          id: locator.id,
+          version: currentVersion,
+          state,
+        },
       },
-    });
+      { references }
+    );
 
     return {
       data,
     };
   }
 
+  private injectReferences({ data, references }: ShortUrlRecord): ShortUrlData {
+    const { locators } = this.dependencies;
+    if (!locators) return data;
+    const locator = locators.get(data.locator.id);
+    if (!locator) return data;
+
+    return {
+      ...data,
+      locator: {
+        ...data.locator,
+        state: locator.inject(data.locator.state, references),
+      },
+    };
+  }
+
   public async get(id: string): Promise<ShortUrl> {
     const { storage } = this.dependencies;
-    const data = await storage.getById(id);
+    const record = await storage.getById(id);
+    const data = this.injectReferences(record);
+
+    return {
+      data,
+    };
+  }
+
+  public async resolve(slug: string): Promise<ShortUrl> {
+    const { storage } = this.dependencies;
+    const record = await storage.getBySlug(slug);
+    const data = this.injectReferences(record);
 
     return {
       data,
@@ -94,14 +136,5 @@ export class ServerShortUrlClient implements IShortUrlClient {
   public async delete(id: string): Promise<void> {
     const { storage } = this.dependencies;
     await storage.delete(id);
-  }
-
-  public async resolve(slug: string): Promise<ShortUrl> {
-    const { storage } = this.dependencies;
-    const data = await storage.getBySlug(slug);
-
-    return {
-      data,
-    };
   }
 }

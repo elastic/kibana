@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
-import { VersionedState } from 'src/plugins/kibana_utils/common';
-import { LocatorPublic } from '../locators';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { VersionedState } from 'src/plugins/kibana_utils/common';
+import type { LocatorPublic, ILocatorClient } from '../locators';
 
 /**
  * A factory for Short URL Service. We need this factory as the dependency
@@ -20,6 +20,10 @@ import { LocatorPublic } from '../locators';
 export interface IShortUrlClientFactory<D> {
   get(dependencies: D): IShortUrlClient;
 }
+
+export type IShortUrlClientFactoryProvider<D> = (params: {
+  locators: Pick<ILocatorClient, 'get'>;
+}) => IShortUrlClientFactory<D>;
 
 /**
  * CRUD-like API for short URLs.

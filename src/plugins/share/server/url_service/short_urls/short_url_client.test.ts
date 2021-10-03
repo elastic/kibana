@@ -7,9 +7,11 @@
  */
 
 import { ServerShortUrlClientFactory } from './short_url_client_factory';
-import { UrlService } from '../../../common/url_service';
+import { UrlService, LocatorDefinition } from '../../../common/url_service';
 import { LegacyShortUrlLocatorDefinition } from '../../../common/url_service/locators/legacy_short_url_locator';
 import { MemoryShortUrlStorage } from './storage/memory_short_url_storage';
+import { SerializableRecord } from '@kbn/utility-types';
+import { SavedObjectReference } from 'kibana/server';
 
 const setup = () => {
   const currentVersion = '1.2.3';
@@ -20,9 +22,10 @@ const setup = () => {
     navigate: () => {
       throw new Error('Not implemented.');
     },
-    shortUrls: new ServerShortUrlClientFactory({
-      currentVersion,
-    }),
+    shortUrls: () =>
+      new ServerShortUrlClientFactory({
+        currentVersion,
+      }),
   });
   const definition = new LegacyShortUrlLocatorDefinition();
   const locator = service.locators.create(definition);
@@ -66,6 +69,37 @@ describe('ServerShortUrlClient', () => {
           id: expect.any(String),
         },
       });
+    });
+
+    test('extracts and persists references', async () => {
+      const { service } = setup();
+
+      interface FooLocatorParams extends SerializableRecord {
+        dashboardId: string;
+      }
+
+      class FooLocatorDefinition implements LocatorDefinition<FooLocatorParams> {
+        public readonly id = 'FOO_LOCATOR';
+        public readonly getLocation = async () => ({
+          app: 'foo_app',
+          path: '/foo/path',
+          state: {},
+        });
+        public readonly extract = (
+          state: FooLocatorParams
+        ): { state: FooLocatorParams; references: SavedObjectReference[] } => ({
+          state,
+          references: [
+            {
+              id: state.dashboardId,
+              type: 'dashboard',
+              name: 'foo',
+            },
+          ],
+        });
+      }
+
+      const locator = service.locators.create(new FooLocatorDefinition());
     });
   });
 

@@ -7,7 +7,8 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { SavedObject, SavedObjectsClientContract } from 'kibana/server';
+import { SavedObject, SavedObjectReference, SavedObjectsClientContract } from 'kibana/server';
+import { ShortUrlRecord } from '..';
 import { LEGACY_SHORT_URL_LOCATOR_ID } from '../../../../common/url_service/locators/legacy_short_url_locator';
 import { ShortUrlData } from '../../../../common/url_service/short_urls/types';
 import { ShortUrlStorage } from '../types';
@@ -106,13 +107,15 @@ export class SavedObjectShortUrlStorage implements ShortUrlStorage {
   constructor(private readonly dependencies: SavedObjectShortUrlStorageDependencies) {}
 
   public async create<P extends SerializableRecord = SerializableRecord>(
-    data: Omit<ShortUrlData<P>, 'id'>
+    data: Omit<ShortUrlData<P>, 'id'>,
+    { references }: { references?: SavedObjectReference[] } = {}
   ): Promise<ShortUrlData<P>> {
     const { savedObjects, savedObjectType } = this.dependencies;
     const attributes = createAttributes(data);
 
     const savedObject = await savedObjects.create(savedObjectType, attributes, {
       refresh: true,
+      references,
     });
 
     return createShortUrlData<P>(savedObject);
@@ -120,16 +123,19 @@ export class SavedObjectShortUrlStorage implements ShortUrlStorage {
 
   public async getById<P extends SerializableRecord = SerializableRecord>(
     id: string
-  ): Promise<ShortUrlData<P>> {
+  ): Promise<ShortUrlRecord<P>> {
     const { savedObjects, savedObjectType } = this.dependencies;
     const savedObject = await savedObjects.get<ShortUrlSavedObjectAttributes>(savedObjectType, id);
 
-    return createShortUrlData<P>(savedObject);
+    return {
+      data: createShortUrlData<P>(savedObject),
+      references: savedObject.references,
+    };
   }
 
   public async getBySlug<P extends SerializableRecord = SerializableRecord>(
     slug: string
-  ): Promise<ShortUrlData<P>> {
+  ): Promise<ShortUrlRecord<P>> {
     const { savedObjects } = this.dependencies;
     const search = `(attributes.slug:"${escapeSearchReservedChars(slug)}")`;
     const result = await savedObjects.find({
@@ -143,7 +149,10 @@ export class SavedObjectShortUrlStorage implements ShortUrlStorage {
 
     const savedObject = result.saved_objects[0] as ShortUrlSavedObject;
 
-    return createShortUrlData<P>(savedObject);
+    return {
+      data: createShortUrlData<P>(savedObject),
+      references: savedObject.references,
+    };
   }
 
   public async exists(slug: string): Promise<boolean> {

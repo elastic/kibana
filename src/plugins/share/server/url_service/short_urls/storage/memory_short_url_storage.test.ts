@@ -58,7 +58,7 @@ describe('.getById()', () => {
       },
       slug: 'test-slug',
     });
-    const url2 = await storage.getById(url1.id);
+    const url2 = (await storage.getById(url1.id)).data;
 
     expect(url2.accessCount).toBe(0);
     expect(url1.createDate).toBe(now);
@@ -112,7 +112,7 @@ describe('.getBySlug()', () => {
       },
       slug: 'test-slug',
     });
-    const url2 = await storage.getBySlug('test-slug');
+    const url2 = (await storage.getBySlug('test-slug')).data;
 
     expect(url2.accessCount).toBe(0);
     expect(url1.createDate).toBe(now);
