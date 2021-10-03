@@ -19,7 +19,8 @@ import { getOrEmptyTagFromValue } from '../../../../../common/components/empty_v
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { FormattedIp } from '../../../../components/formatted_ip';
 
-import { Port, PORT_NAMES } from '../../../../../network/components/port';
+import { Port } from '../../../../../network/components/port';
+import { PORT_NAMES } from '../../../../../network/components/port/helpers';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import {
   DATE_FIELD_TYPE,

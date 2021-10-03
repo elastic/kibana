@@ -12,7 +12,7 @@ import { columnRenderers } from '../body/renderers';
 import { getColumnRenderer } from '../body/renderers/get_column_renderer';
 
 import { CellValueElementProps } from '.';
-import { getLink } from '../../../../common/lib/cell_actions/default_cell_actions';
+import { getLink } from '../../../../common/lib/cell_actions/helpers';
 import {
   ExpandedCellValueActions,
   StyledContent,

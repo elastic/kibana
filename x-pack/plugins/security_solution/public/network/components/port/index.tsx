@@ -12,20 +12,6 @@ import { DefaultDraggable } from '../../../common/components/draggables';
 import { getEmptyValue } from '../../../common/components/empty_value';
 import { PortOrServiceNameLink } from '../../../common/components/links';
 
-export const CLIENT_PORT_FIELD_NAME = 'client.port';
-export const DESTINATION_PORT_FIELD_NAME = 'destination.port';
-export const SERVER_PORT_FIELD_NAME = 'server.port';
-export const SOURCE_PORT_FIELD_NAME = 'source.port';
-export const URL_PORT_FIELD_NAME = 'url.port';
-
-export const PORT_NAMES = [
-  CLIENT_PORT_FIELD_NAME,
-  DESTINATION_PORT_FIELD_NAME,
-  SERVER_PORT_FIELD_NAME,
-  SOURCE_PORT_FIELD_NAME,
-  URL_PORT_FIELD_NAME,
-];
-
 export const Port = React.memo<{
   contextId: string;
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;

@@ -19,66 +19,14 @@ import {
   TGridCellAction,
 } from '../../../../../timelines/common/types';
 import { getPageRowIndex } from '../../../../../timelines/public';
-import { INDICATOR_REFERENCE } from '../../../../common/cti/constants';
 import { Ecs } from '../../../../common/ecs';
-import { IP_FIELD_TYPE } from '../../../network/components/ip';
-import { PORT_NAMES } from '../../../network/components/port';
 import { getMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
-import {
-  EVENT_URL_FIELD_NAME,
-  HOST_NAME_FIELD_NAME,
-  REFERENCE_URL_FIELD_NAME,
-  RULE_REFERENCE_FIELD_NAME,
-  SIGNAL_RULE_NAME_FIELD_NAME,
-} from '../../../timelines/components/timeline/body/renderers/constants';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
 import { parseValue } from '../../../timelines/components/timeline/body/renderers/parse_value';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { escapeDataProviderId } from '../../components/drag_and_drop/helpers';
 import { useKibana } from '../kibana';
-import * as i18n from './translations';
-
-export const COLUMNS_WITH_LINKS = [
-  {
-    columnId: HOST_NAME_FIELD_NAME,
-    label: i18n.VIEW_HOST_SUMMARY,
-  },
-  {
-    fieldType: IP_FIELD_TYPE,
-    label: i18n.EXPAND_IP_DETAILS,
-  },
-  {
-    columnId: SIGNAL_RULE_NAME_FIELD_NAME,
-    label: i18n.VIEW_RULE_DETAILS,
-  },
-  ...PORT_NAMES.map((p) => ({
-    columnId: p,
-    label: i18n.VIEW_PORT_DETAILS,
-  })),
-  {
-    columnId: RULE_REFERENCE_FIELD_NAME,
-    label: i18n.VIEW_RULE_REFERENCE,
-  },
-  {
-    columnId: REFERENCE_URL_FIELD_NAME,
-    label: i18n.VIEW_RULE_REFERENCE,
-  },
-  {
-    columnId: EVENT_URL_FIELD_NAME,
-    label: i18n.VIEW_EVENT_REFERENCE,
-  },
-  {
-    columnId: INDICATOR_REFERENCE,
-    label: i18n.VIEW_INDICATOR_REFERENCE,
-  },
-];
-
-export const getLink = (cId?: string, fieldType?: string) => {
-  return (
-    cId &&
-    COLUMNS_WITH_LINKS.find((c) => c.columnId === cId || (fieldType && c.fieldType === fieldType))
-  );
-};
+import { getLink } from './helpers';
 
 /** a noop required by the filter in / out buttons */
 const onFilterAdded = () => {};
