@@ -9,7 +9,7 @@
 }
 
 .fadeIn {
-  animation-name: fadeIn;
+  animation-name: 'fadeIn';
 }
 
 @keyframes fadeOut {
@@ -23,5 +23,5 @@
 }
 
 .fadeOut {
-  animation-name: fadeOut;
+  animation-name: 'fadeOut';
 }
