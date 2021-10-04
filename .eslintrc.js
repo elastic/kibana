@@ -492,6 +492,7 @@ module.exports = {
     {
       files: [
         '**/*.stories.tsx',
+        '**/*.test.js',
         'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/plugins/apm/**/*.js',
@@ -506,6 +507,7 @@ module.exports = {
       ],
       rules: {
         'import/no-default-export': 'off',
+        'import/no-named-as-default-member': 'off',
         'import/no-named-as-default': 'off',
       },
     },
@@ -1547,8 +1549,8 @@ module.exports = {
       plugins: ['react', '@typescript-eslint'],
       files: ['x-pack/plugins/osquery/**/*.{js,mjs,ts,tsx}'],
       rules: {
-        'arrow-body-style': ['error', 'as-needed'],
-        'prefer-arrow-callback': 'error',
+        // 'arrow-body-style': ['error', 'as-needed'],
+        // 'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',
         'react/prop-types': 'off',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
