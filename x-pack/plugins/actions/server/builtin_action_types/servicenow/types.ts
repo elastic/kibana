@@ -195,13 +195,16 @@ export interface ExternalServiceCommentResponse {
 }
 
 type TypeNullOrUndefined<T> = T | null | undefined;
-export interface ResponseError extends AxiosError {
+
+export interface ServiceNowError {
   error: TypeNullOrUndefined<{
     message: TypeNullOrUndefined<string>;
     detail: TypeNullOrUndefined<string>;
   }>;
   status: TypeNullOrUndefined<string>;
 }
+
+export type ResponseError = AxiosError<ServiceNowError>;
 
 export interface ImportSetApiResponseSuccess {
   import_set: string;

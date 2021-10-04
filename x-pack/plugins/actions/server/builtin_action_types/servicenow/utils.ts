@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Incident, PartialIncident, ResponseError } from './types';
+import { Incident, PartialIncident, ResponseError, ServiceNowError } from './types';
 import { FIELD_PREFIX } from './config';
 import { addTimeZoneToDate, getErrorMessage } from '../lib/axios_utils';
 import * as i18n from './translations';
@@ -18,7 +18,7 @@ export const prepareIncident = (useOldApi: boolean, incident: PartialIncident): 
         {} as Incident
       );
 
-const createErrorMessage = (errorResponse: ResponseError): string => {
+const createErrorMessage = (errorResponse?: ServiceNowError): string => {
   if (errorResponse == null) {
     return 'unknown';
   }
