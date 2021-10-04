@@ -18,8 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const panelActionsTimeRange = getService('dashboardPanelTimeRange');
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
 
-  // FLAKY https://github.com/elastic/kibana/issues/104578
-  describe.skip('Discover Saved Searches', () => {
+  describe('Discover Saved Searches', () => {
     before('initialize tests', async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
       await kibanaServer.importExport.load(ecommerceSOPath);
