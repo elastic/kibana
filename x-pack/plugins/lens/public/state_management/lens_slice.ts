@@ -17,6 +17,7 @@ import {
   getVisualizeFieldSuggestions,
   Suggestion,
 } from '../editor_frame_service/editor_frame/suggestion_helpers';
+import { LensEditContextMapping, LensEditEvent } from '../types';
 
 export const initialState: LensAppState = {
   persistedDoc: undefined,
@@ -132,6 +133,10 @@ export const initEmpty = createAction(
     return { payload: { layerId: generateId(), newState, initialContext } };
   }
 );
+export const editVisualizationAction = createAction<{
+  visualizationId: string;
+  event: LensEditEvent<keyof LensEditContextMapping>;
+}>('lens/editVisualizationAction');
 
 export const lensActions = {
   setState,
@@ -149,6 +154,7 @@ export const lensActions = {
   navigateAway,
   loadInitial,
   initEmpty,
+  editVisualizationAction,
 };
 
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {
@@ -432,6 +438,36 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         };
       }
       return newState;
+    },
+    [editVisualizationAction.type]: (
+      state,
+      {
+        payload,
+      }: {
+        payload: {
+          visualizationId: string;
+          event: LensEditEvent<keyof LensEditContextMapping>;
+        };
+      }
+    ) => {
+      if (!state.visualization.activeId) {
+        throw new Error('Invariant: visualization state got updated without active visualization');
+      }
+      // This is a safeguard that prevents us from accidentally updating the
+      // wrong visualization. This occurs in some cases due to the uncoordinated
+      // way we manage state across plugins.
+      if (state.visualization.activeId !== payload.visualizationId) {
+        return state;
+      }
+      const activeVisualization = visualizationMap[payload.visualizationId];
+
+      return {
+        ...state,
+        visualization: {
+          ...state.visualization,
+          state: activeVisualization.onEditAction!(state.visualization.state, payload.event),
+        },
+      };
     },
   });
 };

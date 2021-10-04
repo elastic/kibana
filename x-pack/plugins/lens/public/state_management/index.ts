@@ -32,6 +32,7 @@ export const {
   switchDatasource,
   setToggleFullscreen,
   initEmpty,
+  editVisualizationAction,
 } = lensActions;
 
 export const makeConfigureStore = (

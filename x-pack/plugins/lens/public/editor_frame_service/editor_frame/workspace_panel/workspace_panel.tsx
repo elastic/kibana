@@ -52,7 +52,7 @@ import { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expre
 import {
   onActiveDataChange,
   useLensDispatch,
-  updateVisualizationState,
+  editVisualizationAction,
   updateDatasourceState,
   setSaveable,
   useLensSelector,
@@ -251,9 +251,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       }
       if (isLensEditEvent(event) && activeVisualization?.onEditAction) {
         dispatchLens(
-          updateVisualizationState({
+          editVisualizationAction({
             visualizationId: activeVisualization.id,
-            updater: (oldState: unknown) => activeVisualization.onEditAction!(oldState, event),
+            event,
           })
         );
       }
