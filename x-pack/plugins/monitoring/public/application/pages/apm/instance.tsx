@@ -15,6 +15,7 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { useCharts } from '../../hooks/use_charts';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 import { ApmTemplate } from './template';
+// @ts-ignore
 import { ApmServerInstance } from '../../../components/apm/instance';
 
 export const ApmInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
