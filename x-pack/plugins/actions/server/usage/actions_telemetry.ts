@@ -78,7 +78,7 @@ export async function getTotalCount(
   }
   return {
     countTotal:
-      Object.keys(aggs).reduce((total: number, key: string) => parseInt(aggs[key], 0) + total, 0) +
+      Object.keys(aggs).reduce((total: number, key: string) => parseInt(aggs[key], 10) + total, 0) +
       (preconfiguredActions?.length ?? 0),
     countByType,
   };
