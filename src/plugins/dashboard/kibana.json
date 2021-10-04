@@ -10,7 +10,6 @@
     "data",
     "embeddable",
     "inspector",
-    "kibanaLegacy",
     "navigation",
     "savedObjects",
     "share",

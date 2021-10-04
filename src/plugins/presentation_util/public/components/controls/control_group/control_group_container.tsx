@@ -9,6 +9,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { cloneDeep } from 'lodash';
+import { PayloadAction } from '@reduxjs/toolkit';
+import { WritableDraft } from 'immer/dist/types/types-external';
 
 import {
   Container,
@@ -32,6 +34,16 @@ import { CONTROL_GROUP_TYPE, DEFAULT_CONTROL_WIDTH } from './control_group_const
 import { ManageControlGroup } from './editor/manage_control_group_component';
 import { OverlayRef } from '../../../../../../core/public';
 import { ControlGroupStrings } from './control_group_strings';
+import { ReduxEmbeddableWrapper } from './state/redux_embeddable_wrapper';
+
+export const testReducers = {
+  updateControlStyle: (
+    state: WritableDraft<ControlGroupInput>,
+    action: PayloadAction<ControlGroupInput['controlStyle']>
+  ) => {
+    state.controlStyle = action.payload;
+  },
+};
 
 export class ControlGroupContainer extends Container<InputControlInput, ControlGroupInput> {
   public readonly type = CONTROL_GROUP_TYPE;
@@ -219,6 +231,11 @@ export class ControlGroupContainer extends Container<InputControlInput, ControlG
   };
 
   public render(dom: HTMLElement) {
-    ReactDOM.render(<ControlGroup controlGroupContainer={this} />, dom);
+    ReactDOM.render(
+      <ReduxEmbeddableWrapper<ControlGroupInput> embeddable={this} reducers={testReducers}>
+        <ControlGroup controlGroupContainer={this} />
+      </ReduxEmbeddableWrapper>,
+      dom
+    );
   }
 }

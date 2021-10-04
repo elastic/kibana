@@ -1,0 +1,36 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { CaseReducer, configureStore, EnhancedStore, PayloadAction } from '@reduxjs/toolkit';
+import { combineReducers, Reducer } from 'redux';
+
+export interface InjectReducerProps<StateShape> {
+  key: string;
+  asyncReducer: Reducer<StateShape>;
+}
+
+type ManagedEmbeddableReduxStore = EnhancedStore & {
+  asyncReducers: { [key: string]: Reducer<unknown> };
+  injectReducer: <StateShape>(props: InjectReducerProps<StateShape>) => void;
+};
+const embeddablesStore = configureStore({ reducer: {} as { [key: string]: Reducer } });
+
+const managedEmbeddablesStore = embeddablesStore as ManagedEmbeddableReduxStore;
+managedEmbeddablesStore.asyncReducers = {};
+
+managedEmbeddablesStore.injectReducer = <StateShape>({
+  key,
+  asyncReducer,
+}: InjectReducerProps<StateShape>) => {
+  managedEmbeddablesStore.asyncReducers[key] = asyncReducer as Reducer<unknown>;
+  managedEmbeddablesStore.replaceReducer(
+    combineReducers({ ...managedEmbeddablesStore.asyncReducers })
+  );
+};
+
+export const getManagedEmbeddablesStore = () => managedEmbeddablesStore;
