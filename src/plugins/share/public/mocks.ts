@@ -18,7 +18,7 @@ const url = new UrlService({
   getUrl: async ({ app, path }, { absolute }) => {
     return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
   },
-  shortUrls: {
+  shortUrls: () => ({
     get: () => ({
       create: async () => {
         throw new Error('Not implemented');
@@ -33,7 +33,7 @@ const url = new UrlService({
         throw new Error('Not implemented.');
       },
     }),
-  },
+  }),
 });
 
 const createSetupContract = (): Setup => {
