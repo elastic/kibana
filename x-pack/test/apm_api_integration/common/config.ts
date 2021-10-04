@@ -76,7 +76,6 @@ export function createTestConfig(config: Config) {
       servers,
       services: {
         ...services,
-
         apmApiClient: async (context: InheritedFtrProviderContext) => {
           const security = context.getService('security');
           await security.init();
