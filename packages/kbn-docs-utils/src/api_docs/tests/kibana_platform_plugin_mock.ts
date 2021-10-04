@@ -12,7 +12,6 @@ import { PluginOrPackage } from '../types';
 export function getKibanaPlatformPlugin(id: string, dir?: string): PluginOrPackage {
   const directory = dir ?? Path.resolve(__dirname, '__fixtures__/src/plugin_a');
   return {
-    importPath: directory,
     manifest: {
       id,
       owner: {
@@ -37,7 +36,6 @@ export function getKibanaPlatformPackage(id: string, importPath?: string): Plugi
       serviceFolders: [],
     },
     directory,
-    importPath: importPath ?? '@kbn/es-query',
     manifestPath: Path.resolve(directory, 'kibana.json'),
     isPlugin: false,
   };

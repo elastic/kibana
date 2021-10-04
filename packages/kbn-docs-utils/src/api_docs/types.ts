@@ -17,11 +17,6 @@ export interface PluginOrPackage {
   directory: string;
   manifestPath: string;
   /**
-   * If this is a package, the import path will be equal to the name, like '@kbn/es-query'. If it's a
-   * plugin, it will be the same as directory, as imports are relative.
-   */
-  importPath: string;
-  /**
    * Only relevant if `isPlugin` is false. Plugins define functionality for each scope using folder structure,
    * while a package defines it's intended usage via package.json fields.
    */

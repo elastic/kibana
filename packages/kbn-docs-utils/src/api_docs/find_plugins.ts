@@ -62,7 +62,6 @@ export function findPackages(): PluginOrPackage[] {
     acc.push({
       directory: Path.dirname(path),
       manifestPath: path,
-      importPath: manifest.name,
       manifest: {
         ...manifest,
         id: manifest.name,

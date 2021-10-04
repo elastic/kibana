@@ -17,7 +17,7 @@ import {
 } from '../tests/kibana_platform_plugin_mock';
 
 const plugin = getKibanaPlatformPlugin('pluginA');
-const packageA = getKibanaPlatformPackage('packageA');
+const packageA = getKibanaPlatformPackage('@kbn/package-a');
 const plugins: PluginOrPackage[] = [plugin, packageA];
 
 const log = new ToolingLog({
@@ -50,7 +50,7 @@ it('test extractImportReference', () => {
 
 it('test extractImportReference with a package', () => {
   const results = extractImportReferences(
-    `(param: string) => import("${packageA.importPath}").Bar`,
+    `(param: string) => import("Users/foo/node_modules/${packageA.manifest.id}/target_types").Bar`,
     plugins,
     log
   );
