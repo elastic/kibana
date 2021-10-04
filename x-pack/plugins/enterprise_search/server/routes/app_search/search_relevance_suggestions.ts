@@ -39,6 +39,20 @@ export function registerSearchRelevanceSuggestionsRoutes({
     })
   );
 
+  router.put(
+    skipBodyValidation({
+      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions',
+      validate: {
+        params: schema.object({
+          engineName: schema.string(),
+        }),
+      },
+    }),
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:engineName/search_relevance_suggestions',
+    })
+  );
+
   router.get(
     {
       path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions/settings',
