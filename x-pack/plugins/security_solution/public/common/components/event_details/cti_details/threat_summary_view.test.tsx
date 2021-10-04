@@ -14,6 +14,15 @@ import { buildEventEnrichmentMock } from '../../../../../common/search_strategy/
 import { mockAlertDetailsData } from '../__mocks__';
 import { TimelineEventsDetailsItem } from '../../../../../../timelines/common';
 import { mockBrowserFields } from '../../../containers/source/mock';
+import { mockTimelines } from '../../../../common/mock/mock_timelines_plugin';
+
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      timelines: { ...mockTimelines },
+    },
+  }),
+}));
 
 jest.mock('../table/action_cell');
 jest.mock('../table/field_name_cell');
