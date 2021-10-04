@@ -30,8 +30,8 @@ export const legacyExtractRuleId = ({
     logger.error(
       [
         'Security Solution notification (Legacy) system "ruleAlertId" is null or undefined when it never should be. ',
-        'This indicates potentially that saved object migrations did not run correctly. Returning empty reference',
-      ].join()
+        'This indicates potentially that saved object migrations did not run correctly. Returning empty reference.',
+      ].join('')
     );
     return [];
   } else {
