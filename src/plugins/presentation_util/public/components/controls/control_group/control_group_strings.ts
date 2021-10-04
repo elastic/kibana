@@ -52,6 +52,10 @@ export const ControlGroupStrings = {
       i18n.translate('presentationUtil.inputControls.controlGroup.management.designTitle', {
         defaultMessage: 'Design',
       }),
+    getWidthTitle: () =>
+      i18n.translate('presentationUtil.inputControls.controlGroup.management.widthTitle', {
+        defaultMessage: 'Width',
+      }),
     getLayoutTitle: () =>
       i18n.translate('presentationUtil.inputControls.controlGroup.management.layoutTitle', {
         defaultMessage: 'Layout',
