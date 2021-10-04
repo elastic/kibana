@@ -90,19 +90,13 @@ export const getTimelineOrNull = async (
   return timeline;
 };
 
-export const resolveTimeline = async (
-  request: FrameworkRequest,
-  timelineId: string,
-  timelineType: TimelineTypeLiteralWithNull = TimelineType.default
-): Promise<ResolvedTimelineWithOutcomeSavedObject> => resolveSavedTimeline(request, timelineId);
-
 export const resolveTimelineOrNull = async (
   frameworkRequest: FrameworkRequest,
   savedObjectId: string
 ): Promise<ResolvedTimelineWithOutcomeSavedObject | null> => {
   let resolvedTimeline = null;
   try {
-    resolvedTimeline = await resolveTimeline(frameworkRequest, savedObjectId);
+    resolvedTimeline = await resolveSavedTimeline(frameworkRequest, savedObjectId);
     // eslint-disable-next-line no-empty
   } catch (e) {}
   return resolvedTimeline;
