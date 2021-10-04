@@ -67,6 +67,7 @@ const App: React.FunctionComponent = () => {
         paddingSize="none"
         verticalPosition="center"
         horizontalPosition="center"
+        data-test-subj="isUpgradingMessage"
       >
         <EuiEmptyPrompt
           iconType="logoElasticsearch"
@@ -100,6 +101,7 @@ const App: React.FunctionComponent = () => {
         paddingSize="none"
         verticalPosition="center"
         horizontalPosition="center"
+        data-test-subj="isUpgradeCompleteMessage"
       >
         <EuiEmptyPrompt
           iconType="logoElasticsearch"
