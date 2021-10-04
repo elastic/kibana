@@ -335,7 +335,12 @@ export const buildExpression = (
                               arguments: {
                                 forAccessor: [yConfig.forAccessor],
                                 axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],
-                                color: [yConfig.color || defaultThresholdColor],
+                                color:
+                                  layer.layerType === layerTypes.THRESHOLD
+                                    ? [yConfig.color || defaultThresholdColor]
+                                    : yConfig.color
+                                    ? [yConfig.color]
+                                    : [],
                                 lineStyle: [yConfig.lineStyle || 'solid'],
                                 lineWidth: [yConfig.lineWidth || 1],
                                 fill: [yConfig.fill || 'none'],
