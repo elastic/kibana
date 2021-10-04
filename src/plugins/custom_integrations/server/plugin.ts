@@ -40,9 +40,6 @@ export class CustomIntegrationsPlugin
           ...integration,
         });
       },
-      getAppendCustomIntegrations: (): CustomIntegration[] => {
-        return this.customIngegrationRegistry.getAppendCustomIntegrations();
-      },
     } as CustomIntegrationsPluginSetup;
   }
 
