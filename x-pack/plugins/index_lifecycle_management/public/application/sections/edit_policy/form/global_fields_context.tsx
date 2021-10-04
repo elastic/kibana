@@ -11,13 +11,15 @@ import { UseMultiFields, FieldHook, FieldConfig } from '../../../../shared_impor
 /**
  * Those are the fields that we always want present in our form.
  */
-interface GlobalFieldsTypes {
+export interface GlobalFieldsTypes {
   deleteEnabled: boolean;
   searchableSnapshotRepo: string;
   warmMinAgeMilliSeconds: number;
   coldMinAgeMilliSeconds: number;
   frozenMinAgeMilliSeconds: number;
   deleteMinAgeMilliSeconds: number;
+  hotIsUsingShardSize: boolean;
+  warmIsUsingShardSize: boolean;
 }
 
 type GlobalFields = {
@@ -47,6 +49,12 @@ export const globalFields: Record<
   },
   deleteMinAgeMilliSeconds: {
     path: '_meta.delete.minAgeToMilliSeconds',
+  },
+  hotIsUsingShardSize: {
+    path: '_meta.hot.shrink.isUsingShardSize',
+  },
+  warmIsUsingShardSize: {
+    path: '_meta.warm.shrink.isUsingShardSize',
   },
 };
 

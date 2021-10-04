@@ -304,32 +304,29 @@ export class ContentStream extends Duplex {
     this.buffer = this.buffer.slice(size);
   }
 
-  async _write(chunk: Buffer | string, encoding: BufferEncoding, callback: Callback) {
+  private async flushAllFullChunks() {
+    const maxChunkSize = await this.getMaxChunkSize();
+
+    while (this.buffer.byteLength >= maxChunkSize) {
+      await this.flush(maxChunkSize);
+    }
+  }
+
+  _write(chunk: Buffer | string, encoding: BufferEncoding, callback: Callback) {
     this.buffer = Buffer.concat([
       this.buffer,
       Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding),
     ]);
 
-    try {
-      const maxChunkSize = await this.getMaxChunkSize();
-
-      while (this.buffer.byteLength >= maxChunkSize) {
-        await this.flush(maxChunkSize);
-      }
-
-      callback();
-    } catch (error) {
-      callback(error);
-    }
+    this.flushAllFullChunks()
+      .then(() => callback())
+      .catch(callback);
   }
 
-  async _final(callback: Callback) {
-    try {
-      await this.flush();
-      callback();
-    } catch (error) {
-      callback(error);
-    }
+  _final(callback: Callback) {
+    this.flush()
+      .then(() => callback())
+      .catch(callback);
   }
 
   getSeqNo(): number | undefined {

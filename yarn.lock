@@ -1454,10 +1454,10 @@
   dependencies:
     "@elastic/ecs-helpers" "^1.1.0"
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^7.15.0-canary.3":
-  version "7.15.0-canary.3"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-7.15.0-canary.3.tgz#0f0f21641d4eab0eaa98e6f9f5c18f28a968c4ad"
-  integrity sha512-9T3/RNW0b6R1D7ZrdMZ7aujEjs4IoiKvhkTqrH6fDNzTaMmTCTf6BLnIbWWwGdFLYOyIjnpDg+pSfYF+JYjKFA==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^7.15.0-canary.4":
+  version "7.15.0-canary.4"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-7.15.0-canary.4.tgz#a1471b6d22f4172bcc133cca5acd91cfadbc6b6f"
+  integrity sha512-82nVfXR9CQ3lEmCrpvPgaEqEzGJZ/CuvT9Vjoq3oBGglJXPmnEqgxvDinE0/etqMiRlqmsC1DPd1OYw1PX0Jxg==
   dependencies:
     debug "^4.3.1"
     hpagent "^0.1.1"
@@ -7069,9 +7069,9 @@ ansi-regex@^4.0.0, ansi-regex@^4.1.0:
   integrity sha512-1apePfXM1UOSqw0o9IiFAovVz9M5S1Dg+4TrDwfMewQ6p/rmMueb7tWZjQ1rx4Loy1ArBggoqGpfqqdI4rondg==
 
 ansi-regex@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-5.0.0.tgz#388539f55179bf39339c81af30a654d69f87cb75"
-  integrity sha512-bY6fj56OUQ0hU1KjFNDQuJFezqKdrAyFdIevADiqrWHwSlbmBNMHp5ak2f40Pm8JTFyM2mqxkG6ngkHO11f/lg==
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-5.0.1.tgz#082cb2c89c9fe8659a311a53bd6a4dc5301db304"
+  integrity sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==
 
 ansi-styles@^1.1.0:
   version "1.1.0"
@@ -8408,7 +8408,7 @@ better-opn@^2.0.0:
   dependencies:
     open "^7.0.3"
 
-big-integer@^1.6.16, big-integer@^1.6.48:
+big-integer@^1.6.16:
   version "1.6.48"
   resolved "https://registry.yarnpkg.com/big-integer/-/big-integer-1.6.48.tgz#8fd88bd1632cba4a1c8c3e3d7159f08bb95b4b9e"
   integrity sha512-j51egjPa7/i+RdiRuJbPdJ2FIUYYPhvYLjzoYbcMMm62ooO6F94fETG4MTs46zPAF9Brs04OajboA/qTGuz78w==
@@ -9521,10 +9521,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^93.0.1:
-  version "93.0.1"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-93.0.1.tgz#3ed1f7baa98a754fc1788c42ac8e4bb1ab27db32"
-  integrity sha512-KDzbW34CvQLF5aTkm3b5VdlTrvdIt4wEpCzT2p4XJIQWQZEPco5pNce7Lu9UqZQGkhQ4mpZt4Ky6NKVyIS2N8A==
+chromedriver@^94.0.0:
+  version "94.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-94.0.0.tgz#f6a3533976ba72413a01672954040c3544ea9d30"
+  integrity sha512-x4hK7R7iOyAhdLHJEcOyGBW/oa2kno6AqpHVLd+n3G7c2Vk9XcAXMz84XhNItqykJvTc6E3z/JRIT1eHYH//Eg==
   dependencies:
     "@testim/chrome-version" "^1.0.7"
     axios "^0.21.2"
@@ -17834,6 +17834,11 @@ js-sha3@0.8.0:
   resolved "https://registry.yarnpkg.com/js-sha3/-/js-sha3-0.8.0.tgz#b9b7a5da73afad7dedd0f8c463954cbde6818840"
   integrity sha512-gF1cRrHhIzNfToc802P800N8PpXS+evLLXfsVpowqmAFR9uwbi89WvXg2QspOmXL8QL86J4T1EpFu+yUkwJY3Q==
 
+js-sql-parser@^1.4.1:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/js-sql-parser/-/js-sql-parser-1.4.1.tgz#775516b3187dd5872ecec04bef8ed4a430242fda"
+  integrity sha512-J8zi3+/yK4FWSnVvLOjS2HIGfJhR6v7ApwIF8gZ/SpaO/tFIDlsgugD6ZMn6flXiuMsCjJxvhE0+xBgbdzvDDw==
+
 js-string-escape@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/js-string-escape/-/js-string-escape-1.0.1.tgz#e2625badbc0d67c7533e9edc1068c587ae4137ef"
@@ -20435,13 +20440,6 @@ node-sass@^4.14.1:
     sass-graph "2.2.5"
     stdout-stream "^1.4.0"
     "true-case-path" "^1.0.2"
-
-node-sql-parser@^3.6.1:
-  version "3.6.1"
-  resolved "https://registry.yarnpkg.com/node-sql-parser/-/node-sql-parser-3.6.1.tgz#6f096e9df1f19d1e2daa658d864bd68b0e2cd2c6"
-  integrity sha512-AseDvELmUvL22L6C63DsTuzF+0i/HBIHjJq/uxC7jV3PGpAUib5Oe6oz4sgAniSUMPSZQbZmRore6Na68Sg4Tg==
-  dependencies:
-    big-integer "^1.6.48"
 
 node-status-codes@^1.0.0:
   version "1.0.0"
