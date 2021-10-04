@@ -30,7 +30,7 @@ export class MessageImporter extends Importer {
   // multiline_start_pattern regex
   // if it does, it is a legitimate end of line and can be pushed into the list,
   // if not, it must be a newline char inside a field value, so keep looking.
-  protected _createDocs(text: string): CreateDocsResponse {
+  protected _createDocs(text: string, isLastPart: boolean): CreateDocsResponse {
     let remainder = 0;
     try {
       const docs: Doc[] = [];
@@ -39,7 +39,15 @@ export class MessageImporter extends Importer {
       let line = '';
       for (let i = 0; i < text.length; i++) {
         const char = text[i];
+        const isLastChar = i === text.length - 1;
         if (char === '\n') {
+          message = this._processLine(docs, message, line);
+          line = '';
+        } else if (isLastPart && isLastChar) {
+          // if this is the end of the last line and the last chunk of data,
+          // add the remainder as a final line.
+          // just in case the last line doesn't end in a new line char.
+          line += char;
           message = this._processLine(docs, message, line);
           line = '';
         } else {

@@ -43,7 +43,6 @@ import type { AlertsStackByField } from '../common/types';
 import { KpiPanel, StackBySelect } from '../common/components';
 
 import { useInspectButton } from '../common/hooks';
-import { fetchQueryRuleRegistryAlerts } from '../../../containers/detection_engine/alerts/api';
 
 const defaultTotalAlertsObj: AlertsTotal = {
   value: 0,
@@ -97,7 +96,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     updateDateRange,
     titleSize = 'm',
   }) => {
-    const { to, from, deleteQuery, setQuery } = useGlobalTime();
+    const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
     // create a unique, but stable (across re-renders) query id
     const uniqueQueryId = useMemo(() => `${DETECTIONS_HISTOGRAM_ID}-${uuid.v4()}`, []);
@@ -117,16 +116,12 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       request,
       refetch,
     } = useQueryAlerts<{}, AlertsAggregation>({
-      fetchMethod: fetchQueryRuleRegistryAlerts,
-      query: {
-        index: signalIndexName,
-        ...getAlertsHistogramQuery(
-          selectedStackByOption,
-          from,
-          to,
-          buildCombinedQueries(combinedQueries)
-        ),
-      },
+      query: getAlertsHistogramQuery(
+        selectedStackByOption,
+        from,
+        to,
+        buildCombinedQueries(combinedQueries)
+      ),
       indexName: signalIndexName,
     });
 
@@ -252,10 +247,10 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       }
     }, [showLinkToAlerts, goToDetectionEngine, formatUrl]);
 
-    const titleText = useMemo(() => (onlyField == null ? title : i18n.TOP(onlyField)), [
-      onlyField,
-      title,
-    ]);
+    const titleText = useMemo(
+      () => (onlyField == null ? title : i18n.TOP(onlyField)),
+      [onlyField, title]
+    );
 
     return (
       <InspectButtonContainer data-test-subj="alerts-histogram-panel" show={!isInitialLoading}>

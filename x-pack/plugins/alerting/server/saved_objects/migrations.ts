@@ -54,8 +54,20 @@ export const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawAl
 export const isSecuritySolutionRule = (doc: SavedObjectUnsanitizedDoc<RawAlert>): boolean =>
   doc.attributes.alertTypeId === 'siem.signals';
 
+/**
+ * Returns true if the alert type is that of "siem.notifications" which is a legacy notification system that was deprecated in 7.16.0
+ * in favor of using the newer alerting notifications system.
+ * @param doc The saved object alert type document
+ * @returns true if this is a legacy "siem.notifications" rule, otherwise false
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ */
+export const isSecuritySolutionLegacyNotification = (
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): boolean => doc.attributes.alertTypeId === 'siem.notifications';
+
 export function getMigrations(
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  isPreconfigured: (connectorId: string) => boolean
 ): SavedObjectMigrationMap {
   const migrationWhenRBACWasIntroduced = createEsoMigration(
     encryptedSavedObjects,
@@ -99,10 +111,20 @@ export function getMigrations(
     pipeMigrations(addExceptionListsToReferences)
   );
 
-  const migrateLegacyIds716 = createEsoMigration(
+  const migrateRules716 = createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
-    pipeMigrations(setLegacyId)
+    pipeMigrations(
+      setLegacyId,
+      getRemovePreconfiguredConnectorsFromReferencesFn(isPreconfigured),
+      addRuleIdsToLegacyNotificationReferences
+    )
+  );
+
+  const migrationRules800 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawAlert>): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
+    (doc) => doc // no-op
   );
 
   return {
@@ -112,7 +134,8 @@ export function getMigrations(
     '7.13.0': executeMigrationWithErrorHandling(migrationSecurityRules713, '7.13.0'),
     '7.14.1': executeMigrationWithErrorHandling(migrationSecurityRules714, '7.14.1'),
     '7.15.0': executeMigrationWithErrorHandling(migrationSecurityRules715, '7.15.0'),
-    '7.16.0': executeMigrationWithErrorHandling(migrateLegacyIds716, '7.16.0'),
+    '7.16.0': executeMigrationWithErrorHandling(migrateRules716, '7.16.0'),
+    '8.0.0': executeMigrationWithErrorHandling(migrationRules800, '8.0.0'),
   };
 }
 
@@ -305,25 +328,17 @@ function restructureConnectorsThatSupportIncident(
           },
         ] as RawAlertAction[];
       } else if (action.actionTypeId === '.jira') {
-        const {
-          title,
-          comments,
-          description,
-          issueType,
-          priority,
-          labels,
-          parent,
-          summary,
-        } = action.params.subActionParams as {
-          title: string;
-          description: string;
-          issueType: string;
-          priority?: string;
-          labels?: string[];
-          parent?: string;
-          comments?: unknown[];
-          summary?: string;
-        };
+        const { title, comments, description, issueType, priority, labels, parent, summary } =
+          action.params.subActionParams as {
+            title: string;
+            description: string;
+            issueType: string;
+            priority?: string;
+            labels?: string[];
+            parent?: string;
+            comments?: unknown[];
+            summary?: string;
+          };
         return [
           ...acc,
           {
@@ -574,6 +589,49 @@ function removeMalformedExceptionsList(
   }
 }
 
+/**
+ * This migrates rule_id's within the legacy siem.notification to saved object references on an upgrade.
+ * We only migrate if we find these conditions:
+ *   - ruleAlertId is a string and not null, undefined, or malformed data.
+ *   - The existing references do not already have a ruleAlertId found within it.
+ * Some of these issues could crop up during either user manual errors of modifying things, earlier migration
+ * issues, etc... so we are safer to check them as possibilities
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ * @param doc The document that might have "ruleAlertId" to migrate into the references
+ * @returns The document migrated with saved object references
+ */
+function addRuleIdsToLegacyNotificationReferences(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  const {
+    attributes: {
+      params: { ruleAlertId },
+    },
+    references,
+  } = doc;
+  if (!isSecuritySolutionLegacyNotification(doc) || !isString(ruleAlertId)) {
+    // early return if we are not a string or if we are not a security solution notification saved object.
+    return doc;
+  } else {
+    const existingReferences = references ?? [];
+    const existingReferenceFound = existingReferences.find((reference) => {
+      return reference.id === ruleAlertId && reference.type === 'alert';
+    });
+    if (existingReferenceFound) {
+      // skip this if the references already exists for some uncommon reason so we do not add an additional one.
+      return doc;
+    } else {
+      const savedObjectReference: SavedObjectReference = {
+        id: ruleAlertId,
+        name: 'param:alert_0',
+        type: 'alert',
+      };
+      const newReferences = [...existingReferences, savedObjectReference];
+      return { ...doc, references: newReferences };
+    }
+  }
+}
+
 function setLegacyId(
   doc: SavedObjectUnsanitizedDoc<RawAlert>
 ): SavedObjectUnsanitizedDoc<RawAlert> {
@@ -585,6 +643,82 @@ function setLegacyId(
       legacyId: id,
     },
   };
+}
+
+function getRemovePreconfiguredConnectorsFromReferencesFn(
+  isPreconfigured: (connectorId: string) => boolean
+) {
+  return (doc: SavedObjectUnsanitizedDoc<RawAlert>) => {
+    return removePreconfiguredConnectorsFromReferences(doc, isPreconfigured);
+  };
+}
+
+function removePreconfiguredConnectorsFromReferences(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>,
+  isPreconfigured: (connectorId: string) => boolean
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  const {
+    attributes: { actions },
+    references,
+  } = doc;
+
+  // Look for connector references
+  const connectorReferences = (references ?? []).filter((ref: SavedObjectReference) =>
+    ref.name.startsWith('action_')
+  );
+  if (connectorReferences.length > 0) {
+    const restReferences = (references ?? []).filter(
+      (ref: SavedObjectReference) => !ref.name.startsWith('action_')
+    );
+
+    const updatedConnectorReferences: SavedObjectReference[] = [];
+    const updatedActions: RawAlert['actions'] = [];
+
+    // For each connector reference, check if connector is preconfigured
+    // If yes, we need to remove from the references array and update
+    // the corresponding action so it directly references the preconfigured connector id
+    connectorReferences.forEach((connectorRef: SavedObjectReference) => {
+      // Look for the corresponding entry in the actions array
+      const correspondingAction = getCorrespondingAction(actions, connectorRef.name);
+      if (correspondingAction) {
+        if (isPreconfigured(connectorRef.id)) {
+          updatedActions.push({
+            ...correspondingAction,
+            actionRef: `preconfigured:${connectorRef.id}`,
+          });
+        } else {
+          updatedActions.push(correspondingAction);
+          updatedConnectorReferences.push(connectorRef);
+        }
+      } else {
+        // Couldn't find the matching action, leave as is
+        updatedConnectorReferences.push(connectorRef);
+      }
+    });
+
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        actions: [...updatedActions],
+      },
+      references: [...updatedConnectorReferences, ...restReferences],
+    };
+  }
+  return doc;
+}
+
+function getCorrespondingAction(
+  actions: SavedObjectAttribute,
+  connectorRef: string
+): RawAlertAction | null {
+  if (!Array.isArray(actions)) {
+    return null;
+  } else {
+    return actions.find(
+      (action) => (action as RawAlertAction)?.actionRef === connectorRef
+    ) as RawAlertAction;
+  }
 }
 
 function pipeMigrations(...migrations: AlertMigration[]): AlertMigration {

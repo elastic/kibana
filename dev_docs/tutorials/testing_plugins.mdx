@@ -1,6 +1,6 @@
 ---
 id: kibDevTutorialTestingPlugins
-slug: /kibana-dev-docs/tutorial/testing-plugins
+slug: /kibana-dev-docs/tutorials/testing-plugins
 title: Testing Kibana Plugins
 summary: Learn how to test different aspects of Kibana plugins
 date: 2021-07-05
@@ -927,6 +927,17 @@ describe('Case migrations v7.7.0 -> v7.8.0', () => {
   });
 });
 ```
+
+You can generate code coverage report for a single plugin.
+
+```bash
+yarn jest --coverage --config src/plugins/console/jest.config.js
+```
+
+Html report should be available in `target/kibana-coverage/jest/src/plugins/console` path
+
+We run code coverage daily on CI and ["Kibana Stats cluster"](https://kibana-stats.elastic.dev/s/code-coverage/app/home)
+can be used to view statistics. The report combines code coverage for all jest tests within Kibana repository.
 
 #### Integration testing
 With more complicated migrations, the behavior of the migration may be dependent on values from other plugins which may

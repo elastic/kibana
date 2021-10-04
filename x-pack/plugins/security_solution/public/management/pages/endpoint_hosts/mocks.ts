@@ -37,8 +37,8 @@ import {
   PendingActionsHttpMockInterface,
   pendingActionsHttpMock,
 } from '../../../common/lib/endpoint_pending_actions/mocks';
-import { TRANSFORM_STATS_URL } from '../../../../common/constants';
-import { TransformStatsResponse, TRANSFORM_STATE } from './types';
+import { METADATA_TRANSFORM_STATS_URL, TRANSFORM_STATES } from '../../../../common/constants';
+import { TransformStatsResponse } from './types';
 
 type EndpointMetadataHttpMocksInterface = ResponseProvidersInterface<{
   metadataList: () => HostResultList;
@@ -89,8 +89,8 @@ export const endpointMetadataHttpMocks = httpHandlerMockFactory<EndpointMetadata
 type EndpointPolicyResponseHttpMockInterface = ResponseProvidersInterface<{
   policyResponse: () => HostPolicyResponse;
 }>;
-export const endpointPolicyResponseHttpMock = httpHandlerMockFactory<EndpointPolicyResponseHttpMockInterface>(
-  [
+export const endpointPolicyResponseHttpMock =
+  httpHandlerMockFactory<EndpointPolicyResponseHttpMockInterface>([
     {
       id: 'policyResponse',
       path: BASE_POLICY_RESPONSE_ROUTE,
@@ -99,14 +99,13 @@ export const endpointPolicyResponseHttpMock = httpHandlerMockFactory<EndpointPol
         return new EndpointDocGenerator('seed').generatePolicyResponse();
       },
     },
-  ]
-);
+  ]);
 
 type EndpointActivityLogHttpMockInterface = ResponseProvidersInterface<{
   activityLogResponse: () => ActivityLog;
 }>;
-export const endpointActivityLogHttpMock = httpHandlerMockFactory<EndpointActivityLogHttpMockInterface>(
-  [
+export const endpointActivityLogHttpMock =
+  httpHandlerMockFactory<EndpointActivityLogHttpMockInterface>([
     {
       id: 'activityLogResponse',
       path: ENDPOINT_ACTION_LOG_ROUTE,
@@ -126,6 +125,8 @@ export const endpointActivityLogHttpMock = httpHandlerMockFactory<EndpointActivi
           body: {
             page: 1,
             pageSize: 50,
+            startDate: 'now-1d',
+            endDate: 'now',
             data: [
               {
                 type: 'response',
@@ -146,14 +147,13 @@ export const endpointActivityLogHttpMock = httpHandlerMockFactory<EndpointActivi
         };
       },
     },
-  ]
-);
+  ]);
 
 export type FleetGetPackageListHttpMockInterface = ResponseProvidersInterface<{
   packageList: () => GetPackagesResponse;
 }>;
-export const fleetGetPackageListHttpMock = httpHandlerMockFactory<FleetGetPackageListHttpMockInterface>(
-  [
+export const fleetGetPackageListHttpMock =
+  httpHandlerMockFactory<FleetGetPackageListHttpMockInterface>([
     {
       id: 'packageList',
       method: 'get',
@@ -166,14 +166,13 @@ export const fleetGetPackageListHttpMock = httpHandlerMockFactory<FleetGetPackag
         };
       },
     },
-  ]
-);
+  ]);
 
 export type FleetGetAgentPolicyListHttpMockInterface = ResponseProvidersInterface<{
   agentPolicy: () => GetAgentPoliciesResponse;
 }>;
-export const fleetGetAgentPolicyListHttpMock = httpHandlerMockFactory<FleetGetAgentPolicyListHttpMockInterface>(
-  [
+export const fleetGetAgentPolicyListHttpMock =
+  httpHandlerMockFactory<FleetGetAgentPolicyListHttpMockInterface>([
     {
       id: 'agentPolicy',
       path: AGENT_POLICY_API_ROUTES.LIST_PATTERN,
@@ -199,15 +198,14 @@ export const fleetGetAgentPolicyListHttpMock = httpHandlerMockFactory<FleetGetAg
         };
       },
     },
-  ]
-);
+  ]);
 
 export type FleetGetCheckPermissionsInterface = ResponseProvidersInterface<{
   checkPermissions: () => CheckPermissionsResponse;
 }>;
 
-export const fleetGetCheckPermissionsHttpMock = httpHandlerMockFactory<FleetGetCheckPermissionsInterface>(
-  [
+export const fleetGetCheckPermissionsHttpMock =
+  httpHandlerMockFactory<FleetGetCheckPermissionsInterface>([
     {
       id: 'checkPermissions',
       path: appRoutesService.getCheckPermissionsPath(),
@@ -219,8 +217,7 @@ export const fleetGetCheckPermissionsHttpMock = httpHandlerMockFactory<FleetGetC
         };
       },
     },
-  ]
-);
+  ]);
 
 type FleetApisHttpMockInterface = FleetGetPackageListHttpMockInterface &
   FleetGetAgentPolicyListHttpMockInterface &
@@ -241,14 +238,14 @@ export const failedTransformStateMock = {
   count: 1,
   transforms: [
     {
-      state: TRANSFORM_STATE.FAILED,
+      state: TRANSFORM_STATES.FAILED,
     },
   ],
 };
 export const transformsHttpMocks = httpHandlerMockFactory<TransformHttpMocksInterface>([
   {
     id: 'metadataTransformStats',
-    path: TRANSFORM_STATS_URL,
+    path: METADATA_TRANSFORM_STATS_URL,
     method: 'get',
     handler: () => failedTransformStateMock,
   },

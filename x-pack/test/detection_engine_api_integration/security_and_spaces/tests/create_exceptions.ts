@@ -63,17 +63,23 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
 
   describe('create_rules_with_exceptions', () => {
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+    });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+    });
+
     describe('creating rules with exceptions', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
         await deleteAllExceptions(es);
-        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       describe('elastic admin', () => {
@@ -529,16 +535,22 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('tests with auditbeat data', () => {
+        before(async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+        });
+
+        after(async () => {
+          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+        });
+
         beforeEach(async () => {
           await createSignalsIndex(supertest);
-          await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
         afterEach(async () => {
           await deleteSignalsIndex(supertest);
           await deleteAllAlerts(supertest);
           await deleteAllExceptions(es);
-          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
         it('should be able to execute against an exception list that does not include valid entries and get back 10 signals', async () => {

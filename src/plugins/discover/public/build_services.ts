@@ -8,7 +8,6 @@
 
 import { History } from 'history';
 
-import type { auto } from 'angular';
 import {
   Capabilities,
   ChromeStart,
@@ -17,6 +16,7 @@ import {
   ToastsStart,
   IUiSettingsClient,
   PluginInitializerContext,
+  HttpStart,
 } from 'kibana/public';
 import {
   FilterManager,
@@ -27,8 +27,9 @@ import {
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { SharePluginStart } from 'src/plugins/share/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
-
 import { UiCounterMetricType } from '@kbn/analytics';
+import { Storage } from '../../kibana_utils/public';
+
 import { DiscoverStartPlugins } from './plugin';
 import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
 import { getHistory } from './kibana_services';
@@ -58,24 +59,25 @@ export interface DiscoverServices {
   toastNotifications: ToastsStart;
   getSavedSearchById: (id?: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
-  getEmbeddableInjector: () => Promise<auto.IInjectorService>;
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  http: HttpStart;
+  storage: Storage;
 }
 
-export async function buildServices(
+export function buildServices(
   core: CoreStart,
   plugins: DiscoverStartPlugins,
-  context: PluginInitializerContext,
-  getEmbeddableInjector: () => Promise<auto.IInjectorService>
-): Promise<DiscoverServices> {
+  context: PluginInitializerContext
+): DiscoverServices {
   const services = {
     savedObjectsClient: core.savedObjects.client,
     savedObjects: plugins.savedObjects,
   };
   const savedObjectService = createSavedSearchesLoader(services);
   const { usageCollection } = plugins;
+  const storage = new Storage(localStorage);
 
   return {
     addBasePath: core.http.basePath.prepend,
@@ -86,7 +88,6 @@ export async function buildServices(
     docLinks: core.docLinks,
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
-    getEmbeddableInjector,
     getSavedSearchById: async (id?: string) => savedObjectService.get(id),
     getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),
     history: getHistory,
@@ -102,7 +103,9 @@ export async function buildServices(
     timefilter: plugins.data.query.timefilter.timefilter,
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
+    storage,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
     indexPatternFieldEditor: plugins.indexPatternFieldEditor,
+    http: core.http,
   };
 }

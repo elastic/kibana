@@ -37,7 +37,7 @@ export const GroupRowSourcesDropdown: React.FC<GroupRowSourcesDropdownProps> = (
   const contentSourceCountHeading = (
     <strong>
       {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.contentSourceCountHeading', {
-        defaultMessage: '{numSources} shared content sources',
+        defaultMessage: '{numSources} organizational content sources',
         values: { numSources: groupSources.length },
       })}
     </strong>

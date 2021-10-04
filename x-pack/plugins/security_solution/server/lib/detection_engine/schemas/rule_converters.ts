@@ -23,7 +23,6 @@ import {
   FullResponseSchema,
   ResponseTypeSpecific,
 } from '../../../../common/detection_engine/schemas/request';
-import { RuleActions } from '../rule_actions/types';
 import { AppClient } from '../../../types';
 import { addTags } from '../rules/add_tags';
 import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
@@ -32,6 +31,15 @@ import { SanitizedAlert } from '../../../../../alerting/common';
 import { IRuleStatusSOAttributes } from '../rules/types';
 import { transformTags } from '../routes/rules/utils';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
+import {
+  transformFromAlertThrottle,
+  transformToAlertThrottle,
+  transformToNotifyWhen,
+  transformActions,
+} from '../rules/utils';
+import { ruleTypeMappings } from '../signals/utils';
+// eslint-disable-next-line no-restricted-imports
+import { LegacyRuleActions } from '../rule_actions/legacy_types';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
@@ -117,14 +125,15 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
 
 export const convertCreateAPIToInternalSchema = (
   input: CreateRulesSchema,
-  siemClient: AppClient
+  siemClient: AppClient,
+  isRuleRegistryEnabled: boolean
 ): InternalRuleCreate => {
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
   const newRuleId = input.rule_id ?? uuid.v4();
   return {
     name: input.name,
     tags: addTags(input.tags ?? [], newRuleId, false),
-    alertTypeId: SIGNALS_ID,
+    alertTypeId: isRuleRegistryEnabled ? ruleTypeMappings[input.type] : SIGNALS_ID,
     consumer: SERVER_APP_ID,
     params: {
       author: input.author ?? [],
@@ -149,6 +158,7 @@ export const convertCreateAPIToInternalSchema = (
       timestampOverride: input.timestamp_override,
       to: input.to ?? 'now',
       references: input.references ?? [],
+      namespace: input.namespace,
       note: input.note,
       version: input.version ?? 1,
       exceptionsList: input.exceptions_list ?? [],
@@ -156,9 +166,9 @@ export const convertCreateAPIToInternalSchema = (
     },
     schedule: { interval: input.interval ?? '5m' },
     enabled: input.enabled ?? true,
-    actions: input.throttle === 'rule' ? (input.actions ?? []).map(transformRuleToAlertAction) : [],
-    throttle: null,
-    notifyWhen: null,
+    actions: input.actions?.map(transformRuleToAlertAction) ?? [],
+    throttle: transformToAlertThrottle(input.throttle),
+    notifyWhen: transformToNotifyWhen(input.throttle),
   };
 };
 
@@ -245,6 +255,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     risk_score: params.riskScore,
     severity: params.severity,
     building_block_type: params.buildingBlockType,
+    namespace: params.namespace,
     note: params.note,
     license: params.license,
     output_index: params.outputIndex,
@@ -271,8 +282,8 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
 
 export const internalRuleToAPIResponse = (
   rule: SanitizedAlert<RuleParams>,
-  ruleActions?: RuleActions | null,
-  ruleStatus?: IRuleStatusSOAttributes
+  ruleStatus?: IRuleStatusSOAttributes,
+  legacyRuleActions?: LegacyRuleActions | null
 ): FullResponseSchema => {
   const mergedStatus = ruleStatus ? mergeAlertWithSidecarStatus(rule, ruleStatus) : undefined;
   return {
@@ -291,8 +302,8 @@ export const internalRuleToAPIResponse = (
     // Type specific security solution rule params
     ...typeSpecificCamelToSnake(rule.params),
     // Actions
-    throttle: ruleActions?.ruleThrottle || 'no_actions',
-    actions: ruleActions?.actions ?? [],
+    throttle: transformFromAlertThrottle(rule, legacyRuleActions),
+    actions: transformActions(rule.actions, legacyRuleActions),
     // Rule status
     status: mergedStatus?.status ?? undefined,
     status_date: mergedStatus?.statusDate ?? undefined,

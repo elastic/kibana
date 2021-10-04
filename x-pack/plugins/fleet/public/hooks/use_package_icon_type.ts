@@ -11,7 +11,8 @@ import { ICON_TYPES } from '@elastic/eui';
 import type { PackageInfo, PackageListItem } from '../types';
 
 // TODO: Determine whether this can be relocated
-import { useLinks as useEPMLinks } from '../applications/integrations/hooks';
+// Import the specific hook to avoid a circular dependency in Babel
+import { useLinks as useEPMLinks } from '../applications/integrations/hooks/use_links';
 
 import { sendGetPackageInfoByKey } from './index';
 
@@ -46,7 +47,7 @@ export const usePackageIconType = ({
       setIconType(CACHED_ICONS.get(cacheKey) || '');
       return;
     }
-    const svgIcons = (paramIcons || iconList)?.filter(
+    const svgIcons = (paramIcons && paramIcons.length ? paramIcons : iconList)?.filter(
       (iconDef) => iconDef.type === 'image/svg+xml'
     );
     const localIconSrc =

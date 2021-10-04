@@ -47,10 +47,10 @@ import { useUiSettings } from '../contexts/kibana';
 import {
   Y_AXIS_LABEL_WIDTH,
   Y_AXIS_LABEL_PADDING,
-  Y_AXIS_LABEL_FONT_COLOR,
   X_AXIS_RIGHT_OVERFLOW,
 } from './swimlane_annotation_container';
 import { AnnotationsTable } from '../../../common/types/annotations';
+import { useCurrentEuiTheme } from '../components/color_range_legend';
 
 declare global {
   interface Window {
@@ -86,31 +86,16 @@ export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
 /**
  * Provides a custom tooltip for the anomaly swim lane chart.
  */
-const SwimLaneTooltip = (fieldName?: string): FC<{ values: TooltipValue[] }> => ({ values }) => {
-  const tooltipData: TooltipValue[] = [];
+const SwimLaneTooltip =
+  (fieldName?: string): FC<{ values: TooltipValue[] }> =>
+  ({ values }) => {
+    const tooltipData: TooltipValue[] = [];
 
-  if (values.length === 1 && fieldName) {
-    // Y-axis tooltip for viewBy swim lane
-    const [yAxis] = values;
-    // @ts-ignore
-    tooltipData.push({ skipHeader: true });
-    tooltipData.push({
-      label: fieldName,
-      value: yAxis.value,
+    if (values.length === 1 && fieldName) {
+      // Y-axis tooltip for viewBy swim lane
+      const [yAxis] = values;
       // @ts-ignore
-      seriesIdentifier: {
-        key: yAxis.value,
-      },
-    });
-  } else if (values.length === 3) {
-    // Cell tooltip
-    const [xAxis, yAxis, cell] = values;
-
-    // Display date using same format as Kibana visualizations.
-    const formattedDate = formatHumanReadableDateTime(parseInt(xAxis.value, 10));
-    tooltipData.push({ label: formattedDate } as TooltipValue);
-
-    if (fieldName !== undefined) {
+      tooltipData.push({ skipHeader: true });
       tooltipData.push({
         label: fieldName,
         value: yAxis.value,
@@ -119,22 +104,39 @@ const SwimLaneTooltip = (fieldName?: string): FC<{ values: TooltipValue[] }> => 
           key: yAxis.value,
         },
       });
-    }
-    tooltipData.push({
-      label: i18n.translate('xpack.ml.explorer.swimlane.maxAnomalyScoreLabel', {
-        defaultMessage: 'Max anomaly score',
-      }),
-      value: cell.formattedValue === '0' ? ' < 1' : cell.formattedValue,
-      color: cell.color,
-      // @ts-ignore
-      seriesIdentifier: {
-        key: cell.value,
-      },
-    });
-  }
+    } else if (values.length === 3) {
+      // Cell tooltip
+      const [xAxis, yAxis, cell] = values;
 
-  return <FormattedTooltip tooltipData={tooltipData} />;
-};
+      // Display date using same format as Kibana visualizations.
+      const formattedDate = formatHumanReadableDateTime(parseInt(xAxis.value, 10));
+      tooltipData.push({ label: formattedDate } as TooltipValue);
+
+      if (fieldName !== undefined) {
+        tooltipData.push({
+          label: fieldName,
+          value: yAxis.value,
+          // @ts-ignore
+          seriesIdentifier: {
+            key: yAxis.value,
+          },
+        });
+      }
+      tooltipData.push({
+        label: i18n.translate('xpack.ml.explorer.swimlane.maxAnomalyScoreLabel', {
+          defaultMessage: 'Max anomaly score',
+        }),
+        value: cell.formattedValue === '0' ? ' < 1' : cell.formattedValue,
+        color: cell.color,
+        // @ts-ignore
+        seriesIdentifier: {
+          key: cell.value,
+        },
+      });
+    }
+
+    return <FormattedTooltip tooltipData={tooltipData} />;
+  };
 
 export interface SwimlaneProps {
   filterActive?: boolean;
@@ -192,6 +194,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   const [chartWidth, setChartWidth] = useState<number>(0);
 
   const isDarkTheme = !!useUiSettings().get('theme:darkMode');
+  const { euiTheme } = useCurrentEuiTheme();
 
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();
@@ -279,11 +282,13 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     return { x: selection.times.map((v) => v * 1000), y: selection.lanes };
   }, [selection, swimlaneData, swimlaneType]);
 
-  const swimLaneConfig: HeatmapSpec['config'] = useMemo(() => {
+  const swimLaneConfig = useMemo<HeatmapSpec['config']>(() => {
     if (!showSwimlane) return {};
 
-    return {
+    const config: HeatmapSpec['config'] = {
       onBrushEnd: (e: HeatmapBrushEvent) => {
+        if (!e.cells.length) return;
+
         onCellsSelection({
           lanes: e.y as string[],
           times: e.x.map((v) => (v as number) / 1000) as [number, number],
@@ -298,7 +303,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         },
         stroke: {
           width: 1,
-          color: '#D3DAE6',
+          color: euiTheme.euiBorderColor,
         },
       },
       cell: {
@@ -308,31 +313,29 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
           visible: false,
         },
         border: {
-          stroke: '#D3DAE6',
+          stroke: euiTheme.euiBorderColor,
           strokeWidth: 0,
         },
       },
       yAxisLabel: {
         visible: true,
         width: Y_AXIS_LABEL_WIDTH,
-        // eui color subdued
-        fill: Y_AXIS_LABEL_FONT_COLOR,
+        textColor: euiTheme.euiTextSubduedColor,
         padding: Y_AXIS_LABEL_PADDING,
         formatter: (laneLabel: string) => {
           return laneLabel === '' ? EMPTY_FIELD_VALUE_LABEL : laneLabel;
         },
-        fontSize: 12,
+        fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
       },
       xAxisLabel: {
         visible: true,
-        // eui color subdued
-        fill: `#98A2B3`,
+        textColor: euiTheme.euiTextSubduedColor,
         formatter: (v: number) => {
           timeBuckets.setInterval(`${swimlaneData.interval}s`);
           const scaledDateFormat = timeBuckets.getScaledDateFormat();
           return moment(v).format(scaledDateFormat);
         },
-        fontSize: 12,
+        fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
         // Required to calculate where the swimlane ends
         width: X_AXIS_RIGHT_OVERFLOW * 2,
       },
@@ -345,6 +348,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       ...(showLegend ? { maxLegendHeight: LEGEND_HEIGHT } : {}),
       timeZone: 'UTC',
     };
+
+    return config;
   }, [
     showSwimlane,
     swimlaneType,
@@ -354,8 +359,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     onCellsSelection,
   ]);
 
-  // @ts-ignore
-  const onElementClick: ElementClickListener = useCallback(
+  const onElementClick = useCallback(
     (e: HeatmapElementEvent[]) => {
       const cell = e[0][0];
       const startTime = (cell.datum.x as number) / 1000;
@@ -368,7 +372,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       onCellsSelection(payload);
     },
     [swimlaneType, swimlaneData?.fieldName, swimlaneData?.interval, onCellsSelection]
-  );
+  ) as ElementClickListener;
 
   const tooltipOptions: TooltipSettings = useMemo(
     () => ({

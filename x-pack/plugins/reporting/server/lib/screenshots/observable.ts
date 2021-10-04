@@ -116,23 +116,21 @@ export function getScreenshots$(
 
           return setup$.pipe(
             takeUntil(exit$),
-            mergeMap(
-              async (data: ScreenSetupData): Promise<ScreenshotResults> => {
-                checkPageIsOpen(driver); // re-check that the browser has not closed
+            mergeMap(async (data: ScreenSetupData): Promise<ScreenshotResults> => {
+              checkPageIsOpen(driver); // re-check that the browser has not closed
 
-                const elements = data.elementsPositionAndAttributes
-                  ? data.elementsPositionAndAttributes
-                  : getDefaultElementPosition(layout.getViewport(1));
-                const screenshots = await getScreenshots(driver, layout, elements, logger);
-                const { timeRange, error: setupError } = data;
-                return {
-                  timeRange,
-                  screenshots,
-                  error: setupError,
-                  elementsPositionAndAttributes: elements,
-                };
-              }
-            )
+              const elements = data.elementsPositionAndAttributes
+                ? data.elementsPositionAndAttributes
+                : getDefaultElementPosition(layout.getViewport(1));
+              const screenshots = await getScreenshots(driver, elements, logger);
+              const { timeRange, error: setupError } = data;
+              return {
+                timeRange,
+                screenshots,
+                error: setupError,
+                elementsPositionAndAttributes: elements,
+              };
+            })
           );
         }),
         take(urlsOrUrlLocatorTuples.length),

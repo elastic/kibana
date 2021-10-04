@@ -80,7 +80,7 @@ jest.mock('../../../common/lib/kibana', () => {
         docLinks: {
           links: {
             siem: {
-              gettingStarted: 'link',
+              privileges: 'link',
             },
           },
         },
@@ -107,6 +107,7 @@ describe('DetectionEnginePageComponent', () => {
     (useUserData as jest.Mock).mockReturnValue([
       {
         hasIndexRead: true,
+        canUserREAD: true,
       },
     ]);
     (useSourcererScope as jest.Mock).mockReturnValue({

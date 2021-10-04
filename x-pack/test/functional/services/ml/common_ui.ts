@@ -241,6 +241,11 @@ export function MachineLearningCommonUIProvider({
       channelTolerance = 10,
       valueTolerance = 10
     ) {
+      if (process.env.TEST_CLOUD) {
+        log.warning('Not running color assertions in cloud');
+        return;
+      }
+
       await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.existOrFail(dataTestSubj);
 
@@ -283,6 +288,20 @@ export function MachineLearningCommonUIProvider({
       await this.ensurePagePopupOpen(testSubj);
       await testSubjects.click(`tablePagination-${rowsNumber}-rows`);
       await this.assertRowsNumberPerPage(testSubj, rowsNumber);
+    },
+
+    async getEuiDescriptionListDescriptionFromTitle(testSubj: string, title: string) {
+      const subj = await testSubjects.find(testSubj);
+      const titles = await subj.findAllByTagName('dt');
+      const descriptions = await subj.findAllByTagName('dd');
+
+      for (let i = 0; i < titles.length; i++) {
+        const titleText = (await titles[i].parseDomContent()).html();
+        if (titleText === title) {
+          return (await descriptions[i].parseDomContent()).html();
+        }
+      }
+      return null;
     },
 
     async changeToSpace(spaceId: string) {

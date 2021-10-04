@@ -53,5 +53,7 @@ export enum EventCode {
   // Memory Protection alert
   MEMORY_SIGNATURE = 'memory_signature',
   // Memory Protection alert
-  MALICIOUS_THREAD = 'malicious_thread',
+  SHELLCODE_THREAD = 'shellcode_thread',
+  // behavior
+  BEHAVIOR = 'behavior',
 }

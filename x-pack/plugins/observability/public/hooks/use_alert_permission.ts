@@ -7,16 +7,41 @@
 
 import { useEffect, useState } from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
+import { Capabilities } from '../../../../../src/core/types';
 
 export interface UseGetUserAlertsPermissionsProps {
   crud: boolean;
   read: boolean;
-  loading: boolean;
+  loading?: boolean;
   featureId: string | null;
 }
 
+export const getAlertsPermissions = (
+  uiCapabilities: RecursiveReadonly<Capabilities>,
+  featureId: string
+) => {
+  if (!featureId || !uiCapabilities[featureId]) {
+    return {
+      crud: false,
+      read: false,
+      loading: false,
+      featureId,
+    };
+  }
+
+  return {
+    crud: (featureId === 'apm'
+      ? uiCapabilities[featureId]['alerting:save']
+      : uiCapabilities[featureId].save) as boolean,
+    read: (featureId === 'apm'
+      ? uiCapabilities[featureId]['alerting:show']
+      : uiCapabilities[featureId].show) as boolean,
+    featureId,
+  };
+};
+
 export const useGetUserAlertsPermissions = (
-  uiCapabilities: RecursiveReadonly<Record<string, any>>,
+  uiCapabilities: RecursiveReadonly<Capabilities>,
   featureId?: string
 ): UseGetUserAlertsPermissionsProps => {
   const [alertsPermissions, setAlertsPermissions] = useState<UseGetUserAlertsPermissionsProps>({
@@ -39,20 +64,7 @@ export const useGetUserAlertsPermissions = (
         if (currentAlertPermissions.featureId === featureId) {
           return currentAlertPermissions;
         }
-        const capabilitiesCanUserCRUD: boolean =
-          typeof uiCapabilities[featureId].save === 'boolean'
-            ? uiCapabilities[featureId].save
-            : false;
-        const capabilitiesCanUserRead: boolean =
-          typeof uiCapabilities[featureId].show === 'boolean'
-            ? uiCapabilities[featureId].show
-            : false;
-        return {
-          crud: capabilitiesCanUserCRUD,
-          read: capabilitiesCanUserRead,
-          loading: false,
-          featureId,
-        };
+        return getAlertsPermissions(uiCapabilities, featureId);
       });
     }
   }, [alertsPermissions.featureId, featureId, uiCapabilities]);

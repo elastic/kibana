@@ -18,15 +18,17 @@ import {
 } from '../../../../../src/plugins/embeddable/public';
 import { LensByReferenceInput, LensEmbeddableInput } from './embeddable';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
 import { Document } from '../persistence/saved_object_store';
 import { LensAttributeService } from '../lens_attribute_service';
-import { DOC_TYPE } from '../../common';
+import { DOC_TYPE } from '../../common/constants';
 import { ErrorMessage } from '../editor_frame_service/types';
 import { extract, inject } from '../../common/embeddable_factory';
 
 export interface LensEmbeddableStartServices {
   timefilter: TimefilterContract;
   coreHttp: HttpSetup;
+  inspector: InspectorStart;
   attributeService: LensAttributeService;
   capabilities: RecursiveReadonly<Capabilities>;
   expressionRenderer: ReactExpressionRendererType;
@@ -87,6 +89,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       indexPatternService,
       capabilities,
       usageCollection,
+      inspector,
     } = await this.getStartServices();
 
     const { Embeddable } = await import('../async_services');
@@ -96,6 +99,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         attributeService,
         indexPatternService,
         timefilter,
+        inspector,
         expressionRenderer,
         basePath: coreHttp.basePath,
         getTrigger: uiActions?.getTrigger,

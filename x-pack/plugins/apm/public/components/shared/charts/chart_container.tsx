@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
-interface Props {
+export interface ChartContainerProps {
   hasData: boolean;
   status: FETCH_STATUS;
   height: number;
@@ -24,7 +24,7 @@ export function ChartContainer({
   status,
   hasData,
   id,
-}: Props) {
+}: ChartContainerProps) {
   if (!hasData && status === FETCH_STATUS.LOADING) {
     return <LoadingChartPlaceholder height={height} />;
   }

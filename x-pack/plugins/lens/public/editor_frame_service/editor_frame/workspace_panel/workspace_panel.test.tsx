@@ -28,12 +28,15 @@ import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
 import { fromExpression } from '@kbn/interpreter/common';
 import { coreMock } from 'src/core/public/mocks';
-import { esFilters, IFieldType, IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { esFilters, IndexPattern } from '../../../../../../../src/plugins/data/public';
+import type { FieldSpec } from '../../../../../../../src/plugins/data/common';
 import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
 import { uiActionsPluginMock } from '../../../../../../../src/plugins/ui_actions/public/mocks';
 import { TriggerContract } from '../../../../../../../src/plugins/ui_actions/public/triggers';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public/embeddable';
 import { LensRootStore, setState } from '../../../state_management';
+import { getLensInspectorService } from '../../../lens_inspector_service';
+import { inspectorPluginMock } from '../../../../../../../src/plugins/inspector/public/mocks';
 
 const defaultPermissions: Record<string, Record<string, boolean | Record<string, boolean>>> = {
   navLinks: { management: true },
@@ -42,7 +45,7 @@ const defaultPermissions: Record<string, Record<string, boolean | Record<string,
 
 function createCoreStartWithPermissions(newCapabilities = defaultPermissions) {
   const core = coreMock.createStart();
-  ((core.application.capabilities as unknown) as Record<
+  (core.application.capabilities as unknown as Record<
     string,
     Record<string, boolean | Record<string, boolean>>
   >) = newCapabilities;
@@ -59,6 +62,7 @@ const defaultProps = {
     data: mockDataPlugin(),
   },
   getSuggestionForField: () => undefined,
+  lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
   toggleFullscreen: jest.fn(),
 };
 
@@ -75,7 +79,7 @@ describe('workspace_panel', () => {
 
   beforeEach(() => {
     // These are used in specific tests to assert function calls
-    trigger = ({ exec: jest.fn() } as unknown) as jest.Mocked<TriggerContract>;
+    trigger = { exec: jest.fn() } as unknown as jest.Mocked<TriggerContract>;
     uiActionsMock = uiActionsPluginMock.createStartContract();
     uiActionsMock.getTrigger.mockReturnValue(trigger);
     mockVisualization = createMockVisualization();
@@ -99,7 +103,6 @@ describe('workspace_panel', () => {
       />,
 
       {
-        data: defaultProps.plugins.data,
         preloadedState: { visualization: { activeId: null, state: {} }, datasourceStates: {} },
       }
     );
@@ -117,7 +120,7 @@ describe('workspace_panel', () => {
         }}
       />,
 
-      { data: defaultProps.plugins.data, preloadedState: { datasourceStates: {} } }
+      { preloadedState: { datasourceStates: {} } }
     );
     instance = mounted.instance;
 
@@ -134,7 +137,7 @@ describe('workspace_panel', () => {
         }}
       />,
 
-      { data: defaultProps.plugins.data, preloadedState: { datasourceStates: {} } }
+      { preloadedState: { datasourceStates: {} } }
     );
     instance = mounted.instance;
 
@@ -161,8 +164,7 @@ describe('workspace_panel', () => {
           testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
         ExpressionRenderer={expressionRendererMock}
-      />,
-      { data: defaultProps.plugins.data }
+      />
     );
 
     instance = mounted.instance;
@@ -195,9 +197,7 @@ describe('workspace_panel', () => {
         }}
         ExpressionRenderer={expressionRendererMock}
         plugins={{ ...props.plugins, uiActions: uiActionsMock }}
-      />,
-
-      { data: defaultProps.plugins.data }
+      />
     );
     instance = mounted.instance;
 
@@ -229,9 +229,7 @@ describe('workspace_panel', () => {
           testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
         ExpressionRenderer={expressionRendererMock}
-      />,
-
-      { data: defaultProps.plugins.data }
+      />
     );
 
     instance = mounted.instance;
@@ -275,7 +273,6 @@ describe('workspace_panel', () => {
       />,
 
       {
-        data: defaultProps.plugins.data,
         preloadedState: {
           datasourceStates: {
             testDatasource: {
@@ -356,9 +353,7 @@ describe('workspace_panel', () => {
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
           }}
           ExpressionRenderer={expressionRendererMock}
-        />,
-
-        { data: defaultProps.plugins.data }
+        />
       );
       instance = mounted.instance;
     });
@@ -404,9 +399,7 @@ describe('workspace_panel', () => {
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
           }}
           ExpressionRenderer={expressionRendererMock}
-        />,
-
-        { data: defaultProps.plugins.data }
+        />
       );
       instance = mounted.instance;
     });
@@ -415,8 +408,8 @@ describe('workspace_panel', () => {
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(1);
 
-    const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
-    const field = ({ name: 'myfield' } as unknown) as IFieldType;
+    const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+    const field = { name: 'myfield' } as unknown as FieldSpec;
 
     await act(async () => {
       instance.setProps({
@@ -452,7 +445,6 @@ describe('workspace_panel', () => {
       />,
 
       {
-        data: defaultProps.plugins.data,
         preloadedState: {
           datasourceStates: {
             testDatasource: {
@@ -495,7 +487,6 @@ describe('workspace_panel', () => {
       />,
 
       {
-        data: defaultProps.plugins.data,
         preloadedState: {
           datasourceStates: {
             testDatasource: {
@@ -539,7 +530,6 @@ describe('workspace_panel', () => {
       />,
 
       {
-        data: defaultProps.plugins.data,
         preloadedState: {
           datasourceStates: {
             testDatasource: {
@@ -578,9 +568,7 @@ describe('workspace_panel', () => {
         visualizationMap={{
           testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
-      />,
-
-      { data: defaultProps.plugins.data }
+      />
     );
     instance = mounted.instance;
 
@@ -610,9 +598,7 @@ describe('workspace_panel', () => {
         visualizationMap={{
           testVis: mockVisualization,
         }}
-      />,
-
-      { data: defaultProps.plugins.data }
+      />
     );
     instance = mounted.instance;
 
@@ -644,9 +630,7 @@ describe('workspace_panel', () => {
         visualizationMap={{
           testVis: mockVisualization,
         }}
-      />,
-
-      { data: defaultProps.plugins.data }
+      />
     );
     instance = mounted.instance;
 
@@ -675,9 +659,7 @@ describe('workspace_panel', () => {
         visualizationMap={{
           testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
-      />,
-
-      { data: defaultProps.plugins.data }
+      />
     );
     instance = mounted.instance;
 
@@ -705,9 +687,7 @@ describe('workspace_panel', () => {
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
           }}
           ExpressionRenderer={expressionRendererMock}
-        />,
-
-        { data: defaultProps.plugins.data }
+        />
       );
       instance = mounted.instance;
     });
@@ -741,9 +721,7 @@ describe('workspace_panel', () => {
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
           }}
           ExpressionRenderer={expressionRendererMock}
-        />,
-
-        { data: defaultProps.plugins.data }
+        />
       );
       instance = mounted.instance;
       lensStore = mounted.lensStore;
@@ -828,10 +806,13 @@ describe('workspace_panel', () => {
       expect(lensStore.dispatch).toHaveBeenCalledWith({
         type: 'lens/switchVisualization',
         payload: {
-          newVisualizationId: 'testVis',
-          initialState: {},
-          datasourceState: {},
-          datasourceId: 'testDatasource',
+          suggestion: {
+            newVisualizationId: 'testVis',
+            visualizationState: {},
+            datasourceState: {},
+            datasourceId: 'testDatasource',
+          },
+          clearStagedPreview: true,
         },
       });
     });

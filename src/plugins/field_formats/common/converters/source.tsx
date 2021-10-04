@@ -41,9 +41,9 @@ export class SourceFormat extends FieldFormat {
   static title = '_source';
   static fieldType = KBN_FIELD_TYPES._SOURCE;
 
-  textConvert: TextContextTypeConvert = (value) => JSON.stringify(value);
+  textConvert: TextContextTypeConvert = (value: string) => JSON.stringify(value);
 
-  htmlConvert: HtmlContextTypeConvert = (value, options = {}) => {
+  htmlConvert: HtmlContextTypeConvert = (value: string, options = {}) => {
     const { field, hit, indexPattern } = options;
 
     if (!field) {
@@ -52,17 +52,18 @@ export class SourceFormat extends FieldFormat {
       return escape(converter(value));
     }
 
-    const highlights = (hit && hit.highlight) || {};
-    const formatted = indexPattern.formatHit(hit);
-    const highlightPairs: any[] = [];
-    const sourcePairs: any[] = [];
+    const highlights: Record<string, string[]> = (hit && hit.highlight) || {};
+    // TODO: remove index pattern dependency
+    const formatted = hit ? indexPattern!.formatHit(hit) : {};
+    const highlightPairs: Array<[string, string]> = [];
+    const sourcePairs: Array<[string, string]> = [];
     const isShortDots = this.getConfig!(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
 
     keys(formatted).forEach((key) => {
       const pairs = highlights[key] ? highlightPairs : sourcePairs;
       const newField = isShortDots ? shortenDottedString(key) : key;
-      const val = formatted[key];
-      pairs.push([newField, val]);
+      const val = formatted![key];
+      pairs.push([newField as string, val]);
     }, []);
 
     return ReactDOM.renderToStaticMarkup(

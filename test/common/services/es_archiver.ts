@@ -8,8 +8,6 @@
 
 import { EsArchiver } from '@kbn/es-archiver';
 import { FtrProviderContext } from '../ftr_provider_context';
-
-// @ts-ignore not TS yet
 import * as KibanaServer from './kibana_server';
 
 export function EsArchiverProvider({ getService }: FtrProviderContext): EsArchiver {

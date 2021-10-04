@@ -59,10 +59,10 @@ export function savedObjectsRoutes(
    *
    * @api {get} /api/ml/saved_objects/sync Sync job saved objects
    * @apiName SyncJobSavedObjects
-   * @apiDescription Create saved objects for jobs which are missing them.
-   *                 Delete saved objects for jobs which no longer exist.
-   *                 Update missing datafeed ids in saved objects for datafeeds which exist.
-   *                 Remove datafeed ids for datafeeds which no longer exist.
+   * @apiDescription Synchronizes saved objects for jobs. Saved objects will be created for jobs which are missing them,
+   *                 and saved objects will be deleted for jobs which no longer exist.
+   *                 Updates missing datafeed IDs in saved objects for datafeeds which exist, and
+   *                 removes datafeed IDs for datafeeds which no longer exist.
    *
    */
   router.get(
@@ -217,9 +217,9 @@ export function savedObjectsRoutes(
   /**
    * @apiGroup JobSavedObjects
    *
-   * @api {get} /api/ml/saved_objects/jobs_spaces All spaces in all jobs
+   * @api {get} /api/ml/saved_objects/jobs_spaces Get all jobs and their spaces
    * @apiName JobsSpaces
-   * @apiDescription List all jobs and their spaces
+   * @apiDescription List all jobs and their spaces.
    *
    */
   router.get(

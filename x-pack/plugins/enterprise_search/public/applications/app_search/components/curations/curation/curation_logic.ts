@@ -27,9 +27,11 @@ interface CurationValues {
   promotedDocumentsLoading: boolean;
   hiddenIds: string[];
   hiddenDocumentsLoading: boolean;
+  isAutomated: boolean;
 }
 
 interface CurationActions {
+  convertToManual(): void;
   loadCuration(): void;
   onCurationLoad(curation: Curation): { curation: Curation };
   updateCuration(): void;
@@ -53,6 +55,7 @@ interface CurationProps {
 export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, CurationProps>>({
   path: ['enterprise_search', 'app_search', 'curation_logic'],
   actions: () => ({
+    convertToManual: true,
     loadCuration: true,
     onCurationLoad: (curation) => ({ curation }),
     updateCuration: true,
@@ -162,14 +165,41 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
       },
     ],
   }),
+  selectors: ({ selectors }) => ({
+    isAutomated: [
+      () => [selectors.curation],
+      (curation: CurationValues['curation']) => {
+        return curation.suggestion?.status === 'automated';
+      },
+    ],
+  }),
   listeners: ({ actions, values, props }) => ({
+    convertToManual: async () => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+
+      try {
+        await http.put(`/internal/app_search/engines/${engineName}/search_relevance_suggestions`, {
+          body: JSON.stringify([
+            {
+              query: values.activeQuery,
+              type: 'curation',
+              status: 'applied',
+            },
+          ]),
+        });
+        actions.loadCuration();
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
     loadCuration: async () => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
       try {
         const response = await http.get(
-          `/api/app_search/engines/${engineName}/curations/${props.curationId}`,
+          `/internal/app_search/engines/${engineName}/curations/${props.curationId}`,
           { query: { skip_record_analytics: 'true' } }
         );
         actions.onCurationLoad(response);
@@ -189,7 +219,7 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
 
       try {
         const response = await http.put(
-          `/api/app_search/engines/${engineName}/curations/${props.curationId}`,
+          `/internal/app_search/engines/${engineName}/curations/${props.curationId}`,
           {
             body: JSON.stringify({
               queries: values.queries,

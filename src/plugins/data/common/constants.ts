@@ -9,9 +9,6 @@
 export const DEFAULT_QUERY_LANGUAGE = 'kuery';
 export const KIBANA_USER_QUERY_LANGUAGE_KEY = 'kibana.userQueryLanguage';
 
-/** @public **/
-export const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
-
 export type ValueSuggestionsMethod = 'terms_enum' | 'terms_agg';
 
 export const UI_SETTINGS = {
@@ -33,7 +30,6 @@ export const UI_SETTINGS = {
   TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: 'timepicker:refreshIntervalDefaults',
   TIMEPICKER_QUICK_RANGES: 'timepicker:quickRanges',
   TIMEPICKER_TIME_DEFAULTS: 'timepicker:timeDefaults',
-  INDEXPATTERN_PLACEHOLDER: 'indexPattern:placeholder',
   FILTERS_PINNED_BY_DEFAULT: 'filters:pinnedByDefault',
   FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
   AUTOCOMPLETE_USE_TIMERANGE: 'autocomplete:useTimeRange',

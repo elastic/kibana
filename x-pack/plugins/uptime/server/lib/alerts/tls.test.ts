@@ -6,11 +6,10 @@
  */
 import moment from 'moment';
 import { ALERT_SEVERITY_WARNING, ALERT_SEVERITY } from '@kbn/rule-data-utils';
-import { tlsAlertFactory, getCertSummary, DEFAULT_SIZE } from './tls';
+import { tlsAlertFactory, getCertSummary } from './tls';
 import { TLS } from '../../../common/constants/alerts';
 import { CertResult, DynamicSettings } from '../../../common/runtime_types';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
-import { DEFAULT_FROM, DEFAULT_TO } from '../../rest_api/certs/certs';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 
 import { savedObjectsAdapter, UMSavedObjectsAdapter } from '../saved_objects';
@@ -123,10 +122,8 @@ describe('tls alert', () => {
       });
       expect(mockGetter).toBeCalledWith(
         expect.objectContaining({
-          from: DEFAULT_FROM,
-          to: DEFAULT_TO,
-          index: 0,
-          size: DEFAULT_SIZE,
+          pageIndex: 0,
+          size: 1000,
           notValidAfter: `now+${DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold}d`,
           notValidBefore: `now-${DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold}d`,
           sortBy: 'common_name',

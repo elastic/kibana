@@ -6,23 +6,21 @@
  */
 
 import uuid from 'uuid';
+import type { Query } from 'src/plugins/data/common';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import {
   MapExtent,
-  MapFilters,
-  MapQuery,
   TableSourceDescriptor,
   VectorJoinSourceRequestMeta,
-  VectorSourceSyncMeta,
+  VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { ITermJoinSource } from '../term_join_source';
 import { BucketProperties, PropertiesMap } from '../../../../common/elasticsearch_util';
 import { IField } from '../../fields/field';
-import { Query } from '../../../../../../../src/plugins/data/common/query';
 import {
   AbstractVectorSource,
-  BoundsFilters,
+  BoundsRequestMeta,
   GeoJsonWithMeta,
   IVectorSource,
   SourceTooltipConfig,
@@ -56,7 +54,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     return `table source ${uuid()}`;
   }
 
-  getSyncMeta(): VectorSourceSyncMeta | null {
+  getSyncMeta(): null {
     return null;
   }
 
@@ -156,7 +154,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
   }
 
   async getBoundsForFilters(
-    boundsFilters: BoundsFilters,
+    boundsFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     return null;
@@ -187,14 +185,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
   // Could be useful to implement, e.g. to preview raw csv data
   async getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: MapFilters & {
-      applyGlobalQuery: boolean;
-      applyGlobalTime: boolean;
-      fieldNames: string[];
-      geogridPrecision?: number;
-      sourceQuery?: MapQuery;
-      sourceMeta: VectorSourceSyncMeta;
-    },
+    searchFilters: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean
   ): Promise<GeoJsonWithMeta> {

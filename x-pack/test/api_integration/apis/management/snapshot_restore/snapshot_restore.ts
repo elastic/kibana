@@ -16,13 +16,8 @@ const REPO_NAME = 'test_repo';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  const {
-    createRepository,
-    createPolicy,
-    deletePolicy,
-    cleanupPolicies,
-    getPolicy,
-  } = registerEsHelpers(getService);
+  const { createRepository, createPolicy, deletePolicy, cleanupPolicies, getPolicy } =
+    registerEsHelpers(getService);
 
   describe('Snapshot Lifecycle Management', function () {
     this.tags(['skipCloud']); // file system repositories are not supported in cloud

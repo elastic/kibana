@@ -5,27 +5,18 @@
  * 2.0.
  */
 
-import { cryptoFactory } from '../../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
 import { JobParamsPNG, TaskPayloadPNG } from '../types';
 
-export const createJobFnFactory: CreateJobFnFactory<
-  CreateJobFn<JobParamsPNG, TaskPayloadPNG>
-> = function createJobFactoryFn(reporting, logger) {
-  const config = reporting.getConfig();
-  const crypto = cryptoFactory(config.get('encryptionKey'));
+export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<JobParamsPNG, TaskPayloadPNG>> =
+  function createJobFactoryFn() {
+    return async function createJob(jobParams) {
+      validateUrls([jobParams.relativeUrl]);
 
-  return async function createJob(jobParams, _context, req) {
-    const serializedEncryptedHeaders = await crypto.encrypt(req.headers);
-
-    validateUrls([jobParams.relativeUrl]);
-
-    return {
-      ...jobParams,
-      headers: serializedEncryptedHeaders,
-      spaceId: reporting.getSpaceId(req, logger),
-      forceNow: new Date().toISOString(),
+      return {
+        ...jobParams,
+        forceNow: new Date().toISOString(),
+      };
     };
   };
-};

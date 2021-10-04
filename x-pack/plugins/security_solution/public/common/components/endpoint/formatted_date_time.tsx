@@ -8,6 +8,9 @@
 import React from 'react';
 import { FormattedDate, FormattedTime, FormattedRelative } from '@kbn/i18n/react';
 
+/**
+ * @deprecated consider using `FormattedDate` from `x-pack/plugins/security_solution/public/common/components/formatted_date/index.tsx:95`
+ */
 export const FormattedDateAndTime: React.FC<{ date: Date }> = ({ date }) => {
   // If date is greater than or equal to 1h (ago), then show it as a date
   // else, show it as relative to "now"

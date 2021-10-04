@@ -43,7 +43,7 @@ export const TestProviders = React.memo(TestProvidersComponent);
 export const useFormFieldMock = <T,>(options?: Partial<FieldHook<T>>): FieldHook<T> => ({
   path: 'path',
   type: 'type',
-  value: ('mockedValue' as unknown) as T,
+  value: 'mockedValue' as unknown as T,
   isPristine: false,
   isDirty: false,
   isModified: false,

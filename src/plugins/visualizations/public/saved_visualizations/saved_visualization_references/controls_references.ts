@@ -8,7 +8,7 @@
 
 import { SavedObjectReference } from '../../../../../core/types';
 import { VisParams } from '../../../common';
-import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../../data/public';
+import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../../data/common';
 
 const isControlsVis = (visType: string) => visType === 'input_control_vis';
 

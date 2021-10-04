@@ -98,7 +98,8 @@ const uploadSourceMapRoute = createApmServerRoute({
         await updateSourceMapsOnFleetPolicies({
           core,
           fleetPluginStart,
-          savedObjectsClient: (savedObjectsClient as unknown) as SavedObjectsClientContract,
+          savedObjectsClient:
+            savedObjectsClient as unknown as SavedObjectsClientContract,
           elasticsearchClient: esClient,
         });
 
@@ -133,7 +134,8 @@ const deleteSourceMapRoute = createApmServerRoute({
         await updateSourceMapsOnFleetPolicies({
           core,
           fleetPluginStart,
-          savedObjectsClient: (savedObjectsClient as unknown) as SavedObjectsClientContract,
+          savedObjectsClient:
+            savedObjectsClient as unknown as SavedObjectsClientContract,
           elasticsearchClient: esClient,
         });
       }

@@ -8,10 +8,7 @@
 
 import React from 'react';
 
-import {
-  DiscoverGridEmbeddable,
-  DiscoverGridEmbeddableProps,
-} from '../angular/create_discover_grid_directive';
+import { DiscoverGridEmbeddable, DiscoverGridEmbeddableProps } from './saved_search_grid';
 import { DiscoverDocTableEmbeddable } from '../apps/main/components/doc_table/create_doc_table_embeddable';
 import { DocTableEmbeddableProps } from '../apps/main/components/doc_table/doc_table_embeddable';
 import { SearchProps } from './saved_search_embeddable';

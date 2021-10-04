@@ -7,11 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { defaults, omit } from 'lodash';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { CoreStart } from '../../../../../../../src/core/public';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { ANOMALY_SEVERITY } from '../../../../common/ml_constants';
-import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
-import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
+import { createCallApmApi } from '../../../services/rest/createCallApmApi';
 import {
   EnvironmentField,
   ServiceField,
@@ -26,16 +27,16 @@ import {
 } from './select_anomaly_severity';
 
 interface AlertParams {
-  anomalySeverityType:
+  anomalySeverityType?:
     | ANOMALY_SEVERITY.CRITICAL
     | ANOMALY_SEVERITY.MAJOR
     | ANOMALY_SEVERITY.MINOR
     | ANOMALY_SEVERITY.WARNING;
-  environment: string;
+  environment?: string;
   serviceName?: string;
   transactionType?: string;
-  windowSize: number;
-  windowUnit: string;
+  windowSize?: number;
+  windowUnit?: string;
 }
 
 interface Props {
@@ -46,11 +47,12 @@ interface Props {
 }
 
 export function TransactionDurationAnomalyAlertTrigger(props: Props) {
+  const { services } = useKibana();
   const { alertParams, metadata, setAlertParams, setAlertProperty } = props;
 
-  const transactionTypes = useServiceTransactionTypesFetcher(
-    metadata?.serviceName
-  );
+  useEffect(() => {
+    createCallApmApi(services as CoreStart);
+  }, [services]);
 
   const params = defaults(
     {
@@ -65,23 +67,18 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
     }
   );
 
-  const { environmentOptions } = useEnvironmentsFetcher({
-    serviceName: params.serviceName,
-    start: metadata?.start,
-    end: metadata?.end,
-  });
-
   const fields = [
-    <ServiceField value={params.serviceName} />,
+    <ServiceField
+      currentValue={params.serviceName}
+      onChange={(value) => setAlertParams('serviceName', value)}
+    />,
     <TransactionTypeField
       currentValue={params.transactionType}
-      options={transactionTypes.map((key) => ({ text: key, value: key }))}
-      onChange={(e) => setAlertParams('transactionType', e.target.value)}
+      onChange={(value) => setAlertParams('transactionType', value)}
     />,
     <EnvironmentField
       currentValue={params.environment}
-      options={environmentOptions}
-      onChange={(e) => setAlertParams('environment', e.target.value)}
+      onChange={(value) => setAlertParams('environment', value)}
     />,
     <PopoverExpression
       value={<AnomalySeverity type={params.anomalySeverityType} />}

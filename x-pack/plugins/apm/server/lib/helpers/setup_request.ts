@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { APMConfig } from '../..';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
-import { UxUIFilters } from '../../../typings/ui_filters';
 import { APMRouteHandlerResources } from '../../routes/typings';
 import {
   ApmIndicesConfig,
@@ -35,49 +33,16 @@ export interface Setup {
   ml?: ReturnType<typeof getMlSetup>;
   config: APMConfig;
   indices: ApmIndicesConfig;
-  uiFilters: UxUIFilters;
 }
 
-export interface SetupTimeRange {
-  start: number;
-  end: number;
-}
-
-interface SetupRequestParams {
-  query: {
-    _inspect?: boolean;
-
-    /**
-     * Timestamp in ms since epoch
-     */
-    start?: number;
-
-    /**
-     * Timestamp in ms since epoch
-     */
-    end?: number;
-    uiFilters?: string;
-  };
-}
-
-type InferSetup<TParams extends SetupRequestParams> = Setup &
-  (TParams extends { query: { start: number } } ? { start: number } : {}) &
-  (TParams extends { query: { end: number } } ? { end: number } : {}) &
-  (TParams extends { query: Partial<SetupTimeRange> }
-    ? Partial<SetupTimeRange>
-    : {});
-
-export async function setupRequest<TParams extends SetupRequestParams>({
+export async function setupRequest({
   context,
   params,
   core,
   plugins,
   request,
   config,
-  logger,
-}: APMRouteHandlerResources & {
-  params: TParams;
-}): Promise<InferSetup<TParams>> {
+}: APMRouteHandlerResources) {
   return withApmSpan('setup_request', async () => {
     const { query } = params;
 
@@ -91,9 +56,7 @@ export async function setupRequest<TParams extends SetupRequestParams>({
       ),
     ]);
 
-    const uiFilters = decodeUiFilters(logger, query.uiFilters);
-
-    const coreSetupRequest = {
+    return {
       indices,
       apmEventClient: createApmEventClient({
         esClient: context.core.elasticsearch.client.asCurrentUser,
@@ -116,14 +79,7 @@ export async function setupRequest<TParams extends SetupRequestParams>({
             )
           : undefined,
       config,
-      uiFilters,
     };
-
-    return {
-      ...('start' in query ? { start: query.start } : {}),
-      ...('end' in query ? { end: query.end } : {}),
-      ...coreSetupRequest,
-    } as InferSetup<TParams>;
   });
 }
 
@@ -137,19 +93,4 @@ function getMlSetup(
     anomalyDetectors: ml.anomalyDetectorsProvider(request, savedObjectsClient),
     modules: ml.modulesProvider(request, savedObjectsClient),
   };
-}
-
-function decodeUiFilters(
-  logger: Logger,
-  uiFiltersEncoded?: string
-): UxUIFilters {
-  if (!uiFiltersEncoded) {
-    return {};
-  }
-  try {
-    return JSON.parse(uiFiltersEncoded);
-  } catch (error) {
-    logger.error(error);
-    return {};
-  }
 }

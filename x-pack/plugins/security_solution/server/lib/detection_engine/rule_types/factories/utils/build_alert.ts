@@ -9,10 +9,16 @@ import {
   ALERT_REASON,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAMESPACE,
+  ALERT_RULE_UUID,
   ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
+  TIMESTAMP,
 } from '@kbn/rule-data-utils';
+
+import { createHash } from 'crypto';
+
 import { RulesSchema } from '../../../../../../common/detection_engine/schemas/response/rules_schema';
 import { isEventTypeSignal } from '../../../signals/build_event_type_signal';
 import { Ancestor, BaseSignalHit, SimpleHit } from '../../../signals/types';
@@ -32,6 +38,16 @@ import {
   ALERT_ORIGINAL_TIME,
 } from '../../field_maps/field_names';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
+
+export const generateAlertId = (alert: RACAlert) => {
+  return createHash('sha256')
+    .update(
+      (alert['kibana.alert.ancestors'] as Ancestor[])
+        .reduce((acc, ancestor) => acc.concat(ancestor.id, ancestor.index), '')
+        .concat(alert[ALERT_RULE_UUID] as string)
+    )
+    .digest('hex');
+};
 
 /**
  * Takes an event document and extracts the information needed for the corresponding entry in the child
@@ -104,17 +120,20 @@ export const buildAlert = (
     []
   );
 
-  return ({
-    '@timestamp': new Date().toISOString(),
+  const { id, output_index: outputIndex, ...mappedRule } = rule;
+  mappedRule.uuid = id;
+
+  return {
+    [TIMESTAMP]: new Date().toISOString(),
     [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
     [SPACE_IDS]: spaceId != null ? [spaceId] : [],
     [ALERT_ANCESTORS]: ancestors,
-    [ALERT_STATUS]: 'open',
+    [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
     [ALERT_WORKFLOW_STATUS]: 'open',
     [ALERT_DEPTH]: depth,
     [ALERT_REASON]: reason,
-    ...flattenWithPrefix(ALERT_RULE_NAMESPACE, rule),
-  } as unknown) as RACAlert;
+    ...flattenWithPrefix(ALERT_RULE_NAMESPACE, mappedRule as RulesSchema),
+  } as unknown as RACAlert;
 };
 
 /**

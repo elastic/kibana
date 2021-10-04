@@ -120,12 +120,12 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
       setEventsDeleted,
       onUpdateSuccess,
       onUpdateFailure,
+      timelineId: id,
     });
 
     return (
       <BulkActions
         data-test-subj="bulk-actions"
-        timelineId={id}
         selectedCount={Object.keys(selectedEventIds).length}
         totalItems={totalItems}
         showClearSelection={showClearSelection}

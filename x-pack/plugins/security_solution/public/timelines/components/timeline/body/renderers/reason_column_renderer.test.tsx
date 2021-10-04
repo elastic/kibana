@@ -61,7 +61,6 @@ const rowRenderers: RowRenderer[] = [
   {
     id: RowRendererId.alerts,
     isInstance: (ecs) => ecs === validEcs,
-    // eslint-disable-next-line react/display-name
     renderRow: () => <span data-test-subj="test-row-render" />,
   },
 ];
@@ -143,6 +142,23 @@ describe('reasonColumnRenderer', () => {
       fireEvent.click(wrapper.getByTestId('reason-cell-button'));
 
       expect(wrapper.queryByTestId('test-row-render')).toBeInTheDocument();
+    });
+
+    it('the popover always contains a class that hides it when an overlay (e.g. the inspect modal) is displayed', () => {
+      const renderedColumn = reasonColumnRenderer.renderColumn({
+        ...defaultProps,
+        ecsData: validEcs,
+        rowRenderers,
+        browserFields,
+      });
+
+      const wrapper = render(<TestProviders>{renderedColumn}</TestProviders>);
+
+      fireEvent.click(wrapper.getByTestId('reason-cell-button'));
+
+      expect(wrapper.getByRole('dialog')).toHaveClass(
+        'euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPopover__panel euiPopover__panel--right withHoverActions__popover'
+      );
     });
   });
 });

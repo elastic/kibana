@@ -5,10 +5,16 @@
  * 2.0.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110907
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { PluginInitializerContext } from 'src/core/server';
 import { RuleRegistryPlugin } from './plugin';
 
 export type { RuleRegistryPluginSetupContract, RuleRegistryPluginStartContract } from './plugin';
+export { RuleDataPluginService } from './rule_data_plugin_service';
+export { RuleDataClient } from './rule_data_client';
+export { IRuleDataClient } from './rule_data_client/types';
 export type {
   RacRequestHandlerContext,
   RacApiRequestHandlerContext,
@@ -19,7 +25,6 @@ export * from './config';
 export * from './rule_data_plugin_service';
 export * from './rule_data_client';
 
-export { getRuleData, RuleExecutorData } from './utils/get_rule_executor_data';
 export { createLifecycleRuleTypeFactory } from './utils/create_lifecycle_rule_type_factory';
 export {
   LifecycleRuleExecutor,

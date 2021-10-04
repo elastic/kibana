@@ -196,12 +196,12 @@ export const geoBoundingBoxFunction: ExpressionFunctionGeoBoundingBox = {
 
     if (isGeoPoints(args)) {
       return {
-        ...((chain(args)
+        ...(chain(args)
           .pick(['topLeft', 'bottomRight', 'topRight', 'bottomLeft'])
           .omitBy(isNil)
           .mapKeys((value, key) => snakeCase(key))
           .mapValues(({ value }) => value)
-          .value() as unknown) as GeoPoints),
+          .value() as unknown as GeoPoints),
         type: 'geo_bounding_box',
       };
     }

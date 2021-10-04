@@ -23,24 +23,28 @@ import {
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from './types';
+import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
 import { calculateStatus$ } from './status';
+import { isValidConnection } from './is_valid_connection';
+import { isInlineScriptingEnabled } from './is_scripting_enabled';
 
-interface SetupDeps {
+export interface SetupDeps {
   http: InternalHttpServiceSetup;
   executionContext: InternalExecutionContextSetup;
 }
 
 /** @internal */
 export class ElasticsearchService
-  implements CoreService<InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart> {
+  implements CoreService<InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart>
+{
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
   private stop$ = new Subject();
   private kibanaVersion: string;
   private getAuthHeaders?: GetAuthHeaders;
   private executionContextClient?: IExecutionContext;
-
+  private esNodesCompatibility$?: Observable<NodesVersionCompatibility>;
   private client?: ClusterClient;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -84,6 +88,8 @@ export class ElasticsearchService
       kibanaVersion: this.kibanaVersion,
     }).pipe(takeUntil(this.stop$), shareReplay({ refCount: true, bufferSize: 1 }));
 
+    this.esNodesCompatibility$ = esNodesCompatibility$;
+
     return {
       legacy: {
         config$: this.config$,
@@ -92,12 +98,38 @@ export class ElasticsearchService
       status$: calculateStatus$(esNodesCompatibility$),
     };
   }
+
   public async start(): Promise<InternalElasticsearchServiceStart> {
-    if (!this.client) {
+    if (!this.client || !this.esNodesCompatibility$) {
       throw new Error('ElasticsearchService needs to be setup before calling start');
     }
 
     const config = await this.config$.pipe(first()).toPromise();
+
+    // Log every error we may encounter in the connection to Elasticsearch
+    this.esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
+      if (!isCompatible && message) {
+        this.log.error(message);
+      }
+    });
+
+    if (!config.skipStartupConnectionCheck) {
+      // Ensure that the connection is established and the product is valid before moving on
+      await isValidConnection(this.esNodesCompatibility$);
+
+      // Ensure inline scripting is enabled on the ES cluster
+      const scriptingEnabled = await isInlineScriptingEnabled({
+        client: this.client.asInternalUser,
+      });
+      if (!scriptingEnabled) {
+        throw new Error(
+          'Inline scripting is disabled on the Elasticsearch cluster, and is mandatory for Kibana to function. ' +
+            'Please enabled inline scripting, then restart Kibana. ' +
+            'Refer to https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting-security.html for more info.'
+        );
+      }
+    }
+
     return {
       client: this.client!,
       createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),

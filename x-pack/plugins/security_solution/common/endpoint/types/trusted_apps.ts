@@ -13,6 +13,7 @@ import {
   GetTrustedAppsRequestSchema,
   PostTrustedAppCreateRequestSchema,
   PutTrustedAppUpdateRequestSchema,
+  GetTrustedAppsSummaryRequestSchema,
 } from '../schema/trusted_apps';
 import { OperatingSystem } from './os';
 
@@ -28,7 +29,10 @@ export interface GetOneTrustedAppResponse {
 /** API request params for retrieving a list of Trusted Apps */
 export type GetTrustedAppsListRequest = TypeOf<typeof GetTrustedAppsRequestSchema.query>;
 
-export interface GetTrustedListAppsResponse {
+/** API request params for retrieving summary of Trusted Apps */
+export type GetTrustedAppsSummaryRequest = TypeOf<typeof GetTrustedAppsSummaryRequestSchema.query>;
+
+export interface GetTrustedAppsListResponse {
   per_page: number;
   page: number;
   total: number;

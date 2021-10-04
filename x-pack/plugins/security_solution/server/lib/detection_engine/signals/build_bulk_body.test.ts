@@ -43,6 +43,7 @@ describe('buildBulkBody', () => {
       ruleSO,
       doc,
       'missingFields',
+      [],
       buildReasonMessage
     );
     // Timestamp will potentially always be different so remove it for the test
@@ -114,6 +115,7 @@ describe('buildBulkBody', () => {
       ruleSO,
       doc,
       'missingFields',
+      [],
       buildReasonMessage
     );
     // Timestamp will potentially always be different so remove it for the test
@@ -199,6 +201,7 @@ describe('buildBulkBody', () => {
       ruleSO,
       doc,
       'missingFields',
+      [],
       buildReasonMessage
     );
     // Timestamp will potentially always be different so remove it for the test
@@ -270,6 +273,7 @@ describe('buildBulkBody', () => {
       ruleSO,
       doc,
       'missingFields',
+      [],
       buildReasonMessage
     );
     // Timestamp will potentially always be different so remove it for the test
@@ -338,6 +342,7 @@ describe('buildBulkBody', () => {
       ruleSO,
       doc,
       'missingFields',
+      [],
       buildReasonMessage
     );
     // Timestamp will potentially always be different so remove it for the test
@@ -394,17 +399,18 @@ describe('buildBulkBody', () => {
     const sampleDoc = sampleDocNoSortId();
     const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     delete sampleDoc._source.source;
-    const doc = ({
+    const doc = {
       ...sampleDoc,
       _source: {
         ...sampleDoc._source,
         signal: 123,
       },
-    } as unknown) as SignalSourceHit;
+    } as unknown as SignalSourceHit;
     const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody(
       ruleSO,
       doc,
       'missingFields',
+      [],
       buildReasonMessage
     );
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: string } = {
@@ -457,17 +463,18 @@ describe('buildBulkBody', () => {
     const sampleDoc = sampleDocNoSortId();
     const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     delete sampleDoc._source.source;
-    const doc = ({
+    const doc = {
       ...sampleDoc,
       _source: {
         ...sampleDoc._source,
         signal: { child_1: { child_2: 'nested data' } },
       },
-    } as unknown) as SignalSourceHit;
+    } as unknown as SignalSourceHit;
     const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody(
       ruleSO,
       doc,
       'missingFields',
+      [],
       buildReasonMessage
     );
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: string } = {
@@ -712,6 +719,7 @@ describe('buildSignalFromEvent', () => {
       ruleSO,
       true,
       'missingFields',
+      [],
       buildReasonMessage
     );
 

@@ -33,6 +33,10 @@ export class RuleDataClient implements IRuleDataClient {
     return this.options.indexInfo.baseName;
   }
 
+  public get kibanaVersion(): string {
+    return this.options.indexInfo.kibanaVersion;
+  }
+
   public isWriteEnabled(): boolean {
     return this.options.isWriteEnabled;
   }

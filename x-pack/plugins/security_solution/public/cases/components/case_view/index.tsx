@@ -59,7 +59,7 @@ const TimelineDetailsPanel = () => {
     <DetailsPanel
       browserFields={browserFields}
       docValueFields={docValueFields}
-      entityType="alerts"
+      entityType="events"
       isFlyoutView
       timelineId={TimelineId.casePage}
     />
@@ -85,7 +85,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
 
   const onCaseDataSuccess = useCallback(
     (data: Case) => {
-      if (spyState.caseTitle === undefined) {
+      if (spyState.caseTitle === undefined || spyState.caseTitle !== data.title) {
         setSpyState({ caseTitle: data.title });
       }
     },

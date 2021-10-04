@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import { of as mockOf } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import type { ExecutionContext } from 'src/plugins/expressions/public';
-import type { IndexPatternsContract } from '../../../common/index_patterns/index_patterns';
+import type { IndexPatternsContract } from '../../../common';
 import type {
   ISearchStartSearchSource,
   KibanaContext,
@@ -54,7 +55,7 @@ describe('esaggs expression function - public', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockHandlers = {
-      abortSignal: (jest.fn() as unknown) as jest.Mocked<AbortSignal>,
+      abortSignal: jest.fn() as unknown as jest.Mocked<AbortSignal>,
       getSearchContext: jest.fn(),
       getSearchSessionId: jest.fn().mockReturnValue('abc123'),
       getExecutionContext: jest.fn(),
@@ -63,13 +64,13 @@ describe('esaggs expression function - public', () => {
       types: {},
     };
     startDependencies = {
-      aggs: ({
+      aggs: {
         createAggConfigs: jest.fn().mockReturnValue({ foo: 'bar' }),
-      } as unknown) as jest.Mocked<AggsStart>,
-      indexPatterns: ({
+      } as unknown as jest.Mocked<AggsStart>,
+      indexPatterns: {
         create: jest.fn().mockResolvedValue({}),
-      } as unknown) as jest.Mocked<IndexPatternsContract>,
-      searchSource: ({} as unknown) as jest.Mocked<ISearchStartSearchSource>,
+      } as unknown as jest.Mocked<IndexPatternsContract>,
+      searchSource: {} as unknown as jest.Mocked<ISearchStartSearchSource>,
     };
     getStartDependencies = jest.fn().mockResolvedValue(startDependencies);
     definition = getFunctionDefinition({ getStartDependencies });
@@ -88,6 +89,12 @@ describe('esaggs expression function - public', () => {
       {},
       args.aggs.map((agg) => agg.value)
     );
+  });
+
+  test('calls aggs.createAggConfigs with the empty aggs array when not provided', async () => {
+    await definition().fn(null, omit(args, 'aggs'), mockHandlers).toPromise();
+
+    expect(startDependencies.aggs.createAggConfigs).toHaveBeenCalledWith({}, []);
   });
 
   test('calls getEsaggsMeta to retrieve meta', () => {

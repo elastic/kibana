@@ -454,17 +454,6 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
         })
       ),
     },
-    [UI_SETTINGS.INDEXPATTERN_PLACEHOLDER]: {
-      name: i18n.translate('data.advancedSettings.indexPatternPlaceholderTitle', {
-        defaultMessage: 'Index pattern placeholder',
-      }),
-      value: '',
-      description: i18n.translate('data.advancedSettings.indexPatternPlaceholderText', {
-        defaultMessage:
-          'The placeholder for the "Index pattern name" field in "Management > Index Patterns > Create Index Pattern".',
-      }),
-      schema: schema.string(),
-    },
     [UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT]: {
       name: i18n.translate('data.advancedSettings.pinFiltersTitle', {
         defaultMessage: 'Pin filters by default',

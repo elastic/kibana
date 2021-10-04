@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/109904
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { PluginInitializerContext } from '../../../core/public';
 import { ConfigSchema } from '../config';
 
@@ -42,12 +45,11 @@ import {
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
-  isDefault,
-  validateIndexPattern,
+  validateDataView,
   flattenHitWrapper,
-} from './index_patterns';
+} from './data_views';
 
-export type { IndexPatternsService } from './index_patterns';
+export type { IndexPatternsService } from './data_views';
 
 // Index patterns namespace:
 export const indexPatterns = {
@@ -55,14 +57,19 @@ export const indexPatterns = {
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
-  isDefault,
   isFilterable,
   isNestedField,
-  validate: validateIndexPattern,
+  validate: validateDataView,
   flattenHitWrapper,
 };
 
-export { IndexPatternsContract, IndexPattern, IndexPatternField, TypeMeta } from './index_patterns';
+export {
+  IndexPatternsContract,
+  DataViewsContract,
+  IndexPattern,
+  IndexPatternField,
+  TypeMeta,
+} from './data_views';
 
 export {
   IIndexPattern,
@@ -76,13 +83,11 @@ export {
   IndexPatternLoadExpressionFunctionDefinition,
   fieldList,
   GetFieldsOptions,
-  INDEX_PATTERN_SAVED_OBJECT_TYPE,
   AggregationRestrictions,
   IndexPatternType,
   IndexPatternListItem,
+  DuplicateDataViewError,
 } from '../common';
-
-export { DuplicateIndexPatternError } from '../common/index_patterns/errors';
 
 /*
  * Autocomplete query suggestions:

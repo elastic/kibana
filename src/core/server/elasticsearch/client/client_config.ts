@@ -56,6 +56,9 @@ export function parseClientOptions(
       ...DEFAULT_HEADERS,
       ...config.customHeaders,
     },
+    // do not make assumption on user-supplied data content
+    // fixes https://github.com/elastic/kibana/issues/101944
+    disablePrototypePoisoningProtection: true,
   };
 
   if (config.pingTimeout != null) {

@@ -678,7 +678,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         action: 'start',
         kind: 'alert',
         category: 'malware',
-        code: isShellcode ? 'malicious_thread' : 'memory_signature',
+        code: isShellcode ? 'shellcode_thread' : 'memory_signature',
         id: this.seededUUIDv4(),
         dataset: 'endpoint',
         module: 'endpoint',
@@ -829,6 +829,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       },
       rule: {
         id: this.randomUUID(),
+        description: 'Behavior rule description',
       },
       event: {
         action: 'rule_detection',
@@ -859,8 +860,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         direction: 'outgoing',
       },
       registry: {
-        path:
-          'HKEY_USERS\\S-1-5-21-2460036010-3910878774-3458087990-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\chrome',
+        path: 'HKEY_USERS\\S-1-5-21-2460036010-3910878774-3458087990-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\chrome',
         value: processName,
         data: {
           strings: `C:/fake_behavior/${processName}`,
@@ -1852,8 +1852,8 @@ export class EndpointDocGenerator extends BaseDataGenerator {
             status: this.commonInfo.Endpoint.policy.applied.status,
             version: policyVersion,
             name: this.commonInfo.Endpoint.policy.applied.name,
-            endpoint_policy_version: this.commonInfo.Endpoint.policy.applied
-              .endpoint_policy_version,
+            endpoint_policy_version:
+              this.commonInfo.Endpoint.policy.applied.endpoint_policy_version,
           },
         },
       },

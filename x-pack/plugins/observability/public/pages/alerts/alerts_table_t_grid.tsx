@@ -14,6 +14,7 @@ import {
   ALERT_DURATION as ALERT_DURATION_TYPED,
   ALERT_REASON as ALERT_REASON_TYPED,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_PRODUCER,
   ALERT_STATUS as ALERT_STATUS_TYPED,
   ALERT_WORKFLOW_STATUS as ALERT_WORKFLOW_STATUS_TYPED,
 } from '@kbn/rule-data-utils';
@@ -38,9 +39,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import React, { Suspense, useMemo, useState, useCallback } from 'react';
+import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
 import { get } from 'lodash';
-import { useGetUserAlertsPermissions } from '../../hooks/use_alert_permission';
+import {
+  getAlertsPermissions,
+  useGetUserAlertsPermissions,
+} from '../../hooks/use_alert_permission';
 import type { TimelinesUIStart, TGridType, SortDirection } from '../../../../timelines/public';
 import { useStatusBulkActionItems } from '../../../../timelines/public';
 import type { TopAlert } from './';
@@ -163,12 +168,18 @@ function ObservabilityActions({
     application: { capabilities },
   } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
 
-  const parseObservabilityAlert = useMemo(() => parseAlert(observabilityRuleTypeRegistry), [
-    observabilityRuleTypeRegistry,
-  ]);
-  const alertDataConsumer = useMemo<string>(() => get(dataFieldEs, ALERT_RULE_CONSUMER, [''])[0], [
-    dataFieldEs,
-  ]);
+  const parseObservabilityAlert = useMemo(
+    () => parseAlert(observabilityRuleTypeRegistry),
+    [observabilityRuleTypeRegistry]
+  );
+  const alertDataConsumer = useMemo<string>(
+    () => get(dataFieldEs, ALERT_RULE_CONSUMER, [''])[0],
+    [dataFieldEs]
+  );
+  const alertDataProducer = useMemo<string>(
+    () => get(dataFieldEs, ALERT_RULE_PRODUCER, [''])[0],
+    [dataFieldEs]
+  );
 
   const alert = parseObservabilityAlert(dataFieldEs);
   const { prepend } = core.http.basePath;
@@ -200,7 +211,10 @@ function ObservabilityActions({
     }
   }, [setActionsPopover, refetch]);
 
-  const alertPermissions = useGetUserAlertsPermissions(capabilities, alertDataConsumer);
+  const alertPermissions = useGetUserAlertsPermissions(
+    capabilities,
+    alertDataConsumer === 'alerts' ? alertDataProducer : alertDataConsumer
+  );
 
   const statusActionItems = useStatusBulkActionItems({
     eventIds: [eventId],
@@ -214,18 +228,22 @@ function ObservabilityActions({
 
   const actionsMenuItems = useMemo(() => {
     return [
-      timelines.getAddToExistingCaseButton({
-        event,
-        casePermissions,
-        appId: observabilityFeatureId,
-        onClose: afterCaseSelection,
-      }),
-      timelines.getAddToNewCaseButton({
-        event,
-        casePermissions,
-        appId: observabilityFeatureId,
-        onClose: afterCaseSelection,
-      }),
+      ...(casePermissions?.crud
+        ? [
+            timelines.getAddToExistingCaseButton({
+              event,
+              casePermissions,
+              appId: observabilityFeatureId,
+              onClose: afterCaseSelection,
+            }),
+            timelines.getAddToNewCaseButton({
+              event,
+              casePermissions,
+              appId: observabilityFeatureId,
+              onClose: afterCaseSelection,
+            }),
+          ]
+        : []),
       ...(alertPermissions.crud ? statusActionItems : []),
     ];
   }, [afterCaseSelection, casePermissions, timelines, event, statusActionItems, alertPermissions]);
@@ -239,6 +257,7 @@ function ObservabilityActions({
             iconType="expand"
             color="text"
             onClick={() => setFlyoutAlert(alert)}
+            data-test-subj="openFlyoutButton"
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -261,6 +280,7 @@ function ObservabilityActions({
                   iconType="boxesHorizontal"
                   aria-label="More"
                   onClick={() => toggleActionsPopover(eventId)}
+                  data-test-subj="alerts-table-row-action-more"
                 />
               }
               isOpen={openActionsPopoverId === eventId}
@@ -279,17 +299,45 @@ function ObservabilityActions({
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const { indexNames, rangeFrom, rangeTo, kuery, workflowStatus, setRefetch, addToQuery } = props;
-  const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
+  const prevWorkflowStatus = usePrevious(workflowStatus);
+  const {
+    timelines,
+    application: { capabilities },
+  } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
 
   const casePermissions = useGetUserCasesPermissions();
 
+  const hasAlertsCrudPermissions = useCallback(
+    ({ ruleConsumer, ruleProducer }: { ruleConsumer: string; ruleProducer?: string }) => {
+      if (ruleConsumer === 'alerts' && ruleProducer) {
+        return getAlertsPermissions(capabilities, ruleProducer).crud;
+      }
+      return getAlertsPermissions(capabilities, ruleConsumer).crud;
+    },
+    [capabilities]
+  );
+
+  const [deletedEventIds, setDeletedEventIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (workflowStatus !== prevWorkflowStatus) {
+      setDeletedEventIds([]);
+    }
+  }, [workflowStatus, prevWorkflowStatus]);
+
+  const setEventsDeleted = useCallback<ObservabilityActionsProps['setEventsDeleted']>((action) => {
+    if (action.isDeleted) {
+      setDeletedEventIds((ids) => [...ids, ...action.eventIds]);
+    }
+  }, []);
+
   const leadingControlColumns = useMemo(() => {
     return [
       {
         id: 'expand',
-        width: 96,
+        width: 120,
         headerCellRender: () => {
           return (
             <EventsThContent>
@@ -303,6 +351,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
           return (
             <ObservabilityActions
               {...actionProps}
+              setEventsDeleted={setEventsDeleted}
               currentStatus={workflowStatus}
               setFlyoutAlert={setFlyoutAlert}
             />
@@ -310,7 +359,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         },
       },
     ];
-  }, [workflowStatus]);
+  }, [workflowStatus, setEventsDeleted]);
 
   const tGridProps = useMemo(() => {
     const type: TGridType = 'standalone';
@@ -320,10 +369,11 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       casePermissions,
       type,
       columns,
-      deletedEventIds: [],
+      deletedEventIds,
       defaultCellActions: getDefaultCellActions({ addToQuery }),
       end: rangeTo,
       filters: [],
+      hasAlertsCrudPermissions,
       indexNames,
       itemsPerPageOptions: [10, 25, 50],
       loadingText: i18n.translate('xpack.observability.alertsTable.loadingTextLabel', {
@@ -336,7 +386,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         query: `${ALERT_WORKFLOW_STATUS}: ${workflowStatus}${kuery !== '' ? ` and ${kuery}` : ''}`,
         language: 'kuery',
       },
-      renderCellValue: getRenderCellValue({ rangeFrom, rangeTo, setFlyoutAlert }),
+      renderCellValue: getRenderCellValue({ setFlyoutAlert }),
       rowRenderers: NO_ROW_RENDER,
       start: rangeFrom,
       setRefetch,
@@ -358,14 +408,16 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     };
   }, [
     casePermissions,
-    indexNames,
-    kuery,
-    leadingControlColumns,
-    rangeFrom,
-    rangeTo,
-    setRefetch,
-    workflowStatus,
     addToQuery,
+    rangeTo,
+    hasAlertsCrudPermissions,
+    indexNames,
+    workflowStatus,
+    kuery,
+    rangeFrom,
+    setRefetch,
+    leadingControlColumns,
+    deletedEventIds,
   ]);
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
   const { observabilityRuleTypeRegistry } = usePluginContext();

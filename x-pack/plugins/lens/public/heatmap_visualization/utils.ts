@@ -14,9 +14,12 @@ import type { HeatmapVisualizationState } from './types';
 export function getSafePaletteParams(
   paletteService: PaletteRegistry,
   currentData: Datatable | undefined,
-  accessor: string,
+  accessor: string | undefined,
   activePalette?: HeatmapVisualizationState['palette']
 ) {
+  if (currentData == null || accessor == null) {
+    return { displayStops: [], activePalette: {} as HeatmapVisualizationState['palette'] };
+  }
   const finalActivePalette: HeatmapVisualizationState['palette'] = activePalette ?? {
     type: 'palette',
     name: DEFAULT_PALETTE_NAME,
