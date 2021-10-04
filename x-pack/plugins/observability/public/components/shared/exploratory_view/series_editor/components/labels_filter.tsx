@@ -17,11 +17,11 @@ import {
 
 import { EuiSelectable } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { FilterProps } from '../columns/filter_expanded';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { FilterValuesList } from './filter_values_list';
 import { useFilterValues } from '../use_filter_values';
-import { i18n } from '../../../../../../../../../../../../../private/var/tmp/_bazel_shahzad-16/974662a0be78d7012b40ce12cff92960/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-i18n';
 
 export function LabelsFieldFilter(props: FilterProps) {
   const { series } = props;
