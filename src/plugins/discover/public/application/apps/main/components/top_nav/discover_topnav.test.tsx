@@ -19,8 +19,14 @@ import { discoverServiceMock } from '../../../../../__mocks__/services';
 
 setHeaderActionMenuMounter(jest.fn());
 
-function getProps(savePermissions = true): DiscoverTopNavProps {
+function getProps(savePermissions = true, labsUiEnabled = true): DiscoverTopNavProps {
   discoverServiceMock.capabilities.discover!.save = savePermissions;
+  discoverServiceMock.uiSettings.get.mockImplementation((key) => {
+    switch (key) {
+      case 'labs:discover:enable_ui':
+        return labsUiEnabled;
+    }
+  });
 
   return {
     stateContainer: {} as GetStateReturn,
@@ -53,5 +59,14 @@ describe('Discover topnav component', () => {
 
     const topMenuConfig = topMenuWrapper.props().config!.map((obj: TopNavMenuData) => obj.id);
     expect(topMenuConfig).toEqual(['labs', 'new', 'open', 'share', 'inspect', 'options']);
+  });
+
+  test('should not show labs button if ui disabled', () => {
+    const props = getProps(false, false);
+    const component = shallowWithIntl(<DiscoverTopNav {...props} />);
+    const topMenuWrapper = component.find(TopNavMenu);
+
+    const topMenuConfig = topMenuWrapper.props().config!.map((obj: TopNavMenuData) => obj.id);
+    expect(topMenuConfig).toEqual(['new', 'open', 'share', 'inspect', 'options']);
   });
 });

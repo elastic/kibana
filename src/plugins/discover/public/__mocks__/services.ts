@@ -47,7 +47,7 @@ export const discoverServiceMock = {
   },
   filterManager: dataPlugin.query.filterManager,
   uiSettings: {
-    get: (key: string) => {
+    get: jest.fn((key: string) => {
       if (key === 'fields:popularLimit') {
         return 5;
       } else if (key === DEFAULT_COLUMNS_SETTING) {
@@ -65,7 +65,7 @@ export const discoverServiceMock = {
       } else if (key === SAMPLE_SIZE_SETTING) {
         return 250;
       }
-    },
+    }),
     isDefault: (key: string) => {
       return true;
     },
@@ -94,4 +94,4 @@ export const discoverServiceMock = {
   storage: {
     get: jest.fn(),
   },
-} as unknown as DiscoverServices;
+} as unknown as DiscoverServices & { uiSettings: { get: jest.Mock<unknown, [string, unknown]> } };

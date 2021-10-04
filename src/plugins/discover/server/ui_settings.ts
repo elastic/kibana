@@ -11,6 +11,7 @@ import { schema } from '@kbn/config-schema';
 
 import { UiSettingsParams } from 'kibana/server';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { SETTING_CATEGORY as LABS_CATEGORY } from '../../presentation_util/server';
 import {
   DEFAULT_COLUMNS_SETTING,
   SAMPLE_SIZE_SETTING,
@@ -25,6 +26,7 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
+  ENABLE_LABS_UI,
 } from '../common';
 
 export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
@@ -200,6 +202,18 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     }),
     value: false,
     category: ['discover'],
+    schema: schema.boolean(),
+  },
+  [ENABLE_LABS_UI]: {
+    name: i18n.translate('discover.advancedSettings.enableLabsUi', {
+      defaultMessage: 'Enable labs button in Discover',
+    }),
+    description: i18n.translate('discover.advancedSettings.enableLabsUiDescription', {
+      defaultMessage:
+        'This flag determines if the viewer has access to the Labs button, a quick way to enable and disable experimental features in Discover.',
+    }),
+    value: true,
+    category: [LABS_CATEGORY],
     schema: schema.boolean(),
   },
 });
