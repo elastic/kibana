@@ -7,3 +7,4 @@
 
 export { ApmOverviewPage } from './overview';
 export { ApmInstancesPage } from './instances';
+export { ApmInstancePage } from './instance';
