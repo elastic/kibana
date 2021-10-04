@@ -142,7 +142,7 @@ export const integrations: LanguageIntegration[] = [
         'Start building your custom application on top of Elasticsearch with the official Java client.',
     }),
     docUrl:
-      'https://www.elastic.co/guide/en/elasticsearch/client/java-rest/7.x/_elasticsearch_java_high_level_client.html',
+      'https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/index.html',
   },
 ];
 
