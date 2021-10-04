@@ -10,7 +10,7 @@ import { AppContextTestRender, createAppRootMockRenderer } from '../../../common
 import { ArtifactEntryCard, ArtifactEntryCardProps } from './artifact_entry_card';
 import { act, fireEvent, getByTestId } from '@testing-library/react';
 import { AnyArtifact } from './types';
-import { isTrustedApp } from './hooks/use_normalized_artifact';
+import { isTrustedApp } from './utils';
 import { getTrustedAppProvider, getExceptionProvider } from './test_utils';
 
 describe.each([

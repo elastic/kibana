@@ -5,18 +5,30 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren } from 'react';
+import React, { memo, PropsWithChildren, useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
+import classNames from 'classnames';
 
 export type TextValueDisplayProps = PropsWithChildren<{
   bold?: boolean;
+  truncate?: boolean;
 }>;
 
 /**
  * Common component for displaying consistent text across the card. Changes here could impact all of
  * display of values on the card
  */
-export const TextValueDisplay = memo<TextValueDisplayProps>(({ bold, children }) => {
-  return <EuiText size="s">{bold ? <strong>{children}</strong> : children}</EuiText>;
+export const TextValueDisplay = memo<TextValueDisplayProps>(({ bold, truncate, children }) => {
+  const cssClassNames = useMemo(() => {
+    return classNames({
+      'eui-textTruncate': truncate,
+    });
+  }, [truncate]);
+
+  return (
+    <EuiText size="s" className={cssClassNames}>
+      {bold ? <strong>{children}</strong> : children}
+    </EuiText>
+  );
 });
 TextValueDisplay.displayName = 'TextValueDisplay';

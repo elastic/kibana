@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { PolicyDetailsState } from '../../../types';
-import { initialPolicyDetailsState } from '../reducer/initial_policy_details_state';
+import { initialPolicyDetailsState } from './initial_policy_details_state';
 import { policyTrustedAppsReducer } from './trusted_apps_reducer';
 
 import { ImmutableObject } from '../../../../../../../common/endpoint/types';
@@ -16,12 +16,20 @@ import {
   createFailedResourceState,
 } from '../../../../../state';
 import { getMockListResponse, getAPIError, getMockCreateResponse } from '../../../test_utils';
+import { getPolicyDetailsArtifactsListPath } from '../../../../../common/routing';
 
 describe('policy trusted apps reducer', () => {
   let initialState: ImmutableObject<PolicyDetailsState>;
 
   beforeEach(() => {
-    initialState = initialPolicyDetailsState();
+    initialState = {
+      ...initialPolicyDetailsState(),
+      location: {
+        pathname: getPolicyDetailsArtifactsListPath('abc'),
+        search: '',
+        hash: '',
+      },
+    };
   });
 
   describe('PolicyTrustedApps', () => {

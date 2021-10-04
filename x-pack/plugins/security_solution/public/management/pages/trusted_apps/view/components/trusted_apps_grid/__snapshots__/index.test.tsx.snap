@@ -407,7 +407,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="body-content undefined"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -563,7 +563,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -790,7 +790,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -946,7 +946,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -1173,7 +1173,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -1329,7 +1329,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -1556,7 +1556,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -1712,7 +1712,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -1939,7 +1939,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -2095,7 +2095,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -2322,7 +2322,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -2478,7 +2478,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -2705,7 +2705,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -2861,7 +2861,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -3088,7 +3088,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -3244,7 +3244,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -3471,7 +3471,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -3627,7 +3627,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -3854,7 +3854,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -4010,7 +4010,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -4532,7 +4532,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="body-content undefined"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -4688,7 +4688,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -4915,7 +4915,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -5071,7 +5071,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -5298,7 +5298,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -5454,7 +5454,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -5681,7 +5681,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -5837,7 +5837,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -6064,7 +6064,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -6220,7 +6220,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -6447,7 +6447,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -6603,7 +6603,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -6830,7 +6830,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -6986,7 +6986,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -7213,7 +7213,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -7369,7 +7369,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -7596,7 +7596,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -7752,7 +7752,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -7979,7 +7979,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -8135,7 +8135,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -8614,7 +8614,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="body-content undefined"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -8770,7 +8770,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -8997,7 +8997,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -9153,7 +9153,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -9380,7 +9380,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -9536,7 +9536,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -9763,7 +9763,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -9919,7 +9919,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -10146,7 +10146,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -10302,7 +10302,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -10529,7 +10529,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -10685,7 +10685,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -10912,7 +10912,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -11068,7 +11068,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -11295,7 +11295,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -11451,7 +11451,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -11678,7 +11678,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -11834,7 +11834,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div
@@ -12061,7 +12061,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c2 c3 artifactEntryCard "
             data-test-subj="trustedAppCard"
           >
             <div
@@ -12217,7 +12217,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 data-test-subj="trustedAppCard-subHeader"
               >
                 <div

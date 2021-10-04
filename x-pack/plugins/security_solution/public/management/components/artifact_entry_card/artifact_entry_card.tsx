@@ -5,27 +5,22 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { CommonProps, EuiHorizontalRule, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import styled from 'styled-components';
+import React, { memo } from 'react';
+import { CommonProps, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
 import { CardHeader, CardHeaderProps } from './components/card_header';
 import { CardSubHeader } from './components/card_sub_header';
 import { getEmptyValue } from '../../../common/components/empty_value';
 import { CriteriaConditions, CriteriaConditionsProps } from './components/criteria_conditions';
-import { EffectScopeProps } from './components/effect_scope';
-import { ContextMenuItemNavByRouterProps } from '../context_menu_with_router_support/context_menu_item_nav_by_rotuer';
-import { AnyArtifact } from './types';
+import { AnyArtifact, MenuItemPropsByPolicyId } from './types';
 import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
-
-const CardContainerPanel = styled(EuiPanel)`
-  &.artifactEntryCard + &.artifactEntryCard {
-    margin-top: ${({ theme }) => theme.eui.spacerSizes.l};
-  }
-`;
+import { CardContainerPanel } from './components/card_container_panel';
+import { CardSectionPanel } from './components/card_section_panel';
+import { usePolicyNavLinks } from './hooks/use_policy_nav_links';
+import { MaybeImmutable } from '../../../../common/endpoint/types';
 
 export interface ArtifactEntryCardProps extends CommonProps {
-  item: AnyArtifact;
+  item: MaybeImmutable<AnyArtifact>;
   /**
    * The list of actions for the card. Will display an icon with the actions in a menu if defined.
    */
@@ -33,52 +28,25 @@ export interface ArtifactEntryCardProps extends CommonProps {
 
   /**
    * Information about the policies that are assigned to the `item`'s `effectScope` and that will be
-   * use to create a navigation link
+   * used to create the items in the popup context menu. This is a
+   * `Record<policyId: string, ContextMenuItemNavByRouterProps>`.
    */
-  policies?: {
-    [policyId: string]: ContextMenuItemNavByRouterProps;
-  };
+  policies?: MenuItemPropsByPolicyId;
 }
 
 /**
  * Display Artifact Items (ex. Trusted App, Event Filter, etc) as a card.
  * This component is a TS Generic that allows you to set what the Item type is
  */
-export const ArtifactEntryCard = memo(
-  ({
-    item,
-    policies,
-    actions,
-    'data-test-subj': dataTestSubj,
-    ...commonProps
-  }: ArtifactEntryCardProps) => {
-    const artifact = useNormalizedArtifact(item);
+export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
+  ({ item, policies, actions, 'data-test-subj': dataTestSubj, ...commonProps }) => {
+    const artifact = useNormalizedArtifact(item as AnyArtifact);
     const getTestId = useTestIdGenerator(dataTestSubj);
-
-    // create the policy links for each policy listed in the artifact record by grabbing the
-    // navigation data from the `policies` prop (if any)
-    const policyNavLinks = useMemo<EffectScopeProps['policies']>(() => {
-      return artifact.effectScope.type === 'policy'
-        ? artifact?.effectScope.policies.map((id) => {
-            return policies && policies[id]
-              ? policies[id]
-              : // else, unable to build a nav link, so just show id
-                {
-                  children: id,
-                };
-          })
-        : undefined;
-    }, [artifact.effectScope, policies]);
+    const policyNavLinks = usePolicyNavLinks(artifact, policies);
 
     return (
-      <CardContainerPanel
-        hasBorder={true}
-        {...commonProps}
-        data-test-subj={dataTestSubj}
-        paddingSize="none"
-        className="artifactEntryCard"
-      >
-        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
+      <CardContainerPanel {...commonProps} data-test-subj={dataTestSubj}>
+        <CardSectionPanel>
           <CardHeader
             name={artifact.name}
             createdDate={artifact.created_at}
@@ -100,17 +68,17 @@ export const ArtifactEntryCard = memo(
               {artifact.description || getEmptyValue()}
             </p>
           </EuiText>
-        </EuiPanel>
+        </CardSectionPanel>
 
         <EuiHorizontalRule margin="none" />
 
-        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
+        <CardSectionPanel>
           <CriteriaConditions
             os={artifact.os as CriteriaConditionsProps['os']}
             entries={artifact.entries}
             data-test-subj={getTestId('criteriaConditions')}
           />
-        </EuiPanel>
+        </CardSectionPanel>
       </CardContainerPanel>
     );
   }

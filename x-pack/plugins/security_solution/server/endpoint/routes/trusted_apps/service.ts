@@ -16,7 +16,7 @@ import {
   GetOneTrustedAppResponse,
   GetTrustedAppsListRequest,
   GetTrustedAppsSummaryResponse,
-  GetTrustedListAppsResponse,
+  GetTrustedAppsListResponse,
   PostTrustedAppCreateRequest,
   PostTrustedAppCreateResponse,
   PutTrustedAppUpdateRequest,
@@ -124,7 +124,7 @@ export const getTrustedApp = async (
 export const getTrustedAppsList = async (
   exceptionsListClient: ExceptionListClient,
   { page, per_page: perPage, kuery }: GetTrustedAppsListRequest
-): Promise<GetTrustedListAppsResponse> => {
+): Promise<GetTrustedAppsListResponse> => {
   // Ensure list is created if it does not exist
   await exceptionsListClient.createTrustedAppsList();
 

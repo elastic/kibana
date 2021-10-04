@@ -17,6 +17,7 @@ import {
 import { getCurrentArtifactsLocation } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsNavigateCallback, usePolicyDetailsSelector } from '../../policy_hooks';
 import { PolicyTrustedAppsFlyout } from '../flyout';
+import { PolicyTrustedAppsList } from '../list/policy_trusted_apps_list';
 
 export const PolicyTrustedAppsLayout = React.memo(() => {
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
@@ -67,8 +68,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
         color="transparent"
         borderRadius="none"
       >
-        {/* TODO: To be implemented */}
-        {'Policy trusted apps layout content'}
+        <PolicyTrustedAppsList />
       </EuiPageContent>
       {showListFlyout ? <PolicyTrustedAppsFlyout /> : null}
     </div>

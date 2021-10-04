@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from './policy_settings_selectors';
-export * from './trusted_apps_selectors';
-export * from './policy_common_selectors';
+export * from './is_trusted_app';
+export * from './map_to_artifact_info';
