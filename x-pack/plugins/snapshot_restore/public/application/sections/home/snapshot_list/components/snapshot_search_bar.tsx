@@ -17,8 +17,8 @@ import { SnapshotDeleteProvider } from '../../../../components';
 import { SnapshotDetails } from '../../../../../../common/types';
 import { getQueryFromListParams, SnapshotListParams, getListParams } from '../../../../lib';
 
-const moreThanOneSearchClauseError = i18n.translate(
-  'xpack.snapshotRestore.snapshotList.table.moreThanOneSearchClauseError',
+const onlyOneClauseMessage = i18n.translate(
+  'xpack.snapshotRestore.snapshotList.searchBar.onlyOneClauseMessage',
   {
     defaultMessage: 'You can only use one clause in the search bar',
   }
@@ -124,7 +124,7 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
       setError(null);
       setQuery(changedQuery);
       if (changedQuery.ast.clauses.length > 1) {
-        setError({ name: moreThanOneSearchClauseError, message: moreThanOneSearchClauseError });
+        setError({ name: onlyOneClauseMessage, message: onlyOneClauseMessage });
       } else {
         setListParams(getListParams(listParams, changedQuery));
       }
@@ -144,7 +144,19 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
       <EuiSpacer />
       {error ? (
         <>
-          <EuiCallOut iconType="alert" color="danger" title={`Invalid search: ${error.message}`} />
+          <EuiCallOut
+            iconType="alert"
+            color="danger"
+            title={
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotList.searchBar.invalidSearchMessage"
+                defaultMessage="Invalid search: {errorMessage}"
+                values={{
+                  errorMessage: error.message,
+                }}
+              />
+            }
+          />
           <EuiSpacer />
         </>
       ) : null}

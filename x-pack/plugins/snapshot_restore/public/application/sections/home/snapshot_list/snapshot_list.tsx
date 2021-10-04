@@ -137,7 +137,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     content = <RepositoryError />;
   } else if (repositories.length === 0) {
     content = <RepositoryEmptyPrompt />;
-  } else if (totalSnapshotsCount === 0 && !listParams.searchField) {
+  } else if (totalSnapshotsCount === 0 && !listParams.searchField && !isLoading) {
     content = <SnapshotEmptyPrompt policiesCount={policies.length} />;
   } else {
     const repositoryErrorsWarning = Object.keys(errors).length ? (
