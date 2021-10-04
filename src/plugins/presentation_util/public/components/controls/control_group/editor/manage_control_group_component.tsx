@@ -9,16 +9,14 @@
 import useMount from 'react-use/lib/useMount';
 import React, { useState } from 'react';
 import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonGroup,
-  EuiFormRow,
   EuiFlyoutHeader,
-  EuiTitle,
+  EuiButtonEmpty,
+  EuiButtonGroup,
   EuiFlyoutBody,
+  EuiFormRow,
   EuiSpacer,
   EuiSwitch,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { ControlsPanels } from '../types';
@@ -30,7 +28,6 @@ interface ManageControlGroupProps {
   panels: ControlsPanels;
   controlStyle: ControlStyle;
   deleteAllEmbeddables: () => void;
-  onClose: () => void;
   setControlStyle: (style: ControlStyle) => void;
   setAllPanelWidths: (newWidth: ControlWidth) => void;
 }
@@ -39,7 +36,6 @@ export const ManageControlGroup = ({
   panels,
   controlStyle,
   setControlStyle,
-  onClose,
   setAllPanelWidths,
   deleteAllEmbeddables,
 }: ManageControlGroupProps) => {
@@ -105,8 +101,8 @@ export const ManageControlGroup = ({
           onClick={deleteAllEmbeddables}
           aria-label={'delete-all'}
           iconType="trash"
-          flush="left"
           color="danger"
+          flush="left"
           size="s"
         >
           {ControlGroupStrings.management.getDeleteAllButtonTitle()}
