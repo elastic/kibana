@@ -17,7 +17,7 @@ A single transaction with a latency of 2ms
 
 or
 
-#### Aggregated (metric) document:
+#### Aggregated (metric) document
 A pre-aggregated document where `_doc_count` is the number of original transactions. 
 
 ```json
