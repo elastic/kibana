@@ -71,26 +71,7 @@ describe('When on the Trusted Apps Page', () => {
   const originalScrollTo = window.scrollTo;
   const act = reactTestingLibrary.act;
 
-  const getFakeTrustedApp = (): TrustedApp => ({
-    id: '1111-2222-3333-4444',
-    version: 'abc123',
-    name: 'one app',
-    os: OperatingSystem.WINDOWS,
-    created_at: '2021-01-04T13:55:00.561Z',
-    created_by: 'me',
-    updated_at: '2021-01-04T13:55:00.561Z',
-    updated_by: 'me',
-    description: 'a good one',
-    effectScope: { type: 'global' },
-    entries: [
-      {
-        field: ConditionEntryField.PATH,
-        value: 'one/two',
-        operator: 'included',
-        type: 'match',
-      },
-    ],
-  });
+  const getFakeTrustedApp = jest.fn();
 
   const createListApiResponse = (
     page: number = 1,
@@ -150,6 +131,28 @@ describe('When on the Trusted Apps Page', () => {
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+    getFakeTrustedApp.mockImplementation(
+      (): TrustedApp => ({
+        id: '1111-2222-3333-4444',
+        version: 'abc123',
+        name: 'one app',
+        os: OperatingSystem.WINDOWS,
+        created_at: '2021-01-04T13:55:00.561Z',
+        created_by: 'me',
+        updated_at: '2021-01-04T13:55:00.561Z',
+        updated_by: 'me',
+        description: 'a good one',
+        effectScope: { type: 'global' },
+        entries: [
+          {
+            field: ConditionEntryField.PATH,
+            value: 'one/two',
+            operator: 'included',
+            type: 'match',
+          },
+        ],
+      })
+    );
 
     history = mockedContext.history;
     coreStart = mockedContext.coreStart;
@@ -192,6 +195,32 @@ describe('When on the Trusted Apps Page', () => {
     });
 
     describe('and the Grid view is being displayed', () => {
+      const TRUSTED_APP_GET_URI = resolvePathVariables(TRUSTED_APPS_GET_API, {
+        id: '9999-edit-8888',
+      });
+
+      const renderAndWaitForGetApi = async () => {
+        // the store action watcher is setup prior to render because `renderWithListData()`
+        // also awaits API calls and this action could be missed.
+        const apiResponseForEditTrustedApp = waitForAction(
+          'trustedAppCreationEditItemStateChanged',
+          {
+            validate({ payload }) {
+              console.log('payload type', payload.type)
+              return isLoadedResourceState(payload) || isFailedResourceState(payload);
+            },
+          }
+        );
+
+        const renderResult = await renderWithListData();
+
+        await reactTestingLibrary.act(async () => {
+          await apiResponseForEditTrustedApp;
+        });
+
+        return renderResult;
+      };
+
       describe('and the edit trusted app button is clicked', () => {
         let renderResult: ReturnType<AppContextTestRender['render']>;
 
@@ -276,34 +305,44 @@ describe('When on the Trusted Apps Page', () => {
             });
           });
         });
+        describe.only('and the license is downgraded to gold or below', () => {
+          beforeEach(() => {
+            (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+            useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+
+            // Mock the API GET for the trusted application
+            const priorMockImplementation = coreStart.http.get.getMockImplementation();
+            coreStart.http.get.mockImplementation(async (...args) => {
+              if ('string' === typeof args[0] && args[0] === TRUSTED_APP_GET_URI) {
+                console.log(args[0]);
+                return {
+                  data: {
+                    ...getFakeTrustedApp(),
+                    id: '9999-edit-8888',
+                    effectScope: { type: 'policy', policies: ['111'] },
+                  },
+                };
+              }
+              if (priorMockImplementation) {
+                return priorMockImplementation(...args);
+              }
+            });
+            reactTestingLibrary.act(() => {
+              history.push('/administration/trusted_apps?show=edit&id=9999-edit-8888');
+            });
+          });
+
+          it('shows a message at the top of the flyout to inform the user their license is expired', async () => {
+            await renderAndWaitForGetApi();
+            console.log(renderResult.baseElement.outerHTML);
+            expect(
+              renderResult.queryByTestId('addTrustedAppFlyout-expired-license-callout')
+            ).toBeTruthy();
+          });
+        });
       });
 
       describe('and attempting to show Edit panel based on URL params', () => {
-        const TRUSTED_APP_GET_URI = resolvePathVariables(TRUSTED_APPS_GET_API, {
-          id: '9999-edit-8888',
-        });
-
-        const renderAndWaitForGetApi = async () => {
-          // the store action watcher is setup prior to render because `renderWithListData()`
-          // also awaits API calls and this action could be missed.
-          const apiResponseForEditTrustedApp = waitForAction(
-            'trustedAppCreationEditItemStateChanged',
-            {
-              validate({ payload }) {
-                return isLoadedResourceState(payload) || isFailedResourceState(payload);
-              },
-            }
-          );
-
-          const renderResult = await renderWithListData();
-
-          await reactTestingLibrary.act(async () => {
-            await apiResponseForEditTrustedApp;
-          });
-
-          return renderResult;
-        };
-
         beforeEach(() => {
           // Mock the API GET for the trusted application
           const priorMockImplementation = coreStart.http.get.getMockImplementation();

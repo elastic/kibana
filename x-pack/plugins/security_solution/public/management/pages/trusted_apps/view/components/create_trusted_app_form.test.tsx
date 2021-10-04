@@ -318,6 +318,61 @@ describe('When using the Trusted App Form', () => {
     });
   });
 
+  describe('the Policy Selection area when the license downgrades to gold or below', () => {
+    beforeEach(() => {
+      // select per policy for trusted app
+      const policy = generator.generatePolicyPackagePolicy();
+      policy.name = 'test policy A';
+      policy.id = '123';
+
+      formProps.policies.options = [policy];
+
+      (formProps.trustedApp as NewTrustedApp).effectScope = {
+        type: 'policy',
+        policies: ['123'],
+      };
+
+      formProps.isEditMode = true;
+
+      // downgrade license
+      (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+    });
+
+    it('maintains policy configuration but does not allow the user to edit add/remove individual policies in edit mode', () => {
+      render();
+      const perPolicyButton = renderResult.getByTestId(
+        `${dataTestSubjForForm}-effectedPolicies-perPolicy`
+      ) as HTMLButtonElement;
+
+      expect(perPolicyButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
+      expect(renderResult.getByTestId('policy-123').getAttribute('aria-disabled')).toEqual('true');
+      expect(renderResult.getByTestId('policy-123-checkbox')).toBeChecked();
+    });
+    it("allows the user to set the trusted app entry to 'Global' in the edit option", () => {
+      render();
+      const globalButton = renderResult.getByTestId(
+        `${dataTestSubjForForm}-effectedPolicies-global`
+      ) as HTMLButtonElement;
+
+      reactTestingLibrary.act(() => {
+        fireEvent.click(globalButton, { button: 1 });
+      });
+
+      rerenderWithLatestTrustedApp();
+      expect(globalButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
+    });
+    it('hides the policy assignment section if the TA is set to global', () => {
+      (formProps.trustedApp as NewTrustedApp).effectScope = {
+        type: 'global',
+      };
+      expect(renderResult.queryByTestId(`${dataTestSubjForForm}-effectedPolicies`)).toBeNull();
+    });
+    it('hides the policy assignment section if the user is adding a new TA', () => {
+      formProps.isEditMode = false;
+      expect(renderResult.queryByTestId(`${dataTestSubjForForm}-effectedPolicies`)).toBeNull();
+    });
+  });
+
   describe('and the user visits required fields but does not fill them out', () => {
     beforeEach(() => {
       render();

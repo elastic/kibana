@@ -15,6 +15,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -44,14 +45,14 @@ import { useTrustedAppsSelector } from '../hooks';
 import { ABOUT_TRUSTED_APPS, CREATE_TRUSTED_APP_ERROR } from '../translations';
 import { defaultNewTrustedApp } from '../../store/builders';
 import { getTrustedAppsListPath } from '../../../../common/routing';
-import { useToasts } from '../../../../../common/lib/kibana';
+import { useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { isGlobalEffectScope } from '../../state/type_guards';
 import { NewTrustedApp } from '../../../../../../common/endpoint/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
-type CreateTrustedAppFlyoutProps = Omit<EuiFlyoutProps, 'hideCloseButton'>;
+export type CreateTrustedAppFlyoutProps = Omit<EuiFlyoutProps, 'hideCloseButton'>;
 export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
   ({ onClose, ...flyoutProps }) => {
     const dispatch = useDispatch<(action: AppAction) => void>();
@@ -69,6 +70,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
     const formValues = useTrustedAppsSelector(getCreationDialogFormEntry) || defaultNewTrustedApp();
     const location = useTrustedAppsSelector(getCurrentLocation);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const docLinks = useKibana().services.docLinks;
 
     const dataTestSubj = flyoutProps['data-test-subj'];
 
@@ -174,6 +176,10 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
       }
     }, [onClose, creationSuccessful]);
 
+    // console.log('TAByPolicyEnabled', isTrustedAppsByPolicyEnabled);
+    // console.log('not isPlatinumPlus', !isPlatinumPlus);
+    // console.log('isEditMode', isEditMode);
+    // console.log('not isGlobal', !isGlobal);
     return (
       <EuiFlyout onClose={handleCancelClick} {...flyoutProps} hideCloseButton={creationInProgress}>
         <EuiFlyoutHeader hasBorder>
@@ -193,7 +199,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
-        {isTrustedAppsByPolicyEnabled && !isPlatinumPlus && isEdit && !isGlobal && (
+        {isTrustedAppsByPolicyEnabled && !isPlatinumPlus && isEditMode && !isGlobal && (
           <EuiCallOut
             title={i18n.translate(
               'xpack.securitySolution.trustedapps.createTrustedAppFlyout.expiredLicenseTitle',
@@ -201,11 +207,18 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
             )}
             color="warning"
             iconType="help"
+            data-test-subj={getTestId('expired-license-callout')}
           >
             <FormattedMessage
               id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.expiredLicenseMessage"
-              defaultMessage="Please update your license to modify associated policy selection."
+              defaultMessage="Your Kibana license has been downgraded. Future policy configurations will now be globally assigned to all policies. For more information, see our "
             />
+            <EuiLink external href={`${docLinks.links.siem.guide}`}>
+              <FormattedMessage
+                id="xpack.securitySolution.trustedapps.docsLink"
+                defaultMessage="Trusted applications documentation."
+              />
+            </EuiLink>
           </EuiCallOut>
         )}
         <EuiFlyoutBody>

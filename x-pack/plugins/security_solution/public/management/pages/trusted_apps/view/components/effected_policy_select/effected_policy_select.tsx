@@ -110,6 +110,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
               onChange={NOOP}
               checked={isPolicySelected.has(policy.id)}
               disabled={isGlobal || !isPlatinumPlus}
+              data-test-subj={`policy-${policy.id}-checkbox`}
             />
           ),
           append: (
