@@ -34,14 +34,12 @@ async function getApmIndicesSavedObject(
 
 export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {
   return {
-    /* eslint-disable @typescript-eslint/naming-convention */
     'xpack.apm.sourcemapIndices': config['xpack.apm.sourcemapIndices'],
     'xpack.apm.errorIndices': config['xpack.apm.errorIndices'],
     'xpack.apm.onboardingIndices': config['xpack.apm.onboardingIndices'],
     'xpack.apm.spanIndices': config['xpack.apm.spanIndices'],
     'xpack.apm.transactionIndices': config['xpack.apm.transactionIndices'],
     'xpack.apm.metricsIndices': config['xpack.apm.metricsIndices'],
-    /* eslint-enable @typescript-eslint/naming-convention */
     // system indices, not configurable
     apmAgentConfigurationIndex: '.apm-agent-configuration',
     apmCustomLinkIndex: '.apm-custom-link',

@@ -13,14 +13,12 @@ import { PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
 
 jest.mock('../settings/apm_indices/get_apm_indices', () => ({
   getApmIndices: async () => ({
-    /* eslint-disable @typescript-eslint/naming-convention */
     'xpack.apm.sourcemapIndices': 'apm-*',
     'xpack.apm.errorIndices': 'apm-*',
     'xpack.apm.onboardingIndices': 'apm-*',
     'xpack.apm.spanIndices': 'apm-*',
     'xpack.apm.transactionIndices': 'apm-*',
     'xpack.apm.metricsIndices': 'apm-*',
-    /* eslint-enable @typescript-eslint/naming-convention */
     apmAgentConfigurationIndex: 'apm-*',
   }),
 }));

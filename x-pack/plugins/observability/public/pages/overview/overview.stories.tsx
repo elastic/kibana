@@ -36,10 +36,7 @@ function unregisterAll() {
   unregisterDataHandler({ appName: 'synthetics' });
 }
 
-const sampleAPMIndices = {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  'xpack.apm.transactionIndices': 'apm-*',
-} as ApmIndicesConfig;
+const sampleAPMIndices = { 'xpack.apm.transactionIndices': 'apm-*' } as ApmIndicesConfig;
 
 const withCore = makeDecorator({
   name: 'withCore',

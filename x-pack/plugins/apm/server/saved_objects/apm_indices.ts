@@ -15,7 +15,6 @@ export const apmIndices: SavedObjectsType = {
   namespaceType: 'agnostic',
   mappings: {
     properties: {
-      /* eslint-disable @typescript-eslint/naming-convention */
       'xpack.apm.sourcemapIndices': {
         type: 'keyword',
       },

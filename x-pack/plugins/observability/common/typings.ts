@@ -16,15 +16,12 @@ export const alertWorkflowStatusRt = t.keyof({
 export type AlertWorkflowStatus = t.TypeOf<typeof alertWorkflowStatusRt>;
 
 export interface ApmIndicesConfig {
-  /* eslint-disable @typescript-eslint/naming-convention */
   'xpack.apm.sourcemapIndices': string;
   'xpack.apm.errorIndices': string;
   'xpack.apm.onboardingIndices': string;
   'xpack.apm.spanIndices': string;
   'xpack.apm.transactionIndices': string;
   'xpack.apm.metricsIndices': string;
-
-  /* eslint-enable @typescript-eslint/naming-convention */
   apmAgentConfigurationIndex: string;
   apmCustomLinkIndex: string;
 }

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
 import { createStaticIndexPattern } from './create_static_index_pattern';
 import { Setup } from '../helpers/setup_request';
 import * as HistoricalAgentData from '../../routes/historical_data/has_historical_agent_data';

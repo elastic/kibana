@@ -13,14 +13,12 @@ import { APMConfig } from '../../..';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 const mockIndices = {
-  /* eslint-disable @typescript-eslint/naming-convention */
   'xpack.apm.sourcemapIndices': 'myIndex',
   'xpack.apm.errorIndices': 'myIndex',
   'xpack.apm.onboardingIndices': 'myIndex',
   'xpack.apm.spanIndices': 'myIndex',
   'xpack.apm.transactionIndices': 'myIndex',
   'xpack.apm.metricsIndices': 'myIndex',
-  /* eslint-enable @typescript-eslint/naming-convention */
   apmAgentConfigurationIndex: 'myIndex',
   apmCustomLinkIndex: 'myIndex',
 };

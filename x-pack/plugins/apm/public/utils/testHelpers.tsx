@@ -119,14 +119,12 @@ interface MockSetup {
   config: APMConfig;
   uiFilters: UxUIFilters;
   indices: {
-    /* eslint-disable @typescript-eslint/naming-convention */
     'xpack.apm.sourcemapIndices': string;
     'xpack.apm.errorIndices': string;
     'xpack.apm.onboardingIndices': string;
     'xpack.apm.spanIndices': string;
     'xpack.apm.transactionIndices': string;
     'xpack.apm.metricsIndices': string;
-    /* eslint-enable @typescript-eslint/naming-convention */
     apmAgentConfigurationIndex: string;
     apmCustomLinkIndex: string;
   };
@@ -178,14 +176,12 @@ export async function inspectSearchParams(
     ) as APMConfig,
     uiFilters: {},
     indices: {
-      /* eslint-disable @typescript-eslint/naming-convention */
       'xpack.apm.sourcemapIndices': 'myIndex',
       'xpack.apm.errorIndices': 'myIndex',
       'xpack.apm.onboardingIndices': 'myIndex',
       'xpack.apm.spanIndices': 'myIndex',
       'xpack.apm.transactionIndices': 'myIndex',
       'xpack.apm.metricsIndices': 'myIndex',
-      /* eslint-enable @typescript-eslint/naming-convention */
       apmAgentConfigurationIndex: 'myIndex',
       apmCustomLinkIndex: 'myIndex',
     },

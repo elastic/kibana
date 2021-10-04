@@ -9,10 +9,7 @@ import { registerDataHandler, getDataHandler } from './data_handler';
 import moment from 'moment';
 import { ApmIndicesConfig } from '../common/typings';
 
-const sampleAPMIndices = {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  'xpack.apm.transactionIndices': 'apm-*',
-} as ApmIndicesConfig;
+const sampleAPMIndices = { 'xpack.apm.transactionIndices': 'apm-*' } as ApmIndicesConfig;
 
 const params = {
   absoluteTime: {

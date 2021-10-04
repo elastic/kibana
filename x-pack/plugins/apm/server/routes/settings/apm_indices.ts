@@ -45,7 +45,6 @@ const saveApmIndicesRoute = createApmServerRoute({
   },
   params: t.type({
     body: t.partial({
-      /* eslint-disable @typescript-eslint/naming-convention */
       'xpack.apm.sourcemapIndices': t.string,
       'xpack.apm.errorIndices': t.string,
       'xpack.apm.onboardingIndices': t.string,

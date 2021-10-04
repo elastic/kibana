@@ -106,14 +106,12 @@ export type APMConfig = ReturnType<typeof mergeConfigs>;
 // plugin config and ui indices settings
 export function mergeConfigs(apmConfig: APMXPackConfig) {
   const mergedConfig = {
-    /* eslint-disable @typescript-eslint/naming-convention */
     'xpack.apm.transactionIndices': apmConfig.transactionIndices,
     'xpack.apm.spanIndices': apmConfig.spanIndices,
     'xpack.apm.errorIndices': apmConfig.errorIndices,
     'xpack.apm.metricsIndices': apmConfig.metricsIndices,
     'xpack.apm.sourcemapIndices': apmConfig.sourcemapIndices,
     'xpack.apm.onboardingIndices': apmConfig.onboardingIndices,
-    /* eslint-enable @typescript-eslint/naming-convention */
     'xpack.apm.serviceMapEnabled': apmConfig.serviceMapEnabled,
     'xpack.apm.serviceMapFingerprintBucketSize':
       apmConfig.serviceMapFingerprintBucketSize,

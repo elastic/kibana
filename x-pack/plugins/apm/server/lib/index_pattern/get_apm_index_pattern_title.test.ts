@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 import { getApmIndexPatternTitle } from './get_apm_index_pattern_title';
 

@@ -90,10 +90,7 @@ const clientSearchMock = (
 };
 
 const getApmIndicesMock = async () =>
-  ({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    'xpack.apm.transactionIndices': 'apm-*',
-  } as ApmIndicesConfig);
+  ({ 'xpack.apm.transactionIndices': 'apm-*' } as ApmIndicesConfig);
 
 describe('APM Correlations search strategy', () => {
   describe('strategy interface', () => {

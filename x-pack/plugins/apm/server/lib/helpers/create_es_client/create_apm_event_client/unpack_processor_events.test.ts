@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
 import { APMEventESSearchRequest } from '.';
 import { ApmIndicesConfig } from '../../../settings/apm_indices/get_apm_indices';
 import { unpackProcessorEvents } from './unpack_processor_events';
