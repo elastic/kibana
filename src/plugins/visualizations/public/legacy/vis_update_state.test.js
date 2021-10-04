@@ -145,7 +145,7 @@ describe('updateOldState', () => {
               id: 'ABC',
               metrics: [
                 {
-                  id: '0',
+                  id: null,
                 },
               ],
             },
@@ -169,7 +169,7 @@ describe('updateOldState', () => {
           id: 'ABC',
           metrics: [
             {
-              id: 'x0',
+              id: 'xnull',
             },
           ],
         },

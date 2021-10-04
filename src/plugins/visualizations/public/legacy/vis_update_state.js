@@ -139,7 +139,8 @@ function convertSeriesParams(visState) {
 /**
  * This function is responsible for updating old TSVB visStates.
  * Specifically, it identifies if the series and metrics ids are numbers
- * and convert them to string with an x prefix
+ * and convert them to string with an x prefix. Number ids are never been generated
+ * from the editor, only programmatically. See https://github.com/elastic/kibana/issues/113601.
  */
 function convertNumIdsToStringsForTSVB(visState) {
   if (visState.params.series) {
