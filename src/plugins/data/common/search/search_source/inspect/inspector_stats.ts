@@ -19,14 +19,7 @@ import type { ISearchSource } from 'src/plugins/data/public';
 import type { RequestStatistics } from 'src/plugins/inspector/common';
 
 /** @public */
-export function getRequestInspectorStats(searchSource: ISearchSource) {
-  const index = searchSource.getField('index');
-
-  return getRequestInspectorStatsFromIndex(index?.title, index?.id);
-}
-
-/** @public */
-export function getRequestInspectorStatsFromIndex(dataViewTitle?: string, dataViewId?: string) {
+export function getRequestInspectorStats(dataViewTitle?: string, dataViewId?: string) {
   const stats: RequestStatistics = {};
 
   if (dataViewTitle) {

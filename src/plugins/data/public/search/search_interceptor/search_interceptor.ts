@@ -7,22 +7,11 @@
  */
 
 import { memoize, once } from 'lodash';
-import {
-  BehaviorSubject,
-  EMPTY,
-  from,
-  fromEvent,
-  Observable,
-  of,
-  Subscription,
-  throwError,
-} from 'rxjs';
+import { BehaviorSubject, EMPTY, from, fromEvent, of, Subscription, throwError } from 'rxjs';
 import {
   catchError,
   filter,
   finalize,
-  first,
-  last,
   map,
   shareReplay,
   skip,
@@ -37,7 +26,6 @@ import { i18n } from '@kbn/i18n';
 import { BatchedFunc, BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
-  getResponseInspectorStats,
   IAsyncSearchOptions,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
@@ -63,7 +51,7 @@ import { ISessionService, SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
 import { createRequestHash } from './utils';
 import { SearchAbortController } from './search_abort_controller';
-import { getRequestInspectorStatsFromIndex } from '../../../common/search/search_source/inspect';
+import { inspectSearch } from '../../../common/search/search_source/inspect/inspect_search';
 
 export interface SearchInterceptorDeps {
   bfetch: BfetchPublicSetup;
@@ -314,7 +302,9 @@ export class SearchInterceptor {
       });
     }
 
-    this.inspectSearch(response$, request, options);
+    inspectSearch(response$, options, this.getSearchRequestBody(request), {
+      title: request.params.index,
+    });
 
     return {
       response$,
@@ -387,70 +377,6 @@ export class SearchInterceptor {
         );
       })
     );
-  }
-
-  /** ****
-   * PRIVATE APIS
-   ******/
-
-  private inspectSearch(
-    s$: Observable<IKibanaSearchResponse<any>>,
-    request: IKibanaSearchRequest,
-    options: ISearchOptions
-  ) {
-    const { id, title, description, adapter } = options.inspector || { title: '' };
-
-    const requestResponder = adapter?.start(title, {
-      id,
-      description,
-      searchSessionId: options.sessionId,
-    });
-
-    const trackRequestBody = () => {
-      try {
-        requestResponder?.json(this.getSearchRequestBody(request));
-      } catch (e) {} // eslint-disable-line no-empty
-    };
-
-    // Track request stats on first emit, swallow errors
-    const first$ = s$
-      .pipe(
-        first(undefined, null),
-        tap(() => {
-          requestResponder?.stats(getRequestInspectorStatsFromIndex(request.params.index));
-          trackRequestBody();
-        }),
-        catchError(() => {
-          trackRequestBody();
-          return EMPTY;
-        }),
-        finalize(() => {
-          first$.unsubscribe();
-        })
-      )
-      .subscribe();
-
-    // Track response stats on last emit, as well as errors
-    const last$ = s$
-      .pipe(
-        catchError((e) => {
-          requestResponder?.error({ json: e });
-          return EMPTY;
-        }),
-        last(undefined, null),
-        tap((finalResponse) => {
-          if (finalResponse) {
-            requestResponder?.stats(getResponseInspectorStats(finalResponse.rawResponse));
-            requestResponder?.ok({ json: finalResponse });
-          }
-        }),
-        finalize(() => {
-          last$.unsubscribe();
-        })
-      )
-      .subscribe();
-
-    return s$;
   }
 
   private getSearchRequestBody(request: IKibanaSearchRequest) {

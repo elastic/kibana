@@ -60,17 +60,8 @@
 
 import { setWith } from '@elastic/safer-lodash-set';
 import { difference, isEqual, isFunction, isObject, keyBy, pick, uniqueId, uniqWith } from 'lodash';
-import {
-  catchError,
-  finalize,
-  first,
-  last,
-  map,
-  shareReplay,
-  switchMap,
-  tap,
-} from 'rxjs/operators';
-import { defer, EMPTY, from, Observable } from 'rxjs';
+import { map, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { defer, from, Observable } from 'rxjs';
 import { estypes } from '@elastic/elasticsearch';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import { normalizeSortRequest } from './normalize_sort_request';
@@ -90,7 +81,6 @@ import type {
   SearchSourceOptions,
 } from './types';
 import { FetchHandlers, getSearchParamsFromRequest, RequestFailure, SearchRequest } from './fetch';
-import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
 import {
   getEsQueryConfig,
@@ -101,6 +91,7 @@ import {
 } from '../../../common';
 import { getHighlightRequest } from '../../../../field_formats/common';
 import { extractReferences } from './extract_references';
+import { inspectSearch } from './inspect/inspect_search';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -297,7 +288,18 @@ export class SearchSource {
       shareReplay()
     );
 
-    return this.inspectSearch(s$, options);
+    const index = this.getField('index');
+
+    return inspectSearch(
+      s$,
+      options,
+      this.getSearchRequestBody(),
+      {
+        id: index?.id,
+        title: index?.title,
+      },
+      this
+    );
   }
 
   /**
@@ -342,62 +344,6 @@ export class SearchSource {
   /** ****
    * PRIVATE APIS
    ******/
-
-  private inspectSearch(s$: Observable<IKibanaSearchResponse<any>>, options: ISearchOptions) {
-    const { id, title, description, adapter } = options.inspector || { title: '' };
-
-    const requestResponder = adapter?.start(title, {
-      id,
-      description,
-      searchSessionId: options.sessionId,
-    });
-
-    const trackRequestBody = () => {
-      try {
-        requestResponder?.json(this.getSearchRequestBody());
-      } catch (e) {} // eslint-disable-line no-empty
-    };
-
-    // Track request stats on first emit, swallow errors
-    const first$ = s$
-      .pipe(
-        first(undefined, null),
-        tap(() => {
-          requestResponder?.stats(getRequestInspectorStats(this));
-          trackRequestBody();
-        }),
-        catchError(() => {
-          trackRequestBody();
-          return EMPTY;
-        }),
-        finalize(() => {
-          first$.unsubscribe();
-        })
-      )
-      .subscribe();
-
-    // Track response stats on last emit, as well as errors
-    const last$ = s$
-      .pipe(
-        catchError((e) => {
-          requestResponder?.error({ json: e });
-          return EMPTY;
-        }),
-        last(undefined, null),
-        tap((finalResponse) => {
-          if (finalResponse) {
-            requestResponder?.stats(getResponseInspectorStats(finalResponse.rawResponse, this));
-            requestResponder?.ok({ json: finalResponse });
-          }
-        }),
-        finalize(() => {
-          last$.unsubscribe();
-        })
-      )
-      .subscribe();
-
-    return s$;
-  }
 
   private hasPostFlightRequests() {
     const aggs = this.getField('aggs');
