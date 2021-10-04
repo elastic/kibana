@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { LogoutReason } from '../../common/types';
 import { SessionExpired } from './session_expired';
 
 describe('#logout', () => {
@@ -41,11 +42,21 @@ describe('#logout', () => {
 
   it(`redirects user to the logout URL with 'msg' and 'next' parameters`, async () => {
     const sessionExpired = new SessionExpired(LOGOUT_URL, TENANT);
-    sessionExpired.logout();
+    sessionExpired.logout(LogoutReason.SESSION_EXPIRED);
 
     const next = `&next=${encodeURIComponent(CURRENT_URL)}`;
     await expect(window.location.assign).toHaveBeenCalledWith(
       `${LOGOUT_URL}?msg=SESSION_EXPIRED${next}`
+    );
+  });
+
+  it(`redirects user to the logout URL with custom reason 'msg'`, async () => {
+    const sessionExpired = new SessionExpired(LOGOUT_URL, TENANT);
+    sessionExpired.logout(LogoutReason.AUTHENTICATION_ERROR);
+
+    const next = `&next=${encodeURIComponent(CURRENT_URL)}`;
+    await expect(window.location.assign).toHaveBeenCalledWith(
+      `${LOGOUT_URL}?msg=AUTHENTICATION_ERROR${next}`
     );
   });
 
@@ -54,7 +65,7 @@ describe('#logout', () => {
     mockGetItem.mockReturnValueOnce(providerName);
 
     const sessionExpired = new SessionExpired(LOGOUT_URL, TENANT);
-    sessionExpired.logout();
+    sessionExpired.logout(LogoutReason.SESSION_EXPIRED);
 
     expect(mockGetItem).toHaveBeenCalledTimes(1);
     expect(mockGetItem).toHaveBeenCalledWith(`${TENANT}/session_provider`);

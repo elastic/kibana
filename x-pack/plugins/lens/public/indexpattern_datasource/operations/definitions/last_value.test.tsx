@@ -343,7 +343,7 @@ describe('last_value', () => {
       'data'
     );
     expect(disabledStatus).toEqual(
-      'This function requires the presence of a date field in your index'
+      'This function requires the presence of a date field in your data view'
     );
   });
 
