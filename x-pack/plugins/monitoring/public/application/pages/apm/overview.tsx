@@ -14,6 +14,7 @@ import { GlobalStateContext } from '../../global_state_context';
 import { useCharts } from '../../hooks/use_charts';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+// @ts-ignore
 import { ApmOverview } from '../../../components/apm/overview';
 
 export const ApmOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
