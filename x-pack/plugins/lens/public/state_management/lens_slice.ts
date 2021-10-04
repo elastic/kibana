@@ -99,6 +99,11 @@ export const updateLayer = createAction<{
   updater: (state: unknown, layerId: string) => unknown;
 }>('lens/updateLayer');
 
+export const insertLayer = createAction<{
+  layerId: string;
+  datasourceId: string;
+}>('lens/insertLayer');
+
 export const switchVisualization = createAction<{
   suggestion: {
     newVisualizationId: string;
@@ -145,6 +150,7 @@ export const lensActions = {
   updateState,
   updateDatasourceState,
   updateVisualizationState,
+  insertLayer,
   updateLayer,
   switchVisualization,
   rollbackSuggestion,
@@ -466,6 +472,32 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         visualization: {
           ...state.visualization,
           state: activeVisualization.onEditAction!(state.visualization.state, payload.event),
+        },
+      };
+    },
+    [insertLayer.type]: (
+      state,
+      {
+        payload,
+      }: {
+        payload: {
+          layerId: string;
+          datasourceId: string;
+        };
+      }
+    ) => {
+      const updater = datasourceMap[payload.datasourceId].insertLayer;
+      return {
+        ...state,
+        datasourceStates: {
+          ...state.datasourceStates,
+          [payload.datasourceId]: {
+            ...state.datasourceStates[payload.datasourceId],
+            state: updater(
+              current(state).datasourceStates[payload.datasourceId].state,
+              payload.layerId
+            ),
+          },
         },
       };
     },

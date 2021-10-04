@@ -31,6 +31,7 @@ import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_he
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public';
 import {
+  insertLayer,
   updateLayer,
   updateVisualizationState,
   useLensDispatch,
@@ -231,13 +232,11 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
     function addNewLayer() {
       const newLayerId = generateId();
       dispatchLens(
-        updateLayer({
+        insertLayer({
           datasourceId: activeDatasourceId!,
           layerId: newLayerId,
-          updater: props.datasourceMap[activeDatasourceId!].insertLayer,
         })
       );
-
       return newLayerId;
     }
 
