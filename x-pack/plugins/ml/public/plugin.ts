@@ -36,13 +36,14 @@ import { isFullLicense, isMlEnabled } from '../common/license';
 import { setDependencyCache } from './application/util/dependency_cache';
 import { registerFeature } from './register_feature';
 import { MlLocatorDefinition, MlLocator } from './locator';
-import type { MapsStartApi } from '../../maps/public';
+import type { MapsStartApi, MapsSetupApi } from '../../maps/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
 import type { DataVisualizerPluginStart } from '../../data_visualizer/public';
 import type { PluginSetupContract as AlertingSetup } from '../../alerting/public';
+import { registerWithMaps } from './maps/register_with_maps';
 import { registerManagementSection } from './application/management';
 import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import type {
@@ -64,6 +65,7 @@ export interface MlStartDependencies {
 
 export interface MlSetupDependencies {
   security?: SecurityPluginSetup;
+  maps?: MapsSetupApi;
   licensing: LicensingPluginSetup;
   management?: ManagementSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
@@ -113,6 +115,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             licenseManagement: pluginsSetup.licenseManagement,
             home: pluginsSetup.home,
             embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
+            // @ts-ignore
             maps: pluginsStart.maps,
             uiActions: pluginsStart.uiActions,
             kibanaVersion,
@@ -125,6 +128,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         );
       },
     });
+
+    if (pluginsSetup.maps) {
+      registerWithMaps(pluginsSetup.maps);
+    }
 
     if (pluginsSetup.share) {
       this.locator = pluginsSetup.share.url.locators.create(new MlLocatorDefinition());
