@@ -76,10 +76,5 @@ export const LICENSE_OVERRIDES = {
   '@mapbox/jsonlint-lines-primitives@2.0.2': ['MIT'], // license in readme https://github.com/tmcw/jsonlint
   '@elastic/ems-client@7.15.0': ['Elastic License 2.0'],
   '@elastic/eui@38.0.1': ['SSPL-1.0 OR Elastic License 2.0'],
-
-  // TODO can be removed if the https://github.com/jindw/xmldom/issues/239 is released
-  'xmldom@0.1.27': ['MIT'],
-
-  // TODO can be removed once we upgrade the use of walk dependency past or equal to v2.3.14
-  'walk@2.3.9': ['MIT'],
+  'language-subtag-registry@0.3.21': ['CC-BY-4.0'], // retired ODC‑By license https://github.com/mattcg/language-subtag-registry
 };
