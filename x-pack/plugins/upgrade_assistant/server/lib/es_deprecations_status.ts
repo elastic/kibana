@@ -16,7 +16,7 @@ import { EnrichedDeprecationInfo, ESUpgradeStatus } from '../../common/types';
 import { esIndicesStateCheck } from './es_indices_state_check';
 import {
   getESSystemIndicesUpgradeStatus,
-  convertFeaturesListToArray,
+  convertFeaturesListToIndexArray,
 } from '../lib/es_system_indices_upgrade';
 
 export async function getESUpgradeStatus(
@@ -27,7 +27,7 @@ export async function getESUpgradeStatus(
   const getCombinedDeprecations = async () => {
     const indices = await getCombinedIndexInfos(deprecations, dataClient);
     const systemIndices = await getESSystemIndicesUpgradeStatus(dataClient.asCurrentUser);
-    const systemIndicesList = convertFeaturesListToArray(systemIndices.features);
+    const systemIndicesList = convertFeaturesListToIndexArray(systemIndices.features);
 
     return Object.keys(deprecations).reduce((combinedDeprecations, deprecationType) => {
       if (deprecationType === 'index_settings') {

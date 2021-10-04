@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { convertFeaturesListToArray } from './es_system_indices_upgrade';
+import { convertFeaturesListToIndexArray } from './es_system_indices_upgrade';
 import { SystemIndicesUpgradeStatus } from '../../common/types';
 
 const esUpgradeSystemIndicesStatusMock: SystemIndicesUpgradeStatus = {
@@ -40,14 +40,14 @@ const esUpgradeSystemIndicesStatusMock: SystemIndicesUpgradeStatus = {
   upgrade_status: 'UPGRADE_NEEDED',
 };
 
-describe('convertFeaturesListToArray', () => {
+describe('convertFeaturesListToIndexArray', () => {
   it('converts list with features to flat array of uniq indices', async () => {
-    const result = convertFeaturesListToArray(esUpgradeSystemIndicesStatusMock.features);
+    const result = convertFeaturesListToIndexArray(esUpgradeSystemIndicesStatusMock.features);
     expect(result).toEqual(['.ml-config', '.ml-notifications']);
   });
 
   it('returns empty array if no features are passed to it', async () => {
-    const result = convertFeaturesListToArray([]);
+    const result = convertFeaturesListToIndexArray([]);
     expect(result).toEqual([]);
   });
 });

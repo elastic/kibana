@@ -9,7 +9,9 @@ import { flow, flatMap, map, flatten, uniq } from 'lodash/fp';
 import { ElasticsearchClient } from 'src/core/server';
 import { SystemIndicesUpgradeStatus, SystemIndicesUpgradeFeature } from '../../common/types';
 
-export const convertFeaturesListToArray = (features: SystemIndicesUpgradeFeature[]): string[] => {
+export const convertFeaturesListToIndexArray = (
+  features: SystemIndicesUpgradeFeature[]
+): string[] => {
   return flow(
     // Map each feature into Indices[]
     map('indices'),
