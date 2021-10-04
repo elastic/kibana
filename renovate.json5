@@ -86,10 +86,9 @@
       {
         groupName: 'platform security modules',
         packageNames: [
-          'broadcast-channel', 
-          'jsonwebtoken', '@types/jsonwebtoken', 
-          'node-forge', '@types/node-forge', 
-          'require-in-the-middle', 
+          'broadcast-channel',
+          'node-forge', '@types/node-forge',
+          'require-in-the-middle',
           'tough-cookie', '@types/tough-cookie',
           'xml-crypto', '@types/xml-crypto'
         ],
