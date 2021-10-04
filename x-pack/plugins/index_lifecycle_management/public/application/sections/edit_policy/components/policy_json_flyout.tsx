@@ -29,6 +29,7 @@ import { useFormContext, useFormData } from '../../../../shared_imports';
 import { i18nTexts } from '../i18n_texts';
 import { FormInternal } from '../types';
 
+type PolicyJson = Omit<SerializedPolicy, 'name'>;
 interface Props {
   close: () => void;
   policyName: string;
@@ -37,48 +38,50 @@ interface Props {
 /**
  * Ensure that the JSON we get from the from has phases in the correct order.
  */
-const prettifyFormJson = (policy: SerializedPolicy): SerializedPolicy => ({
-  ...policy,
-  phases: {
-    hot: policy.phases.hot,
-    warm: policy.phases.warm,
-    cold: policy.phases.cold,
-    frozen: policy.phases.frozen,
-    delete: policy.phases.delete,
-  },
-});
+const prettifyFormJson = (policy: SerializedPolicy): PolicyJson => {
+  return {
+    phases: {
+      hot: policy.phases.hot,
+      warm: policy.phases.warm,
+      cold: policy.phases.cold,
+      frozen: policy.phases.frozen,
+      delete: policy.phases.delete,
+    },
+    _meta: policy._meta,
+  };
+};
 
 export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, close }) => {
   /**
    * policy === undefined: we are checking validity
    * policy === null: we have determined the policy is invalid
-   * policy === {@link SerializedPolicy} we have determined the policy is valid
+   * policy === {@link PolicyJson} we have determined the policy is valid
    */
-  const [policy, setPolicy] = useState<undefined | null | SerializedPolicy>(undefined);
+  const [policyJson, setPolicyJson] = useState<undefined | null | PolicyJson>(undefined);
 
   const { validate: validateForm, getErrors } = useFormContext();
   const [, getFormData] = useFormData<FormInternal>();
 
   const updatePolicy = useCallback(async () => {
-    setPolicy(undefined);
+    setPolicyJson(undefined);
     const isFormValid = await validateForm();
     const errorMessages = getErrors();
     const isOnlyMissingPolicyName =
       errorMessages.length === 1 &&
       errorMessages[0] === i18nTexts.editPolicy.errors.policyNameRequiredMessage;
     if (isFormValid || isOnlyMissingPolicyName) {
-      setPolicy(prettifyFormJson(getFormData()));
+      setPolicyJson(prettifyFormJson(getFormData()));
     } else {
-      setPolicy(null);
+      setPolicyJson(null);
     }
-  }, [setPolicy, getFormData, validateForm, getErrors]);
+  }, [setPolicyJson, getFormData, validateForm, getErrors]);
 
   useEffect(() => {
     updatePolicy();
   }, [updatePolicy]);
 
   let content: React.ReactNode;
-  switch (policy) {
+  switch (policyJson) {
     case undefined:
       content = <EuiLoadingSpinner />;
       break;
@@ -100,12 +103,10 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, c
       );
       break;
     default:
-      const { phases } = policy;
-
       const json = JSON.stringify(
         {
           policy: {
-            phases,
+            ...policyJson,
           },
         },
         null,

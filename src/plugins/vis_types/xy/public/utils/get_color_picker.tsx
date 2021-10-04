@@ -28,69 +28,65 @@ function getAnchorPosition(legendPosition: Position): PopoverAnchorPosition {
 
 const KEY_CODE_ENTER = 13;
 
-export const getColorPicker = (
-  legendPosition: Position,
-  setColor: (newColor: string | null, seriesKey: string | number) => void,
-  getSeriesName: (series: XYChartSeriesIdentifier) => SeriesName,
-  paletteName: string,
-  uiState: PersistedState
-): LegendColorPicker => ({
-  anchor,
-  color,
-  onClose,
-  onChange,
-  seriesIdentifiers: [seriesIdentifier],
-}) => {
-  const seriesName = getSeriesName(seriesIdentifier as XYChartSeriesIdentifier);
-  const overwriteColors: Record<string, string> = uiState?.get('vis.colors', {});
-  const colorIsOverwritten = Object.keys(overwriteColors).includes(seriesName as string);
-  let keyDownEventOn = false;
+export const getColorPicker =
+  (
+    legendPosition: Position,
+    setColor: (newColor: string | null, seriesKey: string | number) => void,
+    getSeriesName: (series: XYChartSeriesIdentifier) => SeriesName,
+    paletteName: string,
+    uiState: PersistedState
+  ): LegendColorPicker =>
+  ({ anchor, color, onClose, onChange, seriesIdentifiers: [seriesIdentifier] }) => {
+    const seriesName = getSeriesName(seriesIdentifier as XYChartSeriesIdentifier);
+    const overwriteColors: Record<string, string> = uiState?.get('vis.colors', {});
+    const colorIsOverwritten = Object.keys(overwriteColors).includes(seriesName as string);
+    let keyDownEventOn = false;
 
-  const handleChange = (newColor: string | null) => {
-    if (!seriesName) {
-      return;
-    }
-    if (newColor) {
-      onChange(newColor);
-    }
-    setColor(newColor, seriesName);
-    // close the popover if no color is applied or the user has clicked a color
-    if (!newColor || !keyDownEventOn) {
-      onClose();
-    }
-  };
+    const handleChange = (newColor: string | null) => {
+      if (!seriesName) {
+        return;
+      }
+      if (newColor) {
+        onChange(newColor);
+      }
+      setColor(newColor, seriesName);
+      // close the popover if no color is applied or the user has clicked a color
+      if (!newColor || !keyDownEventOn) {
+        onClose();
+      }
+    };
 
-  const onKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
-    if (e.keyCode === KEY_CODE_ENTER) {
+    const onKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+      if (e.keyCode === KEY_CODE_ENTER) {
+        onClose?.();
+      }
+      keyDownEventOn = true;
+    };
+
+    const handleOutsideClick = useCallback(() => {
       onClose?.();
-    }
-    keyDownEventOn = true;
+    }, [onClose]);
+
+    return (
+      <EuiOutsideClickDetector onOutsideClick={handleOutsideClick}>
+        <EuiWrappingPopover
+          isOpen
+          ownFocus
+          display="block"
+          button={anchor}
+          anchorPosition={getAnchorPosition(legendPosition)}
+          closePopover={onClose}
+          panelPaddingSize="s"
+        >
+          <ColorPicker
+            color={paletteName === 'kibana_palette' ? color : color.toLowerCase()}
+            onChange={handleChange}
+            label={seriesName}
+            useLegacyColors={paletteName === 'kibana_palette'}
+            colorIsOverwritten={colorIsOverwritten}
+            onKeyDown={onKeyDown}
+          />
+        </EuiWrappingPopover>
+      </EuiOutsideClickDetector>
+    );
   };
-
-  const handleOutsideClick = useCallback(() => {
-    onClose?.();
-  }, [onClose]);
-
-  return (
-    <EuiOutsideClickDetector onOutsideClick={handleOutsideClick}>
-      <EuiWrappingPopover
-        isOpen
-        ownFocus
-        display="block"
-        button={anchor}
-        anchorPosition={getAnchorPosition(legendPosition)}
-        closePopover={onClose}
-        panelPaddingSize="s"
-      >
-        <ColorPicker
-          color={paletteName === 'kibana_palette' ? color : color.toLowerCase()}
-          onChange={handleChange}
-          label={seriesName}
-          useLegacyColors={paletteName === 'kibana_palette'}
-          colorIsOverwritten={colorIsOverwritten}
-          onKeyDown={onKeyDown}
-        />
-      </EuiWrappingPopover>
-    </EuiOutsideClickDetector>
-  );
-};

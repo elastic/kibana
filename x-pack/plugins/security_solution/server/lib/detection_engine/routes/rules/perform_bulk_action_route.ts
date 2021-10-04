@@ -19,15 +19,14 @@ import { duplicateRule } from '../../rules/duplicate_rule';
 import { enableRule } from '../../rules/enable_rule';
 import { findRules } from '../../rules/find_rules';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
-import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
 import { buildSiemResponse } from '../utils';
 
 const BULK_ACTION_RULES_LIMIT = 10000;
 
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  isRuleRegistryEnabled: boolean
 ) => {
   router.post(
     {
@@ -60,6 +59,7 @@ export const performBulkActionRoute = (
         }
 
         const rules = await findRules({
+          isRuleRegistryEnabled,
           rulesClient,
           perPage: BULK_ACTION_RULES_LIMIT,
           filter: body.query !== '' ? body.query : undefined,
@@ -112,7 +112,6 @@ export const performBulkActionRoute = (
                 });
                 await deleteRules({
                   rulesClient,
-                  savedObjectsClient,
                   ruleStatusClient,
                   ruleStatuses,
                   id: rule.id,
@@ -125,23 +124,8 @@ export const performBulkActionRoute = (
               rules.data.map(async (rule) => {
                 throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
-                const createdRule = await rulesClient.create({
+                await rulesClient.create({
                   data: duplicateRule(rule),
-                });
-
-                const ruleActions = await getRuleActionsSavedObject({
-                  savedObjectsClient,
-                  ruleAlertId: rule.id,
-                });
-
-                await updateRulesNotifications({
-                  ruleAlertId: createdRule.id,
-                  rulesClient,
-                  savedObjectsClient,
-                  enabled: createdRule.enabled,
-                  actions: ruleActions?.actions || [],
-                  throttle: ruleActions?.alertThrottle,
-                  name: createdRule.name,
                 });
               })
             );
@@ -149,7 +133,8 @@ export const performBulkActionRoute = (
           case BulkAction.export:
             const exported = await getExportByObjectIds(
               rulesClient,
-              rules.data.map(({ params }) => ({ rule_id: params.ruleId }))
+              rules.data.map(({ params }) => ({ rule_id: params.ruleId })),
+              isRuleRegistryEnabled
             );
 
             const responseBody = `${exported.rulesNdjson}${exported.exportDetails}`;

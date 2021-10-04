@@ -24,4 +24,5 @@ export const phraseFilter: PhraseFilter = {
   $state: {
     store: FilterStateStore.APP_STATE,
   },
+  query: {},
 };

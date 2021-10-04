@@ -17,19 +17,21 @@ jest.mock('../../containers/sourcerer', () => ({
 }));
 
 describe('useHoverActionItems', () => {
-  const defaultProps: UseHoverActionItemsProps = ({
+  const defaultProps: UseHoverActionItemsProps = {
     dataProvider: [{} as DataProvider],
     defaultFocusedButtonRef: null,
     field: 'signal.rule.name',
     handleHoverActionClicked: jest.fn(),
-    isObjectArray: true,
+    hideTopN: false,
+    isCaseView: false,
+    isObjectArray: false,
     ownFocus: false,
     showTopN: false,
     stKeyboardEvent: undefined,
     toggleColumn: jest.fn(),
     toggleTopN: jest.fn(),
     values: ['rule name'],
-  } as unknown) as UseHoverActionItemsProps;
+  } as unknown as UseHoverActionItemsProps;
 
   beforeEach(() => {
     (useDeepEqualSelector as jest.Mock).mockImplementation((cb) => {
@@ -109,6 +111,166 @@ describe('useHoverActionItems', () => {
       );
       expect(result.current.overflowActionItems[2].props.items[3].props['data-test-subj']).toEqual(
         'hover-actions-copy-button'
+      );
+    });
+  });
+
+  test('it should hide the Top N action when hideTopN is true', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const testProps = {
+          ...defaultProps,
+          hideTopN: true, // <-- hide the Top N action
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+
+      result.current.allActionItems.forEach((item) => {
+        expect(item.props['data-test-subj']).not.toEqual('hover-actions-show-top-n');
+      });
+    });
+  });
+
+  test('should not have toggle column', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const defaultFocusedButtonRef = useRef(null);
+        const testProps = {
+          ...defaultProps,
+          isObjectArray: true,
+          defaultFocusedButtonRef,
+          enableOverflowButton: true,
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+
+      expect(result.current.overflowActionItems).toHaveLength(3);
+      expect(result.current.overflowActionItems[0].props['data-test-subj']).toEqual(
+        'hover-actions-filter-for'
+      );
+      expect(result.current.overflowActionItems[1].props['data-test-subj']).toEqual(
+        'hover-actions-filter-out'
+      );
+
+      result.current.overflowActionItems[2].props.items.forEach((item: JSX.Element) => {
+        expect(item.props['data-test-subj']).not.toEqual('hover-actions-toggle-column');
+      });
+    });
+  });
+
+  test('should not have filter in, filter out, or toggle column', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const testProps = {
+          ...defaultProps,
+          isCaseView: true,
+          enableOverflowButton: false,
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+
+      expect(result.current.allActionItems).toHaveLength(3);
+      expect(result.current.allActionItems[0].props['data-test-subj']).toEqual(
+        'hover-actions-add-timeline'
+      );
+      expect(result.current.allActionItems[1].props['data-test-subj']).toEqual(
+        'hover-actions-show-top-n'
+      );
+      expect(result.current.allActionItems[2].props['data-test-subj']).toEqual(
+        'hover-actions-copy-button'
+      );
+    });
+  });
+
+  test('if not on CaseView, overflow button is enabled, ShowTopNButton should disable popOver (e.g.: alerts flyout)', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const testProps = {
+          ...defaultProps,
+          enableOverflowButton: true,
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+      expect(result.current.allActionItems[4].props.enablePopOver).toEqual(false);
+    });
+  });
+
+  test('if not on CaseView, overflow button is disabled, ShowTopNButton should disable popOver (e.g.: alerts table - reason field)', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const testProps = {
+          ...defaultProps,
+          enableOverflowButton: false,
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+      expect(result.current.allActionItems[4].props.enablePopOver).toEqual(false);
+    });
+  });
+
+  test('if on CaseView, ShowTopNButton should enable popOver', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const testProps = {
+          ...defaultProps,
+          isCaseView: true,
+          enableOverflowButton: false,
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+
+      expect(result.current.allActionItems[1].props.enablePopOver).toEqual(true);
+    });
+  });
+
+  test('if on CaseView, it should show all items when shoTopN is true', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const testProps = {
+          ...defaultProps,
+          showTopN: true,
+          isCaseView: true,
+          enableOverflowButton: false,
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+
+      expect(result.current.allActionItems).toHaveLength(3);
+      expect(result.current.allActionItems[0].props['data-test-subj']).toEqual(
+        'hover-actions-add-timeline'
+      );
+      expect(result.current.allActionItems[1].props['data-test-subj']).toEqual(
+        'hover-actions-show-top-n'
+      );
+      expect(result.current.allActionItems[2].props['data-test-subj']).toEqual(
+        'hover-actions-copy-button'
+      );
+    });
+  });
+
+  test('when disable OverflowButton, it should show only "showTopNBtn" when shoTopN is true', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const testProps = {
+          ...defaultProps,
+          showTopN: true,
+          isCaseView: false,
+          enableOverflowButton: false,
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+
+      expect(result.current.allActionItems).toHaveLength(1);
+      expect(result.current.allActionItems[0].props['data-test-subj']).toEqual(
+        'hover-actions-show-top-n'
       );
     });
   });

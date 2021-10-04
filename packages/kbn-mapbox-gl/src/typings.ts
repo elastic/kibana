@@ -7,4 +7,4 @@
  */
 
 // Mapbox-gl doesn't declare this type.
-declare module 'mapbox-gl/dist/mapbox-gl-csp';
+declare module 'maplibre-gl/dist/maplibre-gl-csp';

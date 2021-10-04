@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { Serializable } from '@kbn/utility-types';
 import { Filter, FILTERS } from './types';
 
-import { buildPhraseFilter } from './phrase_filter';
+import { buildPhraseFilter, PhraseFilterValue } from './phrase_filter';
 import { buildPhrasesFilter } from './phrases_filter';
-import { buildRangeFilter } from './range_filter';
+import { buildRangeFilter, RangeFilterParams } from './range_filter';
 import { buildExistsFilter } from './exists_filter';
 
 import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
@@ -36,7 +37,7 @@ export function buildFilter(
   type: FILTERS,
   negate: boolean,
   disabled: boolean,
-  params: any,
+  params: Serializable,
   alias: string | null,
   store?: FilterStateStore
 ): Filter {
@@ -54,18 +55,18 @@ function buildBaseFilter(
   indexPattern: IndexPatternBase,
   field: IndexPatternFieldBase,
   type: FILTERS,
-  params: any
+  params: Serializable
 ): Filter {
   switch (type) {
     case 'phrase':
-      return buildPhraseFilter(field, params, indexPattern);
+      return buildPhraseFilter(field, params as PhraseFilterValue, indexPattern);
     case 'phrases':
-      return buildPhrasesFilter(field, params, indexPattern);
+      return buildPhrasesFilter(field, params as PhraseFilterValue[], indexPattern);
     case 'range':
-      const newParams = { gte: params.from, lt: params.to };
-      return buildRangeFilter(field, newParams, indexPattern);
+      const { from: gte, to: lt } = params as RangeFilterParams;
+      return buildRangeFilter(field, { lt, gte }, indexPattern);
     case 'range_from_value':
-      return buildRangeFilter(field, params, indexPattern);
+      return buildRangeFilter(field, params as RangeFilterParams, indexPattern);
     case 'exists':
       return buildExistsFilter(field, indexPattern);
     default:

@@ -24,6 +24,9 @@ function createManifest(
     requiredPlugins: required,
     optionalPlugins: optional,
     requiredBundles: [],
+    owner: {
+      name: 'foo',
+    },
   } as DiscoveredPlugin;
 }
 

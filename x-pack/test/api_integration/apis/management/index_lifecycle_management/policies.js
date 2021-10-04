@@ -119,6 +119,38 @@ export default function ({ getService }) {
       });
     });
 
+    describe('edit', () => {
+      it('keeps _meta field intact', async () => {
+        const policyName = 'edit-meta-test-policy';
+        const policy = {
+          ...getPolicyPayload(policyName),
+          _meta: { description: 'test policy with _meta field' },
+        };
+
+        // Update the policy (uses the same route as create)
+        await createPolicy(policy).expect(200);
+
+        // only update warm phase timing, not deleting or changing _meta field
+        const editedPolicy = {
+          ...policy,
+          phases: {
+            ...policy.phases,
+            warm: {
+              ...policy.phases.warm,
+              min_age: '2d',
+            },
+          },
+        };
+
+        await createPolicy(editedPolicy).expect(200);
+
+        const { body } = await loadPolicies();
+        const loadedPolicy = body.find((p) => p.name === policyName);
+        // Make sure the edited policy still has _meta field
+        expect(loadedPolicy.policy._meta).to.eql(editedPolicy._meta);
+      });
+    });
+
     describe('delete', () => {
       it('should delete the policy created', async () => {
         const policy = getPolicyPayload('delete-test-policy');

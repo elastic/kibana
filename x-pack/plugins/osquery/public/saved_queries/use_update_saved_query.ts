@@ -12,7 +12,7 @@ import { useKibana } from '../common/lib/kibana';
 import { savedQuerySavedObjectType } from '../../common/types';
 import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
-import { SAVED_QUERIES_ID } from './constants';
+import { SAVED_QUERIES_ID, SAVED_QUERY_ID } from './constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
 interface UseUpdateSavedQueryProps {
@@ -74,6 +74,7 @@ export const useUpdateSavedQuery = ({ savedQueryId }: UseUpdateSavedQueryProps) 
       },
       onSuccess: (payload) => {
         queryClient.invalidateQueries(SAVED_QUERIES_ID);
+        queryClient.invalidateQueries([SAVED_QUERY_ID, { savedQueryId }]);
         navigateToApp(PLUGIN_ID, { path: pagePathGetters.saved_queries() });
         toasts.addSuccess(
           i18n.translate('xpack.osquery.editSavedQuery.successToastMessageText', {

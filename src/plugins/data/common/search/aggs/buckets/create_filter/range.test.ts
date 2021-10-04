@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { RangeFilter } from '@kbn/es-query';
 import { BytesFormat, FieldFormatsGetConfigFn } from '../../../../../../field_formats/common';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry, mockGetFieldFormatsStart } from '../../test_helpers';
@@ -59,7 +60,7 @@ describe('AggConfig Filters', () => {
           lt: 2048.0,
           label: 'A custom label',
         }
-      );
+      ) as RangeFilter;
 
       expect(mockGetFieldFormatsStart().deserialize).toHaveBeenCalledTimes(1);
       expect(filter).toHaveProperty('range');

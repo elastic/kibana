@@ -217,8 +217,9 @@ export class CommonPageObject extends FtrService {
     {
       basePath = '',
       shouldLoginIfPrompted = true,
-      disableWelcomePrompt = true,
       hash = '',
+      search = '',
+      disableWelcomePrompt = true,
       insertTimestamp = true,
     } = {}
   ) {
@@ -229,11 +230,13 @@ export class CommonPageObject extends FtrService {
       appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
         pathname: `${basePath}${appConfig.pathname}`,
         hash: hash || appConfig.hash,
+        search,
       });
     } else {
       appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
         pathname: `${basePath}/app/${appName}`,
         hash,
+        search,
       });
     }
 
@@ -487,7 +490,10 @@ export class CommonPageObject extends FtrService {
     topOffset?: number
   ) {
     await this.testSubjects.click(clickTarget, undefined, topOffset);
-    const validate = isValidatorCssString ? this.find.byCssSelector : this.testSubjects.exists;
-    await validate(validator);
+    if (isValidatorCssString) {
+      await this.find.byCssSelector(validator);
+    } else {
+      await this.testSubjects.exists(validator);
+    }
   }
 }

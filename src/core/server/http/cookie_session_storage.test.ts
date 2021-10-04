@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import request from 'request';
+import { parse as parseCookie } from 'tough-cookie';
 import supertest from 'supertest';
 import { REPO_ROOT } from '@kbn/dev-utils';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -103,7 +103,7 @@ interface Storage {
 }
 
 function retrieveSessionCookie(cookies: string) {
-  const sessionCookie = request.cookie(cookies);
+  const sessionCookie = parseCookie(cookies);
   if (!sessionCookie) {
     throw new Error('session cookie expected to be defined');
   }

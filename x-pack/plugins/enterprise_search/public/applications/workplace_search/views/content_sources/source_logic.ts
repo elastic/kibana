@@ -19,7 +19,7 @@ import {
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { AppLogic } from '../../app_logic';
-import { PERSONAL_SOURCES_PATH, SOURCES_PATH, getSourcesPath } from '../../routes';
+import { PRIVATE_SOURCES_PATH, SOURCES_PATH, getSourcesPath } from '../../routes';
 import { ContentSourceFullData, Meta, DocumentSummaryItem, SourceContentItem } from '../../types';
 
 export interface SourceActions {
@@ -153,8 +153,8 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     initializeSource: async ({ sourceId }) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}`
-        : `/api/workplace_search/account/sources/${sourceId}`;
+        ? `/internal/workplace_search/org/sources/${sourceId}`
+        : `/internal/workplace_search/account/sources/${sourceId}`;
 
       try {
         const response = await HttpLogic.values.http.get(route);
@@ -169,7 +169,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         }
       } catch (e) {
         if (e?.response?.status === 404) {
-          const redirect = isOrganization ? SOURCES_PATH : PERSONAL_SOURCES_PATH;
+          const redirect = isOrganization ? SOURCES_PATH : PRIVATE_SOURCES_PATH;
           KibanaLogic.values.navigateToUrl(redirect);
           setErrorMessage(
             i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.notFoundErrorMessage', {
@@ -182,7 +182,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       }
     },
     initializeFederatedSummary: async ({ sourceId }) => {
-      const route = `/api/workplace_search/account/sources/${sourceId}/federated_summary`;
+      const route = `/internal/workplace_search/account/sources/${sourceId}/federated_summary`;
       try {
         const response = await HttpLogic.values.http.get(route);
         actions.onUpdateSummary(response.summary);
@@ -195,8 +195,8 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
 
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}/documents`
-        : `/api/workplace_search/account/sources/${sourceId}/documents`;
+        ? `/internal/workplace_search/org/sources/${sourceId}/documents`
+        : `/internal/workplace_search/account/sources/${sourceId}/documents`;
 
       const {
         contentFilterValue: query,
@@ -215,8 +215,8 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     updateContentSource: async ({ sourceId, source }) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}/settings`
-        : `/api/workplace_search/account/sources/${sourceId}/settings`;
+        ? `/internal/workplace_search/org/sources/${sourceId}/settings`
+        : `/internal/workplace_search/account/sources/${sourceId}/settings`;
 
       try {
         const response = await HttpLogic.values.http.patch(route, {
@@ -233,8 +233,8 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       clearFlashMessages();
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}`
-        : `/api/workplace_search/account/sources/${sourceId}`;
+        ? `/internal/workplace_search/org/sources/${sourceId}`
+        : `/internal/workplace_search/account/sources/${sourceId}`;
 
       try {
         const response = await HttpLogic.values.http.delete(route);

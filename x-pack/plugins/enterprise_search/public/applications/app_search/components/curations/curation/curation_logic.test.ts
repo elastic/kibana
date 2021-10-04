@@ -287,7 +287,7 @@ describe('CurationLogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/curations/cur-123456789',
+          '/internal/app_search/engines/some-engine/curations/cur-123456789',
           {
             query: { skip_record_analytics: 'true' },
           }
@@ -329,7 +329,7 @@ describe('CurationLogic', () => {
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/curations/cur-123456789',
+          '/internal/app_search/engines/some-engine/curations/cur-123456789',
           {
             body: '{"queries":["a","b","c"],"query":"b","promoted":["d","e","f"],"hidden":["g"]}', // Uses state currently in CurationLogic
           }

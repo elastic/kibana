@@ -7,7 +7,7 @@
  */
 
 import { getSwitchIndexPatternAppState } from './get_switch_index_pattern_app_state';
-import { IndexPattern } from '../../../../../../data/common/index_patterns';
+import { IndexPattern } from '../../../../../../data/common';
 
 /**
  * Helper function returning an index pattern

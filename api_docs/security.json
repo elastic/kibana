@@ -1644,10 +1644,6 @@
               "path": "x-pack/plugins/ml/server/routes/annotations.ts"
             },
             {
-              "plugin": "dashboardMode",
-              "path": "x-pack/plugins/dashboard_mode/server/interceptors/dashboard_mode_request_interceptor.ts"
-            },
-            {
               "plugin": "dataEnhanced",
               "path": "x-pack/plugins/data_enhanced/server/search/session/session_service.ts"
             },

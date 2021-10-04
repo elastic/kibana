@@ -45,6 +45,8 @@ export const REMOVED_TYPES: string[] = [
   'tsvb-validation-telemetry',
   // replaced by osquery-manager-usage-metric
   'osquery-usage-metric',
+  // Was removed in 7.16
+  'timelion-sheet',
 ].sort();
 
 // When migrating from the outdated index we use a read query which excludes

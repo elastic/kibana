@@ -1382,6 +1382,19 @@
           },
           {
             "parentPluginId": "fileUpload",
+            "id": "def-common.ImportFailure.caused_by",
+            "type": "Object",
+            "tags": [],
+            "label": "caused_by",
+            "description": [],
+            "signature": [
+              "{ type: string; reason: string; } | undefined"
+            ],
+            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fileUpload",
             "id": "def-common.ImportFailure.doc",
             "type": "CompoundType",
             "tags": [],

@@ -36,6 +36,8 @@ interface AggregationParams {
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
   maxNumServices: number;
+  start: number;
+  end: number;
 }
 
 export async function getServiceTransactionStats({
@@ -44,8 +46,10 @@ export async function getServiceTransactionStats({
   setup,
   searchAggregatedTransactions,
   maxNumServices,
+  start,
+  end,
 }: AggregationParams) {
-  const { apmEventClient, start, end } = setup;
+  const { apmEventClient } = setup;
 
   const outcomes = getOutcomeAggregation();
 

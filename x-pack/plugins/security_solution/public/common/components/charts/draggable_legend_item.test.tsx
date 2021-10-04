@@ -20,7 +20,6 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
@@ -53,5 +52,11 @@ describe('DraggableLegendItem', () => {
     expect(
       wrapper.find(`[data-test-subj="legend-item-${legendItem.dataProviderId}"]`).first().text()
     ).toEqual(legendItem.value);
+  });
+
+  it('always hides the Top N action for legend items', () => {
+    expect(
+      wrapper.find(`[data-test-subj="legend-item-${legendItem.dataProviderId}"]`).prop('hideTopN')
+    ).toEqual(true);
   });
 });

@@ -7,10 +7,12 @@
 
 import { ActionGroup } from '../../../alerting/common';
 
-export type MonitorStatusActionGroup = ActionGroup<'xpack.uptime.alerts.actionGroups.monitorStatus'>;
+export type MonitorStatusActionGroup =
+  ActionGroup<'xpack.uptime.alerts.actionGroups.monitorStatus'>;
 export type TLSLegacyActionGroup = ActionGroup<'xpack.uptime.alerts.actionGroups.tls'>;
 export type TLSActionGroup = ActionGroup<'xpack.uptime.alerts.actionGroups.tlsCertificate'>;
-export type DurationAnomalyActionGroup = ActionGroup<'xpack.uptime.alerts.actionGroups.durationAnomaly'>;
+export type DurationAnomalyActionGroup =
+  ActionGroup<'xpack.uptime.alerts.actionGroups.durationAnomaly'>;
 
 export const MONITOR_STATUS: MonitorStatusActionGroup = {
   id: 'xpack.uptime.alerts.actionGroups.monitorStatus',

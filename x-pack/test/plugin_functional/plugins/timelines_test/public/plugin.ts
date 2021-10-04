@@ -28,7 +28,8 @@ export class TimelinesTestPlugin
       void,
       TimelinesTestPluginSetupDependencies,
       TimelinesTestPluginStartDependencies
-    > {
+    >
+{
   private timelinesPlugin: TimelinesUIStart | null = null;
   public setup(
     core: CoreSetup<TimelinesTestPluginStartDependencies, TimelinesTestPluginStart>,

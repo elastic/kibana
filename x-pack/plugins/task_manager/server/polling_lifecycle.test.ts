@@ -64,6 +64,9 @@ describe('TaskPollingLifecycle', () => {
         enabled: true,
         request_capacity: 10,
       },
+      unsafe: {
+        exclude_task_types: [],
+      },
     },
     taskStore: mockTaskStore,
     logger: taskManagerLogger,

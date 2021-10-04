@@ -213,10 +213,8 @@ export class RemoteClustersFormField extends PureComponent {
 
   renderCurrentRemoteClusterNotConnected = (name, fatal) => {
     const { isEditable, currentUrl } = this.props;
-    const {
-      remoteClusterNotConnectedEditable,
-      remoteClusterNotConnectedNotEditable,
-    } = this.errorMessages;
+    const { remoteClusterNotConnectedEditable, remoteClusterNotConnectedNotEditable } =
+      this.errorMessages;
 
     const { title, description } = isEditable
       ? remoteClusterNotConnectedEditable(name)

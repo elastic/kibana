@@ -29,6 +29,6 @@ export const getUpdateRequest = () =>
     body: {
       status: 'closed',
       ids: ['alert-1'],
-      index: '.alerts-observability-apm*',
+      index: '.alerts-observability.apm.alerts*',
     },
   });

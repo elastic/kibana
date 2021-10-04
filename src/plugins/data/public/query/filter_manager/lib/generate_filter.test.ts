@@ -15,10 +15,10 @@ import {
   IndexPatternBase,
   isExistsFilter,
   buildExistsFilter,
-  PhraseFilter,
   isPhraseFilter,
-  RangeFilter,
   isRangeFilter,
+  RangeFilter,
+  PhraseFilter,
 } from '@kbn/es-query';
 
 const INDEX_NAME = 'my-index';
@@ -85,10 +85,12 @@ describe('Generate filters', () => {
   it('should create phrase filter', () => {
     const filters = generateFilters(mockFilterManager, FIELD, PHRASE_VALUE, '', INDEX_NAME);
     expect(filters).toHaveLength(1);
-    expect(filters[0].meta.index === INDEX_NAME);
-    expect(filters[0].meta.negate).toBeFalsy();
-    expect(isPhraseFilter(filters[0])).toBeTruthy();
-    expect((filters[0] as PhraseFilter).query.match_phrase).toEqual({
+
+    const [filter] = filters as PhraseFilter[];
+    expect(filter.meta.index === INDEX_NAME);
+    expect(filter.meta.negate).toBeFalsy();
+    expect(isPhraseFilter(filter)).toBeTruthy();
+    expect(filter.query.match_phrase).toEqual({
       [FIELD.name]: PHRASE_VALUE,
     });
   });
@@ -96,10 +98,11 @@ describe('Generate filters', () => {
   it('should create negated phrase filter', () => {
     const filters = generateFilters(mockFilterManager, FIELD, PHRASE_VALUE, '-', INDEX_NAME);
     expect(filters).toHaveLength(1);
-    expect(filters[0].meta.index === INDEX_NAME);
-    expect(filters[0].meta.negate).toBeTruthy();
-    expect(isPhraseFilter(filters[0])).toBeTruthy();
-    expect((filters[0] as PhraseFilter).query.match_phrase).toEqual({
+    const [filter] = filters as PhraseFilter[];
+    expect(filter.meta.index === INDEX_NAME);
+    expect(filter.meta.negate).toBeTruthy();
+    expect(isPhraseFilter(filter)).toBeTruthy();
+    expect(filter.query.match_phrase).toEqual({
       [FIELD.name]: PHRASE_VALUE,
     });
   });
@@ -117,12 +120,13 @@ describe('Generate filters', () => {
       },
       '+',
       INDEX_NAME
-    );
+    ) as RangeFilter[];
     expect(filters).toHaveLength(1);
-    expect(filters[0].meta.index === INDEX_NAME);
-    expect(filters[0].meta.negate).toBeFalsy();
-    expect(isRangeFilter(filters[0])).toBeTruthy();
-    expect((filters[0] as RangeFilter).range).toEqual({
+    const [filter] = filters;
+    expect(filter.meta.index === INDEX_NAME);
+    expect(filter.meta.negate).toBeFalsy();
+    expect(isRangeFilter(filter)).toBeTruthy();
+    expect(filter.range).toEqual({
       [FIELD.name]: {
         gt: '192.168.0.0',
         lte: '192.168.255.255',
@@ -143,10 +147,12 @@ describe('Generate filters', () => {
     );
 
     expect(filters).toHaveLength(1);
-    expect(filters[0].meta.index === INDEX_NAME);
-    expect(filters[0].meta.negate).toBeFalsy();
-    expect(isPhraseFilter(filters[0])).toBeTruthy();
-    expect((filters[0] as PhraseFilter).query.match_phrase).toEqual({
+    const [filter] = filters;
+    expect(filter.meta.index === INDEX_NAME);
+    expect(filter.meta.negate).toBeFalsy();
+    expect(isPhraseFilter(filter)).toBeTruthy();
+
+    expect(filter.query?.match_phrase).toEqual({
       [FIELD.name]: 10000,
     });
   });
@@ -167,10 +173,10 @@ describe('Generate filters', () => {
     expect(filters[1].meta.negate).toBeFalsy();
     expect(isPhraseFilter(filters[0])).toBeTruthy();
     expect(isPhraseFilter(filters[1])).toBeTruthy();
-    expect((filters[0] as PhraseFilter).query.match_phrase).toEqual({
+    expect(filters[0].query?.match_phrase).toEqual({
       [FIELD.name]: PHRASE_VALUE,
     });
-    expect((filters[1] as PhraseFilter).query.match_phrase).toEqual({
+    expect(filters[1].query?.match_phrase).toEqual({
       [FIELD.name]: ANOTHER_PHRASE,
     });
   });
@@ -185,10 +191,10 @@ describe('Generate filters', () => {
       INDEX_NAME
     );
     expect(filters).toHaveLength(2);
-    expect((filters[0] as PhraseFilter).query.match_phrase).toEqual({
+    expect(filters[0].query?.match_phrase).toEqual({
       [FIELD.name]: PHRASE_VALUE,
     });
-    expect((filters[1] as PhraseFilter).query.match_phrase).toEqual({
+    expect(filters[1].query?.match_phrase).toEqual({
       [FIELD.name]: ANOTHER_PHRASE,
     });
   });

@@ -9,35 +9,36 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useUiTracker } from '../../../../../observability/public';
 import { useTheme } from '../../../hooks/use_theme';
-import { CorrelationsTerm } from '../../../../common/search_strategies/failure_correlations/types';
+import type { FieldValuePair } from '../../../../common/search_strategies/types';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 
-export type SelectedCorrelationTerm<T extends CorrelationsTerm> = Pick<
-  T,
-  'fieldName' | 'fieldValue'
->;
-
-interface Props<T> {
+interface CorrelationsTableProps<T extends FieldValuePair> {
   significantTerms?: T[];
   status: FETCH_STATUS;
   percentageColumnName?: string;
   setSelectedSignificantTerm: (term: T | null) => void;
-  selectedTerm?: { fieldName: string; fieldValue: string };
+  selectedTerm?: FieldValuePair;
   onFilter?: () => void;
   columns: Array<EuiBasicTableColumn<T>>;
+  onTableChange: (c: Criteria<T>) => void;
+  sorting?: EuiTableSortingType<T>;
 }
 
-export function CorrelationsTable<T extends CorrelationsTerm>({
+export function CorrelationsTable<T extends FieldValuePair>({
   significantTerms,
   status,
   setSelectedSignificantTerm,
   columns,
   selectedTerm,
-}: Props<T>) {
+  onTableChange,
+  sorting,
+}: CorrelationsTableProps<T>) {
   const euiTheme = useTheme();
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const trackSelectSignificantCorrelationTerm = useCallback(
@@ -67,12 +68,17 @@ export function CorrelationsTable<T extends CorrelationsTerm>({
     };
   }, [pageIndex, pageSize, significantTerms]);
 
-  const onTableChange = useCallback(({ page }) => {
-    const { index, size } = page;
+  const onChange = useCallback(
+    (tableSettings) => {
+      const { index, size } = tableSettings.page;
 
-    setPageIndex(index);
-    setPageSize(size);
-  }, []);
+      setPageIndex(index);
+      setPageSize(size);
+
+      onTableChange(tableSettings);
+    },
+    [onTableChange]
+  );
 
   return (
     <EuiBasicTable
@@ -81,6 +87,7 @@ export function CorrelationsTable<T extends CorrelationsTerm>({
         status === FETCH_STATUS.LOADING ? loadingText : noDataText
       }
       loading={status === FETCH_STATUS.LOADING}
+      error={status === FETCH_STATUS.FAILURE ? errorMessage : ''}
       columns={columns}
       rowProps={(term) => {
         return {
@@ -100,7 +107,8 @@ export function CorrelationsTable<T extends CorrelationsTerm>({
         };
       }}
       pagination={pagination}
-      onChange={onTableChange}
+      onChange={onChange}
+      sorting={sorting}
     />
   );
 }
@@ -113,4 +121,9 @@ const loadingText = i18n.translate(
 const noDataText = i18n.translate(
   'xpack.apm.correlations.correlationsTable.noDataText',
   { defaultMessage: 'No data' }
+);
+
+const errorMessage = i18n.translate(
+  'xpack.apm.correlations.correlationsTable.errorMessage',
+  { defaultMessage: 'Failed to fetch' }
 );

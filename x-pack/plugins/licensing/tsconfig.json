@@ -4,7 +4,8 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "isolatedModules": true,
   },
   "include": [
     "public/**/*",

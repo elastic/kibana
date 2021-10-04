@@ -110,7 +110,7 @@ export const registry = {
     const esArchiver = context.getService('esArchiver');
     const logger = context.getService('log');
 
-    const supertest = context.getService('supertestAsApmWriteUser');
+    const supertest = context.getService('legacySupertestAsApmWriteUser');
 
     const logWithTimer = () => {
       const start = process.hrtime();

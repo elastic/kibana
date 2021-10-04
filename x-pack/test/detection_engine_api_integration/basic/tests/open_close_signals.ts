@@ -66,15 +66,22 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('tests with auditbeat data', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      });
+
       beforeEach(async () => {
         await deleteAllAlerts(supertest);
         await createSignalsIndex(supertest);
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
+
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       it('should be able to execute and get 10 signals', async () => {
@@ -115,13 +122,12 @@ export default ({ getService }: FtrProviderContext) => {
           .send(setSignalStatus({ signalIds, status: 'closed' }))
           .expect(200);
 
-        const {
-          body: signalsClosed,
-        }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
-          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getQuerySignalIds(signalIds))
-          .expect(200);
+        const { body: signalsClosed }: { body: estypes.SearchResponse<{ signal: Signal }> } =
+          await supertest
+            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getQuerySignalIds(signalIds))
+            .expect(200);
         expect(signalsClosed.hits.hits.length).to.equal(10);
       });
 
@@ -142,13 +148,12 @@ export default ({ getService }: FtrProviderContext) => {
           .send(setSignalStatus({ signalIds, status: 'closed' }))
           .expect(200);
 
-        const {
-          body: signalsClosed,
-        }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
-          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getQuerySignalIds(signalIds))
-          .expect(200);
+        const { body: signalsClosed }: { body: estypes.SearchResponse<{ signal: Signal }> } =
+          await supertest
+            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getQuerySignalIds(signalIds))
+            .expect(200);
 
         const everySignalClosed = signalsClosed.hits.hits.every(
           (hit) => hit._source?.signal?.status === 'closed'

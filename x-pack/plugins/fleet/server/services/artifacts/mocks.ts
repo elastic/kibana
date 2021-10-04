@@ -12,7 +12,12 @@ import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 import type { SearchHit, ESSearchResponse } from '../../../../../../src/core/types/elasticsearch';
 
-import type { Artifact, ArtifactElasticsearchProperties, ArtifactsClientInterface } from './types';
+import type {
+  Artifact,
+  ArtifactElasticsearchProperties,
+  ArtifactsClientInterface,
+  NewArtifact,
+} from './types';
 import { newArtifactToElasticsearchProperties } from './mappings';
 
 export const createArtifactsClientMock = (): jest.Mocked<ArtifactsClientInterface> => {
@@ -77,10 +82,12 @@ export const generateEsRequestErrorApiResponseMock = (
   );
 };
 
-export const generateArtifactEsGetSingleHitMock = (): SearchHit<ArtifactElasticsearchProperties> => {
+export const generateArtifactEsGetSingleHitMock = (
+  artifact?: NewArtifact
+): SearchHit<ArtifactElasticsearchProperties> => {
   const { id, created, ...newArtifact } = generateArtifactMock();
   const _source = {
-    ...newArtifactToElasticsearchProperties(newArtifact),
+    ...newArtifactToElasticsearchProperties(artifact ?? newArtifact),
     created,
   };
 

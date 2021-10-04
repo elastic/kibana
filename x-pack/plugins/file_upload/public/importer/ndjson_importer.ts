@@ -13,7 +13,7 @@ export class NdjsonImporter extends Importer {
     super();
   }
 
-  protected _createDocs(json: string): CreateDocsResponse {
+  protected _createDocs(json: string, isLastPart: boolean): CreateDocsResponse {
     let remainder = 0;
     try {
       const splitJson = json.split(/}\s*\n/);

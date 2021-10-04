@@ -94,7 +94,7 @@ function registerApiKeyInvalidatorTaskDefinition(
 
 function getFakeKibanaRequest(basePath: string) {
   const requestHeaders: Record<string, string> = {};
-  return ({
+  return {
     headers: requestHeaders,
     getBasePath: () => basePath,
     path: '/',
@@ -107,7 +107,7 @@ function getFakeKibanaRequest(basePath: string) {
         url: '/',
       },
     },
-  } as unknown) as KibanaRequest;
+  } as unknown as KibanaRequest;
 }
 
 function taskRunner(
@@ -122,10 +122,8 @@ function taskRunner(
         let totalInvalidated = 0;
         const configResult = await config;
         try {
-          const [
-            { savedObjects, http },
-            { encryptedSavedObjects, security },
-          ] = await coreStartServices;
+          const [{ savedObjects, http }, { encryptedSavedObjects, security }] =
+            await coreStartServices;
           const savedObjectsClient = savedObjects.getScopedClient(
             getFakeKibanaRequest(http.basePath.serverBasePath),
             {
@@ -197,10 +195,11 @@ async function invalidateApiKeys(
   let totalInvalidated = 0;
   const apiKeyIds = await Promise.all(
     apiKeysToInvalidate.saved_objects.map(async (apiKeyObj) => {
-      const decryptedApiKey = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<InvalidatePendingApiKey>(
-        'api_key_pending_invalidation',
-        apiKeyObj.id
-      );
+      const decryptedApiKey =
+        await encryptedSavedObjectsClient.getDecryptedAsInternalUser<InvalidatePendingApiKey>(
+          'api_key_pending_invalidation',
+          apiKeyObj.id
+        );
       return decryptedApiKey.attributes.apiKeyId;
     })
   );

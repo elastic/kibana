@@ -7,21 +7,22 @@
 
 import sinon from 'sinon';
 import { DataRequestContext } from '../../../actions';
-import { DataMeta, MapFilters } from '../../../../common/descriptor_types';
+import { DataRequestMeta, DataFilters } from '../../../../common/descriptor_types';
 
 export class MockSyncContext implements DataRequestContext {
-  dataFilters: MapFilters;
+  dataFilters: DataFilters;
   isRequestStillActive: (dataId: string, requestToken: symbol) => boolean;
   onLoadError: (dataId: string, requestToken: symbol, errorMessage: string) => void;
   registerCancelCallback: (requestToken: symbol, callback: () => void) => void;
-  startLoading: (dataId: string, requestToken: symbol, meta: DataMeta) => void;
-  stopLoading: (dataId: string, requestToken: symbol, data: object, meta: DataMeta) => void;
+  startLoading: (dataId: string, requestToken: symbol, meta: DataRequestMeta) => void;
+  stopLoading: (dataId: string, requestToken: symbol, data: object, meta: DataRequestMeta) => void;
   onJoinError: (errorMessage: string) => void;
   updateSourceData: (newData: unknown) => void;
-  forceRefresh: boolean;
+  forceRefreshDueToDrawing: boolean;
+  isForceRefresh: boolean;
 
-  constructor({ dataFilters }: { dataFilters: Partial<MapFilters> }) {
-    const mapFilters: MapFilters = {
+  constructor({ dataFilters }: { dataFilters: Partial<DataFilters> }) {
+    const mapFilters: DataFilters = {
       filters: [],
       timeFilters: {
         from: 'now',
@@ -41,6 +42,7 @@ export class MockSyncContext implements DataRequestContext {
     this.stopLoading = sinon.spy();
     this.onJoinError = sinon.spy();
     this.updateSourceData = sinon.spy();
-    this.forceRefresh = false;
+    this.forceRefreshDueToDrawing = false;
+    this.isForceRefresh = false;
   }
 }

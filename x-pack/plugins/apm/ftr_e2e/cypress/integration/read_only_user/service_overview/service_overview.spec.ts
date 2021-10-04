@@ -57,4 +57,27 @@ describe('Service Overview', () => {
       'Worker'
     );
   });
+
+  it('hides dependency tab when RUM service', () => {
+    cy.intercept('GET', '/api/apm/services/opbeans-rum/agent?*').as(
+      'agentRequest'
+    );
+    cy.visit(
+      url.format({
+        pathname: '/app/apm/services/opbeans-rum/overview',
+        query: { rangeFrom: start, rangeTo: end },
+      })
+    );
+    cy.contains('Overview');
+    cy.contains('Transactions');
+    cy.contains('Error');
+    cy.contains('Service Map');
+    // Waits until the agent request is finished to check the tab.
+    cy.wait('@agentRequest');
+    cy.get('.euiTabs .euiTab__content').then((elements) => {
+      elements.map((index, element) => {
+        expect(element.innerText).to.not.equal('Dependencies');
+      });
+    });
+  });
 });

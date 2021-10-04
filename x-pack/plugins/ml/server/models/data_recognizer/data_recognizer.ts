@@ -589,9 +589,8 @@ export class DataRecognizer {
         const jobStatsJobs: JobStat[] = [];
         if (body.jobs && body.jobs.length > 0) {
           const foundJobIds = body.jobs.map((job) => job.job_id);
-          const latestBucketTimestampsByJob = await this._resultsService.getLatestBucketTimestampByJob(
-            foundJobIds
-          );
+          const latestBucketTimestampsByJob =
+            await this._resultsService.getLatestBucketTimestampByJob(foundJobIds);
 
           body.jobs.forEach((job) => {
             const jobStat = {
@@ -1121,8 +1120,8 @@ export class DataRecognizer {
     if (estimateMML && this._jobsForModelMemoryEstimation.length > 0) {
       try {
         // Checks if all jobs in the module have the same time field configured
-        const firstJobTimeField = this._jobsForModelMemoryEstimation[0].job.config.data_description
-          .time_field;
+        const firstJobTimeField =
+          this._jobsForModelMemoryEstimation[0].job.config.data_description.time_field;
         const isSameTimeFields = this._jobsForModelMemoryEstimation.every(
           ({ job }) => job.config.data_description.time_field === firstJobTimeField
         );
@@ -1131,10 +1130,10 @@ export class DataRecognizer {
           // In case of time range is not provided and the time field is the same
           // set the fallback range for all jobs
           // as there may not be a common query, we use a match_all
-          const {
-            start: fallbackStart,
-            end: fallbackEnd,
-          } = await this._getFallbackTimeRange(firstJobTimeField, { match_all: {} });
+          const { start: fallbackStart, end: fallbackEnd } = await this._getFallbackTimeRange(
+            firstJobTimeField,
+            { match_all: {} }
+          );
           start = fallbackStart;
           end = fallbackEnd;
         }

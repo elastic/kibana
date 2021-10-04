@@ -158,38 +158,11 @@ export const HostsInput: FunctionComponent<Props> = ({
     [value, onChange]
   );
 
-  const onDelete = useCallback(
-    (idx: number) => {
-      onChange([...value.slice(0, idx), ...value.slice(idx + 1)]);
-    },
-    [value, onChange]
-  );
-
-  const addRowHandler = useCallback(() => {
-    setAutoFocus(true);
-    onChange([...value, '']);
-  }, [value, onChange]);
-
-  const onDragEndHandler = useCallback(
-    ({ source, destination }) => {
-      if (source && destination) {
-        const items = euiDragDropReorder(value, source.index, destination.index);
-
-        onChange(items);
-      }
-    },
-    [value, onChange]
-  );
-
-  const globalErrors = useMemo(() => {
-    return errors && errors.filter((err) => err.index === undefined).map(({ message }) => message);
-  }, [errors]);
-
   const indexedErrors = useMemo(() => {
     if (!errors) {
       return [];
     }
-    return errors.reduce((acc, err) => {
+    return errors.reduce<string[][]>((acc, err) => {
       if (err.index === undefined) {
         return acc;
       }
@@ -201,7 +174,37 @@ export const HostsInput: FunctionComponent<Props> = ({
       acc[err.index].push(err.message);
 
       return acc;
-    }, [] as string[][]);
+    }, []);
+  }, [errors]);
+
+  const onDelete = useCallback(
+    (idx: number) => {
+      indexedErrors.splice(idx, 1);
+      onChange([...value.slice(0, idx), ...value.slice(idx + 1)]);
+    },
+    [value, onChange, indexedErrors]
+  );
+
+  const addRowHandler = useCallback(() => {
+    setAutoFocus(true);
+    onChange([...value, '']);
+  }, [value, onChange]);
+
+  const onDragEndHandler = useCallback(
+    ({ source, destination }) => {
+      if (source && destination) {
+        const items = euiDragDropReorder(value, source.index, destination.index);
+        const sourceErrors = indexedErrors[source.index];
+        indexedErrors.splice(source.index, 1);
+        indexedErrors.splice(destination.index, 0, sourceErrors);
+        onChange(items);
+      }
+    },
+    [value, onChange, indexedErrors]
+  );
+
+  const globalErrors = useMemo(() => {
+    return errors && errors.filter((err) => err.index === undefined).map(({ message }) => message);
   }, [errors]);
 
   const isSortable = rows.length > 1;

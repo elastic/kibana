@@ -206,9 +206,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
             version: endpointPackageInfo?.version ?? '',
           },
         };
-        const {
-          body: createResponse,
-        }: { body: CreatePackagePolicyResponse } = await supertest
+        const { body: createResponse }: { body: CreatePackagePolicyResponse } = await supertest
           .post(INGEST_API_PACKAGE_POLICIES)
           .set('kbn-xsrf', 'xxx')
           .send(newPackagePolicyData)
@@ -261,14 +259,13 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
     async deletePolicyByName(name: string) {
       let packagePolicyList: GetPackagePoliciesResponse['items'];
       try {
-        const {
-          body: packagePoliciesResponse,
-        }: { body: GetPackagePoliciesResponse } = await supertest
-          .get(INGEST_API_PACKAGE_POLICIES)
-          .set('kbn-xsrf', 'xxx')
-          .query({ kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: ${name}` })
-          .send()
-          .expect(200);
+        const { body: packagePoliciesResponse }: { body: GetPackagePoliciesResponse } =
+          await supertest
+            .get(INGEST_API_PACKAGE_POLICIES)
+            .set('kbn-xsrf', 'xxx')
+            .query({ kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: ${name}` })
+            .send()
+            .expect(200);
         packagePolicyList = packagePoliciesResponse.items;
       } catch (error) {
         return logSupertestApiErrorAndThrow(

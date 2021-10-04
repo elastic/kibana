@@ -7,6 +7,5 @@
 
 export { DownNoExpressionSelect } from './down_number_select';
 export { FiltersExpressionsSelect } from './filters_expression_select';
-export { FiltersExpressionSelectContainer } from './filters_expression_select_container';
 export { TimeExpressionSelect } from './time_expression_select';
 export { StatusExpressionSelect } from './status_expression_select';

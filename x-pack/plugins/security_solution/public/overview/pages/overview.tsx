@@ -34,6 +34,9 @@ import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
 import { useIsThreatIntelModuleEnabled } from '../containers/overview_cti_links/use_is_threat_intel_module_enabled';
 import { useUserPrivileges } from '../../common/components/user_privileges';
+import { RiskyHostLinks } from '../components/overview_risky_host_links';
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const SidebarFlexItem = styled(EuiFlexItem)`
   margin-right: 24px;
@@ -72,9 +75,12 @@ const OverviewComponent = () => {
   }, [addMessage]);
   const {
     endpointPrivileges: { canAccessFleet },
-    alertsPrivileges,
   } = useUserPrivileges();
+  const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
   const isThreatIntelModuleEnabled = useIsThreatIntelModuleEnabled();
+
+  const riskyHostsEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+
   return (
     <>
       {indicesExist ? (
@@ -98,7 +104,7 @@ const OverviewComponent = () => {
 
               <EuiFlexItem grow={true}>
                 <EuiFlexGroup direction="column" gutterSize="none">
-                  {alertsPrivileges?.read && (
+                  {hasIndexRead && hasKibanaREAD && (
                     <>
                       <EuiFlexItem grow={false}>
                         <SignalsByCategory filters={filters} query={query} />
@@ -145,13 +151,27 @@ const OverviewComponent = () => {
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <ThreatIntelLinkPanel
-                      isThreatIntelModuleEnabled={isThreatIntelModuleEnabled}
-                      deleteQuery={deleteQuery}
-                      from={from}
-                      setQuery={setQuery}
-                      to={to}
-                    />
+                    <EuiFlexGroup direction="row">
+                      <EuiFlexItem grow={1}>
+                        <ThreatIntelLinkPanel
+                          isThreatIntelModuleEnabled={isThreatIntelModuleEnabled}
+                          deleteQuery={deleteQuery}
+                          from={from}
+                          setQuery={setQuery}
+                          to={to}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={1}>
+                        {riskyHostsEnabled && (
+                          <RiskyHostLinks
+                            deleteQuery={deleteQuery}
+                            from={from}
+                            setQuery={setQuery}
+                            to={to}
+                          />
+                        )}
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

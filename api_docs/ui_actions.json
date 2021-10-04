@@ -83,7 +83,7 @@
             "signature": [
               "Map<string, ",
               "TriggerInternal",
-              "<any>>"
+              "<object>>"
             ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false
@@ -665,6 +665,30 @@
               {
                 "plugin": "discover",
                 "path": "src/plugins/discover/public/plugin.tsx"
+              },
+              {
+                "plugin": "embeddable",
+                "path": "src/plugins/embeddable/public/tests/container.test.ts"
+              },
+              {
+                "plugin": "embeddable",
+                "path": "src/plugins/embeddable/public/tests/container.test.ts"
+              },
+              {
+                "plugin": "embeddable",
+                "path": "src/plugins/embeddable/public/tests/container.test.ts"
+              },
+              {
+                "plugin": "embeddable",
+                "path": "src/plugins/embeddable/public/tests/container.test.ts"
+              },
+              {
+                "plugin": "embeddable",
+                "path": "src/plugins/embeddable/public/tests/explicit_input.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/target/types/public/application/embeddable/search_embeddable_factory.d.ts"
               }
             ],
             "children": [
@@ -2240,15 +2264,7 @@
       "label": "UiActionsStart",
       "description": [],
       "signature": [
-        "{ readonly clear: () => void; readonly fork: () => ",
-        {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.UiActionsService",
-          "text": "UiActionsService"
-        },
-        "; readonly addTriggerAction: (triggerId: string, action: ",
+        "{ readonly clear: () => void; readonly addTriggerAction: (triggerId: string, action: ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2318,7 +2334,15 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; }"
+        "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly fork: () => ",
+        {
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.UiActionsService",
+          "text": "UiActionsService"
+        },
+        "; }"
       ],
       "path": "src/plugins/ui_actions/public/plugin.ts",
       "deprecated": false,

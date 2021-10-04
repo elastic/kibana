@@ -5,43 +5,37 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBetaBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { TypedLensByValueInput, LensEmbeddableInput } from '../../../../../../lens/public';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { DataViewLabels } from '../configurations/constants';
-import { ObservabilityAppServices } from '../../../../application/types';
 import { useSeriesStorage } from '../hooks/use_series_storage';
-import { combineTimeRanges } from '../exploratory_view';
+import { LastUpdated } from './last_updated';
+import { combineTimeRanges } from '../lens_embeddable';
+import { ExpViewActionMenu } from '../components/action_menu';
 
 interface Props {
-  seriesId: string;
+  seriesId?: number;
+  lastUpdated?: number;
   lensAttributes: TypedLensByValueInput['attributes'] | null;
 }
 
-export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
-  const kServices = useKibana<ObservabilityAppServices>().services;
+export function ExploratoryViewHeader({ seriesId, lensAttributes, lastUpdated }: Props) {
+  const { getSeries, allSeries, setLastRefresh, reportType } = useSeriesStorage();
 
-  const { lens } = kServices;
+  const series = seriesId ? getSeries(seriesId) : undefined;
 
-  const { getSeries, allSeries } = useSeriesStorage();
-
-  const series = getSeries(seriesId);
-
-  const [isSaveOpen, setIsSaveOpen] = useState(false);
-
-  const LensSaveModalComponent = lens.SaveModalComponent;
-
-  const timeRange = combineTimeRanges(allSeries, series);
+  const timeRange = combineTimeRanges(reportType, allSeries, series);
 
   return (
     <>
+      <ExpViewActionMenu timeRange={timeRange} lensAttributes={lensAttributes} />
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem>
           <EuiText>
             <h2>
-              {DataViewLabels[series.reportType] ??
+              {DataViewLabels[reportType] ??
                 i18n.translate('xpack.observability.expView.heading.label', {
                   defaultMessage: 'Analyze data',
                 })}{' '}
@@ -57,55 +51,18 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            iconType="lensApp"
-            fullWidth={false}
-            isDisabled={!lens.canUseEditor() || lensAttributes === null}
-            onClick={() => {
-              if (lensAttributes) {
-                lens.navigateToPrefilledEditor(
-                  {
-                    id: '',
-                    timeRange,
-                    attributes: lensAttributes,
-                  },
-                  {
-                    openInNewTab: true,
-                  }
-                );
-              }
-            }}
-          >
-            {i18n.translate('xpack.observability.expView.heading.openInLens', {
-              defaultMessage: 'Open in Lens',
-            })}
-          </EuiButton>
+          <LastUpdated lastUpdated={lastUpdated} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            iconType="save"
-            fullWidth={false}
-            isDisabled={!lens.canUseEditor() || lensAttributes === null}
-            onClick={() => {
-              if (lensAttributes) {
-                setIsSaveOpen(true);
-              }
-            }}
-          >
-            {i18n.translate('xpack.observability.expView.heading.saveLensVisualization', {
-              defaultMessage: 'Save',
-            })}
+          <EuiButton iconType="refresh" onClick={() => setLastRefresh(Date.now())}>
+            {REFRESH_LABEL}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      {isSaveOpen && lensAttributes && (
-        <LensSaveModalComponent
-          initialInput={(lensAttributes as unknown) as LensEmbeddableInput}
-          onClose={() => setIsSaveOpen(false)}
-          onSave={() => {}}
-        />
-      )}
     </>
   );
 }
+
+const REFRESH_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.refresh', {
+  defaultMessage: 'Refresh',
+});

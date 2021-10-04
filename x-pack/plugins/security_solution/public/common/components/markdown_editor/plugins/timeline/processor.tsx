@@ -6,23 +6,22 @@
  */
 
 import React, { useCallback, memo } from 'react';
-import { EuiToolTip, EuiLink, EuiMarkdownAstNodePosition } from '@elastic/eui';
+import { EuiToolTip, EuiLink } from '@elastic/eui';
 
 import { useTimelineClick } from '../../../../utils/timeline/use_timeline_click';
 import { TimelineProps } from './types';
 import * as i18n from './translations';
 
-export const TimelineMarkDownRendererComponent: React.FC<
-  TimelineProps & {
-    position: EuiMarkdownAstNodePosition;
-  }
-> = ({ id, title, graphEventId }) => {
+export const TimelineMarkDownRendererComponent: React.FC<TimelineProps> = ({
+  id,
+  title,
+  graphEventId,
+}) => {
   const handleTimelineClick = useTimelineClick();
-  const onClickTimeline = useCallback(() => handleTimelineClick(id ?? '', graphEventId), [
-    id,
-    graphEventId,
-    handleTimelineClick,
-  ]);
+  const onClickTimeline = useCallback(
+    () => handleTimelineClick(id ?? '', graphEventId),
+    [id, graphEventId, handleTimelineClick]
+  );
   return (
     <EuiToolTip content={i18n.TIMELINE_ID(id ?? '')}>
       <EuiLink onClick={onClickTimeline} data-test-subj={`markdown-timeline-link-${id}`}>

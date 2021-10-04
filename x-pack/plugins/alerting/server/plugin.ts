@@ -228,7 +228,8 @@ export class AlertingPlugin {
       core.savedObjects,
       plugins.encryptedSavedObjects,
       this.ruleTypeRegistry,
-      this.logger
+      this.logger,
+      plugins.actions.isPreconfiguredConnector
     );
 
     initializeApiKeyInvalidator(
@@ -239,7 +240,7 @@ export class AlertingPlugin {
     );
 
     const serviceStatus$ = new BehaviorSubject<ServiceStatus>({
-      level: ServiceStatusLevels.unavailable,
+      level: ServiceStatusLevels.degraded,
       summary: 'Alerting is initializing',
     });
     core.status.set(serviceStatus$);

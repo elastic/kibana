@@ -18,9 +18,9 @@ describe('getFields', () => {
   let indexPattern: IndexPatternBase;
 
   beforeEach(() => {
-    indexPattern = ({
+    indexPattern = {
       fields,
-    } as unknown) as IndexPatternBase;
+    } as unknown as IndexPatternBase;
   });
 
   describe('field names without a wildcard', () => {
@@ -41,14 +41,14 @@ describe('getFields', () => {
     });
 
     test('should not match a wildcard in a literal node', () => {
-      const indexPatternWithWildField: IndexPatternBase = ({
+      const indexPatternWithWildField: IndexPatternBase = {
         title: 'wildIndex',
         fields: [
           {
             name: 'foo*',
           },
         ],
-      } as unknown) as IndexPatternBase;
+      } as unknown as IndexPatternBase;
 
       const fieldNameNode = nodeTypes.literal.buildNode('foo*');
       const results = getFields(fieldNameNode, indexPatternWithWildField);

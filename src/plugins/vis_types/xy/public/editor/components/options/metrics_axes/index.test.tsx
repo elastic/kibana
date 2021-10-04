@@ -54,12 +54,7 @@ const createAggs = (aggs: any[]) => ({
 
 describe('MetricsAxisOptions component', () => {
   let setValue: jest.Mock;
-  let defaultProps: ValidationVisOptionsProps<
-    VisParams,
-    {
-      showElasticChartsOptions: boolean;
-    }
-  >;
+  let defaultProps: ValidationVisOptionsProps<VisParams>;
   let axis: ValueAxis;
   let axisRight: ValueAxis;
   let chart: SeriesParam;
@@ -86,9 +81,6 @@ describe('MetricsAxisOptions component', () => {
     defaultProps = {
       aggs: createAggs([aggCount]),
       isTabSelected: true,
-      extraProps: {
-        showElasticChartsOptions: false,
-      },
       vis: {
         type: {
           type: ChartType.Area,
@@ -244,12 +236,7 @@ describe('MetricsAxisOptions component', () => {
     const getProps = (
       valuePosition1: Position = Position.Right,
       valuePosition2: Position = Position.Left
-    ): ValidationVisOptionsProps<
-      VisParams,
-      {
-        showElasticChartsOptions: boolean;
-      }
-    > => ({
+    ): ValidationVisOptionsProps<VisParams> => ({
       ...defaultProps,
       stateParams: {
         ...defaultProps.stateParams,
@@ -387,12 +374,7 @@ describe('MetricsAxisOptions component', () => {
   describe('onCategoryAxisPositionChanged', () => {
     const getProps = (
       position: Position = Position.Bottom
-    ): ValidationVisOptionsProps<
-      VisParams,
-      {
-        showElasticChartsOptions: boolean;
-      }
-    > => ({
+    ): ValidationVisOptionsProps<VisParams> => ({
       ...defaultProps,
       stateParams: {
         ...defaultProps.stateParams,

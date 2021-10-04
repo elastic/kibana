@@ -34,8 +34,7 @@ var IGNORE_WARNINGS = [
     //  that the security features are blocking such check.
     //  Such emit is causing Node.js to crash unless we explicitly catch it.
     //  We need to discard that warning
-    message:
-      'The client is unable to verify that the server is Elasticsearch due to security privileges on the server side. Some functionality may not be compatible if the server is running an unsupported product.',
+    name: 'ProductNotSupportedSecurityError',
   },
 ];
 

@@ -25,8 +25,15 @@ export interface UseFormReturn<T extends FormData, I extends FormData> {
 export function useForm<T extends FormData = FormData, I extends FormData = T>(
   formConfig?: FormConfig<T, I>
 ): UseFormReturn<T, I> {
-  const { onSubmit, schema, serializer, deserializer, options, id = 'default', defaultValue } =
-    formConfig ?? {};
+  const {
+    onSubmit,
+    schema,
+    serializer,
+    deserializer,
+    options,
+    id = 'default',
+    defaultValue,
+  } = formConfig ?? {};
 
   const initDefaultValue = useCallback(
     (_defaultValue?: Partial<T>): { [key: string]: any } => {
@@ -166,7 +173,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
         return { areFieldsValid: true, isFormValid: true };
       }
 
-      const areFieldsValid = validationResult.every(Boolean);
+      const areFieldsValid = validationResult.every((res) => res.isValid);
 
       const validationResultByPath = fieldsToValidate.reduce((acc, field, i) => {
         acc[field.path] = validationResult[i].isValid;

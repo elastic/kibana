@@ -6,20 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { forwardRef, useCallback, useMemo } from 'react';
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import type { IndexPattern, IndexPatternField } from 'src/plugins/data/common';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TableHeader } from './components/table_header/table_header';
 import { FORMATS_UI_SETTINGS } from '../../../../../../../field_formats/common';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SAMPLE_SIZE_SETTING,
+  SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../../../common';
-import { getServices, IndexPattern } from '../../../../../kibana_services';
+import { getServices } from '../../../../../kibana_services';
 import { SortOrder } from './components/table_header/helpers';
 import { DocTableRow, TableRow } from './components/table_row';
 import { DocViewFilterFn } from '../../../../doc_views/doc_views_types';
+import { getFieldsToShow } from '../../../../helpers/get_fields_to_show';
 
 export interface DocTableProps {
   /**
@@ -81,8 +84,8 @@ export interface DocTableProps {
 }
 
 export interface DocTableRenderProps {
+  columnLength: number;
   rows: DocTableRow[];
-  minimumVisibleRows: number;
   sampleSize: number;
   renderRows: (row: DocTableRow[]) => JSX.Element[];
   renderHeader: () => JSX.Element;
@@ -96,148 +99,166 @@ export interface DocTableWrapperProps extends DocTableProps {
   render: (params: DocTableRenderProps) => JSX.Element;
 }
 
-export const DocTableWrapper = ({
-  render,
-  columns,
-  rows,
-  indexPattern,
-  onSort,
-  onAddColumn,
-  onMoveColumn,
-  onRemoveColumn,
-  sort,
-  onFilter,
-  useNewFieldsApi,
-  searchDescription,
-  sharedItemTitle,
-  dataTestSubj,
-  isLoading,
-}: DocTableWrapperProps) => {
-  const [minimumVisibleRows, setMinimumVisibleRows] = useState(50);
-  const [
-    defaultSortOrder,
-    hideTimeColumn,
-    isShortDots,
-    sampleSize,
-    filterManager,
-    addBasePath,
-  ] = useMemo(() => {
-    const services = getServices();
-    return [
-      services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
-      services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
-      services.uiSettings.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE),
-      services.uiSettings.get(SAMPLE_SIZE_SETTING, 500),
-      services.filterManager,
-      services.addBasePath,
-    ];
-  }, []);
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  const onSkipBottomButtonClick = useCallback(async () => {
-    // delay scrolling to after the rows have been rendered
-    const bottomMarker = document.getElementById('discoverBottomMarker');
-    const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-    // show all the rows
-    setMinimumVisibleRows(rows.length);
-
-    while (rows.length !== document.getElementsByClassName('kbnDocTable__row').length) {
-      await wait(50);
-    }
-    bottomMarker!.focus();
-    await wait(50);
-    bottomMarker!.blur();
-  }, [setMinimumVisibleRows, rows]);
-
-  const renderHeader = useCallback(
-    () => (
-      <TableHeader
-        columns={columns}
-        defaultSortOrder={defaultSortOrder}
-        hideTimeColumn={hideTimeColumn}
-        indexPattern={indexPattern}
-        isShortDots={isShortDots}
-        onChangeSortOrder={onSort}
-        onMoveColumn={onMoveColumn}
-        onRemoveColumn={onRemoveColumn}
-        sortOrder={sort as SortOrder[]}
-      />
-    ),
-    [
+export const DocTableWrapper = forwardRef(
+  (
+    {
+      render,
       columns,
-      defaultSortOrder,
-      hideTimeColumn,
+      rows,
       indexPattern,
-      isShortDots,
+      onSort,
+      onAddColumn,
       onMoveColumn,
       onRemoveColumn,
-      onSort,
       sort,
-    ]
-  );
-
-  const renderRows = useCallback(
-    (rowsToRender: DocTableRow[]) => {
-      return rowsToRender.map((current) => (
-        <TableRow
-          key={`${current._index}${current._type ?? ''}${current._id}${current._score}${
-            current._version
-          }${current._routing}`}
-          columns={columns}
-          filter={onFilter}
-          indexPattern={indexPattern}
-          row={current}
-          useNewFieldsApi={useNewFieldsApi}
-          hideTimeColumn={hideTimeColumn}
-          onAddColumn={onAddColumn}
-          onRemoveColumn={onRemoveColumn}
-          filterManager={filterManager}
-          addBasePath={addBasePath}
-        />
-      ));
-    },
-    [
-      columns,
       onFilter,
-      indexPattern,
       useNewFieldsApi,
+      searchDescription,
+      sharedItemTitle,
+      dataTestSubj,
+      isLoading,
+    }: DocTableWrapperProps,
+    ref
+  ) => {
+    const [
+      defaultSortOrder,
       hideTimeColumn,
-      onAddColumn,
-      onRemoveColumn,
+      isShortDots,
+      sampleSize,
+      showMultiFields,
       filterManager,
       addBasePath,
-    ]
-  );
+    ] = useMemo(() => {
+      const services = getServices();
+      return [
+        services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
+        services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+        services.uiSettings.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE),
+        services.uiSettings.get(SAMPLE_SIZE_SETTING, 500),
+        services.uiSettings.get(SHOW_MULTIFIELDS, false),
+        services.filterManager,
+        services.addBasePath,
+      ];
+    }, []);
 
-  return (
-    <div
-      className="kbnDocTableWrapper eui-yScroll eui-xScroll"
-      data-shared-item
-      data-title={sharedItemTitle}
-      data-description={searchDescription}
-      data-test-subj={dataTestSubj}
-      data-render-complete={!isLoading}
-    >
-      {rows.length !== 0 &&
-        render({
-          rows,
-          minimumVisibleRows,
-          sampleSize,
-          onSkipBottomButtonClick,
-          renderHeader,
-          renderRows,
-        })}
-      {!rows.length && (
-        <div className="kbnDocTable__error">
-          <EuiText size="xs" color="subdued">
-            <EuiIcon type="visualizeApp" size="m" color="subdued" />
-            <EuiSpacer size="m" />
-            <FormattedMessage
-              id="discover.docTable.noResultsTitle"
-              defaultMessage="No results found"
-            />
-          </EuiText>
-        </div>
-      )}
-    </div>
-  );
-};
+    const onSkipBottomButtonClick = useCallback(async () => {
+      // delay scrolling to after the rows have been rendered
+      const bottomMarker = document.getElementById('discoverBottomMarker');
+
+      while (rows.length !== document.getElementsByClassName('kbnDocTable__row').length) {
+        await wait(50);
+      }
+      bottomMarker!.focus();
+      await wait(50);
+      bottomMarker!.blur();
+    }, [rows]);
+
+    const fieldsToShow = useMemo(
+      () =>
+        getFieldsToShow(
+          indexPattern.fields.map((field: IndexPatternField) => field.name),
+          indexPattern,
+          showMultiFields
+        ),
+      [indexPattern, showMultiFields]
+    );
+
+    const renderHeader = useCallback(
+      () => (
+        <TableHeader
+          columns={columns}
+          defaultSortOrder={defaultSortOrder}
+          hideTimeColumn={hideTimeColumn}
+          indexPattern={indexPattern}
+          isShortDots={isShortDots}
+          onChangeSortOrder={onSort}
+          onMoveColumn={onMoveColumn}
+          onRemoveColumn={onRemoveColumn}
+          sortOrder={sort as SortOrder[]}
+        />
+      ),
+      [
+        columns,
+        defaultSortOrder,
+        hideTimeColumn,
+        indexPattern,
+        isShortDots,
+        onMoveColumn,
+        onRemoveColumn,
+        onSort,
+        sort,
+      ]
+    );
+
+    const renderRows = useCallback(
+      (rowsToRender: DocTableRow[]) => {
+        return rowsToRender.map((current) => (
+          <TableRow
+            key={`${current._index}${current._type ?? ''}${current._id}${current._score}${
+              current._version
+            }${current._routing}`}
+            columns={columns}
+            filter={onFilter}
+            indexPattern={indexPattern}
+            row={current}
+            useNewFieldsApi={useNewFieldsApi}
+            hideTimeColumn={hideTimeColumn}
+            onAddColumn={onAddColumn}
+            onRemoveColumn={onRemoveColumn}
+            filterManager={filterManager}
+            addBasePath={addBasePath}
+            fieldsToShow={fieldsToShow}
+          />
+        ));
+      },
+      [
+        columns,
+        onFilter,
+        indexPattern,
+        useNewFieldsApi,
+        hideTimeColumn,
+        onAddColumn,
+        onRemoveColumn,
+        filterManager,
+        addBasePath,
+        fieldsToShow,
+      ]
+    );
+
+    return (
+      <div
+        className="kbnDocTableWrapper eui-yScroll eui-xScroll"
+        data-shared-item
+        data-title={sharedItemTitle}
+        data-description={searchDescription}
+        data-test-subj={dataTestSubj}
+        data-render-complete={!isLoading}
+        ref={ref as React.MutableRefObject<HTMLDivElement>}
+      >
+        {rows.length !== 0 &&
+          render({
+            columnLength: columns.length,
+            rows,
+            sampleSize,
+            onSkipBottomButtonClick,
+            renderHeader,
+            renderRows,
+          })}
+        {!rows.length && (
+          <div className="kbnDocTable__error">
+            <EuiText size="xs" color="subdued">
+              <EuiIcon type="visualizeApp" size="m" color="subdued" />
+              <EuiSpacer size="m" />
+              <FormattedMessage
+                id="discover.docTable.noResultsTitle"
+                defaultMessage="No results found"
+              />
+            </EuiText>
+          </div>
+        )}
+      </div>
+    );
+  }
+);

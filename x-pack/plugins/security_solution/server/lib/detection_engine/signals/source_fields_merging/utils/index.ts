@@ -7,6 +7,7 @@
 export * from './array_in_path_exists';
 export * from './filter_field_entries';
 export * from './is_array_of_primitives';
+export * from './is_ignored';
 export * from './is_invalid_key';
 export * from './is_multifield';
 export * from './is_nested_object';

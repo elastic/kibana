@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
@@ -39,12 +40,34 @@ export const stringifyEvent = (ecs: Ecs): string => JSON.stringify(ecs, omitType
 export const getEventIdToDataMapping = (
   timelineData: TimelineItem[],
   eventIds: string[],
-  fieldsToKeep: string[]
+  fieldsToKeep: string[],
+  hasAlertsCrud: boolean,
+  hasAlertsCrudPermissionsByRule?: ({
+    ruleConsumer,
+    ruleProducer,
+  }: {
+    ruleConsumer: string;
+    ruleProducer?: string;
+  }) => boolean
 ): Record<string, TimelineNonEcsData[]> =>
   timelineData.reduce((acc, v) => {
-    const fvm = eventIds.includes(v._id)
-      ? { [v._id]: v.data.filter((ti) => fieldsToKeep.includes(ti.field)) }
-      : {};
+    // FUTURE DEVELOPER
+    // We only have one featureId for security solution therefore we can just use hasAlertsCrud
+    // but for o11y we can multiple featureIds so we need to check every consumer
+    // of the alert to see if they have the permission to update the alert
+    const ruleConsumers = v.data.find((d) => d.field === ALERT_RULE_CONSUMER)?.value ?? [];
+    const ruleProducers = v.data.find((d) => d.field === ALERT_RULE_PRODUCER)?.value ?? [];
+    const hasPermissions = hasAlertsCrudPermissionsByRule
+      ? hasAlertsCrudPermissionsByRule({
+          ruleConsumer: ruleConsumers.length > 0 ? ruleConsumers[0] : '',
+          ruleProducer: ruleProducers.length > 0 ? ruleProducers[0] : undefined,
+        })
+      : hasAlertsCrud;
+
+    const fvm =
+      hasPermissions && eventIds.includes(v._id)
+        ? { [v._id]: v.data.filter((ti) => fieldsToKeep.includes(ti.field)) }
+        : {};
     return {
       ...acc,
       ...fvm,
@@ -192,11 +215,14 @@ export const allowSorting = ({
 export const addBuildingBlockStyle = (
   ecs: Ecs,
   theme: EuiTheme,
-  setCellProps: EuiDataGridCellValueElementProps['setCellProps']
+  setCellProps: EuiDataGridCellValueElementProps['setCellProps'],
+  defaultStyles?: React.CSSProperties
 ) => {
+  const currentStyles = defaultStyles ?? {};
   if (isEventBuildingBlockType(ecs)) {
     setCellProps({
       style: {
+        ...currentStyles,
         backgroundColor: `${theme.eui.euiColorHighlight}`,
       },
     });
@@ -204,6 +230,7 @@ export const addBuildingBlockStyle = (
     // reset cell style
     setCellProps({
       style: {
+        ...currentStyles,
         backgroundColor: 'inherit',
       },
     });

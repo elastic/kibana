@@ -42,7 +42,7 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
   const {
     http,
     notifications: { toasts },
-    spacesOss,
+    spaces: spacesApi,
   } = useKibana().services;
 
   const { basePath } = http;
@@ -68,10 +68,10 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
   useEffect(() => {
     if (alert) {
       const outcome = (alert as ResolvedRule).outcome;
-      if (outcome === 'aliasMatch' && spacesOss.isSpacesAvailable) {
+      if (spacesApi && outcome === 'aliasMatch') {
         // This rule has been resolved from a legacy URL - redirect the user to the new URL and display a toast.
         const path = basePath.prepend(`insightsAndAlerting/triggersActions/rule/${alert.id}`);
-        spacesOss.ui.redirectLegacyUrl(
+        spacesApi.ui.redirectLegacyUrl(
           path,
           i18n.translate('xpack.triggersActionsUI.sections.alertDetails.redirectObjectNoun', {
             defaultMessage: 'rule',
@@ -84,8 +84,8 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
 
   const getLegacyUrlConflictCallout = () => {
     const outcome = (alert as ResolvedRule).outcome;
-    const aliasTargetId = (alert as ResolvedRule).alias_target_id;
-    if (outcome === 'conflict' && aliasTargetId && spacesOss.isSpacesAvailable) {
+    if (spacesApi && outcome === 'conflict') {
+      const aliasTargetId = (alert as ResolvedRule).alias_target_id!; // This is always defined if outcome === 'conflict'
       // We have resolved to one rule, but there is another one with a legacy URL associated with this page. Display a
       // callout with a warning for the user, and provide a way for them to navigate to the other rule.
       const otherRulePath = basePath.prepend(
@@ -94,7 +94,7 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
       return (
         <>
           <EuiSpacer />
-          {spacesOss.ui.components.getLegacyUrlConflict({
+          {spacesApi.ui.components.getLegacyUrlConflict({
             objectNoun: i18n.translate(
               'xpack.triggersActionsUI.sections.alertDetails.redirectObjectNoun',
               {

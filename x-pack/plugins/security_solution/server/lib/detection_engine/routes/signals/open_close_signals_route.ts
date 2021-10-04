@@ -6,6 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { setSignalStatusValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/set_signal_status_type_dependents';
 import {
   SetSignalsStatusSchemaDecoded,
@@ -66,7 +67,12 @@ export const setSignalsStatusRoute = (router: SecuritySolutionPluginRouter) => {
           refresh: true,
           body: {
             script: {
-              source: `ctx._source.signal.status = '${status}'`,
+              source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
+                ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}'
+              }
+              if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                ctx._source.signal.status = '${status}'
+              }`,
               lang: 'painless',
             },
             query: queryObject,

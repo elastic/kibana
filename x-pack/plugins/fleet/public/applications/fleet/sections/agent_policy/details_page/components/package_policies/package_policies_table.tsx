@@ -63,12 +63,11 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   // used in the InMemoryTable (flattens some values for search) as well as
   // the list of options that will be used in the filters dropdowns
   const [packagePolicies, namespaces] = useMemo((): [InMemoryPackagePolicy[], FilterOption[]] => {
-    const namespacesValues: string[] = [];
-    const inputTypesValues: string[] = [];
+    const namespacesValues: Set<string> = new Set();
     const mappedPackagePolicies = originalPackagePolicies.map<InMemoryPackagePolicy>(
       (packagePolicy) => {
-        if (packagePolicy.namespace && !namespacesValues.includes(packagePolicy.namespace)) {
-          namespacesValues.push(packagePolicy.namespace);
+        if (packagePolicy.namespace) {
+          namespacesValues.add(packagePolicy.namespace);
         }
 
         const updatableIntegrationRecord = updatableIntegrations.get(
@@ -78,7 +77,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         const hasUpgrade =
           !!updatableIntegrationRecord &&
           updatableIntegrationRecord.policiesToUpgrade.some(
-            ({ id }) => id === packagePolicy.policy_id
+            ({ pkgPolicyId }) => pkgPolicyId === packagePolicy.id
           );
 
         return {
@@ -91,10 +90,11 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
       }
     );
 
-    namespacesValues.sort(stringSortAscending);
-    inputTypesValues.sort(stringSortAscending);
+    const namespaceFilterOptions = [...namespacesValues]
+      .sort(stringSortAscending)
+      .map(toFilterOption);
 
-    return [mappedPackagePolicies, namespacesValues.map(toFilterOption)];
+    return [mappedPackagePolicies, namespaceFilterOptions];
   }, [originalPackagePolicies, updatableIntegrations]);
 
   const columns = useMemo(
@@ -102,6 +102,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
       {
         field: 'name',
         sortable: true,
+        truncateText: true,
         name: i18n.translate('xpack.fleet.policyDetails.packagePoliciesTable.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
@@ -237,7 +238,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                   upgradePackagePolicyHref={`${getHref('upgrade_package_policy', {
                     policyId: agentPolicy.id,
                     packagePolicyId: packagePolicy.id,
-                  })}`}
+                  })}?from=fleet-policy-list`}
                 />
               );
             },
@@ -266,11 +267,12 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           : [
               <EuiButton
                 key="addPackagePolicyButton"
+                fill
                 isDisabled={!hasWriteCapabilities}
-                iconType="refresh"
+                iconType="plusInCircle"
                 onClick={() => {
                   application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
-                    path: pagePathGetters.integrations_all()[1],
+                    path: pagePathGetters.integrations_all({})[1],
                     state: { forAgentPolicyId: agentPolicy.id },
                   });
                 }}

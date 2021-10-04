@@ -16,7 +16,7 @@ import {
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation } from 'react-query';
 import deepMerge from 'deepmerge';
 
@@ -114,7 +114,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     ),
   });
 
-  const { submit } = form;
+  const { setFieldValue, submit, isSubmitting } = form;
 
   const actionId = useMemo(() => data?.actions[0].action_id, [data?.actions]);
   const agentIds = useMemo(() => data?.actions[0].agents, [data?.actions]);
@@ -143,9 +143,10 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     return 'incomplete';
   }, [agentSelected, isError, isLoading, isSuccess, form]);
 
-  const resultsStatus = useMemo(() => (queryStatus === 'complete' ? 'incomplete' : 'disabled'), [
-    queryStatus,
-  ]);
+  const resultsStatus = useMemo(
+    () => (queryStatus === 'complete' ? 'incomplete' : 'disabled'),
+    [queryStatus]
+  );
 
   const queryComponentProps = useMemo(
     () => ({
@@ -185,7 +186,10 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <EuiButton disabled={!agentSelected || !queryValueProvided} onClick={submit}>
+            <EuiButton
+              disabled={!agentSelected || !queryValueProvided || isSubmitting}
+              onClick={submit}
+            >
               <FormattedMessage
                 id="xpack.osquery.liveQueryForm.form.submitButtonLabel"
                 defaultMessage="Submit"
@@ -196,13 +200,14 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       </>
     ),
     [
-      agentSelected,
-      permissions.writeSavedQueries,
-      handleShowSaveQueryFlout,
       queryComponentProps,
+      singleAgentMode,
+      permissions.writeSavedQueries,
+      agentSelected,
       queryValueProvided,
       resultsStatus,
-      singleAgentMode,
+      handleShowSaveQueryFlout,
+      isSubmitting,
       submit,
     ]
   );
@@ -252,6 +257,15 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     ),
     [queryFieldStepContent, resultsStepContent]
   );
+
+  useEffect(() => {
+    if (defaultValue?.agentSelection) {
+      setFieldValue('agentSelection', defaultValue?.agentSelection);
+    }
+    if (defaultValue?.query) {
+      setFieldValue('query', defaultValue?.query);
+    }
+  }, [defaultValue, setFieldValue]);
 
   return (
     <>

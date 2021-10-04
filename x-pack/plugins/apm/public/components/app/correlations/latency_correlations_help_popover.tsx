@@ -39,7 +39,7 @@ export function LatencyCorrelationsHelpPopover() {
       <p>
         <FormattedMessage
           id="xpack.apm.correlations.latencyPopoverChartExplanation"
-          defaultMessage="The latency distribution chart visualizes the overall latency of the transactions in the service. When you hover over attributes in the table, their latency distribution is added to the chart."
+          defaultMessage="The latency distribution chart visualizes the overall latency of the transactions in the transaction group. When you hover over attributes in the table, their latency distribution is added to the chart."
         />
       </p>
       <p>

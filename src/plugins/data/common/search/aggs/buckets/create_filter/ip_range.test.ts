@@ -12,6 +12,7 @@ import { mockAggTypesRegistry } from '../../test_helpers';
 import { IpFormat } from '../../../../../../field_formats/common';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../bucket_agg_type';
+import { RangeFilter } from '@kbn/es-query';
 
 describe('AggConfig Filters', () => {
   describe('IP range', () => {
@@ -53,7 +54,7 @@ describe('AggConfig Filters', () => {
         type: 'range',
         from: '0.0.0.0',
         to: '1.1.1.1',
-      });
+      }) as RangeFilter;
 
       expect(filter).toHaveProperty('range');
       expect(filter).toHaveProperty('meta');
@@ -81,7 +82,7 @@ describe('AggConfig Filters', () => {
       const filter = createFilterIpRange(aggConfigs.aggs[0] as IBucketAggConfig, {
         type: 'mask',
         mask: '67.129.65.201/27',
-      });
+      }) as RangeFilter;
 
       expect(filter).toHaveProperty('range');
       expect(filter).toHaveProperty('meta');

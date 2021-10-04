@@ -1,5 +1,6 @@
 {
   "id": "taskManagerPerformance",
+  "owner": { "name": "Alerting Services", "githubTeam": "kibana-alerting-services" },
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack"],

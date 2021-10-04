@@ -31,7 +31,7 @@ export async function rollupServiceProvider(
     estypes.RollupGetRollupCapabilitiesRollupCapabilitySummary[] | null
   > {
     if (rollupIndexPatternObject !== null) {
-      const parsedTypeMetaData = JSON.parse(rollupIndexPatternObject.attributes.typeMeta);
+      const parsedTypeMetaData = JSON.parse(rollupIndexPatternObject.attributes.typeMeta!);
       const rollUpIndex: string = parsedTypeMetaData.params.rollup_index;
       const { body: rollupCaps } = await asCurrentUser.rollup.getRollupIndexCaps({
         index: rollUpIndex,

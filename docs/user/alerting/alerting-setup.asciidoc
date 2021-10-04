@@ -61,9 +61,13 @@ Rules and connectors are isolated to the {kib} space in which they were created.
 [[alerting-authorization]]
 === Authorization
 
-Rules, including all background detection and the actions they generate are authorized using an <<api-keys, API key>> associated with the last user to edit the rule. Upon creating or modifying a rule, an API key is generated for that user, capturing a snapshot of their privileges at that moment in time. The API key is then used to run all background tasks associated with the rule including detection checks and executing actions. 
+Rules are authorized using an <<api-keys, API key>> associated with the last user to edit the rule. This API key captures a snapshot of the user's privileges at the time of edit and is subsequently used to run all background tasks associated with the rule, including condition checks, like {es} queries, and action executions. The following rule actions will re-generate the API key:
+
+* Creating a rule
+* Enabling a disabled rule
+* Updating a rule
 
 [IMPORTANT]
 ==============================================
-If a rule requires certain privileges to run, such as index privileges, keep in mind that if a user without those privileges updates the rule, the rule will no longer function.  
+If a rule requires certain privileges, such as index privileges, to run, and a user without those privileges updates, disables, or re-enables the rule, the rule will no longer function. Conversely, if a user with greater or administrator privileges modifies the rule, it will begin running with increased privileges.
 ==============================================

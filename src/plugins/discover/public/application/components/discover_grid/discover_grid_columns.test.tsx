@@ -119,7 +119,7 @@ describe('Discover grid columns ', function () {
           ],
           "display": "Time (timestamp)",
           "id": "timestamp",
-          "initialWidth": 180,
+          "initialWidth": 190,
           "isSortable": true,
           "schema": "datetime",
         },

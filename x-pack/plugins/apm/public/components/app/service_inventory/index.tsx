@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiEmptyPrompt,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import uuid from 'uuid';
@@ -16,10 +21,10 @@ import { useUrlParams } from '../../../context/url_params_context/use_url_params
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { useUpgradeAssistantHref } from '../../shared/Links/kibana';
 import { SearchBar } from '../../shared/search_bar';
 import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
-import { NoServicesMessage } from './no_services_message';
 import { ServiceList } from './service_list';
 import { MLCallout } from './service_list/MLCallout';
 
@@ -34,16 +39,17 @@ const initialData = {
 
 let hasDisplayedToast = false;
 
-function useServicesFetcher({
-  environment,
-  kuery,
-}: {
-  environment: string;
-  kuery: string;
-}) {
+function useServicesFetcher() {
   const {
-    urlParams: { start, end, comparisonEnabled, comparisonType },
+    urlParams: { comparisonEnabled, comparisonType },
   } = useUrlParams();
+
+  const {
+    query: { rangeFrom, rangeTo, environment, kuery },
+  } = useApmParams('/services/{serviceName}', '/services');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
   const { core } = useApmPluginContext();
   const upgradeAssistantHref = useUpgradeAssistantHref();
 
@@ -153,20 +159,11 @@ function useServicesFetcher({
 export function ServiceInventory() {
   const { core } = useApmPluginContext();
 
-  const {
-    query: { environment, kuery },
-  } = useApmParams('/services');
+  const { mainStatisticsData, mainStatisticsStatus, comparisonData } =
+    useServicesFetcher();
 
-  const {
-    mainStatisticsData,
-    mainStatisticsStatus,
-    comparisonData,
-  } = useServicesFetcher({ environment, kuery });
-
-  const {
-    anomalyDetectionJobsData,
-    anomalyDetectionJobsStatus,
-  } = useAnomalyDetectionJobsContext();
+  const { anomalyDetectionJobsData, anomalyDetectionJobsStatus } =
+    useAnomalyDetectionJobsContext();
 
   const [userHasDismissedCallout, setUserHasDismissedCallout] = useLocalStorage(
     'apm.userHasDismissedServiceInventoryMlCallout',
@@ -182,6 +179,19 @@ export function ServiceInventory() {
     !userHasDismissedCallout;
 
   const isLoading = mainStatisticsStatus === FETCH_STATUS.LOADING;
+  const isFailure = mainStatisticsStatus === FETCH_STATUS.FAILURE;
+  const noItemsMessage = (
+    <EuiEmptyPrompt
+      title={
+        <div>
+          {i18n.translate('xpack.apm.servicesTable.notFoundLabel', {
+            defaultMessage: 'No services found',
+          })}
+        </div>
+      }
+      titleSize="s"
+    />
+  );
 
   return (
     <>
@@ -195,16 +205,10 @@ export function ServiceInventory() {
         <EuiFlexItem>
           <ServiceList
             isLoading={isLoading}
+            isFailure={isFailure}
             items={mainStatisticsData.items}
             comparisonData={comparisonData}
-            noItemsMessage={
-              !isLoading && (
-                <NoServicesMessage
-                  historicalDataFound={mainStatisticsData.hasHistoricalData}
-                  status={mainStatisticsStatus}
-                />
-              )
-            }
+            noItemsMessage={noItemsMessage}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

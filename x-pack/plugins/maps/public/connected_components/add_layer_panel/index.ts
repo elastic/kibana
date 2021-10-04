@@ -22,7 +22,7 @@ import {
 import { MapStoreState } from '../../reducers/store';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 import { hasPreviewLayers, isLoadingPreviewLayers } from '../../selectors/map_selectors';
-import { DRAW_MODE } from '../../../common';
+import { DRAW_MODE } from '../../../common/constants';
 
 function mapStateToProps(state: MapStoreState) {
   return {

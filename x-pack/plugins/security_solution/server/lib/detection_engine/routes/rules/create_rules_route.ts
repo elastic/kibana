@@ -6,9 +6,11 @@
  */
 
 import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
-import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+} from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildMlAuthz } from '../../../machine_learning/authz';
@@ -16,7 +18,6 @@ import { throwHttpError } from '../../../machine_learning/validation';
 import { readRules } from '../../rules/read_rules';
 import { buildSiemResponse } from '../utils';
 
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { createRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 import { newTransformValidate } from './validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
@@ -25,7 +26,7 @@ import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters'
 export const createRulesRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  ruleDataClient?: IRuleDataClient | null // TODO: Use this for RAC (otherwise delete it)
+  isRuleRegistryEnabled: boolean
 ): void => {
   router.post(
     {
@@ -55,6 +56,7 @@ export const createRulesRoute = (
 
         if (request.body.rule_id != null) {
           const rule = await readRules({
+            isRuleRegistryEnabled,
             rulesClient,
             ruleId: request.body.rule_id,
             id: undefined,
@@ -67,7 +69,11 @@ export const createRulesRoute = (
           }
         }
 
-        const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient);
+        const internalRule = convertCreateAPIToInternalSchema(
+          request.body,
+          siemClient,
+          isRuleRegistryEnabled
+        );
 
         const mlAuthz = buildMlAuthz({
           license: context.licensing.license,
@@ -81,7 +87,7 @@ export const createRulesRoute = (
           esClient.asCurrentUser,
           internalRule.params.outputIndex
         );
-        if (!indexExists) {
+        if (!isRuleRegistryEnabled && !indexExists) {
           return siemResponse.error({
             statusCode: 400,
             body: `To create a rule, the index must exist first. Index ${internalRule.params.outputIndex} does not exist`,
@@ -95,29 +101,28 @@ export const createRulesRoute = (
           data: internalRule,
         });
 
-        const ruleActions = await updateRulesNotifications({
-          ruleAlertId: createdRule.id,
-          rulesClient,
-          savedObjectsClient,
-          enabled: createdRule.enabled,
-          actions: request.body.actions,
-          throttle: request.body.throttle ?? null,
-          name: createdRule.name,
-        });
+        // mutes if we are creating the rule with the explicit "no_actions"
+        if (request.body.throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
+          await rulesClient.muteAll({ id: createdRule.id });
+        }
 
         const ruleStatuses = await context.securitySolution.getExecutionLogClient().find({
           logsCount: 1,
           ruleId: createdRule.id,
           spaceId: context.securitySolution.getSpaceId(),
         });
-        const [validated, errors] = newTransformValidate(createdRule, ruleActions, ruleStatuses[0]);
+        const [validated, errors] = newTransformValidate(
+          createdRule,
+          ruleStatuses[0],
+          isRuleRegistryEnabled
+        );
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {
           return response.ok({ body: validated ?? {} });
         }
       } catch (err) {
-        const error = transformError(err);
+        const error = transformError(err as Error);
         return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,

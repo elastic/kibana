@@ -19,6 +19,7 @@ import {
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 
 export interface DefaultDraggableType {
+  hideTopN?: boolean;
   id: string;
   isDraggable?: boolean;
   field: string;
@@ -88,9 +89,11 @@ Content.displayName = 'Content';
  * @param tooltipContent - defaults to displaying `field`, pass `null` to
  * prevent a tooltip from being displayed, or pass arbitrary content
  * @param queryValue - defaults to `value`, this query overrides the `queryMatch.value` used by the `DataProvider` that represents the data
+ * @param hideTopN - defaults to `false`, when true, the option to aggregate this field will be hidden
  */
 export const DefaultDraggable = React.memo<DefaultDraggableType>(
   ({
+    hideTopN = false,
     id,
     isDraggable = true,
     field,
@@ -137,6 +140,7 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
     return (
       <DraggableWrapper
         dataProvider={dataProviderProp}
+        hideTopN={hideTopN}
         isDraggable={isDraggable}
         render={renderCallback}
         timelineId={timelineId}

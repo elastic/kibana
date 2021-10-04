@@ -18,7 +18,8 @@ interface SetupDeps {
 
 export class SavedObjectTaggingOssPlugin
   implements
-    Plugin<SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart, SetupDeps, {}> {
+    Plugin<SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart, SetupDeps, {}>
+{
   private apiRegistered = false;
   private api?: SavedObjectsTaggingApi;
 

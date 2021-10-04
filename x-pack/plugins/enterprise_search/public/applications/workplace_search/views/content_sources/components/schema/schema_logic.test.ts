@@ -40,12 +40,8 @@ import { SchemaLogic, dataTypeOptions } from './schema_logic';
 
 describe('SchemaLogic', () => {
   const { http } = mockHttpValues;
-  const {
-    clearFlashMessages,
-    flashAPIErrors,
-    flashSuccessToast,
-    setErrorMessage,
-  } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashAPIErrors, flashSuccessToast, setErrorMessage } =
+    mockFlashMessageHelpers;
   const { mount } = new LogicMounter(SchemaLogic);
 
   const defaultValues = {
@@ -208,7 +204,7 @@ describe('SchemaLogic', () => {
         SchemaLogic.actions.initializeSchema();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/sources/source123/schemas'
+          '/internal/workplace_search/org/sources/source123/schemas'
         );
         await nextTick();
         expect(onInitializeSchemaSpy).toHaveBeenCalledWith(serverResponse);
@@ -222,7 +218,7 @@ describe('SchemaLogic', () => {
         SchemaLogic.actions.initializeSchema();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/source123/schemas'
+          '/internal/workplace_search/account/sources/source123/schemas'
         );
         await nextTick();
         expect(onInitializeSchemaSpy).toHaveBeenCalledWith(serverResponse);
@@ -254,12 +250,12 @@ describe('SchemaLogic', () => {
         );
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/sources/source123/schemas'
+          '/internal/workplace_search/org/sources/source123/schemas'
         );
 
         await initPromise;
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/sources/source123/reindex_job/123'
+          '/internal/workplace_search/org/sources/source123/reindex_job/123'
         );
 
         await promise;
@@ -285,12 +281,12 @@ describe('SchemaLogic', () => {
         );
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/source123/schemas'
+          '/internal/workplace_search/account/sources/source123/schemas'
         );
 
         await initPromise;
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/source123/reindex_job/123'
+          '/internal/workplace_search/account/sources/source123/reindex_job/123'
         );
 
         await promise;
@@ -365,7 +361,7 @@ describe('SchemaLogic', () => {
           SchemaLogic.actions.setServerField(schema, ADD);
 
           expect(http.post).toHaveBeenCalledWith(
-            '/api/workplace_search/org/sources/source123/schemas',
+            '/internal/workplace_search/org/sources/source123/schemas',
             {
               body: JSON.stringify({ ...schema }),
             }
@@ -383,7 +379,7 @@ describe('SchemaLogic', () => {
           SchemaLogic.actions.setServerField(schema, ADD);
 
           expect(http.post).toHaveBeenCalledWith(
-            '/api/workplace_search/account/sources/source123/schemas',
+            '/internal/workplace_search/account/sources/source123/schemas',
             {
               body: JSON.stringify({ ...schema }),
             }
@@ -424,7 +420,7 @@ describe('SchemaLogic', () => {
           SchemaLogic.actions.setServerField(schema, UPDATE);
 
           expect(http.post).toHaveBeenCalledWith(
-            '/api/workplace_search/org/sources/source123/schemas',
+            '/internal/workplace_search/org/sources/source123/schemas',
             {
               body: JSON.stringify({ ...schema }),
             }
@@ -442,7 +438,7 @@ describe('SchemaLogic', () => {
           SchemaLogic.actions.setServerField(schema, UPDATE);
 
           expect(http.post).toHaveBeenCalledWith(
-            '/api/workplace_search/account/sources/source123/schemas',
+            '/internal/workplace_search/account/sources/source123/schemas',
             {
               body: JSON.stringify({ ...schema }),
             }

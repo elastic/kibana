@@ -17,6 +17,7 @@ jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
     services: {
       http: { basePath: { prepend: jest.fn((path: string) => (path ? path : 'path')) } },
       data: { indexPatterns: {} },
+      share: { url: { locators: { get: () => ({ useUrl: () => '' }) } } },
       uiSettings: { get: jest.fn() },
       docLinks: {
         links: {

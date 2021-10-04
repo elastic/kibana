@@ -112,7 +112,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
         const response: SavedObjectsImportResponse = {
           success: true,
           successCount: filteredObjects.length,
-          successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
+          successResults: ['Some success(es) occurred!' as unknown as SavedObjectsImportSuccess],
           warnings: [],
         };
 
@@ -138,10 +138,8 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
 
     const request = httpServerMock.createKibanaRequest();
 
-    const resolveCopySavedObjectsToSpacesConflicts = resolveCopySavedObjectsToSpacesConflictsFactory(
-      savedObjects,
-      request
-    );
+    const resolveCopySavedObjectsToSpacesConflicts =
+      resolveCopySavedObjectsToSpacesConflictsFactory(savedObjects, request);
 
     const namespace = 'sourceSpace';
     const objects = [{ type: 'dashboard', id: 'my-dashboard' }];
@@ -214,7 +212,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
         return Promise.resolve({
           success: true,
           successCount: filteredObjects.length,
-          successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
+          successResults: ['Some success(es) occurred!' as unknown as SavedObjectsImportSuccess],
           warnings: [],
         });
       },
@@ -222,10 +220,8 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
 
     const request = httpServerMock.createKibanaRequest();
 
-    const resolveCopySavedObjectsToSpacesConflicts = resolveCopySavedObjectsToSpacesConflictsFactory(
-      savedObjects,
-      request
-    );
+    const resolveCopySavedObjectsToSpacesConflicts =
+      resolveCopySavedObjectsToSpacesConflictsFactory(savedObjects, request);
 
     const result = await resolveCopySavedObjectsToSpacesConflicts('sourceSpace', {
       includeReferences: true,
@@ -286,10 +282,8 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
 
     const request = httpServerMock.createKibanaRequest();
 
-    const resolveCopySavedObjectsToSpacesConflicts = resolveCopySavedObjectsToSpacesConflictsFactory(
-      savedObjects,
-      request
-    );
+    const resolveCopySavedObjectsToSpacesConflicts =
+      resolveCopySavedObjectsToSpacesConflictsFactory(savedObjects, request);
 
     await expect(
       resolveCopySavedObjectsToSpacesConflicts('sourceSpace', {
