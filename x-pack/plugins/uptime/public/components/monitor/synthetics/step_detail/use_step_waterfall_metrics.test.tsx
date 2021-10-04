@@ -83,6 +83,7 @@ describe('useStepWaterfallMetrics', () => {
               ],
             },
           },
+          size: 1000,
         },
         index: 'heartbeat-*',
       },
