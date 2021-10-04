@@ -153,10 +153,10 @@ function getMarkerBody(label: string | undefined, isHorizontal: boolean) {
           whiteSpace: 'nowrap',
           transform: 'translate(0, 100%) rotate(-90deg)',
           transformOrigin: '0 0',
-          maxWidth: REFERENCE_LINE_MARKER_SIZE * 3,
+          maxWidth: THRESHOLD_MARKER_SIZE * 3,
         }}
       >
-        {Label}
+        {label}
         <div
           style={{
             float: 'left',
