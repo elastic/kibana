@@ -35,10 +35,9 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes, lastUpdated }:
         <EuiFlexItem>
           <EuiText>
             <h2>
-              {DataViewLabels[reportType] ??
-                i18n.translate('xpack.observability.expView.heading.label', {
-                  defaultMessage: 'Analyze data',
-                })}{' '}
+              {i18n.translate('xpack.observability.expView.heading.label', {
+                defaultMessage: 'Explore data',
+              })}{' '}
               <EuiBetaBadge
                 style={{
                   verticalAlign: `middle`,
