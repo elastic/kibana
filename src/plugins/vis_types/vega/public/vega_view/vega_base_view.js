@@ -49,16 +49,17 @@ export function bypassExternalUrlCheck(url) {
   return { url, bypassToken };
 }
 
-const externalUrlsAreNotEnabledError = new Error(
-  i18n.translate('visTypeVega.vegaParser.baseView.externalUrlsAreNotEnabledErrorMessage', {
-    defaultMessage:
-      'External URLs are not enabled. Add {enableExternalUrls} to {kibanaConfigFileName}',
-    values: {
-      enableExternalUrls: 'vis_type_vega.enableExternalUrls: true',
-      kibanaConfigFileName: 'kibana.yml',
-    },
-  })
-);
+const getExternalUrlsAreNotEnabledError = () =>
+  new Error(
+    i18n.translate('visTypeVega.vegaParser.baseView.externalUrlsAreNotEnabledErrorMessage', {
+      defaultMessage:
+        'External URLs are not enabled. Add {enableExternalUrls} to {kibanaConfigFileName}',
+      values: {
+        enableExternalUrls: 'vis_type_vega.enableExternalUrls: true',
+        kibanaConfigFileName: 'kibana.yml',
+      },
+    })
+  );
 
 const getExternalUrlServiceError = (uri) =>
   new Error(
@@ -210,7 +211,7 @@ export class VegaBaseView {
         // because user can only supply pure JSON data structure.
         uri = uri.url;
       } else if (!this._enableExternalUrls) {
-        this.onError(externalUrlsAreNotEnabledError);
+        this.onError(getExternalUrlsAreNotEnabledError());
       } else if (!this._externalUrl.validateUrl(uri)) {
         this.onError(getExternalUrlServiceError(uri));
       }
