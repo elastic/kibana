@@ -16128,10 +16128,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/url_state/helpers.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/navigation/helpers.ts"
           },
           {
@@ -33471,10 +33467,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/url_state/helpers.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/navigation/helpers.ts"
           },
           {
@@ -40222,10 +40214,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/url_state/types.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/url_state/helpers.ts"
           },
           {
             "plugin": "securitySolution",
