@@ -302,9 +302,11 @@ export class SearchInterceptor {
       });
     }
 
-    inspectSearch(response$, options, this.getSearchRequestBody(request), {
-      title: request.params.index,
-    });
+    if (options.inspector) {
+      inspectSearch(response$, options, this.getSearchRequestBody(request), {
+        title: request.params.index,
+      });
+    }
 
     return {
       response$,
