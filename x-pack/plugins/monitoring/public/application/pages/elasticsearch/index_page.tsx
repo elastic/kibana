@@ -5,18 +5,19 @@
  * 2.0.
  */
 import React, { useContext, useState, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { ItemTemplate } from './item_template';
+import { useParams } from 'react-router-dom';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../global_state_context';
-import { NodeReact } from '../../../components/elasticsearch';
+// @ts-ignore
+import { IndexReact } from '../../../components/elasticsearch/index/index_react';
 import { ComponentProps } from '../../route_init';
 import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
-import { useLocalStorage } from '../../hooks/use_local_storage';
 import { useCharts } from '../../hooks/use_charts';
-import { nodesByIndices } from '../../../components/elasticsearch/shard_allocation/transformers/nodes_by_indices';
+import { ItemTemplate } from './item_template';
+// @ts-ignore
+import { indicesByNodes } from '../../../components/elasticsearch/shard_allocation/transformers/indices_by_nodes';
 // @ts-ignore
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 
@@ -26,45 +27,36 @@ interface SetupModeProps {
   bottomBarComponent: any;
 }
 
-export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) => {
+export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
-  const { zoomInfo, onBrush } = useCharts();
-  const [showSystemIndices, setShowSystemIndices] = useLocalStorage<boolean>(
-    'showSystemIndices',
-    false
-  );
-
-  const { node }: { node: string } = useParams();
   const { services } = useKibana<{ data: any }>();
-
+  const { index }: { index: string } = useParams();
+  const { zoomInfo, onBrush } = useCharts();
   const clusterUuid = globalState.cluster_uuid;
-  const ccs = globalState.ccs;
   const [data, setData] = useState({} as any);
+  const [indexLabel, setIndexLabel] = useState(labels.index as any);
   const [nodesByIndicesData, setNodesByIndicesData] = useState([]);
 
-  const title = i18n.translate('xpack.monitoring.elasticsearch.node.overview.routeTitle', {
-    defaultMessage: 'Elasticsearch - Nodes - {nodeName} - Overview',
+  const title = i18n.translate('xpack.monitoring.elasticsearch.index.overview.title', {
+    defaultMessage: 'Elasticsearch - Indices - {indexName} - Overview',
     values: {
-      nodeName: data?.nodeSummary?.name,
+      indexName: index,
     },
   });
 
-  const pageTitle = i18n.translate('xpack.monitoring.elasticsearch.node.overview.pageTitle', {
-    defaultMessage: 'Elasticsearch node: {node}',
+  const pageTitle = i18n.translate('xpack.monitoring.elasticsearch.index.overview.pageTitle', {
+    defaultMessage: 'Index: {indexName}',
     values: {
-      node: data?.nodeSummary?.name,
+      indexName: index,
     },
   });
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
-    const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes/${node}`;
-
+    const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/indices/${index}`;
     const response = await services.http?.fetch(url, {
       method: 'POST',
       body: JSON.stringify({
-        showSystemIndices,
-        ccs,
         timeRange: {
           min: bounds.min.toISOString(),
           max: bounds.max.toISOString(),
@@ -72,44 +64,36 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
         is_advanced: false,
       }),
     });
-
     setData(response);
-    const transformer = nodesByIndices();
+    const transformer = indicesByNodes();
     setNodesByIndicesData(transformer(response.shards, response.nodes));
-  }, [
-    ccs,
-    clusterUuid,
-    services.data?.query.timefilter.timefilter,
-    services.http,
-    node,
-    showSystemIndices,
-  ]);
 
-  const toggleShowSystemIndices = useCallback(() => {
-    setShowSystemIndices(!showSystemIndices);
-  }, [showSystemIndices, setShowSystemIndices]);
+    const shards = response.shards;
+    if (shards.some((shard: any) => shard.state === 'UNASSIGNED')) {
+      setIndexLabel(labels.indexWithUnassigned);
+    }
+  }, [clusterUuid, services.data?.query.timefilter.timefilter, services.http, index]);
 
   return (
     <ItemTemplate
       title={title}
       pageTitle={pageTitle}
       getPageData={getPageData}
-      id={node}
-      pageType="nodes"
+      id={index}
+      pageType="indices"
     >
       <SetupModeRenderer
         render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}
-            <NodeReact
+            <IndexReact
+              setupMode={setupMode}
+              labels={indexLabel}
               alerts={{}}
-              labels={labels.node}
-              nodeId={node}
-              clusterUuid={clusterUuid}
               onBrush={onBrush}
+              indexUuid={index}
+              clusterUuid={clusterUuid}
               zoomInfo={zoomInfo}
-              toggleShowSystemIndices={toggleShowSystemIndices}
-              showSystemIndices={showSystemIndices}
               nodesByIndices={nodesByIndicesData}
               {...data}
             />
