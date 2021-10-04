@@ -110,7 +110,6 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     const max = last(colorsRange)?.to ?? 0;
     const colors = this.getColors();
     const labels = this.getLabels();
-    const metrics: MetricOptions[] = [];
 
     let bucketColumnId: string;
     let bucketFormatter: IFieldFormat;
@@ -120,37 +119,39 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
       bucketFormatter = getFormatService().deserialize(dimensions.bucket.format);
     }
 
-    dimensions.metrics.forEach((metric: ExpressionValueVisDimension) => {
-      const column = this.getColumn(metric.accessor, table?.columns);
-      const formatter = getFormatService().deserialize(metric.format);
-      table.rows.forEach((row, rowIndex) => {
-        let title = column.name;
-        let value: any = row[column.id];
-        const color = this.getColor(value, labels, colors);
+    return dimensions.metrics.reduce(
+      (acc: MetricOptions[], metric: ExpressionValueVisDimension) => {
+        const column = this.getColumn(metric.accessor, table?.columns);
+        const formatter = getFormatService().deserialize(metric.format);
+        const metrics = table.rows.map((row, rowIndex) => {
+          let title = column.name;
+          let value = row[column.id];
+          const color = this.getColor(value, labels, colors);
 
-        if (isPercentageMode) {
-          value = (value - min) / (max - min);
-        }
-        value = this.getFormattedValue(formatter, value, 'html');
-        if (bucketColumnId) {
-          const bucketValue = this.getFormattedValue(bucketFormatter, row[bucketColumnId]);
-          title = `${bucketValue} - ${title}`;
-        }
+          if (isPercentageMode) {
+            value = (value - min) / (max - min);
+          }
+          value = this.getFormattedValue(formatter, value, 'html');
+          if (bucketColumnId) {
+            const bucketValue = this.getFormattedValue(bucketFormatter, row[bucketColumnId]);
+            title = `${bucketValue} - ${title}`;
+          }
 
-        const shouldColor = colorsRange.length > 1;
+          const shouldColor = colorsRange.length > 1;
 
-        metrics.push({
-          label: title,
-          value,
-          color: shouldColor && style.labelColor ? color : undefined,
-          bgColor: shouldColor && style.bgColor ? color : undefined,
-          lightText: shouldColor && style.bgColor && this.needsLightText(color),
-          rowIndex,
+          return {
+            label: title,
+            value,
+            color: shouldColor && style.labelColor ? color : undefined,
+            bgColor: shouldColor && style.bgColor ? color : undefined,
+            lightText: shouldColor && style.bgColor && this.needsLightText(color),
+            rowIndex,
+          };
         });
-      });
-    });
-
-    return metrics;
+        return [...acc, ...metrics];
+      },
+      []
+    );
   }
 
   private filterBucket = (metric: MetricOptions) => {
