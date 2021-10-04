@@ -100,14 +100,13 @@ export function ErrorMarker({ mark }: Props) {
       <Popover>
         <TimeLegend
           text={asDuration(mark.offset)}
-          indicator={() => (
-            <div style={{ marginRight: theme.eui.euiSizeXS }}>@</div>
-          )}
+          indicator={<div style={{ marginRight: theme.eui.euiSizeXS }}>@</div>}
         />
         <Legend
           key={mark.serviceColor}
           color={mark.serviceColor}
           text={error.service.name}
+          indicator={<span />}
         />
         <EuiText size="s">
           <ErrorLink
