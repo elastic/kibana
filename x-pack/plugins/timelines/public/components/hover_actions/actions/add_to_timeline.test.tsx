@@ -87,7 +87,7 @@ describe('add to timeline', () => {
     });
 
     test('it renders the button icon', () => {
-      expect(screen.getByTestId('add-to-timeline')).toHaveClass('timelines__hoverActionButton');
+      expect(screen.getByRole('button')).toHaveClass('timelines__hoverActionButton');
     });
 
     test('it has the expected aria label', () => {
@@ -105,7 +105,7 @@ describe('add to timeline', () => {
     });
 
     test('it renders the component provided via the `Component` prop', () => {
-      expect(screen.getByTestId('add-to-timeline')).toHaveClass('euiButtonEmpty');
+      expect(screen.getByRole('button')).toHaveClass('euiButtonEmpty');
     });
 
     test('it has the expected aria label', () => {
@@ -143,7 +143,7 @@ describe('add to timeline', () => {
         </TestProviders>
       );
 
-      fireEvent.click(screen.getByTestId('add-to-timeline'));
+      fireEvent.click(screen.getByRole('button'));
 
       expect(mockStartDragToTimeline).toBeCalled();
     });
@@ -155,7 +155,7 @@ describe('add to timeline', () => {
         </TestProviders>
       );
 
-      fireEvent.click(screen.getByTestId('add-to-timeline'));
+      fireEvent.click(screen.getByRole('button'));
 
       expect(mockStartDragToTimeline).not.toBeCalled();
     });
@@ -167,7 +167,7 @@ describe('add to timeline', () => {
         </TestProviders>
       );
 
-      fireEvent.click(screen.getByTestId('add-to-timeline'));
+      fireEvent.click(screen.getByRole('button'));
 
       expect(mockDispatch).toHaveBeenCalledTimes(1);
 
@@ -201,7 +201,7 @@ describe('add to timeline', () => {
         </TestProviders>
       );
 
-      fireEvent.click(screen.getByTestId('add-to-timeline'));
+      fireEvent.click(screen.getByRole('button'));
 
       expect(mockDispatch).toHaveBeenCalledTimes(2);
 
@@ -233,7 +233,7 @@ describe('add to timeline', () => {
         </TestProviders>
       );
 
-      fireEvent.click(screen.getByTestId('add-to-timeline'));
+      fireEvent.click(screen.getByRole('button'));
 
       expect(onClick).toBeCalled();
     });
