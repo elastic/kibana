@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const MAJOR_VERSION = '8.0.0';
+export const MAJOR_VERSION = '7.16.0';
