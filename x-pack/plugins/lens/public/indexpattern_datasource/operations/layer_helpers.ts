@@ -282,9 +282,7 @@ export function insertNewColumn({
 
     const possibleOperation = operationDefinition.getPossibleOperation(indexPattern);
     if (!possibleOperation) {
-      throw new Error(
-        `Can't create operation ${op} because it's incompatible with the index pattern`
-      );
+      throw new Error(`Can't create operation ${op} because it's incompatible with the data view`);
     }
     const isBucketed = Boolean(possibleOperation.isBucketed);
 
