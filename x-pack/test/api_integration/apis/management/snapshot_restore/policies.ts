@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   const { createRepository, createPolicy, deletePolicy, cleanupPolicies, getPolicy } =
     registerEsHelpers(getService);
 
-  describe('Snapshot Lifecycle Management', function () {
+  describe('SLM policies', function () {
     this.tags(['skipCloud']); // file system repositories are not supported in cloud
 
     before(async () => {
@@ -134,9 +134,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('Update', () => {
       const POLICY_NAME = 'test_update_policy';
+      const SNAPSHOT_NAME = 'my_snapshot';
       const POLICY = {
-        name: POLICY_NAME,
-        snapshotName: 'my_snapshot',
         schedule: '0 30 1 * * ?',
         repository: REPO_NAME,
         config: {
@@ -159,7 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         // Create SLM policy that can be used to test PUT request
         try {
-          await createPolicy(POLICY, true);
+          await createPolicy({ ...POLICY, policyName: POLICY_NAME, name: SNAPSHOT_NAME }, true);
         } catch (err) {
           // eslint-disable-next-line no-console
           console.log('[Setup error] Error creating policy');
@@ -175,6 +174,8 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             ...POLICY,
+            name: POLICY_NAME,
+            snapshotName: SNAPSHOT_NAME,
             schedule: '0 0 0 ? * 7',
           })
           .expect(200);
@@ -212,7 +213,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .put(uri)
           .set('kbn-xsrf', 'xxx')
-          .send(requiredFields)
+          .send({ ...requiredFields, name: POLICY_NAME, snapshotName: SNAPSHOT_NAME })
           .expect(200);
 
         expect(body).to.eql({
