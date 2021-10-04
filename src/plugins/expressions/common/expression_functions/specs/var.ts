@@ -36,7 +36,8 @@ export const variable: ExpressionFunctionVar = {
     },
   },
   fn(input, args, context) {
-    const variables: Record<string, any> = context.variables;
+    const { variables } = context;
+
     return variables[args.name];
   },
 };

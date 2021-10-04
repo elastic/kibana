@@ -26,14 +26,14 @@ describe('expression_functions', () => {
       };
 
       context = {
-        getSearchContext: () => ({} as any),
+        getSearchContext: () => ({}),
         getSearchSessionId: () => undefined,
         getExecutionContext: () => undefined,
         types: {},
         variables: { theme: themeProps },
-        abortSignal: {} as any,
-        inspectorAdapters: {} as any,
-      };
+        abortSignal: {},
+        inspectorAdapters: {},
+      } as unknown as typeof context;
     });
 
     it('returns the selected variable', () => {

@@ -37,7 +37,7 @@ export type KnownTypeToString<T> =
  * `someArgument: Promise<boolean | string>` results in `types: ['boolean', 'string']`
  */
 export type TypeString<T> = KnownTypeToString<
-  T extends ObservableLike<any> ? UnwrapObservable<T> : UnwrapPromiseOrReturn<T>
+  T extends ObservableLike<unknown> ? UnwrapObservable<T> : UnwrapPromiseOrReturn<T>
 >;
 
 /**
@@ -52,6 +52,7 @@ export type UnmappedTypeStrings = 'date' | 'filter';
  * Is used to carry information about how to format data in
  * a data table as part of the column definition.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface SerializedFieldFormat<TParams = Record<string, any>> {
   id?: string;
   params?: TParams;

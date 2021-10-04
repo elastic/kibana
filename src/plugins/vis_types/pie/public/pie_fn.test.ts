@@ -8,6 +8,7 @@
 
 import { functionWrapper } from '../../../expressions/common/expression_functions/specs/tests/utils';
 import { createPieVisFn } from './pie_fn';
+import { PieVisConfig } from './types';
 import { Datatable } from '../../../expressions/common/expression_types/specs';
 
 describe('interpreter/functions#pie', () => {
@@ -16,7 +17,7 @@ describe('interpreter/functions#pie', () => {
     type: 'datatable',
     rows: [{ 'col-0-1': 0 }],
     columns: [{ id: 'col-0-1', name: 'Count' }],
-  };
+  } as unknown as Datatable;
   const visConfig = {
     addTooltip: true,
     addLegend: true,
@@ -43,7 +44,7 @@ describe('interpreter/functions#pie', () => {
       params: {},
       aggType: 'count',
     },
-  };
+  } as unknown as PieVisConfig;
 
   beforeEach(() => {
     jest.clearAllMocks();
