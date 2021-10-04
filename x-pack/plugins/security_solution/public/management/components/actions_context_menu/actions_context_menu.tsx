@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import {
   ContextMenuItemNavByRouter,
   ContextMenuItemNavByRouterProps,
-} from '../context_menu_with_router_support/context_menu_item_nav_by_rotuer';
+} from '../context_menu_with_router_support/context_menu_item_nav_by_router';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 
 export interface ActionsContextMenuProps {

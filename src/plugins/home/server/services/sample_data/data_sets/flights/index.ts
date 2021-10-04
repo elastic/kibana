@@ -42,5 +42,6 @@ export const flightsSpecProvider = function (): SampleDatasetSchema {
       },
     ],
     status: 'not_installed',
+    iconPath: '/plugins/home/assets/sample_data_resources/flights/icon.svg',
   };
 };
