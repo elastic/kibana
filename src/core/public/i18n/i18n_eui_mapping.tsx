@@ -649,14 +649,14 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiMarkdownEditorFooter.syntaxModalDescriptionSuffix': i18n.translate(
       'core.euiMarkdownEditorFooter.syntaxModalDescriptionSuffix',
       {
-        defaultMessage: 'You can also utilize these additional syntax plugins to add rich content to your text.',
+        defaultMessage:
+          'You can also utilize these additional syntax plugins to add rich content to your text.',
       }
     ),
     'euiMarkdownEditorFooter.syntaxPopoverDescription': i18n.translate(
       'core.euiMarkdownEditorFooter.syntaxPopoverDescription',
       {
-        defaultMessage:
-          'This editor uses',
+        defaultMessage: 'This editor uses',
       }
     ),
     'euiMarkdownEditorToolbar.editor': i18n.translate('core.euiMarkdownEditorToolbar.editor', {
