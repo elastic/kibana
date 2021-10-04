@@ -98,13 +98,7 @@ export function DimensionContainer({
             }}
           >
             <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
-              <EuiFlexGroup
-                gutterSize="none"
-                alignItems="center"
-                className="lnsDimensionContainer__headerLink"
-                onClick={closeFlyout}
-                responsive={false}
-              >
+              <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={true}>
                   <EuiTitle size="xs">
                     <h2
@@ -122,6 +116,7 @@ export function DimensionContainer({
                     </h2>
                   </EuiTitle>
                 </EuiFlexItem>
+
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
                     color="text"
@@ -136,9 +131,9 @@ export function DimensionContainer({
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlyoutHeader>
-            <EuiFlexItem className="eui-yScrollWithShadows" grow={1}>
-              {panel}
-            </EuiFlexItem>
+
+            <div className="lnsDimensionContainer__content">{panel}</div>
+
             <EuiFlyoutFooter className="lnsDimensionContainer__footer">
               <EuiButtonEmpty flush="left" size="s" iconType="cross" onClick={closeFlyout}>
                 {i18n.translate('xpack.lens.dimensionContainer.close', {
