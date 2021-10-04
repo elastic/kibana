@@ -131,9 +131,6 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
         },
       },
     },
-    dataViewId: {
-      type: 'text',
-    },
     description: {
       type: 'text',
     },

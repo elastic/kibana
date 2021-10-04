@@ -131,18 +131,16 @@ export const requestIndexFieldSearch = async (
     existingIndices = dedupeIndices.filter((index, i) => indicesExist[i]);
     if (!request.onlyCheckIfIndicesExist) {
       const fieldDescriptor = await Promise.all(
-        dedupeIndices
-          .filter((index, i) => indicesExist[i])
-          .map(async (index, n) => {
-            if (index.startsWith('.alerts-observability')) {
-              return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
-                pattern: index,
-              });
-            }
-            return indexPatternsFetcherAsCurrentUser.getFieldsForWildcard({
+        existingIndices.map(async (index, n) => {
+          if (index.startsWith('.alerts-observability')) {
+            return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
               pattern: index,
             });
-          })
+          }
+          return indexPatternsFetcherAsCurrentUser.getFieldsForWildcard({
+            pattern: index,
+          });
+        })
       );
       indexFields = await formatIndexFields(beatFields, fieldDescriptor, dedupeIndices);
     }

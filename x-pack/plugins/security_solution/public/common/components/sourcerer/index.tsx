@@ -186,7 +186,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   useEffect(() => {
     setDataViewId((prevSelectedOption) =>
-      !deepEqual(selectedDataViewId, prevSelectedOption) && selectedDataViewId != null
+      selectedDataViewId != null && !deepEqual(selectedDataViewId, prevSelectedOption)
         ? selectedDataViewId
         : prevSelectedOption
     );

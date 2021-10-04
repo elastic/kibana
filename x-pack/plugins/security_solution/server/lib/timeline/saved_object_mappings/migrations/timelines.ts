@@ -14,7 +14,6 @@ import {
 import { flow } from 'lodash';
 import { SAVED_QUERY_ID_REF_NAME, SAVED_QUERY_TYPE } from '../../constants';
 import { createMigratedDoc, createReference } from './utils';
-import { CreateTimelineSchema } from '../../schemas/timelines';
 import { defaultDataViewRef } from '../../../../../common/constants';
 
 export interface SavedQueryId {
@@ -42,8 +41,8 @@ export const migrateSavedQueryIdToReferences = (
 };
 
 export const migrateDataViewIdToReferences = (
-  doc: SavedObjectUnsanitizedDoc<CreateTimelineSchema>
-): SavedObjectSanitizedDoc<CreateTimelineSchema> => {
+  doc: SavedObjectUnsanitizedDoc<unknown>
+): SavedObjectSanitizedDoc<unknown> => {
   let foundDataView = false;
   const references: SavedObjectReference[] = (doc.references || []).map((t) => {
     // this is very unlikely to be set, but if it is we need to overwrite

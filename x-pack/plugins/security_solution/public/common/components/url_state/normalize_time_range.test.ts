@@ -28,8 +28,7 @@ getTimeRangeSettingsMock.mockImplementation(() => ({
 }));
 
 describe('#normalizeTimeRange', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let dateMathSpy: any;
+  let dateMathSpy: jest.SpyInstance;
   beforeAll(() => {
     dateMathSpy = jest.spyOn(DateMath, 'parse');
     dateMathSpy.mockImplementation((date: string) =>

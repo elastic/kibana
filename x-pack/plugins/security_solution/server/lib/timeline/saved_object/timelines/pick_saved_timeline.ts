@@ -16,12 +16,9 @@ import {
 
 export const pickSavedTimeline = (
   timelineId: string | null,
-  savedTimelineRt: SavedTimelineWithSavedObjectId,
+  savedTimeline: SavedTimelineWithSavedObjectId,
   userInfo: AuthenticatedUser | null
 ): Omit<SavedTimelineWithSavedObjectId, 'dataViewId'> => {
-  // dataViewId is saved in references as it is a reference to a data view saved object id
-  const { dataViewId, ...savedTimeline } = savedTimelineRt;
-
   const dateNow = new Date().valueOf();
 
   if (timelineId == null) {

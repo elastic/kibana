@@ -48,31 +48,27 @@ export const createSourcererDataViewRoute = (
         );
 
         let allDataViews = await dataViewService.getIdsWithTitle();
-        const patternId = DEFAULT_DATA_VIEW_ID;
         const { patternList } = request.body;
-        const siemDataView = allDataViews.find((v) => v.id === patternId);
-        let defaultDataView;
+        const siemDataView = allDataViews.find((v) => v.id === DEFAULT_DATA_VIEW_ID);
         const patternListAsTitle = patternList.join();
 
         if (siemDataView == null) {
-          defaultDataView = await dataViewService.createAndSave({
-            id: patternId,
+          const defaultDataView = await dataViewService.createAndSave({
+            id: DEFAULT_DATA_VIEW_ID,
             title: patternListAsTitle,
             timeFieldName: DEFAULT_TIME_FIELD,
           });
-          // ?? patternId -> type thing here, should never happen
-          allDataViews.push({ ...defaultDataView, id: defaultDataView.id ?? patternId });
-        } else {
-          defaultDataView = { ...siemDataView, id: siemDataView.id ?? '' };
-          if (patternListAsTitle !== defaultDataView.title) {
-            const wholeDataView = await dataViewService.get(defaultDataView.id);
-            wholeDataView.title = patternListAsTitle;
-            await dataViewService.updateSavedObject(wholeDataView);
-            // update the data view in allDataViews
-            allDataViews = allDataViews.map((v) =>
-              v.id === patternId ? { ...v, title: patternListAsTitle } : v
-            );
-          }
+          // ?? DEFAULT_DATA_VIEW_ID -> type thing here, should never happen
+          allDataViews.push({ ...defaultDataView, id: defaultDataView.id ?? DEFAULT_DATA_VIEW_ID });
+        } else if (patternListAsTitle !== siemDataView.title) {
+          const defaultDataView = { ...siemDataView, id: siemDataView.id ?? '' };
+          const wholeDataView = await dataViewService.get(defaultDataView.id);
+          wholeDataView.title = patternListAsTitle;
+          await dataViewService.updateSavedObject(wholeDataView);
+          // update the data view in allDataViews
+          allDataViews = allDataViews.map((v) =>
+            v.id === DEFAULT_DATA_VIEW_ID ? { ...v, title: patternListAsTitle } : v
+          );
         }
 
         const patternLists: string[][] = allDataViews.map(({ title }) => title.split(','));
@@ -92,7 +88,7 @@ export const createSourcererDataViewRoute = (
           patternList: activePatternLists[i],
         }));
         const body = {
-          defaultDataView: kibanaDataViews.find((p) => p.id === patternId) ?? {},
+          defaultDataView: kibanaDataViews.find((p) => p.id === DEFAULT_DATA_VIEW_ID) ?? {},
           kibanaDataViews,
         };
         return response.ok({ body });

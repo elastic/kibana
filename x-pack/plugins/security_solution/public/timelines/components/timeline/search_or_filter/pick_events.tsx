@@ -213,22 +213,22 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
 
   const onChangeCombo = useCallback(
     (newSelectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-      const localSelectedPatterns = newSelectedOptions.map((nso) => nso.label);
-      if (localSelectedPatterns.sort().join() === selectablePatterns.sort().join()) {
+      const localSelectedPatterns = newSelectedOptions
+        .map((nso) => nso.label)
+        .sort()
+        .join();
+      if (localSelectedPatterns === selectablePatterns.sort().join()) {
         setFilterEventType('all');
       } else if (
         dataViewId === defaultDataView.id &&
-        localSelectedPatterns.sort().join() ===
+        localSelectedPatterns ===
           selectablePatterns
             .filter((index) => !isSignalIndex(index, signalIndexName))
             .sort()
             .join()
       ) {
         setFilterEventType('raw');
-      } else if (
-        dataViewId === defaultDataView.id &&
-        localSelectedPatterns.sort().join() === signalIndexName
-      ) {
+      } else if (dataViewId === defaultDataView.id && localSelectedPatterns === signalIndexName) {
         setFilterEventType('alert');
       } else {
         setFilterEventType('custom');

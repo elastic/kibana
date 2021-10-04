@@ -7,8 +7,6 @@
 
 import * as t from 'io-ts';
 
-export const sourcererSchema = t.exact(
-  t.type({
-    patternList: t.array(t.string),
-  })
-);
+export const sourcererSchema = t.type({
+  patternList: t.array(t.string),
+});
