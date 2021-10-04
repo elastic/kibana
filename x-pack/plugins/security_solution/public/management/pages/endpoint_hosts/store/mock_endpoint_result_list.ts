@@ -30,7 +30,7 @@ import {
 import { GetPolicyListResponse } from '../../policy/types';
 import { pendingActionsResponseMock } from '../../../../common/lib/endpoint_pending_actions/mocks';
 import { ACTION_STATUS_ROUTE } from '../../../../../common/endpoint/constants';
-import { TRANSFORM_STATS_URL } from '../../../../../common/constants';
+import { METADATA_TRANSFORM_STATS_URL } from '../../../../../common/constants';
 import { TransformStats, TransformStatsResponse } from '../types';
 
 const generator = new EndpointDocGenerator('seed');
@@ -163,7 +163,7 @@ const endpointListApiPathHandlerMocks = ({
       return pendingActionsResponseMock();
     },
 
-    [TRANSFORM_STATS_URL]: (): TransformStatsResponse => ({
+    [METADATA_TRANSFORM_STATS_URL]: (): TransformStatsResponse => ({
       count: transforms.length,
       transforms,
     }),
