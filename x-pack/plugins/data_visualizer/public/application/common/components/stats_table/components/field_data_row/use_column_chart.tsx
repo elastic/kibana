@@ -94,11 +94,19 @@ export const getLegendText = (
 
   if (chartData.type === 'boolean') {
     return (
-      <table className="dataGridChart__legendBoolean">
+      <table>
         <tbody>
           <tr>
-            {chartData.data[0] !== undefined && <td>{chartData.data[0].key_as_string}</td>}
-            {chartData.data[1] !== undefined && <td>{chartData.data[1].key_as_string}</td>}
+            {chartData.data[0] !== undefined && (
+              <td className="dataGridChart__legendBoolean">
+                {chartData.data[0].key_as_string?.slice(0, 1) ?? ''}
+              </td>
+            )}
+            {chartData.data[1] !== undefined && (
+              <td className="dataGridChart__legendBoolean">
+                {chartData.data[1].key_as_string?.slice(0, 1) ?? ''}
+              </td>
+            )}
           </tr>
         </tbody>
       </table>
@@ -185,14 +193,16 @@ export const useColumnChart = (
   // The if/else if/else is a work-around because `.map()` doesn't work with union types.
   // See TS Caveats for details: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-3.html#caveats
   if (isOrdinalChartData(chartData)) {
-    data = chartData.data.map((d: OrdinalDataItem) => ({
+    data = chartData.data.map((d: OrdinalDataItem, idx) => ({
       ...d,
+      x: idx,
       key_as_string: d.key_as_string ?? d.key,
       color: getColor(d),
     }));
   } else if (isNumericChartData(chartData)) {
-    data = chartData.data.map((d: NumericDataItem) => ({
+    data = chartData.data.map((d: NumericDataItem, idx) => ({
       ...d,
+      x: idx,
       key_as_string: d.key_as_string || d.key,
       color: getColor(d),
     }));

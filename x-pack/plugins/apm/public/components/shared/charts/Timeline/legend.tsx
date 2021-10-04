@@ -55,7 +55,7 @@ interface Props {
   disabled?: boolean;
   clickable?: boolean;
   shape?: Shape;
-  indicator?: () => React.ReactNode;
+  indicator?: React.ReactNode;
 }
 
 export function Legend({
@@ -79,7 +79,7 @@ export function Legend({
       {...rest}
     >
       {indicator ? (
-        indicator()
+        indicator
       ) : (
         <Indicator color={indicatorColor} shape={shape} withMargin={!!text} />
       )}

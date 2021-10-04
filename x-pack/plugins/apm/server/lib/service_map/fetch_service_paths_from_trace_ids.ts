@@ -13,18 +13,20 @@ import {
   ExternalConnectionNode,
   ServiceConnectionNode,
 } from '../../../common/service_map';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 
 export async function fetchServicePathsFromTraceIds(
-  setup: Setup & SetupTimeRange,
-  traceIds: string[]
+  setup: Setup,
+  traceIds: string[],
+  start: number,
+  end: number
 ) {
   const { apmEventClient } = setup;
 
   // make sure there's a range so ES can skip shards
   const dayInMs = 24 * 60 * 60 * 1000;
-  const start = setup.start - dayInMs;
-  const end = setup.end + dayInMs;
+  const startRange = start - dayInMs;
+  const endRange = end + dayInMs;
 
   const serviceMapParams = {
     apm: {
@@ -40,7 +42,7 @@ export async function fetchServicePathsFromTraceIds(
                 [TRACE_ID]: traceIds,
               },
             },
-            ...rangeQuery(start, end),
+            ...rangeQuery(startRange, endRange),
           ],
         },
       },
