@@ -14,9 +14,13 @@ import {
   EuiFieldText,
   EuiFieldPassword,
   EuiSpacer,
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { OptionalLabel } from '../optional_label';
 import { CodeEditor } from '../code_editor';
+import { ScriptRecorderFields } from './script_recorder_fields';
 import { MonacoEditorLangId } from '../types';
 
 enum SourceType {
@@ -235,6 +239,29 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
             value={config.inlineScript}
           />
         </EuiFormRow>
+      ),
+    },
+    {
+      id: 'syntheticsBrowserScriptRecorderConfig',
+      name: (
+        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.scriptRecorder.label"
+              defaultMessage="Script recorder"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge label="Beta" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+      'data-test-subj': 'syntheticsSourceTab__scriptRecorder',
+      content: (
+        <ScriptRecorderFields
+          onChange={(code) => setConfig((prevConfig) => ({ ...prevConfig, inlineScript: code }))}
+          script={config.inlineScript}
+        />
       ),
     },
   ];
