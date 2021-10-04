@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
-import React, { Fragment, useRef } from 'react';
+import React, { Fragment, useMemo, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
@@ -100,19 +100,28 @@ export function CollapsibleNav({
   button,
   ...observables
 }: Props) {
-  const navLinks = useObservable(observables.navLinks$, []).filter(
-    // Filterting out hidden links and the integrations one in favor of a specific Add Data button at the bottom
-    (link) => !link.hidden && link.id !== 'integrations'
+  const allLinks = useObservable(observables.navLinks$, []);
+  const allowedLinks = useMemo(
+    () =>
+      allLinks.filter(
+        // Filterting out hidden links and the integrations one in favor of a specific Add Data button at the bottom
+        (link) => !link.hidden && link.id !== 'integrations'
+      ),
+    [allLinks]
   );
-  const integrationsLink = useObservable(observables.navLinks$, []).find(
-    // Find the link
-    (link) => link.id === 'integrations'
+  const integrationsLink = useMemo(
+    () =>
+      allLinks.find(
+        // Find just the integrations link
+        (link) => link.id === 'integrations'
+      ),
+    [allLinks]
   );
   const recentlyAccessed = useObservable(observables.recentlyAccessed$, []);
   const customNavLink = useObservable(observables.customNavLink$, undefined);
   const appId = useObservable(observables.appId$, '');
   const lockRef = useRef<HTMLButtonElement>(null);
-  const groupedNavLinks = groupBy(navLinks, (link) => link?.category?.id);
+  const groupedNavLinks = groupBy(allowedLinks, (link) => link?.category?.id);
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);
   const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
@@ -230,7 +239,7 @@ export function CollapsibleNav({
               // Can remove icon from recent links completely
               const { iconType, onClick, ...hydratedLink } = createRecentNavLink(
                 link,
-                navLinks,
+                allowedLinks,
                 basePath,
                 navigateToUrl
               );
