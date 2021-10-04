@@ -6,7 +6,12 @@
  */
 
 import { getNewRule } from '../../objects/rule';
-import { ALERTS_COUNT, SELECTED_ALERTS, TAKE_ACTION_POPOVER_BTN } from '../../screens/alerts';
+import {
+  ALERTS_COUNT,
+  SELECTED_ALERTS,
+  TAKE_ACTION_POPOVER_BTN,
+  ALERT_COUNT_TABLE_FIRST_ROW_COUNT,
+} from '../../screens/alerts';
 
 import {
   closeFirstAlert,
@@ -46,6 +51,7 @@ describe('Closing alerts', () => {
       .then((alertNumberString) => {
         const numberOfAlerts = alertNumberString.split(' ')[0];
         cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlerts} alerts`);
+        cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should('have.text', `${numberOfAlerts}`);
 
         selectNumberOfAlerts(numberOfAlertsToBeClosed);
 
@@ -56,6 +62,10 @@ describe('Closing alerts', () => {
 
         const expectedNumberOfAlertsAfterClosing = +numberOfAlerts - numberOfAlertsToBeClosed;
         cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlertsAfterClosing} alerts`);
+        cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should(
+          'have.text',
+          `${expectedNumberOfAlertsAfterClosing}`
+        );
 
         goToClosedAlerts();
         waitForAlerts();
@@ -75,6 +85,10 @@ describe('Closing alerts', () => {
           'have.text',
           `${expectedNumberOfClosedAlertsAfterOpened} alerts`
         );
+        cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should(
+          'have.text',
+          `${expectedNumberOfClosedAlertsAfterOpened}`
+        );
 
         goToOpenedAlerts();
         waitForAlerts();
@@ -83,6 +97,10 @@ describe('Closing alerts', () => {
           +numberOfAlerts - expectedNumberOfClosedAlertsAfterOpened;
 
         cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfOpenedAlerts} alerts`);
+        cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should(
+          'have.text',
+          `${expectedNumberOfOpenedAlerts}`
+        );
       });
   });
 
@@ -103,11 +121,16 @@ describe('Closing alerts', () => {
 
         const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeClosed;
         cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
+        cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should('have.text', `${expectedNumberOfAlerts}`);
 
         goToClosedAlerts();
         waitForAlerts();
 
         cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeClosed} alert`);
+        cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should(
+          'have.text',
+          `${numberOfAlertsToBeClosed}`
+        );
       });
   });
 });
