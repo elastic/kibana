@@ -19,6 +19,8 @@ import {
   getCurrentArtifactsLocation,
   getDoesTrustedAppExists,
   policyDetails,
+  doesPolicyHaveTrustedApps,
+  doesTrustedAppExistsLoading,
 } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsNavigateCallback, usePolicyDetailsSelector } from '../../policy_hooks';
 import { PolicyTrustedAppsFlyout } from '../flyout';
@@ -27,8 +29,10 @@ import { PolicyTrustedAppsList } from '../list/policy_trusted_apps_list';
 export const PolicyTrustedAppsLayout = React.memo(() => {
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const doesTrustedAppExists = usePolicyDetailsSelector(getDoesTrustedAppExists);
+  const isDoesTrustedAppExistsLoading = usePolicyDetailsSelector(doesTrustedAppExistsLoading);
   const policyItem = usePolicyDetailsSelector(policyDetails);
   const navigateCallback = usePolicyDetailsNavigateCallback();
+  const hasAssignedTrustedApps = usePolicyDetailsSelector(doesPolicyHaveTrustedApps);
 
   const showListFlyout = location.show === 'list';
 
@@ -54,9 +58,26 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
     [navigateCallback]
   );
 
+  const displaysEmptyState = useMemo(
+    () =>
+      !isDoesTrustedAppExistsLoading &&
+      !hasAssignedTrustedApps.loading &&
+      !hasAssignedTrustedApps.hasTrustedApps,
+    [
+      hasAssignedTrustedApps.hasTrustedApps,
+      hasAssignedTrustedApps.loading,
+      isDoesTrustedAppExistsLoading,
+    ]
+  );
+
+  const displaysEmptyStateIsLoading = useMemo(
+    () => isDoesTrustedAppExistsLoading || hasAssignedTrustedApps.loading,
+    [hasAssignedTrustedApps.loading, isDoesTrustedAppExistsLoading]
+  );
+
   return policyItem ? (
     <div>
-      {false ? (
+      {!displaysEmptyStateIsLoading && !displaysEmptyState ? (
         <EuiPageHeader alignItems="center">
           <EuiPageHeaderSection>
             <EuiTitle size="m">
@@ -77,12 +98,21 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
         color="transparent"
         borderRadius="none"
       >
-        {doesTrustedAppExists ? (
-          <PolicyTrustedAppsEmptyUnassigned policyId={policyItem.id} policyName={policyItem.name} />
+        {displaysEmptyState ? (
+          doesTrustedAppExists ? (
+            <PolicyTrustedAppsEmptyUnassigned
+              policyId={policyItem.id}
+              policyName={policyItem.name}
+            />
+          ) : (
+            <PolicyTrustedAppsEmptyUnexisting
+              policyId={policyItem.id}
+              policyName={policyItem.name}
+            />
+          )
         ) : (
-          <PolicyTrustedAppsEmptyUnexisting policyId={policyItem.id} policyName={policyItem.name} />
+          <PolicyTrustedAppsList />
         )}
-        <PolicyTrustedAppsList />
       </EuiPageContent>
       {showListFlyout ? <PolicyTrustedAppsFlyout /> : null}
     </div>

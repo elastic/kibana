@@ -61,6 +61,7 @@ export const PolicyTrustedAppsEmptyUnassigned = memo<CommonProps>(({ policyId, p
     <EuiPageTemplate template="centeredContent">
       <EuiEmptyPrompt
         iconType="faceHappy"
+        data-test-subj="policy-trusted-apps-empty-unassigned"
         title={
           <h2>
             <FormattedMessage

@@ -7,6 +7,7 @@
 
 import { createSelector } from 'reselect';
 import { Pagination } from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
 import {
   PolicyArtifactsState,
   PolicyAssignedTrustedApps,
@@ -34,10 +35,11 @@ import { getCurrentArtifactsLocation } from './policy_common_selectors';
 export const doesPolicyHaveTrustedApps = (
   state: PolicyDetailsState
 ): { loading: boolean; hasTrustedApps: boolean } => {
-  // TODO: implement empty state (task #1645)
   return {
-    loading: false,
-    hasTrustedApps: true,
+    loading: isLoadingResourceState(state.artifacts.assignedList),
+    hasTrustedApps: isLoadedResourceState(state.artifacts.assignedList)
+      ? !isEmpty(state.artifacts.assignedList.data.artifacts.data)
+      : false,
   };
 };
 
@@ -113,6 +115,13 @@ export const getDoesTrustedAppExists = (state: Immutable<PolicyDetailsState>): b
     isLoadedResourceState(state.artifacts.doesAnyTrustedApp) &&
     state.artifacts.doesAnyTrustedApp.data
   );
+};
+
+/**
+ * Returns does any TA exists loading
+ */
+export const doesTrustedAppExistsLoading = (state: Immutable<PolicyDetailsState>): boolean => {
+  return isLoadingResourceState(state.artifacts.doesAnyTrustedApp);
 };
 
 /** Returns a boolean of whether the user is on the policy details page or not */

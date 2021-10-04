@@ -71,9 +71,6 @@ export const policyTrustedAppsMiddlewareRunner: MiddlewareRunner = async (
       fetchPolicyTrustedAppsIfNeeded(context, store);
       fetchAllPoliciesIfNeeded(context, store);
 
-      // TODO: Change this action when list is merged into this branch
-      await checkIfAnyTrustedApp(store, trustedAppsService);
-
       if (action.type === 'userChangedUrl' && getCurrentArtifactsLocation(state).show === 'list') {
         await searchTrustedApps(store, trustedAppsService);
       }
@@ -322,6 +319,8 @@ const fetchPolicyTrustedAppsIfNeeded = async (
           artifacts: fetchResponse,
         }),
       });
+      if (!fetchResponse.total)
+        await checkIfAnyTrustedApp({ getState, dispatch }, trustedAppsService);
     } catch (error) {
       dispatch({
         type: 'assignedTrustedAppsListStateChanged',
