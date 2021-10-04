@@ -55,7 +55,7 @@ export const SubmitErrorCallout: FunctionComponent<SubmitErrorCalloutProps> = (p
         >
           <FormattedMessage
             id="interactiveSetup.submitErrorCallout.elasticsearchConnectionConfiguredSubmitButton"
-            defaultMessage="Continue to Elastic"
+            defaultMessage="Continue to Kibana"
           />
         </EuiButton>
       </EuiCallOut>
@@ -66,25 +66,11 @@ export const SubmitErrorCallout: FunctionComponent<SubmitErrorCalloutProps> = (p
     <EuiCallOut
       color="danger"
       title={
-        error.body?.attributes?.type === ERROR_KIBANA_CONFIG_NOT_WRITABLE ? (
+        error.body?.attributes?.type === ERROR_KIBANA_CONFIG_NOT_WRITABLE ||
+        error.body?.attributes?.type === ERROR_KIBANA_CONFIG_FAILURE ? (
           <FormattedMessage
             id="interactiveSetup.submitErrorCallout.kibanaConfigNotWritableErrorTitle"
-            defaultMessage="Config file is not writable"
-          />
-        ) : error.body?.attributes?.type === ERROR_KIBANA_CONFIG_FAILURE ? (
-          <FormattedMessage
-            id="interactiveSetup.submitErrorCallout.kibanaConfigFailureErrorTitle"
             defaultMessage="Couldn't write to config file"
-          />
-        ) : error.body?.attributes?.type === ERROR_ENROLL_FAILURE ? (
-          <FormattedMessage
-            id="interactiveSetup.submitErrorCallout.enrollFailureErrorTitle"
-            defaultMessage="Couldn't enroll with cluster"
-          />
-        ) : error.body?.attributes?.type === ERROR_CONFIGURE_FAILURE ? (
-          <FormattedMessage
-            id="interactiveSetup.submitErrorCallout.configureFailureErrorTitle"
-            defaultMessage="Couldn't configure Kibana"
           />
         ) : error.body?.attributes?.type === ERROR_PING_FAILURE ? (
           <FormattedMessage
@@ -99,15 +85,16 @@ export const SubmitErrorCallout: FunctionComponent<SubmitErrorCalloutProps> = (p
       {error.body?.attributes?.type === ERROR_KIBANA_CONFIG_NOT_WRITABLE ? (
         <FormattedMessage
           id="interactiveSetup.submitErrorCallout.kibanaConfigNotWritableErrorDescription"
-          defaultMessage="Check {config} file permissions and ensure Kibana process can write to it."
+          defaultMessage="Check the file permissions and ensure {config} is writable by the Kibana process."
           values={{
             config: <strong>kibana.yml</strong>,
           }}
         />
-      ) : error.body?.attributes?.type === ERROR_KIBANA_CONFIG_FAILURE ? (
+      ) : error.body?.attributes?.type === ERROR_KIBANA_CONFIG_FAILURE ||
+        error.body?.attributes?.type === ERROR_CONFIGURE_FAILURE ? (
         <FormattedMessage
           id="interactiveSetup.submitErrorCallout.kibanaConfigFailureErrorDescription"
-          defaultMessage="Retry or update {config} file manually."
+          defaultMessage="Retry or update the {config} file manually."
           values={{
             config: <strong>kibana.yml</strong>,
           }}
@@ -117,18 +104,10 @@ export const SubmitErrorCallout: FunctionComponent<SubmitErrorCalloutProps> = (p
           id="interactiveSetup.submitErrorCallout.EnrollFailureErrorDescription"
           defaultMessage="Generate a new enrollment token or configure manually."
         />
-      ) : error.body?.attributes?.type === ERROR_CONFIGURE_FAILURE ? (
-        <FormattedMessage
-          id="interactiveSetup.submitErrorCallout.configureFailureErrorDescription"
-          defaultMessage="Retry or update {config} file manually."
-          values={{
-            config: <strong>kibana.yml</strong>,
-          }}
-        />
       ) : error.body?.attributes?.type === ERROR_PING_FAILURE ? (
         <FormattedMessage
           id="interactiveSetup.submitErrorCallout.pingFailureErrorDescription"
-          defaultMessage="Check address and retry."
+          defaultMessage="Check the address and retry."
         />
       ) : (
         error.body?.message || error.message

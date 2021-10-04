@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import type { EnrollmentToken } from '../common';
+import { DocLink } from './doc_link';
 import { SubmitErrorCallout } from './submit_error_callout';
 import { TextTruncate } from './text_truncate';
 import type { ValidationErrors } from './use_form';
@@ -102,7 +103,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
           <SubmitErrorCallout
             error={form.submitError}
             defaultTitle={i18n.translate('interactiveSetup.enrollmentTokenForm.submitErrorTitle', {
-              defaultMessage: "Couldn't connect to cluster",
+              defaultMessage: "Couldn't configure Elastic",
             })}
           />
           <EuiSpacer />
@@ -115,7 +116,18 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
         })}
         error={form.errors.token}
         isInvalid={form.touched.token && !!form.errors.token}
-        helpText={enrollmentToken && <EnrollmentTokenDetails token={enrollmentToken} />}
+        helpText={
+          enrollmentToken ? (
+            <EnrollmentTokenDetails token={enrollmentToken} />
+          ) : (
+            <DocLink app="elasticsearch" doc="configuring-stack-security.html">
+              <FormattedMessage
+                id="interactiveSetup.enrollmentTokenForm.tokenHelpText"
+                defaultMessage="Where do I find this?"
+              />
+            </DocLink>
+          )
+        }
         fullWidth
       >
         <EuiTextArea
@@ -123,7 +135,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
           value={form.values.token}
           isInvalid={form.touched.token && !!form.errors.token}
           placeholder={i18n.translate('interactiveSetup.enrollmentTokenForm.tokenPlaceholder', {
-            defaultMessage: 'Paste enrollment token from terminal',
+            defaultMessage: 'Paste enrollment token from terminal.',
           })}
           fullWidth
         />
@@ -149,7 +161,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
           >
             <FormattedMessage
               id="interactiveSetup.enrollmentTokenForm.submitButton"
-              defaultMessage="{isSubmitting, select, true{Connecting to cluster…} other{Connect to cluster}}"
+              defaultMessage="{isSubmitting, select, true{Configuring Elastic…} other{Configure Elastic}}"
               values={{ isSubmitting: form.isSubmitting }}
             />
           </EuiButton>

@@ -95,7 +95,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
           errors.username = i18n.translate(
             'interactiveSetup.clusterConfigurationForm.usernameReservedError',
             {
-              defaultMessage: "User 'elastic' can't be used as Kibana system user.",
+              defaultMessage: "User 'elastic' can't be used as the Kibana system user.",
             }
           );
         }
@@ -152,7 +152,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
             defaultTitle={i18n.translate(
               'interactiveSetup.clusterConfigurationForm.submitErrorTitle',
               {
-                defaultMessage: "Couldn't connect to cluster",
+                defaultMessage: "Couldn't configure Elastic",
               }
             )}
           />
@@ -217,14 +217,14 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
             title={i18n.translate(
               'interactiveSetup.clusterConfigurationForm.insecureClusterTitle',
               {
-                defaultMessage: 'This cluster is not secure.',
+                defaultMessage: 'This cluster is not secure',
               }
             )}
           >
             <p>
               <FormattedMessage
                 id="interactiveSetup.clusterConfigurationForm.insecureClusterDescription"
-                defaultMessage="Anyone with the address could access your data."
+                defaultMessage="Anyone with the address can access your data."
               />
             </p>
             <p>
@@ -289,7 +289,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
           >
             <FormattedMessage
               id="interactiveSetup.clusterConfigurationForm.submitButton"
-              defaultMessage="{isSubmitting, select, true{Connecting to cluster…} other{Connect to cluster}}"
+              defaultMessage="{isSubmitting, select, true{Configuring Elastic…} other{Configure Elastic}}"
               values={{ isSubmitting: form.isSubmitting }}
             />
           </EuiButton>

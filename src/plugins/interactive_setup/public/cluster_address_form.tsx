@@ -64,7 +64,7 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
           }
         } catch (error) {
           errors.host = i18n.translate('interactiveSetup.clusterAddressForm.hostInvalidError', {
-            defaultMessage: 'Enter a valid address including protocol.',
+            defaultMessage: "Enter a valid address, including 'http' or 'https'.",
           });
         }
       }
@@ -109,6 +109,7 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
           name="host"
           value={form.values.host}
           isInvalid={form.touched.host && !!form.errors.host}
+          placeholder="https://localhost:9200"
           fullWidth
         />
       </EuiFormRow>
