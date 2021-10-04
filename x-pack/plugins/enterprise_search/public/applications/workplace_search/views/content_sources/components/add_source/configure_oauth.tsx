@@ -33,11 +33,8 @@ interface ConfigureOauthProps {
 export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCreated, header }) => {
   const [formLoading, setFormLoading] = useState(false);
 
-  const {
-    getPreContentSourceConfigData,
-    setSelectedGithubOrganizations,
-    createContentSource,
-  } = useActions(AddSourceLogic);
+  const { getPreContentSourceConfigData, setSelectedGithubOrganizations, createContentSource } =
+    useActions(AddSourceLogic);
   const {
     currentServiceType,
     githubOrganizations,

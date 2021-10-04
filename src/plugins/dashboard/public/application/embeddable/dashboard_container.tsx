@@ -79,7 +79,7 @@ const defaultCapabilities: DashboardAppCapabilities = {
   createNew: false,
   saveQuery: false,
   createShortUrl: false,
-  hideWriteControls: true,
+  showWriteControls: false,
   mapsCapabilities: { save: false },
   visualizeCapabilities: { save: false },
   storeSearchSession: true,

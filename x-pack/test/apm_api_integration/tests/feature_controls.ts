@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../common/ftr_provider_context';
 import { registry } from '../common/registry';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestAsApmWriteUser');
+  const supertest = getService('legacySupertestAsApmWriteUser');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
   const spaces = getService('spaces');
@@ -86,7 +86,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/api/apm/services/foo/agent_name?start=${start}&end=${end}`,
+        url: `/api/apm/services/foo/agent?start=${start}&end=${end}`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,

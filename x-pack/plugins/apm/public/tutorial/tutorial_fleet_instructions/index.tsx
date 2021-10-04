@@ -80,7 +80,7 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
             display="plain"
             textAlign="left"
             title={i18n.translate('xpack.apm.tutorial.apmServer.fleet.title', {
-              defaultMessage: 'Elastic APM (beta) now available in Fleet!',
+              defaultMessage: 'Elastic APM now available in Fleet!',
             })}
             description={i18n.translate(
               'xpack.apm.tutorial.apmServer.fleet.message',
@@ -93,7 +93,7 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
               <EuiButton
                 iconType="analyzeEvent"
                 color="secondary"
-                href={`${basePath}/app/integrations#/detail/apm-0.3.0/overview`}
+                href={`${basePath}/app/integrations#/detail/apm-0.4.0/overview`}
               >
                 {i18n.translate(
                   'xpack.apm.tutorial.apmServer.fleet.apmIntegration.button',

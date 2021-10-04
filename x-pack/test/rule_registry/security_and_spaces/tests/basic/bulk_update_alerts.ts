@@ -55,18 +55,17 @@ export default ({ getService }: FtrProviderContext) => {
   const SPACE1 = 'space1';
   const SPACE2 = 'space2';
   const APM_ALERT_ID = 'NoxgpHkBqbdrfX07MqXV';
-  const APM_ALERT_INDEX = '.alerts-observability-apm';
+  const APM_ALERT_INDEX = '.alerts-observability.apm.alerts';
   const SECURITY_SOLUTION_ALERT_ID = '020202';
   const SECURITY_SOLUTION_ALERT_INDEX = '.alerts-security.alerts';
 
   const getAPMIndexName = async (user: User) => {
-    const {
-      body: indexNames,
-    }: { body: { index_name: string[] | undefined } } = await supertestWithoutAuth
-      .get(`${getSpaceUrlPrefix(SPACE1)}${ALERTS_INDEX_URL}`)
-      .auth(user.username, user.password)
-      .set('kbn-xsrf', 'true')
-      .expect(200);
+    const { body: indexNames }: { body: { index_name: string[] | undefined } } =
+      await supertestWithoutAuth
+        .get(`${getSpaceUrlPrefix(SPACE1)}${ALERTS_INDEX_URL}`)
+        .auth(user.username, user.password)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
     const observabilityIndex = indexNames?.index_name?.find(
       (indexName) => indexName === APM_ALERT_INDEX
     );
@@ -74,17 +73,16 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   const getSecuritySolutionIndexName = async (user: User) => {
-    const {
-      body: indexNames,
-    }: { body: { index_name: string[] | undefined } } = await supertestWithoutAuth
-      .get(`${getSpaceUrlPrefix(SPACE1)}${ALERTS_INDEX_URL}`)
-      .auth(user.username, user.password)
-      .set('kbn-xsrf', 'true')
-      .expect(200);
-    const securitySolution = indexNames?.index_name?.find(
-      (indexName) => indexName === SECURITY_SOLUTION_ALERT_INDEX
+    const { body: indexNames }: { body: { index_name: string[] | undefined } } =
+      await supertestWithoutAuth
+        .get(`${getSpaceUrlPrefix(SPACE1)}${ALERTS_INDEX_URL}`)
+        .auth(user.username, user.password)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+    const securitySolution = indexNames?.index_name?.find((indexName) =>
+      indexName.startsWith(SECURITY_SOLUTION_ALERT_INDEX)
     );
-    expect(securitySolution).to.eql(SECURITY_SOLUTION_ALERT_INDEX); // assert this here so we can use constants in the dynamically-defined test cases below
+    expect(securitySolution).to.eql(`${SECURITY_SOLUTION_ALERT_INDEX}-${SPACE1}`); // assert this here so we can use constants in the dynamically-defined test cases below
   };
 
   describe('Alert - Bulk Update - RBAC - spaces', () => {

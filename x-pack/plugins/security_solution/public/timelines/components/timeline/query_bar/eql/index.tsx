@@ -67,9 +67,11 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
   const getOptionsSelected = useMemo(() => getEqlOptions(), []);
   const optionsSelected = useDeepEqualSelector((state) => getOptionsSelected(state, timelineId));
 
-  const { loading: indexPatternsLoading, indexPattern, selectedPatterns } = useSourcererScope(
-    SourcererScopeName.timeline
-  );
+  const {
+    loading: indexPatternsLoading,
+    indexPattern,
+    selectedPatterns,
+  } = useSourcererScope(SourcererScopeName.timeline);
 
   const initialState = {
     ...defaultValues,

@@ -22,6 +22,7 @@ import { findRulesRoute } from './find_rules';
 import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
 import { getRuleStateRoute } from './get_rule_state';
 import { healthRoute } from './health';
+import { resolveRuleRoute } from './resolve_rule';
 import { ruleTypesRoute } from './rule_types';
 import { muteAllRuleRoute } from './mute_all_rule';
 import { muteAlertRoute } from './mute_alert';
@@ -37,17 +38,18 @@ export interface RouteOptions {
 }
 
 export function defineRoutes(opts: RouteOptions) {
-  const { router, licenseState, encryptedSavedObjects } = opts;
+  const { router, licenseState, encryptedSavedObjects, usageCounter } = opts;
 
   defineLegacyRoutes(opts);
   createRuleRoute(opts);
   getRuleRoute(router, licenseState);
+  resolveRuleRoute(router, licenseState);
   updateRuleRoute(router, licenseState);
   deleteRuleRoute(router, licenseState);
   aggregateRulesRoute(router, licenseState);
   disableRuleRoute(router, licenseState);
   enableRuleRoute(router, licenseState);
-  findRulesRoute(router, licenseState);
+  findRulesRoute(router, licenseState, usageCounter);
   getRuleAlertSummaryRoute(router, licenseState);
   getRuleStateRoute(router, licenseState);
   healthRoute(router, licenseState, encryptedSavedObjects);

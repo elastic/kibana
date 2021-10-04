@@ -185,8 +185,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param field  - the desired field for the dimension
      * */
     async dragFieldToWorkspace(field: string) {
+      const from = `lnsFieldListPanelField-${field}`;
+      await find.existsByCssSelector(from);
       await browser.html5DragAndDrop(
-        testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
+        testSubjects.getCssSelector(from),
         testSubjects.getCssSelector('lnsWorkspace')
       );
       await this.waitForLensDragDropToFinish();
@@ -199,8 +201,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param field  - the desired geo_point or geo_shape field
      * */
     async dragFieldToGeoFieldWorkspace(field: string) {
+      const from = `lnsFieldListPanelField-${field}`;
+      await find.existsByCssSelector(from);
       await browser.html5DragAndDrop(
-        testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
+        testSubjects.getCssSelector(from),
         testSubjects.getCssSelector('lnsGeoFieldWorkspace')
       );
       await this.waitForLensDragDropToFinish();
@@ -262,7 +266,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         `[data-test-subj="lnsDragDrop_draggable-${fieldName}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
       );
       await field.focus();
-      await browser.pressKeys(browser.keys.ENTER);
+      await retry.try(async () => {
+        await browser.pressKeys(browser.keys.ENTER);
+        await testSubjects.exists('.lnsDragDrop-isDropTarget'); // checks if we're in dnd mode and there's any drop target active
+      });
       for (let i = 0; i < steps; i++) {
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
       }
@@ -335,8 +342,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param dimension - the selector of the dimension being changed
      * */
     async dragFieldToDimensionTrigger(field: string, dimension: string) {
+      const from = `lnsFieldListPanelField-${field}`;
+      await find.existsByCssSelector(from);
       await browser.html5DragAndDrop(
-        testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
+        testSubjects.getCssSelector(from),
         testSubjects.getCssSelector(dimension)
       );
       await this.waitForLensDragDropToFinish();
@@ -350,6 +359,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param to - the selector of the dimension being dropped to
      * */
     async dragDimensionToDimension(from: string, to: string) {
+      await find.existsByCssSelector(from);
       await browser.html5DragAndDrop(
         testSubjects.getCssSelector(from),
         testSubjects.getCssSelector(to)
@@ -367,6 +377,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async reorderDimensions(dimension: string, startIndex: number, endIndex: number) {
       const dragging = `[data-test-subj='${dimension}']:nth-of-type(${startIndex}) .lnsDragDrop`;
       const dropping = `[data-test-subj='${dimension}']:nth-of-type(${endIndex}) [data-test-subj='lnsDragDrop-reorderableDropLayer'`;
+      await find.existsByCssSelector(dragging);
       await browser.html5DragAndDrop(dragging, dropping);
       await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -634,8 +645,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Adds a new layer to the chart, fails if the chart does not support new layers
      */
-    async createLayer() {
+    async createLayer(layerType: string = 'data') {
       await testSubjects.click('lnsLayerAddButton');
+      const layerCount = (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`))
+        .length;
+
+      await retry.waitFor('check for layer type support', async () => {
+        const fasterChecks = await Promise.all([
+          (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length > layerCount,
+          testSubjects.exists(`lnsLayerAddButton-${layerType}`),
+        ]);
+        return fasterChecks.filter(Boolean).length > 0;
+      });
+      if (await testSubjects.exists(`lnsLayerAddButton-${layerType}`)) {
+        await testSubjects.click(`lnsLayerAddButton-${layerType}`);
+      }
     },
 
     /**
@@ -1062,6 +1086,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async switchToFormula() {
       await testSubjects.click('lens-dimensionTabs-formula');
+    },
+
+    async switchToStaticValue() {
+      await testSubjects.click('lens-dimensionTabs-static_value');
     },
 
     async toggleFullscreen() {

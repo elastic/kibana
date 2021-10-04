@@ -7,13 +7,13 @@
 
 import { useDispatch } from 'react-redux';
 import { EuiSpacer } from '@elastic/eui';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTrackPageview } from '../../../observability/public';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { getDynamicSettings } from '../state/actions/dynamic_settings';
-import { UptimeRefreshContext } from '../contexts';
-import { getCertificatesAction } from '../state/certificates/certificates';
 import { CertificateList, CertificateSearch, CertSort } from '../components/certificates';
+import { useCertSearch } from '../components/certificates/use_cert_search';
+import { setCertificatesTotalAction } from '../state/certificates/certificates';
 
 const DEFAULT_PAGE_SIZE = 10;
 const LOCAL_STORAGE_KEY = 'xpack.uptime.certList.pageSize';
@@ -40,22 +40,21 @@ export const CertificatesPage: React.FC = () => {
 
   const dispatch = useDispatch();
 
-  const { lastRefresh } = useContext(UptimeRefreshContext);
-
   useEffect(() => {
     dispatch(getDynamicSettings());
   }, [dispatch]);
 
+  const certificates = useCertSearch({
+    search,
+    size: page.size,
+    pageIndex: page.index,
+    sortBy: sort.field,
+    direction: sort.direction,
+  });
+
   useEffect(() => {
-    dispatch(
-      getCertificatesAction.get({
-        search,
-        ...page,
-        sortBy: sort.field,
-        direction: sort.direction,
-      })
-    );
-  }, [dispatch, page, search, sort.direction, sort.field, lastRefresh]);
+    dispatch(setCertificatesTotalAction({ total: certificates.total }));
+  }, [certificates.total, dispatch]);
 
   return (
     <>
@@ -70,6 +69,7 @@ export const CertificatesPage: React.FC = () => {
           localStorage.setItem(LOCAL_STORAGE_KEY, pageVal.size.toString());
         }}
         sort={sort}
+        certificates={certificates}
       />
     </>
   );

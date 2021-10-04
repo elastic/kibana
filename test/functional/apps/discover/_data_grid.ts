@@ -47,10 +47,10 @@ export default function ({
       await PageObjects.discover.clickFieldListItemAdd('agent');
       expect(await getTitles()).to.be('Time (@timestamp) bytes agent');
 
-      await PageObjects.discover.clickFieldListItemAdd('bytes');
+      await PageObjects.discover.clickFieldListItemRemove('bytes');
       expect(await getTitles()).to.be('Time (@timestamp) agent');
 
-      await PageObjects.discover.clickFieldListItemAdd('agent');
+      await PageObjects.discover.clickFieldListItemRemove('agent');
       expect(await getTitles()).to.be('Time (@timestamp) Document');
     });
   });

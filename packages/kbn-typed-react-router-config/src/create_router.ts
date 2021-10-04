@@ -9,6 +9,7 @@ import { isLeft } from 'fp-ts/lib/Either';
 import { Location } from 'history';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import {
+  MatchedRoute,
   matchRoutes as matchRoutesConfig,
   RouteConfig as ReactRouterConfig,
 } from 'react-router-config';
@@ -24,22 +25,24 @@ import { Route, Router } from './types';
 const deepExactRt: typeof deepExactRtTyped = deepExactRtNonTyped;
 const mergeRt: typeof mergeRtTyped = mergeRtNonTyped;
 
+function toReactRouterPath(path: string) {
+  return path.replace(/(?:{([^\/]+)})/g, ':$1');
+}
+
 export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<TRoutes> {
   const routesByReactRouterConfig = new Map<ReactRouterConfig, Route>();
   const reactRouterConfigsByRoute = new Map<Route, ReactRouterConfig>();
 
   const reactRouterConfigs = routes.map((route) => toReactRouterConfigRoute(route));
 
-  function toReactRouterConfigRoute(route: Route, prefix: string = ''): ReactRouterConfig {
-    const path = `${prefix}${route.path}`.replace(/\/{2,}/g, '/').replace(/\/$/, '') || '/';
+  function toReactRouterConfigRoute(route: Route): ReactRouterConfig {
     const reactRouterConfig: ReactRouterConfig = {
       component: () => route.element,
       routes:
-        (route.children as Route[] | undefined)?.map((child) =>
-          toReactRouterConfigRoute(child, path)
-        ) ?? [],
+        (route.children as Route[] | undefined)?.map((child) => toReactRouterConfigRoute(child)) ??
+        [],
       exact: !route.children?.length,
-      path,
+      path: toReactRouterPath(route.path),
     };
 
     routesByReactRouterConfig.set(reactRouterConfig, route);
@@ -49,33 +52,44 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
   }
 
   const matchRoutes = (...args: any[]) => {
-    let path: string = args[0];
-    let location: Location = args[1];
-    let optional: boolean = args[2];
+    let optional: boolean = false;
 
-    if (args.length === 1) {
-      location = args[0] as Location;
-      path = location.pathname;
-      optional = args[1];
+    if (typeof args[args.length - 1] === 'boolean') {
+      optional = args[args.length - 1];
+      args.pop();
     }
 
-    const greedy = path.endsWith('/*') || args.length === 1;
+    const location: Location = args[args.length - 1];
+    args.pop();
 
-    if (!path) {
-      path = '/';
+    let paths: string[] = args;
+
+    if (paths.length === 0) {
+      paths = [location.pathname || '/'];
     }
 
-    const matches = matchRoutesConfig(reactRouterConfigs, location.pathname);
+    let matches: Array<MatchedRoute<{}, ReactRouterConfig>> = [];
+    let matchIndex: number = -1;
 
-    const matchIndex = greedy
-      ? matches.length - 1
-      : findLastIndex(matches, (match) => match.route.path === path);
+    for (const path of paths) {
+      const greedy = path.endsWith('/*') || args.length === 0;
+      matches = matchRoutesConfig(reactRouterConfigs, toReactRouterPath(location.pathname));
+
+      matchIndex = greedy
+        ? matches.length - 1
+        : findLastIndex(matches, (match) => match.route.path === toReactRouterPath(path));
+
+      if (matchIndex !== -1) {
+        break;
+      }
+      matchIndex = -1;
+    }
 
     if (matchIndex === -1) {
       if (optional) {
         return [];
       }
-      throw new Error(`No matching route found for ${path}`);
+      throw new Error(`No matching route found for ${paths}`);
     }
 
     return matches.slice(0, matchIndex + 1).map((matchedRoute) => {
@@ -123,11 +137,12 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
     path = path
       .split('/')
       .map((part) => {
-        return part.startsWith(':') ? paramsWithBuiltInDefaults.path[part.split(':')[1]] : part;
+        const match = part.match(/(?:{([a-zA-Z]+)})/);
+        return match ? paramsWithBuiltInDefaults.path[match[1]] : part;
       })
       .join('/');
 
-    const matches = matchRoutesConfig(reactRouterConfigs, path);
+    const matches = matchRoutesConfig(reactRouterConfigs, toReactRouterPath(path));
 
     if (!matches.length) {
       throw new Error(`No matching route found for ${path}`);

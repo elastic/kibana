@@ -36,7 +36,11 @@ export interface PluginStartContract {
   data: DataPluginStart;
 }
 
-export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {
+export interface LensServerPluginSetup {
+  lensEmbeddableFactory: typeof lensEmbeddableFactory;
+}
+
+export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {}> {
   private readonly kibanaIndexConfig: Observable<{ kibana: { index: string } }>;
   private readonly telemetryLogger: Logger;
 
@@ -63,8 +67,11 @@ export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {
         plugins.taskManager
       );
     }
+
     plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());
-    return {};
+    return {
+      lensEmbeddableFactory,
+    };
   }
 
   start(core: CoreStart, plugins: PluginStartContract) {

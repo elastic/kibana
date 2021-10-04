@@ -39,6 +39,7 @@ import {
   DatasourceMock,
   createExpressionRendererMock,
 } from '../../mocks';
+import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
 import { ReactExpressionRendererType } from 'src/plugins/expressions/public';
 import { DragDrop } from '../../drag_drop';
 import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
@@ -46,6 +47,7 @@ import { chartPluginMock } from '../../../../../../src/plugins/charts/public/moc
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
 import { mockDataPlugin, mountWithProvider } from '../../mocks';
 import { setState } from '../../state_management';
+import { getLensInspectorService } from '../../lens_inspector_service';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -79,6 +81,7 @@ function getDefaultProps() {
       charts: chartPluginMock.createStartContract(),
     },
     palettes: chartPluginMock.createPaletteRegistry(),
+    lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
     showNoDataPopover: jest.fn(),
   };
   return defaultProps;
@@ -143,7 +146,6 @@ describe('editor_frame', () => {
       };
       const lensStore = (
         await mountWithProvider(<EditorFrame {...props} />, {
-          data: props.plugins.data,
           preloadedState: {
             activeDatasourceId: 'testDatasource',
             datasourceStates: {
@@ -193,7 +195,6 @@ describe('editor_frame', () => {
       };
 
       await mountWithProvider(<EditorFrame {...props} />, {
-        data: props.plugins.data,
         preloadedState: {
           visualization: { activeId: 'testVis', state: initialState },
         },
@@ -225,9 +226,8 @@ describe('editor_frame', () => {
       };
       instance = (
         await mountWithProvider(<EditorFrame {...props} />, {
-          data: props.plugins.data,
           preloadedState: {
-            visualization: { activeId: 'testVis', state: null },
+            visualization: { activeId: 'testVis', state: {} },
             datasourceStates: {
               testDatasource: {
                 isLoading: false,
@@ -280,9 +280,8 @@ describe('editor_frame', () => {
 
       instance = (
         await mountWithProvider(<EditorFrame {...props} />, {
-          data: props.plugins.data,
           preloadedState: {
-            visualization: { activeId: 'testVis', state: null },
+            visualization: { activeId: 'testVis', state: {} },
             datasourceStates: {
               testDatasource: {
                 isLoading: false,
@@ -392,7 +391,6 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       };
       await mountWithProvider(<EditorFrame {...props} />, {
-        data: props.plugins.data,
         preloadedState: {
           activeDatasourceId: 'testDatasource',
           visualization: { activeId: mockVisualization.id, state: {} },
@@ -434,7 +432,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      await mountWithProvider(<EditorFrame {...props} />, { data: props.plugins.data });
+      await mountWithProvider(<EditorFrame {...props} />);
 
       const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
         .setState;
@@ -471,7 +469,6 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       };
       await mountWithProvider(<EditorFrame {...props} />, {
-        data: props.plugins.data,
         preloadedState: { visualization: { activeId: mockVisualization.id, state: {} } },
       });
 
@@ -520,7 +517,6 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       };
       await mountWithProvider(<EditorFrame {...props} />, {
-        data: props.plugins.data,
         preloadedState: {
           datasourceStates: {
             testDatasource: {
@@ -584,8 +580,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      instance = (await mountWithProvider(<EditorFrame {...props} />, { data: props.plugins.data }))
-        .instance;
+      instance = (await mountWithProvider(<EditorFrame {...props} />)).instance;
 
       // necessary to flush elements to dom synchronously
       instance.update();
@@ -600,9 +595,11 @@ describe('editor_frame', () => {
         instance.find('button[data-test-subj="datasource-switch"]').simulate('click');
       });
       await act(async () => {
-        (document.querySelector(
-          '[data-test-subj="datasource-switch-testDatasource2"]'
-        ) as HTMLButtonElement).click();
+        (
+          document.querySelector(
+            '[data-test-subj="datasource-switch-testDatasource2"]'
+          ) as HTMLButtonElement
+        ).click();
       });
       instance.update();
       expect(mockDatasource2.initialize).toHaveBeenCalled();
@@ -615,9 +612,11 @@ describe('editor_frame', () => {
       instance.find('button[data-test-subj="datasource-switch"]').simulate('click');
 
       await act(async () => {
-        (document.querySelector(
-          '[data-test-subj="datasource-switch-testDatasource2"]'
-        ) as HTMLButtonElement).click();
+        (
+          document.querySelector(
+            '[data-test-subj="datasource-switch-testDatasource2"]'
+          ) as HTMLButtonElement
+        ).click();
       });
 
       expect(mockDatasource2.renderDataPanel).toHaveBeenCalledWith(
@@ -685,7 +684,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      await mountWithProvider(<EditorFrame {...props} />, { data: props.plugins.data });
+      await mountWithProvider(<EditorFrame {...props} />);
 
       expect(mockDatasource.getDatasourceSuggestionsFromCurrentState).toHaveBeenCalled();
       expect(mockDatasource2.getDatasourceSuggestionsFromCurrentState).not.toHaveBeenCalled();
@@ -718,7 +717,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      await mountWithProvider(<EditorFrame {...props} />, { data: props.plugins.data });
+      await mountWithProvider(<EditorFrame {...props} />);
 
       expect(mockVisualization.getSuggestions).toHaveBeenCalled();
       expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
@@ -786,8 +785,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      instance = (await mountWithProvider(<EditorFrame {...props} />, { data: props.plugins.data }))
-        .instance;
+      instance = (await mountWithProvider(<EditorFrame {...props} />)).instance;
 
       expect(
         instance
@@ -833,8 +831,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      instance = (await mountWithProvider(<EditorFrame {...props} />, { data: props.plugins.data }))
-        .instance;
+      instance = (await mountWithProvider(<EditorFrame {...props} />)).instance;
 
       act(() => {
         instance.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
@@ -891,8 +888,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      instance = (await mountWithProvider(<EditorFrame {...props} />, { data: props.plugins.data }))
-        .instance;
+      instance = (await mountWithProvider(<EditorFrame {...props} />)).instance;
 
       act(() => {
         instance.find('[data-test-subj="lnsWorkspace"]').last().simulate('drop');
@@ -961,7 +957,6 @@ describe('editor_frame', () => {
       } as EditorFrameProps;
       instance = (
         await mountWithProvider(<EditorFrame {...props} />, {
-          data: props.plugins.data,
           preloadedState: {
             datasourceStates: {
               testDatasource: {
@@ -1073,11 +1068,7 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       } as EditorFrameProps;
 
-      instance = (
-        await mountWithProvider(<EditorFrame {...props} />, {
-          data: props.plugins.data,
-        })
-      ).instance;
+      instance = (await mountWithProvider(<EditorFrame {...props} />)).instance;
 
       act(() => {
         instance.find(DragDrop).filter('[dataTestSubj="lnsWorkspace"]').prop('onDrop')!(

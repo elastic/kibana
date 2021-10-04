@@ -13,8 +13,8 @@ import {
 } from '../../../../../__mocks__/kea_logic';
 import '../../../../__mocks__/engine_logic.mock';
 
-jest.mock('../../crawler_overview_logic', () => ({
-  CrawlerOverviewLogic: {
+jest.mock('../../crawler_logic', () => ({
+  CrawlerLogic: {
     actions: {
       onReceiveCrawlerData: jest.fn(),
     },
@@ -28,7 +28,7 @@ jest.mock('./utils', () => ({
 
 import { nextTick } from '@kbn/test/jest';
 
-import { CrawlerOverviewLogic } from '../../crawler_overview_logic';
+import { CrawlerLogic } from '../../crawler_logic';
 import { CrawlerDomain } from '../../types';
 
 import { AddDomainLogic, AddDomainLogicValues } from './add_domain_logic';
@@ -286,7 +286,7 @@ describe('AddDomainLogic', () => {
         await nextTick();
 
         expect(http.post).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/crawler/domains',
+          '/internal/app_search/engines/some-engine/crawler/domains',
           {
             query: {
               respond_with: 'crawler_details',
@@ -304,14 +304,18 @@ describe('AddDomainLogic', () => {
           http.post.mockReturnValueOnce(
             Promise.resolve({
               domains: [],
+              events: [],
+              most_recent_crawl_request: null,
             })
           );
 
           AddDomainLogic.actions.submitNewDomain();
           await nextTick();
 
-          expect(CrawlerOverviewLogic.actions.onReceiveCrawlerData).toHaveBeenCalledWith({
+          expect(CrawlerLogic.actions.onReceiveCrawlerData).toHaveBeenCalledWith({
             domains: [],
+            events: [],
+            mostRecentCrawlRequest: null,
           });
         });
 
@@ -328,6 +332,8 @@ describe('AddDomainLogic', () => {
                   name: 'https://swiftype.co/site-search',
                 },
               ],
+              events: [],
+              most_recent_crawl_request: null,
             })
           );
           jest.spyOn(AddDomainLogic.actions, 'onSubmitNewDomainSuccess');
@@ -389,9 +395,10 @@ describe('AddDomainLogic', () => {
         AddDomainLogic.actions.validateDomainInitialVerification('https://elastic.co', '/');
         await nextTick();
 
-        expect(
-          AddDomainLogic.actions.performDomainValidationStep
-        ).toHaveBeenCalledWith('initialValidation', ['url']);
+        expect(AddDomainLogic.actions.performDomainValidationStep).toHaveBeenCalledWith(
+          'initialValidation',
+          ['url']
+        );
       });
     });
 
@@ -402,9 +409,10 @@ describe('AddDomainLogic', () => {
         AddDomainLogic.actions.validateDomainContentVerification();
         await nextTick();
 
-        expect(
-          AddDomainLogic.actions.performDomainValidationStep
-        ).toHaveBeenCalledWith('contentVerification', ['url_request', 'url_content']);
+        expect(AddDomainLogic.actions.performDomainValidationStep).toHaveBeenCalledWith(
+          'contentVerification',
+          ['url_request', 'url_content']
+        );
       });
     });
 
@@ -415,9 +423,10 @@ describe('AddDomainLogic', () => {
         AddDomainLogic.actions.validateDomainIndexingRestrictions();
         await nextTick();
 
-        expect(
-          AddDomainLogic.actions.performDomainValidationStep
-        ).toHaveBeenCalledWith('indexingRestrictions', ['robots_txt']);
+        expect(AddDomainLogic.actions.performDomainValidationStep).toHaveBeenCalledWith(
+          'indexingRestrictions',
+          ['robots_txt']
+        );
       });
     });
 
@@ -428,9 +437,10 @@ describe('AddDomainLogic', () => {
         AddDomainLogic.actions.validateDomainNetworkConnectivity();
         await nextTick();
 
-        expect(
-          AddDomainLogic.actions.performDomainValidationStep
-        ).toHaveBeenCalledWith('networkConnectivity', ['dns', 'tcp']);
+        expect(AddDomainLogic.actions.performDomainValidationStep).toHaveBeenCalledWith(
+          'networkConnectivity',
+          ['dns', 'tcp']
+        );
       });
     });
 
@@ -479,7 +489,7 @@ describe('AddDomainLogic', () => {
             },
             contentVerification: {
               state: 'invalid',
-              message: 'Unable to verify content because the "Network Connectivity" check failed.',
+              message: 'Unable to verify content because the "Indexing Restrictions" check failed.',
             },
           });
         });
@@ -574,7 +584,7 @@ describe('AddDomainLogic', () => {
             },
             contentVerification: {
               state: 'invalid',
-              message: 'Unable to verify content because the "Network Connectivity" check failed.',
+              message: 'Unable to verify content because the "Indexing Restrictions" check failed.',
             },
           });
         });

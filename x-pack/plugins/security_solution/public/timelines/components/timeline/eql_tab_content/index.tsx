@@ -13,7 +13,6 @@ import {
   EuiFlyoutFooter,
   EuiBadge,
 } from '@elastic/eui';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useCallback } from 'react';
 import styled from 'styled-components';
@@ -152,8 +151,6 @@ export type Props = OwnProps & PropsFromRedux;
 
 const NO_SORTING: Sort[] = [];
 
-const alertConsumers: AlertConsumers[] = [AlertConsumers.SIEM];
-
 export const EqlTabContentComponent: React.FC<Props> = ({
   activeTab,
   columns,
@@ -208,23 +205,21 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     );
   }, [dispatch, timelineId]);
 
-  const [
-    isQueryLoading,
-    { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch },
-  ] = useTimelineEvents({
-    docValueFields,
-    endDate: end,
-    eqlOptions: restEqlOption,
-    id: timelineId,
-    indexNames: selectedPatterns,
-    fields: getTimelineQueryFields(),
-    language: 'eql',
-    limit: itemsPerPage,
-    filterQuery: eqlQuery ?? '',
-    startDate: start,
-    skip: !canQueryTimeline(),
-    timerangeKind,
-  });
+  const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
+    useTimelineEvents({
+      docValueFields,
+      endDate: end,
+      eqlOptions: restEqlOption,
+      id: timelineId,
+      indexNames: selectedPatterns,
+      fields: getTimelineQueryFields(),
+      language: 'eql',
+      limit: itemsPerPage,
+      filterQuery: eqlQuery ?? '',
+      startDate: start,
+      skip: !canQueryTimeline(),
+      timerangeKind,
+    });
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.eql, timelineId });
@@ -349,7 +344,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
             <VerticalRule />
             <ScrollableFlexItem grow={1}>
               <DetailsPanel
-                alertConsumers={alertConsumers}
                 browserFields={browserFields}
                 docValueFields={docValueFields}
                 tabType={TimelineTabs.eql}

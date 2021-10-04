@@ -8,7 +8,7 @@
 import type { SavedObjectsClientContract } from 'kibana/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, isEqual } from 'lodash/fp';
 import { ExceptionListClient } from '../../../../../lists/server';
 
 import {
@@ -16,11 +16,13 @@ import {
   GetOneTrustedAppResponse,
   GetTrustedAppsListRequest,
   GetTrustedAppsSummaryResponse,
-  GetTrustedListAppsResponse,
+  GetTrustedAppsListResponse,
   PostTrustedAppCreateRequest,
   PostTrustedAppCreateResponse,
   PutTrustedAppUpdateRequest,
   PutTrustedAppUpdateResponse,
+  GetTrustedAppsSummaryRequest,
+  TrustedApp,
 } from '../../../../common/endpoint/types';
 
 import {
@@ -36,6 +38,7 @@ import {
 } from './errors';
 import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 import { PackagePolicy } from '../../../../../fleet/common';
+import { EndpointLicenseError } from '../../errors';
 
 const getNonExistingPoliciesFromTrustedApp = async (
   savedObjectClient: SavedObjectsClientContract,
@@ -60,6 +63,28 @@ const getNonExistingPoliciesFromTrustedApp = async (
   }
 
   return policies.filter((policy) => policy.version === undefined);
+};
+
+const isUserTryingToModifyEffectScopeWithoutPermissions = (
+  currentTrustedApp: TrustedApp,
+  updatedTrustedApp: PutTrustedAppUpdateRequest,
+  isAtLeastPlatinum: boolean
+): boolean => {
+  if (updatedTrustedApp.effectScope.type === 'global') {
+    return false;
+  } else if (isAtLeastPlatinum) {
+    return false;
+  } else if (
+    isEqual(
+      currentTrustedApp.effectScope.type === 'policy' &&
+        currentTrustedApp.effectScope.policies.sort(),
+      updatedTrustedApp.effectScope.policies.sort()
+    )
+  ) {
+    return false;
+  } else {
+    return true;
+  }
 };
 
 export const deleteTrustedApp = async (
@@ -99,7 +124,7 @@ export const getTrustedApp = async (
 export const getTrustedAppsList = async (
   exceptionsListClient: ExceptionListClient,
   { page, per_page: perPage, kuery }: GetTrustedAppsListRequest
-): Promise<GetTrustedListAppsResponse> => {
+): Promise<GetTrustedAppsListResponse> => {
   // Ensure list is created if it does not exist
   await exceptionsListClient.createTrustedAppsList();
 
@@ -125,10 +150,15 @@ export const createTrustedApp = async (
   exceptionsListClient: ExceptionListClient,
   savedObjectClient: SavedObjectsClientContract,
   packagePolicyClient: PackagePolicyServiceInterface,
-  newTrustedApp: PostTrustedAppCreateRequest
+  newTrustedApp: PostTrustedAppCreateRequest,
+  isAtLeastPlatinum: boolean
 ): Promise<PostTrustedAppCreateResponse> => {
   // Ensure list is created if it does not exist
   await exceptionsListClient.createTrustedAppsList();
+
+  if (newTrustedApp.effectScope.type === 'policy' && !isAtLeastPlatinum) {
+    throw new EndpointLicenseError();
+  }
 
   const unexistingPolicies = await getNonExistingPoliciesFromTrustedApp(
     savedObjectClient,
@@ -155,7 +185,8 @@ export const updateTrustedApp = async (
   savedObjectClient: SavedObjectsClientContract,
   packagePolicyClient: PackagePolicyServiceInterface,
   id: string,
-  updatedTrustedApp: PutTrustedAppUpdateRequest
+  updatedTrustedApp: PutTrustedAppUpdateRequest,
+  isAtLeastPlatinum: boolean
 ): Promise<PutTrustedAppUpdateResponse> => {
   const currentTrustedApp = await exceptionsListClient.getExceptionListItem({
     itemId: '',
@@ -165,6 +196,16 @@ export const updateTrustedApp = async (
 
   if (!currentTrustedApp) {
     throw new TrustedAppNotFoundError(id);
+  }
+
+  if (
+    isUserTryingToModifyEffectScopeWithoutPermissions(
+      exceptionListItemToTrustedApp(currentTrustedApp),
+      updatedTrustedApp,
+      isAtLeastPlatinum
+    )
+  ) {
+    throw new EndpointLicenseError();
   }
 
   const unexistingPolicies = await getNonExistingPoliciesFromTrustedApp(
@@ -205,11 +246,11 @@ export const updateTrustedApp = async (
 };
 
 export const getTrustedAppsSummary = async (
-  exceptionsListClient: ExceptionListClient
+  exceptionsListClient: ExceptionListClient,
+  { kuery }: GetTrustedAppsSummaryRequest
 ): Promise<GetTrustedAppsSummaryResponse> => {
   // Ensure list is created if it does not exist
   await exceptionsListClient.createTrustedAppsList();
-
   const summary = {
     linux: 0,
     windows: 0,
@@ -225,7 +266,7 @@ export const getTrustedAppsSummary = async (
       listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
       page,
       perPage,
-      filter: undefined,
+      filter: kuery,
       namespaceType: 'agnostic',
       sortField: undefined,
       sortOrder: undefined,

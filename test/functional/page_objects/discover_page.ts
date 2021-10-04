@@ -25,8 +25,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
   public async getChartTimespan() {
-    const el = await this.find.byCssSelector('[data-test-subj="discoverIntervalDateRange"]');
-    return await el.getVisibleText();
+    return await this.testSubjects.getAttribute('discoverChart', 'data-time-range');
   }
 
   public async getDocTable() {
@@ -123,6 +122,11 @@ export class DiscoverPageObject extends FtrService {
     return await searchLink.isDisplayed();
   }
 
+  public async getSavedSearchTitle() {
+    const breadcrumb = await this.find.byCssSelector('[data-test-subj="breadcrumb last"]');
+    return await breadcrumb.getVisibleText();
+  }
+
   public async loadSavedSearch(searchName: string) {
     await this.openLoadSavedSearchPanel();
     await this.testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
@@ -175,19 +179,22 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getChartInterval() {
-    const selectedValue = await this.testSubjects.getAttribute('discoverIntervalSelect', 'value');
-    const selectedOption = await this.find.byCssSelector(`option[value="${selectedValue}"]`);
+    await this.testSubjects.click('discoverChartOptionsToggle');
+    await this.testSubjects.click('discoverTimeIntervalPanel');
+    const selectedOption = await this.find.byCssSelector(`.discoverIntervalSelected`);
     return selectedOption.getVisibleText();
   }
 
   public async getChartIntervalWarningIcon() {
+    await this.testSubjects.click('discoverChartOptionsToggle');
     await this.header.waitUntilLoadingHasFinished();
     return await this.find.existsByCssSelector('.euiToolTipAnchor');
   }
 
   public async setChartInterval(interval: string) {
-    const optionElement = await this.find.byCssSelector(`option[label="${interval}"]`, 5000);
-    await optionElement.click();
+    await this.testSubjects.click('discoverChartOptionsToggle');
+    await this.testSubjects.click('discoverTimeIntervalPanel');
+    await this.testSubjects.click(`discoverTimeInterval-${interval}`);
     return await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -353,17 +360,39 @@ export class DiscoverPageObject extends FtrService {
   public async clickFieldListItemAdd(field: string) {
     // a filter check may make sense here, but it should be properly handled to make
     // it work with the _score and _source fields as well
+    if (await this.isFieldSelected(field)) {
+      return;
+    }
     await this.clickFieldListItemToggle(field);
+    const isLegacyDefault = await this.useLegacyTable();
+    if (isLegacyDefault) {
+      await this.retry.waitFor(`field ${field} to be added to classic table`, async () => {
+        return await this.testSubjects.exists(`docTableHeader-${field}`);
+      });
+    } else {
+      await this.retry.waitFor(`field ${field} to be added to new table`, async () => {
+        return await this.testSubjects.exists(`dataGridHeaderCell-${field}`);
+      });
+    }
+  }
+
+  public async isFieldSelected(field: string) {
+    if (!(await this.testSubjects.exists('fieldList-selected'))) {
+      return false;
+    }
+    const selectedList = await this.testSubjects.find('fieldList-selected');
+    return await this.testSubjects.descendantExists(`field-${field}`, selectedList);
   }
 
   public async clickFieldListItemRemove(field: string) {
-    if (!(await this.testSubjects.exists('fieldList-selected'))) {
+    if (
+      !(await this.testSubjects.exists('fieldList-selected')) ||
+      !(await this.isFieldSelected(field))
+    ) {
       return;
     }
-    const selectedList = await this.testSubjects.find('fieldList-selected');
-    if (await this.testSubjects.descendantExists(`field-${field}`, selectedList)) {
-      await this.clickFieldListItemToggle(field);
-    }
+
+    await this.clickFieldListItemToggle(field);
   }
 
   public async clickFieldListItemVisualize(fieldName: string) {
@@ -457,7 +486,7 @@ export class DiscoverPageObject extends FtrService {
    * Check if Discover app is currently rendered on the screen.
    */
   public async isDiscoverAppOnScreen(): Promise<boolean> {
-    const result = await this.find.allByCssSelector('discover-app');
+    const result = await this.find.allByCssSelector('.dscPage');
     return result.length === 1;
   }
 

@@ -93,7 +93,7 @@ describe('createFilter', () => {
 
     if (filters) {
       expect(filters.length).toEqual(1);
-      expect(filters[0].query.match_phrase.bytes).toEqual('2048');
+      expect(filters[0].query!.match_phrase.bytes).toEqual('2048');
     }
   });
 

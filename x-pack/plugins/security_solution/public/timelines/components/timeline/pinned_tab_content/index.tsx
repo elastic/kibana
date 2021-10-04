@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo, useCallback } from 'react';
 import styled from 'styled-components';
@@ -89,8 +88,6 @@ const VerticalRule = styled.div`
 
 VerticalRule.displayName = 'VerticalRule';
 
-const alertConsumers: AlertConsumers[] = [AlertConsumers.SIEM];
-
 interface OwnProps {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
@@ -118,9 +115,11 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   showExpandedDetails,
   sort,
 }) => {
-  const { browserFields, docValueFields, loading: loadingSourcerer } = useSourcererScope(
-    SourcererScopeName.timeline
-  );
+  const {
+    browserFields,
+    docValueFields,
+    loading: loadingSourcerer,
+  } = useSourcererScope(SourcererScopeName.timeline);
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
 
   const existingIndexNamesSelector = useMemo(
@@ -184,22 +183,20 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     [sort]
   );
 
-  const [
-    isQueryLoading,
-    { events, totalCount, pageInfo, loadPage, updatedAt, refetch },
-  ] = useTimelineEvents({
-    docValueFields,
-    endDate: '',
-    id: `pinned-${timelineId}`,
-    indexNames: existingIndexNames,
-    fields: timelineQueryFields,
-    limit: itemsPerPage,
-    filterQuery,
-    skip: filterQuery === '',
-    startDate: '',
-    sort: timelineQuerySortField,
-    timerangeKind: undefined,
-  });
+  const [isQueryLoading, { events, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
+    useTimelineEvents({
+      docValueFields,
+      endDate: '',
+      id: `pinned-${timelineId}`,
+      indexNames: existingIndexNames,
+      fields: timelineQueryFields,
+      limit: itemsPerPage,
+      filterQuery,
+      skip: filterQuery === '',
+      startDate: '',
+      sort: timelineQuerySortField,
+      timerangeKind: undefined,
+    });
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.pinned, timelineId });
@@ -269,7 +266,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
             <VerticalRule />
             <ScrollableFlexItem grow={1}>
               <DetailsPanel
-                alertConsumers={alertConsumers}
                 browserFields={browserFields}
                 docValueFields={docValueFields}
                 handleOnPanelClosed={handleOnPanelClosed}
@@ -288,14 +284,8 @@ const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
-    const {
-      columns,
-      expandedDetail,
-      itemsPerPage,
-      itemsPerPageOptions,
-      pinnedEventIds,
-      sort,
-    } = timeline;
+    const { columns, expandedDetail, itemsPerPage, itemsPerPageOptions, pinnedEventIds, sort } =
+      timeline;
 
     return {
       columns,

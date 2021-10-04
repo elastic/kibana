@@ -8,6 +8,8 @@
 import { useFetcher } from './use_fetcher';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
+import { useApmParams } from './use_apm_params';
+import { useTimeRange } from './use_time_range';
 
 export interface TraceSample {
   traceId: string;
@@ -31,17 +33,20 @@ export function useTransactionTraceSamplesFetcher({
   const { serviceName, transactionType } = useApmServiceContext();
 
   const {
-    urlParams: {
-      start,
-      end,
-      transactionId,
-      traceId,
-      sampleRangeFrom,
-      sampleRangeTo,
-    },
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const {
+    urlParams: { transactionId, traceId, sampleRangeFrom, sampleRangeTo },
   } = useUrlParams();
 
-  const { data = INITIAL_DATA, status, error } = useFetcher(
+  const {
+    data = INITIAL_DATA,
+    status,
+    error,
+  } = useFetcher(
     async (callApmApi) => {
       if (serviceName && start && end && transactionType && transactionName) {
         const response = await callApmApi({

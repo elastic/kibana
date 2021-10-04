@@ -156,6 +156,8 @@ const getSavedObjectTypes = (
         revision: { type: 'integer' },
         monitoring_enabled: { type: 'keyword', index: false },
         is_preconfigured: { type: 'keyword' },
+        data_output_id: { type: 'keyword' },
+        monitoring_output_id: { type: 'keyword' },
       },
     },
     migrations: {
@@ -196,6 +198,7 @@ const getSavedObjectTypes = (
     },
     mappings: {
       properties: {
+        output_id: { type: 'keyword', index: false },
         name: { type: 'keyword' },
         type: { type: 'keyword' },
         is_default: { type: 'boolean' },
@@ -203,6 +206,7 @@ const getSavedObjectTypes = (
         ca_sha256: { type: 'keyword', index: false },
         config: { type: 'flattened' },
         config_yaml: { type: 'text' },
+        is_preconfigured: { type: 'boolean', index: false },
       },
     },
     migrations: {
@@ -251,6 +255,11 @@ const getSavedObjectTypes = (
                   properties: {
                     dataset: { type: 'keyword' },
                     type: { type: 'keyword' },
+                    elasticsearch: {
+                      properties: {
+                        privileges: { type: 'flattened' },
+                      },
+                    },
                   },
                 },
                 vars: { type: 'flattened' },
@@ -322,6 +331,7 @@ const getSavedObjectTypes = (
     },
     migrations: {
       '7.14.0': migrateInstallationToV7140,
+      '7.14.1': migrateInstallationToV7140,
     },
   },
   [ASSETS_SAVED_OBJECT_TYPE]: {

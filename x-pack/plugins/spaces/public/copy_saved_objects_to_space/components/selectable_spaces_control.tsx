@@ -12,10 +12,10 @@ import { EuiIconTip, EuiLoadingSpinner, EuiSelectable } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
+import type { SpacesDataEntry } from '../../types';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
 const LazySpaceAvatar = lazy(() =>
@@ -23,7 +23,7 @@ const LazySpaceAvatar = lazy(() =>
 );
 
 interface Props {
-  spaces: Space[];
+  spaces: SpacesDataEntry[];
   selectedSpaceIds: string[];
   disabledSpaceIds: Set<string>;
   onChange: (selectedSpaceIds: string[]) => void;

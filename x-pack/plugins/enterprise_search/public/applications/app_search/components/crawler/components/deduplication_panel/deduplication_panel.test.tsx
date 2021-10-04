@@ -26,6 +26,8 @@ import {
 
 import { mountWithIntl, rerender } from '../../../../../test_helpers';
 
+import { DataPanel } from '../../../data_panel';
+
 import { DeduplicationPanel } from './deduplication_panel';
 
 const MOCK_ACTIONS = {
@@ -60,7 +62,7 @@ describe('DeduplicationPanel', () => {
   it('contains a button to reset to defaults', () => {
     const wrapper = shallow(<DeduplicationPanel />);
 
-    wrapper.find(EuiButton).simulate('click');
+    wrapper.find(DataPanel).dive().find(EuiButton).simulate('click');
 
     expect(MOCK_ACTIONS.submitDeduplicationUpdate).toHaveBeenCalledWith(MOCK_VALUES.domain, {
       fields: [],

@@ -52,4 +52,20 @@ Array [
 ]
 `;
 
-exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 3`] = `null`;
+exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 3`] = `
+<li
+  className="euiBreadcrumb euiBreadcrumb--last"
+  key="0"
+>
+  <EuiInnerText>
+    <span
+      aria-current="page"
+      className="euiBreadcrumb__content"
+      data-test-subj="breadcrumb first"
+      title="First"
+    >
+      Kibana
+    </span>
+  </EuiInnerText>
+</li>
+`;

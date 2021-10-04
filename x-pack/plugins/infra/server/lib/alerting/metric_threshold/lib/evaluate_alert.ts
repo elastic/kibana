@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mapValues, first, last, isNaN } from 'lodash';
+import { mapValues, first, last, isNaN, isNumber, isObject, has } from 'lodash';
 import moment from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
 import {
@@ -13,7 +13,6 @@ import {
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
 } from '../../../../../common/alerting/metrics';
 import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
-import { roundTimestamp } from '../../../../utils/round_timestamp';
 import { InfraSource } from '../../../../../common/source_configuration/source_configuration';
 import { InfraDatabaseSearchResponse } from '../../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../../utils/create_afterkey_handler';
@@ -22,8 +21,13 @@ import { DOCUMENT_COUNT_I18N } from '../../common/messages';
 import { UNGROUPED_FACTORY_KEY } from '../../common/utils';
 import { MetricExpressionParams, Comparator, Aggregators } from '../types';
 import { getElasticsearchMetricQuery } from './metric_query';
+import { createTimerange } from './create_timerange';
 
-interface Aggregation {
+interface AggregationWithoutIntervals {
+  aggregatedValue: { value: number; values?: Array<{ key: number; value: number }> };
+}
+
+interface AggregationWithIntervals {
   aggregatedIntervals: {
     buckets: Array<{
       aggregatedValue: { value: number; values?: Array<{ key: number; value: number }> };
@@ -33,6 +37,14 @@ interface Aggregation {
       key_as_string: string;
     }>;
   };
+}
+
+type Aggregation = AggregationWithIntervals | AggregationWithoutIntervals;
+
+function isAggregationWithIntervals(
+  subject: Aggregation | undefined
+): subject is AggregationWithIntervals {
+  return isObject(subject) && has(subject, 'aggregatedIntervals');
 }
 
 interface CompositeAggregationsResponse {
@@ -52,7 +64,8 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
   esClient: ElasticsearchClient,
   params: Params,
   config: InfraSource['configuration'],
-  timeframe?: { start: number; end: number }
+  prevGroups: string[],
+  timeframe?: { start?: number; end: number }
 ) => {
   const { criteria, groupBy, filterQuery, shouldDropPartialBuckets } = params;
   return Promise.all(
@@ -79,21 +92,53 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
           : [false];
       };
 
-      return mapValues(currentValues, (points: any[] | typeof NaN | null) => {
-        if (isTooManyBucketsPreviewException(points)) throw points;
-        return {
-          ...criterion,
-          metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
-          currentValue: Array.isArray(points) ? last(points)?.value : NaN,
-          timestamp: Array.isArray(points) ? last(points)?.key : NaN,
-          shouldFire: pointsEvaluator(points, threshold, comparator),
-          shouldWarn: pointsEvaluator(points, warningThreshold, warningComparator),
-          isNoData: Array.isArray(points)
-            ? points.map((point) => point?.value === null || point === null)
-            : [points === null],
-          isError: isNaN(Array.isArray(points) ? last(points)?.value : points),
-        };
-      });
+      // If any previous groups are no longer being reported, backfill them with null values
+      const currentGroups = Object.keys(currentValues);
+
+      const missingGroups = prevGroups.filter((g) => !currentGroups.includes(g));
+      if (currentGroups.length === 0 && missingGroups.length === 0) {
+        missingGroups.push(UNGROUPED_FACTORY_KEY);
+      }
+      const backfillTimestamp =
+        last(last(Object.values(currentValues)))?.key ?? new Date().toISOString();
+      const backfilledPrevGroups: Record<
+        string,
+        Array<{ key: string; value: number }>
+      > = missingGroups.reduce(
+        (result, group) => ({
+          ...result,
+          [group]: [
+            {
+              key: backfillTimestamp,
+              value: criterion.aggType === Aggregators.COUNT ? 0 : null,
+            },
+          ],
+        }),
+        {}
+      );
+      const currentValuesWithBackfilledPrevGroups = {
+        ...currentValues,
+        ...backfilledPrevGroups,
+      };
+
+      return mapValues(
+        currentValuesWithBackfilledPrevGroups,
+        (points: any[] | typeof NaN | null) => {
+          if (isTooManyBucketsPreviewException(points)) throw points;
+          return {
+            ...criterion,
+            metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
+            currentValue: Array.isArray(points) ? last(points)?.value : NaN,
+            timestamp: Array.isArray(points) ? last(points)?.key : NaN,
+            shouldFire: pointsEvaluator(points, threshold, comparator),
+            shouldWarn: pointsEvaluator(points, warningThreshold, warningComparator),
+            isNoData: Array.isArray(points)
+              ? points.map((point) => point?.value === null || point === null)
+              : [points === null],
+            isError: isNaN(Array.isArray(points) ? last(points)?.value : points),
+          };
+        }
+      );
     })
   );
 };
@@ -105,9 +150,9 @@ const getMetric: (
   timefield: string,
   groupBy: string | undefined | string[],
   filterQuery: string | undefined,
-  timeframe?: { start: number; end: number },
+  timeframe?: { start?: number; end: number },
   shouldDropPartialBuckets?: boolean
-) => Promise<Record<string, number[]>> = async function (
+) => Promise<Record<string, Array<{ key: string; value: number }>>> = async function (
   esClient,
   params,
   index,
@@ -123,26 +168,12 @@ const getMetric: (
   const interval = `${timeSize}${timeUnit}`;
   const intervalAsSeconds = getIntervalInSeconds(interval);
   const intervalAsMS = intervalAsSeconds * 1000;
-
-  const to = moment(timeframe ? timeframe.end : Date.now())
-    .add(1, timeUnit)
-    .startOf(timeUnit)
-    .valueOf();
-
-  // Rate aggregations need 5 buckets worth of data
-  const minimumBuckets = aggType === Aggregators.RATE ? 5 : 1;
-
-  const minimumFrom = to - intervalAsMS * minimumBuckets;
-
-  const from = roundTimestamp(
-    timeframe && timeframe.start <= minimumFrom ? timeframe.start : minimumFrom,
-    timeUnit
-  );
+  const calculatedTimerange = createTimerange(intervalAsMS, aggType, timeframe);
 
   const searchBody = getElasticsearchMetricQuery(
     params,
     timefield,
-    { start: from, end: to },
+    calculatedTimerange,
     hasGroupBy ? groupBy : undefined,
     filterQuery
   );
@@ -151,8 +182,8 @@ const getMetric: (
     // Rate aggs always drop partial buckets; guard against this boolean being passed as false
     shouldDropPartialBuckets || aggType === Aggregators.RATE
       ? {
-          from,
-          to,
+          from: calculatedTimerange.start,
+          to: calculatedTimerange.end,
           bucketSizeInMillis: intervalAsMS,
         }
       : null;
@@ -172,16 +203,23 @@ const getMetric: (
         searchBody,
         bucketSelector,
         afterKeyHandler
-      )) as Array<Aggregation & { key: Record<string, string> }>;
-      return compositeBuckets.reduce(
+      )) as Array<Aggregation & { key: Record<string, string>; doc_count: number }>;
+      const groupedResults = compositeBuckets.reduce(
         (result, bucket) => ({
           ...result,
           [Object.values(bucket.key)
             .map((value) => value)
-            .join(', ')]: getValuesFromAggregations(bucket, aggType, dropPartialBucketsOptions),
+            .join(', ')]: getValuesFromAggregations(
+            bucket,
+            aggType,
+            dropPartialBucketsOptions,
+            calculatedTimerange,
+            bucket.doc_count
+          ),
         }),
         {}
       );
+      return groupedResults;
     }
     const { body: result } = await esClient.search({
       body: searchBody,
@@ -190,12 +228,18 @@ const getMetric: (
 
     return {
       [UNGROUPED_FACTORY_KEY]: getValuesFromAggregations(
-        (result.aggregations! as unknown) as Aggregation,
+        result.aggregations! as unknown as Aggregation,
         aggType,
-        dropPartialBucketsOptions
+        dropPartialBucketsOptions,
+        calculatedTimerange,
+        result.hits
+          ? isNumber(result.hits.total)
+            ? result.hits.total
+            : result.hits.total.value
+          : 0
       ),
     };
-  } catch (e) {
+  } catch (e: any) {
     if (timeframe) {
       // This code should only ever be reached when previewing the alert, not executing it
       const causedByType = e.body?.error?.caused_by?.type;
@@ -218,32 +262,59 @@ interface DropPartialBucketOptions {
   bucketSizeInMillis: number;
 }
 
-const dropPartialBuckets = ({ from, to, bucketSizeInMillis }: DropPartialBucketOptions) => (
-  row: {
-    key: string;
-    value: number;
-  } | null
-) => {
-  if (row == null) return null;
-  const timestamp = new Date(row.key).valueOf();
-  return timestamp >= from && timestamp + bucketSizeInMillis <= to;
-};
+const dropPartialBuckets =
+  ({ from, to, bucketSizeInMillis }: DropPartialBucketOptions) =>
+  (
+    row: {
+      key: string;
+      value: number | null;
+    } | null
+  ) => {
+    if (row == null) return null;
+    const timestamp = new Date(row.key).valueOf();
+    return timestamp >= from && timestamp + bucketSizeInMillis <= to;
+  };
 
 const getValuesFromAggregations = (
-  aggregations: Aggregation,
+  aggregations: Aggregation | undefined,
   aggType: MetricExpressionParams['aggType'],
-  dropPartialBucketsOptions: DropPartialBucketOptions | null
+  dropPartialBucketsOptions: DropPartialBucketOptions | null,
+  timeFrame: { start: number; end: number },
+  docCount?: number
 ) => {
   try {
-    const { buckets } = aggregations.aggregatedIntervals;
+    let buckets;
+    if (aggType === Aggregators.COUNT) {
+      buckets = [
+        {
+          doc_count: docCount,
+          to_as_string: moment(timeFrame.end).toISOString(),
+          from_as_string: moment(timeFrame.start).toISOString(),
+          key_as_string: moment(timeFrame.start).toISOString(),
+        },
+      ];
+    } else if (isAggregationWithIntervals(aggregations)) {
+      buckets = aggregations.aggregatedIntervals.buckets;
+    } else {
+      buckets = [
+        {
+          ...aggregations,
+          doc_count: docCount,
+          to_as_string: moment(timeFrame.end).toISOString(),
+          from_as_string: moment(timeFrame.start).toISOString(),
+          key_as_string: moment(timeFrame.start).toISOString(),
+        },
+      ];
+    }
+
     if (!buckets.length) return null; // No Data state
 
-    let mappedBuckets;
+    let mappedBuckets: Array<{ key: string; value: number | null } | null>;
 
     if (aggType === Aggregators.COUNT) {
       mappedBuckets = buckets.map((bucket) => ({
         key: bucket.from_as_string,
-        value: bucket.doc_count,
+        value: bucket.doc_count || null,
       }));
     } else if (aggType === Aggregators.P95 || aggType === Aggregators.P99) {
       mappedBuckets = buckets.map((bucket) => {

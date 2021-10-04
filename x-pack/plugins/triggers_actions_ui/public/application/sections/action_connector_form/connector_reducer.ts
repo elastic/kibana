@@ -56,78 +56,80 @@ export type ConnectorReducer<Config, Secrets> = Reducer<
   ConnectorReducerAction<Config, Secrets>
 >;
 
-export const createConnectorReducer = <Config, Secrets>() => <
-  ConnectorPhase extends
-    | InitialConnector<Config, Secrets>
-    | UserConfiguredActionConnector<Config, Secrets>
->(
-  state: { connector: ConnectorPhase },
-  action: ConnectorReducerAction<Config, Secrets>
-) => {
-  const { connector } = state;
+export const createConnectorReducer =
+  <Config, Secrets>() =>
+  <
+    ConnectorPhase extends
+      | InitialConnector<Config, Secrets>
+      | UserConfiguredActionConnector<Config, Secrets>
+  >(
+    state: { connector: ConnectorPhase },
+    action: ConnectorReducerAction<Config, Secrets>
+  ) => {
+    const { connector } = state;
 
-  switch (action.command.type) {
-    case 'setConnector': {
-      const { key, value } = action.payload as Payload<'connector', ConnectorPhase>;
-      if (key === 'connector') {
-        return {
-          ...state,
-          connector: value,
-        };
-      } else {
-        return state;
+    switch (action.command.type) {
+      case 'setConnector': {
+        const { key, value } = action.payload as Payload<'connector', ConnectorPhase>;
+        if (key === 'connector') {
+          return {
+            ...state,
+            connector: value,
+          };
+        } else {
+          return state;
+        }
       }
-    }
-    case 'setProperty': {
-      const { key, value } = action.payload as TPayload<
-        UserConfiguredActionConnector<Config, Secrets>,
-        keyof UserConfiguredActionConnector<Config, Secrets>
-      >;
-      if (isEqual(connector[key], value)) {
-        return state;
-      } else {
-        return {
-          ...state,
-          connector: {
-            ...connector,
-            [key]: value,
-          },
-        };
-      }
-    }
-    case 'setConfigProperty': {
-      const { key, value } = action.payload as TPayload<Config, keyof Config>;
-      if (isEqual(connector.config[key], value)) {
-        return state;
-      } else {
-        return {
-          ...state,
-          connector: {
-            ...connector,
-            config: {
-              ...(connector.config as Config),
+      case 'setProperty': {
+        const { key, value } = action.payload as TPayload<
+          UserConfiguredActionConnector<Config, Secrets>,
+          keyof UserConfiguredActionConnector<Config, Secrets>
+        >;
+        if (isEqual(connector[key], value)) {
+          return state;
+        } else {
+          return {
+            ...state,
+            connector: {
+              ...connector,
               [key]: value,
             },
-          },
-        };
+          };
+        }
       }
-    }
-    case 'setSecretsProperty': {
-      const { key, value } = action.payload as TPayload<Secrets, keyof Secrets>;
-      if (isEqual(connector.secrets[key], value)) {
-        return state;
-      } else {
-        return {
-          ...state,
-          connector: {
-            ...connector,
-            secrets: {
-              ...(connector.secrets as Secrets),
-              [key]: value,
+      case 'setConfigProperty': {
+        const { key, value } = action.payload as TPayload<Config, keyof Config>;
+        if (isEqual(connector.config[key], value)) {
+          return state;
+        } else {
+          return {
+            ...state,
+            connector: {
+              ...connector,
+              config: {
+                ...(connector.config as Config),
+                [key]: value,
+              },
             },
-          },
-        };
+          };
+        }
+      }
+      case 'setSecretsProperty': {
+        const { key, value } = action.payload as TPayload<Secrets, keyof Secrets>;
+        if (isEqual(connector.secrets[key], value)) {
+          return state;
+        } else {
+          return {
+            ...state,
+            connector: {
+              ...connector,
+              secrets: {
+                ...(connector.secrets as Secrets),
+                [key]: value,
+              },
+            },
+          };
+        }
       }
     }
-  }
-};
+  };

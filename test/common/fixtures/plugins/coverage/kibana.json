@@ -1,6 +1,8 @@
 {
   "id": "coverageFixtures",
+  "owner": { "name": "Kibana Operations", "githubTeam": "kibana-operations" },
   "version": "kibana",
   "server": false,
   "ui": true
 }
+

@@ -15,6 +15,7 @@
     "fileUpload",
     "uiActions",
     "navigation",
+    "expressions",
     "visualizations",
     "dashboard",
     "embeddable",
@@ -33,7 +34,7 @@
   "ui": true,
   "server": true,
   "extraPublicDirs": [
-    "common/constants"
+    "common"
   ],
   "requiredBundles": [
     "kibanaReact",

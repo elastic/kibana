@@ -71,7 +71,12 @@ describe('ServiceMap', () => {
     it('renders null', async () => {
       expect(
         await render(
-          <ServiceMap environment={ENVIRONMENT_ALL.value} kuery="" />,
+          <ServiceMap
+            environment={ENVIRONMENT_ALL.value}
+            kuery=""
+            start="2021-08-20T10:00:00.000Z"
+            end="2021-08-20T10:15:00.000Z"
+          />,
           {
             wrapper: createWrapper(null),
           }
@@ -84,7 +89,12 @@ describe('ServiceMap', () => {
     it('renders the license banner', async () => {
       expect(
         await render(
-          <ServiceMap environment={ENVIRONMENT_ALL.value} kuery="" />,
+          <ServiceMap
+            environment={ENVIRONMENT_ALL.value}
+            kuery=""
+            start="2021-08-20T10:00:00.000Z"
+            end="2021-08-20T10:15:00.000Z"
+          />,
           {
             wrapper: createWrapper(expiredLicense),
           }
@@ -104,7 +114,12 @@ describe('ServiceMap', () => {
 
         expect(
           await render(
-            <ServiceMap environment={ENVIRONMENT_ALL.value} kuery="" />,
+            <ServiceMap
+              environment={ENVIRONMENT_ALL.value}
+              kuery=""
+              start="2021-08-20T10:00:00.000Z"
+              end="2021-08-20T10:15:00.000Z"
+            />,
             {
               wrapper: createWrapper(activeLicense),
             }

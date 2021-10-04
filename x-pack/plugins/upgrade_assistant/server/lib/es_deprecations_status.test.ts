@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import { DeprecationAPIResponse } from '../../common/types';
+import { MigrationDeprecationInfoResponse } from '@elastic/elasticsearch/api/types';
 
 import { getESUpgradeStatus } from './es_deprecations_status';
 import fakeDeprecations from './__fixtures__/fake_deprecations.json';
@@ -32,12 +32,11 @@ describe('getESUpgradeStatus', () => {
   };
 
   // @ts-expect-error mock data is too loosely typed
-  const deprecationsResponse: DeprecationAPIResponse = _.cloneDeep(fakeDeprecations);
+  const deprecationsResponse: MigrationDeprecationInfoResponse = _.cloneDeep(fakeDeprecations);
 
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
 
   esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
-    // @ts-expect-error not full interface
     asApiResponse(deprecationsResponse)
   );
 

@@ -35,13 +35,8 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   private mounted: boolean = false;
   constructor(props: DashboardViewportProps) {
     super(props);
-    const {
-      isFullScreenMode,
-      panels,
-      useMargins,
-      title,
-      isEmbeddedExternally,
-    } = this.props.container.getInput();
+    const { isFullScreenMode, panels, useMargins, title, isEmbeddedExternally } =
+      this.props.container.getInput();
 
     this.state = {
       isFullScreenMode,
@@ -55,13 +50,8 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   public componentDidMount() {
     this.mounted = true;
     this.subscription = this.props.container.getInput$().subscribe(() => {
-      const {
-        isFullScreenMode,
-        useMargins,
-        title,
-        description,
-        isEmbeddedExternally,
-      } = this.props.container.getInput();
+      const { isFullScreenMode, useMargins, title, description, isEmbeddedExternally } =
+        this.props.container.getInput();
       if (this.mounted) {
         this.setState({
           isFullScreenMode,
@@ -90,14 +80,8 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   public render() {
     const { container } = this.props;
     const isEditMode = container.getInput().viewMode !== ViewMode.VIEW;
-    const {
-      isEmbeddedExternally,
-      isFullScreenMode,
-      panels,
-      title,
-      description,
-      useMargins,
-    } = this.state;
+    const { isEmbeddedExternally, isFullScreenMode, panels, title, description, useMargins } =
+      this.state;
     return (
       <React.Fragment>
         <div
@@ -117,7 +101,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
             <div className="dshDashboardEmptyScreen">
               <DashboardEmptyScreen
                 isReadonlyMode={
-                  this.props.container.getInput().dashboardCapabilities?.hideWriteControls
+                  !this.props.container.getInput().dashboardCapabilities?.showWriteControls
                 }
                 isEditMode={isEditMode}
                 uiSettings={this.context.services.uiSettings}

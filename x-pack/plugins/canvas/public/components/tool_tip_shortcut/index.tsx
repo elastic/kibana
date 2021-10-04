@@ -25,15 +25,13 @@ interface Props {
 }
 
 export const ToolTipShortcut = compose<ComponentProps, Props>(
-  mapProps(
-    ({ namespace, action }: Props): ComponentProps => {
-      const shortcutMap = keymap[namespace][action];
-      if (typeof shortcutMap === 'string') {
-        return { shortcut: '' };
-      }
-
-      const shortcuts = shortcutMap[os] || [];
-      return { shortcut: getPrettyShortcut(shortcuts[0]) };
+  mapProps(({ namespace, action }: Props): ComponentProps => {
+    const shortcutMap = keymap[namespace][action];
+    if (typeof shortcutMap === 'string') {
+      return { shortcut: '' };
     }
-  )
+
+    const shortcuts = shortcutMap[os] || [];
+    return { shortcut: getPrettyShortcut(shortcuts[0]) };
+  })
 )(Component);

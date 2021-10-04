@@ -20,16 +20,8 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
   messageVariables,
   errors,
 }) => {
-  const {
-    eventAction,
-    dedupKey,
-    summary,
-    source,
-    severity,
-    timestamp,
-    component,
-    group,
-  } = actionParams;
+  const { eventAction, dedupKey, summary, source, severity, timestamp, component, group } =
+    actionParams;
   const severityOptions = [
     {
       value: 'critical',

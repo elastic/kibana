@@ -29,7 +29,7 @@ import {
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { loggerMock } from '@kbn/logging/target/mocks';
+import { loggerMock } from '@kbn/logging/mocks';
 import { getNoneCaseConnector, CONNECTOR_ID_REFERENCE_NAME } from '../../common';
 import { CasesService } from '.';
 import {
@@ -40,6 +40,7 @@ import {
   createSavedObjectReferences,
   createCaseSavedObjectResponse,
   basicCaseFields,
+  createSOFindResponse,
 } from '../test_utils';
 import { ESCaseAttributes } from './types';
 
@@ -85,13 +86,6 @@ const createFindSO = (
 ): SavedObjectsFindResult<ESCaseAttributes> => ({
   ...createCaseSavedObjectResponse(params),
   score: 0,
-});
-
-const createSOFindResponse = (savedObjects: Array<SavedObjectsFindResult<ESCaseAttributes>>) => ({
-  saved_objects: savedObjects,
-  total: savedObjects.length,
-  per_page: savedObjects.length,
-  page: 1,
 });
 
 const createCaseUpdateParams = (
@@ -1119,7 +1113,7 @@ describe('CasesService', () => {
 
       it('defaults to the none connector and null external_services when attributes is undefined', async () => {
         unsecuredSavedObjectsClient.get.mockReturnValue(
-          Promise.resolve(({
+          Promise.resolve({
             references: [
               {
                 id: '1',
@@ -1127,7 +1121,7 @@ describe('CasesService', () => {
                 type: ACTION_SAVED_OBJECT_TYPE,
               },
             ],
-          } as unknown) as SavedObject<ESCaseAttributes>)
+          } as unknown as SavedObject<ESCaseAttributes>)
         );
         const res = await service.getCase({ unsecuredSavedObjectsClient, id: 'a' });
 

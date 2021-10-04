@@ -71,6 +71,7 @@ const defaultRelativeToConfigPath = (path: string) => {
 
 export const schema = Joi.object()
   .keys({
+    rootTags: Joi.array().items(Joi.string()),
     testFiles: Joi.array().items(Joi.string()),
     testRunner: Joi.func(),
 

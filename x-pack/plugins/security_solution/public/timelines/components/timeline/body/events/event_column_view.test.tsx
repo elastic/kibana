@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
 import { mount } from 'enzyme';
 import React from 'react';
 
@@ -29,6 +28,11 @@ jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
       timelines: { ...mockTimelines },
+      application: {
+        capabilities: {
+          siem: { crud_alerts: true, read_alerts: true },
+        },
+      },
     },
   }),
   useToasts: jest.fn().mockReturnValue({

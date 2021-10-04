@@ -98,8 +98,7 @@ Example.args = {
     },
     service: {
       node: {
-        name:
-          '4810e1f4da909044f1f6f56be41a542dc59784948f059769d6a590952deca405',
+        name: '4810e1f4da909044f1f6f56be41a542dc59784948f059769d6a590952deca405',
       },
       environment: 'production',
       framework: {

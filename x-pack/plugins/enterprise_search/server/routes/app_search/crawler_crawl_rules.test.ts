@@ -10,14 +10,14 @@ import { mockDependencies, mockRequestHandler, MockRouter } from '../../__mocks_
 import { registerCrawlerCrawlRulesRoutes } from './crawler_crawl_rules';
 
 describe('crawler crawl rules routes', () => {
-  describe('POST /api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules', () => {
+  describe('POST /internal/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules',
+        path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules',
       });
 
       registerCrawlerCrawlRulesRoutes({
@@ -53,15 +53,14 @@ describe('crawler crawl rules routes', () => {
     });
   });
 
-  describe('PUT /api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}', () => {
+  describe('PUT /internal/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path:
-          '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
+        path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
       });
 
       registerCrawlerCrawlRulesRoutes({
@@ -98,15 +97,14 @@ describe('crawler crawl rules routes', () => {
     });
   });
 
-  describe('DELETE /api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}', () => {
+  describe('DELETE /internal/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path:
-          '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
+        path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
       });
 
       registerCrawlerCrawlRulesRoutes({

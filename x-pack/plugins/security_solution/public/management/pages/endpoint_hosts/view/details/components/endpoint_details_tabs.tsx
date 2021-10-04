@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { useDispatch } from 'react-redux';
-import React, { memo, useCallback, useMemo } from 'react';
-import { EuiTab, EuiTabs, EuiFlyoutBody, EuiTabbedContentTab, EuiSpacer } from '@elastic/eui';
+import React, { memo, useMemo } from 'react';
+import { EuiTab, EuiTabs, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import { EndpointIndexUIQueryParams } from '../../../types';
-import { EndpointAction } from '../../../store/action';
-import { useEndpointSelector } from '../../hooks';
-import { getActivityLogDataPaging } from '../../../store/selectors';
+
 import { EndpointDetailsFlyoutHeader } from './flyout_header';
 import { useNavigateByRouterEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
@@ -33,17 +30,9 @@ interface EndpointDetailsTabs {
 }
 
 const EndpointDetailsTab = memo(
-  ({
-    tab,
-    isSelected,
-    handleTabClick,
-  }: {
-    tab: EndpointDetailsTabs;
-    isSelected: boolean;
-    handleTabClick: () => void;
-  }) => {
+  ({ tab, isSelected }: { tab: EndpointDetailsTabs; isSelected: boolean }) => {
     const { getAppUrl } = useAppUrl();
-    const onClick = useNavigateByRouterEventHandler(tab.route, handleTabClick);
+    const onClick = useNavigateByRouterEventHandler(tab.route);
     return (
       <EuiTab
         href={getAppUrl({ path: tab.route })}
@@ -70,35 +59,10 @@ export const EndpointDetailsFlyoutTabs = memo(
     show: EndpointIndexUIQueryParams['show'];
     tabs: EndpointDetailsTabs[];
   }) => {
-    const dispatch = useDispatch<(action: EndpointAction) => void>();
-    const { pageSize } = useEndpointSelector(getActivityLogDataPaging);
-
-    const handleTabClick = useCallback(
-      (tab: EuiTabbedContentTab) => {
-        if (tab.id === EndpointDetailsTabsTypes.activityLog) {
-          dispatch({
-            type: 'endpointDetailsActivityLogUpdatePaging',
-            payload: {
-              disabled: false,
-              page: 1,
-              pageSize,
-              startDate: undefined,
-              endDate: undefined,
-            },
-          });
-        }
-      },
-      [dispatch, pageSize]
-    );
-
     const selectedTab = useMemo(() => tabs.find((tab) => tab.id === show), [tabs, show]);
 
     const renderTabs = tabs.map((tab) => (
-      <EndpointDetailsTab
-        tab={tab}
-        handleTabClick={() => handleTabClick(tab)}
-        isSelected={tab.id === selectedTab?.id}
-      />
+      <EndpointDetailsTab tab={tab} isSelected={tab.id === selectedTab?.id} />
     ));
 
     return (

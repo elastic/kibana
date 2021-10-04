@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { checkA11y } from '../../../shared/cypress/commands';
 import { login as baseLogin } from '../../../shared/cypress/commands';
 import { workplaceSearchPath } from '../../../shared/cypress/routes';
 

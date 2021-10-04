@@ -17,7 +17,6 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
@@ -51,7 +50,6 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
 `;
 
 interface EventDetailsPanelProps {
-  alertConsumers?: AlertConsumers[];
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
   entityType?: EntityType;
@@ -63,24 +61,24 @@ interface EventDetailsPanelProps {
     refetch?: () => void;
   };
   handleOnEventClosed: () => void;
+  isDraggable?: boolean;
   isFlyoutView?: boolean;
   tabType: TimelineTabs;
   timelineId: string;
 }
 
 const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
-  alertConsumers,
   browserFields,
   docValueFields,
-  entityType,
+  entityType = 'events', // Default to events so only alerts have to pass entityType in
   expandedEvent,
   handleOnEventClosed,
+  isDraggable,
   isFlyoutView,
   tabType,
   timelineId,
 }) => {
   const [loading, detailsData] = useTimelineEventsDetails({
-    alertConsumers,
     docValueFields,
     entityType,
     indexName: expandedEvent.indexName ?? '',
@@ -94,9 +92,8 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     'isolateHost'
   );
 
-  const [isIsolateActionSuccessBannerVisible, setIsIsolateActionSuccessBannerVisible] = useState(
-    false
-  );
+  const [isIsolateActionSuccessBannerVisible, setIsIsolateActionSuccessBannerVisible] =
+    useState(false);
 
   const showAlertDetails = useCallback(() => {
     setIsHostIsolationPanel(false);
@@ -117,9 +114,10 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     [detailsData]
   );
 
-  const alertId = useMemo(() => getFieldValue({ category: '_id', field: '_id' }, detailsData), [
-    detailsData,
-  ]);
+  const alertId = useMemo(
+    () => getFieldValue({ category: '_id', field: '_id' }, detailsData),
+    [detailsData]
+  );
 
   const hostName = useMemo(
     () => getFieldValue({ category: 'host', field: 'host.name' }, detailsData),
@@ -190,6 +188,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
             detailsData={detailsData}
             event={expandedEvent}
             isAlert={isAlert}
+            isDraggable={isDraggable}
             loading={loading}
             timelineId={timelineId}
             timelineTabType="flyout"
@@ -221,6 +220,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         detailsData={detailsData}
         event={expandedEvent}
         isAlert={isAlert}
+        isDraggable={isDraggable}
         loading={loading}
         timelineId={timelineId}
         timelineTabType={tabType}
@@ -235,5 +235,6 @@ export const EventDetailsPanel = React.memo(
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
     deepEqual(prevProps.expandedEvent, nextProps.expandedEvent) &&
-    prevProps.timelineId === nextProps.timelineId
+    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.isDraggable === nextProps.isDraggable
 );

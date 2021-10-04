@@ -23,13 +23,14 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { TransactionOverviewLink } from '../Links/apm/transaction_overview_link';
-import { TableFetchWrapper } from '../table_fetch_wrapper';
 import { getTimeRangeComparison } from '../time_comparison/get_time_range_comparison';
 import { OverviewTableContainer } from '../overview_table_container';
 import { getColumns } from './get_columns';
 import { ElasticDocsLink } from '../Links/ElasticDocsLink';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
 
-type ApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
+type ApiResponse =
+  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
 interface InitialState {
   requestId: string;
@@ -57,20 +58,26 @@ const DEFAULT_SORT = {
 
 interface Props {
   hideViewTransactionsLink?: boolean;
+  isSingleColumn?: boolean;
   numberOfTransactionsPerPage?: number;
   showAggregationAccurateCallout?: boolean;
   environment: string;
   fixedHeight?: boolean;
   kuery: string;
+  start: string;
+  end: string;
 }
 
 export function TransactionsTable({
   fixedHeight = false,
   hideViewTransactionsLink = false,
+  isSingleColumn = true,
   numberOfTransactionsPerPage = 5,
   showAggregationAccurateCallout = false,
   environment,
   kuery,
+  start,
+  end,
 }: Props) {
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
@@ -83,18 +90,16 @@ export function TransactionsTable({
     sort: DEFAULT_SORT,
   });
 
+  // SparkPlots should be hidden if we're in two-column view and size XL (1200px)
+  const { isXl } = useBreakpoints();
+  const shouldShowSparkPlots = isSingleColumn || !isXl;
+
   const { pageIndex, sort } = tableOptions;
   const { direction, field } = sort;
 
   const { transactionType, serviceName } = useApmServiceContext();
   const {
-    urlParams: {
-      start,
-      end,
-      latencyAggregationType,
-      comparisonType,
-      comparisonEnabled,
-    },
+    urlParams: { latencyAggregationType, comparisonType, comparisonEnabled },
   } = useUrlParams();
 
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
@@ -216,9 +221,11 @@ export function TransactionsTable({
     latencyAggregationType,
     transactionGroupDetailedStatistics,
     comparisonEnabled,
+    shouldShowSparkPlots,
   });
 
   const isLoading = status === FETCH_STATUS.LOADING;
+  const isNotInitiated = status === FETCH_STATUS.NOT_INITIATED;
 
   const pagination = {
     pageIndex,
@@ -234,12 +241,9 @@ export function TransactionsTable({
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h2>
-                {i18n.translate(
-                  'xpack.apm.serviceOverview.transactionsTableTitle',
-                  {
-                    defaultMessage: 'Transactions',
-                  }
-                )}
+                {i18n.translate('xpack.apm.transactionsTable.title', {
+                  defaultMessage: 'Transactions',
+                })}
               </h2>
             </EuiTitle>
           </EuiFlexItem>
@@ -250,12 +254,9 @@ export function TransactionsTable({
                 latencyAggregationType={latencyAggregationType}
                 transactionType={transactionType}
               >
-                {i18n.translate(
-                  'xpack.apm.serviceOverview.transactionsTableLinkText',
-                  {
-                    defaultMessage: 'View transactions',
-                  }
-                )}
+                {i18n.translate('xpack.apm.transactionsTable.linkText', {
+                  defaultMessage: 'View transactions',
+                })}
               </TransactionOverviewLink>
             </EuiFlexItem>
           )}
@@ -265,7 +266,7 @@ export function TransactionsTable({
         <EuiFlexItem>
           <EuiCallOut
             title={i18n.translate(
-              'xpack.apm.transactionCardinalityWarning.title',
+              'xpack.apm.transactionsTable.cardinalityWarning.title',
               {
                 defaultMessage:
                   'This view shows a subset of reported transactions.',
@@ -276,7 +277,7 @@ export function TransactionsTable({
           >
             <p>
               <FormattedMessage
-                id="xpack.apm.transactionCardinalityWarning.body"
+                id="xpack.apm.transactionsTable.cardinalityWarning.body"
                 defaultMessage="The number of unique transaction names exceeds the configured value of {bucketSize}. Try reconfiguring your agents to group similar transactions or increase the value of {codeBlock}"
                 values={{
                   bucketSize,
@@ -291,7 +292,7 @@ export function TransactionsTable({
                 path="/troubleshooting.html#troubleshooting-too-many-transactions"
               >
                 {i18n.translate(
-                  'xpack.apm.transactionCardinalityWarning.docsLink',
+                  'xpack.apm.transactionsTable.cardinalityWarning.docsLink',
                   { defaultMessage: 'Learn more in the docs' }
                 )}
               </ElasticDocsLink>
@@ -301,36 +302,52 @@ export function TransactionsTable({
       )}
       <EuiFlexItem>
         <EuiFlexItem>
-          <TableFetchWrapper status={status}>
-            <OverviewTableContainer
-              fixedHeight={fixedHeight}
-              isEmptyAndLoading={transactionGroupsTotalItems === 0 && isLoading}
-            >
-              <EuiBasicTable
-                loading={isLoading}
-                items={transactionGroups}
-                columns={columns}
-                pagination={pagination}
-                sorting={{ sort: { field, direction } }}
-                onChange={(newTableOptions: {
-                  page?: {
-                    index: number;
-                  };
-                  sort?: { field: string; direction: SortDirection };
-                }) => {
-                  setTableOptions({
-                    pageIndex: newTableOptions.page?.index ?? 0,
-                    sort: newTableOptions.sort
-                      ? {
-                          field: newTableOptions.sort.field as SortField,
-                          direction: newTableOptions.sort.direction,
-                        }
-                      : DEFAULT_SORT,
-                  });
-                }}
-              />
-            </OverviewTableContainer>
-          </TableFetchWrapper>
+          <OverviewTableContainer
+            fixedHeight={fixedHeight}
+            isEmptyAndNotInitiated={
+              transactionGroupsTotalItems === 0 && isNotInitiated
+            }
+          >
+            <EuiBasicTable
+              noItemsMessage={
+                isLoading
+                  ? i18n.translate('xpack.apm.transactionsTable.loading', {
+                      defaultMessage: 'Loading...',
+                    })
+                  : i18n.translate('xpack.apm.transactionsTable.noResults', {
+                      defaultMessage: 'No transaction groups found',
+                    })
+              }
+              loading={isLoading}
+              error={
+                status === FETCH_STATUS.FAILURE
+                  ? i18n.translate('xpack.apm.transactionsTable.errorMessage', {
+                      defaultMessage: 'Failed to fetch',
+                    })
+                  : ''
+              }
+              items={transactionGroups}
+              columns={columns}
+              pagination={pagination}
+              sorting={{ sort: { field, direction } }}
+              onChange={(newTableOptions: {
+                page?: {
+                  index: number;
+                };
+                sort?: { field: string; direction: SortDirection };
+              }) => {
+                setTableOptions({
+                  pageIndex: newTableOptions.page?.index ?? 0,
+                  sort: newTableOptions.sort
+                    ? {
+                        field: newTableOptions.sort.field as SortField,
+                        direction: newTableOptions.sort.direction,
+                      }
+                    : DEFAULT_SORT,
+                });
+              }}
+            />
+          </OverviewTableContainer>
         </EuiFlexItem>
       </EuiFlexItem>
     </EuiFlexGroup>

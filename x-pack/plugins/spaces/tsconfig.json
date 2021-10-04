@@ -15,8 +15,6 @@
     { "path": "../../../src/plugins/home/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/management/tsconfig.json" },
-    { "path": "../../../src/plugins/saved_objects_management/tsconfig.json" },
-    { "path": "../../../src/plugins/spaces_oss/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" }
   ]
 }

@@ -17,8 +17,9 @@ import {
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
 import { Filter, RangeFilter } from '../../../../../../src/plugins/data/public';
 import { DiscoverAppLocator } from '../../../../../../src/plugins/discover/public';
+import { sharePluginMock } from '../../../../../../src/plugins/share/public/mocks';
 
-const i18nTranslateSpy = (i18n.translate as unknown) as jest.SpyInstance;
+const i18nTranslateSpy = i18n.translate as unknown as jest.SpyInstance;
 
 jest.mock('@kbn/i18n', () => ({
   i18n: {
@@ -35,16 +36,15 @@ const setup = (
     useRangeEvent = false,
     timeFieldName,
     filters = [],
-    dashboardOnlyMode = false,
   }: {
     useRangeEvent?: boolean;
     filters?: Filter[];
     timeFieldName?: string;
-    dashboardOnlyMode?: boolean;
   } = { filters: [] }
 ) => {
   const core = coreMock.createStart();
   const locator: DiscoverAppLocator = {
+    ...sharePluginMock.createLocator(),
     getLocation: jest.fn(() =>
       Promise.resolve({
         app: 'discover',
@@ -52,23 +52,11 @@ const setup = (
         state: {},
       })
     ),
-    navigate: jest.fn(async () => {}),
-    getUrl: jest.fn(),
-    useUrl: jest.fn(),
-    extract: jest.fn(),
-    inject: jest.fn(),
-    telemetry: jest.fn(),
-    migrations: {},
   };
 
   const plugins: PluginDeps = {
     discover: {
       locator,
-    },
-    kibanaLegacy: {
-      dashboardConfig: {
-        getHideWriteControls: () => dashboardOnlyMode,
-      },
     },
   };
 
@@ -93,11 +81,11 @@ const setup = (
     ],
   };
 
-  const embeddable: VisualizeEmbeddableContract = ({
+  const embeddable: VisualizeEmbeddableContract = {
     type: VISUALIZE_EMBEDDABLE_TYPE,
     getInput: () => input,
     getOutput: () => output,
-  } as unknown) as VisualizeEmbeddableContract;
+  } as unknown as VisualizeEmbeddableContract;
 
   const context = {
     filters,
@@ -188,13 +176,6 @@ describe('"Explore underlying data" panel action', () => {
       const { action, input, context } = setup();
       input.viewMode = ViewMode.EDIT;
 
-      const isCompatible = await action.isCompatible(context);
-
-      expect(isCompatible).toBe(false);
-    });
-
-    test('return false for dashboard_only mode', async () => {
-      const { action, context } = setup({ dashboardOnlyMode: true });
       const isCompatible = await action.isCompatible(context);
 
       expect(isCompatible).toBe(false);

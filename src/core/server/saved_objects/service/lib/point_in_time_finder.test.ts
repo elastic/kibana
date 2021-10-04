@@ -7,7 +7,6 @@
  */
 
 import { loggerMock, MockedLogger } from '../../../logging/logger.mock';
-import type { SavedObjectsClientContract } from '../../types';
 import type { SavedObjectsFindResult } from '../';
 import { savedObjectsRepositoryMock } from './repository.mock';
 
@@ -43,37 +42,67 @@ const mockHits = [
 
 describe('createPointInTimeFinder()', () => {
   let logger: MockedLogger;
-  let find: jest.Mocked<SavedObjectsClientContract>['find'];
-  let openPointInTimeForType: jest.Mocked<SavedObjectsClientContract>['openPointInTimeForType'];
-  let closePointInTime: jest.Mocked<SavedObjectsClientContract>['closePointInTime'];
+  let repository: ReturnType<typeof savedObjectsRepositoryMock.create>;
 
   beforeEach(() => {
     logger = loggerMock.create();
-    const mockRepository = savedObjectsRepositoryMock.create();
-    find = mockRepository.find;
-    openPointInTimeForType = mockRepository.openPointInTimeForType;
-    closePointInTime = mockRepository.closePointInTime;
+    repository = savedObjectsRepositoryMock.create();
   });
 
   describe('#find', () => {
-    test('throws if a PIT is already open', async () => {
-      openPointInTimeForType.mockResolvedValueOnce({
+    test('opens a PIT with the correct parameters', async () => {
+      repository.openPointInTimeForType.mockResolvedValueOnce({
         id: 'abc123',
       });
-      find.mockResolvedValueOnce({
+      repository.find.mockResolvedValue({
         total: 2,
         saved_objects: mockHits,
         pit_id: 'abc123',
         per_page: 1,
         page: 0,
       });
-      find.mockResolvedValueOnce({
-        total: 2,
-        saved_objects: mockHits,
-        pit_id: 'abc123',
-        per_page: 1,
-        page: 1,
+
+      const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
+        type: ['visualization'],
+        search: 'foo*',
+        perPage: 1,
+        namespaces: ['ns1', 'ns2'],
+      };
+
+      const finder = new PointInTimeFinder(findOptions, {
+        logger,
+        client: repository,
       });
+
+      expect(repository.openPointInTimeForType).not.toHaveBeenCalled();
+
+      await finder.find().next();
+
+      expect(repository.openPointInTimeForType).toHaveBeenCalledTimes(1);
+      expect(repository.openPointInTimeForType).toHaveBeenCalledWith(findOptions.type, {
+        namespaces: findOptions.namespaces,
+      });
+    });
+
+    test('throws if a PIT is already open', async () => {
+      repository.openPointInTimeForType.mockResolvedValueOnce({
+        id: 'abc123',
+      });
+      repository.find
+        .mockResolvedValueOnce({
+          total: 2,
+          saved_objects: mockHits,
+          pit_id: 'abc123',
+          per_page: 1,
+          page: 0,
+        })
+        .mockResolvedValueOnce({
+          total: 2,
+          saved_objects: mockHits,
+          pit_id: 'abc123',
+          per_page: 1,
+          page: 1,
+        });
 
       const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
         type: ['visualization'],
@@ -83,30 +112,25 @@ describe('createPointInTimeFinder()', () => {
 
       const finder = new PointInTimeFinder(findOptions, {
         logger,
-        client: {
-          find,
-          openPointInTimeForType,
-          closePointInTime,
-        },
+        client: repository,
       });
       await finder.find().next();
 
-      expect(find).toHaveBeenCalledTimes(1);
-      find.mockClear();
+      expect(repository.find).toHaveBeenCalledTimes(1);
 
       expect(async () => {
         await finder.find().next();
       }).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Point In Time has already been opened for this finder instance. Please call \`close()\` before calling \`find()\` again."`
       );
-      expect(find).toHaveBeenCalledTimes(0);
+      expect(repository.find).toHaveBeenCalledTimes(1);
     });
 
     test('works with a single page of results', async () => {
-      openPointInTimeForType.mockResolvedValueOnce({
+      repository.openPointInTimeForType.mockResolvedValueOnce({
         id: 'abc123',
       });
-      find.mockResolvedValueOnce({
+      repository.find.mockResolvedValueOnce({
         total: 2,
         saved_objects: mockHits,
         pit_id: 'abc123',
@@ -121,11 +145,7 @@ describe('createPointInTimeFinder()', () => {
 
       const finder = new PointInTimeFinder(findOptions, {
         logger,
-        client: {
-          find,
-          openPointInTimeForType,
-          closePointInTime,
-        },
+        client: repository,
       });
       const hits: SavedObjectsFindResult[] = [];
       for await (const result of finder.find()) {
@@ -133,10 +153,10 @@ describe('createPointInTimeFinder()', () => {
       }
 
       expect(hits.length).toBe(2);
-      expect(openPointInTimeForType).toHaveBeenCalledTimes(1);
-      expect(closePointInTime).toHaveBeenCalledTimes(1);
-      expect(find).toHaveBeenCalledTimes(1);
-      expect(find).toHaveBeenCalledWith(
+      expect(repository.openPointInTimeForType).toHaveBeenCalledTimes(1);
+      expect(repository.closePointInTime).toHaveBeenCalledTimes(1);
+      expect(repository.find).toHaveBeenCalledTimes(1);
+      expect(repository.find).toHaveBeenCalledWith(
         expect.objectContaining({
           pit: expect.objectContaining({ id: 'abc123', keepAlive: '2m' }),
           sortField: 'updated_at',
@@ -147,24 +167,25 @@ describe('createPointInTimeFinder()', () => {
     });
 
     test('works with multiple pages of results', async () => {
-      openPointInTimeForType.mockResolvedValueOnce({
+      repository.openPointInTimeForType.mockResolvedValueOnce({
         id: 'abc123',
       });
-      find.mockResolvedValueOnce({
-        total: 2,
-        saved_objects: [mockHits[0]],
-        pit_id: 'abc123',
-        per_page: 1,
-        page: 0,
-      });
-      find.mockResolvedValueOnce({
-        total: 2,
-        saved_objects: [mockHits[1]],
-        pit_id: 'abc123',
-        per_page: 1,
-        page: 0,
-      });
-      find.mockResolvedValueOnce({
+      repository.find
+        .mockResolvedValueOnce({
+          total: 2,
+          saved_objects: [mockHits[0]],
+          pit_id: 'abc123',
+          per_page: 1,
+          page: 0,
+        })
+        .mockResolvedValueOnce({
+          total: 2,
+          saved_objects: [mockHits[1]],
+          pit_id: 'abc123',
+          per_page: 1,
+          page: 0,
+        });
+      repository.find.mockResolvedValueOnce({
         total: 2,
         saved_objects: [],
         per_page: 1,
@@ -180,11 +201,7 @@ describe('createPointInTimeFinder()', () => {
 
       const finder = new PointInTimeFinder(findOptions, {
         logger,
-        client: {
-          find,
-          openPointInTimeForType,
-          closePointInTime,
-        },
+        client: repository,
       });
       const hits: SavedObjectsFindResult[] = [];
       for await (const result of finder.find()) {
@@ -192,12 +209,12 @@ describe('createPointInTimeFinder()', () => {
       }
 
       expect(hits.length).toBe(2);
-      expect(openPointInTimeForType).toHaveBeenCalledTimes(1);
-      expect(closePointInTime).toHaveBeenCalledTimes(1);
+      expect(repository.openPointInTimeForType).toHaveBeenCalledTimes(1);
+      expect(repository.closePointInTime).toHaveBeenCalledTimes(1);
       // called 3 times since we need a 3rd request to check if we
       // are done paginating through results.
-      expect(find).toHaveBeenCalledTimes(3);
-      expect(find).toHaveBeenCalledWith(
+      expect(repository.find).toHaveBeenCalledTimes(3);
+      expect(repository.find).toHaveBeenCalledWith(
         expect.objectContaining({
           pit: expect.objectContaining({ id: 'abc123', keepAlive: '2m' }),
           sortField: 'updated_at',
@@ -210,10 +227,10 @@ describe('createPointInTimeFinder()', () => {
 
   describe('#close', () => {
     test('calls closePointInTime with correct ID', async () => {
-      openPointInTimeForType.mockResolvedValueOnce({
+      repository.openPointInTimeForType.mockResolvedValueOnce({
         id: 'test',
       });
-      find.mockResolvedValueOnce({
+      repository.find.mockResolvedValueOnce({
         total: 1,
         saved_objects: [mockHits[0]],
         pit_id: 'test',
@@ -229,11 +246,7 @@ describe('createPointInTimeFinder()', () => {
 
       const finder = new PointInTimeFinder(findOptions, {
         logger,
-        client: {
-          find,
-          openPointInTimeForType,
-          closePointInTime,
-        },
+        client: repository,
       });
       const hits: SavedObjectsFindResult[] = [];
       for await (const result of finder.find()) {
@@ -241,28 +254,28 @@ describe('createPointInTimeFinder()', () => {
         await finder.close();
       }
 
-      expect(closePointInTime).toHaveBeenCalledWith('test');
+      expect(repository.closePointInTime).toHaveBeenCalledWith('test');
     });
 
     test('causes generator to stop', async () => {
-      openPointInTimeForType.mockResolvedValueOnce({
+      repository.openPointInTimeForType.mockResolvedValueOnce({
         id: 'test',
       });
-      find.mockResolvedValueOnce({
+      repository.find.mockResolvedValueOnce({
         total: 2,
         saved_objects: [mockHits[0]],
         pit_id: 'test',
         per_page: 1,
         page: 0,
       });
-      find.mockResolvedValueOnce({
+      repository.find.mockResolvedValueOnce({
         total: 2,
         saved_objects: [mockHits[1]],
         pit_id: 'test',
         per_page: 1,
         page: 0,
       });
-      find.mockResolvedValueOnce({
+      repository.find.mockResolvedValueOnce({
         total: 2,
         saved_objects: [],
         per_page: 1,
@@ -278,11 +291,7 @@ describe('createPointInTimeFinder()', () => {
 
       const finder = new PointInTimeFinder(findOptions, {
         logger,
-        client: {
-          find,
-          openPointInTimeForType,
-          closePointInTime,
-        },
+        client: repository,
       });
       const hits: SavedObjectsFindResult[] = [];
       for await (const result of finder.find()) {
@@ -290,15 +299,15 @@ describe('createPointInTimeFinder()', () => {
         await finder.close();
       }
 
-      expect(closePointInTime).toHaveBeenCalledTimes(1);
+      expect(repository.closePointInTime).toHaveBeenCalledTimes(1);
       expect(hits.length).toBe(1);
     });
 
     test('is called if `find` throws an error', async () => {
-      openPointInTimeForType.mockResolvedValueOnce({
+      repository.openPointInTimeForType.mockResolvedValueOnce({
         id: 'test',
       });
-      find.mockRejectedValueOnce(new Error('oops'));
+      repository.find.mockRejectedValueOnce(new Error('oops'));
 
       const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
         type: ['visualization'],
@@ -308,11 +317,7 @@ describe('createPointInTimeFinder()', () => {
 
       const finder = new PointInTimeFinder(findOptions, {
         logger,
-        client: {
-          find,
-          openPointInTimeForType,
-          closePointInTime,
-        },
+        client: repository,
       });
       const hits: SavedObjectsFindResult[] = [];
       try {
@@ -323,27 +328,28 @@ describe('createPointInTimeFinder()', () => {
         // intentionally empty
       }
 
-      expect(closePointInTime).toHaveBeenCalledWith('test');
+      expect(repository.closePointInTime).toHaveBeenCalledWith('test');
     });
 
     test('finder can be reused after closing', async () => {
-      openPointInTimeForType.mockResolvedValueOnce({
+      repository.openPointInTimeForType.mockResolvedValueOnce({
         id: 'abc123',
       });
-      find.mockResolvedValueOnce({
-        total: 2,
-        saved_objects: mockHits,
-        pit_id: 'abc123',
-        per_page: 1,
-        page: 0,
-      });
-      find.mockResolvedValueOnce({
-        total: 2,
-        saved_objects: mockHits,
-        pit_id: 'abc123',
-        per_page: 1,
-        page: 1,
-      });
+      repository.find
+        .mockResolvedValueOnce({
+          total: 2,
+          saved_objects: mockHits,
+          pit_id: 'abc123',
+          per_page: 1,
+          page: 0,
+        })
+        .mockResolvedValueOnce({
+          total: 2,
+          saved_objects: mockHits,
+          pit_id: 'abc123',
+          per_page: 1,
+          page: 1,
+        });
 
       const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
         type: ['visualization'],
@@ -353,11 +359,7 @@ describe('createPointInTimeFinder()', () => {
 
       const finder = new PointInTimeFinder(findOptions, {
         logger,
-        client: {
-          find,
-          openPointInTimeForType,
-          closePointInTime,
-        },
+        client: repository,
       });
 
       const findA = finder.find();
@@ -370,9 +372,9 @@ describe('createPointInTimeFinder()', () => {
 
       expect((await findA.next()).done).toBe(true);
       expect((await findB.next()).done).toBe(true);
-      expect(openPointInTimeForType).toHaveBeenCalledTimes(2);
-      expect(find).toHaveBeenCalledTimes(2);
-      expect(closePointInTime).toHaveBeenCalledTimes(2);
+      expect(repository.openPointInTimeForType).toHaveBeenCalledTimes(2);
+      expect(repository.find).toHaveBeenCalledTimes(2);
+      expect(repository.closePointInTime).toHaveBeenCalledTimes(2);
     });
   });
 });

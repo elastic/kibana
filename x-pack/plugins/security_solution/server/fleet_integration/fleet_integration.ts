@@ -11,9 +11,12 @@ import { PluginStartContract as AlertsStartContract } from '../../../alerting/se
 import { SecurityPluginStart } from '../../../security/server';
 import {
   PostPackagePolicyCreateCallback,
+  PostPackagePolicyDeleteCallback,
   PutPackagePolicyUpdateCallback,
 } from '../../../fleet/server';
+
 import { NewPackagePolicy, UpdatePackagePolicy } from '../../../fleet/common';
+
 import { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
 import { ManifestManager } from '../endpoint/services';
 import { AppClientFactory } from '../client';
@@ -22,6 +25,8 @@ import { installPrepackagedRules } from './handlers/install_prepackaged_rules';
 import { createPolicyArtifactManifest } from './handlers/create_policy_artifact_manifest';
 import { createDefaultPolicy } from './handlers/create_default_policy';
 import { validatePolicyAgainstLicense } from './handlers/validate_policy_against_license';
+import { removePolicyFromTrustedApps } from './handlers/remove_policy_from_trusted_apps';
+import { ExperimentalFeatures } from '../../common/experimental_features';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
@@ -124,5 +129,23 @@ export const getPackagePolicyUpdateCallback = (
     );
 
     return newPackagePolicy;
+  };
+};
+
+export const getPackagePolicyDeleteCallback = (
+  exceptionsClient: ExceptionListClient | undefined,
+  experimentalFeatures: ExperimentalFeatures | undefined
+): PostPackagePolicyDeleteCallback => {
+  return async (deletePackagePolicy): Promise<void> => {
+    if (!exceptionsClient) {
+      return;
+    }
+    const policiesToRemove: Array<Promise<void>> = [];
+    for (const policy of deletePackagePolicy) {
+      if (isEndpointPackagePolicy(policy) && experimentalFeatures?.trustedAppsByPolicyEnabled) {
+        policiesToRemove.push(removePolicyFromTrustedApps(exceptionsClient, policy));
+      }
+    }
+    await Promise.all(policiesToRemove);
   };
 };

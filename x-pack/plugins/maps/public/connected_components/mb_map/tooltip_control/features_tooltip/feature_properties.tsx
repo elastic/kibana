@@ -329,10 +329,11 @@ export class FeatureProperties extends Component<Props, State> {
     }
 
     const rows = this.state.properties.map((tooltipProperty) => {
-      const label = tooltipProperty.getPropertyName();
       return (
-        <tr key={label} className="mapFeatureTooltip_row">
-          <td className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel">{label}</td>
+        <tr key={tooltipProperty.getPropertyKey()} className="mapFeatureTooltip_row">
+          <td className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel">
+            {tooltipProperty.getPropertyName()}
+          </td>
           <td
             className="eui-textOverflowWrap"
             /*

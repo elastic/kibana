@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter/target/common';
+import { Ast } from '@kbn/interpreter/common';
 import { Position } from '@elastic/charts';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getXyVisualization } from './xy_visualization';
@@ -81,24 +81,26 @@ describe('#toExpression', () => {
 
   it('should default the fitting function to None', () => {
     expect(
-      (xyVisualization.toExpression(
-        {
-          legend: { position: Position.Bottom, isVisible: true },
-          valueLabels: 'hide',
-          preferredSeriesType: 'bar',
-          layers: [
-            {
-              layerId: 'first',
-              layerType: layerTypes.DATA,
-              seriesType: 'area',
-              splitAccessor: 'd',
-              xAccessor: 'a',
-              accessors: ['b', 'c'],
-            },
-          ],
-        },
-        frame.datasourceLayers
-      ) as Ast).chain[0].arguments.fittingFunction[0]
+      (
+        xyVisualization.toExpression(
+          {
+            legend: { position: Position.Bottom, isVisible: true },
+            valueLabels: 'hide',
+            preferredSeriesType: 'bar',
+            layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                splitAccessor: 'd',
+                xAccessor: 'a',
+                accessors: ['b', 'c'],
+              },
+            ],
+          },
+          frame.datasourceLayers
+        ) as Ast
+      ).chain[0].arguments.fittingFunction[0]
     ).toEqual('None');
   });
 

@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Jscript tries to query the AmsiEnable registry key from the HKEY_USERS registry hive before initializing Antimalware Scan Interface (AMSI). If this key is set to 0, AMSI is not enabled for the Jscript process. An adversary can modify this key to disable AMSI protections.",
+  "description": "JScript tries to query the AmsiEnable registry key from the HKEY_USERS registry hive before initializing Antimalware Scan Interface (AMSI). If this key is set to 0, AMSI is not enabled for the JScript process. An adversary can modify this key to disable AMSI protections.",
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
@@ -53,5 +53,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

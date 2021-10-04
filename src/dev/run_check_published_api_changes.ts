@@ -195,7 +195,7 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
 
 (async () => {
   const extraFlags: string[] = [];
-  const opts = (getopts(process.argv.slice(2), {
+  const opts = getopts(process.argv.slice(2), {
     boolean: ['accept', 'docs', 'help'],
     string: ['filter'],
     default: {
@@ -205,7 +205,7 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
       extraFlags.push(name);
       return false;
     },
-  }) as any) as Options;
+  }) as any as Options;
 
   if (extraFlags.length > 0) {
     for (const flag of extraFlags) {
@@ -215,19 +215,7 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
     opts.help = true;
   }
 
-  const core = ['core/public', 'core/server'];
-  const plugins = [
-    'plugins/data/server',
-    'plugins/data/public',
-    'plugins/expressions/server',
-    'plugins/expressions/public',
-    'plugins/ui_actions/public',
-    'plugins/embeddable/server',
-    'plugins/embeddable/public',
-    'plugins/kibana_utils/common/state_containers',
-    'plugins/kibana_utils/public/state_sync',
-  ];
-  const folders = [...core, ...plugins];
+  const folders = ['core/public', 'core/server'];
 
   if (opts.help) {
     process.stdout.write(

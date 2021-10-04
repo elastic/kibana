@@ -56,6 +56,8 @@ export interface ContentsProps {
   nodeData: cytoscape.NodeDataDefinition;
   environment: Environment;
   kuery: string;
+  start: string;
+  end: string;
   onFocusClick: (event: MouseEvent<HTMLAnchorElement>) => void;
 }
 
@@ -63,12 +65,16 @@ interface PopoverProps {
   focusedServiceName?: string;
   environment: Environment;
   kuery: string;
+  start: string;
+  end: string;
 }
 
 export function Popover({
   focusedServiceName,
   environment,
   kuery,
+  start,
+  end,
 }: PopoverProps) {
   const theme = useTheme();
   const cy = useContext(CytoscapeContext);
@@ -182,6 +188,8 @@ export function Popover({
           nodeData={selectedNodeData}
           environment={environment}
           kuery={kuery}
+          start={start}
+          end={end}
         />
       </EuiFlexGroup>
     </EuiPopover>

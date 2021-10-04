@@ -22,8 +22,8 @@ import {
   AlertInstanceState,
   AlertTypeState,
 } from '../../../../alerting/common';
-import { JobsErrorsResponse } from '../../models/job_audit_messages/job_audit_messages';
-import { AlertExecutorOptions } from '../../../../alerting/server';
+import type { AlertExecutorOptions } from '../../../../alerting/server';
+import type { JobMessage } from '../../../common/types/audit_message';
 
 type ModelSizeStats = MlJobStats['model_size_stats'];
 
@@ -31,10 +31,10 @@ export interface MmlTestResponse {
   job_id: string;
   memory_status: ModelSizeStats['memory_status'];
   log_time: ModelSizeStats['log_time'];
-  model_bytes: ModelSizeStats['model_bytes'];
-  model_bytes_memory_limit: ModelSizeStats['model_bytes_memory_limit'];
-  peak_model_bytes: ModelSizeStats['peak_model_bytes'];
-  model_bytes_exceeded: ModelSizeStats['model_bytes_exceeded'];
+  model_bytes: string;
+  model_bytes_memory_limit: string;
+  peak_model_bytes: string;
+  model_bytes_exceeded: string;
 }
 
 export interface NotStartedDatafeedResponse {
@@ -51,14 +51,19 @@ export interface DelayedDataResponse {
   /** Number of missed documents */
   missed_docs_count: number;
   /** Timestamp of the latest finalized bucket with missing docs */
-  end_timestamp: number;
+  end_timestamp: string;
+}
+
+export interface JobsErrorsResponse {
+  job_id: string;
+  errors: Array<Omit<JobMessage, 'timestamp'> & { timestamp: string }>;
 }
 
 export type AnomalyDetectionJobHealthResult =
   | MmlTestResponse
   | NotStartedDatafeedResponse
   | DelayedDataResponse
-  | JobsErrorsResponse[number];
+  | JobsErrorsResponse;
 
 export type AnomalyDetectionJobsHealthAlertContext = {
   results: AnomalyDetectionJobHealthResult[];
@@ -143,7 +148,7 @@ export function registerJobsMonitoringRuleType({
       const executionResult = await getTestsResults(options);
 
       if (executionResult.length > 0) {
-        logger.info(
+        logger.debug(
           `"${name}" rule is scheduling actions for tests: ${executionResult
             .map((v) => v.name)
             .join(', ')}`

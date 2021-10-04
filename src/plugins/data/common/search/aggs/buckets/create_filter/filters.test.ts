@@ -10,6 +10,7 @@ import { createFilterFilters } from './filters';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
 import { IBucketAggConfig } from '../bucket_agg_type';
+import { QueryStringFilter } from '@kbn/es-query';
 
 describe('AggConfig Filters', () => {
   describe('filters', () => {
@@ -49,7 +50,10 @@ describe('AggConfig Filters', () => {
 
     test('should return a filters filter', () => {
       const aggConfigs = getAggConfigs();
-      const filter = createFilterFilters(aggConfigs.aggs[0] as IBucketAggConfig, 'type:nginx');
+      const filter = createFilterFilters(
+        aggConfigs.aggs[0] as IBucketAggConfig,
+        'type:nginx'
+      ) as QueryStringFilter;
 
       expect(filter).toMatchInlineSnapshot(`
         Object {
@@ -75,9 +79,9 @@ describe('AggConfig Filters', () => {
         }
       `);
 
-      expect(filter!.query.bool.must[0].query_string.query).toBe('type:nginx');
-      expect(filter!.meta).toHaveProperty('index', '1234');
-      expect(filter!.meta).toHaveProperty('alias', 'type:nginx');
+      expect(filter.query?.bool.must[0].query_string.query).toBe('type:nginx');
+      expect(filter.meta).toHaveProperty('index', '1234');
+      expect(filter.meta).toHaveProperty('alias', 'type:nginx');
     });
   });
 });

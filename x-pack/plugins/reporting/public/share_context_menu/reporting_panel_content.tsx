@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
-import { ToastsSetup, IUiSettingsClient } from 'src/core/public';
+import { IUiSettingsClient, ToastsSetup } from 'src/core/public';
 import url from 'url';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import {
@@ -41,7 +41,7 @@ export interface ReportingPanelProps {
   layoutId?: string;
   objectId?: string;
   getJobParams: () => Omit<BaseParams, 'browserTimezone' | 'version'>;
-  options?: ReactElement<any> | null;
+  options?: ReactElement | null;
   isDirty?: boolean;
   onClose?: () => void;
 }
@@ -103,6 +103,10 @@ class ReportingPanelContentUi extends Component<Props, State> {
     window.addEventListener('hashchange', this.markAsStale, false);
     window.addEventListener('resize', this.setAbsoluteReportGenerationUrl);
   }
+
+  private isNotSaved = () => {
+    return this.props.objectId === undefined || this.props.objectId === '';
+  };
 
   public render() {
     if (
@@ -226,10 +230,6 @@ class ReportingPanelContentUi extends Component<Props, State> {
     this.setState({ isStale: true });
   };
 
-  private isNotSaved = () => {
-    return this.props.objectId === undefined || this.props.objectId === '';
-  };
-
   private setAbsoluteReportGenerationUrl = () => {
     if (!this.mounted) {
       return;
@@ -277,7 +277,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
           this.props.onClose();
         }
       })
-      .catch((error: any) => {
+      .catch((error) => {
         this.props.toasts.addError(error, {
           title: intl.formatMessage({
             id: 'xpack.reporting.panelContent.notification.reportingErrorTitle',

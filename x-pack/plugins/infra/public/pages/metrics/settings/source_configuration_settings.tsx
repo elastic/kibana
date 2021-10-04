@@ -76,10 +76,10 @@ export const SourceConfigurationSettings = ({
     formStateChanges,
   ]);
 
-  const isWriteable = useMemo(() => shouldAllowEdit && source && source.origin !== 'internal', [
-    shouldAllowEdit,
-    source,
-  ]);
+  const isWriteable = useMemo(
+    () => shouldAllowEdit && source && source.origin !== 'internal',
+    [shouldAllowEdit, source]
+  );
 
   const { hasInfraMLCapabilities } = useInfraMLCapabilitiesContext();
 

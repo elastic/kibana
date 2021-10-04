@@ -40,9 +40,8 @@ import {
   APP_OVERVIEW_PATH,
   APP_PATH,
   DEFAULT_INDEX_KEY,
-  DETECTION_ENGINE_INDEX_URL,
-  DEFAULT_ALERTS_INDEX,
   APP_ICON_SOLUTION,
+  DETECTION_ENGINE_INDEX_URL,
 } from '../common/constants';
 
 import { getDeepLinks, updateGlobalNavigation } from './app/deep_links';
@@ -54,6 +53,7 @@ import {
 import { SecurityAppStore } from './common/store/store';
 import { licenseService } from './common/hooks/use_license';
 import { SecuritySolutionUiConfigType } from './common/types';
+import { ExperimentalFeaturesService } from './common/experimental_features_service';
 
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
@@ -185,6 +185,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public start(core: CoreStart, plugins: StartPlugins) {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
+    ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
 
@@ -335,34 +336,33 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ): Promise<SecurityAppStore> {
     if (!this._store) {
       const defaultIndicesName = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
-      const [
-        { createStore, createInitialState },
-        kibanaIndexPatterns,
-        configIndexPatterns,
-      ] = await Promise.all([
-        this.lazyApplicationDependencies(),
-        startPlugins.data.indexPatterns.getIdsWithTitle(),
-        startPlugins.data.search
-          .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
-            { indices: defaultIndicesName, onlyCheckIfIndicesExist: true },
-            {
-              strategy: 'indexFields',
-            }
-          )
-          .toPromise(),
-      ]);
+      const [{ createStore, createInitialState }, kibanaIndexPatterns, configIndexPatterns] =
+        await Promise.all([
+          this.lazyApplicationDependencies(),
+          startPlugins.data.indexPatterns.getIdsWithTitle(),
+          startPlugins.data.search
+            .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
+              { indices: defaultIndicesName, onlyCheckIfIndicesExist: true },
+              {
+                strategy: 'indexFields',
+              }
+            )
+            .toPromise(),
+        ]);
 
       let signal: { name: string | null } = { name: null };
       try {
-        // TODO: Once we are past experimental phase this code should be removed
-        // TODO: This currently prevents TGrid from refreshing
-        if (this.experimentalFeatures.ruleRegistryEnabled) {
-          signal = { name: DEFAULT_ALERTS_INDEX };
-        } else {
-          signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
-            method: 'GET',
-          });
-        }
+        // const { index_name: indexName } = await coreStart.http.fetch(
+        //   `${BASE_RAC_ALERTS_API_PATH}/index`,
+        //   {
+        //     method: 'GET',
+        //     query: { features: SERVER_APP_ID },
+        //   }
+        // );
+        // signal = { name: indexName[0] };
+        signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
+          method: 'GET',
+        });
       } catch {
         signal = { name: null };
       }
@@ -388,11 +388,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       };
 
       const tGridReducer = startPlugins.timelines?.getTGridReducer() ?? {};
-      const timelineReducer = (reduceReducers(
+      const timelineReducer = reduceReducers(
         timelineInitialState.timeline,
         tGridReducer,
         subPlugins.timelines.store.reducer.timeline
-      ) as unknown) as Reducer<TimelineState, AnyAction>;
+      ) as unknown as Reducer<TimelineState, AnyAction>;
 
       this._store = createStore(
         createInitialState(
@@ -426,9 +426,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         this.storage,
         [...(subPlugins.management.store.middleware ?? [])]
       );
-      if (startPlugins.timelines) {
-        startPlugins.timelines.setTGridEmbeddedStore(this._store);
-      }
+    }
+    if (startPlugins.timelines) {
+      startPlugins.timelines.setTGridEmbeddedStore(this._store);
     }
     return this._store;
   }

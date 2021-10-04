@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { orderBy } from 'lodash';
 import React, { ReactNode, useCallback, useMemo } from 'react';
@@ -42,6 +43,7 @@ interface Props<T> {
   ) => T[];
   pagination?: boolean;
   isLoading?: boolean;
+  error?: boolean;
 }
 
 function defaultSortFn<T extends any>(
@@ -67,6 +69,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     sortFn = defaultSortFn,
     pagination = true,
     isLoading = false,
+    error = false,
   } = props;
 
   const {
@@ -126,12 +129,27 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     };
   }, [hidePerPageOptions, items, page, pageSize, pagination]);
 
+  const showNoItemsMessage = useMemo(() => {
+    return isLoading
+      ? i18n.translate('xpack.apm.managedTable.loadingDescription', {
+          defaultMessage: 'Loading…',
+        })
+      : noItemsMessage;
+  }, [isLoading, noItemsMessage]);
+
   return (
     <EuiBasicTable
       loading={isLoading}
-      noItemsMessage={noItemsMessage}
+      error={
+        error
+          ? i18n.translate('xpack.apm.managedTable.errorMessage', {
+              defaultMessage: 'Failed to fetch',
+            })
+          : ''
+      }
+      noItemsMessage={showNoItemsMessage}
       items={renderedItems}
-      columns={(columns as unknown) as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
+      columns={columns as unknown as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
       sorting={sort}
       onChange={onTableChange}
       {...(paginationProps ? { pagination: paginationProps } : {})}

@@ -23,7 +23,7 @@ import {
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { loggerMock } from '@kbn/logging/target/mocks';
+import { loggerMock } from '@kbn/logging/mocks';
 import { CaseConfigureService } from '.';
 import { ESCasesConfigureAttributes } from './types';
 import { getNoneCaseConnector, CONNECTOR_ID_REFERENCE_NAME } from '../../common';
@@ -696,7 +696,7 @@ describe('CaseConfigureService', () => {
 
       it('defaults to the none connector when attributes is undefined', async () => {
         unsecuredSavedObjectsClient.get.mockReturnValue(
-          Promise.resolve(({
+          Promise.resolve({
             references: [
               {
                 id: '1',
@@ -704,7 +704,7 @@ describe('CaseConfigureService', () => {
                 type: ACTION_SAVED_OBJECT_TYPE,
               },
             ],
-          } as unknown) as SavedObject<ESCasesConfigureAttributes>)
+          } as unknown as SavedObject<ESCasesConfigureAttributes>)
         );
         const res = await service.get({ unsecuredSavedObjectsClient, configurationId: '1' });
 

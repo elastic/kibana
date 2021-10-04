@@ -45,7 +45,7 @@ export class InspectorService extends FtrService {
   /**
    * Opens inspector panel
    */
-  public async open(): Promise<void> {
+  public async open(openButton: string = 'openInspectorButton'): Promise<void> {
     this.log.debug('Inspector.open');
     let isOpen = await this.testSubjects.exists('inspectorPanel', { timeout: 10 });
     if (!isOpen) {
@@ -56,7 +56,7 @@ export class InspectorService extends FtrService {
 
     if (!isOpen) {
       await this.retry.try(async () => {
-        await this.testSubjects.click('openInspectorButton');
+        await this.testSubjects.click(openButton);
         await this.testSubjects.exists('inspectorPanel');
       });
     }

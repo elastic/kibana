@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import type { IUrlParams } from '../../../../context/url_params_context/types';
+import type { ApmUrlParams } from '../../../../context/url_params_context/types';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { TransactionSummary } from '../../../shared/Summary/TransactionSummary';
@@ -28,9 +28,8 @@ import { IWaterfall } from './waterfall_container/Waterfall/waterfall_helpers/wa
 import { useApmParams } from '../../../../hooks/use_apm_params';
 
 interface Props {
-  urlParams: IUrlParams;
+  urlParams: ApmUrlParams;
   waterfall: IWaterfall;
-  exceedsMax: boolean;
   isLoading: boolean;
   traceSamples: TraceSample[];
 }
@@ -38,7 +37,6 @@ interface Props {
 export function WaterfallWithSummary({
   urlParams,
   waterfall,
-  exceedsMax,
   isLoading,
   traceSamples,
 }: Props) {
@@ -47,7 +45,7 @@ export function WaterfallWithSummary({
 
   const {
     query: { environment },
-  } = useApmParams('/services/:serviceName/transactions/view');
+  } = useApmParams('/services/{serviceName}/transactions/view');
 
   useEffect(() => {
     setSampleActivePage(0);
@@ -125,7 +123,7 @@ export function WaterfallWithSummary({
       <EuiSpacer size="s" />
 
       <TransactionSummary
-        errorCount={waterfall.errorsCount}
+        errorCount={waterfall.apiResponse.errorDocs.length}
         totalDuration={waterfall.rootTransaction?.transaction.duration.us}
         transaction={entryTransaction}
       />
@@ -135,7 +133,6 @@ export function WaterfallWithSummary({
         transaction={entryTransaction}
         urlParams={urlParams}
         waterfall={waterfall}
-        exceedsMax={exceedsMax}
       />
     </>
   );

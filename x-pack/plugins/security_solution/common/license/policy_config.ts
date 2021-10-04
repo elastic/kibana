@@ -10,6 +10,7 @@ import { isAtLeast } from './license';
 import { PolicyConfig } from '../endpoint/types';
 import {
   DefaultPolicyNotificationMessage,
+  DefaultPolicyRuleNotificationMessage,
   policyFactoryWithoutPaidFeatures,
   policyFactoryWithSupportedFeatures,
 } from '../endpoint/models/policy_config';
@@ -113,7 +114,7 @@ function isEndpointMemoryPolicyValidForLicense(policy: PolicyConfig, license: IL
 
   if (
     policy.windows.popup.memory_protection.message !== '' &&
-    policy.windows.popup.memory_protection.message !== DefaultPolicyNotificationMessage
+    policy.windows.popup.memory_protection.message !== DefaultPolicyRuleNotificationMessage
   ) {
     return false;
   }
@@ -164,11 +165,11 @@ function isEndpointBehaviorPolicyValidForLicense(policy: PolicyConfig, license: 
   // Only Platinum or higher may change the behavior_protection message (which can be blank or what Endpoint defaults)
   if (
     (policy.windows.popup.behavior_protection.message !== '' &&
-      policy.windows.popup.behavior_protection.message !== DefaultPolicyNotificationMessage) ||
+      policy.windows.popup.behavior_protection.message !== DefaultPolicyRuleNotificationMessage) ||
     (policy.mac.popup.behavior_protection.message !== '' &&
-      policy.mac.popup.behavior_protection.message !== DefaultPolicyNotificationMessage) ||
+      policy.mac.popup.behavior_protection.message !== DefaultPolicyRuleNotificationMessage) ||
     (policy.linux.popup.behavior_protection.message !== '' &&
-      policy.linux.popup.behavior_protection.message !== DefaultPolicyNotificationMessage)
+      policy.linux.popup.behavior_protection.message !== DefaultPolicyRuleNotificationMessage)
   ) {
     return false;
   }

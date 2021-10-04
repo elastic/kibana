@@ -5,6 +5,7 @@
 .kbnDocTableWrapper {
   @include euiScrollBar;
   overflow: auto;
+  display: flex;
   flex: 1 1 100%;
   flex-direction: column; /* 1 */
 

@@ -32,7 +32,7 @@ import {
   setDrawMode,
   updateDrawState,
 } from '../../../../../actions';
-import { DRAW_MODE } from '../../../../../../common';
+import { DRAW_MODE } from '../../../../../../common/constants';
 
 function mapStateToProps(state: MapStoreState, ownProps: OwnProps): ReduxStateProps {
   const flyoutDisplay = getFlyoutDisplay(state);

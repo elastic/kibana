@@ -11,11 +11,6 @@
  */
 export enum ElasticsearchConnectionStatus {
   /**
-   * Indicates that Kibana hasn't figured out yet if existing Elasticsearch connection configuration is valid.
-   */
-  Unknown = 'unknown',
-
-  /**
    * Indicates that current Elasticsearch connection configuration valid and sufficient.
    */
   Configured = 'configured',

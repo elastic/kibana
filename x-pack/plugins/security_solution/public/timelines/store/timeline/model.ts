@@ -72,6 +72,7 @@ export type TimelineModel = TGridModelForTimeline & {
   /** timeline is saving */
   isSaving: boolean;
   version: string | null;
+  initialized?: boolean;
 };
 
 export type SubsetTimelineModel = Readonly<
@@ -80,13 +81,16 @@ export type SubsetTimelineModel = Readonly<
     | 'activeTab'
     | 'prevActiveTab'
     | 'columns'
+    | 'defaultColumns'
     | 'dataProviders'
     | 'deletedEventIds'
     | 'description'
+    | 'documentType'
     | 'eventType'
     | 'eventIdToNoteIds'
     | 'excludedRowRendererIds'
     | 'expandedDetail'
+    | 'footerText'
     | 'graphEventId'
     | 'highlightedDropAndProviderId'
     | 'historyIds'
@@ -98,15 +102,18 @@ export type SubsetTimelineModel = Readonly<
     | 'itemsPerPageOptions'
     | 'kqlMode'
     | 'kqlQuery'
+    | 'queryFields'
     | 'title'
     | 'timelineType'
     | 'templateTimelineId'
     | 'templateTimelineVersion'
     | 'loadingEventIds'
+    | 'loadingText'
     | 'noteIds'
     | 'pinnedEventIds'
     | 'pinnedEventsSaveObject'
     | 'dateRange'
+    | 'selectAll'
     | 'selectedEventIds'
     | 'show'
     | 'showCheckboxes'
@@ -114,6 +121,7 @@ export type SubsetTimelineModel = Readonly<
     | 'isSaving'
     | 'isLoading'
     | 'savedObjectId'
+    | 'unit'
     | 'version'
     | 'status'
   >

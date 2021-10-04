@@ -8,91 +8,110 @@
 import React, { useEffect } from 'react';
 import { BrushEndListener, XYBrushArea } from '@elastic/charts';
 import {
-  EuiButtonEmpty,
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useTransactionDistributionFetcher } from '../../../../hooks/use_transaction_distribution_fetcher';
-import { TransactionDistributionChart } from '../../../shared/charts/transaction_distribution_chart';
+
 import { useUiTracker } from '../../../../../../observability/public';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+
+import { getDurationFormatter } from '../../../../../common/utils/formatters';
+import {
+  APM_SEARCH_STRATEGIES,
+  DEFAULT_PERCENTILE_THRESHOLD,
+} from '../../../../../common/search_strategies/constants';
+
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useSearchStrategy } from '../../../../hooks/use_search_strategy';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+
+import {
+  TransactionDistributionChart,
+  TransactionDistributionChartData,
+} from '../../../shared/charts/transaction_distribution_chart';
 import { isErrorMessage } from '../../correlations/utils/is_error_message';
+import { getOverallHistogram } from '../../correlations/utils/get_overall_histogram';
 
-const DEFAULT_PERCENTILE_THRESHOLD = 95;
+import type { TabContentProps } from '../types';
+import { useWaterfallFetcher } from '../use_waterfall_fetcher';
+import { WaterfallWithSummary } from '../waterfall_with_summary';
 
-interface Props {
-  markerCurrentTransaction?: number;
+// Enforce min height so it's consistent across all tabs on the same level
+// to prevent "flickering" behavior
+const MIN_TAB_TITLE_HEIGHT = 56;
+
+type Selection = [number, number];
+
+// Format the selected latency range for the "Clear selection" badge.
+// If the two values share the same unit, it will only displayed once.
+// For example: 12 - 23 ms / 12 ms - 3 s
+export function getFormattedSelection(selection: Selection): string {
+  const from = getDurationFormatter(selection[0])(selection[0]);
+  const to = getDurationFormatter(selection[1])(selection[1]);
+
+  return `${from.unit === to.unit ? from.value : from.formatted} - ${
+    to.formatted
+  }`;
+}
+
+interface TransactionDistributionProps {
   onChartSelection: BrushEndListener;
   onClearSelection: () => void;
-  selection?: [number, number];
+  selection?: Selection;
+  traceSamples: TabContentProps['traceSamples'];
 }
 
 export function TransactionDistribution({
-  markerCurrentTransaction,
   onChartSelection,
   onClearSelection,
   selection,
-}: Props) {
+  traceSamples,
+}: TransactionDistributionProps) {
   const {
     core: { notifications },
   } = useApmPluginContext();
 
-  const { serviceName, transactionType } = useApmServiceContext();
-
-  const {
-    query: { kuery, environment },
-  } = useApmParams('/services/:serviceName');
-
   const { urlParams } = useUrlParams();
 
-  const { transactionName, start, end } = urlParams;
+  const { waterfall, status: waterfallStatus } = useWaterfallFetcher();
 
-  const clearSelectionButtonLabel = i18n.translate(
-    'xpack.apm.transactionDetails.clearSelectionButtonLabel',
+  const markerCurrentTransaction =
+    waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
+
+  const emptySelectionText = i18n.translate(
+    'xpack.apm.transactionDetails.emptySelectionText',
+    {
+      defaultMessage: 'Click and drag to select a range',
+    }
+  );
+
+  const clearSelectionAriaLabel = i18n.translate(
+    'xpack.apm.transactionDetails.clearSelectionAriaLabel',
     {
       defaultMessage: 'Clear selection',
     }
   );
 
-  const {
-    error,
-    percentileThresholdValue,
-    startFetch,
-    cancelFetch,
-    transactionDistribution,
-  } = useTransactionDistributionFetcher({
-    environment,
-    kuery,
-    serviceName,
-    transactionName,
-    transactionType,
-    start,
-    end,
-    percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-  });
-
-  // start fetching on load
-  // we want this effect to execute exactly once after the component mounts
-  useEffect(() => {
-    startFetch();
-
-    return () => {
-      // cancel any running async partial request when unmounting the component
-      // we want this effect to execute exactly once after the component mounts
-      cancelFetch();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { progress, response } = useSearchStrategy(
+    APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS,
+    {
+      percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+      analyzeCorrelations: false,
+    }
+  );
+  const { overallHistogram, hasData, status } = getOverallHistogram(
+    response,
+    progress.isRunning
+  );
 
   useEffect(() => {
-    if (isErrorMessage(error)) {
+    if (isErrorMessage(progress.error)) {
       notifications.toasts.addDanger({
         title: i18n.translate(
           'xpack.apm.transactionDetails.distribution.errorTitle',
@@ -100,10 +119,10 @@ export function TransactionDistribution({
             defaultMessage: 'An error occurred fetching the distribution',
           }
         ),
-        text: error.toString(),
+        text: progress.error.toString(),
       });
     }
-  }, [error, notifications.toasts]);
+  }, [progress.error, notifications.toasts]);
 
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
@@ -119,12 +138,25 @@ export function TransactionDistribution({
     trackApmEvent({ metric: 'transaction_distribution_chart_clear_selection' });
   };
 
+  const transactionDistributionChartData: TransactionDistributionChartData[] =
+    [];
+
+  if (Array.isArray(overallHistogram)) {
+    transactionDistributionChartData.push({
+      id: i18n.translate(
+        'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
+        { defaultMessage: 'All transactions' }
+      ),
+      histogram: overallHistogram,
+    });
+  }
+
   return (
-    <>
-      <EuiFlexGroup data-test-subj="apmCorrelationsTabContent">
+    <div data-test-subj="apmTransactionDistributionTabContent">
+      <EuiFlexGroup style={{ minHeight: MIN_TAB_TITLE_HEIGHT }}>
         <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
           <EuiTitle size="xs">
-            <h5 data-test-subj="apmCorrelationsLatencyCorrelationsChartTitle">
+            <h5 data-test-subj="apmTransactionDistributionChartTitle">
               {i18n.translate(
                 'xpack.apm.transactionDetails.distribution.panelTitle',
                 {
@@ -134,39 +166,45 @@ export function TransactionDistribution({
             </h5>
           </EuiTitle>
         </EuiFlexItem>
-        {selection && (
+        {hasData && !selection && (
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
               <EuiFlexItem
                 grow={false}
                 style={{ flexDirection: 'row', alignItems: 'center' }}
               >
-                <EuiText size="xs">
-                  {i18n.translate(
-                    'xpack.apm.transactionDetails.distribution.selectionText',
-                    {
-                      defaultMessage: `Selection: {selectionFrom} - {selectionTo}ms`,
-                      values: {
-                        selectionFrom: Math.round(selection[0] / 1000),
-                        selectionTo: Math.round(selection[1] / 1000),
-                      },
-                    }
-                  )}
-                </EuiText>
+                <EuiIcon type="iInCircle" title={emptySelectionText} size="s" />
               </EuiFlexItem>
               <EuiFlexItem
                 grow={false}
                 style={{ flexDirection: 'row', alignItems: 'center' }}
               >
-                <EuiButtonEmpty
-                  onClick={onTrackedClearSelection}
-                  iconType="cross"
-                  size="xs"
-                >
-                  {clearSelectionButtonLabel}
-                </EuiButtonEmpty>
+                <EuiText size="xs">{emptySelectionText}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
+        {hasData && selection && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge
+              iconType="cross"
+              iconSide="left"
+              onClick={onTrackedClearSelection}
+              onClickAriaLabel={clearSelectionAriaLabel}
+              iconOnClick={onTrackedClearSelection}
+              iconOnClickAriaLabel={clearSelectionAriaLabel}
+              data-test-sub="apmTransactionDetailsDistributionClearSelectionBadge"
+            >
+              {i18n.translate(
+                'xpack.apm.transactionDetails.distribution.selectionText',
+                {
+                  defaultMessage: `Selection: {formattedSelection}`,
+                  values: {
+                    formattedSelection: getFormattedSelection(selection),
+                  },
+                }
+              )}
+            </EuiBadge>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -174,13 +212,28 @@ export function TransactionDistribution({
       <EuiSpacer size="s" />
 
       <TransactionDistributionChart
+        data={transactionDistributionChartData}
         markerCurrentTransaction={markerCurrentTransaction}
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
-        markerValue={percentileThresholdValue ?? 0}
-        overallHistogram={transactionDistribution}
+        markerValue={response.percentileThresholdValue ?? 0}
         onChartSelection={onTrackedChartSelection}
+        hasData={hasData}
         selection={selection}
+        status={status}
       />
-    </>
+
+      {hasData && (
+        <>
+          <EuiSpacer size="s" />
+
+          <WaterfallWithSummary
+            urlParams={urlParams}
+            waterfall={waterfall}
+            isLoading={waterfallStatus === FETCH_STATUS.LOADING}
+            traceSamples={traceSamples}
+          />
+        </>
+      )}
+    </div>
   );
 }

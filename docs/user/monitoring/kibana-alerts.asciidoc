@@ -124,7 +124,7 @@ valid for 30 days.
 == Alerts and rules
 [discrete]
 === Create default rules
-This option can be used to create default rules in this kibana spaces. This is 
+This option can be used to create default rules in this kibana space. This is 
 useful for scenarios when you didn't choose to create these default rules initially 
 or anytime later if the rules were accidentally deleted.
 

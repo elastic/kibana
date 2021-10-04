@@ -15,13 +15,8 @@ const API_BASE_PATH = '/api/ingest_pipelines';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  const {
-    createPipeline,
-    deletePipeline,
-    cleanupPipelines,
-    createIndex,
-    deleteIndex,
-  } = registerEsHelpers(getService);
+  const { createPipeline, deletePipeline, cleanupPipelines, createIndex, deleteIndex } =
+    registerEsHelpers(getService);
 
   describe('Pipelines', function () {
     after(async () => {

@@ -19,7 +19,6 @@ exports[`SolutionsSection renders a single solution 1`] = `
     </EuiScreenReaderOnly>
     <EuiFlexGroup
       className="homSolutions__content"
-      justifyContent="center"
     >
       <SolutionPanel
         addBasePath={[Function]}
@@ -62,7 +61,6 @@ exports[`SolutionsSection renders multiple solutions 1`] = `
     </EuiScreenReaderOnly>
     <EuiFlexGroup
       className="homSolutions__content"
-      justifyContent="center"
     >
       <SolutionPanel
         addBasePath={[Function]}

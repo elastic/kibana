@@ -39,6 +39,9 @@ jest.mock('../../lib/kibana', () => ({
       application: {
         navigateToApp: jest.fn(),
         getUrlForApp: jest.fn(),
+        capabilities: {
+          siem: { crud_alerts: true, read_alerts: true },
+        },
       },
       uiSettings: {
         get: jest.fn(),
@@ -337,7 +340,9 @@ describe('EventsViewer', () => {
           <EventsViewer
             {...eventsViewerDefaultProps}
             graphEventId={undefined}
-            headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
+            headerFilterGroup={
+              <AlertsTableFilterGroup status={'open'} onFilterGroupChanged={jest.fn()} />
+            }
           />
         </TestProviders>
       );
@@ -350,7 +355,9 @@ describe('EventsViewer', () => {
           <EventsViewer
             {...eventsViewerDefaultProps}
             graphEventId={undefined}
-            headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
+            headerFilterGroup={
+              <AlertsTableFilterGroup status={'open'} onFilterGroupChanged={jest.fn()} />
+            }
           />
         </TestProviders>
       );
@@ -365,7 +372,9 @@ describe('EventsViewer', () => {
           <EventsViewer
             {...eventsViewerDefaultProps}
             graphEventId=""
-            headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
+            headerFilterGroup={
+              <AlertsTableFilterGroup status={'open'} onFilterGroupChanged={jest.fn()} />
+            }
           />
         </TestProviders>
       );
@@ -380,7 +389,9 @@ describe('EventsViewer', () => {
           <EventsViewer
             {...eventsViewerDefaultProps}
             graphEventId="a valid id"
-            headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
+            headerFilterGroup={
+              <AlertsTableFilterGroup status={'open'} onFilterGroupChanged={jest.fn()} />
+            }
           />
         </TestProviders>
       );
@@ -395,7 +406,9 @@ describe('EventsViewer', () => {
           <EventsViewer
             {...eventsViewerDefaultProps}
             graphEventId="a valid id"
-            headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
+            headerFilterGroup={
+              <AlertsTableFilterGroup status={'open'} onFilterGroupChanged={jest.fn()} />
+            }
           />
         </TestProviders>
       );

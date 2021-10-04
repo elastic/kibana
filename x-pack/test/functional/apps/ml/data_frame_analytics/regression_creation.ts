@@ -59,6 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
           ],
           runtimeFieldsEditorContent: ['{', '  "uppercase_stab": {', '    "type": "keyword",'],
           row: {
+            memoryStatus: 'ok',
             type: 'regression',
             status: 'stopped',
             progress: '100',
@@ -231,6 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsTable.assertAnalyticsRowFields(testData.jobId, {
             id: testData.jobId,
             description: testData.jobDescription,
+            memoryStatus: testData.expected.row.memoryStatus,
             sourceIndex: testData.source,
             destinationIndex: testData.destinationIndex,
             type: testData.expected.row.type,
@@ -268,6 +270,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsTable.assertAnalyticsRowFields(testData.jobId, {
             id: testData.jobId,
             description: editedDescription,
+            memoryStatus: testData.expected.row.memoryStatus,
             sourceIndex: testData.source,
             destinationIndex: testData.destinationIndex,
             type: testData.expected.row.type,

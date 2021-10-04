@@ -55,7 +55,8 @@ export const isSecuritySolutionRule = (doc: SavedObjectUnsanitizedDoc<RawAlert>)
   doc.attributes.alertTypeId === 'siem.signals';
 
 export function getMigrations(
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  isPreconfigured: (connectorId: string) => boolean
 ): SavedObjectMigrationMap {
   const migrationWhenRBACWasIntroduced = createEsoMigration(
     encryptedSavedObjects,
@@ -99,6 +100,18 @@ export function getMigrations(
     pipeMigrations(addExceptionListsToReferences)
   );
 
+  const migrateRules716 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
+    pipeMigrations(setLegacyId, getRemovePreconfiguredConnectorsFromReferencesFn(isPreconfigured))
+  );
+
+  const migrationRules800 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawAlert>): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
+    (doc) => doc // no-op
+  );
+
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
@@ -106,6 +119,8 @@ export function getMigrations(
     '7.13.0': executeMigrationWithErrorHandling(migrationSecurityRules713, '7.13.0'),
     '7.14.1': executeMigrationWithErrorHandling(migrationSecurityRules714, '7.14.1'),
     '7.15.0': executeMigrationWithErrorHandling(migrationSecurityRules715, '7.15.0'),
+    '7.16.0': executeMigrationWithErrorHandling(migrateRules716, '7.16.0'),
+    '8.0.0': executeMigrationWithErrorHandling(migrationRules800, '8.0.0'),
   };
 }
 
@@ -298,25 +313,17 @@ function restructureConnectorsThatSupportIncident(
           },
         ] as RawAlertAction[];
       } else if (action.actionTypeId === '.jira') {
-        const {
-          title,
-          comments,
-          description,
-          issueType,
-          priority,
-          labels,
-          parent,
-          summary,
-        } = action.params.subActionParams as {
-          title: string;
-          description: string;
-          issueType: string;
-          priority?: string;
-          labels?: string[];
-          parent?: string;
-          comments?: unknown[];
-          summary?: string;
-        };
+        const { title, comments, description, issueType, priority, labels, parent, summary } =
+          action.params.subActionParams as {
+            title: string;
+            description: string;
+            issueType: string;
+            priority?: string;
+            labels?: string[];
+            parent?: string;
+            comments?: unknown[];
+            summary?: string;
+          };
         return [
           ...acc,
           {
@@ -564,6 +571,95 @@ function removeMalformedExceptionsList(
         return [exceptionItem];
       }
     });
+  }
+}
+
+function setLegacyId(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  const { id } = doc;
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      legacyId: id,
+    },
+  };
+}
+
+function getRemovePreconfiguredConnectorsFromReferencesFn(
+  isPreconfigured: (connectorId: string) => boolean
+) {
+  return (doc: SavedObjectUnsanitizedDoc<RawAlert>) => {
+    return removePreconfiguredConnectorsFromReferences(doc, isPreconfigured);
+  };
+}
+
+function removePreconfiguredConnectorsFromReferences(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>,
+  isPreconfigured: (connectorId: string) => boolean
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  const {
+    attributes: { actions },
+    references,
+  } = doc;
+
+  // Look for connector references
+  const connectorReferences = (references ?? []).filter((ref: SavedObjectReference) =>
+    ref.name.startsWith('action_')
+  );
+  if (connectorReferences.length > 0) {
+    const restReferences = (references ?? []).filter(
+      (ref: SavedObjectReference) => !ref.name.startsWith('action_')
+    );
+
+    const updatedConnectorReferences: SavedObjectReference[] = [];
+    const updatedActions: RawAlert['actions'] = [];
+
+    // For each connector reference, check if connector is preconfigured
+    // If yes, we need to remove from the references array and update
+    // the corresponding action so it directly references the preconfigured connector id
+    connectorReferences.forEach((connectorRef: SavedObjectReference) => {
+      // Look for the corresponding entry in the actions array
+      const correspondingAction = getCorrespondingAction(actions, connectorRef.name);
+      if (correspondingAction) {
+        if (isPreconfigured(connectorRef.id)) {
+          updatedActions.push({
+            ...correspondingAction,
+            actionRef: `preconfigured:${connectorRef.id}`,
+          });
+        } else {
+          updatedActions.push(correspondingAction);
+          updatedConnectorReferences.push(connectorRef);
+        }
+      } else {
+        // Couldn't find the matching action, leave as is
+        updatedConnectorReferences.push(connectorRef);
+      }
+    });
+
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        actions: [...updatedActions],
+      },
+      references: [...updatedConnectorReferences, ...restReferences],
+    };
+  }
+  return doc;
+}
+
+function getCorrespondingAction(
+  actions: SavedObjectAttribute,
+  connectorRef: string
+): RawAlertAction | null {
+  if (!Array.isArray(actions)) {
+    return null;
+  } else {
+    return actions.find(
+      (action) => (action as RawAlertAction)?.actionRef === connectorRef
+    ) as RawAlertAction;
   }
 }
 

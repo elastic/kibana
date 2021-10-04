@@ -136,4 +136,44 @@ describe('<EditPolicy /> request flyout', () => {
 
     expect(json).toBe(expected);
   });
+
+  test('renders _meta field', async () => {
+    const defaultPolicy = getDefaultHotPhasePolicy();
+    const policyWithMetaField = {
+      ...defaultPolicy,
+      policy: {
+        ...defaultPolicy.policy,
+        _meta: {
+          description: 'test meta description',
+          someObject: {
+            test: 'test',
+          },
+        },
+      },
+    };
+    httpRequestsMockHelpers.setLoadPolicies([policyWithMetaField]);
+
+    await act(async () => {
+      testBed = await setupRequestFlyoutTestBed();
+    });
+
+    const { component, actions } = testBed;
+    component.update();
+
+    await actions.openRequestFlyout();
+
+    const json = actions.getRequestJson();
+    const expected = `PUT _ilm/policy/${policyWithMetaField.name}\n${JSON.stringify(
+      {
+        policy: {
+          phases: { ...policyWithMetaField.policy.phases },
+          _meta: { ...policyWithMetaField.policy._meta },
+        },
+      },
+      null,
+      2
+    )}`;
+
+    expect(json).toBe(expected);
+  });
 });

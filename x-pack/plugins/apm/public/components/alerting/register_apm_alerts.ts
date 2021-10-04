@@ -11,12 +11,12 @@ import { stringify } from 'querystring';
 import type {
   ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
   ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
-  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
+  ALERT_SEVERITY as ALERT_SEVERITY_TYPED,
 } from '@kbn/rule-data-utils';
 import {
   ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_NON_TYPED,
   ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_NON_TYPED,
-  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
+  ALERT_SEVERITY as ALERT_SEVERITY_NON_TYPED,
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import type { ObservabilityRuleTypeRegistry } from '../../../../observability/public';
@@ -34,9 +34,11 @@ const SERVICE_ENVIRONMENT = 'service.environment';
 const SERVICE_NAME = 'service.name';
 const TRANSACTION_TYPE = 'transaction.type';
 
-const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED = ALERT_EVALUATION_THRESHOLD_NON_TYPED;
-const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED = ALERT_EVALUATION_VALUE_NON_TYPED;
-const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
+const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED =
+  ALERT_EVALUATION_THRESHOLD_NON_TYPED;
+const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED =
+  ALERT_EVALUATION_VALUE_NON_TYPED;
+const ALERT_SEVERITY: typeof ALERT_SEVERITY_TYPED = ALERT_SEVERITY_NON_TYPED;
 
 const format = ({
   pathname,
@@ -78,7 +80,7 @@ export function registerApmAlerts(
     },
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+      return `${docLinks.links.alerting.apmRules}`;
     },
     alertParamsExpression: lazy(() => import('./error_count_alert_trigger')),
     validate: () => ({
@@ -126,7 +128,7 @@ export function registerApmAlerts(
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+      return `${docLinks.links.alerting.apmRules}`;
     },
     alertParamsExpression: lazy(
       () => import('./transaction_duration_alert_trigger')
@@ -177,7 +179,7 @@ export function registerApmAlerts(
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+      return `${docLinks.links.alerting.apmRules}`;
     },
     alertParamsExpression: lazy(
       () => import('./transaction_error_rate_alert_trigger')
@@ -211,7 +213,7 @@ export function registerApmAlerts(
     format: ({ fields }) => ({
       reason: formatTransactionDurationAnomalyReason({
         serviceName: String(fields[SERVICE_NAME][0]),
-        severityLevel: String(fields[ALERT_SEVERITY_LEVEL]),
+        severityLevel: String(fields[ALERT_SEVERITY]),
         measured: Number(fields[ALERT_EVALUATION_VALUE]),
       }),
       link: format({
@@ -226,7 +228,7 @@ export function registerApmAlerts(
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+      return `${docLinks.links.alerting.apmRules}`;
     },
     alertParamsExpression: lazy(
       () => import('./transaction_duration_anomaly_alert_trigger')

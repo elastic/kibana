@@ -24,16 +24,16 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
 import { AppLogic } from '../../app_logic';
-import sharedSourcesIcon from '../../components/shared/assets/source_icons/share_circle.svg';
+import orgSourcesIcon from '../../components/shared/assets/source_icons/share_circle.svg';
 import { ContentSection } from '../../components/shared/content_section';
-import { SOURCES_PATH, USERS_AND_ROLES_PATH, ORG_SETTINGS_PATH } from '../../routes';
+import { ADD_SOURCE_PATH, USERS_AND_ROLES_PATH, ORG_SETTINGS_PATH } from '../../routes';
 
 import { OnboardingCard } from './onboarding_card';
 import { OverviewLogic } from './overview_logic';
 
 const SOURCES_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.overviewOnboardingSourcesCard.title',
-  { defaultMessage: 'Shared sources' }
+  { defaultMessage: 'Organizational sources' }
 );
 
 const USERS_TITLE = i18n.translate(
@@ -41,9 +41,29 @@ const USERS_TITLE = i18n.translate(
   { defaultMessage: 'Users & invitations' }
 );
 
+const INVITE_FIRST_USERS_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.overviewOnboardingUsersCard.inviteFirstUsers.button',
+  { defaultMessage: 'Invite users' }
+);
+
+const INVITE_MORE_USERS_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.overviewOnboardingUsersCard.inviteMoreUsers.button',
+  { defaultMessage: 'Invite more users' }
+);
+
 const ONBOARDING_SOURCES_CARD_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.overviewOnboardingSourcesCard.description',
-  { defaultMessage: 'Add shared sources for your organization to start searching.' }
+  { defaultMessage: 'Add organizational sources for your organization to start searching.' }
+);
+
+const ADD_FIRST_SOURCES_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sourcesOnboardingCard.addFirstSources.button',
+  { defaultMessage: 'Add sources' }
+);
+
+const ADD_MORE_SOURCES_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sourcesOnboardingCard.addMoreSources.button',
+  { defaultMessage: 'Add more sources' }
 );
 
 const USERS_CARD_DESCRIPTION = i18n.translate(
@@ -59,25 +79,15 @@ const ONBOARDING_USERS_CARD_DESCRIPTION = i18n.translate(
 export const OnboardingSteps: React.FC = () => {
   const {
     organization: { name, defaultOrgName },
-    account: { isCurated, canCreateInvitations },
   } = useValues(AppLogic);
 
-  const {
-    hasUsers,
-    hasOrgSources,
-    canCreateContentSources,
-    accountsCount,
-    sourcesCount,
-  } = useValues(OverviewLogic);
-
-  const accountsPath = canCreateInvitations || isCurated ? USERS_AND_ROLES_PATH : undefined;
-  const sourcesPath = canCreateContentSources || isCurated ? SOURCES_PATH : undefined;
+  const { hasUsers, hasOrgSources, accountsCount, sourcesCount } = useValues(OverviewLogic);
 
   const SOURCES_CARD_DESCRIPTION = i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sourcesOnboardingCard.description',
     {
       defaultMessage:
-        'You have added {sourcesCount, number} shared {sourcesCount, plural, one {source} other {sources}}. Happy searching.',
+        'You have added {sourcesCount, number} organizational {sourcesCount, plural, one {source} other {sources}}. Happy searching.',
       values: { sourcesCount },
     }
   );
@@ -87,19 +97,13 @@ export const OnboardingSteps: React.FC = () => {
       <EuiFlexGrid columns={2}>
         <OnboardingCard
           title={SOURCES_TITLE}
-          testSubj="sharedSourcesButton"
-          icon={sharedSourcesIcon}
+          testSubj="orgSourcesButton"
+          icon={orgSourcesIcon}
           description={
             hasOrgSources ? SOURCES_CARD_DESCRIPTION : ONBOARDING_SOURCES_CARD_DESCRIPTION
           }
-          actionTitle={i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.sourcesOnboardingCard.buttonLabel',
-            {
-              defaultMessage: 'Add {label} sources',
-              values: { label: sourcesCount > 0 ? 'more' : '' },
-            }
-          )}
-          actionPath={sourcesPath}
+          actionTitle={sourcesCount > 0 ? ADD_MORE_SOURCES_BUTTON : ADD_FIRST_SOURCES_BUTTON}
+          actionPath={ADD_SOURCE_PATH}
           complete={hasOrgSources}
         />
         <OnboardingCard
@@ -107,14 +111,8 @@ export const OnboardingSteps: React.FC = () => {
           testSubj="usersButton"
           icon="user"
           description={hasUsers ? USERS_CARD_DESCRIPTION : ONBOARDING_USERS_CARD_DESCRIPTION}
-          actionTitle={i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.usersOnboardingCard.buttonLabel',
-            {
-              defaultMessage: 'Invite {label} users',
-              values: { label: accountsCount > 0 ? 'more' : '' },
-            }
-          )}
-          actionPath={accountsPath}
+          actionTitle={accountsCount > 0 ? INVITE_MORE_USERS_BUTTON : INVITE_FIRST_USERS_BUTTON}
+          actionPath={USERS_AND_ROLES_PATH}
           complete={hasUsers}
         />
       </EuiFlexGrid>

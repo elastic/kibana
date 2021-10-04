@@ -6,13 +6,14 @@
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 
 import type {
   BrowserFields,
   TimelineNonEcsData,
 } from '../../../../../timelines/common/search_strategy';
 import { DataProvider, TGridCellAction } from '../../../../../timelines/common/types';
-import { TimelineId } from '../../../../common';
+import { getPageRowIndex } from '../../../../../timelines/public';
 import { getMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { allowTopN, escapeDataProviderId } from '../../components/drag_and_drop/helpers';
@@ -37,142 +38,185 @@ const useKibanaServices = () => {
 
 /** the default actions shown in `EuiDataGrid` cells */
 export const defaultCellActions: TGridCellAction[] = [
-  ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
-    const { timelines, filterManager } = useKibanaServices();
+  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
+    ({ rowIndex, columnId, Component }) => {
+      const { timelines, filterManager } = useKibanaServices();
 
-    const value = getMappedNonEcsValue({
-      data: data[rowIndex],
-      fieldName: columnId,
-    });
+      const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+      if (pageRowIndex >= data.length) {
+        return null;
+      }
 
-    return (
-      <>
-        {timelines.getHoverActions().getFilterForValueButton({
-          Component,
-          field: columnId,
-          filterManager,
-          onFilterAdded,
-          ownFocus: false,
-          showTooltip: false,
-          value,
-        })}
-      </>
-    );
-  },
-  ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
-    const { timelines, filterManager } = useKibanaServices();
+      const value = getMappedNonEcsValue({
+        data: data[pageRowIndex],
+        fieldName: columnId,
+      });
 
-    const value = getMappedNonEcsValue({
-      data: data[rowIndex],
-      fieldName: columnId,
-    });
-
-    return (
-      <>
-        {timelines.getHoverActions().getFilterOutValueButton({
-          Component,
-          field: columnId,
-          filterManager,
-          onFilterAdded,
-          ownFocus: false,
-          showTooltip: false,
-          value,
-        })}
-      </>
-    );
-  },
-  ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
-    const { timelines } = useKibanaServices();
-
-    const value = getMappedNonEcsValue({
-      data: data[rowIndex],
-      fieldName: columnId,
-    });
-
-    const dataProvider: DataProvider[] = useMemo(
-      () =>
-        value?.map((x) => ({
-          and: [],
-          enabled: true,
-          id: `${escapeDataProviderId(columnId)}-row-${rowIndex}-col-${columnId}-val-${x}`,
-          name: x,
-          excluded: false,
-          kqlQuery: '',
-          queryMatch: {
+      return (
+        <>
+          {timelines.getHoverActions().getFilterForValueButton({
+            Component,
             field: columnId,
-            value: x,
-            operator: IS_OPERATOR,
-          },
-        })) ?? [],
-      [columnId, rowIndex, value]
-    );
+            filterManager,
+            onFilterAdded,
+            ownFocus: false,
+            showTooltip: false,
+            value,
+          })}
+        </>
+      );
+    },
+  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
+    ({ rowIndex, columnId, Component }) => {
+      const { timelines, filterManager } = useKibanaServices();
 
-    return (
-      <>
-        {timelines.getHoverActions().getAddToTimelineButton({
-          Component,
-          dataProvider,
-          field: columnId,
-          ownFocus: false,
-          showTooltip: false,
-        })}
-      </>
-    );
-  },
-  ({ browserFields, data }: { browserFields: BrowserFields; data: TimelineNonEcsData[][] }) => ({
-    rowIndex,
-    columnId,
-    Component,
-  }) => {
-    const [showTopN, setShowTopN] = useState(false);
-    const onClick = useCallback(() => setShowTopN(!showTopN), [showTopN]);
+      const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+      if (pageRowIndex >= data.length) {
+        return null;
+      }
 
-    const value = getMappedNonEcsValue({
-      data: data[rowIndex],
-      fieldName: columnId,
-    });
+      const value = getMappedNonEcsValue({
+        data: data[pageRowIndex],
+        fieldName: columnId,
+      });
 
-    return (
-      <>
-        {allowTopN({
-          browserField: getAllFieldsByName(browserFields)[columnId],
-          fieldName: columnId,
-        }) && (
-          <ShowTopNButton
-            Component={Component}
-            data-test-subj="hover-actions-show-top-n"
-            field={columnId}
-            onClick={onClick}
-            onFilterAdded={onFilterAdded}
-            ownFocus={false}
-            showTopN={showTopN}
-            showTooltip={false}
-            timelineId={TimelineId.active}
-            value={value}
-          />
-        )}
-      </>
-    );
-  },
-  ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
-    const { timelines } = useKibanaServices();
+      return (
+        <>
+          {timelines.getHoverActions().getFilterOutValueButton({
+            Component,
+            field: columnId,
+            filterManager,
+            onFilterAdded,
+            ownFocus: false,
+            showTooltip: false,
+            value,
+          })}
+        </>
+      );
+    },
+  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
+    ({ rowIndex, columnId, Component }) => {
+      const { timelines } = useKibanaServices();
 
-    const value = getMappedNonEcsValue({
-      data: data[rowIndex],
-      fieldName: columnId,
-    });
+      const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+      if (pageRowIndex >= data.length) {
+        return null;
+      }
 
-    return (
-      <>
-        {timelines.getHoverActions().getCopyButton({
-          Component,
-          field: columnId,
-          isHoverAction: false,
-          ownFocus: false,
-          showTooltip: false,
-          value,
-        })}
-      </>
-    );
-  },
+      const value = getMappedNonEcsValue({
+        data: data[pageRowIndex],
+        fieldName: columnId,
+      });
+
+      return (
+        <>
+          {timelines.getHoverActions().getCopyButton({
+            Component,
+            field: columnId,
+            isHoverAction: false,
+            ownFocus: false,
+            showTooltip: false,
+            value,
+          })}
+        </>
+      );
+    },
+  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
+    ({ rowIndex, columnId, Component }) => {
+      const { timelines } = useKibanaServices();
+
+      const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+      if (pageRowIndex >= data.length) {
+        return null;
+      }
+
+      const value = getMappedNonEcsValue({
+        data: data[pageRowIndex],
+        fieldName: columnId,
+      });
+
+      const dataProvider: DataProvider[] = useMemo(
+        () =>
+          value?.map((x) => ({
+            and: [],
+            enabled: true,
+            id: `${escapeDataProviderId(columnId)}-row-${rowIndex}-col-${columnId}-val-${x}`,
+            name: x,
+            excluded: false,
+            kqlQuery: '',
+            queryMatch: {
+              field: columnId,
+              value: x,
+              operator: IS_OPERATOR,
+            },
+          })) ?? [],
+        [columnId, rowIndex, value]
+      );
+
+      return (
+        <>
+          {timelines.getHoverActions().getAddToTimelineButton({
+            Component,
+            dataProvider,
+            field: columnId,
+            ownFocus: false,
+            showTooltip: false,
+          })}
+        </>
+      );
+    },
+  ({
+      browserFields,
+      data,
+      globalFilters,
+      timelineId,
+      pageSize,
+    }: {
+      browserFields: BrowserFields;
+      data: TimelineNonEcsData[][];
+      globalFilters?: Filter[];
+      timelineId: string;
+      pageSize: number;
+    }) =>
+    ({ rowIndex, columnId, Component }) => {
+      const [showTopN, setShowTopN] = useState(false);
+      const onClick = useCallback(() => setShowTopN(!showTopN), [showTopN]);
+
+      const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+      if (pageRowIndex >= data.length) {
+        return null;
+      }
+
+      const value = getMappedNonEcsValue({
+        data: data[pageRowIndex],
+        fieldName: columnId,
+      });
+
+      const showButton = useMemo(
+        () =>
+          allowTopN({
+            browserField: getAllFieldsByName(browserFields)[columnId],
+            fieldName: columnId,
+            hideTopN: false,
+          }),
+        [columnId]
+      );
+
+      return showButton ? (
+        <ShowTopNButton
+          Component={Component}
+          enablePopOver
+          data-test-subj="hover-actions-show-top-n"
+          field={columnId}
+          globalFilters={globalFilters}
+          onClick={onClick}
+          onFilterAdded={onFilterAdded}
+          ownFocus={false}
+          showTopN={showTopN}
+          showTooltip={false}
+          timelineId={timelineId}
+          value={value}
+        />
+      ) : null;
+    },
 ];

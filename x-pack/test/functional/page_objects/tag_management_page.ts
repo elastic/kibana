@@ -58,7 +58,6 @@ class TagModal extends FtrService {
     }
     if (fields.color !== undefined) {
       await this.testSubjects.setValue('~createModalField-color', fields.color);
-
       // Close the popover before moving to the next input, as it can get in the way of interacting with other elements
       await this.testSubjects.existOrFail('euiSaturation');
       await this.retry.try(async () => {

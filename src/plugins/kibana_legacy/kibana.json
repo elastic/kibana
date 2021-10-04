@@ -1,10 +1,10 @@
 {
   "id": "kibanaLegacy",
   "version": "kibana",
-  "server": true,
+  "server": false,
   "ui": true,
   "owner": {
-    "name": "Kibana App",
-    "githubTeam": "kibana-app"
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
   }
 }

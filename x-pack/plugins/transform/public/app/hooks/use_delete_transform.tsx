@@ -33,12 +33,14 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
   const [userCanDeleteIndex, setUserCanDeleteIndex] = useState<boolean>(false);
   const [indexPatternExists, setIndexPatternExists] = useState<boolean>(false);
 
-  const toggleDeleteIndex = useCallback(() => setDeleteDestIndex(!deleteDestIndex), [
-    deleteDestIndex,
-  ]);
-  const toggleDeleteIndexPattern = useCallback(() => setDeleteIndexPattern(!deleteIndexPattern), [
-    deleteIndexPattern,
-  ]);
+  const toggleDeleteIndex = useCallback(
+    () => setDeleteDestIndex(!deleteDestIndex),
+    [deleteDestIndex]
+  );
+  const toggleDeleteIndexPattern = useCallback(
+    () => setDeleteIndexPattern(!deleteIndexPattern),
+    [deleteIndexPattern]
+  );
   const checkIndexPatternExists = useCallback(
     async (indexName: string) => {
       try {

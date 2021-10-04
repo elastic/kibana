@@ -42,7 +42,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AsyncPlugin](./kibana-plugin-core-public.asyncplugin.md) | A plugin with asynchronous lifecycle methods. |
 |  [Capabilities](./kibana-plugin-core-public.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
 |  [ChromeBadge](./kibana-plugin-core-public.chromebadge.md) |  |
-|  [ChromeBrand](./kibana-plugin-core-public.chromebrand.md) |  |
 |  [ChromeDocTitle](./kibana-plugin-core-public.chromedoctitle.md) | APIs for accessing and updating the document title. |
 |  [ChromeHelpExtension](./kibana-plugin-core-public.chromehelpextension.md) |  |
 |  [ChromeHelpExtensionMenuCustomLink](./kibana-plugin-core-public.chromehelpextensionmenucustomlink.md) |  |
@@ -108,6 +107,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsBatchResponse](./kibana-plugin-core-public.savedobjectsbatchresponse.md) |  |
 |  [SavedObjectsBulkCreateObject](./kibana-plugin-core-public.savedobjectsbulkcreateobject.md) |  |
 |  [SavedObjectsBulkCreateOptions](./kibana-plugin-core-public.savedobjectsbulkcreateoptions.md) |  |
+|  [SavedObjectsBulkResolveObject](./kibana-plugin-core-public.savedobjectsbulkresolveobject.md) |  |
+|  [SavedObjectsBulkResolveResponse](./kibana-plugin-core-public.savedobjectsbulkresolveresponse.md) |  |
 |  [SavedObjectsBulkUpdateObject](./kibana-plugin-core-public.savedobjectsbulkupdateobject.md) |  |
 |  [SavedObjectsBulkUpdateOptions](./kibana-plugin-core-public.savedobjectsbulkupdateoptions.md) |  |
 |  [SavedObjectsCollectMultiNamespaceReferencesResponse](./kibana-plugin-core-public.savedobjectscollectmultinamespacereferencesresponse.md) | The response when object references are collected. |

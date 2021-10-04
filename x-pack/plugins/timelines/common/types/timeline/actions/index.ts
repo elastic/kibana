@@ -14,32 +14,33 @@ import { TimelineNonEcsData } from '../../../search_strategy';
 import { Ecs } from '../../../ecs';
 
 export interface ActionProps {
-  ariaRowindex: number;
   action?: RowCellRender;
-  width?: number;
+  ariaRowindex: number;
+  checked: boolean;
   columnId: string;
   columnValues: string;
-  checked: boolean;
-  onRowSelected: OnRowSelected;
-  eventId: string;
-  loadingEventIds: Readonly<string[]>;
-  onEventDetailsPanelOpened: () => void;
-  showCheckboxes: boolean;
   data: TimelineNonEcsData[];
+  disabled?: boolean;
   ecsData: Ecs;
-  index: number;
+  eventId: string;
   eventIdToNoteIds?: Readonly<Record<string, string[]>>;
+  index: number;
   isEventPinned?: boolean;
   isEventViewer?: boolean;
-  rowIndex: number;
-  setEventsLoading: SetEventsLoading;
-  setEventsDeleted: SetEventsDeleted;
-  refetch?: () => void;
+  loadingEventIds: Readonly<string[]>;
+  onEventDetailsPanelOpened: () => void;
+  onRowSelected: OnRowSelected;
   onRuleChange?: () => void;
+  refetch?: () => void;
+  rowIndex: number;
+  setEventsDeleted: SetEventsDeleted;
+  setEventsLoading: SetEventsLoading;
+  showCheckboxes: boolean;
   showNotes?: boolean;
   tabType?: TimelineTabs;
   timelineId: string;
   toggleShowNotes?: () => void;
+  width?: number;
 }
 
 export type SetEventsLoading = (params: { eventIds: string[]; isLoading: boolean }) => void;
@@ -60,6 +61,7 @@ export interface StatusBulkActionsProps {
   setEventsDeleted: SetEventsDeleted;
   onUpdateSuccess?: OnUpdateAlertStatusSuccess;
   onUpdateFailure?: OnUpdateAlertStatusError;
+  timelineId?: string;
 }
 export interface HeaderActionProps {
   width: number;
@@ -118,4 +120,12 @@ export interface BulkActionsObjectProp {
 }
 export type BulkActionsProp = boolean | BulkActionsObjectProp;
 
-export type AlertStatus = 'open' | 'closed' | 'in-progress';
+export type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';
+
+/**
+ * @deprecated
+ * TODO: remove when `acknowledged` migrations are finished
+ */
+export type InProgressStatus = 'in-progress';
+
+export type AlertStatus = AlertWorkflowStatus | InProgressStatus;

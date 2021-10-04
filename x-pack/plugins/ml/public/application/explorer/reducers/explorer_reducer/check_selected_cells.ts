@@ -20,13 +20,8 @@ interface SwimlanePoint {
 // If filter is active - selectedCell may not be available due to swimlane view by change to filter fieldName
 // Ok to keep cellSelection in this case
 export const checkSelectedCells = (state: ExplorerState) => {
-  const {
-    filterActive,
-    loading,
-    selectedCells,
-    viewBySwimlaneData,
-    viewBySwimlaneDataLoading,
-  } = state;
+  const { filterActive, loading, selectedCells, viewBySwimlaneData, viewBySwimlaneDataLoading } =
+    state;
 
   if (loading || viewBySwimlaneDataLoading) {
     return {};

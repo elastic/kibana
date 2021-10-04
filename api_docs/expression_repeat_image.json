@@ -93,7 +93,22 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "start": {
+      "parentPluginId": "expressionRepeatImage",
+      "id": "def-server.ExpressionRepeatImagePluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "ExpressionRepeatImagePluginStart",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "src/plugins/expression_repeat_image/server/plugin.ts",
+      "deprecated": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],
@@ -350,7 +365,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",

@@ -81,8 +81,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-// TODO: Alert counts and preview results not showing correct values. Need to fix this test
-describe.skip('Detection rules, threshold', () => {
+describe('Detection rules, threshold', () => {
   let rule = getNewThresholdRule();
   const expectedUrls = getNewThresholdRule().referenceUrls.join('');
   const expectedFalsePositives = getNewThresholdRule().falsePositivesExamples.join('');

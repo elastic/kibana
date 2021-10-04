@@ -45,7 +45,6 @@ jest.mock('../../../../../common/containers/use_global_time', () => ({
     setQuery: jest.fn(),
   }),
 }));
-
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
 
@@ -65,8 +64,12 @@ jest.mock('../../../../../common/lib/kibana', () => {
     useKibana: () => ({
       services: {
         application: {
+          ...original.useKibana().services.application,
           navigateToUrl: jest.fn(),
-          capabilities: { actions: jest.fn().mockReturnValue({}) },
+          capabilities: {
+            actions: jest.fn().mockReturnValue({}),
+            siem: { crud_alerts: true, read_alerts: true },
+          },
         },
         timelines: { ...mockTimelines },
         data: {

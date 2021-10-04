@@ -6,8 +6,8 @@
  */
 
 import type { IBasePath, KibanaRequest } from 'src/core/server';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
+import type { Space } from '../../common';
 import { getSpaceIdFromPath } from '../../common';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { namespaceToSpaceId, spaceIdToNamespace } from '../lib/utils/namespace';

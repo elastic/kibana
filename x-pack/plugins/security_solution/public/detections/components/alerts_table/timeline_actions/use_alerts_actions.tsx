@@ -8,11 +8,11 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { useStatusBulkActionItems } from '../../../../../../timelines/public';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { timelineActions } from '../../../../timelines/store/timeline';
+import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
-import { useStatusBulkActionItems } from '../../../../../../timelines/public';
-
 interface Props {
   alertStatus?: Status;
   closePopover: () => void;
@@ -31,6 +31,7 @@ export const useAlertsActions = ({
   refetch,
 }: Props) => {
   const dispatch = useDispatch();
+  const { hasIndexWrite, hasKibanaCRUD } = useAlertsPrivileges();
 
   const onStatusUpdate = useCallback(() => {
     closePopover();
@@ -61,9 +62,10 @@ export const useAlertsActions = ({
     setEventsDeleted,
     onUpdateSuccess: onStatusUpdate,
     onUpdateFailure: onStatusUpdate,
+    timelineId,
   });
 
   return {
-    actionItems,
+    actionItems: hasIndexWrite && hasKibanaCRUD ? actionItems : [],
   };
 };

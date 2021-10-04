@@ -40,7 +40,7 @@ function getExistingFilter(
     }
 
     if (isScriptedPhraseFilter(filter)) {
-      return filter.meta.field === fieldName && filter.script!.script.params.value === value;
+      return filter.meta.field === fieldName && filter.script.script.params?.value === value;
     }
   }) as any;
 }
@@ -72,11 +72,13 @@ export function generateFilters(
   index: string
 ): Filter[] {
   values = Array.isArray(values) ? _.uniq(values) : [values];
-  const fieldObj = (_.isObject(field)
-    ? field
-    : {
-        name: field,
-      }) as IFieldType;
+  const fieldObj = (
+    _.isObject(field)
+      ? field
+      : {
+          name: field,
+        }
+  ) as IFieldType;
   const fieldName = fieldObj.name;
   const newFilters: Filter[] = [];
   const appFilters = filterManager.getAppFilters();

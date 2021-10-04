@@ -17,6 +17,7 @@ import {
   EuiFieldText,
   EuiButtonIcon,
   EuiFormRow,
+  EuiComboBox,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isNumber, isFinite } from 'lodash';
@@ -112,7 +113,7 @@ export const Criterion: React.FC<Props> = ({
 
   const fieldOptions = useMemo(() => {
     return fields.map((field) => {
-      return { value: field.name, text: field.name };
+      return { label: field.name };
     });
   }, [fields]);
 
@@ -129,8 +130,14 @@ export const Criterion: React.FC<Props> = ({
   }, [fieldInfo]);
 
   const handleFieldChange = useCallback(
-    (e) => {
-      const fieldName = e.target.value;
+    ([selectedOption]) => {
+      if (!selectedOption) {
+        updateCriterion(idx, { field: '' });
+        return;
+      }
+
+      const fieldName = selectedOption.label;
+
       const nextFieldInfo = getFieldInfo(fields, fieldName);
       // If the field information we're dealing with has changed, reset the comparator and value.
       if (
@@ -146,9 +153,13 @@ export const Criterion: React.FC<Props> = ({
       } else {
         updateCriterion(idx, { field: fieldName });
       }
+
+      setIsFieldPopoverOpen(false);
     },
     [fieldInfo, fields, idx, updateCriterion]
   );
+
+  const selectedField = criterion.field ? [{ label: criterion.field }] : [];
 
   return (
     <EuiFlexGroup gutterSize="s">
@@ -168,25 +179,32 @@ export const Criterion: React.FC<Props> = ({
                   color={errors.field.length === 0 ? 'secondary' : 'danger'}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setIsFieldPopoverOpen(true);
+                    setIsFieldPopoverOpen(!isFieldPopoverOpen);
                   }}
                 />
               }
               isOpen={isFieldPopoverOpen}
               closePopover={() => setIsFieldPopoverOpen(false)}
+              onClick={(e) => e.stopPropagation()}
               ownFocus
               panelPaddingSize="s"
               anchorPosition="downLeft"
             >
               <div>
                 <EuiPopoverTitle>{criterionFieldTitle}</EuiPopoverTitle>
-                <EuiFormRow isInvalid={errors.field.length > 0} error={errors.field}>
-                  <EuiSelect
+                <EuiFormRow
+                  style={{ minWidth: '300px' }}
+                  isInvalid={errors.field.length > 0}
+                  error={errors.field}
+                >
+                  <EuiComboBox
                     compressed
-                    hasNoInitialSelection={criterion.field == null}
-                    value={criterion.field ?? ''}
-                    onChange={handleFieldChange}
+                    fullWidth
+                    isClearable={false}
+                    singleSelection={{ asPlainText: true }}
                     options={fieldOptions}
+                    selectedOptions={selectedField}
+                    onChange={handleFieldChange}
                   />
                 </EuiFormRow>
               </div>
@@ -214,12 +232,13 @@ export const Criterion: React.FC<Props> = ({
                   }
                   onClick={(e) => {
                     e.stopPropagation();
-                    setIsComparatorPopoverOpen(true);
+                    setIsComparatorPopoverOpen(!isComparatorPopoverOpen);
                   }}
                 />
               }
               isOpen={isComparatorPopoverOpen}
               closePopover={() => setIsComparatorPopoverOpen(false)}
+              onClick={(e) => e.stopPropagation()}
               ownFocus
               panelPaddingSize="s"
               anchorPosition="downLeft"

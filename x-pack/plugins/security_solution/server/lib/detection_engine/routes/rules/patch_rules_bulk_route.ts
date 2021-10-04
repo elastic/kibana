@@ -22,13 +22,13 @@ import { transformBulkError, buildSiemResponse } from '../utils';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
 import { patchRules } from '../../rules/patch_rules';
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { readRules } from '../../rules/read_rules';
 import { PartialFilter } from '../../types';
 
 export const patchRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  isRuleRegistryEnabled: boolean
 ) => {
   router.patch(
     {
@@ -122,7 +122,12 @@ export const patchRulesBulkRoute = (
               throwHttpError(await mlAuthz.validateRuleType(type));
             }
 
-            const existingRule = await readRules({ rulesClient, ruleId, id });
+            const existingRule = await readRules({
+              isRuleRegistryEnabled,
+              rulesClient,
+              ruleId,
+              id,
+            });
             if (existingRule?.params.type) {
               // reject an unauthorized modification of an ML rule
               throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
@@ -168,6 +173,7 @@ export const patchRulesBulkRoute = (
               threatQuery,
               threatMapping,
               threatLanguage,
+              throttle,
               concurrentSearches,
               itemsPerSearch,
               timestampOverride,
@@ -180,21 +186,12 @@ export const patchRulesBulkRoute = (
               exceptionsList,
             });
             if (rule != null && rule.enabled != null && rule.name != null) {
-              const ruleActions = await updateRulesNotifications({
-                ruleAlertId: rule.id,
-                rulesClient,
-                savedObjectsClient,
-                enabled: rule.enabled,
-                actions,
-                throttle,
-                name: rule.name,
-              });
               const ruleStatuses = await ruleStatusClient.find({
                 logsCount: 1,
                 ruleId: rule.id,
                 spaceId: context.securitySolution.getSpaceId(),
               });
-              return transformValidateBulkError(rule.id, rule, ruleActions, ruleStatuses);
+              return transformValidateBulkError(rule.id, rule, ruleStatuses, isRuleRegistryEnabled);
             } else {
               return getIdBulkError({ id, ruleId });
             }
