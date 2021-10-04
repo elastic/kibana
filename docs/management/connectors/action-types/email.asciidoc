@@ -5,7 +5,7 @@
 <titleabbrev>Email</titleabbrev>
 ++++
 
-The email connector uses the SMTP protocol to send mail messages, using an integration of https://nodemailer.com/[Nodemailer]. An exception is Microsoft Exchange, which uses HTTP protocol for sending emails https://docs.microsoft.com/en-us/graph/api/user-sendmail[Send mail]. Email message text is sent as both plain text and html text.
+The email connector uses the SMTP protocol to send mail messages, using an integration of https://nodemailer.com/[Nodemailer]. An exception is Microsoft Exchange, which uses HTTP protocol for sending emails, https://docs.microsoft.com/en-us/graph/api/user-sendmail[Send mail]. Email message text is sent as both plain text and html text.
 
 NOTE: For emails to have a footer with a link back to {kib}, set the <<server-publicBaseUrl, `server.publicBaseUrl`>> configuration setting.
 
@@ -252,7 +252,7 @@ Before you create an email connector for Microsoft Exchange, you must create and
 [role="screenshot"]
 image::management/connectors/images/exchange-register-app.png[Register client application for MS Exchange]
 
-On the Azure portal, open *Manage > API permissions*, and then define the permissions for the registered application to send emails. Refer to the https://docs.microsoft.com/en-us/graph/api/user-sendmail?view=graph-rest-1.0&tabs=http#permissions[documentation] for the Microsoft Graph API.
+Next, open *Manage > API permissions*, and then define the permissions for the registered application to send emails. Refer to the https://docs.microsoft.com/en-us/graph/api/user-sendmail?view=graph-rest-1.0&tabs=http#permissions[documentation] for the Microsoft Graph API.
 You can configure it on the Azure portal application page, Manage - API permissions:
 [role="screenshot"]
 image::management/connectors/images/exchange-api-permissions.png[MS Exchange API permissions]
@@ -272,20 +272,20 @@ image::management/connectors/images/exchange-granted.png[MS Exchange grant confi
 [float]
 [[exchange-client-secret]]
 ===== Configure Microsoft Exchange Client secret
-To configure the Client secret , open *Manage > Certificates & secrets* on the Azure portal.
+To configure the Client secret , open *Manage > Certificates & secrets*.
 [role="screenshot"]
 image::management/connectors/images/exchange-secrets.png[MS Exchange secrets configuration]
 
-Add a new client secret, then copy the value and put it to the proper field in Microsoft Exchange email connector.
+Add a new client secret, then copy the value and put it to the proper field in the Microsoft Exchange email connector.
 
 [float]
 [[exchange-client-tenant-id]]
 ===== Configure Microsoft Exchange Client ID and Tenant ID
-To find application Client ID,  open the *Overview* page on the Azure portal.
+To find the application Client ID,  open the *Overview* page.
 [role="screenshot"]
 image::management/connectors/images/exchange-client-tenant.png[MS Exchange Client ID and Tenant ID configuration]
 
-Copy and paste this values to the proper fields in Microsoft Exchange email connector.
+Copy and paste this values to the proper fields in the Microsoft Exchange email connector.
 
 Use the following email connector configuration to send email from Microsoft Exchange:
 [source,text]
