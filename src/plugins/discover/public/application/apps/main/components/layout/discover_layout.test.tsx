@@ -165,21 +165,27 @@ describe('Discover component', () => {
   describe('sidebar', () => {
     test('should be opened if discover:sidebarClosed was not set', () => {
       const component = mountWithIntl(
-        <DiscoverLayout {...getProps(indexPatternWithTimefieldMock)} />
+        <discoverServiceMock.presentationUtil.ContextProvider>
+          <DiscoverLayout {...getProps(indexPatternWithTimefieldMock)} />
+        </discoverServiceMock.presentationUtil.ContextProvider>
       );
       expect(component.find(DiscoverSidebar).length).toBe(1);
     });
 
     test('should be opened if discover:sidebarClosed is false', () => {
       const component = mountWithIntl(
-        <DiscoverLayout {...getProps(indexPatternWithTimefieldMock, false)} />
+        <discoverServiceMock.presentationUtil.ContextProvider>
+          <DiscoverLayout {...getProps(indexPatternWithTimefieldMock, false)} />
+        </discoverServiceMock.presentationUtil.ContextProvider>
       );
       expect(component.find(DiscoverSidebar).length).toBe(1);
     });
 
     test('should be closed if discover:sidebarClosed is true', () => {
       const component = mountWithIntl(
-        <DiscoverLayout {...getProps(indexPatternWithTimefieldMock, true)} />
+        <discoverServiceMock.presentationUtil.ContextProvider>
+          <DiscoverLayout {...getProps(indexPatternWithTimefieldMock, true)} />
+        </discoverServiceMock.presentationUtil.ContextProvider>
       );
       expect(component.find(DiscoverSidebar).length).toBe(0);
     });
