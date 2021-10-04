@@ -19,7 +19,7 @@ import {
 import { useKibana } from '../../common/lib/kibana';
 
 const StyledEuiCodeBlock = styled(EuiCodeBlock)`
-  min-height: 150px;
+  min-height: 100px;
 `;
 
 interface LiveQueryQueryFieldProps {

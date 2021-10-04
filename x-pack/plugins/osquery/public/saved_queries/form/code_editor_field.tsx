@@ -15,11 +15,11 @@ import { OsqueryEditor } from '../../editor';
 import { FieldHook } from '../../shared_imports';
 
 const StyledEuiCodeBlock = styled(EuiCodeBlock)`
-  min-height: 150px;
+  min-height: 100px;
 `;
 
 interface CodeEditorFieldProps {
-  euiFieldProps: any;
+  euiFieldProps?: unknown;
   field: FieldHook<string>;
 }
 

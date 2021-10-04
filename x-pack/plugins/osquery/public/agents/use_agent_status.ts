@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// import { i18n } from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { useQuery } from 'react-query';
 
 import { GetAgentStatusResponse } from '../../../fleet/common';
@@ -38,12 +38,12 @@ export const useAgentStatus = ({ policyId, skip }: UseAgentStatus) => {
       enabled: !skip,
       select: (response) => response.results,
       onSuccess: () => setErrorToast(),
-      // onError: (error) =>
-      //   setErrorToast(error as Error, {
-      //     title: i18n.translate('xpack.osquery.agent_status.fetchError', {
-      //       defaultMessage: 'Error while fetching agent status',
-      //     }),
-      //   }),
+      onError: (error) =>
+        setErrorToast(error as Error, {
+          title: i18n.translate('xpack.osquery.agent_status.fetchError', {
+            defaultMessage: 'Error while fetching agent status',
+          }),
+        }),
     }
   );
 };

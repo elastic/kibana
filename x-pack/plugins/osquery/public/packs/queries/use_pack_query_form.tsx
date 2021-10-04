@@ -28,7 +28,6 @@ export interface PackFormData {
   interval: number;
   platform?: string | undefined;
   version?: string[] | undefined;
-  savedQueryId?: string | undefined;
   ecs_mapping?:
     | Record<
         string,
@@ -65,7 +64,6 @@ export const usePackQueryForm = ({
       stripEmptyFields: true,
     },
     defaultValue: defaultValue || {
-      savedQueryId: null,
       id: '',
       query: '',
       interval: '3600',
@@ -92,9 +90,6 @@ export const usePackQueryForm = ({
         if (isEmpty(draft.ecs_mapping)) {
           delete draft.ecs_mapping;
         }
-        if (!draft.savedQueryId) {
-          delete draft.savedQueryId;
-        }
         return draft;
       }),
     deserializer: (payload) => {
@@ -107,7 +102,6 @@ export const usePackQueryForm = ({
         platform: payload.platform,
         version: payload.version ? [payload.version] : [],
         ecs_mapping: payload.ecs_mapping ?? {},
-        savedQueryId: payload.savedQueryId,
       };
     },
     schema: formSchema,

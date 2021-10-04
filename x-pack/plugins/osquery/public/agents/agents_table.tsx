@@ -59,6 +59,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     [searchValue]
   );
 
+  // grouping related
   const osqueryPolicyData = useOsqueryPolicies();
   const {
     loading: groupsLoading,

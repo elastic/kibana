@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { satisfies } from 'semver';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -108,13 +107,12 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       this code removes that, so the user can schedule queries
       in the next step
     */
-    if (!editMode && newPolicy?.package && satisfies(newPolicy?.package.version, '<0.6.0')) {
+    if (!editMode) {
       const updatedPolicy = produce(newPolicy, (draft) => {
-        if (draft.inputs[0]) {
-          draft.inputs[0].streams = [];
-        }
+        set(draft, 'inputs[0].streams', []);
         return draft;
       });
+
       onChange({
         isValid: true,
         updatedPolicy,

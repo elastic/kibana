@@ -8,40 +8,23 @@
 import { schema } from '@kbn/config-schema';
 import { PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
-import {
-  // packSavedObjectType,
-  savedQuerySavedObjectType,
-} from '../../../common/types';
+import { savedQuerySavedObjectType } from '../../../common/types';
 
 export const readSavedQueryRoute = (router: IRouter) => {
   router.get(
     {
       path: '/internal/osquery/saved_query/{id}',
       validate: {
-        params: schema.object({}, { unknowns: 'allow' }),
+        params: schema.object({
+          id: schema.string(),
+        }),
       },
       options: { tags: [`access:${PLUGIN_ID}-readSavedQueries`] },
     },
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
 
-      const savedQuery = await savedObjectsClient.get(
-        savedQuerySavedObjectType,
-        // @ts-expect-error update types
-        request.params.id
-      );
-
-      // const references = await savedObjectsClient.find({
-      //   type: packSavedObjectType,
-      //   hasReference: {
-      //     type: savedQuerySavedObjectType,
-      //     id: savedQuery.id,
-      //   },
-      // });
-
-      // console.log('savedQuery', savedQuery);
-
-      // console.log('references', references);
+      const savedQuery = await savedObjectsClient.get(savedQuerySavedObjectType, request.params.id);
 
       return response.ok({
         body: savedQuery,
