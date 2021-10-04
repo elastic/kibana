@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -41,6 +42,11 @@ export function CorrelationsContextPopover({
 }) {
   const [infoIsOpen, setOpen] = useState(false);
   const theme = useTheme();
+  const popoverStyle = {
+    minWidth: `calc(${theme.eui.euiSizeXXL} * 6.5)`,
+    maxWidth: `calc(${theme.eui.euiSizeXXL} * 7.5)`,
+    background: 'red',
+  };
 
   if (!isTopValuesStats(stats)) return null;
   const popoverTitle = (
@@ -60,24 +66,33 @@ export function CorrelationsContextPopover({
     <EuiPopover
       display="block"
       button={
-        <EuiButtonIcon
-          iconType="inspect"
-          onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-            setOpen(true);
-          }}
-          aria-label={i18n.translate(
-            'xpack.apm.correlations.fieldContextPopover.inspectAriaLabel',
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.correlations.fieldContextPopover.descriptionTooltipContent',
             {
-              defaultMessage: 'Inspect',
+              defaultMessage: 'Show Top 10 field values',
             }
           )}
-          data-test-subj={'apmCorrelationsContextPopoverButton'}
-          style={{ marginLeft: theme.eui.paddingSizes.xs }}
-        />
+        >
+          <EuiButtonIcon
+            iconType="inspect"
+            onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+              setOpen(true);
+            }}
+            aria-label={i18n.translate(
+              'xpack.apm.correlations.fieldContextPopover.topFieldValuesAriaLabel',
+              {
+                defaultMessage: 'Show Top 10 field values',
+              }
+            )}
+            data-test-subj={'apmCorrelationsContextPopoverButton'}
+            style={{ marginLeft: theme.eui.paddingSizes.xs }}
+          />
+        </EuiToolTip>
       }
       isOpen={infoIsOpen}
       closePopover={() => setOpen(false)}
-      anchorPosition="rightUp"
+      anchorPosition="rightCenter"
       data-test-subj={'apmCorrelationsContextPopover'}
     >
       {popoverTitle}
@@ -96,8 +111,8 @@ export function CorrelationsContextPopover({
           <TopValues stats={stats} onAddFilter={onAddFilter} />
           {stats.topValuesSampleSize !== undefined && (
             <Fragment>
-              <EuiSpacer size="xs" />
-              <EuiText size="xs" textAlign={'center'}>
+              <EuiSpacer size="s" />
+              <EuiText size="xs">
                 <FormattedMessage
                   id="xpack.apm.correlations.fieldContextPopover.calculatedFromSampleDescription"
                   defaultMessage="Calculated from sample of {sampleSize} documents"

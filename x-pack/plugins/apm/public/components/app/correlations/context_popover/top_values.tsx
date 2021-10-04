@@ -14,8 +14,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { IndexPatternField } from '../../../../../../../../src/plugins/data/common';
 import { TopValuesStats } from '../../../../../common/search_strategies/field_stats_types';
@@ -43,11 +41,16 @@ export function TopValues({ stats, barColor, onAddFilter }: Props) {
     fieldName,
   } = stats;
   const theme = useTheme();
-  const filterPaddingSize = theme.eui.paddingSizes.xs / 2;
 
   const progressBarMax = topValuesSampleSize ?? count;
   return (
-    <div data-test-subj="apmCorrelationsContextPopoverTopValues">
+    <div
+      data-test-subj="apmCorrelationsContextPopoverTopValues"
+      style={{
+        minWidth: `calc(${theme.eui.euiSizeXXL} * 6.5)`,
+        maxWidth: `calc(${theme.eui.euiSizeXXL} * 7.5)`,
+      }}
+    >
       {Array.isArray(topValues) &&
         topValues.map((value) => (
           <EuiFlexGroup gutterSize="xs" alignItems="center" key={value.key}>
@@ -58,10 +61,8 @@ export function TopValues({ stats, barColor, onAddFilter }: Props) {
                 color={barColor}
                 size="s"
                 label={value.key}
-                className={classNames(
-                  'eui-textTruncate',
-                  'topValuesValueLabelContainer'
-                )}
+                className="eui-textTruncate"
+                aria-label={'value.key'}
                 valueText={
                   progressBarMax !== undefined
                     ? asPercent(value.doc_count, progressBarMax)
@@ -95,9 +96,9 @@ export function TopValues({ stats, barColor, onAddFilter }: Props) {
                   data-test-subj={`apmFieldContextTopValuesAddFilterButton-${value.key}-${value.key}`}
                   style={{
                     minHeight: 'auto',
-                    minWidth: 'auto',
-                    paddingRight: filterPaddingSize,
-                    paddingLeft: filterPaddingSize,
+                    width: theme.eui.euiSizeL,
+                    paddingRight: 2,
+                    paddingLeft: 2,
                     paddingTop: 0,
                     paddingBottom: 0,
                   }}
@@ -124,11 +125,11 @@ export function TopValues({ stats, barColor, onAddFilter }: Props) {
                   data-test-subj={`apmFieldContextTopValuesExcludeFilterButton-${value.key}-${value.key}`}
                   style={{
                     minHeight: 'auto',
-                    minWidth: 'auto',
+                    width: theme.eui.euiSizeL,
                     paddingTop: 0,
                     paddingBottom: 0,
-                    paddingRight: filterPaddingSize,
-                    paddingLeft: filterPaddingSize,
+                    paddingRight: 2,
+                    paddingLeft: 2,
                   }}
                 />
               </>
