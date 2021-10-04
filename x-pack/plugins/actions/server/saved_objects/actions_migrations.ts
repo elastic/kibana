@@ -65,7 +65,9 @@ export function getActionsMigrations(
   const migrationActionsSixteen = createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
-      doc.attributes.actionTypeId === '.servicenow' || doc.attributes.actionTypeId === '.email',
+      doc.attributes.actionTypeId === '.servicenow' ||
+      doc.attributes.actionTypeId === '.servicenow-sir' ||
+      doc.attributes.actionTypeId === '.email',
     pipeMigrations(markOldServiceNowITSMConnectorAsLegacy, setServiceConfigIfNotSet)
   );
 
@@ -198,7 +200,10 @@ const addIsMissingSecretsField = (
 const markOldServiceNowITSMConnectorAsLegacy = (
   doc: SavedObjectUnsanitizedDoc<RawAction>
 ): SavedObjectUnsanitizedDoc<RawAction> => {
-  if (doc.attributes.actionTypeId !== '.servicenow') {
+  if (
+    doc.attributes.actionTypeId !== '.servicenow' &&
+    doc.attributes.actionTypeId !== '.servicenow-sir'
+  ) {
     return doc;
   }
 
