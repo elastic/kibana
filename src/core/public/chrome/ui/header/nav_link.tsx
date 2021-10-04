@@ -14,7 +14,7 @@ import { HttpStart } from '../../../http';
 import { InternalApplicationStart } from '../../../application/types';
 import { relativeToAbsolute } from '../../nav_links/to_nav_link';
 
-export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
+export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLElement, MouseEvent>) =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey || event.defaultPrevented;
 
 interface Props {
@@ -68,6 +68,29 @@ export function createEuiListItem({
       icon:
         !euiIconType && icon ? <EuiIcon type={basePath.prepend(`/${icon}`)} size="m" /> : undefined,
     }),
+  };
+}
+
+export function createEuiButtonItem({
+  link,
+  onClick = () => {},
+  navigateToUrl,
+  dataTestSubj,
+}: Omit<Props, 'appId' | 'basePath'>) {
+  const { href, disabled, url } = link;
+
+  return {
+    href,
+    /* Use href and onClick to support "open in new tab" and SPA navigation in the same link */
+    onClick(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
+      if (!isModifiedOrPrevented(event)) {
+        onClick();
+      }
+      event.preventDefault();
+      navigateToUrl(url);
+    },
+    isDisabled: disabled,
+    'data-test-subj': dataTestSubj,
   };
 }
 
