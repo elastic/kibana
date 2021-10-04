@@ -31,7 +31,6 @@ import { createKbnUrlTracker } from './services/kibana_utils';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
 import { PresentationUtilPluginStart } from './services/presentation_util';
-import { KibanaLegacySetup, KibanaLegacyStart } from './services/kibana_legacy';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from './services/home';
 import { NavigationPublicPluginStart as NavigationStart } from './services/navigation';
 import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from './services/data';
@@ -102,7 +101,6 @@ export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
   embeddable: EmbeddableSetup;
   home?: HomePublicPluginSetup;
-  kibanaLegacy: KibanaLegacySetup;
   urlForwarding: UrlForwardingSetup;
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
@@ -112,7 +110,6 @@ export interface DashboardSetupDependencies {
 
 export interface DashboardStartDependencies {
   data: DataPublicPluginStart;
-  kibanaLegacy: KibanaLegacyStart;
   urlForwarding: UrlForwardingStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStartContract;

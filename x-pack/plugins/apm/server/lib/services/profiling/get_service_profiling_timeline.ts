@@ -14,7 +14,7 @@ import {
   getValueTypeConfig,
   ProfilingValueType,
 } from '../../../../common/profiling';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { kqlQuery, rangeQuery } from '../../../../../observability/server';
@@ -31,13 +31,17 @@ export async function getServiceProfilingTimeline({
   serviceName,
   environment,
   setup,
+  start,
+  end,
 }: {
   kuery: string;
   serviceName: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   environment: string;
+  start: number;
+  end: number;
 }) {
-  const { apmEventClient, start, end } = setup;
+  const { apmEventClient } = setup;
 
   const response = await apmEventClient.search(
     'get_service_profiling_timeline',
