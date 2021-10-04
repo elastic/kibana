@@ -257,5 +257,21 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         },
       ]);
     });
+
+    it('7.16.0 migrates security_solution (Legacy) siem.notifications with "ruleAlertId" to be saved object references', async () => {
+      // NOTE: We hae to use elastic search directly against the ".kibana" index because alerts do not expose the references which we want to test exists
+      const response = await es.get<{ references: [{}] }>({
+        index: '.kibana',
+        id: 'alert:d7a8c6a1-9394-48df-a634-d5457c35d747',
+      });
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.references).to.eql([
+        {
+          name: 'param:alert_0',
+          id: '1a4ed6ae-3c89-44b2-999d-db554144504c',
+          type: 'alert',
+        },
+      ]);
+    });
   });
 }
