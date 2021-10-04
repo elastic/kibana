@@ -497,21 +497,20 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Map CSV to pipeline', () => {
-
       it('should map to a pipeline', async () => {
-        const validCsv = 'source_field,copy_action,format_action,timestamp_format,destination_field,Notes \\n srcip,,,,source.address,Copying srcip to source.address';
+        const validCsv =
+          'source_field,copy_action,format_action,timestamp_format,destination_field,Notes \\n srcip,,,,source.address,Copying srcip to source.address';
         const { body } = await supertest
           .post(`${API_BASE_PATH}/map`)
           .set('kbn-xsrf', 'xxx')
           .send({
             action: 'copy',
-            file: validCsv
+            file: validCsv,
           })
           .expect(200);
 
         expect(body.processors?.length).to.eql(1);
       });
-
     });
   });
 }
