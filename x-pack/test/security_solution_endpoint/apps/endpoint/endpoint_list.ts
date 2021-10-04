@@ -37,7 +37,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     [
       'Host-ku5jy6j0pw',
       undefined,
-      'With Eventingrev. 3',
+      undefined,
       'Warning',
       'Windows',
       '10.246.87.11, 10.145.117.106,10.109.242.136',
@@ -48,7 +48,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     [
       'Host-9fafsc3tqe',
       undefined,
-      'With Eventingrev. 3',
+      undefined,
       'Warning',
       'Windows',
       '10.231.117.28',
@@ -59,7 +59,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     [
       'Host-o07wj6uaa5',
       undefined,
-      'Detect Malware Onlyrev. 4',
+      undefined,
       'Failure',
       'Windows',
       '10.82.134.220, 10.47.25.170',
@@ -72,9 +72,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const formattedTableData = async () => {
     const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
 
-    // Do not compare timestamps or Agent status
+    // Do not compare timestamps, Agent status, or Policy names since the data can be inconsistent.
     for (let i = 1; i < tableData.length; i++) {
       tableData[i][1] = undefined;
+      tableData[i][2] = undefined;
       tableData[i][7] = undefined;
     }
 
@@ -133,7 +134,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('displays table data', async () => {
-        await sleep(5000);
         const tableData = await formattedTableData();
         expect(tableData).to.eql(expectedData);
       });
