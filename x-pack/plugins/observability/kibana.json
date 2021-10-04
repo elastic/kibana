@@ -25,7 +25,8 @@
     "features",
     "ruleRegistry",
     "timelines",
-    "triggersActionsUi"
+    "triggersActionsUi",
+    "inspector"
   ],
   "ui": true,
   "server": true,
