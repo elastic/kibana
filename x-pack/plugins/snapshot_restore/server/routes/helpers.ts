@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { API_BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH } from '../../common';
 
 export const addBasePath = (uri: string): string => API_BASE_PATH + uri;

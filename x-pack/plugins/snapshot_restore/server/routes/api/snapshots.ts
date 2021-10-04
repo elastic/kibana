@@ -11,31 +11,8 @@ import { deserializeSnapshotDetails } from '../../../common/lib';
 import type { RouteDependencies } from '../../types';
 import { getManagedRepositoryName } from '../../lib';
 import { addBasePath } from '../helpers';
-
-const querySchema = schema.object({
-  sortField: schema.oneOf([
-    schema.literal('snapshot'),
-    schema.literal('repository'),
-    schema.literal('indices'),
-    schema.literal('durationInMillis'),
-    schema.literal('startTimeInMillis'),
-    schema.literal('shards.total'),
-    schema.literal('shards.failed'),
-  ]),
-  sortDirection: schema.oneOf([schema.literal('desc'), schema.literal('asc')]),
-  pageIndex: schema.number(),
-  pageSize: schema.number(),
-  searchField: schema.maybe(
-    schema.oneOf([
-      schema.literal('snapshot'),
-      schema.literal('repository'),
-      schema.literal('policyName'),
-    ])
-  ),
-  searchValue: schema.maybe(schema.string()),
-  searchMatch: schema.maybe(schema.oneOf([schema.literal('must'), schema.literal('must_not')])),
-  searchOperator: schema.maybe(schema.oneOf([schema.literal('eq'), schema.literal('exact')])),
-});
+import { snapshotListSchema } from './validate_schemas';
+import { getSnapshotSearchWildcard } from '../../lib/get_snapshot_search_wildcard';
 
 const sortFieldToESParams = {
   snapshot: 'name',
@@ -45,11 +22,6 @@ const sortFieldToESParams = {
   durationInMillis: 'duration',
   'shards.total': 'shard_count',
   'shards.failed': 'failed_shard_count',
-};
-
-const convertSearchToWildcard = (value: string, match?: string, operator?: string): string => {
-  const wildcard = operator === 'exact' ? '' : '*';
-  return match === 'must_not' ? `*,-${value}${wildcard}` : `${value}${wildcard}`;
 };
 
 const isSearchingForNonExistentRepository = (
@@ -73,17 +45,18 @@ export function registerSnapshotsRoutes({
 }: RouteDependencies) {
   // GET all snapshots
   router.get(
-    { path: addBasePath('snapshots'), validate: { query: querySchema } },
+    { path: addBasePath('snapshots'), validate: { query: snapshotListSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
-      const sortField = sortFieldToESParams[(req.query as TypeOf<typeof querySchema>).sortField];
-      const sortDirection = (req.query as TypeOf<typeof querySchema>).sortDirection;
-      const pageIndex = (req.query as TypeOf<typeof querySchema>).pageIndex;
-      const pageSize = (req.query as TypeOf<typeof querySchema>).pageSize;
-      const searchField = (req.query as TypeOf<typeof querySchema>).searchField;
-      const searchValue = (req.query as TypeOf<typeof querySchema>).searchValue;
-      const searchMatch = (req.query as TypeOf<typeof querySchema>).searchMatch;
-      const searchOperator = (req.query as TypeOf<typeof querySchema>).searchOperator;
+      const sortField =
+        sortFieldToESParams[(req.query as TypeOf<typeof snapshotListSchema>).sortField];
+      const sortDirection = (req.query as TypeOf<typeof snapshotListSchema>).sortDirection;
+      const pageIndex = (req.query as TypeOf<typeof snapshotListSchema>).pageIndex;
+      const pageSize = (req.query as TypeOf<typeof snapshotListSchema>).pageSize;
+      const searchField = (req.query as TypeOf<typeof snapshotListSchema>).searchField;
+      const searchValue = (req.query as TypeOf<typeof snapshotListSchema>).searchValue;
+      const searchMatch = (req.query as TypeOf<typeof snapshotListSchema>).searchMatch;
+      const searchOperator = (req.query as TypeOf<typeof snapshotListSchema>).searchOperator;
 
       const managedRepository = await getManagedRepositoryName(clusterClient.asCurrentUser);
 
@@ -138,17 +111,32 @@ export function registerSnapshotsRoutes({
         const { body: fetchedSnapshots } = await clusterClient.asCurrentUser.snapshot.get({
           repository:
             searchField === 'repository'
-              ? convertSearchToWildcard(searchValue!, searchMatch, searchOperator)
+              ? getSnapshotSearchWildcard({
+                  field: searchField,
+                  value: searchValue!,
+                  match: searchMatch,
+                  operator: searchOperator,
+                })
               : '_all',
           ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
           snapshot:
             searchField === 'snapshot'
-              ? convertSearchToWildcard(searchValue!, searchMatch, searchOperator)
+              ? getSnapshotSearchWildcard({
+                  field: searchField,
+                  value: searchValue!,
+                  match: searchMatch,
+                  operator: searchOperator,
+                })
               : '_all',
           // @ts-expect-error @elastic/elasticsearch new API params
           slm_policy_filter:
             searchField === 'policyName'
-              ? convertSearchToWildcard(searchValue!, searchMatch, searchOperator)
+              ? getSnapshotSearchWildcard({
+                  field: searchField,
+                  value: searchValue!,
+                  match: searchMatch,
+                  operator: searchOperator,
+                })
               : '*,_none',
           order: sortDirection,
           sort: sortField,
@@ -259,7 +247,7 @@ export function registerSnapshotsRoutes({
       const snapshots = req.body;
 
       try {
-        // We intentially perform deletion requests sequentially (blocking) instead of in parallel (non-blocking)
+        // We intentionally perform deletion requests sequentially (blocking) instead of in parallel (non-blocking)
         // because there can only be one snapshot deletion task performed at a time (ES restriction).
         for (let i = 0; i < snapshots.length; i++) {
           const { snapshot, repository } = snapshots[i];
