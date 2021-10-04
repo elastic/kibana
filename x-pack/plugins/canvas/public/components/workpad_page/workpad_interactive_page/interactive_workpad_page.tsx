@@ -23,6 +23,10 @@ import { InteractionBoundary } from './interaction_boundary';
 import { EventHandlers } from './event_handlers';
 import { CanvasPage, CanvasNode, Shape } from '../../../../types';
 
+export interface ElementShape extends Shape {
+  filter?: string;
+}
+
 export interface InteractiveWorkpadPageProps extends EventHandlers {
   pageId: string;
   pageStyle?: CanvasPage['style'];

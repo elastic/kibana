@@ -19,7 +19,11 @@ import {
 import { selectToplevelNodes as selectToplevelNodesAction } from '../../../state/actions/transient';
 import { crawlTree, globalStateUpdater } from '../integration_utils';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../../common/lib';
-import { InteractiveWorkpadPage, InteractiveWorkpadPageProps } from './interactive_workpad_page';
+import {
+  InteractiveWorkpadPage,
+  InteractiveWorkpadPageProps,
+  ElementShape,
+} from './interactive_workpad_page';
 import { useEventHandlers } from './event_handlers';
 import { State, AeroState, CanvasNode } from '../../../../types';
 import { WorkpadPageProps } from '../workpad_page';
@@ -183,10 +187,19 @@ const AeroStoreLayer: FC<AeroStoreLayerProps> = ({
 
   const elementLookup = new Map(elements.map((element) => [element.id, element]));
 
-  const elementsToRender = aeroStore.getCurrentState().currentScene.shapes.map((shape) => {
-    const element = elementLookup.get(shape.id);
-    return element ? { ...shape, width: shape.a * 2, height: shape.b * 2 } : shape;
-  });
+  const elementsToRender = aeroStore
+    .getCurrentState()
+    .currentScene.shapes.map<ElementShape>((shape) => {
+      const element = elementLookup.get(shape.id);
+      return element
+        ? {
+            ...shape,
+            width: shape.a * 2,
+            height: shape.b * 2,
+            filter: 'filter' in element ? element.filter : undefined,
+          }
+        : shape;
+    });
 
   return (
     <InteractiveWorkpadPage
