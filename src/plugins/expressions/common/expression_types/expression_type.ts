@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { Serializable } from '@kbn/utility-types';
 import { AnyExpressionTypeDefinition, ExpressionValue, ExpressionValueConverter } from './types';
 import { getType } from './get_type';
 
@@ -20,15 +21,15 @@ export class ExpressionType {
   /**
    * Type validation, useful for checking function output.
    */
-  validate: (type: any) => void | Error;
+  validate: (type: unknown) => void | Error;
 
   create: unknown;
 
   /**
    * Optional serialization (used when passing context around client/server).
    */
-  serialize?: (value: ExpressionValue) => any;
-  deserialize?: (serialized: any) => ExpressionValue;
+  serialize?: (value: Serializable) => unknown;
+  deserialize?: (serialized: unknown[]) => Serializable;
 
   constructor(private readonly definition: AnyExpressionTypeDefinition) {
     const { name, help, deserialize, serialize, validate } = definition;
@@ -38,7 +39,7 @@ export class ExpressionType {
     this.validate = validate || (() => {});
 
     // Optional
-    this.create = (definition as any).create;
+    this.create = (definition as unknown as Record<'create', unknown>).create;
 
     this.serialize = serialize;
     this.deserialize = deserialize;
