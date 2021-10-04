@@ -125,8 +125,7 @@ const packageMock = {
 const manifestPath = (...pluginPath: string[]) =>
   resolve(KIBANA_ROOT, 'src', 'plugins', ...pluginPath, 'kibana.json');
 
-// TODO: broken during Node 16 upgrade
-describe.skip('plugins discovery system', () => {
+describe('plugins discovery system', () => {
   let logger: ReturnType<typeof loggingSystemMock.create>;
   let instanceInfo: InstanceInfo;
   let env: Env;
