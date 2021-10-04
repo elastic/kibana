@@ -147,11 +147,11 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   }, [editSubActionProperty, fields, incident.issueType, incident.priority]);
 
   useEffect(() => {
-    if (!hasPriority && incident.priority != null) {
+    if (!isLoadingFields && !hasPriority && incident.priority != null) {
       editSubActionProperty('priority', null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasPriority]);
+  }, [hasPriority, isLoadingFields]);
 
   const labelOptions = useMemo(
     () => (incident.labels ? incident.labels.map((label: string) => ({ label })) : []),

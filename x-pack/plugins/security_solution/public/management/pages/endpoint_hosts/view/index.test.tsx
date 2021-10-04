@@ -46,8 +46,9 @@ import {
   APP_PATH,
   MANAGEMENT_PATH,
   DEFAULT_TIMEPICKER_QUICK_RANGES,
+  TRANSFORM_STATES,
 } from '../../../../../common/constants';
-import { TransformStats, TRANSFORM_STATE } from '../types';
+import { TransformStats } from '../types';
 import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
@@ -1403,7 +1404,7 @@ describe('when on the endpoint list page', () => {
       const transforms: TransformStats[] = [
         {
           id: `${metadataTransformPrefix}-0.20.0`,
-          state: TRANSFORM_STATE.STARTED,
+          state: TRANSFORM_STATES.STARTED,
         } as TransformStats,
       ];
       setEndpointListApiMockImplementation(coreStart.http, { transforms });
@@ -1414,7 +1415,7 @@ describe('when on the endpoint list page', () => {
 
     it('is not displayed when non-relevant transform is failing', () => {
       const transforms: TransformStats[] = [
-        { id: 'not-metadata', state: TRANSFORM_STATE.FAILED } as TransformStats,
+        { id: 'not-metadata', state: TRANSFORM_STATES.FAILED } as TransformStats,
       ];
       setEndpointListApiMockImplementation(coreStart.http, { transforms });
       render();
@@ -1426,7 +1427,7 @@ describe('when on the endpoint list page', () => {
       const transforms: TransformStats[] = [
         {
           id: `${metadataTransformPrefix}-0.20.0`,
-          state: TRANSFORM_STATE.FAILED,
+          state: TRANSFORM_STATES.FAILED,
         } as TransformStats,
       ];
       setEndpointListApiMockImplementation(coreStart.http, { transforms });
