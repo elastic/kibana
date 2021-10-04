@@ -38,7 +38,7 @@ export function mapToIngestPipeline(file: string, copyAction: FieldCopyAction) {
       })
     );
   }
-  
+
   if (!file || file.length === 0) {
     return null;
   }
@@ -53,7 +53,8 @@ export function mapToIngestPipeline(file: string, copyAction: FieldCopyAction) {
   if (errors.length > 0) {
     throw new Error(
       i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.parseErrors', {
-        defaultMessage: 'Error reading file: An unexpected issue occured during the processing of the file',
+        defaultMessage:
+          'Error reading file: An unexpected issue occured during the processing of the file',
       })
     );
   }

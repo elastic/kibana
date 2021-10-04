@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-describe('mapper', () => {
-
-});
+describe('mapper', () => {});
