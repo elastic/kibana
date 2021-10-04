@@ -274,7 +274,7 @@ export const useIndexFields = (
                     : patternList.includes(pattern)
                 );
                 const patternString = newSelectedPatterns.sort().join();
-                // TODO: Steph/sourcerer needs test
+
                 if (newSignalsIndex != null) {
                   // if new signal index name is set, there wasn't one before so we need to update detections specifically
                   // technically, we need to update all scopes as there xare can be new fields in signals index

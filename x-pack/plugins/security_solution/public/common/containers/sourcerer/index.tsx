@@ -114,7 +114,7 @@ export const useInitSourcerer = (
     signalIndexName,
     signalIndexNameSelector,
   ]);
-  // TODO: Steph/sourcerer needs tests
+
   const updateSourcererDataView = useCallback(
     (newSignalsIndex: string) => {
       const asyncSearch = async (newPatternList: string[]) => {
