@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useMemo } from 'react';
-import { EuiFlexItem, EuiSpacer, EuiText, htmlIdGenerator } from '@elastic/eui';
+import { EuiSpacer, EuiText, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -20,6 +20,7 @@ import {
 import { EMSTermJoinConfig } from '../../../../../../../../maps/public';
 import { EmbeddedMapComponent } from '../../../embedded_map';
 import { FieldVisStats } from '../../../../../../../common/types';
+import { ExpandedRowPanel } from './expanded_row_panel';
 
 export const getChoroplethTopValuesLayer = (
   fieldName: string,
@@ -104,14 +105,19 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
   );
 
   return (
-    <EuiFlexItem data-test-subj={'fileDataVisualizerChoroplethMapTopValues'}>
-      <div style={{ width: '100%', minHeight: 300 }}>
+    <ExpandedRowPanel
+      dataTestSubj={'fileDataVisualizerChoroplethMapTopValues'}
+      className={'dvPanel__wrapper'}
+      grow={true}
+    >
+      <div className={'dvMap__wrapper'}>
         <EmbeddedMapComponent layerList={layerList} />
       </div>
+
       {isTopValuesSampled === true && (
-        <>
-          <EuiSpacer size="xs" />
-          <EuiText size="xs" textAlign={'left'}>
+        <div>
+          <EuiSpacer size={'s'} />
+          <EuiText size="xs" textAlign={'center'}>
             <FormattedMessage
               id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromSampleDescription"
               defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"
@@ -120,8 +126,8 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
               }}
             />
           </EuiText>
-        </>
+        </div>
       )}
-    </EuiFlexItem>
+    </ExpandedRowPanel>
   );
 };
