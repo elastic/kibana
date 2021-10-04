@@ -197,11 +197,6 @@ export class VegaBaseView {
       renderer: this._parser.renderer,
     };
 
-    const vegaLogger = logger(Warn);
-    vegaLogger.warn = this.onWarn.bind(this);
-    vegaLogger.error = this.onError.bind(this);
-    config.logger = vegaLogger;
-
     // Override URL sanitizer to prevent external data loading (if disabled)
     const vegaLoader = loader();
     const originalSanitize = vegaLoader.sanitize.bind(vegaLoader);
@@ -222,6 +217,13 @@ export class VegaBaseView {
       return result;
     };
     config.loader = vegaLoader;
+
+    const vegaLogger = logger(Warn);
+
+    vegaLogger.warn = this.onWarn.bind(this);
+    vegaLogger.error = this.onError.bind(this);
+
+    config.logger = vegaLogger;
 
     return config;
   }
