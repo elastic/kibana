@@ -39,11 +39,13 @@ export const getDeprecationIndexPatternId = async (dataService: DataPublicPlugin
     // time we need to render the DiscoveryAppLink.
     // So in order to avoid those errors we need to make sure that the indexPattern is created
     // with allowNoIndex and that we skip fetching fields to from the source index.
+    const override = false;
+    const skipFetchFields = true;
     // prettier-ignore
     const newIndexPattern = await dataService.dataViews.createAndSave({
       title: DEPRECATION_LOGS_INDEX_PATTERN,
       allowNoIndex: true,
-    }, false, true);
+    }, override, skipFetchFields);
 
     return newIndexPattern.id;
   }
