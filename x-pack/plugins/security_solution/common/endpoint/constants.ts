@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+export const ENDPOINT_ACTIONS_INDEX = '.logs-endpoint.actions-default';
+export const ENDPOINT_ACTION_RESPONSES_INDEX = '.logs-endpoint.action.responses-default';
+
 export const eventsIndexPattern = 'logs-endpoint.events.*';
 export const alertsIndexPattern = 'logs-endpoint.alerts-*';
 
