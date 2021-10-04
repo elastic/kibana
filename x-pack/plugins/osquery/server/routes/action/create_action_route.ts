@@ -69,8 +69,8 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           ? {
               ecs_mapping: reduce(
                 savedQuery?.attributes.ecs_mapping,
-                (acc, value) => {
-                  acc[value.value] = pick(value, ['field']);
+                (acc, { value, field }) => {
+                  acc[value] = { field };
                   return acc;
                 },
                 {}

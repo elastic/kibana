@@ -16,7 +16,7 @@ interface ConfirmDeployAgentPolicyModalProps {
   onConfirm: () => void;
   onCancel: () => void;
   agentCount: number;
-  agentPolicy: AgentPolicy;
+  agentPolicy?: AgentPolicy;
 }
 
 const ConfirmDeployAgentPolicyModalComponent: React.FC<ConfirmDeployAgentPolicyModalProps> = ({

@@ -7,12 +7,12 @@
 
 import * as t from 'io-ts';
 
-import { query, agentSelection } from '../../common/schemas';
+import { query, agentSelection, savedQueryId } from '../../common/schemas';
 
 export const createActionRequestBodySchema = t.type({
   agentSelection,
   query,
-  savedQueryId: t.string,
+  savedQueryId,
 });
 
 export type CreateActionRequestBodySchema = t.OutputOf<typeof createActionRequestBodySchema>;

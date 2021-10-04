@@ -60,8 +60,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const handleHideConfirmationModal = useCallback(() => setShowConfirmationModal(false), []);
 
-  const { data: agentPolicies } = useAgentPolicies();
-  const agentPoliciesById = mapKeys(agentPolicies, 'id');
+  const { data: { agentPoliciesById, agentPolicies } = {} } = useAgentPolicies();
   const agentPolicyOptions = useMemo(
     () =>
       agentPolicies?.map((agentPolicy) => ({
@@ -183,14 +182,14 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     const agentCount = reduce(
       policyIds,
       (acc, policyId) => {
-        const agentPolicy = agentPoliciesById[policyId];
+        const agentPolicy = agentPoliciesById && agentPoliciesById[policyId];
 
         return acc + (agentPolicy?.agents ?? 0);
       },
       0
     );
 
-    const currentAgentPolicy = agentPoliciesById[policyIds[0]];
+    const currentAgentPolicy = agentPoliciesById && agentPoliciesById[policyIds[0]];
     return {
       agentCount,
       agentPolicy: currentAgentPolicy,

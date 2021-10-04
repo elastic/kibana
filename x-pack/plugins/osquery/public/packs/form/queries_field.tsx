@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { findIndex, forEach, pullAt, pullAllBy } from 'lodash';
+import { findIndex, forEach, pullAt, pullAllBy, pickBy } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
 import { produce } from 'immer';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -148,13 +148,15 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       setValue(
         produce((draft) => {
           forEach(parsedContent.queries, (newQuery, newQueryId) => {
-            draft.push({
-              id: newQueryId,
-              interval: newQuery.interval ?? parsedContent.interval,
-              query: newQuery.query,
-              version: newQuery.version ?? parsedContent.version,
-              platform: getSupportedPlatforms(newQuery.platform ?? parsedContent.platform),
-            });
+            draft.push(
+              pickBy({
+                id: newQueryId,
+                interval: newQuery.interval ?? parsedContent.interval,
+                query: newQuery.query,
+                version: newQuery.version ?? parsedContent.version,
+                platform: getSupportedPlatforms(newQuery.platform ?? parsedContent.platform),
+              })
+            );
           });
 
           return draft;

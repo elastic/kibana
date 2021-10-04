@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter, map } from 'lodash';
+import { filter, map, reduce } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { PLUGIN_ID } from '../../../common';
 
@@ -20,7 +20,12 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
     {
       path: '/internal/osquery/packs/{id}',
       validate: {
-        params: schema.object({}, { unknowns: 'allow' }),
+        params: schema.object(
+          {
+            id: schema.string(),
+          },
+          { unknowns: 'allow' }
+        ),
       },
       options: { tags: [`access:${PLUGIN_ID}-readPacks`] },
     },
@@ -30,12 +35,13 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
       const { attributes, references, ...rest } = await savedObjectsClient.get<{
         name: string;
         description: string;
-        queries: Array<{ name: string; interval: string }>;
-      }>(
-        packSavedObjectType,
-        // @ts-expect-error update types
-        request.params.id
-      );
+        queries: Array<{
+          id: string;
+          name: string;
+          interval: string;
+          ecs_mapping: Record<string, any>;
+        }>;
+      }>(packSavedObjectType, request.params.id);
 
       const policyIds = map(filter(references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]), 'id');
 
@@ -43,8 +49,30 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
         body: {
           ...rest,
           ...attributes,
+          queries: reduce(
+            attributes.queries,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            (acc, { id: queryId, ecs_mapping, ...query }) => {
+              acc[queryId] = {
+                ...query,
+                ecs_mapping: reduce(
+                  ecs_mapping,
+                  (acc2, { value, field }) => {
+                    acc2[value] = {
+                      field,
+                    };
+                    return acc2;
+                  },
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  {} as Record<string, any>
+                ),
+              };
+              return acc;
+            },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            {} as Record<string, any>
+          ),
           policy_ids: policyIds,
-          references,
         },
       });
     }

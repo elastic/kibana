@@ -7,7 +7,6 @@
 
 import { isEmpty } from 'lodash';
 import {
-  EuiCallOut,
   EuiFlyout,
   EuiTitle,
   EuiSpacer,
@@ -29,15 +28,10 @@ import { Form, getUseField, Field, useFormData } from '../../shared_imports';
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
 import { UsePackQueryFormProps, PackFormData, usePackQueryForm } from './use_pack_query_form';
-import {
-  SavedQueriesDropdown,
-  SavedQueriesDropdownRef,
-} from '../../saved_queries/saved_queries_dropdown';
+import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 import { ECSMappingEditorField, ECSMappingEditorFieldRef } from './lazy_ecs_mapping_editor_field';
 
 const CommonUseField = getUseField({ component: Field });
-
-const GhostFormField = () => <></>;
 
 interface QueryFlyoutProps {
   uniqueQueryIds: string[];
@@ -53,7 +47,6 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   onSave,
   onClose,
 }) => {
-  const savedQueriesDropdownRef = useRef<SavedQueriesDropdownRef>();
   const ecsFieldRef = useRef<ECSMappingEditorFieldRef>();
   const [isEditMode] = useState(!!defaultValue);
   const { form } = usePackQueryForm({
@@ -77,9 +70,9 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
 
   const { submit, setFieldValue, reset, isSubmitting } = form;
 
-  const [{ query, savedQueryId }] = useFormData({
+  const [{ query }] = useFormData({
     form,
-    watch: ['query', 'savedQueryId'],
+    watch: ['query'],
   });
 
   const handleSetQueryValue = useCallback(
@@ -90,7 +83,6 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
 
       setFieldValue('id', savedQuery.id);
       setFieldValue('query', savedQuery.query);
-      setFieldValue('savedQueryId', savedQuery.savedQueryId);
 
       if (savedQuery.description) {
         setFieldValue('description', savedQuery.description);
@@ -117,11 +109,6 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
 
   /* Avoids accidental closing of the flyout when the user clicks outside of the flyout */
   const maskProps = useMemo(() => ({ onClick: () => ({}) }), []);
-
-  const handleUnlinkSavedQuery = useCallback(() => {
-    setFieldValue('savedQueryId', null);
-    savedQueriesDropdownRef.current?.clearSelection();
-  }, [setFieldValue]);
 
   return (
     <EuiFlyout
@@ -152,49 +139,20 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         <Form form={form}>
           {!isEditMode ? (
             <>
-              <SavedQueriesDropdown ref={savedQueriesDropdownRef} onChange={handleSetQueryValue} />
+              <SavedQueriesDropdown onChange={handleSetQueryValue} />
               <EuiSpacer />
             </>
           ) : null}
-          {savedQueryId && (
-            <>
-              <EuiCallOut
-                size="s"
-                title={
-                  <>
-                    {
-                      'Saved query attached to the pack will be up-to-date with the original saved query and because of that the form is read only mode. If you want to remove the connection'
-                    }
-                    <EuiButtonEmpty size="s" onClick={handleUnlinkSavedQuery}>
-                      click here
-                    </EuiButtonEmpty>
-                  </>
-                }
-                iconType="pin"
-              />
-              <EuiSpacer />
-            </>
-          )}
-          {
-            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-            <CommonUseField path="id" euiFieldProps={{ disabled: !!savedQueryId }} />
-          }
+          {<CommonUseField path="id" />}
           <EuiSpacer />
-          <CommonUseField
-            path="query"
-            component={CodeEditorField}
-            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-            euiFieldProps={{
-              disabled: !!savedQueryId,
-            }}
-          />
+          <CommonUseField path="query" component={CodeEditorField} />
           <EuiSpacer />
           <EuiFlexGroup>
             <EuiFlexItem>
               <CommonUseField
                 path="interval"
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                euiFieldProps={{ append: 's', disabled: !!savedQueryId }}
+                euiFieldProps={{ append: 's' }}
               />
               <EuiSpacer />
               <CommonUseField
@@ -211,7 +169,6 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                 }
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                 euiFieldProps={{
-                  isDisabled: !!savedQueryId,
                   noSuggestions: false,
                   singleSelection: { asPlainText: true },
                   placeholder: i18n.translate(
@@ -226,12 +183,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <CommonUseField
-                path="platform"
-                component={PlatformCheckBoxGroupField}
-                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                euiFieldProps={{ disabled: !!savedQueryId }}
-              />
+              <CommonUseField path="platform" component={PlatformCheckBoxGroupField} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
@@ -242,12 +194,9 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                 component={ECSMappingEditorField}
                 query={query}
                 fieldRef={ecsFieldRef}
-                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                euiFieldProps={{ isDisabled: !!savedQueryId }}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-          <CommonUseField path="savedQueryId" component={GhostFormField} />
         </Form>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

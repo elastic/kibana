@@ -30,8 +30,6 @@ export const useSavedQuery = ({ savedQueryId }: UseSavedQueryProps) => {
     () => http.get(`/internal/osquery/saved_query/${savedQueryId}`),
     {
       select: (data) => {
-        console.error('data', data);
-
         const ecsMapping = isArray(data.attributes.ecs_mapping)
           ? mapValues(mapKeys(data.attributes.ecs_mapping, 'value'), (item) => ({
               field: item.field,
@@ -39,8 +37,6 @@ export const useSavedQuery = ({ savedQueryId }: UseSavedQueryProps) => {
           : data.attributes.ecs_mapping;
 
         data.attributes.ecs_mapping = ecsMapping;
-
-        console.error('data2', data);
 
         return data;
       },
