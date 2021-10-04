@@ -103,8 +103,7 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
         <EuiText>
           <FormattedMessage
             id="visTypeTimeseries.indexPatternSelect.switchModePopover.text"
-            defaultMessage="Data view identifies one or more Elasticsearch indices that you want to explore.
-            Kibana data views are used by default. {allowStringIndicesLabel}"
+            defaultMessage="A data view groups and retrieves data from Elasticsearch. Disable this mode to directly query Elasticsearch indices instead. {allowStringIndicesLabel}"
             values={{
               allowStringIndicesLabel,
             }}

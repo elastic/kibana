@@ -36,14 +36,14 @@ export interface IndexPatternSelectProps {
 const defaultIndexPatternHelpText = i18n.translate(
   'visTypeTimeseries.indexPatternSelect.defaultDataViewText',
   {
-    defaultMessage: 'Default data view is used.',
+    defaultMessage: 'Using the default data view. ',
   }
 );
 
 const queryAllIndexesHelpText = i18n.translate(
   'visTypeTimeseries.indexPatternSelect.queryAllIndexesText',
   {
-    defaultMessage: 'To query all indexes use *',
+    defaultMessage: 'To query all indices, use *.',
   }
 );
 

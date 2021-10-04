@@ -43,7 +43,7 @@ export const UseIndexPatternModeCallout = () => {
       <p>
         <FormattedMessage
           id="visTypeTimeseries.visEditorVisualization.dataViewMode.notificationMessage"
-          defaultMessage="Great news! You can now visualize the data from Kibana data views (recommended) or Elasticsearch indices. {indexPatternModeLink}."
+          defaultMessage="Great news! You can visualize the data from Kibana data views (recommended) or Elasticsearch indices. {indexPatternModeLink}."
           values={{
             indexPatternModeLink: (
               <EuiLink href={indexPatternModeLink} target="_blank" external>
