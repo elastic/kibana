@@ -348,7 +348,7 @@ describe('createStreamingBatchedFunction()', () => {
 
       fn({ a: '1' });
 
-      const dontCompress = await fetchStreaming.mock.calls[0][0].compressionDisabled$.toPromise();
+      const dontCompress = await fetchStreaming.mock.calls[0][0].getIsCompressionDisabled();
       expect(dontCompress).toBe(false);
     });
 
