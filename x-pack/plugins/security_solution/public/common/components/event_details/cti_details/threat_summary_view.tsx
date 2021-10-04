@@ -32,7 +32,7 @@ import { ActionCell } from '../table/action_cell';
 import { BrowserField, BrowserFields, TimelineEventsDetailsItem } from '../../../../../common';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { RISKY_HOSTS_DOC_LINK } from '../../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
-import { HostRisk } from '../../../../timelines/containers/host_risk_score/use_host_risk_score';
+import { HostRisk } from '../../../../overview/containers/overview_risky_host_links/use_hosts_risk_score';
 
 export interface ThreatSummaryDescription {
   browserField: BrowserField;
@@ -268,12 +268,12 @@ const HostRiskDataBlock: React.FC<{
         toolTipContent={
           <FormattedMessage
             id="xpack.securitySolution.alertDetails.overview.hostDataTooltipContent"
-            defaultMessage="Risk classification is displayed only when available for a host. Ensure {hostRiskScoreDocumentationLink} is enabled within your environment."
+            defaultMessage="Risk classification is displayed only when available for a host. Ensure {hostsRiskScoreDocumentationLink} is enabled within your environment."
             values={{
-              hostRiskScoreDocumentationLink: (
+              hostsRiskScoreDocumentationLink: (
                 <EuiLink href={RISKY_HOSTS_DOC_LINK} target="_blank">
                   <FormattedMessage
-                    id="xpack.securitySolution.alertDetails.overview.hostRiskScoreLink"
+                    id="xpack.securitySolution.alertDetails.overview.hostsRiskScoreLink"
                     defaultMessage="Host Risk Score"
                   />
                 </EuiLink>
@@ -285,16 +285,15 @@ const HostRiskDataBlock: React.FC<{
 
       {hostRisk.loading && <EuiLoadingSpinner />}
 
-      {!hostRisk.loading && (!hostRisk.isModuleEnabled || !hostRisk.hostRiskScore) && (
+      {!hostRisk.loading && (!hostRisk.isModuleEnabled || !hostRisk.result) && (
         <EuiText color="subdued" size="xs">
           {i18n.NO_HOST_RISK_DATA_DESCRIPTION}
         </EuiText>
       )}
 
-      {hostRisk.isModuleEnabled && hostRisk.hostRiskScore && (
+      {hostRisk.isModuleEnabled && hostRisk.result && hostRisk.result.length > 0 && (
         <>
-          <EnrichedDataRow field={'host.risk.keyword'} value={hostRisk.hostRiskScore.risk} />
-          <EnrichedDataRow field={'host.risk_score'} value={hostRisk.hostRiskScore.riskScore} />
+          <EnrichedDataRow field={'host.risk.keyword'} value={hostRisk.result[0].risk} />
         </>
       )}
     </EuiPanel>
@@ -307,7 +306,7 @@ const ThreatSummaryViewComponent: React.FC<{
   enrichments: CtiEnrichment[];
   eventId: string;
   timelineId: string;
-  hostRisk?: HostRisk;
+  hostRisk: HostRisk | null;
   isDraggable?: boolean;
 }> = ({ browserFields, data, enrichments, eventId, timelineId, hostRisk, isDraggable }) => {
   if (!hostRisk && enrichments.length === 0) {

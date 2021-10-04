@@ -10,24 +10,23 @@ import {
   IEsSearchRequest,
   IEsSearchResponse,
 } from '../../../../../../../../src/plugins/data/common';
-import { Inspect, Maybe } from '../../../common';
+import { Inspect, Maybe, TimerangeInput } from '../../../common';
 
-export interface HostRiskScoreRequestOptions extends IEsSearchRequest {
+export interface HostsRiskScoreRequestOptions extends IEsSearchRequest {
   defaultIndex: string[];
   factoryQueryType?: FactoryQueryTypes;
-  hostName: string;
+  hostName?: string;
+  timerange?: TimerangeInput;
 }
-export interface HostRiskScoreStrategyResponse extends IEsSearchResponse {
-  hostRiskScore?: HostRiskScore;
+
+export interface HostsRiskScoreStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
 }
 
-export interface HostRiskScoreResponse {
+export interface HostsRiskScore {
+  host: {
+    name: string;
+  };
   risk_score: number;
-  risk: string;
-}
-
-export interface HostRiskScore {
-  riskScore: number;
   risk: string;
 }

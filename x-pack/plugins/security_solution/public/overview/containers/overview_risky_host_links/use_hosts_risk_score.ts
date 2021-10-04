@@ -9,53 +9,53 @@ import { i18n } from '@kbn/i18n';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { useRiskyHostsComplete } from './use_risky_hosts';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../common/lib/kibana';
 import { inputsActions } from '../../../common/store/actions';
-import { LinkPanelListItem } from '../../components/link_panel';
-import { RISKY_HOSTS_INDEX } from '../../../../common/constants';
+
+import { HOST_RISK_SCORES_INDEX } from '../../../../common/constants';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
+import { HostsRiskScore } from '../../../../common';
+import { useHostsRiskScoreComplete } from './use_hosts_risk_score_complete';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
-export const QUERY_ID = 'risky_hosts';
+export const QUERY_ID = 'host_risk_score';
 const noop = () => {};
-
-export interface RiskyHost {
-  host: {
-    name: string;
-  };
-  risk_score: number;
-  risk: string;
-}
 
 const isRecord = (item: unknown): item is Record<string, unknown> =>
   typeof item === 'object' && !!item;
 
-const isRiskyHostHit = (item: unknown): item is RiskyHost =>
+const isHostsRiskScoreHit = (item: unknown): item is HostsRiskScore =>
   isRecord(item) &&
   isRecord(item.host) &&
   typeof item.host.name === 'string' &&
   typeof item.risk_score === 'number' &&
   typeof item.risk === 'string';
 
-const getListItemsFromHits = (items: RiskyHost[]): LinkPanelListItem[] => {
-  return items.map(({ host, risk_score: count, risk: copy }) => ({
-    title: host.name,
-    count,
-    copy,
-    path: '',
-  }));
-};
+export interface HostRisk {
+  loading: boolean;
+  isModuleEnabled?: boolean;
+  result?: HostsRiskScore[];
+}
 
-export const useRiskyHostLinks = ({ to, from }: { to: string; from: string }) => {
-  const [isModuleEnabled, setIsModuleEnabled] = useState<boolean | undefined>(undefined);
+export const useHostsRiskScore = ({
+  timerange,
+  hostName,
+}: {
+  timerange?: { to: string; from: string };
+  hostName?: string;
+}): HostRisk | null => {
+  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+  const [isModuleEnabled, setIsModuleEnabled] = useState<boolean | undefined>(
+    riskyHostsFeatureEnabled ? undefined : false
+  );
 
   const { addError } = useAppToasts();
   const { data } = useKibana().services;
 
   const dispatch = useDispatch();
 
-  const { error, loading, result, start } = useRiskyHostsComplete();
+  const { error, loading, result, start } = useHostsRiskScoreComplete();
 
   const deleteQuery = useCallback(() => {
     dispatch(inputsActions.deleteOneQuery({ inputId: 'global', id: QUERY_ID }));
@@ -86,8 +86,8 @@ export const useRiskyHostLinks = ({ to, from }: { to: string; from: string }) =>
         setIsModuleEnabled(false);
       } else {
         addError(error, {
-          title: i18n.translate('xpack.securitySolution.overview.riskyHostsError', {
-            defaultMessage: 'Error Fetching Risky Hosts',
+          title: i18n.translate('xpack.securitySolution.overview.hostsRiskError', {
+            defaultMessage: 'Error Fetching Hosts Risk',
           }),
         });
         setIsModuleEnabled(true);
@@ -96,21 +96,27 @@ export const useRiskyHostLinks = ({ to, from }: { to: string; from: string }) =>
   }, [addError, error, setIsModuleEnabled]);
 
   useEffect(() => {
-    start({
-      data,
-      timerange: { to, from, interval: '' },
-      defaultIndex: [RISKY_HOSTS_INDEX],
-      filterQuery: '',
-    });
-  }, [start, data, to, from]);
+    if (riskyHostsFeatureEnabled && (hostName || timerange)) {
+      start({
+        data,
+        timerange: timerange ? { to: timerange.to, from: timerange.from, interval: '' } : undefined,
+        hostName,
+        defaultIndex: [HOST_RISK_SCORES_INDEX],
+      });
+    }
+  }, [start, data, timerange, hostName, riskyHostsFeatureEnabled]);
+
+  if (!hostName && !timerange) {
+    return null;
+  }
+
+  const hits = result?.rawResponse?.hits?.hits;
 
   return {
-    listItems: isRiskyHostHit(result?.rawResponse?.hits?.hits?.[0]?._source)
-      ? getListItemsFromHits(
-          result?.rawResponse?.hits?.hits?.map((hit) => hit._source) as RiskyHost[]
-        )
+    result: isHostsRiskScoreHit(hits?.[0]?._source)
+      ? (hits?.map((hit) => hit._source) as HostsRiskScore[])
       : [],
     isModuleEnabled,
-    loading,
+    loading: isModuleEnabled === undefined ? true : loading,
   };
 };

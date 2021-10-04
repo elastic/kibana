@@ -47,6 +47,7 @@ describe('ThreatSummaryView', () => {
           enrichments={enrichments}
           eventId={eventId}
           timelineId={timelineId}
+          hostRisk={null}
         />
       </TestProviders>
     );

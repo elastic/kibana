@@ -38,8 +38,8 @@ import {
 import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
 import { Reason } from './reason';
 
-import { HostRisk } from '../../../timelines/containers/host_risk_score/use_host_risk_score';
 import { InvestigationGuideView } from './investigation_guide_view';
+import { HostRisk } from '../../../overview/containers/overview_risky_host_links/use_hosts_risk_score';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -63,7 +63,7 @@ interface Props {
   isDraggable?: boolean;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
-  hostRisk?: HostRisk;
+  hostRisk: HostRisk | null;
 }
 
 export const Indent = styled.div`
