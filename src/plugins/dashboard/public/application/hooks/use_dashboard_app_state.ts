@@ -12,7 +12,7 @@ import { debounceTime } from 'rxjs/operators';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 
-import { DashboardConstants } from '../..';
+import { createDashboardEditUrl, DashboardConstants } from '../..';
 import { ViewMode } from '../../services/embeddable';
 import { useKibana } from '../../services/kibana_react';
 import { getNewDashboardTitle } from '../../dashboard_strings';
@@ -152,11 +152,19 @@ export const useDashboardAppState = ({
       const { savedDashboard, savedDashboardState } = loadSavedDashboardResult;
 
       // If the saved dashboard is an alias match, then we will redirect
-      if (savedDashboard.outcome === 'aliasMatch') {
+      if (savedDashboard.outcome === 'aliasMatch' && savedDashboard.id && savedDashboard.aliasId) {
+        // We want to keep the "query" params on our redirect.
+        // But, these aren't true query params, they are technically part of the hash
+        // So, to get the new path, we will just replace the current id in the hash
+        // with the alias id
+        const path = scopedHistory().location.hash.replace(
+          savedDashboard.id,
+          savedDashboard.aliasId
+        );
         if (screenshotModeService?.isScreenshotMode()) {
-          scopedHistory().replace(savedDashboard.getFullPath());
+          scopedHistory().replace(path);
         } else {
-          spacesService?.ui.redirectLegacyUrl(savedDashboard.getFullPath());
+          spacesService?.ui.redirectLegacyUrl(path);
         }
       }
 

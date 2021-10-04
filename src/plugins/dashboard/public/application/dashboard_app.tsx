@@ -21,6 +21,7 @@ import { EmbeddableRenderer } from '../services/embeddable';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
+import { createDashboardEditUrl } from '../dashboard_constants';
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
@@ -116,7 +117,9 @@ export function DashboardApp({
             ? spacesService?.ui.components.getLegacyUrlConflict({
                 currentObjectId: dashboardAppState.savedDashboard.id,
                 otherObjectId: dashboardAppState.savedDashboard.aliasId,
-                otherObjectPath: dashboardAppState.savedDashboard.getFullPath(),
+                otherObjectPath: `#${createDashboardEditUrl(
+                  dashboardAppState.savedDashboard.aliasId
+                )}${history.location.search}`,
               })
             : null}
           <div className="dashboardViewport">
