@@ -26,9 +26,8 @@ const makeSerie = (
     interpolate: InterpolationMode.Linear,
     lineWidth: 2,
     valueAxis: defaultValueAxis,
-    data,
   };
-  return lastSerie ? { ...lastSerie, data } : defaultSerie;
+  return { ...defaultSerie, ...lastSerie, data };
 };
 export const getSeriesParams = (
   aggs: AggConfigs | undefined,
