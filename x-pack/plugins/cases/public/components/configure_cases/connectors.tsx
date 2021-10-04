@@ -111,7 +111,7 @@ const ConnectorsComponent: React.FC<Props> = ({
                 appendAddConnectorButton={true}
               />
             </EuiFlexItem>
-            {isLegacyConnector(connector) && (
+            {selectedConnector.type !== ConnectorTypes.none && isLegacyConnector(connector) && (
               <EuiFlexItem grow={false}>
                 <DeprecatedCallout />
               </EuiFlexItem>

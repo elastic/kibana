@@ -25,7 +25,7 @@ const ERROR_MESSAGE = i18n.translate(
 );
 
 interface Props {
-  message: string | null;
+  message?: string | null;
 }
 
 const ApplicationRequiredCalloutComponent: React.FC<Props> = ({ message }) => {

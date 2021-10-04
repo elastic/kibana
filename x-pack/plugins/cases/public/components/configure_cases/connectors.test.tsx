@@ -15,6 +15,7 @@ import { ConnectorsDropdown } from './connectors_dropdown';
 import { connectors, actionTypes } from './__mock__';
 import { ConnectorTypes } from '../../../common';
 import { useKibana } from '../../common/lib/kibana';
+import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 
 jest.mock('../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -36,11 +37,10 @@ describe('Connectors', () => {
     updateConnectorDisabled: false,
   };
 
+  const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
+
   beforeAll(() => {
-    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
-      actionTypeTitle: 'test',
-      iconClass: 'logoSecurity',
-    });
+    registerConnectorsToMockActionRegistry(actionTypeRegistry, connectors);
     wrapper = mount(<Connectors {...props} />, { wrappingComponent: TestProviders });
   });
 
@@ -123,7 +123,7 @@ describe('Connectors', () => {
     ).toBe('Update My Connector');
   });
 
-  test('it shows the deprecated callout when the connector is legacy', () => {
+  test('it shows the deprecated callout when the connector is legacy', async () => {
     render(
       <Connectors
         {...props}
@@ -134,6 +134,21 @@ describe('Connectors', () => {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
     );
-    expect(screen.getByText('This connector is deprecated')).toBeInTheDocument();
+
+    expect(screen.getByText('Deprecated connector type')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'This connector type is deprecated. Create a new connector or update this connector'
+      )
+    ).toBeInTheDocument();
+  });
+
+  test('it does not shows the deprecated callout when the connector is none', async () => {
+    render(<Connectors {...props} />, {
+      // wrapper: TestProviders produces a TS error
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    expect(screen.queryByText('Deprecated connector type')).not.toBeInTheDocument();
   });
 });

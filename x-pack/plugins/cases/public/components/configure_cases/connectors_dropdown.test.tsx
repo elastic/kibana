@@ -14,7 +14,7 @@ import { ConnectorsDropdown, Props } from './connectors_dropdown';
 import { TestProviders } from '../../common/mock';
 import { connectors } from './__mock__';
 import { useKibana } from '../../common/lib/kibana';
-import { actionTypeRegistryMock } from '../../../../triggers_actions_ui/public/application/action_type_registry.mock';
+import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 
 jest.mock('../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -29,15 +29,10 @@ describe('ConnectorsDropdown', () => {
     selectedConnector: 'none',
   };
 
-  const { createMockActionTypeModel } = actionTypeRegistryMock;
-  const uniqueActionTypeIds = new Set(connectors.map((connector) => connector.actionTypeId));
+  const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
 
   beforeAll(() => {
-    uniqueActionTypeIds.forEach((actionTypeId) =>
-      useKibanaMock().services.triggersActionsUi.actionTypeRegistry.register(
-        createMockActionTypeModel({ id: actionTypeId, iconClass: 'logoSecurity' })
-      )
-    );
+    registerConnectorsToMockActionRegistry(actionTypeRegistry, connectors);
     wrapper = mount(<ConnectorsDropdown {...props} />, { wrappingComponent: TestProviders });
   });
 
@@ -174,6 +169,43 @@ describe('ConnectorsDropdown', () => {
             </EuiFlexItem>
           </EuiFlexGroup>,
           "value": "servicenow-sir",
+        },
+        Object {
+          "data-test-subj": "dropdown-connector-servicenow-legacy",
+          "inputDisplay": <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <Styled(EuiIcon)
+                size="m"
+                type="logoSecurity"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <span>
+                My Connector
+              </span>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiIconTip
+                aria-label="Deprecated connector"
+                color="warning"
+                content="Please update your connector"
+                size="m"
+                title="Deprecated connector"
+                type="alert"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>,
+          "value": "servicenow-legacy",
         },
       ]
     `);

@@ -16,6 +16,7 @@ import {
   User,
   UserAction,
   UserActionField,
+  ActionConnector,
 } from '../api';
 
 export interface CasesUiConfigType {
@@ -259,3 +260,5 @@ export interface Ecs {
   _index?: string;
   signal?: SignalEcs;
 }
+
+export type CaseActionConnector = ActionConnector;
