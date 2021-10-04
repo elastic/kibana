@@ -19,11 +19,11 @@ export const onUnsupportedTimePattern =
     navigateToApp: CoreStart['application']['navigateToApp']
   ) =>
   ({ id, title, index }: { id: string; title: string; index: string }) => {
-    const warningTitle = i18n.translate('data.indexPatterns.warningTitle', {
+    const warningTitle = i18n.translate('dataViews.warningTitle', {
       defaultMessage: 'Support for time interval index patterns removed',
     });
 
-    const warningText = i18n.translate('data.indexPatterns.warningText', {
+    const warningText = i18n.translate('dataViews.warningText', {
       defaultMessage:
         'Currently querying all indices matching {index}. {title} should be migrated to a wildcard-based index pattern.',
       values: { title, index },
@@ -54,7 +54,7 @@ export const onUnsupportedTimePattern =
                 }
               >
                 <FormattedMessage
-                  id="data.indexPatterns.editIndexPattern"
+                  id="dataViews.editIndexPattern"
                   defaultMessage="Edit index pattern"
                 />
               </EuiButton>
