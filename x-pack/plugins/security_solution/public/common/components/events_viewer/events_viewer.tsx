@@ -122,7 +122,6 @@ interface Props {
   end: string;
   filters: Filter[];
   headerFilterGroup?: React.ReactNode;
-  height?: number;
   id: TimelineId;
   indexNames: string[];
   indexPattern: IIndexPattern;
