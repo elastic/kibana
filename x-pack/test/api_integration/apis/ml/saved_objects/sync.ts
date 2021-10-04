@@ -57,7 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should sync datafeeds and saved objects', async () => {
-      // check to see is a sync is needed
+      // check to see if a sync is needed
       const syncNeeded = await runSyncCheckRequest(
         USER.ML_POWERUSER_ALL_SPACES,
         'anomaly-detector',
@@ -97,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
       // left-over saved object should be removed with the request
       await ml.api.deleteAnomalyDetectionJobES(adJobId1);
 
-      // check to see is a sync is needed
+      // check to see if a sync is needed
       const syncNeeded2 = await runSyncCheckRequest(
         USER.ML_POWERUSER_ALL_SPACES,
         'anomaly-detector',
@@ -117,7 +117,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should sync datafeeds after recreation in ES with different name', async () => {
-      // check to see is a sync is needed
+      // check to see if a sync is needed
       const syncNeeded = await runSyncCheckRequest(
         USER.ML_POWERUSER_ALL_SPACES,
         'anomaly-detector',
@@ -133,7 +133,7 @@ export default ({ getService }: FtrProviderContext) => {
       const datafeedConfig1 = ml.commonConfig.getADFqDatafeedConfig(adJobId1);
       await ml.api.createDatafeedES(datafeedConfig1);
 
-      // check to see is a sync is needed
+      // check to see if a sync is needed
       const syncNeeded2 = await runSyncCheckRequest(
         USER.ML_POWERUSER_ALL_SPACES,
         'anomaly-detector',
@@ -160,7 +160,7 @@ export default ({ getService }: FtrProviderContext) => {
       datafeedConfig2.datafeed_id = `different_${datafeedConfig2.datafeed_id}`;
       await ml.api.createDatafeedES(datafeedConfig2);
 
-      // check to see is a sync is needed
+      // check to see if a sync is needed
       const syncNeeded3 = await runSyncCheckRequest(
         USER.ML_POWERUSER_ALL_SPACES,
         'anomaly-detector',
@@ -170,7 +170,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const body2 = await runSyncRequest(USER.ML_POWERUSER_ALL_SPACES, 200);
 
-      // new datafeed will be added on second sync
+      // previous datafeed should be removed and new datafeed should be added on sync
       expect(body2).to.eql({
         datafeedsAdded: { [adJobId1]: { success: true, type: 'anomaly-detector' } },
         datafeedsRemoved: {},
@@ -178,7 +178,7 @@ export default ({ getService }: FtrProviderContext) => {
         savedObjectsDeleted: {},
       });
 
-      // check to see is a sync is needed
+      // check to see if a sync is needed
       const syncNeeded4 = await runSyncCheckRequest(
         USER.ML_POWERUSER_ALL_SPACES,
         'anomaly-detector',
