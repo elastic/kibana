@@ -9,6 +9,7 @@ import { cloneDeep } from 'lodash';
 
 import { buildInput } from '../../../../common/lib/serialization';
 import { AGG_TYPES } from '../../../../common/constants';
+import { getIntervalType } from '../lib/get_interval_type';
 
 /*
 input.search.request.body.query.bool.filter.range
@@ -110,7 +111,6 @@ export function buildVisualizeQuery(watch, visualizeOptions, kibanaVersion) {
   const dateAgg = {
     date_histogram: {
       field: watch.timeField,
-      fixed_interval: visualizeOptions.interval,
       time_zone: visualizeOptions.timezone,
       min_doc_count: 1,
     },
@@ -118,8 +118,11 @@ export function buildVisualizeQuery(watch, visualizeOptions, kibanaVersion) {
 
   if (kibanaVersion.major < 8) {
     // In 7.x we use the deprecated "interval" in date_histogram agg
-    delete dateAgg.date_histogram.fixed_interval;
     dateAgg.date_histogram.interval = visualizeOptions.interval;
+  } else {
+    // From 8.x we use the more precise "fixed_interval" or "calendar_interval"
+    const intervalType = getIntervalType(visualizeOptions.interval);
+    dateAgg.date_histogram[`${intervalType}_interval`] = visualizeOptions.interval;
   }
 
   // override the query range
