@@ -329,7 +329,6 @@ kibana_vars=(
     xpack.reporting.csv.useByteOrderMarkEncoding
     xpack.reporting.enabled
     xpack.reporting.encryptionKey
-    xpack.reporting.index
     xpack.reporting.kibanaApp
     xpack.reporting.kibanaServer.hostname
     xpack.reporting.kibanaServer.port
