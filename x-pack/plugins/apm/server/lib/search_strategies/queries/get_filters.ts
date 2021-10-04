@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
-import { rangeQuery, kqlQuery } from '../../../../observability/server';
-import { environmentQuery } from '../../../common/utils/environment_query';
+import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
+import { rangeQuery, kqlQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
   PROCESSOR_EVENT,
-} from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
+} from '../../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../../common/processor_event';
 
 export interface CorrelationsOptions {
   environment: string;
