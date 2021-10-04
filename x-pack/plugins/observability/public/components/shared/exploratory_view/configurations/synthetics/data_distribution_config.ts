@@ -6,7 +6,12 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, REPORT_METRIC_FIELD, RECORDS_PERCENTAGE_FIELD } from '../constants';
+import {
+  FieldLabels,
+  REPORT_METRIC_FIELD,
+  RECORDS_PERCENTAGE_FIELD,
+  ReportTypes,
+} from '../constants';
 import {
   CLS_LABEL,
   DCL_LABEL,
@@ -30,7 +35,7 @@ export function getSyntheticsDistributionConfig({
   indexPattern,
 }: ConfigProps): SeriesConfig {
   return {
-    reportType: 'data-distribution',
+    reportType: ReportTypes.DISTRIBUTION,
     defaultSeriesType: series?.seriesType || 'line',
     seriesTypes: [],
     xAxisColumn: {

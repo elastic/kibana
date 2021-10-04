@@ -23,14 +23,15 @@ describe('AddToCaseAction', function () {
 
   it('should be able to click add to case button', async function () {
     const initSeries = {
-      data: {
-        'uptime-pings-histogram': {
+      data: [
+        {
+          name: 'test-series',
           dataType: 'synthetics' as const,
           reportType: 'kpi-over-time' as const,
           breakdown: 'monitor.status',
           time: { from: 'now-15m', to: 'now' },
         },
-      },
+      ],
     };
 
     const { findByText, core } = render(

@@ -10,18 +10,16 @@ import { EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { USE_BREAK_DOWN_COLUMN } from '../../configurations/constants';
-import { SeriesConfig } from '../../types';
+import { SeriesConfig, SeriesUrl } from '../../types';
 
 interface Props {
-  seriesId: string;
-  breakdowns: string[];
-  seriesConfig: SeriesConfig;
+  seriesId: number;
+  series: SeriesUrl;
+  seriesConfig?: SeriesConfig;
 }
 
-export function Breakdowns({ seriesConfig, seriesId, breakdowns = [] }: Props) {
-  const { setSeries, getSeries } = useSeriesStorage();
-
-  const series = getSeries(seriesId);
+export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
+  const { setSeries } = useSeriesStorage();
 
   const selectedBreakdown = series.breakdown;
   const NO_BREAKDOWN = 'no_breakdown';
@@ -40,9 +38,13 @@ export function Breakdowns({ seriesConfig, seriesId, breakdowns = [] }: Props) {
     }
   };
 
+  if (!seriesConfig) {
+    return null;
+  }
+
   const hasUseBreakdownColumn = seriesConfig.xAxisColumn.sourceField === USE_BREAK_DOWN_COLUMN;
 
-  const items = breakdowns.map((breakdown) => ({
+  const items = seriesConfig.breakdownFields.map((breakdown) => ({
     id: breakdown,
     label: seriesConfig.labels[breakdown],
   }));
@@ -50,14 +52,12 @@ export function Breakdowns({ seriesConfig, seriesId, breakdowns = [] }: Props) {
   if (!hasUseBreakdownColumn) {
     items.push({
       id: NO_BREAKDOWN,
-      label: i18n.translate('xpack.observability.exp.breakDownFilter.noBreakdown', {
-        defaultMessage: 'No breakdown',
-      }),
+      label: NO_BREAK_DOWN_LABEL,
     });
   }
 
   const options = items.map(({ id, label }) => ({
-    inputDisplay: id === NO_BREAKDOWN ? label : <strong>{label}</strong>,
+    inputDisplay: label,
     value: id,
     dropdownDisplay: label,
   }));
@@ -66,15 +66,18 @@ export function Breakdowns({ seriesConfig, seriesId, breakdowns = [] }: Props) {
     selectedBreakdown || (hasUseBreakdownColumn ? options[0].value : NO_BREAKDOWN);
 
   return (
-    <div style={{ width: 200 }}>
-      <EuiSuperSelect
-        fullWidth
-        compressed
-        options={options}
-        valueOfSelected={valueOfSelected}
-        onChange={(value) => onOptionChange(value)}
-        data-test-subj={'seriesBreakdown'}
-      />
-    </div>
+    <EuiSuperSelect
+      options={options}
+      valueOfSelected={valueOfSelected}
+      onChange={(value) => onOptionChange(value)}
+      data-test-subj={'seriesBreakdown'}
+    />
   );
 }
+
+export const NO_BREAK_DOWN_LABEL = i18n.translate(
+  'xpack.observability.exp.breakDownFilter.noBreakdown',
+  {
+    defaultMessage: 'No breakdown',
+  }
+);

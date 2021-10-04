@@ -25,7 +25,7 @@ async function addToCase(
   http: HttpSetup,
   theCase: Case | SubCase,
   attributes: TypedLensByValueInput['attributes'],
-  timeRange: { from: string; to: string }
+  timeRange?: { from: string; to: string }
 ) {
   const apiPath = `/api/cases/${theCase?.id}/comments`;
 

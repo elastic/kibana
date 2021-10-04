@@ -62,15 +62,18 @@ export function PageViewsTrend() {
 
   const exploratoryViewLink = createExploratoryViewUrl(
     {
-      [`${serviceName}-page-views`]: {
-        dataType: 'ux',
-        reportType: 'kpi-over-time',
-        time: { from: rangeFrom!, to: rangeTo! },
-        reportDefinitions: {
-          'service.name': serviceName as string[],
+      reportType: 'kpi-over-time',
+      allSeries: [
+        {
+          name: `${serviceName}-page-views`,
+          dataType: 'ux',
+          time: { from: rangeFrom!, to: rangeTo! },
+          reportDefinitions: {
+            'service.name': serviceName as string[],
+          },
+          ...(breakdown ? { breakdown: breakdown.fieldName } : {}),
         },
-        ...(breakdown ? { breakdown: breakdown.fieldName } : {}),
-      },
+      ],
     },
     http?.basePath.get()
   );
