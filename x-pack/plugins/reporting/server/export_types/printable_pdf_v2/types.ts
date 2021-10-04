@@ -24,8 +24,4 @@ export type JobParamsPDFV2 = BaseParamsPDFV2 & BaseParams;
 // Job payload: structure of stored job data provided by create_job
 export interface TaskPayloadPDFV2 extends BasePayload, BaseParamsPDFV2 {
   layout: LayoutParams;
-  /**
-   * The value of forceNow is injected server-side every time a given report is generated.
-   */
-  forceNow: string;
 }

@@ -78,7 +78,6 @@ test(`passes browserTimezone to generatePng`, async () => {
   await runTask(
     'pngJobId',
     getBasePayload({
-      forceNow: 'test',
       locatorParams: [{ version: 'test', id: 'test', params: {} }] as LocatorParams[],
       browserTimezone,
       headers: encryptedHeaders,
@@ -105,9 +104,7 @@ test(`passes browserTimezone to generatePng`, async () => {
           "localhost:80undefined/app/management/insightsAndAlerting/reporting/r",
           Object {
             "id": "test",
-            "params": Object {
-              "forceNow": "test",
-            },
+            "params": Object {},
             "version": "test",
           },
         ],

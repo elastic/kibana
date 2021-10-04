@@ -10,7 +10,6 @@ import { BaseParams, BasePayload } from '../../types';
 
 interface BaseParamsPNG {
   layout: LayoutParams;
-  forceNow?: string;
   relativeUrl: string;
 }
 

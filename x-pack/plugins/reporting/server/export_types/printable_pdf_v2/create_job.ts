@@ -11,9 +11,6 @@ import { JobParamsPDFV2, TaskPayloadPDFV2 } from './types';
 export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<JobParamsPDFV2, TaskPayloadPDFV2>> =
   function createJobFactoryFn() {
     return async function createJob(jobParams) {
-      return {
-        ...jobParams,
-        forceNow: new Date().toISOString(),
-      };
+      return jobParams;
     };
   };

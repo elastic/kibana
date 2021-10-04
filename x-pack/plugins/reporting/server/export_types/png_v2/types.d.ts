@@ -21,7 +21,6 @@ export interface JobParamsPNGV2 extends BaseParams {
 // Job payload: structure of stored job data provided by create_job
 export interface TaskPayloadPNGV2 extends BasePayload {
   layout: LayoutParams;
-  forceNow: string;
   /**
    * Even though we only ever handle one locator for a PNG, we store it as an array for consistency with how PDFs are stored
    */

@@ -8,7 +8,7 @@
 import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 import { ReportingCore } from '../..';
-import { JobParamsPDF, TaskPayloadPDF } from '../../export_types/printable_pdf/types';
+import { JobParamsPDF } from '../../export_types/printable_pdf/types';
 import { Report, ReportingStore } from '../../lib/store';
 import { ReportApiJSON } from '../../lib/store/report';
 import {
@@ -121,8 +121,8 @@ describe('Handle request to generate', () => {
           "timeout": undefined,
         }
       `);
-      const { forceNow, ...snapPayload } = payload as TaskPayloadPDF;
-      expect(snapPayload).toMatchInlineSnapshot(`
+
+      expect(payload).toMatchInlineSnapshot(`
         Object {
           "browserTimezone": "UTC",
           "headers": "hello mock cypher text",

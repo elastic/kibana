@@ -14,9 +14,6 @@ export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<JobParamsPNG, Ta
     return async function createJob(jobParams) {
       validateUrls([jobParams.relativeUrl]);
 
-      return {
-        ...jobParams,
-        forceNow: new Date().toISOString(),
-      };
+      return jobParams;
     };
   };

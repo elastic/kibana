@@ -14,7 +14,6 @@ export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<JobParamsPNGV2, 
       return {
         ...jobParams,
         locatorParams: [locatorParams],
-        forceNow: new Date().toISOString(),
       };
     };
   };

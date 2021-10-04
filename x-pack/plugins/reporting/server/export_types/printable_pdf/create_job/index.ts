@@ -25,7 +25,6 @@ export const createJobFnFactory: CreateJobFnFactory<
     // return the payload
     return {
       ...jobParams,
-      forceNow: new Date().toISOString(),
       objects: relativeUrls.map((u) => ({ relativeUrl: u })),
     };
   }, logger);

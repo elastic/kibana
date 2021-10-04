@@ -16,7 +16,6 @@ import {
   getConditionalHeaders,
   omitBlockedHeaders,
   generatePngObservableFactory,
-  setForceNow,
 } from '../common';
 import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
 import { TaskPayloadPNGV2 } from './types';
@@ -39,7 +38,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNGV2>> =
         map((filteredHeaders) => getConditionalHeaders(config, filteredHeaders)),
         mergeMap((conditionalHeaders) => {
           const url = getFullRedirectAppUrl(config, job.spaceId);
-          const [locatorParams] = job.locatorParams.map(setForceNow(job.forceNow));
+          const [locatorParams] = job.locatorParams;
 
           apmGetAssets?.end();
 

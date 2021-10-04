@@ -16,7 +16,6 @@ import {
   getConditionalHeaders,
   omitBlockedHeaders,
   getCustomLogo,
-  setForceNow,
 } from '../common';
 import { generatePdfObservableFactory } from './lib/generate_pdf';
 import { TaskPayloadPDFV2 } from './types';
@@ -50,7 +49,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
             jobLogger,
             job,
             title,
-            locatorParams.map(setForceNow(job.forceNow)),
+            locatorParams,
             browserTimezone,
             conditionalHeaders,
             layout,

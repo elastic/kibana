@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  format as urlFormat,
-  parse as urlParse,
-  UrlWithParsedQuery,
-  UrlWithStringQuery,
-} from 'url';
+import { parse as urlParse, UrlWithParsedQuery, UrlWithStringQuery } from 'url';
 import { ReportingConfig } from '../../';
 import { TaskPayloadPNG } from '../png/types';
 import { TaskPayloadPDF } from '../printable_pdf/types';
@@ -64,26 +59,7 @@ export function getFullUrls(config: ReportingConfig, job: TaskPayloadPDF | TaskP
       );
     }
 
-    // allow the hash check to perform first
-    if (!job.forceNow) {
-      return jobUrl;
-    }
-
-    const visualizationRoute: UrlWithParsedQuery = urlParse(parsed.hash.replace(/^#/, ''), true);
-
-    // combine the visualization route and forceNow parameter into a URL
-    const transformedHash = urlFormat({
-      pathname: visualizationRoute.pathname,
-      query: {
-        ...visualizationRoute.query,
-        forceNow: job.forceNow,
-      },
-    });
-
-    return urlFormat({
-      ...parsed,
-      hash: transformedHash,
-    });
+    return jobUrl;
   });
 
   return urls;

@@ -41,11 +41,7 @@ const encryptHeaders = async (headers: Record<string, string>) => {
   return await crypto.encrypt(headers);
 };
 
-const getBasePayload = (baseObj: any) =>
-  ({
-    params: { forceNow: 'test' },
-    ...baseObj,
-  } as TaskPayloadPDFV2);
+const getBasePayload = (baseObj: any) => ({ params: {}, ...baseObj } as TaskPayloadPDFV2);
 
 beforeEach(async () => {
   content = '';
@@ -77,7 +73,6 @@ test(`passes browserTimezone to generatePdf`, async () => {
   await runTask(
     'pdfJobId',
     getBasePayload({
-      forceNow: 'test',
       title: 'PDF Params Timezone Test',
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
       browserTimezone,
