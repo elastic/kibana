@@ -52,3 +52,13 @@ export const savedQueryId = t.string;
 export type SavedQueryId = t.TypeOf<typeof savedQueryId>;
 export const savedQueryIdOrUndefined = t.union([savedQueryId, t.undefined]);
 export type SavedQueryIdOrUndefined = t.TypeOf<typeof savedQueryIdOrUndefined>;
+
+export const ecsMapping = t.record(
+  t.string,
+  t.type({
+    field: t.string,
+  })
+);
+export type ECSMapping = t.TypeOf<typeof ecsMapping>;
+export const ecsMappingOrUndefined = t.union([ecsMapping, t.undefined]);
+export type ECSMappingOrUndefined = t.TypeOf<typeof ecsMappingOrUndefined>;

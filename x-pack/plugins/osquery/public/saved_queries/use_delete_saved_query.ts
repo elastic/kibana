@@ -9,7 +9,6 @@ import { useMutation, useQueryClient } from 'react-query';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../common/lib/kibana';
-import { savedQuerySavedObjectType } from '../../common/types';
 import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
 import { SAVED_QUERIES_ID } from './constants';
@@ -23,15 +22,17 @@ export const useDeleteSavedQuery = ({ savedQueryId }: UseDeleteSavedQueryProps) 
   const queryClient = useQueryClient();
   const {
     application: { navigateToApp },
-    savedObjects,
+    http,
     notifications: { toasts },
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useMutation(() => savedObjects.client.delete(savedQuerySavedObjectType, savedQueryId), {
-    onError: (error) => {
-      // @ts-expect-error update types
-      setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
+  return useMutation(() => http.delete(`/internal/osquery/saved_query/${savedQueryId}`), {
+    onError: (error: { body: { error: string; message: string } }) => {
+      setErrorToast(error, {
+        title: error.body.error,
+        toastMessage: error.body.message,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries(SAVED_QUERIES_ID);

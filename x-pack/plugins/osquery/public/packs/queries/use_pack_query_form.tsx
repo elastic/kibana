@@ -25,7 +25,7 @@ export interface UsePackQueryFormProps {
 export interface PackFormData {
   id: string;
   query: string;
-  interval: number;
+  interval: string;
   platform?: string | undefined;
   version?: string[] | undefined;
   ecs_mapping?:

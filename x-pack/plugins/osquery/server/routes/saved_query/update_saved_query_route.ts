@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set, unset, has, filter, pickBy, reduce, findIndex } from 'lodash';
+import { pickBy } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
 
@@ -15,6 +15,7 @@ import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PackagePolicy } from '../../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
+import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 
 export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.put(
@@ -50,12 +51,11 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
       options: { tags: [`access:${PLUGIN_ID}-writeSavedQueries`] },
     },
     async (context, request, response) => {
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
       const savedObjectsClient = context.core.savedObjects.client;
-      const packagePolicyService = osqueryContext.service.getPackagePolicyService();
+      const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
 
       const {
-        id: queryId,
+        id,
         description,
         platform,
         query,
@@ -65,170 +65,39 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
         ecs_mapping,
       } = request.body;
 
-      const currentSavedQuerySO = await savedObjectsClient.get<{ id: string }>(
-        savedQuerySavedObjectType,
-        request.params.id
-      );
+      const conflictingEntries = await savedObjectsClient.find({
+        type: savedQuerySavedObjectType,
+        search: id,
+        searchFields: ['id'],
+      });
 
-      const normalizedEcsMapping = reduce(
-        ecs_mapping,
-        (acc, { field, value }) => {
-          acc.push({ field, value });
-          return acc;
-        },
-        []
-      );
+      if (conflictingEntries.saved_objects.length) {
+        return response.conflict({ body: `Saved query with id "${id}" already exists.` });
+      }
 
       const updatedSavedQuerySO = await savedObjectsClient.update(
         savedQuerySavedObjectType,
         request.params.id,
         pickBy({
-          id: queryId,
+          id,
           description,
           platform,
           query,
           version,
           interval,
-          ecs_mapping: ecs_mapping ? normalizedEcsMapping : null,
-        })
+          ecs_mapping: convertECSMappingToArray(ecs_mapping),
+          updated_by: currentUser,
+          updated_at: new Date().toISOString(),
+        }),
+        {
+          refresh: 'wait_for',
+        }
       );
 
-      const { saved_objects: packs } = await savedObjectsClient.find({
-        perPage: 100,
-        type: packSavedObjectType,
-        hasReference: {
-          type: savedQuerySavedObjectType,
-          id: request.params.id,
-        },
-      });
-
-      // @ts-expect-error update types
-      const { items: packagePolicies } = await packagePolicyService?.list(savedObjectsClient, {
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-        perPage: 1000,
-        page: 1,
-      });
-
-      await Promise.all(
-        packs.map(async (pack) => {
-          const currentPackSO = await savedObjectsClient.get<{
-            id: string;
-            queries: Array<
-              Record<
-                string,
-                {
-                  id: string;
-                }
-              >
-            >;
-          }>(packSavedObjectType, pack.id);
-          const currentPackagePolicies = filter(packagePolicies, (packagePolicy) =>
-            has(
-              packagePolicy,
-              // @ts-expect-error update types
-              `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}`
-            )
-          );
-          const packQueryIndex = findIndex(currentPackSO.attributes.queries, [
-            'id',
-            currentSavedQuerySO.attributes.id,
-          ]);
-
-          if (packQueryIndex) {
-            await savedObjectsClient.update(
-              packSavedObjectType,
-              currentPackSO.id,
-              produce(currentPackSO.attributes, (draftPack) => {
-                // @ts-expect-error update types
-                draftPack.queries[packQueryIndex] = pickBy({
-                  id: queryId,
-                  platform,
-                  query,
-                  version,
-                  interval,
-                  ecs_mapping: ecs_mapping ? normalizedEcsMapping : null,
-                });
-
-                return draftPack;
-              }),
-              {
-                references: produce(currentPackSO.references, (draft) => {
-                  if (currentSavedQuerySO.attributes.id !== queryId) {
-                    draft = filter(
-                      draft,
-                      (reference) =>
-                        !(
-                          reference.id === request.params.id &&
-                          reference.type === savedQuerySavedObjectType
-                        )
-                    );
-                    draft.push({
-                      id: request.params.id,
-                      name: queryId,
-                      type: savedQuerySavedObjectType,
-                    });
-                  }
-                  return draft;
-                }),
-              }
-            );
-
-            await Promise.all(
-              currentPackagePolicies.map((packagePolicy) =>
-                packagePolicyService?.update(
-                  savedObjectsClient,
-                  esClient,
-                  packagePolicy.id,
-                  produce<PackagePolicy>(packagePolicy, (draft) => {
-                    unset(draft, 'id');
-
-                    if (currentSavedQuerySO.attributes.id !== queryId) {
-                      unset(
-                        draft,
-                        // @ts-expect-error update types
-                        `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}.${currentSavedQuerySO.attributes.id}`
-                      );
-                    }
-
-                    set(
-                      draft,
-                      // @ts-expect-error update types
-                      `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}.${currentSavedQuerySO.attributes.id}`,
-                      pickBy({
-                        platform,
-                        query,
-                        version,
-                        interval,
-                        ecs_mapping,
-                      })
-                    );
-                    return draft;
-                  })
-                )
-              )
-            );
-          } else {
-            await savedObjectsClient.update(
-              packSavedObjectType,
-              currentPackSO.id,
-              {},
-              {
-                references: produce(currentPackSO.references, (draft) => {
-                  draft = filter(
-                    draft,
-                    (reference) =>
-                      !(
-                        reference.id === request.params.id &&
-                        reference.type === savedQuerySavedObjectType
-                      )
-                  );
-                  return draft;
-                }),
-              }
-            );
-          }
-        })
-      );
+      if (ecs_mapping || updatedSavedQuerySO.attributes.ecs_mapping) {
+        updatedSavedQuerySO.attributes.ecs_mapping =
+          ecs_mapping || convertECSMappingToObject(updatedSavedQuerySO.attributes.ecs_mapping);
+      }
 
       return response.ok({
         body: updatedSavedQuerySO,

@@ -29,15 +29,11 @@ export const useDeletePack = ({ packId, withRedirect }: UseDeletePackProps) => {
   const setErrorToast = useErrorToast();
 
   return useMutation(() => http.delete(`/internal/osquery/packs/${packId}`), {
-    onError: (error) => {
-      if (error instanceof Error) {
-        return setErrorToast(error, {
-          title: 'Pack delete error',
-          toastMessage: error.message,
-        });
-      }
-      // @ts-expect-error update types
-      setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
+    onError: (error: { body: { error: string; message: string } }) => {
+      setErrorToast(error, {
+        title: error.body.error,
+        toastMessage: error.body.message,
+      });
     },
     onSuccess: (payload) => {
       queryClient.invalidateQueries(PACKS_ID);

@@ -42,12 +42,13 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
     id: SAVED_QUERY_FORM_ID + uuid.v4(),
     schema: formSchema,
     onSubmit: async (formData, isValid) => {
+      console.error('formData', formData, isValid);
       if (isValid) {
-        return handleSubmit(formData);
+        try {
+          await handleSubmit(formData);
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
       }
-    },
-    options: {
-      stripEmptyFields: false,
     },
     // @ts-expect-error update types
     defaultValue,
@@ -71,6 +72,7 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
           // @ts-expect-error update types
           delete draft.ecs_mapping;
         }
+        draft.interval = draft.interval + '';
         return draft;
       }),
     // @ts-expect-error update types

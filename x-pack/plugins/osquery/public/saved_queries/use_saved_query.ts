@@ -50,9 +50,11 @@ export const useSavedQuery = ({ savedQueryId }: UseSavedQueryProps) => {
           navigateToApp(PLUGIN_ID, { path: pagePathGetters.saved_queries() });
         }
       },
-      onError: (error) => {
-        // @ts-expect-error update types
-        setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
+      onError: (error: { body: { error: string; message: string } }) => {
+        setErrorToast(error, {
+          title: error.body.error,
+          toastMessage: error.body.message,
+        });
       },
     }
   );
