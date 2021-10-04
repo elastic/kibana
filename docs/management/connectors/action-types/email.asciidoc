@@ -253,7 +253,6 @@ Before you create an email connector for Microsoft Exchange, you must create and
 image::management/connectors/images/exchange-register-app.png[Register client application for MS Exchange]
 
 Next, open *Manage > API permissions*, and then define the permissions for the registered application to send emails. Refer to the https://docs.microsoft.com/en-us/graph/api/user-sendmail?view=graph-rest-1.0&tabs=http#permissions[documentation] for the Microsoft Graph API.
-You can configure it on the Azure portal application page, Manage - API permissions:
 [role="screenshot"]
 image::management/connectors/images/exchange-api-permissions.png[MS Exchange API permissions]
 
@@ -265,7 +264,7 @@ Click *Grant admin consent for <your Azure active directory>*.
 [role="screenshot"]
 image::management/connectors/images/exchange-grant-confirm.png[MS Exchange grant confirmation]
 
-Confirm the grant. The status for the "Mail.Send" permission changes to granted.
+Confirm that the status for the "Mail.Send" permission is now granted.
 [role="screenshot"]
 image::management/connectors/images/exchange-granted.png[MS Exchange grant confirmation]
 
