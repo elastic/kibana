@@ -22,6 +22,7 @@ import { ServerApiError } from '../../../common/types';
 import { GetPackagesResponse } from '../../../../../fleet/common';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import { AsyncResourceState } from '../../state';
+import { TRANSFORM_STATES } from '../../../../common/constants';
 
 export interface EndpointState {
   /** list of host **/
@@ -143,24 +144,7 @@ export interface EndpointIndexUIQueryParams {
   admin_query?: string;
 }
 
-export const TRANSFORM_STATE = {
-  ABORTING: 'aborting',
-  FAILED: 'failed',
-  INDEXING: 'indexing',
-  STARTED: 'started',
-  STOPPED: 'stopped',
-  STOPPING: 'stopping',
-  WAITING: 'waiting',
-};
-
-export const WARNING_TRANSFORM_STATES = new Set([
-  TRANSFORM_STATE.ABORTING,
-  TRANSFORM_STATE.FAILED,
-  TRANSFORM_STATE.STOPPED,
-  TRANSFORM_STATE.STOPPING,
-]);
-
-const transformStates = Object.values(TRANSFORM_STATE);
+const transformStates = Object.values(TRANSFORM_STATES);
 export type TransformState = typeof transformStates[number];
 
 export interface TransformStats {
