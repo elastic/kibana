@@ -49,6 +49,30 @@ export function bypassExternalUrlCheck(url) {
   return { url, bypassToken };
 }
 
+const externalUrlsAreNotEnabledError = new Error(
+  i18n.translate('visTypeVega.vegaParser.baseView.externalUrlsAreNotEnabledErrorMessage', {
+    defaultMessage:
+      'External URLs are not enabled. Add {enableExternalUrls} to {kibanaConfigFileName}',
+    values: {
+      enableExternalUrls: 'vis_type_vega.enableExternalUrls: true',
+      kibanaConfigFileName: 'kibana.yml',
+    },
+  })
+);
+
+const getExternalUrlServiceError = (uri) =>
+  new Error(
+    i18n.translate('visTypeVega.vegaParser.baseView.externalUrlServiceErrorMessage', {
+      defaultMessage:
+        'External URL [{uri}] was denied by ExternalUrl service. You can configure external URL policies using "{externalUrlPolicy}" setting in {kibanaConfigFileName}.',
+      values: {
+        uri,
+        externalUrlPolicy: 'externalUrl.policy',
+        kibanaConfigFileName: 'kibana.yml',
+      },
+    })
+  );
+
 export class VegaBaseView {
   constructor(opts) {
     this._$parentEl = $(opts.parentEl);
@@ -62,6 +86,7 @@ export class VegaBaseView {
     this._$messages = null;
     this._destroyHandlers = [];
     this._initialized = false;
+    this._externalUrl = opts.externalUrl;
     this._enableExternalUrls = getEnableExternalUrls();
     this._vegaStateRestorer = opts.vegaStateRestorer;
   }
@@ -171,6 +196,11 @@ export class VegaBaseView {
       renderer: this._parser.renderer,
     };
 
+    const vegaLogger = logger(Warn);
+    vegaLogger.warn = this.onWarn.bind(this);
+    vegaLogger.error = this.onError.bind(this);
+    config.logger = vegaLogger;
+
     // Override URL sanitizer to prevent external data loading (if disabled)
     const vegaLoader = loader();
     const originalSanitize = vegaLoader.sanitize.bind(vegaLoader);
@@ -180,16 +210,9 @@ export class VegaBaseView {
         // because user can only supply pure JSON data structure.
         uri = uri.url;
       } else if (!this._enableExternalUrls) {
-        throw new Error(
-          i18n.translate('visTypeVega.vegaParser.baseView.externalUrlsAreNotEnabledErrorMessage', {
-            defaultMessage:
-              'External URLs are not enabled. Add   {enableExternalUrls}   to {kibanaConfigFileName}',
-            values: {
-              enableExternalUrls: 'vis_type_vega.enableExternalUrls: true',
-              kibanaConfigFileName: 'kibana.yml',
-            },
-          })
-        );
+        this.onError(externalUrlsAreNotEnabledError);
+      } else if (!this._externalUrl.validateUrl(uri)) {
+        this.onError(getExternalUrlServiceError(uri));
       }
       const result = await originalSanitize(uri, options);
       // This will allow Vega users to load images from any domain.
@@ -198,13 +221,6 @@ export class VegaBaseView {
       return result;
     };
     config.loader = vegaLoader;
-
-    const vegaLogger = logger(Warn);
-
-    vegaLogger.warn = this.onWarn.bind(this);
-    vegaLogger.error = this.onError.bind(this);
-
-    config.logger = vegaLogger;
 
     return config;
   }
