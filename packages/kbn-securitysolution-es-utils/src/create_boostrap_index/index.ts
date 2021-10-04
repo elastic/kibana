@@ -17,7 +17,7 @@ export const createBootstrapIndex = async (
 ): Promise<unknown> => {
   return (
     await esClient.indices.create({
-      index: `/${index}-000001`,
+      index: `${index}-000001`,
       body: {
         aliases: {
           [index]: {
