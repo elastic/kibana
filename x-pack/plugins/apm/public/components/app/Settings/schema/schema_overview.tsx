@@ -148,7 +148,7 @@ export function SchemaOverview({
               'xpack.apm.settings.schema.migrate.classicIndices.description',
               {
                 defaultMessage:
-                  'You are currently using APM server binary. This legacy option is deprecated since version 7.16 and is being replaced by a manages APM Server in Elastic Agent from version 8.0.',
+                  'You are currently using APM Server binary. This legacy option is deprecated since version 7.16 and is being replaced by a manages APM Server in Elastic Agent from version 8.0.',
               }
             )}
             footer={
