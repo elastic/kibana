@@ -14,11 +14,8 @@ import { HttpStart } from '../../../http';
 import { InternalApplicationStart } from '../../../application/types';
 import { relativeToAbsolute } from '../../nav_links/to_nav_link';
 
-export const isModifiedOrPrevented = (
-  event:
-    | React.MouseEvent<HTMLButtonElement, MouseEvent>
-    | React.MouseEvent<HTMLAnchorElement, MouseEvent>
-) => event.metaKey || event.altKey || event.ctrlKey || event.shiftKey || event.defaultPrevented;
+export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLElement, MouseEvent>) =>
+  event.metaKey || event.altKey || event.ctrlKey || event.shiftKey || event.defaultPrevented;
 
 interface Props {
   link: ChromeNavLink;
