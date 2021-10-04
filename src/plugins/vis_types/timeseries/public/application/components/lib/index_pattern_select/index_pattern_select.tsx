@@ -35,7 +35,7 @@ export interface IndexPatternSelectProps {
 
 const queryAllIndexesHelpText = (
   <FormattedMessage
-    id="visTypeTimeseries.indexPatternSelect.queryAllIndexesText"
+    id="visTypeTimeseries.indexPatternSelect.queryAllIndicesText"
     defaultMessage="To query all indices, use {asterisk}."
     values={{
       asterisk: <strong>*</strong>,

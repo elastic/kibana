@@ -5259,7 +5259,6 @@
     "visTypeTimeseries.indexPattern.timeRange.lastValue": "最后值",
     "visTypeTimeseries.indexPattern.timeRange.selectTimeRange": "选择",
     "visTypeTimeseries.indexPattern.сoarse": "粗糙",
-    "visTypeTimeseries.indexPatternSelect.queryAllIndexesText": "要查询所有索引，请使用 *",
     "visTypeTimeseries.kbnVisTypes.metricsDescription": "对时间序列数据执行高级分析。",
     "visTypeTimeseries.kbnVisTypes.metricsTitle": "TSVB",
     "visTypeTimeseries.lastValueModeIndicator.lastBucketDate": "存储桶：{lastBucketDate}",

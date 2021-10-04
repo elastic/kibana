@@ -5214,7 +5214,6 @@
     "visTypeTimeseries.indexPattern.timeRange.lastValue": "最終値",
     "visTypeTimeseries.indexPattern.timeRange.selectTimeRange": "選択してください",
     "visTypeTimeseries.indexPattern.сoarse": "粗い",
-    "visTypeTimeseries.indexPatternSelect.queryAllIndexesText": "すべてのインデックスにクエリを実行するには * を使用します",
     "visTypeTimeseries.kbnVisTypes.metricsDescription": "時系列データの高度な分析を実行します。",
     "visTypeTimeseries.kbnVisTypes.metricsTitle": "TSVB",
     "visTypeTimeseries.lastValueModeIndicator.lastBucketDate": "バケット：{lastBucketDate}",
