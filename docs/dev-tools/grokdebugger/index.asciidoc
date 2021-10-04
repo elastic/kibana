@@ -9,7 +9,7 @@ structure it. Grok is good for parsing syslog, apache, and other
 webserver logs, mysql logs, and in general, any log format that is
 written for human consumption.
 
-Grok patterns are supported in {ref}/runtime.html[{es} runtime fields], the {es}
+Grok patterns are supported in {es} {ref}/runtime.html[runtime fields], the {es}
 {ref}/grok-processor.html[grok ingest processor], and the {ls}
 {logstash-ref}/plugins-filters-grok.html[grok filter]. For syntax, see
 {ref}/grok.html[Grokking grok].
