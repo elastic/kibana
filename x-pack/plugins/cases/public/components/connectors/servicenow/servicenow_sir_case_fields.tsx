@@ -18,7 +18,7 @@ import { choicesToEuiOptions } from './helpers';
 
 import * as i18n from './translations';
 import { connectorValidator } from './validator';
-import { DeprecatedCallout } from './deprecated_callout';
+import { DeprecatedCallout } from '../deprecated_callout';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {
@@ -173,7 +173,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
       {showConnectorWarning && (
         <EuiFlexGroup>
           <EuiFlexItem>
-            <DeprecatedCallout isEdit={isEdit} />
+            <DeprecatedCallout type={isEdit ? 'danger' : 'warning'} />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

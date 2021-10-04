@@ -23,7 +23,7 @@ import { TextFieldWithMessageVariables } from '../../text_field_with_message_var
 import * as i18n from './translations';
 import { useGetChoices } from './use_get_choices';
 import { ServiceNowSIRActionParams, Fields, Choice, ServiceNowActionConnector } from './types';
-import { choicesToEuiOptions, enableLegacyConnector } from './helpers';
+import { choicesToEuiOptions, isLegacyConnector } from './helpers';
 import { UPDATE_INCIDENT_VARIABLE, NOT_UPDATE_INCIDENT_VARIABLE } from './config';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
@@ -49,9 +49,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
     notifications: { toasts },
   } = useKibana().services;
 
-  const isOldConnector =
-    actionConnector != null &&
-    enableLegacyConnector(actionConnector as unknown as ServiceNowActionConnector);
+  const isOldConnector = isLegacyConnector(actionConnector as unknown as ServiceNowActionConnector);
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(

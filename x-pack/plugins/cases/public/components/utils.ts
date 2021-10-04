@@ -12,6 +12,11 @@ import { StartPlugins } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
 import { connectorValidator as servicenowConnectorValidator } from './connectors/servicenow/validator';
 import { CaseActionConnector } from './types';
+import {
+  ENABLE_NEW_SN_ITSM_CONNECTOR,
+  ENABLE_NEW_SN_SIR_CONNECTOR,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../actions/server/constants/connectors';
 
 export const getConnectorById = (
   id: string,
@@ -70,4 +75,21 @@ export const getConnectorIcon = (
   }
 
   return emptyResponse;
+};
+
+// TODO: Remove when the applications are certified
+export const isLegacyConnector = (connector?: CaseActionConnector) => {
+  if (connector == null) {
+    return true;
+  }
+
+  if (!ENABLE_NEW_SN_ITSM_CONNECTOR && connector.actionTypeId === '.servicenow') {
+    return true;
+  }
+
+  if (!ENABLE_NEW_SN_SIR_CONNECTOR && connector.actionTypeId === '.servicenow-sir') {
+    return true;
+  }
+
+  return connector.config.isLegacy;
 };

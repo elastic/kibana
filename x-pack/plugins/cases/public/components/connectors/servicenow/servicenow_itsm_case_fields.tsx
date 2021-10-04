@@ -17,7 +17,7 @@ import { useGetChoices } from './use_get_choices';
 import { Fields, Choice } from './types';
 import { choicesToEuiOptions } from './helpers';
 import { connectorValidator } from './validator';
-import { DeprecatedCallout } from './deprecated_callout';
+import { DeprecatedCallout } from '../deprecated_callout';
 
 const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {
@@ -157,7 +157,7 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
       {showConnectorWarning && (
         <EuiFlexGroup>
           <EuiFlexItem>
-            <DeprecatedCallout isEdit={isEdit} />
+            <DeprecatedCallout type={isEdit ? 'danger' : 'warning'} />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

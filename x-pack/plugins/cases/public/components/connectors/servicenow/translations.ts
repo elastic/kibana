@@ -73,18 +73,3 @@ export const ALERT_FIELD_ENABLED_TEXT = i18n.translate(
     defaultMessage: 'Yes',
   }
 );
-
-export const LEGACY_CONNECTOR_WARNING_TITLE = i18n.translate(
-  'xpack.cases.connectors.serviceNow.legacyConnectorWarningTitle',
-  {
-    defaultMessage: 'Deprecated connector type',
-  }
-);
-
-export const LEGACY_CONNECTOR_WARNING_DESC = i18n.translate(
-  'xpack.cases.connectors.serviceNow.legacyConnectorWarningDesc',
-  {
-    defaultMessage:
-      'This connector type is deprecated. Create a new connector or update this connector',
-  }
-);

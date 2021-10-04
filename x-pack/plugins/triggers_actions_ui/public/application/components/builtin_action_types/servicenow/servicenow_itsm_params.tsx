@@ -21,7 +21,7 @@ import { ServiceNowITSMActionParams, Choice, Fields, ServiceNowActionConnector }
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { useGetChoices } from './use_get_choices';
-import { choicesToEuiOptions, enableLegacyConnector } from './helpers';
+import { choicesToEuiOptions, isLegacyConnector } from './helpers';
 
 import * as i18n from './translations';
 import { UPDATE_INCIDENT_VARIABLE, NOT_UPDATE_INCIDENT_VARIABLE } from './config';
@@ -44,9 +44,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
     notifications: { toasts },
   } = useKibana().services;
 
-  const isOldConnector =
-    actionConnector != null &&
-    enableLegacyConnector(actionConnector as unknown as ServiceNowActionConnector);
+  const isOldConnector = isLegacyConnector(actionConnector as unknown as ServiceNowActionConnector);
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(

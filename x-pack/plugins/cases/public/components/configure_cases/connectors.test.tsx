@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 
 import { Connectors, Props } from './connectors';
 import { TestProviders } from '../../common/mock';
@@ -120,5 +121,19 @@ describe('Connectors', () => {
         .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
         .text()
     ).toBe('Update My Connector');
+  });
+
+  test('it shows the deprecated callout when the connector is legacy', () => {
+    render(
+      <Connectors
+        {...props}
+        selectedConnector={{ id: 'servicenow-legacy', type: ConnectorTypes.serviceNowITSM }}
+      />,
+      {
+        // wrapper: TestProviders produces a TS error
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      }
+    );
+    expect(screen.getByText('This connector is deprecated')).toBeInTheDocument();
   });
 });

@@ -8,6 +8,7 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { EuiSuperSelect } from '@elastic/eui';
+import { render, screen } from '@testing-library/react';
 
 import { ConnectorsDropdown, Props } from './connectors_dropdown';
 import { TestProviders } from '../../common/mock';
@@ -29,11 +30,12 @@ describe('ConnectorsDropdown', () => {
   };
 
   const { createMockActionTypeModel } = actionTypeRegistryMock;
+  const uniqueActionTypeIds = new Set(connectors.map((connector) => connector.actionTypeId));
 
   beforeAll(() => {
-    connectors.forEach((connector) =>
+    uniqueActionTypeIds.forEach((actionTypeId) =>
       useKibanaMock().services.triggersActionsUi.actionTypeRegistry.register(
-        createMockActionTypeModel({ id: connector.actionTypeId, iconClass: 'logoSecurity' })
+        createMockActionTypeModel({ id: actionTypeId, iconClass: 'logoSecurity' })
       )
     );
     wrapper = mount(<ConnectorsDropdown {...props} />, { wrappingComponent: TestProviders });
@@ -252,5 +254,14 @@ describe('ConnectorsDropdown', () => {
         }
       )
     ).not.toThrowError();
+  });
+
+  test('it shows the deprecated tooltip when the connector is legacy', () => {
+    render(<ConnectorsDropdown {...props} selectedConnector="servicenow-legacy" />, {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    const tooltips = screen.getAllByLabelText('Deprecated connector');
+    expect(tooltips[0]).toBeInTheDocument();
   });
 });

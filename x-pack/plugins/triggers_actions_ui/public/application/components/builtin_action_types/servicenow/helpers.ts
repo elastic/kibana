@@ -26,7 +26,11 @@ export const isFieldInvalid = (
 ): boolean => error !== undefined && error.length > 0 && field !== undefined;
 
 // TODO: Remove when the applications are certified
-export const enableLegacyConnector = (connector: ServiceNowActionConnector) => {
+export const isLegacyConnector = (connector: ServiceNowActionConnector) => {
+  if (connector == null) {
+    return true;
+  }
+
   if (!ENABLE_NEW_SN_ITSM_CONNECTOR && connector.actionTypeId === '.servicenow') {
     return true;
   }
