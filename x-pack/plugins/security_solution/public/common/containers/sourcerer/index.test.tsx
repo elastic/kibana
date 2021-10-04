@@ -14,7 +14,11 @@ import { Provider } from 'react-redux';
 import { getScopeFromPath, useInitSourcerer } from '.';
 import { mockPatterns } from './mocks';
 import { RouteSpyState } from '../../utils/route/types';
-import { DEFAULT_SIGNALS_INDEX, SecurityPageName } from '../../../../common/constants';
+import {
+  DEFAULT_DATA_VIEW_ID,
+  DEFAULT_INDEX_PATTERN,
+  SecurityPageName,
+} from '../../../../common/constants';
 import { createStore, State } from '../../store';
 import {
   useUserInfo,
@@ -28,6 +32,7 @@ import {
   mockSourcererState,
 } from '../../mock';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { isSignalIndex } from '../../store/sourcerer/helpers';
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -140,7 +145,7 @@ describe('Sourcerer Hooks', () => {
           id: 'timeline',
           selectedDataViewId: 'security-solution',
           selectedPatterns: [
-            '.siem-signals',
+            '.siem-signals-spacename',
             'apm-*-transaction*',
             'auditbeat-*',
             'endgame-*',
@@ -161,6 +166,11 @@ describe('Sourcerer Hooks', () => {
         sourcerer: {
           ...state.sourcerer,
           signalIndexName: null,
+          defaultDataView: {
+            id: DEFAULT_DATA_VIEW_ID,
+            title: DEFAULT_INDEX_PATTERN.join(','),
+            patternList: DEFAULT_INDEX_PATTERN,
+          },
         },
       },
       SUB_PLUGINS_REDUCER,
@@ -171,28 +181,33 @@ describe('Sourcerer Hooks', () => {
       mockUseUserInfo.mockImplementation(() => ({
         ...userInfoState,
         loading: false,
-        signalIndexName: DEFAULT_SIGNALS_INDEX,
+        signalIndexName: mockSourcererState.signalIndexName,
       }));
       const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
       });
       await waitForNextUpdate();
       rerender();
+      expect(mockDispatch.mock.calls[3][0]).toEqual({
+        type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
+        payload: { loading: true },
+      });
       expect(mockDispatch.mock.calls[2][0]).toEqual({
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
         payload: {
           id: 'timeline',
           selectedDataViewId: mockSourcererState.defaultDataView.id,
-          selectedPatterns: mockSourcererState.defaultDataView.patternList.sort(),
+          selectedPatterns: [
+            mockSourcererState.signalIndexName,
+            ...mockSourcererState.defaultDataView.patternList.filter(
+              (p) => !isSignalIndex(p, mockSourcererState.signalIndexName)
+            ),
+          ].sort(),
         },
-      });
-      expect(mockDispatch.mock.calls[3][0]).toEqual({
-        type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
-        payload: { loading: true },
       });
       expect(mockDispatch.mock.calls[4][0]).toEqual({
         type: 'x-pack/security_solution/local/sourcerer/SET_SIGNAL_INDEX_NAME',
-        payload: { signalIndexName: DEFAULT_SIGNALS_INDEX },
+        payload: { signalIndexName: mockSourcererState.signalIndexName },
       });
     });
   });
@@ -200,7 +215,7 @@ describe('Sourcerer Hooks', () => {
     await act(async () => {
       mockUseUserInfo.mockImplementation(() => ({
         ...userInfoState,
-        signalIndexName: DEFAULT_SIGNALS_INDEX,
+        signalIndexName: mockSourcererState.signalIndexName,
         isSignalIndexExists: true,
       }));
       const { rerender, waitForNextUpdate } = renderHook<string, void>(
@@ -216,7 +231,7 @@ describe('Sourcerer Hooks', () => {
         payload: {
           id: 'detections',
           selectedDataViewId: mockSourcererState.defaultDataView.id,
-          selectedPatterns: [DEFAULT_SIGNALS_INDEX],
+          selectedPatterns: [mockSourcererState.signalIndexName],
         },
       });
     });

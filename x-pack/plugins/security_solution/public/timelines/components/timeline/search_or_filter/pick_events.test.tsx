@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { PickEventType } from './pick_events';
 import {
@@ -18,6 +18,7 @@ import {
 import { TimelineEventsType } from '../../../../../common';
 import { createStore } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { isSignalIndex } from '../../../../common/store/sourcerer/helpers';
 
 describe('Pick Events/Timeline Sourcerer', () => {
   const defaultProps = {
@@ -37,10 +38,17 @@ describe('Pick Events/Timeline Sourcerer', () => {
     );
     fireEvent.click(wrapper.getByTestId('sourcerer-timeline-trigger'));
     expect(wrapper.getByTestId('timeline-sourcerer').textContent).toEqual(
-      mockSourcererState.defaultDataView.patternList.sort().join('')
+      [
+        ...mockSourcererState.defaultDataView.patternList.filter(
+          (p) => !isSignalIndex(p, mockSourcererState.signalIndexName)
+        ),
+        mockSourcererState.signalIndexName,
+      ]
+        .sort()
+        .join('')
     );
   });
-  it.skip('Removes duplicate options from title', () => {
+  it('Removes duplicate options from options list', () => {
     const store = createStore(
       {
         ...mockGlobalState,
@@ -79,9 +87,10 @@ describe('Pick Events/Timeline Sourcerer', () => {
       </TestProviders>
     );
     fireEvent.click(wrapper.getByTestId(`sourcerer-timeline-trigger`));
+    fireEvent.click(wrapper.getByTestId(`sourcerer-accordion`));
     fireEvent.click(wrapper.getByTestId(`comboBoxToggleListButton`));
-    expect(wrapper.getByTestId('sourcerer-accordion').textContent).toEqual(
-      mockSourcererState.defaultDataView.patternList.sort().join('')
-    );
+    expect(
+      wrapper.getByTestId('comboBoxOptionsList timeline-sourcerer-optionsList').textContent
+    ).toEqual('auditbeat-*');
   });
 });

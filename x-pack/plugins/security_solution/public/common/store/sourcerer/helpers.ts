@@ -18,6 +18,15 @@ export interface Args {
   state: SourcererModel;
 }
 
+export const isSignalIndex = (index: string, signalIndex: string | null): boolean => {
+  const first = index.split('-*');
+  const second = `${signalIndex}`.split('-*');
+  if (first.length > 2 || second.length > 2) {
+    return false;
+  }
+  return first[0] === second[0];
+};
+
 export const getScopePatternListSelection = (
   theDataView: KibanaDataView | undefined,
   sourcererScope: SourcererScopeName,
@@ -31,7 +40,7 @@ export const getScopePatternListSelection = (
     if (sourcererScope === SourcererScopeName.default) {
       // indexOf instead of === because the dataView version of signals index
       // will have a wildcard and the signalIndexName does not include the wildcard
-      patternList = patternList.filter((index) => index.indexOf(`${signalIndexName}`) === -1);
+      patternList = patternList.filter((index) => !isSignalIndex(index, signalIndexName));
     } else if (sourcererScope === SourcererScopeName.detections) {
       patternList = signalIndexName != null ? [signalIndexName] : []; // set to signalIndexName whether or not it exists yet in the patternList
     } else if (sourcererScope === SourcererScopeName.timeline) {
@@ -41,7 +50,7 @@ export const getScopePatternListSelection = (
               // indexOf instead of === because the dataView version of signals index
               // will have a wildcard and the signalIndexName does not include the wildcard
               // remove signalIndexName in case its already in there and add it whether or not it exists yet in the patternList
-              ...patternList.filter((index) => index.indexOf(`${signalIndexName}`) === -1),
+              ...patternList.filter((index) => !isSignalIndex(index, signalIndexName)),
               signalIndexName,
             ]
           : patternList;
@@ -102,19 +111,14 @@ export const defaultDataViewByEventType = ({
   } = state;
   if (signalIndexName != null && (eventType === 'signal' || eventType === 'alert')) {
     return {
-      // indexOf instead of === because the dataView version of signals index
-      // will have a wildcard and the signalIndexName does not include the wildcard
-      selectedPatterns: patternList.filter((index) => index.indexOf(signalIndexName) === 0).sort(),
+      selectedPatterns: [signalIndexName],
       selectedDataViewId: id,
     };
   } else if (eventType === 'raw') {
     return {
-      selectedPatterns: (signalIndexName == null
-        ? patternList
-        : // indexOf instead of === because the dataView version of signals index
-          // will have a wildcard and the signalIndexName does not include the wildcard
-          patternList.filter((index) => index.indexOf(signalIndexName) === -1)
-      ).sort(),
+      selectedPatterns: patternList
+        .filter((index) => !isSignalIndex(index, signalIndexName))
+        .sort(),
       selectedDataViewId: id,
     };
   }

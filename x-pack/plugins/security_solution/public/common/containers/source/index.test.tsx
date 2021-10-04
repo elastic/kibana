@@ -192,7 +192,7 @@ describe('source/index.tsx', () => {
         expect(sourceType).toEqual('x-pack/security_solution/local/sourcerer/SET_SOURCE');
         expect(payload.id).toEqual(SourcererScopeName.detections);
         expect(payload.indicesExist).toEqual(true);
-        expect(payload.indexPattern.title).toEqual(`${sourcererState.signalIndexName}-*`);
+        expect(payload.indexPattern.title).toEqual(sourcererState.signalIndexName);
       });
     });
     it('when selectedPatterns=[], defaults to the patternList of the selected dataView', async () => {

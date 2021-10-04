@@ -27,6 +27,7 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
+import { isSignalIndex } from '../../store/sourcerer/helpers';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { SelectedDataView } from '../../store/sourcerer/selectors';
 
@@ -263,17 +264,20 @@ export const useIndexFields = (
             next: (response) => {
               // TODO: Steph/sourcerer needs better tests
               if (isCompleteResponse(response)) {
-                const newSelectedPatterns = selectedPatterns.filter((pattern) =>
-                  patternList.includes(pattern)
-                );
-                const patternString = newSelectedPatterns.sort().join();
                 const signalIndexName = signalIndexNameSelector
                   ? `${signalIndexNameSelector}-*`
                   : newSignalsIndex ?? '';
+                const newSelectedPatterns = selectedPatterns.filter((pattern) =>
+                  // signals index will not be an exact match because stored index has wildcard
+                  isSignalIndex(signalIndexName, pattern)
+                    ? patternList.some((p) => isSignalIndex(p, pattern))
+                    : patternList.includes(pattern)
+                );
+                const patternString = newSelectedPatterns.sort().join();
                 // TODO: Steph/sourcerer needs test
                 if (newSignalsIndex != null) {
                   // if new signal index name is set, there wasn't one before so we need to update detections specifically
-                  // technically, we need to update all scopes as there are can be new fields in signals index
+                  // technically, we need to update all scopes as there xare can be new fields in signals index
                   // once fields are moved to sourcerer.kibanaDataViews we only need to do this for detections scope
                   // TODO: Steph/sourcerer https://github.com/elastic/security-team/issues/1730 to be done before 7.16 feature freeze
                   dispatch(

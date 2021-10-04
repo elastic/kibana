@@ -8,6 +8,7 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { isSignalIndex } from '../../store/sourcerer/helpers';
 import { Sourcerer } from './index';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import {
@@ -35,7 +36,9 @@ const defaultProps = {
 describe('Sourcerer component', () => {
   const state: State = mockGlobalState;
   const { id, patternList, title } = state.sourcerer.defaultDataView;
-  const patternListNoSignals = patternList.filter((p) => state.sourcerer.signalIndexName !== p);
+  const patternListNoSignals = patternList
+    .filter((p) => !isSignalIndex(p, state.sourcerer.signalIndexName))
+    .sort();
   const checkOptionsAndSelections = (wrapper: ReactWrapper, patterns: string[]) => ({
     availableOptionCount: wrapper.find(`[data-test-subj="sourcerer-combo-option"]`).length,
     optionsSelected: patterns.every((pattern) =>

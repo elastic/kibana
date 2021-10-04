@@ -22,9 +22,9 @@ import {
   IndexField,
   IndexFieldsStrategyRequest,
   BeatFields,
-} from '../../../common/search_strategy/index_fields';
+  DELETED_SECURITY_SOLUTION_DATA_VIEW,
+} from '../../../common';
 import { StartPlugins } from '../../types';
-import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '../../../common';
 
 const apmIndexPattern = 'apm-*-transaction*';
 const apmDataStreamsPattern = 'traces-apm*';

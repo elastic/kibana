@@ -38,6 +38,7 @@ import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/mo
 import { mockBrowserFields, mockDocValueFields } from '../containers/source/mock';
 import { mockIndexPattern } from './index_pattern';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
+import { getScopePatternListSelection } from '../store/sourcerer/helpers';
 
 export const mockSourcererState = {
   ...initialSourcererState,
@@ -323,8 +324,10 @@ export const mockGlobalState: State = {
       [SourcererScopeName.default]: {
         ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
         selectedDataViewId: mockSourcererState.defaultDataView.id,
-        selectedPatterns: mockSourcererState.defaultDataView.patternList.filter(
-          (p) => p.indexOf(DEFAULT_SIGNALS_INDEX) === -1
+        selectedPatterns: getScopePatternListSelection(
+          mockSourcererState.defaultDataView,
+          SourcererScopeName.default,
+          mockSourcererState.signalIndexName
         ),
         browserFields: mockBrowserFields,
         indexPattern: mockIndexPattern,
@@ -333,8 +336,10 @@ export const mockGlobalState: State = {
       [SourcererScopeName.detections]: {
         ...mockSourcererState.sourcererScopes[SourcererScopeName.detections],
         selectedDataViewId: mockSourcererState.defaultDataView.id,
-        selectedPatterns: mockSourcererState.defaultDataView.patternList.filter(
-          (p) => p.indexOf(DEFAULT_SIGNALS_INDEX) === 0
+        selectedPatterns: getScopePatternListSelection(
+          mockSourcererState.defaultDataView,
+          SourcererScopeName.detections,
+          mockSourcererState.signalIndexName
         ),
         browserFields: mockBrowserFields,
         indexPattern: mockIndexPattern,
@@ -343,7 +348,11 @@ export const mockGlobalState: State = {
       [SourcererScopeName.timeline]: {
         ...mockSourcererState.sourcererScopes[SourcererScopeName.timeline],
         selectedDataViewId: mockSourcererState.defaultDataView.id,
-        selectedPatterns: mockSourcererState.defaultDataView.patternList,
+        selectedPatterns: getScopePatternListSelection(
+          mockSourcererState.defaultDataView,
+          SourcererScopeName.timeline,
+          mockSourcererState.signalIndexName
+        ),
         browserFields: mockBrowserFields,
         indexPattern: mockIndexPattern,
         docValueFields: mockDocValueFields,
