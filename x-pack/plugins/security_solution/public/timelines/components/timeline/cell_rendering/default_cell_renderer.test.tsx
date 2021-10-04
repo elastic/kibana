@@ -81,6 +81,7 @@ describe('DefaultCellRenderer', () => {
     const data = cloneDeep(mockTimelineData[0].data);
     const header = cloneDeep(defaultHeaders[0]);
     const isDetails = true;
+    const truncate = isDetails ? false : true;
 
     mount(
       <TestProviders>
@@ -101,6 +102,7 @@ describe('DefaultCellRenderer', () => {
               rowIndex={rowIndex}
               setCellProps={setCellProps}
               timelineId={timelineId}
+              truncate={truncate}
             />
           </DroppableWrapper>
         </DragDropContextWrapper>
@@ -119,7 +121,7 @@ describe('DefaultCellRenderer', () => {
       linkValues,
       rowRenderers: undefined,
       timelineId,
-      truncate: false,
+      truncate,
       values: ['2018-11-05T19:03:25.937Z'],
     });
   });
