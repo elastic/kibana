@@ -86,7 +86,7 @@ export const ManageControlComponent = ({
           </EuiFormRow>
           <EuiFormRow label={ControlGroupStrings.manageControl.getWidthInputTitle()}>
             <EuiButtonGroup
-              buttonSize="compressed"
+              color="primary"
               legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
               options={CONTROL_WIDTH_OPTIONS}
               idSelected={currentWidth}
@@ -102,9 +102,10 @@ export const ManageControlComponent = ({
             controlEditorComponent({ setValidState: setControlEditorValid })}
           <EuiSpacer size="l" />
           {removeControl && (
-            <EuiButton
+            <EuiButtonEmpty
               aria-label={`delete-${title}`}
               iconType="trash"
+              flush="left"
               color="danger"
               onClick={() => {
                 onCancel();
@@ -112,7 +113,7 @@ export const ManageControlComponent = ({
               }}
             >
               {ControlGroupStrings.management.getDeleteButtonTitle()}
-            </EuiButton>
+            </EuiButtonEmpty>
           )}
         </EuiForm>
       </EuiFlyoutBody>

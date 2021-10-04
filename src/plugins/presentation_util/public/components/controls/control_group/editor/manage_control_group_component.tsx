@@ -13,11 +13,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonGroup,
-  EuiFormLabel,
+  EuiFormRow,
   EuiFlyoutHeader,
   EuiTitle,
   EuiFlyoutBody,
   EuiSpacer,
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { ControlsPanels } from '../types';
@@ -29,6 +30,7 @@ interface ManageControlGroupProps {
   panels: ControlsPanels;
   controlStyle: ControlStyle;
   deleteAllEmbeddables: () => void;
+  onClose: () => void;
   setControlStyle: (style: ControlStyle) => void;
   setAllPanelWidths: (newWidth: ControlWidth) => void;
 }
@@ -37,11 +39,13 @@ export const ManageControlGroup = ({
   panels,
   controlStyle,
   setControlStyle,
+  onClose,
   setAllPanelWidths,
   deleteAllEmbeddables,
 }: ManageControlGroupProps) => {
   const [currentControlStyle, setCurrentControlStyle] = useState<ControlStyle>(controlStyle);
   const [selectedWidth, setSelectedWidth] = useState<ControlWidth>();
+  const [selectionDisplay, setSelectionDisplay] = useState(false);
 
   useMount(() => {
     if (!panels || Object.keys(panels).length === 0) return;
@@ -59,35 +63,32 @@ export const ManageControlGroup = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiTitle size="s">
-          <h3>{ControlGroupStrings.management.getDesignTitle()}</h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiButtonGroup
-          legend={ControlGroupStrings.management.controlStyle.getDesignSwitchLegend()}
-          options={CONTROL_LAYOUT_OPTIONS}
-          idSelected={currentControlStyle}
-          onChange={(newControlStyle) => {
-            setControlStyle(newControlStyle as ControlStyle);
-            setCurrentControlStyle(newControlStyle as ControlStyle);
-          }}
-        />
+        <EuiFormRow label={ControlGroupStrings.management.getLayoutTitle()}>
+          <EuiButtonGroup
+            color="primary"
+            legend={ControlGroupStrings.management.controlStyle.getDesignSwitchLegend()}
+            options={CONTROL_LAYOUT_OPTIONS}
+            idSelected={currentControlStyle}
+            onChange={(newControlStyle) => {
+              setControlStyle(newControlStyle as ControlStyle);
+              setCurrentControlStyle(newControlStyle as ControlStyle);
+            }}
+          />
+        </EuiFormRow>
         <EuiSpacer size="m" />
-        <EuiTitle size="s">
-          <h3>{ControlGroupStrings.management.getLayoutTitle()}</h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-
-        <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiFormLabel>
-              {ControlGroupStrings.management.controlWidth.getChangeAllControlWidthsTitle()}
-            </EuiFormLabel>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+        <EuiFormRow label={ControlGroupStrings.management.getWidthTitle()}>
+          <EuiSwitch
+            label={ControlGroupStrings.management.controlWidth.getChangeAllControlWidthsTitle()}
+            checked={selectionDisplay}
+            onChange={() => setSelectionDisplay(!selectionDisplay)}
+          />
+        </EuiFormRow>
+        {selectionDisplay ? (
+          <>
+            <EuiSpacer size="s" />
             <EuiButtonGroup
+              color="primary"
               idSelected={selectedWidth ?? ''}
-              buttonSize="compressed"
               legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
               options={CONTROL_WIDTH_OPTIONS}
               onChange={(newWidth: string) => {
@@ -95,19 +96,21 @@ export const ManageControlGroup = ({
                 setSelectedWidth(newWidth as ControlWidth);
               }}
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={deleteAllEmbeddables}
-              aria-label={'delete-all'}
-              iconType="trash"
-              color="danger"
-              size="s"
-            >
-              {ControlGroupStrings.management.getDeleteAllButtonTitle()}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          </>
+        ) : undefined}
+
+        <EuiSpacer size="xl" />
+
+        <EuiButtonEmpty
+          onClick={deleteAllEmbeddables}
+          aria-label={'delete-all'}
+          iconType="trash"
+          flush="left"
+          color="danger"
+          size="s"
+        >
+          {ControlGroupStrings.management.getDeleteAllButtonTitle()}
+        </EuiButtonEmpty>
       </EuiFlyoutBody>
     </>
   );
