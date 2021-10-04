@@ -12,9 +12,27 @@ import {
 import {
   GetTrustedAppsListRequest,
   GetTrustedAppsListResponse,
+  PostTrustedAppCreateResponse,
 } from '../../../../../common/endpoint/types';
 import { TRUSTED_APPS_LIST_API } from '../../../../../common/endpoint/constants';
 import { TrustedAppGenerator } from '../../../../../common/endpoint/data_generators/trusted_app_generator';
+import { createSampleTrustedApps, createSampleTrustedApp } from '../../trusted_apps/test_utils';
+
+export const getMockListResponse: () => GetTrustedAppsListResponse = () => ({
+  data: createSampleTrustedApps({}),
+  per_page: 100,
+  page: 1,
+  total: 100,
+});
+
+export const getMockCreateResponse: () => PostTrustedAppCreateResponse = () =>
+  createSampleTrustedApp(1) as unknown as unknown as PostTrustedAppCreateResponse;
+
+export const getAPIError = () => ({
+  statusCode: 500,
+  error: 'Internal Server Error',
+  message: 'Something is not right',
+});
 
 type PolicyDetailsTrustedAppsHttpMocksInterface = ResponseProvidersInterface<{
   policyTrustedAppsList: () => GetTrustedAppsListResponse;

@@ -5,25 +5,4 @@
  * 2.0.
  */
 
-import {
-  GetTrustedAppsListResponse,
-  PostTrustedAppCreateResponse,
-} from '../../../../../common/endpoint/types';
-
-import { createSampleTrustedApps, createSampleTrustedApp } from '../../trusted_apps/test_utils';
-
-export const getMockListResponse: () => GetTrustedAppsListResponse = () => ({
-  data: createSampleTrustedApps({}),
-  per_page: 100,
-  page: 1,
-  total: 100,
-});
-
-export const getMockCreateResponse: () => PostTrustedAppCreateResponse = () =>
-  createSampleTrustedApp(1) as unknown as unknown as PostTrustedAppCreateResponse;
-
-export const getAPIError = () => ({
-  statusCode: 500,
-  error: 'Internal Server Error',
-  message: 'Something is not right',
-});
+export * from './mocks';
