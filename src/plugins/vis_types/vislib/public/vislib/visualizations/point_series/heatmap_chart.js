@@ -248,7 +248,6 @@ export class HeatmapChart extends PointSeries {
         };
       }
 
-      let hiddenLabels = false;
       squares
         .append('text')
         .text((d) => zAxisFormatter(d.y))
@@ -257,9 +256,6 @@ export class HeatmapChart extends PointSeries {
           const textHeight = this.getBBox().height;
           const textTooLong = textLength > maxLength;
           const textTooWide = textHeight > maxHeight;
-          if (!d.hide && (textTooLong || textTooWide)) {
-            hiddenLabels = true;
-          }
           return d.hide || textTooLong || textTooWide ? 'none' : 'initial';
         })
         .style('dominant-baseline', 'central')
@@ -278,9 +274,6 @@ export class HeatmapChart extends PointSeries {
           const verticalCenter = y(d) + squareHeight / 2;
           return `rotate(${rotate},${horizontalCenter},${verticalCenter})`;
         });
-      if (hiddenLabels) {
-        this.baseChart.handler.alerts.show('Some labels were hidden due to size constraints');
-      }
     }
 
     if (isTooltip) {
