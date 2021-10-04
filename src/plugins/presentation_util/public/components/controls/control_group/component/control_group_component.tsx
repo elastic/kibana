@@ -29,56 +29,44 @@ import {
   LayoutMeasuringStrategy,
 } from '@dnd-kit/core';
 
+import { ControlGroupInput } from '../types';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlGroupContainer, testReducers } from '../control_group_container';
+import { ControlGroupContainer } from '../control_group_container';
+import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
 import { OPTIONS_LIST_CONTROL } from '../../control_types/options_list/options_list_embeddable';
-import { ControlGroupInput } from '../types';
-import { useReduxEmbeddableContext } from '../state/redux_embeddable_wrapper';
+import { useReduxEmbeddableContext } from '../../../redux_embeddables/redux_embeddable_context';
 
 interface ControlGroupProps {
   controlGroupContainer: ControlGroupContainer;
 }
 
 export const ControlGroup = ({ controlGroupContainer }: ControlGroupProps) => {
-  // test redux state stuff
-
-  const { useEmbeddableSelector, useEmbeddableDispatch, actions } = useReduxEmbeddableContext<
+  const reduxEmbeddableContext = useReduxEmbeddableContext<
     ControlGroupInput,
-    typeof testReducers
+    typeof controlGroupReducers
   >();
-  const currentState = useEmbeddableSelector((state) => state);
 
-  const { updateControlStyle } = actions;
-  const dispatch = useEmbeddableDispatch();
-
-  setTimeout(() => dispatch(updateControlStyle('twoLine')), 5000);
-  // End redux state stuff
-
+  const currentState = reduxEmbeddableContext.useEmbeddableSelector((state) => state);
   const [controlIds, setControlIds] = useState<string[]>([]);
 
-  // sync controlIds every time input panels change
   useEffect(() => {
-    const subscription = controlGroupContainer.getInput$().subscribe(() => {
-      setControlIds((currentIds) => {
-        // sync control Ids with panels from container input.
-        const { panels } = controlGroupContainer.getInput();
-        const newIds: string[] = [];
-        const allIds = [...currentIds, ...Object.keys(panels)];
-        allIds.forEach((id) => {
-          const currentIndex = currentIds.indexOf(id);
-          if (!panels[id] && currentIndex !== -1) {
-            currentIds.splice(currentIndex, 1);
-          }
-          if (currentIndex === -1 && Boolean(panels[id])) {
-            newIds.push(id);
-          }
-        });
-        return [...currentIds, ...newIds];
+    setControlIds((currentIds) => {
+      // sync control Ids with panels from state.
+      const newIds: string[] = [];
+      const allIds = [...currentIds, ...Object.keys(currentState.panels)];
+      allIds.forEach((id) => {
+        const currentIndex = currentIds.indexOf(id);
+        if (!currentState.panels[id] && currentIndex !== -1) {
+          currentIds.splice(currentIndex, 1);
+        }
+        if (currentIndex === -1 && Boolean(currentState.panels[id])) {
+          newIds.push(id);
+        }
       });
+      return [...currentIds, ...newIds];
     });
-    return () => subscription.unsubscribe();
-  }, [controlGroupContainer]);
+  }, [currentState.panels]);
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
@@ -131,7 +119,7 @@ export const ControlGroup = ({ controlGroupContainer }: ControlGroupProps) => {
                   container={controlGroupContainer}
                   controlStyle={currentState.controlStyle}
                   embeddableId={controlId}
-                  width={controlGroupContainer.getInput().panels[controlId].width}
+                  width={currentState.panels[controlId].width}
                   key={controlId}
                 />
               ))}
@@ -140,7 +128,7 @@ export const ControlGroup = ({ controlGroupContainer }: ControlGroupProps) => {
           <DragOverlay>
             {draggingId ? (
               <ControlClone
-                width={controlGroupContainer.getInput().panels[draggingId].width}
+                width={currentState.panels[draggingId].width}
                 embeddableId={draggingId}
                 container={controlGroupContainer}
               />
@@ -157,7 +145,7 @@ export const ControlGroup = ({ controlGroupContainer }: ControlGroupProps) => {
                 iconType="gear"
                 color="text"
                 data-test-subj="inputControlsSortingButton"
-                onClick={controlGroupContainer.editControlGroup}
+                onClick={() => controlGroupContainer.editControlGroup(reduxEmbeddableContext)}
               />
             </EuiToolTip>
           </EuiFlexItem>

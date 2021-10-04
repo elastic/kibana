@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CaseReducer, configureStore, EnhancedStore, PayloadAction } from '@reduxjs/toolkit';
+import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
 import { combineReducers, Reducer } from 'redux';
 
 export interface InjectReducerProps<StateShape> {

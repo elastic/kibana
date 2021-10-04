@@ -9,8 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { cloneDeep } from 'lodash';
-import { PayloadAction } from '@reduxjs/toolkit';
-import { WritableDraft } from 'immer/dist/types/types-external';
+import { Provider } from 'react-redux';
 
 import {
   Container,
@@ -25,25 +24,20 @@ import {
   ControlWidth,
 } from '../types';
 import { ControlsService } from '../controls_service';
+import { OverlayRef } from '../../../../../../core/public';
+import { ControlGroupStrings } from './control_group_strings';
 import { ControlGroupInput, ControlPanelState } from './types';
 import { ManageControlComponent } from './editor/manage_control';
 import { toMountPoint } from '../../../../../kibana_react/public';
 import { ControlGroup } from './component/control_group_component';
 import { PresentationOverlaysService } from '../../../services/overlays';
-import { CONTROL_GROUP_TYPE, DEFAULT_CONTROL_WIDTH } from './control_group_constants';
 import { ManageControlGroup } from './editor/manage_control_group_component';
-import { OverlayRef } from '../../../../../../core/public';
-import { ControlGroupStrings } from './control_group_strings';
-import { ReduxEmbeddableWrapper } from './state/redux_embeddable_wrapper';
-
-export const testReducers = {
-  updateControlStyle: (
-    state: WritableDraft<ControlGroupInput>,
-    action: PayloadAction<ControlGroupInput['controlStyle']>
-  ) => {
-    state.controlStyle = action.payload;
-  },
-};
+import { ReduxEmbeddableContextServices } from '../../redux_embeddables/types';
+import { CONTROL_GROUP_TYPE, DEFAULT_CONTROL_WIDTH } from './control_group_constants';
+import { ReduxEmbeddableWrapper } from '../../redux_embeddables/redux_embeddable_wrapper';
+import { ReduxEmbeddableContext } from '../../redux_embeddables/redux_embeddable_context';
+import { getManagedEmbeddablesStore } from '../../redux_embeddables/generic_embeddable_store';
+import { controlGroupReducers } from './state/control_group_reducers';
 
 export class ControlGroupContainer extends Container<InputControlInput, ControlGroupInput> {
   public readonly type = CONTROL_GROUP_TYPE;
@@ -198,41 +192,48 @@ export class ControlGroupContainer extends Container<InputControlInput, ControlG
     );
   };
 
-  public editControlGroup = () => {
+  public editControlGroup = (reduxEmbeddableContext: ReduxEmbeddableContextServices) => {
     const flyoutInstance = this.overlays.openFlyout(
       toMountPoint(
-        <ManageControlGroup
-          controlStyle={this.getInput().controlStyle}
-          setControlStyle={(newStyle) => this.updateInput({ controlStyle: newStyle })}
-          deleteAllEmbeddables={() => {
-            this.overlays
-              .openConfirm(ControlGroupStrings.management.deleteAllControls.getSubtitle(), {
-                confirmButtonText: ControlGroupStrings.management.deleteAllControls.getConfirm(),
-                cancelButtonText: ControlGroupStrings.management.deleteAllControls.getCancel(),
-                title: ControlGroupStrings.management.deleteAllControls.getTitle(),
-                buttonColor: 'danger',
-              })
-              .then((confirmed) => {
-                if (confirmed) {
-                  Object.keys(this.getInput().panels).forEach((id) => this.removeEmbeddable(id));
-                  flyoutInstance.close();
-                }
-              });
-          }}
-          setAllPanelWidths={(newWidth) => {
-            const newPanels = cloneDeep(this.getInput().panels);
-            Object.values(newPanels).forEach((panel) => (panel.width = newWidth));
-            this.updateInput({ panels: { ...newPanels, ...newPanels } });
-          }}
-          panels={this.getInput().panels}
-        />
+        <Provider store={getManagedEmbeddablesStore()}>
+          <ReduxEmbeddableContext.Provider value={reduxEmbeddableContext}>
+            <ManageControlGroup
+              controlStyle={this.getInput().controlStyle}
+              setControlStyle={(newStyle) => this.updateInput({ controlStyle: newStyle })}
+              deleteAllEmbeddables={() => {
+                this.overlays
+                  .openConfirm(ControlGroupStrings.management.deleteAllControls.getSubtitle(), {
+                    confirmButtonText:
+                      ControlGroupStrings.management.deleteAllControls.getConfirm(),
+                    cancelButtonText: ControlGroupStrings.management.deleteAllControls.getCancel(),
+                    title: ControlGroupStrings.management.deleteAllControls.getTitle(),
+                    buttonColor: 'danger',
+                  })
+                  .then((confirmed) => {
+                    if (confirmed) {
+                      Object.keys(this.getInput().panels).forEach((id) =>
+                        this.removeEmbeddable(id)
+                      );
+                      flyoutInstance.close();
+                    }
+                  });
+              }}
+              setAllPanelWidths={(newWidth) => {
+                const newPanels = cloneDeep(this.getInput().panels);
+                Object.values(newPanels).forEach((panel) => (panel.width = newWidth));
+                this.updateInput({ panels: { ...newPanels, ...newPanels } });
+              }}
+              panels={this.getInput().panels}
+            />
+          </ReduxEmbeddableContext.Provider>
+        </Provider>
       )
     );
   };
 
   public render(dom: HTMLElement) {
     ReactDOM.render(
-      <ReduxEmbeddableWrapper<ControlGroupInput> embeddable={this} reducers={testReducers}>
+      <ReduxEmbeddableWrapper<ControlGroupInput> embeddable={this} reducers={controlGroupReducers}>
         <ControlGroup controlGroupContainer={this} />
       </ReduxEmbeddableWrapper>,
       dom

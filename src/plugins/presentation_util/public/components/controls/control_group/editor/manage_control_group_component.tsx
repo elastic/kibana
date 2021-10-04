@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import useMount from 'react-use/lib/useMount';
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -20,10 +19,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { ControlsPanels } from '../types';
+import { ControlGroupInput, ControlsPanels } from '../types';
 import { ControlStyle, ControlWidth } from '../../types';
 import { ControlGroupStrings } from '../control_group_strings';
 import { CONTROL_LAYOUT_OPTIONS, CONTROL_WIDTH_OPTIONS } from '../control_group_constants';
+import { useReduxEmbeddableContext } from '../../../redux_embeddables/redux_embeddable_context';
+import { controlGroupReducers } from '../state/control_group_reducers';
 
 interface ManageControlGroupProps {
   panels: ControlsPanels;
@@ -33,23 +34,23 @@ interface ManageControlGroupProps {
   setAllPanelWidths: (newWidth: ControlWidth) => void;
 }
 
-export const ManageControlGroup = ({
-  panels,
-  controlStyle,
-  setControlStyle,
-  setAllPanelWidths,
-  deleteAllEmbeddables,
-}: ManageControlGroupProps) => {
-  const [currentControlStyle, setCurrentControlStyle] = useState<ControlStyle>(controlStyle);
-  const [selectedWidth, setSelectedWidth] = useState<ControlWidth>();
+export const ManageControlGroup = ({ deleteAllEmbeddables }: ManageControlGroupProps) => {
+  const {
+    useEmbeddableSelector,
+    useEmbeddableDispatch,
+    actions: { updateControlStyle, setAllControlWidths },
+  } = useReduxEmbeddableContext<ControlGroupInput, typeof controlGroupReducers>();
 
-  useMount(() => {
+  const dispatch = useEmbeddableDispatch();
+  const { panels, controlStyle } = useEmbeddableSelector((state) => state);
+
+  const selectedWidth = useMemo(() => {
     if (!panels || Object.keys(panels).length === 0) return;
     const firstWidth = panels[Object.keys(panels)[0]].width;
     if (Object.values(panels).every((panel) => panel.width === firstWidth)) {
-      setSelectedWidth(firstWidth);
+      return firstWidth;
     }
-  });
+  }, [panels]);
 
   return (
     <>
@@ -66,11 +67,10 @@ export const ManageControlGroup = ({
         <EuiButtonGroup
           legend={ControlGroupStrings.management.controlStyle.getDesignSwitchLegend()}
           options={CONTROL_LAYOUT_OPTIONS}
-          idSelected={currentControlStyle}
-          onChange={(newControlStyle) => {
-            setControlStyle(newControlStyle as ControlStyle);
-            setCurrentControlStyle(newControlStyle as ControlStyle);
-          }}
+          idSelected={controlStyle}
+          onChange={(newControlStyle) =>
+            dispatch(updateControlStyle(newControlStyle as ControlStyle))
+          }
         />
         <EuiSpacer size="m" />
         <EuiTitle size="s">
@@ -90,10 +90,9 @@ export const ManageControlGroup = ({
               buttonSize="compressed"
               legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
               options={CONTROL_WIDTH_OPTIONS}
-              onChange={(newWidth: string) => {
-                setAllPanelWidths(newWidth as ControlWidth);
-                setSelectedWidth(newWidth as ControlWidth);
-              }}
+              onChange={(newWidth: string) =>
+                dispatch(setAllControlWidths(newWidth as ControlWidth))
+              }
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
