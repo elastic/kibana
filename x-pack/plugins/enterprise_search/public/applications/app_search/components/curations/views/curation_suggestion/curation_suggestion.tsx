@@ -71,14 +71,24 @@ export const CurationSuggestion: React.FC = () => {
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="xxs">
-            <h2>Current</h2>
+            <h2>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.currentTitle',
+                { defaultMessage: 'Current' }
+              )}
+            </h2>
           </EuiTitle>
           <EuiSpacer size="s" />
           <CurationResultPanel variant="current" results={[...DATA].splice(0, 3)} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="xxs">
-            <h2>Suggested</h2>
+            <h2>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.suggestionTitle',
+                { defaultMessage: 'Suggested' }
+              )}
+            </h2>
           </EuiTitle>
           <EuiSpacer size="s" />
           <CurationResultPanel variant="suggested" results={suggestedPromotedDocuments} />
@@ -95,7 +105,15 @@ export const CurationSuggestion: React.FC = () => {
           onClick={() => setShowOrganicResults(!showOrganicResults)}
           data-test-subj="showOrganicResults"
         >
-          {showOrganicResults ? 'Collapse' : 'Expand'} organic search results
+          {showOrganicResults
+            ? i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.collapseButtonLable',
+                { defaultMessage: 'Collapse organic search results' }
+              )
+            : i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.expandButtonLable',
+                { defaultMessage: 'Expand organic search results' }
+              )}
         </EuiButtonEmpty>
         {showOrganicResults && (
           <>
