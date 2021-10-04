@@ -68,7 +68,7 @@ export const ManageControlComponent = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="flyoutTitle">{ControlGroupStrings.manageControl.getFlyoutTitle()}</h2>
+          <h2>{ControlGroupStrings.manageControl.getFlyoutTitle()}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
