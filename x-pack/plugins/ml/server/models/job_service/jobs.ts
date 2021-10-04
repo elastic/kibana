@@ -11,6 +11,7 @@ import { IScopedClusterClient } from 'kibana/server';
 import {
   getSingleMetricViewerJobErrorMessage,
   parseTimeIntervalForJob,
+  isJobWithGeoData,
 } from '../../../common/util/job_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import {
@@ -269,6 +270,22 @@ export function jobsProvider(
     });
 
     return jobs;
+  }
+
+  async function getJobsWithGeo(): Promise<string[]> {
+    const { body } = await mlClient.getJobs<MlJobsResponse>();
+
+    const geoJobs: string[] = [];
+
+    if (body.count && body.count > 0) {
+      body.jobs.forEach((job) => {
+        if (isJobWithGeoData(job)) {
+          geoJobs.push(job.job_id);
+        }
+      });
+    }
+
+    return geoJobs;
   }
 
   async function jobsWithTimerange() {
@@ -661,5 +678,6 @@ export function jobsProvider(
     getAllJobAndGroupIds,
     getLookBackProgress,
     bulkCreate,
+    getJobsWithGeo,
   };
 }
