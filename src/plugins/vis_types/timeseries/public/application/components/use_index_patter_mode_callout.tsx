@@ -34,7 +34,7 @@ export const UseIndexPatternModeCallout = () => {
       title={
         <FormattedMessage
           id="visTypeTimeseries.visEditorVisualization.dataViewMode.notificationTitle"
-          defaultMessage="TSVB now supports data views"
+          defaultMessage="TSVB supports data views"
         />
       }
       iconType="cheer"
