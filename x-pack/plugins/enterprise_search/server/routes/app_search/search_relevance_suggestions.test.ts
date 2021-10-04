@@ -37,4 +37,53 @@ describe('search relevance insights routes', () => {
       });
     });
   });
+
+  describe('GET /internal/app_search/engines/{name}/search_relevance_suggestions/settings', () => {
+    const mockRouter = new MockRouter({
+      method: 'get',
+      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions/settings',
+    });
+
+    beforeEach(() => {
+      registerSearchRelevanceSuggestionsRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      mockRouter.callRoute({
+        params: { engineName: 'some-engine' },
+      });
+
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/as/v0/engines/:engineName/search_relevance_suggestions/settings',
+      });
+    });
+  });
+
+  describe('PUT /internal/app_search/engines/{name}/search_relevance_suggestions/settings', () => {
+    const mockRouter = new MockRouter({
+      method: 'put',
+      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions/settings',
+    });
+
+    beforeEach(() => {
+      registerSearchRelevanceSuggestionsRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      mockRouter.callRoute({
+        params: { engineName: 'some-engine' },
+        body: { curation: { enabled: true } },
+      });
+
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/as/v0/engines/:engineName/search_relevance_suggestions/settings',
+      });
+    });
+  });
 });
