@@ -107,11 +107,11 @@ export const CurationSuggestion: React.FC = () => {
         >
           {showOrganicResults
             ? i18n.translate(
-                'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.collapseButtonLable',
+                'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.collapseButtonLabel',
                 { defaultMessage: 'Collapse organic search results' }
               )
             : i18n.translate(
-                'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.expandButtonLable',
+                'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.expandButtonLabel',
                 { defaultMessage: 'Expand organic search results' }
               )}
         </EuiButtonEmpty>
