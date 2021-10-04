@@ -6,8 +6,7 @@
   "requiredPlugins": [
     "expressions",
     "visualizations",
-    "data",
-    "kibanaLegacy"
+    "data"
   ],
   "requiredBundles": [
     "kibanaUtils",
