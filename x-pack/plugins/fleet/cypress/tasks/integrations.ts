@@ -8,6 +8,7 @@
 import {
   ADD_POLICY_BTN,
   CONFIRM_MODAL_BTN,
+  CONFIRM_MODAL_BTN_SEL,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
   INTEGRATION_NAME_LINK,
 } from '../screens/integrations';
@@ -23,7 +24,7 @@ export const addIntegration = () => {
 
 function closeModalIfVisible() {
   cy.get('body').then(($body) => {
-    if ($body.find(CONFIRM_MODAL_BTN).length) {
+    if ($body.find(CONFIRM_MODAL_BTN_SEL).length) {
       cy.getBySel(CONFIRM_MODAL_BTN).click();
     }
   });
