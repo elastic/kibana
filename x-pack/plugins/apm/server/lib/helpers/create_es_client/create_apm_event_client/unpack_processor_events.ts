@@ -13,19 +13,16 @@ import {
   ESFilter,
 } from '../../../../../../../../src/core/types/elasticsearch';
 import { APMEventESSearchRequest, APMEventESTermsEnumRequest } from '.';
-import {
-  ApmIndicesConfig,
-  ApmIndicesName,
-} from '../../../settings/apm_indices/get_apm_indices';
+import { ApmIndicesConfig } from '../../../settings/apm_indices/get_apm_indices';
 
-const processorEventIndexMap: Record<ProcessorEvent, ApmIndicesName> = {
+const processorEventIndexMap = {
   [ProcessorEvent.transaction]: 'xpack.apm.transactionIndices',
   [ProcessorEvent.span]: 'xpack.apm.spanIndices',
   [ProcessorEvent.metric]: 'xpack.apm.metricsIndices',
   [ProcessorEvent.error]: 'xpack.apm.errorIndices',
   // TODO: should have its own config setting
   [ProcessorEvent.profile]: 'xpack.apm.transactionIndices',
-};
+} as const;
 
 export function unpackProcessorEvents(
   request: APMEventESSearchRequest | APMEventESTermsEnumRequest,
