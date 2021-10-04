@@ -20,7 +20,7 @@ import type {
 
 import { createClusterDataCheck } from './check_cluster_data';
 import type { ConfigType } from './config';
-import { setupAnonymousAccessCapabilitiesRoute, setupAppStateRoute } from './routes';
+import { setupAppStateRoute } from './routes';
 
 export interface SecurityOssPluginSetup {
   /**
@@ -74,11 +74,6 @@ export class SecurityOssPlugin implements Plugin<SecurityOssPluginSetup, void, {
       config$: this.config$,
       displayModifier$: showInsecureClusterWarning$,
       doesClusterHaveUserData: createClusterDataCheck(),
-      getAnonymousAccessService: () => this.anonymousAccessServiceProvider?.() ?? null,
-    });
-
-    setupAnonymousAccessCapabilitiesRoute({
-      router,
       getAnonymousAccessService: () => this.anonymousAccessServiceProvider?.() ?? null,
     });
 

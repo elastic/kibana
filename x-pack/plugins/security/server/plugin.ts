@@ -126,7 +126,6 @@ export class SecurityPlugin
   private readonly logger: Logger;
   private authorizationSetup?: AuthorizationServiceSetupInternal;
   private auditSetup?: AuditServiceSetup;
-  private anonymousAccessStart?: AnonymousAccessServiceStart;
   private configSubscription?: Subscription;
 
   private config?: ConfigType;
@@ -186,6 +185,13 @@ export class SecurityPlugin
     this.initializerContext.logger.get('anonymous-access'),
     this.getConfig
   );
+  private anonymousAccessStart?: AnonymousAccessServiceStart;
+  private readonly getAnonymousAccess = () => {
+    if (!this.anonymousAccessStart) {
+      throw new Error(`anonymousAccessStart is not registered!`);
+    }
+    return this.anonymousAccessStart;
+  };
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -314,6 +320,7 @@ export class SecurityPlugin
         startServicesPromise.then((services) => services.features.getKibanaFeatures()),
       getFeatureUsageService: this.getFeatureUsageService,
       getAuthenticationService: this.getAuthentication,
+      getAnonymousAccessService: this.getAnonymousAccess,
     });
 
     return Object.freeze<SecurityPluginSetup>({

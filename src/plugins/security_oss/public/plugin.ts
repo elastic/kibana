@@ -59,9 +59,7 @@ export class SecurityOssPlugin
           return anonymousAccess.accessURLParameters;
         },
         getCapabilities() {
-          return core.http.get<Capabilities>(
-            '/internal/security_oss/anonymous_access/capabilities'
-          );
+          return core.http.get<Capabilities>('/internal/security/anonymous_access/capabilities');
         },
       },
     };

@@ -6,13 +6,20 @@
  */
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { httpResourcesMock, httpServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import {
+  coreMock,
+  httpResourcesMock,
+  httpServiceMock,
+  loggingSystemMock,
+} from 'src/core/server/mocks';
 
+import { licensingMock } from '../../../licensing/server/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { authenticationServiceMock } from '../authentication/authentication_service.mock';
 import { authorizationMock } from '../authorization/index.mock';
 import { ConfigSchema, createConfig } from '../config';
 import { sessionMock } from '../session_management/session.mock';
+import type { SecurityRequestHandlerContext } from '../types';
 import type { RouteDefinitionParams } from './';
 
 export const routeDefinitionParamsMock = {
@@ -32,5 +39,13 @@ export const routeDefinitionParamsMock = {
       getFeatureUsageService: jest.fn(),
       getSession: jest.fn().mockReturnValue(sessionMock.create()),
       getAuthenticationService: jest.fn().mockReturnValue(authenticationServiceMock.createStart()),
+      getAnonymousAccessService: jest.fn(),
     } as unknown as DeeplyMockedKeys<RouteDefinitionParams>),
+};
+
+export const securityRequestHandlerContextMock = {
+  create: (): SecurityRequestHandlerContext => ({
+    core: coreMock.createRequestHandlerContext(),
+    licensing: licensingMock.createRequestHandlerContext(),
+  }),
 };

@@ -7,4 +7,3 @@
  */
 
 export { setupAppStateRoute } from './app_state';
-export { setupAnonymousAccessCapabilitiesRoute } from './anonymous_access_capabilities';
