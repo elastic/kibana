@@ -89,4 +89,7 @@ export const discoverServiceMock = {
     useChartsTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
     useChartsBaseTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
   },
+  storage: {
+    get: jest.fn(),
+  },
 } as unknown as DiscoverServices;

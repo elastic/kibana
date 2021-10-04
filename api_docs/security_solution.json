@@ -62,7 +62,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly metricsEntitiesEnabled: boolean; readonly ruleRegistryEnabled: boolean; readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly trustedAppsByPolicyEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly uebaEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; }"
+              "{ readonly metricsEntitiesEnabled: boolean; readonly ruleRegistryEnabled: boolean; readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly trustedAppsByPolicyEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly uebaEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly riskyHostsEnabled: boolean; }"
             ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false
@@ -273,7 +273,7 @@
         "signature": [
           "Pick<",
           "TGridModel",
-          ", \"columns\" | \"filters\" | \"title\" | \"id\" | \"sort\" | \"version\" | \"isLoading\" | \"filterManager\" | \"dateRange\" | \"defaultColumns\" | \"savedObjectId\" | \"unit\" | \"dataProviders\" | \"deletedEventIds\" | \"documentType\" | \"excludedRowRendererIds\" | \"expandedDetail\" | \"footerText\" | \"graphEventId\" | \"kqlQuery\" | \"queryFields\" | \"indexNames\" | \"isSelectAllChecked\" | \"itemsPerPage\" | \"itemsPerPageOptions\" | \"loadingEventIds\" | \"loadingText\" | \"selectAll\" | \"showCheckboxes\" | \"selectedEventIds\"> & { activeTab: ",
+          ", \"columns\" | \"id\" | \"title\" | \"filters\" | \"sort\" | \"version\" | \"isLoading\" | \"filterManager\" | \"dateRange\" | \"defaultColumns\" | \"savedObjectId\" | \"unit\" | \"dataProviders\" | \"deletedEventIds\" | \"documentType\" | \"excludedRowRendererIds\" | \"expandedDetail\" | \"footerText\" | \"graphEventId\" | \"kqlQuery\" | \"queryFields\" | \"indexNames\" | \"isSelectAllChecked\" | \"itemsPerPage\" | \"itemsPerPageOptions\" | \"loadingEventIds\" | \"loadingText\" | \"selectAll\" | \"showCheckboxes\" | \"selectedEventIds\"> & { activeTab: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -7712,6 +7712,57 @@
               "string[]"
             ],
             "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/all/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.HostsRiskyHostsStrategyResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "HostsRiskyHostsStrategyResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.HostsRiskyHostsStrategyResponse",
+            "text": "HostsRiskyHostsStrategyResponse"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IEsSearchResponse",
+            "text": "IEsSearchResponse"
+          },
+          "<any>"
+        ],
+        "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/risky_hosts/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostsRiskyHostsStrategyResponse.inspect",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "inspect",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.Inspect",
+                "text": "Inspect"
+              },
+              " | null | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/risky_hosts/index.ts",
             "deprecated": false
           }
         ],
@@ -19735,6 +19786,26 @@
       },
       {
         "parentPluginId": "securitySolution",
+        "id": "def-common.HostsRiskyHostsRequestOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "HostsRiskyHostsRequestOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.RequestBasicOptions",
+            "text": "RequestBasicOptions"
+          }
+        ],
+        "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/risky_hosts/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
         "id": "def-common.HostTacticsSortField",
         "type": "Type",
         "tags": [],
@@ -21182,6 +21253,22 @@
             "section": "def-common.HostsQueries",
             "text": "HostsQueries"
           },
+          ".riskyHosts ? ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.RequestBasicOptions",
+            "text": "RequestBasicOptions"
+          },
+          " : T extends ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.HostsQueries",
+            "text": "HostsQueries"
+          },
           ".details ? ",
           {
             "pluginId": "securitySolution",
@@ -21647,6 +21734,22 @@
             "docId": "kibSecuritySolutionPluginApi",
             "section": "def-common.RiskScoreStrategyResponse",
             "text": "RiskScoreStrategyResponse"
+          },
+          " : T extends ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.HostsQueries",
+            "text": "HostsQueries"
+          },
+          ".riskyHosts ? ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.HostsRiskyHostsStrategyResponse",
+            "text": "HostsRiskyHostsStrategyResponse"
           },
           " : T extends ",
           {
@@ -22702,7 +22805,7 @@
             "section": "def-common.TimelineStatus",
             "text": "TimelineStatus"
           },
-          " | null | undefined; columns?: { aggregatable?: boolean | null | undefined; category?: string | null | undefined; columnHeaderType?: string | null | undefined; description?: string | null | undefined; example?: string | null | undefined; indexes?: string[] | null | undefined; id?: string | null | undefined; name?: string | null | undefined; placeholder?: string | null | undefined; searchable?: boolean | null | undefined; type?: string | null | undefined; }[] | null | undefined; description?: string | null | undefined; filters?: { exists?: string | null | undefined; meta?: { alias?: string | null | undefined; controlledBy?: string | null | undefined; disabled?: boolean | null | undefined; field?: string | null | undefined; formattedValue?: string | null | undefined; index?: string | null | undefined; key?: string | null | undefined; negate?: boolean | null | undefined; params?: string | null | undefined; type?: string | null | undefined; value?: string | null | undefined; } | null | undefined; match_all?: string | null | undefined; missing?: string | null | undefined; query?: string | null | undefined; range?: string | null | undefined; script?: string | null | undefined; }[] | null | undefined; title?: string | null | undefined; sort?: { columnId?: string | null | undefined; columnType?: string | null | undefined; sortDirection?: string | null | undefined; } | { columnId?: string | null | undefined; columnType?: string | null | undefined; sortDirection?: string | null | undefined; }[] | null | undefined; dateRange?: { start?: string | number | null | undefined; end?: string | number | null | undefined; } | null | undefined; createdBy?: string | null | undefined; updatedBy?: string | null | undefined; created?: number | null | undefined; updated?: number | null | undefined; dataProviders?: { id?: string | null | undefined; name?: string | null | undefined; enabled?: boolean | null | undefined; excluded?: boolean | null | undefined; kqlQuery?: string | null | undefined; queryMatch?: { field?: string | null | undefined; displayField?: string | null | undefined; value?: string | null | undefined; displayValue?: string | null | undefined; operator?: string | null | undefined; } | null | undefined; and?: { id?: string | null | undefined; name?: string | null | undefined; enabled?: boolean | null | undefined; excluded?: boolean | null | undefined; kqlQuery?: string | null | undefined; queryMatch?: { field?: string | null | undefined; displayField?: string | null | undefined; value?: string | null | undefined; displayValue?: string | null | undefined; operator?: string | null | undefined; } | null | undefined; }[] | null | undefined; type?: ",
+          " | null | undefined; columns?: { aggregatable?: boolean | null | undefined; category?: string | null | undefined; columnHeaderType?: string | null | undefined; description?: string | null | undefined; example?: string | null | undefined; indexes?: string[] | null | undefined; id?: string | null | undefined; name?: string | null | undefined; placeholder?: string | null | undefined; searchable?: boolean | null | undefined; type?: string | null | undefined; }[] | null | undefined; title?: string | null | undefined; description?: string | null | undefined; filters?: { exists?: string | null | undefined; meta?: { alias?: string | null | undefined; controlledBy?: string | null | undefined; disabled?: boolean | null | undefined; field?: string | null | undefined; formattedValue?: string | null | undefined; index?: string | null | undefined; key?: string | null | undefined; negate?: boolean | null | undefined; params?: string | null | undefined; type?: string | null | undefined; value?: string | null | undefined; } | null | undefined; match_all?: string | null | undefined; missing?: string | null | undefined; query?: string | null | undefined; range?: string | null | undefined; script?: string | null | undefined; }[] | null | undefined; sort?: { columnId?: string | null | undefined; columnType?: string | null | undefined; sortDirection?: string | null | undefined; } | { columnId?: string | null | undefined; columnType?: string | null | undefined; sortDirection?: string | null | undefined; }[] | null | undefined; dateRange?: { start?: string | number | null | undefined; end?: string | number | null | undefined; } | null | undefined; createdBy?: string | null | undefined; updatedBy?: string | null | undefined; created?: number | null | undefined; updated?: number | null | undefined; dataProviders?: { id?: string | null | undefined; name?: string | null | undefined; enabled?: boolean | null | undefined; excluded?: boolean | null | undefined; kqlQuery?: string | null | undefined; queryMatch?: { field?: string | null | undefined; displayField?: string | null | undefined; value?: string | null | undefined; displayValue?: string | null | undefined; operator?: string | null | undefined; } | null | undefined; and?: { id?: string | null | undefined; name?: string | null | undefined; enabled?: boolean | null | undefined; excluded?: boolean | null | undefined; kqlQuery?: string | null | undefined; queryMatch?: { field?: string | null | undefined; displayField?: string | null | undefined; value?: string | null | undefined; displayValue?: string | null | undefined; operator?: string | null | undefined; } | null | undefined; }[] | null | undefined; type?: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
