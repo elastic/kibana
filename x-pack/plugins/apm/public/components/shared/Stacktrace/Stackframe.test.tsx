@@ -12,12 +12,6 @@ import { mountWithTheme } from '../../../utils/testHelpers';
 import { Stackframe as StackframeComponent } from './Stackframe';
 import stacktracesMock from './__fixtures__/stacktraces.json';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
-  return {
-    htmlIdGenerator: () => () => `generated-id`,
-  };
-});
-
 describe('Stackframe', () => {
   describe('when stackframe has source lines', () => {
     let wrapper: ReactWrapper;

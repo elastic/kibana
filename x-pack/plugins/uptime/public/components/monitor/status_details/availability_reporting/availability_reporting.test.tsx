@@ -10,12 +10,6 @@ import { renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { AvailabilityReporting } from './availability_reporting';
 import { StatusTag } from './location_status_tags';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
-  return {
-    htmlIdGenerator: () => () => `generated-id`,
-  };
-});
-
 describe('AvailabilityReporting component', () => {
   let allLocations: StatusTag[];
 

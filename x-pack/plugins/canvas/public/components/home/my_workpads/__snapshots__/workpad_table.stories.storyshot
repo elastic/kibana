@@ -54,7 +54,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
           >
             <input
               accept="application/json"
-              aria-describedby="generated-id"
+              aria-describedby="generated-id-filePicker__prompt"
               aria-label="Import workpad JSON file"
               className="euiFilePicker__input"
               disabled={false}
@@ -66,7 +66,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
             />
             <div
               className="euiFilePicker__prompt"
-              id="generated-id"
+              id="generated-id-filePicker__prompt"
             >
               <span
                 aria-hidden="true"
@@ -166,7 +166,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
         </div>
         <table
           className="euiTable euiTable--responsive"
-          id="generated-id"
+          id="__table_generated-id"
           tabIndex={-1}
         >
           <caption
@@ -921,7 +921,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                   className="euiPagination__item"
                 >
                   <button
-                    aria-controls="generated-id"
+                    aria-controls="__table_generated-id"
                     aria-current={true}
                     aria-label="Page 1 of 1"
                     className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
