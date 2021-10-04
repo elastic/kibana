@@ -13,4 +13,12 @@ import { CustomIntegrationsPlugin } from './plugin';
 export function plugin() {
   return new CustomIntegrationsPlugin();
 }
+
 export { CustomIntegrationsSetup, CustomIntegrationsStart } from './types';
+
+export {
+  getCustomIntegrationsContextDecorator as getStorybookContextDecorator,
+  getCustomIntegrationsContextProvider as getStorybookContextProvider,
+} from '../storybook/decorator';
+
+export { ReplacementCard } from './components';

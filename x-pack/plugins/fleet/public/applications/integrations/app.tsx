@@ -197,21 +197,23 @@ export const IntegrationsAppContext: React.FC<{
         <KibanaContextProvider services={{ ...startServices }}>
           <EuiErrorBoundary>
             <ConfigContext.Provider value={config}>
-              <KibanaVersionContext.Provider value={kibanaVersion}>
-                <EuiThemeProvider darkMode={isDarkMode}>
-                  <UIExtensionsContext.Provider value={extensions}>
-                    <FleetStatusProvider>
-                      <Router history={history}>
-                        <AgentPolicyContextProvider>
-                          <PackageInstallProvider notifications={startServices.notifications}>
-                            {children}
-                          </PackageInstallProvider>
-                        </AgentPolicyContextProvider>
-                      </Router>
-                    </FleetStatusProvider>
-                  </UIExtensionsContext.Provider>
-                </EuiThemeProvider>
-              </KibanaVersionContext.Provider>
+              <startServices.customIntegrations.ContextProvider>
+                <KibanaVersionContext.Provider value={kibanaVersion}>
+                  <EuiThemeProvider darkMode={isDarkMode}>
+                    <UIExtensionsContext.Provider value={extensions}>
+                      <FleetStatusProvider>
+                        <Router history={history}>
+                          <AgentPolicyContextProvider>
+                            <PackageInstallProvider notifications={startServices.notifications}>
+                              {children}
+                            </PackageInstallProvider>
+                          </AgentPolicyContextProvider>
+                        </Router>
+                      </FleetStatusProvider>
+                    </UIExtensionsContext.Provider>
+                  </EuiThemeProvider>
+                </KibanaVersionContext.Provider>
+              </startServices.customIntegrations.ContextProvider>
             </ConfigContext.Provider>
           </EuiErrorBoundary>
         </KibanaContextProvider>

@@ -28,6 +28,8 @@ import { entries } from '../../../../../types';
 import { useGetCategories } from '../../../../../hooks';
 import { AssetTitleMap, DisplayedAssets, ServiceTitleMap } from '../../../constants';
 
+import { ReplacementCard } from '../../../../../../../../../../../src/plugins/custom_integrations/public';
+
 import { NoticeModal } from './notice_modal';
 
 interface Props {
@@ -180,6 +182,9 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiDescriptionList type="column" compressed listItems={listItems} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <ReplacementCard eprOverlap={packageInfo.name} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
