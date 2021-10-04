@@ -141,14 +141,14 @@ export function SchemaOverview({
             icon={<EuiIcon size="xxl" type="node" />}
             title={i18n.translate(
               'xpack.apm.settings.schema.migrate.classicIndices.title',
-              { defaultMessage: 'Standalone' }
+              { defaultMessage: 'APM Server binary' }
             )}
             display="subdued"
             description={i18n.translate(
               'xpack.apm.settings.schema.migrate.classicIndices.description',
               {
                 defaultMessage:
-                  'You are currently using APM server standalone. This legacy option is deprecated since version 7.16 and is being replaced by a manages APM Server in Elastic Agent from version 8.0.',
+                  'You are currently using APM server binary. This legacy option is deprecated since version 7.16 and is being replaced by a manages APM Server in Elastic Agent from version 8.0.',
               }
             )}
             footer={
@@ -222,7 +222,7 @@ export function SchemaOverviewHeading() {
       <EuiText color="subdued">
         <FormattedMessage
           id="xpack.apm.settings.schema.descriptionText"
-          defaultMessage="We have created a simple and seamless process for switching from APM standalone to Elastic Agent. Beware this action is {irreversibleEmphasis} and can only be performed by a {superuserEmphasis} with access to Fleet. Learn more about {elasticAgentDocLink}."
+          defaultMessage="We have created a simple and seamless process for switching from APM Server binary to Elastic Agent. Beware this action is {irreversibleEmphasis} and can only be performed by a {superuserEmphasis} with access to Fleet. Learn more about {elasticAgentDocLink}."
           values={{
             irreversibleEmphasis: (
               <strong>
