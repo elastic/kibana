@@ -52,8 +52,8 @@ export const EMPTY_STATUS = i18n.translate(
   }
 );
 
-export const EVENT_RENDERER_POPOVER_TITLE = (eventRendererName: string) =>
-  i18n.translate('xpack.securitySolution.event.reason.eventRenderPopoverTitle', {
+export const REASON_RENDERER_TITLE = (eventRendererName: string) =>
+  i18n.translate('xpack.securitySolution.event.reason.reasonRendererTitle', {
     values: { eventRendererName },
     defaultMessage: 'Event renderer: {eventRendererName} ',
   });

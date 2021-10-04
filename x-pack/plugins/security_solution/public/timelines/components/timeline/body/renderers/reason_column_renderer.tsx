@@ -101,7 +101,7 @@ const ReasonCell: React.FC<{
       {rowRenderer && rowRender ? (
         <>
           {value}
-          <h4>{i18n.EVENT_RENDERER_POPOVER_TITLE(eventRendererNames[rowRenderer.id] ?? '')}</h4>
+          <h4>{i18n.REASON_RENDERER_TITLE(eventRendererNames[rowRenderer.id] ?? '')}</h4>
           <EuiSpacer size="xs" />
           <EuiPanel color="subdued" className="eui-xScroll" data-test-subj="reason-cell-renderer">
             <div className="eui-displayInlineBlock">{rowRender}</div>

@@ -22567,7 +22567,6 @@
     "xpack.securitySolution.enpdoint.resolver.panelutils.invaliddate": "日期无效",
     "xpack.securitySolution.enpdoint.resolver.panelutils.noTimestampRetrieved": "未检索时间戳",
     "xpack.securitySolution.event.module.linkToElasticEndpointSecurityDescription": "在 Endpoint Security 中打开",
-    "xpack.securitySolution.event.reason.eventRenderPopoverTitle": "事件渲染器：{eventRendererName} ",
     "xpack.securitySolution.eventDetails.blank": " ",
     "xpack.securitySolution.eventDetails.copyToClipboard": "复制到剪贴板",
     "xpack.securitySolution.eventDetails.copyToClipboardTooltip": "复制到剪贴板",

@@ -22221,7 +22221,6 @@
     "xpack.securitySolution.enpdoint.resolver.panelutils.invaliddate": "無効な日付",
     "xpack.securitySolution.enpdoint.resolver.panelutils.noTimestampRetrieved": "タイムスタンプが取得されていません",
     "xpack.securitySolution.event.module.linkToElasticEndpointSecurityDescription": "Endpoint Securityで開く",
-    "xpack.securitySolution.event.reason.eventRenderPopoverTitle": "イベントレンダラー：{eventRendererName} ",
     "xpack.securitySolution.eventDetails.blank": " ",
     "xpack.securitySolution.eventDetails.copyToClipboard": "クリップボードにコピー",
     "xpack.securitySolution.eventDetails.copyToClipboardTooltip": "クリップボードにコピー",
