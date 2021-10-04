@@ -12,7 +12,7 @@ import { debounceTime } from 'rxjs/operators';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 
-import { createDashboardEditUrl, DashboardConstants } from '../..';
+import { DashboardConstants } from '../..';
 import { ViewMode } from '../../services/embeddable';
 import { useKibana } from '../../services/kibana_react';
 import { getNewDashboardTitle } from '../../dashboard_strings';
