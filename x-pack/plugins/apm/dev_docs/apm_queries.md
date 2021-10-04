@@ -38,7 +38,7 @@ A pre-aggregated document where `_doc_count` is the number of original transacti
 
 Latency is the duration of transactions. This can be calculated using transaction events or metric events (aggregated transactions).
 
-Note-worthy fields: `transaction.duration.us`, `transaction.duration.histogram`
+Noteworthy fields: `transaction.duration.us`, `transaction.duration.histogram`
 
 #### Transaction-based latency
 
