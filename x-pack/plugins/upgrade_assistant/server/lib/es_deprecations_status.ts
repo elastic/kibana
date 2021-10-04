@@ -34,11 +34,11 @@ export async function getESUpgradeStatus(
         // We need to exclude all index related deprecations for system indices since
         // they are resolved separately through the system indices upgrade section in
         // the Overview page.
-        const filteredIndices = indices.filter(
+        const withoutSystemIndices = indices.filter(
           (index) => !systemIndicesList.includes(index.index!)
         );
 
-        combinedDeprecations = combinedDeprecations.concat(filteredIndices);
+        combinedDeprecations = combinedDeprecations.concat(withoutSystemIndices);
       } else {
         const deprecationsByType = deprecations[
           deprecationType as keyof MigrationDeprecationInfoResponse
