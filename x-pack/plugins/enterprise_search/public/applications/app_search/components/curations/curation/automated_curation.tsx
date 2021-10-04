@@ -25,9 +25,10 @@ import { CurationLogic } from './curation_logic';
 import { PromotedDocuments, OrganicDocuments } from './documents';
 
 export const AutomatedCuration: React.FC = () => {
-  const { curationId } = useParams() as { curationId: string };
-  const { convertToManual } = useActions(CurationLogic({ curationId }));
-  const { activeQuery, dataLoading, queries } = useValues(CurationLogic({ curationId }));
+  const { curationId } = useParams<{ curationId: string }>();
+  const logic = CurationLogic({ curationId });
+  const { convertToManual } = useActions(logic);
+  const { activeQuery, dataLoading, queries } = useValues(logic);
 
   return (
     <AppSearchPageTemplate
