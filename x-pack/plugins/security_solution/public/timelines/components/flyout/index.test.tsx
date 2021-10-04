@@ -34,7 +34,6 @@ jest.mock('react-redux', () => {
 });
 
 jest.mock('../timeline', () => ({
-  // eslint-disable-next-line react/display-name
   StatefulTimeline: () => <div />,
 }));
 
