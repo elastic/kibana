@@ -1,0 +1,13 @@
+.dataViewTitleHeader {
+  min-width: 300px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+@include euiBreakpoint('xs', 's', 'm', 'l') {
+  .dataVisualizerPageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

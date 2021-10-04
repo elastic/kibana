@@ -184,7 +184,7 @@
               "APMPluginStartDependencies",
               ", unknown>, plugins: Pick<",
               "APMPluginSetupDependencies",
-              ", \"data\" | \"security\" | \"home\" | \"features\" | \"fleet\" | \"ml\" | \"actions\" | \"usageCollection\" | \"apmOss\" | \"licensing\" | \"observability\" | \"ruleRegistry\" | \"spaces\" | \"cloud\" | \"taskManager\" | \"alerting\">) => { config$: ",
+              ", \"data\" | \"cloud\" | \"security\" | \"home\" | \"features\" | \"fleet\" | \"ml\" | \"actions\" | \"usageCollection\" | \"apmOss\" | \"licensing\" | \"observability\" | \"ruleRegistry\" | \"spaces\" | \"taskManager\" | \"alerting\">) => { config$: ",
               "Observable",
               "<{ 'apm_oss.transactionIndices': string; 'apm_oss.spanIndices': string; 'apm_oss.errorIndices': string; 'apm_oss.metricsIndices': string; 'apm_oss.sourcemapIndices': string; 'apm_oss.onboardingIndices': string; 'xpack.apm.serviceMapEnabled': boolean; 'xpack.apm.serviceMapFingerprintBucketSize': number; 'xpack.apm.serviceMapTraceIdBucketSize': number; 'xpack.apm.serviceMapFingerprintGlobalBucketSize': number; 'xpack.apm.serviceMapTraceIdGlobalBucketSize': number; 'xpack.apm.serviceMapMaxTracesPerRequest': number; 'xpack.apm.ui.enabled': boolean; 'xpack.apm.maxServiceEnvironments': number; 'xpack.apm.maxServiceSelection': number; 'xpack.apm.ui.maxTraceItems': number; 'xpack.apm.ui.transactionGroupBucketSize': number; 'xpack.apm.autocreateApmIndexPattern': boolean; 'xpack.apm.telemetryCollectionEnabled': boolean; 'xpack.apm.searchAggregatedTransactions': ",
               "SearchAggregatedTransactionSetting",
@@ -244,7 +244,7 @@
                 "signature": [
                   "Pick<",
                   "APMPluginSetupDependencies",
-                  ", \"data\" | \"security\" | \"home\" | \"features\" | \"fleet\" | \"ml\" | \"actions\" | \"usageCollection\" | \"apmOss\" | \"licensing\" | \"observability\" | \"ruleRegistry\" | \"spaces\" | \"cloud\" | \"taskManager\" | \"alerting\">"
+                  ", \"data\" | \"cloud\" | \"security\" | \"home\" | \"features\" | \"fleet\" | \"ml\" | \"actions\" | \"usageCollection\" | \"apmOss\" | \"licensing\" | \"observability\" | \"ruleRegistry\" | \"spaces\" | \"taskManager\" | \"alerting\">"
                 ],
                 "path": "x-pack/plugins/apm/server/plugin.ts",
                 "deprecated": false,
@@ -421,7 +421,9 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ query: { _inspect: boolean; }; }"
+              "{ query: { _inspect: boolean; start?: number | undefined; end?: number | undefined; uiFilters?: ",
+              "UxUIFilters",
+              " | undefined; }; }"
             ],
             "path": "x-pack/plugins/apm/server/routes/typings.ts",
             "deprecated": false
@@ -593,7 +595,15 @@
                 "section": "def-server.RuleRegistryPluginStartContract",
                 "text": "RuleRegistryPluginStartContract"
               },
-              ">; }; security?: { setup: ",
+              ">; }; cloud?: { setup: ",
+              {
+                "pluginId": "cloud",
+                "scope": "server",
+                "docId": "kibCloudPluginApi",
+                "section": "def-server.CloudSetup",
+                "text": "CloudSetup"
+              },
+              "; start: () => Promise<undefined>; } | undefined; security?: { setup: ",
               {
                 "pluginId": "security",
                 "scope": "server",
@@ -675,15 +685,7 @@
                 "section": "def-server.SpacesPluginStart",
                 "text": "SpacesPluginStart"
               },
-              ">; } | undefined; cloud?: { setup: ",
-              {
-                "pluginId": "cloud",
-                "scope": "server",
-                "docId": "kibCloudPluginApi",
-                "section": "def-server.CloudSetup",
-                "text": "CloudSetup"
-              },
-              "; start: () => Promise<undefined>; } | undefined; taskManager?: { setup: ",
+              ">; } | undefined; taskManager?: { setup: ",
               {
                 "pluginId": "taskManager",
                 "scope": "server",
@@ -890,7 +892,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { environments: any; }, ",
+          ", { environments: string[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/services/{serviceName}/errors\": ",
           "ServerRoute",
@@ -944,7 +946,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { errorGroups: any; }, ",
+          ", { errorGroups: { message: string; occurrenceCount: number; culprit: string | undefined; groupId: string; latestOccurrenceAt: string; handled: boolean | undefined; type: string | undefined; }[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/services/{serviceName}/errors/{groupId}\": ",
           "ServerRoute",
@@ -991,13 +993,7 @@
             "text": "APMRouteHandlerResources"
           },
           ", { transaction: ",
-          "APMError",
-          " | ",
           "Transaction",
-          " | ",
-          "Span",
-          " | BaseMetric | ",
-          "Profile",
           " | undefined; error: ",
           "APMError",
           "; occurrencesCount: number; }, ",
@@ -1048,7 +1044,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { noHits: boolean; buckets: any; bucketSize: number; }, ",
+          ", { noHits: boolean; buckets: { key: number; count: number; }[]; bucketSize: number; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/services/{serviceName}/metrics/charts\": ",
           "ServerRoute",
@@ -1128,7 +1124,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { serviceCount: any; transactionPerMinute: { value: undefined; timeseries: never[]; } | { value: number; timeseries: any; }; }, ",
+          ", { serviceCount: number; transactionPerMinute: { value: undefined; timeseries: never[]; } | { value: number; timeseries: { x: number; y: number | null; }[]; }; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/observability_overview/has_data\": ",
           "ServerRoute",
@@ -1296,7 +1292,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { topItems: string[]; items: any; }, ",
+          ", { topItems: string[]; items: Record<string, number>[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/rum-client/services\": ",
           "ServerRoute",
@@ -1322,7 +1318,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { rumServices: any; }, ",
+          ", { rumServices: string[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/rum-client/visitor-breakdown\": ",
           "ServerRoute",
@@ -1354,7 +1350,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { os: any; browsers: any; }, ",
+          ", { os: { count: number; name: string; }[]; browsers: { count: number; name: string; }[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/rum-client/web-core-vitals\": ",
           "ServerRoute",
@@ -1386,7 +1382,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { coreVitalPages: any; cls: any; fid: any; lcp: any; tbt: any; fcp: any; lcpRanks: number[]; fidRanks: number[]; clsRanks: number[]; }, ",
+          ", { coreVitalPages: number; cls: number | null; fid: number | null | undefined; lcp: number | null | undefined; tbt: number; fcp: number | null | undefined; lcpRanks: number[]; fidRanks: number[]; clsRanks: number[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/rum-client/long-task-metrics\": ",
           "ServerRoute",
@@ -1508,7 +1504,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { indices: string; hasData: boolean; serviceName: any; }, ",
+          ", { indices: string; hasData: boolean; serviceName: string | number | undefined; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/service-map\": ",
           "ServerRoute",
@@ -1716,7 +1712,19 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { items: JoinedReturnType<any, any>; hasLegacyData: boolean; }, ",
+          ", { items: JoinedReturnType<{ serviceName: string; transactionType: string; environments: string[]; agentName: ",
+          "AgentName",
+          "; latency: number | null; transactionErrorRate: number; throughput: number; } | { serviceName: string; environments: string[]; agentName: ",
+          "AgentName",
+          "; } | { serviceName: string; healthStatus: ",
+          "ServiceHealthStatus",
+          "; }, { serviceName: string; transactionType: string; environments: string[]; agentName: ",
+          "AgentName",
+          "; latency: number | null; transactionErrorRate: number; throughput: number; } & { serviceName: string; environments: string[]; agentName: ",
+          "AgentName",
+          "; } & { serviceName: string; healthStatus: ",
+          "ServiceHealthStatus",
+          "; }>; hasLegacyData: boolean; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/services/detailed_statistics\": ",
           "ServerRoute",
@@ -1764,7 +1772,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentPeriod: _.Dictionary<any>; previousPeriod: _.Dictionary<any>; }, ",
+          ", { currentPeriod: _.Dictionary<{ serviceName: string; latency: { x: number; y: number | null; }[]; transactionErrorRate: { x: number; y: number; }[]; throughput: { x: number; y: number; }[]; }>; previousPeriod: _.Dictionary<{ serviceName: string; latency: { x: number; y: number | null; }[]; transactionErrorRate: { x: number; y: number; }[]; throughput: { x: number; y: number; }[]; }>; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/services/{serviceName}/metadata/details\": ",
           "ServerRoute",
@@ -1864,7 +1872,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { transactionTypes: any; }, ",
+          ", { transactionTypes: string[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/services/{serviceName}/node/{serviceNodeName}/metadata\": ",
           "ServerRoute",
@@ -2030,7 +2038,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { is_aggregation_accurate: boolean; error_groups: any; }, ",
+          ", { is_aggregation_accurate: boolean; error_groups: { group_id: string; name: string; lastSeen: number; occurrences: number; }[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/services/{serviceName}/error_groups/detailed_statistics\": ",
           "ServerRoute",
@@ -2116,9 +2124,29 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { '@timestamp': string; agent: ",
+          ", { '@timestamp': string; agent: (",
           "Agent",
-          " | { name: string; version: string; }; service: any; container: any; kubernetes: any; host: any; cloud: any; }, ",
+          " & { name: string; version: string; }) | ({ name: string; version: string; } & ",
+          "Agent",
+          "); service: ",
+          "Service",
+          " | (",
+          "Service",
+          " & { name: string; node?: { name: string; } | undefined; environment?: string | undefined; version?: string | undefined; }) | (",
+          "Service",
+          " & { node?: { name: string; } | undefined; }) | (",
+          "Service",
+          " & { name: string; node?: { name: string; } | undefined; environment?: string | undefined; version?: string | undefined; } & { node?: { name: string; } | undefined; }) | (",
+          "Service",
+          " & { node?: { name: string; } | undefined; } & { name: string; node?: { name: string; } | undefined; environment?: string | undefined; version?: string | undefined; }); container: ",
+          "Container",
+          " | undefined; kubernetes: ",
+          "Kubernetes",
+          " | undefined; host: ",
+          "Host",
+          " | undefined; cloud: ",
+          "Cloud",
+          " | undefined; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/services/{serviceName}/throughput\": ",
           "ServerRoute",
@@ -2178,7 +2206,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentPeriod: any; previousPeriod: { x: number; y: number | null | undefined; }[]; throughputUnit: ",
+          ", { currentPeriod: { x: number; y: number | null; }[]; previousPeriod: { x: number; y: number | null | undefined; }[]; throughputUnit: ",
           "ThroughputUnit",
           "; }, ",
           "APMRouteCreateOptions",
@@ -2440,7 +2468,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { breakdown: { title: string; data: any; }[]; }, ",
+          ", { breakdown: { title: string; data: { x: number; y: number; }[]; }[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/services/{serviceName}/profiling/timeline\": ",
           "ServerRoute",
@@ -2484,7 +2512,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { profilingTimeline: any; }, ",
+          ", { profilingTimeline: { x: number; valueTypes: { wall_time: number; cpu_time: number; samples: number; alloc_objects: number; alloc_space: number; inuse_objects: number; inuse_space: number; unknown: number; }; }[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/services/{serviceName}/profiling/statistics\": ",
           "ServerRoute",
@@ -2606,7 +2634,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { alerts: any[]; }, ",
+          ", { alerts: Partial<Record<string, unknown[]>>[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/services/{serviceName}/infrastructure\": ",
           "ServerRoute",
@@ -2650,7 +2678,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { serviceInfrastructure: { containerIds: any; hostNames: any; }; }, ",
+          ", { serviceInfrastructure: { containerIds: string[]; hostNames: string[]; }; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/traces/{traceId}\": ",
           "ServerRoute",
@@ -2678,9 +2706,9 @@
           "ProcessorEvent",
           ".transaction | ",
           "ProcessorEvent",
-          ".span>[]; errorDocs: TypeOfProcessorEvent<",
-          "ProcessorEvent",
-          ">[]; }, ",
+          ".span>[]; errorDocs: ",
+          "APMError",
+          "[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/traces\": ",
           "ServerRoute",
@@ -2740,9 +2768,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { transaction: TypeOfProcessorEvent<",
-          "ProcessorEvent",
-          ">; }, ",
+          ", { transaction: ",
+          "Transaction",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/transactions/{transactionId}\": ",
           "ServerRoute",
@@ -2760,9 +2788,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { transaction: TypeOfProcessorEvent<",
-          "ProcessorEvent",
-          ">; }, ",
+          ", { transaction: ",
+          "Transaction",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/services/{serviceName}/transactions/groups/main_statistics\": ",
           "ServerRoute",
@@ -2824,7 +2852,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { transactionGroups: any; isAggregationAccurate: boolean; bucketSize: number; }, ",
+          ", { transactionGroups: { transactionType: string; name: string; latency: number | null; throughput: number; errorRate: number; impact: number; }[]; isAggregationAccurate: boolean; bucketSize: number; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics\": ",
           "ServerRoute",
@@ -2976,7 +3004,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentPeriod: { overallAvgDuration: any; latencyTimeseries: any; }; previousPeriod: { latencyTimeseries: { x: number; y: number | null | undefined; }[]; overallAvgDuration: any; }; anomalyTimeseries: { jobId: string; anomalyScore: { x0: number; x: number; y: number; }[]; anomalyBoundaries: { x: number; y0: number; y: number; }[]; } | undefined; }, ",
+          ", { currentPeriod: { overallAvgDuration: number | null; latencyTimeseries: { x: number; y: number | null; }[]; }; previousPeriod: { latencyTimeseries: { x: number; y: number | null | undefined; }[]; overallAvgDuration: number | null; }; anomalyTimeseries: { jobId: string; anomalyScore: { x0: number; x: number; y: number; }[]; anomalyBoundaries: { x: number; y0: number; y: number; }[]; } | undefined; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/services/{serviceName}/transactions/traces/samples\": ",
           "ServerRoute",
@@ -3088,7 +3116,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { timeseries: { title: any; color: any; type: string; data: any; hideLegend: boolean; legendValue: string; }[]; }, ",
+          ", { timeseries: { title: string; color: string; type: string; data: { x: number; y: number | null; }[]; hideLegend: boolean; legendValue: string; }[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/services/{serviceName}/transactions/charts/error_rate\": ",
           "ServerRoute",
@@ -3204,7 +3232,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { errorRateChartPreview: any; }, ",
+          ", { errorRateChartPreview: { x: number; y: number; }[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/alerts/chart_preview/transaction_duration\": ",
           "ServerRoute",
@@ -3258,7 +3286,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { latencyChartPreview: any; }, ",
+          ", { latencyChartPreview: { x: number; y: number | null; }[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/alerts/chart_preview/transaction_error_count\": ",
           "ServerRoute",
@@ -3312,7 +3340,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { errorCountChartPreview: any; }, ",
+          ", { errorCountChartPreview: { x: number; y: number; }[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/settings/agent-configuration\": ",
           "ServerRoute",
@@ -3482,7 +3510,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { environments: { name: any; alreadyConfigured: any; }[]; }, ",
+          ", { environments: { name: string; alreadyConfigured: boolean; }[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/settings/agent-configuration/agent_name\": ",
           "ServerRoute",
@@ -3544,7 +3572,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { environments: any; }, ",
+          ", { environments: string[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/settings/apm-index-settings\": ",
           "ServerRoute",
@@ -3624,9 +3652,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", TypeOfProcessorEvent<",
-          "ProcessorEvent",
-          ">, ",
+          ", ",
+          "Transaction",
+          ", ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/settings/custom_links\": ",
           "ServerRoute",
@@ -4090,7 +4118,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { metadata: { spanType: any; spanSubtype: any; }; }, ",
+          ", { metadata: { spanType: string | undefined; spanSubtype: string | undefined; }; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/backends/{backendName}/charts/latency\": ",
           "ServerRoute",
@@ -4138,7 +4166,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentTimeseries: any; comparisonTimeseries: any; }, ",
+          ", { currentTimeseries: { x: number; y: number; }[]; comparisonTimeseries: { x: number; y: number; }[] | null; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/backends/{backendName}/charts/throughput\": ",
           "ServerRoute",
@@ -4186,7 +4214,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentTimeseries: any; comparisonTimeseries: any; }, ",
+          ", { currentTimeseries: { x: number; y: number | null; }[]; comparisonTimeseries: { x: number; y: number | null; }[] | null; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/backends/{backendName}/charts/error_rate\": ",
           "ServerRoute",
@@ -4234,7 +4262,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentTimeseries: any; comparisonTimeseries: any; }, ",
+          ", { currentTimeseries: { x: number; y: number; }[]; comparisonTimeseries: { x: number; y: number; }[] | null; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/fallback_to_transactions\": ",
           "ServerRoute",
