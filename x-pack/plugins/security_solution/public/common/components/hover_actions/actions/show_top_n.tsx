@@ -45,8 +45,10 @@ interface Props {
   onClick: () => void;
   onFilterAdded?: () => void;
   ownFocus: boolean;
+  paddingSize?: 's' | 'm' | 'l' | 'none';
   showTooltip?: boolean;
   showTopN: boolean;
+  showLegend?: boolean;
   timelineId?: string | null;
   title?: string;
   value?: string[] | string | null;
@@ -65,6 +67,8 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
     onClick,
     onFilterAdded,
     ownFocus,
+    paddingSize,
+    showLegend,
     showTooltip = true,
     showTopN,
     timelineId,
@@ -145,13 +149,26 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
           field={field}
           indexPattern={indexPattern}
           onFilterAdded={onFilterAdded}
+          paddingSize={paddingSize}
+          showLegend={showLegend}
           timelineId={timelineId ?? undefined}
           toggleTopN={onClick}
           value={value}
           globalFilters={globalFilters}
         />
       ),
-      [browserFields, field, indexPattern, onClick, onFilterAdded, timelineId, value, globalFilters]
+      [
+        browserFields,
+        field,
+        indexPattern,
+        onFilterAdded,
+        paddingSize,
+        showLegend,
+        timelineId,
+        onClick,
+        value,
+        globalFilters,
+      ]
     );
 
     if (isExpandable) {

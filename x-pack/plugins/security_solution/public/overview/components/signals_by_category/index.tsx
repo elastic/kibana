@@ -23,8 +23,10 @@ interface Props {
   headerChildren?: React.ReactNode;
   /** Override all defaults, and only display this field */
   onlyField?: AlertsStackByField;
+  paddingSize?: 's' | 'm' | 'l' | 'none';
   query?: Query;
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
+  showLegend?: boolean;
   timelineId?: string;
 }
 
@@ -33,7 +35,9 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
   filters,
   headerChildren,
   onlyField,
+  paddingSize,
   query,
+  showLegend,
   setAbsoluteRangeDatePickerTarget = 'global',
   timelineId,
 }) => {
@@ -61,16 +65,18 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
       combinedQueries={combinedQueries}
       filters={filters}
       headerChildren={headerChildren}
+      legendPosition={'right'}
       onlyField={onlyField}
-      titleSize={onlyField == null ? 'm' : 's'}
+      paddingSize={paddingSize}
       query={query}
-      signalIndexName={signalIndexName}
-      showTotalAlertsCount={true}
+      showLegend={showLegend}
       showLinkToAlerts={onlyField == null ? true : false}
       showStackBy={onlyField == null}
-      legendPosition={'right'}
+      showTotalAlertsCount={true}
+      signalIndexName={signalIndexName}
       timelineId={timelineId}
       title={i18n.ALERT_COUNT}
+      titleSize={onlyField == null ? 'm' : 's'}
       updateDateRange={updateDateRangeCallback}
     />
   );

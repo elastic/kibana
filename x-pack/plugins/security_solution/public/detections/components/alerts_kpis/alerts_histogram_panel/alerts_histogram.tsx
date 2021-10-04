@@ -31,6 +31,7 @@ interface AlertsHistogramProps {
   legendItems: LegendItem[];
   legendPosition?: Position;
   loading: boolean;
+  showLegend?: boolean;
   to: string;
   data: HistogramData[];
   updateDateRange: UpdateDateRange;
@@ -43,6 +44,7 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
     legendItems,
     legendPosition = 'right',
     loading,
+    showLegend,
     to,
     updateDateRange,
   }) => {
@@ -73,8 +75,8 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
               <Settings
                 legendPosition={legendPosition}
                 onBrushEnd={updateDateRange}
-                showLegend={legendItems.length === 0}
-                showLegendExtra
+                showLegend={showLegend && legendItems.length === 0}
+                showLegendExtra={showLegend}
                 theme={theme}
               />
 
