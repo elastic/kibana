@@ -15,8 +15,7 @@ const exportType = 'printablePdfV2';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const supertestNoAuth = getService('supertestWithoutAuth');
+  const supertest = getService('supertestWithoutAuth');
   const reportingAPI = getService('reportingAPI');
   const log = getService('log');
 
@@ -42,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.deleteAllSchedules();
     });
 
-    it(`listing API only shows the current user's schedules`, async () => {
+    it(`listing API`, async () => {
       {
         log.info(`adding a scheduled report under the 'elastic' user`);
         const scheduleResponse = await reportingAPI.scheduleReport(exportType, POST_URL, {
@@ -51,20 +50,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(scheduleResponse.status).eql(200);
         const schedule = JSON.parse(scheduleResponse.text).schedule;
         expect(schedule.params.created_by).eql('elastic');
-      }
-
-      {
-        log.info(`testing that the elastic user's schedule appears in the listing`);
-        const list = await supertest.get('/api/reporting/schedules/list');
-        expect(list.status).eql(200);
-        const schedules = JSON.parse(list.text).schedules as ConcreteTaskInstance[];
-        expect(schedules.length).eql(1);
-        const users = schedules.map((t) => t.params.created_by);
-        expectSnapshot(users).toMatchInline(`
-          Array [
-            "elastic",
-          ]
-        `);
       }
 
       {
@@ -82,7 +67,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       {
         log.info(`testing that 'elastic' user only sees their schedules`);
-        const list = await supertest.get('/api/reporting/schedules/list');
+        const list = await supertest
+          .get('/api/reporting/schedules/list')
+          .auth('elastic', 'changeme');
         expect(list.status).eql(200);
         const schedules = JSON.parse(list.text).schedules as ConcreteTaskInstance[];
         const users = schedules.map((t) => t.params.created_by);
@@ -96,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       {
         log.info(`testing that '${testUserName}' user only sees their schedules`);
-        const list = await supertestNoAuth
+        const list = await supertest
           .get('/api/reporting/schedules/list')
           .auth(testUserName, testUserPassword);
         expect(list.status).eql(200);
@@ -108,6 +95,77 @@ export default function ({ getService }: FtrProviderContext) {
           ]
         `);
         expect(schedules.length).eql(1);
+      }
+    });
+
+    it(`delete API`, async () => {
+      let scheduleIdTestUser: string;
+      let scheduleIdElastic: string;
+
+      {
+        log.info(`adding a scheduled report under the 'elastic' user`);
+        const scheduleResponse = await reportingAPI.scheduleReport(exportType, POST_URL, {
+          minutes: 2,
+        });
+        expect(scheduleResponse.status).eql(200);
+        const schedule = JSON.parse(scheduleResponse.text).schedule;
+        scheduleIdElastic = schedule.id;
+        expect(schedule.params.created_by).eql('elastic');
+      }
+
+      {
+        log.info(`adding a scheduled report under the 'reporting_user' user`);
+        const scheduleResponse = await reportingAPI.scheduleReport(
+          exportType,
+          POST_URL,
+          { minutes: 2 },
+          { username: testUserName, password: testUserPassword }
+        );
+        expect(scheduleResponse.status).eql(200);
+        const schedule = JSON.parse(scheduleResponse.text).schedule;
+        scheduleIdTestUser = schedule.id;
+        expect(schedule.params.created_by).eql(testUserName);
+        log.info(`received id ${scheduleIdTestUser} for scheduled report task`);
+      }
+
+      {
+        log.info(`testing that 'reporting_user' can not delete the 'elastic' schedule`);
+        const deleted = await supertest
+          .delete(`/api/reporting/schedules/delete/${scheduleIdElastic}`)
+          .set('kbn-xsrf', 'xxx')
+          .auth(testUserName, testUserPassword);
+        expectSnapshot(deleted.text).toMatchInline(
+          `"{\\"statusCode\\":404,\\"error\\":\\"Not Found\\",\\"message\\":\\"Not Found\\"}"`
+        );
+      }
+
+      {
+        log.info(`testing that 'elastic' can not delete the 'reporting_user' schedule`);
+        const deleted = await supertest
+          .delete(`/api/reporting/schedules/delete/${scheduleIdTestUser}`)
+          .set('kbn-xsrf', 'xxx')
+          .auth('elastic', 'changeme');
+        expectSnapshot(deleted.text).toMatchInline(
+          `"{\\"statusCode\\":404,\\"error\\":\\"Not Found\\",\\"message\\":\\"Not Found\\"}"`
+        );
+      }
+
+      {
+        log.info(`testing that 'reporting_user' can delete their own schedule`);
+        const deleted = await supertest
+          .delete(`/api/reporting/schedules/delete/${scheduleIdTestUser}`)
+          .set('kbn-xsrf', 'xxx')
+          .auth(testUserName, testUserPassword);
+        expectSnapshot(deleted.text).toMatchInline(`"{\\"deleted\\":true}"`);
+      }
+
+      {
+        log.info(`testing that 'elastic' can delete their own schedule`);
+        const deleted = await supertest
+          .delete(`/api/reporting/schedules/delete/${scheduleIdElastic}`)
+          .set('kbn-xsrf', 'xxx')
+          .auth('elastic', 'changeme');
+        expectSnapshot(deleted.text).toMatchInline(`"{\\"deleted\\":true}"`);
       }
     });
   });

@@ -70,4 +70,64 @@ export function registerScheduleInfoRoutes(reporting: ReportingCore) {
       });
     })
   );
+
+  /*
+   * WIP Delete a user's schedule
+   */
+  router.delete(
+    {
+      path: `${BASE_SCHEDULE}/delete/{scheduleId}`,
+      validate: {
+        params: schema.object({
+          scheduleId: schema.string({ minLength: 3 }),
+        }),
+      },
+    },
+    authorizedUserPreRouting(reporting, async (user, context, req, res) => {
+      if (!context.reporting) {
+        return handleUnavailable(res);
+      }
+
+      const { scheduleId } = req.params;
+
+      const { taskManager } = await reporting.getPluginStartDeps();
+      const { docs } = await taskManager.fetch({
+        size: 1,
+        query: {
+          constant_score: {
+            filter: {
+              bool: {
+                must: [
+                  { term: { 'task.taskType': 'report:execute' } },
+                  { term: { 'task.user': user ? user.username : user } },
+                  { term: { _id: `task:${scheduleId}` } },
+                ],
+              },
+            },
+          },
+        },
+      });
+
+      if (docs.length !== 1) {
+        return res.notFound();
+      }
+
+      let deleted = false;
+
+      try {
+        await taskManager.remove(scheduleId);
+        deleted = true;
+      } catch (err) {
+        const { logger } = reporting.getPluginSetupDeps();
+        logger.error(err);
+      }
+
+      return res.ok({
+        body: { deleted },
+        headers: {
+          'content-type': 'application/json',
+        },
+      });
+    })
+  );
 }
