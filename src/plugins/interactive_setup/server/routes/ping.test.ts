@@ -13,6 +13,7 @@ import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from
 import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
+import { ERROR_OUTSIDE_PREBOOT_STAGE, ERROR_PING_FAILURE } from '../../common';
 import { interactiveSetupMock } from '../mocks';
 import { routeDefinitionParamsMock } from './index.mock';
 import { definePingRoute } from './ping';
@@ -71,7 +72,7 @@ describe('Configure routes', () => {
           status: 400,
           payload: {
             attributes: {
-              type: 'outside_preboot_stage',
+              type: ERROR_OUTSIDE_PREBOOT_STAGE,
             },
             message: 'Cannot process request outside of preboot stage.',
           },
@@ -100,7 +101,7 @@ describe('Configure routes', () => {
       await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
         expect.objectContaining({
           status: 500,
-          payload: { message: 'Failed to ping cluster.', attributes: { type: 'ping_failure' } },
+          payload: { message: 'Failed to ping cluster.', attributes: { type: ERROR_PING_FAILURE } },
         })
       );
 

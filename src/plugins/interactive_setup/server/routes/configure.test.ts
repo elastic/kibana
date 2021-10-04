@@ -13,7 +13,14 @@ import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from
 import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
-import { ElasticsearchConnectionStatus } from '../../common';
+import {
+  ElasticsearchConnectionStatus,
+  ERROR_CONFIGURE_FAILURE,
+  ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED,
+  ERROR_KIBANA_CONFIG_FAILURE,
+  ERROR_KIBANA_CONFIG_NOT_WRITABLE,
+  ERROR_OUTSIDE_PREBOOT_STAGE,
+} from '../../common';
 import { interactiveSetupMock } from '../mocks';
 import { defineConfigureRoute } from './configure';
 import { routeDefinitionParamsMock } from './index.mock';
@@ -140,7 +147,7 @@ describe('Configure routes', () => {
           status: 400,
           payload: {
             attributes: {
-              type: 'outside_preboot_stage',
+              type: ERROR_OUTSIDE_PREBOOT_STAGE,
             },
             message: 'Cannot process request outside of preboot stage.',
           },
@@ -167,7 +174,7 @@ describe('Configure routes', () => {
           status: 400,
           payload: {
             message: 'Elasticsearch connection is already configured.',
-            attributes: { type: 'elasticsearch_connection_configured' },
+            attributes: { type: ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED },
           },
         })
       );
@@ -193,7 +200,7 @@ describe('Configure routes', () => {
           status: 500,
           payload: {
             message: 'Kibana process does not have enough permissions to write to config file.',
-            attributes: { type: 'kibana_config_not_writable' },
+            attributes: { type: ERROR_KIBANA_CONFIG_NOT_WRITABLE },
           },
         })
       );
@@ -225,7 +232,10 @@ describe('Configure routes', () => {
       await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
         expect.objectContaining({
           status: 500,
-          payload: { message: 'Failed to configure.', attributes: { type: 'configure_failure' } },
+          payload: {
+            message: 'Failed to configure.',
+            attributes: { type: ERROR_CONFIGURE_FAILURE },
+          },
         })
       );
 
@@ -253,7 +263,7 @@ describe('Configure routes', () => {
           status: 500,
           payload: {
             message: 'Failed to save configuration.',
-            attributes: { type: 'kibana_config_failure' },
+            attributes: { type: ERROR_KIBANA_CONFIG_FAILURE },
           },
         })
       );

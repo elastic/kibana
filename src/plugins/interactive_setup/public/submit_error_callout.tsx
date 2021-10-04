@@ -10,9 +10,18 @@ import { EuiButton, EuiCallOut } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { IHttpFetchError } from 'kibana/public';
+
+import {
+  ERROR_CONFIGURE_FAILURE,
+  ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED,
+  ERROR_ENROLL_FAILURE,
+  ERROR_KIBANA_CONFIG_FAILURE,
+  ERROR_KIBANA_CONFIG_NOT_WRITABLE,
+  ERROR_OUTSIDE_PREBOOT_STAGE,
+  ERROR_PING_FAILURE,
+} from '../common';
 
 export interface SubmitErrorCalloutProps {
   error: Error;
@@ -23,18 +32,19 @@ export const SubmitErrorCallout: FunctionComponent<SubmitErrorCalloutProps> = (p
   const error = props.error as IHttpFetchError;
 
   if (
-    error.body?.attributes?.type === 'outside_preboot_stage' ||
-    error.body?.attributes?.type === 'elasticsearch_connection_configured'
+    error.body?.statusCode === 404 ||
+    error.body?.attributes?.type === ERROR_OUTSIDE_PREBOOT_STAGE ||
+    error.body?.attributes?.type === ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED
   ) {
     return (
       <EuiCallOut
         color="primary"
-        title={i18n.translate(
-          'interactiveSetup.submitErrorCallout.elasticsearchConnectionConfiguredErrorTitle',
-          {
-            defaultMessage: 'Elastic is already configured',
-          }
-        )}
+        title={
+          <FormattedMessage
+            id="interactiveSetup.submitErrorCallout.elasticsearchConnectionConfiguredErrorTitle"
+            defaultMessage="Elastic is already configured"
+          />
+        }
       >
         <EuiButton
           onClick={() => {
@@ -56,33 +66,37 @@ export const SubmitErrorCallout: FunctionComponent<SubmitErrorCalloutProps> = (p
     <EuiCallOut
       color="danger"
       title={
-        error.body?.attributes?.type === 'kibana_config_not_writable'
-          ? i18n.translate(
-              'interactiveSetup.submitErrorCallout.kibanaConfigNotWritableErrorTitle',
-              {
-                defaultMessage: 'Config file is not writable',
-              }
-            )
-          : error.body?.attributes?.type === 'kibana_config_failure'
-          ? i18n.translate('interactiveSetup.submitErrorCallout.kibanaConfigFailureErrorTitle', {
-              defaultMessage: "Couldn't write to config file",
-            })
-          : error.body?.attributes?.type === 'enroll_failure'
-          ? i18n.translate('interactiveSetup.submitErrorCallout.EnrollFailureErrorTitle', {
-              defaultMessage: "Couldn't enroll with cluster",
-            })
-          : error.body?.attributes?.type === 'configure_failure'
-          ? i18n.translate('interactiveSetup.submitErrorCallout.configureFailureErrorTitle', {
-              defaultMessage: "Couldn't configure Kibana",
-            })
-          : error.body?.attributes?.type === 'ping_failure'
-          ? i18n.translate('interactiveSetup.submitErrorCallout.pingFailureErrorTitle', {
-              defaultMessage: "Couldn't connect to cluster",
-            })
-          : props.defaultTitle
+        error.body?.attributes?.type === ERROR_KIBANA_CONFIG_NOT_WRITABLE ? (
+          <FormattedMessage
+            id="interactiveSetup.submitErrorCallout.kibanaConfigNotWritableErrorTitle"
+            defaultMessage="Config file is not writable"
+          />
+        ) : error.body?.attributes?.type === ERROR_KIBANA_CONFIG_FAILURE ? (
+          <FormattedMessage
+            id="interactiveSetup.submitErrorCallout.kibanaConfigFailureErrorTitle"
+            defaultMessage="Couldn't write to config file"
+          />
+        ) : error.body?.attributes?.type === ERROR_ENROLL_FAILURE ? (
+          <FormattedMessage
+            id="interactiveSetup.submitErrorCallout.enrollFailureErrorTitle"
+            defaultMessage="Couldn't enroll with cluster"
+          />
+        ) : error.body?.attributes?.type === ERROR_CONFIGURE_FAILURE ? (
+          <FormattedMessage
+            id="interactiveSetup.submitErrorCallout.configureFailureErrorTitle"
+            defaultMessage="Couldn't configure Kibana"
+          />
+        ) : error.body?.attributes?.type === ERROR_PING_FAILURE ? (
+          <FormattedMessage
+            id="interactiveSetup.submitErrorCallout.pingFailureErrorTitle"
+            defaultMessage="Couldn't connect to cluster"
+          />
+        ) : (
+          props.defaultTitle
+        )
       }
     >
-      {error.body?.attributes?.type === 'kibana_config_not_writable' ? (
+      {error.body?.attributes?.type === ERROR_KIBANA_CONFIG_NOT_WRITABLE ? (
         <FormattedMessage
           id="interactiveSetup.submitErrorCallout.kibanaConfigNotWritableErrorDescription"
           defaultMessage="Check {config} file permissions and ensure Kibana process can write to it."
@@ -90,7 +104,7 @@ export const SubmitErrorCallout: FunctionComponent<SubmitErrorCalloutProps> = (p
             config: <strong>kibana.yml</strong>,
           }}
         />
-      ) : error.body?.attributes?.type === 'kibana_config_failure' ? (
+      ) : error.body?.attributes?.type === ERROR_KIBANA_CONFIG_FAILURE ? (
         <FormattedMessage
           id="interactiveSetup.submitErrorCallout.kibanaConfigFailureErrorDescription"
           defaultMessage="Retry or update {config} file manually."
@@ -98,12 +112,12 @@ export const SubmitErrorCallout: FunctionComponent<SubmitErrorCalloutProps> = (p
             config: <strong>kibana.yml</strong>,
           }}
         />
-      ) : error.body?.attributes?.type === 'enroll_failure' ? (
+      ) : error.body?.attributes?.type === ERROR_ENROLL_FAILURE ? (
         <FormattedMessage
           id="interactiveSetup.submitErrorCallout.EnrollFailureErrorDescription"
           defaultMessage="Generate a new enrollment token or configure manually."
         />
-      ) : error.body?.attributes?.type === 'configure_failure' ? (
+      ) : error.body?.attributes?.type === ERROR_CONFIGURE_FAILURE ? (
         <FormattedMessage
           id="interactiveSetup.submitErrorCallout.configureFailureErrorDescription"
           defaultMessage="Retry or update {config} file manually."
@@ -111,7 +125,7 @@ export const SubmitErrorCallout: FunctionComponent<SubmitErrorCalloutProps> = (p
             config: <strong>kibana.yml</strong>,
           }}
         />
-      ) : error.body?.attributes?.type === 'ping_failure' ? (
+      ) : error.body?.attributes?.type === ERROR_PING_FAILURE ? (
         <FormattedMessage
           id="interactiveSetup.submitErrorCallout.pingFailureErrorDescription"
           defaultMessage="Check address and retry."

@@ -116,7 +116,13 @@ export const VerificationCodeForm: FunctionComponent<VerificationCodeFormProps> 
                   id="interactiveSetup.verificationCodeForm.codeDescription"
                   defaultMessage="Copy the code from the Kibana server or run {command} to retrieve it."
                   values={{
-                    command: <EuiCode language="bash">./bin/kibana-verification-code</EuiCode>,
+                    command: (
+                      <EuiCode language="bash">
+                        {window.navigator.userAgent.includes('Win')
+                          ? 'bin\\kibana-verification-code.bat'
+                          : 'bin/kibana-verification-code'}
+                      </EuiCode>
+                    ),
                   }}
                 />
               </p>
