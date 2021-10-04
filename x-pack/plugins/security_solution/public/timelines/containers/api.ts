@@ -22,6 +22,7 @@ import {
   ResponseFavoriteTimeline,
   AllTimelinesResponse,
   SingleTimelineResponse,
+  SingleTimelineResolveResponse,
   allTimelinesResponse,
   responseFavoriteTimeline,
   GetTimelinesArgs,
@@ -314,7 +315,7 @@ export const getTimeline = async (id: string) => {
 };
 
 export const resolveTimeline = async (id: string) => {
-  const response = await KibanaServices.get().http.get<SingleTimelineResponse>(
+  const response = await KibanaServices.get().http.get<SingleTimelineResolveResponse>(
     TIMELINE_RESOLVE_URL,
     {
       query: {
@@ -327,14 +328,11 @@ export const resolveTimeline = async (id: string) => {
 };
 
 export const getTimelineTemplate = async (templateTimelineId: string) => {
-  const response = await KibanaServices.get().http.get<SingleTimelineResolveResponse>(
-    TIMELINE_URL,
-    {
-      query: {
-        template_timeline_id: templateTimelineId,
-      },
-    }
-  );
+  const response = await KibanaServices.get().http.get<SingleTimelineResponse>(TIMELINE_URL, {
+    query: {
+      template_timeline_id: templateTimelineId,
+    },
+  });
 
   return decodeSingleTimelineResponse(response);
 };
