@@ -27,3 +27,4 @@ All files with a .stories.tsx extension will be loaded. You can access the devel
 - [Routing and Linking](./dev_docs/routing_and_linking.md)
 - [Telemetry](./dev_docs/telemetry.md)
 - [Features flags](./dev_docs/feature_flags.md)
+- [Official APM UI settings docs](https://www.elastic.co/guide/en/kibana/current/apm-settings-in-kibana.html)

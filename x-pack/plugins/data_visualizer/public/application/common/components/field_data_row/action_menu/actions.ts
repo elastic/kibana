@@ -20,13 +20,14 @@ import {
 
 export function getActions(
   indexPattern: IndexPattern,
-  services: DataVisualizerKibanaReactContextValue['services'],
+  services: Partial<DataVisualizerKibanaReactContextValue['services']>,
   combinedQuery: CombinedQuery,
   actionFlyoutRef: MutableRefObject<(() => void | undefined) | undefined>
 ): Array<Action<FieldVisConfig>> {
-  const { lens: lensPlugin, indexPatternFieldEditor } = services;
+  const { lens: lensPlugin, data } = services;
 
   const actions: Array<Action<FieldVisConfig>> = [];
+  const filters = data?.query.filterManager.getFilters() ?? [];
 
   const refreshPage = () => {
     const refresh: Refresh = {
@@ -49,7 +50,7 @@ export function getActions(
       available: (item: FieldVisConfig) =>
         getCompatibleLensDataType(item.type) !== undefined && canUseLensEditor,
       onClick: (item: FieldVisConfig) => {
-        const lensAttributes = getLensAttributes(indexPattern, combinedQuery, item);
+        const lensAttributes = getLensAttributes(indexPattern, combinedQuery, filters, item);
         if (lensAttributes) {
           lensPlugin.navigateToPrefilledEditor({
             id: `dataVisualizer-${item.fieldName}`,
@@ -62,7 +63,7 @@ export function getActions(
   }
 
   // Allow to edit index pattern field
-  if (indexPatternFieldEditor?.userPermissions.editIndexPattern()) {
+  if (services.indexPatternFieldEditor?.userPermissions.editIndexPattern()) {
     actions.push({
       name: i18n.translate('xpack.dataVisualizer.index.dataGrid.editIndexPatternFieldTitle', {
         defaultMessage: 'Edit index pattern field',
@@ -76,7 +77,7 @@ export function getActions(
       type: 'icon',
       icon: 'indexEdit',
       onClick: (item: FieldVisConfig) => {
-        actionFlyoutRef.current = indexPatternFieldEditor?.openEditor({
+        actionFlyoutRef.current = services.indexPatternFieldEditor?.openEditor({
           ctx: { indexPattern },
           fieldName: item.fieldName,
           onSave: refreshPage,
@@ -100,7 +101,7 @@ export function getActions(
         return item.deletable === true;
       },
       onClick: (item: FieldVisConfig) => {
-        actionFlyoutRef.current = indexPatternFieldEditor?.openDeleteModal({
+        actionFlyoutRef.current = services.indexPatternFieldEditor?.openDeleteModal({
           ctx: { indexPattern },
           fieldName: item.fieldName!,
           onDelete: refreshPage,
