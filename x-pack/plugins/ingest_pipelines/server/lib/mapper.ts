@@ -31,6 +31,14 @@ interface Mapping {
 }
 
 export function mapToIngestPipeline(file: string, copyAction: FieldCopyAction) {
+  if (!copyAction) {
+    throw new Error(
+      i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.noDefaultAction', {
+        defaultMessage: 'Error parsing file',
+      })
+    );
+  }
+  
   if (!file || file.length === 0) {
     return null;
   }
@@ -45,7 +53,7 @@ export function mapToIngestPipeline(file: string, copyAction: FieldCopyAction) {
   if (errors.length > 0) {
     throw new Error(
       i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.parseErrors', {
-        defaultMessage: 'Error parsing file',
+        defaultMessage: 'Error reading file: An unexpected issue occured during the processing of the file',
       })
     );
   }
