@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { FilterValueButton } from './filter_value_btn';
-import { mockUseSeriesFilter, mockUseValuesList, render } from '../../rtl_helpers';
+import { mockUxSeries, mockUseSeriesFilter, mockUseValuesList, render } from '../../rtl_helpers';
 import {
   USER_AGENT_NAME,
   USER_AGENT_VERSION,
@@ -19,84 +19,98 @@ describe('FilterValueButton', function () {
     render(
       <FilterValueButton
         field={USER_AGENT_NAME}
-        seriesId={'series-id'}
+        seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: '', negate: false }}
         setIsNestedOpen={jest.fn()}
         negate={false}
-      />
-    );
-
-    screen.getByText('Chrome');
-  });
-
-  it('should render display negate state', async function () {
-    render(
-      <FilterValueButton
-        field={USER_AGENT_NAME}
-        seriesId={'series-id'}
-        value={'Chrome'}
-        isNestedOpen={{ value: '', negate: false }}
-        setIsNestedOpen={jest.fn()}
-        negate={true}
+        series={mockUxSeries}
       />
     );
 
     await waitFor(() => {
-      screen.getByText('Not Chrome');
-      screen.getByTitle('Not Chrome');
-      const btn = screen.getByRole('button');
-      expect(btn.classList).toContain('euiButtonEmpty--danger');
+      expect(screen.getByText('Chrome')).toBeInTheDocument();
     });
   });
 
-  it('should call set filter on click', async function () {
-    const { setFilter, removeFilter } = mockUseSeriesFilter();
+  describe('when negate is true', () => {
+    it('displays negate stats', async () => {
+      render(
+        <FilterValueButton
+          field={USER_AGENT_NAME}
+          seriesId={0}
+          value={'Chrome'}
+          isNestedOpen={{ value: '', negate: false }}
+          setIsNestedOpen={jest.fn()}
+          negate={true}
+          series={mockUxSeries}
+        />
+      );
 
-    render(
-      <FilterValueButton
-        field={USER_AGENT_NAME}
-        seriesId={'series-id'}
-        value={'Chrome'}
-        isNestedOpen={{ value: '', negate: false }}
-        setIsNestedOpen={jest.fn()}
-        negate={true}
-        allSelectedValues={['Firefox']}
-      />
-    );
+      await waitFor(() => {
+        expect(screen.getByText('Not Chrome')).toBeInTheDocument();
+        expect(screen.getByTitle('Not Chrome')).toBeInTheDocument();
+        const btn = screen.getByRole('button');
+        expect(btn.classList).toContain('euiButtonEmpty--danger');
+      });
+    });
 
-    await waitFor(() => {
+    it('calls setFilter on click', async () => {
+      const { setFilter, removeFilter } = mockUseSeriesFilter();
+
+      render(
+        <FilterValueButton
+          field={USER_AGENT_NAME}
+          seriesId={0}
+          value={'Chrome'}
+          isNestedOpen={{ value: '', negate: false }}
+          setIsNestedOpen={jest.fn()}
+          negate={true}
+          allSelectedValues={['Firefox']}
+          series={mockUxSeries}
+        />
+      );
+
       fireEvent.click(screen.getByText('Not Chrome'));
-      expect(removeFilter).toHaveBeenCalledTimes(0);
-      expect(setFilter).toHaveBeenCalledTimes(1);
-      expect(setFilter).toHaveBeenCalledWith({
-        field: 'user_agent.name',
-        negate: true,
-        value: 'Chrome',
+
+      await waitFor(() => {
+        expect(removeFilter).toHaveBeenCalledTimes(0);
+        expect(setFilter).toHaveBeenCalledTimes(1);
+
+        expect(setFilter).toHaveBeenCalledWith({
+          field: 'user_agent.name',
+          negate: true,
+          value: 'Chrome',
+        });
       });
     });
   });
 
-  it('should remove filter on click if already selected', async function () {
-    const { removeFilter } = mockUseSeriesFilter();
+  describe('when selected', () => {
+    it('removes the filter on click', async () => {
+      const { removeFilter } = mockUseSeriesFilter();
 
-    render(
-      <FilterValueButton
-        field={USER_AGENT_NAME}
-        seriesId={'series-id'}
-        value={'Chrome'}
-        isNestedOpen={{ value: '', negate: false }}
-        setIsNestedOpen={jest.fn()}
-        negate={false}
-        allSelectedValues={['Chrome', 'Firefox']}
-      />
-    );
-    await waitFor(() => {
+      render(
+        <FilterValueButton
+          field={USER_AGENT_NAME}
+          seriesId={0}
+          value={'Chrome'}
+          isNestedOpen={{ value: '', negate: false }}
+          setIsNestedOpen={jest.fn()}
+          negate={false}
+          allSelectedValues={['Chrome', 'Firefox']}
+          series={mockUxSeries}
+        />
+      );
+
       fireEvent.click(screen.getByText('Chrome'));
-      expect(removeFilter).toHaveBeenCalledWith({
-        field: 'user_agent.name',
-        negate: false,
-        value: 'Chrome',
+
+      await waitFor(() => {
+        expect(removeFilter).toHaveBeenCalledWith({
+          field: 'user_agent.name',
+          negate: false,
+          value: 'Chrome',
+        });
       });
     });
   });
@@ -107,12 +121,13 @@ describe('FilterValueButton', function () {
     render(
       <FilterValueButton
         field={USER_AGENT_NAME}
-        seriesId={'series-id'}
+        seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: '', negate: false }}
         setIsNestedOpen={jest.fn()}
         negate={true}
         allSelectedValues={['Chrome', 'Firefox']}
+        series={mockUxSeries}
       />
     );
 
@@ -134,13 +149,14 @@ describe('FilterValueButton', function () {
     render(
       <FilterValueButton
         field={USER_AGENT_NAME}
-        seriesId={'series-id'}
+        seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: 'Chrome', negate: false }}
         setIsNestedOpen={jest.fn()}
         negate={false}
         allSelectedValues={['Chrome', 'Firefox']}
         nestedField={USER_AGENT_VERSION}
+        series={mockUxSeries}
       />
     );
 
@@ -167,13 +183,14 @@ describe('FilterValueButton', function () {
     render(
       <FilterValueButton
         field={USER_AGENT_NAME}
-        seriesId={'series-id'}
+        seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: 'Chrome', negate: false }}
         setIsNestedOpen={jest.fn()}
         negate={false}
         allSelectedValues={['Chrome', 'Firefox']}
         nestedField={USER_AGENT_VERSION}
+        series={mockUxSeries}
       />
     );
 
@@ -203,13 +220,14 @@ describe('FilterValueButton', function () {
     render(
       <FilterValueButton
         field={USER_AGENT_NAME}
-        seriesId={'series-id'}
+        seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: '', negate: false }}
         setIsNestedOpen={setIsNestedOpen}
         negate={false}
         allSelectedValues={['Chrome', 'Firefox']}
         nestedField={USER_AGENT_VERSION}
+        series={mockUxSeries}
       />
     );
 
@@ -229,13 +247,14 @@ describe('FilterValueButton', function () {
     render(
       <FilterValueButton
         field={USER_AGENT_NAME}
-        seriesId={'series-id'}
+        seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: '', negate: true }}
         setIsNestedOpen={setIsNestedOpen}
         negate={true}
         allSelectedValues={['Firefox']}
         nestedField={USER_AGENT_VERSION}
+        series={mockUxSeries}
       />
     );
 
