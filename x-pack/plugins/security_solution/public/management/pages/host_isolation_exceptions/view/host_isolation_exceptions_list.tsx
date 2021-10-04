@@ -28,7 +28,7 @@ import { AdministrationListPage } from '../../../components/administration_list_
 import { SearchExceptions } from '../../../components/search_exceptions';
 import { ArtifactEntryCard, ArtifactEntryCardProps } from '../../../components/artifact_entry_card';
 import { HostIsolationExceptionsEmptyState } from './components/empty';
-import { HostIsolationExceptionsFlyout } from './components/flyout';
+import { HostIsolationExceptionsFormFlyout } from './components/form_flyout';
 
 type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -110,7 +110,7 @@ export const HostIsolationExceptionsList = () => {
         </EuiButton>
       }
     >
-      {showFlyout && <HostIsolationExceptionsFlyout onCancel={handleCancelButtonClick} />}
+      {showFlyout && <HostIsolationExceptionsFormFlyout onCancel={handleCancelButtonClick} />}
 
       <SearchExceptions
         defaultValue={location.filter}

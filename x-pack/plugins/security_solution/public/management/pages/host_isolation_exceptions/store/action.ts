@@ -18,6 +18,11 @@ export type HostIsolationExceptionsFormStateChanged =
     payload: HostIsolationExceptionsPageState['form']['status'];
   };
 
+export type HostIsolationExceptionsFormEntryChanged =
+  Action<'hostIslationExceptionsFormEntryChanged'> & {
+    payload: HostIsolationExceptionsPageState['form']['entry'];
+  };
+
 export type HostIsolationExceptionsPageAction =
   | HostIsolationExceptionsPageDataChanged
   | HostIsolationExceptionsFormStateChanged;

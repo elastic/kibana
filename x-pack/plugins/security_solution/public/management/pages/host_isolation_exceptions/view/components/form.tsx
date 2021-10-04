@@ -16,8 +16,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useMemo, useState } from 'react';
-import { useHostIsolationExceptionsSelector } from '../hooks';
+import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   NAME_ERROR,
   NAME_LABEL,
@@ -29,17 +29,26 @@ import {
   IP_PLACEHOLDER,
 } from './translations';
 
-export const HostIsolationExceptionsForm: React.FC<{}> = () => {
-  // const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
-  const exception = useHostIsolationExceptionsSelector((state) => state.form.entry);
+interface ExceptionIpEntry {
+  field: 'destination.ip';
+  operator: 'included';
+  type: 'match';
+  value: '';
+}
+
+export const HostIsolationExceptionsForm: React.FC<{
+  exception: CreateExceptionListItemSchema;
+  onError: (error: boolean) => void;
+  onChange: (exception: CreateExceptionListItemSchema) => void;
+}> = memo(({ exception, onError, onChange }) => {
   const [hasBeenInputNameVisited, setHasBeenInputNameVisited] = useState(false);
   const [hasBeenInputIpVisited, setHasBeenInputIpVisited] = useState(false);
   const [hasNameError, setHasNameError] = useState(false);
   const [hasIpError, setHasIpError] = useState(false);
-  const [exceptionName, setExeptionName] = useState(exception?.name);
-  const [exceptionDescription, setExeptionDescription] = useState(exception?.description);
-  // TODO fix this
-  const [exceptionIp, setExeptionIp] = useState(exception?.entries[0]?.value);
+
+  useEffect(() => {
+    onError(hasNameError || hasIpError);
+  }, [hasNameError, hasIpError, onError]);
 
   const handleOnChangeName = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,9 +58,9 @@ export const HostIsolationExceptionsForm: React.FC<{}> = () => {
         return;
       }
       setHasNameError(false);
-      setExeptionName(name);
+      onChange({ ...exception, name });
     },
-    [setHasNameError, setExeptionName]
+    [exception, onChange]
   );
 
   const handleOnIpChange = useCallback(
@@ -63,14 +72,27 @@ export const HostIsolationExceptionsForm: React.FC<{}> = () => {
         return;
       }
       setHasIpError(false);
-      setExeptionIp(ip);
+      onChange({
+        ...exception,
+        entries: [
+          {
+            field: 'destination.ip',
+            operator: 'included',
+            type: 'match',
+            value: ip,
+          },
+        ],
+      });
     },
-    [setHasIpError, setExeptionIp]
+    [exception, onChange]
   );
 
-  const handleOnDescriptionChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setExeptionDescription(event.target.value);
-  }, []);
+  const handleOnDescriptionChange = useCallback(
+    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+      onChange({ ...exception, description: event.target.value });
+    },
+    [exception, onChange]
+  );
 
   const nameInput = useMemo(
     () => (
@@ -83,7 +105,7 @@ export const HostIsolationExceptionsForm: React.FC<{}> = () => {
         <EuiFieldText
           id="eventFiltersFormInputName"
           placeholder={NAME_PLACEHOLDER}
-          defaultValue={exceptionName ?? ''}
+          defaultValue={exception.name ?? ''}
           onChange={handleOnChangeName}
           fullWidth
           aria-label={NAME_PLACEHOLDER}
@@ -93,7 +115,7 @@ export const HostIsolationExceptionsForm: React.FC<{}> = () => {
         />
       </EuiFormRow>
     ),
-    [hasNameError, exceptionName, hasBeenInputNameVisited, handleOnChangeName]
+    [hasNameError, hasBeenInputNameVisited, exception.name, handleOnChangeName]
   );
 
   const ipInput = useMemo(
@@ -107,7 +129,7 @@ export const HostIsolationExceptionsForm: React.FC<{}> = () => {
         <EuiFieldText
           id="eventFiltersFormInputName"
           placeholder={IP_PLACEHOLDER}
-          defaultValue={exceptionIp ?? ''}
+          defaultValue={(exception.entries?.[0] as ExceptionIpEntry)?.value ?? ''}
           onChange={handleOnIpChange}
           fullWidth
           aria-label={IP_PLACEHOLDER}
@@ -117,17 +139,16 @@ export const HostIsolationExceptionsForm: React.FC<{}> = () => {
         />
       </EuiFormRow>
     ),
-    [hasIpError, hasBeenInputIpVisited, exceptionIp, handleOnIpChange]
+    [hasIpError, hasBeenInputIpVisited, exception.entries, handleOnIpChange]
   );
 
-  // TOOD - this should be an area text
   const descriptionInput = useMemo(
     () => (
       <EuiFormRow label={DESCRIPTION_LABEL} fullWidth>
         <EuiTextArea
           id="eventFiltersFormInputName"
           placeholder={DESCRIPTION_PLACEHOLDER}
-          defaultValue={exceptionIp ?? ''}
+          defaultValue={exception.description ?? ''}
           onChange={handleOnDescriptionChange}
           fullWidth
           aria-label={DESCRIPTION_PLACEHOLDER}
@@ -135,7 +156,7 @@ export const HostIsolationExceptionsForm: React.FC<{}> = () => {
         />
       </EuiFormRow>
     ),
-    [exceptionIp, handleOnDescriptionChange]
+    [exception.description, handleOnDescriptionChange]
   );
 
   return (
@@ -151,7 +172,7 @@ export const HostIsolationExceptionsForm: React.FC<{}> = () => {
       <EuiText size="s">
         <FormattedMessage
           id="xpack.securitySolution.hostIsolationExceptions.form.description"
-          defaultMessage="Adds an IP to the Host Isolation Exceptions. Only accepts IPv4 with optional CIDR"
+          defaultMessage="Add an IP to the Host Isolation Exceptions. Only accepts IPv4 with optional CIDR"
         />
       </EuiText>
       <EuiSpacer size="m" />
@@ -177,6 +198,6 @@ export const HostIsolationExceptionsForm: React.FC<{}> = () => {
       {ipInput}
     </EuiForm>
   );
-};
+});
 
 HostIsolationExceptionsForm.displayName = 'HostIsolationExceptionsForm';

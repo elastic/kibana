@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useEffect, useCallback } from 'react';
+import React, { memo, useMemo, useEffect, useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 
@@ -21,6 +21,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { Loader } from '../../../../../common/components/loader';
 import { HostIsolationExceptionsPageAction } from '../../store/action';
 import { HostIsolationExceptionsForm } from './form';
 import { useHostIsolationExceptionsSelector } from '../hooks';
@@ -28,8 +30,9 @@ import {
   isLoadedResourceState,
   isLoadingResourceState,
 } from '../../../../state/async_resource_state';
+import { createEmptyHostIsolationException } from '../../utils';
 
-export const HostIsolationExceptionsFlyout: React.FC<{
+export const HostIsolationExceptionsFormFlyout: React.FC<{
   type?: 'create' | 'edit';
   id?: string;
   onCancel(): void;
@@ -37,9 +40,14 @@ export const HostIsolationExceptionsFlyout: React.FC<{
   // useEventFiltersNotification();
   const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
 
-  const formHasError = useHostIsolationExceptionsSelector(
-    (state) => state.form.hasNameError || state.form.hasIpError
-  );
+  const [formHasError, setFormHasError] = useState(true);
+
+  const [exception, setException] = useState<CreateExceptionListItemSchema | undefined>(undefined);
+
+  useEffect(() => {
+    setException(createEmptyHostIsolationException());
+  }, []);
+
   const creationInProgress = useHostIsolationExceptionsSelector((state) =>
     isLoadingResourceState(state.form.status)
   );
@@ -82,7 +90,7 @@ export const HostIsolationExceptionsFlyout: React.FC<{
     [formHasError, creationInProgress]
   );
 
-  return (
+  return exception ? (
     <EuiFlyout
       size="l"
       onClose={handleOnCancel}
@@ -100,7 +108,11 @@ export const HostIsolationExceptionsFlyout: React.FC<{
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <HostIsolationExceptionsForm />
+        <HostIsolationExceptionsForm
+          onChange={setException}
+          exception={exception}
+          onError={setFormHasError}
+        />
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
@@ -117,7 +129,9 @@ export const HostIsolationExceptionsFlyout: React.FC<{
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
+  ) : (
+    <Loader size="xl" />
   );
 });
 
-HostIsolationExceptionsFlyout.displayName = 'HostIsolationExceptionsFlyout';
+HostIsolationExceptionsFormFlyout.displayName = 'HostIsolationExceptionsFormFlyout';

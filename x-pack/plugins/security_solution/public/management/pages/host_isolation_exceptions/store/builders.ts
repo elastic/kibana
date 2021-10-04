@@ -19,7 +19,5 @@ export const initialHostIsolationExceptionsPageState = (): HostIsolationExceptio
   form: {
     entry: undefined,
     status: createUninitialisedResourceState(),
-    hasNameError: false,
-    hasIpError: false,
   },
 });
