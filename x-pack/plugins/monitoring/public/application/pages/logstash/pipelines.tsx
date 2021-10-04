@@ -23,7 +23,7 @@ export const LogStashPipelinesPage: React.FC<ComponentProps> = ({ clusters }) =>
   const { onBrush } = useCharts();
   const { services } = useKibana<{ data: any }>();
   const dateFormat = useUiSetting<string>('dateFormat');
-  
+
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
 
@@ -44,8 +44,8 @@ export const LogStashPipelinesPage: React.FC<ComponentProps> = ({ clusters }) =>
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
-    const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/logstash/pipelines`;
-    
+    const url = `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipelines`;
+
     const options: any = getPaginationRouteOptions();
     const response = await services.http?.fetch(url, {
       method: 'POST',
@@ -62,17 +62,22 @@ export const LogStashPipelinesPage: React.FC<ComponentProps> = ({ clusters }) =>
 
     setData(response);
     updateTotalItemCount(response.totalPipelineCount);
-  }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http, getPaginationRouteOptions, updateTotalItemCount]);
+  }, [
+    ccs,
+    clusterUuid,
+    services.data?.query.timefilter.timefilter,
+    services.http,
+    getPaginationRouteOptions,
+    updateTotalItemCount,
+  ]);
 
   const renderOverview = (pageData: any) => {
     if (pageData === null) {
       return null;
     }
     const { clusterStatus, pipelines } = pageData || {};
-    
-    const upgradeMessage = pageData
-            ? makeUpgradeMessage(clusterStatus.versions)
-            : null;
+
+    const upgradeMessage = pageData ? makeUpgradeMessage(clusterStatus.versions) : null;
     return (
       <PipelineListing
         className="monitoringLogstashPipelinesTable"

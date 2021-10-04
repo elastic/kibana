@@ -7,6 +7,8 @@
 import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
+import moment from 'moment';
+import { useRouteMatch } from 'react-router-dom';
 import { useKibana, useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../global_state_context';
 import { ComponentProps } from '../../route_init';
@@ -22,20 +24,18 @@ import { PipelineState } from '../../../components/logstash/pipeline_viewer/mode
 import { vertexFactory } from '../../../components/logstash/pipeline_viewer/models/graph/vertex_factory';
 import { LogstashTemplate } from './logstash_template';
 import { useTable } from '../../hooks/use_table';
-import moment from 'moment';
 import { ExternalConfigContext } from '../../external_config_context';
 import { formatTimestampToDuration } from '../../../../common';
 import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
-import { useRouteMatch } from 'react-router-dom';
 
 export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => {
-  const match = useRouteMatch<{id: string | undefined, hash: string | undefined}>();
-  const {hash: pipelineHash, id: pipelineId} = match.params;
+  const match = useRouteMatch<{ id: string | undefined; hash: string | undefined }>();
+  const { hash: pipelineHash, id: pipelineId } = match.params;
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
   const clusterUuid = globalState.cluster_uuid;
-  const {minIntervalSeconds} = useContext(ExternalConfigContext);
-  
+  const { minIntervalSeconds } = useContext(ExternalConfigContext);
+
   const dateFormat = useUiSetting<string>('dateFormat');
   const [pipelineState, setPipelineState] = useState<PipelineState | null>(null);
   const ccs = globalState.ccs;
@@ -44,8 +44,7 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
   });
   const [data, setData] = useState({} as any);
   const [detailVertexId, setDetailVertexId] = useState<string | null>(null);
-  const { getPaginationRouteOptions, updateTotalItemCount, getPaginationTableProps } =
-    useTable('logstash.pipelines');
+  const { getPaginationRouteOptions, updateTotalItemCount } = useTable('logstash.pipelines');
 
   const title = i18n.translate('xpack.monitoring.logstash.pipeline.routeTitle', {
     defaultMessage: 'Logstash - Pipeline',
@@ -106,27 +105,37 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
     });
     setData(myData);
     updateTotalItemCount(response.totalNodeCount);
-  }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http, getPaginationRouteOptions, updateTotalItemCount]);
+  }, [
+    ccs,
+    clusterUuid,
+    services.http,
+    updateTotalItemCount,
+    detailVertexId,
+    minIntervalSeconds,
+    pipelineHash,
+    pipelineId,
+  ]);
 
   useEffect(() => {
     if (data.pipeline) {
-      console.log('data.pipeline', data.pipeline)
-      setPipelineState(new PipelineState(data.pipeline))
+      setPipelineState(new PipelineState(data.pipeline));
     }
-  }, [data])
+  }, [data]);
 
   const timeseriesTooltipXValueFormatter = (xValue: any) => moment(xValue).format(dateFormat);
 
-  const onVertexChange = useCallback((vertex: any) => {
-    if (!vertex) {
-      setDetailVertexId(null)
-    } else {
-      setDetailVertexId(vertex.id)
-    }
+  const onVertexChange = useCallback(
+    (vertex: any) => {
+      if (!vertex) {
+        setDetailVertexId(null);
+      } else {
+        setDetailVertexId(vertex.id);
+      }
 
-    getPageData()
-  }, [getPageData]);
-
+      getPageData();
+    },
+    [getPageData]
+  );
 
   return (
     <LogstashTemplate
@@ -136,16 +145,15 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
       cluster={cluster}
     >
       <div>
-        {pipelineState && <PipelineViewer
-          pipeline={List.fromPipeline(
-            Pipeline.fromPipelineGraph(pipelineState.config.graph)
-          )}
-          timeseriesTooltipXValueFormatter={timeseriesTooltipXValueFormatter}
-          setDetailVertexId={onVertexChange}
-          detailVertex={data.vertex ? vertexFactory(null, data.vertex) : null}
-        />}
+        {pipelineState && (
+          <PipelineViewer
+            pipeline={List.fromPipeline(Pipeline.fromPipelineGraph(pipelineState.config.graph))}
+            timeseriesTooltipXValueFormatter={timeseriesTooltipXValueFormatter}
+            setDetailVertexId={onVertexChange}
+            detailVertex={data.vertex ? vertexFactory(null, data.vertex) : null}
+          />
+        )}
       </div>
     </LogstashTemplate>
   );
 };
-

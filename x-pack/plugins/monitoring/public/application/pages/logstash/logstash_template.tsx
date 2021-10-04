@@ -8,7 +8,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { PageTemplate } from '../page_template';
 import { TabMenuItem, PageTemplateProps } from '../page_template';
-import { ML_SUPPORTED_LICENSES } from '../../../../common/constants';
 
 interface LogstashTemplateProps extends PageTemplateProps {
   cluster: any;
