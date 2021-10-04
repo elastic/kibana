@@ -9,4 +9,4 @@
  * getKibanaRolesByFeature
  */
 
-export { getPrivilegeDeprecationsServices } from './privilege_deprecations';
+export { getPrivilegeDeprecationsService } from './privilege_deprecations';

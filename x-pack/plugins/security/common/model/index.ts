@@ -36,5 +36,5 @@ export {
 export {
   PrivilegeDeprecationsRolesByFeatureIdRequest,
   PrivilegeDeprecationsRolesByFeatureIdResponse,
-  PrivilegeDeprecationsServices,
+  PrivilegeDeprecationsService,
 } from './deprecations';

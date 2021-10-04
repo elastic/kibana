@@ -18,7 +18,7 @@ export interface PrivilegeDeprecationsRolesByFeatureIdRequest {
   context: GetDeprecationsContext;
   featureId: string;
 }
-export interface PrivilegeDeprecationsServices {
+export interface PrivilegeDeprecationsService {
   getKibanaRolesByFeatureId: (
     args: PrivilegeDeprecationsRolesByFeatureIdRequest
   ) => Promise<PrivilegeDeprecationsRolesByFeatureIdResponse>;

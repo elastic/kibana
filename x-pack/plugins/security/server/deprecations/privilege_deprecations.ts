@@ -17,7 +17,7 @@ import { transformElasticsearchRoleToRole } from '../authorization';
 import type { AuthorizationServiceSetupInternal, ElasticsearchRole } from '../authorization';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 
-export const getPrivilegeDeprecationsServices = (
+export const getPrivilegeDeprecationsService = (
   authz: Pick<AuthorizationServiceSetupInternal, 'applicationName'>,
   license: SecurityLicense,
   logger: Logger
@@ -49,14 +49,11 @@ export const getPrivilegeDeprecationsServices = (
       const statusCode = getErrorStatusCode(e);
       const isUnauthorized = statusCode === 403;
       const message = isUnauthorized
-        ? i18n.translate(
-            'xpack.security.privilegeDeprecationsServices.error.unauthorized.message',
-            {
-              defaultMessage: `You must have the 'manage_security' cluster privilege to fix role deprecations.`,
-            }
-          )
+        ? i18n.translate('xpack.security.privilegeDeprecationsService.error.unauthorized.message', {
+            defaultMessage: `You must have the 'manage_security' cluster privilege to fix role deprecations.`,
+          })
         : i18n.translate(
-            'xpack.security.privilegeDeprecationsServices.error.retrievingRoles.message',
+            'xpack.security.privilegeDeprecationsService.error.retrievingRoles.message',
             {
               defaultMessage: `Error retrieving roles for privilege deprecations: {message}`,
               values: {
@@ -80,14 +77,14 @@ export const getPrivilegeDeprecationsServices = (
       return {
         errors: [
           {
-            title: i18n.translate('xpack.security.privilegeDeprecationsServices.error.title', {
+            title: i18n.translate('xpack.security.privilegeDeprecationsService.error.title', {
               defaultMessage: `Error in privilege deprecations services`,
             }),
             level: 'fetch_error',
             message,
             correctiveActions: {
               manualSteps: [
-                i18n.translate('xpack.security.privilegeDeprecationsServices.manualSteps.message', {
+                i18n.translate('xpack.security.privilegeDeprecationsService.manualSteps.message', {
                   defaultMessage:
                     'A user with the "manage_security" cluster privilege is required to perform this check.',
                 }),

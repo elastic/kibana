@@ -123,7 +123,7 @@ describe('Security Plugin', () => {
             "isEnabled": [Function],
             "isLicenseAvailable": [Function],
           },
-          "privilegeDeprecationsServicess": Object {
+          "privilegeDeprecationsService": Object {
             "getKibanaRolesByFeatureId": [Function],
           },
         }

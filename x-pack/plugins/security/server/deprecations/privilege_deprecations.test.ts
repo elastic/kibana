@@ -8,20 +8,20 @@
 import type { GetDeprecationsContext } from 'src/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
-import { getPrivilegeDeprecationsServices } from '.';
+import { getPrivilegeDeprecationsService } from '.';
 import { licenseMock } from '../../common/licensing/index.mock';
 
 const kibanaIndexName = '.a-kibana-index';
 const application = `kibana-${kibanaIndexName}`;
 
-describe('#getPrivilegeDeprecationsServices', () => {
+describe('#getPrivilegeDeprecationsService', () => {
   describe('#getKibanaRolesByFeatureId', () => {
     const mockAsCurrentUser = elasticsearchServiceMock.createScopedClusterClient();
     const mockLicense = licenseMock.create();
     const mockLogger = loggingSystemMock.createLogger();
     const authz = { applicationName: application };
 
-    const { getKibanaRolesByFeatureId } = getPrivilegeDeprecationsServices(
+    const { getKibanaRolesByFeatureId } = getPrivilegeDeprecationsService(
       authz,
       mockLicense,
       mockLogger

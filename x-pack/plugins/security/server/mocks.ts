@@ -28,7 +28,7 @@ function createSetupMock() {
     },
     registerSpacesService: jest.fn(),
     license: licenseMock.create(),
-    privilegeDeprecationsServicess: {
+    privilegeDeprecationsService: {
       getKibanaRolesByFeatureId: jest.fn(),
     },
   };
