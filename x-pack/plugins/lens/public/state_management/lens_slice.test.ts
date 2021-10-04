@@ -40,7 +40,7 @@ describe('lensSlice', () => {
       store.dispatch(
         updateVisualizationState({
           visualizationId: 'testVis',
-          updater: newVisState,
+          newState: newVisState,
         })
       );
 

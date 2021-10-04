@@ -73,8 +73,7 @@ export function LayerPanels(
       dispatchLens(
         updateVisualizationState({
           visualizationId: activeVisualization.id,
-          updater: newState,
-          clearStagedPreview: false,
+          newState,
         })
       );
     },

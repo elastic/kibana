@@ -89,8 +89,7 @@ export const updateDatasourceState = createAction<{
 }>('lens/updateDatasourceState');
 export const updateVisualizationState = createAction<{
   visualizationId: string;
-  updater: unknown;
-  clearStagedPreview?: boolean;
+  newState: unknown;
 }>('lens/updateVisualizationState');
 
 export const insertLayer = createAction<{
@@ -227,8 +226,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       }: {
         payload: {
           visualizationId: string;
-          updater: unknown | ((state: unknown) => unknown);
-          clearStagedPreview?: boolean;
+          newState: unknown;
         };
       }
     ) => {
@@ -245,12 +243,8 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         ...state,
         visualization: {
           ...state.visualization,
-          state:
-            typeof payload.updater === 'function'
-              ? payload.updater(current(state.visualization.state))
-              : payload.updater,
+          state: payload.newState,
         },
-        stagedPreview: payload.clearStagedPreview ? undefined : state.stagedPreview,
       };
     },
 
