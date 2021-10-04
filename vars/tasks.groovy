@@ -162,7 +162,6 @@ def functionalXpack(Map params = [:]) {
         task(kibanaPipeline.functionalTestProcess('xpack-UptimePlaywright', './test/scripts/jenkins_uptime_playwright.sh'))
       }
     }
-
   }
 }
 
