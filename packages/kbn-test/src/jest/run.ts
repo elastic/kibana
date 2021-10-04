@@ -84,7 +84,7 @@ export function runJest(configName = 'jest.config.js') {
     reportTime(runStartTime, 'total', {
       success: true,
       isXpack: cwd.includes('x-pack'),
-      testFiles: map(testFiles, (testFile) => relative(testFile, cwd)),
+      testFiles: map(testFiles, (testFile) => relative(cwd, testFile)),
     });
   });
 }
