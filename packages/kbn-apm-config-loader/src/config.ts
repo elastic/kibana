@@ -113,6 +113,7 @@ export class ApmConfiguration {
 
     if (process.env.ELASTIC_APM_ACTIVE === 'true') {
       config.active = true;
+      config.disableSend = false;
     }
 
     if (process.env.ELASTIC_APM_DISABLE_SEND === 'true') {
