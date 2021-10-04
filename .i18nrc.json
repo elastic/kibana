@@ -9,6 +9,7 @@
     "bfetch": "src/plugins/bfetch",
     "dashboard": "src/plugins/dashboard",
     "data": "src/plugins/data",
+    "dataViews": "src/plugins/data_views",
     "embeddableApi": "src/plugins/embeddable",
     "embeddableExamples": "examples/embeddable_examples",
     "fieldFormats": "src/plugins/field_formats",

@@ -23,7 +23,7 @@ import { roundToDecimalPlace, kibanaFieldFormat } from '../utils';
 import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header';
 import { FieldVisStats } from '../../../../../common/types';
 import { ExpandedRowPanel } from '../stats_table/components/field_data_expanded_row/expanded_row_panel';
-import { IndexPatternField } from '../../../../../../../../src/plugins/data/common/data_views/fields';
+import { IndexPatternField } from '../../../../../../../../src/plugins/data_views/common';
 
 interface Props {
   stats: FieldVisStats | undefined;

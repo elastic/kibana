@@ -6,12 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './utils';
-export {
-  IndexPatternsFetcher,
-  FieldDescriptor,
-  shouldReadFieldFromDocValues,
-  mergeCapabilitiesWithFields,
-  getCapabilitiesForRollupIndices,
-} from './fetcher';
-export { IndexPatternsServiceProvider, IndexPatternsServiceStart } from './index_patterns_service';
+export * from '../../../data_views/server';
