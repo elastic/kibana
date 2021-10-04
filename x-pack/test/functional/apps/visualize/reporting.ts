@@ -42,7 +42,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Print PDF button', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/113496, https://github.com/elastic/kibana/issues/113520
+    describe.skip('Print PDF button', () => {
       it('is available if new', async () => {
         await PageObjects.common.navigateToUrl('visualize', 'new', { useActualUrl: true });
         await PageObjects.visualize.clickAggBasedVisualizations();
