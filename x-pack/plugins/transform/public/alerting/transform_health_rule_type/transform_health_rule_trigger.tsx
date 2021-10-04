@@ -18,7 +18,8 @@ import { useToastNotifications } from '../../app/app_dependencies';
 import { GetTransformsResponseSchema } from '../../../common/api_schemas/transforms';
 import { ALL_TRANSFORMS_SELECTION } from '../../../common/constants';
 
-export type TransformHealthRuleTriggerProps = AlertTypeParamsExpressionProps<TransformHealthRuleParams>;
+export type TransformHealthRuleTriggerProps =
+  AlertTypeParamsExpressionProps<TransformHealthRuleParams>;
 
 const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
   alertParams,
@@ -33,11 +34,10 @@ const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
   const [transformOptions, setTransformOptions] = useState<string[]>([]);
 
   const onAlertParamChange = useCallback(
-    <T extends keyof TransformHealthRuleParams>(param: T) => (
-      update: TransformHealthRuleParams[T]
-    ) => {
-      setAlertParams(param, update);
-    },
+    <T extends keyof TransformHealthRuleParams>(param: T) =>
+      (update: TransformHealthRuleParams[T]) => {
+        setAlertParams(param, update);
+      },
     [setAlertParams]
   );
 
