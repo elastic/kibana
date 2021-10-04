@@ -1,0 +1,60 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import '../../../__mocks__/engine_logic.mock';
+
+import { setMockValues } from '../../../../__mocks__/kea_logic';
+
+import React from 'react';
+
+import { shallow } from 'enzyme';
+import { cloneDeep, set } from 'lodash';
+
+import { SuggestionsCallout } from '../components/suggestions_callout';
+
+import { SuggestedDocumentsCallout } from './suggested_documents_callout';
+
+const MOCK_VALUES = {
+  // CurationLogic
+  curation: {
+    suggestion: {
+      status: 'pending',
+      updated_at: '2021-01-01T00:30:00Z',
+    },
+    queries: ['some query'],
+  },
+};
+
+describe('SuggestedDocumentsCallout', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setMockValues(MOCK_VALUES);
+  });
+
+  it('renders', () => {
+    const wrapper = shallow(<SuggestedDocumentsCallout />);
+
+    expect(wrapper.is(SuggestionsCallout));
+  });
+
+  it('is empty when the suggested is undefined', () => {
+    setMockValues({ ...MOCK_VALUES, curation: {} });
+
+    const wrapper = shallow(<SuggestedDocumentsCallout />);
+
+    expect(wrapper.isEmptyRender()).toBe(true);
+  });
+
+  it('is empty when curation status is not pending', () => {
+    const values = cloneDeep(MOCK_VALUES); // set mutates so we cloneDeep first
+    set(values, 'curation.suggestion.status', 'applied');
+    setMockValues(values);
+
+    const wrapper = shallow(<SuggestedDocumentsCallout />);
+
+    expect(wrapper.isEmptyRender()).toBe(true);
+  });
+});
