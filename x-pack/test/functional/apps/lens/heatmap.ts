@@ -93,86 +93,86 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ]);
     });
 
-    // it('should not change when passing from percentage to number', async () => {
-    //   await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
-    //   await PageObjects.header.waitUntilLoadingHasFinished();
+    it('should not change when passing from percentage to number', async () => {
+      await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
-    //   const debugState = await PageObjects.lens.getCurrentChartDebugState();
+      const debugState = await PageObjects.lens.getCurrentChartDebugState();
 
-    //   if (!debugState) {
-    //     throw new Error('Debug state is not available');
-    //   }
+      if (!debugState) {
+        throw new Error('Debug state is not available');
+      }
 
-    //   // assert legend has changed
-    //   expect(debugState.legend!.items).to.eql([
-    //     { key: '7,126 - 8,529.22', name: '7,126 - 8,529.22', color: '#6092c0' },
-    //     { key: '8,529.22 - 11,335.66', name: '8,529.22 - 11,335.66', color: '#a8bfda' },
-    //     { key: '11,335.66 - 14,142.11', name: '11,335.66 - 14,142.11', color: '#ebeff5' },
-    //     { key: '14,142.11 - 16,948.55', name: '14,142.11 - 16,948.55', color: '#ecb385' },
-    //     { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#e7664c' },
-    //   ]);
-    // });
+      // assert legend has changed
+      expect(debugState.legend!.items).to.eql([
+        { key: '7,126 - 8,529.22', name: '7,126 - 8,529.22', color: '#6092c0' },
+        { key: '8,529.22 - 11,335.66', name: '8,529.22 - 11,335.66', color: '#a8bfda' },
+        { key: '11,335.66 - 14,142.11', name: '11,335.66 - 14,142.11', color: '#ebeff5' },
+        { key: '14,142.11 - 16,948.55', name: '14,142.11 - 16,948.55', color: '#ecb385' },
+        { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#e7664c' },
+      ]);
+    });
 
-    // it('should reflect stop changes when in number to the chart', async () => {
-    //   await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '0', {
-    //     clearWithKeyboard: true,
-    //   });
-    //   await PageObjects.header.waitUntilLoadingHasFinished();
+    it('should reflect stop changes when in number to the chart', async () => {
+      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '0', {
+        clearWithKeyboard: true,
+      });
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
-    //   const debugState = await PageObjects.lens.getCurrentChartDebugState();
+      const debugState = await PageObjects.lens.getCurrentChartDebugState();
 
-    //   if (!debugState) {
-    //     throw new Error('Debug state is not available');
-    //   }
+      if (!debugState) {
+        throw new Error('Debug state is not available');
+      }
 
-    //   // assert legend has changed
-    //   expect(debugState.legend!.items).to.eql([
-    //     { key: '0 - 8,529.22', name: '0 - 8,529.22', color: '#6092c0' },
-    //     { key: '8,529.22 - 11,335.66', name: '8,529.22 - 11,335.66', color: '#a8bfda' },
-    //     { key: '11,335.66 - 14,142.11', name: '11,335.66 - 14,142.11', color: '#ebeff5' },
-    //     { key: '14,142.11 - 16,948.55', name: '14,142.11 - 16,948.55', color: '#ecb385' },
-    //     { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#e7664c' },
-    //   ]);
-    // });
+      // assert legend has changed
+      expect(debugState.legend!.items).to.eql([
+        { key: '0 - 8,529.22', name: '0 - 8,529.22', color: '#6092c0' },
+        { key: '8,529.22 - 11,335.66', name: '8,529.22 - 11,335.66', color: '#a8bfda' },
+        { key: '11,335.66 - 14,142.11', name: '11,335.66 - 14,142.11', color: '#ebeff5' },
+        { key: '14,142.11 - 16,948.55', name: '14,142.11 - 16,948.55', color: '#ecb385' },
+        { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#e7664c' },
+      ]);
+    });
 
-    // it('should reset stop numbers when changing palette', async () => {
-    //   await PageObjects.lens.changePaletteTo('status');
-    //   await PageObjects.header.waitUntilLoadingHasFinished();
+    it('should reset stop numbers when changing palette', async () => {
+      await PageObjects.lens.changePaletteTo('status');
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
-    //   const debugState = await PageObjects.lens.getCurrentChartDebugState();
+      const debugState = await PageObjects.lens.getCurrentChartDebugState();
 
-    //   if (!debugState) {
-    //     throw new Error('Debug state is not available');
-    //   }
+      if (!debugState) {
+        throw new Error('Debug state is not available');
+      }
 
-    //   // assert legend has changed
-    //   expect(debugState.legend!.items).to.eql([
-    //     { key: '5,722.77 - 8,529.22', name: '5,722.77 - 8,529.22', color: '#209280' },
-    //     { key: '8,529.22 - 11,335.66', name: '8,529.22 - 11,335.66', color: '#54b399' },
-    //     { key: '11,335.66 - 14,142.11', name: '11,335.66 - 14,142.11', color: '#d6bf57' },
-    //     { key: '14,142.11 - 16,948.55', name: '14,142.11 - 16,948.55', color: '#e7664c' },
-    //     { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#cc5642' },
-    //   ]);
-    // });
+      // assert legend has changed
+      expect(debugState.legend!.items).to.eql([
+        { key: '5,722.77 - 8,529.22', name: '5,722.77 - 8,529.22', color: '#209280' },
+        { key: '8,529.22 - 11,335.66', name: '8,529.22 - 11,335.66', color: '#54b399' },
+        { key: '11,335.66 - 14,142.11', name: '11,335.66 - 14,142.11', color: '#d6bf57' },
+        { key: '14,142.11 - 16,948.55', name: '14,142.11 - 16,948.55', color: '#e7664c' },
+        { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#cc5642' },
+      ]);
+    });
 
-    // it('should not change when passing from number to percent', async () => {
-    //   await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_percent');
-    //   await PageObjects.header.waitUntilLoadingHasFinished();
+    it('should not change when passing from number to percent', async () => {
+      await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_percent');
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
-    //   const debugState = await PageObjects.lens.getCurrentChartDebugState();
+      const debugState = await PageObjects.lens.getCurrentChartDebugState();
 
-    //   if (!debugState) {
-    //     throw new Error('Debug state is not available');
-    //   }
+      if (!debugState) {
+        throw new Error('Debug state is not available');
+      }
 
-    //   // assert legend has not changed
-    //   expect(debugState.legend!.items).to.eql([
-    //     { key: '5,722.77 - 8,529.22', name: '5,722.77 - 8,529.22', color: '#209280' },
-    //     { key: '8,529.22 - 11,335.66', name: '8,529.22 - 11,335.66', color: '#54b399' },
-    //     { key: '11,335.66 - 14,142.11', name: '11,335.66 - 14,142.11', color: '#d6bf57' },
-    //     { key: '14,142.11 - 16,948.55', name: '14,142.11 - 16,948.55', color: '#e7664c' },
-    //     { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#cc5642' },
-    //   ]);
-    // });
+      // assert legend has not changed
+      expect(debugState.legend!.items).to.eql([
+        { key: '5,722.77 - 8,529.22', name: '5,722.77 - 8,529.22', color: '#209280' },
+        { key: '8,529.22 - 11,335.66', name: '8,529.22 - 11,335.66', color: '#54b399' },
+        { key: '11,335.66 - 14,142.11', name: '11,335.66 - 14,142.11', color: '#d6bf57' },
+        { key: '14,142.11 - 16,948.55', name: '14,142.11 - 16,948.55', color: '#e7664c' },
+        { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#cc5642' },
+      ]);
+    });
   });
 }
