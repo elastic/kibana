@@ -56,8 +56,8 @@ else
 fi
 
 # These are for backwards-compatibility
-export GIT_COMMIT="$BUILDKITE_COMMIT"
-export GIT_BRANCH="$BUILDKITE_BRANCH"
+export GIT_COMMIT="${BUILDKITE_COMMIT:-}"
+export GIT_BRANCH="${BUILDKITE_BRANCH:-}"
 
 export FLEET_PACKAGE_REGISTRY_PORT=6104
 export TEST_CORS_SERVER_PORT=6105
