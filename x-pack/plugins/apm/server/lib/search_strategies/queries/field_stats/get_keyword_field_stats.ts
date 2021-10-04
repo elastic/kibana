@@ -6,7 +6,10 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { SearchRequest } from '@elastic/elasticsearch/api/types';
+import {
+  AggregationsAggregationContainer,
+  SearchRequest,
+} from '@elastic/elasticsearch/api/types';
 import { get } from 'lodash';
 import { FieldValuePair } from '../../../../../common/search_strategies/types';
 import { getQueryWithParams } from '../get_query_with_params';
@@ -36,7 +39,7 @@ export const getKeywordFieldStatsRequest = (
   const size = 0;
   const aggs: Aggs = {};
 
-  const top = {
+  const top: AggregationsAggregationContainer = {
     terms: {
       field: fieldName,
       size: 10,

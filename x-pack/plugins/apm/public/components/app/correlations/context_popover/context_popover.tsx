@@ -42,11 +42,6 @@ export function CorrelationsContextPopover({
 }) {
   const [infoIsOpen, setOpen] = useState(false);
   const theme = useTheme();
-  const popoverStyle = {
-    minWidth: `calc(${theme.eui.euiSizeXXL} * 6.5)`,
-    maxWidth: `calc(${theme.eui.euiSizeXXL} * 7.5)`,
-    background: 'red',
-  };
 
   if (!isTopValuesStats(stats)) return null;
   const popoverTitle = (
@@ -70,7 +65,7 @@ export function CorrelationsContextPopover({
           content={i18n.translate(
             'xpack.apm.correlations.fieldContextPopover.descriptionTooltipContent',
             {
-              defaultMessage: 'Show Top 10 field values',
+              defaultMessage: 'Show top 10 field values',
             }
           )}
         >
@@ -82,7 +77,7 @@ export function CorrelationsContextPopover({
             aria-label={i18n.translate(
               'xpack.apm.correlations.fieldContextPopover.topFieldValuesAriaLabel',
               {
-                defaultMessage: 'Show Top 10 field values',
+                defaultMessage: 'Show top 10 field values',
               }
             )}
             data-test-subj={'apmCorrelationsContextPopoverButton'}

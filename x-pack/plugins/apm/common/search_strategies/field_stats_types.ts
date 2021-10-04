@@ -21,7 +21,7 @@ export interface Field {
 }
 
 export interface Aggs {
-  [key: string]: any;
+  [key: string]: estypes.AggregationsAggregationContainer;
 }
 
 export interface TopValueBucket {

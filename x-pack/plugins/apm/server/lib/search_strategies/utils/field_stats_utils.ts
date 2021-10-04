@@ -79,16 +79,3 @@ export function getSafeAggregationName(
 ): string {
   return fieldName.match(/^[a-zA-Z0-9-_.]+$/) ? fieldName : `field_${index}`;
 }
-
-export const isPopulatedObject = <U extends string = string>(
-  arg: unknown,
-  requiredAttributes: U[] = []
-): arg is Record<U, unknown> => {
-  return (
-    typeof arg === 'object' &&
-    arg !== null &&
-    Object.keys(arg).length > 0 &&
-    (requiredAttributes.length === 0 ||
-      requiredAttributes.every((d) => ({}.hasOwnProperty.call(arg, d))))
-  );
-};

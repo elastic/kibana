@@ -135,7 +135,6 @@ export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransact
 
         let fieldCandidatesFetchedCount = 0;
         const fieldsToSample = new Set<string>();
-        // let fieldsToSample = new Set<string>();
         if (params !== undefined && fieldCandidates.length > 0) {
           const batches = chunk(fieldCandidates, 10);
           for (let i = 0; i < batches.length; i++) {

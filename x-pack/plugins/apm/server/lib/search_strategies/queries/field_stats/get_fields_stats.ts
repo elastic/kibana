@@ -57,7 +57,6 @@ export const fetchFieldsStats = async (
             );
             break;
 
-          // case TYPE_DEFINITION.numeric.subTypes?.types
           case 'numeric':
           case 'number':
           case ES_FIELD_TYPES.FLOAT:
