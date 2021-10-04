@@ -8,7 +8,7 @@
 
 import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { getSavedSearchFullPathUrl } from './saved_searches_utils';
+import { getSavedSearchUrl } from './saved_searches_utils';
 import { SAVED_SEARCH_TYPE } from './constants';
 
 import type { SavedSearch } from './types';
@@ -30,7 +30,7 @@ export const useSavedSearchAliasMatchRedirect = ({
 
         if (spaces && aliasTargetId && outcome === 'aliasMatch') {
           await spaces.ui.redirectLegacyUrl(
-            getSavedSearchFullPathUrl(aliasTargetId),
+            getSavedSearchUrl(aliasTargetId),
             i18n.translate('discover.savedSearchAliasMatchRedirect.objectNoun', {
               defaultMessage: '{savedSearch} {type}',
               values: {

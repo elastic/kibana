@@ -31,10 +31,7 @@ describe('useSavedSearchAliasMatchRedirect', () => {
 
     renderHook(() => useSavedSearchAliasMatchRedirect({ spaces, savedSearch }));
 
-    expect(spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith(
-      '/app/discover#/view/aliasTargetId',
-      ' search'
-    );
+    expect(spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith('#/view/aliasTargetId', ' search');
   });
 
   test('should not render URLConflictCallout if outcome !== aliasMatch', () => {

@@ -147,22 +147,20 @@ export function useDiscoverState({
    */
   const resetSavedSearch = useCallback(
     async (id?: string) => {
-      if (id) {
-        const newSavedSearch = await getSavedSearch(id, {
-          search: services.data.search,
-          savedObjectsClient: services.core.savedObjects.client,
-        });
+      const newSavedSearch = await getSavedSearch(id, {
+        search: services.data.search,
+        savedObjectsClient: services.core.savedObjects.client,
+      });
 
-        const newIndexPattern = newSavedSearch.searchSource.getField('index') || indexPattern;
-        newSavedSearch.searchSource.setField('index', newIndexPattern);
-        const newAppState = getStateDefaults({
-          config,
-          data,
-          savedSearch: newSavedSearch,
-        });
-        await stateContainer.replaceUrlAppState(newAppState);
-        setState(newAppState);
-      }
+      const newIndexPattern = newSavedSearch.searchSource.getField('index') || indexPattern;
+      newSavedSearch.searchSource.setField('index', newIndexPattern);
+      const newAppState = getStateDefaults({
+        config,
+        data,
+        savedSearch: newSavedSearch,
+      });
+      await stateContainer.replaceUrlAppState(newAppState);
+      setState(newAppState);
     },
     [indexPattern, services, config, data, stateContainer]
   );
