@@ -12,9 +12,9 @@ import { setBreadcrumbsTitle } from '../../helpers/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
 import { useDiscoverState } from './services/use_discover_state';
 import { useUrl } from './services/use_url';
-import { IndexPatternAttributes, SavedObject } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
+import { DiscoverDataViewEntry } from './discover_main_route';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -26,7 +26,7 @@ export interface DiscoverMainProps {
   /**
    * List of available index patterns
    */
-  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  indexPatternList: DiscoverDataViewEntry[];
   /**
    * Kibana core services used by discover
    */
@@ -35,6 +35,8 @@ export interface DiscoverMainProps {
    * Current instance of SavedSearch
    */
   savedSearch: SavedSearch;
+  setIndexPatternTimefield: (field: string) => void;
+  onAddIndexPattern: (value: string) => void;
 }
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
@@ -66,6 +68,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     services,
     history,
     savedSearch,
+    indexPatternList,
   });
 
   /**
@@ -112,6 +115,8 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
       services={services}
       state={state}
       stateContainer={stateContainer}
+      setIndexPatternTimefield={props.setIndexPatternTimefield}
+      onAddIndexPattern={props.onAddIndexPattern}
     />
   );
 }

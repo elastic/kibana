@@ -9,13 +9,11 @@
 import { i18n } from '@kbn/i18n';
 import type { IndexPattern, IndexPatternsContract, SearchSource } from 'src/plugins/data/common';
 import type { IUiSettingsClient, SavedObject, ToastsStart } from 'kibana/public';
+import { DataViewListItem } from 'src/plugins/data/common';
+import { DiscoverDataViewEntry } from '../discover_main_route';
 export type IndexPatternSavedObject = SavedObject & { title: string };
 
 interface IndexPatternData {
-  /**
-   * List of existing index patterns
-   */
-  list: IndexPatternSavedObject[];
   /**
    * Loaded index pattern (might be default index pattern if requested was not found)
    */
@@ -31,9 +29,9 @@ interface IndexPatternData {
 }
 
 export function findIndexPatternById(
-  indexPatterns: IndexPatternSavedObject[],
+  indexPatterns: DataViewListItem[],
   id: string
-): IndexPatternSavedObject | undefined {
+): DataViewListItem | undefined {
   if (!Array.isArray(indexPatterns) || !id) {
     return;
   }
@@ -45,7 +43,7 @@ export function findIndexPatternById(
  * the first available index pattern id if not
  */
 export function getFallbackIndexPatternId(
-  indexPatterns: IndexPatternSavedObject[],
+  indexPatterns: DataViewListItem[],
   defaultIndex: string = ''
 ): string {
   if (defaultIndex && findIndexPatternById(indexPatterns, defaultIndex)) {
@@ -61,7 +59,7 @@ export function getFallbackIndexPatternId(
  */
 export function getIndexPatternId(
   id: string = '',
-  indexPatterns: IndexPatternSavedObject[] = [],
+  indexPatterns: DataViewListItem[] = [],
   defaultIndex: string = ''
 ): string {
   if (!id || !findIndexPatternById(indexPatterns, id)) {
@@ -76,14 +74,15 @@ export function getIndexPatternId(
 export async function loadIndexPattern(
   id: string,
   indexPatterns: IndexPatternsContract,
+  indexPatternList: DiscoverDataViewEntry[],
   config: IUiSettingsClient
 ): Promise<IndexPatternData> {
-  const indexPatternList = (await indexPatterns.getCache()) as unknown as IndexPatternSavedObject[];
-
   const actualId = getIndexPatternId(id, indexPatternList, config.get('defaultIndex'));
+  const loaded =
+    indexPatternList.find((entry) => entry.id === actualId)?.dataView ||
+    (await indexPatterns.get(actualId));
   return {
-    list: indexPatternList || [],
-    loaded: await indexPatterns.get(actualId),
+    loaded,
     stateVal: id,
     stateValFound: !!id && actualId === id,
   };

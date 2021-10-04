@@ -7,20 +7,22 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { SavedObject } from 'kibana/public';
-import { IndexPattern, IndexPatternAttributes } from 'src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 import { IndexPatternRef } from './types';
 import { ChangeIndexPattern } from './change_indexpattern';
+import { DiscoverDataViewEntry } from '../../discover_main_route';
 
 export interface DiscoverIndexPatternProps {
   /**
    * list of available index patterns, if length > 1, component offers a "change" link
    */
-  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  indexPatternList: DiscoverDataViewEntry[];
   /**
    * Callback function when changing an index pattern
    */
   onChangeIndexPattern: (id: string) => void;
+
+  onAddIndexPattern: (id: string) => void;
   /**
    * currently selected index pattern
    */
@@ -33,11 +35,12 @@ export interface DiscoverIndexPatternProps {
 export function DiscoverIndexPattern({
   indexPatternList,
   onChangeIndexPattern,
+  onAddIndexPattern,
   selectedIndexPattern,
 }: DiscoverIndexPatternProps) {
   const options: IndexPatternRef[] = (indexPatternList || []).map((entity) => ({
     id: entity.id,
-    title: entity.attributes!.title,
+    title: entity.title,
   }));
   const { id: selectedId, title: selectedTitle } = selectedIndexPattern || {};
 
@@ -49,9 +52,6 @@ export function DiscoverIndexPattern({
     const { id, title } = selectedIndexPattern;
     setSelected({ id, title });
   }, [selectedIndexPattern]);
-  if (!selectedId) {
-    return null;
-  }
 
   return (
     <ChangeIndexPattern
@@ -69,6 +69,7 @@ export function DiscoverIndexPattern({
           setSelected(indexPattern);
         }
       }}
+      onAddIndexPattern={onAddIndexPattern}
     />
   );
 }

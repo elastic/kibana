@@ -20,10 +20,11 @@ import {
   EuiNotificationBadge,
   EuiPageSideBar,
   useResizeObserver,
+  EuiSelect,
 } from '@elastic/eui';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 
-import { isEqual, sortBy } from 'lodash';
+import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';
@@ -74,6 +75,8 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
    * hits fetched from ES, displayed in the doc table
    */
   documents?: ElasticSearchHit[];
+  setIndexPatternTimefield: (field: string) => void;
+  onAddIndexPattern: (id: string) => void;
 }
 
 export function DiscoverSidebarComponent({
@@ -97,6 +100,8 @@ export function DiscoverSidebarComponent({
   setFieldEditorRef,
   closeFlyout,
   editField,
+  setIndexPatternTimefield,
+  onAddIndexPattern,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
 
@@ -284,8 +289,9 @@ export function DiscoverSidebarComponent({
           <EuiFlexItem grow={true}>
             <DiscoverIndexPattern
               selectedIndexPattern={selectedIndexPattern}
-              indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
+              indexPatternList={indexPatternList}
               onChangeIndexPattern={onChangeIndexPattern}
+              onAddIndexPattern={onChangeIndexPattern}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -322,8 +328,9 @@ export function DiscoverSidebarComponent({
             <EuiFlexItem grow={true} className="dscSidebar__indexPatternSwitcher">
               <DiscoverIndexPattern
                 selectedIndexPattern={selectedIndexPattern}
-                indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
+                indexPatternList={indexPatternList}
                 onChangeIndexPattern={onChangeIndexPattern}
+                onAddIndexPattern={onAddIndexPattern}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -336,6 +343,23 @@ export function DiscoverSidebarComponent({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
+        {selectedIndexPattern?.tmp && (
+          <EuiFlexItem grow={false}>
+            <form>
+              <EuiSelect
+                options={[
+                  { value: '', text: 'No timefield' },
+                  ...selectedIndexPattern.fields
+                    .filter((field) => field.type === 'date')
+                    .map((field) => ({ value: field.name, text: `Time field: ${field.name}` })),
+                ]}
+                value={selectedIndexPattern.timeFieldName}
+                onChange={(e) => setIndexPatternTimefield(e.target.value)}
+              />
+            </form>
+          </EuiFlexItem>
+        )}
+
         <EuiFlexItem grow={false}>
           <form>
             <DiscoverFieldSearch

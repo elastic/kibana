@@ -24,15 +24,21 @@ import { useSearchSession } from './use_search_session';
 import { FetchStatus } from '../../../types';
 import { getSwitchIndexPatternAppState } from '../utils/get_switch_index_pattern_app_state';
 import { SortPairArr } from '../components/doc_table/lib/get_sort';
+import { DiscoverDataViewEntry } from '../discover_main_route';
 
 export function useDiscoverState({
   services,
   history,
   savedSearch,
+  indexPatternList,
 }: {
   services: DiscoverServices;
   savedSearch: SavedSearch;
   history: History;
+  /**
+   * List of available index patterns
+   */
+  indexPatternList: DiscoverDataViewEntry[];
 }) {
   const { uiSettings: config, data, filterManager, indexPatterns } = services;
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
@@ -118,7 +124,12 @@ export function useDiscoverState({
          *  That's because appState is updated before savedSearchData$
          *  The following line of code catches this, but should be improved
          */
-        const nextIndexPattern = await loadIndexPattern(nextState.index, indexPatterns, config);
+        const nextIndexPattern = await loadIndexPattern(
+          nextState.index,
+          indexPatterns,
+          indexPatternList,
+          config
+        );
         savedSearch.searchSource.setField('index', nextIndexPattern.loaded);
 
         reset();
@@ -140,6 +151,7 @@ export function useDiscoverState({
     data$,
     reset,
     savedSearch.searchSource,
+    indexPatternList,
   ]);
 
   /**
@@ -166,7 +178,8 @@ export function useDiscoverState({
    */
   const onChangeIndexPattern = useCallback(
     async (id: string) => {
-      const nextIndexPattern = await indexPatterns.get(id);
+      const ip = indexPatternList.find((viewEntry) => viewEntry.id === id);
+      const nextIndexPattern = ip?.dataView ? ip.dataView : await indexPatterns.get(id);
       if (nextIndexPattern && indexPattern) {
         const nextAppState = getSwitchIndexPatternAppState(
           indexPattern,
@@ -179,7 +192,15 @@ export function useDiscoverState({
         stateContainer.setAppState(nextAppState);
       }
     },
-    [config, indexPattern, indexPatterns, state.columns, state.sort, stateContainer]
+    [
+      config,
+      indexPattern,
+      indexPatterns,
+      state.columns,
+      state.sort,
+      stateContainer,
+      indexPatternList,
+    ]
   );
   /**
    * Function triggered when the user changes the query in the search bar

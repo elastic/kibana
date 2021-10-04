@@ -8,12 +8,15 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
   EuiButtonProps,
+  EuiSelectableMessage,
+  EuiText,
 } from '@elastic/eui';
 import { EuiSelectableProps } from '@elastic/eui/src/components/selectable/selectable';
 import { IndexPatternRef } from './types';
@@ -29,16 +32,19 @@ export function ChangeIndexPattern({
   indexPatternId,
   indexPatternRefs,
   onChangeIndexPattern,
+  onAddIndexPattern,
   selectableProps,
   trigger,
 }: {
   indexPatternId?: string;
   indexPatternRefs: IndexPatternRef[];
   onChangeIndexPattern: (newId: string) => void;
+  onAddIndexPattern: (newId: string) => void;
   selectableProps?: EuiSelectableProps<{ value: string }>;
   trigger: ChangeIndexPatternTriggerProps;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const createTrigger = function () {
     const { label, title, ...rest } = trigger;
@@ -94,7 +100,29 @@ export function ChangeIndexPattern({
           searchProps={{
             compressed: true,
             ...(selectableProps ? selectableProps.searchProps : undefined),
+            onSearch: (value) => setSearchTerm(value),
           }}
+          noMatchesMessage={
+            <EuiSelectableMessage>
+              <EuiText size="m">
+                <p>
+                  <FormattedMessage
+                    id="discover.fieldChooser.indexPattern.noIndexPatternsFound"
+                    defaultMessage="No index patterns found"
+                  />
+                </p>
+              </EuiText>
+              <p>
+                <EuiButton onClick={() => onAddIndexPattern(searchTerm)}>
+                  <FormattedMessage
+                    id="discover.fieldChooser.indexPattern.viewData"
+                    defaultMessage="View data of indices named {indices}"
+                    values={{ indices: searchTerm }}
+                  />
+                </EuiButton>
+              </p>
+            </EuiSelectableMessage>
+          }
         >
           {(list, search) => (
             <>

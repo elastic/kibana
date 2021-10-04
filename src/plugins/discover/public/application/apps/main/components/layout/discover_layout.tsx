@@ -49,6 +49,7 @@ export function DiscoverLayout({
   indexPatternList,
   inspectorAdapters,
   navigateTo,
+  onAddIndexPattern,
   onChangeIndexPattern,
   onUpdateQuery,
   savedSearchRefetch$,
@@ -59,6 +60,7 @@ export function DiscoverLayout({
   services,
   state,
   stateContainer,
+  setIndexPatternTimefield,
 }: DiscoverLayoutProps) {
   const { trackUiMetric, capabilities, indexPatterns, data, uiSettings, filterManager } = services;
   const { main$, charts$, totalHits$ } = savedSearchData$;
@@ -182,6 +184,8 @@ export function DiscoverLayout({
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}
               onEditRuntimeField={onEditRuntimeField}
+              setIndexPatternTimefield={setIndexPatternTimefield}
+              onAddIndexPattern={onAddIndexPattern}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>

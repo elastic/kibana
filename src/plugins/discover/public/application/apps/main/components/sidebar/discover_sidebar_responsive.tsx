@@ -7,7 +7,6 @@
  */
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -27,8 +26,6 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { DiscoverIndexPattern } from './discover_index_pattern';
-import { IndexPatternAttributes } from '../../../../../../../data/common';
-import { SavedObject } from '../../../../../../../../core/types';
 import { IndexPatternField, IndexPattern } from '../../../../../../../data/public';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
@@ -37,6 +34,7 @@ import { AppState } from '../../services/discover_state';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { DataDocuments$ } from '../../services/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
+import { DiscoverDataViewEntry } from '../../discover_main_route';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -54,7 +52,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * List of available index patterns
    */
-  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  indexPatternList: DiscoverDataViewEntry[];
   /**
    * Has been toggled closed
    */
@@ -106,6 +104,9 @@ export interface DiscoverSidebarResponsiveProps {
    * callback to execute on edit runtime field
    */
   onEditRuntimeField: () => void;
+
+  setIndexPatternTimefield: (value: string) => void;
+  onAddIndexPattern: (value: string) => void;
 }
 
 /**
@@ -226,6 +227,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             fieldCounts={fieldCounts.current}
             setFieldFilter={setFieldFilter}
             editField={editField}
+            setIndexPatternTimefield={props.setIndexPatternTimefield}
           />
         </EuiHideFor>
       )}
@@ -244,7 +246,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                 <DiscoverIndexPattern
                   onChangeIndexPattern={onChangeIndexPattern}
                   selectedIndexPattern={selectedIndexPattern}
-                  indexPatternList={sortBy(props.indexPatternList, (o) => o.attributes.title)}
+                  indexPatternList={props.indexPatternList}
+                  onAddIndexPattern={props.onAddIndexPattern}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
