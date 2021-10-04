@@ -11,7 +11,7 @@ import { History } from 'history';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { getInitialDatasourceId, getResolvedDateRange } from '../utils';
-import { LensAppState, LensStoreDeps } from './types';
+import { LensAppState, LensStoreDeps, VisualizationState } from './types';
 import { generateId } from '../id_generator';
 import {
   getVisualizeFieldSuggestions,
@@ -137,11 +137,9 @@ export const editVisualizationAction = createAction<{
   event: LensEditEvent<keyof LensEditContextMapping>;
 }>('lens/editVisualizationAction');
 export const removeLayers = createAction<{
-  visualizationId: string;
+  visualizationId: VisualizationState['activeId'];
   layerIds: string[];
 }>('lens/removeLayers');
-
-export const updateLayer = createAction<{ layerIds: string[] }>('lens/updateLayer');
 
 export const lensActions = {
   setState,
@@ -160,7 +158,6 @@ export const lensActions = {
   loadInitial,
   initEmpty,
   editVisualizationAction,
-  updateLayer,
   removeLayers,
 };
 
@@ -476,7 +473,41 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         },
       };
     },
-    [updateLayer.type]: (state, { payload: { layerIds } }: { payload: { layerIds: string[] } }) => {
+    [removeLayers.type]: (
+      state,
+      {
+        payload: { visualizationId, layerIds },
+      }: {
+        payload: {
+          visualizationId: VisualizationState['activeId'];
+          layerIds: string[];
+        };
+      }
+    ) => {
+      if (!state.visualization.activeId) {
+        throw new Error('Invariant: visualization state got updated without active visualization');
+      }
+
+      const activeVisualization = visualizationId && visualizationMap[visualizationId];
+
+      // This is a safeguard that prevents us from accidentally updating the
+      // wrong visualization. This occurs in some cases due to the uncoordinated
+      // way we manage state across plugins.
+      if (
+        state.visualization.activeId === visualizationId &&
+        activeVisualization &&
+        activeVisualization.removeLayer &&
+        state.visualization.state
+      ) {
+        const updater = layerIds.reduce(
+          (acc, layerId) =>
+            activeVisualization.removeLayer ? activeVisualization.removeLayer(acc, layerId) : acc,
+          state.visualization.state
+        );
+
+        state.visualization.state =
+          typeof updater === 'function' ? updater(current(state.visualization.state)) : updater;
+      }
       layerIds.forEach((layerId) => {
         const [layerDatasourceId] =
           Object.entries(datasourceMap).find(([datasourceId, datasource]) => {
@@ -491,36 +522,6 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           ].removeLayer(current(state).datasourceStates[layerDatasourceId].state, layerId);
         }
       });
-    },
-    [removeLayers.type]: (
-      state,
-      {
-        payload,
-      }: {
-        payload: {
-          visualizationId: string;
-          layerIds: string[];
-        };
-      }
-    ) => {
-      if (!state.visualization.activeId) {
-        throw new Error('Invariant: visualization state got updated without active visualization');
-      }
-
-      // This is a safeguard that prevents us from accidentally updating the
-      // wrong visualization. This occurs in some cases due to the uncoordinated
-      // way we manage state across plugins.
-      if (state.visualization.activeId === payload.visualizationId) {
-        const activeVisualization = visualizationMap[payload.visualizationId];
-        const updater = payload.layerIds.reduce(
-          (acc, layerId) =>
-            activeVisualization.removeLayer ? activeVisualization.removeLayer(acc, layerId) : acc,
-          state.visualization.state
-        );
-
-        state.visualization.state =
-          typeof updater === 'function' ? updater(current(state.visualization.state)) : updater;
-      }
     },
   });
 };

@@ -32,7 +32,6 @@ import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   insertLayer,
-  updateLayer,
   removeLayers,
   useLensDispatch,
   useLensSelector,
@@ -121,21 +120,6 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
   const visualization = useLensSelector(selectVisualization);
   const datasourceStates = useLensSelector(selectDatasourceStates);
 
-  function removeLayers2(layerIds: string[]) {
-    const activeVisualization =
-      visualization.activeId && props.visualizationMap[visualization.activeId];
-    if (activeVisualization && activeVisualization.removeLayer && visualization.state) {
-      dispatchLens(
-        removeLayers({
-          visualizationId: activeVisualization.id,
-          layerIds,
-        })
-      );
-    }
-
-    dispatchLens(updateLayer({ layerIds }));
-  }
-
   const commitSelection = (selection: VisualizationSelection) => {
     setFlyoutOpen(false);
 
@@ -154,7 +138,12 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       (!selection.datasourceId && !selection.sameDatasources) ||
       selection.dataLoss === 'everything'
     ) {
-      removeLayers2(Object.keys(props.framePublicAPI.datasourceLayers));
+      dispatchLens(
+        removeLayers({
+          visualizationId: visualization.activeId,
+          layerIds: Object.keys(props.framePublicAPI.datasourceLayers),
+        })
+      );
     }
   };
 

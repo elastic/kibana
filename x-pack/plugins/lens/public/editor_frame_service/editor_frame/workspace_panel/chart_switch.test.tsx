@@ -230,8 +230,8 @@ describe('chart_switch', () => {
       },
     });
     expect(lensStore.dispatch).toHaveBeenCalledWith({
-      type: 'lens/updateLayer',
-      payload: expect.objectContaining({ layerIds: ['a'] }),
+      type: 'lens/removeLayers',
+      payload: { layerIds: ['a'], visualizationId: 'visA' },
     });
   });
 
