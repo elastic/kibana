@@ -203,7 +203,6 @@ const transformControlColumns = ({
   controlColumns.map(
     ({ id: columnId, headerCellRender = EmptyHeaderCellRender, rowCellRender, width }, i) => ({
       id: `${columnId}`,
-      // eslint-disable-next-line react/display-name
       headerCellRender: () => {
         const HeaderActions = headerCellRender;
         return (
@@ -226,7 +225,6 @@ const transformControlColumns = ({
           </>
         );
       },
-      // eslint-disable-next-line react/display-name
       rowCellRender: ({
         isDetails,
         isExpandable,
