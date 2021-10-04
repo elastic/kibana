@@ -130,7 +130,7 @@ function getMarkerBody(label: string | undefined, isHorizontal: boolean) {
   if (!label) {
     return;
   }
-  if(isHorizontal){
+  if (isHorizontal) {
     return (
       <div className="eui-textTruncate" style={{ maxWidth: THRESHOLD_MARKER_SIZE * 3 }}>
         {label}
