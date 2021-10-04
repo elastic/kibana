@@ -22,6 +22,7 @@ import {
 } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsNavigateCallback, usePolicyDetailsSelector } from '../../policy_hooks';
 import { PolicyTrustedAppsFlyout } from '../flyout';
+import { PolicyTrustedAppsList } from '../list/policy_trusted_apps_list';
 
 export const PolicyTrustedAppsLayout = React.memo(() => {
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
@@ -81,6 +82,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
         ) : (
           <PolicyTrustedAppsEmptyUnexisting policyId={policyItem.id} policyName={policyItem.name} />
         )}
+        <PolicyTrustedAppsList />
       </EuiPageContent>
       {showListFlyout ? <PolicyTrustedAppsFlyout /> : null}
     </div>
