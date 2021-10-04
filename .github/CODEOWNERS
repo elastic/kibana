@@ -447,7 +447,5 @@
 /docs/setup/configuring-reporting.asciidoc @elastic/kibana-reporting-services @elastic/kibana-app-services
 #CC# /x-pack/plugins/reporting/ @elastic/kibana-reporting-services
 
-
-# Logstash
+# EUI design
 /src/plugins/kibana_react/public/page_template/ @elastic/eui-design @elastic/kibana-app-services
-
