@@ -6,9 +6,8 @@
  */
 
 import { PolicyDetailsState } from '../../../types';
-import { initialPolicyDetailsState } from '../reducer/initial_policy_details_state';
+import { initialPolicyDetailsState } from '../reducer';
 import {
-  getCurrentArtifactsLocation,
   getAssignableArtifactsList,
   getAssignableArtifactsListIsLoading,
   getUpdateArtifactsIsLoading,
@@ -17,8 +16,8 @@ import {
   getAssignableArtifactsListExist,
   getAssignableArtifactsListExistIsLoading,
   getUpdateArtifacts,
-  isOnPolicyTrustedAppsPage,
 } from './trusted_apps_selectors';
+import { getCurrentArtifactsLocation, isOnPolicyTrustedAppsView } from './policy_common_selectors';
 
 import { ImmutableObject } from '../../../../../../../common/endpoint/types';
 import {
@@ -39,7 +38,7 @@ describe('policy trusted apps selectors', () => {
 
   describe('isOnPolicyTrustedAppsPage()', () => {
     it('when location is on policy trusted apps page', () => {
-      const isOnPage = isOnPolicyTrustedAppsPage({
+      const isOnPage = isOnPolicyTrustedAppsView({
         ...initialState,
         location: {
           pathname: MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
@@ -50,7 +49,7 @@ describe('policy trusted apps selectors', () => {
       expect(isOnPage).toBeFalsy();
     });
     it('when location is not on policy trusted apps page', () => {
-      const isOnPage = isOnPolicyTrustedAppsPage({
+      const isOnPage = isOnPolicyTrustedAppsView({
         ...initialState,
         location: { pathname: '', search: '', hash: '' },
       });
