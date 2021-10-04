@@ -8,12 +8,127 @@
 import React from 'react';
 import { groupBy } from 'lodash';
 import { EuiIcon } from '@elastic/eui';
-import { RectAnnotation, AnnotationDomainType, LineAnnotation } from '@elastic/charts';
+import { RectAnnotation, AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { FieldFormat } from 'src/plugins/field_formats/common';
 import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
-import type { LayerArgs } from '../../common/expressions';
+import type { LayerArgs, YConfig } from '../../common/expressions';
 import type { LensMultiTable } from '../../common/types';
+
+const THRESHOLD_ICON_SIZE = 20;
+
+export const computeChartMargins = (
+  thresholdPaddings: Partial<Record<Position, number>>,
+  labelVisibility: Partial<Record<'x' | 'yLeft' | 'yRight', boolean>>,
+  titleVisibility: Partial<Record<'x' | 'yLeft' | 'yRight', boolean>>,
+  axesMap: Record<'left' | 'right', unknown>,
+  isHorizontal: boolean
+) => {
+  const result: Partial<Record<Position, number>> = {};
+  if (!labelVisibility?.x && !titleVisibility?.x && thresholdPaddings.bottom) {
+    const placement = isHorizontal ? mapVerticalToHorizontalPlacement('bottom') : 'bottom';
+    result[placement] = thresholdPaddings.bottom;
+  }
+  if (
+    thresholdPaddings.left &&
+    (isHorizontal || (!labelVisibility?.yLeft && !titleVisibility?.yLeft))
+  ) {
+    const placement = isHorizontal ? mapVerticalToHorizontalPlacement('left') : 'left';
+    result[placement] = thresholdPaddings.left;
+  }
+  if (
+    thresholdPaddings.right &&
+    (isHorizontal || !axesMap.right || (!labelVisibility?.yRight && !titleVisibility?.yRight))
+  ) {
+    const placement = isHorizontal ? mapVerticalToHorizontalPlacement('right') : 'right';
+    result[placement] = thresholdPaddings.right;
+  }
+  // there's no top axis, so just check if a margin has been computed
+  if (thresholdPaddings.top) {
+    const placement = isHorizontal ? mapVerticalToHorizontalPlacement('top') : 'top';
+    result[placement] = thresholdPaddings.top;
+  }
+  return result;
+};
+
+function hasIcon(icon: string | undefined): icon is string {
+  return icon != null && icon !== 'none';
+}
+
+// Note: it does not take into consideration whether the threshold is in view or not
+export const getThresholdRequiredPaddings = (
+  thresholdLayers: LayerArgs[],
+  axesMap: Record<'left' | 'right', unknown>
+) => {
+  const positions = Object.keys(Position);
+  return thresholdLayers.reduce((memo, layer) => {
+    if (positions.some((pos) => !(pos in memo))) {
+      layer.yConfig?.forEach(({ axisMode, icon, iconPosition }) => {
+        if (axisMode && hasIcon(icon)) {
+          const placement = getBaseIconPlacement(iconPosition, axisMode, axesMap);
+          memo[placement] = THRESHOLD_ICON_SIZE;
+        }
+      });
+    }
+    return memo;
+  }, {} as Partial<Record<Position, number>>);
+};
+
+function mapVerticalToHorizontalPlacement(placement: Position) {
+  switch (placement) {
+    case Position.Top:
+      return Position.Right;
+    case Position.Bottom:
+      return Position.Left;
+    case Position.Left:
+      return Position.Bottom;
+    case Position.Right:
+      return Position.Top;
+  }
+}
+
+// if there's just one axis, put it on the other one
+// otherwise use the same axis
+// this function assume the chart is vertical
+function getBaseIconPlacement(
+  iconPosition: YConfig['iconPosition'],
+  axisMode: YConfig['axisMode'],
+  axesMap: Record<string, unknown>
+) {
+  if (iconPosition === 'auto') {
+    if (axisMode === 'bottom') {
+      return Position.Top;
+    }
+    if (axisMode === 'left') {
+      return axesMap.right ? Position.Left : Position.Right;
+    }
+    return axesMap.left ? Position.Right : Position.Left;
+  }
+
+  if (iconPosition === 'left') {
+    return Position.Left;
+  }
+  if (iconPosition === 'right') {
+    return Position.Right;
+  }
+  if (iconPosition === 'below') {
+    return Position.Bottom;
+  }
+  return Position.Top;
+}
+
+function getIconPlacement(
+  iconPosition: YConfig['iconPosition'],
+  axisMode: YConfig['axisMode'],
+  axesMap: Record<string, unknown>,
+  isHorizontal: boolean
+) {
+  const vPosition = getBaseIconPlacement(iconPosition, axisMode, axesMap);
+  if (isHorizontal) {
+    return mapVerticalToHorizontalPlacement(vPosition);
+  }
+  return vPosition;
+}
 
 export const ThresholdAnnotations = ({
   thresholdLayers,
@@ -21,12 +136,16 @@ export const ThresholdAnnotations = ({
   formatters,
   paletteService,
   syncColors,
+  axesMap,
+  isHorizontal,
 }: {
   thresholdLayers: LayerArgs[];
   data: LensMultiTable;
   formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
   paletteService: PaletteRegistry;
   syncColors: boolean;
+  axesMap: Record<'left' | 'right', boolean>;
+  isHorizontal: boolean;
 }) => {
   return (
     <>
@@ -63,7 +182,13 @@ export const ThresholdAnnotations = ({
 
           const props = {
             groupId,
-            marker: yConfig.icon ? <EuiIcon type={yConfig.icon} /> : undefined,
+            marker: hasIcon(yConfig.icon) ? <EuiIcon type={yConfig.icon} /> : undefined,
+            markerPosition: getIconPlacement(
+              yConfig.iconPosition,
+              yConfig.axisMode,
+              axesMap,
+              isHorizontal
+            ),
           };
           const annotations = [];
 
