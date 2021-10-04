@@ -8,16 +8,19 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiFlexItem } from '@elastic/eui';
+import { EuiBasicTable, HorizontalAlignment, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { FieldDataRowProps } from '../../types';
 import { roundToDecimalPlace } from '../../../utils';
+import { ExpandedRowPanel } from './expanded_row_panel';
 
 const metaTableColumns = [
   {
+    field: 'function',
     name: '',
-    render: (metaItem: { display: ReactNode }) => metaItem.display,
-    width: '75px',
+    render: (_: string, metaItem: { display: ReactNode }) => metaItem.display,
+    width: '25px',
+    align: RIGHT_ALIGNMENT as HorizontalAlignment,
   },
   {
     field: 'value',
@@ -76,18 +79,18 @@ export const DocumentStatsTable: FC<FieldDataRowProps> = ({ config }) => {
   ];
 
   return (
-    <EuiFlexItem
-      data-test-subj={'dataVisualizerDocumentStatsContent'}
-      className={'dataVisualizerSummaryTableWrapper'}
+    <ExpandedRowPanel
+      dataTestSubj={'dataVisualizerDocumentStatsContent'}
+      className={'dvSummaryTable__wrapper dvPanel__wrapper'}
     >
       <ExpandedRowFieldHeader>{metaTableTitle}</ExpandedRowFieldHeader>
       <EuiBasicTable
-        className={'dataVisualizerSummaryTable'}
+        className={'dvSummaryTable'}
         compressed
         items={metaTableItems}
         columns={metaTableColumns}
         tableCaption={metaTableTitle}
       />
-    </EuiFlexItem>
+    </ExpandedRowPanel>
   );
 };
