@@ -44,7 +44,7 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
   });
   const [data, setData] = useState({} as any);
   const [detailVertexId, setDetailVertexId] = useState<string | null>(null);
-  const { getPaginationRouteOptions, updateTotalItemCount } = useTable('logstash.pipelines');
+  const { updateTotalItemCount } = useTable('logstash.pipelines');
 
   const title = i18n.translate('xpack.monitoring.logstash.pipeline.routeTitle', {
     defaultMessage: 'Logstash - Pipeline',
