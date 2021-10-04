@@ -33,18 +33,24 @@ export interface IndexPatternSelectProps {
     | null;
 }
 
-const defaultIndexPatternHelpText = i18n.translate(
-  'visTypeTimeseries.indexPatternSelect.defaultDataViewText',
-  {
-    defaultMessage: 'Using the default data view. ',
-  }
+const queryAllIndexesHelpText = (
+  <FormattedMessage
+    id="visTypeTimeseries.indexPatternSelect.queryAllIndexesText"
+    defaultMessage="To query all indices, use {asterisk}."
+    values={{
+      asterisk: <strong>*</strong>,
+    }}
+  />
 );
 
-const queryAllIndexesHelpText = i18n.translate(
-  'visTypeTimeseries.indexPatternSelect.queryAllIndexesText',
-  {
-    defaultMessage: 'To query all indices, use *.',
-  }
+const getIndexPatternHelpText = (useKibanaIndices: boolean) => (
+  <FormattedMessage
+    id="visTypeTimeseries.indexPatternSelect.defaultDataViewText"
+    defaultMessage="Using the default data view. {queryAllIndicesHelpText}"
+    values={{
+      queryAllIndicesHelpText: useKibanaIndices ? '' : queryAllIndexesHelpText,
+    }}
+  />
 );
 
 const indexPatternLabel = i18n.translate('visTypeTimeseries.indexPatternSelect.label', {
@@ -103,10 +109,7 @@ export const IndexPatternSelect = ({
     <EuiFormRow
       id={htmlId('indexPattern')}
       label={indexPatternLabel}
-      helpText={
-        fetchedIndex.defaultIndex &&
-        defaultIndexPatternHelpText + (!useKibanaIndices ? queryAllIndexesHelpText : '')
-      }
+      helpText={fetchedIndex.defaultIndex && getIndexPatternHelpText(useKibanaIndices)}
       labelAppend={
         fetchedIndex.indexPatternString && !fetchedIndex.indexPattern ? (
           <EuiLink onClick={navigateToCreateIndexPatternPage}>
