@@ -28,7 +28,5 @@ export interface HostIsolationExceptionsPageState {
   form: {
     entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema | undefined;
     status: AsyncResourceState<ExceptionListItemSchema>;
-    hasNameError: boolean;
-    hasIpError: boolean;
   };
 }
