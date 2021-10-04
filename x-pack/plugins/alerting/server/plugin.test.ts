@@ -144,6 +144,14 @@ describe('Alerting Plugin', () => {
           minimumLicenseRequired: 'basic',
         });
       });
+
+      it('should apply default config value for ruleTaskTimeout', async () => {
+        setup.registerType({
+          ...sampleAlertType,
+          minimumLicenseRequired: 'basic',
+        });
+        expect(sampleAlertType.ruleTaskTimeout).toBe('5m');
+      });
     });
   });
 
