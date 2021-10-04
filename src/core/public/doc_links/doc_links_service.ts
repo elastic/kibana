@@ -428,6 +428,7 @@ export class DocLinksService {
           fail: `${ELASTICSEARCH_DOCS}fail-processor.html`,
           foreach: `${ELASTICSEARCH_DOCS}foreach-processor.html`,
           geoIp: `${ELASTICSEARCH_DOCS}geoip-processor.html`,
+          geoMatch: `${ELASTICSEARCH_DOCS}geo-match-enrich-policy-type.html`,
           grok: `${ELASTICSEARCH_DOCS}grok-processor.html`,
           gsub: `${ELASTICSEARCH_DOCS}gsub-processor.html`,
           htmlString: `${ELASTICSEARCH_DOCS}htmlstrip-processor.html`,

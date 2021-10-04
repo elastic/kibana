@@ -91,6 +91,7 @@ export class EndpointTestResources extends FtrService {
       numHostDocs: number;
       alertsPerHost: number;
       enableFleetIntegration: boolean;
+      logsEndpoint: boolean;
       generatorSeed: string;
       waitUntilTransformed: boolean;
     }> = {}
@@ -100,6 +101,7 @@ export class EndpointTestResources extends FtrService {
       numHostDocs = 1,
       alertsPerHost = 1,
       enableFleetIntegration = true,
+      logsEndpoint = false,
       generatorSeed = 'seed',
       waitUntilTransformed = true,
     } = options;
@@ -116,7 +118,8 @@ export class EndpointTestResources extends FtrService {
       'logs-endpoint.events.process-default',
       'logs-endpoint.alerts-default',
       alertsPerHost,
-      enableFleetIntegration
+      enableFleetIntegration,
+      logsEndpoint
     );
 
     if (waitUntilTransformed) {
