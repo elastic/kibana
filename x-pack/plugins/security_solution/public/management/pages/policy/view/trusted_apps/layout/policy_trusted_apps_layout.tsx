@@ -18,6 +18,7 @@ import { PolicyTrustedAppsEmptyUnassigned, PolicyTrustedAppsEmptyUnexisting } fr
 import {
   getCurrentArtifactsLocation,
   getDoesTrustedAppExists,
+  policyDetails,
 } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsNavigateCallback, usePolicyDetailsSelector } from '../../policy_hooks';
 import { PolicyTrustedAppsFlyout } from '../flyout';
@@ -25,6 +26,7 @@ import { PolicyTrustedAppsFlyout } from '../flyout';
 export const PolicyTrustedAppsLayout = React.memo(() => {
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const doesTrustedAppExists = usePolicyDetailsSelector(getDoesTrustedAppExists);
+  const policyItem = usePolicyDetailsSelector(policyDetails);
   const navigateCallback = usePolicyDetailsNavigateCallback();
 
   const showListFlyout = location.show === 'list';
@@ -51,7 +53,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
     [navigateCallback]
   );
 
-  return (
+  return policyItem ? (
     <div>
       {false ? (
         <EuiPageHeader alignItems="center">
@@ -75,20 +77,14 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
         borderRadius="none"
       >
         {doesTrustedAppExists ? (
-          <PolicyTrustedAppsEmptyUnassigned
-            policyId={'bf16726e-f863-41db-ae8e-b5fd88aa1e5f'}
-            policyName={'With eventing'}
-          />
+          <PolicyTrustedAppsEmptyUnassigned policyId={policyItem.id} policyName={policyItem.name} />
         ) : (
-          <PolicyTrustedAppsEmptyUnexisting
-            policyId={'bf16726e-f863-41db-ae8e-b5fd88aa1e5f'}
-            policyName={'With eventing'}
-          />
+          <PolicyTrustedAppsEmptyUnexisting policyId={policyItem.id} policyName={policyItem.name} />
         )}
       </EuiPageContent>
       {showListFlyout ? <PolicyTrustedAppsFlyout /> : null}
     </div>
-  );
+  ) : null;
 });
 
 PolicyTrustedAppsLayout.displayName = 'PolicyTrustedAppsLayout';
