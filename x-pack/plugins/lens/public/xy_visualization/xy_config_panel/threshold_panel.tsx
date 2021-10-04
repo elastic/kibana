@@ -6,19 +6,19 @@
  */
 
 import './xy_config_panel.scss';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiComboBox, EuiFormRow, EuiIcon, EuiRange } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { State } from '../types';
+import { State, XYState } from '../types';
 import { FormatFactory } from '../../../common';
 import { YConfig } from '../../../common/expressions';
-import { LineStyle, FillStyle } from '../../../common/expressions/xy_chart';
+import { LineStyle, FillStyle, IconPosition } from '../../../common/expressions/xy_chart';
 
 import { ColorPicker } from './color_picker';
 import { updateLayer, idPrefix } from '.';
-import { useDebouncedValue } from '../../shared_components';
+import { TooltipWrapper, useDebouncedValue } from '../../shared_components';
 
 const icons = [
   {
@@ -109,36 +109,111 @@ const IconSelect = ({
   );
 };
 
+function getIconPositionOptions({
+  isHorizontal,
+  axisMode,
+}: {
+  isHorizontal: boolean;
+  axisMode: YConfig['axisMode'];
+}) {
+  const options = [
+    {
+      id: `${idPrefix}auto`,
+      label: i18n.translate('xpack.lens.xyChart.thresholdMarker.auto', {
+        defaultMessage: 'Auto',
+      }),
+      'data-test-subj': 'lnsXY_markerPosition_auto',
+    },
+  ];
+  const topLabel = i18n.translate('xpack.lens.xyChart.markerPosition.above', {
+    defaultMessage: 'Top',
+  });
+  const bottomLabel = i18n.translate('xpack.lens.xyChart.markerPosition.below', {
+    defaultMessage: 'Bottom',
+  });
+  const leftLabel = i18n.translate('xpack.lens.xyChart.markerPosition.left', {
+    defaultMessage: 'Left',
+  });
+  const rightLabel = i18n.translate('xpack.lens.xyChart.markerPosition.right', {
+    defaultMessage: 'Right',
+  });
+  if (axisMode === 'bottom') {
+    const bottomOptions = [
+      {
+        id: `${idPrefix}above`,
+        label: isHorizontal ? rightLabel : topLabel,
+        'data-test-subj': 'lnsXY_markerPosition_above',
+      },
+      {
+        id: `${idPrefix}below`,
+        label: isHorizontal ? leftLabel : bottomLabel,
+        'data-test-subj': 'lnsXY_markerPosition_below',
+      },
+    ];
+    if (isHorizontal) {
+      // above -> below
+      // left -> right
+      bottomOptions.reverse();
+    }
+    return [...options, ...bottomOptions];
+  }
+  const yOptions = [
+    {
+      id: `${idPrefix}left`,
+      label: isHorizontal ? bottomLabel : leftLabel,
+      'data-test-subj': 'lnsXY_markerPosition_left',
+    },
+    {
+      id: `${idPrefix}right`,
+      label: isHorizontal ? topLabel : rightLabel,
+      'data-test-subj': 'lnsXY_markerPosition_right',
+    },
+  ];
+  if (isHorizontal) {
+    // left -> right
+    // above -> below
+    yOptions.reverse();
+  }
+  return [...options, ...yOptions];
+}
+
 export const ThresholdPanel = (
   props: VisualizationDimensionEditorProps<State> & {
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
+    isHorizontal: boolean;
   }
 ) => {
-  const { state, setState, layerId, accessor } = props;
-  const index = state.layers.findIndex((l) => l.layerId === layerId);
-  const layer = state.layers[index];
+  const { state, setState, layerId, accessor, isHorizontal } = props;
+
+  const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
+    value: state,
+    onChange: setState,
+  });
+
+  const index = localState.layers.findIndex((l) => l.layerId === layerId);
+  const layer = localState.layers[index];
 
   const setYConfig = useCallback(
     (yConfig: Partial<YConfig> | undefined) => {
       if (yConfig == null) {
         return;
       }
-      setState((currState) => {
-        const currLayer = currState.layers[index];
-        const newYConfigs = [...(currLayer.yConfig || [])];
-        const existingIndex = newYConfigs.findIndex(
-          (yAxisConfig) => yAxisConfig.forAccessor === accessor
-        );
-        if (existingIndex !== -1) {
-          newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], ...yConfig };
-        } else {
-          newYConfigs.push({ forAccessor: accessor, ...yConfig });
-        }
-        return updateLayer(currState, { ...currLayer, yConfig: newYConfigs }, index);
-      });
+      const newYConfigs = [...(layer.yConfig || [])];
+      const existingIndex = newYConfigs.findIndex(
+        (yAxisConfig) => yAxisConfig.forAccessor === accessor
+      );
+      if (existingIndex !== -1) {
+        newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], ...yConfig };
+      } else {
+        newYConfigs.push({
+          forAccessor: accessor,
+          ...yConfig,
+        });
+      }
+      setLocalState(updateLayer(localState, { ...layer, yConfig: newYConfigs }, index));
     },
-    [accessor, index, setState]
+    [accessor, index, localState, layer, setLocalState]
   );
 
   const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
@@ -259,7 +334,7 @@ export const ThresholdPanel = (
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.xyChart.axisSide.icon', {
+        label={i18n.translate('xpack.lens.xyChart.thresholdMarker.icon', {
           defaultMessage: 'Icon',
         })}
       >
@@ -269,6 +344,44 @@ export const ThresholdPanel = (
             setYConfig({ forAccessor: accessor, icon: newIcon });
           }}
         />
+      </EuiFormRow>
+      <EuiFormRow
+        display="columnCompressed"
+        fullWidth
+        isDisabled={currentYConfig?.icon == null || currentYConfig?.icon === 'none'}
+        label={i18n.translate('xpack.lens.xyChart.thresholdMarker.position', {
+          defaultMessage: 'Icon position',
+        })}
+      >
+        <TooltipWrapper
+          tooltipContent={i18n.translate('xpack.lens.thresholdMarker.positionRequirementTooltip', {
+            defaultMessage: 'You must select an icon in order to alter its position',
+          })}
+          condition={currentYConfig?.icon == null || currentYConfig?.icon === 'none'}
+          position="top"
+          delay="regular"
+          display="block"
+        >
+          <EuiButtonGroup
+            isFullWidth
+            legend={i18n.translate('xpack.lens.xyChart.thresholdMarker.position', {
+              defaultMessage: 'Icon position',
+            })}
+            data-test-subj="lnsXY_markerPosition_threshold"
+            name="markerPosition"
+            isDisabled={currentYConfig?.icon == null || currentYConfig?.icon === 'none'}
+            buttonSize="compressed"
+            options={getIconPositionOptions({
+              isHorizontal,
+              axisMode: currentYConfig!.axisMode,
+            })}
+            idSelected={`${idPrefix}${currentYConfig?.iconPosition || 'auto'}`}
+            onChange={(id) => {
+              const newMode = id.replace(idPrefix, '') as IconPosition;
+              setYConfig({ forAccessor: accessor, iconPosition: newMode });
+            }}
+          />
+        </TooltipWrapper>
       </EuiFormRow>
     </>
   );
@@ -291,35 +404,38 @@ const LineThicknessSlider = ({
   value: number;
   onChange: (value: number) => void;
 }) => {
-  const onChangeWrapped = useCallback(
-    (newValue) => {
-      if (Number.isInteger(newValue)) {
-        onChange(getSafeValue(newValue, newValue, minRange, maxRange));
-      }
-    },
-    [onChange]
-  );
-  const { inputValue, handleInputChange } = useDebouncedValue<number | ''>(
-    { value, onChange: onChangeWrapped },
-    { allowFalsyValue: true }
-  );
+  const [unsafeValue, setUnsafeValue] = useState<string>(String(value));
 
   return (
     <EuiRange
       fullWidth
       data-test-subj="lnsXY_lineThickness"
-      value={inputValue}
+      value={unsafeValue}
       showInput
       min={minRange}
       max={maxRange}
       step={1}
       compressed
-      onChange={(e) => {
-        const newValue = e.currentTarget.value;
-        handleInputChange(newValue === '' ? '' : Number(newValue));
+      onChange={({ currentTarget: { value: newValue } }) => {
+        setUnsafeValue(newValue);
+        const convertedValue = newValue === '' ? '' : Number(newValue);
+        const safeValue = getSafeValue(Number(newValue), Number(newValue), minRange, maxRange);
+        // only update onChange is the value is valid and in range
+        if (convertedValue === safeValue) {
+          onChange(safeValue);
+        }
       }}
       onBlur={() => {
-        handleInputChange(getSafeValue(inputValue, value, minRange, maxRange));
+        if (unsafeValue !== String(value)) {
+          const safeValue = getSafeValue(
+            unsafeValue === '' ? unsafeValue : Number(unsafeValue),
+            value,
+            minRange,
+            maxRange
+          );
+          onChange(safeValue);
+          setUnsafeValue(String(safeValue));
+        }
       }}
     />
   );
