@@ -35,10 +35,6 @@ import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trust
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-  htmlIdGenerator: () => () => 'mockId',
-}));
-
 // TODO: remove this mock when feature flag is removed
 jest.mock('../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
