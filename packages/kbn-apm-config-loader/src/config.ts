@@ -115,6 +115,12 @@ export class ApmConfiguration {
       config.active = true;
     }
 
+    if (process.env.ELASTIC_APM_DISABLE_SEND === 'true') {
+      config.disableSend = true;
+    } else if (process.env.ELASTIC_APM_DISABLE_SEND === 'false') {
+      config.disableSend = false;
+    }
+
     if (process.env.ELASTIC_APM_ENVIRONMENT || process.env.NODE_ENV) {
       config.environment = process.env.ELASTIC_APM_ENVIRONMENT || process.env.NODE_ENV;
     }

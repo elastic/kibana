@@ -36,7 +36,8 @@ export ELASTIC_APM_ENVIRONMENT=ci
 export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1
 
 if is_pr; then
-  export ELASTIC_APM_ACTIVE=false
+  export ELASTIC_APM_ACTIVE=true
+  export ELASTIC_APM_DISABLE_SEND=true
   export CHECKS_REPORTER_ACTIVE=true
 
   # These can be removed once we're not supporting Jenkins and Buildkite at the same time
@@ -48,6 +49,7 @@ if is_pr; then
   # set_git_merge_base # TODO for PRs
 else
   export ELASTIC_APM_ACTIVE=true
+  export ELASTIC_APM_DISABLE_SEND=false
   export CHECKS_REPORTER_ACTIVE=false
 fi
 
