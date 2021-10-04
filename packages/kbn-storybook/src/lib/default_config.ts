@@ -8,7 +8,10 @@
 
 import * as path from 'path';
 import { StorybookConfig } from '@storybook/core/types';
+import { Configuration } from 'webpack';
+import webpackMerge from 'webpack-merge';
 import { REPO_ROOT } from './constants';
+import { default as WebpackConfig } from '../webpack.config';
 
 const toPath = (_path: string) => path.join(REPO_ROOT, _path);
 export const defaultConfig: StorybookConfig = {
@@ -42,4 +45,20 @@ export const defaultConfig: StorybookConfig = {
 
     return emotion11CompatibleConfig;
   },
+};
+
+// defaultConfigWebFinal and mergeWebpackFinal have been moved here  because webpackFinal usage in
+// storybook main.ts somehow is  causing issues with newly added dependency of ts-node most likely
+// an issue with storybook typescript setup see this issue for more details
+// https://github.com/storybookjs/storybook/issues/9610
+
+export const defaultConfigWebFinal = {
+  ...defaultConfig,
+  webpackFinal: (config: Configuration) => {
+    return WebpackConfig({ config });
+  },
+};
+
+export const mergeWebpackFinal = (extraConfig: Configuration) => {
+  return { webpackFinal: (config: Configuration) => webpackMerge(config, extraConfig) };
 };
