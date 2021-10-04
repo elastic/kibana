@@ -12,8 +12,9 @@ import type {
   SavedObjectsFindOptions,
   SavedObjectsClientContract,
   SavedObjectAttributes,
+  SavedObjectReference,
 } from 'kibana/public';
-import type { ChromeStart, OverlayStart } from '../../../../core/public';
+import type { OverlayStart } from '../../../../core/public';
 import { SavedObjectNotFound } from '../../../kibana_utils/public';
 import {
   extractSearchSourceReferences,
@@ -29,15 +30,21 @@ import {
 import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 import type { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
 import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
-import type { VisSavedObject, SerializedVis, ISavedVis } from '../types';
-import type { TypesStart } from '../vis_types';
+import type {
+  VisSavedObject,
+  SerializedVis,
+  ISavedVis,
+  SaveVisOptions,
+  GetVisOptions,
+} from '../types';
+import type { TypesStart, BaseVisType } from '../vis_types';
 // @ts-ignore
 import { updateOldState } from '../legacy/vis_update_state';
 import { injectReferences, extractReferences } from './saved_visualization_references';
 
 export const SAVED_VIS_TYPE = 'visualization';
 
-const getDefaults = (opts: Record<string, unknown>) => ({
+const getDefaults = (opts: GetVisOptions) => ({
   title: '',
   visState: !opts.type ? null : { type: opts.type },
   uiStateJSON: '{}',
@@ -55,20 +62,33 @@ export function urlFor(id: string) {
 }
 
 export function mapHitSource(
-  visTypes: any,
+  visTypes: Pick<TypesStart, 'get'>,
   {
     attributes,
     id,
     references,
   }: {
-    attributes: any;
+    attributes: SavedObjectAttributes;
     id: string;
-    references: any;
+    references: SavedObjectReference[];
   }
 ) {
-  attributes.id = id;
-  attributes.references = references;
-  attributes.url = urlFor(id);
+  const newAttributes: {
+    id: string;
+    references: SavedObjectReference[];
+    url: string;
+    savedObjectType?: string;
+    editUrl?: string;
+    type?: BaseVisType;
+    icon?: BaseVisType['icon'];
+    image?: BaseVisType['image'];
+    typeTitle?: BaseVisType['title'];
+    error?: string;
+  } = {
+    id,
+    references,
+    url: urlFor(id),
+  };
 
   let typeName = attributes.typeName;
   if (attributes.visState) {
@@ -79,19 +99,19 @@ export function mapHitSource(
     }
   }
 
-  if (!typeName || !visTypes.get(typeName)) {
-    attributes.error = 'Unknown visualization type';
-    return attributes;
+  if (!typeName || !visTypes.get(typeName as string)) {
+    newAttributes.error = 'Unknown visualization type';
+    return newAttributes;
   }
 
-  attributes.type = visTypes.get(typeName);
-  attributes.savedObjectType = 'visualization';
-  attributes.icon = attributes.type.icon;
-  attributes.image = attributes.type.image;
-  attributes.typeTitle = attributes.type.title;
-  attributes.editUrl = `/edit/${id}`;
+  newAttributes.type = visTypes.get(typeName as string);
+  newAttributes.savedObjectType = 'visualization';
+  newAttributes.icon = newAttributes.type?.icon;
+  newAttributes.image = newAttributes.type?.image;
+  newAttributes.typeTitle = newAttributes.type?.title;
+  newAttributes.editUrl = `/edit/${id}`;
 
-  return attributes;
+  return newAttributes;
 }
 
 export const convertToSerializedVis = (savedVis: VisSavedObject): SerializedVis => {
@@ -186,13 +206,13 @@ export async function getSavedVisualization(
     savedObjectsClient: SavedObjectsClientContract;
     search: DataPublicPluginStart['search'];
     dataViews: DataPublicPluginStart['dataViews'];
-    spaces: SpacesPluginStart;
+    spaces?: SpacesPluginStart;
     savedObjectsTagging?: SavedObjectsTaggingApi;
   },
-  opts?: any
+  opts?: GetVisOptions | string
 ): Promise<VisSavedObject> {
   if (typeof opts !== 'object') {
-    opts = { id: opts };
+    opts = { id: opts } as GetVisOptions;
   }
 
   const id = (opts.id as string) || '';
@@ -204,9 +224,7 @@ export async function getSavedVisualization(
     getEsType: () => SAVED_VIS_TYPE,
     getDisplayName: () => SAVED_VIS_TYPE,
     searchSource: opts.searchSource ? services.search.searchSource.createEmpty() : undefined,
-  } as VisSavedObject & { _source: any };
-  const config = { injectReferences };
-
+  } as VisSavedObject;
   const defaultsProps = getDefaults(opts);
 
   if (!id) {
@@ -224,16 +242,16 @@ export async function getSavedVisualization(
     throw new SavedObjectNotFound(SAVED_VIS_TYPE, id || '');
   }
 
-  savedObject._source = _.cloneDeep(resp.attributes);
+  const attributes = _.cloneDeep(resp.attributes);
 
-  if (savedObject._source.visState) {
-    savedObject._source.visState = JSON.parse(savedObject._source.visState);
+  if (attributes.visState && typeof attributes.visState === 'string') {
+    attributes.visState = JSON.parse(attributes.visState);
   }
 
   // assign the defaults to the response
-  _.defaults(savedObject._source, defaultsProps);
+  _.defaults(attributes, defaultsProps);
 
-  Object.assign(savedObject, savedObject._source);
+  Object.assign(savedObject, attributes);
   savedObject.lastSavedTitle = savedObject.title;
 
   savedObject.sharingSavedObjectProps = {
@@ -249,11 +267,11 @@ export async function getSavedVisualization(
         : undefined,
   };
 
-  const meta = savedObject._source.kibanaSavedObjectMeta || {};
+  const meta = (attributes.kibanaSavedObjectMeta || {}) as SavedObjectAttributes;
 
   if (meta.searchSourceJSON) {
     try {
-      let searchSourceValues = parseSearchSourceJSON(meta.searchSourceJSON);
+      let searchSourceValues = parseSearchSourceJSON(meta.searchSourceJSON as string);
 
       if (opts.searchSource) {
         searchSourceValues = injectSearchSourceReferences(
@@ -270,7 +288,7 @@ export async function getSavedVisualization(
   }
 
   if (resp.references && resp.references.length > 0) {
-    config.injectReferences(savedObject, resp.references);
+    injectReferences(savedObject, resp.references);
   }
 
   if (services.savedObjectsTagging) {
@@ -287,18 +305,9 @@ export async function getSavedVisualization(
 
 export async function saveVisualization(
   savedObject: VisSavedObject,
-  {
-    confirmOverwrite = false,
-    isTitleDuplicateConfirmed = false,
-    onTitleDuplicate,
-  }: {
-    confirmOverwrite?: boolean;
-    isTitleDuplicateConfirmed?: boolean;
-    onTitleDuplicate?: () => void;
-  },
+  { confirmOverwrite = false, isTitleDuplicateConfirmed = false, onTitleDuplicate }: SaveVisOptions,
   services: {
     savedObjectsClient: SavedObjectsClientContract;
-    chrome: ChromeStart;
     overlays: OverlayStart;
     savedObjectsTagging?: SavedObjectsTaggingApi;
   }
@@ -315,7 +324,7 @@ export async function saveVisualization(
     delete savedObject.id;
   }
 
-  const attributes: any = {
+  const attributes: SavedObjectAttributes = {
     visState: JSON.stringify(savedObject.visState),
     title: savedObject.title,
     uiStateJSON: savedObject.uiStateJSON,
@@ -323,7 +332,7 @@ export async function saveVisualization(
     savedSearchId: savedObject.savedSearchId,
     version: savedObject.version,
   };
-  let references: any = [];
+  let references: SavedObjectReference[] = [];
 
   if (savedObject.searchSource) {
     const { searchSourceJSON, references: searchSourceReferences } =
@@ -374,8 +383,6 @@ export async function saveVisualization(
           ...createOpt,
           overwrite: true,
         });
-
-    services.chrome.recentlyAccessed.add(getFullPath(resp.id), savedObject.title, String(resp.id));
 
     savedObject.id = resp.id;
     savedObject.isSaving = false;

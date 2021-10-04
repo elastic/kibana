@@ -39,6 +39,7 @@ import {
   convertToSerializedVis,
   getSavedVisualization,
   saveVisualization,
+  getFullPath,
 } from '../utils/saved_visualize_utils';
 import {
   extractControlsReferences,
@@ -163,7 +164,7 @@ export class VisualizeEmbeddableFactory
           search: startDeps.plugins.data.search,
           dataViews: startDeps.plugins.data.dataViews,
           spaces: startDeps.plugins.spaces,
-          savedObjectsTagging: startDeps.plugins.savedObjectsTaggingOss.getTaggingApi(),
+          savedObjectsTagging: startDeps.plugins.savedObjectsTaggingOss?.getTaggingApi(),
         },
         savedObjectId
       );
@@ -171,7 +172,7 @@ export class VisualizeEmbeddableFactory
       if (savedObject.sharingSavedObjectProps?.outcome === 'conflict') {
         return new ErrorEmbeddable(
           i18n.translate('visualizations.embeddable.legacyURLConflict.errorMessage', {
-            defaultMessage: `This object has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
+            defaultMessage: `This visualization has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
             values: { json: savedObject.sharingSavedObjectProps?.errorJSON },
           }),
           input,
@@ -244,9 +245,8 @@ export class VisualizeEmbeddableFactory
       const { core, plugins } = await this.deps.start();
       const id = await saveVisualization(savedVis, saveOptions, {
         savedObjectsClient: core.savedObjects.client,
-        chrome: core.chrome,
         overlays: core.overlays,
-        savedObjectsTagging: plugins.savedObjectsTaggingOss.getTaggingApi(),
+        savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
       });
       if (!id || id === '') {
         throw new Error(
@@ -255,6 +255,7 @@ export class VisualizeEmbeddableFactory
           })
         );
       }
+      core.chrome.recentlyAccessed.add(getFullPath(id), savedVis.title, String(id));
       return { id };
     } catch (error) {
       throw error;

@@ -16,7 +16,6 @@ import type {
   SavedObjectsStart,
   DocLinksStart,
 } from '../../../core/public';
-import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 import type { TypesStart } from './vis_types';
 import { createGetterSetter } from '../../../plugins/kibana_utils/public';
 import { DataPublicPluginStart, TimefilterContract } from '../../../plugins/data/public';
@@ -67,5 +66,3 @@ export const [getChrome, setChrome] = createGetterSetter<ChromeStart>('Chrome');
 
 export const [getSavedSearchLoader, setSavedSearchLoader] =
   createGetterSetter<SavedObjectLoader>('savedSearchLoader');
-
-export const [getSpaces, setSpaces] = createGetterSetter<SpacesPluginStart>('Spaces');

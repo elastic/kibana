@@ -105,7 +105,7 @@ export interface VisualizeServices extends CoreStart {
   presentationUtil: PresentationUtilPluginStart;
   usageCollection?: UsageCollectionStart;
   getKibanaVersion: () => string;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export interface SavedVisInstance {

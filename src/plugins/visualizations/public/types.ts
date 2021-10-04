@@ -56,6 +56,21 @@ export interface VisSavedObject extends ISavedVis {
   tags?: string[];
 }
 
+export interface SaveVisOptions {
+  confirmOverwrite?: boolean;
+  isTitleDuplicateConfirmed?: boolean;
+  onTitleDuplicate?: () => void;
+}
+
+export interface GetVisOptions {
+  id?: string;
+  searchSource?: boolean;
+  migrationVersion?: SavedObjectsMigrationVersion;
+  savedSearchId?: string;
+  type?: string;
+  indexPattern?: string;
+}
+
 export interface VisToExpressionAstParams {
   timefilter: TimefilterContract;
   timeRange?: any;

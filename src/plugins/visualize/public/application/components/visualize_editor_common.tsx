@@ -65,9 +65,7 @@ export const VisualizeEditorCommon = ({
       if (services.spaces && sharingSavedObjectProps?.outcome === 'aliasMatch') {
         // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
         const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
-        const newPath = services.http.basePath.prepend(
-          `${getFullPath(newObjectId!)}${services.history.location.search}`
-        );
+        const newPath = `${getFullPath(newObjectId!)}${services.history.location.search}`;
         await services.spaces.ui.redirectLegacyUrl(
           newPath,
           i18n.translate('visualize.legacyUrlConflict.objectNoun', {
@@ -92,7 +90,7 @@ export const VisualizeEditorCommon = ({
       // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
       // callout with a warning for the user, and provide a way for them to navigate to the other object.
       const otherObjectId = sharingSavedObjectProps?.aliasTargetId!; // This is always defined if outcome === 'conflict'
-      const otherObjectPath = urlFor(otherObjectId) + services.history.location.search;
+      const otherObjectPath = `${urlFor(otherObjectId)}${services.history.location.search}`;
       return services.spaces.ui.components.getLegacyUrlConflict({
         objectNoun: i18n.translate('visualize.legacyUrlConflict.objectNoun', {
           defaultMessage: '{visName} visualization',

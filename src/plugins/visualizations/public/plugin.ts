@@ -26,7 +26,6 @@ import {
   setSavedSearchLoader,
   setEmbeddable,
   setDocLinks,
-  setSpaces,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
@@ -75,7 +74,7 @@ import type { ExpressionsSetup, ExpressionsStart } from '../../expressions/publi
 import type { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
 import { createVisAsync } from './vis_async';
-import type { VisSavedObject } from './types';
+import type { VisSavedObject, SaveVisOptions, GetVisOptions } from './types';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -91,8 +90,8 @@ export interface VisualizationsStart extends TypesStart {
   convertToSerializedVis: typeof convertToSerializedVis;
   convertFromSerializedVis: typeof convertFromSerializedVis;
   showNewVisModal: typeof showNewVisModal;
-  getSavedVisualization: (opts?: any) => Promise<VisSavedObject>;
-  saveVisualization: (savedVis: VisSavedObject, saveOptions: any) => Promise<string>;
+  getSavedVisualization: (opts?: GetVisOptions | string) => Promise<VisSavedObject>;
+  saveVisualization: (savedVis: VisSavedObject, saveOptions: SaveVisOptions) => Promise<string>;
   findListItems: (
     searchTerm: string,
     listingLimit: number,
@@ -119,8 +118,8 @@ export interface VisualizationsStartDeps {
   getAttributeService: EmbeddableStart['getAttributeService'];
   savedObjects: SavedObjectsStart;
   savedObjectsClient: SavedObjectsClientContract;
-  spaces: SpacesPluginStart;
-  savedObjectsTaggingOss: SavedObjectTaggingOssPluginStart;
+  spaces?: SpacesPluginStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
 /**
@@ -192,7 +191,6 @@ export class VisualizationsPlugin
     setAggs(data.search.aggs);
     setOverlays(core.overlays);
     setChrome(core.chrome);
-    setSpaces(spaces);
     const savedVisualizationsLoader = createSavedVisLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: data.indexPatterns,
@@ -215,7 +213,7 @@ export class VisualizationsPlugin
             savedObjectsClient: core.savedObjects.client,
             dataViews: data.dataViews,
             spaces,
-            savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
+            savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
           },
           opts
         );
@@ -223,9 +221,8 @@ export class VisualizationsPlugin
       saveVisualization: async (savedVis, saveOptions) => {
         return saveVisualization(savedVis, saveOptions, {
           savedObjectsClient: core.savedObjects.client,
-          chrome: core.chrome,
           overlays: core.overlays,
-          savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
+          savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
         });
       },
       findListItems: async (searchTerm, listingLimit, references) => {

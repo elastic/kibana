@@ -14,7 +14,11 @@ import { parse } from 'query-string';
 
 import { Capabilities } from 'src/core/public';
 import { TopNavMenuData } from 'src/plugins/navigation/public';
-import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from '../../../../visualizations/public';
+import {
+  VISUALIZE_EMBEDDABLE_TYPE,
+  VisualizeInput,
+  getFullPath,
+} from '../../../../visualizations/public';
 import {
   showSaveModal,
   SavedObjectSaveModalOrigin,
@@ -144,6 +148,8 @@ export const getTopNavConfig = (
           }),
           'data-test-subj': 'saveVisualizationSuccess',
         });
+
+        chrome.recentlyAccessed.add(getFullPath(id), savedVis.title, String(id));
 
         if ((originatingApp && saveOptions.returnToOrigin) || saveOptions.dashboardId) {
           if (!embeddableId) {

@@ -120,7 +120,7 @@ describe('saved_visualize_utils', () => {
             }),
           }) as unknown as SpacesPluginStart,
         },
-        { id: 'test', searchSource: {} }
+        { id: 'test', searchSource: true }
       );
       expect(mockParseSearchSourceJSON).toHaveBeenCalledWith('{filter: []}');
       expect(mockInjectSearchSourceReferences).toHaveBeenCalled();
@@ -139,7 +139,7 @@ describe('saved_visualize_utils', () => {
             }),
           }) as unknown as SpacesPluginStart,
         },
-        { id: 'test', searchSource: {} }
+        { id: 'test', searchSource: true }
       );
       expect(mockInjectReferences.mock.calls[0][1]).toEqual([
         {
@@ -167,7 +167,7 @@ describe('saved_visualize_utils', () => {
             },
           } as unknown as SavedObjectsTaggingApi,
         },
-        { id: 'test', searchSource: {} }
+        { id: 'test', searchSource: true }
       );
       expect(mockGetTagIdsFromReferences).toHaveBeenCalled();
     });
@@ -195,7 +195,7 @@ describe('saved_visualize_utils', () => {
     });
 
     it('should return id after save', async () => {
-      const savedVisId = await saveVisualization(vis, {}, { savedObjectsClient, chrome, overlays });
+      const savedVisId = await saveVisualization(vis, {}, { savedObjectsClient, overlays });
       expect(savedObjectsClient.create).toHaveBeenCalled();
       expect(mockExtractReferences).toHaveBeenCalled();
       expect(savedVisId).toBe('test');
@@ -203,13 +203,13 @@ describe('saved_visualize_utils', () => {
 
     it('should call extractSearchSourceReferences if we new vis has searchSourceFields', async () => {
       vis.searchSourceFields = { fields: [] };
-      await saveVisualization(vis, {}, { savedObjectsClient, chrome, overlays });
+      await saveVisualization(vis, {}, { savedObjectsClient, overlays });
       expect(mockExtractSearchSourceReferences).toHaveBeenCalledWith(vis.searchSourceFields);
     });
 
     it('should serialize searchSource', async () => {
       vis.searchSource = { serialize: jest.fn(() => ({ searchSourceJSON: '{}', references: [] })) };
-      await saveVisualization(vis, {}, { savedObjectsClient, chrome, overlays });
+      await saveVisualization(vis, {}, { savedObjectsClient, overlays });
       expect(vis.searchSource.serialize).toHaveBeenCalled();
     });
 
@@ -220,7 +220,6 @@ describe('saved_visualize_utils', () => {
         {},
         {
           savedObjectsClient,
-          chrome,
           overlays,
           savedObjectsTagging: {
             ui: {
@@ -237,7 +236,7 @@ describe('saved_visualize_utils', () => {
         const savedVisId = await saveVisualization(
           vis,
           { confirmOverwrite: false },
-          { savedObjectsClient, chrome, overlays }
+          { savedObjectsClient, overlays }
         );
         expect(savedObjectsClient.create).toHaveBeenCalled();
         expect(mockExtractReferences).toHaveBeenCalled();
@@ -249,7 +248,7 @@ describe('saved_visualize_utils', () => {
         const savedVisId = await saveVisualization(
           vis,
           { confirmOverwrite: true },
-          { savedObjectsClient, chrome, overlays }
+          { savedObjectsClient, overlays }
         );
         expect(savedObjectsClient.create).not.toHaveBeenCalled();
         expect(mockSaveWithConfirmation).toHaveBeenCalled();
@@ -263,7 +262,7 @@ describe('saved_visualize_utils', () => {
         const savedVisId = await saveVisualization(
           vis,
           { isTitleDuplicateConfirmed },
-          { savedObjectsClient, chrome, overlays }
+          { savedObjectsClient, overlays }
         );
         expect(savedObjectsClient.create).not.toHaveBeenCalled();
         expect(mockSaveWithConfirmation).not.toHaveBeenCalled();
@@ -277,7 +276,7 @@ describe('saved_visualize_utils', () => {
         const savedVisId = await saveVisualization(
           vis,
           { isTitleDuplicateConfirmed },
-          { savedObjectsClient, chrome, overlays }
+          { savedObjectsClient, overlays }
         );
         expect(mockCheckForDuplicateTitle).toHaveBeenCalled();
         expect(savedObjectsClient.create).toHaveBeenCalled();
