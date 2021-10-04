@@ -142,6 +142,10 @@ export const editVisualizationAction = createAction<{
   visualizationId: string;
   event: LensEditEvent<keyof LensEditContextMapping>;
 }>('lens/editVisualizationAction');
+export const removeLayers = createAction<{
+  visualizationId: string;
+  layerIds: string[];
+}>('lens/removeLayers');
 
 export const lensActions = {
   setState,
@@ -161,6 +165,7 @@ export const lensActions = {
   loadInitial,
   initEmpty,
   editVisualizationAction,
+  removeLayers,
 };
 
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {
@@ -500,6 +505,45 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           },
         },
       };
+    },
+    [removeLayers.type]: (
+      state,
+      {
+        payload,
+      }: {
+        payload: {
+          visualizationId: string;
+          layerIds: string[];
+        };
+      }
+    ) => {
+      if (!state.visualization.activeId) {
+        throw new Error('Invariant: visualization state got updated without active visualization');
+      }
+
+      let newState = state;
+
+      // This is a safeguard that prevents us from accidentally updating the
+      // wrong visualization. This occurs in some cases due to the uncoordinated
+      // way we manage state across plugins.
+      if (state.visualization.activeId === payload.visualizationId) {
+        const activeVisualization = visualizationMap[payload.visualizationId];
+        const updater = payload.layerIds.reduce(
+          (acc, layerId) =>
+            activeVisualization.removeLayer ? activeVisualization.removeLayer(acc, layerId) : acc,
+          state.visualization.state
+        );
+
+        newState = {
+          ...state,
+          visualization: {
+            ...state.visualization,
+            state:
+              typeof updater === 'function' ? updater(current(state.visualization.state)) : updater,
+          },
+        };
+      }
+      return newState;
     },
   });
 };

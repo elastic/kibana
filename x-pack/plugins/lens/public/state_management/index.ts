@@ -34,6 +34,7 @@ export const {
   setToggleFullscreen,
   initEmpty,
   editVisualizationAction,
+  removeLayers,
 } = lensActions;
 
 export const makeConfigureStore = (

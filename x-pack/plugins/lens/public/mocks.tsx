@@ -162,12 +162,30 @@ export function createMockDatasource(id: string): DatasourceMock {
 }
 
 export const mockDatasource: DatasourceMock = createMockDatasource('testDatasource');
-export const mockDatasource2: DatasourceMock = createMockDatasource('testDatasource2');
 
-export const datasourceMap = {
-  testDatasource2: mockDatasource2,
-  testDatasource: mockDatasource,
-};
+export function mockDatasourceMap() {
+  const datasource = createMockDatasource('testDatasource');
+  datasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+    {
+      state: {},
+      table: {
+        columns: [],
+        isMultiRow: true,
+        layerId: 'a',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: ['a'],
+    },
+  ]);
+
+  datasource.getLayers.mockReturnValue(['a']);
+  return {
+    testDatasource2: createMockDatasource('testDatasource2'),
+    testDatasource: datasource,
+  };
+}
+
+export const datasourceMap = mockDatasourceMap();
 
 export function createExpressionRendererMock(): jest.Mock<
   React.ReactElement,
@@ -177,6 +195,7 @@ export function createExpressionRendererMock(): jest.Mock<
 }
 
 export type FrameMock = jest.Mocked<FramePublicAPI>;
+
 export function createMockFramePublicAPI(): FrameMock {
   return {
     datasourceLayers: {},
