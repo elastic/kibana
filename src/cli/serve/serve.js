@@ -52,7 +52,6 @@ const pathCollector = function () {
 };
 
 const configPathCollector = pathCollector();
-const pluginDirCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
 function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
@@ -133,7 +132,6 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     set('logging.root.level', 'all');
   }
 
-  set('plugins.scanDirs', _.compact([].concat(get('plugins.scanDirs'), opts.pluginDir)));
   set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));
 
   merge(extraCliOptions);
@@ -160,11 +158,8 @@ export default function (program) {
     .option('--verbose', 'Set the root logger level to all')
     .option('-H, --host <host>', 'The host to bind to')
     .option(
-      '--plugin-dir <path>',
-      'A path to scan for plugins, this can be specified multiple ' +
-        'times to specify multiple directories',
-      pluginDirCollector,
-      [fromRoot('plugins')]
+      '-l, --log-file <path>',
+      'Deprecated, set logging file destination in your configuration'
     )
     .option(
       '--plugin-path <path>',
@@ -173,7 +168,6 @@ export default function (program) {
       pluginPathCollector,
       []
     )
-    .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
     .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
   if (!isKibanaDistributable()) {
