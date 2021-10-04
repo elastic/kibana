@@ -19,7 +19,6 @@ describe('interpreter/functions#metric', () => {
   };
   const args = {
     percentageMode: false,
-    useRanges: false,
     colorSchema: 'Green to Red',
     metricColorMode: 'None',
     colorsRange: [

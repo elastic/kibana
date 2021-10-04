@@ -36,7 +36,6 @@ const config: MetricVisRenderConfig = {
   visConfig: {
     metric: {
       percentageMode: false,
-      useRanges: false,
       colorSchema: ColorSchemas.GreenToRed,
       metricColorMode: ColorMode.None,
       colorsRange: [],

@@ -22,7 +22,6 @@ export interface MetricArguments {
   percentageMode: boolean;
   colorSchema: ColorSchemas;
   colorMode: ColorMode;
-  useRanges: boolean;
   invertColors: boolean;
   showLabels: boolean;
   bgFill: string;

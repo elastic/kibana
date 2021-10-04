@@ -45,7 +45,6 @@ Object {
           "labelColor": false,
           "subText": "\\"\\"",
         },
-        "useRanges": false,
       },
     },
     "visData": Object {
