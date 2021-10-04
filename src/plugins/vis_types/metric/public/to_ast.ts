@@ -43,7 +43,6 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
   const {
     percentageMode,
     percentageFormatPattern,
-    useRanges,
     colorSchema,
     metricColorMode,
     colorsRange,
@@ -66,7 +65,6 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
     percentageMode,
     colorSchema,
     colorMode: metricColorMode,
-    useRanges,
     invertColors,
     showLabels: labels?.show ?? false,
   });

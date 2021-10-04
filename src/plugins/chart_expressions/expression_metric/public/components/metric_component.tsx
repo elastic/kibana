@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { last, findIndex, isNaN } from 'lodash';
+import { last, isNaN } from 'lodash';
 import React, { Component } from 'react';
 import { isColorDark } from '@elastic/eui';
 import { MetricVisValue } from './metric_value';
@@ -28,11 +28,13 @@ export interface MetricVisComponentProps {
 
 class MetricVisComponent extends Component<MetricVisComponentProps> {
   private getLabels() {
-    const config = this.props.visParams.metric;
-    const isPercentageMode = config.percentageMode;
-    const colorsRange = config.colorsRange;
-    const max = last(colorsRange)?.to ?? 1;
+    const { percentageMode: isPercentageMode, colorsRange } = this.props.visParams.metric;
+    const lastRange = last(colorsRange);
+    if (!colorsRange || !lastRange) {
+      return [];
+    }
 
+    const max = lastRange.to;
     return colorsRange.map((range: any) => {
       const from = isPercentageMode ? Math.round((100 * range.from) / max) : range.from;
       const to = isPercentageMode ? Math.round((100 * range.to) / max) : range.to;
@@ -51,14 +53,14 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
   }
 
   private getBucket(val: number) {
-    const config = this.props.visParams.metric;
-    let bucket = findIndex(config.colorsRange, (range: any) => {
-      return range.from <= val && range.to > val;
-    });
+    const { colorsRange = [] } = this.props.visParams.metric;
+    const bucket = colorsRange.findIndex((range) => range.from <= val && range.to > val);
 
     if (bucket === -1) {
-      if (config.colorsRange?.[0] && val < config.colorsRange?.[0].from) bucket = 0;
-      else bucket = config.colorsRange.length - 1;
+      if (colorsRange?.[0] && val < colorsRange?.[0].from) {
+        return 0;
+      }
+      return colorsRange.length - 1;
     }
 
     return bucket;
@@ -66,8 +68,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
 
   private getColor(val: number, labels: string[], colors: { [label: string]: string }) {
     const bucket = this.getBucket(val);
-    const label = labels[bucket];
-    return colors[label];
+    return colors[labels[bucket]];
   }
 
   private needsLightText(bgColor: string) {
@@ -85,7 +86,10 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     value: any,
     format: FieldFormatsContentType = 'text'
   ) => {
-    if (isNaN(value)) return '-';
+    if (isNaN(value)) {
+      return '-';
+    }
+
     return fieldFormatter.convert(value, format);
   };
 
@@ -100,11 +104,10 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
   }
 
   private processTableGroups(table: Datatable) {
-    const config = this.props.visParams.metric;
-    const dimensions = this.props.visParams.dimensions;
-    const isPercentageMode = config.percentageMode;
-    const min = config.colorsRange?.[0]?.from ?? 0;
-    const max = last(config.colorsRange)?.to ?? 0;
+    const { dimensions, metric: metricConfig } = this.props.visParams;
+    const { percentageMode: isPercentageMode, colorsRange, style } = metricConfig;
+    const min = colorsRange?.[0]?.from ?? 0;
+    const max = last(colorsRange)?.to ?? 0;
     const colors = this.getColors();
     const labels = this.getLabels();
     const metrics: MetricOptions[] = [];
@@ -134,14 +137,14 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
           title = `${bucketValue} - ${title}`;
         }
 
-        const shouldColor = config.colorsRange.length > 1;
+        const shouldColor = colorsRange.length > 1;
 
         metrics.push({
           label: title,
           value,
-          color: shouldColor && config.style.labelColor ? color : undefined,
-          bgColor: shouldColor && config.style.bgColor ? color : undefined,
-          lightText: shouldColor && config.style.bgColor && this.needsLightText(color),
+          color: shouldColor && style.labelColor ? color : undefined,
+          bgColor: shouldColor && style.bgColor ? color : undefined,
+          lightText: shouldColor && style.bgColor && this.needsLightText(color),
           rowIndex,
         });
       });
@@ -151,10 +154,11 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
   }
 
   private filterBucket = (metric: MetricOptions) => {
-    const dimensions = this.props.visParams.dimensions;
+    const { dimensions } = this.props.visParams;
     if (!dimensions.bucket) {
       return;
     }
+
     const table = this.props.visData;
     this.props.fireEvent({
       name: 'filterBucket',

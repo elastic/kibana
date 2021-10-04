@@ -150,7 +150,6 @@ export const metricFunction = (): MetricVisExpressionFunctionDefinition => ({
         visConfig: {
           metric: {
             percentageMode: args.percentageMode,
-            useRanges: args.useRanges,
             colorSchema: args.colorSchema,
             metricColorMode: args.colorMode,
             colorsRange: args.colorRange,
