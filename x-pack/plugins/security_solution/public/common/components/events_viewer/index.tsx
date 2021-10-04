@@ -32,11 +32,11 @@ import { defaultControlColumn } from '../../../timelines/components/timeline/bod
 import { EventsViewer } from './events_viewer';
 import * as i18n from './translations';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
+
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 const leadingControlColumns: ControlColumnProps[] = [
   {
     ...defaultControlColumn,
-    // eslint-disable-next-line react/display-name
     headerCellRender: () => <>{i18n.ACTIONS}</>,
   },
 ];
