@@ -28,7 +28,6 @@ export interface UsageStats {
   'autocomplete:useTimeRange': boolean;
   'autocomplete:valueSuggestionMethod': string;
   'search:timeout': number;
-  'visualization:visualize:legacyChartsLibrary': boolean;
   'visualization:visualize:legacyPieChartsLibrary': boolean;
   'doc_table:legacy': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
@@ -36,8 +35,8 @@ export interface UsageStats {
   'discover:showMultiFields': boolean;
   'discover:maxDocFieldsDisplayed': number;
   'securitySolution:rulesTableRefresh': string;
-  'apm:enableSignificantTerms': boolean;
   'observability:enableInspectEsQueries': boolean;
+  'observability:maxSuggestions': number;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
@@ -51,10 +50,7 @@ export interface UsageStats {
   'timelion:max_buckets': number;
   'timelion:es.timefield': string;
   'timelion:min_interval': string;
-  'timelion:default_rows': number;
-  'timelion:default_columns': number;
   'timelion:es.default_index': string;
-  'timelion:showTutorial': boolean;
   'securitySolution:timeDefaults': string;
   'securitySolution:defaultAnomalyScore': number;
   'securitySolution:refreshIntervalDefaults': string;

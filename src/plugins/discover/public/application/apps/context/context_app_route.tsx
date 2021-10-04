@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { DiscoverServices } from '../../../build_services';
-import { ContextApp } from '../../components/context_app/context_app';
+import { ContextApp } from './context_app';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useIndexPattern } from '../../helpers/use_index_pattern';

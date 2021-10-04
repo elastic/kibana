@@ -284,9 +284,11 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickQuickSave() {
-    await this.expectQuickSaveButtonEnabled();
-    this.log.debug('clickQuickSave');
-    await this.testSubjects.click('dashboardQuickSaveMenuItem');
+    await this.retry.try(async () => {
+      await this.expectQuickSaveButtonEnabled();
+      this.log.debug('clickQuickSave');
+      await this.testSubjects.click('dashboardQuickSaveMenuItem');
+    });
   }
 
   public async clickNewDashboard(continueEditing = false) {
@@ -392,10 +394,11 @@ export class DashboardPageObject extends FtrService {
    */
   public async saveDashboard(
     dashboardName: string,
-    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true, exitFromEditMode: true }
+    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true, exitFromEditMode: true },
+    clickMenuItem = true
   ) {
     await this.retry.try(async () => {
-      await this.enterDashboardTitleAndClickSave(dashboardName, saveOptions);
+      await this.enterDashboardTitleAndClickSave(dashboardName, saveOptions, clickMenuItem);
 
       if (saveOptions.needsConfirm) {
         await this.ensureDuplicateTitleCallout();
@@ -435,9 +438,12 @@ export class DashboardPageObject extends FtrService {
    */
   public async enterDashboardTitleAndClickSave(
     dashboardTitle: string,
-    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true }
+    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true },
+    clickMenuItem = true
   ) {
-    await this.testSubjects.click('dashboardSaveMenuItem');
+    if (clickMenuItem) {
+      await this.testSubjects.click('dashboardSaveMenuItem');
+    }
     const modalDialog = await this.testSubjects.find('savedObjectSaveModal');
 
     this.log.debug('entering new title');

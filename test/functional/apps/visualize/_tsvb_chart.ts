@@ -17,11 +17,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const security = getService('security');
 
-  const { timePicker, visChart, visualBuilder, visualize } = getPageObjects([
+  const { timePicker, visChart, visualBuilder, visualize, settings } = getPageObjects([
     'timePicker',
     'visChart',
     'visualBuilder',
     'visualize',
+    'settings',
   ]);
 
   describe('visual builder', function describeIndexTests() {
@@ -102,6 +103,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(kibanaIndexPatternModeValue).to.eql('32,212,254,720');
       });
 
+      it('should show error if we use parent pipeline aggregations in entire time range mode', async () => {
+        await visualBuilder.selectAggType('Max');
+        await visualBuilder.setFieldForAggregation('machine.ram');
+        await visualBuilder.createNewAgg();
+        await visualBuilder.selectAggType('derivative', 1);
+        await visualBuilder.setFieldForAggregation('Max of machine.ram', 1);
+
+        const value = await visualBuilder.getMetricValue();
+
+        expect(value).to.eql('0');
+
+        await visualBuilder.clickPanelOptions('metric');
+        await visualBuilder.setMetricsDataTimerangeMode('Entire time range');
+        await visualBuilder.clickDataTab('metric');
+        await visualBuilder.checkInvalidAggComponentIsPresent();
+        const error = await visualBuilder.getVisualizeError();
+
+        expect(error).to.eql(
+          'The aggregation derivative is not supported in entire_time_range mode'
+        );
+      });
+
       describe('Color rules', () => {
         beforeEach(async () => {
           await visualBuilder.selectAggType('Min');
@@ -163,6 +186,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.clickDataTab('gauge');
       });
 
+      it('should show error if we use parent pipeline aggregations in entire time range mode', async () => {
+        await visualBuilder.clickPanelOptions('gauge');
+        await visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await visualBuilder.clickDataTab('gauge');
+        await visualBuilder.selectAggType('Max');
+        await visualBuilder.setFieldForAggregation('machine.ram');
+        await visualBuilder.createNewAgg();
+        await visualBuilder.selectAggType('derivative', 1);
+        await visualBuilder.setFieldForAggregation('Max of machine.ram', 1);
+
+        const value = await visualBuilder.getGaugeCount();
+
+        expect(value).to.eql('0');
+
+        await visualBuilder.clickPanelOptions('gauge');
+        await visualBuilder.setMetricsDataTimerangeMode('Entire time range');
+        await visualBuilder.clickDataTab('gauge');
+        await visualBuilder.checkInvalidAggComponentIsPresent();
+        const error = await visualBuilder.getVisualizeError();
+
+        expect(error).to.eql(
+          'The aggregation derivative is not supported in entire_time_range mode'
+        );
+      });
+
       it('should verify gauge label and count display', async () => {
         await visChart.waitForVisualizationRenderingStabilized();
         const gaugeLabel = await visualBuilder.getGaugeLabel();
@@ -174,6 +222,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should display correct data for max aggregation with entire time range mode', async () => {
         await visualBuilder.selectAggType('Max');
         await visualBuilder.setFieldForAggregation('bytes');
+        await visualBuilder.clickSeriesOption();
+        await visualBuilder.changeDataFormatter('number');
 
         const gaugeLabel = await visualBuilder.getGaugeLabel();
         const gaugeCount = await visualBuilder.getGaugeCount();
@@ -269,6 +319,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should display correct data for sum of squares aggregation with entire time range mode', async () => {
         await visualBuilder.selectAggType('Sum of squares');
         await visualBuilder.setFieldForAggregation('bytes');
+        await visualBuilder.clickSeriesOption();
+        await visualBuilder.changeDataFormatter('number');
         await visualBuilder.clickPanelOptions('topN');
         await visualBuilder.setMetricsDataTimerangeMode('Entire time range');
 
@@ -289,6 +341,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(firstTopNBarStyle).to.contain('background-color: rgb(229, 255, 207);');
         expect(secondTopNBarStyle).to.contain('background-color: rgb(128, 224, 138);');
+      });
+
+      it('should show error if we use parent pipeline aggregations in entire time range mode', async () => {
+        await visualBuilder.selectAggType('Max');
+        await visualBuilder.setFieldForAggregation('machine.ram');
+        await visualBuilder.createNewAgg();
+        await visualBuilder.selectAggType('derivative', 1);
+        await visualBuilder.setFieldForAggregation('Max of machine.ram', 1);
+
+        const value = await visualBuilder.getTopNCount();
+
+        expect(value).to.eql('0');
+
+        await visualBuilder.clickPanelOptions('topN');
+        await visualBuilder.setMetricsDataTimerangeMode('Entire time range');
+        await visualBuilder.clickDataTab('topN');
+        await visualBuilder.checkInvalidAggComponentIsPresent();
+        const error = await visualBuilder.getVisualizeError();
+
+        expect(error).to.eql(
+          'The aggregation derivative is not supported in entire_time_range mode'
+        );
       });
 
       describe('Color rules', () => {
@@ -450,6 +524,119 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visChart.waitForVisualizationRenderingStabilized();
         const legendItems3 = await visualBuilder.getLegendItemsContent();
         expect(legendItems3).to.eql(finalLegendItems);
+      });
+    });
+
+    describe('applying field formats from Advanced Settings', () => {
+      const toggleSetFormatForMachineOsRaw = async () => {
+        log.debug(
+          'Navigate to Advanced Settings Index Patterns and toggle Set Format for machine.os.raw'
+        );
+        await settings.navigateTo();
+        await settings.clickKibanaIndexPatterns();
+        await settings.clickIndexPatternLogstash();
+        await settings.openControlsByName('machine.os.raw');
+        await settings.toggleRow('formatRow');
+      };
+
+      before(async () => {
+        log.debug('Toggle on Set Format for machine.os.raw and set it to the title case');
+        await toggleSetFormatForMachineOsRaw();
+        await settings.setFieldFormat('string');
+        await settings.setScriptedFieldStringTransform('title');
+        await settings.controlChangeSave();
+      });
+
+      beforeEach(async () => {
+        await visualBuilder.resetPage();
+        await visualBuilder.selectAggType('Average');
+        await visualBuilder.setFieldForAggregation('bytes');
+        await visualBuilder.setMetricsGroupByTerms('machine.os.raw');
+        await visChart.waitForVisualizationRenderingStabilized();
+      });
+
+      it('should display title field formatted labels with byte field formatted values by default', async () => {
+        const expectedLegendItems = [
+          'Win 8: 4.968KB',
+          'Win Xp: 4.23KB',
+          'Win 7: 6.181KB',
+          'Ios: 5.84KB',
+          'Osx: 5.928KB',
+        ];
+
+        const legendItems = await visualBuilder.getLegendItemsContent();
+        expect(legendItems).to.eql(expectedLegendItems);
+      });
+
+      it('should display title field formatted labels with raw values', async () => {
+        const expectedLegendItems = [
+          'Win 8: 5,087.5',
+          'Win Xp: 4,332',
+          'Win 7: 6,328.938',
+          'Ios: 5,980',
+          'Osx: 6,070',
+        ];
+        await visualBuilder.clickSeriesOption();
+        await visualBuilder.changeDataFormatter('number');
+        const legendItems = await visualBuilder.getLegendItemsContent();
+
+        expect(legendItems).to.eql(expectedLegendItems);
+      });
+
+      it('should display title field formatted labels with TSVB formatted values', async () => {
+        const expectedLegendItems = [
+          'Win 8: 5,087.5 format',
+          'Win Xp: 4,332 format',
+          'Win 7: 6,328.938 format',
+          'Ios: 5,980 format',
+          'Osx: 6,070 format',
+        ];
+
+        await visualBuilder.clickSeriesOption();
+        await visualBuilder.changeDataFormatter('number');
+        await visualBuilder.enterSeriesTemplate('{{value}} format');
+        await visChart.waitForVisualizationRenderingStabilized();
+
+        const legendItems = await visualBuilder.getLegendItemsContent();
+        expect(legendItems).to.eql(expectedLegendItems);
+      });
+
+      describe('formatting values for Metric, TopN and Gauge', () => {
+        it('should display field formatted value for Metric', async () => {
+          await visualBuilder.clickMetric();
+          await visualBuilder.checkMetricTabIsPresent();
+
+          const metricValue = await visualBuilder.getMetricValue();
+          expect(metricValue).to.eql('5.514KB');
+        });
+
+        it('should display field formatted label and value for TopN', async () => {
+          await visualBuilder.clickTopN();
+          await visualBuilder.checkTopNTabIsPresent();
+
+          const topNLabel = await visualBuilder.getTopNLabel();
+          const topNCount = await visualBuilder.getTopNCount();
+
+          expect(topNLabel).to.eql('Win 7');
+          expect(topNCount).to.eql('5.664KB');
+        });
+
+        it('should display field formatted label and value for Gauge', async () => {
+          await visualBuilder.clickGauge();
+          await visualBuilder.checkGaugeTabIsPresent();
+
+          const gaugeLabel = await visualBuilder.getGaugeLabel();
+          const gaugeCount = await visualBuilder.getGaugeCount();
+
+          expect(gaugeLabel).to.eql('Average of bytes');
+          expect(gaugeCount).to.eql('5.514KB');
+        });
+      });
+
+      after(async () => {
+        log.debug('Toggle off Set Format for machine.os.raw');
+        await toggleSetFormatForMachineOsRaw();
+        await settings.controlChangeSave();
       });
     });
   });

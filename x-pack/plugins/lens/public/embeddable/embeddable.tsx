@@ -41,7 +41,11 @@ import {
   ReferenceOrValueEmbeddable,
 } from '../../../../../src/plugins/embeddable/public';
 import { Document, injectFilterReferences } from '../persistence';
-import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
+import {
+  ExpressionWrapper,
+  ExpressionWrapperProps,
+  savedObjectConflictError,
+} from './expression_wrapper';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import {
   isLensBrushEvent,
@@ -58,8 +62,12 @@ import { IBasePath } from '../../../../../src/core/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
+import { SharingSavedObjectProps } from '../types';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
+export interface ResolvedLensSavedObjectAttributes extends LensSavedObjectAttributes {
+  sharingSavedObjectProps?: SharingSavedObjectProps;
+}
 
 interface LensBaseEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
@@ -76,7 +84,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
 }
 
 export type LensByValueInput = {
-  attributes: LensSavedObjectAttributes;
+  attributes: ResolvedLensSavedObjectAttributes;
 } & LensBaseEmbeddableInput;
 
 export type LensByReferenceInput = SavedObjectEmbeddableInput & LensBaseEmbeddableInput;
@@ -104,7 +112,8 @@ export interface LensEmbeddableDeps {
 
 export class Embeddable
   extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput> {
+  implements ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput>
+{
   type = DOC_TYPE;
 
   deferEmbeddableLoad = true;
@@ -253,15 +262,18 @@ export class Embeddable
   }
 
   async initializeSavedVis(input: LensEmbeddableInput) {
-    const attributes:
-      | LensSavedObjectAttributes
-      | false = await this.deps.attributeService.unwrapAttributes(input).catch((e: Error) => {
-      this.onFatalError(e);
-      return false;
-    });
-    if (!attributes || this.isDestroyed) {
+    const attrs: ResolvedLensSavedObjectAttributes | false = await this.deps.attributeService
+      .unwrapAttributes(input)
+      .catch((e: Error) => {
+        this.onFatalError(e);
+        return false;
+      });
+    if (!attrs || this.isDestroyed) {
       return;
     }
+
+    const { sharingSavedObjectProps, ...attributes } = attrs;
+
     this.savedVis = {
       ...attributes,
       type: this.type,
@@ -269,8 +281,12 @@ export class Embeddable
     };
     const { ast, errors } = await this.deps.documentToExpression(this.savedVis);
     this.errors = errors;
+    if (sharingSavedObjectProps?.outcome === 'conflict') {
+      const conflictError = savedObjectConflictError(sharingSavedObjectProps.errorJSON!);
+      this.errors = this.errors ? [...this.errors, conflictError] : [conflictError];
+    }
     this.expression = ast ? toExpression(ast) : null;
-    if (errors) {
+    if (this.errors) {
       this.logError('validation');
     }
     await this.initializeOutput();
@@ -346,6 +362,7 @@ export class Embeddable
         searchSessionId={this.externalSearchContext.searchSessionId}
         handleEvent={this.handleEvent}
         onData$={this.updateActiveData}
+        interactive={!input.disableTriggers}
         renderMode={input.renderMode}
         syncColors={input.syncColors}
         hasCompatibleActions={this.hasCompatibleActions}
@@ -439,7 +456,7 @@ export class Embeddable
         true
       );
       if (this.input.onTableRowClick) {
-        this.input.onTableRowClick((event.data as unknown) as LensTableRowContextMenuEvent['data']);
+        this.input.onTableRowClick(event.data as unknown as LensTableRowContextMenuEvent['data']);
       }
     }
   };

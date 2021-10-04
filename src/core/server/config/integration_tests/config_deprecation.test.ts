@@ -51,8 +51,8 @@ describe('configuration deprecations', () => {
     const logs = loggingSystemMock.collect(mockLoggingSystem);
     expect(logs.warn.flat()).toMatchInlineSnapshot(`
       Array [
-        "optimize.lazy is deprecated and is no longer used",
-        "optimize.lazyPort is deprecated and is no longer used",
+        "You no longer need to configure \\"optimize.lazy\\".",
+        "You no longer need to configure \\"optimize.lazyPort\\".",
         "\\"logging.silent\\" has been deprecated and will be removed in 8.0. Moving forward, you can use \\"logging.root.level:off\\" in your logging configuration. ",
       ]
     `);

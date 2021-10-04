@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { ConfigDeprecationProvider } from 'src/core/server';
 
 export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
@@ -28,27 +29,45 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
     const legacyAuditLoggerEnabled = !settings?.xpack?.security?.audit?.appender;
     if (auditLoggingEnabled && legacyAuditLoggerEnabled) {
       addDeprecation({
-        message: `The legacy audit logger is deprecated in favor of the new ECS-compliant audit logger.`,
+        title: i18n.translate('xpack.security.deprecations.auditLoggerTitle', {
+          defaultMessage: 'The legacy audit logger is deprecated',
+        }),
+        message: i18n.translate('xpack.security.deprecations.auditLoggerMessage', {
+          defaultMessage:
+            'The legacy audit logger is deprecated in favor of the new ECS-compliant audit logger.',
+        }),
         documentationUrl:
           'https://www.elastic.co/guide/en/kibana/current/security-settings-kb.html#audit-logging-settings',
         correctiveActions: {
           manualSteps: [
-            `Declare an audit logger "appender" via "xpack.security.audit.appender" to enable the ECS audit logger.`,
+            i18n.translate('xpack.security.deprecations.auditLogger.manualStepOneMessage', {
+              defaultMessage:
+                'Declare an audit logger "appender" via "xpack.security.audit.appender" to enable the ECS audit logger.',
+            }),
           ],
         },
       });
     }
   },
+
   // Deprecation warning for the old array-based format of `xpack.security.authc.providers`.
   (settings, fromPath, addDeprecation) => {
     if (Array.isArray(settings?.xpack?.security?.authc?.providers)) {
       addDeprecation({
-        message:
-          `Defining "xpack.security.authc.providers" as an array of provider types is deprecated. ` +
-          `Use extended "object" format instead.`,
+        title: i18n.translate('xpack.security.deprecations.authcProvidersTitle', {
+          defaultMessage:
+            'Defining "xpack.security.authc.providers" as an array of provider types is deprecated',
+        }),
+        message: i18n.translate('xpack.security.deprecations.authcProvidersMessage', {
+          defaultMessage:
+            '"xpack.security.authc.providers" accepts an extended "object" format instead of an array of provider types.',
+        }),
         correctiveActions: {
           manualSteps: [
-            `Use the extended object format for "xpack.security.authc.providers" in your Kibana configuration.`,
+            i18n.translate('xpack.security.deprecations.authcProviders.manualStepOneMessage', {
+              defaultMessage:
+                'Use the extended object format for "xpack.security.authc.providers" in your Kibana configuration.',
+            }),
           ],
         },
       });
@@ -68,11 +87,23 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
 
     if (hasProviderType('basic') && hasProviderType('token')) {
       addDeprecation({
-        message:
-          'Enabling both `basic` and `token` authentication providers in `xpack.security.authc.providers` is deprecated. Login page will only use `token` provider.',
+        title: i18n.translate('xpack.security.deprecations.basicAndTokenProvidersTitle', {
+          defaultMessage:
+            'Both "basic" and "token" authentication providers are enabled in "xpack.security.authc.providers"',
+        }),
+        message: i18n.translate('xpack.security.deprecations.basicAndTokenProvidersMessage', {
+          defaultMessage:
+            'Enabling both "basic" and "token" authentication providers in "xpack.security.authc.providers" is deprecated. Login page will only use "token" provider.',
+        }),
         correctiveActions: {
           manualSteps: [
-            'Remove either the `basic` or `token` auth provider in "xpack.security.authc.providers" from your Kibana configuration.',
+            i18n.translate(
+              'xpack.security.deprecations.basicAndTokenProviders.manualStepOneMessage',
+              {
+                defaultMessage:
+                  'Remove either the "basic" or "token" auth provider in "xpack.security.authc.providers" from your Kibana configuration.',
+              }
+            ),
           ],
         },
       });
@@ -85,26 +116,46 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
     >;
     if (Object.values(samlProviders).find((provider) => !!provider.maxRedirectURLSize)) {
       addDeprecation({
-        message:
-          '`xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize` is deprecated and is no longer used',
+        title: i18n.translate('xpack.security.deprecations.maxRedirectURLSizeTitle', {
+          defaultMessage:
+            '"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" is deprecated',
+        }),
+        message: i18n.translate('xpack.security.deprecations.maxRedirectURLSizeMessage', {
+          defaultMessage:
+            '"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" is no longer used.',
+        }),
         correctiveActions: {
           manualSteps: [
-            `Remove "xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" from your Kibana configuration.`,
+            i18n.translate('xpack.security.deprecations.maxRedirectURLSize.manualStepOneMessage', {
+              defaultMessage:
+                'Remove "xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" from your Kibana configuration.',
+            }),
           ],
         },
       });
     }
   },
   (settings, fromPath, addDeprecation) => {
-    if (settings?.xpack?.security?.enabled === false) {
+    if ('enabled' in (settings?.xpack?.security || {})) {
       addDeprecation({
-        message:
-          'Disabling the security plugin (`xpack.security.enabled`) will not be supported in the next major version (8.0). ' +
-          'To turn off security features, disable them in Elasticsearch instead.',
+        title: i18n.translate('xpack.security.deprecations.enabledTitle', {
+          defaultMessage: 'Setting "xpack.security.enabled" is deprecated',
+        }),
+        message: i18n.translate('xpack.security.deprecations.enabledMessage', {
+          defaultMessage:
+            'Enabling or disabling the Security plugin in Kibana is deprecated. Configure security in Elasticsearch instead.',
+        }),
+        documentationUrl:
+          'https://www.elastic.co/guide/en/elasticsearch/reference/current/secure-cluster.html',
         correctiveActions: {
           manualSteps: [
-            `Remove "xpack.security.enabled" from your Kibana configuration.`,
-            `To turn off security features, disable them in Elasticsearch instead.`,
+            i18n.translate('xpack.security.deprecations.enabled.manualStepOneMessage', {
+              defaultMessage: 'Remove "xpack.security.enabled" from kibana.yml.',
+            }),
+            i18n.translate('xpack.security.deprecations.enabled.manualStepTwoMessage', {
+              defaultMessage:
+                'Set "xpack.security.enabled" to true or false in elasticsearch.yml to enable or disable security.',
+            }),
           ],
         },
       });
@@ -114,14 +165,23 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   (settings, fromPath, addDeprecation) => {
     if (settings?.xpack?.security?.session?.idleTimeout === undefined) {
       addDeprecation({
-        message:
-          'Session idle timeout ("xpack.security.session.idleTimeout") will be set to 1 hour by default in the next major version (8.0).',
+        level: 'warning',
+        title: i18n.translate('xpack.security.deprecations.idleTimeoutTitle', {
+          defaultMessage: 'The "xpack.security.session.idleTimeout" default is changing',
+        }),
+        message: i18n.translate('xpack.security.deprecations.idleTimeoutMessage', {
+          defaultMessage: 'The session idle timeout will default to 1 hour in 8.0.',
+        }),
         documentationUrl:
           'https://www.elastic.co/guide/en/kibana/current/xpack-security-session-management.html#session-idle-timeout',
         correctiveActions: {
           manualSteps: [
-            `Use "xpack.security.session.idleTimeout" in your Kibana configuration to change default session idle timeout.`,
-            `To disable session idle timeout, set "xpack.security.session.idleTimeout" to 0.`,
+            i18n.translate('xpack.security.deprecations.idleTimeout.manualStepOneMessage', {
+              defaultMessage: `Set "xpack.security.session.idleTimeout" in your Kibana configuration to override the default session idle timeout.`,
+            }),
+            i18n.translate('xpack.security.deprecations.idleTimeout.manualStepTwoMessage', {
+              defaultMessage: `To disable the session idle timeout, set "xpack.security.session.idleTimeout" to 0.`,
+            }),
           ],
         },
       });
@@ -129,14 +189,23 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
 
     if (settings?.xpack?.security?.session?.lifespan === undefined) {
       addDeprecation({
-        message:
-          'Session lifespan ("xpack.security.session.lifespan") will be set to 30 days by default in the next major version (8.0).',
+        level: 'warning',
+        title: i18n.translate('xpack.security.deprecations.lifespanTitle', {
+          defaultMessage: 'The "xpack.security.session.lifespan" default is changing',
+        }),
+        message: i18n.translate('xpack.security.deprecations.lifespanMessage', {
+          defaultMessage: 'The session lifespan will default to 30 days in 8.0.',
+        }),
         documentationUrl:
           'https://www.elastic.co/guide/en/kibana/current/xpack-security-session-management.html#session-lifespan',
         correctiveActions: {
           manualSteps: [
-            `Use "xpack.security.session.lifespan" in your Kibana configuration to change default session lifespan.`,
-            `To disable session lifespan, set "xpack.security.session.lifespan" to 0.`,
+            i18n.translate('xpack.security.deprecations.lifespan.manualStepOneMessage', {
+              defaultMessage: `Set "xpack.security.session.lifespan" in your Kibana configuration to override the default session lifespan.`,
+            }),
+            i18n.translate('xpack.security.deprecations.lifespan.manualStepTwoMessage', {
+              defaultMessage: `To disable the session lifespan, set "xpack.security.session.lifespan" to 0.`,
+            }),
           ],
         },
       });

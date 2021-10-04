@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { RequestHandler, ResponseHeaders } from 'src/core/server';
 import bluebird from 'bluebird';
+import { safeDump } from 'js-yaml';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService, packagePolicyService } from '../../services';
@@ -135,7 +136,7 @@ export const createAgentPolicyHandler: RequestHandler<
       });
     }
 
-    await agentPolicyService.createFleetPolicyChangeAction(soClient, agentPolicy.id);
+    await agentPolicyService.createFleetServerPolicy(soClient, agentPolicy.id);
 
     const body: CreateAgentPolicyResponse = {
       item: agentPolicy,
@@ -269,7 +270,7 @@ export const downloadFullAgentPolicy: RequestHandler<
       standalone: request.query.standalone === true,
     });
     if (fullAgentPolicy) {
-      const body = fullAgentPolicyToYaml(fullAgentPolicy);
+      const body = fullAgentPolicyToYaml(fullAgentPolicy, safeDump);
       const headers: ResponseHeaders = {
         'content-type': 'text/x-yaml',
         'content-disposition': `attachment; filename="elastic-agent.yml"`,

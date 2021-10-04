@@ -22,9 +22,10 @@ import {
   LayoutDirection,
 } from '@elastic/charts';
 import { PaletteOutput } from 'src/plugins/charts/public';
-import { calculateMinInterval, XYChart, XYChartRenderProps, xyChart } from './expression';
+import { calculateMinInterval, XYChart, XYChartRenderProps } from './expression';
 import type { LensMultiTable } from '../../common';
 import { layerTypes } from '../../common';
+import { xyChart } from '../../common/expressions';
 import {
   layerConfig,
   legendConfig,
@@ -480,7 +481,7 @@ describe('xy_expression', () => {
       defaultProps = {
         formatFactory: getFormatSpy,
         timeZone: 'UTC',
-        renderMode: 'display',
+        renderMode: 'view',
         chartsThemeService,
         chartsActiveCursorService,
         paletteService,
@@ -973,7 +974,6 @@ describe('xy_expression', () => {
           }}
         />
       );
-
       wrapper.find(Settings).first().prop('onBrushEnd')!({ x: [1585757732783, 1585758880838] });
 
       expect(onSelectRange).toHaveBeenCalledWith({
@@ -1064,14 +1064,30 @@ describe('xy_expression', () => {
       });
     });
 
-    test('onBrushEnd is not set on noInteractivity mode', () => {
+    test('onBrushEnd is not set on non-interactive mode', () => {
       const { args, data } = sampleArgs();
 
       const wrapper = mountWithIntl(
-        <XYChart {...defaultProps} data={data} args={args} renderMode="noInteractivity" />
+        <XYChart {...defaultProps} data={data} args={args} interactive={false} />
       );
 
       expect(wrapper.find(Settings).first().prop('onBrushEnd')).toBeUndefined();
+    });
+
+    test('allowBrushingLastHistogramBucket is true for date histogram data', () => {
+      const { args } = sampleArgs();
+
+      const wrapper = mountWithIntl(
+        <XYChart
+          {...defaultProps}
+          data={dateHistogramData}
+          args={{
+            ...args,
+            layers: [dateHistogramLayer],
+          }}
+        />
+      );
+      expect(wrapper.find(Settings).at(0).prop('allowBrushingLastHistogramBucket')).toEqual(true);
     });
 
     test('onElementClick returns correct context data', () => {
@@ -1334,11 +1350,41 @@ describe('xy_expression', () => {
       });
     });
 
-    test('onElementClick is not triggering event on noInteractivity mode', () => {
+    test('allowBrushingLastHistogramBucket should be fakse for ordinal data', () => {
       const { args, data } = sampleArgs();
 
       const wrapper = mountWithIntl(
-        <XYChart {...defaultProps} data={data} args={args} renderMode="noInteractivity" />
+        <XYChart
+          {...defaultProps}
+          data={data}
+          args={{
+            ...args,
+            layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                seriesType: 'line',
+                xAccessor: 'd',
+                accessors: ['a', 'b'],
+                columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+                xScaleType: 'ordinal',
+                yScaleType: 'linear',
+                isHistogram: false,
+                palette: mockPaletteOutput,
+              },
+            ],
+          }}
+        />
+      );
+
+      expect(wrapper.find(Settings).at(0).prop('allowBrushingLastHistogramBucket')).toEqual(false);
+    });
+
+    test('onElementClick is not triggering event on non-interactive mode', () => {
+      const { args, data } = sampleArgs();
+
+      const wrapper = mountWithIntl(
+        <XYChart {...defaultProps} data={data} args={args} interactive={false} />
       );
 
       expect(wrapper.find(Settings).first().prop('onElementClick')).toBeUndefined();

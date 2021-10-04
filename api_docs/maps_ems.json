@@ -347,7 +347,7 @@
             "children": [
               {
                 "parentPluginId": "mapsEms",
-                "id": "def-public.IServiceSettings.setQueryParams.$1.params",
+                "id": "def-public.IServiceSettings.setQueryParams.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -357,7 +357,7 @@
                 "children": [
                   {
                     "parentPluginId": "mapsEms",
-                    "id": "def-public.IServiceSettings.setQueryParams.$1.params.Unnamed",
+                    "id": "def-public.IServiceSettings.setQueryParams.$1.Unnamed",
                     "type": "Any",
                     "tags": [],
                     "label": "Unnamed",
@@ -566,104 +566,6 @@
     "misc": [
       {
         "parentPluginId": "mapsEms",
-        "id": "def-public.DEFAULT_EMS_DARKMAP_ID",
-        "type": "string",
-        "tags": [],
-        "label": "DEFAULT_EMS_DARKMAP_ID",
-        "description": [],
-        "signature": [
-          "\"dark_map\""
-        ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "mapsEms",
-        "id": "def-public.DEFAULT_EMS_FILE_API_URL",
-        "type": "string",
-        "tags": [],
-        "label": "DEFAULT_EMS_FILE_API_URL",
-        "description": [],
-        "signature": [
-          "\"https://vector.maps.elastic.co\""
-        ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "mapsEms",
-        "id": "def-public.DEFAULT_EMS_FONT_LIBRARY_URL",
-        "type": "string",
-        "tags": [],
-        "label": "DEFAULT_EMS_FONT_LIBRARY_URL",
-        "description": [],
-        "signature": [
-          "\"https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf\""
-        ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "mapsEms",
-        "id": "def-public.DEFAULT_EMS_LANDING_PAGE_URL",
-        "type": "string",
-        "tags": [],
-        "label": "DEFAULT_EMS_LANDING_PAGE_URL",
-        "description": [],
-        "signature": [
-          "\"https://maps.elastic.co/v7.15\""
-        ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "mapsEms",
-        "id": "def-public.DEFAULT_EMS_ROADMAP_DESATURATED_ID",
-        "type": "string",
-        "tags": [],
-        "label": "DEFAULT_EMS_ROADMAP_DESATURATED_ID",
-        "description": [],
-        "signature": [
-          "\"road_map_desaturated\""
-        ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "mapsEms",
-        "id": "def-public.DEFAULT_EMS_ROADMAP_ID",
-        "type": "string",
-        "tags": [],
-        "label": "DEFAULT_EMS_ROADMAP_ID",
-        "description": [],
-        "signature": [
-          "\"road_map\""
-        ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "mapsEms",
-        "id": "def-public.DEFAULT_EMS_TILE_API_URL",
-        "type": "string",
-        "tags": [],
-        "label": "DEFAULT_EMS_TILE_API_URL",
-        "description": [],
-        "signature": [
-          "\"https://tiles.maps.elastic.co\""
-        ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "mapsEms",
         "id": "def-public.LayerConfig",
         "type": "Type",
         "tags": [],
@@ -705,41 +607,7 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "mapsEms",
-        "id": "def-public.ORIGIN",
-        "type": "Object",
-        "tags": [],
-        "label": "ORIGIN",
-        "description": [],
-        "path": "src/plugins/maps_ems/common/origin.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "mapsEms",
-            "id": "def-public.ORIGIN.EMS",
-            "type": "string",
-            "tags": [],
-            "label": "EMS",
-            "description": [],
-            "path": "src/plugins/maps_ems/common/origin.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "mapsEms",
-            "id": "def-public.ORIGIN.KIBANA_YML",
-            "type": "string",
-            "tags": [],
-            "label": "KIBANA_YML",
-            "description": [],
-            "path": "src/plugins/maps_ems/common/origin.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "objects": [],
     "setup": {
       "parentPluginId": "mapsEms",
       "id": "def-public.MapsEmsPluginSetup",
@@ -1014,7 +882,7 @@
         "signature": [
           "\"dark_map\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "path": "src/plugins/maps_ems/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1028,7 +896,7 @@
         "signature": [
           "\"https://vector.maps.elastic.co\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "path": "src/plugins/maps_ems/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1042,7 +910,7 @@
         "signature": [
           "\"https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "path": "src/plugins/maps_ems/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1056,7 +924,7 @@
         "signature": [
           "\"https://maps.elastic.co/v7.15\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "path": "src/plugins/maps_ems/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1070,7 +938,7 @@
         "signature": [
           "\"road_map_desaturated\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "path": "src/plugins/maps_ems/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1084,7 +952,7 @@
         "signature": [
           "\"road_map\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "path": "src/plugins/maps_ems/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1098,7 +966,7 @@
         "signature": [
           "\"https://tiles.maps.elastic.co\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "path": "src/plugins/maps_ems/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

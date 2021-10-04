@@ -22,7 +22,10 @@ import {
 } from '../../../../../src/plugins/kibana_react/public';
 import { APMRouteDefinition } from '../application/routes';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
-import { RumHome, UX_LABEL } from '../components/app/RumDashboard/RumHome';
+import {
+  RumHome,
+  DASHBOARD_LABEL,
+} from '../components/app/RumDashboard/RumHome';
 import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { ConfigSchema } from '../index';
@@ -34,13 +37,14 @@ import { redirectTo } from '../components/routing/redirect_to';
 import { useBreadcrumbs } from '../../../observability/public';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
+import { InspectorContextProvider } from '../context/inspector/inspector_context';
 
 export const uxRoutes: APMRouteDefinition[] = [
   {
     exact: true,
     path: '/',
     render: redirectTo('/ux'),
-    breadcrumb: UX_LABEL,
+    breadcrumb: DASHBOARD_LABEL,
   },
 ];
 
@@ -91,7 +95,7 @@ export function UXAppRoot({
   core,
   deps,
   config,
-  corePlugins: { embeddable, maps, observability, data },
+  corePlugins: { embeddable, inspector, maps, observability, data },
   observabilityRuleTypeRegistry,
 }: {
   appMountParameters: AppMountParameters;
@@ -108,6 +112,7 @@ export function UXAppRoot({
     appMountParameters,
     config,
     core,
+    inspector,
     plugins,
     observability,
     observabilityRuleTypeRegistry,
@@ -124,10 +129,12 @@ export function UXAppRoot({
         >
           <i18nCore.Context>
             <RouterProvider history={history} router={uxRouter}>
-              <UrlParamsProvider>
-                <UxApp />
-                <UXActionMenu appMountParameters={appMountParameters} />
-              </UrlParamsProvider>
+              <InspectorContextProvider>
+                <UrlParamsProvider>
+                  <UxApp />
+                  <UXActionMenu appMountParameters={appMountParameters} />
+                </UrlParamsProvider>
+              </InspectorContextProvider>
             </RouterProvider>
           </i18nCore.Context>
         </KibanaContextProvider>

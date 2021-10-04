@@ -15,12 +15,12 @@ describe('LensStore', () => {
       bulkUpdate: jest.fn(([{ id }]: SavedObjectsBulkUpdateObject[]) =>
         Promise.resolve({ savedObjects: [{ id }, { id }] })
       ),
-      get: jest.fn(),
+      resolve: jest.fn(),
     };
 
     return {
       client,
-      store: new SavedObjectIndexStore((client as unknown) as SavedObjectsClientContract),
+      store: new SavedObjectIndexStore(client as unknown as SavedObjectsClientContract),
     };
   }
 
@@ -142,15 +142,18 @@ describe('LensStore', () => {
   describe('load', () => {
     test('throws if an error is returned', async () => {
       const { client, store } = testStore();
-      client.get = jest.fn(async () => ({
-        id: 'Paul',
-        type: 'lens',
-        attributes: {
-          title: 'Hope clouds observation.',
-          visualizationType: 'dune',
-          state: '{ "datasource": { "giantWorms": true } }',
+      client.resolve = jest.fn(async () => ({
+        outcome: 'exactMatch',
+        saved_object: {
+          id: 'Paul',
+          type: 'lens',
+          attributes: {
+            title: 'Hope clouds observation.',
+            visualizationType: 'dune',
+            state: '{ "datasource": { "giantWorms": true } }',
+          },
+          error: new Error('shoot dang!'),
         },
-        error: new Error('shoot dang!'),
       }));
 
       await expect(store.load('Paul')).rejects.toThrow('shoot dang!');

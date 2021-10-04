@@ -70,10 +70,10 @@ function setupMockCallCluster(
       });
     }
   }
-  const esClientMock = ({
+  const esClientMock = {
     get: jest.fn().mockImplementation(mockedEsGetMethod),
     search: jest.fn().mockImplementation(mockedEsSearchMethod),
-  } as unknown) as ElasticsearchClient;
+  } as unknown as ElasticsearchClient;
   esClient = esClientMock;
 }
 

@@ -51,7 +51,7 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
 
 Config defines information for the connector type.
 
-`service`:: The name of a https://nodemailer.com/smtp/well-known/[well-known email service provider]. If `service` is provided, `host`, `port`, and `secure` properties are ignored. For more information on the `gmail` service value, see the https://nodemailer.com/usage/using-gmail/[Nodemailer Gmail documentation].
+`service`:: The name of the email service. If `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's https://nodemailer.com/smtp/well-known/[well-known email service providers], `host`, `port`, and `secure` properties are ignored. If `service` is `other`, `host` and `port` properties must be defined. For more information on the `gmail` service value, see the https://nodemailer.com/usage/using-gmail/[Nodemailer Gmail documentation].
 `from`:: An email address that corresponds to *Sender*.
 `host`:: A string that corresponds to *Host*.
 `port`:: A number that corresponds to *Port*.
@@ -107,7 +107,7 @@ For other email servers, you can check the list of well-known services that Node
 [[elasticcloud]]
 ==== Sending email from Elastic Cloud
 
-IMPORTANT: These instructions require you to link:{cloud}/ec-watcher.html#ec-watcher-whitelist[whitelist] the email addresses that notifications get sent first.
+IMPORTANT: These instructions require you to link:{cloud}/ec-watcher.html#ec-watcher-whitelist[allowlist] the email addresses that notifications get sent.
 
 Use the following connector settings to send email from Elastic Cloud: 
 

@@ -20,7 +20,10 @@ import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
-describe('perform_bulk_action', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('perform_bulk_action - %s', (_, isRuleRegistryEnabled) => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -30,9 +33,9 @@ describe('perform_bulk_action', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
 
-    performBulkActionRoute(server.router, ml);
+    performBulkActionRoute(server.router, ml, isRuleRegistryEnabled);
   });
 
   describe('status codes', () => {

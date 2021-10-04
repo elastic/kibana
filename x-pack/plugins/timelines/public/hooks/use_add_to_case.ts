@@ -143,10 +143,10 @@ export const useAddToCase = ({
   );
   const currentSearch = useLocation().search;
   const urlSearch = useMemo(() => currentSearch, [currentSearch]);
-  const createCaseUrl = useMemo(() => getUrlForApp('cases') + getCreateCaseUrl(urlSearch), [
-    getUrlForApp,
-    urlSearch,
-  ]);
+  const createCaseUrl = useMemo(
+    () => getUrlForApp('cases') + getCreateCaseUrl(urlSearch),
+    [getUrlForApp, urlSearch]
+  );
 
   const attachAlertToCase = useCallback(
     async (

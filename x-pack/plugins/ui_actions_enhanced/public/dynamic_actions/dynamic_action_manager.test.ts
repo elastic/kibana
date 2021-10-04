@@ -18,10 +18,10 @@ import { dynamicActionGrouping } from './dynamic_action_grouping';
 
 const actionFactoryDefinition1: ActionFactoryDefinition = {
   id: 'ACTION_FACTORY_1',
-  CollectConfig: {} as any,
+  CollectConfig: {},
   createConfig: () => ({}),
-  isConfigValid: (() => true) as any,
-  create: ({ name }) => ({
+  isConfigValid: () => true,
+  create: ({ name }: { name: string }) => ({
     id: '',
     execute: async () => {},
     getDisplayName: () => name,
@@ -29,14 +29,14 @@ const actionFactoryDefinition1: ActionFactoryDefinition = {
   supportedTriggers() {
     return ['VALUE_CLICK_TRIGGER'];
   },
-};
+} as unknown as ActionFactoryDefinition;
 
 const actionFactoryDefinition2: ActionFactoryDefinition = {
   id: 'ACTION_FACTORY_2',
-  CollectConfig: {} as any,
+  CollectConfig: {},
   createConfig: () => ({}),
-  isConfigValid: (() => true) as any,
-  create: ({ name }) => ({
+  isConfigValid: () => true,
+  create: ({ name }: { name: string }) => ({
     id: '',
     execute: async () => {},
     getDisplayName: () => name,
@@ -44,7 +44,7 @@ const actionFactoryDefinition2: ActionFactoryDefinition = {
   supportedTriggers() {
     return ['VALUE_CLICK_TRIGGER'];
   },
-};
+} as unknown as ActionFactoryDefinition;
 
 const event1: SerializedEvent = {
   eventId: 'EVENT_ID_1',
@@ -709,10 +709,7 @@ describe('DynamicActionManager', () => {
 
     await manager.start();
 
-    const basicActions = await uiActions.getTriggerCompatibleActions(
-      'VALUE_CLICK_TRIGGER',
-      {} as any
-    );
+    const basicActions = await uiActions.getTriggerCompatibleActions('VALUE_CLICK_TRIGGER', {});
     expect(basicActions).toHaveLength(1);
 
     getLicenseInfo.mockImplementation(() =>
@@ -721,7 +718,7 @@ describe('DynamicActionManager', () => {
 
     const basicAndGoldActions = await uiActions.getTriggerCompatibleActions(
       'VALUE_CLICK_TRIGGER',
-      {} as any
+      {}
     );
 
     expect(basicAndGoldActions).toHaveLength(2);

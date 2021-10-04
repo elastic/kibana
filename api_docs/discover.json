@@ -1009,7 +1009,7 @@
         "signature": [
           "\"search\""
         ],
-        "path": "src/plugins/discover/public/application/embeddable/constants.ts",
+        "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1305,6 +1305,20 @@
         "description": [],
         "signature": [
           "\"discover:sampleSize\""
+        ],
+        "path": "src/plugins/discover/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-common.SEARCH_EMBEDDABLE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_EMBEDDABLE_TYPE",
+        "description": [],
+        "signature": [
+          "\"search\""
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,

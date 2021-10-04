@@ -73,31 +73,29 @@ export async function loadIndexPatterns({
           (field) =>
             !indexPatternsUtils.isNestedField(field) && (!!field.aggregatable || !!field.scripted)
         )
-        .map(
-          (field): IndexPatternField => {
-            // Convert the getters on the index pattern service into plain JSON
-            const base = {
-              name: field.name,
-              displayName: field.displayName,
-              type: field.type,
-              aggregatable: field.aggregatable,
-              searchable: field.searchable,
-              meta: indexPattern.metaFields.includes(field.name),
-              esTypes: field.esTypes,
-              scripted: field.scripted,
-              runtime: Boolean(field.runtimeField),
-            };
+        .map((field): IndexPatternField => {
+          // Convert the getters on the index pattern service into plain JSON
+          const base = {
+            name: field.name,
+            displayName: field.displayName,
+            type: field.type,
+            aggregatable: field.aggregatable,
+            searchable: field.searchable,
+            meta: indexPattern.metaFields.includes(field.name),
+            esTypes: field.esTypes,
+            scripted: field.scripted,
+            runtime: Boolean(field.runtimeField),
+          };
 
-            // Simplifies tests by hiding optional properties instead of undefined
-            return base.scripted
-              ? {
-                  ...base,
-                  lang: field.lang,
-                  script: field.script,
-                }
-              : base;
-          }
-        )
+          // Simplifies tests by hiding optional properties instead of undefined
+          return base.scripted
+            ? {
+                ...base,
+                lang: field.lang,
+                script: field.script,
+              }
+            : base;
+        })
         .concat(documentField);
 
       const { typeMeta, title, timeFieldName, fieldFormatMap } = indexPattern;

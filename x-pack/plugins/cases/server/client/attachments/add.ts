@@ -40,7 +40,12 @@ import {
 } from '../../services/user_actions/helpers';
 
 import { AttachmentService, CasesService, CaseUserActionService } from '../../services';
-import { createCaseError, CommentableCase, isCommentRequestTypeGenAlert } from '../../common';
+import {
+  createCaseError,
+  CommentableCase,
+  createAlertUpdateRequest,
+  isCommentRequestTypeGenAlert,
+} from '../../common';
 import { CasesClientArgs, CasesClientInternal } from '..';
 
 import { decodeCommentRequest } from '../utils';
@@ -101,7 +106,7 @@ async function getSubCase({
         caseId,
         subCaseId: newSubCase.id,
         fields: ['status', 'sub_case'],
-        newValue: JSON.stringify({ status: newSubCase.attributes.status }),
+        newValue: { status: newSubCase.attributes.status },
         owner: newSubCase.attributes.owner,
       }),
     ],
@@ -182,16 +187,27 @@ const addGeneratedAlerts = async (
       lensEmbeddableFactory,
     });
 
-    const {
-      comment: newComment,
-      commentableCase: updatedCase,
-    } = await commentableCase.createComment({
-      createdDate,
-      user: userDetails,
-      commentReq: query,
-      id: savedObjectID,
-      casesClientInternal,
-    });
+    const { comment: newComment, commentableCase: updatedCase } =
+      await commentableCase.createComment({
+        createdDate,
+        user: userDetails,
+        commentReq: query,
+        id: savedObjectID,
+      });
+
+    if (
+      (newComment.attributes.type === CommentType.alert ||
+        newComment.attributes.type === CommentType.generatedAlert) &&
+      caseInfo.attributes.settings.syncAlerts
+    ) {
+      const alertsToUpdate = createAlertUpdateRequest({
+        comment: query,
+        status: subCase.attributes.status,
+      });
+      await casesClientInternal.alerts.updateStatus({
+        alerts: alertsToUpdate,
+      });
+    }
 
     await userActionService.bulkCreate({
       unsecuredSavedObjectsClient,
@@ -204,7 +220,7 @@ const addGeneratedAlerts = async (
           subCaseId: updatedCase.subCaseId,
           commentId: newComment.id,
           fields: ['comment'],
-          newValue: JSON.stringify(query),
+          newValue: query,
           owner: newComment.attributes.owner,
         }),
       ],
@@ -368,8 +384,18 @@ export const addComment = async (
       user: userInfo,
       commentReq: query,
       id: savedObjectID,
-      casesClientInternal,
     });
+
+    if (newComment.attributes.type === CommentType.alert && updatedCase.settings.syncAlerts) {
+      const alertsToUpdate = createAlertUpdateRequest({
+        comment: query,
+        status: updatedCase.status,
+      });
+
+      await casesClientInternal.alerts.updateStatus({
+        alerts: alertsToUpdate,
+      });
+    }
 
     await userActionService.bulkCreate({
       unsecuredSavedObjectsClient,
@@ -382,7 +408,7 @@ export const addComment = async (
           subCaseId: updatedCase.subCaseId,
           commentId: newComment.id,
           fields: ['comment'],
-          newValue: JSON.stringify(query),
+          newValue: query,
           owner: newComment.attributes.owner,
         }),
       ],

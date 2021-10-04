@@ -58,9 +58,10 @@ export const DocViewerTable = ({
 }: DocViewRenderProps) => {
   const showMultiFields = getServices().uiSettings.get(SHOW_MULTIFIELDS);
 
-  const mapping = useCallback((name: string) => indexPattern?.fields.getByName(name), [
-    indexPattern?.fields,
-  ]);
+  const mapping = useCallback(
+    (name: string) => indexPattern?.fields.getByName(name),
+    [indexPattern?.fields]
+  );
 
   const formattedHit = useMemo(() => indexPattern?.formatHit(hit, 'html'), [hit, indexPattern]);
 
@@ -145,3 +146,7 @@ export const DocViewerTable = ({
     />
   );
 };
+
+// Required for usage in React.lazy
+// eslint-disable-next-line import/no-default-export
+export default DocViewerTable;

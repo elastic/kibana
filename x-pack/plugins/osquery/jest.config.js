@@ -9,4 +9,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/osquery'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/osquery',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: ['<rootDir>/x-pack/plugins/osquery/{common,public,server}/**/*.{ts,tsx}'],
 };

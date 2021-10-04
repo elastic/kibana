@@ -61,7 +61,7 @@ describe('msearch route', () => {
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockClient.msearch.mock.calls[0][0].body).toEqual(
       convertRequestBody(mockBody as any, {})
@@ -109,7 +109,7 @@ describe('msearch route', () => {
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockClient.msearch).toBeCalledTimes(1);
     expect(mockResponse.customError).toBeCalled();
@@ -143,7 +143,7 @@ describe('msearch route', () => {
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockClient.msearch).toBeCalledTimes(1);
     expect(mockResponse.customError).toBeCalled();

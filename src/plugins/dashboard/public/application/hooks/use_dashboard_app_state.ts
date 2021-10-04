@@ -35,9 +35,10 @@ import {
   syncDashboardFilterState,
   loadSavedDashboardState,
   buildDashboardContainer,
-  loadDashboardUrlState,
+  syncDashboardUrlState,
   diffDashboardState,
   areTimeRangesEqual,
+  areRefreshIntervalsEqual,
 } from '../lib';
 
 export interface UseDashboardStateProps {
@@ -127,6 +128,7 @@ export const useDashboardAppState = ({
       savedDashboards,
       kbnUrlStateStorage,
       initializerContext,
+      savedObjectsTagging,
       isEmbeddedExternally,
       dashboardCapabilities,
       dispatchDashboardStateChange,
@@ -151,15 +153,20 @@ export const useDashboardAppState = ({
        * Combine initial state from the saved object, session storage, and URL, then dispatch it to Redux.
        */
       const dashboardSessionStorageState = dashboardSessionStorage.getState(savedDashboardId) || {};
-      const dashboardURLState = loadDashboardUrlState(dashboardBuildContext);
+
       const forwardedAppState = loadDashboardHistoryLocationState(
         scopedHistory()?.location?.state as undefined | DashboardAppLocatorParams
       );
 
+      const { initialDashboardStateFromUrl, stopWatchingAppStateInUrl } = syncDashboardUrlState({
+        ...dashboardBuildContext,
+        savedDashboard,
+      });
+
       const initialDashboardState = {
         ...savedDashboardState,
         ...dashboardSessionStorageState,
-        ...dashboardURLState,
+        ...initialDashboardStateFromUrl,
         ...forwardedAppState,
 
         // if there is an incoming embeddable, dashboard always needs to be in edit mode to receive it.
@@ -231,27 +238,29 @@ export const useDashboardAppState = ({
         .pipe(debounceTime(DashboardConstants.CHANGE_CHECK_DEBOUNCE))
         .subscribe((states) => {
           const [lastSaved, current] = states;
-          const unsavedChanges =
-            current.viewMode === ViewMode.EDIT ? diffDashboardState(lastSaved, current) : {};
+          const unsavedChanges = diffDashboardState(lastSaved, current);
 
-          let savedTimeChanged = false;
+          const savedTimeChanged =
+            lastSaved.timeRestore &&
+            (!areTimeRangesEqual(
+              {
+                from: savedDashboard?.timeFrom,
+                to: savedDashboard?.timeTo,
+              },
+              timefilter.getTime()
+            ) ||
+              !areRefreshIntervalsEqual(
+                savedDashboard?.refreshInterval,
+                timefilter.getRefreshInterval()
+              ));
 
           /**
-           * changes to the time filter should only be considered 'unsaved changes' when
+           * changes to the dashboard should only be considered 'unsaved changes' when
            * editing the dashboard
            */
-          if (current.viewMode === ViewMode.EDIT) {
-            savedTimeChanged =
-              lastSaved.timeRestore &&
-              !areTimeRangesEqual(
-                {
-                  from: savedDashboard?.timeFrom,
-                  to: savedDashboard?.timeTo,
-                },
-                timefilter.getTime()
-              );
-          }
-          const hasUnsavedChanges = Object.keys(unsavedChanges).length > 0 || savedTimeChanged;
+          const hasUnsavedChanges =
+            current.viewMode === ViewMode.EDIT &&
+            (Object.keys(unsavedChanges).length > 0 || savedTimeChanged);
           setDashboardAppState((s) => ({ ...s, hasUnsavedChanges }));
 
           unsavedChanges.viewMode = current.viewMode; // always push view mode into session store.
@@ -291,6 +300,7 @@ export const useDashboardAppState = ({
 
       onDestroy = () => {
         stopSyncingContainerInput();
+        stopWatchingAppStateInUrl();
         stopSyncingDashboardFilterState();
         lastSavedSubscription.unsubscribe();
         indexPatternsSubscription.unsubscribe();

@@ -71,6 +71,7 @@ import {
   timestamp_override,
   Author,
   event_category_override,
+  namespace,
 } from '../common/schemas';
 
 /**
@@ -136,10 +137,10 @@ export const addPrepackagedRulesSchema = t.intersection([
       threat_indicator_path, // defaults "undefined" if not set during decode
       concurrent_searches, // defaults to "undefined" if not set during decode
       items_per_search, // defaults to "undefined" if not set during decode
+      namespace, // defaults to "undefined" if not set during decode
     })
   ),
 ]);
-
 export type AddPrepackagedRulesSchema = t.TypeOf<typeof addPrepackagedRulesSchema>;
 
 // This type is used after a decode since some things are defaults after a decode.
@@ -153,6 +154,7 @@ export type AddPrepackagedRulesSchemaDecoded = Omit<
   | 'from'
   | 'interval'
   | 'max_signals'
+  | 'namespace'
   | 'risk_score_mapping'
   | 'severity_mapping'
   | 'tags'
@@ -176,4 +178,5 @@ export type AddPrepackagedRulesSchemaDecoded = Omit<
   threat: Threats;
   throttle: ThrottleOrNull;
   exceptions_list: ListArray;
+  namespace?: string;
 };

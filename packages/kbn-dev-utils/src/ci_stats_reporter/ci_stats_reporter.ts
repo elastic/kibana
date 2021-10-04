@@ -10,7 +10,8 @@ import { inspect } from 'util';
 import Os from 'os';
 import Fs from 'fs';
 import Path from 'path';
-
+import crypto from 'crypto';
+import execa from 'execa';
 import Axios from 'axios';
 
 import { ToolingLog } from '../tooling_log';
@@ -80,17 +81,36 @@ export class CiStatsReporter {
     const timings = options.timings;
     const upstreamBranch = options.upstreamBranch ?? this.getUpstreamBranch();
     const kibanaUuid = options.kibanaUuid === undefined ? this.getKibanaUuid() : options.kibanaUuid;
+    let email;
+
+    try {
+      const { stdout } = await execa('git', ['config', 'user.email']);
+      email = stdout;
+    } catch (e) {
+      this.log.debug(e.message);
+    }
+
+    const isElasticCommitter = email && email.endsWith('@elastic.co') ? true : false;
+
     const defaultMetadata = {
-      osPlatform: Os.platform(),
-      osRelease: Os.release(),
-      osArch: Os.arch(),
+      committerHash: email
+        ? crypto.createHash('sha256').update(email).digest('hex').substring(0, 20)
+        : undefined,
       cpuCount: Os.cpus()?.length,
       cpuModel: Os.cpus()[0]?.model,
       cpuSpeed: Os.cpus()[0]?.speed,
+      email: isElasticCommitter ? email : undefined,
       freeMem: Os.freemem(),
-      totalMem: Os.totalmem(),
+      isElasticCommitter,
       kibanaUuid,
+      nestedTiming: process.env.CI_STATS_NESTED_TIMING ? true : false,
+      osArch: Os.arch(),
+      osPlatform: Os.platform(),
+      osRelease: Os.release(),
+      totalMem: Os.totalmem(),
     };
+
+    this.log.debug('CIStatsReporter committerHash: %s', defaultMetadata.committerHash);
 
     return await this.req({
       auth: !!buildId,
@@ -199,7 +219,7 @@ export class CiStatsReporter {
           throw error;
         }
 
-        if (error?.response && error.response.status < 502) {
+        if (error?.response && error.response.status < 500) {
           // error response from service was received so warn the user and move on
           this.log.warning(
             `error reporting ${bodyDesc} [status=${error.response.status}] [resp=${inspect(
@@ -221,11 +241,12 @@ export class CiStatsReporter {
           ? `${error.response.status} response`
           : 'no response';
 
+        const seconds = attempt * 10;
         this.log.warning(
-          `failed to reach ci-stats service [reason=${reason}], retrying in ${attempt} seconds`
+          `failed to reach ci-stats service, retrying in ${seconds} seconds, [reason=${reason}], [error=${error.message}]`
         );
 
-        await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+        await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
       }
     }
   }

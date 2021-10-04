@@ -1,5 +1,9 @@
 {
   "id": "featureUsageTest",
+  "owner": {
+    "name": "Platform Security",
+    "githubTeam": "kibana-security"
+  },
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "feature_usage_test"],

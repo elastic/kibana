@@ -8,13 +8,10 @@
 import { HeadlessChromiumDriver } from '../../browsers';
 import {
   createMockBrowserDriverFactory,
-  createMockConfig,
   createMockConfigSchema,
-  createMockLayoutInstance,
   createMockLevelLogger,
   createMockReportingCore,
 } from '../../test_helpers';
-import { LayoutInstance } from '../layouts';
 import { getScreenshots } from './get_screenshots';
 
 describe('getScreenshots', () => {
@@ -35,17 +32,12 @@ describe('getScreenshots', () => {
     },
   ];
 
-  let layout: LayoutInstance;
   let logger: ReturnType<typeof createMockLevelLogger>;
   let browser: jest.Mocked<HeadlessChromiumDriver>;
 
   beforeEach(async () => {
-    const schema = createMockConfigSchema();
-    const config = createMockConfig(schema);
-    const captureConfig = config.get('capture');
-    const core = await createMockReportingCore(schema);
+    const core = await createMockReportingCore(createMockConfigSchema());
 
-    layout = createMockLayoutInstance(captureConfig);
     logger = createMockLevelLogger();
 
     await createMockBrowserDriverFactory(core, logger, {
@@ -71,7 +63,7 @@ describe('getScreenshots', () => {
   });
 
   it('should return screenshots', async () => {
-    await expect(getScreenshots(browser, layout, elementsPositionAndAttributes, logger)).resolves
+    await expect(getScreenshots(browser, elementsPositionAndAttributes, logger)).resolves
       .toMatchInlineSnapshot(`
             Array [
               Object {
@@ -117,7 +109,7 @@ describe('getScreenshots', () => {
   });
 
   it('should forward elements positions', async () => {
-    await getScreenshots(browser, layout, elementsPositionAndAttributes, logger);
+    await getScreenshots(browser, elementsPositionAndAttributes, logger);
 
     expect(browser.screenshot).toHaveBeenCalledTimes(2);
     expect(browser.screenshot).toHaveBeenNthCalledWith(
@@ -134,7 +126,7 @@ describe('getScreenshots', () => {
     browser.screenshot.mockResolvedValue(Buffer.from(''));
 
     await expect(
-      getScreenshots(browser, layout, elementsPositionAndAttributes, logger)
+      getScreenshots(browser, elementsPositionAndAttributes, logger)
     ).rejects.toBeInstanceOf(Error);
   });
 });

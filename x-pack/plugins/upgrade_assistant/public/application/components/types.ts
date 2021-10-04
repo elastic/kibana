@@ -13,14 +13,6 @@ export enum LoadingState {
   Error,
 }
 
-export type LevelFilterOption = 'all' | 'critical';
-
-export enum GroupByOption {
-  message = 'message',
-  index = 'index',
-  node = 'node',
-}
-
 export type DeprecationTableColumns =
   | 'type'
   | 'index'
@@ -38,4 +30,9 @@ export interface DeprecationLoggingPreviewProps {
   updateError: ResponseError | undefined;
   resendRequest: () => void;
   toggleLogging: () => void;
+}
+
+export interface OverviewStepProps {
+  isComplete: boolean;
+  setIsComplete: (isComplete: boolean) => void;
 }

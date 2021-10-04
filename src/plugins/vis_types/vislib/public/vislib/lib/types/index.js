@@ -11,12 +11,7 @@ import { vislibPieConfig } from './pie';
 import { vislibGaugeConfig } from './gauge';
 
 export const vislibTypesConfig = {
-  histogram: pointSeries.column,
-  horizontal_bar: pointSeries.column,
-  line: pointSeries.line,
   pie: vislibPieConfig,
-  area: pointSeries.area,
-  point_series: pointSeries.line,
   heatmap: pointSeries.heatmap,
   gauge: vislibGaugeConfig,
   goal: vislibGaugeConfig,

@@ -11,17 +11,35 @@ import ReactDOM from 'react-dom';
 import { Route, Switch, Redirect, Router } from 'react-router-dom';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { LoadingPage } from './pages/loading_page';
+import { LicensePage } from './pages/license_page';
+import { ClusterOverview } from './pages/cluster/overview_page';
 import { MonitoringStartPluginDependencies } from '../types';
 import { GlobalStateProvider } from './global_state_context';
+import { ExternalConfigContext, ExternalConfig } from './external_config_context';
 import { createPreserveQueryHistory } from './preserve_query_history';
 import { RouteInit } from './route_init';
+import { NoDataPage } from './pages/no_data';
+import { ElasticsearchOverviewPage } from './pages/elasticsearch/overview';
+import { BeatsOverviewPage } from './pages/beats/overview';
+import { BeatsInstancesPage } from './pages/beats/instances';
+import { BeatsInstancePage } from './pages/beats/instance';
+import { CODE_PATH_ELASTICSEARCH, CODE_PATH_BEATS } from '../../common/constants';
+import { ElasticsearchNodesPage } from './pages/elasticsearch/nodes_page';
+import { ElasticsearchIndicesPage } from './pages/elasticsearch/indices_page';
+import { ElasticsearchNodePage } from './pages/elasticsearch/node_page';
+import { MonitoringTimeContainer } from './hooks/use_monitoring_time';
+import { BreadcrumbContainer } from './hooks/use_breadcrumbs';
 
 export const renderApp = (
   core: CoreStart,
   plugins: MonitoringStartPluginDependencies,
-  { element }: AppMountParameters
+  { element }: AppMountParameters,
+  externalConfig: ExternalConfig
 ) => {
-  ReactDOM.render(<MonitoringApp core={core} plugins={plugins} />, element);
+  ReactDOM.render(
+    <MonitoringApp core={core} plugins={plugins} externalConfig={externalConfig} />,
+    element
+  );
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
@@ -31,54 +49,106 @@ export const renderApp = (
 const MonitoringApp: React.FC<{
   core: CoreStart;
   plugins: MonitoringStartPluginDependencies;
-}> = ({ core, plugins }) => {
+  externalConfig: ExternalConfig;
+}> = ({ core, plugins, externalConfig }) => {
   const history = createPreserveQueryHistory();
 
   return (
     <KibanaContextProvider services={{ ...core, ...plugins }}>
-      <GlobalStateProvider query={plugins.data.query} toasts={core.notifications.toasts}>
-        <Router history={history}>
-          <Switch>
-            <Route path="/no-data" component={NoData} />
-            <Route path="/loading" component={LoadingPage} />
-            <RouteInit
-              path="/license"
-              component={License}
-              codePaths={['all']}
-              fetchAllClusters={false}
-            />
-            <RouteInit path="/home" component={Home} codePaths={['all']} fetchAllClusters={false} />
-            <RouteInit
-              path="/overview"
-              component={ClusterOverview}
-              codePaths={['all']}
-              fetchAllClusters={false}
-            />
-            <Redirect
-              to={{
-                pathname: '/loading',
-                search: history.location.search,
-              }}
-            />
-          </Switch>
-        </Router>
-      </GlobalStateProvider>
+      <ExternalConfigContext.Provider value={externalConfig}>
+        <GlobalStateProvider query={plugins.data.query} toasts={core.notifications.toasts}>
+          <MonitoringTimeContainer.Provider>
+            <BreadcrumbContainer.Provider history={history}>
+              <Router history={history}>
+                <Switch>
+                  <Route path="/no-data" component={NoDataPage} />
+                  <Route path="/loading" component={LoadingPage} />
+                  <RouteInit
+                    path="/license"
+                    component={LicensePage}
+                    codePaths={['all']}
+                    fetchAllClusters={false}
+                  />
+                  <RouteInit
+                    path="/home"
+                    component={Home}
+                    codePaths={['all']}
+                    fetchAllClusters={false}
+                  />
+                  <RouteInit
+                    path="/overview"
+                    component={ClusterOverview}
+                    codePaths={['all']}
+                    fetchAllClusters={false}
+                  />
+
+                  {/* ElasticSearch Views */}
+                  <RouteInit
+                    path="/elasticsearch/indices"
+                    component={ElasticsearchIndicesPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/elasticsearch/nodes/:node"
+                    component={ElasticsearchNodePage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/elasticsearch/nodes"
+                    component={ElasticsearchNodesPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/elasticsearch"
+                    component={ElasticsearchOverviewPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
+                  {/* Beats Views */}
+                  <RouteInit
+                    path="/beats/beat/:instance"
+                    component={BeatsInstancePage}
+                    codePaths={[CODE_PATH_BEATS]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/beats/beats"
+                    component={BeatsInstancesPage}
+                    codePaths={[CODE_PATH_BEATS]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/beats"
+                    component={BeatsOverviewPage}
+                    codePaths={[CODE_PATH_BEATS]}
+                    fetchAllClusters={false}
+                  />
+
+                  <Redirect
+                    to={{
+                      pathname: '/loading',
+                      search: history.location.search,
+                    }}
+                  />
+                </Switch>
+              </Router>
+            </BreadcrumbContainer.Provider>
+          </MonitoringTimeContainer.Provider>
+        </GlobalStateProvider>
+      </ExternalConfigContext.Provider>
     </KibanaContextProvider>
   );
 };
 
-const NoData: React.FC<{}> = () => {
-  return <div>No data page</div>;
-};
-
 const Home: React.FC<{}> = () => {
   return <div>Home page (Cluster listing)</div>;
-};
-
-const ClusterOverview: React.FC<{}> = () => {
-  return <div>Cluster overview page</div>;
-};
-
-const License: React.FC<{}> = () => {
-  return <div>License page</div>;
 };

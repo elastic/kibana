@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110891
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { PluginInitializerContext } from 'kibana/public';
 import { KibanaLegacyPlugin } from './plugin';
 
@@ -14,7 +17,6 @@ export const plugin = (initializerContext: PluginInitializerContext) =>
 
 export * from './plugin';
 
-export { PaginateDirectiveProvider, PaginateControlsDirectiveProvider } from './paginate/paginate';
 export * from './angular';
 export * from './notify';
 export * from './utils';

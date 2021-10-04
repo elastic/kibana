@@ -29,14 +29,6 @@ jest.mock(
   })
 );
 
-jest.mock('@kbn/alerts', () => ({
-  useGetUserAlertsPermissions: () => ({
-    loading: false,
-    crud: true,
-    read: true,
-  }),
-}));
-
 jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {

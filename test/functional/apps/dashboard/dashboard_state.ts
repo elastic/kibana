@@ -33,9 +33,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const xyChartSelector = 'visTypeXyChart';
 
-  const enableNewChartLibraryDebug = async () => {
-    if (await PageObjects.visChart.isNewChartsLibraryEnabled()) {
+  const enableNewChartLibraryDebug = async (force = false) => {
+    if ((await PageObjects.visChart.isNewChartsLibraryEnabled()) || force) {
       await elasticChart.setNewChartUiDebugFlag();
       await queryBar.submitQuery();
     }
@@ -52,7 +53,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       if (isNewChartsLibraryEnabled) {
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyChartsLibrary': false,
           'visualization:visualize:legacyPieChartsLibrary': false,
         });
         await browser.refresh();
@@ -69,33 +69,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setHistoricalDataRange();
 
-      const visName = await PageObjects.visChart.getExpectedValue(
-        AREA_CHART_VIS_NAME,
-        `${AREA_CHART_VIS_NAME} - new charts library`
-      );
+      const visName = AREA_CHART_VIS_NAME;
       await dashboardAddPanel.addVisualization(visName);
-      const dashboarName = await PageObjects.visChart.getExpectedValue(
-        'Overridden colors',
-        'Overridden colors - new charts library'
-      );
-      await PageObjects.dashboard.saveDashboard(dashboarName);
+      const dashboardName = 'Overridden colors - new charts library';
+      await PageObjects.dashboard.saveDashboard(dashboardName);
 
       await PageObjects.dashboard.switchToEditMode();
       await queryBar.clickQuerySubmitButton();
 
-      await PageObjects.visChart.openLegendOptionColors('Count', `[data-title="${visName}"]`);
-      const overwriteColor = isNewChartsLibraryEnabled ? '#d36086' : '#EA6460';
+      await PageObjects.visChart.openLegendOptionColorsForXY('Count', `[data-title="${visName}"]`);
+      const overwriteColor = '#d36086';
       await PageObjects.visChart.selectNewLegendColorChoice(overwriteColor);
 
-      await PageObjects.dashboard.saveDashboard(dashboarName);
+      await PageObjects.dashboard.saveDashboard(dashboardName);
 
       await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.loadSavedDashboard(dashboarName);
+      await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
-      await enableNewChartLibraryDebug();
+      await enableNewChartLibraryDebug(true);
 
-      const colorChoiceRetained = await PageObjects.visChart.doesSelectedLegendColorExist(
-        overwriteColor
+      const colorChoiceRetained = await PageObjects.visChart.doesSelectedLegendColorExistForXY(
+        overwriteColor,
+        xyChartSelector
       );
 
       expect(colorChoiceRetained).to.be(true);
@@ -206,11 +201,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     const hardRefresh = async (newUrl: string) => {
-      // We need to add a timestamp to the URL because URL changes now only work with a hard refresh.
+      // We add a timestamp here to force a hard refresh
       await browser.get(newUrl.toString());
       const alert = await browser.getAlert();
       await alert?.accept();
-      await enableNewChartLibraryDebug();
+      await enableNewChartLibraryDebug(true);
       await PageObjects.dashboard.waitForRenderComplete();
     };
 
@@ -221,16 +216,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setHistoricalDataRange();
       });
 
-      it('for query parameter', async function () {
-        const currentQuery = await queryBar.getQueryString();
-        expect(currentQuery).to.equal('');
+      const changeQuery = async (useHardRefresh: boolean, newQuery: string) => {
+        await queryBar.clickQuerySubmitButton();
+        const oldQuery = await queryBar.getQueryString();
         const currentUrl = await getUrlFromShare();
-        const newUrl = currentUrl.replace(`query:''`, `query:'hi:hello'`);
+        const newUrl = currentUrl.replace(`query:'${oldQuery}'`, `query:'${newQuery}'`);
 
-        // We need to add a timestamp to the URL because URL changes now only work with a hard refresh.
-        await browser.get(newUrl.toString());
-        const newQuery = await queryBar.getQueryString();
-        expect(newQuery).to.equal('hi:hello');
+        await browser.get(newUrl.toString(), !useHardRefresh);
+        const queryBarContentsAfterRefresh = await queryBar.getQueryString();
+        expect(queryBarContentsAfterRefresh).to.equal(newQuery);
+      };
+
+      it('for query parameter with soft refresh', async function () {
+        await changeQuery(false, 'hi:goodbye');
+      });
+
+      it('for query parameter with hard refresh', async function () {
+        await changeQuery(true, 'hi:hello');
         await queryBar.clearQuery();
         await queryBar.clickQuerySubmitButton();
       });
@@ -286,7 +288,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('updates a pie slice color on a hard refresh', async function () {
-          await PageObjects.visChart.openLegendOptionColors(
+          await PageObjects.visChart.openLegendOptionColorsForPie(
             '80,000',
             `[data-title="${PIE_CHART_VIS_NAME}"]`
           );
@@ -311,7 +313,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('and updates the pie slice legend color', async function () {
           await retry.try(async () => {
-            const colorExists = await PageObjects.visChart.doesSelectedLegendColorExist('#FFFFFF');
+            const colorExists = await PageObjects.visChart.doesSelectedLegendColorExistForPie(
+              '#FFFFFF'
+            );
             expect(colorExists).to.be(true);
           });
         });
@@ -335,7 +339,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('resets the legend color as well', async function () {
           await retry.try(async () => {
-            const colorExists = await PageObjects.visChart.doesSelectedLegendColorExist('#57c17b');
+            const colorExists = await PageObjects.visChart.doesSelectedLegendColorExistForPie(
+              '#57c17b'
+            );
             expect(colorExists).to.be(true);
           });
         });

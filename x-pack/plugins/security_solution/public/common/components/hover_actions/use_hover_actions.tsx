@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useMemo, useState, useRef, useContext } from 'react';
 import { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import { HoverActions } from '.';
+import { TimelineContext } from '../../../../../timelines/public';
 
 import { DataProvider } from '../../../../common/types';
 import { ProviderContentWrapper } from '../drag_and_drop/draggable_wrapper';
 import { getDraggableId } from '../drag_and_drop/helpers';
-import { useGetTimelineId } from '../drag_and_drop/use_get_timeline_id_from_dom';
 
 const draggableContainsLinks = (draggableElement: HTMLDivElement | null) => {
   const links = draggableElement?.querySelectorAll('.euiLink') ?? [];
@@ -50,8 +50,7 @@ export const useHoverActions = ({
   const [closePopOverTrigger, setClosePopOverTrigger] = useState(false);
   const [showTopN, setShowTopN] = useState<boolean>(false);
   const [hoverActionsOwnFocus, setHoverActionsOwnFocus] = useState<boolean>(false);
-  const [goGetTimelineId, setGoGetTimelineId] = useState(false);
-  const timelineIdFind = useGetTimelineId(containerRef, goGetTimelineId);
+  const { timelineId: timelineIdFind } = useContext(TimelineContext);
 
   const handleClosePopOverTrigger = useCallback(() => {
     setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger);
@@ -105,7 +104,6 @@ export const useHoverActions = ({
         field={dataProvider.queryMatch.field}
         hideTopN={hideTopN}
         isObjectArray={false}
-        goGetTimelineId={setGoGetTimelineId}
         onFilterAdded={onFilterAdded}
         ownFocus={hoverActionsOwnFocus}
         showOwnFocus={false}

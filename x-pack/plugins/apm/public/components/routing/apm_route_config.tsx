@@ -21,7 +21,7 @@ import { settings } from './settings';
  */
 const apmRoutes = route([
   {
-    path: '/link-to/transaction/:transactionId',
+    path: '/link-to/transaction/{transactionId}',
     element: <TransactionLink />,
     params: t.intersection([
       t.type({
@@ -38,7 +38,7 @@ const apmRoutes = route([
     ]),
   },
   {
-    path: '/link-to/trace/:traceId',
+    path: '/link-to/trace/{traceId}',
     element: <TraceLink />,
     params: t.intersection([
       t.type({

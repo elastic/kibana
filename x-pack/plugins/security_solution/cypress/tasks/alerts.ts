@@ -63,7 +63,12 @@ export const closeAlerts = () => {
 };
 
 export const expandFirstAlert = () => {
-  cy.get(EXPAND_ALERT_BTN).should('exist').first().click({ force: true });
+  cy.get(EXPAND_ALERT_BTN).should('exist');
+
+  cy.get(EXPAND_ALERT_BTN)
+    .first()
+    .pipe(($el) => $el.trigger('click'))
+    .should('exist');
 };
 
 export const viewThreatIntelTab = () => cy.get(THREAT_INTEL_TAB).click();
@@ -75,7 +80,7 @@ export const viewThreatDetails = () => {
 export const setEnrichmentDates = (from?: string, to?: string) => {
   cy.get(ENRICHMENT_QUERY_RANGE_PICKER).within(() => {
     if (from) {
-      cy.get(ENRICHMENT_QUERY_START_INPUT).type(`{selectall}${from}{enter}`);
+      cy.get(ENRICHMENT_QUERY_START_INPUT).first().type(`{selectall}${from}{enter}`);
     }
     if (to) {
       cy.get(ENRICHMENT_QUERY_END_INPUT).type(`{selectall}${to}{enter}`);

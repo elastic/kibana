@@ -24,9 +24,10 @@ export const AccountSettings: React.FC = () => {
   }, [security.authc]);
 
   const PersonalInfo = useMemo(() => security!.uiApi!.components.getPersonalInfo, [security.uiApi]);
-  const ChangePassword = useMemo(() => security!.uiApi!.components.getChangePassword, [
-    security.uiApi,
-  ]);
+  const ChangePassword = useMemo(
+    () => security!.uiApi!.components.getChangePassword,
+    [security.uiApi]
+  );
 
   if (!currentUser) {
     return null;

@@ -14,6 +14,7 @@ import {
   ALERT_DURATION as ALERT_DURATION_TYPED,
   ALERT_REASON as ALERT_REASON_TYPED,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_PRODUCER,
   ALERT_STATUS as ALERT_STATUS_TYPED,
   ALERT_WORKFLOW_STATUS as ALERT_WORKFLOW_STATUS_TYPED,
 } from '@kbn/rule-data-utils';
@@ -167,12 +168,18 @@ function ObservabilityActions({
     application: { capabilities },
   } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
 
-  const parseObservabilityAlert = useMemo(() => parseAlert(observabilityRuleTypeRegistry), [
-    observabilityRuleTypeRegistry,
-  ]);
-  const alertDataConsumer = useMemo<string>(() => get(dataFieldEs, ALERT_RULE_CONSUMER, [''])[0], [
-    dataFieldEs,
-  ]);
+  const parseObservabilityAlert = useMemo(
+    () => parseAlert(observabilityRuleTypeRegistry),
+    [observabilityRuleTypeRegistry]
+  );
+  const alertDataConsumer = useMemo<string>(
+    () => get(dataFieldEs, ALERT_RULE_CONSUMER, [''])[0],
+    [dataFieldEs]
+  );
+  const alertDataProducer = useMemo<string>(
+    () => get(dataFieldEs, ALERT_RULE_PRODUCER, [''])[0],
+    [dataFieldEs]
+  );
 
   const alert = parseObservabilityAlert(dataFieldEs);
   const { prepend } = core.http.basePath;
@@ -204,7 +211,10 @@ function ObservabilityActions({
     }
   }, [setActionsPopover, refetch]);
 
-  const alertPermissions = useGetUserAlertsPermissions(capabilities, alertDataConsumer);
+  const alertPermissions = useGetUserAlertsPermissions(
+    capabilities,
+    alertDataConsumer === 'alerts' ? alertDataProducer : alertDataConsumer
+  );
 
   const statusActionItems = useStatusBulkActionItems({
     eventIds: [eventId],
@@ -247,6 +257,7 @@ function ObservabilityActions({
             iconType="expand"
             color="text"
             onClick={() => setFlyoutAlert(alert)}
+            data-test-subj="openFlyoutButton"
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -269,6 +280,7 @@ function ObservabilityActions({
                   iconType="boxesHorizontal"
                   aria-label="More"
                   onClick={() => toggleActionsPopover(eventId)}
+                  data-test-subj="alerts-table-row-action-more"
                 />
               }
               isOpen={openActionsPopoverId === eventId}
@@ -298,8 +310,11 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const casePermissions = useGetUserCasesPermissions();
 
   const hasAlertsCrudPermissions = useCallback(
-    (featureId: string) => {
-      return getAlertsPermissions(capabilities, featureId).crud;
+    ({ ruleConsumer, ruleProducer }: { ruleConsumer: string; ruleProducer?: string }) => {
+      if (ruleConsumer === 'alerts' && ruleProducer) {
+        return getAlertsPermissions(capabilities, ruleProducer).crud;
+      }
+      return getAlertsPermissions(capabilities, ruleConsumer).crud;
     },
     [capabilities]
   );
@@ -371,7 +386,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         query: `${ALERT_WORKFLOW_STATUS}: ${workflowStatus}${kuery !== '' ? ` and ${kuery}` : ''}`,
         language: 'kuery',
       },
-      renderCellValue: getRenderCellValue({ rangeFrom, rangeTo, setFlyoutAlert }),
+      renderCellValue: getRenderCellValue({ setFlyoutAlert }),
       rowRenderers: NO_ROW_RENDER,
       start: rangeFrom,
       setRefetch,

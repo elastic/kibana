@@ -12,14 +12,14 @@ import type { estypes } from '@elastic/elasticsearch';
 describe('response utils', () => {
   describe('getTotalLoaded', () => {
     it('returns the total/loaded, not including skipped', () => {
-      const result = getTotalLoaded(({
+      const result = getTotalLoaded({
         _shards: {
           successful: 10,
           failed: 5,
           skipped: 5,
           total: 100,
         },
-      } as unknown) as estypes.SearchResponse<unknown>);
+      } as unknown as estypes.SearchResponse<unknown>);
 
       expect(result).toEqual({
         total: 100,
@@ -30,14 +30,14 @@ describe('response utils', () => {
 
   describe('toKibanaSearchResponse', () => {
     it('returns rawResponse, isPartial, isRunning, total, and loaded', () => {
-      const result = toKibanaSearchResponse(({
+      const result = toKibanaSearchResponse({
         _shards: {
           successful: 10,
           failed: 5,
           skipped: 5,
           total: 100,
         },
-      } as unknown) as estypes.SearchResponse<unknown>);
+      } as unknown as estypes.SearchResponse<unknown>);
 
       expect(result).toEqual({
         rawResponse: {

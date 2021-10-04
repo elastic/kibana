@@ -16,7 +16,7 @@ export function registerSynonymsRoutes({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/engines/{engineName}/synonyms',
+      path: '/internal/app_search/engines/{engineName}/synonyms',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -34,7 +34,7 @@ export function registerSynonymsRoutes({
 
   router.post(
     skipBodyValidation({
-      path: '/api/app_search/engines/{engineName}/synonyms',
+      path: '/internal/app_search/engines/{engineName}/synonyms',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -48,7 +48,7 @@ export function registerSynonymsRoutes({
 
   router.put(
     skipBodyValidation({
-      path: '/api/app_search/engines/{engineName}/synonyms/{synonymId}',
+      path: '/internal/app_search/engines/{engineName}/synonyms/{synonymId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -63,7 +63,7 @@ export function registerSynonymsRoutes({
 
   router.delete(
     {
-      path: '/api/app_search/engines/{engineName}/synonyms/{synonymId}',
+      path: '/internal/app_search/engines/{engineName}/synonyms/{synonymId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),

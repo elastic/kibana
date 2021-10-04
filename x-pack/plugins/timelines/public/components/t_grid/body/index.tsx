@@ -32,7 +32,7 @@ import React, {
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 
 import styled, { ThemeContext } from 'styled-components';
-import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
+import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import {
   TGridCellAction,
   BulkActionsProp,
@@ -74,6 +74,7 @@ import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/com
 import { ViewSelection } from '../event_rendered_view/selector';
 import { EventRenderedView } from '../event_rendered_view';
 import { useDataGridHeightHack } from './height_hack';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 
 const StatefulAlertStatusBulkActions = lazy(
   () => import('../toolbar/bulk_actions/alert_status_bulk_actions')
@@ -86,6 +87,7 @@ interface OwnProps {
   bulkActions?: BulkActionsProp;
   data: TimelineItem[];
   defaultCellActions?: TGridCellAction[];
+  filters?: Filter[];
   filterQuery: string;
   filterStatus?: AlertStatus;
   id: string;
@@ -105,7 +107,13 @@ interface OwnProps {
   trailingControlColumns?: ControlColumnProps[];
   unit?: (total: number) => React.ReactNode;
   hasAlertsCrud?: boolean;
-  hasAlertsCrudPermissions?: (featureId: string) => boolean;
+  hasAlertsCrudPermissions?: ({
+    ruleConsumer,
+    ruleProducer,
+  }: {
+    ruleConsumer: string;
+    ruleProducer?: string;
+  }) => boolean;
   totalSelectAllAlerts?: number;
 }
 
@@ -180,7 +188,13 @@ const transformControlColumns = ({
   theme: EuiTheme;
   setEventsLoading: SetEventsLoading;
   setEventsDeleted: SetEventsDeleted;
-  hasAlertsCrudPermissions?: (featureId: string) => boolean;
+  hasAlertsCrudPermissions?: ({
+    ruleConsumer,
+    ruleProducer,
+  }: {
+    ruleConsumer: string;
+    ruleProducer?: string;
+  }) => boolean;
 }): EuiDataGridControlColumn[] =>
   controlColumns.map(
     ({ id: columnId, headerCellRender = EmptyHeaderCellRender, rowCellRender, width }, i) => ({
@@ -208,7 +222,6 @@ const transformControlColumns = ({
           </>
         );
       },
-
       // eslint-disable-next-line react/display-name
       rowCellRender: ({
         isDetails,
@@ -224,9 +237,15 @@ const transformControlColumns = ({
         if (rowData) {
           addBuildingBlockStyle(rowData.ecs, theme, setCellProps);
           if (columnId === 'checkbox-control-column' && hasAlertsCrudPermissions != null) {
-            const alertConsumers =
+            // FUTURE ENGINEER, the assumption here is you can only have one producer and consumer at this time
+            const ruleConsumers =
               rowData.data.find((d) => d.field === ALERT_RULE_CONSUMER)?.value ?? [];
-            disabled = alertConsumers.some((consumer) => !hasAlertsCrudPermissions(consumer));
+            const ruleProducers =
+              rowData.data.find((d) => d.field === ALERT_RULE_PRODUCER)?.value ?? [];
+            disabled = !hasAlertsCrudPermissions({
+              ruleConsumer: ruleConsumers.length > 0 ? ruleConsumers[0] : '',
+              ruleProducer: ruleProducers.length > 0 ? ruleProducers[0] : undefined,
+            });
           }
         } else {
           // disable the cell when it has no data
@@ -283,15 +302,18 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     data,
     defaultCellActions,
     filterQuery,
+    filters,
     filterStatus,
+    hasAlertsCrud,
+    hasAlertsCrudPermissions,
     id,
     indexNames,
     isEventViewer = false,
+    isLoading,
     isSelectAllChecked,
     itemsPerPageOptions,
     leadingControlColumns = EMPTY_CONTROL_COLUMNS,
     loadingEventIds,
-    isLoading,
     loadPage,
     onRuleChange,
     pageSize,
@@ -305,11 +327,9 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     tableView = 'gridView',
     tabType,
     totalItems,
+    totalSelectAllAlerts,
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
     unit = defaultUnit,
-    hasAlertsCrud,
-    hasAlertsCrudPermissions,
-    totalSelectAllAlerts,
   }) => {
     const dispatch = useDispatch();
     const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
@@ -317,10 +337,10 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       getManageTimeline(state, id)
     );
 
-    const alertCountText = useMemo(() => `${totalItems.toLocaleString()} ${unit(totalItems)}`, [
-      totalItems,
-      unit,
-    ]);
+    const alertCountText = useMemo(
+      () => `${totalItems.toLocaleString()} ${unit(totalItems)}`,
+      [totalItems, unit]
+    );
 
     const selectedCount = useMemo(() => Object.keys(selectedEventIds).length, [selectedEventIds]);
 
@@ -624,10 +644,11 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         columnHeaders.map((header) => {
           const buildAction = (tGridCellAction: TGridCellAction) =>
             tGridCellAction({
-              data: data.map((row) => row.data),
               browserFields,
-              timelineId: id,
+              data: data.map((row) => row.data),
+              globalFilters: filters,
               pageSize,
+              timelineId: id,
             });
 
           return {
@@ -636,7 +657,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               header.tGridCellActions?.map(buildAction) ?? defaultCellActions?.map(buildAction),
           };
         }),
-      [browserFields, columnHeaders, data, defaultCellActions, id, pageSize]
+      [browserFields, columnHeaders, data, defaultCellActions, id, pageSize, filters]
     );
 
     const renderTGridCellValue = useMemo(() => {
@@ -700,20 +721,16 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     const onChangeItemsPerPage = useCallback(
       (itemsChangedPerPage) => {
-        clearSelected({ id });
-        dispatch(tGridActions.setTGridSelectAll({ id, selectAll: false }));
         dispatch(tGridActions.updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage }));
       },
-      [id, dispatch, clearSelected]
+      [id, dispatch]
     );
 
     const onChangePage = useCallback(
       (page) => {
-        clearSelected({ id });
-        dispatch(tGridActions.setTGridSelectAll({ id, selectAll: false }));
         loadPage(page);
       },
-      [id, loadPage, dispatch, clearSelected]
+      [loadPage]
     );
 
     const height = useDataGridHeightHack(pageSize, data.length);
@@ -766,7 +783,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               pageSize={pageSize}
               pageSizeOptions={itemsPerPageOptions}
               rowRenderers={rowRenderers}
-              timelineId={id}
               totalItemCount={totalItems}
             />
           )}

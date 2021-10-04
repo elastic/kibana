@@ -68,6 +68,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
     {
       id: 'syntheticsBrowserZipURLConfig',
       name: zipUrlLabel,
+      'data-test-subj': `syntheticsSourceTab__zipUrl`,
       content: (
         <>
           <EuiSpacer size="m" />
@@ -92,6 +93,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
                 setConfig((prevConfig) => ({ ...prevConfig, zipUrl: value }))
               }
               value={config.zipUrl}
+              data-test-subj="syntheticsBrowserZipUrl"
             />
           </EuiFormRow>
           <EuiFormRow
@@ -114,6 +116,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
                 setConfig((prevConfig) => ({ ...prevConfig, folder: value }))
               }
               value={config.folder}
+              data-test-subj="syntheticsBrowserZipUrlFolder"
             />
           </EuiFormRow>
           <EuiFormRow
@@ -142,6 +145,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
               languageId={MonacoEditorLangId.JSON}
               onChange={(code) => setConfig((prevConfig) => ({ ...prevConfig, params: code }))}
               value={config.params}
+              data-test-subj="syntheticsBrowserZipUrlParams"
             />
           </EuiFormRow>
           <EuiFormRow
@@ -164,6 +168,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
                 setConfig((prevConfig) => ({ ...prevConfig, username: value }))
               }
               value={config.username}
+              data-test-subj="syntheticsBrowserZipUrlUsername"
             />
           </EuiFormRow>
           <EuiFormRow
@@ -186,6 +191,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
                 setConfig((prevConfig) => ({ ...prevConfig, password: value }))
               }
               value={config.password}
+              data-test-subj="syntheticsBrowserZipUrlPassword"
             />
           </EuiFormRow>
         </>
@@ -199,6 +205,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
           defaultMessage="Inline script"
         />
       ),
+      'data-test-subj': `syntheticsSourceTab__inline`,
       content: (
         <EuiFormRow
           isInvalid={!config.inlineScript}

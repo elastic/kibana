@@ -18,7 +18,7 @@ pageLoadAssetSize:
   devTools: 38781
   discover: 99999
   discoverEnhanced: 42730
-  embeddable: 242753
+  embeddable: 99999
   embeddableEnhanced: 41145
   enterpriseSearch: 35741
   features: 21723
@@ -34,7 +34,7 @@ pageLoadAssetSize:
   indexPatternManagement: 28222
   indexPatternEditor: 40000
   infra: 184320
-  fleet: 465774
+  fleet: 250000
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
@@ -71,12 +71,11 @@ pageLoadAssetSize:
   telemetry: 51957
   telemetryManagementSection: 38586
   tileMap: 65337
-  timelion: 29920
   transform: 41151
   triggersActionsUi: 100000
-  uiActions: 95074
-  uiActionsEnhanced: 313011
-  upgradeAssistant: 80966
+  uiActions: 97717
+  uiActionsEnhanced: 48000
+  upgradeAssistant: 81241
   uptime: 40825
   urlDrilldown: 70674
   urlForwarding: 32579
@@ -119,3 +118,4 @@ pageLoadAssetSize:
   securitySolution: 232514
   share: 100298
   snapshotRestore: 63225
+  customIntegrations: 28810

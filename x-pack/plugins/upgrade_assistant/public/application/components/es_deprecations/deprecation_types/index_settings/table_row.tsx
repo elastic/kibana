@@ -37,10 +37,8 @@ export const IndexSettingsTableRow: React.FunctionComponent<Props> = ({
     services: { api },
   } = useAppContext();
 
-  const {
-    addContent: addContentToGlobalFlyout,
-    removeContent: removeContentFromGlobalFlyout,
-  } = useGlobalFlyout();
+  const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
+    useGlobalFlyout();
 
   const closeFlyout = useCallback(() => {
     setShowFlyout(false);
@@ -75,6 +73,7 @@ export const IndexSettingsTableRow: React.FunctionComponent<Props> = ({
         },
         flyoutProps: {
           onClose: closeFlyout,
+          className: 'eui-textBreakWord',
           'data-test-subj': 'indexSettingsDetails',
           'aria-labelledby': 'indexSettingsDetailsFlyoutTitle',
         },

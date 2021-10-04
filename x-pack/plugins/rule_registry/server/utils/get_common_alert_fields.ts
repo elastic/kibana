@@ -9,7 +9,7 @@ import { Values } from '@kbn/utility-types';
 import { AlertExecutorOptions } from '../../../alerting/server';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import {
-  ALERT_ID,
+  ALERT_INSTANCE_ID,
   ALERT_UUID,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -35,7 +35,7 @@ const commonAlertFieldNames = [
 ];
 export type CommonAlertFieldName = Values<typeof commonAlertFieldNames>;
 
-const commonAlertIdFieldNames = [ALERT_ID, ALERT_UUID];
+const commonAlertIdFieldNames = [ALERT_INSTANCE_ID, ALERT_UUID];
 export type CommonAlertIdFieldName = Values<typeof commonAlertIdFieldNames>;
 
 export type CommonAlertFields = Pick<ParsedTechnicalFields, CommonAlertFieldName>;

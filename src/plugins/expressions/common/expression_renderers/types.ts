@@ -53,12 +53,11 @@ export type AnyExpressionRenderDefinition = ExpressionRenderDefinition<any>;
  * This value can be set from a consumer embedding an expression renderer and is accessible
  * from within the active render function as part of the handlers.
  * The following modes are supported:
- * * display (default): The chart is rendered in a container with the main purpose of viewing the chart (e.g. in a container like dashboard or canvas)
+ * * view (default): The chart is rendered in a container with the main purpose of viewing the chart (e.g. in a container like dashboard or canvas)
  * * preview: The chart is rendered in very restricted space (below 100px width and height) and should only show a rough outline
  * * edit: The chart is rendered within an editor and configuration elements within the chart should be displayed
- * * noInteractivity: The chart is rendered in a non-interactive environment and should not provide any affordances for interaction like brushing
  */
-export type RenderMode = 'noInteractivity' | 'edit' | 'preview' | 'display';
+export type RenderMode = 'edit' | 'preview' | 'view';
 
 export interface IInterpreterRenderHandlers {
   /**
@@ -71,6 +70,12 @@ export interface IInterpreterRenderHandlers {
   event: (event: any) => void;
   hasCompatibleActions?: (event: any) => Promise<boolean>;
   getRenderMode: () => RenderMode;
+
+  /**
+   * The chart is rendered in a non-interactive environment and should not provide any affordances for interaction like brushing.
+   */
+  isInteractive: () => boolean;
+
   isSyncColorsEnabled: () => boolean;
   /**
    * This uiState interface is actually `PersistedState` from the visualizations plugin,

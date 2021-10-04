@@ -120,6 +120,7 @@ export const getUpgradeStep = ({ nextMajor }: { nextMajor: number }): EuiStepPro
   return {
     title: i18nTexts.upgradeStepTitle(nextMajor),
     status: 'incomplete',
-    children: <UpgradeStep />,
+    'data-test-subj': 'upgradeStep',
+    children: <UpgradeStep docLinks={docLinks} />,
   };
 };

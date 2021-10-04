@@ -595,7 +595,7 @@ describe('SAMLAuthenticationProvider', () => {
           ),
         ],
         [
-          'current session is is expired',
+          'current session is expired',
           Promise.reject(
             new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
           ),

@@ -103,19 +103,25 @@ const bucketsC = (from: number) => [
   },
 ];
 
-export const basicMetricResponse = (from: number) => ({
-  aggregations: {
-    aggregatedIntervals: {
-      buckets: bucketsA(from),
+export const basicMetricResponse = () => ({
+  hits: {
+    total: {
+      value: 1,
     },
+  },
+  aggregations: {
+    aggregatedValue: { value: 1.0, values: [{ key: 95.0, value: 1.0 }] },
   },
 });
 
-export const alternateMetricResponse = (from: number) => ({
-  aggregations: {
-    aggregatedIntervals: {
-      buckets: bucketsB(from),
+export const alternateMetricResponse = () => ({
+  hits: {
+    total: {
+      value: 1,
     },
+  },
+  aggregations: {
+    aggregatedValue: { value: 3, values: [{ key: 99.0, value: 3 }] },
   },
 });
 
@@ -153,6 +159,7 @@ export const basicCompositeResponse = (from: number) => ({
           aggregatedIntervals: {
             buckets: bucketsA(from),
           },
+          doc_count: 1,
         },
         {
           key: {
@@ -161,6 +168,7 @@ export const basicCompositeResponse = (from: number) => ({
           aggregatedIntervals: {
             buckets: bucketsB(from),
           },
+          doc_count: 1,
         },
       ],
     },
@@ -184,6 +192,7 @@ export const alternateCompositeResponse = (from: number) => ({
           aggregatedIntervals: {
             buckets: bucketsB(from),
           },
+          doc_count: 1,
         },
         {
           key: {
@@ -192,13 +201,23 @@ export const alternateCompositeResponse = (from: number) => ({
           aggregatedIntervals: {
             buckets: bucketsA(from),
           },
+          doc_count: 1,
+        },
+        {
+          key: {
+            groupBy0: 'c',
+          },
+          aggregatedIntervals: {
+            buckets: bucketsC(from),
+          },
+          doc_count: 1,
         },
       ],
     },
   },
   hits: {
     total: {
-      value: 2,
+      value: 3,
     },
   },
 });

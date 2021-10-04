@@ -6,12 +6,12 @@
  */
 
 import React, { useContext, useEffect, useState } from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { CytoscapeContext } from './Cytoscape';
 import { useTheme } from '../../../hooks/use_theme';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 const EmptyBannerContainer = euiStyled.div`
   margin: ${({ theme }) => theme.eui.gutterTypes.gutterSmall};
@@ -28,6 +28,7 @@ export function EmptyBanner() {
   const theme = useTheme();
   const cy = useContext(CytoscapeContext);
   const [nodeCount, setNodeCount] = useState(0);
+  const { docLinks } = useApmPluginContext().core;
 
   useEffect(() => {
     const handler: cytoscape.EventHandler = (event) =>
@@ -67,14 +68,11 @@ export function EmptyBanner() {
           defaultMessage:
             "We will map out connected services and external requests if we can detect them. Please make sure you're running the latest version of the APM agent.",
         })}{' '}
-        <ElasticDocsLink
-          section="/kibana"
-          path="/service-maps.html#service-maps-supported"
-        >
+        <EuiLink href={docLinks.links.apm.supportedServiceMaps}>
           {i18n.translate('xpack.apm.serviceMap.emptyBanner.docsLink', {
             defaultMessage: 'Learn more in the docs',
           })}
-        </ElasticDocsLink>
+        </EuiLink>
       </EuiCallOut>
     </EmptyBannerContainer>
   );

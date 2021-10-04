@@ -7,11 +7,29 @@
 
 import sinon, { SinonFakeServer } from 'sinon';
 import { API_BASE_PATH } from '../../../common/constants';
-import { ESUpgradeStatus, DeprecationLoggingStatus } from '../../../common/types';
+import {
+  CloudBackupStatus,
+  ESUpgradeStatus,
+  DeprecationLoggingStatus,
+} from '../../../common/types';
 import { ResponseError } from '../../../public/application/lib/api';
 
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
+  const setLoadCloudBackupStatusResponse = (
+    response?: CloudBackupStatus,
+    error?: ResponseError
+  ) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/cloud_backup_status`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
   const setLoadEsDeprecationsResponse = (response?: ESUpgradeStatus, error?: ResponseError) => {
     const status = error ? error.statusCode || 400 : 200;
     const body = error ? error : response;
@@ -97,6 +115,28 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setReindexStatusResponse = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/reindex/:indexName`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
+  const setStartReindexingResponse = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('POST', `${API_BASE_PATH}/reindex/:indexName`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
   const setDeleteMlSnapshotResponse = (response?: object, error?: ResponseError) => {
     const status = error ? error.statusCode || 400 : 200;
     const body = error ? error : response;
@@ -119,6 +159,17 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setLoadMlUpgradeModeResponse = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/ml_upgrade_mode`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
   const setUpgradeSystemIndicesStatus = (response?: object, error?: ResponseError) => {
     const status = error ? error.statusCode || 400 : 200;
     const body = error ? error : response;
@@ -131,6 +182,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   };
 
   return {
+    setLoadCloudBackupStatusResponse,
     setLoadEsDeprecationsResponse,
     setLoadDeprecationLoggingResponse,
     setUpdateDeprecationLoggingResponse,
@@ -141,6 +193,9 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setLoadDeprecationLogsCountResponse,
     setLoadSystemIndicesUpgradeStatus,
     setUpgradeSystemIndicesStatus,
+    setStartReindexingResponse,
+    setReindexStatusResponse,
+    setLoadMlUpgradeModeResponse,
   };
 };
 
@@ -155,8 +210,19 @@ export const init = () => {
 
   const httpRequestsMockHelpers = registerHttpRequestMockHelpers(server);
 
+  const setServerAsync = (isAsync: boolean, timeout: number = 200) => {
+    if (isAsync) {
+      server.autoRespond = true;
+      server.autoRespondAfter = 1000;
+      server.respondImmediately = false;
+    } else {
+      server.respondImmediately = true;
+    }
+  };
+
   return {
     server,
+    setServerAsync,
     httpRequestsMockHelpers,
   };
 };

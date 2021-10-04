@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -24,7 +25,9 @@ import {
 } from '@elastic/eui';
 
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import { DeprecationBadge } from '../../../shared';
 import { MlSnapshotContext } from './context';
+import { useAppContext } from '../../../../app_context';
 import { SnapshotState } from './use_snapshot_state';
 
 export interface FixSnapshotsFlyoutProps extends MlSnapshotContext {
@@ -51,12 +54,6 @@ const i18nTexts = {
       defaultMessage: 'Retry upgrade',
     }
   ),
-  upgradeResolvedButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.deleteResolvupgradeResolvedButtonLabeledButtonLabel',
-    {
-      defaultMessage: 'Upgrade complete',
-    }
-  ),
   closeButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.closeButtonLabel',
     {
@@ -73,12 +70,6 @@ const i18nTexts = {
     'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.deletingButtonLabel',
     {
       defaultMessage: 'Deleting…',
-    }
-  ),
-  deleteResolvedButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.deleteResolvedButtonLabel',
-    {
-      defaultMessage: 'Deletion complete',
     }
   ),
   retryDeleteButtonLabel: i18n.translate(
@@ -108,6 +99,28 @@ const i18nTexts = {
       defaultMessage: 'Learn more about this deprecation',
     }
   ),
+  upgradeModeEnabledErrorTitle: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.upgradeModeEnabledErrorTitle',
+    {
+      defaultMessage: 'Machine Learning upgrade mode is enabled',
+    }
+  ),
+  upgradeModeEnabledErrorDescription: (docsLink: string) => (
+    <FormattedMessage
+      id="xpack.upgradeAssistant.esDeprecations.mlSnapshots.upgradeModeEnabledErrorDescription"
+      defaultMessage="No actions can be taken on Machine Learning snapshots while upgrade mode is enabled. {docsLink}."
+      values={{
+        docsLink: (
+          <EuiLink href={docsLink} target="_blank" data-test-subj="setUpgradeModeDocsLink">
+            <FormattedMessage
+              id="xpack.upgradeAssistant.esDeprecations.mlSnapshots.upgradeModeEnabledDocsLink"
+              defaultMessage="Learn more"
+            />
+          </EuiLink>
+        ),
+      }}
+    />
+  ),
 };
 
 const getDeleteButtonLabel = (snapshotState: SnapshotState) => {
@@ -119,8 +132,6 @@ const getDeleteButtonLabel = (snapshotState: SnapshotState) => {
     switch (snapshotState.status) {
       case 'in_progress':
         return i18nTexts.deletingButtonLabel;
-      case 'complete':
-        return i18nTexts.deleteResolvedButtonLabel;
       case 'idle':
       default:
         return i18nTexts.deleteButtonLabel;
@@ -138,8 +149,6 @@ const getUpgradeButtonLabel = (snapshotState: SnapshotState) => {
     switch (snapshotState.status) {
       case 'in_progress':
         return i18nTexts.upgradingButtonLabel;
-      case 'complete':
-        return i18nTexts.upgradeResolvedButtonLabel;
       case 'idle':
       default:
         return i18nTexts.upgradeButtonLabel;
@@ -154,7 +163,15 @@ export const FixSnapshotsFlyout = ({
   snapshotState,
   upgradeSnapshot,
   deleteSnapshot,
+  mlUpgradeModeEnabled,
 }: FixSnapshotsFlyoutProps) => {
+  const {
+    services: {
+      core: { docLinks },
+    },
+  } = useAppContext();
+  const isResolved = snapshotState.status === 'complete';
+
   const onUpgradeSnapshot = () => {
     upgradeSnapshot();
     closeFlyout();
@@ -168,12 +185,14 @@ export const FixSnapshotsFlyout = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
+        <DeprecationBadge isCritical={deprecation.isCritical} isResolved={isResolved} />
+        <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
-          <h2>{i18nTexts.flyoutTitle}</h2>
+          <h2 id="mlSnapshotDetailsFlyoutTitle">{i18nTexts.flyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {snapshotState.error && (
+        {snapshotState.error && !isResolved && (
           <>
             <EuiCallOut
               title={
@@ -190,6 +209,23 @@ export const FixSnapshotsFlyout = ({
             <EuiSpacer />
           </>
         )}
+
+        {mlUpgradeModeEnabled && (
+          <>
+            <EuiCallOut
+              title={i18nTexts.upgradeModeEnabledErrorTitle}
+              color="warning"
+              iconType="alert"
+              data-test-subj="mlUpgradeModeEnabledError"
+            >
+              <p>
+                {i18nTexts.upgradeModeEnabledErrorDescription(docLinks.links.ml.setUpgradeMode)}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
+
         <EuiText>
           <p>{deprecation.details}</p>
           <p>
@@ -207,40 +243,38 @@ export const FixSnapshotsFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiButtonEmpty
-                  data-test-subj="deleteSnapshotButton"
-                  color="danger"
-                  onClick={onDeleteSnapshot}
-                  isLoading={
-                    snapshotState.action === 'delete' && snapshotState.status === 'in_progress'
-                  }
-                  disabled={
-                    snapshotState.status === 'in_progress' || snapshotState.status === 'complete'
-                  }
-                >
-                  {getDeleteButtonLabel(snapshotState)}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiButton
-                  fill
-                  onClick={onUpgradeSnapshot}
-                  isLoading={
-                    snapshotState.action === 'upgrade' && snapshotState.status === 'in_progress'
-                  }
-                  disabled={
-                    snapshotState.status === 'in_progress' || snapshotState.status === 'complete'
-                  }
-                  data-test-subj="upgradeSnapshotButton"
-                >
-                  {getUpgradeButtonLabel(snapshotState)}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {!isResolved && !mlUpgradeModeEnabled && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiButtonEmpty
+                    data-test-subj="deleteSnapshotButton"
+                    color="danger"
+                    onClick={onDeleteSnapshot}
+                    isLoading={
+                      snapshotState.action === 'delete' && snapshotState.status === 'in_progress'
+                    }
+                    isDisabled={snapshotState.status === 'in_progress'}
+                  >
+                    {getDeleteButtonLabel(snapshotState)}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButton
+                    fill
+                    onClick={onUpgradeSnapshot}
+                    isLoading={
+                      snapshotState.action === 'upgrade' && snapshotState.status === 'in_progress'
+                    }
+                    isDisabled={snapshotState.status === 'in_progress'}
+                    data-test-subj="upgradeSnapshotButton"
+                  >
+                    {getUpgradeButtonLabel(snapshotState)}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </>

@@ -8,7 +8,7 @@
 
 export interface ManagedConfigKey {
   key: string;
-  value: Record<string, any>;
+  value: string | Record<string, any> | boolean;
 }
 
 /**
@@ -36,5 +36,14 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
     value: {
       ['**/packages/kbn-pm/dist/index.js']: true,
     },
+  },
+  {
+    key: 'typescript.tsdk',
+    // we use a relative path here so that it works with remote vscode connections
+    value: './node_modules/typescript/lib',
+  },
+  {
+    key: 'typescript.enablePromptUseWorkspaceTsdk',
+    value: true,
   },
 ];

@@ -13,7 +13,7 @@ import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 import { TypeKind, ApiScope } from '../types';
 import { getKibanaPlatformPlugin } from '../tests/kibana_platform_plugin_mock';
 import { getDeclarationNodesForPluginScope } from '../get_declaration_nodes_for_plugin';
-import { buildApiDeclaration } from './build_api_declaration';
+import { buildApiDeclarationTopNode } from './build_api_declaration';
 import { isNamedNode } from '../tsmorph_utils';
 
 const log = new ToolingLog({
@@ -42,8 +42,7 @@ beforeAll(() => {
 it('Test number primitive doc def', () => {
   const node = nodes.find((n) => getNodeName(n) === 'aNum');
   expect(node).toBeDefined();
-  const def = buildApiDeclaration({
-    node: node!,
+  const def = buildApiDeclarationTopNode(node!, {
     plugins,
     log,
     currentPluginId: plugins[0].manifest.id,
@@ -57,8 +56,7 @@ it('Test number primitive doc def', () => {
 it('Function type is exported as type with signature', () => {
   const node = nodes.find((n) => getNodeName(n) === 'FnWithGeneric');
   expect(node).toBeDefined();
-  const def = buildApiDeclaration({
-    node: node!,
+  const def = buildApiDeclarationTopNode(node!, {
     plugins,
     log,
     currentPluginId: plugins[0].manifest.id,
@@ -73,8 +71,7 @@ it('Function type is exported as type with signature', () => {
 it('Test Interface Kind doc def', () => {
   const node = nodes.find((n) => getNodeName(n) === 'ExampleInterface');
   expect(node).toBeDefined();
-  const def = buildApiDeclaration({
-    node: node!,
+  const def = buildApiDeclarationTopNode(node!, {
     plugins,
     log,
     currentPluginId: plugins[0].manifest.id,
@@ -90,8 +87,7 @@ it('Test Interface Kind doc def', () => {
 it('Test union export', () => {
   const node = nodes.find((n) => getNodeName(n) === 'aUnionProperty');
   expect(node).toBeDefined();
-  const def = buildApiDeclaration({
-    node: node!,
+  const def = buildApiDeclarationTopNode(node!, {
     plugins,
     log,
     currentPluginId: plugins[0].manifest.id,
@@ -104,8 +100,7 @@ it('Test union export', () => {
 it('Function inside interface has a label', () => {
   const node = nodes.find((n) => getNodeName(n) === 'ExampleInterface');
   expect(node).toBeDefined();
-  const def = buildApiDeclaration({
-    node: node!,
+  const def = buildApiDeclarationTopNode(node!, {
     plugins,
     log,
     currentPluginId: plugins[0].manifest.id,
@@ -122,8 +117,7 @@ it('Function inside interface has a label', () => {
 it('Test ReactElement signature', () => {
   const node = nodes.find((n) => getNodeName(n) === 'AReactElementFn');
   expect(node).toBeDefined();
-  const def = buildApiDeclaration({
-    node: node!,
+  const def = buildApiDeclarationTopNode(node!, {
     plugins,
     log,
     currentPluginId: plugins[0].manifest.id,

@@ -972,10 +972,10 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-public.Executor.state",
+            "id": "def-public.Executor.container",
             "type": "Object",
             "tags": [],
-            "label": "state",
+            "label": "container",
             "description": [],
             "signature": [
               {
@@ -1060,6 +1060,26 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.Executor.parent",
+            "type": "Object",
+            "tags": [],
+            "label": "parent",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Executor",
+                "text": "Executor"
+              },
+              "<Context> | undefined"
+            ],
+            "path": "src/plugins/expressions/common/executor/executor.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.Executor.Unnamed",
             "type": "Function",
             "tags": [],
@@ -1094,6 +1114,26 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.Executor.state",
+            "type": "Object",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutorState",
+                "text": "ExecutorState"
+              },
+              "<Context>"
+            ],
+            "path": "src/plugins/expressions/common/executor/executor.ts",
+            "deprecated": false
           },
           {
             "parentPluginId": "expressions",
@@ -1969,7 +2009,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.input",
+                "id": "def-public.ExpressionFunction.fn.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "input",
@@ -1982,7 +2022,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.params",
+                "id": "def-public.ExpressionFunction.fn.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -1995,7 +2035,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.handlers",
+                "id": "def-public.ExpressionFunction.fn.$3",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "handlers",
@@ -2082,7 +2122,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.state",
+                "id": "def-public.ExpressionFunction.telemetry.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -2103,7 +2143,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.telemetryData",
+                "id": "def-public.ExpressionFunction.telemetry.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "telemetryData",
@@ -2150,7 +2190,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.state",
+                "id": "def-public.ExpressionFunction.extract.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -2205,7 +2245,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.state",
+                "id": "def-public.ExpressionFunction.inject.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -2226,7 +2266,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.references",
+                "id": "def-public.ExpressionFunction.inject.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "references",
@@ -2621,7 +2661,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.domNode",
+                "id": "def-public.ExpressionRenderer.render.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "domNode",
@@ -2634,7 +2674,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.config",
+                "id": "def-public.ExpressionRenderer.render.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -2647,7 +2687,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.handlers",
+                "id": "def-public.ExpressionRenderer.render.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "handlers",
@@ -2982,7 +3022,7 @@
                 "id": "def-public.ExpressionRenderHandler.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      hasCompatibleActions = async () => false,\n    }",
+                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      interactive,\n      hasCompatibleActions = async () => false,\n    }",
                 "description": [],
                 "signature": [
                   "ExpressionRenderHandlerParams"
@@ -3204,15 +3244,15 @@
             "section": "def-public.Plugin",
             "text": "Plugin"
           },
-          "<Pick<",
+          "<",
           {
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionsService",
-            "text": "ExpressionsService"
+            "section": "def-common.ExpressionsServiceSetup",
+            "text": "ExpressionsServiceSetup"
           },
-          ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
+          ", ",
           {
             "pluginId": "expressions",
             "scope": "public",
@@ -3278,15 +3318,14 @@
                 "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<object, unknown>) => Pick<",
+              "<object, unknown>) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
                 "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionsService",
-                "text": "ExpressionsService"
-              },
-              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
+                "section": "def-common.ExpressionsServiceSetup",
+                "text": "ExpressionsServiceSetup"
+              }
             ],
             "path": "src/plugins/expressions/public/plugin.ts",
             "deprecated": false,
@@ -3407,15 +3446,15 @@
             "section": "def-public.Plugin",
             "text": "Plugin"
           },
-          "<Pick<",
+          "<",
           {
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionsService",
-            "text": "ExpressionsService"
+            "section": "def-common.ExpressionsServiceSetup",
+            "text": "ExpressionsServiceSetup"
           },
-          ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
+          ", ",
           {
             "pluginId": "expressions",
             "scope": "public",
@@ -3481,15 +3520,14 @@
                 "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<object, unknown>) => Pick<",
+              "<object, unknown>) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
                 "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionsService",
-                "text": "ExpressionsService"
-              },
-              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
+                "section": "def-common.ExpressionsServiceSetup",
+                "text": "ExpressionsServiceSetup"
+              }
             ],
             "path": "src/plugins/expressions/public/plugin.ts",
             "deprecated": false,
@@ -3620,7 +3658,22 @@
             "section": "def-common.ExpressionAstExpression",
             "text": "ExpressionAstExpression"
           },
-          ">"
+          ">,",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionsServiceSetup",
+            "text": "ExpressionsServiceSetup"
+          },
+          ",",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionsServiceStart",
+            "text": "ExpressionsServiceStart"
+          }
         ],
         "path": "src/plugins/expressions/common/service/expressions_services.ts",
         "deprecated": false,
@@ -3702,13 +3755,194 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.ExpressionsService.getFunction",
+            "type": "Function",
+            "tags": [],
+            "label": "getFunction",
+            "description": [],
+            "signature": [
+              "(name: string) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionsService.getFunction.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionsService.getFunctions",
+            "type": "Function",
+            "tags": [],
+            "label": "getFunctions",
+            "description": [],
+            "signature": [
+              "() => Record<string, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              ">"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionsService.getRenderer",
+            "type": "Function",
+            "tags": [],
+            "label": "getRenderer",
+            "description": [],
+            "signature": [
+              "(name: string) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionRenderer",
+                "text": "ExpressionRenderer"
+              },
+              "<unknown> | null"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionsService.getRenderer.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionsService.getRenderers",
+            "type": "Function",
+            "tags": [],
+            "label": "getRenderers",
+            "description": [],
+            "signature": [
+              "() => Record<string, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionRenderer",
+                "text": "ExpressionRenderer"
+              },
+              "<unknown>>"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionsService.getType",
+            "type": "Function",
+            "tags": [],
+            "label": "getType",
+            "description": [],
+            "signature": [
+              "(name: string) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionType",
+                "text": "ExpressionType"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionsService.getType.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionsService.getTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "getTypes",
+            "description": [],
+            "signature": [
+              "() => Record<string, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionType",
+                "text": "ExpressionType"
+              },
+              ">"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.ExpressionsService.registerFunction",
             "type": "Function",
             "tags": [],
             "label": "registerFunction",
-            "description": [
-              "\nRegister an expression function, which will be possible to execute as\npart of the expression pipeline.\n\nBelow we register a function which simply sleeps for given number of\nmilliseconds to delay the execution and outputs its input as-is.\n\n```ts\nexpressions.registerFunction({\n  name: 'sleep',\n  args: {\n    time: {\n      aliases: ['_'],\n      help: 'Time in milliseconds for how long to sleep',\n      types: ['number'],\n    },\n  },\n  help: '',\n  fn: async (input, args, context) => {\n    await new Promise(r => setTimeout(r, args.time));\n    return input;\n  },\n}\n```\n\nThe actual function is defined in the `fn` key. The function can be *async*.\nIt receives three arguments: (1) `input` is the output of the previous function\nor the initial input of the expression if the function is first in chain;\n(2) `args` are function arguments as defined in expression string, that can\nbe edited by user (e.g in case of Canvas); (3) `context` is a shared object\npassed to all functions that can be used for side-effects."
-            ],
+            "description": [],
             "signature": [
               "(functionDefinition: ",
               {
@@ -3887,6 +4121,136 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.ExpressionsService.fork",
+            "type": "Function",
+            "tags": [],
+            "label": "fork",
+            "description": [],
+            "signature": [
+              "(name: string | undefined) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionsService",
+                "text": "ExpressionsService"
+              }
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionsService.fork.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionsService.execute",
+            "type": "Function",
+            "tags": [],
+            "label": "execute",
+            "description": [],
+            "signature": [
+              "<Input = unknown, Output = unknown>(ast: string | ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              ", input: Input, params?: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionExecutionParams",
+                "text": "ExpressionExecutionParams"
+              },
+              " | undefined) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContract",
+                "text": "ExecutionContract"
+              },
+              "<Input, Output, unknown>"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionsService.execute.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "ast",
+                "description": [],
+                "signature": [
+                  "string | ",
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.ExpressionAstExpression",
+                    "text": "ExpressionAstExpression"
+                  }
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionsService.execute.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "Input"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionsService.execute.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.ExpressionExecutionParams",
+                    "text": "ExpressionExecutionParams"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.ExpressionsService.run",
             "type": "Function",
             "tags": [],
@@ -3999,310 +4363,6 @@
                 "isRequired": false
               }
             ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.ExpressionsService.getFunction",
-            "type": "Function",
-            "tags": [],
-            "label": "getFunction",
-            "description": [],
-            "signature": [
-              "(name: string) => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionFunction",
-                "text": "ExpressionFunction"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/expressions/common/service/expressions_services.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "expressions",
-                "id": "def-public.ExpressionsService.getFunction.$1",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.ExpressionsService.getFunctions",
-            "type": "Function",
-            "tags": [],
-            "label": "getFunctions",
-            "description": [
-              "\nReturns POJO map of all registered expression functions, where keys are\nnames of the functions and values are `ExpressionFunction` instances."
-            ],
-            "signature": [
-              "() => Record<string, ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionFunction",
-                "text": "ExpressionFunction"
-              },
-              ">"
-            ],
-            "path": "src/plugins/expressions/common/service/expressions_services.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.ExpressionsService.getRenderer",
-            "type": "Function",
-            "tags": [],
-            "label": "getRenderer",
-            "description": [],
-            "signature": [
-              "(name: string) => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionRenderer",
-                "text": "ExpressionRenderer"
-              },
-              "<unknown> | null"
-            ],
-            "path": "src/plugins/expressions/common/service/expressions_services.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "expressions",
-                "id": "def-public.ExpressionsService.getRenderer.$1",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.ExpressionsService.getRenderers",
-            "type": "Function",
-            "tags": [],
-            "label": "getRenderers",
-            "description": [
-              "\nReturns POJO map of all registered expression renderers, where keys are\nnames of the renderers and values are `ExpressionRenderer` instances."
-            ],
-            "signature": [
-              "() => Record<string, ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionRenderer",
-                "text": "ExpressionRenderer"
-              },
-              "<unknown>>"
-            ],
-            "path": "src/plugins/expressions/common/service/expressions_services.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.ExpressionsService.getType",
-            "type": "Function",
-            "tags": [],
-            "label": "getType",
-            "description": [],
-            "signature": [
-              "(name: string) => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionType",
-                "text": "ExpressionType"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/expressions/common/service/expressions_services.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "expressions",
-                "id": "def-public.ExpressionsService.getType.$1",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.ExpressionsService.getTypes",
-            "type": "Function",
-            "tags": [],
-            "label": "getTypes",
-            "description": [
-              "\nReturns POJO map of all registered expression types, where keys are\nnames of the types and values are `ExpressionType` instances."
-            ],
-            "signature": [
-              "() => Record<string, ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionType",
-                "text": "ExpressionType"
-              },
-              ">"
-            ],
-            "path": "src/plugins/expressions/common/service/expressions_services.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.ExpressionsService.execute",
-            "type": "Function",
-            "tags": [],
-            "label": "execute",
-            "description": [],
-            "signature": [
-              "<Input = unknown, Output = unknown>(ast: string | ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionAstExpression",
-                "text": "ExpressionAstExpression"
-              },
-              ", input: Input, params?: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionExecutionParams",
-                "text": "ExpressionExecutionParams"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExecutionContract",
-                "text": "ExecutionContract"
-              },
-              "<Input, Output, unknown>"
-            ],
-            "path": "src/plugins/expressions/common/service/expressions_services.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "expressions",
-                "id": "def-public.ast",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "ast",
-                "description": [],
-                "signature": [
-                  "string | ",
-                  {
-                    "pluginId": "expressions",
-                    "scope": "common",
-                    "docId": "kibExpressionsPluginApi",
-                    "section": "def-common.ExpressionAstExpression",
-                    "text": "ExpressionAstExpression"
-                  }
-                ],
-                "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "expressions",
-                "id": "def-public.input",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "input",
-                "description": [],
-                "signature": [
-                  "Input"
-                ],
-                "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "expressions",
-                "id": "def-public.params",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "expressions",
-                    "scope": "common",
-                    "docId": "kibExpressionsPluginApi",
-                    "section": "def-common.ExpressionExecutionParams",
-                    "text": "ExpressionExecutionParams"
-                  },
-                  " | undefined"
-                ],
-                "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.ExpressionsService.fork",
-            "type": "Function",
-            "tags": [],
-            "label": "fork",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionsService",
-                "text": "ExpressionsService"
-              }
-            ],
-            "path": "src/plugins/expressions/common/service/expressions_services.ts",
-            "deprecated": false,
-            "children": [],
             "returnComment": []
           },
           {
@@ -4595,15 +4655,14 @@
               "\nReturns Kibana Platform *setup* life-cycle contract. Useful to return the\nsame contract on server-side and browser-side."
             ],
             "signature": [
-              "(...args: unknown[]) => Pick<",
+              "(...args: unknown[]) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
                 "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionsService",
-                "text": "ExpressionsService"
-              },
-              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
+                "section": "def-common.ExpressionsServiceSetup",
+                "text": "ExpressionsServiceSetup"
+              }
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -4732,7 +4791,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.type",
+                "id": "def-public.ExpressionType.validate.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "type",
@@ -8430,6 +8489,31 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.ExpressionsServiceStart.getFunctions",
+            "type": "Function",
+            "tags": [],
+            "label": "getFunctions",
+            "description": [
+              "\nReturns POJO map of all registered expression functions, where keys are\nnames of the functions and values are `ExpressionFunction` instances."
+            ],
+            "signature": [
+              "() => Record<string, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              ">"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.ExpressionsServiceStart.getRenderer",
             "type": "Function",
             "tags": [],
@@ -8470,6 +8554,31 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.ExpressionsServiceStart.getRenderers",
+            "type": "Function",
+            "tags": [],
+            "label": "getRenderers",
+            "description": [
+              "\nReturns POJO map of all registered expression renderers, where keys are\nnames of the renderers and values are `ExpressionRenderer` instances."
+            ],
+            "signature": [
+              "() => Record<string, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionRenderer",
+                "text": "ExpressionRenderer"
+              },
+              "<unknown>>"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.ExpressionsServiceStart.getType",
             "type": "Function",
             "tags": [],
@@ -8506,6 +8615,31 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionsServiceStart.getTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "getTypes",
+            "description": [
+              "\nReturns POJO map of all registered expression types, where keys are\nnames of the types and values are `ExpressionType` instances."
+            ],
+            "signature": [
+              "() => Record<string, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionType",
+                "text": "ExpressionType"
+              },
+              ">"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -8722,30 +8856,6 @@
                 "isRequired": false
               }
             ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.ExpressionsServiceStart.fork",
-            "type": "Function",
-            "tags": [],
-            "label": "fork",
-            "description": [
-              "\nCreate a new instance of `ExpressionsService`. The new instance inherits\nall state of the original `ExpressionsService`, including all expression\ntypes, expression functions and context. Also, all new types and functions\nregistered in the original services AFTER the forking event will be\navailable in the forked instance. However, all new types and functions\nregistered in the forked instances will NOT be available to the original\nservice."
-            ],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionsService",
-                "text": "ExpressionsService"
-              }
-            ],
-            "path": "src/plugins/expressions/common/service/expressions_services.ts",
-            "deprecated": false,
-            "children": [],
             "returnComment": []
           }
         ],
@@ -9169,6 +9279,19 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.IExpressionLoaderParams.interactive",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "interactive",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/public/types/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.IExpressionLoaderParams.onRenderError",
             "type": "Function",
             "tags": [],
@@ -9202,7 +9325,7 @@
             "label": "renderMode",
             "description": [],
             "signature": [
-              "\"display\" | \"noInteractivity\" | \"edit\" | \"preview\" | undefined"
+              "\"edit\" | \"preview\" | \"view\" | undefined"
             ],
             "path": "src/plugins/expressions/public/types/index.ts",
             "deprecated": false
@@ -9466,6 +9589,23 @@
                 "section": "def-common.RenderMode",
                 "text": "RenderMode"
               }
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.IInterpreterRenderHandlers.isInteractive",
+            "type": "Function",
+            "tags": [],
+            "label": "isInteractive",
+            "description": [
+              "\nThe chart is rendered in a non-interactive environment and should not provide any affordances for interaction like brushing."
+            ],
+            "signature": [
+              "() => boolean"
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
@@ -10228,7 +10368,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"geo_point\" | \"_source\" | \"attachment\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -10458,7 +10598,7 @@
         "children": [
           {
             "parentPluginId": "expressions",
-            "id": "def-public.props",
+            "id": "def-public.ExpressionRendererComponent.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -10471,7 +10611,7 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-public.context",
+            "id": "def-public.ExpressionRendererComponent.$2",
             "type": "Any",
             "tags": [],
             "label": "context",
@@ -10529,7 +10669,7 @@
         "children": [
           {
             "parentPluginId": "expressions",
-            "id": "def-public.input",
+            "id": "def-public.ExpressionValueConverter.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "input",
@@ -10542,7 +10682,7 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-public.availableTypes",
+            "id": "def-public.ExpressionValueConverter.$2",
             "type": "Object",
             "tags": [],
             "label": "availableTypes",
@@ -10979,155 +11119,13 @@
         "\nExpressions public setup contract, extends {@link ExpressionsServiceSetup}"
       ],
       "signature": [
-        "{ readonly getType: (name: string) => ",
         {
           "pluginId": "expressions",
           "scope": "common",
           "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExpressionType",
-          "text": "ExpressionType"
-        },
-        " | undefined; readonly registerType: (typeDefinition: ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.AnyExpressionTypeDefinition",
-          "text": "AnyExpressionTypeDefinition"
-        },
-        " | (() => ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.AnyExpressionTypeDefinition",
-          "text": "AnyExpressionTypeDefinition"
-        },
-        ")) => void; readonly getFunction: (name: string) => ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExpressionFunction",
-          "text": "ExpressionFunction"
-        },
-        " | undefined; readonly getFunctions: () => Record<string, ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExpressionFunction",
-          "text": "ExpressionFunction"
-        },
-        ">; readonly getRenderer: (name: string) => ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExpressionRenderer",
-          "text": "ExpressionRenderer"
-        },
-        "<unknown> | null; readonly getRenderers: () => Record<string, ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExpressionRenderer",
-          "text": "ExpressionRenderer"
-        },
-        "<unknown>>; readonly getTypes: () => Record<string, ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExpressionType",
-          "text": "ExpressionType"
-        },
-        ">; readonly registerFunction: (functionDefinition: ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.AnyExpressionFunctionDefinition",
-          "text": "AnyExpressionFunctionDefinition"
-        },
-        " | (() => ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.AnyExpressionFunctionDefinition",
-          "text": "AnyExpressionFunctionDefinition"
-        },
-        ")) => void; readonly registerRenderer: (definition: ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.AnyExpressionRenderDefinition",
-          "text": "AnyExpressionRenderDefinition"
-        },
-        " | (() => ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.AnyExpressionRenderDefinition",
-          "text": "AnyExpressionRenderDefinition"
-        },
-        ")) => void; readonly run: <Input, Output>(ast: string | ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExpressionAstExpression",
-          "text": "ExpressionAstExpression"
-        },
-        ", input: Input, params?: ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExpressionExecutionParams",
-          "text": "ExpressionExecutionParams"
-        },
-        " | undefined) => ",
-        "Observable",
-        "<",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExecutionResult",
-          "text": "ExecutionResult"
-        },
-        "<",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExpressionValueBoxed",
-          "text": "ExpressionValueBoxed"
-        },
-        "<\"error\", { error: ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ErrorLike",
-          "text": "ErrorLike"
-        },
-        "; info?: ",
-        "SerializableRecord",
-        " | undefined; }> | Output>>; readonly fork: () => ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExpressionsService",
-          "text": "ExpressionsService"
-        },
-        "; }"
+          "section": "def-common.ExpressionsServiceSetup",
+          "text": "ExpressionsServiceSetup"
+        }
       ],
       "path": "src/plugins/expressions/public/plugin.ts",
       "deprecated": false,
@@ -11230,7 +11228,7 @@
           "children": [
             {
               "parentPluginId": "expressions",
-              "id": "def-public.element",
+              "id": "def-public.ExpressionsStart.loader.$1",
               "type": "Object",
               "tags": [],
               "label": "element",
@@ -11243,7 +11241,7 @@
             },
             {
               "parentPluginId": "expressions",
-              "id": "def-public.expression",
+              "id": "def-public.ExpressionsStart.loader.$2",
               "type": "CompoundType",
               "tags": [],
               "label": "expression",
@@ -11263,7 +11261,7 @@
             },
             {
               "parentPluginId": "expressions",
-              "id": "def-public.params",
+              "id": "def-public.ExpressionsStart.loader.$3",
               "type": "Object",
               "tags": [],
               "label": "params",
@@ -11306,7 +11304,7 @@
           "children": [
             {
               "parentPluginId": "expressions",
-              "id": "def-public.__0",
+              "id": "def-public.ExpressionsStart.ReactExpressionRenderer.$1",
               "type": "Object",
               "tags": [],
               "label": "__0",
@@ -11350,7 +11348,7 @@
           "children": [
             {
               "parentPluginId": "expressions",
-              "id": "def-public.element",
+              "id": "def-public.ExpressionsStart.render.$1",
               "type": "Object",
               "tags": [],
               "label": "element",
@@ -11363,7 +11361,7 @@
             },
             {
               "parentPluginId": "expressions",
-              "id": "def-public.data",
+              "id": "def-public.ExpressionsStart.render.$2",
               "type": "Any",
               "tags": [],
               "label": "data",
@@ -11376,7 +11374,7 @@
             },
             {
               "parentPluginId": "expressions",
-              "id": "def-public.options",
+              "id": "def-public.ExpressionsStart.render.$3",
               "type": "Object",
               "tags": [],
               "label": "options",
@@ -12175,10 +12173,10 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-server.Executor.state",
+            "id": "def-server.Executor.container",
             "type": "Object",
             "tags": [],
-            "label": "state",
+            "label": "container",
             "description": [],
             "signature": [
               {
@@ -12263,6 +12261,26 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-server.Executor.parent",
+            "type": "Object",
+            "tags": [],
+            "label": "parent",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Executor",
+                "text": "Executor"
+              },
+              "<Context> | undefined"
+            ],
+            "path": "src/plugins/expressions/common/executor/executor.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-server.Executor.Unnamed",
             "type": "Function",
             "tags": [],
@@ -12297,6 +12315,26 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.Executor.state",
+            "type": "Object",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutorState",
+                "text": "ExecutorState"
+              },
+              "<Context>"
+            ],
+            "path": "src/plugins/expressions/common/executor/executor.ts",
+            "deprecated": false
           },
           {
             "parentPluginId": "expressions",
@@ -13172,7 +13210,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.input",
+                "id": "def-server.ExpressionFunction.fn.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "input",
@@ -13185,7 +13223,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.params",
+                "id": "def-server.ExpressionFunction.fn.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -13198,7 +13236,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.handlers",
+                "id": "def-server.ExpressionFunction.fn.$3",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "handlers",
@@ -13285,7 +13323,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.state",
+                "id": "def-server.ExpressionFunction.telemetry.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -13306,7 +13344,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.telemetryData",
+                "id": "def-server.ExpressionFunction.telemetry.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "telemetryData",
@@ -13353,7 +13391,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.state",
+                "id": "def-server.ExpressionFunction.extract.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -13408,7 +13446,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.state",
+                "id": "def-server.ExpressionFunction.inject.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -13429,7 +13467,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.references",
+                "id": "def-server.ExpressionFunction.inject.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "references",
@@ -13824,7 +13862,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.domNode",
+                "id": "def-server.ExpressionRenderer.render.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "domNode",
@@ -13837,7 +13875,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.config",
+                "id": "def-server.ExpressionRenderer.render.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -13850,7 +13888,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.handlers",
+                "id": "def-server.ExpressionRenderer.render.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "handlers",
@@ -14116,15 +14154,15 @@
             "section": "def-server.Plugin",
             "text": "Plugin"
           },
-          "<Pick<",
+          "<",
           {
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionsService",
-            "text": "ExpressionsService"
+            "section": "def-common.ExpressionsServiceSetup",
+            "text": "ExpressionsServiceSetup"
           },
-          ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
+          ", ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -14209,15 +14247,14 @@
                 "section": "def-server.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<object, unknown>) => Pick<",
+              "<object, unknown>) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
                 "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionsService",
-                "text": "ExpressionsService"
-              },
-              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
+                "section": "def-common.ExpressionsServiceSetup",
+                "text": "ExpressionsServiceSetup"
+              }
             ],
             "path": "src/plugins/expressions/server/plugin.ts",
             "deprecated": false,
@@ -14338,15 +14375,15 @@
             "section": "def-server.Plugin",
             "text": "Plugin"
           },
-          "<Pick<",
+          "<",
           {
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionsService",
-            "text": "ExpressionsService"
+            "section": "def-common.ExpressionsServiceSetup",
+            "text": "ExpressionsServiceSetup"
           },
-          ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
+          ", ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -14431,15 +14468,14 @@
                 "section": "def-server.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<object, unknown>) => Pick<",
+              "<object, unknown>) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
                 "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionsService",
-                "text": "ExpressionsService"
-              },
-              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
+                "section": "def-common.ExpressionsServiceSetup",
+                "text": "ExpressionsServiceSetup"
+              }
             ],
             "path": "src/plugins/expressions/server/plugin.ts",
             "deprecated": false,
@@ -14587,7 +14623,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.type",
+                "id": "def-server.ExpressionType.validate.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "type",
@@ -18414,6 +18450,23 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-server.IInterpreterRenderHandlers.isInteractive",
+            "type": "Function",
+            "tags": [],
+            "label": "isInteractive",
+            "description": [
+              "\nThe chart is rendered in a non-interactive environment and should not provide any affordances for interaction like brushing."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-server.IInterpreterRenderHandlers.isSyncColorsEnabled",
             "type": "Function",
             "tags": [],
@@ -18889,7 +18942,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"geo_point\" | \"_source\" | \"attachment\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -19139,7 +19192,7 @@
         "children": [
           {
             "parentPluginId": "expressions",
-            "id": "def-server.input",
+            "id": "def-server.ExpressionValueConverter.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "input",
@@ -19152,7 +19205,7 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-server.availableTypes",
+            "id": "def-server.ExpressionValueConverter.$2",
             "type": "Object",
             "tags": [],
             "label": "availableTypes",
@@ -19557,155 +19610,13 @@
       "label": "ExpressionsServerSetup",
       "description": [],
       "signature": [
-        "{ readonly getType: (name: string) => ",
         {
           "pluginId": "expressions",
           "scope": "common",
           "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExpressionType",
-          "text": "ExpressionType"
-        },
-        " | undefined; readonly registerType: (typeDefinition: ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.AnyExpressionTypeDefinition",
-          "text": "AnyExpressionTypeDefinition"
-        },
-        " | (() => ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.AnyExpressionTypeDefinition",
-          "text": "AnyExpressionTypeDefinition"
-        },
-        ")) => void; readonly getFunction: (name: string) => ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExpressionFunction",
-          "text": "ExpressionFunction"
-        },
-        " | undefined; readonly getFunctions: () => Record<string, ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExpressionFunction",
-          "text": "ExpressionFunction"
-        },
-        ">; readonly getRenderer: (name: string) => ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExpressionRenderer",
-          "text": "ExpressionRenderer"
-        },
-        "<unknown> | null; readonly getRenderers: () => Record<string, ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExpressionRenderer",
-          "text": "ExpressionRenderer"
-        },
-        "<unknown>>; readonly getTypes: () => Record<string, ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExpressionType",
-          "text": "ExpressionType"
-        },
-        ">; readonly registerFunction: (functionDefinition: ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.AnyExpressionFunctionDefinition",
-          "text": "AnyExpressionFunctionDefinition"
-        },
-        " | (() => ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.AnyExpressionFunctionDefinition",
-          "text": "AnyExpressionFunctionDefinition"
-        },
-        ")) => void; readonly registerRenderer: (definition: ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.AnyExpressionRenderDefinition",
-          "text": "AnyExpressionRenderDefinition"
-        },
-        " | (() => ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.AnyExpressionRenderDefinition",
-          "text": "AnyExpressionRenderDefinition"
-        },
-        ")) => void; readonly run: <Input, Output>(ast: string | ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExpressionAstExpression",
-          "text": "ExpressionAstExpression"
-        },
-        ", input: Input, params?: ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExpressionExecutionParams",
-          "text": "ExpressionExecutionParams"
-        },
-        " | undefined) => ",
-        "Observable",
-        "<",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExecutionResult",
-          "text": "ExecutionResult"
-        },
-        "<",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExpressionValueBoxed",
-          "text": "ExpressionValueBoxed"
-        },
-        "<\"error\", { error: ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ErrorLike",
-          "text": "ErrorLike"
-        },
-        "; info?: ",
-        "SerializableRecord",
-        " | undefined; }> | Output>>; readonly fork: () => ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.ExpressionsService",
-          "text": "ExpressionsService"
-        },
-        "; }"
+          "section": "def-common.ExpressionsServiceSetup",
+          "text": "ExpressionsServiceSetup"
+        }
       ],
       "path": "src/plugins/expressions/server/plugin.ts",
       "deprecated": false,
@@ -20706,10 +20617,10 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-common.Executor.state",
+            "id": "def-common.Executor.container",
             "type": "Object",
             "tags": [],
-            "label": "state",
+            "label": "container",
             "description": [],
             "signature": [
               {
@@ -20794,6 +20705,26 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-common.Executor.parent",
+            "type": "Object",
+            "tags": [],
+            "label": "parent",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Executor",
+                "text": "Executor"
+              },
+              "<Context> | undefined"
+            ],
+            "path": "src/plugins/expressions/common/executor/executor.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-common.Executor.Unnamed",
             "type": "Function",
             "tags": [],
@@ -20828,6 +20759,26 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.Executor.state",
+            "type": "Object",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutorState",
+                "text": "ExecutorState"
+              },
+              "<Context>"
+            ],
+            "path": "src/plugins/expressions/common/executor/executor.ts",
+            "deprecated": false
           },
           {
             "parentPluginId": "expressions",
@@ -21703,7 +21654,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.input",
+                "id": "def-common.ExpressionFunction.fn.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "input",
@@ -21716,7 +21667,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.params",
+                "id": "def-common.ExpressionFunction.fn.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -21729,7 +21680,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.handlers",
+                "id": "def-common.ExpressionFunction.fn.$3",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "handlers",
@@ -21816,7 +21767,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.state",
+                "id": "def-common.ExpressionFunction.telemetry.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -21837,7 +21788,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.telemetryData",
+                "id": "def-common.ExpressionFunction.telemetry.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "telemetryData",
@@ -21884,7 +21835,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.state",
+                "id": "def-common.ExpressionFunction.extract.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -21939,7 +21890,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.state",
+                "id": "def-common.ExpressionFunction.inject.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -21960,7 +21911,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.references",
+                "id": "def-common.ExpressionFunction.inject.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "references",
@@ -22355,7 +22306,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.domNode",
+                "id": "def-common.ExpressionRenderer.render.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "domNode",
@@ -22368,7 +22319,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.config",
+                "id": "def-common.ExpressionRenderer.render.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -22381,7 +22332,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.handlers",
+                "id": "def-common.ExpressionRenderer.render.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "handlers",
@@ -22723,7 +22674,22 @@
             "section": "def-common.ExpressionAstExpression",
             "text": "ExpressionAstExpression"
           },
-          ">"
+          ">,",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionsServiceSetup",
+            "text": "ExpressionsServiceSetup"
+          },
+          ",",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionsServiceStart",
+            "text": "ExpressionsServiceStart"
+          }
         ],
         "path": "src/plugins/expressions/common/service/expressions_services.ts",
         "deprecated": false,
@@ -22805,13 +22771,194 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsService.getFunction",
+            "type": "Function",
+            "tags": [],
+            "label": "getFunction",
+            "description": [],
+            "signature": [
+              "(name: string) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsService.getFunction.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsService.getFunctions",
+            "type": "Function",
+            "tags": [],
+            "label": "getFunctions",
+            "description": [],
+            "signature": [
+              "() => Record<string, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              ">"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsService.getRenderer",
+            "type": "Function",
+            "tags": [],
+            "label": "getRenderer",
+            "description": [],
+            "signature": [
+              "(name: string) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionRenderer",
+                "text": "ExpressionRenderer"
+              },
+              "<unknown> | null"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsService.getRenderer.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsService.getRenderers",
+            "type": "Function",
+            "tags": [],
+            "label": "getRenderers",
+            "description": [],
+            "signature": [
+              "() => Record<string, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionRenderer",
+                "text": "ExpressionRenderer"
+              },
+              "<unknown>>"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsService.getType",
+            "type": "Function",
+            "tags": [],
+            "label": "getType",
+            "description": [],
+            "signature": [
+              "(name: string) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionType",
+                "text": "ExpressionType"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsService.getType.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsService.getTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "getTypes",
+            "description": [],
+            "signature": [
+              "() => Record<string, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionType",
+                "text": "ExpressionType"
+              },
+              ">"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-common.ExpressionsService.registerFunction",
             "type": "Function",
             "tags": [],
             "label": "registerFunction",
-            "description": [
-              "\nRegister an expression function, which will be possible to execute as\npart of the expression pipeline.\n\nBelow we register a function which simply sleeps for given number of\nmilliseconds to delay the execution and outputs its input as-is.\n\n```ts\nexpressions.registerFunction({\n  name: 'sleep',\n  args: {\n    time: {\n      aliases: ['_'],\n      help: 'Time in milliseconds for how long to sleep',\n      types: ['number'],\n    },\n  },\n  help: '',\n  fn: async (input, args, context) => {\n    await new Promise(r => setTimeout(r, args.time));\n    return input;\n  },\n}\n```\n\nThe actual function is defined in the `fn` key. The function can be *async*.\nIt receives three arguments: (1) `input` is the output of the previous function\nor the initial input of the expression if the function is first in chain;\n(2) `args` are function arguments as defined in expression string, that can\nbe edited by user (e.g in case of Canvas); (3) `context` is a shared object\npassed to all functions that can be used for side-effects."
-            ],
+            "description": [],
             "signature": [
               "(functionDefinition: ",
               {
@@ -22990,6 +23137,136 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsService.fork",
+            "type": "Function",
+            "tags": [],
+            "label": "fork",
+            "description": [],
+            "signature": [
+              "(name: string | undefined) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionsService",
+                "text": "ExpressionsService"
+              }
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsService.fork.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsService.execute",
+            "type": "Function",
+            "tags": [],
+            "label": "execute",
+            "description": [],
+            "signature": [
+              "<Input = unknown, Output = unknown>(ast: string | ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              ", input: Input, params?: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionExecutionParams",
+                "text": "ExpressionExecutionParams"
+              },
+              " | undefined) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContract",
+                "text": "ExecutionContract"
+              },
+              "<Input, Output, unknown>"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsService.execute.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "ast",
+                "description": [],
+                "signature": [
+                  "string | ",
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.ExpressionAstExpression",
+                    "text": "ExpressionAstExpression"
+                  }
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsService.execute.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "Input"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsService.execute.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.ExpressionExecutionParams",
+                    "text": "ExpressionExecutionParams"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-common.ExpressionsService.run",
             "type": "Function",
             "tags": [],
@@ -23102,310 +23379,6 @@
                 "isRequired": false
               }
             ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-common.ExpressionsService.getFunction",
-            "type": "Function",
-            "tags": [],
-            "label": "getFunction",
-            "description": [],
-            "signature": [
-              "(name: string) => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionFunction",
-                "text": "ExpressionFunction"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/expressions/common/service/expressions_services.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "expressions",
-                "id": "def-common.ExpressionsService.getFunction.$1",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-common.ExpressionsService.getFunctions",
-            "type": "Function",
-            "tags": [],
-            "label": "getFunctions",
-            "description": [
-              "\nReturns POJO map of all registered expression functions, where keys are\nnames of the functions and values are `ExpressionFunction` instances."
-            ],
-            "signature": [
-              "() => Record<string, ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionFunction",
-                "text": "ExpressionFunction"
-              },
-              ">"
-            ],
-            "path": "src/plugins/expressions/common/service/expressions_services.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-common.ExpressionsService.getRenderer",
-            "type": "Function",
-            "tags": [],
-            "label": "getRenderer",
-            "description": [],
-            "signature": [
-              "(name: string) => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionRenderer",
-                "text": "ExpressionRenderer"
-              },
-              "<unknown> | null"
-            ],
-            "path": "src/plugins/expressions/common/service/expressions_services.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "expressions",
-                "id": "def-common.ExpressionsService.getRenderer.$1",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-common.ExpressionsService.getRenderers",
-            "type": "Function",
-            "tags": [],
-            "label": "getRenderers",
-            "description": [
-              "\nReturns POJO map of all registered expression renderers, where keys are\nnames of the renderers and values are `ExpressionRenderer` instances."
-            ],
-            "signature": [
-              "() => Record<string, ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionRenderer",
-                "text": "ExpressionRenderer"
-              },
-              "<unknown>>"
-            ],
-            "path": "src/plugins/expressions/common/service/expressions_services.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-common.ExpressionsService.getType",
-            "type": "Function",
-            "tags": [],
-            "label": "getType",
-            "description": [],
-            "signature": [
-              "(name: string) => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionType",
-                "text": "ExpressionType"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/expressions/common/service/expressions_services.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "expressions",
-                "id": "def-common.ExpressionsService.getType.$1",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-common.ExpressionsService.getTypes",
-            "type": "Function",
-            "tags": [],
-            "label": "getTypes",
-            "description": [
-              "\nReturns POJO map of all registered expression types, where keys are\nnames of the types and values are `ExpressionType` instances."
-            ],
-            "signature": [
-              "() => Record<string, ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionType",
-                "text": "ExpressionType"
-              },
-              ">"
-            ],
-            "path": "src/plugins/expressions/common/service/expressions_services.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-common.ExpressionsService.execute",
-            "type": "Function",
-            "tags": [],
-            "label": "execute",
-            "description": [],
-            "signature": [
-              "<Input = unknown, Output = unknown>(ast: string | ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionAstExpression",
-                "text": "ExpressionAstExpression"
-              },
-              ", input: Input, params?: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionExecutionParams",
-                "text": "ExpressionExecutionParams"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExecutionContract",
-                "text": "ExecutionContract"
-              },
-              "<Input, Output, unknown>"
-            ],
-            "path": "src/plugins/expressions/common/service/expressions_services.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "expressions",
-                "id": "def-common.ast",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "ast",
-                "description": [],
-                "signature": [
-                  "string | ",
-                  {
-                    "pluginId": "expressions",
-                    "scope": "common",
-                    "docId": "kibExpressionsPluginApi",
-                    "section": "def-common.ExpressionAstExpression",
-                    "text": "ExpressionAstExpression"
-                  }
-                ],
-                "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "expressions",
-                "id": "def-common.input",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "input",
-                "description": [],
-                "signature": [
-                  "Input"
-                ],
-                "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "expressions",
-                "id": "def-common.params",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "expressions",
-                    "scope": "common",
-                    "docId": "kibExpressionsPluginApi",
-                    "section": "def-common.ExpressionExecutionParams",
-                    "text": "ExpressionExecutionParams"
-                  },
-                  " | undefined"
-                ],
-                "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-common.ExpressionsService.fork",
-            "type": "Function",
-            "tags": [],
-            "label": "fork",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionsService",
-                "text": "ExpressionsService"
-              }
-            ],
-            "path": "src/plugins/expressions/common/service/expressions_services.ts",
-            "deprecated": false,
-            "children": [],
             "returnComment": []
           },
           {
@@ -23698,15 +23671,14 @@
               "\nReturns Kibana Platform *setup* life-cycle contract. Useful to return the\nsame contract on server-side and browser-side."
             ],
             "signature": [
-              "(...args: unknown[]) => Pick<",
+              "(...args: unknown[]) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
                 "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionsService",
-                "text": "ExpressionsService"
-              },
-              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
+                "section": "def-common.ExpressionsServiceSetup",
+                "text": "ExpressionsServiceSetup"
+              }
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -23835,7 +23807,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.type",
+                "id": "def-common.ExpressionType.validate.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "type",
@@ -25083,7 +25055,7 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-common.buildResultColumns.$5.options",
+            "id": "def-common.buildResultColumns.$5",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -25093,7 +25065,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.buildResultColumns.$5.options.allowColumnOverwrite",
+                "id": "def-common.buildResultColumns.$5.allowColumnOverwrite",
                 "type": "boolean",
                 "tags": [],
                 "label": "allowColumnOverwrite",
@@ -26487,7 +26459,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"geo_point\" | \"_source\" | \"attachment\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false
@@ -29477,6 +29449,385 @@
       },
       {
         "parentPluginId": "expressions",
+        "id": "def-common.ExpressionsServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExpressionsServiceSetup",
+        "description": [
+          "\nThe public contract that `ExpressionsService` provides to other plugins\nin Kibana Platform in *setup* life-cycle."
+        ],
+        "path": "src/plugins/expressions/common/service/expressions_services.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsServiceSetup.getFunction",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "getFunction",
+            "description": [
+              "\nGet a registered `ExpressionFunction` by its name, which was registered\nusing the `registerFunction` method. The returned `ExpressionFunction`\ninstance is an internal representation of the function in Expressions\nservice - do not mutate that object."
+            ],
+            "signature": [
+              "(name: string) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": true,
+            "references": [
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/setup_expressions.ts"
+              }
+            ],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsServiceSetup.getFunction.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsServiceSetup.getFunctions",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "getFunctions",
+            "description": [
+              "\nReturns POJO map of all registered expression functions, where keys are\nnames of the functions and values are `ExpressionFunction` instances."
+            ],
+            "signature": [
+              "() => Record<string, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              ">"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": true,
+            "references": [
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/application.tsx"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/application.tsx"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/functions/functions.test.ts"
+              }
+            ],
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsServiceSetup.getTypes",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "getTypes",
+            "description": [
+              "\nReturns POJO map of all registered expression types, where keys are\nnames of the types and values are `ExpressionType` instances."
+            ],
+            "signature": [
+              "() => Record<string, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionType",
+                "text": "ExpressionType"
+              },
+              ">"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": true,
+            "references": [
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/setup_expressions.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/application.tsx"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
+              }
+            ],
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsServiceSetup.fork",
+            "type": "Function",
+            "tags": [],
+            "label": "fork",
+            "description": [
+              "\nCreate a new instance of `ExpressionsService`. The new instance inherits\nall state of the original `ExpressionsService`, including all expression\ntypes, expression functions and context. Also, all new types and functions\nregistered in the original services AFTER the forking event will be\navailable in the forked instance. However, all new types and functions\nregistered in the forked instances will NOT be available to the original\nservice."
+            ],
+            "signature": [
+              "(name?: string | undefined) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionsService",
+                "text": "ExpressionsService"
+              }
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsServiceSetup.fork.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [
+                  "A fork name that can be used to get fork instance later."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsServiceSetup.registerFunction",
+            "type": "Function",
+            "tags": [],
+            "label": "registerFunction",
+            "description": [
+              "\nRegister an expression function, which will be possible to execute as\npart of the expression pipeline.\n\nBelow we register a function which simply sleeps for given number of\nmilliseconds to delay the execution and outputs its input as-is.\n\n```ts\nexpressions.registerFunction({\n  name: 'sleep',\n  args: {\n    time: {\n      aliases: ['_'],\n      help: 'Time in milliseconds for how long to sleep',\n      types: ['number'],\n    },\n  },\n  help: '',\n  fn: async (input, args, context) => {\n    await new Promise(r => setTimeout(r, args.time));\n    return input;\n  },\n}\n```\n\nThe actual function is defined in the `fn` key. The function can be *async*.\nIt receives three arguments: (1) `input` is the output of the previous function\nor the initial input of the expression if the function is first in chain;\n(2) `args` are function arguments as defined in expression string, that can\nbe edited by user (e.g in case of Canvas); (3) `context` is a shared object\npassed to all functions that can be used for side-effects."
+            ],
+            "signature": [
+              "(functionDefinition: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.AnyExpressionFunctionDefinition",
+                "text": "AnyExpressionFunctionDefinition"
+              },
+              " | (() => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.AnyExpressionFunctionDefinition",
+                "text": "AnyExpressionFunctionDefinition"
+              },
+              ")) => void"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsServiceSetup.registerFunction.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "functionDefinition",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.AnyExpressionFunctionDefinition",
+                    "text": "AnyExpressionFunctionDefinition"
+                  },
+                  " | (() => ",
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.AnyExpressionFunctionDefinition",
+                    "text": "AnyExpressionFunctionDefinition"
+                  },
+                  ")"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsServiceSetup.registerType",
+            "type": "Function",
+            "tags": [],
+            "label": "registerType",
+            "description": [],
+            "signature": [
+              "(typeDefinition: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.AnyExpressionTypeDefinition",
+                "text": "AnyExpressionTypeDefinition"
+              },
+              " | (() => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.AnyExpressionTypeDefinition",
+                "text": "AnyExpressionTypeDefinition"
+              },
+              ")) => void"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsServiceSetup.registerType.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "typeDefinition",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.AnyExpressionTypeDefinition",
+                    "text": "AnyExpressionTypeDefinition"
+                  },
+                  " | (() => ",
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.AnyExpressionTypeDefinition",
+                    "text": "AnyExpressionTypeDefinition"
+                  },
+                  ")"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsServiceSetup.registerRenderer",
+            "type": "Function",
+            "tags": [],
+            "label": "registerRenderer",
+            "description": [],
+            "signature": [
+              "(definition: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.AnyExpressionRenderDefinition",
+                "text": "AnyExpressionRenderDefinition"
+              },
+              " | (() => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.AnyExpressionRenderDefinition",
+                "text": "AnyExpressionRenderDefinition"
+              },
+              ")) => void"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsServiceSetup.registerRenderer.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "definition",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.AnyExpressionRenderDefinition",
+                    "text": "AnyExpressionRenderDefinition"
+                  },
+                  " | (() => ",
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.AnyExpressionRenderDefinition",
+                    "text": "AnyExpressionRenderDefinition"
+                  },
+                  ")"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
         "id": "def-common.ExpressionsServiceStart",
         "type": "Interface",
         "tags": [],
@@ -29529,6 +29880,31 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsServiceStart.getFunctions",
+            "type": "Function",
+            "tags": [],
+            "label": "getFunctions",
+            "description": [
+              "\nReturns POJO map of all registered expression functions, where keys are\nnames of the functions and values are `ExpressionFunction` instances."
+            ],
+            "signature": [
+              "() => Record<string, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              ">"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-common.ExpressionsServiceStart.getRenderer",
             "type": "Function",
             "tags": [],
@@ -29569,6 +29945,31 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsServiceStart.getRenderers",
+            "type": "Function",
+            "tags": [],
+            "label": "getRenderers",
+            "description": [
+              "\nReturns POJO map of all registered expression renderers, where keys are\nnames of the renderers and values are `ExpressionRenderer` instances."
+            ],
+            "signature": [
+              "() => Record<string, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionRenderer",
+                "text": "ExpressionRenderer"
+              },
+              "<unknown>>"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-common.ExpressionsServiceStart.getType",
             "type": "Function",
             "tags": [],
@@ -29605,6 +30006,31 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsServiceStart.getTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "getTypes",
+            "description": [
+              "\nReturns POJO map of all registered expression types, where keys are\nnames of the types and values are `ExpressionType` instances."
+            ],
+            "signature": [
+              "() => Record<string, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionType",
+                "text": "ExpressionType"
+              },
+              ">"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -29821,30 +30247,6 @@
                 "isRequired": false
               }
             ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-common.ExpressionsServiceStart.fork",
-            "type": "Function",
-            "tags": [],
-            "label": "fork",
-            "description": [
-              "\nCreate a new instance of `ExpressionsService`. The new instance inherits\nall state of the original `ExpressionsService`, including all expression\ntypes, expression functions and context. Also, all new types and functions\nregistered in the original services AFTER the forking event will be\navailable in the forked instance. However, all new types and functions\nregistered in the forked instances will NOT be available to the original\nservice."
-            ],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionsService",
-                "text": "ExpressionsService"
-              }
-            ],
-            "path": "src/plugins/expressions/common/service/expressions_services.ts",
-            "deprecated": false,
-            "children": [],
             "returnComment": []
           }
         ],
@@ -30309,6 +30711,23 @@
                 "section": "def-common.RenderMode",
                 "text": "RenderMode"
               }
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.IInterpreterRenderHandlers.isInteractive",
+            "type": "Function",
+            "tags": [],
+            "label": "isInteractive",
+            "description": [
+              "\nThe chart is rendered in a non-interactive environment and should not provide any affordances for interaction like brushing."
+            ],
+            "signature": [
+              "() => boolean"
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
@@ -31111,7 +31530,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"geo_point\" | \"_source\" | \"attachment\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -31890,170 +32309,6 @@
       },
       {
         "parentPluginId": "expressions",
-        "id": "def-common.ExpressionsServiceSetup",
-        "type": "Type",
-        "tags": [],
-        "label": "ExpressionsServiceSetup",
-        "description": [
-          "\nThe public contract that `ExpressionsService` provides to other plugins\nin Kibana Platform in *setup* life-cycle."
-        ],
-        "signature": [
-          "{ readonly getType: (name: string) => ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionType",
-            "text": "ExpressionType"
-          },
-          " | undefined; readonly registerType: (typeDefinition: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.AnyExpressionTypeDefinition",
-            "text": "AnyExpressionTypeDefinition"
-          },
-          " | (() => ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.AnyExpressionTypeDefinition",
-            "text": "AnyExpressionTypeDefinition"
-          },
-          ")) => void; readonly getFunction: (name: string) => ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionFunction",
-            "text": "ExpressionFunction"
-          },
-          " | undefined; readonly getFunctions: () => Record<string, ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionFunction",
-            "text": "ExpressionFunction"
-          },
-          ">; readonly getRenderer: (name: string) => ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionRenderer",
-            "text": "ExpressionRenderer"
-          },
-          "<unknown> | null; readonly getRenderers: () => Record<string, ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionRenderer",
-            "text": "ExpressionRenderer"
-          },
-          "<unknown>>; readonly getTypes: () => Record<string, ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionType",
-            "text": "ExpressionType"
-          },
-          ">; readonly registerFunction: (functionDefinition: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.AnyExpressionFunctionDefinition",
-            "text": "AnyExpressionFunctionDefinition"
-          },
-          " | (() => ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.AnyExpressionFunctionDefinition",
-            "text": "AnyExpressionFunctionDefinition"
-          },
-          ")) => void; readonly registerRenderer: (definition: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.AnyExpressionRenderDefinition",
-            "text": "AnyExpressionRenderDefinition"
-          },
-          " | (() => ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.AnyExpressionRenderDefinition",
-            "text": "AnyExpressionRenderDefinition"
-          },
-          ")) => void; readonly run: <Input, Output>(ast: string | ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionAstExpression",
-            "text": "ExpressionAstExpression"
-          },
-          ", input: Input, params?: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionExecutionParams",
-            "text": "ExpressionExecutionParams"
-          },
-          " | undefined) => ",
-          "Observable",
-          "<",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExecutionResult",
-            "text": "ExecutionResult"
-          },
-          "<",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionValueBoxed",
-            "text": "ExpressionValueBoxed"
-          },
-          "<\"error\", { error: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ErrorLike",
-            "text": "ErrorLike"
-          },
-          "; info?: ",
-          "SerializableRecord",
-          " | undefined; }> | Output>>; readonly fork: () => ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionsService",
-            "text": "ExpressionsService"
-          },
-          "; }"
-        ],
-        "path": "src/plugins/expressions/common/service/expressions_services.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "expressions",
         "id": "def-common.ExpressionValue",
         "type": "Type",
         "tags": [],
@@ -32096,7 +32351,7 @@
         "children": [
           {
             "parentPluginId": "expressions",
-            "id": "def-common.input",
+            "id": "def-common.ExpressionValueConverter.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "input",
@@ -32109,7 +32364,7 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-common.availableTypes",
+            "id": "def-common.ExpressionValueConverter.$2",
             "type": "Object",
             "tags": [],
             "label": "availableTypes",
@@ -32575,10 +32830,10 @@
         "tags": [],
         "label": "RenderMode",
         "description": [
-          "\nMode of the expression render environment.\nThis value can be set from a consumer embedding an expression renderer and is accessible\nfrom within the active render function as part of the handlers.\nThe following modes are supported:\n* display (default): The chart is rendered in a container with the main purpose of viewing the chart (e.g. in a container like dashboard or canvas)\n* preview: The chart is rendered in very restricted space (below 100px width and height) and should only show a rough outline\n* edit: The chart is rendered within an editor and configuration elements within the chart should be displayed\n* noInteractivity: The chart is rendered in a non-interactive environment and should not provide any affordances for interaction like brushing"
+          "\nMode of the expression render environment.\nThis value can be set from a consumer embedding an expression renderer and is accessible\nfrom within the active render function as part of the handlers.\nThe following modes are supported:\n* view (default): The chart is rendered in a container with the main purpose of viewing the chart (e.g. in a container like dashboard or canvas)\n* preview: The chart is rendered in very restricted space (below 100px width and height) and should only show a rough outline\n* edit: The chart is rendered within an editor and configuration elements within the chart should be displayed"
         ],
         "signature": [
-          "\"display\" | \"noInteractivity\" | \"edit\" | \"preview\""
+          "\"edit\" | \"preview\" | \"view\""
         ],
         "path": "src/plugins/expressions/common/expression_renderers/types.ts",
         "deprecated": false,
@@ -35950,7 +36205,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"number\" | \"boolean\" | \"string\" | \"null\")[]"
+                      "(\"number\" | \"string\" | \"boolean\" | \"null\")[]"
                     ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/map_column.ts",
                     "deprecated": false
@@ -36095,15 +36350,15 @@
               },
               ") => ",
               "Observable",
-              "<",
+              "<{ columns: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
                 "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Datatable",
-                "text": "Datatable"
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
               },
-              ">"
+              "[]; rows: Record<string, any>[]; type: \"datatable\"; }>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/map_column.ts",
             "deprecated": false,

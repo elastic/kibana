@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 
 import {
   EuiSteps,
@@ -26,6 +26,8 @@ import { getFixIssuesStep } from './fix_issues_step';
 import { getFixLogsStep } from './fix_logs_step';
 import { getUpgradeStep } from './upgrade_step';
 import { getUpgradeSystemIndicesStep } from './upgrade_system_indices';
+
+type OverviewStep = 'backup' | 'fix_issues' | 'fix_logs';
 
 export const Overview: FunctionComponent = () => {
   const {
@@ -52,14 +54,22 @@ export const Overview: FunctionComponent = () => {
     breadcrumbs.setBreadcrumbs('overview');
   }, [breadcrumbs]);
 
-  let cloudBackupStatusResponse;
+  const [completedStepsMap, setCompletedStepsMap] = useState({
+    backup: false,
+    fix_issues: false,
+    fix_logs: false,
+  });
 
-  if (cloud?.isCloudEnabled) {
-    cloudBackupStatusResponse = api.useLoadCloudBackupStatus();
-  }
+  const isStepComplete = (step: OverviewStep) => completedStepsMap[step];
+  const setCompletedStep = (step: OverviewStep, isCompleted: boolean) => {
+    setCompletedStepsMap({
+      ...completedStepsMap,
+      [step]: isCompleted,
+    });
+  };
 
   return (
-    <EuiPageBody restrictWidth={true}>
+    <EuiPageBody restrictWidth={true} data-test-subj="overview">
       <EuiPageContent horizontalPosition="center" color="transparent" paddingSize="none">
         <EuiPageHeader
           bottomBorder
@@ -71,7 +81,7 @@ export const Overview: FunctionComponent = () => {
           })}
           rightSideItems={[
             <EuiButtonEmpty
-              href={docLinks.links.upgradeAssistant}
+              href={docLinks.links.upgradeAssistant.overview}
               target="_blank"
               iconType="help"
               data-test-subj="documentationLink"
@@ -98,11 +108,22 @@ export const Overview: FunctionComponent = () => {
 
         <EuiSteps
           steps={[
-            getBackupStep({ cloud, cloudBackupStatusResponse }),
+            getBackupStep({
+              cloud,
+              isComplete: isStepComplete('backup'),
+              setIsComplete: setCompletedStep.bind(null, 'backup'),
+            }),
             getUpgradeSystemIndicesStep({ docLinks }),
-            getFixIssuesStep({ nextMajor }),
-            getFixLogsStep(),
-            getUpgradeStep({ nextMajor }),
+            getFixIssuesStep({
+              nextMajor,
+              isComplete: isStepComplete('fix_issues'),
+              setIsComplete: setCompletedStep.bind(null, 'fix_issues'),
+            }),
+            getFixLogsStep({
+              isComplete: isStepComplete('fix_logs'),
+              setIsComplete: setCompletedStep.bind(null, 'fix_logs'),
+            }),
+            getUpgradeStep({ docLinks, nextMajor }),
           ]}
         />
       </EuiPageContent>

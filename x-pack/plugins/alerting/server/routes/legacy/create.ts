@@ -19,6 +19,7 @@ import {
 import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
 import { RouteOptions } from '..';
 import { countUsageOfPredefinedIds } from '../lib';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -67,6 +68,7 @@ export const createAlertRoute = ({ router, licenseState, logger, usageCounter }:
         const alert = req.body;
         const params = req.params;
         const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as AlertNotifyWhenType) : null;
+        trackLegacyRouteUsage('create', usageCounter);
 
         const spaceId = rulesClient.getSpaceId();
         const shouldWarnId = params?.id && spaceId !== undefined && spaceId !== 'default';
@@ -83,12 +85,11 @@ export const createAlertRoute = ({ router, licenseState, logger, usageCounter }:
         });
 
         try {
-          const alertRes: SanitizedAlert<AlertTypeParams> = await rulesClient.create<AlertTypeParams>(
-            {
+          const alertRes: SanitizedAlert<AlertTypeParams> =
+            await rulesClient.create<AlertTypeParams>({
               data: { ...alert, notifyWhen },
               options: { id: params?.id },
-            }
-          );
+            });
           return res.ok({
             body: alertRes,
             ...(shouldWarnId

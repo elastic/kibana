@@ -12,7 +12,7 @@ import { ChartsPluginSetup } from '../../../charts/public';
 import { tagcloudRenderer } from './expression_renderers';
 import { tagcloudFunction } from '../common/expression_functions';
 import { FieldFormatsStart } from '../../../field_formats/public';
-import { setFormatService } from './services';
+import { setFormatService } from './format_service';
 
 interface SetupDeps {
   expressions: ExpressionsSetup;
@@ -34,7 +34,8 @@ export type ExpressionTagcloudPluginStart = void;
 
 export class ExpressionTagcloudPlugin
   implements
-    Plugin<ExpressionTagcloudPluginSetup, ExpressionTagcloudPluginStart, SetupDeps, StartDeps> {
+    Plugin<ExpressionTagcloudPluginSetup, ExpressionTagcloudPluginStart, SetupDeps, StartDeps>
+{
   public setup(core: CoreSetup, { expressions, charts }: SetupDeps): ExpressionTagcloudPluginSetup {
     const rendererDependencies: ExpressioTagcloudRendererDependencies = {
       palettes: charts.palettes,

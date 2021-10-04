@@ -769,9 +769,7 @@ describe('common utils', () => {
             },
           ]),
         })
-      ).toEqual(
-        new Map<string, number>([['1', 2]])
-      );
+      ).toEqual(new Map<string, number>([['1', 2]]));
     });
 
     it('returns a map with two entry, 2 alerts, and 0 alerts', () => {

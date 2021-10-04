@@ -626,6 +626,30 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
           'the UNIX epoch beginning. Timestamps before 01/01/1970 00:00:00 (UTC) are not supported for machine learning jobs.',
       }),
     },
+    datafeed_preview_no_documents: {
+      status: VALIDATION_STATUS.WARNING,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.datafeedPreviewNoDocumentsHeading',
+        {
+          defaultMessage: 'Datafeed preview',
+        }
+      ),
+      text: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.datafeedPreviewNoDocumentsMessage',
+        {
+          defaultMessage:
+            'Running the datafeed preview over the current job configuration produces no results. ' +
+            'If the index contains no documents this warning can be ignored, otherwise the job may be misconfigured.',
+        }
+      ),
+    },
+    datafeed_preview_failed: {
+      status: VALIDATION_STATUS.ERROR,
+      text: i18n.translate('xpack.ml.models.jobValidation.messages.datafeedPreviewFailedMessage', {
+        defaultMessage:
+          'The datafeed preview failed. This may be due to an error in the job or datafeed configurations.',
+      }),
+    },
   };
 });
 
