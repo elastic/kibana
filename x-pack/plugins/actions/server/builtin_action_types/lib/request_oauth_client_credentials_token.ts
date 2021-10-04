@@ -7,6 +7,7 @@
 
 import qs from 'query-string';
 import axios from 'axios';
+import stringify from 'json-stable-stringify';
 import { Logger } from '../../../../../../src/core/server';
 import { request } from './axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
@@ -59,7 +60,7 @@ export async function requestOAuthClientCredentialsToken(
       expiresIn: res.data.expires_in,
     };
   } else {
-    const errString = JSON.stringify(res.data);
+    const errString = stringify(res.data);
     logger.warn(
       `error thrown getting the access token from ${tokenUrl} for clientID: ${clientId}: ${errString}`
     );
