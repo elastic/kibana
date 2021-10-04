@@ -52,6 +52,10 @@ export const ControlGroupStrings = {
       i18n.translate('presentationUtil.inputControls.controlGroup.management.designTitle', {
         defaultMessage: 'Design',
       }),
+    getDefaultWidthTitle: () =>
+      i18n.translate('presentationUtil.inputControls.controlGroup.management.defaultWidthTitle', {
+        defaultMessage: 'Default width',
+      }),
     getLayoutTitle: () =>
       i18n.translate('presentationUtil.inputControls.controlGroup.management.layoutTitle', {
         defaultMessage: 'Layout',
@@ -59,6 +63,10 @@ export const ControlGroupStrings = {
     getDeleteButtonTitle: () =>
       i18n.translate('presentationUtil.inputControls.controlGroup.management.delete', {
         defaultMessage: 'Delete control',
+      }),
+    getSetAllWidthsToDefaultTitle: () =>
+      i18n.translate('presentationUtil.inputControls.controlGroup.management.setAllWidths', {
+        defaultMessage: 'Set all widths to default',
       }),
     getDeleteAllButtonTitle: () =>
       i18n.translate('presentationUtil.inputControls.controlGroup.management.deleteAll', {

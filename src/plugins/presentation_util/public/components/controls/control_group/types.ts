@@ -17,6 +17,7 @@ export interface ControlGroupInput
     useQuery: boolean;
     useTimerange: boolean;
   };
+  defaultControlWidth?: ControlWidth;
   controlStyle: ControlStyle;
   panels: ControlsPanels;
 }

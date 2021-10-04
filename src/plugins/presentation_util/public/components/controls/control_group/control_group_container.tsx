@@ -103,7 +103,7 @@ export class ControlGroupContainer extends Container<InputControlInput, ControlG
       const flyoutInstance = this.overlays.openFlyout(
         toMountPoint(
           <ManageControlComponent
-            width={this.nextControlWidth}
+            width={this.getInput().defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
             updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
             updateWidth={(newWidth) => (this.nextControlWidth = newWidth)}
             controlEditorComponent={(factory as IEditableControlFactory).getControlEditor?.({

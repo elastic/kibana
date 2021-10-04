@@ -13,11 +13,17 @@ import { ControlWidth } from '../../types';
 import { ControlGroupInput } from '../types';
 
 export const controlGroupReducers = {
-  updateControlStyle: (
+  setControlStyle: (
     state: WritableDraft<ControlGroupInput>,
     action: PayloadAction<ControlGroupInput['controlStyle']>
   ) => {
     state.controlStyle = action.payload;
+  },
+  setDefaultControlWidth: (
+    state: WritableDraft<ControlGroupInput>,
+    action: PayloadAction<ControlGroupInput['defaultControlWidth']>
+  ) => {
+    state.defaultControlWidth = action.payload;
   },
   setAllControlWidths: (
     state: WritableDraft<ControlGroupInput>,

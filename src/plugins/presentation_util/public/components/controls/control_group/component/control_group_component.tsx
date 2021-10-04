@@ -47,26 +47,26 @@ export const ControlGroup = ({ controlGroupContainer }: ControlGroupProps) => {
     typeof controlGroupReducers
   >();
 
-  const currentState = reduxEmbeddableContext.useEmbeddableSelector((state) => state);
+  const { controlStyle, panels } = reduxEmbeddableContext.useEmbeddableSelector((state) => state);
   const [controlIds, setControlIds] = useState<string[]>([]);
 
   useEffect(() => {
     setControlIds((currentIds) => {
       // sync control Ids with panels from state.
       const newIds: string[] = [];
-      const allIds = [...currentIds, ...Object.keys(currentState.panels)];
+      const allIds = [...currentIds, ...Object.keys(panels)];
       allIds.forEach((id) => {
         const currentIndex = currentIds.indexOf(id);
-        if (!currentState.panels[id] && currentIndex !== -1) {
+        if (!panels[id] && currentIndex !== -1) {
           currentIds.splice(currentIndex, 1);
         }
-        if (currentIndex === -1 && Boolean(currentState.panels[id])) {
+        if (currentIndex === -1 && Boolean(panels[id])) {
           newIds.push(id);
         }
       });
       return [...currentIds, ...newIds];
     });
-  }, [currentState.panels]);
+  }, [panels]);
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
@@ -117,9 +117,9 @@ export const ControlGroup = ({ controlGroupContainer }: ControlGroupProps) => {
                   onRemove={() => controlGroupContainer.removeEmbeddable(controlId)}
                   dragInfo={{ index, draggingIndex }}
                   container={controlGroupContainer}
-                  controlStyle={currentState.controlStyle}
+                  width={panels[controlId].width}
+                  controlStyle={controlStyle}
                   embeddableId={controlId}
-                  width={currentState.panels[controlId].width}
                   key={controlId}
                 />
               ))}
@@ -128,9 +128,9 @@ export const ControlGroup = ({ controlGroupContainer }: ControlGroupProps) => {
           <DragOverlay>
             {draggingId ? (
               <ControlClone
-                width={currentState.panels[draggingId].width}
-                embeddableId={draggingId}
+                width={panels[draggingId].width}
                 container={controlGroupContainer}
+                embeddableId={draggingId}
               />
             ) : null}
           </DragOverlay>

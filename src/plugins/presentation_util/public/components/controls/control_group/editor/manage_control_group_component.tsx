@@ -8,21 +8,25 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonGroup,
-  EuiFormLabel,
   EuiFlyoutHeader,
-  EuiTitle,
+  EuiButtonEmpty,
+  EuiButtonGroup,
   EuiFlyoutBody,
+  EuiFormRow,
   EuiSpacer,
+  EuiSwitch,
+  EuiTitle,
 } from '@elastic/eui';
 
+import { EuiFlexGroup } from '@elastic/eui/src/components/flex/flex_group';
 import { ControlGroupInput, ControlsPanels } from '../types';
 import { ControlStyle, ControlWidth } from '../../types';
 import { ControlGroupStrings } from '../control_group_strings';
-import { CONTROL_LAYOUT_OPTIONS, CONTROL_WIDTH_OPTIONS } from '../control_group_constants';
+import {
+  CONTROL_LAYOUT_OPTIONS,
+  CONTROL_WIDTH_OPTIONS,
+  DEFAULT_CONTROL_WIDTH,
+} from '../control_group_constants';
 import { useReduxEmbeddableContext } from '../../../redux_embeddables/redux_embeddable_context';
 import { controlGroupReducers } from '../state/control_group_reducers';
 
@@ -38,19 +42,11 @@ export const ManageControlGroup = ({ deleteAllEmbeddables }: ManageControlGroupP
   const {
     useEmbeddableSelector,
     useEmbeddableDispatch,
-    actions: { updateControlStyle, setAllControlWidths },
+    actions: { setControlStyle, setAllControlWidths, setDefaultControlWidth },
   } = useReduxEmbeddableContext<ControlGroupInput, typeof controlGroupReducers>();
 
   const dispatch = useEmbeddableDispatch();
-  const { panels, controlStyle } = useEmbeddableSelector((state) => state);
-
-  const selectedWidth = useMemo(() => {
-    if (!panels || Object.keys(panels).length === 0) return;
-    const firstWidth = panels[Object.keys(panels)[0]].width;
-    if (Object.values(panels).every((panel) => panel.width === firstWidth)) {
-      return firstWidth;
-    }
-  }, [panels]);
+  const { panels, controlStyle, defaultControlWidth } = useEmbeddableSelector((state) => state);
 
   return (
     <>
@@ -60,53 +56,56 @@ export const ManageControlGroup = ({ deleteAllEmbeddables }: ManageControlGroupP
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiTitle size="s">
-          <h3>{ControlGroupStrings.management.getDesignTitle()}</h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiButtonGroup
-          legend={ControlGroupStrings.management.controlStyle.getDesignSwitchLegend()}
-          options={CONTROL_LAYOUT_OPTIONS}
-          idSelected={controlStyle}
-          onChange={(newControlStyle) =>
-            dispatch(updateControlStyle(newControlStyle as ControlStyle))
-          }
-        />
+        <EuiFormRow label={ControlGroupStrings.management.getLayoutTitle()}>
+          <EuiButtonGroup
+            color="primary"
+            legend={ControlGroupStrings.management.controlStyle.getDesignSwitchLegend()}
+            options={CONTROL_LAYOUT_OPTIONS}
+            idSelected={controlStyle}
+            onChange={(newControlStyle) =>
+              dispatch(setControlStyle(newControlStyle as ControlStyle))
+            }
+          />
+        </EuiFormRow>
         <EuiSpacer size="m" />
-        <EuiTitle size="s">
-          <h3>{ControlGroupStrings.management.getLayoutTitle()}</h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
+        <EuiFormRow label={ControlGroupStrings.management.getDefaultWidthTitle()}>
+          <EuiButtonGroup
+            color="primary"
+            idSelected={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
+            legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
+            options={CONTROL_WIDTH_OPTIONS}
+            onChange={(newWidth: string) =>
+              dispatch(setDefaultControlWidth(newWidth as ControlWidth))
+            }
+          />
+        </EuiFormRow>
+        <EuiFormRow label={ControlGroupStrings.management.getDefaultWidthTitle()}>
+          <EuiButtonEmpty
+            onClick={() =>
+              dispatch(setAllControlWidths(defaultControlWidth ?? DEFAULT_CONTROL_WIDTH))
+            }
+            aria-label={'delete-all'}
+            iconType="trash"
+            color="primary"
+            flush="left"
+            size="s"
+          >
+            {ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}
+          </EuiButtonEmpty>
+        </EuiFormRow>
 
-        <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiFormLabel>
-              {ControlGroupStrings.management.controlWidth.getChangeAllControlWidthsTitle()}
-            </EuiFormLabel>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonGroup
-              idSelected={selectedWidth ?? ''}
-              buttonSize="compressed"
-              legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
-              options={CONTROL_WIDTH_OPTIONS}
-              onChange={(newWidth: string) =>
-                dispatch(setAllControlWidths(newWidth as ControlWidth))
-              }
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={deleteAllEmbeddables}
-              aria-label={'delete-all'}
-              iconType="trash"
-              color="danger"
-              size="s"
-            >
-              {ControlGroupStrings.management.getDeleteAllButtonTitle()}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiSpacer size="xl" />
+
+        <EuiButtonEmpty
+          onClick={deleteAllEmbeddables}
+          aria-label={'delete-all'}
+          iconType="trash"
+          color="danger"
+          flush="left"
+          size="s"
+        >
+          {ControlGroupStrings.management.getDeleteAllButtonTitle()}
+        </EuiButtonEmpty>
       </EuiFlyoutBody>
     </>
   );
