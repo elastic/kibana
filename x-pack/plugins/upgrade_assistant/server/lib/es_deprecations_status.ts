@@ -27,10 +27,8 @@ export async function getESUpgradeStatus(
   const getCombinedDeprecations = async () => {
     const indices = await getCombinedIndexInfos(deprecations, dataClient);
     const systemIndices = await getESSystemIndicesUpgradeStatus(dataClient.asCurrentUser);
-    const systemIndicesList = [
-      ...convertFeaturesListToArray(systemIndices.features),
-      '.security-6',
-    ];
+    const systemIndicesList = convertFeaturesListToArray(systemIndices.features);
+
     return Object.keys(deprecations).reduce((combinedDeprecations, deprecationType) => {
       if (deprecationType === 'index_settings') {
         const filteredIndices = indices.filter((index) => {
