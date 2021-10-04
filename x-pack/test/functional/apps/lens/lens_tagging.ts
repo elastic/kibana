@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
     'visualize',
     'lens',
+    'timePicker',
   ]);
 
   const lensTag = 'extreme-lens-tag';
@@ -32,6 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('lens tagging', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
@@ -42,6 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
