@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type { AggregationsAggregate } from '@elastic/elasticsearch/api/types';
-
 export interface LatencyCorrelationSearchServiceProgress {
   started: number;
   loadedOverallStats: number;
   loadedFieldStats: number;
 }
 
-type FieldStat = Record<string, AggregationsAggregate> | undefined;
+export type FieldStat = Record<string, any> | undefined;
 export const fieldStatsSearchServiceStateProvider = () => {
   let ccsWarning = false;
   function setCcsWarning(d: boolean) {
@@ -43,9 +41,13 @@ export const fieldStatsSearchServiceStateProvider = () => {
     fieldsStats.push(d);
   }
 
+  function addFieldsStats(d: FieldStat[]) {
+    fieldsStats.push(...d);
+  }
+
   let progress: LatencyCorrelationSearchServiceProgress = {
     started: Date.now(),
-    loadedOverallStats: 0,
+    loadedOverallStats: 1,
     loadedFieldStats: 0,
   };
   function getOverallProgress() {
@@ -78,6 +80,7 @@ export const fieldStatsSearchServiceStateProvider = () => {
     setIsCancelled,
     setIsRunning,
     setProgress,
+    addFieldsStats,
     addFieldStats,
   };
 };

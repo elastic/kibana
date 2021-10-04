@@ -13,7 +13,6 @@ import { Aggs, Bucket, Field, StringFieldStats } from '../../types';
 import {
   buildBaseFilterCriteria,
   buildSamplerAggregation,
-  getSafeAggregationName,
   getSamplerAggregationsResponsePath,
 } from '../../../common/utils/query_utils';
 import {
@@ -31,7 +30,7 @@ export const getStringFieldStatsRequest = (params: FieldStatsCommonRequestParams
 
   const aggs: Aggs = {};
 
-  const safeFieldName = getSafeAggregationName(field.fieldName, field.identifier);
+  const safeFieldName = field.safeFieldName;
   const top = {
     terms: {
       field: field.fieldName,
@@ -87,7 +86,7 @@ export const fetchStringFieldStats = async (
   const aggregations = body.aggregations;
   const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
 
-  const safeFieldName = getSafeAggregationName(field.fieldName, field.identifier);
+  const safeFieldName = field.safeFieldName;
 
   const topAggsPath = [...aggsPath, `${safeFieldName}_top`];
   if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {

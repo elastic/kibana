@@ -12,7 +12,6 @@ import { Bucket, Field, NumericFieldStats } from '../../types';
 import {
   buildBaseFilterCriteria,
   buildSamplerAggregation,
-  getSafeAggregationName,
   getSamplerAggregationsResponsePath,
 } from '../../../common/utils/query_utils';
 import {
@@ -45,8 +44,7 @@ export const getNumericFieldStatsRequest = (
   );
 
   const aggs: { [key: string]: any } = {};
-  // @todo: check if field.cardinality is a proper replacement for index
-  const safeFieldName = getSafeAggregationName(field.fieldName, field.identifier);
+  const safeFieldName = field.safeFieldName;
   aggs[`${safeFieldName}_field_stats`] = {
     filter: { exists: { field: field.fieldName } },
     aggs: {
@@ -116,7 +114,7 @@ export const fetchNumericFieldStats = async (
   const aggregations = body.aggregations;
   const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
 
-  const safeFieldName = getSafeAggregationName(field.fieldName, field.identifier);
+  const safeFieldName = field.safeFieldName;
   const docCount = get(aggregations, [...aggsPath, `${safeFieldName}_field_stats`, 'doc_count'], 0);
   const fieldStatsResp = get(
     aggregations,

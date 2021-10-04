@@ -21,7 +21,7 @@ export interface Field {
   fieldName: string;
   type: string;
   cardinality: number;
-  identifier: number;
+  safeFieldName: string;
 }
 
 export function isValidField(arg: unknown): arg is Field {
@@ -173,3 +173,15 @@ export type BatchStats =
   | DateFieldStats
   | DocumentCountStats
   | FieldExamples;
+
+export type FieldStats =
+  | NumericFieldStats
+  | StringFieldStats
+  | BooleanFieldStats
+  | DateFieldStats
+  // | DocumentCountStats
+  | FieldExamples;
+
+export function isValidFieldStats(arg: unknown): arg is FieldStats {
+  return isPopulatedObject(arg, ['fieldName', 'type', 'count']);
+}

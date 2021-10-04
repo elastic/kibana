@@ -90,7 +90,9 @@ export const useDataVisualizerGridData = (
   }, [
     currentSavedSearch,
     currentIndexPattern,
-    dataVisualizerListState,
+    dataVisualizerListState.searchQuery,
+    dataVisualizerListState.searchString,
+    dataVisualizerListState.searchQueryLanguage,
     currentQuery,
     currentFilters,
   ]);
@@ -279,15 +281,16 @@ export const useDataVisualizerGridData = (
       });
     });
 
+    // @todo: remove
     // Add a config for 'document count', identified by no field name if indexpattern is time based.
-    if (currentIndexPattern.timeFieldName !== undefined) {
-      configs.push({
-        type: JOB_FIELD_TYPES.NUMBER,
-        existsInDocs: true,
-        loading: true,
-        aggregatable: true,
-      });
-    }
+    // if (currentIndexPattern.timeFieldName !== undefined) {
+    //   configs.push({
+    //     type: JOB_FIELD_TYPES.NUMBER,
+    //     existsInDocs: true,
+    //     loading: true,
+    //     aggregatable: true,
+    //   });
+    // }
 
     if (metricsLoaded === false) {
       setMetricsLoaded(true);
@@ -429,154 +432,6 @@ export const useDataVisualizerGridData = (
     showEmptyFields,
   ]);
 
-  async function loadMetricFieldStats() {
-    // Only request data for fields that exist in documents.
-    if (metricConfigs.length === 0) {
-      return;
-    }
-
-    const configsToLoad = metricConfigs.filter(
-      (config) => config.existsInDocs === true && config.loading === true
-    );
-    if (configsToLoad.length === 0) {
-      return;
-    }
-
-    // Pass the field name, type and cardinality in the request.
-    // Top values will be obtained on a sample if cardinality > 100000.
-    const existMetricFields: FieldRequestConfig[] = configsToLoad.map((config) => {
-      const props = { fieldName: config.fieldName, type: config.type, cardinality: 0 };
-      if (config.stats !== undefined && config.stats.cardinality !== undefined) {
-        props.cardinality = config.stats.cardinality;
-      }
-      return props;
-    });
-
-    // Obtain the interval to use for date histogram aggregations
-    // (such as the document count chart). Aim for 75 bars.
-    const buckets = getTimeBuckets();
-
-    const tf = timefilter as any;
-    let earliest: number | undefined;
-    let latest: number | undefined;
-    if (currentIndexPattern.timeFieldName !== undefined) {
-      earliest = tf.getActiveBounds().min.valueOf();
-      latest = tf.getActiveBounds().max.valueOf();
-    }
-
-    const bounds = tf.getActiveBounds();
-    const BAR_TARGET = 75;
-    buckets.setInterval('auto');
-    buckets.setBounds(bounds);
-    buckets.setBarTarget(BAR_TARGET);
-    const aggInterval = buckets.getInterval();
-
-    try {
-      const metricFieldStats = await dataLoader.loadFieldStats(
-        searchQuery,
-        samplerShardSize,
-        earliest,
-        latest,
-        existMetricFields,
-        aggInterval.asMilliseconds()
-      );
-
-      // Add the metric stats to the existing stats in the corresponding config.
-      const configs: FieldVisConfig[] = [];
-      metricConfigs.forEach((config) => {
-        const configWithStats = { ...config };
-        if (config.fieldName !== undefined) {
-          configWithStats.stats = {
-            ...configWithStats.stats,
-            ...metricFieldStats.find(
-              (fieldStats: any) => fieldStats.fieldName === config.fieldName
-            ),
-          };
-          configWithStats.loading = false;
-          configs.push(configWithStats);
-        } else {
-          // Document count card.
-          configWithStats.stats = metricFieldStats.find(
-            (fieldStats: any) => fieldStats.fieldName === undefined
-          );
-
-          if (configWithStats.stats !== undefined) {
-            // Add earliest / latest of timefilter for setting x axis domain.
-            configWithStats.stats.timeRangeEarliest = earliest;
-            configWithStats.stats.timeRangeLatest = latest;
-          }
-          setDocumentCountStats(configWithStats);
-        }
-      });
-
-      setMetricConfigs(configs);
-    } catch (err) {
-      dataLoader.displayError(err);
-    }
-  }
-
-  async function loadNonMetricFieldStats() {
-    // Only request data for fields that exist in documents.
-    if (nonMetricConfigs.length === 0) {
-      return;
-    }
-
-    const configsToLoad = nonMetricConfigs.filter(
-      (config) => config.existsInDocs === true && config.loading === true
-    );
-    if (configsToLoad.length === 0) {
-      return;
-    }
-
-    // Pass the field name, type and cardinality in the request.
-    // Top values will be obtained on a sample if cardinality > 100000.
-    const existNonMetricFields: FieldRequestConfig[] = configsToLoad.map((config) => {
-      const props = { fieldName: config.fieldName, type: config.type, cardinality: 0 };
-      if (config.stats !== undefined && config.stats.cardinality !== undefined) {
-        props.cardinality = config.stats.cardinality;
-      }
-      return props;
-    });
-
-    const tf = timefilter as any;
-    let earliest;
-    let latest;
-    if (currentIndexPattern.timeFieldName !== undefined) {
-      earliest = tf.getActiveBounds().min.valueOf();
-      latest = tf.getActiveBounds().max.valueOf();
-    }
-
-    try {
-      const nonMetricFieldStats = await dataLoader.loadFieldStats(
-        searchQuery,
-        samplerShardSize,
-        earliest,
-        latest,
-        existNonMetricFields
-      );
-
-      // Add the field stats to the existing stats in the corresponding config.
-      const configs: FieldVisConfig[] = [];
-      nonMetricConfigs.forEach((config) => {
-        const configWithStats = { ...config };
-        if (config.fieldName !== undefined) {
-          configWithStats.stats = {
-            ...configWithStats.stats,
-            ...nonMetricFieldStats.find(
-              (fieldStats: any) => fieldStats.fieldName === config.fieldName
-            ),
-          };
-        }
-        configWithStats.loading = false;
-        configs.push(configWithStats);
-      });
-
-      setNonMetricConfigs(configs);
-    } catch (err) {
-      dataLoader.displayError(err);
-    }
-  }
-
   useEffect(() => {
     loadOverallStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -588,27 +443,8 @@ export const useDataVisualizerGridData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overallStats, showEmptyFields]);
 
-  useEffect(() => {
-    loadMetricFieldStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [metricConfigs]);
-
-  useEffect(() => {
-    loadNonMetricFieldStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nonMetricConfigs]);
-
-  useEffect(() => {
-    createMetricCards();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [metricsLoaded]);
-
-  useEffect(() => {
-    createNonMetricCards();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nonMetricsLoaded]);
-
   const configs = useMemo(() => {
+    const fieldStats = strategyResponse.response.fieldStats;
     let combinedConfigs = [...nonMetricConfigs, ...metricConfigs];
     if (visibleFieldTypes && visibleFieldTypes.length > 0) {
       combinedConfigs = combinedConfigs.filter(
@@ -621,8 +457,22 @@ export const useDataVisualizerGridData = (
       );
     }
 
+    if (Array.isArray(fieldStats)) {
+      combinedConfigs = combinedConfigs.map((c) => ({
+        ...c,
+        loading: false,
+        stats: { ...c.stats, ...fieldStats.find((r) => r.fieldName === c.fieldName) },
+      }));
+    }
+
     return combinedConfigs;
-  }, [nonMetricConfigs, metricConfigs, visibleFieldTypes, visibleFieldNames]);
+  }, [
+    nonMetricConfigs,
+    metricConfigs,
+    visibleFieldTypes,
+    visibleFieldNames,
+    strategyResponse.response.fieldStats,
+  ]);
 
   // Some actions open up fly-out or popup
   // This variable is used to keep track of them and clean up when unmounting

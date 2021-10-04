@@ -11,7 +11,7 @@ import {
   FieldStatsCommonRequestParams,
   FieldStatsSearchStrategyParams,
 } from '../../../common/search_strategy/types';
-import { isValidField } from '../../types';
+import { FieldStats, isValidField } from '../../types';
 import { fetchDocumentCountStats } from './get_document_stats';
 import { fetchNumericFieldStats } from './get_numeric_field_stats';
 import { fetchStringFieldStats } from './get_string_field_stats';
@@ -21,30 +21,21 @@ import { fetchFieldExamples } from './get_field_examples';
 
 export const getFieldStats = async (
   esClient: ElasticsearchClient,
-  searchStrategyParams: FieldStatsSearchStrategyParams,
+  params: FieldStatsCommonRequestParams,
   field: {
     fieldName?: string;
     type: string;
     cardinality: number;
+    safeFieldName: string;
   }
-) => {
-  const params: FieldStatsCommonRequestParams = {
-    index: searchStrategyParams.index,
-    query: searchStrategyParams.searchQuery,
-    samplerShardSize: searchStrategyParams.samplerShardSize,
-    timeFieldName: searchStrategyParams.timeFieldName,
-    earliestMs: searchStrategyParams.earliest,
-    latestMs: searchStrategyParams.latest,
-    runtimeFieldMap: searchStrategyParams.runtimeFieldMap,
-    intervalMs: searchStrategyParams.intervalMs,
-  };
-
+): Promise<FieldStats | undefined> => {
   // An invalid field with undefined fieldName is used for a document count request.
   if (!isValidField(field)) {
+    // @todo
     // Will only ever be one document count card,
     // so no value in batching up the single request.
     if (field.type === JOB_FIELD_TYPES.NUMBER && params.intervalMs !== undefined) {
-      return fetchDocumentCountStats(esClient, params);
+      // return fetchDocumentCountStats(esClient, params);
     }
   } else {
     switch (field.type) {
@@ -62,11 +53,13 @@ export const getFieldStats = async (
         return fetchBooleanFieldStats(esClient, params, field);
         break;
       case JOB_FIELD_TYPES.TEXT:
-      default:
-        // Use an exists filter on the the field name to get
-        // examples of the field, so cannot batch up.
         return fetchFieldExamples(esClient, params, field);
         break;
+      // default:
+      //   // Use an exists filter on the the field name to get
+      //   // examples of the field, so cannot batch up.
+      //   return fetchFieldExamples(esClient, params, field);
+      //   break;
     }
   }
 };

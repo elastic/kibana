@@ -29,7 +29,7 @@ export const getFieldExamplesRequest = (params: FieldStatsCommonRequestParams, f
   });
 
   const searchBody = {
-    fields: [field],
+    fields: [field.fieldName],
     _source: false,
     query: {
       bool: {
@@ -55,7 +55,7 @@ export const fetchFieldExamples = async (
   const { body } = await esClient.search(request);
 
   const stats = {
-    fieldName: field,
+    fieldName: field.fieldName,
     examples: [] as any[],
   };
   // @ts-expect-error incorrect search response type
@@ -63,7 +63,7 @@ export const fetchFieldExamples = async (
     const hits = body.hits.hits;
     for (let i = 0; i < hits.length; i++) {
       // Use lodash get() to support field names containing dots.
-      const doc: object[] | undefined = get(hits[i].fields, field);
+      const doc: object[] | undefined = get(hits[i].fields, field.fieldName);
       // the results from fields query is always an array
       if (Array.isArray(doc) && doc.length > 0) {
         const example = doc[0];

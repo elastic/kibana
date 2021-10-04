@@ -6,20 +6,21 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import uuid from 'uuid';
 import { of } from 'rxjs';
+import { chunk } from 'lodash';
 import { fieldStatsSearchServiceStateProvider } from './field_stats_state_provider';
-import { Field, StartDeps } from '../types';
+import { FieldStats, StartDeps } from '../types';
 import { ISearchStrategy } from '../../../../../src/plugins/data/server';
 import {
   FieldStatRawResponse,
+  FieldStatsCommonRequestParams,
   FieldStatsRequest,
   FieldStatsResponse,
   FieldStatsSearchStrategyParams,
   isFieldStatsSearchStrategyParams,
 } from '../../common/search_strategy/types';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../../src/plugins/data/common';
 import { getFieldStats } from './requests/get_field_stats';
+import { buildBaseFilterCriteria, getSafeAggregationName } from '../../common/utils/query_utils';
 
 export interface RawResponseBase {
   ccsWarning: boolean;
@@ -63,17 +64,13 @@ export type SearchServiceProvider<
 export const myEnhancedSearchStrategyProvider = (
   data: StartDeps['data']
 ): ISearchStrategy<FieldStatsRequest, FieldStatsResponse> => {
-  // Get the default search strategy
-  const ese = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
   const searchServiceMap = new Map<string, GetSearchServiceState<FieldStatRawResponse>>();
 
   return {
     search: (request, options, deps) => {
-      if (request.params === undefined) {
+      if (options.sessionId === undefined || request.params === undefined) {
         throw new Error('Invalid request parameters.');
       }
-
-      // return formatResponse(ese.search(preprocessRequest(request.params), options, deps));
 
       // The function to fetch the current state of the search service.
       // This will be either an existing service for a follow up fetch or a new one for new requests.
@@ -82,22 +79,19 @@ export const myEnhancedSearchStrategyProvider = (
       // If the request includes an ID, we require that the search service already exists
       // otherwise we throw an error. The client should never poll a service that's been cancelled or finished.
       // This also avoids instantiating search services when the service gets called with random IDs.
-      if (typeof request.id === 'string') {
-        const existingGetSearchServiceState = searchServiceMap.get(request.id);
+      const existingGetSearchServiceState = searchServiceMap.get(options.sessionId);
 
-        if (typeof existingGetSearchServiceState === 'undefined') {
-          throw new Error(`SearchService with ID '${request.id}' does not exist.`);
-        }
-
-        getSearchServiceState = existingGetSearchServiceState;
-      } else {
+      if (typeof existingGetSearchServiceState === 'undefined') {
         getSearchServiceState = fieldStatsSearchServiceProvider(
           deps.esClient.asCurrentUser,
           request
         );
+      } else {
+        getSearchServiceState = existingGetSearchServiceState;
       }
+
       // Reuse the request's id or create a new one.
-      const id = request.id ?? uuid();
+      const id = options.sessionId;
 
       const { error, meta, rawResponse } = getSearchServiceState();
 
@@ -120,13 +114,19 @@ export const myEnhancedSearchStrategyProvider = (
       // return ese.search(request, options, deps);
     },
     cancel: async (id, options, deps) => {
-      // call the cancel method of the async strategy you are using or implement your own cancellation function.
-      if (ese.cancel) {
-        await ese.cancel(id, options, deps);
+      const getSearchServiceState = searchServiceMap.get(id);
+      if (getSearchServiceState !== undefined) {
+        getSearchServiceState().cancel();
+        searchServiceMap.delete(id);
       }
     },
   };
 };
+
+// @todo: remove
+function timeout(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export const fieldStatsSearchServiceProvider = (
   esClient: ElasticsearchClient,
@@ -134,38 +134,82 @@ export const fieldStatsSearchServiceProvider = (
 ) => {
   const state = fieldStatsSearchServiceStateProvider();
 
-  async function fetchCorrelations() {
+  async function fetchFieldStats() {
     try {
       if (isFieldStatsSearchStrategyParams(request.params)) {
-        const params = request.params;
-        const fields = [...params.metricConfigs, ...params.nonMetricConfigs];
+        const searchStrategyParams = request.params;
+        const fields = [
+          ...searchStrategyParams.metricConfigs,
+          ...searchStrategyParams.nonMetricConfigs,
+        ];
+
+        const filterCriteria = buildBaseFilterCriteria(
+          searchStrategyParams.timeFieldName,
+          searchStrategyParams.earliest,
+          searchStrategyParams.latest,
+          searchStrategyParams.searchQuery
+        );
+
+        const params: FieldStatsCommonRequestParams = {
+          index: searchStrategyParams.index,
+          samplerShardSize: searchStrategyParams.samplerShardSize,
+          timeFieldName: searchStrategyParams.timeFieldName,
+          earliestMs: searchStrategyParams.earliest,
+          latestMs: searchStrategyParams.latest,
+          runtimeFieldMap: searchStrategyParams.runtimeFieldMap,
+          intervalMs: searchStrategyParams.intervalMs,
+          query: {
+            bool: {
+              filter: filterCriteria,
+            },
+          },
+        };
+
         const fieldToLoadCnt = fields.length;
+        const fieldsWithError: any[] = [];
         let fieldsLoadedCnt = 0;
 
-        for (let idx = 0; idx < fieldToLoadCnt; idx++) {
-          const field = {
-            fieldName: fields[idx].fieldName,
-            type: fields[idx].type,
-            cardinality: fields[idx].cardinality,
-            identifier: idx,
-          };
+        if (params !== undefined && fields.length > 0) {
+          const batches = chunk(fields, 5);
+          for (let i = 0; i < batches.length; i++) {
+            const batchedResults: FieldStats[] = [];
 
-          try {
-            const testMetricFieldResult = await getFieldStats(esClient, params, field, idx);
-            state.addFieldStats(testMetricFieldResult);
-          } catch (e) {
-            console.error(e);
-            // @todo: Log error
+            try {
+              const results = await Promise.allSettled([
+                ...batches[i].map((field, idx) => {
+                  return getFieldStats(esClient, params, {
+                    fieldName: field.fieldName,
+                    type: field.type,
+                    cardinality: field.cardinality,
+                    safeFieldName: getSafeAggregationName(field.fieldName ?? '', idx),
+                  });
+                }),
+                timeout(2000),
+              ]);
+
+              results.forEach((r) => {
+                if (r.status === 'fulfilled' && r.value !== undefined) {
+                  batchedResults.push(r.value);
+                } else {
+                  fieldsWithError.push(r);
+                }
+              });
+
+              state.addFieldsStats(batchedResults);
+            } catch (e) {
+              state.setError(e);
+            }
+
+            fieldsLoadedCnt += batches[i].length;
+            state.setProgress({
+              loadedFieldStats: fieldsLoadedCnt / fieldToLoadCnt,
+            });
           }
-
-          fieldsLoadedCnt += 1;
-          state.setProgress({ loadedFieldStats: fieldsLoadedCnt / fieldToLoadCnt });
         }
       }
     } catch (e) {
       state.setError(e);
     }
-
     if (state.getState().error !== undefined) {
       state.setCcsWarning(true);
     }
@@ -178,17 +222,17 @@ export const fieldStatsSearchServiceProvider = (
     state.setIsCancelled(true);
   }
 
-  fetchCorrelations();
+  fetchFieldStats();
 
   return () => {
-    const { ccsWarning, error, isRunning } = state.getState();
+    const { ccsWarning, error, isRunning, fieldsStats } = state.getState();
 
     return {
       cancel,
       error,
       meta: {
-        loaded: Math.round(state.getOverallProgress() * 100),
-        total: 100,
+        loaded: state.getOverallProgress(),
+        total: 1,
         isRunning,
         isPartial: isRunning,
       },
@@ -197,7 +241,7 @@ export const fieldStatsSearchServiceProvider = (
         ccsWarning,
         log: [],
         took: 0,
-        fieldStats: state.getState().fieldsStats,
+        fieldStats: fieldsStats,
       },
     };
   };

@@ -46,6 +46,10 @@ export function useFieldStatsSearchStrategy<
     services: { data },
   } = useDataVisualizerKibana();
 
+  useEffect(() => {
+    console.log('searchStrategyParams updated');
+  }, [searchStrategyParams]);
+
   const [rawResponse, setRawResponse] = useReducer(
     getReducer<TRawResponse>(),
     getInitialRawResponse<TRawResponse>()
@@ -58,8 +62,6 @@ export function useFieldStatsSearchStrategy<
 
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef<Subscription>();
-
-  console.log('rawResponse', rawResponse);
 
   const startFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();
@@ -79,11 +81,14 @@ export function useFieldStatsSearchStrategy<
       .search<FieldStatsRequest, FieldStatsResponse>(request, {
         strategy: FIELD_STATS_SEARCH_STRATEGY,
         abortSignal: abortCtrl.current.signal,
+        sessionId: searchStrategyParams?.sessionId,
       })
       .subscribe({
         next: (response) => {
           // Setting results to latest even if the response is still partial
+
           setRawResponse(response.rawResponse);
+
           setFetchState({
             isRunning: response.isRunning || false,
             ...(response.loaded ? { loaded: response.loaded } : {}),
@@ -102,8 +107,6 @@ export function useFieldStatsSearchStrategy<
               error: response as unknown as Error,
               isRunning: false,
             });
-          } else {
-            // If is partial response
           }
         },
         error: (error: Error) => {

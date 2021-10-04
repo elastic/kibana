@@ -13,7 +13,6 @@ import { Field, BooleanFieldStats, Aggs } from '../../types';
 import {
   buildBaseFilterCriteria,
   buildSamplerAggregation,
-  getSafeAggregationName,
   getSamplerAggregationsResponsePath,
 } from '../../../common/utils/query_utils';
 import { isPopulatedObject } from '../../../common/utils/object_utils';
@@ -29,7 +28,7 @@ export const getBooleanFieldStatsRequest = (
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
   const aggs: Aggs = {};
 
-  const safeFieldName = getSafeAggregationName(field.fieldName, field.identifier);
+  const safeFieldName = field.safeFieldName;
   aggs[`${safeFieldName}_value_count`] = {
     filter: { exists: { field: field.fieldName } },
   };
@@ -68,7 +67,7 @@ export const fetchBooleanFieldStats = async (
   const aggregations = body.aggregations;
   const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
 
-  const safeFieldName = getSafeAggregationName(field.fieldName, field.identifier);
+  const safeFieldName = field.safeFieldName;
   const stats: BooleanFieldStats = {
     fieldName: field.fieldName,
     count: get(aggregations, [...aggsPath, `${safeFieldName}_value_count`, 'doc_count'], 0),

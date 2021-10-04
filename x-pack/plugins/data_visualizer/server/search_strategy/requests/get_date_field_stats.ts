@@ -13,7 +13,6 @@ import { Aggs, DateFieldStats, Field } from '../../types';
 import {
   buildBaseFilterCriteria,
   buildSamplerAggregation,
-  getSafeAggregationName,
   getSamplerAggregationsResponsePath,
 } from '../../../common/utils/query_utils';
 import { isPopulatedObject } from '../../../common/utils/object_utils';
@@ -26,7 +25,7 @@ export const getDateFieldStatsRequest = (params: FieldStatsCommonRequestParams, 
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
 
   const aggs: Aggs = {};
-  const safeFieldName = getSafeAggregationName(field.fieldName, field.identifier);
+  const safeFieldName = field.safeFieldName;
   aggs[`${safeFieldName}_field_stats`] = {
     filter: { exists: { field: field.fieldName } },
     aggs: {
@@ -64,7 +63,7 @@ export const fetchDateFieldStats = async (
 
   const aggregations = body.aggregations;
   const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
-  const safeFieldName = getSafeAggregationName(field.fieldName, field.identifier);
+  const safeFieldName = field.safeFieldName;
   const docCount = get(aggregations, [...aggsPath, `${safeFieldName}_field_stats`, 'doc_count'], 0);
   const fieldStatsResp = get(
     aggregations,
