@@ -53,7 +53,7 @@ interface VisPickerProps {
 
 export const VisPicker = ({ onChange, currentVisType }: VisPickerProps) => {
   return (
-    <EuiTabs>
+    <EuiTabs size="l">
       {tabs.map(({ label, type }) => (
         <EuiTab
           key={type}
