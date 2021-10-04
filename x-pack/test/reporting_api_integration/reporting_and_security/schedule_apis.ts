@@ -29,10 +29,8 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.deleteAllSchedules();
       await reportingAPI.initEcommerce();
 
-      ({
-        username: testUserName,
-        password: testUserPassword,
-      } = reportingAPI.getTestReportingUserAuth());
+      ({ username: testUserName, password: testUserPassword } =
+        reportingAPI.getTestReportingUserAuth());
     });
 
     after(async () => {
@@ -100,7 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
         log.info(`testing that '${testUserName}' user only sees their schedules`);
         const list = await supertestNoAuth
           .get('/api/reporting/schedules/list')
-          .auth({ username: testUserName, password: testUserPassword });
+          .auth(testUserName, testUserPassword);
         expect(list.status).eql(200);
         const schedules = JSON.parse(list.text).schedules as ConcreteTaskInstance[];
         const users = schedules.map((t) => t.params.created_by);
