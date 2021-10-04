@@ -9,7 +9,7 @@ import React, { createContext, useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFetcher } from '../../../observability/public';
 import { DataPublicPluginStart, IndexPattern } from '../../../../../src/plugins/data/public';
-import { selectDynamicSettings } from '../state/selectors';
+import { indexStatusSelector, selectDynamicSettings } from '../state/selectors';
 import { getDynamicSettings } from '../state/actions/dynamic_settings';
 
 export const UptimeIndexPatternContext = createContext({} as IndexPattern);
@@ -19,6 +19,8 @@ export const UptimeIndexPatternContextProvider: React.FC<{ data: DataPublicPlugi
   data: { indexPatterns },
 }) => {
   const { settings } = useSelector(selectDynamicSettings);
+  const { data: indexStatus } = useSelector(indexStatusSelector);
+
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -30,11 +32,11 @@ export const UptimeIndexPatternContextProvider: React.FC<{ data: DataPublicPlugi
   const heartbeatIndices = settings?.heartbeatIndices || '';
 
   const { data } = useFetcher<Promise<IndexPattern | undefined>>(async () => {
-    if (heartbeatIndices) {
+    if (heartbeatIndices && indexStatus?.indexExists) {
       // this only creates an index pattern in memory, not as saved object
       return indexPatterns.create({ title: heartbeatIndices });
     }
-  }, [heartbeatIndices]);
+  }, [heartbeatIndices, indexStatus?.indexExists]);
 
   return <UptimeIndexPatternContext.Provider value={data!} children={children} />;
 };

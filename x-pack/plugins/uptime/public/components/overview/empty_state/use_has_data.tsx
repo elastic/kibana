@@ -13,7 +13,7 @@ import { UptimeRefreshContext } from '../../../contexts';
 import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
 
 export const useHasData = () => {
-  const { loading, error } = useSelector(indexStatusSelector);
+  const { loading, error, data } = useSelector(indexStatusSelector);
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
   const { settings } = useSelector(selectDynamicSettings);
@@ -29,6 +29,7 @@ export const useHasData = () => {
   }, [dispatch]);
 
   return {
+    data,
     error,
     loading,
     settings,

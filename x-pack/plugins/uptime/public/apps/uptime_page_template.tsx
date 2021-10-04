@@ -38,11 +38,13 @@ export const UptimePageTemplateComponent: React.FC<Props> = ({ path, pageHeader,
 
   const noDataConfig = useNoDataConfig();
 
-  const { loading, error } = useHasData();
+  const { loading, error, data } = useHasData();
 
   if (error) {
     return <EmptyStateError errors={[error]} />;
   }
+
+  const showLoading = loading && path === OVERVIEW_ROUTE && !data;
 
   return (
     <>
@@ -51,9 +53,9 @@ export const UptimePageTemplateComponent: React.FC<Props> = ({ path, pageHeader,
         pageHeader={pageHeader}
         noDataConfig={path === OVERVIEW_ROUTE && !loading ? noDataConfig : undefined}
       >
-        {loading && path === OVERVIEW_ROUTE && <EmptyStateLoading />}
+        {showLoading && <EmptyStateLoading />}
         <div
-          style={{ visibility: loading && path === OVERVIEW_ROUTE ? 'hidden' : 'initial' }}
+          style={{ visibility: showLoading ? 'hidden' : 'initial' }}
           data-test-subj={noDataConfig ? 'data-missing' : undefined}
         >
           {children}
