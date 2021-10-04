@@ -42,8 +42,7 @@ async function playwrightStart(getService: any) {
 
   const res = await playwrightRun({
     params: { kibanaUrl },
-    playwrightOptions: { chromiumSandbox: false, headless: false },
-    pauseOnError: true,
+    playwrightOptions: { chromiumSandbox: false },
   });
 
   console.log('Removing esArchiver...');
