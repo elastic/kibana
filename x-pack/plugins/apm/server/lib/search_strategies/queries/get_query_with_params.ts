@@ -15,7 +15,7 @@ import type {
   SearchStrategyParams,
 } from '../../../../common/search_strategies/types';
 import { rangeRt } from '../../../routes/default_api_types';
-import { getCorrelationsFilters } from '../../correlations/get_filters';
+import { getCorrelationsFilters } from './get_filters';
 
 export const getTermsQuery = ({ fieldName, fieldValue }: FieldValuePair) => {
   return { term: { [fieldName]: fieldValue } };
