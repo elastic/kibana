@@ -185,7 +185,7 @@ export const FleetServerCommandStep = ({
                 >
                   <FormattedMessage
                     id="xpack.fleet.fleetServerSetup.setupGuideLink"
-                    defaultMessage="Fleet User Guide"
+                    defaultMessage="Fleet and Elastic Agent Guide"
                   />
                 </EuiLink>
               ),
@@ -757,7 +757,7 @@ export const OnPremInstructions: React.FC = () => {
               >
                 <FormattedMessage
                   id="xpack.fleet.fleetServerSetup.setupGuideLink"
-                  defaultMessage="Fleet User Guide"
+                  defaultMessage="Fleet and Elastic Agent Guide"
                 />
               </EuiLink>
             ),
