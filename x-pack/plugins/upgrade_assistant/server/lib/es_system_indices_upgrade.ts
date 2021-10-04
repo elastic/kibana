@@ -9,15 +9,15 @@ import { flow, flatMap, map, flatten, uniq } from 'lodash/fp';
 import { ElasticsearchClient } from 'src/core/server';
 import { SystemIndicesUpgradeStatus, SystemIndicesUpgradeFeature } from '../../common/types';
 
-export const esSystemIndicesToFlatArray = (features: SystemIndicesUpgradeFeature[]): string[] => {
+export const convertFeaturesListToArray = (features: SystemIndicesUpgradeFeature[]): string[] => {
   return flow(
-    // Map each feature into an array of indices
+    // Map each feature into Indices[]
     map('indices'),
-    // Flatten each feature into an list of indices
+    // Flatten each into an string[] of indices
     map(flatMap('index')),
-    // Flatten all the features to get a single array with all the indices
+    // Flatten the array
     flatten,
-    // Finally, dedupe the resulting list
+    // And finally dedupe the indices
     uniq
   )(features);
 };
