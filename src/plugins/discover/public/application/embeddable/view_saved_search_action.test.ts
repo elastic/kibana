@@ -44,7 +44,8 @@ const embeddableConfig = {
   services,
 };
 
-describe('view saved search action', () => {
+// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
+describe.skip('view saved search action', () => {
   it('is compatible when embeddable is of type saved search, in view mode && appropriate permissions are set', async () => {
     const action = new ViewSavedSearchAction(applicationMock);
     const embeddable = new SavedSearchEmbeddable(

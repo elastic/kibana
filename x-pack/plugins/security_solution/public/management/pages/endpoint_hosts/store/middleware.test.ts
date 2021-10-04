@@ -61,7 +61,8 @@ jest.mock('../../../../common/lib/kibana');
 
 type EndpointListStore = Store<Immutable<EndpointState>, Immutable<AppAction>>;
 
-describe('endpoint list middleware', () => {
+// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
+describe.skip('endpoint list middleware', () => {
   const getKibanaServicesMock = KibanaServices.get as jest.Mock;
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;

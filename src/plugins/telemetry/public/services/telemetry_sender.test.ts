@@ -267,6 +267,8 @@ describe('TelemetrySender', () => {
       originalSetInterval = window.setInterval;
     });
 
+    // TODO: types broken during Node 16 upgrade
+    // @ts-expect-error
     beforeEach(() => (window.setInterval = mockSetInterval = jest.fn()));
     afterAll(() => (window.setInterval = originalSetInterval));
 

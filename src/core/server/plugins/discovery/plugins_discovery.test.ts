@@ -125,7 +125,8 @@ const packageMock = {
 const manifestPath = (...pluginPath: string[]) =>
   resolve(KIBANA_ROOT, 'src', 'plugins', ...pluginPath, 'kibana.json');
 
-describe('plugins discovery system', () => {
+// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
+describe.skip('plugins discovery system', () => {
   let logger: ReturnType<typeof loggingSystemMock.create>;
   let instanceInfo: InstanceInfo;
   let env: Env;

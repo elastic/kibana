@@ -303,7 +303,9 @@ describe('CSV Execute Job', function () {
       });
       await expect(
         runTask('job123', jobParams, cancellationToken, stream)
-      ).rejects.toMatchInlineSnapshot(`[TypeError: Cannot read property 'indexOf' of undefined]`);
+      ).rejects.toMatchInlineSnapshot(
+        `[TypeError: Cannot read properties of undefined (reading 'indexOf')]`
+      );
 
       expect(mockEsClient.clearScroll).toHaveBeenCalledWith(
         expect.objectContaining({ body: { scroll_id: lastScrollId } })

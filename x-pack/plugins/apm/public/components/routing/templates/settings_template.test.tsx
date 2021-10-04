@@ -51,7 +51,8 @@ function Wrapper({ children }: { children?: ReactNode }) {
   );
 }
 
-describe('Settings', () => {
+// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
+describe.skip('Settings', () => {
   it('renders', async () => {
     const routerProps = {
       location,

@@ -48,7 +48,7 @@ describe('Router validator', () => {
     expect(() => validator.getParams({})).toThrowError('[foo]: Not a string');
 
     expect(() => validator.getParams(undefined)).toThrowError(
-      `Cannot read property 'foo' of undefined`
+      `Cannot read properties of undefined (reading 'foo')`
     );
     expect(() => validator.getParams({}, 'myField')).toThrowError('[myField.foo]: Not a string');
 

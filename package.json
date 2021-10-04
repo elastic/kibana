@@ -69,7 +69,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "resolutions": {
-    "**/@types/node": "14.14.44",
+    "**/@types/node": "16.10.2",
     "**/chokidar": "^3.4.3",
     "**/deepmerge": "^4.2.2",
     "**/fast-deep-equal": "^3.1.1",
@@ -88,7 +88,7 @@
     "**/underscore": "^1.13.1"
   },
   "engines": {
-    "node": "14.17.6",
+    "node": "16.10.0",
     "yarn": "^1.21.1"
   },
   "dependencies": {
@@ -572,7 +572,7 @@
     "@types/mustache": "^0.8.31",
     "@types/ncp": "^2.0.1",
     "@types/nock": "^10.0.3",
-    "@types/node": "14.14.44",
+    "@types/node": "16.10.2",
     "@types/node-fetch": "^2.5.7",
     "@types/node-forge": "^0.10.5",
     "@types/nodemailer": "^6.4.0",
