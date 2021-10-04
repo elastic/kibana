@@ -125,7 +125,7 @@ const packageMock = {
 const manifestPath = (...pluginPath: string[]) =>
   resolve(KIBANA_ROOT, 'src', 'plugins', ...pluginPath, 'kibana.json');
 
-// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
+// TODO: broken during Node 16 upgrade
 describe.skip('plugins discovery system', () => {
   let logger: ReturnType<typeof loggingSystemMock.create>;
   let instanceInfo: InstanceInfo;
