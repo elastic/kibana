@@ -19,6 +19,7 @@ export class CustomIntegrationsPlugin
 {
   private readonly logger: Logger;
   private readonly customIngegrationRegistry: CustomIntegrationRegistry;
+  private readonly branch: string;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -26,6 +27,7 @@ export class CustomIntegrationsPlugin
       this.logger,
       initializerContext.env.mode.dev
     );
+    this.branch = initializerContext.env.packageInfo.branch;
   }
 
   public setup(core: CoreSetup) {
@@ -34,7 +36,7 @@ export class CustomIntegrationsPlugin
     const router = core.http.createRouter();
     defineRoutes(router, this.customIngegrationRegistry);
 
-    registerLanguageClients(core, this.customIngegrationRegistry);
+    registerLanguageClients(core, this.customIngegrationRegistry, this.branch);
 
     return {
       registerCustomIntegration: (integration: Omit<CustomIntegration, 'type'>) => {
@@ -42,6 +44,9 @@ export class CustomIntegrationsPlugin
           type: 'ui_link',
           ...integration,
         });
+      },
+      getAppendCustomIntegrations: () => {
+        return this.customIngegrationRegistry.getAppendCustomIntegrations();
       },
     } as CustomIntegrationsPluginSetup;
   }
