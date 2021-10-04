@@ -203,6 +203,7 @@ const transformControlColumns = ({
   controlColumns.map(
     ({ id: columnId, headerCellRender = EmptyHeaderCellRender, rowCellRender, width }, i) => ({
       id: `${columnId}`,
+      // eslint-disable-next-line react/display-name
       headerCellRender: () => {
         const HeaderActions = headerCellRender;
         return (
@@ -225,6 +226,7 @@ const transformControlColumns = ({
           </>
         );
       },
+      // eslint-disable-next-line react/display-name
       rowCellRender: ({
         isDetails,
         isExpandable,
@@ -707,7 +709,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           rowIndex,
           rowRenderers,
           setCellProps,
-          timelineId: tabType != null ? `${id}-${tabType}` : id,
+          timelineId: id,
           truncate: isDetails ? false : true,
         }) as React.ReactElement;
       };
@@ -721,7 +723,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       pageSize,
       renderCellValue,
       rowRenderers,
-      tabType,
       theme,
     ]);
 
