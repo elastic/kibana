@@ -27,7 +27,7 @@ const Status = {
     </EuiBadge>
   ),
   Inactive: (
-    <EuiBadge color="subdued">
+    <EuiBadge color="#98A2B3">
       <FormattedMessage id="xpack.fleet.agentHealth.inactiveStatusText" defaultMessage="Inactive" />
     </EuiBadge>
   ),
