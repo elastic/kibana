@@ -280,7 +280,7 @@ describe('ConfigPanel', () => {
       instance.update();
       act(() => {
         instance
-          .find(`[data-test-subj="lnsLayerAddButton-${layerTypes.THRESHOLD}"]`)
+          .find(`[data-test-subj="lnsLayerAddButton-${layerTypes.REFERENCELINE}"]`)
           .first()
           .simulate('click');
       });
@@ -301,8 +301,8 @@ describe('ConfigPanel', () => {
       props.activeVisualization.getSupportedLayers = jest.fn(() => [
         { type: layerTypes.DATA, label: 'Data Layer' },
         {
-          type: layerTypes.THRESHOLD,
-          label: 'Threshold layer',
+          type: layerTypes.REFERENCELINE,
+          label: 'Reference layer',
         },
       ]);
       datasourceMap.testDatasource.initializeDimension = jest.fn();
@@ -331,8 +331,8 @@ describe('ConfigPanel', () => {
           ],
         },
         {
-          type: layerTypes.THRESHOLD,
-          label: 'Threshold layer',
+          type: layerTypes.REFERENCELINE,
+          label: 'Reference layer',
         },
       ]);
       datasourceMap.testDatasource.initializeDimension = jest.fn();
@@ -349,8 +349,8 @@ describe('ConfigPanel', () => {
       props.activeVisualization.getSupportedLayers = jest.fn(() => [
         { type: layerTypes.DATA, label: 'Data Layer' },
         {
-          type: layerTypes.THRESHOLD,
-          label: 'Threshold layer',
+          type: layerTypes.REFERENCELINE,
+          label: 'Reference layer',
           initialDimensions: [
             {
               groupId: 'testGroup',

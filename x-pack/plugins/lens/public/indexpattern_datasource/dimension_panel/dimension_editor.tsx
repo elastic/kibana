@@ -173,7 +173,18 @@ export function DimensionEditor(props: DimensionEditorProps) {
     if (temporaryStaticValue) {
       setTemporaryState('none');
     }
-    return setStateWrapper(setter, { forceRender: true });
+    if (typeof setter === 'function') {
+      return setState(
+        (prevState) => {
+          const layer = setter(addStaticValueColumn(prevState.layers[layerId]));
+          return mergeLayer({ state: prevState, layerId, newLayer: layer });
+        },
+        {
+          isDimensionComplete: true,
+          forceRender: true,
+        }
+      );
+    }
   };
 
   const ParamEditor = getParamEditor(

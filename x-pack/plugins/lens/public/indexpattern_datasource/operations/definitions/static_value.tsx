@@ -206,7 +206,7 @@ export const staticValueOperation: OperationDefinition<
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
         <EuiFormLabel>
           {i18n.translate('xpack.lens.indexPattern.staticValue.label', {
-            defaultMessage: 'Threshold value',
+            defaultMessage: 'Reference line value',
           })}
         </EuiFormLabel>
         <EuiSpacer size="s" />

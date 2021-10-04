@@ -14,17 +14,17 @@ import { isPercentageSeries, isStackedChart } from './state_helpers';
 import type { XYState } from './types';
 import { checkScaleOperation } from './visualization_helpers';
 
-export interface ThresholdBase {
+export interface ReferenceLineBase {
   label: 'x' | 'yRight' | 'yLeft';
 }
 
 /**
- * Return the threshold layers groups to show based on multiple criteria:
+ * Return the reference layers groups to show based on multiple criteria:
  * * what groups are current defined in data layers
- * * what existing threshold are currently defined in data thresholds
+ * * what existing reference line are currently defined in data reference lines
  */
-export function getGroupsToShow<T extends ThresholdBase & { config?: YConfig[] }>(
-  thresholdLayers: T[],
+export function getGroupsToShow<T extends ReferenceLineBase & { config?: YConfig[] }>(
+  referenceLineLayers: T[],
   state: XYState | undefined,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
   tables: Record<string, Datatable> | undefined
@@ -36,16 +36,16 @@ export function getGroupsToShow<T extends ThresholdBase & { config?: YConfig[] }
     ({ layerType = layerTypes.DATA }) => layerType === layerTypes.DATA
   );
   const groupsAvailable = getGroupsAvailableInData(dataLayers, datasourceLayers, tables);
-  return thresholdLayers
+  return referenceLineLayers
     .filter(({ label, config }: T) => groupsAvailable[label] || config?.length)
     .map((layer) => ({ ...layer, valid: groupsAvailable[layer.label] }));
 }
 
 /**
- * Returns the threshold layers groups to show based on what groups are current defined in data layers.
+ * Returns the reference layers groups to show based on what groups are current defined in data layers.
  */
-export function getGroupsRelatedToData<T extends ThresholdBase>(
-  thresholdLayers: T[],
+export function getGroupsRelatedToData<T extends ReferenceLineBase>(
+  referenceLineLayers: T[],
   state: XYState | undefined,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
   tables: Record<string, Datatable> | undefined
@@ -57,7 +57,7 @@ export function getGroupsRelatedToData<T extends ThresholdBase>(
     ({ layerType = layerTypes.DATA }) => layerType === layerTypes.DATA
   );
   const groupsAvailable = getGroupsAvailableInData(dataLayers, datasourceLayers, tables);
-  return thresholdLayers.filter(({ label }: T) => groupsAvailable[label]);
+  return referenceLineLayers.filter(({ label }: T) => groupsAvailable[label]);
 }
 /**
  * Returns a dictionary with the groups filled in all the data layers
@@ -89,7 +89,7 @@ export function getStaticValue(
     return fallbackValue;
   }
 
-  // filter and organize data dimensions into threshold groups
+  // filter and organize data dimensions into reference line groups
   // now pick the columnId in the active data
   const { dataLayers: filteredLayers, accessors } = getAccessorCriteriaForGroup(
     groupId,
@@ -147,11 +147,11 @@ function computeStaticValueForGroup(
   activeData: NonNullable<FramePublicAPI['activeData']>,
   minZeroBased: boolean
 ) {
-  const defaultThresholdFactor = 3 / 4;
+  const defaultReferenceLineFactor = 3 / 4;
 
   if (dataLayers.length && accessorIds.length) {
     if (dataLayers.some(({ seriesType }) => isPercentageSeries(seriesType))) {
-      return defaultThresholdFactor;
+      return defaultReferenceLineFactor;
     }
 
     const accessorMap = new Set(accessorIds);
@@ -193,7 +193,7 @@ function computeStaticValueForGroup(
       // Custom axis bounds can go below 0, so consider also lower values than 0
       const finalMinValue = minZeroBased ? Math.min(0, columnMin) : columnMin;
       const interval = columnMax - finalMinValue;
-      return Number((finalMinValue + interval * defaultThresholdFactor).toFixed(2));
+      return Number((finalMinValue + interval * defaultReferenceLineFactor).toFixed(2));
     }
   }
 }

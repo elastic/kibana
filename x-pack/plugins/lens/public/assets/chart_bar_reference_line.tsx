@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiIconProps } from '@elastic/eui';
 
-export const LensIconChartBarThreshold = ({
+export const LensIconChartBarReferenceLine = ({
   title,
   titleId,
   ...props

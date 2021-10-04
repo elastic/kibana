@@ -14,59 +14,59 @@ import type { FieldFormat } from 'src/plugins/field_formats/common';
 import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
 import type { LayerArgs, YConfig } from '../../common/expressions';
 import type { LensMultiTable } from '../../common/types';
-import { hasIcon } from './xy_config_panel/threshold_panel';
+import { hasIcon } from './xy_config_panel/reference_line_panel';
 
-const THRESHOLD_MARKER_SIZE = 20;
+const REFERENCE_LINE_MARKER_SIZE = 20;
 
 export const computeChartMargins = (
-  thresholdPaddings: Partial<Record<Position, number>>,
+  referenceLinePaddings: Partial<Record<Position, number>>,
   labelVisibility: Partial<Record<'x' | 'yLeft' | 'yRight', boolean>>,
   titleVisibility: Partial<Record<'x' | 'yLeft' | 'yRight', boolean>>,
   axesMap: Record<'left' | 'right', unknown>,
   isHorizontal: boolean
 ) => {
   const result: Partial<Record<Position, number>> = {};
-  if (!labelVisibility?.x && !titleVisibility?.x && thresholdPaddings.bottom) {
+  if (!labelVisibility?.x && !titleVisibility?.x && referenceLinePaddings.bottom) {
     const placement = isHorizontal ? mapVerticalToHorizontalPlacement('bottom') : 'bottom';
-    result[placement] = thresholdPaddings.bottom;
+    result[placement] = referenceLinePaddings.bottom;
   }
   if (
-    thresholdPaddings.left &&
+    referenceLinePaddings.left &&
     (isHorizontal || (!labelVisibility?.yLeft && !titleVisibility?.yLeft))
   ) {
     const placement = isHorizontal ? mapVerticalToHorizontalPlacement('left') : 'left';
-    result[placement] = thresholdPaddings.left;
+    result[placement] = referenceLinePaddings.left;
   }
   if (
-    thresholdPaddings.right &&
+    referenceLinePaddings.right &&
     (isHorizontal || !axesMap.right || (!labelVisibility?.yRight && !titleVisibility?.yRight))
   ) {
     const placement = isHorizontal ? mapVerticalToHorizontalPlacement('right') : 'right';
-    result[placement] = thresholdPaddings.right;
+    result[placement] = referenceLinePaddings.right;
   }
   // there's no top axis, so just check if a margin has been computed
-  if (thresholdPaddings.top) {
+  if (referenceLinePaddings.top) {
     const placement = isHorizontal ? mapVerticalToHorizontalPlacement('top') : 'top';
-    result[placement] = thresholdPaddings.top;
+    result[placement] = referenceLinePaddings.top;
   }
   return result;
 };
 
-// Note: it does not take into consideration whether the threshold is in view or not
-export const getThresholdRequiredPaddings = (
-  thresholdLayers: LayerArgs[],
+// Note: it does not take into consideration whether the reference line is in view or not
+export const getReferenceLineRequiredPaddings = (
+  referenceLineLayers: LayerArgs[],
   axesMap: Record<'left' | 'right', unknown>
 ) => {
   // collect all paddings for the 4 axis: if any text is detected double it.
   const paddings: Partial<Record<Position, number>> = {};
   const icons: Partial<Record<Position, number>> = {};
-  thresholdLayers.forEach((layer) => {
+  referenceLineLayers.forEach((layer) => {
     layer.yConfig?.forEach(({ axisMode, icon, iconPosition, textVisibility }) => {
       if (axisMode && (hasIcon(icon) || textVisibility)) {
         const placement = getBaseIconPlacement(iconPosition, axisMode, axesMap);
         paddings[placement] = Math.max(
           paddings[placement] || 0,
-          THRESHOLD_MARKER_SIZE * (textVisibility ? 2 : 1) // double the padding size if there's text
+          REFERENCE_LINE_MARKER_SIZE * (textVisibility ? 2 : 1) // double the padding size if there's text
         );
         icons[placement] = (icons[placement] || 0) + (hasIcon(icon) ? 1 : 0);
       }
@@ -76,7 +76,7 @@ export const getThresholdRequiredPaddings = (
   // if no icon is present for the placement, just reduce the padding
   (Object.keys(paddings) as Position[]).forEach((placement) => {
     if (!icons[placement]) {
-      paddings[placement] = THRESHOLD_MARKER_SIZE;
+      paddings[placement] = REFERENCE_LINE_MARKER_SIZE;
     }
   });
 
@@ -130,19 +130,20 @@ function getMarkerBody(label: string | undefined, isHorizontal: boolean) {
   if (!label) {
     return;
   }
-  const Label = (
-    <div className="eui-textTruncate" style={{ maxWidth: THRESHOLD_MARKER_SIZE * 3 }}>
-      {label}
-    </div>
-  );
-  return isHorizontal ? (
-    Label
-  ) : (
+  if (isHorizontal) {
+    return (
+      <div className="eui-textTruncate" style={{ maxWidth: REFERENCE_LINE_MARKER_SIZE * 3 }}>
+        {label}
+      </div>
+    );
+  }
+  return (
     <div
+      className="eui-textTruncate"
       style={{
         display: 'inline-block',
         overflow: 'hidden',
-        width: THRESHOLD_MARKER_SIZE,
+        width: REFERENCE_LINE_MARKER_SIZE,
         lineHeight: 1.5,
       }}
     >
@@ -152,9 +153,10 @@ function getMarkerBody(label: string | undefined, isHorizontal: boolean) {
           whiteSpace: 'nowrap',
           transform: 'translate(0, 100%) rotate(-90deg)',
           transformOrigin: '0 0',
+          maxWidth: REFERENCE_LINE_MARKER_SIZE * 3,
         }}
       >
-        {Label}
+        {label}
         <div
           style={{
             float: 'left',
@@ -189,32 +191,32 @@ function getMarkerToShow(
   }
 }
 
-export const ThresholdAnnotations = ({
-  thresholdLayers,
+export const ReferenceLineAnnotations = ({
+  layers,
   data,
   formatters,
   paletteService,
   syncColors,
   axesMap,
   isHorizontal,
-  thresholdPaddingMap,
+  paddingMap,
 }: {
-  thresholdLayers: LayerArgs[];
+  layers: LayerArgs[];
   data: LensMultiTable;
   formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
   paletteService: PaletteRegistry;
   syncColors: boolean;
   axesMap: Record<'left' | 'right', boolean>;
   isHorizontal: boolean;
-  thresholdPaddingMap: Partial<Record<Position, number>>;
+  paddingMap: Partial<Record<Position, number>>;
 }) => {
   return (
     <>
-      {thresholdLayers.flatMap((thresholdLayer) => {
-        if (!thresholdLayer.yConfig) {
+      {layers.flatMap((layer) => {
+        if (!layer.yConfig) {
           return [];
         }
-        const { columnToLabel, yConfig: yConfigs, layerId } = thresholdLayer;
+        const { columnToLabel, yConfig: yConfigs, layerId } = layer;
         const columnToLabelMap: Record<string, string> = columnToLabel
           ? JSON.parse(columnToLabel)
           : {};
@@ -227,6 +229,9 @@ export const ThresholdAnnotations = ({
         );
 
         const groupedByDirection = groupBy(yConfigByValue, 'fill');
+        if (groupedByDirection.below) {
+          groupedByDirection.below.reverse();
+        }
 
         return yConfigByValue.flatMap((yConfig, i) => {
           // Find the formatter for the given axis
@@ -249,7 +254,7 @@ export const ThresholdAnnotations = ({
           );
           // the padding map is built for vertical chart
           const hasReducedPadding =
-            thresholdPaddingMap[markerPositionVertical] === THRESHOLD_MARKER_SIZE;
+            paddingMap[markerPositionVertical] === REFERENCE_LINE_MARKER_SIZE;
 
           const props = {
             groupId,
@@ -315,7 +320,7 @@ export const ThresholdAnnotations = ({
             const indexFromSameType = groupedByDirection[yConfig.fill].findIndex(
               ({ forAccessor }) => forAccessor === yConfig.forAccessor
             );
-            const shouldCheckNextThreshold =
+            const shouldCheckNextReferenceLine =
               indexFromSameType < groupedByDirection[yConfig.fill].length - 1;
             annotations.push(
               <RectAnnotation
@@ -323,18 +328,16 @@ export const ThresholdAnnotations = ({
                 id={`${layerId}-${yConfig.forAccessor}-rect`}
                 key={`${layerId}-${yConfig.forAccessor}-rect`}
                 dataValues={table.rows.map(() => {
+                  const nextValue =
+                    !isFillAbove && shouldCheckNextReferenceLine
+                      ? row[groupedByDirection[yConfig.fill!][indexFromSameType + 1].forAccessor]
+                      : undefined;
                   if (yConfig.axisMode === 'bottom') {
                     return {
                       coordinates: {
-                        x0: isFillAbove ? row[yConfig.forAccessor] : undefined,
+                        x0: isFillAbove ? row[yConfig.forAccessor] : nextValue,
                         y0: undefined,
-                        x1: isFillAbove
-                          ? shouldCheckNextThreshold
-                            ? row[
-                                groupedByDirection[yConfig.fill!][indexFromSameType + 1].forAccessor
-                              ]
-                            : undefined
-                          : row[yConfig.forAccessor],
+                        x1: isFillAbove ? nextValue : row[yConfig.forAccessor],
                         y1: undefined,
                       },
                       header: columnToLabelMap[yConfig.forAccessor],
@@ -345,15 +348,9 @@ export const ThresholdAnnotations = ({
                   return {
                     coordinates: {
                       x0: undefined,
-                      y0: isFillAbove ? row[yConfig.forAccessor] : undefined,
+                      y0: isFillAbove ? row[yConfig.forAccessor] : nextValue,
                       x1: undefined,
-                      y1: isFillAbove
-                        ? shouldCheckNextThreshold
-                          ? row[
-                              groupedByDirection[yConfig.fill!][indexFromSameType + 1].forAccessor
-                            ]
-                          : undefined
-                        : row[yConfig.forAccessor],
+                      y1: isFillAbove ? nextValue : row[yConfig.forAccessor],
                     },
                     header: columnToLabelMap[yConfig.forAccessor],
                     details:
