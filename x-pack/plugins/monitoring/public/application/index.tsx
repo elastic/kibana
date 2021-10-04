@@ -27,6 +27,8 @@ import { KibanaOverviewPage } from './pages/kibana/overview';
 import { CODE_PATH_ELASTICSEARCH, CODE_PATH_BEATS, CODE_PATH_KIBANA } from '../../common/constants';
 import { ElasticsearchNodesPage } from './pages/elasticsearch/nodes_page';
 import { ElasticsearchIndicesPage } from './pages/elasticsearch/indices_page';
+import { ElasticsearchIndexPage } from './pages/elasticsearch/index_page';
+import { ElasticsearchIndexAdvancedPage } from './pages/elasticsearch/index_advanced_page';
 import { ElasticsearchNodePage } from './pages/elasticsearch/node_page';
 import { MonitoringTimeContainer } from './hooks/use_monitoring_time';
 import { BreadcrumbContainer } from './hooks/use_breadcrumbs';
@@ -84,6 +86,21 @@ const MonitoringApp: React.FC<{
                   />
 
                   {/* ElasticSearch Views */}
+
+                  <RouteInit
+                    path="/elasticsearch/indices/:index/advanced"
+                    component={ElasticsearchIndexAdvancedPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/elasticsearch/indices/:index"
+                    component={ElasticsearchIndexPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
                   <RouteInit
                     path="/elasticsearch/indices"
                     component={ElasticsearchIndicesPage}
