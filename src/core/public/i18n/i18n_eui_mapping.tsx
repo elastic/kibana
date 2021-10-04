@@ -643,15 +643,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiMarkdownEditorFooter.syntaxModalDescriptionPrefix': i18n.translate(
       'core.euiMarkdownEditorFooter.syntaxModalDescriptionPrefix',
       {
-        defaultMessage:
-          'This editor uses',
+        defaultMessage: 'This editor uses',
       }
     ),
     'euiMarkdownEditorFooter.syntaxModalDescriptionSuffix': i18n.translate(
       'core.euiMarkdownEditorFooter.syntaxModalDescriptionSuffix',
       {
-        defaultMessage:
-          'You can also utilize these additional syntax plugins to add rich content to your text.',
+        defaultMessage: 'You can also utilize these additional syntax plugins to add rich content to your text.',
       }
     ),
     'euiMarkdownEditorFooter.syntaxPopoverDescription': i18n.translate(
