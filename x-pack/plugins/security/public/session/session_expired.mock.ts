@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { ISessionExpired } from './session_expired';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
+import type { SessionExpired } from './session_expired';
 
 export function createSessionExpiredMock() {
   return {
     logout: jest.fn(),
-  } as jest.Mocked<ISessionExpired>;
+  } as jest.Mocked<PublicMethodsOf<SessionExpired>>;
 }

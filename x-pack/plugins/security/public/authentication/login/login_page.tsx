@@ -12,7 +12,6 @@ import classNames from 'classnames';
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { BehaviorSubject } from 'rxjs';
-import { parse } from 'url';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -23,6 +22,8 @@ import {
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
 } from '../../../common/constants';
 import type { LoginState } from '../../../common/login_state';
+import type { LogoutReason } from '../../../common/types';
+import type { LoginFormProps } from './components';
 import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
 
 interface Props {
@@ -36,36 +37,33 @@ interface State {
   loginState: LoginState | null;
 }
 
-const messageMap = new Map([
-  [
-    'SESSION_EXPIRED',
-    {
-      type: LoginFormMessageType.Info,
-      content: i18n.translate('xpack.security.login.sessionExpiredDescription', {
-        defaultMessage: 'Your session has timed out. Please log in again.',
-      }),
-    },
-  ],
-  [
-    'LOGGED_OUT',
-    {
-      type: LoginFormMessageType.Info,
-      content: i18n.translate('xpack.security.login.loggedOutDescription', {
-        defaultMessage: 'You have logged out of Elastic.',
-      }),
-    },
-  ],
-  [
-    'UNAUTHENTICATED',
-    {
-      type: LoginFormMessageType.Danger,
-      content: i18n.translate('xpack.security.unauthenticated.errorDescription', {
-        defaultMessage:
-          "We hit an authentication error. Please check your credentials and try again. If you still can't log in, contact your system administrator.",
-      }),
-    },
-  ],
-]);
+const loginFormMessages: Record<LogoutReason, NonNullable<LoginFormProps['message']>> = {
+  SESSION_EXPIRED: {
+    type: LoginFormMessageType.Info,
+    content: i18n.translate('xpack.security.login.sessionExpiredDescription', {
+      defaultMessage: 'Your session has timed out. Please log in again.',
+    }),
+  },
+  AUTHENTICATION_ERROR: {
+    type: LoginFormMessageType.Info,
+    content: i18n.translate('xpack.security.login.authenticationErrorDescription', {
+      defaultMessage: 'An unexpected authentication error occurred. Please log in again.',
+    }),
+  },
+  LOGGED_OUT: {
+    type: LoginFormMessageType.Info,
+    content: i18n.translate('xpack.security.login.loggedOutDescription', {
+      defaultMessage: 'You have logged out of Elastic.',
+    }),
+  },
+  UNAUTHENTICATED: {
+    type: LoginFormMessageType.Danger,
+    content: i18n.translate('xpack.security.unauthenticated.errorDescription', {
+      defaultMessage:
+        "We hit an authentication error. Please check your credentials and try again. If you still can't log in, contact your system administrator.",
+    }),
+  },
+};
 
 export class LoginPage extends Component<Props, State> {
   state = { loginState: null } as State;
@@ -77,7 +75,7 @@ export class LoginPage extends Component<Props, State> {
     try {
       this.setState({ loginState: await this.props.http.get('/internal/security/login_state') });
     } catch (err) {
-      this.props.fatalErrors.add(err);
+      this.props.fatalErrors.add(err as Error);
     }
 
     loadingCount$.next(0);
@@ -235,17 +233,19 @@ export class LoginPage extends Component<Props, State> {
       );
     }
 
-    const query = parse(window.location.href, true).query;
+    const { searchParams } = new URL(window.location.href);
+
     return (
       <LoginForm
         http={this.props.http}
         notifications={this.props.notifications}
         selector={selector}
-        // @ts-expect-error Map.get is ok with getting `undefined`
-        message={messageMap.get(query[LOGOUT_REASON_QUERY_STRING_PARAMETER]?.toString())}
+        message={
+          loginFormMessages[searchParams.get(LOGOUT_REASON_QUERY_STRING_PARAMETER) as LogoutReason]
+        }
         loginAssistanceMessage={this.props.loginAssistanceMessage}
         loginHelp={loginHelp}
-        authProviderHint={query[AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER]?.toString()}
+        authProviderHint={searchParams.get(AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER) || undefined}
       />
     );
   };
