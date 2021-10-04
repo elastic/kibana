@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-import { defaultConfigWebFinal } from '@kbn/storybook';
-
-module.exports = {
-  ...defaultConfigWebFinal,
-  addons: ['@storybook/addon-essentials'],
-  babel: () => ({
-    presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-  }),
-};
+export * from './uptime.journey';
