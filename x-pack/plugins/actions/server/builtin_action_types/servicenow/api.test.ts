@@ -375,4 +375,23 @@ describe('api', () => {
       expect(res).toEqual(serviceNowChoices);
     });
   });
+
+  describe('getIncident', () => {
+    test('it gets the incident correctly', async () => {
+      const res = await api.getIncident({
+        externalService,
+        params: {
+          externalId: 'incident-1',
+        },
+      });
+      expect(res).toEqual({
+        description: 'description from servicenow',
+        id: 'incident-1',
+        pushedDate: '2020-03-10T12:24:20.000Z',
+        short_description: 'title from servicenow',
+        title: 'INC01',
+        url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
+      });
+    });
+  });
 });
