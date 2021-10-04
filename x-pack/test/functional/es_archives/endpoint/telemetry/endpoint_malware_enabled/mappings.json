@@ -198,25 +198,29 @@
         },
         "apm-indices": {
           "properties": {
-            "apm_oss": {
+            "xpack": {
               "properties": {
-                "errorIndices": {
-                  "type": "keyword"
-                },
-                "metricsIndices": {
-                  "type": "keyword"
-                },
-                "onboardingIndices": {
-                  "type": "keyword"
-                },
-                "sourcemapIndices": {
-                  "type": "keyword"
-                },
-                "spanIndices": {
-                  "type": "keyword"
-                },
-                "transactionIndices": {
-                  "type": "keyword"
+                "apm": {
+                  "properties": {
+                    "errorIndices": {
+                      "type": "keyword"
+                    },
+                    "metricsIndices": {
+                      "type": "keyword"
+                    },
+                    "onboardingIndices": {
+                      "type": "keyword"
+                    },
+                    "sourcemapIndices": {
+                      "type": "keyword"
+                    },
+                    "spanIndices": {
+                      "type": "keyword"
+                    },
+                    "transactionIndices": {
+                      "type": "keyword"
+                    }
+                  }
                 }
               }
             }
