@@ -27,18 +27,11 @@ export const useSystemIndicesUpgrade = () => {
     details?: ResponseError;
   }>({ statusType: 'idle' });
 
-  const {
-    data,
-    error,
-    isLoading,
-    resendRequest,
-    isInitialRequest,
-  } = api.useLoadSystemIndicesUpgradeStatus();
+  const { data, error, isLoading, resendRequest, isInitialRequest } =
+    api.useLoadSystemIndicesUpgradeStatus();
 
-  const {
-    addContent: addContentToGlobalFlyout,
-    removeContent: removeContentFromGlobalFlyout,
-  } = useGlobalFlyout();
+  const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
+    useGlobalFlyout();
 
   const closeFlyout = useCallback(() => {
     setShowFlyout(false);

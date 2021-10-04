@@ -79,12 +79,8 @@ const i18nTexts = {
 };
 
 const UpgradeSystemIndicesStep: FunctionComponent = () => {
-  const {
-    beginSystemIndicesUpgrade,
-    startUpgradeStatus,
-    upgradeStatus,
-    setShowFlyout,
-  } = useSystemIndicesUpgrade();
+  const { beginSystemIndicesUpgrade, startUpgradeStatus, upgradeStatus, setShowFlyout } =
+    useSystemIndicesUpgrade();
 
   if (upgradeStatus.error) {
     return (

@@ -123,7 +123,7 @@ export const Overview: FunctionComponent = () => {
               isComplete: isStepComplete('fix_logs'),
               setIsComplete: setCompletedStep.bind(null, 'fix_logs'),
             }),
-            getUpgradeStep({ docLinks, nextMajor }),
+            getUpgradeStep({ nextMajor }),
           ]}
         />
       </EuiPageContent>
