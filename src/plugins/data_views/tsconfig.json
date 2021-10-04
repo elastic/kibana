@@ -17,13 +17,10 @@
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },
-    { "path": "../bfetch/tsconfig.json" },
-    { "path": "../ui_actions/tsconfig.json" },
-    { "path": "../share/tsconfig.json" },
-    { "path": "../inspector/tsconfig.json" },
     { "path": "../usage_collection/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../field_formats/tsconfig.json" }
+    { "path": "../field_formats/tsconfig.json" },
+    { "path": "../expressions/tsconfig.json" }
   ]
 }
