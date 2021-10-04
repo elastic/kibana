@@ -6,7 +6,6 @@
  */
 import React from 'react';
 
-/* eslint-disable react/display-name */
 export const mockHoverActions = {
   getAddToTimelineButton: () => <>{'Add To Timeline'}</>,
   getColumnToggleButton: () => <>{'Column Toggle'}</>,
