@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { KibanaClient as ElasticsearchClient } from '@elastic/elasticsearch/api/kibana';
+import type { ElasticsearchClient } from '../elasticsearch_client';
 
 export const getPolicyExists = async (
   esClient: ElasticsearchClient,

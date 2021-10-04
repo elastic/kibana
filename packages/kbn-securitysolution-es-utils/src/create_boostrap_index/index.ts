@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaClient as ElasticsearchClient } from '@elastic/elasticsearch/api/kibana';
+import type { ElasticsearchClient } from '../elasticsearch_client';
 
 // See the reference(s) below on explanations about why -000001 was chosen and
 // why the is_write_index is true as well as the bootstrapping step which is needed.

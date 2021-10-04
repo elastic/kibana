@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaClient as ElasticsearchClient } from '@elastic/elasticsearch/api/kibana';
+import type { ElasticsearchClient } from '../elasticsearch_client';
 
 export const deleteAllIndex = async (
   esClient: ElasticsearchClient,
