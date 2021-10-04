@@ -139,7 +139,12 @@ export function runFailedTestsReporterCli() {
           }
 
           if (existingIssue) {
-            const newFailureCount = await updateFailureIssue(buildUrl, existingIssue, githubApi);
+            const newFailureCount = await updateFailureIssue(
+              buildUrl,
+              existingIssue,
+              githubApi,
+              branch
+            );
             const url = existingIssue.html_url;
             pushMessage(`Test has failed ${newFailureCount - 1} times on tracked branches: ${url}`);
             if (updateGithub) {
@@ -148,7 +153,7 @@ export function runFailedTestsReporterCli() {
             continue;
           }
 
-          const newIssue = await createFailureIssue(buildUrl, failure, githubApi);
+          const newIssue = await createFailureIssue(buildUrl, failure, githubApi, branch);
           pushMessage('Test has not failed recently on tracked branches');
           if (updateGithub) {
             pushMessage(`Created new issue: ${newIssue.html_url}`);
