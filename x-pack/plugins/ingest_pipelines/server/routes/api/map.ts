@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { Pipeline } from '../../../common/types';
 import { API_BASE_PATH } from '../../../common/constants';
 import { FieldCopyAction } from '../../../common/types';
-import { mapToIngestPipeline } from '../../services/mapper';
+import { mapToIngestPipeline } from '../../lib/mapper';
 import { RouteDependencies } from '../../types';
 
 export const registerMapRoute = ({ router }: RouteDependencies): void => {
