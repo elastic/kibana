@@ -191,10 +191,13 @@ describe('use composite image', () => {
       expect(composeSpy.mock.calls[0][1]).toBe(canvasMock);
       expect(composeSpy.mock.calls[0][2]).toBe(blocks);
 
-      await waitFor(() => {
-        expect(onComposeImageSuccess).toHaveBeenCalledTimes(1);
-        expect(onComposeImageSuccess).toHaveBeenCalledWith('compose success');
-      });
+      await waitFor(
+        () => {
+          expect(onComposeImageSuccess).toHaveBeenCalledTimes(1);
+          expect(onComposeImageSuccess).toHaveBeenCalledWith('compose success');
+        },
+        { timeout: 10000 }
+      );
     });
   });
 });
