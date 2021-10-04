@@ -387,6 +387,10 @@ export const ResolvedSingleTimelineResponseType = runtimeTypes.type({
   data: ResolvedTimelineSavedObjectToReturnObjectRuntimeType,
 });
 
+export type SingleTimelineResolveResponse = runtimeTypes.TypeOf<
+  typeof ResolvedSingleTimelineResponseType
+>;
+
 /**
  * All Timeline Saved object type with metadata
  */

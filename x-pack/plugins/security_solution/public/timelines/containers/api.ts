@@ -73,7 +73,7 @@ const decodeSingleTimelineResponse = (respTimeline?: SingleTimelineResponse) =>
     fold(throwErrors(createToasterPlainError), identity)
   );
 
-const decodeResolvedSingleTimelineResponse = (respTimeline?: SingleTimelineResponse) =>
+const decodeResolvedSingleTimelineResponse = (respTimeline?: SingleTimelineResolveResponse) =>
   pipe(
     ResolvedSingleTimelineResponseType.decode(respTimeline),
     fold(throwErrors(createToasterPlainError), identity)
@@ -327,17 +327,20 @@ export const resolveTimeline = async (id: string) => {
 };
 
 export const getTimelineTemplate = async (templateTimelineId: string) => {
-  const response = await KibanaServices.get().http.get<SingleTimelineResponse>(TIMELINE_URL, {
-    query: {
-      template_timeline_id: templateTimelineId,
-    },
-  });
+  const response = await KibanaServices.get().http.get<SingleTimelineResolveResponse>(
+    TIMELINE_URL,
+    {
+      query: {
+        template_timeline_id: templateTimelineId,
+      },
+    }
+  );
 
   return decodeSingleTimelineResponse(response);
 };
 
 export const getResolvedTimelineTemplate = async (templateTimelineId: string) => {
-  const response = await KibanaServices.get().http.get<SingleTimelineResponse>(
+  const response = await KibanaServices.get().http.get<SingleTimelineResolveResponse>(
     TIMELINE_RESOLVE_URL,
     {
       query: {
