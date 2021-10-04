@@ -33,6 +33,7 @@
       "feature": {
         "ml": ["all"],
         "siem": ["all", "read_alerts", "crud_alerts"],
+        "securitySolutionCases": ["all"],
         "actions": ["read"],
         "builtInAlerts": ["all"],
         "dev_tools": ["all"]
