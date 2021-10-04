@@ -37,8 +37,8 @@ export function runFailedTestsReporterCli() {
         );
       }
 
+      let branch: string = '';
       if (updateGithub) {
-        let branch: string = '';
         let isPr = false;
 
         if (process.env.BUILDKITE === 'true') {
