@@ -35,7 +35,6 @@ import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { esQuery, Filter } from '../../../../../../../src/plugins/data/public';
 
-import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
 import { HostDetailsProps } from './types';
@@ -97,7 +96,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     [dispatch]
   );
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+  const { docValueFields, indexPattern, selectedPatterns } = useSourcererScope();
   const [loading, { inspect, hostDetails: hostOverview, id, refetch }] = useHostDetails({
     endDate: to,
     startDate: from,
@@ -120,110 +119,99 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
   return (
     <>
-      {indicesExist ? (
-        <>
-          <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar indexPattern={indexPattern} id="global" />
-          </FiltersGlobal>
+      <>
+        <EuiWindowEvent event="resize" handler={noop} />
+        <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+          <SiemSearchBar indexPattern={indexPattern} id="global" />
+        </FiltersGlobal>
 
-          <SecuritySolutionPageWrapper
-            noPadding={globalFullScreen}
-            data-test-subj="hostDetailsPage"
-          >
-            <Display show={!globalFullScreen}>
-              <HeaderPage
-                border
-                subtitle={
-                  <LastEventTime
-                    docValueFields={docValueFields}
-                    indexKey={LastEventIndexKey.hostDetails}
-                    hostName={detailName}
-                    indexNames={selectedPatterns}
-                  />
-                }
-                title={detailName}
-              />
-
-              <AnomalyTableProvider
-                criteriaFields={hostToCriteria(hostOverview)}
-                startDate={from}
-                endDate={to}
-                skip={isInitializing}
-              >
-                {({ isLoadingAnomaliesData, anomaliesData }) => (
-                  <HostOverviewManage
-                    docValueFields={docValueFields}
-                    id={id}
-                    isInDetailsSidePanel={false}
-                    data={hostOverview as HostItem}
-                    anomaliesData={anomaliesData}
-                    isLoadingAnomaliesData={isLoadingAnomaliesData}
-                    indexNames={selectedPatterns}
-                    loading={loading}
-                    startDate={from}
-                    endDate={to}
-                    narrowDateRange={(score, interval) => {
-                      const fromTo = scoreIntervalToDateTime(score, interval);
-                      setAbsoluteRangeDatePicker({
-                        id: 'global',
-                        from: fromTo.from,
-                        to: fromTo.to,
-                      });
-                    }}
-                    setQuery={setQuery}
-                    refetch={refetch}
-                    inspect={inspect}
-                  />
-                )}
-              </AnomalyTableProvider>
-
-              <EuiHorizontalRule />
-
-              <HostsDetailsKpiComponent
-                filterQuery={filterQuery}
-                from={from}
-                indexNames={selectedPatterns}
-                setQuery={setQuery}
-                to={to}
-                narrowDateRange={narrowDateRange}
-                skip={isInitializing}
-              />
-
-              <EuiSpacer />
-
-              <SecuritySolutionTabNavigation
-                navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
-              />
-
-              <EuiSpacer />
-            </Display>
-
-            <HostDetailsTabs
-              docValueFields={docValueFields}
-              indexNames={selectedPatterns}
-              isInitializing={isInitializing}
-              deleteQuery={deleteQuery}
-              pageFilters={hostDetailsPageFilters}
-              to={to}
-              from={from}
-              detailName={detailName}
-              type={type}
-              setQuery={setQuery}
-              filterQuery={filterQuery}
-              hostDetailsPagePath={hostDetailsPagePath}
-              indexPattern={indexPattern}
-              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+        <SecuritySolutionPageWrapper noPadding={globalFullScreen} data-test-subj="hostDetailsPage">
+          <Display show={!globalFullScreen}>
+            <HeaderPage
+              border
+              subtitle={
+                <LastEventTime
+                  docValueFields={docValueFields}
+                  indexKey={LastEventIndexKey.hostDetails}
+                  hostName={detailName}
+                  indexNames={selectedPatterns}
+                />
+              }
+              title={detailName}
             />
-          </SecuritySolutionPageWrapper>
-        </>
-      ) : (
-        <SecuritySolutionPageWrapper>
-          <HeaderPage border title={detailName} />
 
-          <OverviewEmpty />
+            <AnomalyTableProvider
+              criteriaFields={hostToCriteria(hostOverview)}
+              startDate={from}
+              endDate={to}
+              skip={isInitializing}
+            >
+              {({ isLoadingAnomaliesData, anomaliesData }) => (
+                <HostOverviewManage
+                  docValueFields={docValueFields}
+                  id={id}
+                  isInDetailsSidePanel={false}
+                  data={hostOverview as HostItem}
+                  anomaliesData={anomaliesData}
+                  isLoadingAnomaliesData={isLoadingAnomaliesData}
+                  indexNames={selectedPatterns}
+                  loading={loading}
+                  startDate={from}
+                  endDate={to}
+                  narrowDateRange={(score, interval) => {
+                    const fromTo = scoreIntervalToDateTime(score, interval);
+                    setAbsoluteRangeDatePicker({
+                      id: 'global',
+                      from: fromTo.from,
+                      to: fromTo.to,
+                    });
+                  }}
+                  setQuery={setQuery}
+                  refetch={refetch}
+                  inspect={inspect}
+                />
+              )}
+            </AnomalyTableProvider>
+
+            <EuiHorizontalRule />
+
+            <HostsDetailsKpiComponent
+              filterQuery={filterQuery}
+              from={from}
+              indexNames={selectedPatterns}
+              setQuery={setQuery}
+              to={to}
+              narrowDateRange={narrowDateRange}
+              skip={isInitializing}
+            />
+
+            <EuiSpacer />
+
+            <SecuritySolutionTabNavigation
+              navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
+            />
+
+            <EuiSpacer />
+          </Display>
+
+          <HostDetailsTabs
+            docValueFields={docValueFields}
+            indexNames={selectedPatterns}
+            isInitializing={isInitializing}
+            deleteQuery={deleteQuery}
+            pageFilters={hostDetailsPageFilters}
+            to={to}
+            from={from}
+            detailName={detailName}
+            type={type}
+            setQuery={setQuery}
+            filterQuery={filterQuery}
+            hostDetailsPagePath={hostDetailsPagePath}
+            indexPattern={indexPattern}
+            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+          />
         </SecuritySolutionPageWrapper>
-      )}
+      </>
 
       <SpyRoute pageName={SecurityPageName.hosts} />
     </>

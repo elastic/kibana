@@ -18,7 +18,6 @@ import { useFetchIndex } from '../../common/containers/source';
 
 import { EventsByDataset } from '../components/events_by_dataset';
 import { EventCounts } from '../components/event_counts';
-import { OverviewEmpty } from '../components/overview_empty';
 import { StatefulSidebar } from '../components/sidebar';
 import { SignalsByCategory } from '../components/signals_by_category';
 import { inputsSelectors } from '../../common/store';
@@ -56,7 +55,7 @@ const OverviewComponent = () => {
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
-  const { indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+  const { indexPattern, selectedPatterns } = useSourcererScope();
 
   const endpointMetadataIndex = useMemo<string[]>(() => {
     return [ENDPOINT_METADATA_INDEX];
@@ -83,105 +82,100 @@ const OverviewComponent = () => {
 
   return (
     <>
-      {indicesExist ? (
-        <>
-          <FiltersGlobal>
-            <SiemSearchBar id="global" indexPattern={indexPattern} />
-          </FiltersGlobal>
+      <>
+        <FiltersGlobal>
+          <SiemSearchBar id="global" indexPattern={indexPattern} />
+        </FiltersGlobal>
 
-          <StyledSecuritySolutionPageWrapper>
-            {!dismissMessage && !metadataIndexExists && canAccessFleet && (
-              <>
-                <EndpointNotice onDismiss={dismissEndpointNotice} />
-                <EuiSpacer size="l" />
-              </>
-            )}
-            <Sourcerer scope={SourcererScopeName.default} />
-            <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
-              <SidebarFlexItem grow={false}>
-                <StatefulSidebar />
-              </SidebarFlexItem>
+        <StyledSecuritySolutionPageWrapper>
+          {!dismissMessage && !metadataIndexExists && canAccessFleet && (
+            <>
+              <EndpointNotice onDismiss={dismissEndpointNotice} />
+              <EuiSpacer size="l" />
+            </>
+          )}
+          <Sourcerer scope={SourcererScopeName.default} />
+          <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+            <SidebarFlexItem grow={false}>
+              <StatefulSidebar />
+            </SidebarFlexItem>
 
-              <EuiFlexItem grow={true}>
-                <EuiFlexGroup direction="column" gutterSize="none">
-                  {hasIndexRead && hasKibanaREAD && (
-                    <>
-                      <EuiFlexItem grow={false}>
-                        <SignalsByCategory filters={filters} query={query} />
-                        <EuiSpacer size="l" />
-                      </EuiFlexItem>
+            <EuiFlexItem grow={true}>
+              <EuiFlexGroup direction="column" gutterSize="none">
+                {hasIndexRead && hasKibanaREAD && (
+                  <>
+                    <EuiFlexItem grow={false}>
+                      <SignalsByCategory filters={filters} query={query} />
+                      <EuiSpacer size="l" />
+                    </EuiFlexItem>
 
-                      <EuiFlexItem grow={false}>
-                        <AlertsByCategory
+                    <EuiFlexItem grow={false}>
+                      <AlertsByCategory
+                        deleteQuery={deleteQuery}
+                        filters={filters}
+                        from={from}
+                        indexPattern={indexPattern}
+                        indexNames={selectedPatterns}
+                        query={query}
+                        setQuery={setQuery}
+                        to={to}
+                      />
+                    </EuiFlexItem>
+                  </>
+                )}
+
+                <EuiFlexItem grow={false}>
+                  <EventsByDataset
+                    deleteQuery={deleteQuery}
+                    filters={filters}
+                    from={from}
+                    indexPattern={indexPattern}
+                    indexNames={selectedPatterns}
+                    query={query}
+                    setQuery={setQuery}
+                    to={to}
+                  />
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EventCounts
+                    filters={filters}
+                    from={from}
+                    indexNames={selectedPatterns}
+                    indexPattern={indexPattern}
+                    query={query}
+                    setQuery={setQuery}
+                    to={to}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup direction="row">
+                    <EuiFlexItem grow={1}>
+                      <ThreatIntelLinkPanel
+                        isThreatIntelModuleEnabled={isThreatIntelModuleEnabled}
+                        deleteQuery={deleteQuery}
+                        from={from}
+                        setQuery={setQuery}
+                        to={to}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={1}>
+                      {riskyHostsEnabled && (
+                        <RiskyHostLinks
                           deleteQuery={deleteQuery}
-                          filters={filters}
                           from={from}
-                          indexPattern={indexPattern}
-                          indexNames={selectedPatterns}
-                          query={query}
                           setQuery={setQuery}
                           to={to}
                         />
-                      </EuiFlexItem>
-                    </>
-                  )}
-
-                  <EuiFlexItem grow={false}>
-                    <EventsByDataset
-                      deleteQuery={deleteQuery}
-                      filters={filters}
-                      from={from}
-                      indexPattern={indexPattern}
-                      indexNames={selectedPatterns}
-                      query={query}
-                      setQuery={setQuery}
-                      to={to}
-                    />
-                  </EuiFlexItem>
-
-                  <EuiFlexItem grow={false}>
-                    <EventCounts
-                      filters={filters}
-                      from={from}
-                      indexNames={selectedPatterns}
-                      indexPattern={indexPattern}
-                      query={query}
-                      setQuery={setQuery}
-                      to={to}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup direction="row">
-                      <EuiFlexItem grow={1}>
-                        <ThreatIntelLinkPanel
-                          isThreatIntelModuleEnabled={isThreatIntelModuleEnabled}
-                          deleteQuery={deleteQuery}
-                          from={from}
-                          setQuery={setQuery}
-                          to={to}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={1}>
-                        {riskyHostsEnabled && (
-                          <RiskyHostLinks
-                            deleteQuery={deleteQuery}
-                            from={from}
-                            setQuery={setQuery}
-                            to={to}
-                          />
-                        )}
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </StyledSecuritySolutionPageWrapper>
-        </>
-      ) : (
-        <OverviewEmpty />
-      )}
-
+                      )}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </StyledSecuritySolutionPageWrapper>
+      </>
       <SpyRoute pageName={SecurityPageName.overview} />
     </>
   );
