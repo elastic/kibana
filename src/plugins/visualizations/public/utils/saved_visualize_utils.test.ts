@@ -62,7 +62,7 @@ jest.mock('../../../../plugins/saved_objects/public', () => ({
 }));
 
 describe('saved_visualize_utils', () => {
-  const { chrome, overlays, savedObjects } = coreMock.createStart();
+  const { overlays, savedObjects } = coreMock.createStart();
   const savedObjectsClient = savedObjects.client as jest.Mocked<SavedObjectsClientContract>;
   (savedObjectsClient.resolve as jest.Mock).mockImplementation(() => ({
     saved_object: {
