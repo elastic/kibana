@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '../elasticsearch_client';
+import type { KibanaClient as ElasticsearchClient } from '@elastic/elasticsearch/api/kibana';
 
 export const getIndexExists = async (
   esClient: ElasticsearchClient,

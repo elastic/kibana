@@ -6,16 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '../elasticsearch_client';
+import type { KibanaClient as ElasticsearchClient } from '@elastic/elasticsearch/api/kibana';
 
 export const readPrivileges = async (
   esClient: ElasticsearchClient,
   index: string
 ): Promise<unknown> => {
   return (
-    await esClient.transport.request({
-      path: '/_security/user/_has_privileges',
-      method: 'POST',
+    await esClient.security.hasPrivileges({
       body: {
         cluster: [
           'all',

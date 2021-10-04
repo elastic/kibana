@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ElasticsearchClient } from '../elasticsearch_client';
+import type { KibanaClient as ElasticsearchClient } from '@elastic/elasticsearch/api/kibana';
 
 export const setPolicy = async (
   esClient: ElasticsearchClient,
@@ -14,10 +13,8 @@ export const setPolicy = async (
   body: Record<string, unknown>
 ): Promise<unknown> => {
   return (
-    await esClient.transport.request({
-      path: `/_ilm/policy/${policy}`,
-      method: 'PUT',
-      body,
+    await esClient.ilm.putLifecycle({
+      policy,
     })
   ).body;
 };
