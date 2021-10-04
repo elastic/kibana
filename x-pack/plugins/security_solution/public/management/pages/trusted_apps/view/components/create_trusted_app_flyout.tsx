@@ -176,10 +176,6 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
       }
     }, [onClose, creationSuccessful]);
 
-    // console.log('TAByPolicyEnabled', isTrustedAppsByPolicyEnabled);
-    // console.log('not isPlatinumPlus', !isPlatinumPlus);
-    // console.log('isEditMode', isEditMode);
-    // console.log('not isGlobal', !isGlobal);
     return (
       <EuiFlyout onClose={handleCancelClick} {...flyoutProps} hideCloseButton={creationInProgress}>
         <EuiFlyoutHeader hasBorder>

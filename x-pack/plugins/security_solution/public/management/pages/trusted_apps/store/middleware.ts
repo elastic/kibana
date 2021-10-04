@@ -420,7 +420,7 @@ const fetchEditTrustedAppIfNeeded = async (
 
         trustedAppForEdit = (await trustedAppsService.getTrustedApp({ id: editTrustedAppId })).data;
       }
-      console.log('dispatching trustedAppCreationEditItemStateChanged');
+
       dispatch({
         type: 'trustedAppCreationEditItemStateChanged',
         payload: {
@@ -429,7 +429,6 @@ const fetchEditTrustedAppIfNeeded = async (
         },
       });
 
-      console.log('dispatching trustedAppCreationDialogFormStateUpdated');
       dispatch({
         type: 'trustedAppCreationDialogFormStateUpdated',
         payload: {

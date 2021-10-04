@@ -195,45 +195,49 @@ describe('When on the Trusted Apps Page', () => {
     });
 
     describe('and the Grid view is being displayed', () => {
-      const TRUSTED_APP_GET_URI = resolvePathVariables(TRUSTED_APPS_GET_API, {
-        id: '9999-edit-8888',
-      });
+      let renderResult: ReturnType<AppContextTestRender['render']>;
 
-      const renderAndWaitForGetApi = async () => {
-        // the store action watcher is setup prior to render because `renderWithListData()`
-        // also awaits API calls and this action could be missed.
-        const apiResponseForEditTrustedApp = waitForAction(
-          'trustedAppCreationEditItemStateChanged',
-          {
-            validate({ payload }) {
-              console.log('payload type', payload.type)
-              return isLoadedResourceState(payload) || isFailedResourceState(payload);
-            },
-          }
-        );
+      const renderWithListDataAndClickOnEditCard = async () => {
+        renderResult = await renderWithListData();
 
-        const renderResult = await renderWithListData();
-
-        await reactTestingLibrary.act(async () => {
-          await apiResponseForEditTrustedApp;
+        await act(async () => {
+          (await renderResult.findAllByTestId('trustedAppCard-header-actions-button'))[0].click();
         });
 
-        return renderResult;
+        act(() => {
+          fireEvent.click(renderResult.getByTestId('editTrustedAppAction'));
+        });
       };
 
-      describe('and the edit trusted app button is clicked', () => {
-        let renderResult: ReturnType<AppContextTestRender['render']>;
-
+      describe('and the license is downgraded to gold or below', () => {
         beforeEach(async () => {
-          renderResult = await renderWithListData();
+          (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+          useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
 
-          await act(async () => {
-            (await renderResult.findAllByTestId('trustedAppCard-header-actions-button'))[0].click();
+          const originalFakeTrustedAppProvider = getFakeTrustedApp.getMockImplementation();
+          getFakeTrustedApp.mockImplementation(() => {
+            return {
+              ...originalFakeTrustedAppProvider!(),
+              effectScope: {
+                type: 'policy',
+                policies: ['abc123'],
+              },
+            };
           });
 
-          act(() => {
-            fireEvent.click(renderResult.getByTestId('editTrustedAppAction'));
-          });
+          await renderWithListDataAndClickOnEditCard();
+        });
+
+        it('shows a message at the top of the flyout to inform the user their license is expired', async () => {
+          expect(
+            renderResult.queryByTestId('addTrustedAppFlyout-expired-license-callout')
+          ).toBeTruthy();
+        });
+      });
+
+      describe('and the edit trusted app button is clicked', () => {
+        beforeEach(async () => {
+          await renderWithListDataAndClickOnEditCard();
         });
 
         it('should persist edit params to url', () => {
@@ -305,44 +309,34 @@ describe('When on the Trusted Apps Page', () => {
             });
           });
         });
-        describe.only('and the license is downgraded to gold or below', () => {
-          beforeEach(() => {
-            (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
-            useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
-
-            // Mock the API GET for the trusted application
-            const priorMockImplementation = coreStart.http.get.getMockImplementation();
-            coreStart.http.get.mockImplementation(async (...args) => {
-              if ('string' === typeof args[0] && args[0] === TRUSTED_APP_GET_URI) {
-                console.log(args[0]);
-                return {
-                  data: {
-                    ...getFakeTrustedApp(),
-                    id: '9999-edit-8888',
-                    effectScope: { type: 'policy', policies: ['111'] },
-                  },
-                };
-              }
-              if (priorMockImplementation) {
-                return priorMockImplementation(...args);
-              }
-            });
-            reactTestingLibrary.act(() => {
-              history.push('/administration/trusted_apps?show=edit&id=9999-edit-8888');
-            });
-          });
-
-          it('shows a message at the top of the flyout to inform the user their license is expired', async () => {
-            await renderAndWaitForGetApi();
-            console.log(renderResult.baseElement.outerHTML);
-            expect(
-              renderResult.queryByTestId('addTrustedAppFlyout-expired-license-callout')
-            ).toBeTruthy();
-          });
-        });
       });
 
       describe('and attempting to show Edit panel based on URL params', () => {
+        const TRUSTED_APP_GET_URI = resolvePathVariables(TRUSTED_APPS_GET_API, {
+          id: '9999-edit-8888',
+        });
+
+        const renderAndWaitForGetApi = async () => {
+          // the store action watcher is setup prior to render because `renderWithListData()`
+          // also awaits API calls and this action could be missed.
+          const apiResponseForEditTrustedApp = waitForAction(
+            'trustedAppCreationEditItemStateChanged',
+            {
+              validate({ payload }) {
+                return isLoadedResourceState(payload) || isFailedResourceState(payload);
+              },
+            }
+          );
+
+          renderResult = await renderWithListData();
+
+          await reactTestingLibrary.act(async () => {
+            await apiResponseForEditTrustedApp;
+          });
+
+          return renderResult;
+        };
+
         beforeEach(() => {
           // Mock the API GET for the trusted application
           const priorMockImplementation = coreStart.http.get.getMockImplementation();
@@ -367,7 +361,7 @@ describe('When on the Trusted Apps Page', () => {
         });
 
         it('should retrieve trusted app via API using url `id`', async () => {
-          const renderResult = await renderAndWaitForGetApi();
+          renderResult = await renderAndWaitForGetApi();
 
           expect(coreStart.http.get).toHaveBeenCalledWith(TRUSTED_APP_GET_URI);
 
