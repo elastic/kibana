@@ -81,6 +81,7 @@ const secAll: Role = {
       {
         feature: {
           siem: ['all'],
+          securitySolutionCases: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -110,7 +111,8 @@ const secReadCasesAll: Role = {
     kibana: [
       {
         feature: {
-          siem: ['minimal_read', 'cases_all'],
+          siem: ['read'],
+          securitySolutionCases: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },

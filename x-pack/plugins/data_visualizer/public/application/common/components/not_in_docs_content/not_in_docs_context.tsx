@@ -6,19 +6,16 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiIcon, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const NotInDocsContent: FC = () => (
   <Fragment>
-    <EuiSpacer size="xxl" />
     <EuiText textAlign="center">
       <EuiIcon type="alert" />
     </EuiText>
-
-    <EuiSpacer size="s" />
-    <EuiText textAlign="center">
+    <EuiText textAlign="center" size={'xs'}>
       <FormattedMessage
         id="xpack.dataVisualizer.dataGrid.field.fieldNotInDocsLabel"
         defaultMessage="This field does not appear in any documents for the selected time range"
