@@ -21,6 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { useDecodedParams } from '../../../../utils/encode_path_params';
+import { EngineLogic } from '../../../engine';
 import { AppSearchPageTemplate } from '../../../layout';
 import { Result } from '../../../result';
 import { Result as ResultType } from '../../../result/types';
@@ -36,6 +37,7 @@ export const CurationSuggestion: React.FC = () => {
   const { query } = useDecodedParams();
   const curationSuggestionLogic = CurationSuggestionLogic({ query });
   const { loadSuggestion } = useActions(curationSuggestionLogic);
+  const { engine, isMetaEngine } = useValues(EngineLogic);
   const { suggestion, suggestedPromotedDocuments, dataLoading } =
     useValues(curationSuggestionLogic);
   const [showOrganicResults, setShowOrganicResults] = useState(false);
@@ -102,10 +104,18 @@ export const CurationSuggestion: React.FC = () => {
               <EuiFlexGroup gutterSize="m">
                 <EuiFlexItem>
                   {currentOrganicResults.length > 0 && (
-                    <EuiFlexGroup direction="column" gutterSize="s">
+                    <EuiFlexGroup
+                      direction="column"
+                      gutterSize="s"
+                      data-test-subj="currentOrganicResults"
+                    >
                       {currentOrganicResults.map((result: ResultType) => (
                         <EuiFlexItem grow={false} key={result.id.raw}>
-                          <Result result={result} isMetaEngine={false} />
+                          <Result
+                            result={result}
+                            isMetaEngine={isMetaEngine}
+                            schemaForTypeHighlights={engine.schema}
+                          />
                         </EuiFlexItem>
                       ))}
                     </EuiFlexGroup>
@@ -113,10 +123,18 @@ export const CurationSuggestion: React.FC = () => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   {proposedOrganicResults.length > 0 && (
-                    <EuiFlexGroup direction="column" gutterSize="s">
+                    <EuiFlexGroup
+                      direction="column"
+                      gutterSize="s"
+                      data-test-subj="proposedOrganicResults"
+                    >
                       {proposedOrganicResults.map((result: ResultType) => (
                         <EuiFlexItem grow={false} key={result.id.raw}>
-                          <Result result={result} isMetaEngine={false} />
+                          <Result
+                            result={result}
+                            isMetaEngine={isMetaEngine}
+                            schemaForTypeHighlights={engine.schema}
+                          />
                         </EuiFlexItem>
                       ))}
                     </EuiFlexGroup>

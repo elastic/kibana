@@ -16,6 +16,8 @@ import { shallow } from 'enzyme';
 
 import { AppSearchPageTemplate } from '../../../layout';
 
+import { Result } from '../../../result';
+
 import { CurationResultPanel } from './curation_result_panel';
 import { CurationSuggestion } from './curation_suggestion';
 
@@ -55,6 +57,10 @@ describe('CurationSuggestion', () => {
         },
       },
     ],
+    isMetaEngine: true,
+    engine: {
+      schema: {},
+    },
   };
 
   const actions = {
@@ -102,5 +108,25 @@ describe('CurationSuggestion', () => {
     expect(wrapper.find('[data-test-subj="organicResults"]').exists()).toBe(true);
     wrapper.find('[data-test-subj="showOrganicResults"]').simulate('click');
     expect(wrapper.find('[data-test-subj="organicResults"]').exists()).toBe(false);
+  });
+
+  it('displays proposed organic results', () => {
+    const wrapper = shallow(<CurationSuggestion />);
+    wrapper.find('[data-test-subj="showOrganicResults"]').simulate('click');
+    expect(wrapper.find('[data-test-subj="proposedOrganicResults"]').find(Result).length).toBe(4);
+    expect(wrapper.find(Result).at(0).prop('isMetaEngine')).toEqual(true);
+    expect(wrapper.find(Result).at(0).prop('schemaForTypeHighlights')).toEqual(
+      values.engine.schema
+    );
+  });
+
+  it('displays current organic results', () => {
+    const wrapper = shallow(<CurationSuggestion />);
+    wrapper.find('[data-test-subj="showOrganicResults"]').simulate('click');
+    expect(wrapper.find('[data-test-subj="currentOrganicResults"]').find(Result).length).toBe(4);
+    expect(wrapper.find(Result).at(0).prop('isMetaEngine')).toEqual(true);
+    expect(wrapper.find(Result).at(0).prop('schemaForTypeHighlights')).toEqual(
+      values.engine.schema
+    );
   });
 });
