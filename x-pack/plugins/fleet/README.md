@@ -54,41 +54,54 @@ It can be useful to run Fleet Server in a container on your local machine in ord
 
 _The following is adapted from the Fleet Server [README](https://github.com/elastic/fleet-server#running-elastic-agent-with-fleet-server-in-container)_
 
-1. Add the following configuration to your `kibana.dev.yml`
+1. Bootstrap Kibana
+
+```
+  cd kibana
+  yarn kbn bootstrap
+```
+
+
+2. Add the following configuration to your `config/kibana.dev.yml`
 
 ```yml
 server.host: 0.0.0.0
 ```
 
-2. Append the following option to the command you use to start Elasticsearch
+3. Append `-E http.host=0.0.0.0` to the command you use to start Elasticsearch. The `-E path.data` option ensures that the Elasticsearch data is persisted locally, using on the specified path:
 
 ```
--E http.host=0.0.0.0
-```
-
-This command should look something like this:
-
-```
+nvm use
 yarn es snapshot --license trial -E xpack.security.authc.api_key.enabled=true -E path.data=/tmp/es-data -E http.host=0.0.0.0
 ```
 
-3. Run the Fleet Server Docker container. Make sure you include a `BASE-PATH` value if your local Kibana instance is using one. `YOUR-IP` should correspond to the IP address used by your Docker network to represent the host. For Windows and Mac machines, this should be `192.168.65.2`. If you're not sure what this IP should be, run the following to look it up:
+4. On another terminal start Kibana:
 
 ```
-docker run -it --rm alpine nslookup host.docker.internal
+nvm use
+yarn start
 ```
 
-To run the Fleet Server Docker container:
+5. Head to http://localhost:5601. Log in: `elastic:changeme`.
+Trigger Fleet setup by clicking Fleet or going to http://localhost:5601/app/fleet#/.
+
+6. Determine your IP address by opening a new terminal window and running:
+
+```
+ipconfig getifaddr en0
+```
+
+7. Run the Fleet Server Docker container.
+Make sure you include a `BASE-PATH` value if your local Kibana instance is using one. Replace `{YOUR_IP}` with the IP address from the previous step. Also ensure you provide the `-p 8220:8220` port mapping to map the Fleet Server container's port `8220` to your local machine's port `8220` in order for Fleet to communicate with Fleet Server.
+
+For the latest version, use `8.0.0-SNAPSHOT`. Otherwise, you can explore the available versions at https://www.docker.elastic.co/r/beats/elastic-agent.
 
 ```
 docker run -e KIBANA_HOST=http://{YOUR-IP}:5601/{BASE-PATH} -e KIBANA_USERNAME=elastic -e KIBANA_PASSWORD=changeme -e ELASTICSEARCH_HOST=http://{YOUR-IP}:9200 -e ELASTICSEARCH_USERNAME=elastic -e ELASTICSEARCH_PASSWORD=changeme -e KIBANA_FLEET_SETUP=1 -e FLEET_SERVER_ENABLE=1 -e FLEET_SERVER_INSECURE_HTTP=1 -p 8220:8220 docker.elastic.co/beats/elastic-agent:{VERSION}
 ```
+Head to http://localhost:5601/app/fleet#/fleet/agents and verify that an healthy agent is running.
 
-Ensure you provide the `-p 8220:8220` port mapping to map the Fleet Server container's port `8220` to your local machine's port `8220` in order for Fleet to communicate with Fleet Server.
-
-For the latest version, use `8.0.0-SNAPSHOT`. Otherwise, you can explore the available versions at https://www.docker.elastic.co/r/beats/elastic-agent.
-
-Once the Fleet Server container is running, you should be able to treat it as if it were a local process running on `http://localhost:8220` when configuring Fleet via the UI. You can then run `elastic-agent` on your local machine directly for testing purposes.
+Once the Fleet Server container is running, you should be able to treat it as if it were a local process when configuring Fleet via the UI. You can then run `elastic-agent` on your local machine directly for testing purposes.
 
 ### Tests
 
