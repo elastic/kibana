@@ -46,7 +46,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(newPipelineExists).to.be(true);
     });
 
-    it('Creates a pipeline from CSV', async () => {});
+    it('Creates a pipeline from CSV', async () => {
+      // TODO test
+    });
 
     after(async () => {
       // Delete the pipeline that was created

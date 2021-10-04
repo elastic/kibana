@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-describe('mapper', () => {});
+describe('mapper', () => {
+  describe('mapToIngestPipeline()', () => {
+    // TODO tests
+
+    it('test tbd', () => {});
+  });
+});
