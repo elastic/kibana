@@ -9,17 +9,10 @@ import { encode } from 'rison-node';
 import React, { FunctionComponent, useState, useEffect } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiText } from '@elastic/eui';
 
-import { DataPublicPluginStart } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
-import {
-  uiMetricService,
-  UIM_OBSERVABILITY_CLICK,
-  UIM_DISCOVER_CLICK,
-} from '../../../lib/ui_metric';
-
+import { DataPublicPluginStart } from '../../../../shared_imports';
 import {
   DEPRECATION_LOGS_INDEX_PATTERN,
   DEPRECATION_LOGS_SOURCE_ID,
@@ -80,14 +73,7 @@ const DiscoverAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
   }, [dataService, checkpoint, share.url.locators]);
 
   return (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink
-      href={discoveryUrl}
-      onClick={() => {
-        uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DISCOVER_CLICK);
-      }}
-      data-test-subj="viewDiscoverLogs"
-    >
+    <EuiLink href={discoveryUrl} data-test-subj="viewDiscoverLogs">
       <FormattedMessage
         id="xpack.upgradeAssistant.overview.viewDiscoverResultsAction"
         defaultMessage="Analyze logs in Discover"
@@ -109,14 +95,7 @@ const ObservabilityAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
   );
 
   return (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink
-      href={logStreamUrl}
-      onClick={() => {
-        uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_OBSERVABILITY_CLICK);
-      }}
-      data-test-subj="viewObserveLogs"
-    >
+    <EuiLink href={logStreamUrl} data-test-subj="viewObserveLogs">
       <FormattedMessage
         id="xpack.upgradeAssistant.overview.viewObservabilityResultsAction"
         defaultMessage="View deprecation logs in Observability"
