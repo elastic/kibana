@@ -6,7 +6,7 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, OPERATION_COLUMN, REPORT_METRIC_FIELD } from '../constants';
+import { FieldLabels, OPERATION_COLUMN, REPORT_METRIC_FIELD, ReportTypes } from '../constants';
 import {
   CLS_LABEL,
   DCL_LABEL,
@@ -30,7 +30,7 @@ const SUMMARY_DOWN = 'summary.down';
 
 export function getSyntheticsKPIConfig({ indexPattern }: ConfigProps): SeriesConfig {
   return {
-    reportType: 'kpi-over-time',
+    reportType: ReportTypes.KPI,
     defaultSeriesType: 'bar_stacked',
     seriesTypes: [],
     xAxisColumn: {
