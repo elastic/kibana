@@ -22,7 +22,7 @@ import {
 } from '../../screens/timeline';
 import { createTimelineTemplate } from '../../tasks/api_calls/timelines';
 
-import { cleanKibana, reload } from '../../tasks/common';
+import { cleanKibana } from '../../tasks/common';
 import { loginAndWaitForPage, loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { selectCustomTemplates } from '../../tasks/templates';
