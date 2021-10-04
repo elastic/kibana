@@ -31,12 +31,12 @@ export async function getESUpgradeStatus(
 
     return Object.keys(deprecations).reduce((combinedDeprecations, deprecationType) => {
       if (deprecationType === 'index_settings') {
-        const filteredIndices = indices.filter((index) => {
-          const isReindexOp = index.correctiveAction?.type === 'reindex';
-          const isSystemIndex = systemIndicesList.includes(index.index!);
-
-          return !(isReindexOp && isSystemIndex);
-        });
+        // We need to exclude all index related deprecations for system indices since
+        // they are resolved separately through the system indices upgrade section in
+        // the Overview page.
+        const filteredIndices = indices.filter(
+          (index) => !systemIndicesList.includes(index.index!)
+        );
 
         combinedDeprecations = combinedDeprecations.concat(filteredIndices);
       } else {
