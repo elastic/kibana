@@ -121,12 +121,7 @@ export const VisualizeListing = () => {
           ),
         }));
     },
-    [
-      listingLimit,
-      uiSettings,
-      savedObjectsTagging,
-      visualizations.findListItems,
-    ]
+    [listingLimit, uiSettings, savedObjectsTagging, visualizations]
   );
 
   const deleteItems = useCallback(

@@ -14,10 +14,7 @@ import { parse } from 'query-string';
 
 import { Capabilities } from 'src/core/public';
 import { TopNavMenuData } from 'src/plugins/navigation/public';
-import {
-  VISUALIZE_EMBEDDABLE_TYPE,
-  VisualizeInput,
-} from '../../../../visualizations/public';
+import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from '../../../../visualizations/public';
 import {
   showSaveModal,
   SavedObjectSaveModalOrigin,
