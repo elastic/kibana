@@ -49,20 +49,6 @@ function LabelsPanel({ stateParams, setValue, setGaugeValue }: GaugeOptionsInter
           setGaugeValue('style', { ...stateParams.gauge.style, [paramName]: value })
         }
       />
-
-      <SwitchOption
-        disabled={!stateParams.gauge.labels.show}
-        label={i18n.translate('visTypeVislib.controls.gaugeOptions.displayWarningsLabel', {
-          defaultMessage: 'Display warnings',
-        })}
-        tooltip={i18n.translate('visTypeVislib.controls.gaugeOptions.switchWarningsTooltip', {
-          defaultMessage:
-            'Turns on/off warnings. When turned on, a warning will be shown if not all labels could be displayed.',
-        })}
-        paramName="isDisplayWarning"
-        value={stateParams.isDisplayWarning}
-        setValue={setValue}
-      />
     </EuiPanel>
   );
 }
