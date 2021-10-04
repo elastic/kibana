@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { useLocation } from 'react-router-dom';
+
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -25,7 +27,6 @@ interface SuggestionsCalloutProps {
   title: string;
   description: string;
   buttonTo: string;
-  calloutGroupId: string;
   lastUpdatedTimestamp: string; // ISO string like '2021-10-04T18:53:02.784Z'
 }
 
@@ -33,11 +34,12 @@ export const SuggestionsCallout: React.FC<SuggestionsCalloutProps> = ({
   title,
   description,
   buttonTo,
-  calloutGroupId,
   lastUpdatedTimestamp,
 }) => {
+  const { pathname } = useLocation();
+
   const [lastDismissedTimestamp, setLastDismissedTimestamp] = useLocalStorage<string>(
-    `suggestion-callout--${calloutGroupId}`,
+    `suggestions-callout--${pathname}`,
     new Date(0).toISOString()
   );
 

@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import '../../../../__mocks__/react_router';
+
 jest.mock('../../../../shared/use_local_storage', () => ({
   useLocalStorage: jest.fn(),
 }));
 
 import React from 'react';
+
+import { useLocation } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
@@ -21,7 +25,6 @@ import { useLocalStorage } from '../../../../shared/use_local_storage';
 import { SuggestionsCallout } from './suggestions_callout';
 
 const props = {
-  calloutGroupId: 'some-id',
   title: 'Title',
   description: 'A description.',
   buttonTo: '/suggestions',
@@ -43,6 +46,9 @@ describe('SuggestionsCallout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockLastDismissedTimestamp(tenMinutesAgo);
+    (useLocation as jest.Mock).mockImplementationOnce(() => ({
+      pathname: 'app/enterprise_search/app_search/engines/some-engine',
+    }));
   });
 
   it('renders a callout with a link to the suggestions', () => {

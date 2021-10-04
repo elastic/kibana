@@ -17,7 +17,6 @@ import { EngineLogic, generateEnginePath } from '../../engine';
 export const SuggestedCurationsCallout: React.FC = () => {
   const {
     engine: { search_relevance_suggestions: searchRelevanceSuggestions },
-    engineName,
   } = useValues(EngineLogic);
 
   const pendingCount = searchRelevanceSuggestions?.curation.pending;
@@ -28,7 +27,6 @@ export const SuggestedCurationsCallout: React.FC = () => {
 
   return (
     <SuggestionsCallout
-      calloutGroupId={`engine-${engineName}`}
       title={i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.suggestedCurationsCallout.title',
         { defaultMessage: 'New suggested curations to review' }

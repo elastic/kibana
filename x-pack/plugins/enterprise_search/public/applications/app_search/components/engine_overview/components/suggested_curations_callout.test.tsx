@@ -26,7 +26,6 @@ const MOCK_VALUES = {
       },
     },
   },
-  engineName: 'some-engine',
 };
 
 describe('SuggestedCurationsCallout', () => {

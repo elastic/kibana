@@ -19,7 +19,7 @@ import { CurationLogic } from '.';
 
 export const SuggestedDocumentsCallout: React.FC = () => {
   const {
-    curation: { suggestion, queries, id },
+    curation: { suggestion, queries },
   } = useValues(CurationLogic);
 
   if (typeof suggestion === 'undefined' || suggestion.status !== 'pending') {
@@ -28,7 +28,6 @@ export const SuggestedDocumentsCallout: React.FC = () => {
 
   return (
     <SuggestionsCallout
-      calloutGroupId={`curation-${id}`}
       title={i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.curation.suggestedDocumentsCallout.title',
         { defaultMessage: 'New suggested documents for this query' }
