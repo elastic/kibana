@@ -15,6 +15,7 @@ export const setPolicy = async (
   return (
     await esClient.ilm.putLifecycle({
       policy,
+      body,
     })
   ).body;
 };
