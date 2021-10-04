@@ -21015,8 +21015,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdLabel": "しきい値",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.importTimelineModalTitle": "保存されたタイムラインからクエリをインポート",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.importTimelineQueryButton": "保存されたタイムラインからクエリをインポート",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.indicesCustomDescription": "インデックスのカスタムリストを入力します",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.indicesFromConfigDescription": "セキュリティソリューション詳細設定からElasticsearchインデックスを使用します",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.indicesHelperDescription": "このルールを実行するElasticsearchインデックスのパターンを入力します。デフォルトでは、セキュリティソリューション詳細設定で定義されたインデックスパターンが含まれます。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningJobIdHelpText": "手始めに使えるように、一般的なジョブがいくつか提供されています。独自のカスタムジョブを追加するには、{machineLearning} アプリケーションでジョブに「security」のグループを割り当て、ここに表示されるようにします。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningJobIdRequired": "機械学習ジョブが必要です。",

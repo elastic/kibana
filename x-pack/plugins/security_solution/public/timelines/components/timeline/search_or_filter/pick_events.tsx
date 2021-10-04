@@ -33,7 +33,10 @@ import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { TimelineEventsType } from '../../../../../common';
 import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
 import * as i18n from './translations';
-import { getScopePatternListSelection } from '../../../../common/store/sourcerer/helpers';
+import {
+  getScopePatternListSelection,
+  isSignalIndex,
+} from '../../../../common/store/sourcerer/helpers';
 import { SIEM_DATA_VIEW_LABEL } from '../../../../common/components/sourcerer/translations';
 
 const PopoverContent = styled.div`
@@ -190,9 +193,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         setSelectedOptions(
           (signalIndexName == null
             ? selectablePatterns
-            : // indexOf instead of === because the dataView version of signals index
-              // will have a wildcard and the signalIndexName does not include the wildcard
-              selectablePatterns.filter((index) => index.indexOf(signalIndexName) === -1)
+            : selectablePatterns.filter((index) => !isSignalIndex(index, signalIndexName))
           ).map((indexSelected) => ({
             label: indexSelected,
             value: indexSelected,
@@ -219,7 +220,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         dataViewId === defaultDataView.id &&
         localSelectedPatterns.sort().join() ===
           selectablePatterns
-            .filter((index) => index !== signalIndexName)
+            .filter((index) => !isSignalIndex(index, signalIndexName))
             .sort()
             .join()
       ) {

@@ -8,6 +8,7 @@
 import { State } from '../../store';
 import { sourcererSelectors } from '../../store/selectors';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { isSignalIndex } from '../../store/sourcerer/helpers';
 
 export interface IndicesSelector {
   all: string[];
@@ -23,9 +24,7 @@ export const getIndicesSelector = () => {
     const signalIndexName = getSignalIndexNameSelector(state);
     const { selectedPatterns } = getScopeSelector(state, scopeId);
     selectedPatterns.forEach((index) => {
-      // indexOf instead of === because the dataView version of signals index
-      // will have a wildcard and the signalIndexName does not include the wildcard
-      if (index.indexOf(`${signalIndexName}`) === -1) {
+      if (!isSignalIndex(index, signalIndexName)) {
         raw.push(index);
       }
     });

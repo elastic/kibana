@@ -38,17 +38,14 @@ export const getScopePatternListSelection = (
   // when our SIEM DATA_VIEW is set, here are the defaults
   if (theDataView && theDataView.id === DEFAULT_DATA_VIEW_ID) {
     if (sourcererScope === SourcererScopeName.default) {
-      // indexOf instead of === because the dataView version of signals index
-      // will have a wildcard and the signalIndexName does not include the wildcard
       patternList = patternList.filter((index) => !isSignalIndex(index, signalIndexName));
     } else if (sourcererScope === SourcererScopeName.detections) {
-      patternList = signalIndexName != null ? [signalIndexName] : []; // set to signalIndexName whether or not it exists yet in the patternList
+      // set to signalIndexName whether or not it exists yet in the patternList
+      patternList = signalIndexName != null ? [signalIndexName] : [];
     } else if (sourcererScope === SourcererScopeName.timeline) {
       patternList =
         signalIndexName != null
           ? [
-              // indexOf instead of === because the dataView version of signals index
-              // will have a wildcard and the signalIndexName does not include the wildcard
               // remove signalIndexName in case its already in there and add it whether or not it exists yet in the patternList
               ...patternList.filter((index) => !isSignalIndex(index, signalIndexName)),
               signalIndexName,
