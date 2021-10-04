@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { Provider } from 'react-redux';
