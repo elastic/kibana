@@ -93,12 +93,6 @@ export const updateVisualizationState = createAction<{
   clearStagedPreview?: boolean;
 }>('lens/updateVisualizationState');
 
-export const updateLayer = createAction<{
-  layerId: string;
-  datasourceId: string;
-  updater: (state: unknown, layerId: string) => unknown;
-}>('lens/updateLayer');
-
 export const insertLayer = createAction<{
   layerId: string;
   datasourceId: string;
@@ -147,6 +141,8 @@ export const removeLayers = createAction<{
   layerIds: string[];
 }>('lens/removeLayers');
 
+export const updateLayer = createAction<{ layerIds: string[] }>('lens/updateLayer');
+
 export const lensActions = {
   setState,
   onActiveDataChange,
@@ -155,7 +151,6 @@ export const lensActions = {
   updateDatasourceState,
   updateVisualizationState,
   insertLayer,
-  updateLayer,
   switchVisualization,
   rollbackSuggestion,
   setToggleFullscreen,
@@ -165,6 +160,7 @@ export const lensActions = {
   loadInitial,
   initEmpty,
   editVisualizationAction,
+  updateLayer,
   removeLayers,
 };
 
@@ -258,32 +254,6 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
               : payload.updater,
         },
         stagedPreview: payload.clearStagedPreview ? undefined : state.stagedPreview,
-      };
-    },
-    [updateLayer.type]: (
-      state,
-      {
-        payload,
-      }: {
-        payload: {
-          layerId: string;
-          datasourceId: string;
-          updater: (state: unknown, layerId: string) => unknown;
-        };
-      }
-    ) => {
-      return {
-        ...state,
-        datasourceStates: {
-          ...state.datasourceStates,
-          [payload.datasourceId]: {
-            ...state.datasourceStates[payload.datasourceId],
-            state: payload.updater(
-              current(state).datasourceStates[payload.datasourceId].state,
-              payload.layerId
-            ),
-          },
-        },
       };
     },
 
@@ -506,6 +476,22 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         },
       };
     },
+    [updateLayer.type]: (state, { payload: { layerIds } }: { payload: { layerIds: string[] } }) => {
+      layerIds.forEach((layerId) => {
+        const [layerDatasourceId] =
+          Object.entries(datasourceMap).find(([datasourceId, datasource]) => {
+            return (
+              state.datasourceStates[datasourceId] &&
+              datasource.getLayers(state.datasourceStates[datasourceId].state).includes(layerId)
+            );
+          }) ?? [];
+        if (layerDatasourceId) {
+          state.datasourceStates[layerDatasourceId].state = datasourceMap[
+            layerDatasourceId
+          ].removeLayer(current(state).datasourceStates[layerDatasourceId].state, layerId);
+        }
+      });
+    },
     [removeLayers.type]: (
       state,
       {
@@ -521,8 +507,6 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         throw new Error('Invariant: visualization state got updated without active visualization');
       }
 
-      let newState = state;
-
       // This is a safeguard that prevents us from accidentally updating the
       // wrong visualization. This occurs in some cases due to the uncoordinated
       // way we manage state across plugins.
@@ -534,16 +518,9 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           state.visualization.state
         );
 
-        newState = {
-          ...state,
-          visualization: {
-            ...state.visualization,
-            state:
-              typeof updater === 'function' ? updater(current(state.visualization.state)) : updater,
-          },
-        };
+        state.visualization.state =
+          typeof updater === 'function' ? updater(current(state.visualization.state)) : updater;
       }
-      return newState;
     },
   });
 };

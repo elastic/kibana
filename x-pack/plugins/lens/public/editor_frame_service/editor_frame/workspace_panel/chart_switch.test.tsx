@@ -231,10 +231,7 @@ describe('chart_switch', () => {
     });
     expect(lensStore.dispatch).toHaveBeenCalledWith({
       type: 'lens/updateLayer',
-      payload: expect.objectContaining({
-        datasourceId: 'testDatasource',
-        layerId: 'a',
-      }),
+      payload: expect.objectContaining({ layerIds: ['a'] }),
     });
   });
 

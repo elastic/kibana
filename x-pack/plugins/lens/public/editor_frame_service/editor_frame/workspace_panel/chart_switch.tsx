@@ -132,24 +132,8 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
         })
       );
     }
-    layerIds.forEach((layerId) => {
-      const [layerDatasourceId] =
-        Object.entries(props.datasourceMap).find(([datasourceId, datasource]) => {
-          return (
-            datasourceStates[datasourceId] &&
-            datasource.getLayers(datasourceStates[datasourceId].state).includes(layerId)
-          );
-        }) ?? [];
-      if (layerDatasourceId) {
-        dispatchLens(
-          updateLayer({
-            layerId,
-            datasourceId: layerDatasourceId,
-            updater: props.datasourceMap[layerDatasourceId].removeLayer,
-          })
-        );
-      }
-    });
+
+    dispatchLens(updateLayer({ layerIds }));
   }
 
   const commitSelection = (selection: VisualizationSelection) => {
