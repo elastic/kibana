@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { run, combineErrors, createFlagError, createFailError } from '@kbn/dev-utils';
+import { run, combineErrors, createFlagError } from '@kbn/dev-utils';
 import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';
@@ -21,11 +21,6 @@ run(
       : undefined;
     if (maxFilesCount !== undefined && (!Number.isFinite(maxFilesCount) || maxFilesCount < 1)) {
       throw createFlagError('expected --max-files to be a number greater than 0');
-    }
-
-    const virtualFilesCount = files.filter((file) => file.isVirtual()).length;
-    if (virtualFilesCount > 0 && virtualFilesCount < files.length) {
-      throw createFailError('Mixing of virtual and on-filesystem files is unsupported');
     }
 
     if (maxFilesCount && files.length > maxFilesCount) {
@@ -71,11 +66,7 @@ run(
       help: `
       --fix              Execute eslint in --fix mode
       --max-files        Max files number to check against. If exceeded the script will skip the execution
-      --ref              Run checks against git ref files instead of running against staged ones
-                         Examples:
-                           HEAD~1..HEAD   files changed in the commit at HEAD
-                           HEAD           equivalent to HEAD~1..HEAD
-                           main...        files changed in current branch since the common ancestor with main
+      --ref              Run checks against any git ref files (example HEAD or <commit_sha>) instead of running against staged ones
     `,
     },
   }
