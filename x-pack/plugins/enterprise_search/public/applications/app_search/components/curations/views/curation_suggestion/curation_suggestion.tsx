@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+
+import { useActions, useValues } from 'kea';
 
 import {
   EuiButtonEmpty,
@@ -27,26 +29,36 @@ import { getCurationsBreadcrumbs } from '../../utils';
 import { CurationActionBar } from './curation_action_bar';
 import { CurationResultPanel } from './curation_result_panel';
 
+import { CurationSuggestionLogic } from './curation_suggestion_logic';
 import { DATA } from './temp_data';
 
 export const CurationSuggestion: React.FC = () => {
   const { query } = useDecodedParams();
+  const curationSuggestionLogic = CurationSuggestionLogic({ query });
+  const { loadSuggestion } = useActions(curationSuggestionLogic);
+  const { suggestion, suggestedPromotedDocuments, dataLoading } =
+    useValues(curationSuggestionLogic);
   const [showOrganicResults, setShowOrganicResults] = useState(false);
   const currentOrganicResults = [...DATA].splice(5, 4);
   const proposedOrganicResults = [...DATA].splice(2, 4);
 
-  const queryTitle = query === '""' ? query : `${query}`;
+  const suggestionQuery = suggestion?.query || '';
+
+  useEffect(() => {
+    loadSuggestion();
+  }, []);
 
   return (
     <AppSearchPageTemplate
+      isLoading={dataLoading}
       pageChrome={getCurationsBreadcrumbs([
         i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.breadcrumbLabel',
-          { defaultMessage: 'Suggested: {query}', values: { query } }
+          { defaultMessage: 'Suggested: {query}', values: { query: suggestionQuery } }
         ),
       ])}
       pageHeader={{
-        pageTitle: queryTitle,
+        pageTitle: suggestionQuery,
       }}
     >
       <CurationActionBar
@@ -67,7 +79,7 @@ export const CurationSuggestion: React.FC = () => {
             <h2>Suggested</h2>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <CurationResultPanel variant="suggested" results={[...DATA].splice(3, 2)} />
+          <CurationResultPanel variant="suggested" results={suggestedPromotedDocuments} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />

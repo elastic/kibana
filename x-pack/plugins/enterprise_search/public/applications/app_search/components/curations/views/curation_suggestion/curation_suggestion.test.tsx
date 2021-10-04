@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
+import '../../../../../__mocks__/shallow_useeffect.mock';
 import { mockUseParams } from '../../../../../__mocks__/react_router';
 import '../../../../__mocks__/engine_logic.mock';
 
@@ -14,12 +16,59 @@ import { shallow } from 'enzyme';
 
 import { AppSearchPageTemplate } from '../../../layout';
 
+import { CurationResultPanel } from './curation_result_panel';
 import { CurationSuggestion } from './curation_suggestion';
 
 describe('CurationSuggestion', () => {
+  const values = {
+    suggestion: {
+      query: 'foo',
+      updated_at: '2021-07-08T14:35:50Z',
+      promoted: ['1', '2', '3'],
+    },
+    suggestedPromotedDocuments: [
+      {
+        id: {
+          raw: '1',
+        },
+        _meta: {
+          id: '1',
+          engine: 'some-engine',
+        },
+      },
+      {
+        id: {
+          raw: '2',
+        },
+        _meta: {
+          id: '2',
+          engine: 'some-engine',
+        },
+      },
+      {
+        id: {
+          raw: '3',
+        },
+        _meta: {
+          id: '3',
+          engine: 'some-engine',
+        },
+      },
+    ],
+  };
+
+  const actions = {
+    loadSuggestion: jest.fn(),
+  };
+
+  beforeAll(() => {
+    setMockValues(values);
+    setMockActions(actions);
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseParams.mockReturnValue({ query: 'some%20query' });
+    mockUseParams.mockReturnValue({ query: 'foo' });
   });
 
   it('renders', () => {
@@ -28,19 +77,21 @@ describe('CurationSuggestion', () => {
     expect(wrapper.is(AppSearchPageTemplate)).toBe(true);
   });
 
-  it('displays the decoded query in the title', () => {
-    const wrapper = shallow(<CurationSuggestion />);
-
-    expect(wrapper.prop('pageHeader').pageTitle).toEqual('some query');
+  it('loads data on initialization', () => {
+    shallow(<CurationSuggestion />);
+    expect(actions.loadSuggestion).toHaveBeenCalled();
   });
 
-  // TODO This will need to come from somewhere else when wired up
-  it('displays an empty query if "" is encoded in as the qery', () => {
-    mockUseParams.mockReturnValue({ query: '%22%22' });
+  it('shows suggested promoted documents', () => {
+    const wrapper = shallow(<CurationSuggestion />);
+    const suggestedResultsPanel = wrapper.find(CurationResultPanel).at(1);
+    expect(suggestedResultsPanel.prop('results')).toEqual(values.suggestedPromotedDocuments);
+  });
 
+  it('displays the query in the title', () => {
     const wrapper = shallow(<CurationSuggestion />);
 
-    expect(wrapper.prop('pageHeader').pageTitle).toEqual('""');
+    expect(wrapper.prop('pageHeader').pageTitle).toEqual('foo');
   });
 
   it('displays has a button to display organic results', () => {
