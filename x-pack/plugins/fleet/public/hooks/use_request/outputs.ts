@@ -22,7 +22,7 @@ export function useGetOutputs() {
 export function useDefaultOutput() {
   const outputsRequest = useGetOutputs();
   const output = useMemo(() => {
-    return outputsRequest.data?.items.filter((o) => o.is_default)[0];
+    return outputsRequest.data?.items.find((o) => o.is_default);
   }, [outputsRequest.data]);
 
   const refresh = useCallback(() => {
