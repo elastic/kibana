@@ -1047,7 +1047,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </th>
             <th
               class="euiTableHeaderCell euiTableHeaderCell--hideForMobile"
-              data-test-subj="tableHeaderCell_histogram.points_5"
+              data-test-subj="tableHeaderCell_monitor_id_5"
               role="columnheader"
               scope="col"
             >
