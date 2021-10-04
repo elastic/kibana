@@ -33,7 +33,7 @@ export interface IndexPatternSelectProps {
     | null;
 }
 
-const queryAllIndexesHelpText = (
+const queryAllIndicesHelpText = (
   <FormattedMessage
     id="visTypeTimeseries.indexPatternSelect.queryAllIndicesText"
     defaultMessage="To query all indices, use {asterisk}."
@@ -48,7 +48,7 @@ const getIndexPatternHelpText = (useKibanaIndices: boolean) => (
     id="visTypeTimeseries.indexPatternSelect.defaultDataViewText"
     defaultMessage="Using the default data view. {queryAllIndicesHelpText}"
     values={{
-      queryAllIndicesHelpText: useKibanaIndices ? '' : queryAllIndexesHelpText,
+      queryAllIndicesHelpText: useKibanaIndices ? '' : queryAllIndicesHelpText,
     }}
   />
 );
