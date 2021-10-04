@@ -340,6 +340,7 @@ export const buildExpression = (
                                 lineWidth: [yConfig.lineWidth || 1],
                                 fill: [yConfig.fill || 'none'],
                                 icon: yConfig.icon ? [yConfig.icon] : [],
+                                iconPosition: [yConfig.iconPosition || 'auto'],
                               },
                             },
                           ],
