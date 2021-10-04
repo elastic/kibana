@@ -176,7 +176,7 @@ export function getVisualizeFieldSuggestions({
     datasourceMap,
     datasourceStates,
     visualizationMap,
-    activeVisualization: visualizationMap?.[Object.keys(visualizationMap)[0]] || null,
+    activeVisualization,
     visualizationState: undefined,
     visualizeTriggerFieldContext,
   });
