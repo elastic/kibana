@@ -36,35 +36,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     ],
     [
       'Host-ku5jy6j0pw',
-      undefined,
-      undefined,
+      'x',
+      'x',
       'Warning',
       'Windows',
       '10.246.87.11, 10.145.117.106,10.109.242.136',
       '7.0.13',
-      undefined,
+      'x',
       '',
     ],
-    [
-      'Host-9fafsc3tqe',
-      undefined,
-      undefined,
-      'Warning',
-      'Windows',
-      '10.231.117.28',
-      '7.17.12',
-      undefined,
-      '',
-    ],
+    ['Host-9fafsc3tqe', 'x', 'x', 'Warning', 'Windows', '10.231.117.28', '7.17.12', 'x', ''],
     [
       'Host-o07wj6uaa5',
-      undefined,
-      undefined,
+      'x',
+      'x',
       'Failure',
       'Windows',
       '10.82.134.220, 10.47.25.170',
       '7.11.13',
-      undefined,
+      'x',
       '',
     ],
   ];
@@ -74,9 +64,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     // Do not compare timestamps, Agent status, or Policy names since the data can be inconsistent.
     for (let i = 1; i < tableData.length; i++) {
-      tableData[i][1] = undefined;
-      tableData[i][2] = undefined;
-      tableData[i][7] = undefined;
+      tableData[i][1] = 'x';
+      tableData[i][2] = 'x';
+      tableData[i][7] = 'x';
     }
 
     return tableData;
