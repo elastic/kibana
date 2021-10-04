@@ -32,7 +32,8 @@ import type { Capabilities } from 'src/core/public';
 
 import { shortenUrl } from '../lib/url_shortener';
 import { UrlParamExtension } from '../types';
-import type { SecurityOssPluginStart } from '../../../security_oss/public';
+import type { AnonymousAccessServiceStart } from '../../../../../x-pack/plugins/security/public';
+import type { AnonymousAccessState } from '../../../../../x-pack/plugins/security/common';
 
 interface Props {
   allowShortUrl: boolean;
@@ -43,7 +44,7 @@ interface Props {
   basePath: string;
   post: HttpStart['post'];
   urlParamExtensions?: UrlParamExtension[];
-  anonymousAccess?: SecurityOssPluginStart['anonymousAccess'];
+  anonymousAccess?: AnonymousAccessServiceStart;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
 }
 
@@ -66,7 +67,7 @@ interface State {
   url?: string;
   shortUrlErrorMsg?: string;
   urlParams?: UrlParams;
-  anonymousAccessParameters: Record<string, string> | null;
+  anonymousAccessParameters: AnonymousAccessState['accessURLParameters'];
   showPublicUrlSwitch: boolean;
 }
 
@@ -104,8 +105,8 @@ export class UrlPanelContent extends Component<Props, State> {
 
     if (this.props.anonymousAccess) {
       (async () => {
-        const anonymousAccessParameters =
-          await this.props.anonymousAccess!.getAccessURLParameters();
+        const { accessURLParameters: anonymousAccessParameters } =
+          await this.props.anonymousAccess!.getState();
 
         if (!this.mounted) {
           return;

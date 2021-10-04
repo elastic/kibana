@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export type { SecurityLicense } from './licensing';
-export type { AuthenticatedUser } from './model';
-export type { AnonymousAccessState } from './types';
+import type { AnonymousAccessServiceStart } from './anonymous_access_service';
+
+export const anonymousAccessMock = {
+  createStart: (): jest.Mocked<AnonymousAccessServiceStart> => ({
+    getState: jest.fn(),
+    getCapabilities: jest.fn(),
+  }),
+};

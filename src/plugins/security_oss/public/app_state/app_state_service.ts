@@ -12,7 +12,6 @@ import type { AppState } from '../../common';
 
 const DEFAULT_APP_STATE = Object.freeze({
   insecureClusterAlert: { displayAlert: false },
-  anonymousAccess: { isEnabled: false, accessURLParameters: null },
 });
 
 interface StartDeps {

@@ -27,12 +27,6 @@ export interface SecurityOssPluginSetup {
    * Allows consumers to show/hide the insecure cluster warning.
    */
   showInsecureClusterWarning$: BehaviorSubject<boolean>;
-
-  /**
-   * Set the provider function that returns a service to deal with the anonymous access.
-   * @param provider
-   */
-  setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessService) => void;
 }
 
 export interface AnonymousAccessService {
@@ -57,7 +51,6 @@ export interface AnonymousAccessService {
 export class SecurityOssPlugin implements Plugin<SecurityOssPluginSetup, void, {}, {}> {
   private readonly config$: Observable<ConfigType>;
   private readonly logger: Logger;
-  private anonymousAccessServiceProvider?: () => AnonymousAccessService;
 
   constructor(initializerContext: PluginInitializerContext<ConfigType>) {
     this.config$ = initializerContext.config.create();
@@ -74,18 +67,10 @@ export class SecurityOssPlugin implements Plugin<SecurityOssPluginSetup, void, {
       config$: this.config$,
       displayModifier$: showInsecureClusterWarning$,
       doesClusterHaveUserData: createClusterDataCheck(),
-      getAnonymousAccessService: () => this.anonymousAccessServiceProvider?.() ?? null,
     });
 
     return {
       showInsecureClusterWarning$,
-      setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessService) => {
-        if (this.anonymousAccessServiceProvider) {
-          throw new Error('Anonymous Access service provider is already set.');
-        }
-
-        this.anonymousAccessServiceProvider = provider;
-      },
     };
   }
 

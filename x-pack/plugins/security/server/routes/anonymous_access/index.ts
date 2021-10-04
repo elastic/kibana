@@ -7,7 +7,9 @@
 
 import type { RouteDefinitionParams } from '../';
 import { defineAnonymousAccessGetCapabilitiesRoutes } from './get_capabilities';
+import { defineAnonymousAccessGetStateRoutes } from './get_state';
 
 export function defineAnonymousAccessRoutes(params: RouteDefinitionParams) {
   defineAnonymousAccessGetCapabilitiesRoutes(params);
+  defineAnonymousAccessGetStateRoutes(params);
 }

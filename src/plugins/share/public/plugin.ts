@@ -10,7 +10,6 @@ import './index.scss';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
-import type { SecurityOssPluginSetup, SecurityOssPluginStart } from '../../security_oss/public';
 import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
 import { createShortUrlRedirectApp } from './services/short_url_redirect_app';
 import {
@@ -22,13 +21,10 @@ import { UrlService } from '../common/url_service';
 import { RedirectManager } from './url_service';
 import type { RedirectOptions } from '../common/url_service/locators/redirect';
 import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
-
-export interface ShareSetupDependencies {
-  securityOss?: SecurityOssPluginSetup;
-}
+import type { SecurityPluginStart } from '../../../../x-pack/plugins/security/public';
 
 export interface ShareStartDependencies {
-  securityOss?: SecurityOssPluginStart;
+  security?: SecurityPluginStart;
 }
 
 /** @public */
@@ -83,7 +79,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, plugins: ShareSetupDependencies): SharePluginSetup {
+  public setup(core: CoreSetup): SharePluginSetup {
     const { application, http } = core;
     const { basePath } = http;
 
@@ -146,7 +142,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
       ...this.shareContextMenu.start(
         core,
         this.shareMenuRegistry.start(),
-        plugins.securityOss?.anonymousAccess
+        plugins.security?.anonymousAccess
       ),
       urlGenerators: this.urlGeneratorsService.start(core),
       url: this.url!,

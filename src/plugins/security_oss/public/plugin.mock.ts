@@ -22,10 +22,6 @@ export const mockSecurityOssPlugin = {
     return {
       insecureCluster:
         mockInsecureClusterService.createStart() as jest.Mocked<InsecureClusterServiceStart>,
-      anonymousAccess: {
-        getAccessURLParameters: jest.fn().mockResolvedValue(null),
-        getCapabilities: jest.fn().mockResolvedValue({}),
-      },
     } as DeeplyMockedKeys<SecurityOssPluginStart>;
   },
 };

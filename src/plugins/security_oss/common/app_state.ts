@@ -11,8 +11,4 @@
  */
 export interface AppState {
   insecureClusterAlert: { displayAlert: boolean };
-  anonymousAccess: {
-    isEnabled: boolean;
-    accessURLParameters: Record<string, string> | null;
-  };
 }

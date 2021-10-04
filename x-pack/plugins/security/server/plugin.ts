@@ -240,13 +240,6 @@ export class SecurityPlugin
         const showInsecureClusterWarning = !allowRbac;
         securityOss.showInsecureClusterWarning$.next(showInsecureClusterWarning);
       });
-
-      securityOss.setAnonymousAccessServiceProvider(() => {
-        if (!this.anonymousAccessStart) {
-          throw new Error('AnonymousAccess service is not started!');
-        }
-        return this.anonymousAccessStart;
-      });
     }
 
     securityFeatures.forEach((securityFeature) =>

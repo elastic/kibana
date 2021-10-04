@@ -19,7 +19,6 @@ describe('AppStateService', () => {
       const appStateService = new AppStateService();
       await expect(appStateService.start({ core: coreStart }).getState()).resolves.toEqual({
         insecureClusterAlert: { displayAlert: false },
-        anonymousAccess: { isEnabled: false, accessURLParameters: null },
       });
 
       expect(coreStart.http.get).not.toHaveBeenCalled();
@@ -35,7 +34,6 @@ describe('AppStateService', () => {
       const appStateService = new AppStateService();
       await expect(appStateService.start({ core: coreStart }).getState()).resolves.toEqual({
         insecureClusterAlert: { displayAlert: false },
-        anonymousAccess: { isEnabled: false, accessURLParameters: null },
       });
 
       expect(coreStart.http.get).toHaveBeenCalledTimes(1);
@@ -48,7 +46,6 @@ describe('AppStateService', () => {
 
       const state = {
         insecureClusterAlert: { displayAlert: true },
-        anonymousAccess: { isEnabled: true, accessURLParameters: { hint: 'some-hint' } },
       };
       coreStart.http.get.mockResolvedValue(state);
 

@@ -10,7 +10,7 @@ import { registryMock, managerMock } from './plugin.test.mocks';
 import { SharePlugin } from './plugin';
 import { CoreStart } from 'kibana/public';
 import { coreMock } from '../../../core/public/mocks';
-import { mockSecurityOssPlugin } from '../../security_oss/public/mocks';
+import { securityMock } from '../../../../x-pack/plugins/security/public/mocks';
 
 describe('SharePlugin', () => {
   beforeEach(() => {
@@ -22,12 +22,8 @@ describe('SharePlugin', () => {
   describe('setup', () => {
     test('wires up and returns registry', async () => {
       const coreSetup = coreMock.createSetup();
-      const plugins = {
-        securityOss: mockSecurityOssPlugin.createSetup(),
-      };
       const setup = await new SharePlugin(coreMock.createPluginInitializerContext()).setup(
-        coreSetup,
-        plugins
+        coreSetup
       );
       expect(registryMock.setup).toHaveBeenCalledWith();
       expect(setup.register).toBeDefined();
@@ -35,10 +31,7 @@ describe('SharePlugin', () => {
 
     test('registers redirect app', async () => {
       const coreSetup = coreMock.createSetup();
-      const plugins = {
-        securityOss: mockSecurityOssPlugin.createSetup(),
-      };
-      await new SharePlugin(coreMock.createPluginInitializerContext()).setup(coreSetup, plugins);
+      await new SharePlugin(coreMock.createPluginInitializerContext()).setup(coreSetup);
       expect(coreSetup.application.register).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'short_url_redirect',
@@ -50,13 +43,10 @@ describe('SharePlugin', () => {
   describe('start', () => {
     test('wires up and returns show function, but not registry', async () => {
       const coreSetup = coreMock.createSetup();
-      const pluginsSetup = {
-        securityOss: mockSecurityOssPlugin.createSetup(),
-      };
       const service = new SharePlugin(coreMock.createPluginInitializerContext());
-      await service.setup(coreSetup, pluginsSetup);
+      await service.setup(coreSetup);
       const pluginsStart = {
-        securityOss: mockSecurityOssPlugin.createStart(),
+        security: securityMock.createStart(),
       };
       const start = await service.start({} as CoreStart, pluginsStart);
       expect(registryMock.start).toHaveBeenCalled();

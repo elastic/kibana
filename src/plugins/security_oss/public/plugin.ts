@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type {
-  Capabilities,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-} from 'src/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 
 import { AppStateService } from './app_state';
 import type { ConfigType } from './config';
@@ -28,10 +22,6 @@ export interface SecurityOssPluginSetup {
 
 export interface SecurityOssPluginStart {
   insecureCluster: InsecureClusterServiceStart;
-  anonymousAccess: {
-    getAccessURLParameters: () => Promise<Record<string, string> | null>;
-    getCapabilities: () => Promise<Capabilities>;
-  };
 }
 
 export class SecurityOssPlugin
@@ -53,15 +43,6 @@ export class SecurityOssPlugin
     const appState = this.appStateService.start({ core });
     return {
       insecureCluster: this.insecureClusterService.start({ core, appState }),
-      anonymousAccess: {
-        async getAccessURLParameters() {
-          const { anonymousAccess } = await appState.getState();
-          return anonymousAccess.accessURLParameters;
-        },
-        getCapabilities() {
-          return core.http.get<Capabilities>('/internal/security/anonymous_access/capabilities');
-        },
-      },
     };
   }
 }

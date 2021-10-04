@@ -14,7 +14,6 @@ import type { IRouter, Logger } from 'src/core/server';
 import type { AppState } from '../../common';
 import type { createClusterDataCheck } from '../check_cluster_data';
 import type { ConfigType } from '../config';
-import type { AnonymousAccessService } from '../plugin';
 
 interface Deps {
   router: IRouter;
@@ -22,7 +21,6 @@ interface Deps {
   config$: Observable<ConfigType>;
   displayModifier$: Observable<boolean>;
   doesClusterHaveUserData: ReturnType<typeof createClusterDataCheck>;
-  getAnonymousAccessService: () => AnonymousAccessService | null;
 }
 
 export const setupAppStateRoute = ({
@@ -31,7 +29,6 @@ export const setupAppStateRoute = ({
   config$,
   displayModifier$,
   doesClusterHaveUserData,
-  getAnonymousAccessService,
 }: Deps) => {
   let showInsecureClusterWarning = false;
 
@@ -50,15 +47,8 @@ export const setupAppStateRoute = ({
         );
       }
 
-      const anonymousAccessService = getAnonymousAccessService();
       const appState: AppState = {
         insecureClusterAlert: { displayAlert },
-        anonymousAccess: {
-          isEnabled: anonymousAccessService?.isAnonymousAccessEnabled ?? false,
-          accessURLParameters: anonymousAccessService?.accessURLParameters
-            ? Object.fromEntries(anonymousAccessService.accessURLParameters.entries())
-            : null,
-        },
       };
       return response.ok({ body: appState });
     }

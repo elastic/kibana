@@ -22,6 +22,8 @@ import type { SpacesPluginStart } from '../../spaces/public';
 import { SecurityLicenseService } from '../common/licensing';
 import type { SecurityLicense } from '../common/licensing';
 import { accountManagementApp } from './account_management';
+import type { AnonymousAccessServiceStart } from './anonymous_access';
+import { AnonymousAccessService } from './anonymous_access';
 import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
 import type { ConfigType } from './config';
@@ -63,6 +65,7 @@ export class SecurityPlugin
   private readonly securityLicenseService = new SecurityLicenseService();
   private readonly managementService = new ManagementService();
   private readonly securityCheckupService = new SecurityCheckupService();
+  private readonly anonymousAccessService = new AnonymousAccessService();
   private authc!: AuthenticationServiceSetup;
   private readonly config: ConfigType;
 
@@ -156,6 +159,7 @@ export class SecurityPlugin
       uiApi: getUiApi({ core }),
       navControlService: this.navControlService.start({ core }),
       authc: this.authc as AuthenticationServiceStart,
+      anonymousAccess: this.anonymousAccessService.start({ core }),
     };
   }
 
@@ -192,4 +196,8 @@ export interface SecurityPluginStart {
    * Exposes UI components that will be loaded asynchronously.
    */
   uiApi: UiApi;
+  /**
+   * Exposes information about whether anonymous access is available and in what capacity.
+   */
+  anonymousAccess: AnonymousAccessServiceStart;
 }

@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export type { SecurityLicense } from './licensing';
-export type { AuthenticatedUser } from './model';
-export type { AnonymousAccessState } from './types';
+export { AnonymousAccessService, AnonymousAccessServiceStart } from './anonymous_access_service';

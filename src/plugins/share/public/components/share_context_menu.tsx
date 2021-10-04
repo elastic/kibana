@@ -17,7 +17,7 @@ import type { Capabilities } from 'src/core/public';
 
 import { UrlPanelContent } from './url_panel_content';
 import { ShareMenuItem, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
-import type { SecurityOssPluginStart } from '../../../security_oss/public';
+import type { AnonymousAccessServiceStart } from '../../../../../x-pack/plugins/security/public';
 
 interface Props {
   allowEmbed: boolean;
@@ -31,7 +31,7 @@ interface Props {
   basePath: string;
   post: HttpStart['post'];
   embedUrlParamExtensions?: UrlParamExtension[];
-  anonymousAccess?: SecurityOssPluginStart['anonymousAccess'];
+  anonymousAccess?: AnonymousAccessServiceStart;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
 }
 
