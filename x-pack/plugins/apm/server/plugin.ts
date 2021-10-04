@@ -50,6 +50,7 @@ import {
   TRANSACTION_TYPE,
 } from '../common/elasticsearch_fieldnames';
 import { tutorialProvider } from './tutorial';
+import { getDeprecations } from './deprecations';
 
 export class APMPlugin
   implements
@@ -219,6 +220,12 @@ export class APMPlugin
           includeFrozen
         );
       })();
+    });
+    core.deprecations.registerDeprecations({
+      getDeprecations: getDeprecations({
+        cloudSetup: plugins.cloud,
+        fleet: resourcePlugins.fleet,
+      }),
     });
 
     return {

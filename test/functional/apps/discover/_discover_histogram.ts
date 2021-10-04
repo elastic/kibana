@@ -52,21 +52,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
 
     it('should visualize monthly data with different day intervals', async () => {
-      const fromTime = 'Nov 01, 2017 @ 00:00:00.000';
+      const fromTime = 'Nov 1, 2017 @ 00:00:00.000';
       const toTime = 'Mar 21, 2018 @ 00:00:00.000';
       await prepareTest(fromTime, toTime, 'Month');
       const chartCanvasExist = await elasticChart.canvasExists();
       expect(chartCanvasExist).to.be(true);
     });
     it('should visualize weekly data with within DST changes', async () => {
-      const fromTime = 'Mar 01, 2018 @ 00:00:00.000';
-      const toTime = 'May 01, 2018 @ 00:00:00.000';
+      const fromTime = 'Mar 1, 2018 @ 00:00:00.000';
+      const toTime = 'May 1, 2018 @ 00:00:00.000';
       await prepareTest(fromTime, toTime, 'Week');
       const chartCanvasExist = await elasticChart.canvasExists();
       expect(chartCanvasExist).to.be(true);
     });
     it('should visualize monthly data with different years scaled to 30 days', async () => {
-      const fromTime = 'Jan 01, 2010 @ 00:00:00.000';
+      const fromTime = 'Jan 1, 2010 @ 00:00:00.000';
       const toTime = 'Mar 21, 2019 @ 00:00:00.000';
       await prepareTest(fromTime, toTime, 'Day');
       const chartCanvasExist = await elasticChart.canvasExists();
@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(chartIntervalIconTip).to.be(true);
     });
     it('should allow hide/show histogram, persisted in url state', async () => {
-      const fromTime = 'Jan 01, 2010 @ 00:00:00.000';
+      const fromTime = 'Jan 1, 2010 @ 00:00:00.000';
       const toTime = 'Mar 21, 2019 @ 00:00:00.000';
       await prepareTest(fromTime, toTime);
       let canvasExists = await elasticChart.canvasExists();
@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(canvasExists).to.be(true);
     });
     it('should allow hiding the histogram, persisted in saved search', async () => {
-      const fromTime = 'Jan 01, 2010 @ 00:00:00.000';
+      const fromTime = 'Jan 1, 2010 @ 00:00:00.000';
       const toTime = 'Mar 21, 2019 @ 00:00:00.000';
       const savedSearch = 'persisted hidden histogram';
       await prepareTest(fromTime, toTime);
