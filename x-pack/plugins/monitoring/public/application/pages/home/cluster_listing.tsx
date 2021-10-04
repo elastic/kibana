@@ -100,7 +100,10 @@ export const ClusterListing: React.FC<ComponentProps> = () => {
         angular={{
           scope: fakeScope,
           globalState,
-          storage: window.localStorage,
+          storage: {
+            get: (key: string) => window.localStorage.getItem(key),
+            set: (key: string, value: string) => window.localStorage.setItem(key, value),
+          },
           showLicenseExpiration: externalConfig.showLicenseExpiration,
         }}
         sorting={sorting}
