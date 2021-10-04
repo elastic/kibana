@@ -129,7 +129,7 @@ export class TimePickerPageObject extends FtrService {
       const actualToTime = await this.testSubjects.getVisibleText(
         'superDatePickerendDatePopoverButton'
       );
-      this.log.debug(`Validating 'endDate' is set to '${toTime}'`);
+      this.log.debug(`Validating 'endDate' - expected: '${toTime}, actual: ${actualToTime}'`);
       return toTime === actualToTime;
     });
 
@@ -145,7 +145,7 @@ export class TimePickerPageObject extends FtrService {
       const actualFromTime = await this.testSubjects.getVisibleText(
         'superDatePickerstartDatePopoverButton'
       );
-      this.log.debug(`Validating 'startDate' is set to '${fromTime}'`);
+      this.log.debug(`Validating 'startDate' - expected: '${fromTime}, actual: ${actualFromTime}'`);
       return fromTime === actualFromTime;
     });
 
