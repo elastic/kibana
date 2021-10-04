@@ -113,7 +113,7 @@ export const useValuesList = ({
         },
       },
     }),
-    [debouncedQuery, from, to, JSON.stringify(filters), indexPatternTitle]
+    [debouncedQuery, from, to, JSON.stringify(filters), indexPatternTitle, sourceField]
   );
 
   useEffect(() => {
