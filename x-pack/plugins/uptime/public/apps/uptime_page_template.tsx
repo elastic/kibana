@@ -38,13 +38,15 @@ export const UptimePageTemplateComponent: React.FC<Props> = ({ path, pageHeader,
 
   const noDataConfig = useNoDataConfig();
 
-  const { loading, error } = useHasData();
+  const { loading, error, data } = useHasData();
 
   if (error) {
     return <EmptyStateError errors={[error]} />;
   }
 
   const isMainRoute = path === OVERVIEW_ROUTE || path === CERTIFICATES_ROUTE;
+
+  const showLoading = loading && isMainRoute && !data;
 
   return (
     <>
@@ -53,9 +55,9 @@ export const UptimePageTemplateComponent: React.FC<Props> = ({ path, pageHeader,
         data-test-subj={noDataConfig ? 'data-missing' : undefined}
         noDataConfig={isMainRoute && !loading ? noDataConfig : undefined}
       >
-        {loading && isMainRoute && <EmptyStateLoading />}
+        {showLoading && <EmptyStateLoading />}
         <div
-          style={{ visibility: loading && isMainRoute ? 'hidden' : 'initial' }}
+          style={{ visibility: showLoading ? 'hidden' : 'initial' }}
           data-test-subj={noDataConfig ? 'data-missing' : undefined}
         >
           {children}
