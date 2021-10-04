@@ -59,7 +59,11 @@ import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axe
 import { getColorAssignments } from './color_assignment';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './get_legend_action';
-import { ThresholdAnnotations } from './expression_thresholds';
+import {
+  computeChartMargins,
+  getThresholdRequiredPaddings,
+  ThresholdAnnotations,
+} from './expression_thresholds';
 
 declare global {
   interface Window {
@@ -314,6 +318,12 @@ export function XYChart({
     Boolean(isHistogramViz)
   );
 
+  const yAxesMap = {
+    left: yAxesConfiguration.find(({ groupId }) => groupId === 'left'),
+    right: yAxesConfiguration.find(({ groupId }) => groupId === 'right'),
+  };
+  const thresholdPaddings = getThresholdRequiredPaddings(thresholdLayers, yAxesMap);
+
   const getYAxesTitles = (
     axisSeries: Array<{ layer: string; accessor: string }>,
     groupId: string
@@ -330,23 +340,38 @@ export function XYChart({
     );
   };
 
-  const getYAxesStyle = (groupId: string) => {
+  const getYAxesStyle = (groupId: 'left' | 'right') => {
+    const tickVisible =
+      groupId === 'right'
+        ? tickLabelsVisibilitySettings?.yRight
+        : tickLabelsVisibilitySettings?.yLeft;
+
     const style = {
       tickLabel: {
-        visible:
-          groupId === 'right'
-            ? tickLabelsVisibilitySettings?.yRight
-            : tickLabelsVisibilitySettings?.yLeft,
+        visible: tickVisible,
         rotation:
           groupId === 'right'
             ? args.labelsOrientation?.yRight || 0
             : args.labelsOrientation?.yLeft || 0,
+        padding:
+          thresholdPaddings[groupId] != null
+            ? {
+                inner: thresholdPaddings[groupId],
+              }
+            : undefined,
       },
       axisTitle: {
         visible:
           groupId === 'right'
             ? axisTitlesVisibilitySettings?.yRight
             : axisTitlesVisibilitySettings?.yLeft,
+        // if labels are not visible add the padding to the title
+        padding:
+          !tickVisible && thresholdPaddings[groupId] != null
+            ? {
+                inner: thresholdPaddings[groupId],
+              }
+            : undefined,
       },
     };
     return style;
@@ -510,6 +535,17 @@ export function XYChart({
           legend: {
             labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
           },
+          // if not title or labels are shown for axes, add some padding if required by threshold markers
+          chartMargins: {
+            ...chartTheme.chartPaddings,
+            ...computeChartMargins(
+              thresholdPaddings,
+              tickLabelsVisibilitySettings,
+              axisTitlesVisibilitySettings,
+              yAxesMap,
+              shouldRotate
+            ),
+          },
         }}
         baseTheme={chartBaseTheme}
         tooltip={{
@@ -545,9 +581,15 @@ export function XYChart({
           tickLabel: {
             visible: tickLabelsVisibilitySettings?.x,
             rotation: labelsOrientation?.x,
+            padding:
+              thresholdPaddings.bottom != null ? { inner: thresholdPaddings.bottom } : undefined,
           },
           axisTitle: {
             visible: axisTitlesVisibilitySettings.x,
+            padding:
+              !tickLabelsVisibilitySettings?.x && thresholdPaddings.bottom != null
+                ? { inner: thresholdPaddings.bottom }
+                : undefined,
           },
         }}
       />
@@ -568,7 +610,7 @@ export function XYChart({
             }}
             hide={filteredLayers[0].hide}
             tickFormat={(d) => axis.formatter?.convert(d) || ''}
-            style={getYAxesStyle(axis.groupId)}
+            style={getYAxesStyle(axis.groupId as 'left' | 'right')}
             domain={getYAxisDomain(axis)}
           />
         );
@@ -836,14 +878,18 @@ export function XYChart({
         <ThresholdAnnotations
           thresholdLayers={thresholdLayers}
           data={data}
-          colorAssignments={colorAssignments}
           syncColors={syncColors}
           paletteService={paletteService}
           formatters={{
-            left: yAxesConfiguration.find(({ groupId }) => groupId === 'left')?.formatter,
-            right: yAxesConfiguration.find(({ groupId }) => groupId === 'right')?.formatter,
+            left: yAxesMap.left?.formatter,
+            right: yAxesMap.right?.formatter,
             bottom: xAxisFormatter,
           }}
+          axesMap={{
+            left: Boolean(yAxesMap.left),
+            right: Boolean(yAxesMap.right),
+          }}
+          isHorizontal={shouldRotate}
         />
       ) : null}
     </Chart>

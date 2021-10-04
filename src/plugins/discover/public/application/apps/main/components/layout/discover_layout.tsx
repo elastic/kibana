@@ -42,6 +42,11 @@ import { useDataState } from '../../utils/use_data_state';
 import { DiscoverDataVisualizerGrid } from '../../../../components/data_visualizer_grid';
 import { VIEW_MODE } from '../view_mode_toggle';
 
+/**
+ * Local storage key for sidebar persistence state
+ */
+export const SIDEBAR_CLOSED_KEY = 'discover:sidebarClosed';
+
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 const DiscoverChartMemoized = React.memo(DiscoverChart);
@@ -63,7 +68,8 @@ export function DiscoverLayout({
   state,
   stateContainer,
 }: DiscoverLayoutProps) {
-  const { trackUiMetric, capabilities, indexPatterns, data, uiSettings, filterManager } = services;
+  const { trackUiMetric, capabilities, indexPatterns, data, uiSettings, filterManager, storage } =
+    services;
   const { main$, charts$, totalHits$ } = savedSearchData$;
 
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
@@ -91,7 +97,8 @@ export function DiscoverLayout({
     return indexPattern.type !== 'rollup' ? indexPattern.timeFieldName : undefined;
   }, [indexPattern]);
 
-  const [isSidebarClosed, setIsSidebarClosed] = useState(false);
+  const initialSidebarClosed = Boolean(storage.get(SIDEBAR_CLOSED_KEY));
+  const [isSidebarClosed, setIsSidebarClosed] = useState(initialSidebarClosed);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const resultState = useMemo(
@@ -157,6 +164,11 @@ export function DiscoverLayout({
     filterManager.setFilters(disabledFilters);
   }, [filterManager]);
 
+  const toggleSidebarCollapse = useCallback(() => {
+    storage.set(SIDEBAR_CLOSED_KEY, !isSidebarClosed);
+    setIsSidebarClosed(!isSidebarClosed);
+  }, [isSidebarClosed, storage]);
+
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
 
   return (
@@ -206,7 +218,7 @@ export function DiscoverLayout({
                   iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
                   iconSize="m"
                   size="xs"
-                  onClick={() => setIsSidebarClosed(!isSidebarClosed)}
+                  onClick={toggleSidebarCollapse}
                   data-test-subj="collapseSideBarButton"
                   aria-controls="discover-sidebar"
                   aria-expanded={isSidebarClosed ? 'false' : 'true'}
