@@ -24,6 +24,7 @@ import { BeatsOverviewPage } from './pages/beats/overview';
 import { BeatsInstancesPage } from './pages/beats/instances';
 import { BeatsInstancePage } from './pages/beats/instance';
 import { KibanaOverviewPage } from './pages/kibana/overview';
+import { KibanaInstancesPage } from './pages/kibana/instances';
 import { CODE_PATH_ELASTICSEARCH, CODE_PATH_BEATS, CODE_PATH_KIBANA } from '../../common/constants';
 import { ElasticsearchNodesPage } from './pages/elasticsearch/nodes_page';
 import { ElasticsearchIndicesPage } from './pages/elasticsearch/indices_page';
@@ -152,6 +153,13 @@ const MonitoringApp: React.FC<{
                   />
 
                   {/* Kibana Views */}
+                  <RouteInit
+                    path="/kibana/instances"
+                    component={KibanaInstancesPage}
+                    codePaths={[CODE_PATH_KIBANA]}
+                    fetchAllClusters={false}
+                  />
+
                   <RouteInit
                     path="/kibana"
                     component={KibanaOverviewPage}
