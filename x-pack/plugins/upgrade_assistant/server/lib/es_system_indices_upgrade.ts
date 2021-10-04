@@ -27,13 +27,10 @@ export const convertFeaturesToIndicesArray = (
 export const getESSystemIndicesUpgradeStatus = async (
   client: ElasticsearchClient
 ): Promise<SystemIndicesUpgradeStatus> => {
-  const { body } = await client.transport.request(
-    {
-      method: 'GET',
-      path: '/_migration/system_features',
-    },
-    { ignore: [404] }
-  );
+  const { body } = await client.transport.request({
+    method: 'GET',
+    path: '/_migration/system_features',
+  });
 
   return body as SystemIndicesUpgradeStatus;
 };

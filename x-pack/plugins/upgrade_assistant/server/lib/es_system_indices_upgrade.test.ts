@@ -47,7 +47,6 @@ describe('convertFeaturesToIndicesArray', () => {
   });
 
   it('returns empty array if no features are passed to it', async () => {
-    const result = convertFeaturesToIndicesArray([]);
-    expect(result).toEqual([]);
+    expect(convertFeaturesToIndicesArray([])).toEqual([]);
   });
 });
