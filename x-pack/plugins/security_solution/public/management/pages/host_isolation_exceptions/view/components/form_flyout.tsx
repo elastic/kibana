@@ -5,48 +5,42 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useEffect, useCallback, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { Dispatch } from 'redux';
-
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { Dispatch } from 'redux';
 import { Loader } from '../../../../../common/components/loader';
-import { HostIsolationExceptionsPageAction } from '../../store/action';
-import { HostIsolationExceptionsForm } from './form';
-import { useHostIsolationExceptionsSelector } from '../hooks';
+import { useToasts } from '../../../../../common/lib/kibana';
 import {
+  isFailedResourceState,
   isLoadedResourceState,
   isLoadingResourceState,
 } from '../../../../state/async_resource_state';
+import { HostIsolationExceptionsPageAction } from '../../store/action';
 import { createEmptyHostIsolationException } from '../../utils';
+import { useHostIsolationExceptionsSelector } from '../hooks';
+import { HostIsolationExceptionsForm } from './form';
 
 export const HostIsolationExceptionsFormFlyout: React.FC<{
   type?: 'create' | 'edit';
   id?: string;
   onCancel(): void;
 }> = memo(({ onCancel }) => {
-  // useEventFiltersNotification();
   const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
-
-  const [formHasError, setFormHasError] = useState(true);
-
-  const [exception, setException] = useState<CreateExceptionListItemSchema | undefined>(undefined);
-
-  useEffect(() => {
-    setException(createEmptyHostIsolationException());
-  }, []);
+  const toasts = useToasts();
 
   const creationInProgress = useHostIsolationExceptionsSelector((state) =>
     isLoadingResourceState(state.form.status)
@@ -54,6 +48,16 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{
   const creationSuccessful = useHostIsolationExceptionsSelector((state) =>
     isLoadedResourceState(state.form.status)
   );
+  const creationFailure = useHostIsolationExceptionsSelector((state) =>
+    isFailedResourceState(state.form.status)
+  );
+
+  const [formHasError, setFormHasError] = useState(true);
+  const [exception, setException] = useState<CreateExceptionListItemSchema | undefined>(undefined);
+
+  useEffect(() => {
+    setException(createEmptyHostIsolationException());
+  }, []);
 
   useEffect(() => {
     if (creationSuccessful) {
@@ -64,8 +68,36 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{
           type: 'UninitialisedResourceState',
         },
       });
+      toasts.addSuccess(
+        i18n.translate(
+          'xpack.securitySolution.hostIsolationExceptions.form.creationSuccessToastTitle',
+          {
+            defaultMessage: '"{name}" has been added to the host isolation exceptions list.',
+            values: { name: exception?.name },
+          }
+        )
+      );
     }
-  }, [creationSuccessful, onCancel, dispatch]);
+  }, [creationSuccessful, onCancel, dispatch, toasts, exception?.name]);
+
+  useEffect(() => {
+    if (creationFailure) {
+      dispatch({
+        type: 'hostIsolationExceptionsFormStateChanged',
+        payload: {
+          type: 'UninitialisedResourceState',
+        },
+      });
+      toasts.addDanger(
+        i18n.translate(
+          'xpack.securitySolution.hostIsolationExceptions.form.creationFailureToastTitle',
+          {
+            defaultMessage: 'There was an error creating the exception',
+          }
+        )
+      );
+    }
+  }, [dispatch, toasts, creationFailure]);
 
   const handleOnCancel = useCallback(() => {
     if (creationInProgress) return;
