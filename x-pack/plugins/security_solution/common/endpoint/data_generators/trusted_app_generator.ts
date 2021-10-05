@@ -45,7 +45,7 @@ export class TrustedAppGenerator extends BaseDataGenerator<TrustedApp> {
     return merge(
       this.generateTrustedAppForCreate(),
       {
-        id: this.randomUUID(),
+        id: this.seededUUIDv4(),
         version: this.randomString(5),
         created_at: this.randomPastDate(),
         updated_at: new Date().toISOString(),
