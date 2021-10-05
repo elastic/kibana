@@ -45,10 +45,7 @@ export function getScreenshots$(
   const apmTrans = apm.startTransaction(`reporting screenshot pipeline`, 'reporting');
 
   const apmCreatePage = apmTrans?.startSpan('create_page', 'wait');
-  const create$ = browserDriverFactory.createPage(
-    { viewport: layout.getBrowserViewport(), browserTimezone },
-    logger
-  );
+  const create$ = browserDriverFactory.createPage({ browserTimezone }, logger);
 
   return create$.pipe(
     mergeMap(({ driver, exit$ }) => {
