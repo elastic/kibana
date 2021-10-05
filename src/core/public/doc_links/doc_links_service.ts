@@ -471,7 +471,7 @@ export class DocLinksService {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
         },
         clients: {
-/** Changes to these URLs must also be synched in src/plugins/custom_integrations/server/language_clients/index.ts */
+          /** Changes to these URLs must also be synched in src/plugins/custom_integrations/server/language_clients/index.ts */
           guide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/index.html`,
           goOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/go-api/${DOC_LINK_VERSION}/overview.html`,
           javaIndex: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/java-api-client/${DOC_LINK_VERSION}/index.html`,
