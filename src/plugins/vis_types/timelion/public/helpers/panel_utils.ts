@@ -88,8 +88,8 @@ const adaptYaxisParams = (yaxis: IAxis) => {
     tickFormat: y.tickFormatter,
     domain: withStaticPadding({
       fit: y.min === undefined && y.max === undefined,
-      min: y.min,
-      max: y.max,
+      min: y.min ?? NaN,
+      max: y.max ?? NaN,
     }),
   };
 };
@@ -118,6 +118,8 @@ export const extractAllYAxis = (series: Series[]) => {
         groupId,
         domain: withStaticPadding({
           fit: false,
+          min: NaN,
+          max: NaN,
         }),
         id: (yaxis?.position || Position.Left) + index,
         position: Position.Left,

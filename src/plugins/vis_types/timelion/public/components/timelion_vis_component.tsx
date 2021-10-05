@@ -64,6 +64,8 @@ const DefaultYAxis = () => (
     id="left"
     domain={withStaticPadding({
       fit: false,
+      min: NaN,
+      max: NaN,
     })}
     position={Position.Left}
     groupId={`${MAIN_GROUP_ID}`}
