@@ -54,7 +54,8 @@ export async function _installPackage({
   installType: InstallType;
   installSource: InstallSource;
 }): Promise<AssetReference[]> {
-  const { name: pkgName, version: pkgVersion } = packageInfo;
+  const { name: pkgName, version: pkgVersion, categories: pkgCategories } = packageInfo;
+
   try {
     // if some installation already exists
     if (installedPkg) {
@@ -164,7 +165,12 @@ export async function _installPackage({
     );
 
     // if this is an update or retrying an update, delete the previous version's pipelines
-    if ((installType === 'update' || installType === 'reupdate') && installedPkg) {
+    if (
+      pkgCategories &&
+      pkgCategories.includes('ml') === false &&
+      (installType === 'update' || installType === 'reupdate') &&
+      installedPkg
+    ) {
       await deletePreviousPipelines(
         esClient,
         savedObjectsClient,

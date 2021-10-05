@@ -15,7 +15,6 @@ import type { EsAssetReference, InstallablePackage } from '../../../../../common
 import { getInstallation } from '../../packages';
 import { appContextService } from '../../../app_context';
 
-import { deleteMlModel, deleteMlModelRefs } from './remove';
 import { getAsset } from './common';
 
 interface MlModelInstallation {
@@ -30,28 +29,6 @@ export const installMlModel = async (
   savedObjectsClient: SavedObjectsClientContract
 ) => {
   const logger = appContextService.getLogger();
-  const installation = await getInstallation({
-    savedObjectsClient,
-    pkgName: installablePackage.name,
-  });
-  let previousInstalledMlModelEsAssets: EsAssetReference[] = [];
-  if (installation) {
-    previousInstalledMlModelEsAssets = installation.installed_es.filter(
-      ({ type, id }) => type === ElasticsearchAssetType.mlModel
-    );
-    if (previousInstalledMlModelEsAssets.length) {
-      logger.info(
-        `Found previous ml model references:\n ${JSON.stringify(previousInstalledMlModelEsAssets)}`
-      );
-    }
-  }
-
-  // delete all previous ml models of this type
-  await deleteMlModel(
-    esClient,
-    previousInstalledMlModelEsAssets.map((asset) => asset.id)
-  );
-
   const mlModelPath = paths.find((path) => isMlModel(path));
 
   const installedMlModels: EsAssetReference[] = [];
@@ -75,22 +52,6 @@ export const installMlModel = async (
 
     const result = await handleMlModelInstall({ esClient, mlModel });
     installedMlModels.push(result);
-  }
-
-  if (previousInstalledMlModelEsAssets.length > 0) {
-    const currentInstallation = await getInstallation({
-      savedObjectsClient,
-      pkgName: installablePackage.name,
-    });
-
-    // remove the saved object reference
-    await deleteMlModelRefs(
-      savedObjectsClient,
-      currentInstallation?.installed_es || [],
-      installablePackage.name,
-      previousInstalledMlModelEsAssets.map((asset) => asset.id),
-      installedMlModels.map((installed) => installed.id)
-    );
   }
   return installedMlModels;
 };

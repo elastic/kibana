@@ -24,24 +24,3 @@ export const deleteMlModel = async (esClient: ElasticsearchClient, mlModelIds: s
     })
   );
 };
-
-export const deleteMlModelRefs = async (
-  savedObjectsClient: SavedObjectsClientContract,
-  installedEsAssets: EsAssetReference[],
-  pkgName: string,
-  installedEsIdToRemove: string[],
-  currentInstalledEsMlModelIds: string[]
-) => {
-  const seen = new Set<string>();
-  const filteredAssets = installedEsAssets.filter(({ type, id }) => {
-    if (type !== ElasticsearchAssetType.mlModel) return true;
-    const add =
-      (currentInstalledEsMlModelIds.includes(id) || !installedEsIdToRemove.includes(id)) &&
-      !seen.has(id);
-    seen.add(id);
-    return add;
-  });
-  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    installed_es: filteredAssets,
-  });
-};
