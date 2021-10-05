@@ -30,7 +30,7 @@ describe('SyncFrequency', () => {
     expect(wrapper.find(FrequencyItem)).toHaveLength(4);
   });
 
-  it('renders withuot DLP', () => {
+  it('renders without DLP', () => {
     setMockValues({
       contentSource: sourceWithNoDLP,
     });
