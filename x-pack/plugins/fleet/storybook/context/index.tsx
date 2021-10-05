@@ -21,6 +21,8 @@ import type { FleetConfigType, FleetStartServices } from '../../public/plugin';
 import { setHttpClient } from '../../public/hooks/use_request';
 import { setCustomIntegrations } from '../../public/services/custom_integrations';
 
+import { setCustomIntegrations } from '../../public/services/custom_integrations';
+
 import { getApplication } from './application';
 import { getChrome } from './chrome';
 import { getHttp } from './http';
