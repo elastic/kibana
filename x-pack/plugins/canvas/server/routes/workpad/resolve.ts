@@ -11,11 +11,11 @@ import { API_ROUTE_WORKPAD } from '../../../common/lib/constants';
 import { catchErrorHandler } from '../catch_error_handler';
 import { shimWorkpad } from './shim_workpad';
 
-export function initializeGetWorkpadRoute(deps: RouteInitializerDeps) {
+export function initializeResolveWorkpadRoute(deps: RouteInitializerDeps) {
   const { router } = deps;
   router.get(
     {
-      path: `${API_ROUTE_WORKPAD}/{id}`,
+      path: `${API_ROUTE_WORKPAD}/resolve/{id}`,
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -23,14 +23,19 @@ export function initializeGetWorkpadRoute(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      const workpad = await context.canvas.workpad.get(request.params.id);
+      const resolved = await context.canvas.workpad.resolve(request.params.id);
+      const { saved_object: workpad } = resolved;
 
       shimWorkpad(workpad);
 
       return response.ok({
         body: {
-          id: workpad.id,
-          ...workpad.attributes,
+          workpad: {
+            id: workpad.id,
+            ...workpad.attributes,
+          },
+          outcome: resolved.outcome,
+          aliasId: resolved.alias_target_id,
         },
       });
     })
