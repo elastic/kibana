@@ -21,15 +21,6 @@ Object {
               "trace.id": "bar",
             },
           },
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
-            },
-          },
         ],
       },
     },
@@ -90,11 +81,11 @@ Object {
         },
         "date_histogram": Object {
           "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
+            "max": 50000,
+            "min": 0,
           },
           "field": "@timestamp",
-          "fixed_interval": "10800s",
+          "fixed_interval": "30s",
           "min_doc_count": 0,
         },
       },
@@ -154,8 +145,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
@@ -236,11 +227,11 @@ Object {
         },
         "date_histogram": Object {
           "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
+            "max": 50000,
+            "min": 0,
           },
           "field": "@timestamp",
-          "fixed_interval": "10800s",
+          "fixed_interval": "30s",
           "min_doc_count": 0,
         },
       },
@@ -300,8 +291,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
@@ -365,8 +356,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },

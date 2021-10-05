@@ -44,6 +44,10 @@ as uiSettings within the code.
 |Console provides the user with tools for storing and executing requests against Elasticsearch.
 
 
+|{kib-repo}blob/{branch}/src/plugins/custom_integrations/README.md[customIntegrations]
+|Register add-data cards
+
+
 |<<kibana-dashboard-plugin>>
 |- Registers the dashboard application.
 - Adds a dashboard embeddable that can be used in other applications.
@@ -51,6 +55,12 @@ as uiSettings within the code.
 
 |{kib-repo}blob/{branch}/src/plugins/data/README.mdx[data]
 |The data plugin provides common data access services, such as search and query, for solutions and application developers.
+
+
+|{kib-repo}blob/{branch}/src/plugins/data_views/README.mdx[dataViews]
+|The data views API provides a consistent method of structuring and formatting documents
+and field lists across the various Kibana apps. Its typically used in conjunction with
+<DocLink id="kibDevTutorialDataSearchAndSessions" section="high-level-search" text="SearchSource" /> for composing queries.
 
 
 |{kib-repo}blob/{branch}/src/plugins/dev_tools/README.md[devTools]

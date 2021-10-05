@@ -99,6 +99,7 @@ const urlService = new UrlService({
   getUrl: async ({ app, path }, { absolute }) => {
     return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
   },
+  shortUrls: {} as any,
 });
 const locator = urlService.locators.create(new MlLocatorDefinition());
 

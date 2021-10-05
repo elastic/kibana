@@ -13,6 +13,8 @@ import type { SavedObject } from 'src/core/public';
 
 import type { Installation } from '../../../../../../common';
 
+import type { IntegrationCardItem } from '../../../../../../common';
+
 import type { ListProps } from './package_list_grid';
 import { PackageListGrid } from './package_list_grid';
 
@@ -57,77 +59,88 @@ export const EmptyList = (props: Args) => (
 
 export const List = (props: Args) => (
   <PackageListGrid
-    list={[
-      {
-        title: 'Package One',
-        description: 'Not Installed Description',
-        name: 'beats',
-        release: 'ga',
-        id: 'id',
-        version: '1.0.0',
-        download: '/',
-        path: 'path',
-        status: 'not_installed',
-      },
-      {
-        title: 'Package Two',
-        description: 'Not Installed Description',
-        name: 'aws',
-        release: 'beta',
-        id: 'id',
-        version: '1.0.0',
-        download: '/',
-        path: 'path',
-        status: 'not_installed',
-      },
-      {
-        title: 'Package Three',
-        description: 'Not Installed Description',
-        name: 'azure',
-        release: 'experimental',
-        id: 'id',
-        version: '1.0.0',
-        download: '/',
-        path: 'path',
-        status: 'not_installed',
-      },
-      {
-        title: 'Package Four',
-        description: 'Installed Description',
-        name: 'elastic',
-        release: 'ga',
-        id: 'id',
-        version: '1.0.0',
-        download: '/',
-        path: 'path',
-        status: 'installed',
-        savedObject,
-      },
-      {
-        title: 'Package Five',
-        description: 'Installed Description',
-        name: 'unknown',
-        release: 'beta',
-        id: 'id',
-        version: '1.0.0',
-        download: '/',
-        path: 'path',
-        status: 'installed',
-        savedObject,
-      },
-      {
-        title: 'Package Six',
-        description: 'Installed Description',
-        name: 'kibana',
-        release: 'experimental',
-        id: 'id',
-        version: '1.0.0',
-        download: '/',
-        path: 'path',
-        status: 'installed',
-        savedObject,
-      },
-    ]}
+    list={
+      [
+        {
+          title: 'Package One',
+          description: 'Not Installed Description',
+          name: 'beats',
+          release: 'ga',
+          id: 'package_one',
+          version: '1.0.0',
+          uiInternalPath: '/',
+          path: 'path',
+          status: 'not_installed',
+        },
+        {
+          title: 'Package Two',
+          description: 'Not Installed Description',
+          name: 'aws',
+          release: 'beta',
+          id: 'package_two',
+          version: '1.0.0',
+          uiInternalPath: '/',
+          path: 'path',
+          status: 'not_installed',
+        },
+        {
+          title: 'Package Three',
+          description: 'Not Installed Description',
+          name: 'azure',
+          release: 'experimental',
+          id: 'package_three',
+          version: '1.0.0',
+          uiInternalPath: '/',
+          path: 'path',
+          status: 'not_installed',
+        },
+        {
+          title: 'Package Four',
+          description: 'Installed Description',
+          name: 'elastic',
+          release: 'ga',
+          id: 'package_four',
+          version: '1.0.0',
+          uiInternalPath: '/',
+          path: 'path',
+          status: 'installed',
+          savedObject: {
+            ...savedObject,
+            id: 'package_four',
+          },
+        },
+        {
+          title: 'Package Five',
+          description: 'Installed Description',
+          name: 'unknown',
+          release: 'beta',
+          id: 'package_five',
+          version: '1.0.0',
+          uiInternalPath: '/',
+          path: 'path',
+          status: 'installed',
+          savedObject: {
+            ...savedObject,
+            id: 'package_five',
+          },
+        },
+        {
+          title: 'Package Six',
+          description: 'Installed Description',
+          name: 'kibana',
+          release: 'experimental',
+          id: 'package_six',
+          version: '1.0.0',
+          uiInternalPath: '/',
+          path: 'path',
+          status: 'installed',
+          savedObject: {
+            ...savedObject,
+            id: 'package_six',
+          },
+        },
+      ] as unknown as IntegrationCardItem[]
+    }
     onSearchChange={action('onSearchChange')}
     setSelectedCategory={action('setSelectedCategory')}
     {...props}

@@ -8,7 +8,6 @@
 
 export { fetchExportByTypeAndSearch } from './fetch_export_by_type_and_search';
 export { fetchExportObjects } from './fetch_export_objects';
-export { canViewInApp } from './in_app_url';
 export { getRelationships } from './get_relationships';
 export { getSavedObjectCounts } from './get_saved_object_counts';
 export { getSavedObjectLabel } from './get_saved_object_label';
@@ -24,6 +23,5 @@ export { getDefaultTitle } from './get_default_title';
 export { findObjects } from './find_objects';
 export { bulkGetObjects } from './bulk_get_objects';
 export { extractExportDetails, SavedObjectsExportResultDetails } from './extract_export_details';
-export { createFieldList } from './create_field_list';
 export { getAllowedTypes } from './get_allowed_types';
 export { getTagFindReferences } from './get_tag_references';

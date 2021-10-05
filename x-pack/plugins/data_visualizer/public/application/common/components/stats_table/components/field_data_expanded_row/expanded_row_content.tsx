@@ -6,7 +6,7 @@
  */
 
 import React, { FC, ReactNode } from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGrid } from '@elastic/eui';
 
 interface Props {
   children: ReactNode;
@@ -14,12 +14,8 @@ interface Props {
 }
 export const ExpandedRowContent: FC<Props> = ({ children, dataTestSubj }) => {
   return (
-    <EuiFlexGroup
-      data-test-subj={dataTestSubj}
-      gutterSize={'xl'}
-      className={'dataVisualizerExpandedRow'}
-    >
+    <EuiFlexGrid data-test-subj={dataTestSubj} gutterSize={'s'}>
       {children}
-    </EuiFlexGroup>
+    </EuiFlexGrid>
   );
 };
