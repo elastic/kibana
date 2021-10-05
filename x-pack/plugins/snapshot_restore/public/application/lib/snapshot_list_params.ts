@@ -18,19 +18,19 @@ export type SortField =
 
 export type SortDirection = Direction;
 
-export interface SnapshotTableOptions {
+interface SnapshotTableParams {
   sortField: SortField;
   sortDirection: SortDirection;
   pageIndex: number;
   pageSize: number;
 }
-export interface SnapshotSearchOptions {
+interface SnapshotSearchParams {
   searchField?: string;
   searchValue?: string;
   searchMatch?: string;
   searchOperator?: string;
 }
-export type SnapshotListParams = SnapshotTableOptions & SnapshotSearchOptions;
+export type SnapshotListParams = SnapshotTableParams & SnapshotSearchParams;
 
 // By default, we'll display the most recent snapshots at the top of the table (no query).
 export const DEFAULT_SNAPSHOT_LIST_PARAMS: SnapshotListParams = {

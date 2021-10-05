@@ -129,6 +129,7 @@ export function registerSnapshotsRoutes({
                 })
               : '_all',
           // @ts-expect-error @elastic/elasticsearch new API params
+          // https://github.com/elastic/elasticsearch-specification/issues/845
           slm_policy_filter:
             searchField === 'policyName'
               ? getSnapshotSearchWildcard({
@@ -154,7 +155,7 @@ export function registerSnapshotsRoutes({
             snapshots: snapshots || [],
             policies,
             repositories,
-            // @ts-expect-error @elastic/elasticsearch "failures" is a new field in the response
+            // @ts-expect-error @elastic/elasticsearch https://github.com/elastic/elasticsearch-specification/issues/845
             errors: fetchedSnapshots?.failures,
             // @ts-expect-error @elastic/elasticsearch "total" is a new field in the response
             total: fetchedSnapshots?.total,
