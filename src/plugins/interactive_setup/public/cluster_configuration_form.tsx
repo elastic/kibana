@@ -214,27 +214,27 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
         <>
           <EuiCallOut
             color="warning"
+            iconType="alert"
             title={i18n.translate(
               'interactiveSetup.clusterConfigurationForm.insecureClusterTitle',
               {
                 defaultMessage: 'This cluster is not secure',
               }
             )}
+            size="s"
           >
-            <p>
+            <FormattedMessage
+              tagName="div"
+              id="interactiveSetup.clusterConfigurationForm.insecureClusterDescription"
+              defaultMessage="Anyone with the address can access your data."
+            />
+            <EuiSpacer size="xs" />
+            <DocLink app="elasticsearch" doc="configuring-stack-security.html">
               <FormattedMessage
-                id="interactiveSetup.clusterConfigurationForm.insecureClusterDescription"
-                defaultMessage="Anyone with the address can access your data."
+                id="interactiveSetup.clusterConfigurationForm.insecureClusterLink"
+                defaultMessage="Learn how to enable security features."
               />
-            </p>
-            <p>
-              <DocLink app="elasticsearch" doc="configuring-stack-security.html" color="warning">
-                <FormattedMessage
-                  id="interactiveSetup.clusterConfigurationForm.insecureClusterLink"
-                  defaultMessage="Learn how to enable security features."
-                />
-              </DocLink>
-            </p>
+            </DocLink>
           </EuiCallOut>
           <EuiSpacer />
         </>
