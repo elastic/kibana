@@ -16,7 +16,6 @@ export { SecurityLicense, SecurityLicenseFeatures } from '../common/licensing';
 export { UserMenuLink, SecurityNavControlServiceStart } from '../public/nav_control';
 
 export { AuthenticationServiceStart, AuthenticationServiceSetup } from './authentication';
-export { AnonymousAccessServiceStart } from './anonymous_access';
 
 export const plugin: PluginInitializer<
   SecurityPluginSetup,

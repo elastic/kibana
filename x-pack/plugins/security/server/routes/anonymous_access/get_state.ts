@@ -6,7 +6,7 @@
  */
 
 import type { RouteDefinitionParams } from '..';
-import type { AnonymousAccessState } from '../../../common';
+import type { AnonymousAccessState } from '../../../../../../src/plugins/share/common';
 
 /**
  * Defines route that returns the state of anonymous access -- whether anonymous access is enabled, and what additional parameters should be

@@ -16,13 +16,13 @@ import type {
 } from 'src/plugins/security_oss/public';
 
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import type { FeaturesPluginStart } from '../../features/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 import { SecurityLicenseService } from '../common/licensing';
 import type { SecurityLicense } from '../common/licensing';
 import { accountManagementApp } from './account_management';
-import type { AnonymousAccessServiceStart } from './anonymous_access';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
@@ -40,6 +40,7 @@ export interface PluginSetupDependencies {
   securityOss: SecurityOssPluginSetup;
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
+  share?: SharePluginSetup;
 }
 
 export interface PluginStartDependencies {
@@ -48,6 +49,7 @@ export interface PluginStartDependencies {
   securityOss: SecurityOssPluginStart;
   management?: ManagementStart;
   spaces?: SpacesPluginStart;
+  share?: SharePluginStart;
 }
 
 export class SecurityPlugin
@@ -75,7 +77,7 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies>,
-    { home, licensing, management, securityOss }: PluginSetupDependencies
+    { home, licensing, management, securityOss, share }: PluginSetupDependencies
   ): SecurityPluginSetup {
     const { http, notifications } = core;
     const { anonymousPaths } = http;
@@ -138,6 +140,10 @@ export class SecurityPlugin
       });
     }
 
+    if (share) {
+      this.anonymousAccessService.setup({ share });
+    }
+
     return {
       authc: this.authc,
       license,
@@ -146,7 +152,7 @@ export class SecurityPlugin
 
   public start(
     core: CoreStart,
-    { management, securityOss }: PluginStartDependencies
+    { management, securityOss, share }: PluginStartDependencies
   ): SecurityPluginStart {
     this.sessionTimeout.start();
     this.securityCheckupService.start({ securityOssStart: securityOss, docLinks: core.docLinks });
@@ -155,11 +161,14 @@ export class SecurityPlugin
       this.managementService.start({ capabilities: core.application.capabilities });
     }
 
+    if (share) {
+      this.anonymousAccessService.start({ core });
+    }
+
     return {
       uiApi: getUiApi({ core }),
       navControlService: this.navControlService.start({ core }),
       authc: this.authc as AuthenticationServiceStart,
-      anonymousAccess: this.anonymousAccessService.start({ core }),
     };
   }
 
@@ -196,8 +205,4 @@ export interface SecurityPluginStart {
    * Exposes UI components that will be loaded asynchronously.
    */
   uiApi: UiApi;
-  /**
-   * Exposes information about whether anonymous access is available and in what capacity.
-   */
-  anonymousAccess: AnonymousAccessServiceStart;
 }

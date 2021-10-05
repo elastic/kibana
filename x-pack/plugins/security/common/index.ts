@@ -7,4 +7,3 @@
 
 export type { SecurityLicense } from './licensing';
 export type { AuthenticatedUser } from './model';
-export type { AnonymousAccessState } from './types';

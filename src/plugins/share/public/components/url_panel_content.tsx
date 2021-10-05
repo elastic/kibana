@@ -32,8 +32,10 @@ import type { Capabilities } from 'src/core/public';
 
 import { shortenUrl } from '../lib/url_shortener';
 import { UrlParamExtension } from '../types';
-import type { AnonymousAccessServiceStart } from '../../../../../x-pack/plugins/security/public';
-import type { AnonymousAccessState } from '../../../../../x-pack/plugins/security/common';
+import {
+  AnonymousAccessServiceContract,
+  AnonymousAccessState,
+} from '../../common/anonymous_access';
 
 interface Props {
   allowShortUrl: boolean;
@@ -44,7 +46,7 @@ interface Props {
   basePath: string;
   post: HttpStart['post'];
   urlParamExtensions?: UrlParamExtension[];
-  anonymousAccess?: AnonymousAccessServiceStart;
+  anonymousAccess?: AnonymousAccessServiceContract;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
 }
 

@@ -114,10 +114,6 @@ describe('Security Plugin', () => {
           getUserMenuLinks$: expect.any(Function),
           addUserMenuLinks: expect.any(Function),
         },
-        anonymousAccess: {
-          getCapabilities: expect.any(Function),
-          getState: expect.any(Function),
-        },
       });
     });
 

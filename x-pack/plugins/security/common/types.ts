@@ -19,8 +19,3 @@ export enum LogoutReason {
   'LOGGED_OUT' = 'LOGGED_OUT',
   'UNAUTHENTICATED' = 'UNAUTHENTICATED',
 }
-
-export interface AnonymousAccessState {
-  isEnabled: boolean;
-  accessURLParameters: Record<string, string> | null;
-}

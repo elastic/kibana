@@ -7,28 +7,37 @@
 
 import type { Capabilities, CoreStart } from 'src/core/public';
 
-import type { AnonymousAccessState } from '../../common';
+import type {
+  AnonymousAccessServiceContract,
+  AnonymousAccessState,
+} from '../../../../../src/plugins/share/common';
+import type { SharePluginSetup } from '../../../../../src/plugins/share/public';
 
 const DEFAULT_ANONYMOUS_ACCESS_STATE = Object.freeze<AnonymousAccessState>({
   isEnabled: false,
   accessURLParameters: null,
 });
 
-interface StartDeps {
-  core: Pick<CoreStart, 'http'>;
+interface SetupDeps {
+  share: SharePluginSetup;
 }
 
-export interface AnonymousAccessServiceStart {
-  getState: () => Promise<AnonymousAccessState>;
-  getCapabilities: () => Promise<Capabilities>;
+interface StartDeps {
+  core: Pick<CoreStart, 'http'>;
 }
 
 /**
  * Service that allows to retrieve application state.
  */
 export class AnonymousAccessService {
-  start({ core }: StartDeps): AnonymousAccessServiceStart {
-    return {
+  private internalService!: AnonymousAccessServiceContract;
+
+  setup({ share }: SetupDeps) {
+    share.setAnonymousAccessServiceProvider(() => this.internalService);
+  }
+
+  start({ core }: StartDeps) {
+    this.internalService = {
       getCapabilities: () =>
         core.http.get<Capabilities>('/internal/security/anonymous_access/capabilities'),
       getState: () =>

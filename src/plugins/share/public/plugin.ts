@@ -21,11 +21,7 @@ import { UrlService } from '../common/url_service';
 import { RedirectManager } from './url_service';
 import type { RedirectOptions } from '../common/url_service/locators/redirect';
 import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
-import type { SecurityPluginStart } from '../../../../x-pack/plugins/security/public';
-
-export interface ShareStartDependencies {
-  security?: SecurityPluginStart;
-}
+import { AnonymousAccessServiceContract } from '../common';
 
 /** @public */
 export type SharePluginSetup = ShareMenuRegistrySetup & {
@@ -46,6 +42,11 @@ export type SharePluginSetup = ShareMenuRegistrySetup & {
    * the locator, then using the locator to navigate.
    */
   navigate(options: RedirectOptions): void;
+
+  /**
+   * Sets the provider for the anonymous access service; this is consumed by the Security plugin to avoid a circular dependency.
+   */
+  setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => void;
 };
 
 /** @public */
@@ -76,6 +77,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
 
   private redirectManager?: RedirectManager;
   private url?: UrlService;
+  private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -134,15 +136,21 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
       urlGenerators: this.urlGeneratorsService.setup(core),
       url: this.url,
       navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
+      setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => {
+        if (this.anonymousAccessServiceProvider) {
+          throw new Error('Anonymous Access service provider is already set.');
+        }
+        this.anonymousAccessServiceProvider = provider;
+      },
     };
   }
 
-  public start(core: CoreStart, plugins: ShareStartDependencies): SharePluginStart {
+  public start(core: CoreStart): SharePluginStart {
     return {
       ...this.shareContextMenu.start(
         core,
         this.shareMenuRegistry.start(),
-        plugins.security?.anonymousAccess
+        this.anonymousAccessServiceProvider
       ),
       urlGenerators: this.urlGeneratorsService.start(core),
       url: this.url!,
