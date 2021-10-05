@@ -40,7 +40,7 @@ export interface ExpressionExecOptions {
 }
 
 export class TypesRegistry implements IRegistry<ExpressionType> {
-  constructor(private readonly executor: Executor<any>) {}
+  constructor(private readonly executor: Executor) {}
 
   public register(
     typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)
@@ -62,7 +62,7 @@ export class TypesRegistry implements IRegistry<ExpressionType> {
 }
 
 export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
-  constructor(private readonly executor: Executor<any>) {}
+  constructor(private readonly executor: Executor) {}
 
   public register(
     functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)
@@ -100,12 +100,12 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   /**
    * @deprecated
    */
-  public readonly functions = new FunctionsRegistry(this);
+  public readonly functions = new FunctionsRegistry(this as Executor);
 
   /**
    * @deprecated
    */
-  public readonly types = new TypesRegistry(this);
+  public readonly types = new TypesRegistry(this as Executor);
 
   protected parent?: Executor<Context>;
 
@@ -207,15 +207,15 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     ast: string | ExpressionAstExpression,
     params: ExpressionExecutionParams = {}
   ): Execution<Input, Output> {
-    const executionParams: ExecutionParams = {
+    const executionParams = {
       executor: this,
       params: {
         ...params,
         // for canvas we are passing this in,
         // canvas should be refactored to not pass any extra context in
         extraContext: this.context,
-      } as any,
-    };
+      },
+    } as ExecutionParams;
 
     if (typeof ast === 'string') executionParams.expression = ast;
     else executionParams.ast = ast;
@@ -273,7 +273,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     return { state: newAst, references: allReferences };
   }
 
-  public telemetry(ast: ExpressionAstExpression, telemetryData: Record<string, any>) {
+  public telemetry(ast: ExpressionAstExpression, telemetryData: Record<string, unknown>) {
     this.walkAst(cloneDeep(ast), (fn, link) => {
       telemetryData = fn.telemetry(link.arguments, telemetryData);
     });
