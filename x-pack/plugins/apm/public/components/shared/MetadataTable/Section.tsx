@@ -10,15 +10,21 @@ import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { KeyValueTable } from '../KeyValueTable';
-import { KeyValuePair } from '../../../utils/flattenObject';
 
 interface Props {
-  keyValuePairs: KeyValuePair[];
+  properties: Array<{ field: string; value: string[] | number[] }>;
 }
 
-export function Section({ keyValuePairs }: Props) {
-  if (!isEmpty(keyValuePairs)) {
-    return <KeyValueTable keyValuePairs={keyValuePairs} />;
+export function Section({ properties }: Props) {
+  if (!isEmpty(properties)) {
+    return (
+      <KeyValueTable
+        keyValuePairs={properties.map((property) => ({
+          key: property.field,
+          value: property.value,
+        }))}
+      />
+    );
   }
   return (
     <EuiText size="s">
