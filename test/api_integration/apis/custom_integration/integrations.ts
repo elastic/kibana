@@ -21,7 +21,9 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(resp.body).to.be.an('array');
-        expect(resp.body.length).to.be.above(2); // Should at least have registered the three sample data-sets
+
+        // sample data
+        expect(resp.body.length).to.be.above(13); // at least the language clients + tutorials + sample data
 
         ['flights', 'logs', 'ecommerce'].forEach((sampleData) => {
           expect(resp.body.findIndex((c: { id: string }) => c.id === sampleData)).to.be.above(-1);
@@ -37,7 +39,8 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(resp.body).to.be.an('array');
-        expect(resp.body.length).to.be.above(2); // Should have at least a few beats registered
+
+        expect(resp.body.length).to.be.above(109); // at least the beats + apm
       });
     });
   });
