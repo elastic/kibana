@@ -46,24 +46,24 @@ export const useHostsRiskScore = ({
   hostName?: string;
 }): HostRisk | null => {
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
-  const [isModuleEnabled, setIsModuleEnabled] = useState<boolean | undefined>(
-    riskyHostsFeatureEnabled ? undefined : false
-  );
+  const [isModuleEnabled, setIsModuleEnabled] = useState<boolean | undefined>(undefined);
+  const [loading, setLoading] = useState<boolean>(riskyHostsFeatureEnabled);
 
   const { addError } = useAppToasts();
   const { data } = useKibana().services;
 
   const dispatch = useDispatch();
 
-  const { error, loading, result, start } = useHostsRiskScoreComplete();
+  const { error, result, start, loading: isHostsRiskScoreLoading } = useHostsRiskScoreComplete();
 
   const deleteQuery = useCallback(() => {
     dispatch(inputsActions.deleteOneQuery({ inputId: 'global', id: QUERY_ID }));
   }, [dispatch]);
 
   useEffect(() => {
-    if (!loading && result) {
+    if (!isHostsRiskScoreLoading && result) {
       setIsModuleEnabled(true);
+      setLoading(false);
       dispatch(
         inputsActions.setQuery({
           inputId: 'global',
@@ -72,24 +72,26 @@ export const useHostsRiskScore = ({
             dsl: result.inspect?.dsl ?? [],
             response: [JSON.stringify(result.rawResponse, null, 2)],
           },
-          loading,
+          loading: isHostsRiskScoreLoading,
           refetch: noop,
         })
       );
     }
     return deleteQuery;
-  }, [deleteQuery, dispatch, loading, result, setIsModuleEnabled]);
+  }, [deleteQuery, dispatch, isHostsRiskScoreLoading, result, setIsModuleEnabled]);
 
   useEffect(() => {
     if (error) {
       if (isIndexNotFoundError(error)) {
         setIsModuleEnabled(false);
+        setLoading(false);
       } else {
         addError(error, {
           title: i18n.translate('xpack.securitySolution.overview.hostsRiskError', {
             defaultMessage: 'Error Fetching Hosts Risk',
           }),
         });
+        setLoading(false);
         setIsModuleEnabled(true);
       }
     }
@@ -117,6 +119,6 @@ export const useHostsRiskScore = ({
       ? (hits?.map((hit) => hit._source) as HostsRiskScore[])
       : [],
     isModuleEnabled,
-    loading: isModuleEnabled === undefined ? true : loading,
+    loading,
   };
 };
