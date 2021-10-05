@@ -216,7 +216,7 @@ Above example is overly simplified. In reality [we do a bit more](https://github
 
 Breakdown metrics are used to power the "Time spent by span type" graph. Agents collect summarized metrics about the timings of spans and transactions, broken down by transaction or span type.
 
-![image](https://user-images.githubusercontent.com/209966/135989975-2b9e3c5f-d8e4-4e12-b68c-d98147366aff.png)
+![image](https://user-images.githubusercontent.com/209966/135990865-9077ae3e-a7a4-4b5d-bdce-41dc832689ea.png)
 
 ## Transaction breakdown metrics (`transaction_breakdown`)
 
