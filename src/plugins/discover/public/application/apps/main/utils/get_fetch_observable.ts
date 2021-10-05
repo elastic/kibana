@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { merge } from 'rxjs';
-import { debounceTime, filter, tap } from 'rxjs/operators';
+import { debounceTime, filter, skip, tap } from 'rxjs/operators';
 
 import { FetchStatus } from '../../../types';
 import type {
@@ -26,6 +26,7 @@ export function getFetch$({
   main$,
   refetch$,
   searchSessionManager,
+  initialFetchStatus,
 }: {
   setAutoRefreshDone: (val: AutoRefreshDoneFn | undefined) => void;
   data: DataPublicPluginStart;
@@ -33,10 +34,11 @@ export function getFetch$({
   refetch$: DataRefetch$;
   searchSessionManager: DiscoverSearchSessionManager;
   searchSource: SearchSource;
+  initialFetchStatus: FetchStatus;
 }) {
   const { timefilter } = data.query.timefilter;
   const { filterManager } = data.query;
-  return merge(
+  let fetch$ = merge(
     refetch$,
     filterManager.getFetches$(),
     timefilter.getFetch$(),
@@ -58,4 +60,13 @@ export function getFetch$({
     data.query.queryString.getUpdates$(),
     searchSessionManager.newSearchSessionIdFromURL$.pipe(filter((sessionId) => !!sessionId))
   ).pipe(debounceTime(100));
+
+  /**
+   * Skip initial fetch when discover:searchOnPageLoad is disabled.
+   */
+  if (initialFetchStatus === FetchStatus.UNINITIALIZED) {
+    fetch$ = fetch$.pipe(skip(1));
+  }
+
+  return fetch$;
 }

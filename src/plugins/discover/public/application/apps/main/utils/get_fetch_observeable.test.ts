@@ -58,6 +58,7 @@ describe('getFetchObservable', () => {
       data: createDataMock(new Subject(), new Subject(), new Subject(), new Subject()),
       searchSessionManager: searchSessionManagerMock.searchSessionManager,
       searchSource: savedSearchMock.searchSource,
+      initialFetchStatus: FetchStatus.LOADING,
     });
 
     fetch$.subscribe(() => {
@@ -81,6 +82,7 @@ describe('getFetchObservable', () => {
       data: dataMock,
       searchSessionManager: searchSessionManagerMock.searchSessionManager,
       searchSource: savedSearchMockWithTimeField.searchSource,
+      initialFetchStatus: FetchStatus.LOADING,
     });
 
     const fetchfnMock = jest.fn();
