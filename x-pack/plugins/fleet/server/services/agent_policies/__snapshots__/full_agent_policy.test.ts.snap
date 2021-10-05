@@ -51,25 +51,14 @@ Object {
         "cluster": Array [
           "monitor",
         ],
+      },
+      "_elastic_agent_monitoring": Object {
         "indices": Array [
           Object {
             "names": Array [
-              "metrics-elastic_agent-default",
-              "metrics-elastic_agent.elastic_agent-default",
-              "metrics-elastic_agent.apm_server-default",
-              "metrics-elastic_agent.filebeat-default",
-              "metrics-elastic_agent.fleet_server-default",
-              "metrics-elastic_agent.metricbeat-default",
-              "metrics-elastic_agent.osquerybeat-default",
-              "metrics-elastic_agent.packetbeat-default",
-              "metrics-elastic_agent.endpoint_security-default",
-              "metrics-elastic_agent.auditbeat-default",
-              "metrics-elastic_agent.heartbeat-default",
+              "metrics-default",
             ],
-            "privileges": Array [
-              "auto_configure",
-              "create_doc",
-            ],
+            "privileges": Array [],
           },
         ],
       },
@@ -148,25 +137,14 @@ Object {
         "cluster": Array [
           "monitor",
         ],
+      },
+      "_elastic_agent_monitoring": Object {
         "indices": Array [
           Object {
             "names": Array [
-              "metrics-elastic_agent-default",
-              "metrics-elastic_agent.elastic_agent-default",
-              "metrics-elastic_agent.apm_server-default",
-              "metrics-elastic_agent.filebeat-default",
-              "metrics-elastic_agent.fleet_server-default",
-              "metrics-elastic_agent.metricbeat-default",
-              "metrics-elastic_agent.osquerybeat-default",
-              "metrics-elastic_agent.packetbeat-default",
-              "metrics-elastic_agent.endpoint_security-default",
-              "metrics-elastic_agent.auditbeat-default",
-              "metrics-elastic_agent.heartbeat-default",
+              "metrics-default",
             ],
-            "privileges": Array [
-              "auto_configure",
-              "create_doc",
-            ],
+            "privileges": Array [],
           },
         ],
       },
@@ -245,25 +223,14 @@ Object {
         "cluster": Array [
           "monitor",
         ],
+      },
+      "_elastic_agent_monitoring": Object {
         "indices": Array [
           Object {
             "names": Array [
-              "metrics-elastic_agent-default",
-              "metrics-elastic_agent.elastic_agent-default",
-              "metrics-elastic_agent.apm_server-default",
-              "metrics-elastic_agent.filebeat-default",
-              "metrics-elastic_agent.fleet_server-default",
-              "metrics-elastic_agent.metricbeat-default",
-              "metrics-elastic_agent.osquerybeat-default",
-              "metrics-elastic_agent.packetbeat-default",
-              "metrics-elastic_agent.endpoint_security-default",
-              "metrics-elastic_agent.auditbeat-default",
-              "metrics-elastic_agent.heartbeat-default",
+              "metrics-default",
             ],
-            "privileges": Array [
-              "auto_configure",
-              "create_doc",
-            ],
+            "privileges": Array [],
           },
         ],
       },
