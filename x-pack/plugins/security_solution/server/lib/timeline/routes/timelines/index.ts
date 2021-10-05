@@ -12,3 +12,4 @@ export { getTimelinesRoute } from './get_timelines';
 export { importTimelinesRoute } from './import_timelines';
 export { patchTimelinesRoute } from './patch_timelines';
 export { persistFavoriteRoute } from './persist_favorite';
+export { resolveTimelineRoute } from './resolve_timeline';
