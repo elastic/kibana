@@ -131,5 +131,6 @@ describe('Create a timeline from a template', () => {
     cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
     cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
     cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
+    closeTimeline();
   });
 });
