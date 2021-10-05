@@ -14,8 +14,18 @@ import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/sav
 import { getCoreOverlays, getEmbeddableService, getSavedObjectsClient } from './kibana_services';
 import { extractReferences, injectReferences } from '../common/migrations/references';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
+import { getSpacesApi } from './kibana_services';
 
-type MapDoc = MapSavedObjectAttributes & { references?: SavedObjectReference[] };
+export interface SharingSavedObjectProps {
+  outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
+  aliasTargetId?: string;
+  errorJSON?: string;
+}
+
+type MapDoc = MapSavedObjectAttributes & {
+  sharingSavedObjectProps?: SharingSavedObjectProps;
+  references?: SavedObjectReference[];
+};
 
 export type MapAttributeService = AttributeService<MapDoc, MapByValueInput, MapByReferenceInput>;
 
@@ -58,7 +68,11 @@ export function getMapAttributeService(): MapAttributeService {
       return { id: savedObject.id };
     },
     unwrapMethod: async (savedObjectId: string): Promise<MapDoc> => {
-      const savedObject = await getSavedObjectsClient().get<MapSavedObjectAttributes>(
+      const {
+        saved_object: savedObject,
+        outcome,
+        alias_target_id: aliasTargetId,
+      } = await getSavedObjectsClient().resolve<MapSavedObjectAttributes>(
         MAP_SAVED_OBJECT_TYPE,
         savedObjectId
       );
@@ -68,7 +82,22 @@ export function getMapAttributeService(): MapAttributeService {
       }
 
       const { attributes } = injectReferences(savedObject);
-      return { ...attributes, references: savedObject.references };
+      return {
+        ...attributes,
+        references: savedObject.references,
+        sharingSavedObjectProps: {
+          aliasTargetId,
+          outcome,
+          errorJSON:
+            outcome === 'conflict' && getSpacesApi()
+              ? JSON.stringify({
+                  targetType: MAP_SAVED_OBJECT_TYPE,
+                  sourceId: savedObjectId,
+                  targetSpace: (await getSpacesApi()!.getActiveSpace()).id,
+                })
+              : undefined,
+        },
+      };
     },
     checkForDuplicateTitle: (props: OnSaveProps) => {
       return checkForDuplicateTitle(

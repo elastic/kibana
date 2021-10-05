@@ -20,8 +20,7 @@ import type {
   PluginInitializerContext,
 } from '../../../../src/core/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-// @ts-ignore
-import { MapView } from './inspector/views/map_view';
+import { MapInspectorView } from './inspector/map_inspector_view';
 import {
   setEMSSettings,
   setKibanaCommonConfig,
@@ -83,7 +82,8 @@ import {
   tileMapRenderer,
   tileMapVisType,
 } from './legacy_visualizations';
-import { SecurityPluginStart } from '../../security/public';
+import type { SecurityPluginStart } from '../../security/public';
+import type { SpacesPluginStart } from '../../spaces/public';
 
 export interface MapsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
@@ -113,6 +113,7 @@ export interface MapsPluginStartDependencies {
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   security: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 /**
@@ -166,7 +167,7 @@ export class MapsPlugin
       })
     );
 
-    plugins.inspector.registerView(MapView);
+    plugins.inspector.registerView(MapInspectorView);
     if (plugins.home) {
       plugins.home.featureCatalogue.register(featureCatalogueEntry);
     }
