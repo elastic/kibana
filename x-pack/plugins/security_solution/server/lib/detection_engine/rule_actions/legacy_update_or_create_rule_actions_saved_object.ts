@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { Logger } from 'src/core/server';
 import { AlertAction } from '../../../../../alerting/common';
 import { AlertServices } from '../../../../../alerting/server';
+
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetRuleActionsSavedObject } from './legacy_get_rule_actions_saved_object';
 // eslint-disable-next-line no-restricted-imports
@@ -22,6 +24,7 @@ interface LegacyUpdateOrCreateRuleActionsSavedObject {
   savedObjectsClient: AlertServices['savedObjectsClient'];
   actions: AlertAction[] | undefined;
   throttle: string | null | undefined;
+  logger: Logger;
 }
 
 /**
@@ -35,10 +38,12 @@ export const legacyUpdateOrCreateRuleActionsSavedObject = async ({
   ruleAlertId,
   actions,
   throttle,
+  logger,
 }: LegacyUpdateOrCreateRuleActionsSavedObject): Promise<void> => {
   const ruleActions = await legacyGetRuleActionsSavedObject({
     ruleAlertId,
     savedObjectsClient,
+    logger,
   });
 
   if (ruleActions != null) {

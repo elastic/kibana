@@ -6,6 +6,8 @@
  */
 
 import { SavedObjectsUpdateResponse } from 'kibana/server';
+import { loggingSystemMock } from 'src/core/server/mocks';
+
 import { AlertAction } from '../../../../../alerting/common';
 
 // eslint-disable-next-line no-restricted-imports
@@ -30,6 +32,11 @@ import {
 describe('legacy_utils', () => {
   describe('legacyGetRuleActionsFromSavedObject', () => {
     type FuncReturn = ReturnType<typeof legacyGetRuleActionsFromSavedObject>;
+    let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+    beforeEach(() => {
+      logger = loggingSystemMock.createLogger();
+    });
 
     test('returns no_actions and an alert throttle of null if nothing is in the references or in the attributes', async () => {
       const savedObject: SavedObjectsUpdateResponse<LegacyIRuleActionsAttributesSavedObjectAttributes> =
@@ -39,7 +46,7 @@ describe('legacy_utils', () => {
           references: [],
           attributes: {},
         };
-      expect(legacyGetRuleActionsFromSavedObject(savedObject)).toEqual<FuncReturn>({
+      expect(legacyGetRuleActionsFromSavedObject(savedObject, logger)).toEqual<FuncReturn>({
         actions: [],
         alertThrottle: null,
         id: '123',
@@ -63,7 +70,7 @@ describe('legacy_utils', () => {
             actions: [],
           },
         };
-      expect(legacyGetRuleActionsFromSavedObject(savedObject)).toEqual<FuncReturn>({
+      expect(legacyGetRuleActionsFromSavedObject(savedObject, logger)).toEqual<FuncReturn>({
         actions: [],
         alertThrottle: null,
         id: '123',
@@ -101,7 +108,7 @@ describe('legacy_utils', () => {
             alertThrottle: '1d',
           },
         };
-      expect(legacyGetRuleActionsFromSavedObject(savedObject)).toEqual<FuncReturn>({
+      expect(legacyGetRuleActionsFromSavedObject(savedObject, logger)).toEqual<FuncReturn>({
         actions: [
           {
             action_type_id: 'action_type_1',
@@ -157,7 +164,7 @@ describe('legacy_utils', () => {
             alertThrottle: '1d',
           },
         };
-      expect(legacyGetRuleActionsFromSavedObject(savedObject)).toEqual<FuncReturn>({
+      expect(legacyGetRuleActionsFromSavedObject(savedObject, logger)).toEqual<FuncReturn>({
         id: '123',
         alertThrottle: '1d',
         ruleThrottle: '1d',
@@ -214,7 +221,7 @@ describe('legacy_utils', () => {
             alertThrottle: '1d',
           },
         };
-      expect(legacyGetRuleActionsFromSavedObject(savedObject)).toEqual<FuncReturn>({
+      expect(legacyGetRuleActionsFromSavedObject(savedObject, logger)).toEqual<FuncReturn>({
         id: '123',
         alertThrottle: '1d',
         ruleThrottle: '1d',
@@ -254,7 +261,7 @@ describe('legacy_utils', () => {
             alertThrottle: '1d',
           },
         };
-      expect(legacyGetRuleActionsFromSavedObject(savedObject)).toEqual<FuncReturn>({
+      expect(legacyGetRuleActionsFromSavedObject(savedObject, logger)).toEqual<FuncReturn>({
         actions: [],
         alertThrottle: '1d',
         id: '123',

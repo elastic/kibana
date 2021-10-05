@@ -6,6 +6,8 @@
  */
 
 import { SavedObjectsUpdateResponse } from 'kibana/server';
+import { Logger } from 'src/core/server';
+
 import { AlertAction } from '../../../../../alerting/common';
 
 // eslint-disable-next-line no-restricted-imports
@@ -32,7 +34,8 @@ export const legacyGetThrottleOptions = (
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export const legacyGetRuleActionsFromSavedObject = (
-  savedObject: SavedObjectsUpdateResponse<LegacyIRuleActionsAttributesSavedObjectAttributes>
+  savedObject: SavedObjectsUpdateResponse<LegacyIRuleActionsAttributesSavedObjectAttributes>,
+  logger: Logger
 ): {
   id: string;
   actions: LegacyRuleAlertAction[];
@@ -58,6 +61,12 @@ export const legacyGetRuleActionsFromSavedObject = (
         ];
       } else {
         // We cannot find it so we return no actions. This line should not be reached.
+        logger.error(
+          [
+            'Security Solution notification (Legacy) Expected to find an action within the action reference of:',
+            `${actionRef} inside of the references of ${savedObject.references} but did not. Skipping this action.`,
+          ].join('')
+        );
         return [];
       }
     }

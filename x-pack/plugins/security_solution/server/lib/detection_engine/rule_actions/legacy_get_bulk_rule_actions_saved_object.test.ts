@@ -6,7 +6,8 @@
  */
 
 import { SavedObjectsFindOptions, SavedObjectsFindResult } from 'kibana/server';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+
+import { loggingSystemMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetBulkRuleActionsSavedObject } from './legacy_get_bulk_rule_actions_saved_object';
@@ -19,9 +20,11 @@ import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_type
 
 describe('legacy_get_bulk_rule_actions_saved_object', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   type FuncReturn = Record<string, LegacyRulesActionsSavedObject>;
 
   beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
     savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.find.mockResolvedValue({
       total: 0,
@@ -32,7 +35,7 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
   });
 
   test('calls "savedObjectsClient.find" with the expected "hasReferences"', () => {
-    legacyGetBulkRuleActionsSavedObject({ alertIds: ['123'], savedObjectsClient });
+    legacyGetBulkRuleActionsSavedObject({ alertIds: ['123'], savedObjectsClient, logger });
     const [[arg1]] = savedObjectsClient.find.mock.calls;
     expect(arg1).toEqual<SavedObjectsFindOptions>({
       hasReference: [{ id: '123', type: 'alert' }],
@@ -55,6 +58,7 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
     const returnValue = await legacyGetBulkRuleActionsSavedObject({
       alertIds: ['123'],
       savedObjectsClient,
+      logger,
     });
     expect(returnValue).toEqual<FuncReturn>({});
   });
@@ -103,6 +107,7 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
     const returnValue = await legacyGetBulkRuleActionsSavedObject({
       alertIds: ['123'],
       savedObjectsClient,
+      logger,
     });
     expect(returnValue).toEqual<FuncReturn>({
       'alert-123': {
@@ -194,6 +199,7 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
     const returnValue = await legacyGetBulkRuleActionsSavedObject({
       alertIds: ['123'],
       savedObjectsClient,
+      logger,
     });
     expect(returnValue).toEqual<FuncReturn>({
       'alert-123': {
@@ -280,6 +286,7 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
     const returnValue = await legacyGetBulkRuleActionsSavedObject({
       alertIds: ['123'],
       savedObjectsClient,
+      logger,
     });
     expect(returnValue).toEqual<FuncReturn>({
       'alert-123': {
@@ -355,6 +362,7 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
     const returnValue = await legacyGetBulkRuleActionsSavedObject({
       alertIds: ['123'],
       savedObjectsClient,
+      logger,
     });
     expect(returnValue).toEqual<FuncReturn>({
       'alert-123': {
@@ -423,6 +431,7 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
     const returnValue = await legacyGetBulkRuleActionsSavedObject({
       alertIds: ['123'],
       savedObjectsClient,
+      logger,
     });
     expect(returnValue).toEqual<FuncReturn>({
       'alert-123': {
@@ -481,6 +490,7 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
     const returnValue = await legacyGetBulkRuleActionsSavedObject({
       alertIds: ['123'],
       savedObjectsClient,
+      logger,
     });
     expect(returnValue).toEqual<FuncReturn>({});
   });

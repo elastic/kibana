@@ -6,6 +6,8 @@
  */
 
 import { SavedObjectsFindOptionsReference } from 'kibana/server';
+import { Logger } from 'src/core/server';
+
 import { AlertServices } from '../../../../../alerting/server';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
@@ -22,6 +24,7 @@ import { LegacyRulesActionsSavedObject } from './legacy_get_rule_actions_saved_o
 interface LegacyGetBulkRuleActionsSavedObject {
   alertIds: string[];
   savedObjectsClient: AlertServices['savedObjectsClient'];
+  logger: Logger;
 }
 
 /**
@@ -30,6 +33,7 @@ interface LegacyGetBulkRuleActionsSavedObject {
 export const legacyGetBulkRuleActionsSavedObject = async ({
   alertIds,
   savedObjectsClient,
+  logger,
 }: LegacyGetBulkRuleActionsSavedObject): Promise<Record<string, LegacyRulesActionsSavedObject>> => {
   const references = alertIds.map<SavedObjectsFindOptionsReference>((alertId) => ({
     id: alertId,
@@ -52,7 +56,7 @@ export const legacyGetBulkRuleActionsSavedObject = async ({
       // We check to ensure we have found a "ruleAlertId" and hopefully we have.
       const ruleAlertIdKey = ruleAlertId != null ? ruleAlertId.id : undefined;
       if (ruleAlertIdKey != null) {
-        acc[ruleAlertIdKey] = legacyGetRuleActionsFromSavedObject(savedObject);
+        acc[ruleAlertIdKey] = legacyGetRuleActionsFromSavedObject(savedObject, logger);
       } else {
         // this is unusual and should not occur. We should not reach this point.
       }

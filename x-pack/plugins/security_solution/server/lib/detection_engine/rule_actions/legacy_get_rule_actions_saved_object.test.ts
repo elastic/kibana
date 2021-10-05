@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsFindOptions, SavedObjectsFindResult } from 'kibana/server';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { loggingSystemMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
 // eslint-disable-next-line no-restricted-imports
 import {
@@ -21,8 +21,10 @@ import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_type
 describe('legacy_get_rule_actions_saved_object', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   type FuncReturn = LegacyRulesActionsSavedObject | null;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
     savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.find.mockResolvedValue({
       total: 0,
@@ -33,7 +35,7 @@ describe('legacy_get_rule_actions_saved_object', () => {
   });
 
   test('calls "savedObjectsClient.find" with the expected "hasReferences"', () => {
-    legacyGetRuleActionsSavedObject({ ruleAlertId: '123', savedObjectsClient });
+    legacyGetRuleActionsSavedObject({ ruleAlertId: '123', savedObjectsClient, logger });
     const [[arg1]] = savedObjectsClient.find.mock.calls;
     expect(arg1).toEqual<SavedObjectsFindOptions>({
       hasReference: { id: '123', type: 'alert' },
@@ -56,6 +58,7 @@ describe('legacy_get_rule_actions_saved_object', () => {
     const returnValue = await legacyGetRuleActionsSavedObject({
       ruleAlertId: '123',
       savedObjectsClient,
+      logger,
     });
     expect(returnValue).toEqual<FuncReturn>(null);
   });
@@ -104,6 +107,7 @@ describe('legacy_get_rule_actions_saved_object', () => {
     const returnValue = await legacyGetRuleActionsSavedObject({
       ruleAlertId: '123',
       savedObjectsClient,
+      logger,
     });
     expect(returnValue).toEqual<FuncReturn>({
       actions: [
@@ -175,6 +179,7 @@ describe('legacy_get_rule_actions_saved_object', () => {
     const returnValue = await legacyGetRuleActionsSavedObject({
       ruleAlertId: '123',
       savedObjectsClient,
+      logger,
     });
     expect(returnValue).toEqual<FuncReturn>({
       actions: [
