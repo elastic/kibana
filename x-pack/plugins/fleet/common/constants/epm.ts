@@ -55,3 +55,5 @@ export const installationStatuses = {
   Installed: 'installed',
   NotInstalled: 'not_installed',
 } as const;
+
+export const learnMoreBlogPost = 'https://ela.st/learn-agent-integrations';

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, Fragment } from 'react';
 import { Switch, Route, useLocation, useHistory, useParams } from 'react-router-dom';
 import semverLt from 'semver/functions/lt';
 import { i18n } from '@kbn/i18n';
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 
-import { installationStatuses } from '../../../../../../../common/constants';
+import { installationStatuses, learnMoreBlogPost } from '../../../../../../../common/constants';
 import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../../../../constants';
 import {
   INTEGRATIONS_ROUTING_PATHS,
@@ -225,6 +226,25 @@ const InstalledPackages: React.FC = memo(() => {
     return mapToCard(getAbsolutePath, getHref, item);
   });
 
+  const callout =
+    selectedCategory === 'updates_available' ? null : (
+      <Fragment>
+        <EuiSpacer />
+        <EuiCallOut
+          title="Only installed Elastic Agent Integrations are displayed."
+          iconType="iInCircle"
+        >
+          <p>
+            To learn more about integrations and the new Elastic Agent, read our{' '}
+            <EuiLink href={learnMoreBlogPost} target="_blank">
+              announcement blog post
+            </EuiLink>
+            .
+          </p>
+        </EuiCallOut>
+      </Fragment>
+    );
+
   return (
     <PackageListGrid
       isLoading={isLoadingPackages}
@@ -234,6 +254,7 @@ const InstalledPackages: React.FC = memo(() => {
       initialSearch={searchParam}
       title={title}
       list={cards}
+      callout={callout}
     />
   );
 });
