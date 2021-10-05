@@ -69,6 +69,8 @@ journey('uptime', ({ page, params }) => {
   });
 
   step('Navigates to details page', async () => {
-    await page.click('[data-test-subj=uptimeMonitorPage]');
+    await waitForLoadingToFinish();
+
+    await page.click('[data-test-subj=uptimeMonitorPage]', { timeout: 60 * 1000 });
   });
 });
