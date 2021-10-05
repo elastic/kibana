@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, Fragment } from 'react';
+import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -101,7 +101,6 @@ export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, ch
           ),
           isSelected: section === 'manage',
           href: getHref('integrations_installed'),
-          tooltipContent: <Fragment>View installed Elastic Agent integrations.</Fragment>,
         },
       ]}
     >

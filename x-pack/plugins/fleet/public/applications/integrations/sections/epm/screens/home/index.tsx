@@ -25,6 +25,7 @@ import {
   useGetAppendCustomIntegrations,
   useGetReplacementCustomIntegrations,
   useLink,
+  useStartServices,
 } from '../../../../hooks';
 import { doesPackageHaveIntegrations } from '../../../../services';
 import { DefaultLayout } from '../../../../layouts';
@@ -144,6 +145,7 @@ const InstalledPackages: React.FC = memo(() => {
     experimental: true,
   });
   const { getHref, getAbsolutePath } = useLink();
+  const { docLinks } = useStartServices();
 
   const { selectedCategory, searchParam } = getParams(
     useParams<CategoryParams>(),
@@ -231,13 +233,20 @@ const InstalledPackages: React.FC = memo(() => {
       <Fragment>
         <EuiSpacer />
         <EuiCallOut
-          title="Only installed Elastic Agent Integrations are displayed."
+          title={i18n.translate('xpack.fleet.epmList.availableCalloutTitle', {
+            defaultMessage: 'Only installed Elastic Agent Integrations are displayed.',
+          })}
           iconType="iInCircle"
         >
           <p>
-            To learn more about integrations and the new Elastic Agent, read our{' '}
-            <EuiLink href={learnMoreBlogPost} target="_blank">
-              announcement blog post
+            {i18n.translate('xpack.fleet.epmList.availableCalloutIntroText', {
+              defaultMessage:
+                'To learn more about integrations and the new Elastic Agent, read our',
+            })}{' '}
+            <EuiLink href={docLinks.links.fleet.learnMoreBlog} target="_blank">
+              {i18n.translate('xpack.fleet.epmList.availableCalloutBlogText', {
+                defaultMessage: 'announcement blog post',
+              })}
             </EuiLink>
             .
           </p>

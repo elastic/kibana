@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, Fragment } from 'react';
+import React, { memo } from 'react';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import type { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
 
@@ -43,9 +43,7 @@ export interface HeaderProps {
   leftColumn?: JSX.Element;
   rightColumn?: JSX.Element;
   rightColumnGrow?: EuiFlexItemProps['grow'];
-  tabs?: Array<
-    Omit<EuiTabProps, 'name'> & { name?: JSX.Element | string } & { tooltipContent?: JSX.Element }
-  >;
+  tabs?: Array<Omit<EuiTabProps, 'name'> & { name?: JSX.Element | string }>;
   tabsClassName?: string;
   'data-test-subj'?: string;
 }
@@ -67,45 +65,32 @@ export const Header: React.FC<HeaderProps> = ({
   maxWidth,
   tabsClassName,
   'data-test-subj': dataTestSubj,
-}) => {
-  return (
-    <Container data-test-subj={dataTestSubj}>
-      <Wrapper maxWidth={maxWidth}>
-        <HeaderColumns
-          leftColumn={leftColumn}
-          rightColumn={rightColumn}
-          rightColumnGrow={rightColumnGrow}
-        />
-        <EuiFlexGroup>
-          {tabs ? (
-            <EuiFlexItem>
-              <EuiSpacer size="s" />
-              <Tabs className={tabsClassName}>
-                {tabs.map((props, index) => {
-                  const tab = (
-                    <EuiTab {...(props as EuiTabProps)} key={props.id}>
-                      {props.name}
-                    </EuiTab>
-                  );
-
-                  let wrappedTab;
-                  if (props.tooltipContent) {
-                    wrappedTab = <EuiToolTip content={props.tooltipContent}>{tab}</EuiToolTip>;
-                  } else {
-                    wrappedTab = tab;
-                  }
-
-                  return <Fragment key={`${props.id}-${index}`}>{wrappedTab}</Fragment>;
-                })}
-              </Tabs>
-            </EuiFlexItem>
-          ) : (
-            <EuiFlexItem>
-              <EuiSpacer size="l" />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </Wrapper>
-    </Container>
-  );
-};
+}) => (
+  <Container data-test-subj={dataTestSubj}>
+    <Wrapper maxWidth={maxWidth}>
+      <HeaderColumns
+        leftColumn={leftColumn}
+        rightColumn={rightColumn}
+        rightColumnGrow={rightColumnGrow}
+      />
+      <EuiFlexGroup>
+        {tabs ? (
+          <EuiFlexItem>
+            <EuiSpacer size="s" />
+            <Tabs className={tabsClassName}>
+              {tabs.map((props, index) => (
+                <EuiTab {...(props as EuiTabProps)} key={`${props.id}-${index}`}>
+                  {props.name}
+                </EuiTab>
+              ))}
+            </Tabs>
+          </EuiFlexItem>
+        ) : (
+          <EuiFlexItem>
+            <EuiSpacer size="l" />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </Wrapper>
+  </Container>
+);
