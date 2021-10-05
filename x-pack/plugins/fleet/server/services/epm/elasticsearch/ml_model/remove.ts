@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import type { ElasticsearchClient } from 'kibana/server';
 
-import { ElasticsearchAssetType } from '../../../../types';
-import type { EsAssetReference } from '../../../../types';
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common/constants';
 import { appContextService } from '../../../app_context';
 
 export const deleteMlModel = async (esClient: ElasticsearchClient, mlModelIds: string[]) => {

@@ -12,8 +12,6 @@ import { saveInstalledEsRefs } from '../../packages/install';
 import { getPathParts } from '../../archive';
 import { ElasticsearchAssetType } from '../../../../../common/types/models';
 import type { EsAssetReference, InstallablePackage } from '../../../../../common/types/models';
-import { getInstallation } from '../../packages';
-import { appContextService } from '../../../app_context';
 
 import { getAsset } from './common';
 
@@ -28,7 +26,6 @@ export const installMlModel = async (
   esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract
 ) => {
-  const logger = appContextService.getLogger();
   const mlModelPath = paths.find((path) => isMlModel(path));
 
   const installedMlModels: EsAssetReference[] = [];
