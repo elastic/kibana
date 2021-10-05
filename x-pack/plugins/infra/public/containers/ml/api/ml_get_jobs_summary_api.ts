@@ -41,6 +41,7 @@ export type FetchJobStatusRequestPayload = rt.TypeOf<typeof fetchJobStatusReques
 
 const datafeedStateRT = rt.keyof({
   started: null,
+  starting: null,
   stopped: null,
   stopping: null,
   '': null,
@@ -77,6 +78,7 @@ export const jobSummaryRT = rt.intersection([
     jobState: jobStateRT,
   }),
   rt.partial({
+    awaitingNodeAssignment: rt.boolean,
     datafeedIndices: rt.array(rt.string),
     datafeedState: datafeedStateRT,
     fullJob: rt.partial({
