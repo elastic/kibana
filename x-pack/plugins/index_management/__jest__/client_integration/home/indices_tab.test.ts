@@ -160,5 +160,20 @@ describe('<IndexManagementHome />', () => {
       const latestRequest = server.requests[server.requests.length - 1];
       expect(latestRequest.url).toBe(`${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`);
     });
+
+    test('should be able to close index', async () => {
+      const { find, actions } = testBed;
+
+      actions.clickManageContextMenuButton();
+      const contextMenu = find('indexContextMenu');
+
+      const closeIndexButton = contextMenu
+        .find('button[data-test-subj="indexTableContextMenuButton"]')
+        .at(0);
+
+      await closeIndexButton.simulate('click');
+      const latestRequest = server.requests[server.requests.length - 1];
+      expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/close`);
+    });
   });
 });
