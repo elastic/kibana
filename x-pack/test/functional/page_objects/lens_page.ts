@@ -773,6 +773,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getDatatableHeader(index = 0) {
+      log.debug(`All headers ${await testSubjects.getVisibleText('dataGridHeader')}`);
       return find.byCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
           index + 1
