@@ -15,9 +15,9 @@ import { tap, debounceTime, map, distinctUntilChanged } from 'rxjs/operators';
 
 import { esFilters } from '../../../../../../data/public';
 import { OptionsListStrings } from './options_list_strings';
+import { Embeddable, IContainer } from '../../../../../../embeddable/public';
+import { InputControlInput, InputControlOutput } from '../../types';
 import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
-import { Embeddable } from '../../../../../../embeddable/public';
-import { InputControlInput, InputControlOutput } from '../../embeddable/types';
 
 const toggleAvailableOptions = (
   indices: number[],
@@ -50,6 +50,9 @@ interface OptionsListDataFetchProps {
   timeRange?: InputControlInput['timeRange'];
 }
 
+export type OptionsListIndexPatternFetcher = () => Promise<string[]>; // TODO: use the proper types here.
+export type OptionsListFieldFetcher = (indexPattern: string) => Promise<string[]>; // TODO: use the proper types here.
+
 export type OptionsListDataFetcher = (
   props: OptionsListDataFetchProps
 ) => Promise<EuiSelectableOption[]>;
@@ -58,7 +61,7 @@ export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 export interface OptionsListEmbeddableInput extends InputControlInput {
   field: string;
   indexPattern: string;
-  multiSelect: boolean;
+  singleSelect?: boolean;
   defaultSelections?: string[];
 }
 export class OptionsListEmbeddable extends Embeddable<
@@ -66,14 +69,11 @@ export class OptionsListEmbeddable extends Embeddable<
   InputControlOutput
 > {
   public readonly type = OPTIONS_LIST_CONTROL;
-
   private node?: HTMLElement;
-  private fetchData: OptionsListDataFetcher;
 
   // internal state for this input control.
   private selectedOptions: Set<string>;
   private typeaheadSubject: Subject<string> = new Subject<string>();
-  private searchString: string = '';
 
   private componentState: OptionsListComponentState;
   private componentStateSubject$ = new Subject<OptionsListComponentState>();
@@ -88,9 +88,10 @@ export class OptionsListEmbeddable extends Embeddable<
   constructor(
     input: OptionsListEmbeddableInput,
     output: InputControlOutput,
-    fetchData: OptionsListDataFetcher
+    private fetchData: OptionsListDataFetcher,
+    parent?: IContainer
   ) {
-    super(input, output);
+    super(input, output, parent);
     this.fetchData = fetchData;
 
     // populate default selections from input
@@ -99,7 +100,7 @@ export class OptionsListEmbeddable extends Embeddable<
 
     // fetch available options when input changes or when search string has changed
     const typeaheadPipe = this.typeaheadSubject.pipe(
-      tap((newSearchString) => (this.searchString = newSearchString)),
+      tap((newSearchString) => this.updateComponentState({ searchString: newSearchString })),
       debounceTime(100)
     );
     const inputPipe = this.getInput$().pipe(
@@ -136,7 +137,7 @@ export class OptionsListEmbeddable extends Embeddable<
 
     const { indexPattern, timeRange, filters, field, query } = this.getInput();
     let newOptions = await this.fetchData({
-      search: this.searchString,
+      search: this.componentState.searchString,
       indexPattern,
       timeRange,
       filters,
