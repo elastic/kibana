@@ -6,14 +6,24 @@
  * Side Public License, v 1.
  */
 
-export function getType(node: any) {
-  if (node == null) return 'null';
+export function getType(node: unknown): string {
+  if (node == null) {
+    return 'null';
+  }
+
   if (Array.isArray(node)) {
     throw new Error('Unexpected array value encountered.');
   }
-  if (typeof node === 'object') {
-    if (!node.type) throw new Error('Objects must have a type property');
-    return node.type;
+
+  if (typeof node !== 'object') {
+    return typeof node;
   }
-  return typeof node;
+
+  const { type } = node as Record<string, unknown>;
+
+  if (!type) {
+    throw new Error('Objects must have a type property');
+  }
+
+  return type as string;
 }
