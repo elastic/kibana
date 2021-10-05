@@ -720,7 +720,7 @@ export const SYNC_DISABLED_MESSAGE = i18n.translate(
 );
 
 export const SYNC_SETTINGS_UPDATED_MESSAGE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.sync_settings_updated_message',
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncSettingsUpdatedMessage',
   {
     defaultMessage: 'Source synchronization settings updated.',
   }
