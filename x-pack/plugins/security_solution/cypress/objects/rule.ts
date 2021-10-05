@@ -342,7 +342,6 @@ export const getCCSEqlRule = (): CustomRule => ({
   lookBack: getLookBack(),
   timeline: getTimeline(),
   maxSignals: 100,
-  language: 'eql',
 });
 
 export const getEqlSequenceRule = (): CustomRule => ({
