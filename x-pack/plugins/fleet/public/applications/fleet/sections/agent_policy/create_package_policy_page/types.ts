@@ -8,7 +8,6 @@
 export type EditPackagePolicyFrom =
   | 'package'
   | 'package-edit'
-  | 'policy'
   | 'edit'
   | 'upgrade-from-fleet-policy-list'
   | 'upgrade-from-integrations-policy-list';
