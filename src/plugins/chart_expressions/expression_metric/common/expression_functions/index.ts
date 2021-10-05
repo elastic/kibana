@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { metricVisFunction } from './metric_function';
+export { metricVisFunction } from './metric_vis_function';
