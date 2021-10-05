@@ -22,9 +22,145 @@ describe('CustomIntegrationsPlugin', () => {
       initContext = coreMock.createPluginInitializerContext();
     });
 
-    test('wires up tutorials provider service and returns registerTutorial and addScopedTutorialContextFactory', () => {
+    test('should return setup contract', () => {
       const setup = new CustomIntegrationsPlugin(initContext).setup(mockCoreSetup);
       expect(setup).toHaveProperty('registerCustomIntegration');
+      expect(setup).toHaveProperty('getAppendCustomIntegrations');
+    });
+
+    test('should register language clients', () => {
+      const setup = new CustomIntegrationsPlugin(initContext).setup(mockCoreSetup);
+      expect(setup.getAppendCustomIntegrations()).toEqual([
+        {
+          id: 'language_client.all',
+          title: 'Elasticsearch Clients',
+          description:
+            'Start building your custom application on top of Elasticsearch with the official language clients.',
+          type: 'ui_link',
+          shipper: 'language_clients',
+          uiInternalPath: 'https://www.elastic.co/guide/en/elasticsearch/client/index.html',
+          isBeta: false,
+          icons: [{ type: 'eui', src: 'logoElasticsearch' }],
+          categories: ['elastic_stack', 'custom', 'language_client'],
+        },
+        {
+          id: 'language_client.javascript',
+          title: 'Elasticsearch JavaScript Client',
+          description:
+            'Start building your custom application on top of Elasticsearch with the official Node.js client.',
+          type: 'ui_link',
+          shipper: 'language_clients',
+          uiInternalPath:
+            'https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/branch/introduction.html',
+          isBeta: false,
+          icons: [{ type: 'svg' }],
+          categories: ['elastic_stack', 'custom', 'language_client'],
+        },
+        {
+          id: 'language_client.ruby',
+          title: 'Elasticsearch Ruby Client',
+          description:
+            'Start building your custom application on top of Elasticsearch with the official Ruby client.',
+          type: 'ui_link',
+          shipper: 'language_clients',
+          uiInternalPath:
+            'https://www.elastic.co/guide/en/elasticsearch/client/ruby-api/branch/ruby_client.html',
+          isBeta: false,
+          icons: [{ type: 'svg' }],
+          categories: ['elastic_stack', 'custom', 'language_client'],
+        },
+        {
+          id: 'language_client.go',
+          title: 'Elasticsearch Go Client',
+          description:
+            'Start building your custom application on top of Elasticsearch with the official Go client.',
+          type: 'ui_link',
+          shipper: 'language_clients',
+          uiInternalPath:
+            'https://www.elastic.co/guide/en/elasticsearch/client/go-api/branch/overview.html',
+          isBeta: false,
+          icons: [{ type: 'svg' }],
+          categories: ['elastic_stack', 'custom', 'language_client'],
+        },
+        {
+          id: 'language_client.dotnet',
+          title: 'Elasticsearch .NET Client',
+          description:
+            'Start building your custom application on top of Elasticsearch with the official .NET client.',
+          type: 'ui_link',
+          shipper: 'language_clients',
+          uiInternalPath:
+            'https://www.elastic.co/guide/en/elasticsearch/client/net-api/branch/index.html',
+          isBeta: false,
+          icons: [{ type: 'svg' }],
+          categories: ['elastic_stack', 'custom', 'language_client'],
+        },
+        {
+          id: 'language_client.php',
+          title: 'Elasticsearch PHP Client',
+          description:
+            'Start building your custom application on top of Elasticsearch with the official .PHP client.',
+          type: 'ui_link',
+          shipper: 'language_clients',
+          uiInternalPath:
+            'https://www.elastic.co/guide/en/elasticsearch/client/php-api/branch/index.html',
+          isBeta: false,
+          icons: [{ type: 'svg' }],
+          categories: ['elastic_stack', 'custom', 'language_client'],
+        },
+        {
+          id: 'language_client.perl',
+          title: 'Elasticsearch Perl Client',
+          description:
+            'Start building your custom application on top of Elasticsearch with the official Perl client.',
+          type: 'ui_link',
+          shipper: 'language_clients',
+          uiInternalPath:
+            'https://www.elastic.co/guide/en/elasticsearch/client/perl-api/branch/index.html',
+          isBeta: false,
+          icons: [{ type: 'svg' }],
+          categories: ['elastic_stack', 'custom', 'language_client'],
+        },
+        {
+          id: 'language_client.python',
+          title: 'Elasticsearch Python Client',
+          description:
+            'Start building your custom application on top of Elasticsearch with the official Python client.',
+          type: 'ui_link',
+          shipper: 'language_clients',
+          uiInternalPath:
+            'https://www.elastic.co/guide/en/elasticsearch/client/python-api/branch/index.html',
+          isBeta: false,
+          icons: [{ type: 'svg' }],
+          categories: ['elastic_stack', 'custom', 'language_client'],
+        },
+        {
+          id: 'language_client.rust',
+          title: 'Elasticsearch Rust Client',
+          description:
+            'Start building your custom application on top of Elasticsearch with the official Rust client.',
+          type: 'ui_link',
+          shipper: 'language_clients',
+          uiInternalPath:
+            'https://www.elastic.co/guide/en/elasticsearch/client/rust-api/branch/index.html',
+          isBeta: false,
+          icons: [{ type: 'svg' }],
+          categories: ['elastic_stack', 'custom', 'language_client'],
+        },
+        {
+          id: 'language_client.java',
+          title: 'Elasticsearch Java Client',
+          description:
+            'Start building your custom application on top of Elasticsearch with the official Java client.',
+          type: 'ui_link',
+          shipper: 'language_clients',
+          uiInternalPath:
+            'https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/branch/index.html',
+          isBeta: false,
+          icons: [{ type: 'svg' }],
+          categories: ['elastic_stack', 'custom', 'language_client'],
+        },
+      ]);
     });
   });
 });
