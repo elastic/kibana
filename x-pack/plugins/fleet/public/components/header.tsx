@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, Fragment } from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
@@ -81,17 +81,21 @@ export const Header: React.FC<HeaderProps> = ({
             <EuiFlexItem>
               <EuiSpacer size="s" />
               <Tabs className={tabsClassName}>
-                {tabs.map((props) => {
+                {tabs.map((props, index) => {
                   const tab = (
                     <EuiTab {...(props as EuiTabProps)} key={props.id}>
                       {props.name}
                     </EuiTab>
                   );
+
+                  let wrappedTab;
                   if (props.tooltipContent) {
-                    return <EuiToolTip content={props.tooltipContent}>{tab}</EuiToolTip>;
+                    wrappedTab = <EuiToolTip content={props.tooltipContent}>{tab}</EuiToolTip>;
                   } else {
-                    return tab;
+                    wrappedTab = tab;
                   }
+
+                  return <Fragment key={`${props.id}-${index}`}>{wrappedTab}</Fragment>;
                 })}
               </Tabs>
             </EuiFlexItem>
