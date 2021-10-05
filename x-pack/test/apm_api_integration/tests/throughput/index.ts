@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { sum } from 'lodash';
+import { mean, sum } from 'lodash';
 import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { createApmApiSupertest } from '../../common/apm_api_supertest';
@@ -22,15 +22,12 @@ type TransactionsDetailsReturn = APIReturnType<'GET /api/apm/services/{serviceNa
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiSupertest = createApmApiSupertest(getService('supertest'));
 
-  const archiveName = 'apm_8.0.0';
+  const archiveName = 'apm_data_generation_8.0.0';
   const metadata = archives_metadata[archiveName];
 
   let throughputResponse: ThroughputReturn;
   let serviceResponse: ServiceReturn;
   let transactionsDetailsReturn: TransactionsDetailsReturn;
-
-  const deltaAsMinute =
-    (new Date(metadata.end).valueOf() - new Date(metadata.start).valueOf()) / 1000 / 60;
 
   function callAPIs({ processorEvent }: { processorEvent: 'transaction' | 'metric' }) {
     return Promise.all([
@@ -38,7 +35,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         endpoint: 'GET /api/apm/services',
         params: {
           query: {
-            kuery: `service.name : "opbeans-java" and processor.event : "${processorEvent}"`,
+            kuery: `service.name : "opbeans-go" and processor.event : "${processorEvent}"`,
             start: metadata.start,
             end: metadata.end,
             environment: 'ENVIRONMENT_ALL',
@@ -49,7 +46,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         endpoint: 'GET /api/apm/services/{serviceName}/throughput',
         params: {
           path: {
-            serviceName: 'opbeans-java',
+            serviceName: 'opbeans-go',
           },
           query: {
             kuery: `processor.event : "${processorEvent}"`,
@@ -64,7 +61,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         endpoint: `GET /api/apm/services/{serviceName}/transactions/groups/main_statistics`,
         params: {
           path: {
-            serviceName: 'opbeans-java',
+            serviceName: 'opbeans-go',
           },
           query: {
             kuery: `processor.event : "${processorEvent}"`,
@@ -101,16 +98,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const serviceApiThroughput = serviceResponse.items[0].throughput;
 
           // return of calling GET /api/apm/services/{serviceName}/throughput
-          const throughputChartApiSum = sum(throughputResponse.currentPeriod.map((d) => d.y));
-
-          // needs to divide by 2 first because for the requested time range the bucket size will be 30s
-          const throughputChartApiTPM = throughputChartApiSum / 2 / deltaAsMinute;
+          const throughputChartApiMean = mean(throughputResponse.currentPeriod.map((d) => d.y));
 
           const transactionsThroughputSum = sum(
             transactionsDetailsReturn.transactionGroups.map((data) => data.throughput)
           );
-
-          expect(roundNumber(serviceApiThroughput)).to.be(roundNumber(throughputChartApiTPM));
+          expect(roundNumber(serviceApiThroughput)).to.be(roundNumber(throughputChartApiMean));
           expect(roundNumber(serviceApiThroughput)).to.be(roundNumber(transactionsThroughputSum));
         });
       });
@@ -133,15 +126,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const serviceApiThroughput = serviceResponse.items[0].throughput;
 
           // return of calling GET /api/apm/services/{serviceName}/throughput
-          const throughputChartApiSum = sum(throughputResponse.currentPeriod.map((d) => d.y));
-          const throughputChartApiTPM = throughputChartApiSum / deltaAsMinute;
+          const throughputChartApiMean = mean(throughputResponse.currentPeriod.map((d) => d.y));
 
           // return of calling GET /api/apm/services/{serviceName}/transactions/groups/main_statistics
           const transactionsThroughputSum = sum(
             transactionsDetailsReturn.transactionGroups.map((data) => data.throughput)
           );
 
-          expect(roundNumber(serviceApiThroughput)).to.be(roundNumber(throughputChartApiTPM));
+          expect(roundNumber(serviceApiThroughput)).to.be(roundNumber(throughputChartApiMean));
           expect(roundNumber(serviceApiThroughput)).to.be(roundNumber(transactionsThroughputSum));
         });
       });

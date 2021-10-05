@@ -6,21 +6,21 @@
  */
 
 import expect from '@kbn/expect';
-import { first, last, mean } from 'lodash';
+import { first, last, mean, meanBy } from 'lodash';
 import moment from 'moment';
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { createApmApiSupertest } from '../../common/apm_api_supertest';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
-import { createApmApiSupertest } from '../../common/apm_api_supertest';
 
 type ThroughputReturn = APIReturnType<'GET /api/apm/services/{serviceName}/throughput'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiSupertest = createApmApiSupertest(getService('supertest'));
 
-  const archiveName = 'apm_8.0.0';
+  const archiveName = 'apm_data_generation_8.0.0';
   const metadata = archives_metadata[archiveName];
 
   registry.when('Throughput when data is not loaded', { config: 'basic', archives: [] }, () => {
@@ -29,7 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         endpoint: 'GET /api/apm/services/{serviceName}/throughput',
         params: {
           path: {
-            serviceName: 'opbeans-java',
+            serviceName: 'opbeans-go',
           },
           query: {
             start: metadata.start,
@@ -47,108 +47,95 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  let throughputResponse: ThroughputReturn;
+  async function callThroughApis() {
+    const path = {
+      serviceName: 'opbeans-go',
+    };
+    const commonQuery = {
+      start: metadata.start,
+      end: metadata.end,
+      transactionType: 'request',
+      environment: 'ENVIRONMENT_ALL',
+    };
+    const [throughputMetricsResponse, throughputTransactionsResponse] = await Promise.all([
+      apmApiSupertest({
+        endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+        params: {
+          path,
+          query: {
+            ...commonQuery,
+            kuery: 'processor.event : "metric"',
+          },
+        },
+      }),
+      apmApiSupertest({
+        endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+        params: {
+          path,
+          query: {
+            ...commonQuery,
+            kuery: 'processor.event : "transaction"',
+            _inspect: true,
+          },
+        },
+      }),
+    ]);
+    return {
+      throughputMetrics: throughputMetricsResponse.body,
+      throughputTransactions: throughputTransactionsResponse.body,
+    };
+  }
+
   registry.when(
     'Throughput when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
-      describe('with kql filter to force metrics-based UI', () => {
+      let throughputMetrics: ThroughputReturn;
+      let throughputTransactions: ThroughputReturn;
+
+      describe('compare metrics and transactions values', () => {
         before(async () => {
-          const response = await apmApiSupertest({
-            endpoint: 'GET /api/apm/services/{serviceName}/throughput',
-            params: {
-              path: {
-                serviceName: 'opbeans-java',
-              },
-              query: {
-                start: metadata.start,
-                end: metadata.end,
-                transactionType: 'request',
-                environment: 'ENVIRONMENT_ALL',
-                kuery: 'processor.event : "metric"',
-              },
-            },
-          });
-          throughputResponse = response.body;
+          const throughputApiResponse = await callThroughApis();
+          throughputMetrics = throughputApiResponse.throughputMetrics;
+          throughputTransactions = throughputApiResponse.throughputTransactions;
         });
 
-        it('returns some data', () => {
-          expect(throughputResponse.currentPeriod.length).to.be.greaterThan(0);
-          expect(throughputResponse.previousPeriod.length).not.to.be.greaterThan(0);
+        it('returns some transactions data', () => {
+          expect(throughputTransactions.currentPeriod.length).to.be.greaterThan(0);
+          const nonNullTransactionsDataPoints = throughputTransactions.currentPeriod.filter(
+            ({ y }) => isFiniteNumber(y)
+          );
+          expect(nonNullTransactionsDataPoints.length).to.be.greaterThan(0);
+        });
 
-          const nonNullDataPoints = throughputResponse.currentPeriod.filter(({ y }) =>
+        it('returns some metrics data', () => {
+          expect(throughputMetrics.currentPeriod.length).to.be.greaterThan(0);
+          const nonNullMetricsDataPoints = throughputTransactions.currentPeriod.filter(({ y }) =>
             isFiniteNumber(y)
           );
-
-          expect(nonNullDataPoints.length).to.be.greaterThan(0);
+          expect(nonNullMetricsDataPoints.length).to.be.greaterThan(0);
         });
 
-        it('has the correct start date', () => {
-          expectSnapshot(
-            new Date(first(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
-          ).toMatchInline(`"2021-08-03T06:50:00.000Z"`);
+        it('has same mean value for metrics and transactions data', () => {
+          const transactionsMean = meanBy(throughputTransactions.currentPeriod, 'y');
+          const metricsMean = meanBy(throughputMetrics.currentPeriod, 'y');
+          expect(transactionsMean).to.equal(metricsMean);
+          expectSnapshot(transactionsMean).toMatchInline(`100`);
+          expectSnapshot(metricsMean).toMatchInline(`100`);
         });
 
-        it('has the correct end date', () => {
-          expectSnapshot(
-            new Date(last(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
-          ).toMatchInline(`"2021-08-03T07:20:00.000Z"`);
+        it('uses 10s time interval between buckets for transactions data', () => {
+          const firstTimerange = throughputTransactions.currentPeriod[0].x;
+          const secondTimerange = throughputTransactions.currentPeriod[1].x;
+          const timeIntervalAsSeconds = (secondTimerange - firstTimerange) / 1000;
+          expect(timeIntervalAsSeconds).to.equal(10);
         });
 
-        it('has the correct throughput avg', () => {
-          const avg = mean(throughputResponse.currentPeriod.map((d) => d.y));
-          expectSnapshot(avg).toMatchInline(`7.2258064516129`);
-        });
-      });
-
-      describe('with kql filter to force transaction-based UI', () => {
-        describe('calculate throughput per minute because of time range', () => {
-          before(async () => {
-            const response = await apmApiSupertest({
-              endpoint: 'GET /api/apm/services/{serviceName}/throughput',
-              params: {
-                path: {
-                  serviceName: 'opbeans-java',
-                },
-                query: {
-                  kuery: 'processor.event : "transaction"',
-                  start: metadata.start,
-                  end: metadata.end,
-                  transactionType: 'request',
-                  environment: 'ENVIRONMENT_ALL',
-                },
-              },
-            });
-            throughputResponse = response.body;
-          });
-
-          it('returns some data', () => {
-            expect(throughputResponse.currentPeriod.length).to.be.greaterThan(0);
-            expect(throughputResponse.previousPeriod.length).not.to.be.greaterThan(0);
-
-            const nonNullDataPoints = throughputResponse.currentPeriod.filter(({ y }) =>
-              isFiniteNumber(y)
-            );
-
-            expect(nonNullDataPoints.length).to.be.greaterThan(0);
-          });
-
-          it('has the correct start date', () => {
-            expectSnapshot(
-              new Date(first(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
-            ).toMatchInline(`"2021-08-03T06:50:00.000Z"`);
-          });
-
-          it('has the correct end date', () => {
-            expectSnapshot(
-              new Date(last(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
-            ).toMatchInline(`"2021-08-03T07:20:00.000Z"`);
-          });
-
-          it('has the correct throughput avg', () => {
-            const avg = mean(throughputResponse.currentPeriod.map((d) => d.y));
-            expectSnapshot(avg).toMatchInline(`7.44262295081967`);
-          });
+        it('uses 1m time interval between buckets for metrics data', () => {
+          const firstTimerange = throughputMetrics.currentPeriod[0].x;
+          const secondTimerange = throughputMetrics.currentPeriod[1].x;
+          const timeIntervalAsMinutes = (secondTimerange - firstTimerange) / 1000 / 60;
+          expect(timeIntervalAsMinutes).to.equal(1);
         });
       });
     }
@@ -158,12 +145,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Throughput when data is loaded with time comparison',
     { config: 'basic', archives: [archiveName] },
     () => {
+      let throughputResponse: ThroughputReturn;
+
       before(async () => {
         const response = await apmApiSupertest({
           endpoint: 'GET /api/apm/services/{serviceName}/throughput',
           params: {
             path: {
-              serviceName: 'opbeans-java',
+              serviceName: 'opbeans-go',
             },
             query: {
               transactionType: 'request',
@@ -195,24 +184,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(previousPeriodNonNullDataPoints.length).to.be.greaterThan(0);
       });
 
-      it('has the correct start date', () => {
-        expectSnapshot(
-          new Date(first(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2021-08-03T07:05:10.000Z"`);
-
-        expectSnapshot(
+      it('has same start time for both periods', () => {
+        expect(new Date(first(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()).to.equal(
           new Date(first(throughputResponse.previousPeriod)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2021-08-03T07:05:10.000Z"`);
+        );
       });
 
-      it('has the correct end date', () => {
-        expectSnapshot(
-          new Date(last(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2021-08-03T07:20:10.000Z"`);
-
-        expectSnapshot(
+      it('has same end time for both periods', () => {
+        expect(new Date(last(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()).to.equal(
           new Date(last(throughputResponse.previousPeriod)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2021-08-03T07:20:10.000Z"`);
+        );
       });
 
       it('returns same number of buckets for both periods', () => {
@@ -221,11 +202,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
       });
 
-      it('calculates the correct throughput avg for both periods', () => {
+      it('has same mea value for both periods', () => {
         const currentPeriodAvg = mean(throughputResponse.currentPeriod.map((d) => d.y));
-        expectSnapshot(currentPeriodAvg).toMatchInline(`6.46153846153846`);
         const previousPeriodAvg = mean(throughputResponse.previousPeriod.map((d) => d.y));
-        expectSnapshot(previousPeriodAvg).toMatchInline(`8.50549450549451`);
+        expect(currentPeriodAvg).to.equal(previousPeriodAvg);
       });
     }
   );
