@@ -20,7 +20,7 @@ describe('useSavedSearchAliasMatchRedirect', () => {
     spaces = spacesPluginMock.createStartContract();
   });
 
-  test("should render URLConflictCallout in case of id's conflicts", () => {
+  test('should redirect in case of aliasMatch', () => {
     const savedSearch = {
       id: 'id',
       sharingSavedObject: {
@@ -34,7 +34,7 @@ describe('useSavedSearchAliasMatchRedirect', () => {
     expect(spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith('#/view/aliasTargetId', ' search');
   });
 
-  test('should not render URLConflictCallout if outcome !== aliasMatch', () => {
+  test('should not redirect if outcome !== aliasMatch', () => {
     const savedSearch = {
       id: 'id',
       sharingSavedObject: {
@@ -47,7 +47,7 @@ describe('useSavedSearchAliasMatchRedirect', () => {
     expect(spaces.ui.redirectLegacyUrl).not.toHaveBeenCalled();
   });
 
-  test('should not render URLConflictCallout if aliasTargetId is not defined', () => {
+  test('should not redirect if aliasTargetId is not defined', () => {
     const savedSearch = {
       id: 'id',
       sharingSavedObject: {
