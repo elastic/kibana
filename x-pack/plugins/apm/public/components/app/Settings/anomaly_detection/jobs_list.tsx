@@ -25,6 +25,7 @@ import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { AnomalyDetectionApiResponse } from './index';
 import { LegacyJobsCallout } from './legacy_jobs_callout';
+import { MLJobsAwaitingNodeWarning } from '../../../../../../ml/public';
 
 type Jobs = AnomalyDetectionApiResponse['jobs'];
 
@@ -67,6 +68,7 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
 
   return (
     <>
+      <MLJobsAwaitingNodeWarning jobIds={jobs.map((j) => j.job_id)} />
       <EuiText color="subdued">
         <FormattedMessage
           id="xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText"
