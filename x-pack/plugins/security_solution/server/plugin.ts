@@ -69,6 +69,7 @@ import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
 import { ManifestTask } from './endpoint/lib/artifacts';
+import { CheckMetadataTransformsTask } from './endpoint/lib/metadata';
 import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig, ConfigType } from './config';
@@ -105,7 +106,7 @@ import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_m
 import { alertsFieldMap } from './lib/detection_engine/rule_types/field_maps/alerts';
 import { rulesFieldMap } from './lib/detection_engine/rule_types/field_maps/rules';
 import { RuleExecutionLogClient } from './lib/detection_engine/rule_execution_log/rule_execution_log_client';
-import { getKibanaPrivilegesFeaturePrivileges } from './features';
+import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
 import { ctiFieldMap } from './lib/detection_engine/rule_types/field_maps/cti';
@@ -162,6 +163,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private policyWatcher?: PolicyWatcher;
 
   private manifestTask: ManifestTask | undefined;
+  private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private artifactsCache: LRU<string, Buffer>;
   private telemetryUsageCounter?: UsageCounter;
 
@@ -314,6 +316,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     ];
 
     plugins.features.registerKibanaFeature(getKibanaPrivilegesFeaturePrivileges(ruleTypes));
+    plugins.features.registerKibanaFeature(getCasesKibanaFeature());
 
     // Continue to register legacy rules against alerting client exposed through rule-registry
     if (this.setupPlugins.alerting != null) {
@@ -370,6 +373,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.taskManager,
       this.telemetryUsageCounter
     );
+
+    this.checkMetadataTransformsTask = new CheckMetadataTransformsTask({
+      endpointAppContext: endpointContext,
+      core,
+      taskManager: plugins.taskManager!,
+    });
 
     return {};
   }
@@ -459,6 +468,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.taskManager,
       this.telemetryReceiver
     );
+
+    this.checkMetadataTransformsTask?.start({
+      taskManager: plugins.taskManager!,
+    });
 
     return {};
   }

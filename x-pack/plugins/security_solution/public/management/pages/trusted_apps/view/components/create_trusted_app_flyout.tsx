@@ -88,6 +88,18 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
         policies.options.forEach((policy) => {
           errorMessage = errorMessage?.replace(policy.id, policy.name);
         });
+      } else if (
+        creationErrors &&
+        creationErrors.attributes &&
+        creationErrors.attributes.type === 'EndpointLicenseError'
+      ) {
+        errorMessage = i18n.translate(
+          'xpack.securitySolution.trustedapps.createTrustedAppFlyout.byPolicyLicenseError',
+          {
+            defaultMessage:
+              'Your Kibana license has been downgraded. As such, individual policy configuration is no longer supported.',
+          }
+        );
       }
       return errorMessage;
     }, [creationErrors, policies]);

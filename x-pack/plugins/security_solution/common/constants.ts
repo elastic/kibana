@@ -7,9 +7,10 @@
 
 import type { TransformConfigSchema } from './transforms/types';
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
-import { metadataTransformPattern } from './endpoint/constants';
+import { METADATA_TRANSFORMS_PATTERN } from './endpoint/constants';
 
 export const APP_ID = 'securitySolution' as const;
+export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
 export const SERVER_APP_ID = 'siem' as const;
 export const APP_NAME = 'Security' as const;
 export const APP_ICON = 'securityAnalyticsApp' as const;
@@ -69,19 +70,35 @@ export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"' as const;
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
+  authentications = 'authentications',
   case = 'case',
+  caseConfigure = 'case-configure',
+  caseCreate = 'case-create',
   detections = 'detections',
   endpoints = 'endpoints',
   eventFilters = 'event_filters',
+  hostIsolationExceptions = 'host_isolation_exceptions',
+  events = 'events',
   exceptions = 'exceptions',
+  explore = 'explore',
   hosts = 'hosts',
+  hostsAnomalies = 'hosts-anomalies',
+  hostsExternalAlerts = 'hosts-external_alerts',
+  investigate = 'investigate',
   network = 'network',
+  networkAnomalies = 'network-anomalies',
+  networkDns = 'network-dns',
+  networkExternalAlerts = 'network-external_alerts',
+  networkHttp = 'network-http',
+  networkTls = 'network-tls',
+  timelines = 'timelines',
+  timelinesTemplates = 'timelines-templates',
   overview = 'overview',
   policies = 'policies',
   rules = 'rules',
-  timelines = 'timelines',
   trustedApps = 'trusted_apps',
   ueba = 'ueba',
+  uncommonProcesses = 'uncommon_processes',
 }
 
 export const TIMELINES_PATH = '/timelines' as const;
@@ -98,6 +115,8 @@ export const MANAGEMENT_PATH = '/administration' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
 export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps` as const;
 export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters` as const;
+export const HOST_ISOLATION_EXCEPTIONS_PATH =
+  `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_MANAGEMENT_PATH = `${APP_PATH}${MANAGEMENT_PATH}` as const;
@@ -114,6 +133,8 @@ export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
 export const APP_TRUSTED_APPS_PATH = `${APP_PATH}${TRUSTED_APPS_PATH}` as const;
 export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}` as const;
+export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
+  `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
 
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [
@@ -217,6 +238,7 @@ export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL =
 export const DETECTION_ENGINE_RULES_BULK_ACTION =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_action` as const;
 
+export const TIMELINE_RESOLVE_URL = '/api/timeline/resolve' as const;
 export const TIMELINE_URL = '/api/timeline' as const;
 export const TIMELINES_URL = '/api/timelines' as const;
 export const TIMELINE_FAVORITE_URL = '/api/timeline/_favorite' as const;
@@ -305,7 +327,23 @@ export const showAllOthersBucket: string[] = [
  */
 export const ELASTIC_NAME = 'estc' as const;
 
-export const TRANSFORM_STATS_URL =
-  `/api/transform/transforms/${metadataTransformPattern}-*/_stats` as const;
+export const METADATA_TRANSFORM_STATS_URL = `/api/transform/transforms/${METADATA_TRANSFORMS_PATTERN}/_stats`;
 
-export const RISKY_HOSTS_INDEX = 'ml_host_risk_score_latest' as const;
+export const RISKY_HOSTS_INDEX = 'ml_host_risk_score_latest';
+
+export const TRANSFORM_STATES = {
+  ABORTING: 'aborting',
+  FAILED: 'failed',
+  INDEXING: 'indexing',
+  STARTED: 'started',
+  STOPPED: 'stopped',
+  STOPPING: 'stopping',
+  WAITING: 'waiting',
+};
+
+export const WARNING_TRANSFORM_STATES = new Set([
+  TRANSFORM_STATES.ABORTING,
+  TRANSFORM_STATES.FAILED,
+  TRANSFORM_STATES.STOPPED,
+  TRANSFORM_STATES.STOPPING,
+]);
