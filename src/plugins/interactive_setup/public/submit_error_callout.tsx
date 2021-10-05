@@ -66,8 +66,13 @@ export const SubmitErrorCallout: FunctionComponent<SubmitErrorCalloutProps> = (p
     <EuiCallOut
       color="danger"
       title={
-        error.body?.attributes?.type === ERROR_KIBANA_CONFIG_NOT_WRITABLE ||
-        error.body?.attributes?.type === ERROR_KIBANA_CONFIG_FAILURE ? (
+        error.body?.statusCode === 403 ? (
+          <FormattedMessage
+            id="interactiveSetup.submitErrorCallout.forbiddenErrorTitle"
+            defaultMessage="Verification required"
+          />
+        ) : error.body?.attributes?.type === ERROR_KIBANA_CONFIG_NOT_WRITABLE ||
+          error.body?.attributes?.type === ERROR_KIBANA_CONFIG_FAILURE ? (
           <FormattedMessage
             id="interactiveSetup.submitErrorCallout.kibanaConfigNotWritableErrorTitle"
             defaultMessage="Couldn't write to config file"
@@ -82,7 +87,12 @@ export const SubmitErrorCallout: FunctionComponent<SubmitErrorCalloutProps> = (p
         )
       }
     >
-      {error.body?.attributes?.type === ERROR_KIBANA_CONFIG_NOT_WRITABLE ? (
+      {error.body?.statusCode === 403 ? (
+        <FormattedMessage
+          id="interactiveSetup.submitErrorCallout.forbiddenErrorDescription"
+          defaultMessage="Retry to configure Elastic."
+        />
+      ) : error.body?.attributes?.type === ERROR_KIBANA_CONFIG_NOT_WRITABLE ? (
         <FormattedMessage
           id="interactiveSetup.submitErrorCallout.kibanaConfigNotWritableErrorDescription"
           defaultMessage="Check the file permissions and ensure {config} is writable by the Kibana process."
