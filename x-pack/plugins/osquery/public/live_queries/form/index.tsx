@@ -98,7 +98,14 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const { form } = useForm({
     id: FORM_ID,
     schema: formSchema,
-    onSubmit: (payload) => mutateAsync(payload),
+    onSubmit: async (formData, isValid) => {
+      if (isValid) {
+        try {
+          await mutateAsync(formData);
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
+      }
+    },
     options: {
       stripEmptyFields: false,
     },

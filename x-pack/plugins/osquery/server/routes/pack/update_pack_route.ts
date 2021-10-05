@@ -35,19 +35,28 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         ),
         body: schema.object(
           {
-            name: schema.string(),
+            name: schema.maybe(schema.string()),
             description: schema.maybe(schema.string()),
             enabled: schema.maybe(schema.boolean()),
             policy_ids: schema.maybe(schema.arrayOf(schema.string())),
-            queries: schema.recordOf(
-              schema.string(),
-              schema.object({
-                query: schema.string(),
-                interval: schema.maybe(schema.any()),
-                platform: schema.maybe(schema.string()),
-                version: schema.maybe(schema.string()),
-                ecs_mapping: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-              })
+            queries: schema.maybe(
+              schema.recordOf(
+                schema.string(),
+                schema.object({
+                  query: schema.string(),
+                  interval: schema.maybe(schema.number()),
+                  platform: schema.maybe(schema.string()),
+                  version: schema.maybe(schema.string()),
+                  ecs_mapping: schema.maybe(
+                    schema.recordOf(
+                      schema.string(),
+                      schema.object({
+                        field: schema.string(),
+                      })
+                    )
+                  ),
+                })
+              )
             ),
           },
           { unknowns: 'allow' }
@@ -69,6 +78,19 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         packSavedObjectType,
         request.params.id
       );
+
+      const conflictingEntries = await savedObjectsClient.find({
+        type: packSavedObjectType,
+        search: name,
+        searchFields: ['name'],
+      });
+
+      if (
+        filter(conflictingEntries.saved_objects, (packSO) => packSO.id !== currentPackSO.id).length
+      ) {
+        return response.conflict({ body: `Pack with name "${name}" already exists.` });
+      }
+
       const { items: packagePolicies } = (await packagePolicyService?.list(savedObjectsClient, {
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
         perPage: 1000,
@@ -90,7 +112,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           ...pickBy({
             name,
             description,
-            queries: convertPackQueriesToSO(queries),
+            queries: queries && convertPackQueriesToSO(queries),
             updated_at: moment().toISOString(),
             updated_by: currentUser,
           }),
@@ -164,6 +186,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                 esClient,
                 packagePolicy.id,
                 produce<PackagePolicy>(packagePolicy, (draft) => {
+                  unset(draft, 'id');
                   unset(
                     draft,
                     `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}`
@@ -190,6 +213,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                 esClient,
                 packagePolicy.id,
                 produce<PackagePolicy>(packagePolicy, (draft) => {
+                  unset(draft, 'id');
                   unset(
                     draft,
                     `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}`

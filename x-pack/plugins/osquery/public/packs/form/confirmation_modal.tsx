@@ -10,20 +10,18 @@ import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { AgentPolicy } from '../../../../fleet/common';
-
 interface ConfirmDeployAgentPolicyModalProps {
   onConfirm: () => void;
   onCancel: () => void;
   agentCount: number;
-  agentPolicy?: AgentPolicy;
+  agentPolicyCount: number;
 }
 
 const ConfirmDeployAgentPolicyModalComponent: React.FC<ConfirmDeployAgentPolicyModalProps> = ({
   onConfirm,
   onCancel,
   agentCount,
-  agentPolicy,
+  agentPolicyCount,
 }) => (
   <EuiConfirmModal
     title={
@@ -61,12 +59,12 @@ const ConfirmDeployAgentPolicyModalComponent: React.FC<ConfirmDeployAgentPolicyM
       <div className="eui-textBreakWord">
         <FormattedMessage
           id="xpack.osquery.agentPolicy.confirmModalCalloutDescription"
-          defaultMessage="Fleet has detected that the selected agent policy, {policyName}, is already in use by
+          defaultMessage="Fleet has detected that the selected {agentPolicyCount, plural, one {agent policy} other {agent policies}}, is already in use by
             some of your agents. As a result of this action, Fleet will deploy updates to all agents
-            that use this policy."
+            that use this {agentPolicyCount, plural, one {agent policy} other {agent policies}}."
           // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
           values={{
-            policyName: <b>{agentPolicy.name}</b>,
+            agentPolicyCount,
           }}
         />
       </div>

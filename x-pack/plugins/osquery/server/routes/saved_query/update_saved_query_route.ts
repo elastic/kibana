@@ -30,7 +30,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
             id: schema.string(),
             query: schema.string(),
             description: schema.maybe(schema.string()),
-            interval: schema.maybe(schema.string()),
+            interval: schema.maybe(schema.number()),
             platform: schema.maybe(schema.string()),
             version: schema.maybe(schema.string()),
             ecs_mapping: schema.maybe(
@@ -92,8 +92,13 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
       );
 
       if (ecs_mapping || updatedSavedQuerySO.attributes.ecs_mapping) {
+        // @ts-expect-error update types
         updatedSavedQuerySO.attributes.ecs_mapping =
-          ecs_mapping || convertECSMappingToObject(updatedSavedQuerySO.attributes.ecs_mapping);
+          ecs_mapping ||
+          (updatedSavedQuerySO.attributes.ecs_mapping &&
+            // @ts-expect-error update types
+            convertECSMappingToObject(updatedSavedQuerySO.attributes.ecs_mapping)) ||
+          {};
       }
 
       return response.ok({

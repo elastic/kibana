@@ -19,7 +19,7 @@ const StyledEuiCodeBlock = styled(EuiCodeBlock)`
 `;
 
 interface CodeEditorFieldProps {
-  euiFieldProps?: unknown;
+  euiFieldProps?: Record<string, unknown>;
   field: FieldHook<string>;
 }
 
@@ -36,7 +36,7 @@ const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({ euiFieldProp
       error={error}
       fullWidth
     >
-      {euiFieldProps.disabled ? (
+      {euiFieldProps?.disabled ? (
         <StyledEuiCodeBlock
           language="sql"
           fontSize="m"

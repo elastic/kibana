@@ -16,6 +16,7 @@ import { useErrorToast } from '../common/hooks/use_error_toast';
 
 interface UseUpdatePackProps {
   withRedirect?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   options?: any;
 }
 
@@ -29,18 +30,13 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
   const setErrorToast = useErrorToast();
 
   return useMutation(
-    async ({ id, ...payload }) =>
+    // @ts-expect-error update types
+    ({ id, ...payload }) =>
       http.put(`/internal/osquery/packs/${id}`, {
         body: JSON.stringify(payload),
       }),
     {
       onError: (error) => {
-        if (error instanceof Error) {
-          return setErrorToast(error, {
-            title: 'Pack update error',
-            toastMessage: error.message,
-          });
-        }
         // @ts-expect-error update types
         setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
       },
@@ -51,9 +47,9 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
         }
         toasts.addSuccess(
           i18n.translate('xpack.osquery.updatePack.successToastMessageText', {
-            defaultMessage: 'Successfully updated "{packId}" pack',
+            defaultMessage: 'Successfully updated "{packName}" pack',
             values: {
-              packId: payload.attributes?.id ?? '',
+              packName: payload.attributes?.name ?? '',
             },
           })
         );

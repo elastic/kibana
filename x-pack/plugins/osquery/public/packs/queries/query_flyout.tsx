@@ -143,7 +143,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
               <EuiSpacer />
             </>
           ) : null}
-          {<CommonUseField path="id" />}
+          <CommonUseField path="id" />
           <EuiSpacer />
           <CommonUseField path="query" component={CodeEditorField} />
           <EuiSpacer />

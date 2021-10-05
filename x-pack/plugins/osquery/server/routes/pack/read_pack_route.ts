@@ -36,7 +36,7 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
         queries: Array<{
           id: string;
           name: string;
-          interval: string;
+          interval: number;
           ecs_mapping: Record<string, unknown>;
         }>;
       }>(packSavedObjectType, request.params.id);

@@ -19321,7 +19321,6 @@
     "xpack.osquery.agent_policy_details.fetchError": "提取代理策略详情时出错",
     "xpack.osquery.agent_status.fetchError": "提取代理状态时出错",
     "xpack.osquery.agentDetails.fetchError": "提取代理详细信息时出错",
-    "xpack.osquery.agentPolicy.confirmModalCalloutDescription": "Fleet 检测到您的部分代理已在使用选定代理策略 {policyName}。由于此操作，Fleet 会将更新部署到使用此策略的所有代理。",
     "xpack.osquery.agentPolicy.confirmModalCalloutTitle": "此操作将更新 {agentCount, plural, other {# 个代理}}",
     "xpack.osquery.agentPolicy.confirmModalCancelButtonLabel": "取消",
     "xpack.osquery.agentPolicy.confirmModalConfirmButtonLabel": "保存并部署更改",

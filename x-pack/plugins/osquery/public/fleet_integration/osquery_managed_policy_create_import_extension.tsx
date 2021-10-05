@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { set } from 'lodash';
+import { satisfies } from 'semver';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -107,16 +109,34 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       this code removes that, so the user can schedule queries
       in the next step
     */
-    if (!editMode) {
-      const updatedPolicy = produce(newPolicy, (draft) => {
-        set(draft, 'inputs[0].streams', []);
-        return draft;
-      });
+    if (newPolicy?.package?.version) {
+      if (!editMode && satisfies(newPolicy?.package?.version, '<0.6.0')) {
+        const updatedPolicy = produce(newPolicy, (draft) => {
+          set(draft, 'inputs[0].streams', []);
+        });
+        onChange({
+          isValid: true,
+          updatedPolicy,
+        });
+      }
 
-      onChange({
-        isValid: true,
-        updatedPolicy,
-      });
+      /* From 0.6.0 we don't provide an input template, so we have to set it here */
+      if (satisfies(newPolicy?.package?.version, '>=0.6.0')) {
+        const updatedPolicy = produce(newPolicy, (draft) => {
+          if (!draft.inputs.length) {
+            set(draft, 'inputs[0]', {
+              type: 'osquery',
+              enabled: true,
+              streams: [],
+              policy_template: 'osquery_manager',
+            });
+          }
+        });
+        onChange({
+          isValid: true,
+          updatedPolicy,
+        });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

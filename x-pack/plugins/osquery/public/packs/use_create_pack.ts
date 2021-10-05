@@ -34,12 +34,6 @@ export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
       }),
     {
       onError: (error) => {
-        if (error instanceof Error) {
-          return setErrorToast(error, {
-            title: 'Pack creation error',
-            toastMessage: error.message,
-          });
-        }
         // @ts-expect-error update types
         setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
       },
@@ -50,9 +44,9 @@ export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
         }
         toasts.addSuccess(
           i18n.translate('xpack.osquery.newPack.successToastMessageText', {
-            defaultMessage: 'Successfully saved "{packId}" pack',
+            defaultMessage: 'Successfully created "{packName}" pack',
             values: {
-              packId: payload.attributes?.id ?? '',
+              packName: payload.attributes?.name ?? '',
             },
           })
         );

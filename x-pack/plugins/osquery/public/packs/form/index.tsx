@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mapKeys, reduce, transform } from 'lodash';
+import { reduce } from 'lodash';
 import { merge } from 'lodash/fp';
 import {
   EuiFlexGroup,
@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { OsqueryManagerPackagePolicy } from '../../../common/types';
-import { AgentPolicy, PackagePolicyPackage } from '../../../../fleet/common';
+import { PackagePolicyPackage } from '../../../../fleet/common';
 import {
   Form,
   useForm,
@@ -39,6 +39,7 @@ import { ConfirmDeployAgentPolicyModal } from './confirmation_modal';
 import { useAgentPolicies } from '../../agent_policies';
 import { useCreatePack } from '../use_create_pack';
 import { useUpdatePack } from '../use_update_pack';
+import { convertPackQueriesToSO, convertSOQueriesToPack } from './utils';
 
 const GhostFormField = () => <></>;
 
@@ -119,33 +120,30 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         }),
       },
     },
-    onSubmit: (payload, isValid) => {
-      if (!isValid) return Promise.resolve();
-
-      return editMode ? updateAsync({ id: defaultValue?.id, ...payload }) : createAsync(payload);
-    },
-    options: {
-      stripEmptyFields: false,
+    onSubmit: async (formData, isValid) => {
+      if (isValid) {
+        try {
+          if (editMode) {
+            // @ts-expect-error update types
+            await updateAsync({ id: defaultValue?.id, ...formData });
+          } else {
+            // @ts-expect-error update types
+            await createAsync(formData);
+          }
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
+      }
     },
     deserializer: (payload) => ({
       ...payload,
       policy_ids: payload.policy_ids ?? [],
-
-      queries:
-        (payload?.queries &&
-          Object.entries(payload.queries).map(([id, query]) => ({ ...query, id }))) ??
-        [],
+      // @ts-expect-error update types
+      queries: convertPackQueriesToSO(payload.queries),
     }),
     serializer: (payload) => ({
       ...payload,
-      queries: transform(
-        payload.queries,
-        (result, query) => {
-          const { id: queryId, ...rest } = query;
-          result[queryId] = rest;
-        },
-        {}
-      ),
+      // @ts-expect-error update types
+      queries: convertSOQueriesToPack(payload.queries),
     }),
     defaultValue: merge(
       {
@@ -171,30 +169,18 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     watch: ['policy_ids'],
   });
 
-  const currentPolicy = useMemo(() => {
-    if (!policyIds?.length) {
-      return {
-        agentCount: 0,
-        agentPolicy: {} as AgentPolicy,
-      };
-    }
-
-    const agentCount = reduce(
-      policyIds,
-      (acc, policyId) => {
-        const agentPolicy = agentPoliciesById && agentPoliciesById[policyId];
-
-        return acc + (agentPolicy?.agents ?? 0);
-      },
-      0
-    );
-
-    const currentAgentPolicy = agentPoliciesById && agentPoliciesById[policyIds[0]];
-    return {
-      agentCount,
-      agentPolicy: currentAgentPolicy,
-    };
-  }, [agentPoliciesById, policyIds]);
+  const agentCount = useMemo(
+    () =>
+      reduce(
+        policyIds,
+        (acc, policyId) => {
+          const agentPolicy = agentPoliciesById && agentPoliciesById[policyId];
+          return acc + (agentPolicy?.agents ?? 0);
+        },
+        0
+      ),
+    [policyIds, agentPoliciesById]
+  );
 
   const handleNameChange = useCallback(
     (newName: string) => setFieldValue('name', newName),
@@ -202,13 +188,13 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   );
 
   const handleSaveClick = useCallback(() => {
-    if (currentPolicy.agentCount) {
+    if (agentCount) {
       setShowConfirmationModal(true);
       return;
     }
 
     submit();
-  }, [currentPolicy.agentCount, submit]);
+  }, [agentCount, submit]);
 
   const handleConfirmConfirmationClick = useCallback(() => {
     submit();
@@ -309,7 +295,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         <ConfirmDeployAgentPolicyModal
           onCancel={handleHideConfirmationModal}
           onConfirm={handleConfirmConfirmationClick}
-          {...currentPolicy}
+          agentCount={agentCount}
+          agentPolicyCount={policyIds.length}
         />
       )}
     </>

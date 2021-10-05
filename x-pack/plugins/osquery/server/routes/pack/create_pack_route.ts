@@ -36,7 +36,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               schema.string(),
               schema.object({
                 query: schema.string(),
-                interval: schema.maybe(schema.any()),
+                interval: schema.maybe(schema.number()),
                 platform: schema.maybe(schema.string()),
                 version: schema.maybe(schema.string()),
                 ecs_mapping: schema.maybe(
@@ -65,6 +65,16 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const { name, description, queries, enabled, policy_ids } = request.body;
+
+      const conflictingEntries = await savedObjectsClient.find({
+        type: packSavedObjectType,
+        search: name,
+        searchFields: ['name'],
+      });
+
+      if (conflictingEntries.saved_objects.length) {
+        return response.conflict({ body: `Pack with name "${name}" already exists.` });
+      }
 
       const { items: packagePolicies } = (await packagePolicyService?.list(savedObjectsClient, {
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,

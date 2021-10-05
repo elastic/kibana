@@ -19048,7 +19048,6 @@
     "xpack.osquery.agent_policy_details.fetchError": "エージェントポリシー詳細の取得中にエラーが発生しました",
     "xpack.osquery.agent_status.fetchError": "エージェントステータスの取得中にエラーが発生しました",
     "xpack.osquery.agentDetails.fetchError": "エージェント詳細の取得中にエラーが発生しました",
-    "xpack.osquery.agentPolicy.confirmModalCalloutDescription": "選択されたエージェントポリシー {policyName} が一部のエージェントですでに使用されていることを Fleet が検出しました。このアクションの結果として、Fleetはこのポリシーで使用されているすべてのエージェントに更新をデプロイします。",
     "xpack.osquery.agentPolicy.confirmModalCancelButtonLabel": "キャンセル",
     "xpack.osquery.agentPolicy.confirmModalConfirmButtonLabel": "変更を保存してデプロイ",
     "xpack.osquery.agentPolicy.confirmModalDescription": "続行していいですか？",

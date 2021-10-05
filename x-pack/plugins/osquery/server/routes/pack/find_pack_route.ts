@@ -38,7 +38,7 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
       const soClientResponse = await savedObjectsClient.find<{
         name: string;
         description: string;
-        queries: Array<{ name: string; interval: string }>;
+        queries: Array<{ name: string; interval: number }>;
         policy_ids: string[];
       }>({
         type: packSavedObjectType,

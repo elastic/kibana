@@ -14,6 +14,7 @@ import { stringify } from 'querystring';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 import { AgentIdToName } from '../agents/agent_id_to_name';
 import { usePackQueryErrors } from './use_pack_query_errors';
+import { SearchHit } from '../../common/search_strategy';
 
 const VIEW_IN_LOGS = i18n.translate(
   'xpack.osquery.pack.queriesTable.viewLogsErrorsActionAriaLabel',
@@ -82,12 +83,10 @@ const renderErrorMessage = (error: string) => (
 
 const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProps> = ({
   actionId,
-  agentIds,
   interval,
 }) => {
   const { data: lastErrorsData } = usePackQueryErrors({
     actionId,
-    agentIds,
     interval,
   });
 
@@ -139,8 +138,14 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
     [renderAgentIdColumn, renderLogsErrorsAction]
   );
 
-  // @ts-expect-error update types
-  return <EuiInMemoryTable items={lastErrorsData?.hits} columns={columns} pagination={true} />;
+  return (
+    <EuiInMemoryTable<SearchHit>
+      // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
+      items={lastErrorsData?.hits ?? []}
+      columns={columns}
+      pagination={true}
+    />
+  );
 };
 
 export const ScheduledQueryErrorsTable = React.memo(ScheduledQueryErrorsTableComponent);

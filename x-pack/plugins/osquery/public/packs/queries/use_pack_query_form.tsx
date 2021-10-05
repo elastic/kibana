@@ -11,7 +11,6 @@ import { produce } from 'immer';
 
 import { useMemo } from 'react';
 import { FormConfig, useForm } from '../../shared_imports';
-import { OsqueryManagerPackagePolicyConfigRecord } from '../../../common/types';
 import { createFormSchema } from './schema';
 
 const FORM_ID = 'editQueryFlyoutForm';
@@ -22,12 +21,21 @@ export interface UsePackQueryFormProps {
   handleSubmit: FormConfig<PackFormData, PackFormData>['onSubmit'];
 }
 
+export interface PackSOFormData {
+  id: string;
+  query: string;
+  interval: number;
+  platform?: string | undefined;
+  version?: string | undefined;
+  ecs_mapping?: Array<{ field: string; value: string }> | undefined;
+}
+
 export interface PackFormData {
   id: string;
   query: string;
-  interval: string;
+  interval: number;
   platform?: string | undefined;
-  version?: string[] | undefined;
+  version?: string | undefined;
   ecs_mapping?:
     | Record<
         string,
@@ -52,11 +60,10 @@ export const usePackQueryForm = ({
     [idSet]
   );
 
-  return useForm<OsqueryManagerPackagePolicyConfigRecord, PackFormData>({
+  return useForm<PackSOFormData, PackFormData>({
     id: FORM_ID + uuid.v4(),
     onSubmit: async (formData, isValid) => {
       if (isValid && handleSubmit) {
-        // @ts-expect-error update types
         return handleSubmit(formData, isValid);
       }
     },
@@ -66,10 +73,9 @@ export const usePackQueryForm = ({
     defaultValue: defaultValue || {
       id: '',
       query: '',
-      interval: '3600',
+      interval: 3600,
       ecs_mapping: {},
     },
-    // @ts-expect-error update types
     serializer: (payload) =>
       produce(payload, (draft) => {
         if (isArray(draft.platform)) {
@@ -83,7 +89,6 @@ export const usePackQueryForm = ({
           if (!draft.version.length) {
             delete draft.version;
           } else {
-            // @ts-expect-error update types
             draft.version = draft.version[0];
           }
         }
@@ -98,7 +103,7 @@ export const usePackQueryForm = ({
       return {
         id: payload.id,
         query: payload.query,
-        interval: parseInt(payload.interval, 10),
+        interval: payload.interval,
         platform: payload.platform,
         version: payload.version ? [payload.version] : [],
         ecs_mapping: payload.ecs_mapping ?? {},

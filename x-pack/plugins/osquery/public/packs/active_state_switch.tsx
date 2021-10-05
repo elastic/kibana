@@ -6,15 +6,14 @@
  */
 
 import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useQueryClient } from 'react-query';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
 import { PackagePolicy } from '../../../fleet/common';
 import { useKibana } from '../common/lib/kibana';
-import { useAgentStatus } from '../agents/use_agent_status';
-import { useAgentPolicy } from '../agent_policies/use_agent_policy';
+import { useAgentPolicies } from '../agent_policies/use_agent_policies';
 import { ConfirmDeployAgentPolicyModal } from './form/confirmation_modal';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useUpdatePack } from './use_update_pack';
@@ -25,7 +24,7 @@ const StyledEuiLoadingSpinner = styled(EuiLoadingSpinner)`
 
 interface ActiveStateSwitchProps {
   disabled?: boolean;
-  item: PackagePolicy;
+  item: PackagePolicy & { policy_ids: string[] };
 }
 
 const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) => {
@@ -41,24 +40,33 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
 
   const hideConfirmationModal = useCallback(() => setConfirmationModal(false), []);
 
-  const { data: agentStatus } = useAgentStatus({ policyId: item.policy_id });
-  const { data: agentPolicy } = useAgentPolicy({ policyId: item.policy_id });
+  const { data } = useAgentPolicies();
+
+  const agentCount = useMemo(
+    () =>
+      item.policy_ids.reduce(
+        (acc, policyId) => acc + (data?.agentPoliciesById[policyId].agents || 0),
+        0
+      ),
+    [data?.agentPoliciesById, item.policy_ids]
+  );
 
   const { isLoading, mutateAsync } = useUpdatePack({
     options: {
+      // @ts-expect-error update types
       onSuccess: (response) => {
         queryClient.invalidateQueries('packList');
         setErrorToast();
         toasts.addSuccess(
           response.attributes.enabled
             ? i18n.translate('xpack.osquery.pack.table.activatedSuccessToastMessageText', {
-                defaultMessage: 'Successfully activated {packName}',
+                defaultMessage: 'Successfully activated "{packName}" pack',
                 values: {
                   packName: response.attributes.name,
                 },
               })
             : i18n.translate('xpack.osquery.pack.table.deactivatedSuccessToastMessageText', {
-                defaultMessage: 'Successfully deactivated {packName}',
+                defaultMessage: 'Successfully deactivated "{packName}" pack',
                 values: {
                   packName: response.attributes.name,
                 },
@@ -73,17 +81,18 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
   });
 
   const handleToggleActive = useCallback(() => {
+    // @ts-expect-error update types
     mutateAsync({ id: item.id, enabled: !item.attributes.enabled });
     hideConfirmationModal();
   }, [hideConfirmationModal, item, mutateAsync]);
 
   const handleToggleActiveClick = useCallback(() => {
-    if (agentStatus?.total) {
+    if (agentCount) {
       return setConfirmationModal(true);
     }
 
     handleToggleActive();
-  }, [agentStatus?.total, handleToggleActive]);
+  }, [agentCount, handleToggleActive]);
 
   return (
     <>
@@ -96,12 +105,12 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
         label=""
         onChange={handleToggleActiveClick}
       />
-      {confirmationModal && agentStatus?.total && (
+      {confirmationModal && agentCount && (
         <ConfirmDeployAgentPolicyModal
           onConfirm={handleToggleActive}
           onCancel={hideConfirmationModal}
-          agentCount={agentStatus?.total}
-          agentPolicy={agentPolicy}
+          agentCount={agentCount}
+          agentPolicyCount={item.policy_ids.length}
         />
       )}
     </>

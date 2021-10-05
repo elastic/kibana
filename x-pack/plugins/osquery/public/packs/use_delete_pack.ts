@@ -35,17 +35,14 @@ export const useDeletePack = ({ packId, withRedirect }: UseDeletePackProps) => {
         toastMessage: error.body.message,
       });
     },
-    onSuccess: (payload) => {
+    onSuccess: () => {
       queryClient.invalidateQueries(PACKS_ID);
       if (withRedirect) {
         navigateToApp(PLUGIN_ID, { path: pagePathGetters.packs() });
       }
       toasts.addSuccess(
         i18n.translate('xpack.osquery.deletePack.successToastMessageText', {
-          defaultMessage: 'Successfully deleted "{packName}" pack',
-          values: {
-            packName: payload.attributes?.name ?? '',
-          },
+          defaultMessage: 'Successfully deleted pack',
         })
       );
     },

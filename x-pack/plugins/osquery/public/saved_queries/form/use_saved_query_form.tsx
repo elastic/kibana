@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { isArray, isEmpty } from 'lodash';
+import { isArray, isEmpty, map } from 'lodash';
 import uuid from 'uuid';
 import { produce } from 'immer';
-
 import { useMemo } from 'react';
+
 import { useForm } from '../../shared_imports';
 import { createFormSchema } from '../../packs/queries/schema';
 import { PackFormData } from '../../packs/queries/use_pack_query_form';
@@ -25,8 +25,7 @@ interface UseSavedQueryFormProps {
 export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryFormProps) => {
   const { data } = useSavedQueries({});
   const ids: string[] = useMemo<string[]>(
-    // @ts-expect-error update types
-    () => data?.saved_objects.map((obj) => obj.attributes.id) ?? [],
+    () => map(data?.saved_objects, 'attributes.id') ?? [],
     [data]
   );
   const idSet = useMemo<Set<string>>(() => {
@@ -84,7 +83,7 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
         id: payload.id,
         description: payload.description,
         query: payload.query,
-        interval: payload.interval ? parseInt(payload.interval, 10) : undefined,
+        interval: payload.interval ?? 3600,
         platform: payload.platform,
         version: payload.version ? [payload.version] : [],
         ecs_mapping: payload.ecs_mapping ?? {},
