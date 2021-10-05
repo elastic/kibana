@@ -78,7 +78,7 @@ import { resolvePathVariables } from '../../../../common/utils/resolve_path_vari
 import { EndpointPackageInfoStateChanged } from './action';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
 import { getIsInvalidDateRange } from '../utils';
-import { TRANSFORM_STATS_URL } from '../../../../../common/constants';
+import { METADATA_TRANSFORM_STATS_URL } from '../../../../../common/constants';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
 
@@ -785,7 +785,9 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
   });
 
   try {
-    const transformStatsResponse: TransformStatsResponse = await http.get(TRANSFORM_STATS_URL);
+    const transformStatsResponse: TransformStatsResponse = await http.get(
+      METADATA_TRANSFORM_STATS_URL
+    );
 
     dispatch({
       type: 'metadataTransformStatsChanged',

@@ -13,7 +13,7 @@ import { fireEvent } from '@testing-library/dom';
 import { MiddlewareActionSpyHelper } from '../../../../common/store/test_utils';
 import {
   ConditionEntryField,
-  GetTrustedListAppsResponse,
+  GetTrustedAppsListResponse,
   NewTrustedApp,
   OperatingSystem,
   PostTrustedAppCreateResponse,
@@ -77,7 +77,7 @@ describe('When on the Trusted Apps Page', () => {
     page: number = 1,
     // eslint-disable-next-line @typescript-eslint/naming-convention
     per_page: number = 20
-  ): GetTrustedListAppsResponse => {
+  ): GetTrustedAppsListResponse => {
     return {
       data: [getFakeTrustedApp()],
       total: 50, // << Should be a value large enough to fulfill two pages
@@ -730,7 +730,7 @@ describe('When on the Trusted Apps Page', () => {
   });
 
   describe('and there are no trusted apps', () => {
-    const releaseExistsResponse: jest.MockedFunction<() => Promise<GetTrustedListAppsResponse>> =
+    const releaseExistsResponse: jest.MockedFunction<() => Promise<GetTrustedAppsListResponse>> =
       jest.fn(async () => {
         return {
           data: [],
@@ -739,7 +739,7 @@ describe('When on the Trusted Apps Page', () => {
           per_page: 1,
         };
       });
-    const releaseListResponse: jest.MockedFunction<() => Promise<GetTrustedListAppsResponse>> =
+    const releaseListResponse: jest.MockedFunction<() => Promise<GetTrustedAppsListResponse>> =
       jest.fn(async () => {
         return {
           data: [],
