@@ -50,7 +50,12 @@ import {
   DEFAULT_COLUMN_MIN_WIDTH,
 } from '../timeline/body/constants';
 
-import { OpenTimelineResult, UpdateTimeline, DispatchUpdateTimeline } from './types';
+import {
+  OpenTimelineResult,
+  UpdateTimeline,
+  DispatchUpdateTimeline,
+  TimelineErrorCallback,
+} from './types';
 import { createNote } from '../notes/helpers';
 import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
@@ -313,6 +318,7 @@ export interface QueryTimelineById<TCache> {
   graphEventId?: string;
   timelineId: string;
   timelineType?: TimelineType;
+  onError?: TimelineErrorCallback;
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
   updateIsLoading: ({
@@ -331,6 +337,7 @@ export const queryTimelineById = <TCache>({
   graphEventId = '',
   timelineId,
   timelineType,
+  onError,
   onOpenTimeline,
   openTimeline = true,
   updateIsLoading,
@@ -370,6 +377,11 @@ export const queryTimelineById = <TCache>({
           },
           to,
         })();
+      }
+    })
+    .catch((error) => {
+      if (onError != null) {
+        onError(error, timelineId);
       }
     })
     .finally(() => {
