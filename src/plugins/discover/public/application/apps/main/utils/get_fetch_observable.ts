@@ -34,6 +34,7 @@ export function getFetch$({
   refetch$: DataRefetch$;
   searchSessionManager: DiscoverSearchSessionManager;
   searchSource: ISearchSource;
+  initialFetchStatus: FetchStatus;
 }) {
   const { timefilter } = data.query.timefilter;
   const { filterManager } = data.query;
