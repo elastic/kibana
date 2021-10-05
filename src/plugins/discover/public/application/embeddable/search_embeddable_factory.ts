@@ -24,6 +24,7 @@ import {
   getSavedSearch,
   getSavedSearchUrl,
   savedSearchHasUrlConflict,
+  throwErrorOnUrlConflict,
   SAVED_SEARCH_TYPE,
 } from '../../saved_searches';
 
@@ -75,21 +76,7 @@ export class SearchEmbeddableFactory
         savedObjectsClient: services.core.savedObjects.client,
       });
 
-      if (savedSearchHasUrlConflict(savedSearch)) {
-        throw new Error(
-          i18n.translate('discover.savedSearchEmbeddable.legacyURLConflict.errorMessage', {
-            defaultMessage: `This {type} has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
-            values: {
-              type: SAVED_SEARCH_TYPE,
-              json: JSON.stringify({
-                sourceId: savedSearch.id,
-                targetType: SAVED_SEARCH_TYPE,
-                targetSpace: ((await services.spaces?.getActiveSpace()) ?? {}).id || 'default',
-              }),
-            },
-          })
-        );
-      }
+      await throwErrorOnUrlConflict(savedSearch, services.spaces);
 
       const indexPattern = savedSearch.searchSource.getField('index');
       const { executeTriggerActions } = await this.getStartServices();

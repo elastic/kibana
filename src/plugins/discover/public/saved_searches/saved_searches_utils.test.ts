@@ -11,6 +11,7 @@ import {
   getSavedSearchFullPathUrl,
   fromSavedSearchAttributes,
   toSavedSearchAttributes,
+  throwErrorOnUrlConflict,
 } from './saved_searches_utils';
 
 import { createSearchSourceMock } from '../../../data/public/mocks';
@@ -75,6 +76,27 @@ describe('saved_searches_utils', () => {
           "title": "saved search",
         }
       `);
+    });
+  });
+
+  describe('throwErrorOnUrlConflict', () => {
+    test('should throw an error on url conflict', async () => {
+      let error = 'no error';
+
+      try {
+        await throwErrorOnUrlConflict({
+          id: 'id',
+          sharingSavedObject: {
+            outcome: 'conflict',
+          },
+        } as SavedSearch);
+      } catch (e) {
+        error = e.message;
+      }
+
+      expect(error).toBe(
+        'This search has the same URL as a legacy alias. Disable the alias to resolve this error : {"sourceId":"id","targetType":"search","targetSpace":"default"}'
+      );
     });
   });
 

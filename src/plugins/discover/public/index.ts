@@ -13,6 +13,7 @@ export {
   getSavedSearch,
   getSavedSearchFullPathUrl,
   getSavedSearchUrl,
+  throwErrorOnUrlConflict,
   SavedSearch,
   LegacySavedSearch,
   SavedSearchLoader,
