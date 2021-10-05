@@ -7,8 +7,7 @@
 import React, { useContext, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { find } from 'lodash';
-import { ElasticsearchTemplate } from './elasticsearch_template';
+import { ItemTemplate } from './item_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../global_state_context';
 import { NodeReact } from '../../../components/elasticsearch';
@@ -18,6 +17,8 @@ import { SetupModeContext } from '../../../components/setup_mode/setup_mode_cont
 import { useLocalStorage } from '../../hooks/use_local_storage';
 import { useCharts } from '../../hooks/use_charts';
 import { nodesByIndices } from '../../../components/elasticsearch/shard_allocation/transformers/nodes_by_indices';
+// @ts-ignore
+import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 
 interface SetupModeProps {
   setupMode: any;
@@ -38,13 +39,10 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
 
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
-  const cluster = find(clusters, {
-    cluster_uuid: clusterUuid,
-  });
   const [data, setData] = useState({} as any);
   const [nodesByIndicesData, setNodesByIndicesData] = useState([]);
 
-  const title = i18n.translate('xpack.monitoring.elasticsearch.node.overview.routeTitle', {
+  const title = i18n.translate('xpack.monitoring.elasticsearch.node.overview.title', {
     defaultMessage: 'Elasticsearch - Nodes - {nodeName} - Overview',
     values: {
       nodeName: data?.nodeSummary?.name,
@@ -92,33 +90,33 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
   }, [showSystemIndices, setShowSystemIndices]);
 
   return (
-    <ElasticsearchTemplate
+    <ItemTemplate
       title={title}
       pageTitle={pageTitle}
       getPageData={getPageData}
-      cluster={cluster}
+      id={node}
+      pageType="nodes"
     >
-      <div data-test-subj="elasticsearchNodeListingPage">
-        <SetupModeRenderer
-          render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
-            <SetupModeContext.Provider value={{ setupModeSupported: true }}>
-              {flyoutComponent}
-              <NodeReact
-                alerts={{}}
-                nodeId={node}
-                clusterUuid={clusterUuid}
-                onBrush={onBrush}
-                zoomInfo={zoomInfo}
-                toggleShowSystemIndices={toggleShowSystemIndices}
-                showSystemIndices={showSystemIndices}
-                nodesByIndices={nodesByIndicesData}
-                {...data}
-              />
-              {bottomBarComponent}
-            </SetupModeContext.Provider>
-          )}
-        />
-      </div>
-    </ElasticsearchTemplate>
+      <SetupModeRenderer
+        render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
+          <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+            {flyoutComponent}
+            <NodeReact
+              alerts={{}}
+              labels={labels.node}
+              nodeId={node}
+              clusterUuid={clusterUuid}
+              onBrush={onBrush}
+              zoomInfo={zoomInfo}
+              toggleShowSystemIndices={toggleShowSystemIndices}
+              showSystemIndices={showSystemIndices}
+              nodesByIndices={nodesByIndicesData}
+              {...data}
+            />
+            {bottomBarComponent}
+          </SetupModeContext.Provider>
+        )}
+      />
+    </ItemTemplate>
   );
 };
