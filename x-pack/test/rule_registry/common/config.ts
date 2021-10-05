@@ -83,7 +83,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           // TO DO: Remove feature flags once we're good to go
           '--xpack.securitySolution.enableExperimental=["ruleRegistryEnabled"]',
           '--xpack.ruleRegistry.write.enabled=true',
-          `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
+          `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,

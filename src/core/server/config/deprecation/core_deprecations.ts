@@ -8,19 +8,6 @@
 
 import { ConfigDeprecationProvider, ConfigDeprecation } from '@kbn/config';
 
-const kibanaPathConf: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
-  if (process.env?.KIBANA_PATH_CONF) {
-    addDeprecation({
-      message: `Environment variable "KIBANA_PATH_CONF" is deprecated. It has been replaced with "KBN_PATH_CONF" pointing to a config folder`,
-      correctiveActions: {
-        manualSteps: [
-          'Use "KBN_PATH_CONF" instead of "KIBANA_PATH_CONF" to point to a config folder.',
-        ],
-      },
-    });
-  }
-};
-
 const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (settings.server?.basePath && !settings.server?.rewriteBasePath) {
     addDeprecation({
@@ -44,6 +31,7 @@ const rewriteCorsSettings: ConfigDeprecation = (settings, fromPath, addDeprecati
   if (typeof corsSettings === 'boolean') {
     addDeprecation({
       message: '"server.cors" is deprecated and has been replaced by "server.cors.enabled"',
+      level: 'warning',
       correctiveActions: {
         manualSteps: [
           `Replace "server.cors: ${corsSettings}" with "server.cors.enabled: ${corsSettings}"`,
@@ -114,11 +102,7 @@ const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecati
 };
 
 export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unusedFromRoot }) => [
-  rename('cpu.cgroup.path.override', 'ops.cGroupOverrides.cpuPath'),
-  rename('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
-  rename('server.xsrf.whitelist', 'server.xsrf.allowlist'),
   rewriteCorsSettings,
-  kibanaPathConf,
   rewriteBasePathDeprecation,
   cspRulesDeprecation,
 ];

@@ -26,16 +26,6 @@ Toggling this causes the server to regenerate assets on the next startup,
 which may cause a delay before pages start being served.
 Set to `false` to disable Console. *Default: `true`*
 
-| `cpu.cgroup.path.override:`
- | deprecated:[7.10.0,"In 8.0 and later, this setting will no longer be supported."]
- This setting has been renamed to
- <<ops-cGroupOverrides-cpuPath,`ops.cGroupOverrides.cpuPath`>>.
-
-| `cpuacct.cgroup.path.override:`
- | deprecated:[7.10.0,"In 8.0 and later, this setting will no longer be supported."]
- This setting has been renamed to
- <<ops-cGroupOverrides-cpuAcctPath, `ops.cGroupOverrides.cpuAcctPath`>>.
-
 | `csp.rules:`
  | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
 A https://w3c.github.io/webappsec-csp/[Content Security Policy] template
