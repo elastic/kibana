@@ -493,7 +493,7 @@ export const AlertsList: React.FunctionComponent = () => {
               type="alert"
               color="warning"
               content={i18n.translate(
-                'xpack.triggersActionsUI.checkAlertTypeEnabled.ruleTypeDisabledByLicenseMessage',
+                'xpack.triggersActionsUI.checkAlertTypeEnabled.ruleTypeExcessDurationMessage',
                 {
                   defaultMessage: 'This exceeds the expected maximum execution time for this rule.',
                 }
