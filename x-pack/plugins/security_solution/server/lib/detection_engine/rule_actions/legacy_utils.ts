@@ -64,6 +64,9 @@ export const legacyGetRuleActionsFromSavedObject = (
     id: savedObject.id,
     actions: actionsWithIdReplacedFromReference,
     alertThrottle: savedObject.attributes.alertThrottle || null,
-    ruleThrottle: savedObject.attributes.ruleThrottle || 'no_actions',
+    ruleThrottle:
+      savedObject.attributes.ruleThrottle == null || actionsWithIdReplacedFromReference.length === 0
+        ? 'no_actions'
+        : savedObject.attributes.ruleThrottle,
   };
 };

@@ -50,11 +50,12 @@ export const legacyGetBulkRuleActionsSavedObject = async ({
         return reference.type === 'alert';
       });
       // We check to ensure we have found a "ruleAlertId" and hopefully we have.
-      // Fallback is if we don't have one is to try to use the "savedObject.attributes.ruleAlertId" if it still exists as a last resort.
-      // The only reason this should ever happen is if migrations did not run, which should not be the case, but we are safe guarding here at the moment in case it does.
-      const ruleAlertIdKey =
-        ruleAlertId != null ? ruleAlertId.id : savedObject.attributes.ruleAlertId;
-      acc[ruleAlertIdKey] = legacyGetRuleActionsFromSavedObject(savedObject);
+      const ruleAlertIdKey = ruleAlertId != null ? ruleAlertId.id : undefined;
+      if (ruleAlertIdKey != null) {
+        acc[ruleAlertIdKey] = legacyGetRuleActionsFromSavedObject(savedObject);
+      } else {
+        // this is unusual and should not occur. We should not reach this point.
+      }
       return acc;
     },
     {}

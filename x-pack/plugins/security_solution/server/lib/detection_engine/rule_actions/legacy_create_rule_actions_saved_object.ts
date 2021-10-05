@@ -49,7 +49,7 @@ export const legacyCreateRuleActionsSavedObject = async ({
   await savedObjectsClient.create<LegacyIRuleActionsAttributesSavedObjectAttributes>(
     legacyRuleActionsSavedObjectType,
     {
-      actions: actions.map(({ id, group, params, actionTypeId }, index) => ({
+      actions: actions.map(({ group, params, actionTypeId }, index) => ({
         actionRef: `action_${index}`,
         group,
         params,
