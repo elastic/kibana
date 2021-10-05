@@ -9,6 +9,15 @@ import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiSpacer,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiPanel,
+} from '@elastic/eui';
 import { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../global_state_context';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
@@ -21,16 +30,6 @@ import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { DetailStatus } from '../../../components/kibana/detail_status';
 import { PageTemplate } from '../page_template';
 import { AlertsCallout } from '../../../alerts/callout';
-
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiSpacer,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiPanel,
-} from '@elastic/eui';
 
 const KibanaInstance = ({ data, alerts }: { data: any; alerts: any }) => {
   const { zoomInfo, onBrush } = useCharts();
