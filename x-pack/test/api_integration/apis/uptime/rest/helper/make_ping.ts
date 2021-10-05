@@ -7,7 +7,7 @@
 
 import uuid from 'uuid';
 import { merge } from 'lodash';
-import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { makeTls, TlsProps } from './make_tls';
 
 const DEFAULT_INDEX_NAME = 'heartbeat-8-generated-test';

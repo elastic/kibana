@@ -8,7 +8,7 @@
 
 import type supertest from 'supertest';
 import type { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/server';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 
 import {
   createTestServers,

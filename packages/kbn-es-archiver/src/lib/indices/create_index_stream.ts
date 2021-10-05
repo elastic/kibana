@@ -10,7 +10,7 @@ import { Transform, Readable } from 'stream';
 import { inspect } from 'util';
 
 import { estypes } from '@elastic/elasticsearch';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { ToolingLog } from '@kbn/dev-utils';
 
 import { Stats } from '../stats';

@@ -149,7 +149,7 @@ export const hasTimestampFields = async (args: {
   timestampField: string;
   ruleName: string;
   // any is derived from here
-  // node_modules/@elastic/elasticsearch/api/kibana.d.ts
+  // node_modules/@elastic/elasticsearch/lib/api/kibana.d.ts
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   timestampFieldCapsResponse: ApiResponse<Record<string, any>, Context>;
   inputIndices: string[];

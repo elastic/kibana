@@ -6,7 +6,7 @@
  */
 
 import type { SuperTest } from 'supertest';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { AUTHENTICATION } from './authentication';
 
 export const createUsersAndRoles = async (es: KibanaClient, supertest: SuperTest<any>) => {

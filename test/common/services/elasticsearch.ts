@@ -10,7 +10,7 @@ import { format as formatUrl } from 'url';
 import fs from 'fs';
 import { Client } from '@elastic/elasticsearch';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 

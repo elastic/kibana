@@ -6,7 +6,7 @@
  */
 
 import { ApiResponse, estypes } from '@elastic/elasticsearch';
-import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { JsonObject, JsonArray } from '@kbn/utility-types';
 
 export async function getSavedObjectFromES<T>(

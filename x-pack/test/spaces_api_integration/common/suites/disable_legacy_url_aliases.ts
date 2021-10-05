@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { LegacyUrlAlias } from 'src/core/server/saved_objects/object_types';
 import { SPACES } from '../lib/spaces';
 import { getUrlPrefix } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';

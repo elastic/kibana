@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { SPACES, ALL_SPACES_ID } from './spaces';
 import { AUTHENTICATION } from './authentication';

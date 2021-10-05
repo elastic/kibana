@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import sinon from 'sinon';
 import { ToolingLog } from '@kbn/dev-utils';
 import { Stats } from '../../stats';

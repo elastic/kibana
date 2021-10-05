@@ -9,7 +9,7 @@ import { KbnClient } from '@kbn/test';
 import type { ApiResponse } from '@elastic/elasticsearch';
 import { Context } from '@elastic/elasticsearch/lib/Transport';
 import type { estypes } from '@elastic/elasticsearch';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import type SuperTest from 'supertest';
 import type {
   ListArray,

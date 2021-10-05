@@ -9,7 +9,7 @@
 import { resolve, relative } from 'path';
 import { createWriteStream, mkdirSync } from 'fs';
 import { Readable, Writable } from 'stream';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import { createListStream, createPromiseFromStreams } from '@kbn/utils';
 

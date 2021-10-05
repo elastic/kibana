@@ -7,7 +7,7 @@
 
 import uuid from 'uuid';
 import { merge, flattenDeep } from 'lodash';
-import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { makePing } from './make_ping';
 import { TlsProps } from './make_tls';
 

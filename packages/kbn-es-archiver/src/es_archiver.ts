@@ -9,7 +9,7 @@
 import Fs from 'fs';
 import Path from 'path';
 
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 
