@@ -38,7 +38,7 @@ export interface ListProps {
   setSelectedCategory: (category: string) => void;
   onSearchChange: (search: string) => void;
   showMissingIntegrationMessage?: boolean;
-  callout?: JSX.Element;
+  callout?: JSX.Element | null;
 }
 
 export function PackageListGrid({

@@ -19,8 +19,6 @@ import type { Section } from '../sections';
 
 import { useLinks } from '../hooks';
 
-import { learnMoreBlogPost } from '../../../../common/constants';
-
 import { WithHeaderLayout } from './';
 
 interface Props {
