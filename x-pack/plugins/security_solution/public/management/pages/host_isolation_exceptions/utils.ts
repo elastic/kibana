@@ -7,23 +7,35 @@
 
 import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import ipaddr from 'ipaddr.js';
 
-export const createEmptyHostIsolationException = (): CreateExceptionListItemSchema => ({
-  comments: [],
-  description: '',
-  entries: [
-    {
-      field: 'destination.ip',
-      operator: 'included',
-      type: 'match',
-      value: '',
-    },
-  ],
-  item_id: undefined,
-  list_id: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
-  name: '',
-  namespace_type: 'agnostic',
-  tags: ['policy:all'],
-  type: 'simple',
-  os_types: ['windows', 'linux', 'macos'],
-});
+export function createEmptyHostIsolationException(): CreateExceptionListItemSchema {
+  return {
+    comments: [],
+    description: '',
+    entries: [
+      {
+        field: 'destination.ip',
+        operator: 'included',
+        type: 'match',
+        value: '',
+      },
+    ],
+    item_id: undefined,
+    list_id: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+    name: '',
+    namespace_type: 'agnostic',
+    tags: ['policy:all'],
+    type: 'simple',
+    os_types: ['windows', 'linux', 'macos'],
+  };
+}
+
+export function isValidIPv4OrCIDR(maybeIp: string): boolean {
+  try {
+    ipaddr.IPv4.parseCIDR(maybeIp);
+    return true;
+  } catch (e) {
+    return ipaddr.IPv4.isValid(maybeIp);
+  }
+}

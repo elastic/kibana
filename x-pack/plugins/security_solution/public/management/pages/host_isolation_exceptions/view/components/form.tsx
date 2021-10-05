@@ -18,15 +18,16 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { isValidIPv4OrCIDR } from '../../utils';
 import {
-  NAME_ERROR,
-  NAME_LABEL,
-  NAME_PLACEHOLDER,
   DESCRIPTION_LABEL,
   DESCRIPTION_PLACEHOLDER,
   IP_ERROR,
   IP_LABEL,
   IP_PLACEHOLDER,
+  NAME_ERROR,
+  NAME_LABEL,
+  NAME_PLACEHOLDER,
 } from './translations';
 
 interface ExceptionIpEntry {
@@ -66,8 +67,7 @@ export const HostIsolationExceptionsForm: React.FC<{
   const handleOnIpChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const ip = event.target.value;
-      // TODO validate IP somehow with CIDR
-      if (!ip.trim()) {
+      if (!isValidIPv4OrCIDR(ip)) {
         setHasIpError(true);
         return;
       }
