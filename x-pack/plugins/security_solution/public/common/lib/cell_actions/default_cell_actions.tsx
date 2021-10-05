@@ -6,7 +6,7 @@
  */
 
 import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
-import { head, getOr, get } from 'lodash/fp';
+import { head, getOr, get, isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
 
 import type {
@@ -45,57 +45,60 @@ const useKibanaServices = () => {
 
 const cellActionLink = [
   ({
-      browserFields,
-      data,
-      ecsData,
-      header,
-      timelineId,
-      pageSize,
-    }: {
-      browserFields: BrowserFields;
-      data: TimelineNonEcsData[][];
-      ecsData: Ecs[];
-      header?: ColumnHeaderOptions;
-      timelineId: string;
-      pageSize: number;
-    }) =>
-    ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
-      const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
-      const ecs = pageRowIndex < ecsData.length ? ecsData[pageRowIndex] : null;
-      const linkValues = header && getOr([], header.linkField ?? '', ecs);
-      const eventId = header && get('_id' ?? '', ecs);
+    browserFields,
+    data,
+    ecsData,
+    header,
+    timelineId,
+    pageSize,
+  }: {
+    browserFields: BrowserFields;
+    data: TimelineNonEcsData[][];
+    ecsData: Ecs[];
+    header?: ColumnHeaderOptions;
+    timelineId: string;
+    pageSize: number;
+  }) =>
+    getLink(header?.id, header?.type)
+      ? ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
+          const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+          const ecs = pageRowIndex < ecsData.length ? ecsData[pageRowIndex] : null;
+          const linkValues = header && getOr([], header.linkField ?? '', ecs);
+          const eventId = header && get('_id' ?? '', ecs);
 
-      if (pageRowIndex >= data.length) {
-        return null;
-      }
+          if (pageRowIndex >= data.length) {
+            return <></>;
+          }
 
-      const values = getMappedNonEcsValue({
-        data: data[pageRowIndex],
-        fieldName: columnId,
-      });
+          const values = getMappedNonEcsValue({
+            data: data[pageRowIndex],
+            fieldName: columnId,
+          });
 
-      const link = getLink(columnId, header?.type);
+          const link = getLink(columnId, header?.type);
+          const value = parseValue(head(values));
 
-      return link && eventId
-        ? values?.map((value, i) => (
+          return link && eventId && values && !isEmpty(value) ? (
             <FormattedFieldValue
               Component={Component}
-              contextId={`expanded-value-${columnId}-row-${pageRowIndex}-${i}-${timelineId}`}
+              contextId={`expanded-value-${columnId}-row-${pageRowIndex}-${timelineId}`}
               eventId={eventId}
               fieldFormat={header?.format || ''}
               fieldName={columnId}
               fieldType={header?.type || ''}
               isButton={true}
               isDraggable={false}
-              value={parseValue(value)}
+              value={value}
               truncate={false}
               title={values.length > 1 ? `${link?.label}: ${value}` : link?.label}
               linkValue={head(linkValues)}
               onClick={closePopover}
             />
-          ))
-        : null;
-    },
+          ) : (
+            <></>
+          );
+        }
+      : () => <></>,
 ];
 
 export const cellActions: TGridCellAction[] = [
@@ -105,7 +108,7 @@ export const cellActions: TGridCellAction[] = [
 
       const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
       if (pageRowIndex >= data.length) {
-        return null;
+        return <></>;
       }
 
       const value = getMappedNonEcsValue({
@@ -133,7 +136,7 @@ export const cellActions: TGridCellAction[] = [
 
       const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
       if (pageRowIndex >= data.length) {
-        return null;
+        return <></>;
       }
 
       const value = getMappedNonEcsValue({
@@ -161,7 +164,7 @@ export const cellActions: TGridCellAction[] = [
 
       const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
       if (pageRowIndex >= data.length) {
-        return null;
+        return <></>;
       }
 
       const value = getMappedNonEcsValue({
@@ -205,7 +208,7 @@ export const cellActions: TGridCellAction[] = [
 
       const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
       if (pageRowIndex >= data.length) {
-        return null;
+        return <></>;
       }
 
       const value = getMappedNonEcsValue({

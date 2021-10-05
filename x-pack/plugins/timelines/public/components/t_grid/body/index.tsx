@@ -655,9 +655,13 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
           return {
             ...header,
-            cellActions: hasCellActions(header.id)
-              ? header.tGridCellActions?.map(buildAction) ?? defaultCellActions?.map(buildAction)
-              : [],
+            ...(hasCellActions(header.id)
+              ? {
+                  cellActions:
+                    header.tGridCellActions?.map(buildAction) ??
+                    defaultCellActions?.map(buildAction),
+                }
+              : {}),
           };
         }),
       [columnHeaders, defaultCellActions, browserFields, data, pageSize, id]
