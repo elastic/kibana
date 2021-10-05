@@ -29,17 +29,6 @@ export function formatHitProvider(dataView: DataView, defaultFormat: any) {
   }
 
   function formatHit(hit: Record<string, any>, type: string = 'html') {
-    if (type === 'text') {
-      // formatHit of type text is for react components to get rid of <span ng-non-bindable>
-      // since it's currently just used at the discover's doc view table, caching is not necessary
-      const flattened = dataView.flattenHit(hit);
-      const result: Record<string, any> = {};
-      for (const [key, value] of Object.entries(flattened)) {
-        result[key] = convert(hit, value, key, type);
-      }
-      return result;
-    }
-
     const cached = formattedCache.get(hit);
     if (cached) {
       return cached;
