@@ -189,7 +189,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const adminSearchBar = await testSubjects.find('adminSearchBar');
           await adminSearchBar.clearValueWithKeyboard();
           await adminSearchBar.type(
-            'united.endpoint.host.hostname : "Host-ku5jy6j0pw" or host.hostname : "Host-003ex9rih7" '
+            'united.endpoint.host.hostname : "Host-ku5jy6j0pw" or host.hostname : "Host-ku5jy6j0pw" '
           );
           const querySubmitButton = await testSubjects.find('querySubmitButton');
           await querySubmitButton.click();
