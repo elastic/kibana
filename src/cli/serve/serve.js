@@ -185,7 +185,7 @@ export default function (program) {
       pluginPathCollector,
       []
     )
-    .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
+    .option('--plugins <path>', 'Deprecated, an alias for --plugin-dir', pluginDirCollector)
     .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
   if (!isKibanaDistributable()) {
