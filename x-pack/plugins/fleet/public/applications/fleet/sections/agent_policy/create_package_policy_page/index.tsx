@@ -88,6 +88,20 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     [queryParams]
   );
 
+  /**
+   * Please note: policyId can come from one of two sources. The URL param (in the URL path) or
+   * in the query params (?policyId=foo).
+   *
+   * Either way, we take this as an indication that a user is "coming from" the fleet policy UI
+   * since we link them out to packages (a.k.a. integrations) UI when choosing a new package. It is
+   * no longer possible to choose a package directly in the create package form.
+   *
+   * We may want to deprecate the ability to pass in policyId from URL params since there is no package
+   * creation possible if a user has not chosen one from the packages UI.
+   */
+  const from: EditPackagePolicyFrom =
+    'policyId' in params || queryParamsPolicyId ? 'policy' : 'package';
+
   // Agent policy state
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | undefined>();
 
@@ -221,8 +235,12 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     if (routeState && routeState.onCancelUrl) {
       return routeState.onCancelUrl;
     }
-    return getHref('integration_details_overview', { pkgkey: params.pkgkey });
-  }, [params, getHref, routeState]);
+    return from === 'policy' && agentPolicyId
+      ? getHref('policy_details', {
+          policyId: agentPolicyId,
+        })
+      : getHref('integration_details_overview', { pkgkey: params.pkgkey });
+  }, [routeState, from, agentPolicyId, getHref, params.pkgkey]);
 
   const cancelClickHandler: ReactEventHandler = useCallback(
     (ev) => {
@@ -277,6 +295,8 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         }
       }
 
+      const fromPolicyWithoutAgentsAssigned = from === 'policy' && agentPolicy && agentCount === 0;
+
       const fromPackageWithoutAgentsAssigned = packageInfo && agentPolicy && agentCount === 0;
 
       const hasAgentsAssigned = agentCount && agentPolicy;
@@ -288,7 +308,17 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             packagePolicyName: packagePolicy.name,
           },
         }),
-        text: fromPackageWithoutAgentsAssigned
+        text: fromPolicyWithoutAgentsAssigned
+          ? i18n.translate(
+              'xpack.fleet.createPackagePolicy.policyContextAddAgentNextNotificationMessage',
+              {
+                defaultMessage: `The policy has been updated. Add an agent to the '{agentPolicyName}' policy to deploy this policy.`,
+                values: {
+                  agentPolicyName: agentPolicy!.name,
+                },
+              }
+            )
+          : fromPackageWithoutAgentsAssigned
           ? toMountPoint(
               // To render the link below we need to mount this JSX in the success toast
               <FormattedMessage
@@ -332,8 +362,9 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     hasErrors,
     agentCount,
     savePackagePolicy,
-    packageInfo,
+    from,
     agentPolicy,
+    packageInfo,
     notifications.toasts,
     packagePolicy.name,
     getHref,
@@ -355,14 +386,14 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
 
   const layoutProps = useMemo(
     () => ({
-      from: 'package' as EditPackagePolicyFrom,
+      from,
       cancelUrl,
       onCancel: cancelClickHandler,
       agentPolicy,
       packageInfo,
       integrationInfo,
     }),
-    [agentPolicy, cancelClickHandler, cancelUrl, integrationInfo, packageInfo]
+    [agentPolicy, cancelClickHandler, cancelUrl, from, integrationInfo, packageInfo]
   );
 
   const stepSelectAgentPolicy = useMemo(
@@ -408,8 +439,8 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             />
           )}
 
-          {/* If an Agent Policy and a package has been selected, then show UI extension (if any) */}
-          {extensionView && packagePolicy.policy_id && packagePolicy.package?.name && (
+          {/* If a package has been loaded, then show UI extension (if any) */}
+          {extensionView && packagePolicy.package?.name && (
             <ExtensionWrapper>
               <extensionView.Component
                 newPolicy={packagePolicy}
@@ -440,7 +471,6 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       title: i18n.translate('xpack.fleet.createPackagePolicy.stepConfigurePackagePolicyTitle', {
         defaultMessage: 'Configure integration',
       }),
-      status: !packageInfo || !agentPolicy ? 'disabled' : undefined,
       'data-test-subj': 'dataCollectionSetupStep',
       children: stepConfigurePackagePolicy,
     },

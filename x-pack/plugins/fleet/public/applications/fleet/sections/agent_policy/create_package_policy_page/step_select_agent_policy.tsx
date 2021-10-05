@@ -92,9 +92,9 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
 
   const doesAgentPolicyHaveLimitedPackage = useCallback(
     (policy: AgentPolicy, pkgInfo: PackageInfo) => {
-      return (
-        isPackageLimited(pkgInfo) && doesAgentPolicyAlreadyIncludePackage(policy, pkgInfo.name)
-      );
+      return policy
+        ? isPackageLimited(pkgInfo) && doesAgentPolicyAlreadyIncludePackage(policy, pkgInfo.name)
+        : false;
     },
     []
   );
@@ -272,8 +272,8 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 ) : null
               }
               isInvalid={Boolean(
-                selectedPolicyId &&
-                  packageInfo &&
+                !selectedPolicyId ||
+                  !packageInfo ||
                   doesAgentPolicyHaveLimitedPackage(
                     agentPoliciesById[selectedPolicyId],
                     packageInfo
