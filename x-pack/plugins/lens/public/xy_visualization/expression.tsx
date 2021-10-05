@@ -26,7 +26,6 @@ import {
   ElementClickListener,
   BrushEndListener,
   XYBrushEvent,
-  BrushEvent,
   CurveType,
   LegendPositionConfig,
   LabelOverflowConstraint,
@@ -388,14 +387,14 @@ export function XYChart({
       })
     );
     const fit = !hasBarOrArea && extent.mode === 'dataBounds';
-    let min: undefined | number;
-    let max: undefined | number;
+    let min: number = NaN;
+    let max: number = NaN;
 
     if (extent.mode === 'custom') {
       const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrArea, extent);
       if (!inclusiveZeroError && !boundaryError) {
-        min = extent.lowerBound;
-        max = extent.upperBound;
+        min = extent.lowerBound ?? NaN;
+        max = extent.upperBound ?? NaN;
       }
     }
 
