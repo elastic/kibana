@@ -58,7 +58,9 @@ export const legacyGetBulkRuleActionsSavedObject = async ({
       if (ruleAlertIdKey != null) {
         acc[ruleAlertIdKey] = legacyGetRuleActionsFromSavedObject(savedObject, logger);
       } else {
-        // this is unusual and should not occur. We should not reach this point.
+        logger.error(
+          `Security Solution notification (Legacy) Was expecting to find a reference of type "alert" within ${savedObject.references} but did not. Skipping this notification.`
+        );
       }
       return acc;
     },
