@@ -214,9 +214,8 @@ Noteworthy fields: `system.memory.actual.free`, `system.memory.total`,
 Above example is overly simplified. In reality [we do a bit more](https://github.com/elastic/kibana/blob/fe9b5332e157fd456f81aecfd4ffa78d9e511a66/x-pack/plugins/apm/server/lib/metrics/by_agent/shared/memory/index.ts#L51-L71) to properly calculate memory usage inside containers
 
 
-# Breakdown metrics 
 
-## Transaction breakdown metrics (`transaction_breakdown`)
+# Transaction breakdown metrics (`transaction_breakdown`)
 
 A pre-aggregations of transaction documents where `transaction.breakdown.count` is the number of original transactions.
 
@@ -236,7 +235,7 @@ Noteworthy fields: `transaction.name`, `transaction.type`
 }
 ```
 
-## Span breakdown metrics (`span_breakdown`)
+# Span breakdown metrics (`span_breakdown`)
 
 A pre-aggregations of span documents where `span.self_time.count` is the number of original spans. Measures the "self-time" for a span type, and optional subtype, within a transaction group. 
 
