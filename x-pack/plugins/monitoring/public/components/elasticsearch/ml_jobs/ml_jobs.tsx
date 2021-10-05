@@ -8,18 +8,32 @@
 import { capitalize } from 'lodash';
 import numeral from '@elastic/numeral';
 import React from 'react';
-import { EuiLink, EuiPage, EuiPageContent, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiPage,
+  EuiPageContent,
+  EuiPageBody,
+  EuiPanel,
+  EuiSpacer,
+  Pagination,
+  EuiTableSortingType,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { LARGE_ABBREVIATED, LARGE_BYTES } from '../../../../common/formatting';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import type { MLJobs } from '../../../types';
 import { EuiMonitoringTable } from '../../table';
 import { MachineLearningJobStatusIcon } from '../ml_job_listing/status_icon';
-import { LARGE_ABBREVIATED, LARGE_BYTES } from '../../../../common/formatting';
 import { ClusterStatus } from '../cluster_status';
-import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 
 interface Props {
   clusterStatus: boolean;
+  jobs: MLJobs;
+  onTableChange: () => void;
+  sorting: EuiTableSortingType<string>;
+  pagination: Pagination;
 }
 
 export const ElasticsearchMLJobs = ({
@@ -92,7 +106,7 @@ const columns = [
     }),
     field: 'state',
     sortable: true,
-    render: (state) => (
+    render: (state: string) => (
       <div>
         <MachineLearningJobStatusIcon status={state} />
         &nbsp;
@@ -106,7 +120,7 @@ const columns = [
     }),
     field: 'data_counts.processed_record_count',
     sortable: true,
-    render: (value) => <span>{numeral(value).format(LARGE_ABBREVIATED)}</span>,
+    render: (value: unknown) => <span>{numeral(value).format(LARGE_ABBREVIATED)}</span>,
   },
   {
     name: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.modelSizeTitle', {
@@ -114,7 +128,7 @@ const columns = [
     }),
     field: 'model_size_stats.model_bytes',
     sortable: true,
-    render: (value) => <span>{numeral(value).format(LARGE_BYTES)}</span>,
+    render: (value: unknown) => <span>{numeral(value).format(LARGE_BYTES)}</span>,
   },
   {
     name: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.forecastsTitle', {
@@ -122,7 +136,7 @@ const columns = [
     }),
     field: 'forecasts_stats.total',
     sortable: true,
-    render: (value) => <span>{numeral(value).format(LARGE_ABBREVIATED)}</span>,
+    render: (value: unknown) => <span>{numeral(value).format(LARGE_ABBREVIATED)}</span>,
   },
   {
     name: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.nodeTitle', {
@@ -130,7 +144,7 @@ const columns = [
     }),
     field: 'node.name',
     sortable: true,
-    render: (name, node) => {
+    render: (name: string, node: { id: string }) => {
       if (node) {
         return (
           <EuiLink href={getSafeForExternalLink(`#/elasticsearch/nodes/${node.id}`)}>

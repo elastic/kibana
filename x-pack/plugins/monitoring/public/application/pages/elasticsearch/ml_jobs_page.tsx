@@ -15,6 +15,7 @@ import { ComponentProps } from '../../route_init';
 import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
+import type { MLJobs } from '../../../types';
 
 interface SetupModeProps {
   setupMode: any;
@@ -56,8 +57,8 @@ export const ElasticsearchMLJobsPage: React.FC<ComponentProps> = ({ clusters }) 
     });
     setData({
       clusterStatus: response.clusterStatus,
-      jobs: response.rows.map((job) => {
-        if (job.ml) {
+      jobs: (response.rows as MLJobs).map((job) => {
+        if ('ml' in job && job.ml?.job) {
           return {
             ...job.ml.job,
             node: job.node,
