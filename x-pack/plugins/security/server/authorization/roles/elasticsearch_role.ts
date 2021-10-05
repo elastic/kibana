@@ -8,10 +8,10 @@
 import {
   GLOBAL_RESOURCE,
   RESERVED_PRIVILEGES_APPLICATION_WILDCARD,
-} from '../../../../../common/constants';
-import type { Role, RoleKibanaPrivilege } from '../../../../../common/model';
-import { PrivilegeSerializer } from '../../../../authorization/privilege_serializer';
-import { ResourceSerializer } from '../../../../authorization/resource_serializer';
+} from '../../../common/constants';
+import type { Role, RoleKibanaPrivilege } from '../../../common/model';
+import { PrivilegeSerializer } from '../privilege_serializer';
+import { ResourceSerializer } from '../resource_serializer';
 
 export type ElasticsearchRole = Pick<Role, 'name' | 'metadata' | 'transient_metadata'> & {
   applications: Array<{

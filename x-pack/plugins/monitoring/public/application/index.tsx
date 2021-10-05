@@ -13,6 +13,7 @@ import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/p
 import { LoadingPage } from './pages/loading_page';
 import { LicensePage } from './pages/license_page';
 import { ClusterOverview } from './pages/cluster/overview_page';
+import { ClusterListing } from './pages/home/cluster_listing';
 import { MonitoringStartPluginDependencies } from '../types';
 import { GlobalStateProvider } from './global_state_context';
 import { ExternalConfigContext, ExternalConfig } from './external_config_context';
@@ -25,6 +26,7 @@ import { BeatsInstancesPage } from './pages/beats/instances';
 import { BeatsInstancePage } from './pages/beats/instance';
 import { ApmOverviewPage, ApmInstancesPage, ApmInstancePage } from './pages/apm';
 import { KibanaOverviewPage } from './pages/kibana/overview';
+import { KibanaInstancesPage } from './pages/kibana/instances';
 import { ElasticsearchNodesPage } from './pages/elasticsearch/nodes_page';
 import { ElasticsearchIndicesPage } from './pages/elasticsearch/indices_page';
 import { ElasticsearchIndexPage } from './pages/elasticsearch/index_page';
@@ -81,9 +83,10 @@ const MonitoringApp: React.FC<{
                   />
                   <RouteInit
                     path="/home"
-                    component={Home}
+                    component={ClusterListing}
                     codePaths={['all']}
-                    fetchAllClusters={false}
+                    fetchAllClusters={true}
+                    unsetGlobalState={true}
                   />
                   <RouteInit
                     path="/overview"
@@ -143,6 +146,13 @@ const MonitoringApp: React.FC<{
                   />
 
                   {/* Kibana Views */}
+                  <RouteInit
+                    path="/kibana/instances"
+                    component={KibanaInstancesPage}
+                    codePaths={[CODE_PATH_KIBANA]}
+                    fetchAllClusters={false}
+                  />
+
                   <RouteInit
                     path="/kibana"
                     component={KibanaOverviewPage}
@@ -208,8 +218,4 @@ const MonitoringApp: React.FC<{
       </ExternalConfigContext.Provider>
     </KibanaContextProvider>
   );
-};
-
-const Home: React.FC<{}> = () => {
-  return <div>Home page (Cluster listing)</div>;
 };
