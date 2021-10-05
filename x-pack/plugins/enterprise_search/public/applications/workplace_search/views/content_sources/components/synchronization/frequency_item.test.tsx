@@ -8,21 +8,24 @@
 import React from 'react';
 
 import { shallow } from 'enzyme';
+import moment from 'moment';
 
 import { EuiFieldNumber, EuiSuperSelect } from '@elastic/eui';
 
 import { FrequencyItem } from './frequency_item';
 
 describe('FrequencyItem', () => {
+  const estimate = {
+    duration: 'PT3D',
+    nextStart: '2021-09-27T21:39:24+00:00',
+    lastRun: '2021-09-25T21:39:24+00:00',
+  };
+
   const props = {
     label: 'Item',
     description: 'My item',
     duration: 'PT2D',
-    estimate: {
-      duration: 'PT3D',
-      nextStart: '2021-09-27T21:39:24+00:00',
-      lastRun: '2021-09-25T21:39:24+00:00',
-    },
+    estimate,
   };
 
   it('renders', () => {
@@ -59,6 +62,26 @@ describe('FrequencyItem', () => {
 
       expect(wrapper.find(EuiFieldNumber).prop('value')).toEqual(1);
       expect(wrapper.find(EuiSuperSelect).prop('valueOfSelected')).toEqual('minutes');
+    });
+
+    it('handles "nextStart" that is in past', () => {
+      const wrapper = shallow(<FrequencyItem {...props} />);
+
+      expect(
+        (wrapper.find('[data-test-subj="nextStartSummary"]').prop('values') as any)!.nextStartTime
+      ).toEqual('as soon as the currently running job finishes');
+    });
+
+    it('handles "nextStart" that is in future', () => {
+      const estimateWithPastNextStart = {
+        ...estimate,
+        nextStart: moment().add(2, 'days').format(),
+      };
+      const wrapper = shallow(<FrequencyItem {...props} estimate={estimateWithPastNextStart} />);
+
+      expect(
+        (wrapper.find('[data-test-subj="nextStartSummary"]').prop('values') as any)!.nextStartTime
+      ).toEqual('in 2 days');
     });
   });
 });
