@@ -64,11 +64,14 @@ export function registerSchedulingRoutes(reporting: ReportingCore, logger: Level
 
       const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
       try {
+        // TODO: generate an API Key on behalf of the calling user
+        const apiKey = 'okApi123';
+
         return requestHandler.handleScheduleRequest(
           req.params.exportType,
           jobParams,
           interval,
-          req.body.api_key
+          apiKey
         );
       } catch (err) {
         if (err instanceof BadRequestError) {

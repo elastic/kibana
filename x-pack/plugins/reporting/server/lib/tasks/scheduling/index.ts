@@ -17,18 +17,9 @@ export const ScheduleReportFromJobParams = schema.object({
     schema.object({ hours: schema.number({ min: 1 }) }),
     schema.object({ days: schema.number({ min: 1 }) }),
   ]),
-
-  // api_key is not required if security is disabled
-  api_key: schema.maybe(
-    schema.object({
-      name: schema.string(),
-      base64: schema.string(),
-    })
-  ),
 });
 
 export type ScheduleIntervalSchemaType = TypeOf<typeof ScheduleReportFromJobParams>['interval'];
-export type ScheduleApiKeyType = TypeOf<typeof ScheduleReportFromJobParams>['api_key'];
 
 export function isScheduled(
   task: ReportTaskParams | ScheduledReportTaskParams

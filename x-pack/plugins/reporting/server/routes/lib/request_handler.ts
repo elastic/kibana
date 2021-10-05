@@ -13,7 +13,7 @@ import { JobParamsPDFLegacy } from '../../export_types/printable_pdf/types';
 import { checkParamsVersion, cryptoFactory, LevelLogger } from '../../lib';
 import { Report, reportFromTask } from '../../lib/store';
 import { ScheduledReportTaskParams } from '../../lib/tasks';
-import { ScheduleApiKeyType, ScheduleIntervalSchemaType } from '../../lib/tasks/scheduling';
+import { ScheduleIntervalSchemaType } from '../../lib/tasks/scheduling';
 import { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../types';
 import { BadRequestError } from './errors';
 
@@ -164,7 +164,7 @@ export class RequestHandler {
     exportTypeId: string,
     jobParamsRaw: BaseParams,
     interval: ScheduleIntervalSchemaType,
-    apiKey: ScheduleApiKeyType
+    apiKey: { base64: string }
   ) {
     const { reporting, logger, context, user } = this;
 
