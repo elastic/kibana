@@ -15,6 +15,8 @@ import '../../../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
+import { CurationSuggestion } from '../../types';
+
 import { CurationSuggestionLogic } from './curation_suggestion_logic';
 
 const DEFAULT_VALUES = {
@@ -23,10 +25,11 @@ const DEFAULT_VALUES = {
   suggestedPromotedDocuments: [],
 };
 
-const suggestion = {
+const suggestion: CurationSuggestion = {
   query: 'foo',
   updated_at: '2021-07-08T14:35:50Z',
   promoted: ['1', '2', '3'],
+  status: 'applied',
 };
 
 const suggestedPromotedDocuments = [
