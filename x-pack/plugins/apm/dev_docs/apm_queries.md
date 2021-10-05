@@ -229,14 +229,14 @@ Noteworthy fields: `transaction.name`, `transaction.type`
 #### Sample document
 
 ```json
-  {
-    "@timestamp": "2021-09-27T21:59:59.828Z",
-    "processor.event": "metric",
-    "metricset.name": "transaction_breakdown",
-    "transaction.breakdown.count": 12,
-    "transaction.name": "GET /api/products",
-    "transaction.type": "request"
-  }
+{
+  "@timestamp": "2021-09-27T21:59:59.828Z",
+  "processor.event": "metric",
+  "metricset.name": "transaction_breakdown",
+  "transaction.breakdown.count": 12,
+  "transaction.name": "GET /api/products",
+  "transaction.type": "request"
+}
 }
 ```
 
