@@ -9,7 +9,6 @@ import moment from 'moment';
 import { ElasticsearchClient, RequestHandler, Logger } from 'src/core/server';
 import uuid from 'uuid';
 import { TypeOf } from '@kbn/config-schema';
-import { LogsEndpointAction } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { CommentType } from '../../../../../cases/common';
 import { CasesByAlertId } from '../../../../../cases/common/api/cases/case';
 import { HostIsolationRequestSchema } from '../../../../common/endpoint/schema/actions';
@@ -19,7 +18,11 @@ import {
   UNISOLATE_HOST_ROUTE,
 } from '../../../../common/endpoint/constants';
 import { AGENT_ACTIONS_INDEX } from '../../../../../fleet/common';
-import { EndpointAction, HostMetadata } from '../../../../common/endpoint/types';
+import {
+  EndpointAction,
+  HostMetadata,
+  LogsEndpointAction,
+} from '../../../../common/endpoint/types';
 import {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,

@@ -7,12 +7,8 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { DeleteByQueryResponse } from '@elastic/elasticsearch/api/types';
-import { HostMetadata } from '../types';
-import {
-  EndpointActionGenerator,
-  LogsEndpointAction,
-  LogsEndpointActionResponse,
-} from '../data_generators/endpoint_action_generator';
+import { HostMetadata, LogsEndpointAction, LogsEndpointActionResponse } from '../types';
+import { EndpointActionGenerator } from '../data_generators/endpoint_action_generator';
 import { wrapErrorAndRejectPromise } from './utils';
 import { ENDPOINT_ACTIONS_INDEX, ENDPOINT_ACTION_RESPONSES_INDEX } from '../constants';
 

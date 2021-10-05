@@ -8,51 +8,7 @@
 import { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import { BaseDataGenerator } from './base_data_generator';
-import { EndpointActionData, ISOLATION_ACTIONS } from '../types';
-
-interface EcsError {
-  code: string;
-  id: string;
-  message: string;
-  stack_trace: string;
-  type: string;
-}
-
-interface EndpointActionFields {
-  action_id: string;
-  data: EndpointActionData;
-}
-
-interface ActionRequestFields {
-  expiration: string;
-  type: 'INPUT_ACTION';
-  input_type: 'endpoint';
-}
-
-interface ActionResponseFields {
-  completed_at: string;
-  started_at: string;
-}
-export interface LogsEndpointAction {
-  '@timestamp': string;
-  agent: {
-    id: string | string[];
-  };
-  EndpointAction: EndpointActionFields & ActionRequestFields;
-  error?: EcsError;
-  user: {
-    id: string;
-  };
-}
-
-export interface LogsEndpointActionResponse {
-  '@timestamp': string;
-  agent: {
-    id: string | string[];
-  };
-  EndpointAction: EndpointActionFields & ActionResponseFields;
-  error?: EcsError;
-}
+import { ISOLATION_ACTIONS, LogsEndpointAction, LogsEndpointActionResponse } from '../types';
 
 const ISOLATION_COMMANDS: ISOLATION_ACTIONS[] = ['isolate', 'unisolate'];
 
