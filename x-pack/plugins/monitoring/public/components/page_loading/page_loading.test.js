@@ -9,7 +9,8 @@ import React from 'react';
 import { renderWithIntl } from '@kbn/test/jest';
 import { PageLoading } from '.';
 
-describe('PageLoading', () => {
+// https://github.com/elastic/kibana/issues/113991
+describe.skip('PageLoading', () => {
   test('should show a simple page loading component', () => {
     expect(renderWithIntl(<PageLoading />)).toMatchSnapshot();
   });
