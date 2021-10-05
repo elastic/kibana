@@ -43,7 +43,6 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
     const [showModal, setShowModal] = useState(false);
 
     const { fetchAppInfo, isLoading } = useGetAppInfo({
-      toastNotifications: toasts,
       actionTypeId: action.actionTypeId,
     });
 

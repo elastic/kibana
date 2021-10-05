@@ -6,27 +6,19 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { ToastsApi } from 'kibana/public';
 import { getAppInfo } from './api';
 import { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
 
-export interface UseGetChoicesProps {
+export interface UseGetAppInfoProps {
   actionTypeId: string;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
 }
 
-export interface UseGetChoices {
+export interface UseGetAppInfo {
   fetchAppInfo: (connector: ServiceNowActionConnector) => Promise<AppInfo | RESTApiError>;
   isLoading: boolean;
 }
 
-export const useGetAppInfo = ({
-  actionTypeId,
-  toastNotifications,
-}: UseGetChoicesProps): UseGetChoices => {
+export const useGetAppInfo = ({ actionTypeId }: UseGetAppInfoProps): UseGetAppInfo => {
   const [isLoading, setIsLoading] = useState(false);
   const didCancel = useRef(false);
   const abortCtrl = useRef(new AbortController());
