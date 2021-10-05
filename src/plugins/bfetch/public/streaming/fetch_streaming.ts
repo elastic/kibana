@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { map } from 'rxjs/operators';
+import { map, share } from 'rxjs/operators';
 import { inflateResponse } from '.';
 import { fromStreamingXhr } from './from_streaming_xhr';
 import { split } from './split';
@@ -57,7 +57,8 @@ export function fetchStreaming({
     split('\n'),
     map((msg) => {
       return isCompressionDisabled ? msg : inflateResponse(msg);
-    })
+    }),
+    share()
   );
 
   return {
