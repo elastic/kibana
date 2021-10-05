@@ -106,7 +106,7 @@ export function useChangePointDetection(
 
       for (const fieldCandidatesChunk of fieldCandidatesChunks) {
         const pValues = await callApmApi({
-          endpoint: 'POST /internal/apm/correlations/p_values',
+          endpoint: 'POST /internal/apm/correlations/change_point_p_values',
           signal: abortCtrl.current.signal,
           params: {
             body: { ...fetchParams, fieldCandidates: fieldCandidatesChunk },

@@ -15,6 +15,7 @@ import { isActivePlatinumLicense } from '../../../common/license_check';
 
 import { setupRequest } from '../../lib/helpers/setup_request';
 import {
+  fetchChangePointPValues,
   fetchPValues,
   fetchSignificantCorrelations,
   fetchTransactionDurationFieldCandidates,
@@ -354,7 +355,54 @@ const pValuesRoute = createApmServerRoute({
   },
 });
 
+const changePointPValuesRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/correlations/change_point_p_values',
+  params: t.type({
+    body: t.intersection([
+      t.partial({
+        serviceName: t.string,
+        transactionName: t.string,
+        transactionType: t.string,
+      }),
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      t.type({
+        fieldCandidates: t.array(t.string),
+      }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources) => {
+    const { context } = resources;
+    if (!isActivePlatinumLicense(context.licensing.license)) {
+      throw Boom.forbidden(INVALID_LICENSE);
+    }
+
+    const { indices } = await setupRequest(resources);
+    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+
+    const { fieldCandidates, ...params } = resources.params.body;
+
+    const paramsWithIndex = {
+      ...params,
+      index: indices.transaction,
+    };
+
+    return withApmSpan(
+      'get_change_point_p_values',
+      async () =>
+        await fetchChangePointPValues(
+          esClient,
+          paramsWithIndex,
+          fieldCandidates
+        )
+    );
+  },
+});
+
 export const correlationsRouteRepository = {
+  ...changePointPValuesRoute,
   ...pValuesRoute,
   ...fieldCandidatesRoute,
   ...fieldStatsRoute,

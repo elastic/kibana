@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { uniqBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'kibana/server';
 import { CorrelationsParams } from '../../../../common/correlations/types';
@@ -92,43 +93,51 @@ export const getChangePointRequest = (
 export const fetchChangePointPValues = async (
   esClient: ElasticsearchClient,
   params: ChangePointParams & CorrelationsParams,
-  fieldName: string
+  fieldNames: string[]
 ) => {
-  const resp = await esClient.search(getChangePointRequest(params, fieldName));
-
-  if (resp.body.aggregations === undefined) {
-    throw new Error('fetchChangePoint failed, did not return aggregations.');
-  }
-
-  console.log('resp', resp.body.aggregations);
-  const overallResult = resp.body.aggregations
-    .change_point_p_value as estypes.AggregationsSignificantTermsAggregate<{
-    key: string | number;
-    doc_count: number;
-    bg_count: number;
-    score: number;
-  }>;
-
-  // Using for of to sequentially augment the results with histogram data.
   const result = [];
-  for (const bucket of overallResult.buckets) {
-    // Scale the score into a value from 0 - 1
-    // using a concave piecewise linear function in -log(p-value)
-    const normalizedScore =
-      0.5 * Math.min(Math.max((bucket.score - 3.912) / 2.995, 0), 1) +
-      0.25 * Math.min(Math.max((bucket.score - 6.908) / 6.908, 0), 1) +
-      0.25 * Math.min(Math.max((bucket.score - 13.816) / 101.314, 0), 1);
 
-    result.push({
-      fieldName,
-      fieldValue: bucket.key,
-      doc_count: bucket.doc_count,
-      bg_count: bucket.doc_count,
-      score: bucket.score,
-      pValue: Math.exp(-bucket.score),
-      normalizedScore,
-    });
+  for (const fieldName of fieldNames) {
+    const resp = await esClient.search(
+      getChangePointRequest(params, fieldName)
+    );
+
+    if (resp.body.aggregations === undefined) {
+      throw new Error('fetchChangePoint failed, did not return aggregations.');
+    }
+
+    const overallResult = resp.body.aggregations
+      .change_point_p_value as estypes.AggregationsSignificantTermsAggregate<{
+      key: string | number;
+      doc_count: number;
+      bg_count: number;
+      score: number;
+    }>;
+
+    // Using for of to sequentially augment the results with histogram data.
+    for (const bucket of overallResult.buckets) {
+      // Scale the score into a value from 0 - 1
+      // using a concave piecewise linear function in -log(p-value)
+      const normalizedScore =
+        0.5 * Math.min(Math.max((bucket.score - 3.912) / 2.995, 0), 1) +
+        0.25 * Math.min(Math.max((bucket.score - 6.908) / 6.908, 0), 1) +
+        0.25 * Math.min(Math.max((bucket.score - 13.816) / 101.314, 0), 1);
+
+      const pValue = Math.exp(-bucket.score);
+
+      if (typeof pValue === 'number' && pValue < ERROR_CORRELATION_THRESHOLD) {
+        result.push({
+          fieldName,
+          fieldValue: bucket.key,
+          doc_count: bucket.doc_count,
+          bg_count: bucket.doc_count,
+          score: bucket.score,
+          pValue,
+          normalizedScore,
+        });
+      }
+    }
   }
 
-  return result;
+  return uniqBy(result, (d) => `${d.fieldName},${d.fieldValue}`);
 };
