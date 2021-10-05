@@ -125,6 +125,8 @@ System metrics are captured periodically (every 60 seconds by default).
 
 ![image](https://user-images.githubusercontent.com/209966/135990500-f85bd8d9-b5a5-4b7c-b9e1-0759eefb8a29.png)
 
+Used in: [Metrics section](https://github.com/elastic/kibana/blob/00bb59713ed115343eb70d4e39059476edafbade/x-pack/plugins/apm/server/lib/metrics/by_agent/shared/cpu/index.ts#L83)
+
 Noteworthy fields: `system.cpu.total.norm.pct`, `system.process.cpu.total.norm.pct`
 
 #### Sample document
@@ -241,6 +243,8 @@ Noteworthy fields: `transaction.name`, `transaction.type`
 ## Span breakdown metrics (`span_breakdown`)
 
 A pre-aggregations of span documents where `span.self_time.count` is the number of original spans. Measures the "self-time" for a span type, and optional subtype, within a transaction group. 
+
+Used in: ["Time spent by span type" chart](https://github.com/elastic/kibana/blob/723370ab23573e50b3524a62c6b9998f2042423d/x-pack/plugins/apm/server/lib/transactions/breakdown/index.ts#L48-L87)
 
 Noteworthy fields: `transaction.name`, `transaction.type`, `span.type`, `span.subtype`, `span.self_time.*`
 
