@@ -7,6 +7,7 @@
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
+import { fullContentSources } from '../../../../__mocks__/content_sources.mock';
 import { blockedWindow } from './__mocks__/syncronization.mock';
 
 import React from 'react';
@@ -25,6 +26,7 @@ describe('BlockedWindows', () => {
   };
   const mockValues = {
     blockedWindows: [blockedWindow],
+    contentSource: fullContentSources[0],
   };
 
   beforeEach(() => {
