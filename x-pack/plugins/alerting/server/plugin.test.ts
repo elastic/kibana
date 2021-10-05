@@ -149,7 +149,7 @@ describe('Alerting Plugin', () => {
         const ruleType = {
           ...sampleAlertType,
           minimumLicenseRequired: 'basic',
-        } as AlertType<never, never, never, never, never, "default", never>;
+        } as AlertType<never, never, never, never, never, 'default', never>;
         await setup.registerType(ruleType);
         expect(ruleType.ruleTaskTimeout).toBe('5m');
       });
