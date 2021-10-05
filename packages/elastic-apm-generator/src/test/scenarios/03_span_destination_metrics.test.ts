@@ -18,8 +18,8 @@ describe('span destination metrics', () => {
     const javaInstance = javaService.instance('instance-1');
 
     const range = timerange(
-      new Date(2021, 0, 1).getTime(),
-      new Date(2021, 0, 1, 0, 15).getTime() - 1
+      new Date('2021-01-01T00:00:00.000Z').getTime(),
+      new Date('2021-01-01T00:15:00.000Z').getTime() - 1
     );
 
     events = getSpanDestinationMetrics(

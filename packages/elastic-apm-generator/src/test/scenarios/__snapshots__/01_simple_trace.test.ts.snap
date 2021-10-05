@@ -3,7 +3,7 @@
 exports[`simple trace generates the same data every time 1`] = `
 Array [
   Object {
-    "@timestamp": 1609455600000,
+    "@timestamp": 1609459200000,
     "agent.name": "java",
     "event.outcome": "success",
     "processor.event": "transaction",
@@ -19,7 +19,7 @@ Array [
     "transaction.type": "request",
   },
   Object {
-    "@timestamp": 1609455600050,
+    "@timestamp": 1609459200050,
     "agent.name": "java",
     "event.outcome": "success",
     "parent.id": "36c16f18e75058f8",
@@ -37,7 +37,7 @@ Array [
     "transaction.id": "36c16f18e75058f8",
   },
   Object {
-    "@timestamp": 1609455660000,
+    "@timestamp": 1609459260000,
     "agent.name": "java",
     "event.outcome": "success",
     "processor.event": "transaction",
@@ -53,7 +53,7 @@ Array [
     "transaction.type": "request",
   },
   Object {
-    "@timestamp": 1609455660050,
+    "@timestamp": 1609459260050,
     "agent.name": "java",
     "event.outcome": "success",
     "parent.id": "65ce74106eb050be",
@@ -71,7 +71,7 @@ Array [
     "transaction.id": "65ce74106eb050be",
   },
   Object {
-    "@timestamp": 1609455720000,
+    "@timestamp": 1609459320000,
     "agent.name": "java",
     "event.outcome": "success",
     "processor.event": "transaction",
@@ -87,7 +87,7 @@ Array [
     "transaction.type": "request",
   },
   Object {
-    "@timestamp": 1609455720050,
+    "@timestamp": 1609459320050,
     "agent.name": "java",
     "event.outcome": "success",
     "parent.id": "91fa709d90625fff",
@@ -105,7 +105,7 @@ Array [
     "transaction.id": "91fa709d90625fff",
   },
   Object {
-    "@timestamp": 1609455780000,
+    "@timestamp": 1609459380000,
     "agent.name": "java",
     "event.outcome": "success",
     "processor.event": "transaction",
@@ -121,7 +121,7 @@ Array [
     "transaction.type": "request",
   },
   Object {
-    "@timestamp": 1609455780050,
+    "@timestamp": 1609459380050,
     "agent.name": "java",
     "event.outcome": "success",
     "parent.id": "6c500d1d19835e68",
@@ -139,7 +139,7 @@ Array [
     "transaction.id": "6c500d1d19835e68",
   },
   Object {
-    "@timestamp": 1609455840000,
+    "@timestamp": 1609459440000,
     "agent.name": "java",
     "event.outcome": "success",
     "processor.event": "transaction",
@@ -155,7 +155,7 @@ Array [
     "transaction.type": "request",
   },
   Object {
-    "@timestamp": 1609455840050,
+    "@timestamp": 1609459440050,
     "agent.name": "java",
     "event.outcome": "success",
     "parent.id": "1b3246cc83595869",
@@ -173,7 +173,7 @@ Array [
     "transaction.id": "1b3246cc83595869",
   },
   Object {
-    "@timestamp": 1609455900000,
+    "@timestamp": 1609459500000,
     "agent.name": "java",
     "event.outcome": "success",
     "processor.event": "transaction",
@@ -189,7 +189,7 @@ Array [
     "transaction.type": "request",
   },
   Object {
-    "@timestamp": 1609455900050,
+    "@timestamp": 1609459500050,
     "agent.name": "java",
     "event.outcome": "success",
     "parent.id": "12b49e3c83fe58d5",
@@ -207,7 +207,7 @@ Array [
     "transaction.id": "12b49e3c83fe58d5",
   },
   Object {
-    "@timestamp": 1609455960000,
+    "@timestamp": 1609459560000,
     "agent.name": "java",
     "event.outcome": "success",
     "processor.event": "transaction",
@@ -223,7 +223,7 @@ Array [
     "transaction.type": "request",
   },
   Object {
-    "@timestamp": 1609455960050,
+    "@timestamp": 1609459560050,
     "agent.name": "java",
     "event.outcome": "success",
     "parent.id": "d9272009dd4354a1",
@@ -241,7 +241,7 @@ Array [
     "transaction.id": "d9272009dd4354a1",
   },
   Object {
-    "@timestamp": 1609456020000,
+    "@timestamp": 1609459620000,
     "agent.name": "java",
     "event.outcome": "success",
     "processor.event": "transaction",
@@ -257,7 +257,7 @@ Array [
     "transaction.type": "request",
   },
   Object {
-    "@timestamp": 1609456020050,
+    "@timestamp": 1609459620050,
     "agent.name": "java",
     "event.outcome": "success",
     "parent.id": "bc52ca08063c505b",
@@ -275,7 +275,7 @@ Array [
     "transaction.id": "bc52ca08063c505b",
   },
   Object {
-    "@timestamp": 1609456080000,
+    "@timestamp": 1609459680000,
     "agent.name": "java",
     "event.outcome": "success",
     "processor.event": "transaction",
@@ -291,7 +291,7 @@ Array [
     "transaction.type": "request",
   },
   Object {
-    "@timestamp": 1609456080050,
+    "@timestamp": 1609459680050,
     "agent.name": "java",
     "event.outcome": "success",
     "parent.id": "186858dd88b75d59",
@@ -309,7 +309,7 @@ Array [
     "transaction.id": "186858dd88b75d59",
   },
   Object {
-    "@timestamp": 1609456140000,
+    "@timestamp": 1609459740000,
     "agent.name": "java",
     "event.outcome": "success",
     "processor.event": "transaction",
@@ -325,7 +325,7 @@ Array [
     "transaction.type": "request",
   },
   Object {
-    "@timestamp": 1609456140050,
+    "@timestamp": 1609459740050,
     "agent.name": "java",
     "event.outcome": "success",
     "parent.id": "0d5f44d48189546c",
@@ -343,7 +343,7 @@ Array [
     "transaction.id": "0d5f44d48189546c",
   },
   Object {
-    "@timestamp": 1609456200000,
+    "@timestamp": 1609459800000,
     "agent.name": "java",
     "event.outcome": "success",
     "processor.event": "transaction",
@@ -359,7 +359,7 @@ Array [
     "transaction.type": "request",
   },
   Object {
-    "@timestamp": 1609456200050,
+    "@timestamp": 1609459800050,
     "agent.name": "java",
     "event.outcome": "success",
     "parent.id": "7483e0606e435c83",
@@ -377,7 +377,7 @@ Array [
     "transaction.id": "7483e0606e435c83",
   },
   Object {
-    "@timestamp": 1609456260000,
+    "@timestamp": 1609459860000,
     "agent.name": "java",
     "event.outcome": "success",
     "processor.event": "transaction",
@@ -393,7 +393,7 @@ Array [
     "transaction.type": "request",
   },
   Object {
-    "@timestamp": 1609456260050,
+    "@timestamp": 1609459860050,
     "agent.name": "java",
     "event.outcome": "success",
     "parent.id": "f142c4cbc7f3568e",
@@ -411,7 +411,7 @@ Array [
     "transaction.id": "f142c4cbc7f3568e",
   },
   Object {
-    "@timestamp": 1609456320000,
+    "@timestamp": 1609459920000,
     "agent.name": "java",
     "event.outcome": "success",
     "processor.event": "transaction",
@@ -427,7 +427,7 @@ Array [
     "transaction.type": "request",
   },
   Object {
-    "@timestamp": 1609456320050,
+    "@timestamp": 1609459920050,
     "agent.name": "java",
     "event.outcome": "success",
     "parent.id": "2e3a47fa2d905519",
@@ -445,7 +445,7 @@ Array [
     "transaction.id": "2e3a47fa2d905519",
   },
   Object {
-    "@timestamp": 1609456380000,
+    "@timestamp": 1609459980000,
     "agent.name": "java",
     "event.outcome": "success",
     "processor.event": "transaction",
@@ -461,7 +461,7 @@ Array [
     "transaction.type": "request",
   },
   Object {
-    "@timestamp": 1609456380050,
+    "@timestamp": 1609459980050,
     "agent.name": "java",
     "event.outcome": "success",
     "parent.id": "de5eaa1e47dc56b1",
@@ -479,7 +479,7 @@ Array [
     "transaction.id": "de5eaa1e47dc56b1",
   },
   Object {
-    "@timestamp": 1609456440000,
+    "@timestamp": 1609460040000,
     "agent.name": "java",
     "event.outcome": "success",
     "processor.event": "transaction",
@@ -495,7 +495,7 @@ Array [
     "transaction.type": "request",
   },
   Object {
-    "@timestamp": 1609456440050,
+    "@timestamp": 1609460040050,
     "agent.name": "java",
     "event.outcome": "success",
     "parent.id": "af7eac7ae61e576a",

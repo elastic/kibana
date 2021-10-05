@@ -18,8 +18,8 @@ describe('transaction metrics', () => {
     const javaInstance = javaService.instance('instance-1');
 
     const range = timerange(
-      new Date(2021, 0, 1).getTime(),
-      new Date(2021, 0, 1, 0, 15).getTime() - 1
+      new Date('2021-01-01T00:00:00.000Z').getTime(),
+      new Date('2021-01-01T00:15:00.000Z').getTime() - 1
     );
 
     events = getTransactionMetrics(
@@ -61,7 +61,7 @@ describe('transaction metrics', () => {
       new Date(event['@timestamp']).toISOString()
     );
 
-    expect([first, second]).toEqual(['2020-12-31T23:00:00.000Z', '2020-12-31T23:01:00.000Z']);
+    expect([first, second]).toEqual(['2021-01-01T00:00:00.000Z', '2021-01-01T00:01:00.000Z']);
   });
 
   it('generates a metricset per value of event.outcome', () => {
