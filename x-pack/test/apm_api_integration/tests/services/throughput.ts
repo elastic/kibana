@@ -75,7 +75,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           query: {
             ...commonQuery,
             kuery: 'processor.event : "transaction"',
-            _inspect: true,
           },
         },
       }),
