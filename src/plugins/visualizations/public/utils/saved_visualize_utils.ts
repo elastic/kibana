@@ -88,6 +88,7 @@ export function mapHitSource(
     id,
     references,
     url: urlFor(id),
+    ...attributes,
   };
 
   let typeName = attributes.typeName;
