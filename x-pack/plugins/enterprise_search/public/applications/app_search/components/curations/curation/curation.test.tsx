@@ -12,31 +12,58 @@ import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
-import { rerender } from '../../../../test_helpers';
+import { rerender, getPageTitle, getPageHeaderActions } from '../../../../test_helpers';
 
 jest.mock('./curation_logic', () => ({ CurationLogic: jest.fn() }));
+import { CurationLogic } from './curation_logic';
 
-import { AutomatedCuration } from './automated_curation';
-
-import { ManualCuration } from './manual_curation';
+import { AddResultFlyout } from './results';
 
 import { Curation } from './';
 
 describe('Curation', () => {
   const values = {
-    isAutomated: true,
+    dataLoading: false,
+    queries: ['query A', 'query B'],
+    isFlyoutOpen: false,
   };
-
   const actions = {
     loadCuration: jest.fn(),
+    resetCuration: jest.fn(),
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues(values);
     setMockActions(actions);
+  });
+
+  it('renders', () => {
+    const wrapper = shallow(<Curation />);
+
+    expect(getPageTitle(wrapper)).toEqual('Manage curation');
+    expect(wrapper.prop('pageChrome')).toEqual([
+      'Engines',
+      'some-engine',
+      'Curations',
+      'query A, query B',
+    ]);
+  });
+
+  it('renders the add result flyout when open', () => {
+    setMockValues({ ...values, isFlyoutOpen: true });
+    const wrapper = shallow(<Curation />);
+
+    expect(wrapper.find(AddResultFlyout)).toHaveLength(1);
+  });
+
+  it('initializes CurationLogic with a curationId prop from URL param', () => {
+    mockUseParams.mockReturnValueOnce({ curationId: 'hello-world' });
+    shallow(<Curation />);
+
+    expect(CurationLogic).toHaveBeenCalledWith({ curationId: 'hello-world' });
   });
 
   it('calls loadCuration on page load & whenever the curationId URL param changes', () => {
@@ -49,17 +76,31 @@ describe('Curation', () => {
     expect(actions.loadCuration).toHaveBeenCalledTimes(2);
   });
 
-  it('renders a view for automated curations', () => {
-    setMockValues({ isAutomated: true });
-    const wrapper = shallow(<Curation />);
+  describe('restore defaults button', () => {
+    let restoreDefaultsButton: ShallowWrapper;
+    let confirmSpy: jest.SpyInstance;
 
-    expect(wrapper.is(AutomatedCuration)).toBe(true);
-  });
+    beforeAll(() => {
+      const wrapper = shallow(<Curation />);
+      restoreDefaultsButton = getPageHeaderActions(wrapper).childAt(0);
 
-  it('renders a view for manual curations', () => {
-    setMockValues({ isAutomated: false });
-    const wrapper = shallow(<Curation />);
+      confirmSpy = jest.spyOn(window, 'confirm');
+    });
 
-    expect(wrapper.is(ManualCuration)).toBe(true);
+    afterAll(() => {
+      confirmSpy.mockRestore();
+    });
+
+    it('resets the curation upon user confirmation', () => {
+      confirmSpy.mockReturnValueOnce(true);
+      restoreDefaultsButton.simulate('click');
+      expect(actions.resetCuration).toHaveBeenCalled();
+    });
+
+    it('does not reset the curation if the user cancels', () => {
+      confirmSpy.mockReturnValueOnce(false);
+      restoreDefaultsButton.simulate('click');
+      expect(actions.resetCuration).not.toHaveBeenCalled();
+    });
   });
 });
