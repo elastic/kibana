@@ -247,6 +247,7 @@ export const DETECTION_ENGINE_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status`;
 export const DETECTION_ENGINE_RULES_BULK_ACTION = `${DETECTION_ENGINE_RULES_URL}/_bulk_action`;
 
+export const TIMELINE_RESOLVE_URL = '/api/timeline/resolve';
 export const TIMELINE_URL = '/api/timeline';
 export const TIMELINES_URL = '/api/timelines';
 export const TIMELINE_FAVORITE_URL = '/api/timeline/_favorite';

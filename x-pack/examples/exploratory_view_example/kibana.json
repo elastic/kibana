@@ -1,0 +1,20 @@
+{
+  "id": "exploratoryViewExample",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["exploratory_view_example"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [
+    "observability",
+    "data",
+    "embeddable",
+    "developerExamples"
+  ],
+  "optionalPlugins": [],
+  "requiredBundles": [],
+  "owner": {
+    "name": "`Synthetics team`",
+    "githubTeam": "uptime"
+  }
+}
