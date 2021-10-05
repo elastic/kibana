@@ -73,7 +73,7 @@ const FormattedFieldValueComponent: React.FC<{
   isDraggable = true,
   onClick,
   title,
-  truncate,
+  truncate = true,
   value,
   linkValue,
 }) => {
