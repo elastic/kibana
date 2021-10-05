@@ -76,9 +76,5 @@ you can override the flags with:
 
 |--verbose| --logging.root.level=debug --logging.root.appenders[0]=default --logging.root.appenders[1]=custom | --verbose
 
-|--quiet| --logging.root.level=error --logging.root.appenders[0]=default --logging.root.appenders[1]=custom | not supported
-
 |--silent| --logging.root.level=off | --silent
 |===
-
-NOTE: To preserve backwards compatibility, you are required to pass the root `default` appender until the legacy logging system is removed in `v8.0`.

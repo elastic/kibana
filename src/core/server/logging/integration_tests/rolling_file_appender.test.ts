@@ -19,7 +19,6 @@ const flush = async () => delay(flushDelay);
 function createRoot(appenderConfig: any) {
   return kbnTestServer.createRoot({
     logging: {
-      silent: true, // set "true" in kbnTestServer
       appenders: {
         'rolling-file': appenderConfig,
       },

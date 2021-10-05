@@ -82,24 +82,13 @@ kibana_vars=(
     logging.appenders
     logging.appenders.console
     logging.appenders.file
-    logging.dest
-    logging.json
     logging.loggers
     logging.loggers.appenders
     logging.loggers.level
     logging.loggers.name
-    logging.quiet
     logging.root
     logging.root.appenders
     logging.root.level
-    logging.rotate.enabled
-    logging.rotate.everyBytes
-    logging.rotate.keepFiles
-    logging.rotate.pollingInterval
-    logging.rotate.usePolling
-    logging.silent
-    logging.useUTC
-    logging.verbose
     map.includeElasticMapsService
     map.proxyElasticMapsServiceInMaps
     map.regionmap

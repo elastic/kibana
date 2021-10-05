@@ -29,7 +29,6 @@ filegroup(
       "//packages/kbn-i18n:build",
       "//packages/kbn-interpreter:build",
       "//packages/kbn-io-ts-utils:build",
-      "//packages/kbn-legacy-logging:build",
       "//packages/kbn-logging:build",
       "//packages/kbn-mapbox-gl:build",
       "//packages/kbn-monaco:build",
