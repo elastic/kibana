@@ -38,7 +38,7 @@ describe('Alerting Plugin', () => {
           removalDelay: '1h',
         },
         maxEphemeralActionsPerAlert: 10,
-        defaultRuleTaskTimeout: '20m',
+        defaultRuleTaskTimeout: '5m',
       });
       plugin = new AlertingPlugin(context);
 
@@ -72,7 +72,7 @@ describe('Alerting Plugin', () => {
           removalDelay: '1h',
         },
         maxEphemeralActionsPerAlert: 10,
-        defaultRuleTaskTimeout: '20m',
+        defaultRuleTaskTimeout: '5m',
       });
       plugin = new AlertingPlugin(context);
 
@@ -146,11 +146,12 @@ describe('Alerting Plugin', () => {
       });
 
       it('should apply default config value for ruleTaskTimeout', async () => {
-        setup.registerType({
+        const ruleType = {
           ...sampleAlertType,
           minimumLicenseRequired: 'basic',
-        });
-        expect(sampleAlertType.ruleTaskTimeout).toBe('5m');
+        } as AlertType<never, never, never, never, never, "default", never>;
+        await setup.registerType(ruleType);
+        expect(ruleType.ruleTaskTimeout).toBe('5m');
       });
     });
   });
@@ -167,7 +168,7 @@ describe('Alerting Plugin', () => {
             removalDelay: '1h',
           },
           maxEphemeralActionsPerAlert: 10,
-          defaultRuleTaskTimeout: '20m',
+          defaultRuleTaskTimeout: '5m',
         });
         const plugin = new AlertingPlugin(context);
 
@@ -208,7 +209,7 @@ describe('Alerting Plugin', () => {
             removalDelay: '1h',
           },
           maxEphemeralActionsPerAlert: 10,
-          defaultRuleTaskTimeout: '20m',
+          defaultRuleTaskTimeout: '5m',
         });
         const plugin = new AlertingPlugin(context);
 
@@ -263,7 +264,7 @@ describe('Alerting Plugin', () => {
           removalDelay: '1h',
         },
         maxEphemeralActionsPerAlert: 100,
-        defaultRuleTaskTimeout: '20m',
+        defaultRuleTaskTimeout: '5m',
       });
       const plugin = new AlertingPlugin(context);
 
