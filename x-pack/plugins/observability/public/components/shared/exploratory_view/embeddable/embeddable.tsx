@@ -8,17 +8,16 @@
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
-import { isEmpty } from 'lodash';
-import { AllSeries } from '../../../..';
+import { AllSeries, useTheme } from '../../../..';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
-import { getDefaultConfigs } from '../configurations/default_configs';
-import { OperationTypeComponent } from '../series_builder/columns/operation_type_select';
-import { UrlFilter } from '../types';
-import { getFiltersFromDefs } from '../hooks/use_lens_attributes';
-import { DataView } from '../../../../../../../../src/plugins/data/common';
+import { ReportViewType } from '../types';
+import { getLayerConfigs } from '../hooks/use_lens_attributes';
 import { LensPublicStart } from '../../../../../../lens/public';
+import { OperationTypeComponent } from '../series_editor/columns/operation_type_select';
+import { IndexPatternState } from '../hooks/use_app_index_pattern';
 
 export interface ExploratoryEmbeddableProps {
+  reportType: ReportViewType;
   attributes: AllSeries;
   appendTitle?: JSX.Element;
   title: string | JSX.Element;
@@ -27,54 +26,31 @@ export interface ExploratoryEmbeddableProps {
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
   lens: LensPublicStart;
-  indexPattern: DataView;
+  indexPatterns: IndexPatternState;
 }
 
 // eslint-disable-next-line import/no-default-export
 export default function Embeddable({
+  reportType,
   attributes,
   title,
   appendTitle,
-  indexPattern,
+  indexPatterns,
   lens,
   showCalculationMethod = false,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
 
   const series = Object.entries(attributes)[0][1];
-  const allSeriesIds = Object.keys(attributes);
 
   const [operationType, setOperationType] = useState(series?.operationType);
+  const theme = useTheme();
 
-  const layerConfigs: LayerConfig[] = [];
+  const layerConfigs: LayerConfig[] = getLayerConfigs(attributes, reportType, theme, indexPatterns);
 
-  allSeriesIds.forEach((seriesIdT) => {
-    const seriesT = attributes[seriesIdT];
-    if (indexPattern && seriesT.reportType && !isEmpty(seriesT.reportDefinitions)) {
-      const seriesConfig = getDefaultConfigs({
-        reportType: seriesT.reportType,
-        dataType: seriesT.dataType,
-        indexPattern,
-      });
-
-      const filters: UrlFilter[] = (seriesT.filters ?? []).concat(
-        getFiltersFromDefs(seriesT.reportDefinitions)
-      );
-
-      layerConfigs.push({
-        filters,
-        indexPattern,
-        seriesConfig,
-        time: seriesT.time,
-        breakdown: seriesT.breakdown,
-        seriesType: seriesT.seriesType,
-        operationType: seriesT.operationType,
-        reportDefinitions: seriesT.reportDefinitions ?? {},
-        selectedMetricField: seriesT.selectedMetricField,
-      });
-    }
-  });
-
+  if (layerConfigs.length < 1) {
+    return null;
+  }
   const lensAttributes = new LensAttributes(layerConfigs);
 
   if (!LensComponent) {

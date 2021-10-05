@@ -30,24 +30,26 @@ export const App = (props: {
 }) => {
   const ExploratoryViewComponent = props.plugins.observability.ExploratoryViewEmbeddable;
 
-  const exploratoryViewAttributes: AllSeries = {
-    [`monitor-duration`]: {
-      reportType: 'kpi-over-time',
+  const seriesList: AllSeries = [
+    {
+      name: 'Monitors response duration',
       time: {
         from: 'now-5d',
         to: 'now',
       },
       reportDefinitions: {
-        'monitor.id': ['always-down'],
+        'monitor.id': ['ALL_VALUES'],
       },
       breakdown: 'observer.geo.name',
       operationType: 'average',
       dataType: 'synthetics',
+      seriesType: 'line',
+      selectedMetricField: 'monitor.duration.us',
     },
-  };
+  ];
 
   const hrefLink = props.plugins.observability.createExploratoryViewUrl(
-    exploratoryViewAttributes,
+    { reportType: 'kpi-over-time', allSeries: seriesList },
     props.core.http.basePath.get()
   );
 
@@ -75,7 +77,8 @@ export const App = (props: {
               </EuiFlexItem>
             </EuiFlexGroup>
             <ExploratoryViewComponent
-              attributes={exploratoryViewAttributes}
+              attributes={seriesList}
+              reportType="kpi-over-time"
               title={'Monitor response duration'}
             />
           </EuiPageContentBody>

@@ -9,9 +9,10 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
 import type { ExploratoryEmbeddableProps, ExploratoryEmbeddableComponentProps } from './embeddable';
-import { DataView } from '../../../../../../../../src/plugins/data/common';
 import { ObservabilityIndexPatterns } from '../utils/observability_index_patterns';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
+import type { IndexPatternState } from '../hooks/use_app_index_pattern';
+import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 
 const Embeddable = React.lazy(() => import('./embeddable'));
 
@@ -28,17 +29,19 @@ export function getExploratoryViewEmbeddable(
   plugins: ObservabilityPublicPluginsStart
 ) {
   return (props: ExploratoryEmbeddableProps) => {
-    const [indexPattern, setIndexPattern] = useState<DataView>();
+    const [indexPatterns, setIndexPatterns] = useState<IndexPatternState>({} as IndexPatternState);
     const [loading, setLoading] = useState(false);
 
-    const series = Object.entries(props.attributes)[0][1];
+    const series = props.attributes[0];
 
-    const loadIndexPattern = useCallback(async ({ dataType: dt }) => {
+    const isDarkMode = core.uiSettings.get('theme:darkMode');
+
+    const loadIndexPattern = useCallback(async ({ dataType }) => {
       setLoading(true);
       try {
         const obsvIndexP = new ObservabilityIndexPatterns(plugins.data);
-        const indPattern = await obsvIndexP.getIndexPattern(dt, 'heartbeat-*');
-        setIndexPattern(indPattern!);
+        const indPattern = await obsvIndexP.getIndexPattern(dataType, 'heartbeat-*');
+        setIndexPatterns((prevState) => ({ ...(prevState ?? {}), [dataType]: indPattern }));
 
         setLoading(false);
       } catch (e) {
@@ -50,10 +53,14 @@ export function getExploratoryViewEmbeddable(
       loadIndexPattern({ dataType: series.dataType });
     }, [series.dataType, loadIndexPattern]);
 
-    if (!indexPattern || loading) {
+    if (Object.keys(indexPatterns).length === 0 || loading) {
       return <EuiLoadingSpinner />;
     }
 
-    return <ExploratoryViewEmbeddable {...props} indexPattern={indexPattern} lens={plugins.lens} />;
+    return (
+      <EuiThemeProvider darkMode={isDarkMode}>
+        <ExploratoryViewEmbeddable {...props} indexPatterns={indexPatterns} lens={plugins.lens} />
+      </EuiThemeProvider>
+    );
   };
 }
