@@ -216,10 +216,6 @@ Above example is overly simplified. In reality [we do a bit more](https://github
 
 # Breakdown metrics 
 
-Breakdown metrics are used to power the "Time spent by span type" graph. Agents collect summarized metrics about the timings of spans and transactions, broken down by transaction or span type.
-
-![image](https://user-images.githubusercontent.com/209966/135990865-9077ae3e-a7a4-4b5d-bdce-41dc832689ea.png)
-
 ## Transaction breakdown metrics (`transaction_breakdown`)
 
 A pre-aggregations of transaction documents where `transaction.breakdown.count` is the number of original transactions.
@@ -243,6 +239,10 @@ Noteworthy fields: `transaction.name`, `transaction.type`
 ## Span breakdown metrics (`span_breakdown`)
 
 A pre-aggregations of span documents where `span.self_time.count` is the number of original spans. Measures the "self-time" for a span type, and optional subtype, within a transaction group. 
+
+Span breakdown metrics are used to power the "Time spent by span type" graph. Agents collect summarized metrics about the timings of spans, broken down by `span.type`.
+
+![image](https://user-images.githubusercontent.com/209966/135990865-9077ae3e-a7a4-4b5d-bdce-41dc832689ea.png)
 
 Used in: ["Time spent by span type" chart](https://github.com/elastic/kibana/blob/723370ab23573e50b3524a62c6b9998f2042423d/x-pack/plugins/apm/server/lib/transactions/breakdown/index.ts#L48-L87)
 
