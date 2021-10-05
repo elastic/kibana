@@ -8,7 +8,7 @@
 import { URL } from 'url';
 import { schema } from '@kbn/config-schema';
 import rison from 'rison-node';
-import { API_BASE_URL } from '../../../common/constants';
+import { BASE_SCHEDULE } from '../../../common/constants';
 import { ReportingCore } from '../../core';
 import { LevelLogger } from '../../lib';
 import { ScheduleReportFromJobParams } from '../../lib/tasks';
@@ -16,9 +16,6 @@ import { BaseParams } from '../../types';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { BadRequestError } from '../lib/errors';
 import { handleUnavailable, RequestHandler } from '../lib/request_handler';
-
-// TODO: move this to constants file - will eventually be needed in the UI
-const BASE_SCHEDULE = `${API_BASE_URL}/schedule`;
 
 export function registerSchedulingRoutes(reporting: ReportingCore, logger: LevelLogger) {
   const setupDeps = reporting.getPluginSetupDeps();
@@ -65,7 +62,7 @@ export function registerSchedulingRoutes(reporting: ReportingCore, logger: Level
       const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
       try {
         // TODO: generate an API Key on behalf of the calling user
-        const apiKey = 'okApi123';
+        const apiKey = { base64: 'okApi123' };
 
         return requestHandler.handleScheduleRequest(
           req.params.exportType,
