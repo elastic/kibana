@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ReportingPanelContent, ReportingPanelProps } from './reporting_panel_content';
+export { ReportingPanelContent, Props, ReportingPanelProps } from './reporting_panel_content';

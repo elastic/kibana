@@ -27,13 +27,13 @@ export const ErrorUrlTooLongPanel: FunctionComponent<Props> = ({ isUnsaved }) =>
       <p>
         {isUnsaved ? (
           <FormattedMessage
-            id="xpack.reporting.panelContent.unsavedStateAndExceedsMaxLength"
+            id="xpack.reporting.panelContent.unsavedStateAndExceedsMaxLengthTrySaveDescription"
             defaultMessage="This URL cannot be copied. Try saving your work."
           />
         ) : (
           // Reaching this state is essentially just an error and should result in a user contacting us.
           <FormattedMessage
-            id="xpack.reporting.panelContent.unsavedStateAndExceedsMaxLength"
+            id="xpack.reporting.panelContent.unsavedStateAndExceedsMaxLengthDescription"
             defaultMessage="This URL cannot be copied."
           />
         )}
