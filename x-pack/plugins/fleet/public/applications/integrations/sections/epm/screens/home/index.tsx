@@ -11,7 +11,7 @@ import semverLt from 'semver/functions/lt';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 
-import { installationStatuses, learnMoreBlogPost } from '../../../../../../../common/constants';
+import { installationStatuses } from '../../../../../../../common/constants';
 import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../../../../constants';
 import {
   INTEGRATIONS_ROUTING_PATHS,
