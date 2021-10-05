@@ -131,7 +131,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
           if (isPercentageMode && colorsRange?.length && max !== undefined && min !== undefined) {
             value = (value - min) / (max - min);
           }
-          value = this.getFormattedValue(formatter, value, 'html');
+          const formattedValue = this.getFormattedValue(formatter, value, 'html');
           if (bucketColumnId) {
             const bucketValue = this.getFormattedValue(bucketFormatter, row[bucketColumnId]);
             title = `${bucketValue} - ${title}`;
@@ -141,7 +141,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
 
           return {
             label: title,
-            value,
+            value: formattedValue,
             color: shouldColor && style.labelColor ? color : undefined,
             bgColor: shouldColor && style.bgColor ? color : undefined,
             lightText: shouldColor && style.bgColor && this.needsLightText(color),
