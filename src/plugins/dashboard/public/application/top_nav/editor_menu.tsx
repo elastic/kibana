@@ -27,7 +27,7 @@ interface Props {
   /** Dashboard container */
   dashboardContainer: DashboardContainer;
   /** Handler for creating new visualization of a specified type */
-  createNewVisType: (visType: BaseVisType | VisTypeAlias | undefined) => () => void;
+  createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;
 }
 
 interface FactoryGroup {
@@ -128,6 +128,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
       name: titleInWizard || title,
       icon: icon as string,
       onClick:
+        // not all the agg-based visualizations need to be created via the wizard
         group === VisGroups.AGGBASED && visType.options.showIndexSelection
           ? createNewAggsBasedVis(visType)
           : createNewVisType(visType),
