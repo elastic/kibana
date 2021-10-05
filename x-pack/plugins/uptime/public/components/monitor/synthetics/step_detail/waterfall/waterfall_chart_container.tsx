@@ -14,6 +14,7 @@ import { getNetworkEvents } from '../../../../../state/actions/network_events';
 import { networkEventsSelector } from '../../../../../state/selectors';
 import { WaterfallChartWrapper } from './waterfall_chart_wrapper';
 import { extractItems } from './data_formatting';
+import { useStepWaterfallMetrics } from '../use_step_waterfall_metrics';
 
 export const NO_DATA_TEXT = i18n.translate('xpack.uptime.synthetics.stepDetail.waterfallNoData', {
   defaultMessage: 'No waterfall data could be found for this step',
@@ -44,6 +45,12 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
   const isWaterfallSupported = networkEvents?.isWaterfallSupported;
   const hasEvents = networkEvents?.events?.length > 0;
 
+  const { metrics } = useStepWaterfallMetrics({
+    checkGroup,
+    stepIndex,
+    hasNavigationRequest: networkEvents?.hasNavigationRequest,
+  });
+
   return (
     <>
       {!waterfallLoaded && (
@@ -70,6 +77,7 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
       {waterfallLoaded && hasEvents && isWaterfallSupported && (
         <WaterfallChartWrapper
           data={extractItems(networkEvents.events)}
+          markerItems={metrics}
           total={networkEvents.total}
         />
       )}
