@@ -18,6 +18,7 @@ import { getContextUrl } from '../../../../../helpers/get_context_url';
 import { getSingleDocUrl } from '../../../../../helpers/get_single_doc_url';
 import { TableRowDetails } from './table_row_details';
 import { formatRow, formatTopLevelObject } from '../lib/row_formatter';
+import { trimSpan } from '../../../../../components/table/table_helper';
 
 export type DocTableRow = ElasticSearchHit & {
   isAnchor?: boolean;
@@ -67,7 +68,8 @@ export const TableRow = ({
    * Fill an element with the value of a field
    */
   const displayField = (fieldName: string) => {
-    const formattedField = indexPattern.formatField(row, fieldName);
+    const text = indexPattern.formatField(row, fieldName);
+    const formattedField = trimSpan(String(text));
 
     // field formatters take care of escaping
     // eslint-disable-next-line react/no-danger

@@ -10,6 +10,7 @@ import classNames from 'classnames';
 import React, { Fragment, useState } from 'react';
 import { FieldRecord } from './table';
 import { DocViewTableRowBtnCollapse } from './table_row_btn_collapse';
+import { trimSpan } from './table_helper';
 
 const COLLAPSE_LINE_LENGTH = 350;
 
@@ -18,7 +19,7 @@ type TableFieldValueProps = FieldRecord['value'] & Pick<FieldRecord['field'], 'f
 export const TableFieldValue = ({ formattedValue, field }: TableFieldValueProps) => {
   const [fieldOpen, setFieldOpen] = useState(false);
 
-  const value = String(formattedValue);
+  const value = trimSpan(String(formattedValue));
   const isCollapsible = value.length > COLLAPSE_LINE_LENGTH;
   const isCollapsed = isCollapsible && !fieldOpen;
 
