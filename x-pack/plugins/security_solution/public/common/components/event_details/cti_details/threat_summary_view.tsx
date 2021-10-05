@@ -190,7 +190,7 @@ const ThreatSummaryEnrichmentData: React.FC<{
   return (
     <>
       {indicator.length > 0 && (
-        <>
+        <EuiFlexItem grow={false}>
           <EuiPanel hasBorder paddingSize="s" grow={false}>
             <ThreatSummaryPanelHeader
               title={i18n.INDICATOR_ENRICHMENT_TITLE}
@@ -216,13 +216,11 @@ const ThreatSummaryEnrichmentData: React.FC<{
               />
             ))}
           </EuiPanel>
-        </>
+        </EuiFlexItem>
       )}
 
-      {indicator.length > 0 && investigation.length > 0 && <EuiSpacer size="m" />}
-
       {investigation.length > 0 && (
-        <>
+        <EuiFlexItem grow={false}>
           <EuiPanel hasBorder paddingSize="s" grow={false}>
             <ThreatSummaryPanelHeader
               title={i18n.INVESTIGATION_ENRICHMENT_TITLE}
@@ -248,7 +246,7 @@ const ThreatSummaryEnrichmentData: React.FC<{
               />
             ))}
           </EuiPanel>
-        </>
+        </EuiFlexItem>
       )}
     </>
   );
@@ -276,18 +274,22 @@ const ThreatSummaryViewComponent: React.FC<{
       </EuiTitle>
       <EuiSpacer size="m" />
 
-      {hostRisk && <HostRiskData hostRisk={hostRisk} />}
+      <EuiFlexGroup direction="column" gutterSize="m">
+        {hostRisk && (
+          <EuiFlexItem grow={false}>
+            <HostRiskData hostRisk={hostRisk} />
+          </EuiFlexItem>
+        )}
 
-      {hostRisk && enrichments.length > 0 && <EuiSpacer size="m" />}
-
-      <ThreatSummaryEnrichmentData
-        browserFields={browserFields}
-        data={data}
-        enrichments={enrichments}
-        timelineId={timelineId}
-        eventId={eventId}
-        isDraggable={isDraggable}
-      />
+        <ThreatSummaryEnrichmentData
+          browserFields={browserFields}
+          data={data}
+          enrichments={enrichments}
+          timelineId={timelineId}
+          eventId={eventId}
+          isDraggable={isDraggable}
+        />
+      </EuiFlexGroup>
     </>
   );
 };
