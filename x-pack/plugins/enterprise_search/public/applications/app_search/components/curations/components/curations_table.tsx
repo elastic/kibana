@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EDIT_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
@@ -25,6 +25,8 @@ import { generateEnginePath } from '../../engine';
 import { CurationsLogic } from '../curations_logic';
 import { Curation } from '../types';
 import { convertToDate } from '../utils';
+
+import { AutomatedIcon } from './automated_icon';
 
 export const CurationsTable: React.FC = () => {
   const { dataLoading, curations, meta } = useValues(CurationsLogic);
@@ -43,6 +45,28 @@ export const CurationsTable: React.FC = () => {
           to={generateEnginePath(ENGINE_CURATION_PATH, { curationId: curation.id })}
         >
           {queries.join(', ')}
+          {curation.suggestion?.status === 'automated' && (
+            <>
+              {' '}
+              <EuiBadge color="accent" iconType={AutomatedIcon}>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.engine.curations.table.automatedLabel',
+                  { defaultMessage: 'Automated' }
+                )}
+              </EuiBadge>
+            </>
+          )}
+          {curation.suggestion?.status === 'pending' && (
+            <>
+              {' '}
+              <EuiBadge color="default">
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.engine.curations.table.newSuggestionLabel',
+                  { defaultMessage: 'New suggestion' }
+                )}
+              </EuiBadge>
+            </>
+          )}
         </EuiLinkTo>
       ),
       width: '40%',
