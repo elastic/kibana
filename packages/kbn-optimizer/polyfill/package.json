@@ -1,0 +1,4 @@
+{
+  "main": "../target_node/node/polyfill",
+  "types": "../target_types/node/polyfill"
+}

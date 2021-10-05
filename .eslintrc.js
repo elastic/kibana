@@ -480,6 +480,11 @@ module.exports = {
                 from: ['ui/**/*'],
                 errorMessage: 'Plugins cannot import legacy UI code.',
               },
+              {
+                target: ['**/*'],
+                from: ['@kbn/*/(target_node|npm_modules|target_types|target_web)/**/*'],
+                errorMessage: 'Deep imports are not supported in packages',
+              },
             ],
           },
         ],
