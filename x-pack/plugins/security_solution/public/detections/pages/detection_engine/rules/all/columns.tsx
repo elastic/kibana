@@ -315,7 +315,6 @@ export const getMonitoringColumns = (
   navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>,
   formatUrl: FormatUrl
 ): RulesStatusesColumns[] => {
-  // @ts-ignore
   const cols: RulesStatusesColumns[] = [
     {
       field: 'name',
