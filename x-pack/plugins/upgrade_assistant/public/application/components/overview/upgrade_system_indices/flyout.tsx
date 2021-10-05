@@ -48,7 +48,7 @@ const i18nTexts = {
     'xpack.upgradeAssistant.overview.system_indices.flyoutDescription',
     {
       defaultMessage:
-        'Migrate your system indices to keep them happy. In addition to regular checkups, it is recommended that you brush and floss your indices twice per day.',
+        'The following features contain system indices that need to be migrated before upgrading:',
     }
   ),
   upgradeCompleteLabel: i18n.translate(

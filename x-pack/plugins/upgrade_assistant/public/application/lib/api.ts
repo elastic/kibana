@@ -16,7 +16,6 @@ import {
   API_BASE_PATH,
   DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,
   CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS,
-  SYSTEM_INDICES_UPGRADE_POLL_INTERVAL_MS,
 } from '../../../common/constants';
 import {
   UseRequestConfig,
@@ -67,7 +66,6 @@ export class ApiService {
     return this.useRequest<SystemIndicesUpgradeStatus>({
       path: `${API_BASE_PATH}/system_indices_upgrade`,
       method: 'get',
-      pollIntervalMs: SYSTEM_INDICES_UPGRADE_POLL_INTERVAL_MS,
     });
   }
 

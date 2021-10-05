@@ -57,7 +57,7 @@ describe('Overview - Upgrade system indices - Step status', () => {
 
       // First request should make the step be incomplete
       httpRequestsMockHelpers.setLoadSystemIndicesUpgradeStatus({
-        upgrade_status: 'UPGRADE_NEEDED',
+        upgrade_status: 'IN_PROGRESS',
       });
 
       testBed = await setupOverviewPage();

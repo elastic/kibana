@@ -66,14 +66,13 @@ const i18nTexts = {
   noUpgradeNeeded: i18n.translate(
     'xpack.upgradeAssistant.overview.system_indices.noUpgradeNeeded',
     {
-      // NOTE: This could be that all indices have either been upgraded or dont need to be upgraded
       defaultMessage: 'All system indices have been upgraded',
     }
   ),
-  viewSystemIndices: i18n.translate(
-    'xpack.upgradeAssistant.system_indices.overview.system_indices.viewSystemIndices',
+  viewSystemIndicesStatus: i18n.translate(
+    'xpack.upgradeAssistant.system_indices.overview.system_indices.viewSystemIndicesStatus',
     {
-      defaultMessage: 'View system indices and status',
+      defaultMessage: 'View status',
     }
   ),
   retryButtonLabel: i18n.translate(
@@ -148,9 +147,7 @@ const UpgradeSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
             size="s"
             color="danger"
             iconType="alert"
-            title={`${startUpgradeStatus.details!.statusCode} - ${
-              startUpgradeStatus.details!.message
-            }`}
+            title={`${startUpgradeStatus.error!.statusCode} - ${startUpgradeStatus.error!.message}`}
             data-test-subj="startSystemIndicesUpgradeCalloutError"
           />
           <EuiSpacer size="m" />
@@ -174,7 +171,7 @@ const UpgradeSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
             isDisabled={isButtonDisabled}
             data-test-subj="viewSystemIndicesStateButton"
           >
-            {i18nTexts.viewSystemIndices}
+            {i18nTexts.viewSystemIndicesStatus}
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>

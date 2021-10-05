@@ -6,11 +6,13 @@
  */
 
 import { useCallback, useState, useEffect } from 'react';
+import useInterval from 'react-use/lib/useInterval';
 
 import { SystemIndicesFlyout, SystemIndicesFlyoutProps } from './flyout';
 import { useAppContext } from '../../../app_context';
 import type { ResponseError } from '../../../lib/api';
 import { GlobalFlyout } from '../../../../shared_imports';
+import { SYSTEM_INDICES_UPGRADE_POLL_INTERVAL_MS } from '../../../../../common/constants';
 
 const FLYOUT_ID = 'upgradeSystemIndicesFlyout';
 const { useGlobalFlyout } = GlobalFlyout;
@@ -24,11 +26,16 @@ export const useSystemIndicesUpgrade = () => {
 
   const [startUpgradeStatus, setStartUpgradeStatus] = useState<{
     statusType: string;
-    details?: ResponseError;
+    error?: ResponseError;
   }>({ statusType: 'idle' });
 
   const { data, error, isLoading, resendRequest, isInitialRequest } =
     api.useLoadSystemIndicesUpgradeStatus();
+  const isInProgress = data?.upgrade_status === 'IN_PROGRESS';
+
+  // We only want to poll for the status while the upgrading process
+  // is in progress.
+  useInterval(resendRequest, isInProgress ? SYSTEM_INDICES_UPGRADE_POLL_INTERVAL_MS : null);
 
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
     useGlobalFlyout();
@@ -59,7 +66,7 @@ export const useSystemIndicesUpgrade = () => {
 
     setStartUpgradeStatus({
       statusType: startUpgradeError ? 'error' : 'started',
-      details: startUpgradeError ?? undefined,
+      error: startUpgradeError ?? undefined,
     });
 
     if (!startUpgradeError) {

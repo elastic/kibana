@@ -13,58 +13,6 @@ import {
   startESSystemIndicesUpgrade,
 } from '../lib/es_system_indices_upgrade';
 
-const mockedResponse = {
-  features: [
-    {
-      feature_name: 'log_stash',
-      minimum_index_version: '7.1.1',
-      upgrade_status: 'NO_UPGRADE_NEEDED',
-      indices: [
-        {
-          index: '.security-7',
-          index_version: '7.1.1',
-        },
-      ],
-    },
-    {
-      feature_name: 'security',
-      minimum_index_version: '7.1.1',
-      upgrade_status: 'ERROR',
-      indices: [
-        {
-          index: '.security-7',
-          index_version: '7.1.1',
-        },
-      ],
-    },
-    {
-      feature_name: 'kibana',
-      minimum_index_version: '7.1.1',
-      upgrade_status: 'IN_PROGRESS',
-      indices: [
-        {
-          index: '.security-7',
-          index_version: '7.1.1',
-        },
-      ],
-    },
-    {
-      feature_name: 'machine_learning',
-      minimum_index_version: '7.1.1',
-      upgrade_status: 'UPGRADE_NEEDED',
-      indices: [
-        {
-          index: '.security-7',
-          index_version: '7.1.1',
-        },
-      ],
-    },
-  ],
-  // upgrade_status: 'NO_UPGRADE_NEEDED',
-  upgrade_status: 'UPGRADE_NEEDED',
-  // upgrade_status: 'IN_PROGRESS',
-};
-
 export function registerSystemIndicesUpgradeRoutes({
   router,
   lib: { handleEsError },
@@ -85,7 +33,7 @@ export function registerSystemIndicesUpgradeRoutes({
           const status = await getESSystemIndicesUpgradeStatus(client.asCurrentUser);
 
           return response.ok({
-            body: mockedResponse,
+            body: status,
           });
         } catch (error) {
           return handleEsError({ error, response });
