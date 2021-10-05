@@ -14,7 +14,7 @@ import { GlobalStateContext } from '../../global_state_context';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useCharts } from '../../hooks/use_charts';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
-import { ApmTemplate } from './apm_template';
+import { PageTemplate } from '../page_template';
 // @ts-ignore
 import { ApmServerInstance } from '../../../components/apm/instance';
 
@@ -75,7 +75,7 @@ export const ApmInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
   }, [ccs, clusterUuid, instance, services.data?.query.timefilter.timefilter, services.http]);
 
   return (
-    <ApmTemplate
+    <PageTemplate
       title={title}
       pageTitle={pageTitle}
       getPageData={getPageData}
@@ -88,6 +88,6 @@ export const ApmInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
         onBrush={onBrush}
         zoomInfo={zoomInfo}
       />
-    </ApmTemplate>
+    </PageTemplate>
   );
 };

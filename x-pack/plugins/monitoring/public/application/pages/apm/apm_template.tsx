@@ -14,24 +14,22 @@ interface ApmTemplateProps extends PageTemplateProps {
 }
 
 export const ApmTemplate: React.FC<ApmTemplateProps> = ({ instance, ...props }) => {
-  const tabs: TabMenuItem[] = [];
-
-  if (!instance) {
-    tabs.push({
+  const tabs: TabMenuItem[] = [
+    {
       id: 'overview',
       label: i18n.translate('xpack.monitoring.apmNavigation.overviewLinkText', {
         defaultMessage: 'Overview',
       }),
       route: '/apm',
-    });
-    tabs.push({
+    },
+    {
       id: 'instances',
       label: i18n.translate('xpack.monitoring.apmNavigation.instancesLinkText', {
         defaultMessage: 'Instances',
       }),
       route: '/apm/instances',
-    });
-  }
+    },
+  ];
 
   return <PageTemplate {...props} tabs={tabs} product="apm" />;
 };
