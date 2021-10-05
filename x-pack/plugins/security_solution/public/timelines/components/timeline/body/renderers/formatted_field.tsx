@@ -78,7 +78,7 @@ const FormattedFieldValueComponent: React.FC<{
   linkValue,
 }) => {
   if (isObjectArray || asPlainText) {
-    return <span>{value}</span>;
+    return <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>;
   } else if (fieldType === IP_FIELD_TYPE) {
     return (
       <FormattedIp
