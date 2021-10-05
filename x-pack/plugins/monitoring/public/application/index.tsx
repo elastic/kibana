@@ -22,10 +22,15 @@ import { NoDataPage } from './pages/no_data';
 import { ElasticsearchOverviewPage } from './pages/elasticsearch/overview';
 import { BeatsOverviewPage } from './pages/beats/overview';
 import { BeatsInstancesPage } from './pages/beats/instances';
-import { CODE_PATH_ELASTICSEARCH, CODE_PATH_BEATS } from '../../common/constants';
+import { BeatsInstancePage } from './pages/beats/instance';
+import { KibanaOverviewPage } from './pages/kibana/overview';
+import { CODE_PATH_ELASTICSEARCH, CODE_PATH_BEATS, CODE_PATH_KIBANA } from '../../common/constants';
 import { ElasticsearchNodesPage } from './pages/elasticsearch/nodes_page';
 import { ElasticsearchIndicesPage } from './pages/elasticsearch/indices_page';
+import { ElasticsearchIndexPage } from './pages/elasticsearch/index_page';
+import { ElasticsearchIndexAdvancedPage } from './pages/elasticsearch/index_advanced_page';
 import { ElasticsearchNodePage } from './pages/elasticsearch/node_page';
+import { ElasticsearchNodeAdvancedPage } from './pages/elasticsearch/node_advanced_page';
 import { MonitoringTimeContainer } from './hooks/use_monitoring_time';
 import { BreadcrumbContainer } from './hooks/use_breadcrumbs';
 
@@ -82,9 +87,31 @@ const MonitoringApp: React.FC<{
                   />
 
                   {/* ElasticSearch Views */}
+
+                  <RouteInit
+                    path="/elasticsearch/indices/:index/advanced"
+                    component={ElasticsearchIndexAdvancedPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/elasticsearch/indices/:index"
+                    component={ElasticsearchIndexPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
                   <RouteInit
                     path="/elasticsearch/indices"
                     component={ElasticsearchIndicesPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/elasticsearch/nodes/:node/advanced"
+                    component={ElasticsearchNodeAdvancedPage}
                     codePaths={[CODE_PATH_ELASTICSEARCH]}
                     fetchAllClusters={false}
                   />
@@ -112,6 +139,13 @@ const MonitoringApp: React.FC<{
 
                   {/* Beats Views */}
                   <RouteInit
+                    path="/beats/beat/:instance"
+                    component={BeatsInstancePage}
+                    codePaths={[CODE_PATH_BEATS]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
                     path="/beats/beats"
                     component={BeatsInstancesPage}
                     codePaths={[CODE_PATH_BEATS]}
@@ -122,6 +156,14 @@ const MonitoringApp: React.FC<{
                     path="/beats"
                     component={BeatsOverviewPage}
                     codePaths={[CODE_PATH_BEATS]}
+                    fetchAllClusters={false}
+                  />
+
+                  {/* Kibana Views */}
+                  <RouteInit
+                    path="/kibana"
+                    component={KibanaOverviewPage}
+                    codePaths={[CODE_PATH_KIBANA]}
                     fetchAllClusters={false}
                   />
 

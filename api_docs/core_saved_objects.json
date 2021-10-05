@@ -14904,6 +14904,21 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-server.SavedObjectsTypeManagementDefinition.displayName",
+            "type": "string",
+            "tags": [],
+            "label": "displayName",
+            "description": [
+              "\nWhen specified, will be used instead of the type's name in SO management section's labels."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/server/saved_objects/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.SavedObjectsTypeManagementDefinition.visibleInManagement",
             "type": "CompoundType",
             "tags": [],
