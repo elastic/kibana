@@ -9,7 +9,7 @@ import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { ItemTemplate } from './item_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 // @ts-ignore
 import { AdvancedNode } from '../../../components/elasticsearch/node/advanced';
 import { ComponentProps } from '../../route_init';

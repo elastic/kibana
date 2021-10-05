@@ -8,7 +8,7 @@ import React, { useContext, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 // @ts-ignore
 import { IndexReact } from '../../../components/elasticsearch/index/index_react';
 import { ComponentProps } from '../../route_init';

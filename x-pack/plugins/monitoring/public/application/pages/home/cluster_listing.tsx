@@ -12,8 +12,8 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 // @ts-ignore
 import { Listing } from '../../../components/cluster/listing';
 import { EnableAlertsModal } from '../../../alerts/enable_alerts_modal';
-import { GlobalStateContext } from '../../global_state_context';
-import { ExternalConfigContext } from '../../external_config_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
+import { ExternalConfigContext } from '../../contexts/external_config_context';
 import { ComponentProps } from '../../route_init';
 import { useTable } from '../../hooks/use_table';
 import { PageTemplate, TabMenuItem } from '../page_template';

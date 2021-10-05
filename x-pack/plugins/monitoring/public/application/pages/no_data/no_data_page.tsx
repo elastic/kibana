@@ -18,7 +18,7 @@ import { Legacy } from '../../../legacy_shims';
 import { Enabler } from './enabler';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 import { initSetupModeState } from '../../setup_mode/setup_mode';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 
 const CODE_PATHS = [CODE_PATH_LICENSE];
 

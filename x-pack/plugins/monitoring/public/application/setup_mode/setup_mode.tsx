@@ -15,7 +15,7 @@ import { Legacy } from '../../legacy_shims';
 import { SetupModeEnterButton } from '../../components/setup_mode/enter_button';
 import { SetupModeFeature } from '../../../common/enums';
 import { ISetupModeContext } from '../../components/setup_mode/setup_mode_context';
-import { State as GlobalState } from '../../application/global_state_context';
+import { State as GlobalState } from '../contexts/global_state_context';
 
 function isOnPage(hash: string) {
   return includes(window.location.hash, hash);

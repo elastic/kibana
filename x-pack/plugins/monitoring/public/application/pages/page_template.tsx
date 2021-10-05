@@ -14,6 +14,8 @@ import { MonitoringTimeContainer } from '../hooks/use_monitoring_time';
 import { PageLoading } from '../../components';
 import { getSetupModeState, isSetupModeFeatureEnabled } from '../setup_mode/setup_mode';
 import { SetupModeFeature } from '../../../common/enums';
+import { AlertsDropdown } from '../../alerts/alerts_dropdown';
+import { ActionMenu } from '../../components/action_menu';
 
 export interface TabMenuItem {
   id: string;
@@ -27,6 +29,7 @@ export interface PageTemplateProps {
   tabs?: TabMenuItem[];
   getPageData?: () => Promise<void>;
   product?: string;
+  loadAlerts?: boolean;
 }
 
 export const PageTemplate: React.FC<PageTemplateProps> = ({
@@ -65,6 +68,9 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
 
   return (
     <div className="app-container">
+      <ActionMenu>
+        <AlertsDropdown />
+      </ActionMenu>
       <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
       {tabs && (
         <EuiTabs>
