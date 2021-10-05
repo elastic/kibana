@@ -21,20 +21,22 @@ import { AbstractLayer } from '../layer';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
   AGG_TYPE,
-  FEATURE_ID_PROPERTY_NAME,
+  GEOJSON_FEATURE_ID_PROPERTY_NAME,
   SOURCE_META_DATA_REQUEST_ID,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
   FEATURE_VISIBLE_PROPERTY_NAME,
   EMPTY_FEATURE_COLLECTION,
-  KBN_METADATA_FEATURE,
   LAYER_TYPE,
   FIELD_ORIGIN,
-  KBN_TOO_MANY_FEATURES_IMAGE_ID,
   FieldFormatter,
   SOURCE_TYPES,
   STYLE_TYPE,
   SUPPORTS_FEATURE_EDITING_REQUEST_ID,
-  KBN_IS_TILE_COMPLETE,
+  MVT_META_SOURCE_LAYER_NAME,
+  DEFAULT_MAX_RESULT_WINDOW,
+  MVT_HITS_TOTAL_RELATION,
+  MVT_HITS_TOTAL_VALUE,
+  MVT_FEATURE_ID_PROPERTY_NAME,
   VECTOR_STYLES,
 } from '../../../../common/constants';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
@@ -93,6 +95,8 @@ export interface VectorLayerArguments {
 }
 
 export interface IVectorLayer extends ILayer {
+  getMbTooltipLayerIds(): string[];
+  getMbFeatureIdPropertyName(): string;
   getFields(): Promise<IField[]>;
   getStyleEditorFields(): Promise<IField[]>;
   getJoins(): InnerJoin[];
@@ -218,6 +222,12 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return clonedDescriptor;
   }
 
+  getMbFeatureIdPropertyName(): string {
+    return this.getSource().isMvt()
+      ? MVT_FEATURE_ID_PROPERTY_NAME
+      : GEOJSON_FEATURE_ID_PROPERTY_NAME;
+  }
+
   getSource(): IVectorSource {
     return super.getSource() as IVectorSource;
   }
@@ -255,6 +265,16 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this.getJoins().filter((join) => {
       return join.hasCompleteConfig();
     });
+  }
+
+  getLabelsDisabledReason() {
+    if (this.getSource().isMvt()) {
+      return i18n.translate('xpack.maps.vectorlayer.labelsDisabledReasonMvt', {
+        defaultMessage: 'Labels are not supported when using Elasticsearch vector tiles',
+      });
+    }
+
+    return null;
   }
 
   supportsFeatureEditing(): boolean {
@@ -311,12 +331,12 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
     const sourceDataRequest = this.getSourceDataRequest();
     const { tooltipContent, areResultsTrimmed, isDeprecated } =
-      this.getSource().getSourceTooltipContent(sourceDataRequest);
+      this.getSource().getSourceTooltipConfigFromGeoJson(sourceDataRequest);
     return {
       icon: isDeprecated ? (
         <EuiIcon type="alert" color="danger" />
       ) : (
-        this.getCurrentStyle().getIcon()
+        this.getCurrentStyle().getIcon(this.getSource().isPointsOnly())
       ),
       tooltipContent,
       areResultsTrimmed,
@@ -589,6 +609,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         timeFilters: nextMeta.timeFilters,
         searchSessionId: dataFilters.searchSessionId,
       });
+
       stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
@@ -774,6 +795,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   _getSourceFeatureCollection() {
+    if (this.getSource().isMvt()) {
+      return null;
+    }
     const sourceDataRequest = this.getSourceDataRequest();
     return sourceDataRequest ? (sourceDataRequest.getData() as FeatureCollection) : null;
   }
@@ -973,28 +997,27 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       }
       mbMap.addLayer(mbLayer);
     }
-    if (!mbMap.getLayer(tooManyFeaturesLayerId)) {
-      const mbLayer: MbLayer = {
+
+    if (this.getSource().showTooManyFeaturesBounds() && !mbMap.getLayer(tooManyFeaturesLayerId)) {
+      const mbTooManyFeaturesLayer: MbLayer = {
         id: tooManyFeaturesLayerId,
-        type: 'fill',
+        type: 'line',
         source: sourceId,
         paint: {},
       };
       if (mvtSourceLayer) {
-        mbLayer['source-layer'] = mvtSourceLayer;
+        mbTooManyFeaturesLayer['source-layer'] = MVT_META_SOURCE_LAYER_NAME;
       }
-      mbMap.addLayer(mbLayer);
+      mbMap.addLayer(mbTooManyFeaturesLayer);
       mbMap.setFilter(tooManyFeaturesLayerId, [
         'all',
-        ['==', ['get', KBN_METADATA_FEATURE], true],
-        ['==', ['get', KBN_IS_TILE_COMPLETE], false],
+        ['==', ['get', MVT_HITS_TOTAL_RELATION], 'gte'],
+        ['>=', ['get', MVT_HITS_TOTAL_VALUE], DEFAULT_MAX_RESULT_WINDOW],
       ]);
-      mbMap.setPaintProperty(
-        tooManyFeaturesLayerId,
-        'fill-pattern',
-        KBN_TOO_MANY_FEATURES_IMAGE_ID
-      );
-      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'fill-opacity', this.getAlpha());
+      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-color', '#FF0000');
+      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-width', 2);
+      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-dasharray', [2, 1]);
+      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-opacity', this.getAlpha());
     }
 
     this.getCurrentStyle().setMBPaintProperties({
@@ -1018,8 +1041,10 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       mbMap.setFilter(lineLayerId, lineFilterExpr);
     }
 
-    this.syncVisibilityWithMb(mbMap, tooManyFeaturesLayerId);
-    mbMap.setLayerZoomRange(tooManyFeaturesLayerId, this.getMinZoom(), this.getMaxZoom());
+    if (this.getSource().showTooManyFeaturesBounds()) {
+      this.syncVisibilityWithMb(mbMap, tooManyFeaturesLayerId);
+      mbMap.setLayerZoomRange(tooManyFeaturesLayerId, this.getMinZoom(), this.getMaxZoom());
+    }
   }
 
   _setMbCentroidProperties(
@@ -1112,7 +1137,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this.makeMbLayerId('toomanyfeatures');
   }
 
-  getMbLayerIds() {
+  getMbTooltipLayerIds() {
     return [
       this._getMbPointLayerId(),
       this._getMbTextLayerId(),
@@ -1120,8 +1145,15 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       this._getMbSymbolLayerId(),
       this._getMbLineLayerId(),
       this._getMbPolygonLayerId(),
-      this._getMbTooManyFeaturesLayerId(),
     ];
+  }
+
+  getMbLayerIds() {
+    const layers = this.getMbTooltipLayerIds();
+    if (this.getSource().showTooManyFeaturesBounds()) {
+      layers.push(this._getMbTooManyFeaturesLayerId());
+    }
+    return layers;
   }
 
   ownsMbLayerId(mbLayerId: string) {
@@ -1170,7 +1202,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const targetFeature = featureCollection.features.find((feature) => {
-      return feature.properties?.[FEATURE_ID_PROPERTY_NAME] === id;
+      return feature.properties?.[this.getMbFeatureIdPropertyName()] === id;
     });
     return targetFeature ? targetFeature : null;
   }

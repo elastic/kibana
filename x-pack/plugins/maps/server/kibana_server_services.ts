@@ -20,14 +20,17 @@ export const setInternalRepository = (
 };
 export const getInternalRepository = () => internalRepository;
 
+let esClient: ElasticsearchClient;
 let indexPatternsService: IndexPatternsCommonService;
 export const setIndexPatternsService = async (
   indexPatternsServiceFactory: IndexPatternsServiceStart['indexPatternsServiceFactory'],
   elasticsearchClient: ElasticsearchClient
 ) => {
+  esClient = elasticsearchClient;
   indexPatternsService = await indexPatternsServiceFactory(
     new SavedObjectsClient(getInternalRepository()),
     elasticsearchClient
   );
 };
 export const getIndexPatternsService = () => indexPatternsService;
+export const getESClient = () => esClient;

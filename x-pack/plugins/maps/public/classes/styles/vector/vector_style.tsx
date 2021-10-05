@@ -16,7 +16,6 @@ import {
   FIELD_ORIGIN,
   GEO_JSON_TYPE,
   KBN_IS_CENTROID_FEATURE,
-  KBN_VECTOR_SHAPE_TYPE_COUNTS,
   LAYER_STYLE_TYPE,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
   STYLE_TYPE,
@@ -76,7 +75,6 @@ import { IVectorLayer } from '../../layers/vector_layer';
 import { IVectorSource } from '../../sources/vector_source';
 import { createStyleFieldsHelper, StyleFieldsHelper } from './style_fields_helper';
 import { IESAggField } from '../../fields/agg';
-import { VectorShapeTypeCounts } from '../../../../common/get_geometry_counts';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
@@ -92,9 +90,8 @@ export interface IVectorStyle extends IStyle {
     previousFields: IField[],
     mapColors: string[]
   ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
-  isTimeAware: () => boolean;
-  getIcon: () => ReactElement<any>;
-  getIconFromGeometryTypes: (isLinesOnly: boolean, isPointsOnly: boolean) => ReactElement<any>;
+  isTimeAware(): boolean;
+  getIcon(isPointsOnlyFromSource: boolean): ReactElement<any>;
   hasLegendDetails: () => Promise<boolean>;
   renderLegendDetails: () => ReactElement<any>;
   clearFeatureState: (featureCollection: FeatureCollection, mbMap: MbMap, sourceId: string) => void;
@@ -492,51 +489,7 @@ export class VectorStyle implements IVectorStyle {
   }
 
   async pluckStyleMetaFromTileMeta(metaFeatures: TileMetaFeature[]): Promise<StyleMetaDescriptor> {
-    const shapeTypeCountMeta: VectorShapeTypeCounts = metaFeatures.reduce(
-      (accumulator: VectorShapeTypeCounts, tileMeta: TileMetaFeature) => {
-        if (
-          !tileMeta ||
-          !tileMeta.properties ||
-          !tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS]
-        ) {
-          return accumulator;
-        }
-
-        accumulator[VECTOR_SHAPE_TYPE.POINT] +=
-          tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.POINT];
-        accumulator[VECTOR_SHAPE_TYPE.LINE] +=
-          tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.LINE];
-        accumulator[VECTOR_SHAPE_TYPE.POLYGON] +=
-          tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.POLYGON];
-
-        return accumulator;
-      },
-      {
-        [VECTOR_SHAPE_TYPE.POLYGON]: 0,
-        [VECTOR_SHAPE_TYPE.LINE]: 0,
-        [VECTOR_SHAPE_TYPE.POINT]: 0,
-      }
-    );
-
-    const isLinesOnly =
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] > 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] === 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] === 0;
-    const isPointsOnly =
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] === 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] > 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] === 0;
-    const isPolygonsOnly =
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] === 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] === 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] > 0;
-
     const styleMeta: StyleMetaDescriptor = {
-      geometryTypes: {
-        isPointsOnly,
-        isLinesOnly,
-        isPolygonsOnly,
-      },
       fieldMeta: {},
     };
 
@@ -737,7 +690,7 @@ export class VectorStyle implements IVectorStyle {
       : (this._iconStyleProperty as StaticIconProperty).getOptions().value;
   }
 
-  getIconFromGeometryTypes(isLinesOnly: boolean, isPointsOnly: boolean) {
+  _getIconFromGeometryTypes(isLinesOnly: boolean, isPointsOnly: boolean) {
     let strokeColor;
     if (isLinesOnly) {
       strokeColor = extractColorFromStyleProperty(
@@ -768,10 +721,10 @@ export class VectorStyle implements IVectorStyle {
     );
   }
 
-  getIcon() {
-    const isLinesOnly = this._getIsLinesOnly();
-    const isPointsOnly = this._getIsPointsOnly();
-    return this.getIconFromGeometryTypes(isLinesOnly, isPointsOnly);
+  getIcon(isPointsOnlyFromSource: boolean) {
+    const isLinesOnly = isPointsOnlyFromSource ? false : this._getIsLinesOnly();
+    const isPointsOnly = isPointsOnlyFromSource ? true : this._getIsPointsOnly();
+    return this._getIconFromGeometryTypes(isLinesOnly, isPointsOnly);
   }
 
   _getLegendDetailStyleProperties = () => {

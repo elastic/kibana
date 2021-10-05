@@ -8,11 +8,11 @@
 import _ from 'lodash';
 import { Dispatch } from 'redux';
 import { Feature } from 'geojson';
-import { getOpenTooltips } from '../selectors/map_selectors';
+import { getLayerById, getOpenTooltips } from '../selectors/map_selectors';
 import { SET_OPEN_TOOLTIPS } from './map_action_constants';
-import { FEATURE_ID_PROPERTY_NAME } from '../../common/constants';
 import { TooltipState } from '../../common/descriptor_types';
 import { MapStoreState } from '../reducers/store';
+import { IVectorLayer } from '../classes/layers/vector_layer';
 
 export function closeOnClickTooltip(tooltipId: string) {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
@@ -65,6 +65,7 @@ export function openOnHoverTooltip(tooltipState: TooltipState) {
 export function cleanTooltipStateForLayer(layerId: string, layerFeatures: Feature[] = []) {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
     let featuresRemoved = false;
+    const layer: IVectorLayer = getLayerById(layerId, getState()) as IVectorLayer;
     const openTooltips = getOpenTooltips(getState())
       .map((tooltipState) => {
         const nextFeatures = tooltipState.features.filter((tooltipFeature) => {
@@ -75,7 +76,9 @@ export function cleanTooltipStateForLayer(layerId: string, layerFeatures: Featur
 
           // Keep feature if it is still in layer
           return layerFeatures.some((layerFeature) => {
-            return layerFeature.properties![FEATURE_ID_PROPERTY_NAME] === tooltipFeature.id;
+            return (
+              layerFeature.properties![layer.getMbFeatureIdPropertyName()] === tooltipFeature.id
+            );
           });
         });
 

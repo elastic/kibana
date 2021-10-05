@@ -34,9 +34,21 @@ export class AggField extends CountAggField {
     return !!this._esDocField;
   }
 
+  getMbFieldName(): string {
+    if (this._source.isMvt()) {
+      return this.getName() + '.value';
+    } else {
+      return this.getName();
+    }
+  }
+
   supportsFieldMeta(): boolean {
     // count and sum aggregations are not within field bounds so they do not support field meta.
     return !isMetricCountable(this._getAggType());
+  }
+
+  isCountable(): boolean {
+    return isMetricCountable(this._getAggType());
   }
 
   canValueBeFormatted(): boolean {

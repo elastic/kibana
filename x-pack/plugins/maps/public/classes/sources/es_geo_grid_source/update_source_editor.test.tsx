@@ -8,7 +8,6 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-// @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
 

@@ -19,7 +19,8 @@ import {
   ES_GEO_FIELD_TYPE,
   RENDER_AS,
 } from '../../common/constants';
-import { getGridTile, getTile } from './get_tile';
+import { getEsTile } from './get_tile';
+import { getEsGridTile } from './get_grid_tile';
 
 const CACHE_TIMEOUT_SECONDS = 60 * 60;
 
@@ -56,14 +57,15 @@ export function initMVTRoutes({
     ) => {
       const { query, params } = request;
 
-      const abortController = new AbortController();
-      request.events.aborted$.subscribe(() => {
-        abortController.abort();
-      });
+      // todo - replace with direct abortion of raw transport request
+      // const abortController = new AbortController();
+      // request.events.aborted$.subscribe(() => {
+      //   abortController.abort();
+      // });
 
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
-      const tile = await getTile({
+      const tile = await getEsTile({
         logger,
         context,
         geometryFieldName: query.geometryFieldName as string,
@@ -73,8 +75,6 @@ export function initMVTRoutes({
         index: query.index as string,
         requestBody: requestBodyDSL as any,
         geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
-        searchSessionId: query.searchSessionId,
-        abortSignal: abortController.signal,
       });
 
       return sendResponse(response, tile);
@@ -107,14 +107,16 @@ export function initMVTRoutes({
       response: KibanaResponseFactory
     ) => {
       const { query, params } = request;
-      const abortController = new AbortController();
-      request.events.aborted$.subscribe(() => {
-        abortController.abort();
-      });
+
+      // todo - replace with direct abortion of raw transport request
+      // const abortController = new AbortController();
+      // request.events.aborted$.subscribe(() => {
+      //   abortController.abort();
+      // });
 
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
-      const tile = await getGridTile({
+      const tile = await getEsGridTile({
         logger,
         context,
         geometryFieldName: query.geometryFieldName as string,
@@ -125,8 +127,6 @@ export function initMVTRoutes({
         requestBody: requestBodyDSL as any,
         requestType: query.requestType as RENDER_AS.POINT | RENDER_AS.GRID,
         geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
-        searchSessionId: query.searchSessionId,
-        abortSignal: abortController.signal,
       });
 
       return sendResponse(response, tile);

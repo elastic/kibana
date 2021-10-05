@@ -9,7 +9,14 @@ import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiFormRow,
+  EuiSpacer,
+  EuiSwitch,
+  EuiSwitchEvent,
+  EuiCallOut,
+} from '@elastic/eui';
 import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
 // @ts-expect-error
@@ -259,11 +266,12 @@ export class VectorStyleEditor extends Component<Props, State> {
   }
 
   _renderLabelProperties(isPoints: boolean) {
-    if (
-      !isPoints &&
-      this.props.layer.getType() === LAYER_TYPE.TILED_VECTOR &&
-      !this.props.layer.getSource().isESSource()
-    ) {
+    const labelsDisabledReason = this.props.layer.getLabelsDisabledReason();
+    if (labelsDisabledReason) {
+      return <EuiCallOut color="warning">{labelsDisabledReason}</EuiCallOut>;
+    }
+
+    if (!isPoints && this.props.layer.getType() === LAYER_TYPE.TILED_VECTOR) {
       // This handles and edge-case
       // 3rd party lines and polygons from mvt sources cannot be labeled, because they do not have label-centroid geometries inside the tile.
       // These label-centroids are only added for ES-sources

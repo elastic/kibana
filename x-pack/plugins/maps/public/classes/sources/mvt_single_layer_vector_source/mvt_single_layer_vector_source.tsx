@@ -10,7 +10,7 @@ import uuid from 'uuid/v4';
 import React from 'react';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import { BoundsRequestMeta, GeoJsonWithMeta } from '../vector_source';
+import { BoundsRequestMeta, GeoJsonWithMeta, SourceTooltipConfig } from '../vector_source';
 import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
 import {
   FIELD_ORIGIN,
@@ -25,6 +25,7 @@ import {
   MapExtent,
   MVTFieldDescriptor,
   TiledSingleLayerVectorSourceDescriptor,
+  TileMetaFeature,
 } from '../../../../common/descriptor_types';
 import { MVTField } from '../../fields/mvt_field';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -80,6 +81,28 @@ export class MVTSingleLayerVectorSource
         return this.getFieldByName(fieldName);
       })
       .filter((f) => f !== null) as MVTField[];
+  }
+
+  isMvt() {
+    return true;
+  }
+
+  isPointsOnly(): boolean {
+    return false;
+  }
+
+  showTooManyFeaturesBounds(): boolean {
+    return false;
+  }
+
+  getSourceTooltipConfigFromTileMeta(
+    tileMetaFeatures: TileMetaFeature[],
+    totalFeaturesCount: number
+  ): SourceTooltipConfig {
+    return {
+      tooltipContent: null,
+      areResultsTrimmed: false,
+    };
   }
 
   async supportsFitToBounds() {
@@ -204,7 +227,7 @@ export class MVTSingleLayerVectorSource
     return false;
   }
 
-  getSourceTooltipContent() {
+  getSourceTooltipConfigFromGeoJson() {
     return { tooltipContent: null, areResultsTrimmed: false };
   }
 

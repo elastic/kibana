@@ -10,7 +10,7 @@ import Protobuf from 'pbf';
 import expect from '@kbn/expect';
 import {
   KBN_IS_CENTROID_FEATURE,
-  MVT_SOURCE_LAYER_NAME,
+  MVT_AGGS_SOURCE_LAYER_NAME,
 } from '../../../../plugins/maps/common/constants';
 
 export default function ({ getService }) {
@@ -32,7 +32,7 @@ export default function ({ getService }) {
         .expect(200);
 
       const jsonTile = new VectorTile(new Protobuf(resp.body));
-      const layer = jsonTile.layers[MVT_SOURCE_LAYER_NAME];
+      const layer = jsonTile.layers[MVT_AGGS_SOURCE_LAYER_NAME];
       expect(layer.length).to.be(2);
 
       // Cluster feature
@@ -81,7 +81,7 @@ export default function ({ getService }) {
         .expect(200);
 
       const jsonTile = new VectorTile(new Protobuf(resp.body));
-      const layer = jsonTile.layers[MVT_SOURCE_LAYER_NAME];
+      const layer = jsonTile.layers[MVT_AGGS_SOURCE_LAYER_NAME];
       expect(layer.length).to.be(3);
 
       const gridFeature = layer.feature(0);

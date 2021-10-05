@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { GRID_RESOLUTION } from '../../../../common/constants';
-import { EuiSelect, EuiFormRow } from '@elastic/eui';
+import { EuiSelect, EuiFormRow, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const BASE_OPTIONS = [
@@ -38,24 +38,40 @@ export function ResolutionEditor({ resolution, onChange, includeSuperFine }) {
     options.push({
       value: GRID_RESOLUTION.SUPER_FINE,
       text: i18n.translate('xpack.maps.source.esGrid.superFineDropDownOption', {
-        defaultMessage: 'super fine (beta)',
+        defaultMessage: 'super fine',
       }),
     });
   }
 
+  let mvtCallout = null;
+  if (resolution === GRID_RESOLUTION.SUPER_FINE) {
+    mvtCallout = (
+      <EuiFormRow label={' '} display="columnCompressed">
+        <EuiCallOut>
+          {i18n.translate('xpack.maps.resolution.mvtCallout', {
+            defaultMessage:
+              'This setting generates clusters at a high resolution, using Elasticsearch vector tiles. Some layer-settings are not compatible with this selection and will be disabled.',
+          })}
+        </EuiCallOut>
+      </EuiFormRow>
+    );
+  }
   return (
-    <EuiFormRow
-      label={i18n.translate('xpack.maps.geoGrid.resolutionLabel', {
-        defaultMessage: 'Grid resolution',
-      })}
-      display="columnCompressed"
-    >
-      <EuiSelect
-        options={options}
-        value={resolution}
-        onChange={(e) => onChange(e.target.value)}
-        compressed
-      />
-    </EuiFormRow>
+    <Fragment>
+      <EuiFormRow
+        label={i18n.translate('xpack.maps.geoGrid.resolutionLabel', {
+          defaultMessage: 'Grid resolution',
+        })}
+        display="columnCompressed"
+      >
+        <EuiSelect
+          options={options}
+          value={resolution}
+          onChange={(e) => onChange(e.target.value)}
+          compressed
+        />
+      </EuiFormRow>
+      {mvtCallout}
+    </Fragment>
   );
 }

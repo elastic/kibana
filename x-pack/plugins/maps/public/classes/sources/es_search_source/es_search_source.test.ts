@@ -162,7 +162,7 @@ describe('ESSearchSource', () => {
         scalingType: SCALING_TYPES.MVT,
       });
       expect(esSearchSource.getJoinsDisabledReason()).toBe(
-        'Joins are not supported when scaling by mvt vector tiles'
+        'Joins are not supported when scaling by Elasticsearch vector tiles'
       );
     });
   });

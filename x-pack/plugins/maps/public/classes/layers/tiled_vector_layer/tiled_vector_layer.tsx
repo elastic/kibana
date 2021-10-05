@@ -13,28 +13,26 @@ import type {
 import { Feature } from 'geojson';
 import uuid from 'uuid/v4';
 import { parse as parseUrl } from 'url';
-import { i18n } from '@kbn/i18n';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
-  KBN_FEATURE_COUNT,
-  KBN_IS_TILE_COMPLETE,
-  KBN_METADATA_FEATURE,
   LAYER_TYPE,
+  MVT_HITS_TOTAL_VALUE,
+  MVT_META_SOURCE_LAYER_NAME,
   SOURCE_DATA_REQUEST_ID,
 } from '../../../../common/constants';
 import {
+  NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
   VectorLayer,
   VectorLayerArguments,
-  NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
 } from '../vector_layer';
 import { ITiledSingleLayerVectorSource } from '../../sources/tiled_single_layer_vector_source';
 import { DataRequestContext } from '../../../actions';
 import {
-  Timeslice,
   StyleMetaDescriptor,
+  TileMetaFeature,
+  Timeslice,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
-  TileMetaFeature,
 } from '../../../../common/descriptor_types';
 import { MVTSingleLayerVectorSourceConfig } from '../../sources/mvt_single_layer_vector_source/types';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
@@ -70,13 +68,22 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
-    const tileMetas = this._getMetaFromTiles();
-    if (!tileMetas.length) {
+    if (!this._source.isESSource()) {
+      // Only ES-sources can have a special meta-tile, not 3rd party vector tile sources
+      return {
+        icon: this.getCurrentStyle().getIcon(this.getSource().isPointsOnly()),
+        tooltipContent: null,
+        areResultsTrimmed: false,
+      };
+    }
+
+    const tileMetaFeatures = this._getMetaFromTiles();
+    if (!tileMetaFeatures.length) {
       return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
     }
 
-    const totalFeaturesCount: number = tileMetas.reduce((acc: number, tileMeta: Feature) => {
-      const count = tileMeta && tileMeta.properties ? tileMeta.properties[KBN_FEATURE_COUNT] : 0;
+    const totalFeaturesCount: number = tileMetaFeatures.reduce((acc: number, tileMeta: Feature) => {
+      const count = tileMeta && tileMeta.properties ? tileMeta.properties[MVT_HITS_TOTAL_VALUE] : 0;
       return count + acc;
     }, 0);
 
@@ -84,26 +91,13 @@ export class TiledVectorLayer extends VectorLayer {
       return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
     }
 
-    const isIncomplete: boolean = tileMetas.some((tileMeta: Feature) => {
-      return !tileMeta?.properties?.[KBN_IS_TILE_COMPLETE];
-    });
-
+    const content = this._source.getSourceTooltipConfigFromTileMeta(
+      tileMetaFeatures,
+      totalFeaturesCount
+    );
     return {
-      icon: this.getCurrentStyle().getIcon(),
-      tooltipContent: isIncomplete
-        ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
-            defaultMessage: `Results limited to {count} documents.`,
-            values: {
-              count: totalFeaturesCount.toLocaleString(),
-            },
-          })
-        : i18n.translate('xpack.maps.tiles.resultsCompleteMsg', {
-            defaultMessage: `Found {count} documents.`,
-            values: {
-              count: totalFeaturesCount.toLocaleString(),
-            },
-          }),
-      areResultsTrimmed: isIncomplete,
+      icon: this.getCurrentStyle().getIcon(this.getSource().isPointsOnly()),
+      ...content,
     };
   }
 
@@ -141,6 +135,7 @@ export class TiledVectorLayer extends VectorLayer {
           },
         });
         const canSkip = noChangesInSourceState && noChangesInSearchState;
+
         if (canSkip) {
           return null;
         }
@@ -240,6 +235,10 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   queryTileMetaFeatures(mbMap: MbMap): TileMetaFeature[] | null {
+    if (!this.getSource().isESSource()) {
+      return null;
+    }
+
     // @ts-ignore
     const mbSource = mbMap.getSource(this._getMbSourceId());
     if (!mbSource) {
@@ -259,26 +258,38 @@ export class TiledVectorLayer extends VectorLayer {
     // querySourceFeatures can return duplicated features when features cross tile boundaries.
     // Tile meta will never have duplicated features since by there nature, tile meta is a feature contained within a single tile
     const mbFeatures = mbMap.querySourceFeatures(this._getMbSourceId(), {
-      sourceLayer: sourceMeta.layerName,
-      filter: ['==', ['get', KBN_METADATA_FEATURE], true],
+      sourceLayer: MVT_META_SOURCE_LAYER_NAME,
     });
 
-    const metaFeatures: TileMetaFeature[] = mbFeatures.map((mbFeature: Feature) => {
+    const metaFeatures: Array<TileMetaFeature | null> = (
+      mbFeatures as unknown as TileMetaFeature[]
+    ).map((mbFeature: TileMetaFeature | null) => {
       const parsedProperties: Record<string, unknown> = {};
-      for (const key in mbFeature.properties) {
-        if (mbFeature.properties.hasOwnProperty(key)) {
-          parsedProperties[key] = JSON.parse(mbFeature.properties[key]); // mvt properties cannot be nested geojson
+      for (const key in mbFeature?.properties) {
+        if (mbFeature?.properties.hasOwnProperty(key)) {
+          parsedProperties[key] =
+            typeof mbFeature.properties[key] === 'string' ||
+            typeof mbFeature.properties[key] === 'number' ||
+            typeof mbFeature.properties[key] === 'boolean'
+              ? mbFeature.properties[key]
+              : JSON.parse(mbFeature.properties[key]); // mvt properties cannot be nested geojson
         }
       }
-      return {
-        type: 'Feature',
-        id: mbFeature.id,
-        geometry: mbFeature.geometry,
-        properties: parsedProperties,
-      } as TileMetaFeature;
+
+      try {
+        return {
+          type: 'Feature',
+          id: mbFeature?.id,
+          geometry: mbFeature?.geometry, // this getter might throw with non-conforming geometries
+          properties: parsedProperties,
+        } as TileMetaFeature;
+      } catch (e) {
+        return null;
+      }
     });
 
-    return metaFeatures as TileMetaFeature[];
+    const filtered = metaFeatures.filter((f) => f !== null);
+    return filtered as TileMetaFeature[];
   }
 
   _requiresPrevSourceCleanup(mbMap: MbMap): boolean {
@@ -317,8 +328,13 @@ export class TiledVectorLayer extends VectorLayer {
       const mbLayer = mbMap.getLayer(layerIds[i]);
       // The mapbox type in the spec is specified with `source-layer`
       // but the programmable JS-object uses camelcase `sourceLayer`
-      // @ts-expect-error
-      if (mbLayer && mbLayer.sourceLayer !== tiledSourceMeta.layerName) {
+      if (
+        mbLayer &&
+        // @ts-expect-error
+        mbLayer.sourceLayer !== tiledSourceMeta.layerName &&
+        // @ts-expect-error
+        mbLayer.sourceLayer !== MVT_META_SOURCE_LAYER_NAME
+      ) {
         // If the source-pointer of one of the layers is stale, they will all be stale.
         // In this case, all the mb-layers need to be removed and re-added.
         return true;

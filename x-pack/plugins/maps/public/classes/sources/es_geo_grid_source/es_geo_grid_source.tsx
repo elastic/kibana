@@ -16,7 +16,6 @@ import {
   convertRegularRespToGeoJson,
   makeESBbox,
 } from '../../../../common/elasticsearch_util';
-// @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   DEFAULT_MAX_BUCKETS_LIMIT,
@@ -25,8 +24,8 @@ import {
   GEOTILE_GRID_AGG_NAME,
   GIS_API_PATH,
   GRID_RESOLUTION,
+  MVT_AGGS_SOURCE_LAYER_NAME,
   MVT_GETGRIDTILE_API_PATH,
-  MVT_SOURCE_LAYER_NAME,
   MVT_TOKEN_PARAM_NAME,
   RENDER_AS,
   SOURCE_TYPES,
@@ -140,6 +139,14 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
         value: this._descriptor.geoField,
       },
     ];
+  }
+
+  isMvt() {
+    return this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE;
+  }
+
+  isPointsOnly(): boolean {
+    return this._descriptor.requestType === RENDER_AS.POINT;
   }
 
   getFieldNames() {
@@ -421,7 +428,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   }
 
   getLayerName(): string {
-    return MVT_SOURCE_LAYER_NAME;
+    return MVT_AGGS_SOURCE_LAYER_NAME;
   }
 
   async getUrlTemplateWithMeta(
