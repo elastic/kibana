@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from './page_objects';
 import { ReportingAPIProvider } from './reporting_services';
 

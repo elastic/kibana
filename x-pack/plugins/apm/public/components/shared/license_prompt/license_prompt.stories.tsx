@@ -12,9 +12,9 @@ import {
   ApmPluginContextValue,
 } from '../../../context/apm_plugin/apm_plugin_context';
 
-const contextMock = ({
+const contextMock = {
   core: { http: { basePath: { prepend: () => {} } } },
-} as unknown) as ApmPluginContextValue;
+} as unknown as ApmPluginContextValue;
 
 export default {
   title: 'shared/LicensePrompt',
@@ -36,6 +36,5 @@ export function Example({
 }
 Example.args = {
   showBetaBadge: false,
-  text:
-    'To create Feature name, you must be subscribed to an Elastic X license or above.',
+  text: 'To create Feature name, you must be subscribed to an Elastic X license or above.',
 } as ComponentProps<typeof LicensePrompt>;

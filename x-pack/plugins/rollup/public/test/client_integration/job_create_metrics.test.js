@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { setHttp } from '../../crud_app/services';
+import { setHttp, init as initDocumentation } from '../../crud_app/services';
 import { mockHttpRequest, pageHelpers } from './helpers';
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, docLinksServiceMock } from '../../../../../../src/core/public/mocks';
 
 jest.mock('lodash', () => ({
   ...jest.requireActual('lodash'),
@@ -29,6 +29,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
   beforeAll(() => {
     startMock = coreMock.createStart();
     setHttp(startMock.http);
+    initDocumentation(docLinksServiceMock.createStartContract());
   });
 
   beforeEach(() => {
@@ -191,9 +192,8 @@ describe('Create Rollup Job, step 5: Metrics', () => {
           rows: [firstRow],
         } = table.getMetaData('rollupJobMetricsFieldList');
         const columnWithMetricsCheckboxes = 2;
-        const metricsCheckboxes = firstRow.columns[columnWithMetricsCheckboxes].reactWrapper.find(
-          'input'
-        );
+        const metricsCheckboxes =
+          firstRow.columns[columnWithMetricsCheckboxes].reactWrapper.find('input');
         expect(metricsCheckboxes.length).toBe(
           numericTypeMetrics.length + 1 /* add one for select all */
         );
@@ -215,9 +215,8 @@ describe('Create Rollup Job, step 5: Metrics', () => {
           rows: [firstRow],
         } = table.getMetaData('rollupJobMetricsFieldList');
         const columnWithMetricsCheckboxes = 2;
-        const metricsCheckboxes = firstRow.columns[columnWithMetricsCheckboxes].reactWrapper.find(
-          'input'
-        );
+        const metricsCheckboxes =
+          firstRow.columns[columnWithMetricsCheckboxes].reactWrapper.find('input');
         expect(metricsCheckboxes.length).toBe(
           dateTypeMetrics.length + 1 /* add one for select all */
         );

@@ -7,46 +7,30 @@
 
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import { LocalUIFilterName } from '../../../../../common/ui_filter';
-import { pickKeys } from '../../../../../common/utils/pick_keys';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LocalUIFiltersAPIResponse } from '../../../../../server/lib/rum_client/ui_filters/local_ui_filters';
 import {
-  localUIFilters,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../server/lib/rum_client/ui_filters/local_ui_filters/config';
+  uxFiltersByName,
+  UxLocalUIFilter,
+  UxLocalUIFilterName,
+} from '../../../../../common/ux_ui_filter';
 import {
   fromQuery,
   toQuery,
 } from '../../../../components/shared/Links/url_helpers';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { getExcludedName } from '../LocalUIFilters';
 
-const getInitialData = (
-  filterNames: LocalUIFilterName[]
-): LocalUIFiltersAPIResponse => {
-  return filterNames.map((filterName) => ({
-    options: [],
-    ...localUIFilters[filterName],
-  }));
-};
+export type FiltersUIHook = ReturnType<typeof useLocalUIFilters>;
 
 export function useLocalUIFilters({
   filterNames,
-  params,
-  shouldFetch,
 }: {
-  filterNames: LocalUIFilterName[];
-  params?: Record<string, string | number | boolean | undefined>;
-  shouldFetch: boolean;
+  filterNames: UxLocalUIFilterName[];
 }) {
   const history = useHistory();
-  const { uiFilters, urlParams } = useUrlParams();
+  const { uxUiFilters } = useUrlParams();
 
-  const values = pickKeys(uiFilters, ...filterNames);
-
-  const setFilterValue = (name: LocalUIFilterName, value: string[]) => {
+  const setFilterValue = (name: UxLocalUIFilterName, value: string[]) => {
     const search = omit(toQuery(history.location.search), name);
 
     history.push({
@@ -60,52 +44,62 @@ export function useLocalUIFilters({
     });
   };
 
+  const invertFilter = (
+    name: UxLocalUIFilterName,
+    value: string,
+    negate: boolean
+  ) => {
+    if (!negate) {
+      setFilterValue(
+        name,
+        (uxUiFilters?.[name] as string[]).filter((valT) => valT !== value)
+      );
+
+      const excludedName = getExcludedName(name);
+      setFilterValue(excludedName, [
+        ...(uxUiFilters?.[excludedName] ?? []),
+        value,
+      ]);
+    } else {
+      const includeName = name.split('Excluded')[0] as UxLocalUIFilterName;
+      const excludedName = name;
+
+      setFilterValue(
+        excludedName,
+        (uxUiFilters?.[excludedName] as string[]).filter(
+          (valT) => valT !== value
+        )
+      );
+
+      setFilterValue(includeName, [
+        ...(uxUiFilters?.[includeName] ?? []),
+        value,
+      ]);
+    }
+  };
+
   const clearValues = () => {
-    const search = omit(toQuery(history.location.search), filterNames);
+    const search = omit(toQuery(history.location.search), [
+      ...filterNames,
+      'transactionUrl',
+    ]);
+
     history.push({
       ...history.location,
       search: fromQuery(search),
     });
   };
 
-  const { data, status } = useFetcher(
-    (callApmApi) => {
-      if (shouldFetch && urlParams.start && urlParams.end) {
-        return callApmApi({
-          endpoint: 'GET /api/apm/rum/local_filters',
-          params: {
-            query: {
-              uiFilters: JSON.stringify(uiFilters),
-              start: urlParams.start,
-              end: urlParams.end,
-              // type expects string constants, but we have to send it as json
-              filterNames: JSON.stringify(filterNames) as any,
-              ...params,
-            },
-          },
-        });
-      }
-    },
-    [
-      uiFilters,
-      urlParams.start,
-      urlParams.end,
-      filterNames,
-      params,
-      shouldFetch,
-    ]
-  );
-
-  const localUiFilters = data?.localUiFilters ?? getInitialData(filterNames);
-  const filters = localUiFilters.map((filter) => ({
-    ...filter,
-    value: values[filter.name] || [],
+  const filters: UxLocalUIFilter[] = filterNames.map((name) => ({
+    value: (uxUiFilters[name] as string[]) ?? [],
+    ...uxFiltersByName[name],
+    name,
   }));
 
   return {
     filters,
-    status,
     setFilterValue,
     clearValues,
+    invertFilter,
   };
 }

@@ -10,7 +10,7 @@ import {
   mockHttpValues,
   mockKibanaValues,
   mockFlashMessageHelpers,
-} from '../../../../__mocks__';
+} from '../../../../__mocks__/kea_logic';
 import '../../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
@@ -55,6 +55,7 @@ describe('CurationLogic', () => {
     promotedDocumentsLoading: false,
     hiddenIds: [],
     hiddenDocumentsLoading: false,
+    isAutomated: false,
   };
 
   beforeEach(() => {
@@ -265,7 +266,60 @@ describe('CurationLogic', () => {
     });
   });
 
+  describe('selectors', () => {
+    describe('isAutomated', () => {
+      it('is true when suggestion status is automated', () => {
+        mount({ curation: { suggestion: { status: 'automated' } } });
+
+        expect(CurationLogic.values.isAutomated).toBe(true);
+      });
+
+      it('is false when suggestion status is not automated', () => {
+        for (status of ['pending', 'applied', 'rejected', 'disabled']) {
+          mount({ curation: { suggestion: { status } } });
+
+          expect(CurationLogic.values.isAutomated).toBe(false);
+        }
+      });
+    });
+  });
+
   describe('listeners', () => {
+    describe('convertToManual', () => {
+      it('should make an API call and re-load the curation on success', async () => {
+        http.put.mockReturnValueOnce(Promise.resolve());
+        mount({ activeQuery: 'some query' });
+        jest.spyOn(CurationLogic.actions, 'loadCuration');
+
+        CurationLogic.actions.convertToManual();
+        await nextTick();
+
+        expect(http.put).toHaveBeenCalledWith(
+          '/internal/app_search/engines/some-engine/search_relevance_suggestions',
+          {
+            body: JSON.stringify([
+              {
+                query: 'some query',
+                type: 'curation',
+                status: 'applied',
+              },
+            ]),
+          }
+        );
+        expect(CurationLogic.actions.loadCuration).toHaveBeenCalled();
+      });
+
+      it('flashes any error messages', async () => {
+        http.put.mockReturnValueOnce(Promise.reject('error'));
+        mount({ activeQuery: 'some query' });
+
+        CurationLogic.actions.convertToManual();
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
+    });
+
     describe('loadCuration', () => {
       it('should set dataLoading state', () => {
         mount({ dataLoading: false }, { curationId: 'cur-123456789' });
@@ -287,7 +341,10 @@ describe('CurationLogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/curations/cur-123456789'
+          '/internal/app_search/engines/some-engine/curations/cur-123456789',
+          {
+            query: { skip_record_analytics: 'true' },
+          }
         );
         expect(CurationLogic.actions.onCurationLoad).toHaveBeenCalledWith(MOCK_CURATION_RESPONSE);
       });
@@ -326,7 +383,7 @@ describe('CurationLogic', () => {
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/curations/cur-123456789',
+          '/internal/app_search/engines/some-engine/curations/cur-123456789',
           {
             body: '{"queries":["a","b","c"],"query":"b","promoted":["d","e","f"],"hidden":["g"]}', // Uses state currently in CurationLogic
           }

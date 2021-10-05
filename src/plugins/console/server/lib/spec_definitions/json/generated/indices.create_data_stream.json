@@ -1,0 +1,11 @@
+{
+  "indices.create_data_stream": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_data_stream/{name}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/data-streams.html"
+  }
+}

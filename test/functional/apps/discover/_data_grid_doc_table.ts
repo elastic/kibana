@@ -27,8 +27,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover data grid doc table', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
@@ -39,10 +40,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
     });
 
-    it('should show the first 11 rows by default', async function () {
+    it('should show rows by default', async function () {
       // with the default range the number of hits is ~14000
       const rows = await dataGrid.getDocTableRows();
-      expect(rows.length).to.be(11);
+      expect(rows.length).to.be.above(0);
     });
 
     it('should refresh the table content when changing time window', async function () {
@@ -104,6 +105,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      it('should allow paginating docs in the flyout by clicking in the doc table', async function () {
+        await retry.try(async function () {
+          await dataGrid.clickRowToggle({ rowIndex: rowToInspect - 1 });
+          await testSubjects.exists(`dscDocNavigationPage0`);
+          await dataGrid.clickRowToggle({ rowIndex: rowToInspect });
+          await testSubjects.exists(`dscDocNavigationPage1`);
+          await dataGrid.closeFlyout();
+        });
+      });
+
       it('should show allow adding columns from the detail panel', async function () {
         await retry.try(async function () {
           await dataGrid.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
@@ -160,7 +171,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.header.waitUntilLoadingHasFinished();
         }
         // remove the second column
-        await PageObjects.discover.clickFieldListItemAdd(extraColumns[1]);
+        await PageObjects.discover.clickFieldListItemRemove(extraColumns[1]);
         await PageObjects.header.waitUntilLoadingHasFinished();
         // test that the second column is no longer there
         const header = await dataGrid.getHeaderFields();

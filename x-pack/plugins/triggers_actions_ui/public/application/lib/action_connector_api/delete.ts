@@ -16,7 +16,9 @@ export async function deleteActions({
 }): Promise<{ successes: string[]; errors: string[] }> {
   const successes: string[] = [];
   const errors: string[] = [];
-  await Promise.all(ids.map((id) => http.delete(`${BASE_ACTION_API_PATH}/connector/${id}`))).then(
+  await Promise.all(
+    ids.map((id) => http.delete(`${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(id)}`))
+  ).then(
     function (fulfilled) {
       successes.push(...fulfilled);
     },

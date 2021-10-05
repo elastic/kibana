@@ -9,27 +9,24 @@ import React, { useEffect, useState } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { QueryStringInput } from '../../../../../../../../src/plugins/data/public';
-import { useIndexPattern } from '../../query_bar/use_index_pattern';
 import { isValidKuery } from '../../query_bar/query_bar';
 import * as labels from '../translations';
-import { useGetUrlParams } from '../../../../hooks';
+import { useIndexPattern } from '../../../../hooks';
 
 interface Props {
   query: string;
   onChange: (query: string) => void;
 }
 
-export const AlertQueryBar = ({ query, onChange }: Props) => {
-  const { index_pattern: indexPattern } = useIndexPattern();
+export const AlertQueryBar = ({ query = '', onChange }: Props) => {
+  const indexPattern = useIndexPattern();
 
-  const { search } = useGetUrlParams();
-
-  const [inputVal, setInputVal] = useState<string>(search ?? '');
+  const [inputVal, setInputVal] = useState<string>(query);
 
   useEffect(() => {
-    onChange(search);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    onChange(query);
+    setInputVal(query);
+  }, [onChange, query]);
 
   return (
     <EuiFlexItem grow={1} style={{ flexBasis: 485 }}>
@@ -49,7 +46,7 @@ export const AlertQueryBar = ({ query, onChange }: Props) => {
         }}
         query={{ query: inputVal, language: 'kuery' }}
         aria-label={labels.ALERT_KUERY_BAR_ARIA}
-        data-test-subj="xpack.uptime.alerts.monitorStatus.filterBar"
+        dataTestSubj="xpack.uptime.alerts.monitorStatus.filterBar"
         autoSubmit={true}
         disableLanguageSwitcher={true}
         isInvalid={!!(inputVal && !query)}

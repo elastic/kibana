@@ -1,5 +1,5 @@
 {
-  "browser": "../target/web/react",
-  "main": "../target/node/react",
-  "types": "../target/types/react/index.d.ts"
+  "browser": "../target_web/react",
+  "main": "../target_node/react",
+  "types": "../target_types/react/index.d.ts"
 }

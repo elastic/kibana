@@ -16,12 +16,14 @@ import {
   EnvironmentStatus,
   environmentNames,
   isProjectEnabledByStatus,
+  SolutionName,
 } from '../../common';
 
 export interface PresentationLabsService {
+  isProjectEnabled: (id: ProjectID) => boolean;
   getProjectIDs: () => typeof projectIDs;
   getProject: (id: ProjectID) => Project;
-  getProjects: () => Record<ProjectID, Project>;
+  getProjects: (solutions?: SolutionName[]) => Record<ProjectID, Project>;
   setProjectStatus: (id: ProjectID, env: EnvironmentName, status: boolean) => void;
   reset: () => void;
 }

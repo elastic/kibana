@@ -5,22 +5,28 @@
  * 2.0.
  */
 
-import { findIndex, forEach, pullAt } from 'lodash';
+import { findIndex, forEach, pullAt, pullAllBy } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
 import { produce } from 'immer';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { satisfies } from 'semver';
 
-import { PackagePolicyInput, PackagePolicyInputStream } from '../../../../fleet/common';
+import {
+  OsqueryManagerPackagePolicyInputStream,
+  OsqueryManagerPackagePolicyInput,
+} from '../../../common/types';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { FieldHook } from '../../shared_imports';
 import { ScheduledQueryGroupQueriesTable } from '../scheduled_query_group_queries_table';
-import { AddQueryFlyout } from './add_query_flyout';
-import { EditQueryFlyout } from './edit_query_flyout';
+import { QueryFlyout } from '../queries/query_flyout';
 import { OsqueryPackUploader } from './pack_uploader';
+import { getSupportedPlatforms } from '../queries/platforms/helpers';
 
 interface QueriesFieldProps {
-  field: FieldHook<PackagePolicyInput[]>;
+  handleNameChange: (name: string) => void;
+  field: FieldHook<OsqueryManagerPackagePolicyInput[]>;
+  integrationPackageVersion?: string | undefined;
   scheduledQueryGroupId: string;
 }
 
@@ -28,28 +34,65 @@ interface GetNewStreamProps {
   id: string;
   interval: string;
   query: string;
+  platform?: string | undefined;
+  version?: string | undefined;
   scheduledQueryGroupId?: string;
+  ecs_mapping?: Record<
+    string,
+    {
+      field: string;
+    }
+  >;
 }
 
-const getNewStream = ({ id, interval, query, scheduledQueryGroupId }: GetNewStreamProps) => ({
-  data_stream: { type: 'logs', dataset: `${OSQUERY_INTEGRATION_NAME}.result` },
-  enabled: true,
-  id: scheduledQueryGroupId
-    ? `osquery-${OSQUERY_INTEGRATION_NAME}.result-${scheduledQueryGroupId}`
-    : null,
-  vars: {
-    id: { type: 'text', value: id },
-    interval: {
-      type: 'integer',
-      value: interval,
-    },
-    query: { type: 'text', value: query },
-  },
-});
+interface GetNewStreamReturn extends Omit<OsqueryManagerPackagePolicyInputStream, 'id'> {
+  id?: string | null;
+}
 
-const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQueryGroupId }) => {
+const getNewStream = (payload: GetNewStreamProps) =>
+  produce<GetNewStreamReturn>(
+    {
+      data_stream: { type: 'logs', dataset: `${OSQUERY_INTEGRATION_NAME}.result` },
+      enabled: true,
+      id: payload.scheduledQueryGroupId
+        ? `osquery-${OSQUERY_INTEGRATION_NAME}.result-${payload.scheduledQueryGroupId}`
+        : null,
+      vars: {
+        id: { type: 'text', value: payload.id },
+        interval: {
+          type: 'integer',
+          value: payload.interval,
+        },
+        query: { type: 'text', value: payload.query },
+      },
+    },
+    (draft) => {
+      if (payload.platform && draft.vars) {
+        draft.vars.platform = { type: 'text', value: payload.platform };
+      }
+      if (payload.version && draft.vars) {
+        draft.vars.version = { type: 'text', value: payload.version };
+      }
+      if (payload.ecs_mapping && draft.vars) {
+        draft.vars.ecs_mapping = {
+          value: payload.ecs_mapping,
+        };
+      }
+      return draft;
+    }
+  );
+
+const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
+  field,
+  handleNameChange,
+  integrationPackageVersion,
+  scheduledQueryGroupId,
+}) => {
   const [showAddQueryFlyout, setShowAddQueryFlyout] = useState(false);
   const [showEditQueryFlyout, setShowEditQueryFlyout] = useState<number>(-1);
+  const [tableSelectedItems, setTableSelectedItems] = useState<
+    OsqueryManagerPackagePolicyInputStream[]
+  >([]);
 
   const handleShowAddFlyout = useCallback(() => setShowAddQueryFlyout(true), []);
   const handleHideAddFlyout = useCallback(() => setShowAddQueryFlyout(false), []);
@@ -58,7 +101,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQu
   const { setValue } = field;
 
   const handleDeleteClick = useCallback(
-    (stream: PackagePolicyInputStream) => {
+    (stream: OsqueryManagerPackagePolicyInputStream) => {
       const streamIndex = findIndex(field.value[0].streams, [
         'vars.id.value',
         stream.vars?.id.value,
@@ -78,7 +121,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQu
   );
 
   const handleEditClick = useCallback(
-    (stream: PackagePolicyInputStream) => {
+    (stream: OsqueryManagerPackagePolicyInputStream) => {
       const streamIndex = findIndex(field.value[0].streams, [
         'vars.id.value',
         stream.vars?.id.value,
@@ -90,52 +133,100 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQu
   );
 
   const handleEditQuery = useCallback(
-    (updatedQuery) => {
-      if (showEditQueryFlyout >= 0) {
-        setValue(
-          produce((draft) => {
-            draft[0].streams[showEditQueryFlyout].vars.id.value = updatedQuery.id;
-            draft[0].streams[showEditQueryFlyout].vars.interval.value = updatedQuery.interval;
-            draft[0].streams[showEditQueryFlyout].vars.query.value = updatedQuery.query;
+    (updatedQuery) =>
+      new Promise<void>((resolve) => {
+        if (showEditQueryFlyout >= 0) {
+          setValue(
+            produce((draft) => {
+              draft[0].streams[showEditQueryFlyout].vars.id.value = updatedQuery.id;
+              draft[0].streams[showEditQueryFlyout].vars.interval.value = updatedQuery.interval;
+              draft[0].streams[showEditQueryFlyout].vars.query.value = updatedQuery.query;
 
-            return draft;
-          })
-        );
-      }
+              if (updatedQuery.platform?.length) {
+                draft[0].streams[showEditQueryFlyout].vars.platform = {
+                  type: 'text',
+                  value: updatedQuery.platform,
+                };
+              } else {
+                delete draft[0].streams[showEditQueryFlyout].vars.platform;
+              }
 
-      handleHideEditFlyout();
-    },
+              if (updatedQuery.version?.length) {
+                draft[0].streams[showEditQueryFlyout].vars.version = {
+                  type: 'text',
+                  value: updatedQuery.version,
+                };
+              } else {
+                delete draft[0].streams[showEditQueryFlyout].vars.version;
+              }
+
+              if (updatedQuery.ecs_mapping) {
+                draft[0].streams[showEditQueryFlyout].vars.ecs_mapping = {
+                  value: updatedQuery.ecs_mapping,
+                };
+              } else {
+                delete draft[0].streams[showEditQueryFlyout].vars.ecs_mapping;
+              }
+
+              return draft;
+            })
+          );
+        }
+
+        handleHideEditFlyout();
+        resolve();
+      }),
     [handleHideEditFlyout, setValue, showEditQueryFlyout]
   );
 
   const handleAddQuery = useCallback(
-    (newQuery) => {
-      setValue(
-        produce((draft) => {
-          draft[0].streams.push(
-            getNewStream({
-              ...newQuery,
-              scheduledQueryGroupId,
-            })
-          );
-          return draft;
-        })
-      );
-      handleHideAddFlyout();
-    },
+    (newQuery) =>
+      new Promise<void>((resolve) => {
+        setValue(
+          produce((draft) => {
+            draft[0].streams.push(
+              getNewStream({
+                ...newQuery,
+                scheduledQueryGroupId,
+              })
+            );
+            return draft;
+          })
+        );
+        handleHideAddFlyout();
+        resolve();
+      }),
     [handleHideAddFlyout, scheduledQueryGroupId, setValue]
   );
 
+  const handleDeleteQueries = useCallback(() => {
+    setValue(
+      produce((draft) => {
+        pullAllBy(draft[0].streams, tableSelectedItems, 'vars.id.value');
+
+        return draft;
+      })
+    );
+    setTableSelectedItems([]);
+  }, [setValue, tableSelectedItems]);
+
   const handlePackUpload = useCallback(
-    (newQueries) => {
+    (parsedContent, packName) => {
+      /* Osquery scheduled packs are supported since osquery_manager@0.5.0 */
+      const isOsqueryPackSupported = integrationPackageVersion
+        ? satisfies(integrationPackageVersion, '>=0.5.0')
+        : false;
+
       setValue(
         produce((draft) => {
-          forEach(newQueries, (newQuery, newQueryId) => {
+          forEach(parsedContent.queries, (newQuery, newQueryId) => {
             draft[0].streams.push(
               getNewStream({
-                id: newQueryId,
-                interval: newQuery.interval,
+                id: isOsqueryPackSupported ? newQueryId : `pack_${packName}_${newQueryId}`,
+                interval: newQuery.interval ?? parsedContent.interval,
                 query: newQuery.query,
+                version: newQuery.version ?? parsedContent.version,
+                platform: getSupportedPlatforms(newQuery.platform ?? parsedContent.platform),
                 scheduledQueryGroupId,
               })
             );
@@ -144,41 +235,83 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQu
           return draft;
         })
       );
+
+      if (isOsqueryPackSupported) {
+        handleNameChange(packName);
+      }
     },
-    [scheduledQueryGroupId, setValue]
+    [handleNameChange, integrationPackageVersion, scheduledQueryGroupId, setValue]
+  );
+
+  const tableData = useMemo(
+    () => (field.value.length ? field.value[0].streams : []),
+    [field.value]
+  );
+
+  const uniqueQueryIds = useMemo<string[]>(
+    () =>
+      field.value && field.value[0].streams.length
+        ? field.value[0].streams.reduce((acc, stream) => {
+            if (stream.vars?.id.value) {
+              acc.push(stream.vars?.id.value);
+            }
+
+            return acc;
+          }, [] as string[])
+        : [],
+    [field.value]
   );
 
   return (
     <>
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton fill onClick={handleShowAddFlyout} iconType="plusInCircle">
-            <FormattedMessage
-              id="xpack.osquery.scheduledQueryGroup.queriesForm.addQueryButtonLabel"
-              defaultMessage="Add query"
-            />
-          </EuiButton>
+          {!tableSelectedItems.length ? (
+            <EuiButton fill onClick={handleShowAddFlyout} iconType="plusInCircle">
+              <FormattedMessage
+                id="xpack.osquery.scheduledQueryGroup.queriesForm.addQueryButtonLabel"
+                defaultMessage="Add query"
+              />
+            </EuiButton>
+          ) : (
+            <EuiButton color="danger" onClick={handleDeleteQueries} iconType="trash">
+              <FormattedMessage
+                id="xpack.osquery.scheduledQueryGroup.table.deleteQueriesButtonLabel"
+                defaultMessage="Delete {queriesCount, plural, one {# query} other {# queries}}"
+                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                values={{
+                  queriesCount: tableSelectedItems.length,
+                }}
+              />
+            </EuiButton>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
       {field.value && field.value[0].streams?.length ? (
         <ScheduledQueryGroupQueriesTable
-          editMode={true}
-          // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-          data={{ inputs: field.value }}
+          data={tableData}
           onEditClick={handleEditClick}
           onDeleteClick={handleDeleteClick}
+          selectedItems={tableSelectedItems}
+          setSelectedItems={setTableSelectedItems}
         />
       ) : null}
       <EuiSpacer />
       {<OsqueryPackUploader onChange={handlePackUpload} />}
       {showAddQueryFlyout && (
-        // @ts-expect-error update types
-        <AddQueryFlyout onSave={handleAddQuery} onClose={handleHideAddFlyout} />
+        <QueryFlyout
+          uniqueQueryIds={uniqueQueryIds}
+          integrationPackageVersion={integrationPackageVersion}
+          onSave={handleAddQuery}
+          onClose={handleHideAddFlyout}
+        />
       )}
       {showEditQueryFlyout != null && showEditQueryFlyout >= 0 && (
-        <EditQueryFlyout
-          defaultValue={field.value[0].streams[showEditQueryFlyout]}
+        <QueryFlyout
+          uniqueQueryIds={uniqueQueryIds}
+          defaultValue={field.value[0].streams[showEditQueryFlyout]?.vars}
+          integrationPackageVersion={integrationPackageVersion}
           onSave={handleEditQuery}
           onClose={handleHideEditFlyout}
         />

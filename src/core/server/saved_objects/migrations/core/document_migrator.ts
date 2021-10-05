@@ -62,9 +62,10 @@ import {
   SavedObjectsType,
 } from '../../types';
 import { MigrationLogger } from './migration_logger';
+import { TransformSavedObjectDocumentError } from '.';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectMigrationFn, SavedObjectMigrationMap } from '../types';
-import { DEFAULT_NAMESPACE_STRING } from '../../service/lib/utils';
+import { DEFAULT_NAMESPACE_STRING, SavedObjectsUtils } from '../../service/lib/utils';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 
 const DEFAULT_MINIMUM_CONVERT_VERSION = '8.0.0';
@@ -169,7 +170,7 @@ export class DocumentMigrator implements VersionedTransformer {
   }
 
   /**
-   * Gets the latest version of each migratable property.
+   * Gets the latest version of each migrate-able property.
    *
    * @readonly
    * @type {SavedObjectsMigrationVersion}
@@ -259,6 +260,7 @@ function validateMigrationsMapObject(
       throw new Error(`${prefix} Got ${obj}.`);
     }
   }
+
   function assertValidSemver(version: string, type: string) {
     if (!Semver.valid(version)) {
       throw new Error(
@@ -271,6 +273,7 @@ function validateMigrationsMapObject(
       );
     }
   }
+
   function assertValidTransform(fn: any, version: string, type: string) {
     if (typeof fn !== 'function') {
       throw new Error(`Invalid migration ${type}.${version}: expected a function, but got ${fn}.`);
@@ -553,12 +556,13 @@ function convertNamespaceType(doc: SavedObjectUnsanitizedDoc) {
   }
 
   const { id: originId, type } = otherAttrs;
-  const id = deterministicallyRegenerateObjectId(namespace, type, originId!);
+  const id = SavedObjectsUtils.getConvertedObjectId(namespace, type, originId!);
   if (namespace !== undefined) {
     const legacyUrlAlias: SavedObjectUnsanitizedDoc<LegacyUrlAlias> = {
       id: `${namespace}:${type}:${originId}`,
       type: LEGACY_URL_ALIAS_TYPE,
       attributes: {
+        sourceId: originId,
         targetNamespace: namespace,
         targetType: type,
         targetId: id,
@@ -612,7 +616,9 @@ function getReferenceTransforms(typeRegistry: ISavedObjectTypeRegistry): Transfo
             references: references.map(({ type, id, ...attrs }) => ({
               ...attrs,
               type,
-              id: types.has(type) ? deterministicallyRegenerateObjectId(namespace, type, id) : id,
+              id: types.has(type)
+                ? SavedObjectsUtils.getConvertedObjectId(namespace, type, id)
+                : id,
             })),
           },
           additionalDocs: [],
@@ -659,13 +665,15 @@ function wrapWithTry(
   migrationFn: SavedObjectMigrationFn,
   log: Logger
 ) {
+  const context = Object.freeze({
+    log: new MigrationLogger(log),
+    migrationVersion: version,
+    convertToMultiNamespaceTypeVersion: type.convertToMultiNamespaceTypeVersion,
+    isSingleNamespaceType: type.namespaceType === 'single',
+  });
+
   return function tryTransformDoc(doc: SavedObjectUnsanitizedDoc) {
     try {
-      const context = {
-        log: new MigrationLogger(log),
-        migrationVersion: version,
-        convertToMultiNamespaceTypeVersion: type.convertToMultiNamespaceTypeVersion,
-      };
       const result = migrationFn(doc, context);
 
       // A basic sanity check to help migration authors detect basic errors
@@ -676,13 +684,8 @@ function wrapWithTry(
 
       return { transformedDoc: result, additionalDocs: [] };
     } catch (error) {
-      const failedTransform = `${type.name}:${version}`;
-      const failedDoc = JSON.stringify(doc);
       log.error(error);
-
-      throw new Error(
-        `Failed to transform document ${doc?.id}. Transform: ${failedTransform}\nDoc: ${failedDoc}`
-      );
+      throw new TransformSavedObjectDocumentError(error, version);
     }
   };
 }
@@ -850,7 +853,8 @@ function assertNoDowngrades(
  * that we can later regenerate any inbound object references to match.
  *
  * @note This is only intended to be used when single-namespace object types are converted into multi-namespace object types.
+ * @internal
  */
-function deterministicallyRegenerateObjectId(namespace: string, type: string, id: string) {
+export function deterministicallyRegenerateObjectId(namespace: string, type: string, id: string) {
   return uuidv5(`${namespace}:${type}:${id}`, uuidv5.DNS); // the uuidv5 namespace constant (uuidv5.DNS) is arbitrary
 }

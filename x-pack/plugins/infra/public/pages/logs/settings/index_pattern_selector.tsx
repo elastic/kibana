@@ -28,15 +28,30 @@ export const IndexPatternSelector: React.FC<{
     fetchIndexPatternTitles();
   }, [fetchIndexPatternTitles]);
 
-  const availableOptions = useMemo<IndexPatternOption[]>(
-    () =>
-      availableIndexPatterns.map(({ id, title }) => ({
+  const availableOptions = useMemo<IndexPatternOption[]>(() => {
+    const options = [
+      ...availableIndexPatterns.map(({ id, title }) => ({
         key: id,
         label: title,
         value: id,
       })),
-    [availableIndexPatterns]
-  );
+      ...(indexPatternId == null || availableIndexPatterns.some(({ id }) => id === indexPatternId)
+        ? []
+        : [
+            {
+              key: indexPatternId,
+              label: i18n.translate('xpack.infra.logSourceConfiguration.missingIndexPatternLabel', {
+                defaultMessage: `Missing index pattern {indexPatternId}`,
+                values: {
+                  indexPatternId,
+                },
+              }),
+              value: indexPatternId,
+            },
+          ]),
+    ];
+    return options;
+  }, [availableIndexPatterns, indexPatternId]);
 
   const selectedOptions = useMemo<IndexPatternOption[]>(
     () => availableOptions.filter(({ key }) => key === indexPatternId),

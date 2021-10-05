@@ -17,6 +17,7 @@ export const PIVOT_SUPPORTED_AGGS = {
   SUM: 'sum',
   VALUE_COUNT: 'value_count',
   FILTER: 'filter',
+  TOP_METRICS: 'top_metrics',
 } as const;
 
 export type PivotSupportedAggs = typeof PIVOT_SUPPORTED_AGGS[keyof typeof PIVOT_SUPPORTED_AGGS];

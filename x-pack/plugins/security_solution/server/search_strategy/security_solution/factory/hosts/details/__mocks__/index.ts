@@ -17,6 +17,7 @@ import {
 export const mockOptions: HostDetailsRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -440,10 +441,10 @@ export const mockOptions: HostDetailsRequestOptions = {
     from: '2020-09-02T15:17:13.678Z',
     to: '2020-09-03T15:17:13.678Z',
   },
-  sort: ({
+  sort: {
     direction: Direction.desc,
     field: 'success',
-  } as unknown) as SortField<HostsFields>,
+  } as unknown as SortField<HostsFields>,
   params: {},
   hostName: 'bastion00.siem.estc.dev',
 } as HostDetailsRequestOptions;
@@ -1303,6 +1304,7 @@ export const formattedSearchStrategyResponse = {
           allowNoIndices: true,
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -1370,6 +1372,20 @@ export const formattedSearchStrategyResponse = {
                 terms: { field: 'cloud.region', size: 10, order: { timestamp: 'desc' } },
                 aggs: { timestamp: { max: { field: '@timestamp' } } },
               },
+              endpoint_id: {
+                filter: {
+                  term: {
+                    'agent.type': 'endpoint',
+                  },
+                },
+                aggs: {
+                  value: {
+                    terms: {
+                      field: 'agent.id',
+                    },
+                  },
+                },
+              },
             },
             query: {
               bool: {
@@ -1402,6 +1418,7 @@ export const expectedDsl = {
   allowNoIndices: true,
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -1413,6 +1430,20 @@ export const expectedDsl = {
   track_total_hits: false,
   body: {
     aggregations: {
+      endpoint_id: {
+        filter: {
+          term: {
+            'agent.type': 'endpoint',
+          },
+        },
+        aggs: {
+          value: {
+            terms: {
+              field: 'agent.id',
+            },
+          },
+        },
+      },
       host_architecture: {
         terms: {
           field: 'host.architecture',

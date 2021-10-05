@@ -86,7 +86,12 @@ export interface Annotation {
   annotation: string;
   job_id: string;
   type: ANNOTATION_TYPE.ANNOTATION | ANNOTATION_TYPE.COMMENT;
-  event?: string;
+  event?:
+    | 'user'
+    | 'delayed_data'
+    | 'model_snapshot_stored'
+    | 'model_change'
+    | 'categorization_status_change';
   detector_index?: number;
   partition_field_name?: string;
   partition_field_value?: string;

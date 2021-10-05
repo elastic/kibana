@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -30,8 +30,7 @@ import {
   ActionTypeRegistryContract,
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
-import { ConnectorAddModal } from './connector_add_modal';
-import { ActionTypeForm, ActionTypeFormProps } from './action_type_form';
+import { ActionTypeForm } from './action_type_form';
 import { AddConnectorInline } from './connector_add_inline';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
@@ -43,6 +42,8 @@ import {
 import { ActionGroup, AlertActionParam } from '../../../../../alerting/common';
 import { useKibana } from '../../../common/lib/kibana';
 import { DefaultActionParamsGetter } from '../../lib/get_defaults_for_action_params';
+import { ConnectorAddModal } from '.';
+import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 
 export interface ActionGroupWithMessageVariables extends ActionGroup<string> {
   omitOptionalMessageVariables?: boolean;
@@ -104,18 +105,19 @@ export const ActionForm = ({
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [emptyActionsIds, setEmptyActionsIds] = useState<string[]>([]);
 
-  const closeAddConnectorModal = useCallback(() => setAddModalVisibility(false), [
-    setAddModalVisibility,
-  ]);
+  const closeAddConnectorModal = useCallback(
+    () => setAddModalVisibility(false),
+    [setAddModalVisibility]
+  );
 
   // load action types
   useEffect(() => {
     (async () => {
       try {
         setIsLoadingActionTypes(true);
-        const registeredActionTypes = (
-          actionTypes ?? (await loadActionTypes({ http }))
-        ).sort((a, b) => a.name.localeCompare(b.name));
+        const registeredActionTypes = (actionTypes ?? (await loadActionTypes({ http }))).sort(
+          (a, b) => a.name.localeCompare(b.name)
+        );
         const index: ActionTypeIndex = {};
         for (const actionTypeItem of registeredActionTypes) {
           index[actionTypeItem.id] = actionTypeItem;
@@ -124,7 +126,7 @@ export const ActionForm = ({
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.unableToLoadConnectorTypesMessage',
+            'xpack.triggersActionsUI.sections.actionForm.unableToLoadConnectorTypesMessage',
             { defaultMessage: 'Unable to load connector types' }
           ),
         });
@@ -141,11 +143,11 @@ export const ActionForm = ({
       try {
         setIsLoadingConnectors(true);
         const loadedConnectors = await loadConnectors({ http });
-        setConnectors(loadedConnectors);
+        setConnectors(loadedConnectors.filter((connector) => !connector.isMissingSecrets));
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionsMessage',
+            'xpack.triggersActionsUI.sections.actionForm.unableToLoadActionsMessage',
             {
               defaultMessage: 'Unable to load connectors',
             }
@@ -193,7 +195,7 @@ export const ActionForm = ({
   function addActionType(actionTypeModel: ActionTypeModel) {
     if (!defaultActionGroupId) {
       toasts!.addDanger({
-        title: i18n.translate('xpack.triggersActionsUI.sections.alertForm.unableToAddAction', {
+        title: i18n.translate('xpack.triggersActionsUI.sections.actionForm.unableToAddAction', {
           defaultMessage: 'Unable to add action, because default action group is not defined',
         }),
       });
@@ -271,7 +273,14 @@ export const ActionForm = ({
             label={actionTypesIndex[item.id].name}
             onClick={() => addActionType(item)}
           >
-            <EuiIcon size="xl" type={item.iconClass} />
+            <EuiIcon
+              size="xl"
+              type={
+                typeof item.iconClass === 'string'
+                  ? item.iconClass
+                  : suspendedComponentWithProps(item.iconClass as React.ComponentType)
+              }
+            />
           </EuiKeyPadMenuItem>
         );
 
@@ -291,17 +300,17 @@ export const ActionForm = ({
   return isLoadingConnectors ? (
     <SectionLoading>
       <FormattedMessage
-        id="xpack.triggersActionsUI.sections.alertForm.loadingConnectorsDescription"
+        id="xpack.triggersActionsUI.sections.actionForm.loadingConnectorsDescription"
         defaultMessage="Loading connectors…"
       />
     </SectionLoading>
   ) : (
-    <Fragment>
+    <>
       <EuiTitle size="s">
         <h4>
           <FormattedMessage
             defaultMessage="Actions"
-            id="xpack.triggersActionsUI.sections.alertForm.actionSectionsTitle"
+            id="xpack.triggersActionsUI.sections.actionForm.actionSectionsTitle"
           />
         </h4>
       </EuiTitle>
@@ -349,15 +358,10 @@ export const ActionForm = ({
             );
           }
 
-          const actionParamsErrors: ActionTypeFormProps['actionParamsErrors'] = actionTypeRegistry
-            .get(actionItem.actionTypeId)
-            ?.validateParams(actionItem.params);
-
           return (
             <ActionTypeForm
               actionItem={actionItem}
               actionConnector={actionConnector}
-              actionParamsErrors={actionParamsErrors}
               index={index}
               key={`action-form-action-at-${index}`}
               setActionParamsProperty={setActionParamsProperty}
@@ -394,14 +398,14 @@ export const ActionForm = ({
         })}
       <EuiSpacer size="m" />
       {isAddActionPanelOpen ? (
-        <Fragment>
+        <>
           <EuiFlexGroup id="alertActionTypeTitle" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
                 <h5>
                   <FormattedMessage
                     defaultMessage="Select a connector type"
-                    id="xpack.triggersActionsUI.sections.alertForm.selectConnectorTypeTitle"
+                    id="xpack.triggersActionsUI.sections.actionForm.selectConnectorTypeTitle"
                   />
                 </h5>
               </EuiTitle>
@@ -431,7 +435,7 @@ export const ActionForm = ({
             {isLoadingActionTypes ? (
               <SectionLoading>
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertForm.loadingConnectorTypesDescription"
+                  id="xpack.triggersActionsUI.sections.actionForm.loadingConnectorTypesDescription"
                   defaultMessage="Loading connector types…"
                 />
               </SectionLoading>
@@ -439,7 +443,7 @@ export const ActionForm = ({
               actionTypeNodes
             )}
           </EuiFlexGroup>
-        </Fragment>
+        </>
       ) : (
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
@@ -449,7 +453,7 @@ export const ActionForm = ({
               onClick={() => setIsAddActionPanelOpen(true)}
             >
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertForm.addActionButtonLabel"
+                id="xpack.triggersActionsUI.sections.actionForm.addActionButtonLabel"
                 defaultMessage="Add action"
               />
             </EuiButton>
@@ -468,7 +472,7 @@ export const ActionForm = ({
           actionTypeRegistry={actionTypeRegistry}
         />
       ) : null}
-    </Fragment>
+    </>
   );
 };
 

@@ -48,6 +48,8 @@
   It is very likely that this file will be removed in future but for now it enables
   extended JSON parsing, like e.g. """{}""" (triple quotes)
 */
+// @internal
+// @ts-nocheck
 "no use strict";
 ! function(window) {
   function resolveModuleId(id, paths) {

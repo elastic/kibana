@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
@@ -17,15 +17,19 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...functionalConfig.getAll(),
 
     testFiles: [
-      require.resolve('./apps/discover'),
+      // these 5 tests all load addSampleDataSet('flights')
+      // only the last test does removeSampleDataSet('flights')
       require.resolve('./apps/dashboard'),
       require.resolve('./apps/dashboard_panel'),
+      require.resolve('./apps/filter_panel'),
+      require.resolve('./apps/home'),
+      require.resolve('./apps/kibana_overview'),
+
+      // next tests don't use sample data
+      require.resolve('./apps/discover'),
       require.resolve('./apps/visualize'),
       require.resolve('./apps/management'),
       require.resolve('./apps/console'),
-      require.resolve('./apps/home'),
-      require.resolve('./apps/filter_panel'),
-      require.resolve('./apps/kibana_overview'),
     ],
     pageObjects,
     services,

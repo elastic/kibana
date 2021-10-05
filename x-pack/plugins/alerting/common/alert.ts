@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectAttribute, SavedObjectAttributes } from 'kibana/server';
+import {
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectsResolveResponse,
+} from 'kibana/server';
 import { AlertNotifyWhenType } from './alert_notify_when_type';
 
 export type AlertTypeState = Record<string, unknown>;
@@ -76,6 +80,28 @@ export interface Alert<Params extends AlertTypeParams = never> {
 }
 
 export type SanitizedAlert<Params extends AlertTypeParams = never> = Omit<Alert<Params>, 'apiKey'>;
+export type ResolvedSanitizedRule<Params extends AlertTypeParams = never> = SanitizedAlert<Params> &
+  Omit<SavedObjectsResolveResponse, 'saved_object'>;
+
+export type SanitizedRuleConfig = Pick<
+  SanitizedAlert,
+  | 'name'
+  | 'tags'
+  | 'consumer'
+  | 'enabled'
+  | 'schedule'
+  | 'actions'
+  | 'createdBy'
+  | 'updatedBy'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'throttle'
+  | 'notifyWhen'
+> & {
+  producer: string;
+  ruleTypeId: string;
+  ruleTypeName: string;
+};
 
 export enum HealthStatus {
   OK = 'ok',

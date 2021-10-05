@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { KibanaServerError } from '../../../../kibana_utils/common';
 
 export interface FailedShard {
@@ -24,7 +24,7 @@ export interface Reason {
     start: number;
     end: number;
   };
-  lang?: string;
+  lang?: estypes.ScriptLanguage;
   script?: string;
   caused_by?: {
     type: string;

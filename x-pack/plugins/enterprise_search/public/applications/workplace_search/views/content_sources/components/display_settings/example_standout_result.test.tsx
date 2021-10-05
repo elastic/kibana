@@ -7,7 +7,7 @@
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues } from '../../../../../__mocks__';
+import { setMockValues } from '../../../../../__mocks__/kea_logic';
 import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
@@ -40,5 +40,27 @@ describe('ExampleStandoutResult', () => {
     const wrapper = shallow(<ExampleStandoutResult />);
 
     expect(wrapper.find('[data-test-subj="DefaultDescriptionLabel"]')).toHaveLength(1);
+  });
+
+  it('renders optional fields if they exist in result', () => {
+    setMockValues({
+      ...exampleResult,
+      exampleDocuments: [
+        {
+          myLink: 'http://foo',
+          otherTitle: 'foo',
+          otherType: 'File',
+          otherMediaType: 'PDF',
+          otherCreatedBy: 'bar',
+          otherUpdatedBy: 'baz',
+        },
+      ],
+    });
+    const wrapper = shallow(<ExampleStandoutResult />);
+
+    expect(wrapper.find('[data-test-subj="CreatedByField"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="UpdatedByField"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="TypeField"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="MediaTypeField"]')).toHaveLength(1);
   });
 });

@@ -10,8 +10,15 @@ import {
   ESGeoGridSourceDescriptor,
   ESSearchSourceDescriptor,
   LayerDescriptor,
+  VectorLayerDescriptor,
 } from '../../common/descriptor_types';
-import { LAYER_TYPE, RENDER_AS, SCALING_TYPES, SOURCE_TYPES } from '../../common';
+import {
+  GRID_RESOLUTION,
+  LAYER_TYPE,
+  RENDER_AS,
+  SCALING_TYPES,
+  SOURCE_TYPES,
+} from '../../common/constants';
 import {
   DEFAULT_EMS_DARKMAP_ID,
   DEFAULT_EMS_ROADMAP_DESATURATED_ID,
@@ -29,7 +36,6 @@ export enum TELEMETRY_LAYER_TYPE {
   ES_AGG_HEATMAP = 'es_agg_heatmap',
   EMS_REGION = 'ems_region',
   EMS_BASEMAP = 'ems_basemap',
-  KBN_REGION = 'kbn_region',
   KBN_TMS_RASTER = 'kbn_tms_raster',
   UX_TMS_RASTER = 'ux_tms_raster', // configured in the UX layer wizard of Maps
   UX_TMS_MVT = 'ux_tms_mvt', // configured in the UX layer wizard of Maps
@@ -73,6 +79,16 @@ export interface TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER {
   [TELEMETRY_TERM_JOIN]?: ClusterCountStats;
 }
 
+export enum TELEMETRY_GRID_RESOLUTION {
+  COARSE = 'coarse',
+  FINE = 'fine',
+  MOST_FINE = 'most_fine',
+  SUPER_FINE = 'super_fine',
+}
+export type TELEMETRY_GRID_RESOLUTION_COUNTS_PER_CLUSTER = {
+  [key in TELEMETRY_GRID_RESOLUTION]?: ClusterCountStats;
+};
+
 // These capture a particular "combo" of source and layer-settings.
 // They are mutually exclusive (ie. a layerDescriptor can only be a single telemetry_layer_type)
 // They are more useful from a telemetry-perspective than:
@@ -99,10 +115,6 @@ export function getTelemetryLayerType(
 
   if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.KIBANA_TILEMAP) {
     return TELEMETRY_LAYER_TYPE.KBN_TMS_RASTER;
-  }
-
-  if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.REGIONMAP_FILE) {
-    return TELEMETRY_LAYER_TYPE.KBN_REGION;
   }
 
   if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.EMS_XYZ) {
@@ -254,11 +266,46 @@ export function getTermJoinsPerCluster(
 ): TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER {
   return getCountsByCluster(layerLists, (layerDescriptor: LayerDescriptor) => {
     return layerDescriptor.type === LAYER_TYPE.VECTOR &&
-      layerDescriptor.joins &&
-      layerDescriptor.joins.length
+      (layerDescriptor as VectorLayerDescriptor)?.joins?.length
       ? TELEMETRY_TERM_JOIN
       : null;
   });
+}
+
+function getGridResolution(layerDescriptor: LayerDescriptor): TELEMETRY_GRID_RESOLUTION | null {
+  if (
+    !layerDescriptor.sourceDescriptor ||
+    layerDescriptor.sourceDescriptor.type !== SOURCE_TYPES.ES_GEO_GRID ||
+    !(layerDescriptor.sourceDescriptor as ESGeoGridSourceDescriptor).resolution
+  ) {
+    return null;
+  }
+
+  const descriptor = layerDescriptor.sourceDescriptor as ESGeoGridSourceDescriptor;
+
+  if (descriptor.resolution === GRID_RESOLUTION.COARSE) {
+    return TELEMETRY_GRID_RESOLUTION.COARSE;
+  }
+
+  if (descriptor.resolution === GRID_RESOLUTION.FINE) {
+    return TELEMETRY_GRID_RESOLUTION.FINE;
+  }
+
+  if (descriptor.resolution === GRID_RESOLUTION.MOST_FINE) {
+    return TELEMETRY_GRID_RESOLUTION.MOST_FINE;
+  }
+
+  if (descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
+    return TELEMETRY_GRID_RESOLUTION.SUPER_FINE;
+  }
+
+  return null;
+}
+
+export function getGridResolutionsPerCluster(
+  layerLists: LayerDescriptor[][]
+): TELEMETRY_GRID_RESOLUTION_COUNTS_PER_CLUSTER {
+  return getCountsByCluster(layerLists, getGridResolution);
 }
 
 export function getBaseMapsPerCluster(

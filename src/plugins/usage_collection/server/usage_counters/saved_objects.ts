@@ -6,24 +6,35 @@
  * Side Public License, v 1.
  */
 
-import {
+import type {
   SavedObject,
   SavedObjectsRepository,
   SavedObjectAttributes,
   SavedObjectsServiceSetup,
 } from 'kibana/server';
 import moment from 'moment';
-import { CounterMetric } from './usage_counter';
+import type { CounterMetric } from './usage_counter';
 
+/**
+ * The attributes stored in the UsageCounters' SavedObjects
+ */
 export interface UsageCountersSavedObjectAttributes extends SavedObjectAttributes {
+  /** The domain ID registered in the Usage Counter **/
   domainId: string;
+  /** The counter name **/
   counterName: string;
+  /** The counter type **/
   counterType: string;
+  /** Number of times the event has occurred **/
   count: number;
 }
 
+/**
+ * The structure of the SavedObjects of type "usage-counters"
+ */
 export type UsageCountersSavedObject = SavedObject<UsageCountersSavedObjectAttributes>;
 
+/** The Saved Objects type for Usage Counters **/
 export const USAGE_COUNTERS_SAVED_OBJECT_TYPE = 'usage-counters';
 
 export const registerUsageCountersSavedObjectType = (
@@ -42,13 +53,26 @@ export const registerUsageCountersSavedObjectType = (
   });
 };
 
+/**
+ * Parameters to the `serializeCounterKey` method
+ * @internal used in kibana_usage_collectors
+ */
 export interface SerializeCounterParams {
+  /** The domain ID registered in the UsageCounter **/
   domainId: string;
+  /** The counter name **/
   counterName: string;
+  /** The counter type **/
   counterType: string;
+  /** The date to which serialize the key **/
   date: moment.MomentInput;
 }
 
+/**
+ * Generates a key based on the UsageCounter details
+ * @internal used in kibana_usage_collectors
+ * @param opts {@link SerializeCounterParams}
+ */
 export const serializeCounterKey = ({
   domainId,
   counterName,

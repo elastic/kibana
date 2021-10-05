@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { EuiButtonEmpty, EuiFlyout } from '@elastic/eui';
+import { EuiHeaderLink, EuiFlyout } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FlyoutHome } from './flyout_home';
 import { JobSetupScreen } from './job_setup_screen';
@@ -50,12 +50,18 @@ export const AnomalyDetectionFlyout = () => {
 
   return (
     <>
-      <EuiButtonEmpty iconSide={'left'} iconType={'inspect'} onClick={openFlyout}>
+      <EuiHeaderLink
+        color="text"
+        iconSide={'left'}
+        iconType={'inspect'}
+        onClick={openFlyout}
+        data-test-subj="openAnomalyFlyoutButton"
+      >
         <FormattedMessage
           id="xpack.infra.ml.anomalyDetectionButton"
           defaultMessage="Anomaly detection"
         />
-      </EuiButtonEmpty>
+      </EuiHeaderLink>
       {showFlyout && (
         <MetricHostsModuleProvider
           indexPattern={source?.configuration.metricAlias ?? ''}

@@ -8,7 +8,7 @@
 import { KibanaRequest, Logger, RequestHandlerContext } from 'kibana/server';
 import { ExceptionListClient } from '../../../../lists/server';
 import { PluginStartContract as AlertsStartContract } from '../../../../alerting/server';
-import { SecurityPluginSetup } from '../../../../security/server';
+import { SecurityPluginStart } from '../../../../security/server';
 import { AppClientFactory } from '../../client';
 import { createDetectionIndex } from '../../lib/detection_engine/routes/index/create_index_route';
 import { createPrepackagedRules } from '../../lib/detection_engine/routes/rules/add_prepackaged_rules_route';
@@ -19,9 +19,11 @@ export interface InstallPrepackagedRulesProps {
   appClientFactory: AppClientFactory;
   context: RequestHandlerContext;
   request: KibanaRequest;
-  securitySetup: SecurityPluginSetup;
+  securityStart: SecurityPluginStart;
   alerts: AlertsStartContract;
   maxTimelineImportExportSize: number;
+  prebuiltRulesFromFileSystem: boolean;
+  prebuiltRulesFromSavedObjects: boolean;
   exceptionsClient: ExceptionListClient;
 }
 
@@ -34,9 +36,11 @@ export const installPrepackagedRules = async ({
   appClientFactory,
   context,
   request,
-  securitySetup,
+  securityStart,
   alerts,
   maxTimelineImportExportSize,
+  prebuiltRulesFromFileSystem,
+  prebuiltRulesFromSavedObjects,
   exceptionsClient,
 }: InstallPrepackagedRulesProps): Promise<void> => {
   // prep for detection rules creation
@@ -46,7 +50,7 @@ export const installPrepackagedRules = async ({
   // It doesn't have access to SecuritySolutionRequestHandlerContext in runtime.
   // Muting the error to have green CI.
   // @ts-expect-error
-  const frameworkRequest = await buildFrameworkRequest(context, securitySetup, request);
+  const frameworkRequest = await buildFrameworkRequest(context, securityStart, request);
 
   // Create detection index & rules (if necessary). move past any failure, this is just a convenience
   try {
@@ -67,9 +71,11 @@ export const installPrepackagedRules = async ({
       // @ts-expect-error
       context,
       appClient,
-      alerts.getAlertsClientWithRequest(request),
+      alerts.getRulesClientWithRequest(request),
       frameworkRequest,
       maxTimelineImportExportSize,
+      prebuiltRulesFromFileSystem,
+      prebuiltRulesFromSavedObjects,
       exceptionsClient
     );
   } catch (err) {

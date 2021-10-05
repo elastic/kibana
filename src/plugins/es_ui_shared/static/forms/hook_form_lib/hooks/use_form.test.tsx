@@ -10,7 +10,7 @@ import React, { useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, getRandomString, TestBed } from '../shared_imports';
-
+import { emptyField } from '../../helpers/field_validators';
 import { Form, UseField } from '../components';
 import {
   FormSubmitHandler,
@@ -18,7 +18,8 @@ import {
   FormHook,
   ValidationFunc,
   FieldConfig,
-} from '../types';
+  VALIDATION_TYPES,
+} from '..';
 import { useForm } from './use_form';
 
 interface MyForm {
@@ -499,6 +500,76 @@ describe('useForm() hook', () => {
 
       ({ isValid } = formHook!);
       expect(isValid).toBeUndefined(); // Make sure it is "undefined" and not "false".
+    });
+  });
+
+  describe('form.validate()', () => {
+    test('should not invalidate a field with arrayItem validation when validating a form', async () => {
+      const TestComp = () => {
+        const { form } = useForm();
+        formHook = form;
+
+        return (
+          <Form form={form}>
+            <UseField
+              path="test-path"
+              config={{
+                validations: [
+                  {
+                    validator: emptyField('error-message'),
+                    type: VALIDATION_TYPES.ARRAY_ITEM,
+                    isBlocking: false,
+                  },
+                ],
+              }}
+            />
+          </Form>
+        );
+      };
+
+      registerTestBed(TestComp)();
+
+      let isValid: boolean = false;
+
+      await act(async () => {
+        isValid = await formHook!.validate();
+      });
+
+      expect(isValid).toBe(true);
+    });
+
+    test('should invalidate a field with a blocking arrayItem validation when validating a form', async () => {
+      const TestComp = () => {
+        const { form } = useForm();
+        formHook = form;
+
+        return (
+          <Form form={form}>
+            <UseField
+              path="test-path"
+              config={{
+                validations: [
+                  {
+                    validator: emptyField('error-message'),
+                    type: VALIDATION_TYPES.ARRAY_ITEM,
+                    isBlocking: true,
+                  },
+                ],
+              }}
+            />
+          </Form>
+        );
+      };
+
+      registerTestBed(TestComp)();
+
+      let isValid: boolean = false;
+
+      await act(async () => {
+        isValid = await formHook!.validate();
+      });
+
+      expect(isValid).toBe(false);
     });
   });
 });

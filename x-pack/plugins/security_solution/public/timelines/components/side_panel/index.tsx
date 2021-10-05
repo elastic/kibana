@@ -8,23 +8,21 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiFlyout, EuiFlyoutProps } from '@elastic/eui';
-import styled from 'styled-components';
+
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { BrowserFields, DocValueFields } from '../../../common/containers/source';
-import { TimelineTabs } from '../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { EventDetailsPanel } from './event_details';
 import { HostDetailsPanel } from './host_details';
 import { NetworkDetailsPanel } from './network_details';
-
-const StyledEuiFlyout = styled(EuiFlyout)`
-  z-index: ${({ theme }) => theme.eui.euiZLevel7};
-`;
+import { EntityType } from '../../../../../timelines/common';
 
 interface DetailsPanelProps {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
+  entityType?: EntityType;
   handleOnPanelClosed?: () => void;
   isFlyoutView?: boolean;
   tabType?: TimelineTabs;
@@ -40,6 +38,7 @@ export const DetailsPanel = React.memo(
   ({
     browserFields,
     docValueFields,
+    entityType,
     handleOnPanelClosed,
     isFlyoutView,
     tabType,
@@ -71,14 +70,17 @@ export const DetailsPanel = React.memo(
     let visiblePanel = null; // store in variable to make return statement more readable
     let panelSize: EuiFlyoutProps['size'] = 's';
     const contextID = `${timelineId}-${activeTab}`;
+    const isDraggable = timelineId === TimelineId.active && activeTab === TimelineTabs.query;
     if (currentTabDetail?.panelView === 'eventDetail' && currentTabDetail?.params?.eventId) {
       panelSize = 'm';
       visiblePanel = (
         <EventDetailsPanel
           browserFields={browserFields}
           docValueFields={docValueFields}
+          entityType={entityType}
           expandedEvent={currentTabDetail?.params}
           handleOnEventClosed={closePanel}
+          isDraggable={isDraggable}
           isFlyoutView={isFlyoutView}
           tabType={activeTab}
           timelineId={timelineId}
@@ -92,6 +94,7 @@ export const DetailsPanel = React.memo(
           contextID={contextID}
           expandedHost={currentTabDetail?.params}
           handleOnHostClosed={closePanel}
+          isDraggable={isDraggable}
           isFlyoutView={isFlyoutView}
         />
       );
@@ -103,19 +106,21 @@ export const DetailsPanel = React.memo(
           contextID={contextID}
           expandedNetwork={currentTabDetail?.params}
           handleOnNetworkClosed={closePanel}
+          isDraggable={isDraggable}
           isFlyoutView={isFlyoutView}
         />
       );
     }
 
     return isFlyoutView ? (
-      <StyledEuiFlyout
+      <EuiFlyout
         data-test-subj="timeline:details-panel:flyout"
         size={panelSize}
         onClose={closePanel}
+        ownFocus={false}
       >
         {visiblePanel}
-      </StyledEuiFlyout>
+      </EuiFlyout>
     ) : (
       visiblePanel
     );

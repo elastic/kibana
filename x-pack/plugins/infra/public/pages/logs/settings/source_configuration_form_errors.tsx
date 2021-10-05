@@ -88,6 +88,16 @@ export const LogSourceConfigurationFormError: React.FC<{ error: FormValidationEr
         defaultMessage="The index pattern must not be a rollup index pattern."
       />
     );
+  } else if (error.type === 'missing_index_pattern') {
+    return (
+      <FormattedMessage
+        id="xpack.infra.logSourceConfiguration.missingIndexPatternErrorMessage"
+        defaultMessage="The index pattern {indexPatternId} must exist."
+        values={{
+          indexPatternId: <EuiCode>{error.indexPatternId}</EuiCode>,
+        }}
+      />
+    );
   } else {
     return null;
   }

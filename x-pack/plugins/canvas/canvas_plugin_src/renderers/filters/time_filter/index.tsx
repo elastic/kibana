@@ -19,6 +19,8 @@ import { RendererFactory } from '../../../../types';
 
 const { timeFilter: strings } = RendererStrings;
 
+const defaultTimeFilterExpression = 'timefilter column=@timestamp from=now-24h to=now';
+
 export const timeFilterFactory: StartInitializer<RendererFactory<Arguments>> = (core, plugins) => {
   const { uiSettings } = core;
 
@@ -38,9 +40,12 @@ export const timeFilterFactory: StartInitializer<RendererFactory<Arguments>> = (
     help: strings.getHelpDescription(),
     reuseDomNode: true, // must be true, otherwise popovers don't work
     render: async (domNode: HTMLElement, config: Arguments, handlers: RendererHandlers) => {
-      const filterExpression = handlers.getFilter();
+      let filterExpression = handlers.getFilter();
 
-      if (filterExpression !== '') {
+      if (filterExpression === undefined || filterExpression.indexOf('timefilter') !== 0) {
+        filterExpression = defaultTimeFilterExpression;
+        handlers.setFilter(filterExpression);
+      } else if (filterExpression !== '') {
         // NOTE: setFilter() will cause a data refresh, avoid calling unless required
         // compare expression and filter, update filter if needed
         const { changed, newAst } = syncFilterExpression(config, filterExpression, [

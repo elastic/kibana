@@ -22,8 +22,8 @@ describe('Upgrade Assistant Telemetry SavedObject UIOpen', () => {
 
       await upsertUIOpenOption({
         overview: true,
-        cluster: true,
-        indices: true,
+        elasticsearch: true,
+        kibana: true,
         savedObjects: { createInternalRepository: () => internalRepo } as any,
       });
 
@@ -31,17 +31,17 @@ describe('Upgrade Assistant Telemetry SavedObject UIOpen', () => {
       expect(internalRepo.incrementCounter).toHaveBeenCalledWith(
         UPGRADE_ASSISTANT_TYPE,
         UPGRADE_ASSISTANT_DOC_ID,
-        [`ui_open.overview`]
+        ['ui_open.overview']
       );
       expect(internalRepo.incrementCounter).toHaveBeenCalledWith(
         UPGRADE_ASSISTANT_TYPE,
         UPGRADE_ASSISTANT_DOC_ID,
-        [`ui_open.cluster`]
+        ['ui_open.elasticsearch']
       );
       expect(internalRepo.incrementCounter).toHaveBeenCalledWith(
         UPGRADE_ASSISTANT_TYPE,
         UPGRADE_ASSISTANT_DOC_ID,
-        [`ui_open.indices`]
+        ['ui_open.kibana']
       );
     });
   });

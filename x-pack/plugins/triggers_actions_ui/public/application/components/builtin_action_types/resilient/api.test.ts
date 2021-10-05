@@ -32,7 +32,7 @@ const incidentTypesResponse = {
     { id: 16, name: 'TBD / Unknown' },
     { id: 15, name: 'Vendor / 3rd party error' },
   ],
-  actionId: 'test',
+  actionId: 'te/st',
 };
 
 const severityResponse = {
@@ -42,7 +42,7 @@ const severityResponse = {
     { id: 5, name: 'Medium' },
     { id: 6, name: 'High' },
   ],
-  actionId: 'test',
+  actionId: 'te/st',
 };
 
 describe('Resilient API', () => {
@@ -57,11 +57,11 @@ describe('Resilient API', () => {
       const res = await getIncidentTypes({
         http,
         signal: abortCtrl.signal,
-        connectorId: 'test',
+        connectorId: 'te/st',
       });
 
       expect(res).toEqual(incidentTypesResponse);
-      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/test/_execute', {
+      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/te%2Fst/_execute', {
         body: '{"params":{"subAction":"incidentTypes","subActionParams":{}}}',
         signal: abortCtrl.signal,
       });
@@ -75,11 +75,11 @@ describe('Resilient API', () => {
       const res = await getSeverity({
         http,
         signal: abortCtrl.signal,
-        connectorId: 'test',
+        connectorId: 'te/st',
       });
 
       expect(res).toEqual(severityResponse);
-      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/test/_execute', {
+      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/te%2Fst/_execute', {
         body: '{"params":{"subAction":"severity","subActionParams":{}}}',
         signal: abortCtrl.signal,
       });

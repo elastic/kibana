@@ -23,11 +23,13 @@ const transformConnector: RewriteRequestCase<
   connector_type_id: actionTypeId,
   is_preconfigured: isPreconfigured,
   referenced_by_count: referencedByCount,
+  is_missing_secrets: isMissingSecrets,
   ...res
 }) => ({
   actionTypeId,
   isPreconfigured,
   referencedByCount,
+  isMissingSecrets,
   ...res,
 });
 

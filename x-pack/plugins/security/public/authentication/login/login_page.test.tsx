@@ -14,7 +14,7 @@ import { coreMock } from 'src/core/public/mocks';
 
 import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import type { LoginState } from '../../../common/login_state';
-import { DisabledLoginForm, LoginForm } from './components';
+import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
 import { LoginPage } from './login_page';
 
 const createLoginState = (options?: Partial<LoginState>) => {
@@ -228,9 +228,12 @@ describe('LoginPage', () => {
         resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
       });
 
-      const { authProviderHint, infoMessage } = wrapper.find(LoginForm).props();
+      const { authProviderHint, message } = wrapper.find(LoginForm).props();
       expect(authProviderHint).toBe('basic1');
-      expect(infoMessage).toBe('Your session has timed out. Please log in again.');
+      expect(message).toEqual({
+        type: LoginFormMessageType.Info,
+        content: 'Your session has timed out. Please log in again.',
+      });
     });
 
     it('renders as expected when loginAssistanceMessage is set', async () => {

@@ -18,6 +18,9 @@ export default ({ getService, getPageObjects }) => {
       await browser.setWindowSize(1200, 800);
       await PageObjects.common.navigateToApp('home');
     });
+    after(async function () {
+      await PageObjects.common.dismissBanner();
+    });
 
     it('should show banner Help us improve the Elastic Stack', async () => {
       const actualMessage = await PageObjects.common.getWelcomeText();

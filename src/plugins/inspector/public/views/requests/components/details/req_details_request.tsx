@@ -26,6 +26,11 @@ export class RequestDetailsRequest extends Component<RequestDetailsProps> {
       return null;
     }
 
-    return <RequestCodeViewer json={JSON.stringify(json, null, 2)} />;
+    return (
+      <RequestCodeViewer
+        indexPattern={this.props.request.stats?.indexPattern?.value}
+        json={JSON.stringify(json, null, 2)}
+      />
+    );
   }
 }

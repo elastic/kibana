@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { of } from 'rxjs';
+
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -22,6 +24,14 @@ import type { FleetAppContext } from '../plugin';
 export * from '../services/artifacts/mocks';
 
 export const createAppContextStartContractMock = (): FleetAppContext => {
+  const config = {
+    agents: { enabled: true, elasticsearch: {} },
+    enabled: true,
+    agentIdVerificationEnabled: true,
+  };
+
+  const config$ = of(config);
+
   return {
     elasticsearch: elasticsearchServiceMock.createStart(),
     data: dataPluginMock.createStartContract(),
@@ -30,6 +40,12 @@ export const createAppContextStartContractMock = (): FleetAppContext => {
     security: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
     isProductionMode: true,
+    configInitialValue: {
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+      agentIdVerificationEnabled: true,
+    },
+    config$,
     kibanaVersion: '8.0.0',
     kibanaBranch: 'master',
   };
@@ -46,7 +62,7 @@ export const xpackMocks = {
   createRequestHandlerContext: createCoreRequestHandlerContextMock,
 };
 
-export const createPackagePolicyServiceMock = () => {
+export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServiceInterface> => {
   return {
     compilePackagePolicyInputs: jest.fn(),
     buildPackagePolicyFromPackage: jest.fn(),
@@ -59,7 +75,11 @@ export const createPackagePolicyServiceMock = () => {
     listIds: jest.fn(),
     update: jest.fn(),
     runExternalCallbacks: jest.fn(),
-  } as jest.Mocked<PackagePolicyServiceInterface>;
+    runDeleteExternalCallbacks: jest.fn(),
+    upgrade: jest.fn(),
+    getUpgradeDryRunDiff: jest.fn(),
+    getUpgradePackagePolicyInfo: jest.fn(),
+  };
 };
 
 /**
@@ -72,6 +92,7 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
     list: jest.fn(),
     getDefaultAgentPolicyId: jest.fn(),
     getFullAgentPolicy: jest.fn(),
+    getByIds: jest.fn(),
   };
 };
 
@@ -81,6 +102,7 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
 export const createMockAgentService = (): jest.Mocked<AgentService> => {
   return {
     getAgentStatusById: jest.fn(),
+    getAgentStatusForAgentPolicy: jest.fn(),
     authenticateAgentWithAccessToken: jest.fn(),
     getAgent: jest.fn(),
     listAgents: jest.fn(),

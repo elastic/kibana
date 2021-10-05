@@ -11,6 +11,7 @@ import { HttpStart } from 'src/core/public';
 import { IImporter, ImportFactoryOptions } from '../importer';
 import { getHttp } from '../kibana_services';
 import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/public';
+import { IndexNameFormProps } from '../';
 
 export interface FileUploadGeoResults {
   indexPatternId: string;
@@ -23,15 +24,17 @@ export interface FileUploadComponentProps {
   isIndexingTriggered: boolean;
   onFileSelect: (geojsonFile: FeatureCollection, name: string, previewCoverage: number) => void;
   onFileClear: () => void;
-  onIndexReady: (indexReady: boolean) => void;
+  enableImportBtn: () => void;
+  disableImportBtn: () => void;
   onUploadComplete: (results: FileUploadGeoResults) => void;
   onUploadError: () => void;
 }
 
 let loadModulesPromise: Promise<LazyLoadedFileUploadModules>;
 
-interface LazyLoadedFileUploadModules {
+export interface LazyLoadedFileUploadModules {
   JsonUploadAndParse: React.ComponentType<FileUploadComponentProps>;
+  IndexNameForm: React.ComponentType<IndexNameFormProps>;
   importerFactory: (format: string, options: ImportFactoryOptions) => IImporter | undefined;
   getHttp: () => HttpStart;
 }
@@ -41,14 +44,18 @@ export async function lazyLoadModules(): Promise<LazyLoadedFileUploadModules> {
     return loadModulesPromise;
   }
 
-  loadModulesPromise = new Promise(async (resolve) => {
-    const { JsonUploadAndParse, importerFactory } = await import('./lazy');
-
-    resolve({
-      JsonUploadAndParse,
-      importerFactory,
-      getHttp,
-    });
+  loadModulesPromise = new Promise(async (resolve, reject) => {
+    try {
+      const { JsonUploadAndParse, importerFactory, IndexNameForm } = await import('./lazy');
+      resolve({
+        JsonUploadAndParse,
+        importerFactory,
+        getHttp,
+        IndexNameForm,
+      });
+    } catch (error) {
+      reject(error);
+    }
   });
   return loadModulesPromise;
 }

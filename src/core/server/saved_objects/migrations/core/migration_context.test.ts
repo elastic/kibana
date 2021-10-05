@@ -31,7 +31,7 @@ describe('disableUnknownTypeMappingFields', () => {
         },
       },
     },
-  };
+  } as const;
   const activeMappings = {
     _meta: {
       migrationMappingPropertyHashes: {
@@ -46,7 +46,7 @@ describe('disableUnknownTypeMappingFields', () => {
         },
       },
     },
-  };
+  } as const;
   const targetMappings = disableUnknownTypeMappingFields(activeMappings, sourceMappings);
 
   it('disables complex field mappings from unknown types in the source mappings', () => {
@@ -73,5 +73,19 @@ describe('disableUnknownTypeMappingFields', () => {
         known_type: 'md5hash',
       },
     });
+  });
+
+  it('does not fail if the source mapping does not have `properties` defined', () => {
+    const missingPropertiesMappings = {
+      ...sourceMappings,
+      properties: undefined,
+    };
+    const result = disableUnknownTypeMappingFields(
+      activeMappings,
+      // @ts-expect-error `properties` should not be undefined
+      missingPropertiesMappings
+    );
+
+    expect(Object.keys(result.properties)).toEqual(['known_type']);
   });
 });

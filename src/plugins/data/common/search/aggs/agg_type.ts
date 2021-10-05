@@ -215,6 +215,10 @@ export class AggType<
     return agg.id;
   };
 
+  splitForTimeShift(agg: TAggConfig, aggs: IAggConfigs) {
+    return false;
+  }
+
   /**
    * Generic AggType Constructor
    *

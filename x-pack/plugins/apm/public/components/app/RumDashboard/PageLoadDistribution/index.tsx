@@ -34,11 +34,11 @@ export function PageLoadDistribution() {
     services: { http },
   } = useKibana();
 
-  const { urlParams, uiFilters } = useUrlParams();
+  const { urlParams, uxUiFilters } = useUrlParams();
 
   const { start, end, rangeFrom, rangeTo, searchTerm } = urlParams;
 
-  const { serviceName } = uiFilters;
+  const { serviceName } = uxUiFilters;
 
   const [percentileRange, setPercentileRange] = useState<PercentileRange>({
     min: null,
@@ -56,7 +56,7 @@ export function PageLoadDistribution() {
             query: {
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters),
+              uiFilters: JSON.stringify(uxUiFilters),
               urlQuery: searchTerm,
               ...(percentileRange.min && percentileRange.max
                 ? {
@@ -73,7 +73,7 @@ export function PageLoadDistribution() {
     [
       end,
       start,
-      uiFilters,
+      uxUiFilters,
       percentileRange.min,
       percentileRange.max,
       searchTerm,
@@ -87,17 +87,23 @@ export function PageLoadDistribution() {
 
   const exploratoryViewLink = createExploratoryViewUrl(
     {
-      [`${serviceName}-page-views`]: {
-        reportType: 'pld',
-        time: { from: rangeFrom!, to: rangeTo! },
-        reportDefinitions: {
-          'service.name': serviceName?.[0] as string,
+      reportType: 'kpi-over-time',
+      allSeries: [
+        {
+          name: `${serviceName}-page-views`,
+          dataType: 'ux',
+          time: { from: rangeFrom!, to: rangeTo! },
+          reportDefinitions: {
+            'service.name': serviceName as string[],
+          },
+          ...(breakdown ? { breakdown: breakdown.fieldName } : {}),
         },
-        ...(breakdown ? { breakdown: breakdown.fieldName } : {}),
-      },
+      ],
     },
     http?.basePath.get()
   );
+
+  const showAnalyzeButton = false;
 
   return (
     <div data-cy="pageLoadDist">
@@ -118,18 +124,20 @@ export function PageLoadDistribution() {
             dataTestSubj={'pldBreakdownFilter'}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            isDisabled={!serviceName?.[0]}
-            href={exploratoryViewLink}
-          >
-            <FormattedMessage
-              id="xpack.apm.csm.pageViews.analyze"
-              defaultMessage="Analyze"
-            />
-          </EuiButton>
-        </EuiFlexItem>
+        {showAnalyzeButton && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              isDisabled={!serviceName?.[0]}
+              href={exploratoryViewLink}
+            >
+              <FormattedMessage
+                id="xpack.apm.csm.pageViews.analyze"
+                defaultMessage="Analyze"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <PageLoadDistChart

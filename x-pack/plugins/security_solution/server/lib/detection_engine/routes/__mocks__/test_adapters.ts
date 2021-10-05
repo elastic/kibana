@@ -17,7 +17,10 @@ interface ResponseCall {
   status: number;
 }
 
-interface Response extends ResponseCall {
+/**
+ * @internal
+ */
+export interface Response extends ResponseCall {
   calls: ResponseCall[];
 }
 

@@ -67,7 +67,6 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
         >
           <span
             className="euiToolTipAnchor"
-            onKeyUp={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
@@ -84,6 +83,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="pencil"
                 size="m"
               />
@@ -95,7 +95,6 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
         >
           <span
             className="euiToolTipAnchor"
-            onKeyUp={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
@@ -112,6 +111,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="trash"
                 size="m"
               />
@@ -176,7 +176,6 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
         >
           <span
             className="euiToolTipAnchor"
-            onKeyUp={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
@@ -193,6 +192,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="pencil"
                 size="m"
               />
@@ -204,7 +204,6 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
         >
           <span
             className="euiToolTipAnchor"
-            onKeyUp={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
@@ -221,6 +220,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="trash"
                 size="m"
               />
@@ -285,7 +285,6 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
         >
           <span
             className="euiToolTipAnchor"
-            onKeyUp={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
@@ -302,6 +301,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="pencil"
                 size="m"
               />
@@ -313,7 +313,6 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
         >
           <span
             className="euiToolTipAnchor"
-            onKeyUp={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
@@ -330,6 +329,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="trash"
                 size="m"
               />

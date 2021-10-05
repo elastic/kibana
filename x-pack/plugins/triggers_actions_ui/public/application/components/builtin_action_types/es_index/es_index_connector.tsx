@@ -74,6 +74,8 @@ const IndexActionConnectorFields: React.FunctionComponent<
     indexPatternsFunction();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const isIndexInvalid: boolean =
+    errors.index !== undefined && errors.index.length > 0 && index !== undefined;
 
   return (
     <>
@@ -95,7 +97,7 @@ const IndexActionConnectorFields: React.FunctionComponent<
             defaultMessage="Index"
           />
         }
-        isInvalid={errors.index.length > 0 && index !== undefined}
+        isInvalid={isIndexInvalid}
         error={errors.index}
         helpText={
           <>
@@ -118,7 +120,7 @@ const IndexActionConnectorFields: React.FunctionComponent<
           singleSelection={{ asPlainText: true }}
           async
           isLoading={isIndiciesLoading}
-          isInvalid={errors.index.length > 0 && index !== undefined}
+          isInvalid={isIndexInvalid}
           noSuggestions={!indexOptions.length}
           options={indexOptions}
           data-test-subj="connectorIndexesComboBox"

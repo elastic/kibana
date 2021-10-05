@@ -17,6 +17,8 @@ export { TODO_EMBEDDABLE, TodoEmbeddableFactory } from './todo';
 
 export { BOOK_EMBEDDABLE } from './book';
 
+export { SIMPLE_EMBEDDABLE } from './migrations';
+
 import { EmbeddableExamplesPlugin } from './plugin';
 
 export {

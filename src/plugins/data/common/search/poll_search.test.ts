@@ -20,11 +20,13 @@ describe('pollSearch', () => {
           resolve({
             isRunning: false,
             isPartial: finishWithError,
+            rawResponse: {},
           });
         } else {
           resolve({
             isRunning: true,
             isPartial: true,
+            rawResponse: {},
           });
         }
       });

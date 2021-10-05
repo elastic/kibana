@@ -231,19 +231,18 @@ export class ReindexWorker {
  * Swallows any exceptions that may occur during the reindex process. This prevents any errors from
  * stopping the worker from continuing to process more jobs.
  */
-const swallowExceptions = (
-  func: (reindexOp: ReindexSavedObject) => Promise<ReindexSavedObject>,
-  log: Logger
-) => async (reindexOp: ReindexSavedObject) => {
-  try {
-    return await func(reindexOp);
-  } catch (e) {
-    if (reindexOp.attributes.locked) {
-      log.debug(`Skipping reindexOp with unexpired lock: ${reindexOp.id}`);
-    } else {
-      log.warn(`Error when trying to process reindexOp (${reindexOp.id}): ${e.toString()}`);
-    }
+const swallowExceptions =
+  (func: (reindexOp: ReindexSavedObject) => Promise<ReindexSavedObject>, log: Logger) =>
+  async (reindexOp: ReindexSavedObject) => {
+    try {
+      return await func(reindexOp);
+    } catch (e) {
+      if (reindexOp.attributes.locked) {
+        log.debug(`Skipping reindexOp with unexpired lock: ${reindexOp.id}`);
+      } else {
+        log.warn(`Error when trying to process reindexOp (${reindexOp.id}): ${e.toString()}`);
+      }
 
-    return reindexOp;
-  }
-};
+      return reindexOp;
+    }
+  };

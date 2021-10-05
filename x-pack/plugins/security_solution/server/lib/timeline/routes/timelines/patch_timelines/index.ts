@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_URL } from '../../../../../../common/constants';
@@ -13,7 +14,7 @@ import { SetupPlugins } from '../../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { ConfigType } from '../../../../..';
 
-import { transformError, buildSiemResponse } from '../../../../detection_engine/routes/utils';
+import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { patchTimelineSchema } from '../../../schemas/timelines/patch_timelines_schema';
 import { buildFrameworkRequest, TimelineStatusActions } from '../../../utils/common';
@@ -41,13 +42,8 @@ export const patchTimelinesRoute = (
       try {
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
         const { timelineId, timeline, version } = request.body;
-        const {
-          templateTimelineId,
-          templateTimelineVersion,
-          timelineType,
-          title,
-          status,
-        } = timeline;
+        const { templateTimelineId, templateTimelineVersion, timelineType, title, status } =
+          timeline;
 
         const compareTimelinesStatus = new CompareTimelinesStatus({
           status,

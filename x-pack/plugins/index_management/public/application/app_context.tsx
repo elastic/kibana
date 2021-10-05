@@ -7,6 +7,7 @@
 
 import React, { createContext, useContext } from 'react';
 import { ScopedHistory } from 'kibana/public';
+import { SemVer } from 'semver';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
@@ -35,8 +36,9 @@ export interface AppDependencies {
   history: ScopedHistory;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   uiSettings: CoreSetup['uiSettings'];
-  urlGenerators: SharePluginStart['urlGenerators'];
+  url: SharePluginStart['url'];
   docLinks: CoreStart['docLinks'];
+  kibanaVersion: SemVer;
 }
 
 export const AppContextProvider = ({

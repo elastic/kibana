@@ -25,6 +25,10 @@ describe('TaskManagerPlugin', () => {
         max_poll_inactivity_cycles: 10,
         request_capacity: 1000,
         monitored_aggregated_stats_refresh_rate: 5000,
+        monitored_stats_health_verbose_log: {
+          enabled: false,
+          warn_delayed_task_start_in_seconds: 60,
+        },
         monitored_stats_required_freshness: 5000,
         monitored_stats_running_average_window: 50,
         monitored_task_execution_thresholds: {
@@ -34,12 +38,21 @@ describe('TaskManagerPlugin', () => {
           },
           custom: {},
         },
+        ephemeral_tasks: {
+          enabled: false,
+          request_capacity: 10,
+        },
+        unsafe: {
+          exclude_task_types: [],
+        },
       });
 
       pluginInitializerContext.env.instanceUuid = '';
 
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
-      expect(() => taskManagerPlugin.setup(coreMock.createSetup())).toThrow(
+      expect(() =>
+        taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined })
+      ).toThrow(
         new Error(`TaskManager is unable to start as Kibana has no valid UUID assigned to it.`)
       );
     });
@@ -55,6 +68,10 @@ describe('TaskManagerPlugin', () => {
         max_poll_inactivity_cycles: 10,
         request_capacity: 1000,
         monitored_aggregated_stats_refresh_rate: 5000,
+        monitored_stats_health_verbose_log: {
+          enabled: false,
+          warn_delayed_task_start_in_seconds: 60,
+        },
         monitored_stats_required_freshness: 5000,
         monitored_stats_running_average_window: 50,
         monitored_task_execution_thresholds: {
@@ -64,11 +81,20 @@ describe('TaskManagerPlugin', () => {
           },
           custom: {},
         },
+        ephemeral_tasks: {
+          enabled: true,
+          request_capacity: 10,
+        },
+        unsafe: {
+          exclude_task_types: [],
+        },
       });
 
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
 
-      const setupApi = await taskManagerPlugin.setup(coreMock.createSetup());
+      const setupApi = await taskManagerPlugin.setup(coreMock.createSetup(), {
+        usageCollection: undefined,
+      });
 
       // we only start a poller if we have task types that we support and we track
       // phases (moving from Setup to Start) based on whether the poller is working
@@ -100,6 +126,48 @@ describe('TaskManagerPlugin', () => {
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"Cannot register task definitions after the task manager has started"`
+      );
+    });
+
+    test('it logs a warning when the unsafe `exclude_task_types` config is used', async () => {
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
+        enabled: true,
+        max_workers: 10,
+        index: 'foo',
+        max_attempts: 9,
+        poll_interval: 3000,
+        version_conflict_threshold: 80,
+        max_poll_inactivity_cycles: 10,
+        request_capacity: 1000,
+        monitored_aggregated_stats_refresh_rate: 5000,
+        monitored_stats_health_verbose_log: {
+          enabled: false,
+          warn_delayed_task_start_in_seconds: 60,
+        },
+        monitored_stats_required_freshness: 5000,
+        monitored_stats_running_average_window: 50,
+        monitored_task_execution_thresholds: {
+          default: {
+            error_threshold: 90,
+            warn_threshold: 80,
+          },
+          custom: {},
+        },
+        ephemeral_tasks: {
+          enabled: false,
+          request_capacity: 10,
+        },
+        unsafe: {
+          exclude_task_types: ['*'],
+        },
+      });
+
+      const logger = pluginInitializerContext.logger.get();
+      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
+      taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
+      expect((logger.warn as jest.Mock).mock.calls.length).toBe(1);
+      expect((logger.warn as jest.Mock).mock.calls[0][0]).toBe(
+        'Excluding task types from execution: *'
       );
     });
   });

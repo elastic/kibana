@@ -37,4 +37,13 @@ describe('add_tags', () => {
       `${INTERNAL_IMMUTABLE_KEY}:false`,
     ]);
   });
+
+  test('it should overwrite existing immutable tag if it exists', () => {
+    const tags1 = addTags(['tag-1', `${INTERNAL_IMMUTABLE_KEY}:true`], 'rule-1', false);
+    expect(tags1).toEqual([
+      'tag-1',
+      `${INTERNAL_RULE_ID_KEY}:rule-1`,
+      `${INTERNAL_IMMUTABLE_KEY}:false`,
+    ]);
+  });
 });

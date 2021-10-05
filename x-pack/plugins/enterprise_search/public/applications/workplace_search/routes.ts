@@ -13,7 +13,6 @@ export const SETUP_GUIDE_PATH = '/setup_guide';
 
 export const NOT_FOUND_PATH = '/404';
 export const LOGOUT_ROUTE = '/logout';
-export const KIBANA_ACCOUNT_ROUTE = '/security/account';
 
 export const LEAVE_FEEDBACK_EMAIL = 'support@elastic.co';
 export const LEAVE_FEEDBACK_URL = `mailto:${LEAVE_FEEDBACK_EMAIL}?Subject=Elastic%20Workplace%20Search%20Feedback`;
@@ -46,23 +45,26 @@ export const CUSTOM_SOURCE_DOCS_URL = `${DOCS_PREFIX}/workplace-search-custom-ap
 export const CUSTOM_API_DOCS_URL = `${DOCS_PREFIX}/workplace-search-custom-sources-api.html`;
 export const CUSTOM_API_DOCUMENT_PERMISSIONS_DOCS_URL = `${CUSTOM_SOURCE_DOCS_URL}#custom-api-source-document-level-access-control`;
 export const ENT_SEARCH_LICENSE_MANAGEMENT = `${docLinks.enterpriseSearchBase}/license-management.html`;
+export const SYNCHRONIZATION_DOCS_URL = '#TODO';
+export const DIFFERENT_SYNC_TYPES_DOCS_URL = '#TODO';
+export const SYNC_BEST_PRACTICES_DOCS_URL = '#TODO';
+export const OBJECTS_AND_ASSETS_DOCS_URL = '#TODO';
 
 export const PERSONAL_PATH = '/p';
 
-export const ROLE_MAPPINGS_PATH = '/role_mappings';
-export const ROLE_MAPPING_PATH = `${ROLE_MAPPINGS_PATH}/:roleId`;
-export const ROLE_MAPPING_NEW_PATH = `${ROLE_MAPPINGS_PATH}/new`;
+export const OAUTH_AUTHORIZE_PATH = `${PERSONAL_PATH}/oauth/authorize`;
+export const SEARCH_AUTHORIZE_PATH = `${PERSONAL_PATH}/authorize_search`;
 
-export const USERS_PATH = '/users';
+export const USERS_AND_ROLES_PATH = '/users_and_roles';
+
 export const SECURITY_PATH = '/security';
 
 export const GROUPS_PATH = '/groups';
 export const GROUP_PATH = `${GROUPS_PATH}/:groupId`;
 export const GROUP_SOURCE_PRIORITIZATION_PATH = `${GROUPS_PATH}/:groupId/source_prioritization`;
 
-export const ALPHA_PATH = '/alpha';
 export const SOURCES_PATH = '/sources';
-export const PERSONAL_SOURCES_PATH = `${PERSONAL_PATH}${SOURCES_PATH}`;
+export const PRIVATE_SOURCES_PATH = `${PERSONAL_PATH}${SOURCES_PATH}`;
 
 export const SOURCE_ADDED_PATH = `${SOURCES_PATH}/added`;
 export const ADD_SOURCE_PATH = `${SOURCES_PATH}/add`;
@@ -91,11 +93,16 @@ export const SOURCE_DETAILS_PATH = `${SOURCES_PATH}/:sourceId`;
 export const SOURCE_CONTENT_PATH = `${SOURCES_PATH}/:sourceId/content`;
 export const SOURCE_SCHEMAS_PATH = `${SOURCES_PATH}/:sourceId/schemas`;
 export const SOURCE_DISPLAY_SETTINGS_PATH = `${SOURCES_PATH}/:sourceId/display_settings`;
+export const SOURCE_SYNCHRONIZATION_PATH = `${SOURCES_PATH}/:sourceId/synchronization`;
 export const SOURCE_SETTINGS_PATH = `${SOURCES_PATH}/:sourceId/settings`;
-export const REINDEX_JOB_PATH = `${SOURCES_PATH}/:sourceId/schema_errors/:activeReindexJobId`;
+export const REINDEX_JOB_PATH = `${SOURCE_SCHEMAS_PATH}/:activeReindexJobId`;
 
 export const DISPLAY_SETTINGS_SEARCH_RESULT_PATH = `${SOURCE_DISPLAY_SETTINGS_PATH}/`;
 export const DISPLAY_SETTINGS_RESULT_DETAIL_PATH = `${SOURCE_DISPLAY_SETTINGS_PATH}/result_detail`;
+
+export const SYNC_FREQUENCY_PATH = `${SOURCE_SYNCHRONIZATION_PATH}/frequency`;
+export const BLOCKED_TIME_WINDOWS_PATH = `${SOURCE_SYNCHRONIZATION_PATH}/frequency/blocked_windows`;
+export const OBJECTS_AND_ASSETS_PATH = `${SOURCE_SYNCHRONIZATION_PATH}/objects_and_assets`;
 
 export const ORG_SETTINGS_PATH = '/settings';
 export const ORG_SETTINGS_CUSTOMIZE_PATH = `${ORG_SETTINGS_PATH}/customize`;
@@ -136,4 +143,3 @@ export const getReindexJobRoute = (
   isOrganization: boolean
 ) =>
   getSourcesPath(generatePath(REINDEX_JOB_PATH, { sourceId, activeReindexJobId }), isOrganization);
-export const getRoleMappingPath = (roleId: string) => generatePath(ROLE_MAPPING_PATH, { roleId });

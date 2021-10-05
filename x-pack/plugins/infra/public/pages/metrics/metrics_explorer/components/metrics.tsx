@@ -69,6 +69,7 @@ export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = 
 
   return (
     <EuiComboBox
+      data-test-subj="metricsExplorer-metrics"
       aria-label={placeholderText}
       isDisabled={options.aggregation === 'count'}
       placeholder={placeholderText}

@@ -6,11 +6,32 @@
  * Side Public License, v 1.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110893
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { PresentationUtilPlugin } from './plugin';
+
+export {
+  PresentationCapabilitiesService,
+  PresentationDashboardsService,
+  PresentationLabsService,
+  getStubPluginServices,
+} from './services';
+
+export {
+  KibanaPluginServiceFactory,
+  PluginServiceFactory,
+  PluginServices,
+  PluginServiceProviders,
+  PluginServiceProvider,
+  PluginServiceRegistry,
+  KibanaPluginServiceParams,
+} from './services/create';
 
 export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
 export { SaveModalDashboardProps } from './components/types';
 export { projectIDs, ProjectID, Project } from '../common/labs';
+export * from '../common/lib';
 
 export {
   LazyLabsBeakerButton,
@@ -19,6 +40,8 @@ export {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from './components';
+
+export * from './components/types';
 
 export {
   AddFromLibraryButton,
@@ -34,3 +57,7 @@ export {
 export function plugin() {
   return new PresentationUtilPlugin();
 }
+
+import { pluginServices } from './services';
+
+export const useLabs = () => (() => pluginServices.getHooks().labs.useService())();

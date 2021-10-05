@@ -5,43 +5,49 @@
  * 2.0.
  */
 
-import { useUrlStorage } from './use_url_storage';
-import { UrlFilter } from '../types';
+import { useSeriesStorage } from './use_series_storage';
+import { SeriesUrl, UrlFilter } from '../types';
 
 export interface UpdateFilter {
   field: string;
-  value: string;
+  value: string | string[];
   negate?: boolean;
 }
 
-export const useSeriesFilters = ({ seriesId }: { seriesId: string }) => {
-  const { series, setSeries } = useUrlStorage(seriesId);
+export const useSeriesFilters = ({ seriesId, series }: { seriesId: number; series: SeriesUrl }) => {
+  const { setSeries } = useSeriesStorage();
 
   const filters = series.filters ?? [];
 
   const removeFilter = ({ field, value, negate }: UpdateFilter) => {
-    const filtersN = filters.map((filter) => {
-      if (filter.field === field) {
-        if (negate) {
-          const notValuesN = filter.notValues?.filter((val) => val !== value);
-          return { ...filter, notValues: notValuesN };
-        } else {
-          const valuesN = filter.values?.filter((val) => val !== value);
-          return { ...filter, values: valuesN };
+    const filtersN = filters
+      .map((filter) => {
+        if (filter.field === field) {
+          if (negate) {
+            const notValuesN = filter.notValues?.filter((val) =>
+              value instanceof Array ? !value.includes(val) : val !== value
+            );
+            return { ...filter, notValues: notValuesN };
+          } else {
+            const valuesN = filter.values?.filter((val) =>
+              value instanceof Array ? !value.includes(val) : val !== value
+            );
+            return { ...filter, values: valuesN };
+          }
         }
-      }
 
-      return filter;
-    });
+        return filter;
+      })
+      .filter(({ values = [], notValues = [] }) => values.length > 0 || notValues.length > 0);
     setSeries(seriesId, { ...series, filters: filtersN });
   };
 
   const addFilter = ({ field, value, negate }: UpdateFilter) => {
     const currFilter: UrlFilter = { field };
     if (negate) {
-      currFilter.notValues = [value];
+      currFilter.notValues = value instanceof Array ? value : [value];
     } else {
-      currFilter.values = [value];
+      currFilter.values = value instanceof Array ? value : [value];
     }
     if (filters.length === 0) {
       setSeries(seriesId, { ...series, filters: [currFilter] });
@@ -61,13 +67,26 @@ export const useSeriesFilters = ({ seriesId }: { seriesId: string }) => {
     const currNotValues = currFilter.notValues ?? [];
     const currValues = currFilter.values ?? [];
 
-    const notValues = currNotValues.filter((val) => val !== value);
-    const values = currValues.filter((val) => val !== value);
+    const notValues = currNotValues.filter((val) =>
+      value instanceof Array ? !value.includes(val) : val !== value
+    );
+
+    const values = currValues.filter((val) =>
+      value instanceof Array ? !value.includes(val) : val !== value
+    );
 
     if (negate) {
-      notValues.push(value);
+      if (value instanceof Array) {
+        notValues.push(...value);
+      } else {
+        notValues.push(value);
+      }
     } else {
-      values.push(value);
+      if (value instanceof Array) {
+        values.push(...value);
+      } else {
+        values.push(value);
+      }
     }
 
     currFilter.notValues = notValues.length > 0 ? notValues : undefined;

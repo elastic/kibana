@@ -222,11 +222,11 @@ export class JobCreator {
   }
 
   public get description(): string {
-    return this._job_config.description;
+    return this._job_config.description ?? '';
   }
 
   public get groups(): string[] {
-    return this._job_config.groups;
+    return this._job_config.groups ?? [];
   }
 
   public set groups(groups: string[]) {
@@ -287,6 +287,7 @@ export class JobCreator {
     if (enable) {
       this._job_config.results_index_name = this._job_config.job_id;
     } else {
+      // @ts-expect-error The operand of a 'delete' operator must be optional
       delete this._job_config.results_index_name;
     }
   }
@@ -394,6 +395,9 @@ export class JobCreator {
     // change the detector to be a non-zer or non-null count or sum.
     // note, the aggregations will always be a standard count or sum and not a non-null or non-zero version
     this._detectors.forEach((d, i) => {
+      if (this._aggs[i] === undefined) {
+        return;
+      }
       switch (this._aggs[i].id) {
         case ML_JOB_AGGREGATION.COUNT:
           d.function = this._sparseData

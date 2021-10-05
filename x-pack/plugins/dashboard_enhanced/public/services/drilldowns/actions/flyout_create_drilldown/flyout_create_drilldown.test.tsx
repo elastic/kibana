@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Subject } from 'rxjs';
 import {
   FlyoutCreateDrilldownAction,
   OpenFlyoutAddDrilldownParams,
@@ -22,6 +23,9 @@ const actionParams: OpenFlyoutAddDrilldownParams = {
   start: () => ({
     core: {
       overlays,
+      application: {
+        currentAppId$: new Subject(),
+      },
     } as any,
     plugins: {
       uiActionsEnhanced,
@@ -68,9 +72,9 @@ describe('isCompatible', () => {
     expectedResult: boolean = true
   ): Promise<void> {
     uiActionsEnhanced.getActionFactories.mockImplementation(() => [
-      ({
+      {
         supportedTriggers: () => actionFactoriesTriggers,
-      } as unknown) as UiActionsEnhancedActionFactory,
+      } as unknown as UiActionsEnhancedActionFactory,
     ]);
 
     let embeddable = new MockEmbeddable(

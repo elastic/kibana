@@ -7,8 +7,6 @@
 
 import React from 'react';
 
-import dedent from 'dedent';
-
 import { useValues, useActions } from 'kea';
 
 import {
@@ -107,23 +105,22 @@ export const FlyoutBody: React.FC = () => {
         </EuiFlexGroup>
       </EuiPanel>
       <EuiCodeBlock language="bash" fontSize="m" isCopyable>
-        {dedent(`
-        curl -X POST '${documentsApiUrl}'
-          -H 'Content-Type: application/json'
-          -H 'Authorization: Bearer ${apiKey}'
-          -d '${DOCUMENTS_API_JSON_EXAMPLE}'
-        # Returns
-        # [
-        #   {
-        #     "id": "park_rocky-mountain",
-        #     "errors": []
-        #   },
-        #   {
-        #     "id": "park_saguaro",
-        #     "errors": []
-        #   }
-        # ]
-      `)}
+        {`\
+curl -X POST '${documentsApiUrl}' \\
+  -H 'Content-Type: application/json' \\
+  -H 'Authorization: Bearer ${apiKey}' \\
+  -d '${DOCUMENTS_API_JSON_EXAMPLE}'
+# Returns
+# [
+#   {
+#     "id": "park_rocky-mountain",
+#     "errors": []
+#   },
+#   {
+#     "id": "park_saguaro",
+#     "errors": []
+#   }
+# ]`}
       </EuiCodeBlock>
     </EuiFlyoutBody>
   );

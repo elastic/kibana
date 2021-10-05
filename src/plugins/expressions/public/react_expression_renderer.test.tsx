@@ -14,6 +14,7 @@ import { ReactExpressionRenderer } from './react_expression_renderer';
 import { ExpressionLoader } from './loader';
 import { mount } from 'enzyme';
 import { EuiProgress } from '@elastic/eui';
+import { IInterpreterRenderHandlers } from '../common';
 import { RenderErrorHandlerFnType } from './types';
 import { ExpressionRendererEvent } from './render';
 
@@ -234,7 +235,7 @@ describe('ExpressionRenderer', () => {
         done: () => {
           renderSubject.next(1);
         },
-      } as any);
+      } as IInterpreterRenderHandlers);
     });
 
     instance.update();
@@ -255,7 +256,7 @@ describe('ExpressionRenderer', () => {
     const dataSubject = new Subject();
     const data$ = dataSubject.asObservable().pipe(share());
 
-    const newData = {};
+    const result = {};
     const inspectData = {};
     const onData$ = jest.fn();
 
@@ -275,11 +276,11 @@ describe('ExpressionRenderer', () => {
     expect(onData$).toHaveBeenCalledTimes(0);
 
     act(() => {
-      dataSubject.next(newData);
+      dataSubject.next({ result });
     });
 
     expect(onData$).toHaveBeenCalledTimes(1);
-    expect(onData$.mock.calls[0][0]).toBe(newData);
+    expect(onData$.mock.calls[0][0]).toBe(result);
     expect(onData$.mock.calls[0][1]).toBe(inspectData);
   });
 

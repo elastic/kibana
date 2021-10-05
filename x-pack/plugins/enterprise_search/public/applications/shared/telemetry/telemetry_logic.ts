@@ -37,7 +37,7 @@ export const TelemetryLogic = kea<MakeLogicType<TelemetryActions>>({
       const { http } = HttpLogic.values;
       try {
         const body = JSON.stringify({ product, action, metric });
-        await http.put('/api/enterprise_search/stats', { headers, body });
+        await http.put('/internal/enterprise_search/stats', { headers, body });
       } catch (error) {
         throw new Error('Unable to send telemetry');
       }

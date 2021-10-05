@@ -25,6 +25,7 @@ export default function ({ getService }) {
       aggregatable: true,
       name: 'bar',
       readFromDocValues: true,
+      metadata_field: false,
     },
     {
       type: 'string',
@@ -33,6 +34,7 @@ export default function ({ getService }) {
       aggregatable: false,
       name: 'baz',
       readFromDocValues: false,
+      metadata_field: false,
     },
     {
       type: 'string',
@@ -42,6 +44,7 @@ export default function ({ getService }) {
       name: 'baz.keyword',
       readFromDocValues: true,
       subType: { multi: { parent: 'baz' } },
+      metadata_field: false,
     },
     {
       type: 'number',
@@ -50,6 +53,7 @@ export default function ({ getService }) {
       aggregatable: true,
       name: 'foo',
       readFromDocValues: true,
+      metadata_field: false,
     },
     {
       aggregatable: true,
@@ -63,12 +67,17 @@ export default function ({ getService }) {
         },
       },
       type: 'string',
+      metadata_field: false,
     },
   ];
 
   describe('fields_for_wildcard_route response', () => {
-    before(() => esArchiver.load('index_patterns/basic_index'));
-    after(() => esArchiver.unload('index_patterns/basic_index'));
+    before(() =>
+      esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
+    );
+    after(() =>
+      esArchiver.unload('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
+    );
 
     it('returns a flattened version of the fields in es', async () => {
       await supertest
@@ -80,8 +89,7 @@ export default function ({ getService }) {
         .then(ensureFieldsAreSorted);
     });
 
-    // https://github.com/elastic/kibana/issues/79813
-    it.skip('always returns a field for all passed meta fields', async () => {
+    it('always returns a field for all passed meta fields', async () => {
       await supertest
         .get('/api/index_patterns/_fields_for_wildcard')
         .query({
@@ -91,12 +99,13 @@ export default function ({ getService }) {
         .expect(200, {
           fields: [
             {
-              aggregatable: true,
+              aggregatable: false,
               name: '_id',
               esTypes: ['_id'],
               readFromDocValues: false,
               searchable: true,
               type: 'string',
+              metadata_field: true,
             },
             {
               aggregatable: false,
@@ -105,6 +114,7 @@ export default function ({ getService }) {
               readFromDocValues: false,
               searchable: false,
               type: '_source',
+              metadata_field: true,
             },
             {
               type: 'boolean',
@@ -113,6 +123,7 @@ export default function ({ getService }) {
               aggregatable: true,
               name: 'bar',
               readFromDocValues: true,
+              metadata_field: false,
             },
             {
               aggregatable: false,
@@ -121,6 +132,7 @@ export default function ({ getService }) {
               readFromDocValues: false,
               searchable: true,
               type: 'string',
+              metadata_field: false,
             },
             {
               type: 'string',
@@ -130,6 +142,7 @@ export default function ({ getService }) {
               name: 'baz.keyword',
               readFromDocValues: true,
               subType: { multi: { parent: 'baz' } },
+              metadata_field: false,
             },
             {
               aggregatable: false,
@@ -137,6 +150,7 @@ export default function ({ getService }) {
               readFromDocValues: false,
               searchable: false,
               type: 'string',
+              metadata_field: true,
             },
             {
               type: 'number',
@@ -145,6 +159,7 @@ export default function ({ getService }) {
               aggregatable: true,
               name: 'foo',
               readFromDocValues: true,
+              metadata_field: false,
             },
             {
               aggregatable: true,
@@ -158,6 +173,7 @@ export default function ({ getService }) {
                 },
               },
               type: 'string',
+              metadata_field: false,
             },
           ],
         })

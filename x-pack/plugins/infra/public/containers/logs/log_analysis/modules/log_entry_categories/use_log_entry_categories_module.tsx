@@ -26,7 +26,7 @@ export const useLogEntryCategoriesModule = ({
   sourceId: string;
   spaceId: string;
   timestampField: string;
-  runtimeMappings: estypes.RuntimeFields;
+  runtimeMappings: estypes.MappingRuntimeFields;
 }) => {
   const sourceConfiguration: ModuleSourceConfiguration = useMemo(
     () => ({
@@ -86,7 +86,5 @@ export const useLogEntryCategoriesModule = ({
   };
 };
 
-export const [
-  LogEntryCategoriesModuleProvider,
-  useLogEntryCategoriesModuleContext,
-] = createContainer(useLogEntryCategoriesModule);
+export const [LogEntryCategoriesModuleProvider, useLogEntryCategoriesModuleContext] =
+  createContainer(useLogEntryCategoriesModule);

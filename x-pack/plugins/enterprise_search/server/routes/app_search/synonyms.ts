@@ -7,9 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { skipBodyValidation } from '../../lib/route_config_helpers';
 import { RouteDependencies } from '../../plugin';
-
-const synonymsSchema = schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 2 });
 
 export function registerSynonymsRoutes({
   router,
@@ -17,7 +16,7 @@ export function registerSynonymsRoutes({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/engines/{engineName}/synonyms',
+      path: '/internal/app_search/engines/{engineName}/synonyms',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -34,35 +33,29 @@ export function registerSynonymsRoutes({
   );
 
   router.post(
-    {
-      path: '/api/app_search/engines/{engineName}/synonyms',
+    skipBodyValidation({
+      path: '/internal/app_search/engines/{engineName}/synonyms',
       validate: {
         params: schema.object({
           engineName: schema.string(),
         }),
-        body: schema.object({
-          synonyms: synonymsSchema,
-        }),
       },
-    },
+    }),
     enterpriseSearchRequestHandler.createRequest({
       path: '/as/engines/:engineName/synonyms/collection',
     })
   );
 
   router.put(
-    {
-      path: '/api/app_search/engines/{engineName}/synonyms/{synonymId}',
+    skipBodyValidation({
+      path: '/internal/app_search/engines/{engineName}/synonyms/{synonymId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
           synonymId: schema.string(),
         }),
-        body: schema.object({
-          synonyms: synonymsSchema,
-        }),
       },
-    },
+    }),
     enterpriseSearchRequestHandler.createRequest({
       path: '/as/engines/:engineName/synonyms/:synonymId',
     })
@@ -70,7 +63,7 @@ export function registerSynonymsRoutes({
 
   router.delete(
     {
-      path: '/api/app_search/engines/{engineName}/synonyms/{synonymId}',
+      path: '/internal/app_search/engines/{engineName}/synonyms/{synonymId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),

@@ -20,13 +20,16 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import { TelemetryPluginStart } from '../../../telemetry/public';
 import { UrlForwardingStart } from '../../../url_forwarding/public';
 import { TutorialService } from '../services/tutorials';
+import { AddDataService } from '../services/add_data';
 import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
 import { EnvironmentService } from '../services/environment';
 import { ConfigSchema } from '../../config';
+import { SharePluginSetup } from '../../../share/public';
 
 export interface HomeKibanaServices {
   indexPatternService: any;
   kibanaVersion: string;
+  share: SharePluginSetup;
   chrome: ChromeStart;
   application: ApplicationStart;
   uiSettings: IUiSettingsClient;
@@ -44,6 +47,7 @@ export interface HomeKibanaServices {
   environmentService: EnvironmentService;
   telemetry?: TelemetryPluginStart;
   tutorialService: TutorialService;
+  addDataService: AddDataService;
 }
 
 let services: HomeKibanaServices | null = null;

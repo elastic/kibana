@@ -6,51 +6,24 @@
  */
 
 import React from 'react';
-import { mockUrlStorage, render } from '../rtl_helpers';
+import { render } from '../rtl_helpers';
 import { ExploratoryViewHeader } from './header';
-import { fireEvent } from '@testing-library/dom';
+import * as pluginHook from '../../../../hooks/use_plugin_context';
+
+jest.spyOn(pluginHook, 'usePluginContext').mockReturnValue({
+  appMountParameters: {
+    setHeaderActionMenu: jest.fn(),
+  },
+} as any);
 
 describe('ExploratoryViewHeader', function () {
   it('should render properly', function () {
     const { getByText } = render(
       <ExploratoryViewHeader
-        seriesId={'dummy-series'}
+        seriesId={0}
         lensAttributes={{ title: 'Performance distribution' } as any}
       />
     );
-    getByText('Open in Lens');
-  });
-
-  it('should be able to click open in lens', function () {
-    mockUrlStorage({
-      data: {
-        'uptime-pings-histogram': {
-          reportType: 'upp',
-          breakdown: 'monitor.status',
-          time: { from: 'now-15m', to: 'now' },
-        },
-      },
-    });
-
-    const { getByText, core } = render(
-      <ExploratoryViewHeader
-        seriesId={'dummy-series'}
-        lensAttributes={{ title: 'Performance distribution' } as any}
-      />
-    );
-    fireEvent.click(getByText('Open in Lens'));
-
-    expect(core?.lens?.navigateToPrefilledEditor).toHaveBeenCalledTimes(1);
-    expect(core?.lens?.navigateToPrefilledEditor).toHaveBeenCalledWith(
-      {
-        attributes: { title: 'Performance distribution' },
-        id: '',
-        timeRange: {
-          from: 'now-15m',
-          to: 'now',
-        },
-      },
-      true
-    );
+    getByText('Refresh');
   });
 });

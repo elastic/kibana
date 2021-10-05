@@ -8,7 +8,6 @@
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 import { registerSessionRoutes } from './routes';
 import { searchSessionSavedObjectType } from './saved_objects';
-import { getUiSettings } from './ui_settings';
 import type {
   DataEnhancedRequestHandlerContext,
   DataEnhancedSetupDependencies as SetupDependencies,
@@ -19,7 +18,8 @@ import { registerUsageCollector } from './collectors';
 import { SearchSessionService } from './search';
 
 export class EnhancedDataServerPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies> {
+  implements Plugin<void, void, SetupDependencies, StartDependencies>
+{
   private readonly logger: Logger;
   private sessionService!: SearchSessionService;
   private config: ConfigSchema;
@@ -30,10 +30,14 @@ export class EnhancedDataServerPlugin
   }
 
   public setup(core: CoreSetup<StartDependencies>, deps: SetupDependencies) {
-    core.uiSettings.register(getUiSettings());
     core.savedObjects.registerType(searchSessionSavedObjectType);
 
-    this.sessionService = new SearchSessionService(this.logger, this.config, deps.security);
+    this.sessionService = new SearchSessionService(
+      this.logger,
+      this.config,
+      this.initializerContext.env.packageInfo.version,
+      deps.security
+    );
 
     deps.data.__enhance({
       search: {

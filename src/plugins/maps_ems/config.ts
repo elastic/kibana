@@ -36,37 +36,10 @@ export const tilemapConfigSchema = schema.object({
   options: tileMapConfigOptionsSchema,
 });
 
-const layerConfigSchema = schema.object({
-  url: schema.string(),
-  format: schema.object({
-    type: schema.string({ defaultValue: 'geojson' }),
-  }),
-  meta: schema.object({
-    feature_collection_path: schema.string({ defaultValue: 'data' }),
-  }),
-  attribution: schema.string(),
-  name: schema.string(),
-  fields: schema.arrayOf(
-    schema.object({
-      name: schema.string(),
-      description: schema.string(),
-    })
-  ),
-});
-
-export type LayerConfig = TypeOf<typeof layerConfigSchema>;
-
-const regionmapConfigSchema = schema.object({
-  includeElasticMapsService: schema.boolean({ defaultValue: true }),
-  layers: schema.arrayOf(layerConfigSchema, { defaultValue: [] }),
-});
-
 export const emsConfigSchema = schema.object({
-  regionmap: regionmapConfigSchema,
   tilemap: tilemapConfigSchema,
   includeElasticMapsService: schema.boolean({ defaultValue: true }),
   proxyElasticMapsServiceInMaps: schema.boolean({ defaultValue: false }),
-  manifestServiceUrl: schema.string({ defaultValue: '' }),
   emsUrl: schema.conditional(
     schema.siblingRef('proxyElasticMapsServiceInMaps'),
     true,

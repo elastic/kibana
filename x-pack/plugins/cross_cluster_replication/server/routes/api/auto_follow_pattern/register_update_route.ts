@@ -17,7 +17,7 @@ import { RouteDependencies } from '../../../types';
 export const registerUpdateRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   const paramsSchema = schema.object({
     id: schema.string(),
@@ -39,22 +39,21 @@ export const registerUpdateRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
       const { id } = request.params;
       const body = serializeAutoFollowPattern(request.body as AutoFollowPattern);
 
       try {
-        return response.ok({
-          body: await context.crossClusterReplication!.client.callAsCurrentUser(
-            'ccr.saveAutoFollowPattern',
-            { id, body }
-          ),
+        const { body: responseBody } = await client.asCurrentUser.ccr.putAutoFollowPattern({
+          name: id,
+          body,
         });
-      } catch (err) {
-        if (isEsError(err)) {
-          return response.customError(formatEsError(err));
-        }
-        // Case: default
-        throw err;
+
+        return response.ok({
+          body: responseBody,
+        });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     })
   );

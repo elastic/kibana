@@ -14,12 +14,12 @@ export function VisitorBreakdownsPanel() {
   return (
     <EuiFlexGroup gutterSize="s" wrap>
       <EuiFlexItem style={{ flexBasis: 650 }}>
-        <EuiPanel>
+        <EuiPanel hasBorder={true}>
           <VisitorBreakdownMap />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem style={{ flexBasis: 650 }}>
-        <EuiPanel>
+        <EuiPanel hasBorder={true}>
           <VisitorBreakdown />
         </EuiPanel>
       </EuiFlexItem>

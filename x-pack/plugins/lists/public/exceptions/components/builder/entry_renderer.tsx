@@ -5,25 +5,20 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import styled from 'styled-components';
-
-import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
-import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
-import { HttpStart } from '../../../../../../../src/core/public';
-import { FieldComponent } from '../autocomplete/field';
-import { OperatorComponent } from '../autocomplete/operator';
-import { OperatorOption } from '../autocomplete/types';
-import { EXCEPTION_OPERATORS_ONLY_LISTS } from '../autocomplete/operators';
-import { AutocompleteFieldExistsComponent } from '../autocomplete/field_value_exists';
-import { AutocompleteFieldMatchComponent } from '../autocomplete/field_value_match';
-import { AutocompleteFieldMatchAnyComponent } from '../autocomplete/field_value_match_any';
-import { AutocompleteFieldListsComponent } from '../autocomplete/field_value_lists';
-import { ExceptionListType, ListSchema, OperatorTypeEnum } from '../../../../common';
-import { getEmptyValue } from '../../../common/empty_value';
-
 import {
+  ExceptionListType,
+  ListSchema,
+  ListOperatorTypeEnum as OperatorTypeEnum,
+  OsTypeArray,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
+  BuilderEntry,
+  EXCEPTION_OPERATORS_ONLY_LISTS,
+  FormattedBuilderEntry,
+  OperatorOption,
   getEntryOnFieldChange,
   getEntryOnListChange,
   getEntryOnMatchAnyChange,
@@ -31,8 +26,21 @@ import {
   getEntryOnOperatorChange,
   getFilteredIndexPatterns,
   getOperatorOptions,
-} from './helpers';
-import { BuilderEntry, FormattedBuilderEntry } from './types';
+} from '@kbn/securitysolution-list-utils';
+import {
+  AutocompleteFieldExistsComponent,
+  AutocompleteFieldListsComponent,
+  AutocompleteFieldMatchAnyComponent,
+  AutocompleteFieldMatchComponent,
+  FieldComponent,
+  OperatorComponent,
+} from '@kbn/securitysolution-autocomplete';
+import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
+
+import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
+import { HttpStart } from '../../../../../../../src/core/public';
+import { getEmptyValue } from '../../../common/empty_value';
+
 import * as i18n from './translations';
 
 const MyValuesInput = styled(EuiFlexItem)`
@@ -44,16 +52,20 @@ export interface EntryItemProps {
   autocompleteService: AutocompleteStart;
   entry: FormattedBuilderEntry;
   httpService: HttpStart;
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPatternBase;
+  showLabel: boolean;
+  osTypes?: OsTypeArray;
   listType: ExceptionListType;
   listTypeSpecificIndexPatternFilter?: (
-    pattern: IIndexPattern,
-    type: ExceptionListType
-  ) => IIndexPattern;
+    pattern: IndexPatternBase,
+    type: ExceptionListType,
+    osTypes?: OsTypeArray
+  ) => IndexPatternBase;
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;
   setErrorsExist: (arg: boolean) => void;
-  showLabel: boolean;
+  isDisabled?: boolean;
+  operatorsList?: OperatorOption[];
 }
 
 export const BuilderEntryItem: React.FC<EntryItemProps> = ({
@@ -62,12 +74,15 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   entry,
   httpService,
   indexPattern,
+  osTypes,
   listType,
   listTypeSpecificIndexPatternFilter,
   onChange,
   onlyShowListOperators = false,
   setErrorsExist,
   showLabel,
+  isDisabled = false,
+  operatorsList,
 }): JSX.Element => {
   const handleError = useCallback(
     (err: boolean): void => {
@@ -77,7 +92,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   );
 
   const handleFieldChange = useCallback(
-    ([newField]: IFieldType[]): void => {
+    ([newField]: IndexPatternFieldBase[]): void => {
       const { updatedEntry, index } = getEntryOnFieldChange(entry, newField);
       onChange(updatedEntry, index);
     },
@@ -120,13 +135,22 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     [onChange, entry]
   );
 
+  const isFieldComponentDisabled = useMemo(
+    (): boolean =>
+      isDisabled ||
+      indexPattern == null ||
+      (indexPattern != null && indexPattern.fields.length === 0),
+    [isDisabled, indexPattern]
+  );
+
   const renderFieldInput = useCallback(
     (isFirst: boolean): JSX.Element => {
       const filteredIndexPatterns = getFilteredIndexPatterns(
         indexPattern,
         entry,
         listType,
-        listTypeSpecificIndexPatternFilter
+        listTypeSpecificIndexPatternFilter,
+        osTypes
       );
       const comboBox = (
         <FieldComponent
@@ -139,7 +163,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           selectedField={entry.field}
           isClearable={false}
           isLoading={false}
-          isDisabled={indexPattern == null}
+          isDisabled={isDisabled || indexPattern == null}
           onChange={handleFieldChange}
           data-test-subj="exceptionBuilderEntryField"
           fieldInputWidth={275}
@@ -160,26 +184,34 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         );
       }
     },
-    [indexPattern, entry, listType, listTypeSpecificIndexPatternFilter, handleFieldChange]
+    [
+      indexPattern,
+      entry,
+      listType,
+      listTypeSpecificIndexPatternFilter,
+      handleFieldChange,
+      osTypes,
+      isDisabled,
+    ]
   );
 
   const renderOperatorInput = (isFirst: boolean): JSX.Element => {
-    const operatorOptions = onlyShowListOperators
+    const operatorOptions = operatorsList
+      ? operatorsList
+      : onlyShowListOperators
       ? EXCEPTION_OPERATORS_ONLY_LISTS
       : getOperatorOptions(
           entry,
           listType,
           entry.field != null && entry.field.type === 'boolean',
-          isFirst && !allowLargeValueLists
+          isFirst && allowLargeValueLists
         );
     const comboBox = (
       <OperatorComponent
         placeholder={i18n.EXCEPTION_OPERATOR_PLACEHOLDER}
         selectedField={entry.field}
         operator={entry.operator}
-        isDisabled={
-          indexPattern == null || (indexPattern != null && indexPattern.fields.length === 0)
-        }
+        isDisabled={isFieldComponentDisabled}
         operatorOptions={operatorOptions}
         isLoading={false}
         isClearable={false}
@@ -214,9 +246,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             placeholder={i18n.EXCEPTION_FIELD_VALUE_PLACEHOLDER}
             selectedField={entry.correspondingKeywordField ?? entry.field}
             selectedValue={value}
-            isDisabled={
-              indexPattern == null || (indexPattern != null && indexPattern.fields.length === 0)
-            }
+            isDisabled={isFieldComponentDisabled}
             isLoading={false}
             isClearable={false}
             indexPattern={indexPattern}
@@ -239,9 +269,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
                 : entry.field
             }
             selectedValue={values}
-            isDisabled={
-              indexPattern == null || (indexPattern != null && indexPattern.fields.length === 0)
-            }
+            isDisabled={isFieldComponentDisabled}
             isLoading={false}
             isClearable={false}
             indexPattern={indexPattern}
@@ -261,9 +289,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             placeholder={i18n.EXCEPTION_FIELD_LISTS_PLACEHOLDER}
             selectedValue={id}
             isLoading={false}
-            isDisabled={
-              indexPattern == null || (indexPattern != null && indexPattern.fields.length === 0)
-            }
+            isDisabled={isFieldComponentDisabled}
             isClearable={false}
             onChange={handleFieldListValueChange}
             data-test-subj="exceptionBuilderEntryFieldList"

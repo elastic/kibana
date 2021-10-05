@@ -5,121 +5,94 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import {
+  EuiFlexGroup,
+  EuiFlexGroupProps,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCallOut } from '@elastic/eui';
-import { EuiLink } from '@elastic/eui';
-import { enableInspectEsQueries } from '../../../../observability/public';
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
-import { px, unit } from '../../style/variables';
+import { useBreakpoints } from '../../hooks/use_breakpoints';
 import { DatePicker } from './DatePicker';
-import { KueryBar } from './KueryBar';
+import { KueryBar } from './kuery_bar';
 import { TimeComparison } from './time_comparison';
-import { useBreakPoints } from '../../hooks/use_break_points';
-import { useKibanaUrl } from '../../hooks/useKibanaUrl';
-import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { TransactionTypeSelect } from './transaction_type_select';
 
-const EuiFlexGroupSpaced = euiStyled(EuiFlexGroup)`
-  margin: ${({ theme }) =>
-    `${theme.eui.euiSizeS} ${theme.eui.euiSizeS} -${theme.eui.gutterTypes.gutterMedium} ${theme.eui.euiSizeS}`};
-`;
-
 interface Props {
-  prepend?: React.ReactNode | string;
+  hidden?: boolean;
+  showKueryBar?: boolean;
   showTimeComparison?: boolean;
   showTransactionTypeSelector?: boolean;
-}
-
-function getRowDirection(showColumn: boolean) {
-  return showColumn ? 'column' : 'row';
-}
-
-function DebugQueryCallout() {
-  const { uiSettings } = useApmPluginContext().core;
-  const advancedSettingsUrl = useKibanaUrl('/app/management/kibana/settings', {
-    query: {
-      query: 'category:(observability)',
-    },
-  });
-
-  if (!uiSettings.get(enableInspectEsQueries)) {
-    return null;
-  }
-
-  return (
-    <EuiFlexGroupSpaced>
-      <EuiFlexItem>
-        <EuiCallOut
-          title={i18n.translate(
-            'xpack.apm.searchBar.inspectEsQueriesEnabled.callout.title',
-            {
-              defaultMessage:
-                'Inspectable ES queries (`apm:enableInspectEsQueries`)',
-            }
-          )}
-          iconType="beaker"
-          color="warning"
-        >
-          <FormattedMessage
-            id="xpack.apm.searchBar.inspectEsQueriesEnabled.callout.description"
-            defaultMessage="You can now inspect every Elasticsearch query by opening your browser's Dev Tool and looking at the API responses. The setting can be disabled in Kibana's {advancedSettingsLink}"
-            values={{
-              advancedSettingsLink: (
-                <EuiLink href={advancedSettingsUrl}>
-                  {i18n.translate(
-                    'xpack.apm.searchBar.inspectEsQueriesEnabled.callout.description.advancedSettings',
-                    { defaultMessage: 'Advanced Settings' }
-                  )}
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiCallOut>
-      </EuiFlexItem>
-    </EuiFlexGroupSpaced>
-  );
+  kueryBarPlaceholder?: string;
+  kueryBarBoolFilter?: QueryDslQueryContainer[];
 }
 
 export function SearchBar({
-  prepend,
+  hidden = false,
+  showKueryBar = true,
   showTimeComparison = false,
   showTransactionTypeSelector = false,
+  kueryBarBoolFilter,
+  kueryBarPlaceholder,
 }: Props) {
-  const { isMedium, isLarge } = useBreakPoints();
-  const itemsStyle = { marginBottom: isLarge ? px(unit) : 0 };
+  const { isSmall, isMedium, isLarge, isXl, isXXL, isXXXL } = useBreakpoints();
+
+  if (hidden) {
+    return null;
+  }
+
+  const searchBarDirection: EuiFlexGroupProps['direction'] =
+    isXXXL || (!isXl && !showTimeComparison) ? 'row' : 'column';
 
   return (
     <>
-      <DebugQueryCallout />
-      <EuiFlexGroupSpaced gutterSize="m" direction={getRowDirection(isLarge)}>
-        {showTransactionTypeSelector && (
-          <EuiFlexItem grow={false}>
-            <TransactionTypeSelect />
-          </EuiFlexItem>
-        )}
+      <EuiFlexGroup
+        gutterSize="s"
+        responsive={false}
+        direction={searchBarDirection}
+      >
         <EuiFlexItem>
-          <KueryBar />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
           <EuiFlexGroup
-            justifyContent="flexEnd"
+            direction={isLarge ? 'columnReverse' : 'row'}
             gutterSize="s"
-            direction={getRowDirection(isMedium)}
+            responsive={false}
+          >
+            {showTransactionTypeSelector && (
+              <EuiFlexItem grow={false}>
+                <TransactionTypeSelect />
+              </EuiFlexItem>
+            )}
+
+            {showKueryBar && (
+              <EuiFlexItem>
+                <KueryBar
+                  placeholder={kueryBarPlaceholder}
+                  boolFilter={kueryBarBoolFilter}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={showTimeComparison && !isXXXL}>
+          <EuiFlexGroup
+            direction={isSmall || isMedium || isLarge ? 'columnReverse' : 'row'}
+            justifyContent={isXXL ? 'flexEnd' : undefined}
+            gutterSize="s"
+            responsive={false}
           >
             {showTimeComparison && (
-              <EuiFlexItem style={{ ...itemsStyle, minWidth: px(300) }}>
+              <EuiFlexItem grow={isXXXL} style={{ minWidth: 300 }}>
                 <TimeComparison />
               </EuiFlexItem>
             )}
-            <EuiFlexItem style={itemsStyle}>
+            <EuiFlexItem grow={false}>
               <DatePicker />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-      </EuiFlexGroupSpaced>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
     </>
   );
 }

@@ -15,6 +15,7 @@ don't forget to check our other troubleshooting guides or discussion forum:
 * {apm-server-ref}/troubleshooting.html[APM Server troubleshooting]
 * {apm-dotnet-ref}/troubleshooting.html[.NET agent troubleshooting]
 * {apm-go-ref}/troubleshooting.html[Go agent troubleshooting]
+* {apm-ios-ref}/troubleshooting.html[iOS agent troubleshooting]
 * {apm-java-ref}/trouble-shooting.html[Java agent troubleshooting]
 * {apm-node-ref}/troubleshooting.html[Node.js agent troubleshooting]
 * {apm-php-ref}/troubleshooting.html[PHP agent troubleshooting]

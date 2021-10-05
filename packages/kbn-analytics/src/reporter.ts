@@ -68,7 +68,7 @@ export class Reporter {
     }
   };
 
-  private log(message: any) {
+  private log(message: unknown) {
     if (this.debug) {
       // eslint-disable-next-line
       console.debug(message);

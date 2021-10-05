@@ -25,7 +25,7 @@ interface IHTTPAdvancedFieldsContextProvider {
   defaultValues?: IHTTPAdvancedFields;
 }
 
-export const initialValues = {
+export const initialValues: IHTTPAdvancedFields = {
   [ConfigKeys.PASSWORD]: '',
   [ConfigKeys.PROXY_URL]: '',
   [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: [],
@@ -36,7 +36,7 @@ export const initialValues = {
   [ConfigKeys.RESPONSE_STATUS_CHECK]: [],
   [ConfigKeys.REQUEST_BODY_CHECK]: {
     value: '',
-    type: Mode.TEXT,
+    type: Mode.PLAINTEXT,
   },
   [ConfigKeys.REQUEST_HEADERS_CHECK]: {},
   [ConfigKeys.REQUEST_METHOD_CHECK]: HTTPMethod.GET,

@@ -5,19 +5,26 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import moment from 'moment';
+import { SetupUX } from '../../routes/rum_client';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeQuery } from '../../../server/utils/queries';
+import { rangeQuery } from '../../../../observability/server';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 
-export async function hasRumData({ setup }: { setup: Setup & SetupTimeRange }) {
+export async function hasRumData({
+  setup,
+  start = moment().subtract(24, 'h').valueOf(),
+  end = moment().valueOf(),
+}: {
+  setup: SetupUX;
+  start?: number;
+  end?: number;
+}) {
   try {
-    const { start, end } = setup;
-
     const params = {
       apm: {
         events: [ProcessorEvent.transaction],
@@ -47,7 +54,7 @@ export async function hasRumData({ setup }: { setup: Setup & SetupTimeRange }) {
 
     const { apmEventClient } = setup;
 
-    const response = await apmEventClient.search(params);
+    const response = await apmEventClient.search('has_rum_data', params);
     return {
       indices: setup.indices['apm_oss.transactionIndices']!,
       hasData: response.hits.total.value > 0,

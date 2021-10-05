@@ -25,6 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
+  const kibanaServer = getService('kibanaServer');
 
   async function setDiscoverTimeRange() {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -32,15 +33,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('discover feature controls security', () => {
     before(async () => {
-      await esArchiver.load('discover/feature_controls/security');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
+      );
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
 
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();
     });
 
     after(async () => {
-      await esArchiver.unload('discover/feature_controls/security');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
+      );
 
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       await PageObjects.security.forceLogout();
@@ -224,12 +229,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      it(`doesn't show CSV reports`, async () => {
-        await PageObjects.share.clickShareTopNavButton();
-        await testSubjects.missingOrFail('sharePanel-CSVReports');
-        await PageObjects.share.clickShareTopNavButton();
-      });
-
       it('allows loading a saved query via the saved query management component', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         const queryString = await queryBar.getQueryString();
@@ -317,7 +316,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('Permalinks shows create short-url button', async () => {
-        await PageObjects.share.clickShareTopNavButton();
+        await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlExistOrFail();
         // close the menu
         await PageObjects.share.clickShareTopNavButton();

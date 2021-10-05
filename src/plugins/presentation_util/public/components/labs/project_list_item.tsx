@@ -15,6 +15,8 @@ import {
   EuiText,
   EuiFormFieldset,
   EuiScreenReaderOnly,
+  EuiSpacer,
+  EuiIconTip,
 } from '@elastic/eui';
 import classnames from 'classnames';
 
@@ -47,8 +49,20 @@ export const ProjectListItem = ({ project, onStatusChange }: Props) => {
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiTitle className="projectListItem__title" size="s">
-                <h2>{name}</h2>
+              <EuiTitle className="projectListItem__title" size="xs">
+                <h2>
+                  {name}
+                  {isOverride ? (
+                    <span className="projectListItem__titlePendingChangesIndicator">
+                      <EuiIconTip
+                        content={strings.getOverriddenIconTipLabel()}
+                        position="top"
+                        type="dot"
+                        color="secondary"
+                      />
+                    </span>
+                  ) : null}
+                </h2>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -59,10 +73,14 @@ export const ProjectListItem = ({ project, onStatusChange }: Props) => {
               </div>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText size="s">{description}</EuiText>
+              <EuiSpacer size="s" />
+              <EuiText size="s" color="subdued">
+                {description}
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText size="s" color="subdued">
+              <EuiSpacer size="xs" />
+              <EuiText size="xs" color="subdued">
                 {isActive ? strings.getEnabledStatusMessage() : strings.getDisabledStatusMessage()}
               </EuiText>
             </EuiFlexItem>

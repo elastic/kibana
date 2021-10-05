@@ -76,11 +76,11 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
   }
 }
 
-const withDefaultIfNotFound = <DefaultValue>(defaultValue: DefaultValue) => (
-  error: any
-): DefaultValue => {
-  if (error && error.status === 404) {
-    return defaultValue;
-  }
-  throw error;
-};
+const withDefaultIfNotFound =
+  <DefaultValue>(defaultValue: DefaultValue) =>
+  (error: any): DefaultValue => {
+    if (error && error.status === 404) {
+      return defaultValue;
+    }
+    throw error;
+  };

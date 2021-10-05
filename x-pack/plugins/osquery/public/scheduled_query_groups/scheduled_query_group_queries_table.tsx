@@ -5,81 +5,31 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { EuiInMemoryTable, EuiCodeBlock, EuiButtonIcon } from '@elastic/eui';
+import { get } from 'lodash/fp';
+import React, { useCallback, useMemo } from 'react';
+import { EuiBasicTable, EuiCodeBlock, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { PackagePolicy, PackagePolicyInputStream } from '../../../fleet/common';
-import { FilterStateStore } from '../../../../../src/plugins/data/common';
-import { useKibana } from '../common/lib/kibana';
-
-interface ViewResultsInDiscoverActionProps {
-  item: PackagePolicyInputStream;
-}
-
-const ViewResultsInDiscoverAction: React.FC<ViewResultsInDiscoverActionProps> = ({ item }) => {
-  const urlGenerator = useKibana().services.discover?.urlGenerator;
-  const [discoverUrl, setDiscoverUrl] = useState<string>('');
-
-  useEffect(() => {
-    const getDiscoverUrl = async () => {
-      if (!urlGenerator?.createUrl) return;
-
-      const newUrl = await urlGenerator.createUrl({
-        indexPatternId: 'logs-*',
-        filters: [
-          {
-            meta: {
-              index: 'logs-*',
-              alias: null,
-              negate: false,
-              disabled: false,
-              type: 'phrase',
-              key: 'action_id',
-              params: { query: item.vars?.id.value },
-            },
-            query: { match_phrase: { action_id: item.vars?.id.value } },
-            $state: { store: FilterStateStore.APP_STATE },
-          },
-        ],
-      });
-      setDiscoverUrl(newUrl);
-    };
-    getDiscoverUrl();
-  }, [item.vars?.id.value, urlGenerator]);
-
-  return (
-    <EuiButtonIcon
-      iconType="visTable"
-      href={discoverUrl}
-      aria-label={i18n.translate(
-        'xpack.osquery.scheduledQueryGroup.queriesTable.viewDiscoverResultsActionAriaLabel',
-        {
-          defaultMessage: 'Check results of {queryName} in Discover',
-          values: {
-            queryName: item.vars?.id.value,
-          },
-        }
-      )}
-    />
-  );
-};
+import { PlatformIcons } from './queries/platforms';
+import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
 
 interface ScheduledQueryGroupQueriesTableProps {
-  data: Pick<PackagePolicy, 'inputs'>;
-  editMode?: boolean;
-  onDeleteClick?: (item: PackagePolicyInputStream) => void;
-  onEditClick?: (item: PackagePolicyInputStream) => void;
+  data: OsqueryManagerPackagePolicyInputStream[];
+  onDeleteClick?: (item: OsqueryManagerPackagePolicyInputStream) => void;
+  onEditClick?: (item: OsqueryManagerPackagePolicyInputStream) => void;
+  selectedItems?: OsqueryManagerPackagePolicyInputStream[];
+  setSelectedItems?: (selection: OsqueryManagerPackagePolicyInputStream[]) => void;
 }
 
 const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQueriesTableProps> = ({
   data,
-  editMode = false,
   onDeleteClick,
   onEditClick,
+  selectedItems,
+  setSelectedItems,
 }) => {
   const renderDeleteAction = useCallback(
-    (item: PackagePolicyInputStream) => (
+    (item: OsqueryManagerPackagePolicyInputStream) => (
       <EuiButtonIcon
         color="danger"
         // @ts-expect-error update types
@@ -101,7 +51,7 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
   );
 
   const renderEditAction = useCallback(
-    (item: PackagePolicyInputStream) => (
+    (item: OsqueryManagerPackagePolicyInputStream) => (
       <EuiButtonIcon
         color="primary"
         // @ts-expect-error update types
@@ -131,8 +81,18 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
     []
   );
 
-  const renderDiscoverResultsAction = useCallback(
-    (item) => <ViewResultsInDiscoverAction item={item} />,
+  const renderPlatformColumn = useCallback(
+    (platform: string) => <PlatformIcons platform={platform} />,
+    []
+  );
+
+  const renderVersionColumn = useCallback(
+    (version: string) =>
+      version
+        ? `${version}`
+        : i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.osqueryVersionAllLabel', {
+            defaultMessage: 'ALL',
+          }),
     []
   );
 
@@ -148,7 +108,7 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
       {
         field: 'vars.interval.value',
         name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.intervalColumnTitle', {
-          defaultMessage: 'Interval',
+          defaultMessage: 'Interval (s)',
         }),
         width: '100px',
       },
@@ -160,53 +120,74 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
         render: renderQueryColumn,
       },
       {
-        name: editMode
-          ? i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.actionsColumnTitle', {
-              defaultMessage: 'Actions',
-            })
-          : i18n.translate(
-              'xpack.osquery.scheduledQueryGroup.queriesTable.viewResultsColumnTitle',
-              {
-                defaultMessage: 'View results',
-              }
-            ),
+        field: 'vars.platform.value',
+        name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.platformColumnTitle', {
+          defaultMessage: 'Platform',
+        }),
+        render: renderPlatformColumn,
+      },
+      {
+        field: 'vars.version.value',
+        name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.versionColumnTitle', {
+          defaultMessage: 'Min Osquery version',
+        }),
+        render: renderVersionColumn,
+      },
+      {
+        name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.actionsColumnTitle', {
+          defaultMessage: 'Actions',
+        }),
         width: '120px',
-        actions: editMode
-          ? [
-              {
-                render: renderEditAction,
-              },
-              {
-                render: renderDeleteAction,
-              },
-            ]
-          : [
-              {
-                render: renderDiscoverResultsAction,
-              },
-            ],
+        actions: [
+          {
+            render: renderEditAction,
+          },
+          {
+            render: renderDeleteAction,
+          },
+        ],
       },
     ],
-    [editMode, renderDeleteAction, renderDiscoverResultsAction, renderEditAction, renderQueryColumn]
+    [
+      renderDeleteAction,
+      renderEditAction,
+      renderPlatformColumn,
+      renderQueryColumn,
+      renderVersionColumn,
+    ]
   );
 
   const sorting = useMemo(
     () => ({
       sort: {
-        field: 'vars.id.value',
+        field: 'vars.id.value' as keyof OsqueryManagerPackagePolicyInputStream,
         direction: 'asc' as const,
       },
     }),
     []
   );
 
+  const itemId = useCallback(
+    (item: OsqueryManagerPackagePolicyInputStream) => get('vars.id.value', item),
+    []
+  );
+
+  const selection = useMemo(
+    () => ({
+      onSelectionChange: setSelectedItems,
+      initialSelected: selectedItems,
+    }),
+    [selectedItems, setSelectedItems]
+  );
+
   return (
-    <EuiInMemoryTable<PackagePolicyInputStream>
-      items={data.inputs[0].streams}
-      itemId="vars.id.value"
-      isExpandable={true}
+    <EuiBasicTable<OsqueryManagerPackagePolicyInputStream>
+      items={data}
+      itemId={itemId}
       columns={columns}
       sorting={sorting}
+      selection={selection}
+      isSelectable
     />
   );
 };

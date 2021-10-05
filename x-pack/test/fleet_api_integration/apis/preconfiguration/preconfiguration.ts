@@ -21,19 +21,23 @@ export default function (providerContext: FtrProviderContext) {
   describe('Preconfiguration', async () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
-      await getService('esArchiver').load('empty_kibana');
-      await getService('esArchiver').load('fleet/empty_fleet_server');
+      await getService('esArchiver').load('x-pack/test/functional/es_archives/empty_kibana');
+      await getService('esArchiver').load(
+        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+      );
     });
 
     after(async () => {
-      await getService('esArchiver').unload('fleet/empty_fleet_server');
-      await getService('esArchiver').unload('empty_kibana');
+      await getService('esArchiver').unload(
+        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+      );
+      await getService('esArchiver').unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     // Basic health check for the API; functionality is covered by the unit tests
     it('should succeed with an empty payload', async () => {
       const { body } = await supertest
-        .put(PRECONFIGURATION_API_ROUTES.PUT_PRECONFIG)
+        .put(PRECONFIGURATION_API_ROUTES.UPDATE_PATTERN)
         .set('kbn-xsrf', 'xxxx')
         .send({})
         .expect(200);
@@ -41,6 +45,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(body).to.eql({
         packages: [],
         policies: [],
+        nonFatalErrors: [],
       });
     });
   });

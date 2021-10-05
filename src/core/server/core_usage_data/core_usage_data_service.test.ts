@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { ConfigPath } from '@kbn/config';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HotObservable } from 'rxjs/internal/testing/HotObservable';
 import { TestScheduler } from 'rxjs/testing';
@@ -29,12 +30,31 @@ import { CORE_USAGE_STATS_TYPE } from './constants';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
 
 describe('CoreUsageDataService', () => {
+  function getConfigServiceAtPathMockImplementation() {
+    return (path: ConfigPath) => {
+      if (path === 'elasticsearch') {
+        return new BehaviorSubject(RawElasticsearchConfig.schema.validate({}));
+      } else if (path === 'server') {
+        return new BehaviorSubject(RawHttpConfig.schema.validate({}));
+      } else if (path === 'logging') {
+        return new BehaviorSubject(RawLoggingConfig.schema.validate({}));
+      } else if (path === 'savedObjects') {
+        return new BehaviorSubject(RawSavedObjectsConfig.schema.validate({}));
+      } else if (path === 'kibana') {
+        return new BehaviorSubject(RawKibanaConfig.schema.validate({}));
+      }
+      return new BehaviorSubject({});
+    };
+  }
+
   const getTestScheduler = () =>
     new TestScheduler((actual, expected) => {
       expect(actual).toEqual(expected);
     });
 
   let service: CoreUsageDataService;
+  let configService: ReturnType<typeof configServiceMock.create>;
+
   const mockConfig = {
     unused_config: {},
     elasticsearch: { username: 'kibana_system', password: 'changeme' },
@@ -60,27 +80,11 @@ describe('CoreUsageDataService', () => {
     },
   };
 
-  const configService = configServiceMock.create({
-    getConfig$: mockConfig,
-  });
-
-  configService.atPath.mockImplementation((path) => {
-    if (path === 'elasticsearch') {
-      return new BehaviorSubject(RawElasticsearchConfig.schema.validate({}));
-    } else if (path === 'server') {
-      return new BehaviorSubject(RawHttpConfig.schema.validate({}));
-    } else if (path === 'logging') {
-      return new BehaviorSubject(RawLoggingConfig.schema.validate({}));
-    } else if (path === 'savedObjects') {
-      return new BehaviorSubject(RawSavedObjectsConfig.schema.validate({}));
-    } else if (path === 'kibana') {
-      return new BehaviorSubject(RawKibanaConfig.schema.validate({}));
-    }
-    return new BehaviorSubject({});
-  });
-  const coreContext = mockCoreContext.create({ configService });
-
   beforeEach(() => {
+    configService = configServiceMock.create({ getConfig$: mockConfig });
+    configService.atPath.mockImplementation(getConfigServiceAtPathMockImplementation());
+
+    const coreContext = mockCoreContext.create({ configService });
     service = new CoreUsageDataService(coreContext);
   });
 
@@ -91,7 +95,8 @@ describe('CoreUsageDataService', () => {
       const savedObjectsStartPromise = Promise.resolve(
         savedObjectsServiceMock.createStartContract()
       );
-      service.setup({ http, metrics, savedObjectsStartPromise });
+      const changedDeprecatedConfigPath$ = configServiceMock.create().getDeprecatedConfigPath$();
+      service.setup({ http, metrics, savedObjectsStartPromise, changedDeprecatedConfigPath$ });
 
       const savedObjects = await savedObjectsStartPromise;
       expect(savedObjects.createInternalRepository).toHaveBeenCalledTimes(1);
@@ -105,7 +110,13 @@ describe('CoreUsageDataService', () => {
         const savedObjectsStartPromise = Promise.resolve(
           savedObjectsServiceMock.createStartContract()
         );
-        const coreUsageData = service.setup({ http, metrics, savedObjectsStartPromise });
+        const changedDeprecatedConfigPath$ = configServiceMock.create().getDeprecatedConfigPath$();
+        const coreUsageData = service.setup({
+          http,
+          metrics,
+          savedObjectsStartPromise,
+          changedDeprecatedConfigPath$,
+        });
         const typeRegistry = typeRegistryMock.create();
 
         coreUsageData.registerType(typeRegistry);
@@ -115,6 +126,7 @@ describe('CoreUsageDataService', () => {
           hidden: true,
           namespaceType: 'agnostic',
           mappings: expect.anything(),
+          migrations: expect.anything(),
         });
       });
     });
@@ -126,23 +138,77 @@ describe('CoreUsageDataService', () => {
         const savedObjectsStartPromise = Promise.resolve(
           savedObjectsServiceMock.createStartContract()
         );
-        const coreUsageData = service.setup({ http, metrics, savedObjectsStartPromise });
+        const changedDeprecatedConfigPath$ = configServiceMock.create().getDeprecatedConfigPath$();
+        const coreUsageData = service.setup({
+          http,
+          metrics,
+          savedObjectsStartPromise,
+          changedDeprecatedConfigPath$,
+        });
 
         const usageStatsClient = coreUsageData.getClient();
         expect(usageStatsClient).toBeInstanceOf(CoreUsageStatsClient);
+      });
+    });
+
+    describe('Usage Counter', () => {
+      it('registers a usage counter and uses it to increment the counters', async () => {
+        const http = httpServiceMock.createInternalSetupContract();
+        const metrics = metricsServiceMock.createInternalSetupContract();
+        const savedObjectsStartPromise = Promise.resolve(
+          savedObjectsServiceMock.createStartContract()
+        );
+        const changedDeprecatedConfigPath$ = configServiceMock.create().getDeprecatedConfigPath$();
+        const coreUsageData = service.setup({
+          http,
+          metrics,
+          savedObjectsStartPromise,
+          changedDeprecatedConfigPath$,
+        });
+        const myUsageCounter = { incrementCounter: jest.fn() };
+        coreUsageData.registerUsageCounter(myUsageCounter);
+        coreUsageData.incrementUsageCounter({ counterName: 'test' });
+        expect(myUsageCounter.incrementCounter).toHaveBeenCalledWith({ counterName: 'test' });
+      });
+
+      it('swallows errors when provided increment counter fails', async () => {
+        const http = httpServiceMock.createInternalSetupContract();
+        const metrics = metricsServiceMock.createInternalSetupContract();
+        const savedObjectsStartPromise = Promise.resolve(
+          savedObjectsServiceMock.createStartContract()
+        );
+        const changedDeprecatedConfigPath$ = configServiceMock.create().getDeprecatedConfigPath$();
+        const coreUsageData = service.setup({
+          http,
+          metrics,
+          savedObjectsStartPromise,
+          changedDeprecatedConfigPath$,
+        });
+        const myUsageCounter = {
+          incrementCounter: jest.fn(() => {
+            throw new Error('Something is really wrong');
+          }),
+        };
+        coreUsageData.registerUsageCounter(myUsageCounter);
+        expect(() => coreUsageData.incrementUsageCounter({ counterName: 'test' })).not.toThrow();
+        expect(myUsageCounter.incrementCounter).toHaveBeenCalledWith({ counterName: 'test' });
       });
     });
   });
 
   describe('start', () => {
     describe('getCoreUsageData', () => {
-      it('returns core metrics for default config', async () => {
+      function setup() {
         const http = httpServiceMock.createInternalSetupContract();
         const metrics = metricsServiceMock.createInternalSetupContract();
         const savedObjectsStartPromise = Promise.resolve(
           savedObjectsServiceMock.createStartContract()
         );
-        service.setup({ http, metrics, savedObjectsStartPromise });
+        const changedDeprecatedConfigPath$ = new BehaviorSubject({
+          set: ['new.path'],
+          unset: ['deprecated.path'],
+        });
+        service.setup({ http, metrics, savedObjectsStartPromise, changedDeprecatedConfigPath$ });
         const elasticsearch = elasticsearchServiceMock.createStart();
         elasticsearch.client.asInternalUser.cat.indices.mockResolvedValueOnce({
           body: [
@@ -166,6 +232,19 @@ describe('CoreUsageDataService', () => {
             },
           ],
         } as any);
+        elasticsearch.client.asInternalUser.search.mockResolvedValueOnce({
+          body: {
+            hits: { total: { value: 6 } },
+            aggregations: {
+              aliases: {
+                buckets: {
+                  active: { doc_count: 1 },
+                  disabled: { doc_count: 2 },
+                },
+              },
+            },
+          },
+        } as any);
         const typeRegistry = savedObjectsServiceMock.createTypeRegistryMock();
         typeRegistry.getAllTypes.mockReturnValue([
           { name: 'type 1', indexPattern: '.kibana' },
@@ -177,9 +256,22 @@ describe('CoreUsageDataService', () => {
           exposedConfigsToUsage: new Map(),
           elasticsearch,
         });
+        return { getCoreUsageData };
+      }
+
+      it('returns core metrics for default config', async () => {
+        const { getCoreUsageData } = setup();
         expect(getCoreUsageData()).resolves.toMatchInlineSnapshot(`
           Object {
             "config": Object {
+              "deprecatedKeys": Object {
+                "set": Array [
+                  "new.path",
+                ],
+                "unset": Array [
+                  "deprecated.path",
+                ],
+              },
               "elasticsearch": Object {
                 "apiVersion": "master",
                 "customHeadersConfigured": false,
@@ -187,6 +279,7 @@ describe('CoreUsageDataService', () => {
                 "logQueries": false,
                 "numberOfHostsConfigured": 1,
                 "pingTimeoutMs": 30000,
+                "principal": "unknown",
                 "requestHeadersWhitelistConfigured": false,
                 "requestTimeoutMs": 30000,
                 "shardTimeoutMs": 30000,
@@ -304,10 +397,70 @@ describe('CoreUsageDataService', () => {
                     "storeSizeBytes": 2000,
                   },
                 ],
+                "legacyUrlAliases": Object {
+                  "activeCount": 1,
+                  "disabledCount": 2,
+                  "inactiveCount": 3,
+                  "totalCount": 6,
+                },
               },
             },
           }
         `);
+      });
+
+      describe('elasticsearch.principal', () => {
+        async function doTest({
+          username,
+          serviceAccountToken,
+          expectedPrincipal,
+        }: {
+          username?: string;
+          serviceAccountToken?: string;
+          expectedPrincipal: string;
+        }) {
+          const defaultMockImplementation = getConfigServiceAtPathMockImplementation();
+          configService.atPath.mockImplementation((path) => {
+            if (path === 'elasticsearch') {
+              return new BehaviorSubject(
+                RawElasticsearchConfig.schema.validate({ username, serviceAccountToken })
+              );
+            }
+            return defaultMockImplementation(path);
+          });
+          const { getCoreUsageData } = setup();
+          return expect(getCoreUsageData()).resolves.toEqual(
+            expect.objectContaining({
+              config: expect.objectContaining({
+                elasticsearch: expect.objectContaining({ principal: expectedPrincipal }),
+              }),
+            })
+          );
+        }
+
+        it('returns expected usage data for elastic.username "elastic"', async () => {
+          return doTest({ username: 'elastic', expectedPrincipal: 'elastic_user' });
+        });
+
+        it('returns expected usage data for elastic.username "kibana"', async () => {
+          return doTest({ username: 'kibana', expectedPrincipal: 'kibana_user' });
+        });
+
+        it('returns expected usage data for elastic.username "kibana_system"', async () => {
+          return doTest({ username: 'kibana_system', expectedPrincipal: 'kibana_system_user' });
+        });
+
+        it('returns expected usage data for elastic.username anything else', async () => {
+          return doTest({ username: 'anything else', expectedPrincipal: 'other_user' });
+        });
+
+        it('returns expected usage data for elastic.serviceAccountToken', async () => {
+          // Note: elastic.username and elastic.serviceAccountToken are mutually exclusive
+          return doTest({
+            serviceAccountToken: 'any',
+            expectedPrincipal: 'kibana_service_account',
+          });
+        });
       });
     });
 
@@ -381,12 +534,10 @@ describe('CoreUsageDataService', () => {
           elasticsearch,
         });
 
-        await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-          Object {
-            "pluginA.enabled": "[redacted]",
-            "pluginAB.enabled": "[redacted]",
-          }
-        `);
+        await expect(getConfigsUsageData()).resolves.toEqual({
+          'pluginA.enabled': '[redacted]',
+          'pluginAB.enabled': '[redacted]',
+        });
       });
 
       it('returns an object of plugin config usage', async () => {
@@ -418,23 +569,21 @@ describe('CoreUsageDataService', () => {
           elasticsearch,
         });
 
-        await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-          Object {
-            "elasticsearch.password": "[redacted]",
-            "elasticsearch.username": "[redacted]",
-            "logging.json": false,
-            "pluginA.arrayOfNumbers": "[redacted]",
-            "pluginA.enabled": true,
-            "pluginA.objectConfig.debug": true,
-            "pluginA.objectConfig.username": "[redacted]",
-            "pluginAB.enabled": false,
-            "pluginB.arrayOfObjects": "[redacted]",
-            "plugins.paths": "[redacted]",
-            "server.basePath": "/zvt",
-            "server.port": 5603,
-            "server.rewriteBasePath": true,
-          }
-        `);
+        await expect(getConfigsUsageData()).resolves.toEqual({
+          'elasticsearch.password': '[redacted]',
+          'elasticsearch.username': '[redacted]',
+          'logging.json': false,
+          'pluginA.arrayOfNumbers': '[redacted]',
+          'pluginA.enabled': true,
+          'pluginA.objectConfig.debug': true,
+          'pluginA.objectConfig.username': '[redacted]',
+          'pluginAB.enabled': false,
+          'pluginB.arrayOfObjects': '[redacted]',
+          'plugins.paths': '[redacted]',
+          'server.basePath': '/zvt',
+          'server.port': 5603,
+          'server.rewriteBasePath': true,
+        });
       });
 
       describe('config explicitly exposed to usage', () => {
@@ -457,12 +606,10 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-            Object {
-              "pluginA.objectConfig.debug": "[redacted]",
-              "server.basePath": "[redacted]",
-            }
-          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'pluginA.objectConfig.debug': '[redacted]',
+            'server.basePath': '[redacted]',
+          });
         });
 
         it('returns config value on safe complete match', async () => {
@@ -478,11 +625,9 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-            Object {
-              "server.basePath": "/zvt",
-            }
-          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'server.basePath': '/zvt',
+          });
         });
 
         it('returns [redacted] on unsafe parent match', async () => {
@@ -501,12 +646,10 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-            Object {
-              "pluginA.objectConfig.debug": "[redacted]",
-              "pluginA.objectConfig.username": "[redacted]",
-            }
-          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'pluginA.objectConfig.debug': '[redacted]',
+            'pluginA.objectConfig.username': '[redacted]',
+          });
         });
 
         it('returns config value on safe parent match', async () => {
@@ -525,12 +668,10 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-            Object {
-              "pluginA.objectConfig.debug": true,
-              "pluginA.objectConfig.username": "some_user",
-            }
-          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'pluginA.objectConfig.debug': true,
+            'pluginA.objectConfig.username': 'some_user',
+          });
         });
 
         it('returns [redacted] on explicitly marked as safe array of objects', async () => {
@@ -546,11 +687,9 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-            Object {
-              "pluginB.arrayOfObjects": "[redacted]",
-            }
-          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'pluginB.arrayOfObjects': '[redacted]',
+          });
         });
 
         it('returns values on explicitly marked as safe array of numbers', async () => {
@@ -566,15 +705,9 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-            Object {
-              "pluginA.arrayOfNumbers": Array [
-                1,
-                2,
-                3,
-              ],
-            }
-          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'pluginA.arrayOfNumbers': [1, 2, 3],
+          });
         });
 
         it('returns values on explicitly marked as safe array of strings', async () => {
@@ -590,15 +723,9 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-            Object {
-              "plugins.paths": Array [
-                "pluginA",
-                "pluginAB",
-                "pluginB",
-              ],
-            }
-          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'plugins.paths': ['pluginA', 'pluginAB', 'pluginB'],
+          });
         });
       });
 
@@ -619,12 +746,10 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-            Object {
-              "pluginA.objectConfig.debug": "[redacted]",
-              "pluginA.objectConfig.username": "[redacted]",
-            }
-          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'pluginA.objectConfig.debug': '[redacted]',
+            'pluginA.objectConfig.username': '[redacted]',
+          });
         });
 
         it('returns config value on safe parent match', async () => {
@@ -640,13 +765,11 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-            Object {
-              "elasticsearch.password": "[redacted]",
-              "elasticsearch.username": "[redacted]",
-              "pluginA.objectConfig.username": "[redacted]",
-            }
-          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'elasticsearch.password': '[redacted]',
+            'elasticsearch.username': '[redacted]',
+            'pluginA.objectConfig.username': '[redacted]',
+          });
         });
 
         it('returns [redacted] on implicit array of objects', async () => {
@@ -658,11 +781,9 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-            Object {
-              "pluginB.arrayOfObjects": "[redacted]",
-            }
-          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'pluginB.arrayOfObjects': '[redacted]',
+          });
         });
 
         it('returns values on implicit array of numbers', async () => {
@@ -674,16 +795,11 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-            Object {
-              "pluginA.arrayOfNumbers": Array [
-                1,
-                2,
-                3,
-              ],
-            }
-          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'pluginA.arrayOfNumbers': [1, 2, 3],
+          });
         });
+
         it('returns [redacted] on implicit array of strings', async () => {
           configService.getUsedPaths.mockResolvedValue(['plugins.paths']);
 
@@ -693,11 +809,9 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-            Object {
-              "plugins.paths": "[redacted]",
-            }
-          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'plugins.paths': '[redacted]',
+          });
         });
 
         it('returns config value for numbers', async () => {
@@ -709,11 +823,9 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-            Object {
-              "server.port": 5603,
-            }
-          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'server.port': 5603,
+          });
         });
 
         it('returns config value for booleans', async () => {
@@ -728,12 +840,10 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-            Object {
-              "logging.json": false,
-              "pluginA.objectConfig.debug": true,
-            }
-          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'logging.json': false,
+            'pluginA.objectConfig.debug': true,
+          });
         });
 
         it('ignores exposed to usage configs but not used', async () => {
@@ -749,11 +859,9 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-            Object {
-              "logging.json": false,
-            }
-          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'logging.json': false,
+          });
         });
       });
     });
@@ -779,7 +887,8 @@ describe('CoreUsageDataService', () => {
           savedObjectsServiceMock.createStartContract()
         );
 
-        service.setup({ http, metrics, savedObjectsStartPromise });
+        const changedDeprecatedConfigPath$ = configServiceMock.create().getDeprecatedConfigPath$();
+        service.setup({ http, metrics, savedObjectsStartPromise, changedDeprecatedConfigPath$ });
 
         // Use the stopTimer$ to delay calling stop() until the third frame
         const stopTimer$ = cold('---a|');

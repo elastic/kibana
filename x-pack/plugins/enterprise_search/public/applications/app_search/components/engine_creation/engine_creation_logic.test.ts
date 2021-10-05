@@ -10,7 +10,7 @@ import {
   mockHttpValues,
   mockKibanaValues,
   mockFlashMessageHelpers,
-} from '../../../__mocks__';
+} from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test/jest';
 
@@ -20,9 +20,10 @@ describe('EngineCreationLogic', () => {
   const { mount } = new LogicMounter(EngineCreationLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const { setQueuedSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
+  const { flashSuccessToast, flashAPIErrors } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
+    isLoading: false,
     name: '',
     rawName: '',
     language: 'Universal',
@@ -63,6 +64,28 @@ describe('EngineCreationLogic', () => {
         expect(EngineCreationLogic.values.name).toEqual('name-with-special-characters');
       });
     });
+
+    describe('submitEngine', () => {
+      it('sets isLoading to true', () => {
+        mount({ isLoading: false });
+        EngineCreationLogic.actions.submitEngine();
+        expect(EngineCreationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          isLoading: true,
+        });
+      });
+    });
+
+    describe('onSubmitError', () => {
+      it('resets isLoading to false', () => {
+        mount({ isLoading: true });
+        EngineCreationLogic.actions.onSubmitError();
+        expect(EngineCreationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          isLoading: false,
+        });
+      });
+    });
   });
 
   describe('listeners', () => {
@@ -76,8 +99,8 @@ describe('EngineCreationLogic', () => {
         jest.clearAllMocks();
       });
 
-      it('should set a success message', () => {
-        expect(setQueuedSuccessMessage).toHaveBeenCalledWith('Successfully created engine.');
+      it('should show a success message', () => {
+        expect(flashSuccessToast).toHaveBeenCalledWith("Engine 'test' was created");
       });
 
       it('should navigate the user to the engine page', () => {
@@ -94,13 +117,13 @@ describe('EngineCreationLogic', () => {
         jest.clearAllMocks();
       });
 
-      it('POSTS to /api/app_search/engines', () => {
+      it('POSTS to /internal/app_search/engines', () => {
         const body = JSON.stringify({
           name: EngineCreationLogic.values.name,
           language: EngineCreationLogic.values.language,
         });
         EngineCreationLogic.actions.submitEngine();
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/engines', { body });
+        expect(http.post).toHaveBeenCalledWith('/internal/app_search/engines', { body });
       });
 
       it('calls onEngineCreationSuccess on valid submission', async () => {

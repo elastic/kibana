@@ -18,8 +18,8 @@ export { PresentationUtilServices } from '..';
 export interface StorybookParams {
   canAccessDashboards?: boolean;
   canCreateNewDashboards?: boolean;
-  canEditDashboards?: boolean;
   canSaveVisualizations?: boolean;
+  canSetAdvancedSettings?: boolean;
 }
 
 export const providers: PluginServiceProviders<PresentationUtilServices, StorybookParams> = {

@@ -10,18 +10,21 @@ import type { DocLinksStart } from 'kibana/public';
 import { ComponentType } from 'react';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { IconType } from '@elastic/eui';
 import {
   ActionType,
   AlertHistoryEsIndexConnectorId,
   AlertHistoryDocumentTemplate,
   ALERT_HISTORY_PREFIX,
   AlertHistoryDefaultIndexName,
+  AsApiContract,
 } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
 import {
   ActionGroup,
   AlertActionParam,
   SanitizedAlert,
+  ResolvedSanitizedRule,
   AlertAction,
   AlertAggregations,
   AlertTaskState,
@@ -38,6 +41,7 @@ import {
 // In Triggers and Actions we treat all `Alert`s as `SanitizedAlert<AlertTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
 type Alert = SanitizedAlert<AlertTypeParams>;
+type ResolvedRule = ResolvedSanitizedRule<AlertTypeParams>;
 
 export {
   Alert,
@@ -50,6 +54,7 @@ export {
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
   AlertTypeParams,
+  ResolvedRule,
 };
 export {
   ActionType,
@@ -57,6 +62,7 @@ export {
   AlertHistoryDocumentTemplate,
   AlertHistoryDefaultIndexName,
   ALERT_HISTORY_PREFIX,
+  AsApiContract,
 };
 
 export type ActionTypeIndex = Record<string, ActionType>;
@@ -65,7 +71,7 @@ export type ActionTypeRegistryContract<
   ActionConnector = unknown,
   ActionParams = unknown
 > = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
-export type AlertTypeRegistryContract = PublicMethodsOf<TypeRegistry<AlertTypeModel>>;
+export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<AlertTypeModel>>;
 
 export interface ActionConnectorFieldsProps<TActionConnector> {
   action: TActionConnector;
@@ -103,15 +109,15 @@ export interface Sorting {
 
 export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, ActionParams = any> {
   id: string;
-  iconClass: string;
+  iconClass: IconType;
   selectMessage: string;
   actionTypeTitle?: string;
   validateConnector: (
     connector: UserConfiguredActionConnector<ActionConfig, ActionSecrets>
-  ) => ConnectorValidationResult<Partial<ActionConfig>, Partial<ActionSecrets>>;
+  ) => Promise<ConnectorValidationResult<Partial<ActionConfig>, Partial<ActionSecrets>>>;
   validateParams: (
     actionParams: ActionParams
-  ) => GenericValidationResult<Partial<ActionParams> | unknown>;
+  ) => Promise<GenericValidationResult<Partial<ActionParams> | unknown>>;
   actionConnectorFields: React.LazyExoticComponent<
     ComponentType<
       ActionConnectorFieldsProps<UserConfiguredActionConnector<ActionConfig, ActionSecrets>>
@@ -141,6 +147,7 @@ export interface ActionConnectorProps<Config, Secrets> {
   referencedByCount?: number;
   config: Config;
   isPreconfigured: boolean;
+  isMissingSecrets?: boolean;
 }
 
 export type PreConfiguredActionConnector = Omit<
@@ -245,4 +252,51 @@ export interface AlertTypeModel<Params extends AlertTypeParams = AlertTypeParams
 
 export interface IErrorObject {
   [key: string]: string | string[] | IErrorObject;
+}
+
+export interface ConnectorAddFlyoutProps {
+  onClose: () => void;
+  actionTypes?: ActionType[];
+  onTestConnector?: (connector: ActionConnector) => void;
+  reloadConnectors?: () => Promise<ActionConnector[] | void>;
+  consumer?: string;
+  actionTypeRegistry: ActionTypeRegistryContract;
+}
+export enum EditConectorTabs {
+  Configuration = 'configuration',
+  Test = 'test',
+}
+
+export interface ConnectorEditFlyoutProps {
+  initialConnector: ActionConnector;
+  onClose: () => void;
+  tab?: EditConectorTabs;
+  reloadConnectors?: () => Promise<ActionConnector[] | void>;
+  consumer?: string;
+  actionTypeRegistry: ActionTypeRegistryContract;
+}
+
+export interface AlertEditProps<MetaData = Record<string, any>> {
+  initialAlert: Alert;
+  ruleTypeRegistry: RuleTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  onClose: (reason: AlertFlyoutCloseReason) => void;
+  /** @deprecated use `onSave` as a callback after an alert is saved*/
+  reloadAlerts?: () => Promise<void>;
+  onSave?: () => Promise<void>;
+  metadata?: MetaData;
+}
+
+export interface AlertAddProps<MetaData = Record<string, any>> {
+  consumer: string;
+  ruleTypeRegistry: RuleTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  onClose: (reason: AlertFlyoutCloseReason) => void;
+  alertTypeId?: string;
+  canChangeTrigger?: boolean;
+  initialValues?: Partial<Alert>;
+  /** @deprecated use `onSave` as a callback after an alert is saved*/
+  reloadAlerts?: () => Promise<void>;
+  onSave?: () => Promise<void>;
+  metadata?: MetaData;
 }

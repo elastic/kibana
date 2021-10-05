@@ -5,11 +5,23 @@
  * 2.0.
  */
 
+import {
+  PluginServiceFactory,
+  projectIDs,
+} from '../../../../../../src/plugins/presentation_util/public';
 import { CanvasLabsService } from '../labs';
+
+type CanvasLabsServiceFactory = PluginServiceFactory<CanvasLabsService>;
 
 const noop = (..._args: any[]): any => {};
 
-export const labsService: CanvasLabsService = {
+export const labsServiceFactory: CanvasLabsServiceFactory = () => ({
   getProject: noop,
   getProjects: noop,
-};
+  getProjectIDs: () => projectIDs,
+  isProjectEnabled: () => false,
+  isLabsEnabled: () => true,
+  projectIDs,
+  reset: noop,
+  setProjectStatus: noop,
+});

@@ -6,32 +6,39 @@
  */
 
 import React from 'react';
-import { fireEvent, screen, waitFor } from '@testing-library/dom';
-import { render, mockUrlStorage, mockCore, mockAppIndexPattern } from './rtl_helpers';
+import { screen } from '@testing-library/dom';
+import { render, mockAppIndexPattern } from './rtl_helpers';
 import { ExploratoryView } from './exploratory_view';
-import { getStubIndexPattern } from '../../../../../../../src/plugins/data/public/test_utils';
 import * as obsvInd from './utils/observability_index_patterns';
+import * as pluginHook from '../../../hooks/use_plugin_context';
+import { createStubIndexPattern } from '../../../../../../../src/plugins/data/common/stubs';
 
+jest.spyOn(pluginHook, 'usePluginContext').mockReturnValue({
+  appMountParameters: {
+    setHeaderActionMenu: jest.fn(),
+  },
+} as any);
 describe('ExploratoryView', () => {
   mockAppIndexPattern();
 
   beforeEach(() => {
-    const indexPattern = getStubIndexPattern(
-      'apm-*',
-      () => {},
-      '@timestamp',
-      [
-        {
-          name: '@timestamp',
-          type: 'date',
-          esTypes: ['date'],
-          searchable: true,
-          aggregatable: true,
-          readFromDocValues: true,
+    const indexPattern = createStubIndexPattern({
+      spec: {
+        id: 'apm-*',
+        title: 'apm-*',
+        timeFieldName: '@timestamp',
+        fields: {
+          '@timestamp': {
+            name: '@timestamp',
+            type: 'date',
+            esTypes: ['date'],
+            searchable: true,
+            aggregatable: true,
+            readFromDocValues: true,
+          },
         },
-      ],
-      mockCore() as any
-    );
+      },
+    });
 
     jest.spyOn(obsvInd, 'ObservabilityIndexPatterns').mockReturnValue({
       getIndexPattern: jest.fn().mockReturnValue(indexPattern),
@@ -39,56 +46,22 @@ describe('ExploratoryView', () => {
   });
 
   it('renders exploratory view', async () => {
-    render(<ExploratoryView />);
+    render(<ExploratoryView />, { initSeries: { data: [] } });
 
-    await waitFor(() => {
-      screen.getByText(/open in lens/i);
-      screen.getByRole('heading', { name: /exploratory view/i });
-      screen.getByRole('img', { name: /visulization/i });
-      screen.getByText(/add series/i);
-      screen.getByText(/no series found, please add a series\./i);
-    });
-  });
-
-  it('can add, cancel new series', async () => {
-    render(<ExploratoryView />);
-
-    await fireEvent.click(screen.getByText(/add series/i));
-
-    await waitFor(() => {
-      screen.getByText(/open in lens/i);
-    });
-
-    await waitFor(() => {
-      screen.getByText(/select a data type to start building a series\./i);
-    });
-
-    await fireEvent.click(screen.getByText(/cancel/i));
-
-    await waitFor(() => {
-      screen.getByText(/add series/i);
-    });
+    expect(await screen.findByText(/No series found. Please add a series./i)).toBeInTheDocument();
+    expect(await screen.findByText(/Hide chart/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Refresh/i)).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: /Performance Distribution/i })
+    ).toBeInTheDocument();
   });
 
   it('renders lens component when there is series', async () => {
-    mockUrlStorage({
-      data: {
-        'uptime-pings-histogram': {
-          reportType: 'upp',
-          breakdown: 'monitor.status',
-          time: { from: 'now-15m', to: 'now' },
-        },
-      },
-    });
-
     render(<ExploratoryView />);
 
-    await waitFor(() => {
-      screen.getByText(/open in lens/i);
-      screen.getByRole('heading', { name: /uptime pings/i });
-      screen.getByText(/uptime-pings-histogram/i);
-      screen.getByText(/Lens Embeddable Component/i);
-      screen.getByRole('table', { name: /this table contains 1 rows\./i });
-    });
+    expect((await screen.findAllByText('Performance distribution'))[0]).toBeInTheDocument();
+    expect(await screen.findByText(/Lens Embeddable Component/i)).toBeInTheDocument();
+
+    expect(screen.getByTestId('exploratoryViewSeriesPanel0')).toBeInTheDocument();
   });
 });

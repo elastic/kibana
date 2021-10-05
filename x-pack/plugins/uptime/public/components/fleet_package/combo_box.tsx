@@ -13,7 +13,7 @@ export interface Props {
   selectedOptions: string[];
 }
 
-export const ComboBox = ({ onChange, selectedOptions }: Props) => {
+export const ComboBox = ({ onChange, selectedOptions, ...props }: Props) => {
   const [formattedSelectedOptions, setSelectedOptions] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >(selectedOptions.map((option) => ({ label: option, key: option })));
@@ -66,6 +66,7 @@ export const ComboBox = ({ onChange, selectedOptions }: Props) => {
       onChange={onOptionsChange}
       onSearchChange={onSearchChange}
       isInvalid={isInvalid}
+      {...props}
     />
   );
 };

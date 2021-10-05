@@ -24,7 +24,7 @@ import {
   useStartServices,
   useGetAgentPolicies,
 } from '../../../../hooks';
-import { AgentPolicyPackageBadges } from '../agent_policy_package_badges';
+import { AgentPolicyPackageBadges } from '../../../../components';
 
 interface Props {
   onClose: () => void;
@@ -122,7 +122,7 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
           defaultMessage="Assign policy"
         />
       }
-      buttonColor="danger"
+      buttonColor="primary"
     >
       <p>
         <FormattedMessage

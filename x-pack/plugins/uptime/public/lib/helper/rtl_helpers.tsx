@@ -18,6 +18,7 @@ import { coreMock } from 'src/core/public/mocks';
 import { configure } from '@testing-library/dom';
 import { mockState } from '../__mocks__/uptime_store.mock';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
+import { IStorageWrapper } from '../../../../../../src/plugins/kibana_utils/public';
 import {
   KibanaContextProvider,
   KibanaServices,
@@ -27,6 +28,8 @@ import { AppState } from '../../state';
 import { stringifyUrlParams } from './stringify_url_params';
 import { ClientPluginsStart } from '../../apps/plugin';
 import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
+import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { UptimeRefreshContextProvider, UptimeStartupPluginsContextProvider } from '../../contexts';
 
 interface KibanaProps {
   services?: KibanaServices;
@@ -60,21 +63,37 @@ interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore
 }
 
 function getSetting<T = any>(key: string): T {
-  return ('MMM D, YYYY @ HH:mm:ss.SSS' as unknown) as T;
+  return 'MMM D, YYYY @ HH:mm:ss.SSS' as unknown as T;
 }
 
 function setSetting$<T = any>(key: string): T {
-  return (of('MMM D, YYYY @ HH:mm:ss.SSS') as unknown) as T;
+  return of('MMM D, YYYY @ HH:mm:ss.SSS') as unknown as T;
 }
+
+const createMockStore = () => {
+  let store: Record<string, any> = {};
+  return {
+    get: jest.fn().mockImplementation((key) => store[key]),
+    set: jest.fn().mockImplementation((key, value) => (store[key] = value)),
+    remove: jest.fn().mockImplementation((key: string) => delete store[key]),
+    clear: jest.fn().mockImplementation(() => (store = {})),
+  };
+};
+
+const mockAppUrls: Record<string, string> = {
+  uptime: '/app/uptime',
+  observability: '/app/observability',
+  '/home#/tutorial/uptimeMonitors': '/home#/tutorial/uptimeMonitors',
+};
 
 /* default mock core */
 const defaultCore = coreMock.createStart();
 const mockCore: () => Partial<CoreStart> = () => {
-  const core: Partial<CoreStart & ClientPluginsStart> = {
+  const core: Partial<CoreStart & ClientPluginsStart & { storage: IStorageWrapper }> = {
     ...defaultCore,
     application: {
       ...defaultCore.application,
-      getUrlForApp: () => '/app/uptime',
+      getUrlForApp: (app: string) => mockAppUrls[app],
       navigateToUrl: jest.fn(),
       capabilities: {
         ...defaultCore.application.capabilities,
@@ -92,6 +111,8 @@ const mockCore: () => Partial<CoreStart> = () => {
       get$: setSetting$,
     },
     triggersActionsUi: triggersActionsUiMock.createStart(),
+    storage: createMockStore(),
+    data: dataPluginMock.createStartContract(),
   };
 
   return core;
@@ -109,9 +130,13 @@ export function MockKibanaProvider<ExtraCore>({
   };
   return (
     <KibanaContextProvider services={{ ...coreOptions }} {...kibanaProps}>
-      <EuiThemeProvider darkMode={false}>
-        <I18nProvider>{children}</I18nProvider>
-      </EuiThemeProvider>
+      <UptimeRefreshContextProvider>
+        <UptimeStartupPluginsContextProvider data={(coreOptions as any).data}>
+          <EuiThemeProvider darkMode={false}>
+            <I18nProvider>{children}</I18nProvider>
+          </EuiThemeProvider>
+        </UptimeStartupPluginsContextProvider>
+      </UptimeRefreshContextProvider>
     </KibanaContextProvider>
   );
 }

@@ -6,7 +6,7 @@
  */
 
 import { HttpHandler } from 'kibana/public';
-import _ from 'lodash';
+import { last } from 'lodash';
 import {
   loadInitialState,
   loadIndexPatterns,
@@ -36,7 +36,7 @@ const createMockStorage = (lastData?: Record<string, string>) => {
   };
 };
 
-const indexPattern1 = ({
+const indexPattern1 = {
   id: '1',
   title: 'my-fake-index-pattern',
   timeFieldName: 'timestamp',
@@ -105,14 +105,14 @@ const indexPattern1 = ({
     },
     documentField,
   ],
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
 const sampleIndexPatternsFromService = {
   '1': createMockedIndexPattern(),
   '2': createMockedRestrictedIndexPattern(),
 };
 
-const indexPattern2 = ({
+const indexPattern2 = {
   id: '2',
   title: 'my-fake-restricted-pattern',
   timeFieldName: 'timestamp',
@@ -177,7 +177,7 @@ const indexPattern2 = ({
     },
     documentField,
   ],
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
 const sampleIndexPatterns = {
   '1': indexPattern1,
@@ -185,7 +185,7 @@ const sampleIndexPatterns = {
 };
 
 function mockIndexPatternsService() {
-  return ({
+  return {
     get: jest.fn(async (id: '1' | '2') => {
       const result = { ...sampleIndexPatternsFromService[id], metaFields: [] };
       if (!result.fields) {
@@ -205,7 +205,7 @@ function mockIndexPatternsService() {
         },
       ];
     }),
-  } as unknown) as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>;
+  } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>;
 }
 
 describe('loader', () => {
@@ -214,12 +214,12 @@ describe('loader', () => {
       const cache = await loadIndexPatterns({
         cache: sampleIndexPatterns,
         patterns: ['1', '2'],
-        indexPatternsService: ({
+        indexPatternsService: {
           get: jest.fn(() =>
             Promise.reject('mockIndexPatternService.get should not have been called')
           ),
           getIdsWithTitle: jest.fn(),
-        } as unknown) as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
+        } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
       });
 
       expect(cache).toEqual(sampleIndexPatterns);
@@ -251,7 +251,7 @@ describe('loader', () => {
       const cache = await loadIndexPatterns({
         cache: {},
         patterns: ['foo'],
-        indexPatternsService: ({
+        indexPatternsService: {
           get: jest.fn(async () => ({
             id: 'foo',
             title: 'Foo index',
@@ -292,7 +292,7 @@ describe('loader', () => {
             id: 'foo',
             title: 'Foo index',
           })),
-        } as unknown) as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
+        } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
       });
 
       expect(cache.foo.getFieldByName('bytes')!.aggregationRestrictions).toEqual({
@@ -307,7 +307,7 @@ describe('loader', () => {
       const cache = await loadIndexPatterns({
         cache: {},
         patterns: ['foo'],
-        indexPatternsService: ({
+        indexPatternsService: {
           get: jest.fn(async () => ({
             id: 'foo',
             title: 'Foo index',
@@ -348,7 +348,7 @@ describe('loader', () => {
             id: 'foo',
             title: 'Foo index',
           })),
-        } as unknown) as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
+        } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
       });
 
       expect(cache.foo.getFieldByName('timestamp')!.meta).toEqual(true);
@@ -495,6 +495,57 @@ describe('loader', () => {
       expect(storage.set).toHaveBeenCalledWith('lens-settings', {
         indexPatternId: '1',
       });
+    });
+
+    it('should initialize all the embeddable references without local storage', async () => {
+      const savedState: IndexPatternPersistedState = {
+        layers: {
+          layerb: {
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: {
+                dataType: 'date',
+                isBucketed: true,
+                label: 'My date',
+                operationType: 'date_histogram',
+                params: {
+                  interval: 'm',
+                },
+                sourceField: 'timestamp',
+              },
+              col2: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Sum of bytes',
+                operationType: 'sum',
+                sourceField: 'bytes',
+              },
+            },
+          },
+        },
+      };
+      const storage = createMockStorage({});
+      const state = await loadInitialState({
+        persistedState: savedState,
+        references: [
+          { name: 'indexpattern-datasource-current-indexpattern', id: '2', type: 'index-pattern' },
+          { name: 'indexpattern-datasource-layer-layerb', id: '2', type: 'index-pattern' },
+          { name: 'another-reference', id: 'c', type: 'index-pattern' },
+        ],
+        indexPatternsService: mockIndexPatternsService(),
+        storage,
+        options: { isFullEditor: false },
+      });
+
+      expect(state).toMatchObject({
+        currentIndexPatternId: undefined,
+        indexPatternRefs: [],
+        indexPatterns: {
+          '2': sampleIndexPatterns['2'],
+        },
+        layers: { layerb: { ...savedState.layers.layerb, indexPatternId: '2' } },
+      });
+      expect(storage.set).not.toHaveBeenCalled();
     });
 
     it('should initialize from saved state', async () => {
@@ -770,7 +821,7 @@ describe('loader', () => {
                 label: 'My hist',
                 operationType: 'date_histogram',
                 params: {
-                  interval: '1d',
+                  interval: 'm',
                 },
                 sourceField: 'timestamp',
               },
@@ -840,15 +891,15 @@ describe('loader', () => {
 
     it('should call once for each index pattern', async () => {
       const setState = jest.fn();
-      const fetchJson = (jest.fn((path: string) => {
-        const indexPatternTitle = _.last(path.split('/'));
+      const fetchJson = jest.fn((path: string) => {
+        const indexPatternTitle = last(path.split('/'));
         return {
           indexPatternTitle,
           existingFieldNames: ['field_1', 'field_2'].map(
             (fieldName) => `ip${indexPatternTitle}_${fieldName}`
           ),
         };
-      }) as unknown) as HttpHandler;
+      }) as unknown as HttpHandler;
 
       await syncExistingFields({
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
@@ -890,8 +941,8 @@ describe('loader', () => {
     it('should call showNoDataPopover callback if current index pattern returns no fields', async () => {
       const setState = jest.fn();
       const showNoDataPopover = jest.fn();
-      const fetchJson = (jest.fn((path: string) => {
-        const indexPatternTitle = _.last(path.split('/'));
+      const fetchJson = jest.fn((path: string) => {
+        const indexPatternTitle = last(path.split('/'));
         return {
           indexPatternTitle,
           existingFieldNames:
@@ -899,7 +950,7 @@ describe('loader', () => {
               ? ['field_1', 'field_2'].map((fieldName) => `${indexPatternTitle}_${fieldName}`)
               : [],
         };
-      }) as unknown) as HttpHandler;
+      }) as unknown as HttpHandler;
 
       const args = {
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
@@ -926,11 +977,11 @@ describe('loader', () => {
 
     it('should set all fields to available and existence error flag if the request fails', async () => {
       const setState = jest.fn();
-      const fetchJson = (jest.fn((path: string) => {
+      const fetchJson = jest.fn((path: string) => {
         return new Promise((resolve, reject) => {
           reject(new Error());
         });
-      }) as unknown) as HttpHandler;
+      }) as unknown as HttpHandler;
 
       const args = {
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
@@ -968,18 +1019,18 @@ describe('loader', () => {
 
     it('should set all fields to available and existence error flag if the request times out', async () => {
       const setState = jest.fn();
-      const fetchJson = (jest.fn((path: string) => {
+      const fetchJson = jest.fn((path: string) => {
         return new Promise((resolve, reject) => {
           reject(
             new HttpFetchError(
               'timeout',
               'name',
-              ({} as unknown) as Request,
-              ({ status: 408 } as unknown) as Response
+              {} as unknown as Request,
+              { status: 408 } as unknown as Response
             )
           );
         });
-      }) as unknown) as HttpHandler;
+      }) as unknown as HttpHandler;
 
       const args = {
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },

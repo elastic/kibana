@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { mockHttpValues, mockFlashMessageHelpers } from '../../../__mocks__';
-import { LogicMounter } from '../../../__mocks__/kea.mock';
+import {
+  LogicMounter,
+  mockHttpValues,
+  mockFlashMessageHelpers,
+} from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test/jest';
 
@@ -115,7 +118,7 @@ describe('SecurityLogic', () => {
         SecurityLogic.actions.initializeSourceRestrictions();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/security/source_restrictions'
+          '/internal/workplace_search/org/security/source_restrictions'
         );
         await nextTick();
         expect(setServerPropsSpy).toHaveBeenCalledWith(serverProps);
@@ -140,7 +143,7 @@ describe('SecurityLogic', () => {
         SecurityLogic.actions.saveSourceRestrictions();
 
         expect(http.patch).toHaveBeenCalledWith(
-          '/api/workplace_search/org/security/source_restrictions',
+          '/internal/workplace_search/org/security/source_restrictions',
           {
             body: JSON.stringify(serverProps),
           }

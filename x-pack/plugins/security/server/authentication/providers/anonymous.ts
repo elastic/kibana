@@ -136,9 +136,8 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
       this.logger.debug('Anonymous requests will be authenticated via username and password.');
     }
 
-    this.httpAuthorizationHeader = AnonymousAuthenticationProvider.createHTTPAuthorizationHeader(
-      credentials
-    );
+    this.httpAuthorizationHeader =
+      AnonymousAuthenticationProvider.createHTTPAuthorizationHeader(credentials);
   }
 
   /**

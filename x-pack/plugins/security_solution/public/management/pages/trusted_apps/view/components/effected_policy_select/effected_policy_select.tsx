@@ -7,12 +7,15 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import {
+  EuiButtonGroup,
+  EuiButtonGroupOptionProps,
   EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiSelectable,
   EuiSelectableProps,
-  EuiSwitch,
-  EuiSwitchProps,
+  EuiSpacer,
   EuiText,
   htmlIdGenerator,
 } from '@elastic/eui';
@@ -21,11 +24,10 @@ import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/sele
 import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 import { PolicyData } from '../../../../../../../common/endpoint/types';
-import { MANAGEMENT_APP_ID } from '../../../../../common/constants';
 import { getPolicyDetailPath } from '../../../../../common/routing';
-import { useFormatUrl } from '../../../../../../common/components/link_to';
-import { SecurityPageName } from '../../../../../../../common/constants';
+import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
 import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
+import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
 
 const NOOP = () => {};
 const DEFAULT_LIST_PROPS: EuiSelectableProps['listProps'] = { bordered: true, showIcons: false };
@@ -67,15 +69,30 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
     'data-test-subj': dataTestSubj,
     ...otherSelectableProps
   }) => {
-    const { formatUrl } = useFormatUrl(SecurityPageName.administration);
+    const { getAppUrl } = useAppUrl();
 
-    const getTestId = useCallback(
-      (suffix): string | undefined => {
-        if (dataTestSubj) {
-          return `${dataTestSubj}-${suffix}`;
-        }
-      },
-      [dataTestSubj]
+    const getTestId = useTestIdGenerator(dataTestSubj);
+
+    const toggleGlobal: EuiButtonGroupOptionProps[] = useMemo(
+      () => [
+        {
+          id: 'globalPolicy',
+          label: i18n.translate('xpack.securitySolution.endpoint.trustedAppsByPolicy.global', {
+            defaultMessage: 'Global',
+          }),
+          iconType: isGlobal ? 'checkInCircleFilled' : '',
+          'data-test-subj': getTestId('global'),
+        },
+        {
+          id: 'perPolicy',
+          label: i18n.translate('xpack.securitySolution.endpoint.trustedAppsByPolicy.perPolicy', {
+            defaultMessage: 'Per Policy',
+          }),
+          iconType: !isGlobal ? 'checkInCircleFilled' : '',
+          'data-test-subj': getTestId('perPolicy'),
+        },
+      ],
+      [getTestId, isGlobal]
     );
 
     const selectableOptions: EffectedPolicyOption[] = useMemo(() => {
@@ -95,8 +112,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           ),
           append: (
             <LinkToApp
-              href={formatUrl(getPolicyDetailPath(policy.id))}
-              appId={MANAGEMENT_APP_ID}
+              href={getAppUrl({ path: getPolicyDetailPath(policy.id) })}
               appPath={getPolicyDetailPath(policy.id)}
               target="_blank"
             >
@@ -112,7 +128,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           'data-test-subj': `policy-${policy.id}`,
         }))
         .sort(({ label: labelA }, { label: labelB }) => labelA.localeCompare(labelB));
-    }, [formatUrl, isGlobal, options, selected]);
+    }, [getAppUrl, isGlobal, options, selected]);
 
     const handleOnPolicySelectChange = useCallback<
       Required<EuiSelectableProps<OptionPolicyData>>['onChange']
@@ -126,10 +142,10 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
       [isGlobal, onChange]
     )!;
 
-    const handleGlobalSwitchChange: EuiSwitchProps['onChange'] = useCallback(
-      ({ target: { checked } }) => {
+    const handleGlobalButtonChange = useCallback(
+      (selectedId) => {
         onChange({
-          isGlobal: checked,
+          isGlobal: selectedId === 'globalPolicy',
           selected,
         });
       },
@@ -147,48 +163,54 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
 
     return (
       <EffectivePolicyFormContainer>
-        <EuiFormRow
-          fullWidth
-          label={
+        <EuiText size="xs">
+          <h3>
+            <FormattedMessage
+              id="xpack.securitySolution.trustedapps.policySelect.assignmentSectionTitle"
+              defaultMessage="Assignment"
+            />
+          </h3>
+        </EuiText>
+        <EuiSpacer size="xs" />
+        <EuiFlexGroup>
+          <EuiFlexItem grow={2}>
             <EuiText size="s">
-              <h3>
-                <FormattedMessage
-                  id="xpack.securitySolution.trustedapps.policySelect.globalSectionTitle"
-                  defaultMessage="Assignment"
-                />
-              </h3>
+              <p>
+                {i18n.translate('xpack.securitySolution.trustedApps.assignmentSectionDescription', {
+                  defaultMessage:
+                    'You can assign this trusted application globally across all policies or assign it to specific policies.',
+                })}
+              </p>
             </EuiText>
-          }
-        >
-          <EuiSwitch
-            label={i18n.translate(
-              'xpack.securitySolution.trustedapps.policySelect.globalSwitchTitle',
-              {
-                defaultMessage: 'Apply trusted application globally',
-              }
-            )}
-            checked={isGlobal}
-            onChange={handleGlobalSwitchChange}
-            data-test-subj={getTestId('globalSwitch')}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          fullWidth
-          label={i18n.translate('xpack.securitySolution.policySelect.policySpecificSectionTitle', {
-            defaultMessage: 'Apply to specific endpoint policies',
-          })}
-        >
-          <EuiSelectable<OptionPolicyData>
-            {...otherSelectableProps}
-            options={selectableOptions}
-            listProps={listProps || DEFAULT_LIST_PROPS}
-            onChange={handleOnPolicySelectChange}
-            searchable={true}
-            data-test-subj={getTestId('policiesSelectable')}
-          >
-            {listBuilderCallback}
-          </EuiSelectable>
-        </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <EuiFormRow fullWidth>
+              <EuiButtonGroup
+                legend="Global Policy Toggle"
+                options={toggleGlobal}
+                idSelected={isGlobal ? 'globalPolicy' : 'perPolicy'}
+                onChange={handleGlobalButtonChange}
+                color="primary"
+                isFullWidth
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer />
+        {!isGlobal && (
+          <EuiFormRow fullWidth>
+            <EuiSelectable<OptionPolicyData>
+              {...otherSelectableProps}
+              options={selectableOptions}
+              listProps={listProps || DEFAULT_LIST_PROPS}
+              onChange={handleOnPolicySelectChange}
+              searchable={true}
+              data-test-subj={getTestId('policiesSelectable')}
+            >
+              {listBuilderCallback}
+            </EuiSelectable>
+          </EuiFormRow>
+        )}
       </EffectivePolicyFormContainer>
     );
   }

@@ -15,10 +15,10 @@ export default function ({ getService }: FtrProviderContext) {
   describe('fleet_agent_policies', () => {
     describe('POST /api/fleet/agent_policies', () => {
       before(async () => {
-        await esArchiver.load('fleet/empty_fleet_server');
+        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
       after(async () => {
-        await esArchiver.unload('fleet/empty_fleet_server');
+        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
       it('should work with valid minimum required values', async () => {
         const {
@@ -34,6 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { body } = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
         expect(body.item.is_managed).to.equal(false);
+        expect(body.item.status).to.be('active');
       });
 
       it('sets given is_managed value', async () => {
@@ -116,10 +117,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('POST /api/fleet/agent_policies/{agentPolicyId}/copy', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('fleet/agents');
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
       });
       after(async () => {
-        await esArchiver.unload('fleet/agents');
+        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
       });
 
       const TEST_POLICY_ID = 'policy1';
@@ -140,6 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(newPolicy).to.eql({
           name: 'Copied policy',
+          status: 'active',
           description: 'Test',
           is_managed: false,
           namespace: 'default',
@@ -196,7 +198,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('PUT /api/fleet/agent_policies/{agentPolicyId}', () => {
       before(async () => {
-        await esArchiver.load('fleet/empty_fleet_server');
+        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
       const createdPolicyIds: string[] = [];
       after(async () => {
@@ -210,7 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
         await Promise.all(deletedPromises);
       });
       after(async () => {
-        await esArchiver.unload('fleet/empty_fleet_server');
+        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
       let agentPolicyId: undefined | string;
       it('should work with valid values', async () => {
@@ -242,6 +244,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { id, updated_at, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
+          status: 'active',
           name: 'Updated name',
           description: 'Updated description',
           namespace: 'default',
@@ -322,10 +325,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('POST /api/fleet/agent_policies/delete', () => {
       before(async () => {
-        await esArchiver.load('fleet/empty_fleet_server');
+        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
       after(async () => {
-        await esArchiver.unload('fleet/empty_fleet_server');
+        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
       let hostedPolicy: any | undefined;
       it('should prevent hosted policies being deleted', async () => {

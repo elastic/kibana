@@ -6,9 +6,9 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
-import { APP_ICON, getExistingMapPath } from '../../common/constants';
+import { APP_ICON, getFullPath } from '../../common/constants';
 // @ts-ignore
-import { migrations } from './migrations';
+import { savedObjectMigrations } from './saved_object_migrations';
 
 export const mapSavedObjects: SavedObjectsType = {
   name: 'map',
@@ -34,10 +34,10 @@ export const mapSavedObjects: SavedObjectsType = {
     },
     getInAppUrl(obj) {
       return {
-        path: getExistingMapPath(obj.id),
+        path: getFullPath(obj.id),
         uiCapabilitiesPath: 'maps.show',
       };
     },
   },
-  migrations: migrations.map,
+  migrations: savedObjectMigrations,
 };

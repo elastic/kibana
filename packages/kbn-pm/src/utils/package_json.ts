@@ -61,7 +61,7 @@ export function transformDependencies(dependencies: IPackageDependencies = {}) {
     }
 
     if (isBazelPackageDependency(depVersion)) {
-      newDeps[name] = depVersion.replace('link:bazel-bin/', 'file:').replace('/npm_module', '');
+      newDeps[name] = depVersion.replace('link:bazel-bin/', 'file:');
       continue;
     }
 

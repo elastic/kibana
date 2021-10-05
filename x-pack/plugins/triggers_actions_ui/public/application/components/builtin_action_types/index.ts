@@ -10,6 +10,7 @@ import { getSlackActionType } from './slack';
 import { getEmailActionType } from './email';
 import { getIndexActionType } from './es_index';
 import { getPagerDutyActionType } from './pagerduty';
+import { getSwimlaneActionType } from './swimlane';
 import { getWebhookActionType } from './webhook';
 import { TypeRegistry } from '../../type_registry';
 import { ActionTypeModel } from '../../../types';
@@ -28,6 +29,7 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getEmailActionType());
   actionTypeRegistry.register(getIndexActionType());
   actionTypeRegistry.register(getPagerDutyActionType());
+  actionTypeRegistry.register(getSwimlaneActionType());
   actionTypeRegistry.register(getWebhookActionType());
   actionTypeRegistry.register(getServiceNowITSMActionType());
   actionTypeRegistry.register(getServiceNowSIRActionType());

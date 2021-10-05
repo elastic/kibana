@@ -28,9 +28,8 @@ describe('get buckets', () => {
       environment: 'prod',
       serviceName: 'myServiceName',
       bucketSize: 10,
+      kuery: '',
       setup: {
-        start: 1528113600000,
-        end: 1528977600000,
         apmEventClient: {
           search: clientSpy,
         } as any,
@@ -43,7 +42,6 @@ describe('get buckets', () => {
             get: () => 'myIndex',
           }
         ) as APMConfig,
-        uiFilters: {},
         indices: {
           /* eslint-disable @typescript-eslint/naming-convention */
           'apm_oss.sourcemapIndices': 'apm-*',
@@ -57,6 +55,8 @@ describe('get buckets', () => {
           apmCustomLinkIndex: '.apm-custom-link',
         },
       },
+      start: 1528113600000,
+      end: 1528977600000,
     });
   });
 
@@ -65,7 +65,7 @@ describe('get buckets', () => {
   });
 
   it('should limit query results to error documents', () => {
-    const query = clientSpy.mock.calls[0][0];
+    const query = clientSpy.mock.calls[0][1];
     expect(query.apm.events).toEqual([ProcessorEvent.error]);
   });
 });

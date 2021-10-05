@@ -27,8 +27,12 @@ describe('AppContainer', () => {
   });
 
   const flushPromises = async () => {
-    await new Promise<void>(async (resolve) => {
-      setImmediate(() => resolve());
+    await new Promise<void>(async (resolve, reject) => {
+      try {
+        setImmediate(() => resolve());
+      } catch (error) {
+        reject(error);
+      }
     });
   };
 
@@ -45,6 +49,7 @@ describe('AppContainer', () => {
     appRoute: '/some-route',
     unmountBeforeMounting: false,
     exactRoute: false,
+    deepLinkPaths: {},
     mount: async ({ element }: AppMountParameters) => {
       await promise;
       const container = document.createElement('div');
@@ -133,6 +138,7 @@ describe('AppContainer', () => {
     const mounter = {
       appBasePath: '/base-path/some-route',
       appRoute: '/some-route',
+      deepLinkPaths: {},
       unmountBeforeMounting: false,
       exactRoute: false,
       mount: async ({ element }: AppMountParameters) => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110898
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { PluginInitializerContext } from 'kibana/server';
 import { MlServerPlugin } from './plugin';
 export type { MlPluginSetup, MlPluginStart } from './plugin';

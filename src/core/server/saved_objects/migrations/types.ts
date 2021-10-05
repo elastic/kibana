@@ -56,15 +56,19 @@ export interface SavedObjectMigrationContext {
   /**
    * logger instance to be used by the migration handler
    */
-  log: SavedObjectsMigrationLogger;
+  readonly log: SavedObjectsMigrationLogger;
   /**
    * The migration version that this migration function is defined for
    */
-  migrationVersion: string;
+  readonly migrationVersion: string;
   /**
    * The version in which this object type is being converted to a multi-namespace type
    */
-  convertToMultiNamespaceTypeVersion?: string;
+  readonly convertToMultiNamespaceTypeVersion?: string;
+  /**
+   * Whether this is a single-namespace type or not
+   */
+  readonly isSingleNamespaceType: boolean;
 }
 
 /**

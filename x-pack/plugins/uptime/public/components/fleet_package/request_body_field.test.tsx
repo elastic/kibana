@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import 'jest-canvas-mock';
+
 import React, { useState, useCallback } from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
@@ -16,7 +18,7 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 }));
 
 describe('<RequestBodyField />', () => {
-  const defaultMode = Mode.TEXT;
+  const defaultMode = Mode.PLAINTEXT;
   const defaultValue = 'sample value';
   const WrappedComponent = () => {
     const [config, setConfig] = useState({
@@ -28,9 +30,10 @@ describe('<RequestBodyField />', () => {
       <RequestBodyField
         type={config.type}
         value={config.value}
-        onChange={useCallback((code) => setConfig({ type: code.type as Mode, value: code.value }), [
-          setConfig,
-        ])}
+        onChange={useCallback(
+          (code) => setConfig({ type: code.type as Mode, value: code.value }),
+          [setConfig]
+        )}
       />
     );
   };

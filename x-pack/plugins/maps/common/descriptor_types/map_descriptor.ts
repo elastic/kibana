@@ -7,24 +7,16 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { ReactNode } from 'react';
 import { GeoJsonProperties } from 'geojson';
-import { Query } from '../../../../../src/plugins/data/common';
-import { DRAW_TYPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../constants';
+import { Geometry } from 'geojson';
+import { DRAW_SHAPE, ES_SPATIAL_RELATIONS } from '../constants';
 
 export type MapExtent = {
   minLon: number;
   minLat: number;
   maxLon: number;
   maxLat: number;
-};
-
-export type MapQuery = Query & {
-  queryLastTriggeredAt?: string;
-};
-
-export type MapRefreshConfig = {
-  isPaused: boolean;
-  interval: number;
 };
 
 export type MapCenter = {
@@ -41,26 +33,38 @@ export type Goto = {
   center?: MapCenterAndZoom;
 };
 
+export const GEOMETRY_FILTER_ACTION = 'GEOMETRY_FILTER_ACTION';
+
+export type TooltipFeatureAction = {
+  label: string;
+  id: typeof GEOMETRY_FILTER_ACTION;
+  form: ReactNode;
+};
+
 export type TooltipFeature = {
   id?: number | string;
   layerId: string;
+  geometry?: Geometry;
   mbProperties: GeoJsonProperties;
+  actions: TooltipFeatureAction[];
 };
 
 export type TooltipState = {
   features: TooltipFeature[];
   id: string;
   isLocked: boolean;
-  location: number[]; // 0 index is lon, 1 index is lat
+  location: [number, number]; // 0 index is lon, 1 index is lat
 };
 
 export type DrawState = {
   actionId: string;
-  drawType: DRAW_TYPE;
+  drawShape?: DRAW_SHAPE;
   filterLabel?: string; // point radius filter alias
-  geoFieldName?: string;
-  geoFieldType?: ES_GEO_FIELD_TYPE;
   geometryLabel?: string;
-  indexPatternId?: string;
   relation?: ES_SPATIAL_RELATIONS;
+};
+
+export type EditState = {
+  layerId: string;
+  drawShape?: DRAW_SHAPE;
 };

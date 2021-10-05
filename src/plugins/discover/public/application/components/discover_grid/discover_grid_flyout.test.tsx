@@ -23,10 +23,10 @@ describe('Discover flyout', function () {
 
   const getProps = () => {
     const onClose = jest.fn();
-    const services = ({
+    const services = {
       filterManager: createFilterManagerMock(),
       addBasePath: (path: string) => `/base${path}`,
-    } as unknown) as DiscoverServices;
+    } as unknown as DiscoverServices;
 
     return {
       columns: ['date'],
@@ -142,5 +142,25 @@ describe('Discover flyout', function () {
     findTestSubject(component, 'pagination-button-previous').simulate('click');
     expect(props.setExpandedDoc).toHaveBeenCalledTimes(1);
     expect(props.setExpandedDoc.mock.calls[0][0]._id).toBe('4');
+  });
+
+  it('allows navigating with arrow keys through documents', () => {
+    const props = getProps();
+    const component = mountWithIntl(<DiscoverGridFlyout {...props} />);
+    findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowRight' });
+    expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ _id: '2' }));
+    component.setProps({ ...props, hit: props.hits[1] });
+    findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowLeft' });
+    expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ _id: '1' }));
+  });
+
+  it('should not navigate with keypresses when already at the border of documents', () => {
+    const props = getProps();
+    const component = mountWithIntl(<DiscoverGridFlyout {...props} />);
+    findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowLeft' });
+    expect(props.setExpandedDoc).not.toHaveBeenCalled();
+    component.setProps({ ...props, hit: props.hits[props.hits.length - 1] });
+    findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowRight' });
+    expect(props.setExpandedDoc).not.toHaveBeenCalled();
   });
 });

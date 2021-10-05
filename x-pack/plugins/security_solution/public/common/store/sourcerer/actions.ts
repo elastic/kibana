@@ -22,9 +22,8 @@ export const setIndexPatternsList = actionCreator<{
   configIndexPatterns: string[];
 }>('SET_INDEX_PATTERNS_LIST');
 
-export const setSignalIndexName = actionCreator<{ signalIndexName: string }>(
-  'SET_SIGNAL_INDEX_NAME'
-);
+export const setSignalIndexName =
+  actionCreator<{ signalIndexName: string }>('SET_SIGNAL_INDEX_NAME');
 
 export const setSourcererScopeLoading = actionCreator<{ id: SourcererScopeName; loading: boolean }>(
   'SET_SOURCERER_SCOPE_LOADING'

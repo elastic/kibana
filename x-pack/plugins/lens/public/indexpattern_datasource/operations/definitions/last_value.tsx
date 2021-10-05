@@ -15,15 +15,27 @@ import { FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField, IndexPattern } from '../../types';
 import { updateColumnParam } from '../layer_helpers';
 import { DataType } from '../../../types';
-import { getFormatFromPreviousColumn, getInvalidFieldMessage, getSafeName } from './helpers';
+import {
+  getFormatFromPreviousColumn,
+  getInvalidFieldMessage,
+  getSafeName,
+  getFilter,
+} from './helpers';
+import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 
-function ofName(name: string) {
-  return i18n.translate('xpack.lens.indexPattern.lastValueOf', {
-    defaultMessage: 'Last value of {name}',
-    values: {
-      name,
-    },
-  });
+function ofName(name: string, timeShift: string | undefined) {
+  return adjustTimeScaleLabelSuffix(
+    i18n.translate('xpack.lens.indexPattern.lastValueOf', {
+      defaultMessage: 'Last value of {name}',
+      values: {
+        name,
+      },
+    }),
+    undefined,
+    undefined,
+    undefined,
+    timeShift
+  );
 }
 
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
@@ -91,7 +103,8 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
   displayName: i18n.translate('xpack.lens.indexPattern.lastValue', {
     defaultMessage: 'Last value',
   }),
-  getDefaultLabel: (column, indexPattern) => ofName(getSafeName(column.sourceField, indexPattern)),
+  getDefaultLabel: (column, indexPattern) =>
+    ofName(getSafeName(column.sourceField, indexPattern), column.timeShift),
   input: 'field',
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
@@ -102,7 +115,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     return {
       ...oldColumn,
       dataType: field.type as DataType,
-      label: ofName(field.displayName),
+      label: ofName(field.displayName, oldColumn.timeShift),
       sourceField: field.name,
       params: newParams,
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
@@ -121,7 +134,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     const hasDateFields = indexPattern && getDateFields(indexPattern).length;
     if (!hasDateFields) {
       return i18n.translate('xpack.lens.indexPattern.lastValue.disabled', {
-        defaultMessage: 'This function requires the presence of a date field in your index',
+        defaultMessage: 'This function requires the presence of a date field in your data view',
       });
     }
   },
@@ -141,7 +154,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     }
     return errorMessages.length ? errorMessages : undefined;
   },
-  buildColumn({ field, previousColumn, indexPattern }) {
+  buildColumn({ field, previousColumn, indexPattern }, columnParams) {
     const sortField = isTimeFieldNameDateField(indexPattern)
       ? indexPattern.timeFieldName
       : indexPattern.fields.find((f) => f.type === 'date')?.name;
@@ -149,19 +162,20 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     if (!sortField) {
       throw new Error(
         i18n.translate('xpack.lens.functions.lastValue.missingSortField', {
-          defaultMessage: 'This index pattern does not contain any date fields',
+          defaultMessage: 'This data view does not contain any date fields',
         })
       );
     }
 
     return {
-      label: ofName(field.displayName),
+      label: ofName(field.displayName, previousColumn?.timeShift),
       dataType: field.type as DataType,
       operationType: 'last_value',
       isBucketed: false,
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
       sourceField: field.name,
-      filter: previousColumn?.filter,
+      filter: getFilter(previousColumn, columnParams),
+      timeShift: columnParams?.shift || previousColumn?.timeShift,
       params: {
         sortField,
         ...getFormatFromPreviousColumn(previousColumn),
@@ -169,6 +183,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     };
   },
   filterable: true,
+  shiftable: true,
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggTopHit']>('aggTopHit', {
       id: columnId,
@@ -179,6 +194,8 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       size: 1,
       sortOrder: 'desc',
       sortField: column.params.sortField,
+      // time shift is added to wrapping aggFilteredMetric if filter is set
+      timeShift: column.filter ? undefined : column.timeShift,
     }).toAst();
   },
 
@@ -208,7 +225,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
           display="columnCompressed"
           fullWidth
           error={i18n.translate('xpack.lens.indexPattern.sortField.invalid', {
-            defaultMessage: 'Invalid field. Check your index pattern or pick another field.',
+            defaultMessage: 'Invalid field. Check your data view or pick another field.',
           })}
           isInvalid={isSortFieldInvalid}
         >
@@ -244,7 +261,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
               );
             }}
             selectedOptions={
-              ((currentColumn.params?.sortField
+              (currentColumn.params?.sortField
                 ? [
                     {
                       label:
@@ -253,11 +270,27 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
                       value: currentColumn.params.sortField,
                     },
                   ]
-                : []) as unknown) as EuiComboBoxOptionOption[]
+                : []) as unknown as EuiComboBoxOptionOption[]
             }
           />
         </EuiFormRow>
       </>
     );
+  },
+  documentation: {
+    section: 'elasticsearch',
+    signature: i18n.translate('xpack.lens.indexPattern.lastValue.signature', {
+      defaultMessage: 'field: string',
+    }),
+    description: i18n.translate('xpack.lens.indexPattern.lastValue.documentation.markdown', {
+      defaultMessage: `
+Returns the value of a field from the last document, ordered by the default time field of the data view.
+
+This function is usefull the retrieve the latest state of an entity.
+
+Example: Get the current status of server A:
+\`last_value(server.status, kql=\'server.name="A"\')\`
+      `,
+    }),
   },
 };

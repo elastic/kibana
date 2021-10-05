@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type {
-  FailedImport,
-  ProcessedImportResponse,
-  SavedObjectsManagementRecord,
-} from 'src/plugins/saved_objects_management/public';
-
-import type { SavedObjectTarget } from '../types';
+import type { FailedImport, ProcessedImportResponse } from '../lib';
+import type { CopyToSpaceSavedObjectTarget } from '../types';
 import { summarizeCopyResult } from './summarize_copy_result';
 
 // Sample data references:
@@ -29,40 +24,65 @@ const OBJECTS = {
     namespaces: [],
     icon: 'dashboardApp',
     title: 'my-dashboard-title',
-  } as Required<SavedObjectTarget>,
+  } as Required<CopyToSpaceSavedObjectTarget>,
   MY_DASHBOARD: {
     type: 'dashboard',
     id: 'foo',
-    meta: { title: 'my-dashboard-title', icon: 'dashboardApp', namespaceType: 'single' },
+    meta: {
+      title: 'my-dashboard-title',
+      icon: 'dashboardApp',
+      namespaceType: 'single',
+      hiddenType: false,
+    },
     references: [
       { type: 'visualization', id: 'foo', name: 'Visualization foo' },
       { type: 'visualization', id: 'bar', name: 'Visualization bar' },
     ],
-  } as SavedObjectsManagementRecord,
+  },
   VISUALIZATION_FOO: {
     type: 'visualization',
     id: 'bar',
-    meta: { title: 'visualization-foo-title', icon: 'visualizeApp', namespaceType: 'single' },
+    meta: {
+      title: 'visualization-foo-title',
+      icon: 'visualizeApp',
+      namespaceType: 'single',
+      hiddenType: false,
+    },
     references: [{ type: 'index-pattern', id: 'foo', name: 'Index pattern foo' }],
-  } as SavedObjectsManagementRecord,
+  },
   VISUALIZATION_BAR: {
     type: 'visualization',
     id: 'baz',
-    meta: { title: 'visualization-bar-title', icon: 'visualizeApp', namespaceType: 'single' },
+    meta: {
+      title: 'visualization-bar-title',
+      icon: 'visualizeApp',
+      namespaceType: 'single',
+      hiddenType: false,
+    },
     references: [{ type: 'index-pattern', id: 'bar', name: 'Index pattern bar' }],
-  } as SavedObjectsManagementRecord,
+  },
   INDEX_PATTERN_FOO: {
     type: 'index-pattern',
     id: 'foo',
-    meta: { title: 'index-pattern-foo-title', icon: 'indexPatternApp', namespaceType: 'single' },
+    meta: {
+      title: 'index-pattern-foo-title',
+      icon: 'indexPatternApp',
+      namespaceType: 'single',
+      hiddenType: false,
+    },
     references: [],
-  } as SavedObjectsManagementRecord,
+  },
   INDEX_PATTERN_BAR: {
     type: 'index-pattern',
     id: 'bar',
-    meta: { title: 'index-pattern-bar-title', icon: 'indexPatternApp', namespaceType: 'single' },
+    meta: {
+      title: 'index-pattern-bar-title',
+      icon: 'indexPatternApp',
+      namespaceType: 'single',
+      hiddenType: false,
+    },
     references: [],
-  } as SavedObjectsManagementRecord,
+  },
 };
 
 interface ObjectProperties {
@@ -70,6 +90,7 @@ interface ObjectProperties {
   id: string;
   meta: { title?: string; icon?: string };
 }
+
 const createSuccessResult = ({ type, id, meta }: ObjectProperties) => {
   return { type, id, meta };
 };
@@ -190,6 +211,7 @@ describe('summarizeCopyResult', () => {
               "obj": Object {
                 "id": "bar",
                 "meta": Object {
+                  "hiddenType": false,
                   "icon": "visualizeApp",
                   "namespaceType": "single",
                   "title": "visualization-foo-title",

@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ScriptedFieldsTable } from '../scripted_fields_table';
-import { IIndexPattern, IndexPattern } from '../../../../../../plugins/data/common/index_patterns';
+import { IIndexPattern, IndexPattern } from '../../../../../../plugins/data/common';
 
 jest.mock('@elastic/eui', () => ({
   EuiTitle: 'eui-title',
@@ -155,6 +155,7 @@ describe('ScriptedFieldsTable', () => {
     );
 
     await component.update(); // Fire `componentWillMount()`
+    // @ts-expect-error lang is not valid
     component.instance().startDeleteField({ name: 'ScriptedField', lang: '', script: '' });
     await component.update();
 
@@ -167,10 +168,10 @@ describe('ScriptedFieldsTable', () => {
     const component = shallow<ScriptedFieldsTable>(
       <ScriptedFieldsTable
         indexPattern={
-          ({
+          {
             ...indexPattern,
             removeScriptedField,
-          } as unknown) as IndexPattern
+          } as unknown as IndexPattern
         }
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
@@ -179,6 +180,7 @@ describe('ScriptedFieldsTable', () => {
     );
 
     await component.update(); // Fire `componentWillMount()`
+    // @ts-expect-error lang is not valid
     component.instance().startDeleteField({ name: 'ScriptedField', lang: '', script: '' });
 
     await component.update();

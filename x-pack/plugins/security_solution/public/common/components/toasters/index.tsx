@@ -16,34 +16,59 @@ import * as i18n from './translations';
 export * from './utils';
 export * from './errors';
 
+/**
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ */
 export interface AppToast extends Toast {
+  // FunFact: In a very rare case of errors this can be something other than array. We have a unit test case for it and am leaving it like this type for now.
   errors?: string[];
 }
 
+/**
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ */
 interface ToastState {
   toasts: AppToast[];
 }
 
+/**
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ */
 const initialToasterState: ToastState = {
   toasts: [],
 };
 
+/**
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ */
 export type ActionToaster =
   | { type: 'addToaster'; toast: AppToast }
   | { type: 'deleteToaster'; id: string }
   | { type: 'toggleWaitToShowNextToast' };
 
+/**
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ */
 export const StateToasterContext = createContext<[ToastState, Dispatch<ActionToaster>]>([
   initialToasterState,
   () => noop,
 ]);
 
+/**
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ */
 export const useStateToaster = () => useContext(StateToasterContext);
 
+/**
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ */
 interface ManageGlobalToasterProps {
   children: React.ReactNode;
 }
 
+/**
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ */
 export const ManageGlobalToaster = ({ children }: ManageGlobalToasterProps) => {
   const reducerToaster = (state: ToastState, action: ActionToaster) => {
     switch (action.type) {
@@ -63,16 +88,25 @@ export const ManageGlobalToaster = ({ children }: ManageGlobalToasterProps) => {
   );
 };
 
+/**
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ */
 const GlobalToasterListContainer = styled.div`
   position: absolute;
   right: 0;
   bottom: 0;
 `;
 
+/**
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ */
 interface GlobalToasterProps {
   toastLifeTimeMs?: number;
 }
 
+/**
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ */
 export const GlobalToaster = ({ toastLifeTimeMs = 5000 }: GlobalToasterProps) => {
   const [{ toasts }, dispatch] = useStateToaster();
   const [isShowing, setIsShowing] = useState(false);
@@ -108,6 +142,9 @@ export const GlobalToaster = ({ toastLifeTimeMs = 5000 }: GlobalToasterProps) =>
   );
 };
 
+/**
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ */
 const formatToErrorToastIfNeeded = (
   toast: AppToast,
   toggle: (toast: AppToast) => void
@@ -129,8 +166,14 @@ const formatToErrorToastIfNeeded = (
   return toast;
 };
 
+/**
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ */
 const ErrorToastContainer = styled.div`
   text-align: right;
 `;
 
+/**
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ */
 ErrorToastContainer.displayName = 'ErrorToastContainer';

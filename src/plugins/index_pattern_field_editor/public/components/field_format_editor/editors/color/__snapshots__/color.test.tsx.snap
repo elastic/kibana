@@ -45,6 +45,7 @@ exports[`ColorFormatEditor should render multiple colors 1`] = `
             Object {
               "available": [Function],
               "color": "danger",
+              "data-test-subj": "colorEditorRemoveColor",
               "description": "Delete color format",
               "icon": "trash",
               "name": "Delete",
@@ -83,6 +84,7 @@ exports[`ColorFormatEditor should render multiple colors 1`] = `
     size="m"
   />
   <EuiButton
+    data-test-subj="colorEditorAddColor"
     iconType="plusInCircle"
     onClick={[Function]}
     size="s"
@@ -144,6 +146,7 @@ exports[`ColorFormatEditor should render other type normally (range field) 1`] =
             Object {
               "available": [Function],
               "color": "danger",
+              "data-test-subj": "colorEditorRemoveColor",
               "description": "Delete color format",
               "icon": "trash",
               "name": "Delete",
@@ -175,6 +178,7 @@ exports[`ColorFormatEditor should render other type normally (range field) 1`] =
     size="m"
   />
   <EuiButton
+    data-test-subj="colorEditorAddColor"
     iconType="plusInCircle"
     onClick={[Function]}
     size="s"
@@ -236,6 +240,7 @@ exports[`ColorFormatEditor should render string type normally (regex field) 1`] 
             Object {
               "available": [Function],
               "color": "danger",
+              "data-test-subj": "colorEditorRemoveColor",
               "description": "Delete color format",
               "icon": "trash",
               "name": "Delete",
@@ -267,6 +272,7 @@ exports[`ColorFormatEditor should render string type normally (regex field) 1`] 
     size="m"
   />
   <EuiButton
+    data-test-subj="colorEditorAddColor"
     iconType="plusInCircle"
     onClick={[Function]}
     size="s"

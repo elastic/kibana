@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import {
   EuiBasicTable,
   EuiPanel,
@@ -29,7 +27,7 @@ const FailureHistoryComponent: React.FC<FailureHistoryProps> = ({ id }) => {
   const [loading, ruleStatus] = useRuleStatus(id);
   if (loading) {
     return (
-      <EuiPanel>
+      <EuiPanel hasBorder>
         <HeaderSection title={i18n.LAST_FIVE_ERRORS} />
         <EuiLoadingContent />
       </EuiPanel>
@@ -60,7 +58,7 @@ const FailureHistoryComponent: React.FC<FailureHistoryProps> = ({ id }) => {
     },
   ];
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder>
       <HeaderSection title={i18n.LAST_FIVE_ERRORS} />
       <EuiBasicTable
         columns={columns}

@@ -2,8 +2,8 @@
 [[snapshot-repositories]]
 == Snapshot and Restore
 
-*Snapshot and Restore* enables you to backup your {es}
-indices and clusters using data and state snapshots.
+*Snapshot and Restore* lets you back up a running {es}
+cluster using data and state snapshots.
 Snapshots are important because they provide a copy of your data in case
 something goes wrong. If you need to roll back to an older version of your data,
 you can restore a snapshot from the repository.
@@ -34,17 +34,12 @@ The minimum required permissions to access *Snapshot and Restore* include:
 
 To add privileges, open the main menu, then click *Stack Management > Roles*.
 
-[role="screenshot"]
-image:management/snapshot-restore/images/snapshot_permissions.png["Edit Role"]
-
 [float]
 [[kib-snapshot-register-repository]]
 === Register a repository
 A repository is where your snapshots live. You must register a snapshot
 repository before you can perform snapshot and restore operations.
 
-If you don't have a repository, Kibana walks you through the process of
-registering one.
 {kib} supports three repository types
 out of the box: shared file system, read-only URL, and source-only.
 For more information on these repositories and their settings,
@@ -52,11 +47,9 @@ see {ref}/snapshots-register-repository.html[Repositories].
 To use other repositories, such as S3, see
 {ref}/snapshots-register-repository.html#snapshots-repository-plugins[Repository plugins].
 
-
-Once you create a repository, it is listed in the *Repositories*
-view.
-Click a repository name to view its type, number of snapshots, and settings,
-and to verify status.
+The *Repositories* view displays a list of registered repositories. Click a
+repository name to view information about the repository, verify its status, or
+clean it up.
 
 [role="screenshot"]
 image:management/snapshot-restore/images/repository_list.png["Repository list"]
@@ -73,15 +66,8 @@ into each snapshot for further investigation.
 [role="screenshot"]
 image:management/snapshot-restore/images/snapshot_details.png["Snapshot details"]
 
-If you don’t have any snapshots, you can create them from the {kib} <<console-kibana, Console>>. The
-{ref}/snapshots-take-snapshot.html[snapshot API]
-takes the current state and data in your index or cluster, and then saves it to a
-shared repository.
-
-The snapshot process is "smart." Your first snapshot is a complete copy of
-the data in your index or cluster.
-All subsequent snapshots save the changes between the existing snapshots and
-the new data.
+If you don’t have any snapshots, you can create them using the
+{ref}/create-snapshot-api.html[create snapshot API].
 
 [float]
 [[kib-restore-snapshot]]
@@ -93,14 +79,14 @@ restore a snapshot made from one cluster to another cluster. You might
 use the restore operation to:
 
 * Recover data lost due to a failure
-* Migrate a current Elasticsearch cluster to a new version
+* Migrate an {es} cluster to a new version
 * Move data from one cluster to another cluster
 
 To get started, go to the *Snapshots* view, find the
 snapshot, and click the restore icon in the *Actions* column.
 The Restore wizard presents
 options for the restore operation, including which
-indices to restore and whether to modify the index settings.
+data streams and indices to restore and whether to change index settings.
 You can restore an existing index only if it’s closed and has the same
 number of shards as the index in the snapshot.
 
@@ -119,7 +105,7 @@ Use a {ref}/snapshot-lifecycle-management-api.html[snapshot lifecycle policy]
 to automate the creation and deletion
 of cluster snapshots. Taking automatic snapshots:
 
-* Ensures your {es} indices and clusters are backed up on a regular basis
+* Ensures your {es} data is backed up on a regular basis
 * Ensures a recent and relevant snapshot is available if a situation
 arises where a cluster needs to be recovered
 * Allows you to manage your snapshots in {kib}, instead of using a
@@ -138,8 +124,8 @@ You can drill down into each policy to examine its settings and last successful 
 
 You can perform the following actions on a snapshot policy:
 
-* *Run* a policy immediately without waiting for the scheduled time.
-This action is useful before an upgrade or before performing maintenance on indices.
+* *Run* a policy immediately without waiting for the scheduled time. This action
+is useful before an upgrade or before performing maintenance.
 * *Edit* a policy and immediately apply changes to the schedule.
 * *Delete* a policy to prevent any future snapshots from being taken.
 This action does not cancel any currently ongoing snapshots or remove any previously taken snapshots.
@@ -160,7 +146,7 @@ and then click *Delete snapshots*.
 
 [role="xpack"]
 [[snapshot-restore-tutorial]]
-=== Tutorial:  Snapshot and Restore
+=== Tutorial: Snapshot and Restore
 
 
 Ready to try *Snapshot and Restore*? In this tutorial, you'll learn to:
@@ -174,15 +160,12 @@ Ready to try *Snapshot and Restore*? In this tutorial, you'll learn to:
 
 This example shows you how to register a shared file system repository
 and store snapshots.
-Before you begin, you must register the location of the repository in the
-{ref}/snapshots-register-repository.html#snapshots-filesystem-repository[path.repo] setting on
-your master and data nodes.  You can do this in one of two ways:
 
-* Edit  your `elasticsearch.yml` to include the `path.repo` setting.
-
-* Pass the `path.repo` setting when you start Elasticsearch.
-+
-`bin/elasticsearch -E path.repo=/tmp/es-backups`
+Before you begin, you must first mount the file system to the same location on
+all master and data nodes. Then add the file system’s path or parent directory
+to the
+{ref}/snapshots-register-repository.html#snapshots-filesystem-repository[`path.repo`]
+setting in `elasticsearch.yml` for each master and data node.
 
 [float]
 [[register-repo-example]]
@@ -216,13 +199,10 @@ Use the {ref}/snapshots-take-snapshot.html[snapshot API] to create a snapshot.
 . Create the snapshot:
 +
 [source,js]
-PUT /_snapshot/my_backup/2019-04-25_snapshot?wait_for_completion=true
+PUT /_snapshot/my_backup/2099-04-25_snapshot?wait_for_completion=true
 +
-In this example, the snapshot name is `2019-04-25_snapshot`. You can also
+In this example, the snapshot name is `2099-04-25_snapshot`. You can also
 use {ref}/date-math-index-names.html[date math expression] for the snapshot name.
-+
-[role="screenshot"]
-image:management/snapshot-restore/images/create_snapshot.png["Create snapshot"]
 
 . Return to *Snapshot and Restore*.
 +
@@ -251,16 +231,17 @@ image:management/snapshot-restore/images/create-policy-example.png["Create polic
 |Snapshot name
 |`<daily-snap-{now/d}>`
 
-|Schedule
-|Every day at 1:30 a.m.
-
 |Repository
 |`my_backup`
 
+|Schedule
+|Every day at 1:30 a.m.
+
 |*Snapshot&nbsp;settings* |
 
-|Indices
-|Select the indices to back up. By default, all indices, including system indices, are backed up.
+|Data streams and indices
+|Select the data streams and indices to back up. By default, all data streams
+and indices, including system indices, are backed up.
 
 |All&nbsp;other&nbsp;settings
 |Use the defaults.
@@ -280,20 +261,22 @@ Your new policy is listed in the *Policies* view, and you see a summary of its d
 
 [[restore-snapshot-example]]
 ==== Restore a snapshot
-Finally, you'll restore indices from an existing snapshot.
+Finally, you'll restore data streams and indices from an existing snapshot.
 
-. In the *Snapshots* view, find the snapshot you want to restore, for example `2019-04-25_snapshot`.
+. In the *Snapshots* view, find the snapshot you want to restore, for example `2099-04-25_snapshot`.
 . Click the restore icon in the *Actions* column.
 . As you walk through the wizard, enter the following values:
 +
 |===
 |*Logistics* |
 
-|Indices
-|Toggle to choose specific indices to restore, or leave in place to restore all indices.
+|Data streams and indices
+|Toggle to choose specific data streams and indices to restore. Use the default
+to restore all data streams and indices in the snapshot.
 
-|Rename indices
-|Toggle to give your restored indices new names, or leave in place to restore under original index names.
+|Rename data streams and indices
+|Toggle to give your restored data streams and indices new names. Use the
+default to restore the original data stream and index names.
 
 |All other fields
 |Use the defaults.
@@ -313,4 +296,4 @@ or leave in place to keep existing settings.
 +
 The operation loads for a few seconds,
 and then you’re navigated to *Restore Status*,
-where you can monitor the status of your restored indices.
+where you can monitor the status of your restored data streams and indices.

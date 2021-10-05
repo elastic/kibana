@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { OWNER_FIELD } from './constants';
 
 import { UserRT } from '../user';
 
@@ -22,6 +23,7 @@ const UserActionFieldTypeRt = rt.union([
   rt.literal('status'),
   rt.literal('settings'),
   rt.literal('sub_case'),
+  rt.literal(OWNER_FIELD),
 ]);
 const UserActionFieldRt = rt.array(UserActionFieldTypeRt);
 const UserActionRt = rt.union([
@@ -32,7 +34,6 @@ const UserActionRt = rt.union([
   rt.literal('push-to-service'),
 ]);
 
-// TO DO change state to status
 const CaseUserActionBasicRT = rt.type({
   action_field: UserActionFieldRt,
   action: UserActionRt,
@@ -40,6 +41,7 @@ const CaseUserActionBasicRT = rt.type({
   action_by: UserRT,
   new_value: rt.union([rt.string, rt.null]),
   old_value: rt.union([rt.string, rt.null]),
+  owner: rt.string,
 });
 
 const CaseUserActionResponseRT = rt.intersection([
@@ -48,6 +50,8 @@ const CaseUserActionResponseRT = rt.intersection([
     action_id: rt.string,
     case_id: rt.string,
     comment_id: rt.union([rt.string, rt.null]),
+    new_val_connector_id: rt.union([rt.string, rt.null]),
+    old_val_connector_id: rt.union([rt.string, rt.null]),
   }),
   rt.partial({ sub_case_id: rt.string }),
 ]);
@@ -58,6 +62,7 @@ export const CaseUserActionsResponseRt = rt.array(CaseUserActionResponseRT);
 
 export type CaseUserActionAttributes = rt.TypeOf<typeof CaseUserActionAttributesRt>;
 export type CaseUserActionsResponse = rt.TypeOf<typeof CaseUserActionsResponseRt>;
+export type CaseUserActionResponse = rt.TypeOf<typeof CaseUserActionResponseRT>;
 
 export type UserAction = rt.TypeOf<typeof UserActionRt>;
 export type UserActionField = rt.TypeOf<typeof UserActionFieldRt>;

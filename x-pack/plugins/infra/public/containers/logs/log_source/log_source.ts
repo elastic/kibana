@@ -7,8 +7,8 @@
 
 import createContainer from 'constate';
 import { useCallback, useMemo, useState } from 'react';
-import useMountedState from 'react-use/lib/useMountedState';
 import type { HttpHandler } from 'src/core/public';
+import { IndexPatternsContract } from '../../../../../../../src/plugins/data/common';
 import {
   LogIndexField,
   LogSourceConfigurationPropertiesPatch,
@@ -19,12 +19,12 @@ import {
   LogSourceConfigurationProperties,
   ResolvedLogSourceConfiguration,
   resolveLogSourceConfiguration,
+  ResolveLogSourceConfigurationError,
 } from '../../../../common/log_sources';
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { isRejectedPromiseState, useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callFetchLogSourceConfigurationAPI } from './api/fetch_log_source_configuration';
 import { callFetchLogSourceStatusAPI } from './api/fetch_log_source_status';
 import { callPatchLogSourceConfigurationAPI } from './api/patch_log_source_configuration';
-import { IndexPatternsContract } from '../../../../../../../src/plugins/data/common';
 
 export {
   LogIndexField,
@@ -32,6 +32,7 @@ export {
   LogSourceConfigurationProperties,
   LogSourceConfigurationPropertiesPatch,
   LogSourceStatus,
+  ResolveLogSourceConfigurationError,
 };
 
 export const useLogSource = ({
@@ -43,7 +44,6 @@ export const useLogSource = ({
   fetch: HttpHandler;
   indexPatternsService: IndexPatternsContract;
 }) => {
-  const getIsMounted = useMountedState();
   const [sourceConfiguration, setSourceConfiguration] = useState<
     LogSourceConfiguration | undefined
   >(undefined);
@@ -58,52 +58,34 @@ export const useLogSource = ({
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        const { data: sourceConfigurationResponse } = await callFetchLogSourceConfigurationAPI(
-          sourceId,
-          fetch
-        );
-        const resolvedSourceConfigurationResponse = await resolveLogSourceConfiguration(
-          sourceConfigurationResponse?.configuration,
-          indexPatternsService
-        );
-        return { sourceConfigurationResponse, resolvedSourceConfigurationResponse };
+        return (await callFetchLogSourceConfigurationAPI(sourceId, fetch)).data;
       },
-      onResolve: ({ sourceConfigurationResponse, resolvedSourceConfigurationResponse }) => {
-        if (!getIsMounted()) {
-          return;
-        }
-
-        setSourceConfiguration(sourceConfigurationResponse);
-        setResolvedSourceConfiguration(resolvedSourceConfigurationResponse);
-      },
+      onResolve: setSourceConfiguration,
     },
     [sourceId, fetch, indexPatternsService]
+  );
+
+  const [resolveSourceConfigurationRequest, resolveSourceConfiguration] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'resolution',
+      createPromise: async (unresolvedSourceConfiguration: LogSourceConfigurationProperties) => {
+        return await resolveLogSourceConfiguration(
+          unresolvedSourceConfiguration,
+          indexPatternsService
+        );
+      },
+      onResolve: setResolvedSourceConfiguration,
+    },
+    [indexPatternsService]
   );
 
   const [updateSourceConfigurationRequest, updateSourceConfiguration] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async (patchedProperties: LogSourceConfigurationPropertiesPatch) => {
-        const { data: updatedSourceConfig } = await callPatchLogSourceConfigurationAPI(
-          sourceId,
-          patchedProperties,
-          fetch
-        );
-        const resolvedSourceConfig = await resolveLogSourceConfiguration(
-          updatedSourceConfig.configuration,
-          indexPatternsService
-        );
-        return { updatedSourceConfig, resolvedSourceConfig };
+        return (await callPatchLogSourceConfigurationAPI(sourceId, patchedProperties, fetch)).data;
       },
-      onResolve: ({ updatedSourceConfig, resolvedSourceConfig }) => {
-        if (!getIsMounted()) {
-          return;
-        }
-
-        setSourceConfiguration(updatedSourceConfig);
-        setResolvedSourceConfiguration(resolvedSourceConfig);
-        loadSourceStatus();
-      },
+      onResolve: setSourceConfiguration,
     },
     [sourceId, fetch, indexPatternsService]
   );
@@ -114,13 +96,7 @@ export const useLogSource = ({
       createPromise: async () => {
         return await callFetchLogSourceStatusAPI(sourceId, fetch);
       },
-      onResolve: ({ data }) => {
-        if (!getIsMounted()) {
-          return;
-        }
-
-        setSourceStatus(data);
-      },
+      onResolve: ({ data }) => setSourceStatus(data),
     },
     [sourceId, fetch]
   );
@@ -133,52 +109,66 @@ export const useLogSource = ({
     [resolvedSourceConfiguration]
   );
 
-  const isLoadingSourceConfiguration = useMemo(
-    () => loadSourceConfigurationRequest.state === 'pending',
-    [loadSourceConfigurationRequest.state]
+  const isLoadingSourceConfiguration = loadSourceConfigurationRequest.state === 'pending';
+  const isResolvingSourceConfiguration = resolveSourceConfigurationRequest.state === 'pending';
+  const isLoadingSourceStatus = loadSourceStatusRequest.state === 'pending';
+  const isUpdatingSourceConfiguration = updateSourceConfigurationRequest.state === 'pending';
+
+  const isLoading =
+    isLoadingSourceConfiguration ||
+    isResolvingSourceConfiguration ||
+    isLoadingSourceStatus ||
+    isUpdatingSourceConfiguration;
+
+  const isUninitialized =
+    loadSourceConfigurationRequest.state === 'uninitialized' ||
+    resolveSourceConfigurationRequest.state === 'uninitialized' ||
+    loadSourceStatusRequest.state === 'uninitialized';
+
+  const hasFailedLoadingSource = loadSourceConfigurationRequest.state === 'rejected';
+  const hasFailedResolvingSource = resolveSourceConfigurationRequest.state === 'rejected';
+  const hasFailedLoadingSourceStatus = loadSourceStatusRequest.state === 'rejected';
+
+  const latestLoadSourceFailures = [
+    loadSourceConfigurationRequest,
+    resolveSourceConfigurationRequest,
+    loadSourceStatusRequest,
+  ]
+    .filter(isRejectedPromiseState)
+    .map(({ value }) => (value instanceof Error ? value : new Error(`${value}`)));
+
+  const hasFailedLoading = latestLoadSourceFailures.length > 0;
+
+  const loadSource = useCallback(async () => {
+    const loadSourceConfigurationPromise = loadSourceConfiguration();
+    const loadSourceStatusPromise = loadSourceStatus();
+    const resolveSourceConfigurationPromise = resolveSourceConfiguration(
+      (await loadSourceConfigurationPromise).configuration
+    );
+
+    return await Promise.all([
+      loadSourceConfigurationPromise,
+      resolveSourceConfigurationPromise,
+      loadSourceStatusPromise,
+    ]);
+  }, [loadSourceConfiguration, loadSourceStatus, resolveSourceConfiguration]);
+
+  const updateSource = useCallback(
+    async (patchedProperties: LogSourceConfigurationPropertiesPatch) => {
+      const updatedSourceConfiguration = await updateSourceConfiguration(patchedProperties);
+      const resolveSourceConfigurationPromise = resolveSourceConfiguration(
+        updatedSourceConfiguration.configuration
+      );
+      const loadSourceStatusPromise = loadSourceStatus();
+
+      return await Promise.all([
+        updatedSourceConfiguration,
+        resolveSourceConfigurationPromise,
+        loadSourceStatusPromise,
+      ]);
+    },
+    [loadSourceStatus, resolveSourceConfiguration, updateSourceConfiguration]
   );
-
-  const isUpdatingSourceConfiguration = useMemo(
-    () => updateSourceConfigurationRequest.state === 'pending',
-    [updateSourceConfigurationRequest.state]
-  );
-
-  const isLoadingSourceStatus = useMemo(() => loadSourceStatusRequest.state === 'pending', [
-    loadSourceStatusRequest.state,
-  ]);
-
-  const isLoading = useMemo(
-    () => isLoadingSourceConfiguration || isLoadingSourceStatus || isUpdatingSourceConfiguration,
-    [isLoadingSourceConfiguration, isLoadingSourceStatus, isUpdatingSourceConfiguration]
-  );
-
-  const isUninitialized = useMemo(
-    () =>
-      loadSourceConfigurationRequest.state === 'uninitialized' ||
-      loadSourceStatusRequest.state === 'uninitialized',
-    [loadSourceConfigurationRequest.state, loadSourceStatusRequest.state]
-  );
-
-  const hasFailedLoadingSource = useMemo(
-    () => loadSourceConfigurationRequest.state === 'rejected',
-    [loadSourceConfigurationRequest.state]
-  );
-
-  const hasFailedLoadingSourceStatus = useMemo(() => loadSourceStatusRequest.state === 'rejected', [
-    loadSourceStatusRequest.state,
-  ]);
-
-  const loadSourceFailureMessage = useMemo(
-    () =>
-      loadSourceConfigurationRequest.state === 'rejected'
-        ? `${loadSourceConfigurationRequest.value}`
-        : undefined,
-    [loadSourceConfigurationRequest]
-  );
-
-  const loadSource = useCallback(() => {
-    return Promise.all([loadSourceConfiguration(), loadSourceStatus()]);
-  }, [loadSourceConfiguration, loadSourceStatus]);
 
   const initialize = useCallback(async () => {
     if (!isUninitialized) {
@@ -194,21 +184,23 @@ export const useLogSource = ({
     isUninitialized,
     derivedIndexPattern,
     // Failure states
+    hasFailedLoading,
     hasFailedLoadingSource,
     hasFailedLoadingSourceStatus,
-    loadSourceFailureMessage,
+    hasFailedResolvingSource,
+    latestLoadSourceFailures,
     // Loading states
     isLoading,
     isLoadingSourceConfiguration,
     isLoadingSourceStatus,
+    isResolvingSourceConfiguration,
     // Source status (denotes the state of the indices, e.g. missing)
     sourceStatus,
     loadSourceStatus,
     // Source configuration (represents the raw attributes of the source configuration)
     loadSource,
-    loadSourceConfiguration,
     sourceConfiguration,
-    updateSourceConfiguration,
+    updateSource,
     // Resolved source configuration (represents a fully resolved state, you would use this for the vast majority of "read" scenarios)
     resolvedSourceConfiguration,
   };

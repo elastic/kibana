@@ -7,7 +7,7 @@
 
 import equal from 'fast-deep-equal';
 import { useCallback, useMemo, useState } from 'react';
-import { useAsync } from 'react-use';
+import useAsync from 'react-use/lib/useAsync';
 import { ObjectEntries } from '../../../../common/utility_types';
 import { ChildFormValidationError, GenericValidationError } from './validation_errors';
 
@@ -141,10 +141,10 @@ export const useCompositeFormElement = <FormValues extends {}, InvalidReason>({
     }
   }, [childFormElementEntries]);
 
-  const validity = useMemo(() => getCombinedValidity(formValidity, childFormElementsValidity), [
-    formValidity,
-    childFormElementsValidity,
-  ]);
+  const validity = useMemo(
+    () => getCombinedValidity(formValidity, childFormElementsValidity),
+    [formValidity, childFormElementsValidity]
+  );
 
   const resetValue = useCallback(() => {
     childFormElementEntries.forEach(([, formElement]) => formElement.resetValue());
@@ -180,10 +180,10 @@ const useValidity = <Value, InvalidReason>(
   value: Value,
   validate?: (value: Value) => Promise<InvalidReason[]>
 ) => {
-  const validationState = useAsync(() => validate?.(value) ?? Promise.resolve([]), [
-    validate,
-    value,
-  ]);
+  const validationState = useAsync(
+    () => validate?.(value) ?? Promise.resolve([]),
+    [validate, value]
+  );
 
   const validity = useMemo<FormElementValidity<InvalidReason | GenericValidationError>>(() => {
     if (validationState.loading) {
@@ -236,8 +236,9 @@ export const getCombinedValidity = <FirstInvalidReason, SecondInvalidReason>(
   }
 };
 
-export const isFormElementForType = <Value extends any>(
-  isValue: (value: any) => value is Value
-) => <InvalidReason extends unknown>(
-  formElement: FormElement<any, InvalidReason>
-): formElement is FormElement<Value, InvalidReason> => isValue(formElement.value);
+export const isFormElementForType =
+  <Value extends any>(isValue: (value: any) => value is Value) =>
+  <InvalidReason extends unknown>(
+    formElement: FormElement<any, InvalidReason>
+  ): formElement is FormElement<Value, InvalidReason> =>
+    isValue(formElement.value);

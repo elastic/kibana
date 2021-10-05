@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CustomRule, ThreatIndicatorRule } from '../../objects/rule';
+import { CustomRule, EventCorrelationRule, ThreatIndicatorRule } from '../../objects/rule';
 
 export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing', interval = '100m') =>
   cy.request({
@@ -19,7 +19,7 @@ export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing', inte
       name: rule.name,
       severity: rule.severity.toLocaleLowerCase(),
       type: 'query',
-      from: 'now-17520h',
+      from: 'now-50000h',
       index: ['exceptions-*'],
       query: rule.customQuery,
       language: 'kuery',
@@ -27,6 +27,27 @@ export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing', inte
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
+  });
+
+export const createEventCorrelationRule = (rule: EventCorrelationRule, ruleId = 'rule_testing') =>
+  cy.request({
+    method: 'POST',
+    url: 'api/detection_engine/rules',
+    body: {
+      rule_id: ruleId,
+      risk_score: parseInt(rule.riskScore, 10),
+      description: rule.description,
+      interval: `${rule.runsEvery.interval}${rule.runsEvery.type}`,
+      from: `now-${rule.lookBack.interval}${rule.lookBack.type}`,
+      name: rule.name,
+      severity: rule.severity.toLocaleLowerCase(),
+      type: 'eql',
+      index: rule.index,
+      query: rule.customQuery,
+      language: 'eql',
+      enabled: true,
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds' },
   });
 
 export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'rule_testing') =>
@@ -41,6 +62,8 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
       name: rule.name,
       severity: rule.severity.toLocaleLowerCase(),
       type: 'threat_match',
+      timeline_id: rule.timeline.templateTimelineId,
+      timeline_title: rule.timeline.title,
       threat_mapping: [
         {
           entries: [
@@ -57,7 +80,7 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
       threat_filters: [],
       threat_index: rule.indicatorIndexPattern,
       threat_indicator_path: '',
-      from: 'now-17520h',
+      from: 'now-50000h',
       index: rule.index,
       query: rule.customQuery || '*:*',
       language: 'kuery',
@@ -84,8 +107,8 @@ export const createCustomRuleActivated = (
       name: rule.name,
       severity: rule.severity.toLocaleLowerCase(),
       type: 'query',
-      from: 'now-17520h',
-      index: ['auditbeat-*'],
+      from: 'now-50000h',
+      index: rule.index,
       query: rule.customQuery,
       language: 'kuery',
       enabled: true,
@@ -102,6 +125,14 @@ export const deleteCustomRule = (ruleId = '1') => {
     url: `api/detection_engine/rules?rule_id=${ruleId}`,
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
+  });
+};
+
+export const createSignalsIndex = () => {
+  cy.request({
+    method: 'POST',
+    url: 'api/detection_engine/index',
+    headers: { 'kbn-xsrf': 'cypress-creds' },
   });
 };
 

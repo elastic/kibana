@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header renders correctly against snapshot 1`] = `
+<Fragment>
+  <Memo(HeaderContentComponent)
+    header={
+      Object {
+        "columnHeaderType": "not-filtered",
+        "id": "@timestamp",
+        "initialWidth": 190,
+        "type": "number",
+      }
+    }
+    isLoading={false}
+    isResizing={false}
+    onClick={[Function]}
+    showSortingCapability={true}
+    sort={
+      Array [
+        Object {
+          "columnId": "@timestamp",
+          "columnType": "number",
+          "sortDirection": "desc",
+        },
+      ]
+    }
+  >
+    <Actions
+      header={
+        Object {
+          "columnHeaderType": "not-filtered",
+          "id": "@timestamp",
+          "initialWidth": 190,
+          "type": "number",
+        }
+      }
+      isLoading={false}
+      onColumnRemoved={[Function]}
+      sort={
+        Array [
+          Object {
+            "columnId": "@timestamp",
+            "columnType": "number",
+            "sortDirection": "desc",
+          },
+        ]
+      }
+    />
+  </Memo(HeaderContentComponent)>
+</Fragment>
+`;

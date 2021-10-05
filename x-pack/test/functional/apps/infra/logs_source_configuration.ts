@@ -24,18 +24,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Logs Source Configuration', function () {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     describe('Allows indices configuration', () => {
       before(async () => {
-        await esArchiver.load('infra/metrics_and_logs');
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       });
       after(async () => {
-        await esArchiver.unload('infra/metrics_and_logs');
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       });
 
       it('can change the log indices to a pattern that matches nothing', async () => {

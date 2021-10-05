@@ -13,18 +13,21 @@ import { REPO_ROOT, run, CiStatsReporter, createFlagError } from '@kbn/dev-utils
 import { Project } from 'ts-morph';
 
 import { writePluginDocs } from './mdx/write_plugin_mdx_docs';
-import { ApiDeclaration, PluginApi, TypeKind } from './types';
+import {
+  ApiDeclaration,
+  ApiStats,
+  MissingApiItemMap,
+  PluginApi,
+  PluginMetaInfo,
+  ReferencedDeprecationsByPlugin,
+  TypeKind,
+} from './types';
 import { findPlugins } from './find_plugins';
 import { pathsOutsideScopes } from './build_api_declarations/utils';
 import { getPluginApiMap } from './get_plugin_api_map';
-
-export interface PluginInfo {
-  apiCount: number;
-  apiCountMissingComments: number;
-  id: string;
-  missingApiItems: string[];
-  percentApiMissingComments: number;
-}
+import { writeDeprecationDocByApi } from './mdx/write_deprecations_doc_by_api';
+import { writeDeprecationDocByPlugin } from './mdx/write_deprecations_doc_by_plugin';
+import { writePluginDirectoryDoc } from './mdx/write_plugin_directory_doc';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
@@ -71,10 +74,29 @@ export function runBuildApiDocsCli() {
           }
         });
       }
+      const collectReferences = flags.references as boolean;
 
-      const { pluginApiMap, missingApiItems } = getPluginApiMap(project, plugins, log);
+      const { pluginApiMap, missingApiItems, unReferencedDeprecations, referencedDeprecations } =
+        getPluginApiMap(project, plugins, log, {
+          collectReferences,
+          pluginFilter: pluginFilter as string[],
+        });
 
       const reporter = CiStatsReporter.fromEnv(log);
+
+      const allPluginStats = plugins.reduce((acc, plugin) => {
+        const id = plugin.manifest.id;
+        const pluginApi = pluginApiMap[id];
+        acc[id] = {
+          ...collectApiStatsForPlugin(pluginApi, missingApiItems, referencedDeprecations),
+          owner: plugin.manifest.owner,
+          description: plugin.manifest.description,
+        };
+        return acc;
+      }, {} as { [key: string]: PluginMetaInfo });
+
+      writePluginDirectoryDoc(outputFolder, pluginApiMap, allPluginStats, log);
+
       plugins.forEach((plugin) => {
         // Note that the filtering is done here, and not above because the entire public plugin API has to
         // be parsed in order to correctly determine reference links, and ensure that `removeBrokenLinks`
@@ -85,14 +107,13 @@ export function runBuildApiDocsCli() {
 
         const id = plugin.manifest.id;
         const pluginApi = pluginApiMap[id];
-        const apiCount = countApiForPlugin(pluginApi);
-        const pluginStats = collectApiStatsForPlugin(pluginApi);
+        const pluginStats = allPluginStats[id];
 
         reporter.metrics([
           {
             id,
             group: 'API count',
-            value: apiCount,
+            value: pluginStats.apiCount,
           },
           {
             id,
@@ -109,12 +130,44 @@ export function runBuildApiDocsCli() {
             group: 'Non-exported public API item count',
             value: missingApiItems[id] ? Object.keys(missingApiItems[id]).length : 0,
           },
+          {
+            id,
+            group: 'References to deprecated APIs',
+            value: pluginStats.deprecatedAPIsReferencedCount,
+          },
         ]);
+
+        const getLink = (d: ApiDeclaration) =>
+          `https://github.com/elastic/kibana/tree/master/${d.path}#:~:text=${encodeURIComponent(
+            d.label
+          )}`;
+
+        if (collectReferences && pluginFilter === plugin.manifest.id) {
+          if (referencedDeprecations[id] && pluginStats.deprecatedAPIsReferencedCount > 0) {
+            log.info(`${referencedDeprecations[id].length} deprecated APIs used`);
+            // eslint-disable-next-line no-console
+            console.table(referencedDeprecations[id]);
+          } else {
+            log.info(`No referenced deprecations for plugin ${plugin.manifest.id}`);
+          }
+          if (pluginStats.noReferences.length > 0) {
+            // eslint-disable-next-line no-console
+            console.table(
+              pluginStats.noReferences.map((d) => ({
+                id: d.id,
+                link: getLink(d),
+              }))
+            );
+          } else {
+            log.info(`No unused APIs for plugin ${plugin.manifest.id}`);
+          }
+        }
 
         if (stats) {
           const passesAllChecks =
             pluginStats.isAnyType.length === 0 &&
             pluginStats.missingComments.length === 0 &&
+            pluginStats.deprecatedAPIsReferencedCount === 0 &&
             (!missingApiItems[id] || Object.keys(missingApiItems[id]).length === 0);
 
           log.info(`--- Plugin '${id}' ${passesAllChecks ? ` passes all checks ----` : '----`'}`);
@@ -122,8 +175,6 @@ export function runBuildApiDocsCli() {
           if (!passesAllChecks) {
             log.info(`${pluginStats.isAnyType.length} API items with ANY`);
 
-            const getLink = (d: ApiDeclaration) =>
-              `https://github.com/elastic/kibana/tree/master/${d.source.path}#L${d.source.lineNumber}`;
             if (stats.includes('any')) {
               // eslint-disable-next-line no-console
               console.table(
@@ -162,9 +213,19 @@ export function runBuildApiDocsCli() {
           }
         }
 
-        if (apiCount > 0) {
-          writePluginDocs(outputFolder, pluginApi, log);
+        if (pluginStats.apiCount > 0) {
+          log.info(`Writing public API doc for plugin ${pluginApi.id}.`);
+          writePluginDocs(outputFolder, { doc: pluginApi, plugin, pluginStats, log });
+        } else {
+          log.info(`Plugin ${pluginApi.id} has no public API.`);
         }
+        writeDeprecationDocByPlugin(outputFolder, referencedDeprecations, log);
+        writeDeprecationDocByApi(
+          outputFolder,
+          referencedDeprecations,
+          unReferencedDeprecations,
+          log
+        );
       });
       if (Object.values(pathsOutsideScopes).length > 0) {
         log.warning(`Found paths outside of normal scope folders:`);
@@ -177,9 +238,11 @@ export function runBuildApiDocsCli() {
       },
       flags: {
         string: ['plugin', 'stats'],
+        boolean: ['references'],
         help: `
           --plugin             Optionally, run for only a specific plugin
           --stats              Optionally print API stats. Must be one or more of: any, comments or exports. 
+          --references         Collect references for API items
         `,
       },
     }
@@ -192,30 +255,38 @@ function getTsProject(repoPath: string) {
     tsConfigFilePath: xpackTsConfig,
   });
   project.addSourceFilesAtPaths(`${repoPath}/x-pack/plugins/**/*{.d.ts,.ts}`);
+  project.addSourceFilesAtPaths(`${repoPath}/src/plugins/**/*{.d.ts,.ts}`);
   project.resolveSourceFileDependencies();
   return project;
 }
 
-interface ApiStats {
-  missingComments: ApiDeclaration[];
-  isAnyType: ApiDeclaration[];
-}
-
-function collectApiStatsForPlugin(doc: PluginApi): ApiStats {
-  const stats: ApiStats = { missingComments: [], isAnyType: [] };
+function collectApiStatsForPlugin(
+  doc: PluginApi,
+  missingApiItems: MissingApiItemMap,
+  deprecations: ReferencedDeprecationsByPlugin
+): ApiStats {
+  const stats: ApiStats = {
+    missingComments: [],
+    isAnyType: [],
+    noReferences: [],
+    deprecatedAPIsReferencedCount: 0,
+    apiCount: countApiForPlugin(doc),
+    missingExports: Object.values(missingApiItems[doc.id] ?? {}).length,
+  };
   Object.values(doc.client).forEach((def) => {
-    collectStatsForApi(def, stats);
+    collectStatsForApi(def, stats, doc);
   });
   Object.values(doc.server).forEach((def) => {
-    collectStatsForApi(def, stats);
+    collectStatsForApi(def, stats, doc);
   });
   Object.values(doc.common).forEach((def) => {
-    collectStatsForApi(def, stats);
+    collectStatsForApi(def, stats, doc);
   });
+  stats.deprecatedAPIsReferencedCount = deprecations[doc.id] ? deprecations[doc.id].length : 0;
   return stats;
 }
 
-function collectStatsForApi(doc: ApiDeclaration, stats: ApiStats): void {
+function collectStatsForApi(doc: ApiDeclaration, stats: ApiStats, pluginApi: PluginApi): void {
   const missingComment = doc.description === undefined || doc.description.length === 0;
   if (missingComment) {
     stats.missingComments.push(doc);
@@ -225,8 +296,11 @@ function collectStatsForApi(doc: ApiDeclaration, stats: ApiStats): void {
   }
   if (doc.children) {
     doc.children.forEach((child) => {
-      collectStatsForApi(child, stats);
+      collectStatsForApi(child, stats, pluginApi);
     });
+  }
+  if (!doc.references || doc.references.length === 0) {
+    stats.noReferences.push(doc);
   }
 }
 

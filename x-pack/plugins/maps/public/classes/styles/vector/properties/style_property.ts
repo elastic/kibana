@@ -59,6 +59,8 @@ export class AbstractStyleProperty<T> implements IStyleProperty<T> {
       return '';
     } else if (typeof value === 'boolean') {
       return value.toString();
+    } else if (Array.isArray(value)) {
+      return value.join(', ');
     } else {
       return value;
     }

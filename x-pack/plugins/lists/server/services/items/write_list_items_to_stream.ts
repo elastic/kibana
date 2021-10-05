@@ -10,9 +10,9 @@ import { PassThrough } from 'stream';
 import type { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from 'kibana/server';
 
-import { SearchEsListItemSchema } from '../../../common/schemas';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 import { findSourceValue } from '../utils/find_source_value';
+import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 
 /**
  * How many results to page through from the network at a time
@@ -117,7 +117,7 @@ export const getResponse = async ({
   listItemIndex,
   size = SIZE,
 }: GetResponseOptions): Promise<estypes.SearchResponse<SearchEsListItemSchema>> => {
-  return ((
+  return (
     await esClient.search<SearchEsListItemSchema>({
       body: {
         query: {
@@ -132,7 +132,7 @@ export const getResponse = async ({
       index: listItemIndex,
       size,
     })
-  ).body as unknown) as estypes.SearchResponse<SearchEsListItemSchema>;
+  ).body as unknown as estypes.SearchResponse<SearchEsListItemSchema>;
 };
 
 export interface WriteResponseHitsToStreamOptions {

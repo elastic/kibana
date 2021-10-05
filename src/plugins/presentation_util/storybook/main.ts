@@ -6,14 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Configuration } from 'webpack';
-import { defaultConfig } from '@kbn/storybook';
-import webpackConfig from '@kbn/storybook/target/webpack.config';
+import { defaultConfigWebFinal } from '@kbn/storybook';
 
 module.exports = {
-  ...defaultConfig,
+  ...defaultConfigWebFinal,
   addons: ['@storybook/addon-essentials'],
-  webpackFinal: (config: Configuration) => {
-    return webpackConfig({ config });
-  },
 };

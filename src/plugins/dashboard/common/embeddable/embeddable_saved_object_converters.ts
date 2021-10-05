@@ -8,11 +8,11 @@
 
 import { omit } from 'lodash';
 import { DashboardPanelState, SavedDashboardPanel } from '../types';
-import { SavedObjectEmbeddableInput } from '../../../embeddable/common/';
+import { EmbeddableInput, SavedObjectEmbeddableInput } from '../../../embeddable/common/';
 
-export function convertSavedDashboardPanelToPanelState(
-  savedDashboardPanel: SavedDashboardPanel
-): DashboardPanelState {
+export function convertSavedDashboardPanelToPanelState<
+  TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+>(savedDashboardPanel: SavedDashboardPanel): DashboardPanelState<TEmbeddableInput> {
   return {
     type: savedDashboardPanel.type,
     gridData: savedDashboardPanel.gridData,
@@ -22,7 +22,7 @@ export function convertSavedDashboardPanelToPanelState(
       ...(savedDashboardPanel.id !== undefined && { savedObjectId: savedDashboardPanel.id }),
       ...(savedDashboardPanel.title !== undefined && { title: savedDashboardPanel.title }),
       ...savedDashboardPanel.embeddableConfig,
-    },
+    } as TEmbeddableInput,
   };
 }
 

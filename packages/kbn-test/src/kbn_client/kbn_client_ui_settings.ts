@@ -8,7 +8,7 @@
 
 import { ToolingLog } from '@kbn/dev-utils';
 
-import { KbnClientRequester, uriencode } from './kbn_client_requester';
+import { KbnClientRequester, pathWithSpace } from './kbn_client_requester';
 
 export type UiSettingValues = Record<string, string | number | boolean>;
 interface UiSettingsApiResponse {
@@ -27,8 +27,8 @@ export class KbnClientUiSettings {
     private readonly defaults?: UiSettingValues
   ) {}
 
-  async get(setting: string) {
-    const all = await this.getAll();
+  async get(setting: string, { space }: { space?: string } = {}) {
+    const all = await this.getAll({ space });
     const value = all[setting]?.userValue;
 
     this.log.verbose('uiSettings.value: %j', value);
@@ -45,9 +45,9 @@ export class KbnClientUiSettings {
   /**
    * Unset a uiSetting
    */
-  async unset(setting: string) {
+  async unset(setting: string, { space }: { space?: string } = {}) {
     const { data } = await this.requester.request<any>({
-      path: uriencode`/api/kibana/settings/${setting}`,
+      path: pathWithSpace(space)`/api/kibana/settings/${setting}`,
       method: 'DELETE',
     });
     return data;
@@ -57,7 +57,10 @@ export class KbnClientUiSettings {
    * Replace all uiSettings with the `doc` values, `doc` is merged
    * with some defaults
    */
-  async replace(doc: UiSettingValues, { retries = 5 }: { retries?: number } = {}) {
+  async replace(
+    doc: UiSettingValues,
+    { retries = 5, space }: { retries?: number; space?: string } = {}
+  ) {
     this.log.debug('replacing kibana config doc: %j', doc);
 
     const changes: Record<string, any> = {
@@ -73,7 +76,7 @@ export class KbnClientUiSettings {
 
     await this.requester.request({
       method: 'POST',
-      path: '/api/kibana/settings',
+      path: pathWithSpace(space)`/api/kibana/settings`,
       body: { changes },
       retries,
     });
@@ -82,11 +85,11 @@ export class KbnClientUiSettings {
   /**
    * Add fields to the config doc (like setting timezone and defaultIndex)
    */
-  async update(updates: UiSettingValues) {
+  async update(updates: UiSettingValues, { space }: { space?: string } = {}) {
     this.log.debug('applying update to kibana config: %j', updates);
 
     await this.requester.request({
-      path: '/api/kibana/settings',
+      path: pathWithSpace(space)`/api/kibana/settings`,
       method: 'POST',
       body: {
         changes: updates,
@@ -95,9 +98,9 @@ export class KbnClientUiSettings {
     });
   }
 
-  private async getAll() {
+  private async getAll({ space }: { space?: string } = {}) {
     const { data } = await this.requester.request<UiSettingsApiResponse>({
-      path: '/api/kibana/settings',
+      path: pathWithSpace(space)`/api/kibana/settings`,
       method: 'GET',
     });
 

@@ -22,6 +22,7 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
+import type { InternalExecutionContextSetup } from '../execution_context';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth, OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
@@ -33,6 +34,7 @@ import {
   KibanaRouteOptions,
   KibanaRequestState,
   isSafeMethod,
+  RouterRoute,
 } from './router';
 import {
   SessionStorageCookieOptions,
@@ -52,6 +54,13 @@ export interface HttpServerSetup {
    * @param router {@link IRouter} - a router with registered route handlers.
    */
   registerRouter: (router: IRouter) => void;
+  /**
+   * Add all the routes registered with `router` to HTTP server request listeners.
+   * Unlike `registerRouter`, this function allows routes to be registered even after the server
+   * has started listening for requests.
+   * @param router {@link IRouter} - a router with registered route handlers.
+   */
+  registerRouterAfterListening: (router: IRouter) => void;
   registerStaticDir: (path: string, dirPath: string) => void;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
@@ -114,22 +123,39 @@ export class HttpServer {
     this.registeredRouters.add(router);
   }
 
-  public async setup(config: HttpConfig): Promise<HttpServerSetup> {
+  private registerRouterAfterListening(router: IRouter) {
+    if (this.isListening()) {
+      for (const route of router.getRoutes()) {
+        this.configureRoute(route);
+      }
+    } else {
+      // Not listening yet, add to set of registeredRouters so that it can be added after listening has started.
+      this.registeredRouters.add(router);
+    }
+  }
+
+  public async setup(
+    config: HttpConfig,
+    executionContext?: InternalExecutionContextSetup
+  ): Promise<HttpServerSetup> {
     const serverOptions = getServerOptions(config);
     const listenerOptions = getListenerOptions(config);
     this.server = createServer(serverOptions, listenerOptions);
     await this.server.register([HapiStaticFiles]);
     this.config = config;
 
+    // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
+    // That's the only reason why context initialization exists in this method.
+    this.setupRequestStateAssignment(config, executionContext);
     const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
     this.setupBasePathRewrite(config, basePathService);
     this.setupConditionalCompression(config);
     this.setupResponseLogging();
-    this.setupRequestStateAssignment(config);
     this.setupGracefulShutdownHandlers();
 
     return {
       registerRouter: this.registerRouter.bind(this),
+      registerRouterAfterListening: this.registerRouterAfterListening.bind(this),
       registerStaticDir: this.registerStaticDir.bind(this),
       registerOnPreRouting: this.registerOnPreRouting.bind(this),
       registerOnPreAuth: this.registerOnPreAuth.bind(this),
@@ -170,45 +196,7 @@ export class HttpServer {
 
     for (const router of this.registeredRouters) {
       for (const route of router.getRoutes()) {
-        this.log.debug(`registering route handler for [${route.path}]`);
-        // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
-        const validate = isSafeMethod(route.method) ? undefined : { payload: true };
-        const { authRequired, tags, body = {}, timeout } = route.options;
-        const { accepts: allow, maxBytes, output, parse } = body;
-
-        const kibanaRouteOptions: KibanaRouteOptions = {
-          xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
-        };
-
-        this.server.route({
-          handler: route.handler,
-          method: route.method,
-          path: route.path,
-          options: {
-            auth: this.getAuthOption(authRequired),
-            app: kibanaRouteOptions,
-            tags: tags ? Array.from(tags) : undefined,
-            // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
-            // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
-            // validation applied in ./http_tools#getServerOptions
-            // (All NP routes are already required to specify their own validation in order to access the payload)
-            validate,
-            // @ts-expect-error Types are outdated and doesn't allow `payload.multipart` to be `true`
-            payload: [allow, maxBytes, output, parse, timeout?.payload].some((x) => x !== undefined)
-              ? {
-                  allow,
-                  maxBytes,
-                  output,
-                  parse,
-                  timeout: timeout?.payload,
-                  multipart: true,
-                }
-              : undefined,
-            timeout: {
-              socket: timeout?.idleSocket ?? this.config!.socketTimeout,
-            },
-          },
-        });
+        this.configureRoute(route);
       }
     }
 
@@ -341,11 +329,21 @@ export class HttpServer {
     this.server.events.on('response', this.handleServerResponseEvent);
   }
 
-  private setupRequestStateAssignment(config: HttpConfig) {
+  private setupRequestStateAssignment(
+    config: HttpConfig,
+    executionContext?: InternalExecutionContextSetup
+  ) {
     this.server!.ext('onRequest', (request, responseToolkit) => {
+      const requestId = getRequestId(request, config.requestId);
+
+      const parentContext = executionContext?.getParentContextFrom(request.headers);
+      if (parentContext) executionContext?.set(parentContext);
+
+      executionContext?.setRequestId(requestId);
+
       request.app = {
         ...(request.app ?? {}),
-        requestId: getRequestId(request, config.requestId),
+        requestId,
         requestUuid: uuid.v4(),
       } as KibanaRequestState;
       return responseToolkit.continue;
@@ -483,7 +481,55 @@ export class HttpServer {
           lookupCompressed: true,
         },
       },
-      options: { auth: false },
+      options: {
+        auth: false,
+        cache: {
+          privacy: 'public',
+          otherwise: 'must-revalidate',
+        },
+      },
+    });
+  }
+
+  private configureRoute(route: RouterRoute) {
+    this.log.debug(`registering route handler for [${route.path}]`);
+    // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
+    const validate = isSafeMethod(route.method) ? undefined : { payload: true };
+    const { authRequired, tags, body = {}, timeout } = route.options;
+    const { accepts: allow, maxBytes, output, parse } = body;
+
+    const kibanaRouteOptions: KibanaRouteOptions = {
+      xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
+    };
+
+    this.server!.route({
+      handler: route.handler,
+      method: route.method,
+      path: route.path,
+      options: {
+        auth: this.getAuthOption(authRequired),
+        app: kibanaRouteOptions,
+        tags: tags ? Array.from(tags) : undefined,
+        // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
+        // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
+        // validation applied in ./http_tools#getServerOptions
+        // (All NP routes are already required to specify their own validation in order to access the payload)
+        validate,
+        // @ts-expect-error Types are outdated and doesn't allow `payload.multipart` to be `true`
+        payload: [allow, maxBytes, output, parse, timeout?.payload].some((x) => x !== undefined)
+          ? {
+              allow,
+              maxBytes,
+              output,
+              parse,
+              timeout: timeout?.payload,
+              multipart: true,
+            }
+          : undefined,
+        timeout: {
+          socket: timeout?.idleSocket ?? this.config!.socketTimeout,
+        },
+      },
     });
   }
 }

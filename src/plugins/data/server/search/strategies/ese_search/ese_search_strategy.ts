@@ -9,7 +9,7 @@
 import type { Observable } from 'rxjs';
 import type { IScopedClusterClient, Logger, SharedGlobalConfig } from 'kibana/server';
 import { catchError, first, tap } from 'rxjs/operators';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { from } from 'rxjs';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
@@ -38,11 +38,13 @@ import {
 export const enhancedEsSearchStrategyProvider = (
   legacyConfig$: Observable<SharedGlobalConfig>,
   logger: Logger,
-  usage?: SearchUsage
-): ISearchStrategy<IEsSearchRequest> => {
+  usage?: SearchUsage,
+  useInternalUser: boolean = false
+): ISearchStrategy => {
   async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
     try {
-      await esClient.asCurrentUser.asyncSearch.delete({ id });
+      const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
+      await client.asyncSearch.delete({ id });
     } catch (e) {
       throw getKbnServerError(e);
     }
@@ -53,11 +55,11 @@ export const enhancedEsSearchStrategyProvider = (
     options: IAsyncSearchOptions,
     { esClient, uiSettingsClient, searchSessionsClient }: SearchStrategyDependencies
   ) {
-    const client = esClient.asCurrentUser.asyncSearch;
+    const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
 
     const search = async () => {
       const params = id
-        ? getDefaultAsyncGetParams(options)
+        ? getDefaultAsyncGetParams(searchSessionsClient.getConfig(), options)
         : {
             ...(await getDefaultAsyncSubmitParams(
               uiSettingsClient,
@@ -66,13 +68,17 @@ export const enhancedEsSearchStrategyProvider = (
             )),
             ...request.params,
           };
-      const promise = id ? client.get({ ...params, id }) : client.submit(params);
-      const { body } = await shimAbortSignal(promise, options.abortSignal);
+      const promise = id
+        ? client.asyncSearch.get({ ...params, id })
+        : client.asyncSearch.submit(params);
+      const { body, headers } = await shimAbortSignal(promise, options.abortSignal);
+
       const response = shimHitsTotal(body.response, options);
 
       return toAsyncKibanaSearchResponse(
         // @ts-expect-error @elastic/elasticsearch start_time_in_millis expected to be number
-        { ...body, response }
+        { ...body, response },
+        headers?.warning
       );
     };
 
@@ -96,6 +102,7 @@ export const enhancedEsSearchStrategyProvider = (
     options: ISearchOptions,
     { esClient, uiSettingsClient }: SearchStrategyDependencies
   ): Promise<IEsSearchResponse> {
+    const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const legacyConfig = await legacyConfig$.pipe(first()).toPromise();
     const { body, index, ...params } = request.params!;
     const method = 'POST';
@@ -108,7 +115,7 @@ export const enhancedEsSearchStrategyProvider = (
     };
 
     try {
-      const promise = esClient.asCurrentUser.transport.request({
+      const promise = client.transport.request({
         method,
         path,
         body,
@@ -116,7 +123,7 @@ export const enhancedEsSearchStrategyProvider = (
       });
 
       const esResponse = await shimAbortSignal(promise, options?.abortSignal);
-      const response = esResponse.body as SearchResponse<any>;
+      const response = esResponse.body as estypes.SearchResponse<any>;
       return {
         rawResponse: shimHitsTotal(response, options),
         ...getTotalLoaded(response),
@@ -169,7 +176,11 @@ export const enhancedEsSearchStrategyProvider = (
     extend: async (id, keepAlive, options, { esClient }) => {
       logger.debug(`extend ${id} by ${keepAlive}`);
       try {
-        await esClient.asCurrentUser.asyncSearch.get({ id, body: { keep_alive: keepAlive } });
+        const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
+        await client.asyncSearch.get({
+          id,
+          keep_alive: keepAlive,
+        });
       } catch (e) {
         throw getKbnServerError(e);
       }

@@ -24,7 +24,7 @@ const expectedResult = {
   _id: '16989191B1A93ECECD5FE9E63EBD4B5C3B606D26',
   subjects: ['CN=edgecert.googleapis.com,O=Google LLC,L=Mountain View,ST=California,C=US'],
   issuers: ['CN=GTS CA 1O1,O=Google Trust Services,C=US'],
-  ja3: [],
+  ja3: ['bd12d76eb0b6787e6a78a14d2ff96c2b'],
   notAfter: ['2020-05-06T11:52:15.000Z'],
 };
 
@@ -41,7 +41,7 @@ const expectedOverviewDestinationResult = {
           'CN=*.cdn.mozilla.net,OU=Cloud Services,O=Mozilla Corporation,L=Mountain View,ST=California,C=US',
         ],
         issuers: ['CN=DigiCert SHA2 Secure Server CA,O=DigiCert Inc,C=US'],
-        ja3: [],
+        ja3: ['b20b44b18b853ef29ab773e921b03422'],
         notAfter: ['2020-12-09T12:00:00.000Z'],
       },
     },
@@ -67,7 +67,7 @@ const expectedOverviewSourceResult = {
           'CN=*.cdn.mozilla.net,OU=Cloud Services,O=Mozilla Corporation,L=Mountain View,ST=California,C=US',
         ],
         issuers: ['CN=DigiCert SHA2 Secure Server CA,O=DigiCert Inc,C=US'],
-        ja3: [],
+        ja3: ['b20b44b18b853ef29ab773e921b03422'],
         notAfter: ['2020-12-09T12:00:00.000Z'],
       },
     },
@@ -86,8 +86,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Tls Test with Packetbeat', () => {
     describe('Tls Test', () => {
-      before(() => esArchiver.load('packetbeat/tls'));
-      after(() => esArchiver.unload('packetbeat/tls'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/packetbeat/tls'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/tls'));
 
       it('Ensure data is returned for FlowTarget.Source', async () => {
         const { body: tls } = await supertest
@@ -153,8 +153,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Tls Overview Test', () => {
-      before(() => esArchiver.load('packetbeat/tls'));
-      after(() => esArchiver.unload('packetbeat/tls'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/packetbeat/tls'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/tls'));
 
       it('Ensure data is returned for FlowTarget.Source', async () => {
         const { body: tls } = await supertest

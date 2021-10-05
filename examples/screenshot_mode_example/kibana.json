@@ -1,0 +1,14 @@
+{
+  "id": "screenshotModeExample",
+  "kibanaVersion": "kibana",
+  "version": "1.0.0",
+  "server": true,
+  "ui": true,
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Example plugin of how to use screenshotMode plugin services",
+  "requiredPlugins": ["navigation", "screenshotMode", "usageCollection", "developerExamples"],
+  "optionalPlugins": []
+}

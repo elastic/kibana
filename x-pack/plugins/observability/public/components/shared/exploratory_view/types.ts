@@ -6,28 +6,24 @@
  */
 
 import { PaletteOutput } from 'src/plugins/charts/public';
+import { ExistsFilter, PhraseFilter } from '@kbn/es-query';
 import {
   LastValueIndexPatternColumn,
   DateHistogramIndexPatternColumn,
   FieldBasedIndexPatternColumn,
   SeriesType,
   OperationType,
+  YConfig,
 } from '../../../../../lens/public';
 
 import { PersistableFilter } from '../../../../../lens/common';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
+import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 
 export const ReportViewTypes = {
-  pld: 'page-load-dist',
-  kpi: 'kpi-trends',
-  upd: 'uptime-duration',
-  upp: 'uptime-pings',
-  svl: 'service-latency',
-  tpt: 'service-throughput',
-  logs: 'logs-frequency',
-  cpu: 'cpu-usage',
-  mem: 'memory-usage',
-  nwk: 'network-activity',
+  dist: 'data-distribution',
+  kpi: 'kpi-over-time',
+  cwv: 'core-web-vitals',
+  mdd: 'device-data-distribution',
 } as const;
 
 type ValueOf<T> = T[keyof T];
@@ -36,38 +32,44 @@ export type ReportViewTypeId = keyof typeof ReportViewTypes;
 
 export type ReportViewType = ValueOf<typeof ReportViewTypes>;
 
-export interface ReportDefinition {
-  field: string;
-  required?: boolean;
-  custom?: boolean;
-  defaultValue?: string;
-  options?: Array<{
-    field: string;
-    label: string;
-    description?: string;
-    columnType?: 'range' | 'operation';
-  }>;
+export interface ColumnFilter {
+  language: 'kuery';
+  query: string;
 }
 
-export interface DataSeries {
-  reportType: ReportViewType;
+export interface MetricOption {
   id: string;
+  field?: string;
+  label: string;
+  description?: string;
+  columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN' | 'unique_count';
+  columnFilters?: ColumnFilter[];
+  timeScale?: string;
+}
+
+export interface SeriesConfig {
+  reportType: ReportViewType;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
   yAxisColumns: Array<Partial<FieldBasedIndexPatternColumn>>;
-
-  breakdowns: string[];
+  breakdownFields: string[];
   defaultSeriesType: SeriesType;
-  defaultFilters: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
+  filterFields: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
   seriesTypes: SeriesType[];
-  filters?: PersistableFilter[];
-  reportDefinitions: ReportDefinition[];
+  baseFilters?: Array<PersistableFilter | ExistsFilter | PhraseFilter>;
+  definitionFields: string[];
+  metricOptions?: MetricOption[];
   labels: Record<string, string>;
   hasOperationType: boolean;
   palette?: PaletteOutput;
   yTitle?: string;
+  yConfig?: YConfig[];
+  query?: { query: string; language: 'kuery' };
 }
 
+export type URLReportDefinition = Record<string, string[]>;
+
 export interface SeriesUrl {
+  name: string;
   time: {
     to: string;
     from: string;
@@ -75,10 +77,12 @@ export interface SeriesUrl {
   breakdown?: string;
   filters?: UrlFilter[];
   seriesType?: SeriesType;
-  reportType: ReportViewTypeId;
   operationType?: OperationType;
-  dataType?: AppDataType;
-  reportDefinitions?: Record<string, string>;
+  dataType: AppDataType;
+  reportDefinitions?: URLReportDefinition;
+  selectedMetricField?: string;
+  hidden?: boolean;
+  color?: string;
 }
 
 export interface UrlFilter {
@@ -88,21 +92,22 @@ export interface UrlFilter {
 }
 
 export interface ConfigProps {
-  seriesId: string;
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
+  series?: SeriesUrl;
 }
 
-export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm';
+export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm' | 'mobile';
 
-type FormatType = 'duration' | 'number';
+type FormatType = 'duration' | 'number' | 'bytes' | 'percent';
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';
-type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize';
+type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize' | 'humanizePrecise';
 
 export interface FieldFormatParams {
-  inputFormat: InputFormat;
-  outputFormat: OutputFormat;
+  inputFormat?: InputFormat;
+  outputFormat?: OutputFormat;
   outputPrecision?: number;
   showSuffix?: boolean;
+  useShortSuffix?: boolean;
 }
 
 export interface FieldFormat {
@@ -111,4 +116,10 @@ export interface FieldFormat {
     id: FormatType;
     params: FieldFormatParams;
   };
+}
+
+export interface BuilderItem {
+  id: number;
+  series: SeriesUrl;
+  seriesConfig?: SeriesConfig;
 }

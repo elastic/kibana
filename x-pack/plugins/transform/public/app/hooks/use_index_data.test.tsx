@@ -6,9 +6,10 @@
  */
 
 import React, { FC } from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
 
 import '@testing-library/jest-dom/extend-expect';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
 import { CoreSetup } from 'src/core/public';
@@ -26,7 +27,7 @@ jest.mock('./use_api');
 
 import { useAppDependencies } from '../__mocks__/app_dependencies';
 import { MlSharedContext } from '../__mocks__/shared_context';
-import { RuntimeField } from '../../../../../../src/plugins/data/common/index_patterns';
+import { RuntimeField } from '../../../../../../src/plugins/data/common';
 
 const query: SimpleQuery = {
   query_string: {
@@ -48,17 +49,19 @@ describe('Transform: useIndexData()', () => {
   test('indexPattern set triggers loading', async () => {
     const mlShared = await getMlSharedImports();
     const wrapper: FC = ({ children }) => (
-      <MlSharedContext.Provider value={mlShared}>{children}</MlSharedContext.Provider>
+      <IntlProvider locale="en">
+        <MlSharedContext.Provider value={mlShared}>{children}</MlSharedContext.Provider>
+      </IntlProvider>
     );
 
     const { result, waitForNextUpdate } = renderHook(
       () =>
         useIndexData(
-          ({
+          {
             id: 'the-id',
             title: 'the-title',
             fields: [],
-          } as unknown) as SearchItems['indexPattern'],
+          } as unknown as SearchItems['indexPattern'],
           query,
           runtimeMappings
         ),
@@ -101,17 +104,21 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
       return <DataGrid {...props} />;
     };
 
-    const { queryByText } = render(
-      <MlSharedContext.Provider value={mlSharedImports}>
-        <Wrapper />
-      </MlSharedContext.Provider>
+    render(
+      <IntlProvider locale="en">
+        <MlSharedContext.Provider value={mlSharedImports}>
+          <Wrapper />
+        </MlSharedContext.Provider>
+      </IntlProvider>
     );
 
     // Act
     // Assert
     await waitFor(() => {
-      expect(queryByText('the-index-preview-title')).toBeInTheDocument();
-      expect(queryByText('Cross-cluster search returned no fields data.')).not.toBeInTheDocument();
+      expect(screen.queryByText('the-index-preview-title')).toBeInTheDocument();
+      expect(
+        screen.queryByText('Cross-cluster search returned no fields data.')
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -140,17 +147,21 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
       return <DataGrid {...props} />;
     };
 
-    const { queryByText } = render(
-      <MlSharedContext.Provider value={mlSharedImports}>
-        <Wrapper />
-      </MlSharedContext.Provider>
+    render(
+      <IntlProvider locale="en">
+        <MlSharedContext.Provider value={mlSharedImports}>
+          <Wrapper />
+        </MlSharedContext.Provider>
+      </IntlProvider>
     );
 
     // Act
     // Assert
     await waitFor(() => {
-      expect(queryByText('the-index-preview-title')).toBeInTheDocument();
-      expect(queryByText('Cross-cluster search returned no fields data.')).toBeInTheDocument();
+      expect(screen.queryByText('the-index-preview-title')).toBeInTheDocument();
+      expect(
+        screen.queryByText('Cross-cluster search returned no fields data.')
+      ).toBeInTheDocument();
     });
   });
 });

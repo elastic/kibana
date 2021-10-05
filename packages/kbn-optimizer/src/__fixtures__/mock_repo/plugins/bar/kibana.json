@@ -2,5 +2,8 @@
   "id": "bar",
   "ui": true,
   "requiredBundles": ["foo"],
-  "version": "8.0.0"
+  "version": "8.0.0",
+  "owner": {
+    "name": "Operations"
+  }
 }

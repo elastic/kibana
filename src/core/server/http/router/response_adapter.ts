@@ -72,6 +72,9 @@ export class HapiResponseAdapter {
   }
 
   private toHapiResponse(kibanaResponse: KibanaResponse) {
+    if (kibanaResponse.options.bypassErrorFormat) {
+      return this.toSuccess(kibanaResponse);
+    }
     if (statusHelpers.isError(kibanaResponse.status)) {
       return this.toError(kibanaResponse);
     }

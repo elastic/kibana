@@ -8,17 +8,21 @@
 import { DiscoverStart } from '../../../../src/plugins/discover/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { FleetStart } from '../../fleet/public';
+import { LensPublicStart } from '../../lens/public';
+import { SecurityPluginStart } from '../../security/public';
 import { CoreStart } from '../../../../src/core/public';
 import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
+import { getLazyOsqueryAction } from './shared_components';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface OsqueryPluginStart {}
+export interface OsqueryPluginStart {
+  OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
+}
 
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
@@ -28,6 +32,8 @@ export interface StartPlugins {
   discover: DiscoverStart;
   data: DataPublicPluginStart;
   fleet: FleetStart;
+  lens?: LensPublicStart;
+  security: SecurityPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 

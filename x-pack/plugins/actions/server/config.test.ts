@@ -164,6 +164,57 @@ describe('config validation', () => {
       ]
     `);
   });
+
+  // Most of the customHostSettings tests are in ./lib/custom_host_settings.test.ts
+  // but this one seemed more relevant for this test suite, since url is the one
+  // required property.
+  test('validates customHostSettings contains a URL', () => {
+    const config: Record<string, unknown> = {
+      customHostSettings: [{}],
+    };
+
+    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+      `"[customHostSettings.0.url]: expected value of type [string] but got [undefined]"`
+    );
+  });
+
+  test('action with ssl configuration', () => {
+    const config: Record<string, unknown> = {
+      ssl: {
+        verificationMode: 'none',
+        proxyVerificationMode: 'none',
+      },
+    };
+    expect(configSchema.validate(config)).toMatchInlineSnapshot(`
+      Object {
+        "allowedHosts": Array [
+          "*",
+        ],
+        "cleanupFailedExecutionsTask": Object {
+          "cleanupInterval": "PT5M",
+          "enabled": true,
+          "idleInterval": "PT1H",
+          "pageSize": 100,
+        },
+        "enabled": true,
+        "enabledActionTypes": Array [
+          "*",
+        ],
+        "maxResponseContentLength": ByteSizeValue {
+          "valueInBytes": 1048576,
+        },
+        "preconfigured": Object {},
+        "preconfiguredAlertHistoryEsIndex": false,
+        "proxyRejectUnauthorizedCertificates": true,
+        "rejectUnauthorized": true,
+        "responseTimeout": "PT1M",
+        "ssl": Object {
+          "proxyVerificationMode": "none",
+          "verificationMode": "none",
+        },
+      }
+    `);
+  });
 });
 
 // object creator that ensures we can create a property named __proto__ on an

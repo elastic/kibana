@@ -6,16 +6,10 @@
  * Side Public License, v 1.
  */
 
-import {
-  TimeRange,
-  Filter,
-  Query,
-  esFilters,
-  QueryState,
-  RefreshInterval,
-} from '../../data/public';
+import type { UrlGeneratorsDefinition } from '../../share/public';
+import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
+import { esFilters } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
-import { UrlGeneratorsDefinition } from '../../share/public';
 
 export const DISCOVER_APP_URL_GENERATOR = 'DISCOVER_APP_URL_GENERATOR';
 
@@ -71,10 +65,12 @@ export interface DiscoverUrlGeneratorState {
    * Used interval of the histogram
    */
   interval?: string;
+
   /**
    * Array of the used sorting [[field,direction],...]
    */
   sort?: string[][];
+
   /**
    * id of the used saved query
    */
@@ -89,7 +85,8 @@ interface Params {
 export const SEARCH_SESSION_ID_QUERY_PARAM = 'searchSessionId';
 
 export class DiscoverUrlGenerator
-  implements UrlGeneratorsDefinition<typeof DISCOVER_APP_URL_GENERATOR> {
+  implements UrlGeneratorsDefinition<typeof DISCOVER_APP_URL_GENERATOR>
+{
   constructor(private readonly params: Params) {}
 
   public readonly id = DISCOVER_APP_URL_GENERATOR;

@@ -14,10 +14,10 @@ describe('get_beats_for_clusters', () => {
     expect(handleResponse(clusterUuid, response)).toEqual({
       clusterUuid: 'foo_uuid',
       stats: {
-        totalEvents: null,
-        bytesSent: null,
+        totalEvents: 0,
+        bytesSent: 0,
         beats: {
-          total: null,
+          total: 0,
           types: [],
         },
       },

@@ -19,7 +19,6 @@ const flush = async () => delay(flushDelay);
 function createRoot(appenderConfig: any) {
   return kbnTestServer.createRoot({
     logging: {
-      silent: true, // set "true" in kbnTestServer
       appenders: {
         'rolling-file': appenderConfig,
       },
@@ -60,7 +59,8 @@ describe('RollingFileAppender', () => {
   const message = (index: number) => `some message of around 40 bytes number ${index}`;
   const expectedFileContent = (indices: number[]) => indices.map(message).join('\n') + '\n';
 
-  describe('`size-limit` policy with `numeric` strategy', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/108633
+  describe.skip('`size-limit` policy with `numeric` strategy', () => {
     it('rolls the log file in the correct order', async () => {
       root = createRoot({
         type: 'rolling-file',
@@ -79,6 +79,7 @@ describe('RollingFileAppender', () => {
           pattern: '.%i',
         },
       });
+      await root.preboot();
       await root.setup();
 
       const logger = root.logger.get('test.rolling.file');
@@ -124,6 +125,7 @@ describe('RollingFileAppender', () => {
           pattern: '-%i',
         },
       });
+      await root.preboot();
       await root.setup();
 
       const logger = root.logger.get('test.rolling.file');
@@ -174,6 +176,7 @@ describe('RollingFileAppender', () => {
           pattern: '-%i',
         },
       });
+      await root.preboot();
       await root.setup();
 
       const logger = root.logger.get('test.rolling.file');

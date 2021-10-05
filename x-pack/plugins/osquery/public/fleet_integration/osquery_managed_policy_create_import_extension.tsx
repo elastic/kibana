@@ -8,25 +8,26 @@
 import { filter } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { produce } from 'immer';
 
-import { i18n } from '@kbn/i18n';
 import {
   agentRouteService,
   agentPolicyRouteService,
-  PackagePolicy,
   AgentPolicy,
+  PLUGIN_ID,
+  NewPackagePolicy,
 } from '../../../fleet/common';
 import {
   pagePathGetters,
-  CreatePackagePolicyRouteState,
   PackagePolicyCreateExtensionComponentProps,
   PackagePolicyEditExtensionComponentProps,
 } from '../../../fleet/public';
 import { ScheduledQueryGroupQueriesTable } from '../scheduled_query_groups/scheduled_query_group_queries_table';
 import { useKibana } from '../common/lib/kibana';
 import { NavigationButtons } from './navigation_buttons';
+import { DisabledCallout } from './disabled_callout';
+import { OsqueryManagerPackagePolicy } from '../../common/types';
 
 /**
  * Exports Osquery-specific package policy instructions
@@ -45,15 +46,16 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
     application: { getUrlForApp },
     http,
   } = useKibana().services;
-  const { replace } = useHistory();
+  const { state: locationState } = useLocation();
+  const { go } = useHistory();
 
   const agentsLinkHref = useMemo(() => {
     if (!policy?.policy_id) return '#';
 
-    return getUrlForApp('fleet', {
+    return getUrlForApp(PLUGIN_ID, {
       path:
         `#` +
-        pagePathGetters.policy_details({ policyId: policy?.policy_id }) +
+        pagePathGetters.policy_details({ policyId: policy?.policy_id })[1] +
         '?openEnrollmentFlyout=true',
     });
   }, [getUrlForApp, policy?.policy_id]);
@@ -95,6 +97,16 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
 
   useEffect(() => {
     /*
+      in order to enable Osquery side nav we need to refresh the whole Kibana
+      TODO: Find a better solution
+    */
+    if (editMode && locationState?.forceRefresh) {
+      go(0);
+    }
+  }, [editMode, go, locationState]);
+
+  useEffect(() => {
+    /*
       by default Fleet set up streams with an empty scheduled query,
       this code removes that, so the user can schedule queries
       in the next step
@@ -112,27 +124,35 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (!editMode) {
-      replace({
-        state: {
-          onSaveNavigateTo: (newPackagePolicy) => [
-            'fleet',
-            {
-              path:
-                '#' +
-                pagePathGetters.integration_policy_edit({
-                  packagePolicyId: newPackagePolicy.id,
-                }),
-            },
-          ],
-        } as CreatePackagePolicyRouteState,
-      });
-    }
-  }, [editMode, replace]);
+  // TODO: Find a better solution
+  // useEffect(() => {
+  //   if (!editMode) {
+  //     replace({
+  //       state: {
+  //         onSaveNavigateTo: (newPackagePolicy) => [
+  //           INTEGRATIONS_PLUGIN_ID,
+  //           {
+  //             path:
+  //               '#' +
+  //               pagePathGetters.integration_policy_edit({
+  //                 packagePolicyId: newPackagePolicy.id,
+  //               })[1],
+  //             state: {
+  //               forceRefresh: true,
+  //             },
+  //           },
+  //         ],
+  //       } as CreatePackagePolicyRouteState,
+  //     });
+  //   }
+  // }, [editMode, replace]);
 
   const scheduledQueryGroupTableData = useMemo(() => {
-    const policyWithoutEmptyQueries = produce(newPolicy, (draft) => {
+    const policyWithoutEmptyQueries = produce<
+      NewPackagePolicy,
+      OsqueryManagerPackagePolicy,
+      OsqueryManagerPackagePolicy
+    >(newPolicy, (draft) => {
       draft.inputs[0].streams = filter(['compiled_stream.id', null], draft.inputs[0].streams);
       return draft;
     });
@@ -142,22 +162,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
 
   return (
     <>
-      {!editMode ? (
-        <>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiCallOut
-                title={i18n.translate(
-                  'xpack.osquery.fleetIntegration.saveIntegrationCalloutTitle',
-                  { defaultMessage: 'Save the integration to access the options below' }
-                )}
-                iconType="save"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer />
-        </>
-      ) : null}
+      {!editMode ? <DisabledCallout /> : null}
       {policyAgentsCount === 0 ? (
         <>
           <EuiFlexGroup>
@@ -186,12 +191,15 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         integrationPolicyId={policy?.id}
         agentPolicyId={policy?.policy_id}
       />
-      <EuiSpacer />
+      <EuiSpacer size="xxl" />
+      <EuiSpacer size="xxl" />
 
       {editMode && scheduledQueryGroupTableData.inputs[0].streams.length ? (
         <EuiFlexGroup>
           <EuiFlexItem>
-            <ScheduledQueryGroupQueriesTable data={scheduledQueryGroupTableData as PackagePolicy} />
+            <ScheduledQueryGroupQueriesTable
+              data={scheduledQueryGroupTableData.inputs[0].streams}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : null}

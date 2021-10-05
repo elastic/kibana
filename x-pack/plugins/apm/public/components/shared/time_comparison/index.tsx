@@ -10,13 +10,14 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useUiTracker } from '../../../../../observability/public';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { getDateDifference } from '../../../../common/utils/formatters';
+import { useUiTracker } from '../../../../../observability/public';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { px, unit } from '../../../style/variables';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import * as urlHelpers from '../../shared/Links/url_helpers';
-import { useBreakPoints } from '../../../hooks/use_break_points';
+import { getComparisonTypes } from './get_comparison_types';
 import {
   getTimeRangeComparison,
   TimeRangeComparisonType,
@@ -26,8 +27,9 @@ const PrependContainer = euiStyled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: ${({ theme }) => theme.eui.euiGradientMiddle};
-  padding: 0 ${px(unit)};
+  background-color: ${({ theme }) =>
+    theme.eui.euiFormInputGroupLabelBackground};
+  padding: 0 ${({ theme }) => theme.eui.paddingSizes.m};
 `;
 
 function getDateFormat({
@@ -59,95 +61,79 @@ function formatDate({
   return `${momentStart.format(dateFormat)} - ${momentEnd.format(dateFormat)}`;
 }
 
-function getSelectOptions({
+export function getSelectOptions({
+  comparisonTypes,
   start,
   end,
-  rangeTo,
-  comparisonEnabled,
 }: {
+  comparisonTypes: TimeRangeComparisonType[];
   start?: string;
   end?: string;
-  rangeTo?: string;
-  comparisonEnabled?: boolean;
 }) {
-  const momentStart = moment(start);
-  const momentEnd = moment(end);
+  return comparisonTypes.map((value) => {
+    switch (value) {
+      case TimeRangeComparisonType.DayBefore: {
+        return {
+          value,
+          text: i18n.translate('xpack.apm.timeComparison.select.dayBefore', {
+            defaultMessage: 'Day before',
+          }),
+        };
+      }
+      case TimeRangeComparisonType.WeekBefore: {
+        return {
+          value,
+          text: i18n.translate('xpack.apm.timeComparison.select.weekBefore', {
+            defaultMessage: 'Week before',
+          }),
+        };
+      }
+      case TimeRangeComparisonType.PeriodBefore: {
+        const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+          comparisonType: TimeRangeComparisonType.PeriodBefore,
+          start,
+          end,
+          comparisonEnabled: true,
+        });
 
-  const dayBeforeOption = {
-    value: TimeRangeComparisonType.DayBefore,
-    text: i18n.translate('xpack.apm.timeComparison.select.dayBefore', {
-      defaultMessage: 'Day before',
-    }),
-  };
+        const dateFormat = getDateFormat({
+          previousPeriodStart: comparisonStart,
+          currentPeriodEnd: end,
+        });
 
-  const weekBeforeOption = {
-    value: TimeRangeComparisonType.WeekBefore,
-    text: i18n.translate('xpack.apm.timeComparison.select.weekBefore', {
-      defaultMessage: 'Week before',
-    }),
-  };
-
-  const dateDiff = Number(
-    getDateDifference({
-      start: momentStart,
-      end: momentEnd,
-      unitOfTime: 'days',
-      precise: true,
-    }).toFixed(2)
-  );
-
-  const isRangeToNow = rangeTo === 'now';
-
-  if (isRangeToNow) {
-    // Less than or equals to one day
-    if (dateDiff <= 1) {
-      return [dayBeforeOption, weekBeforeOption];
+        return {
+          value,
+          text: formatDate({
+            dateFormat,
+            previousPeriodStart: comparisonStart,
+            previousPeriodEnd: comparisonEnd,
+          }),
+        };
+      }
     }
-
-    // Less than or equals to one week
-    if (dateDiff <= 7) {
-      return [weekBeforeOption];
-    }
-  }
-
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    comparisonType: TimeRangeComparisonType.PeriodBefore,
-    start,
-    end,
-    comparisonEnabled,
   });
-
-  const dateFormat = getDateFormat({
-    previousPeriodStart: comparisonStart,
-    currentPeriodEnd: end,
-  });
-
-  const prevPeriodOption = {
-    value: TimeRangeComparisonType.PeriodBefore,
-    text: formatDate({
-      dateFormat,
-      previousPeriodStart: comparisonStart,
-      previousPeriodEnd: comparisonEnd,
-    }),
-  };
-
-  // above one week or when rangeTo is not "now"
-  return [prevPeriodOption];
 }
 
 export function TimeComparison() {
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const history = useHistory();
-  const { isMedium, isLarge } = useBreakPoints();
+  const { isSmall } = useBreakpoints();
   const {
-    urlParams: { start, end, comparisonEnabled, comparisonType, rangeTo },
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services', '/backends/*', '/services/{serviceName}');
+
+  const { exactStart, exactEnd } = useTimeRange({
+    rangeFrom,
+    rangeTo,
+  });
+
+  const {
+    urlParams: { comparisonEnabled, comparisonType },
   } = useUrlParams();
 
-  const selectOptions = getSelectOptions({
-    start,
-    end,
-    rangeTo,
-    comparisonEnabled,
+  const comparisonTypes = getComparisonTypes({
+    start: exactStart,
+    end: exactEnd,
   });
 
   // Sets default values
@@ -155,13 +141,17 @@ export function TimeComparison() {
     urlHelpers.replace(history, {
       query: {
         comparisonEnabled: comparisonEnabled === false ? 'false' : 'true',
-        comparisonType: comparisonType
-          ? comparisonType
-          : selectOptions[0].value,
+        comparisonType: comparisonType ? comparisonType : comparisonTypes[0],
       },
     });
     return null;
   }
+
+  const selectOptions = getSelectOptions({
+    comparisonTypes,
+    start: exactStart,
+    end: exactEnd,
+  });
 
   const isSelectedComparisonTypeAvailable = selectOptions.some(
     ({ value }) => value === comparisonType
@@ -177,7 +167,7 @@ export function TimeComparison() {
 
   return (
     <EuiSelect
-      fullWidth={!isMedium && isLarge}
+      fullWidth={isSmall}
       data-test-subj="comparisonSelect"
       disabled={!comparisonEnabled}
       options={selectOptions}

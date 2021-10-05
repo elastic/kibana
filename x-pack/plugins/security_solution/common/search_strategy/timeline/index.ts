@@ -24,7 +24,12 @@ import {
   SortField,
   Maybe,
 } from '../common';
-import { DataProviderType, TimelineType, TimelineStatus } from '../../types/timeline';
+import {
+  DataProviderType,
+  TimelineType,
+  TimelineStatus,
+  RowRendererId,
+} from '../../types/timeline';
 
 export * from './events';
 
@@ -48,29 +53,27 @@ export interface TimelineRequestOptionsPaginated<Field = string>
   sort: Array<TimelineRequestSortField<Field>>;
 }
 
-export type TimelineStrategyResponseType<
-  T extends TimelineFactoryQueryTypes
-> = T extends TimelineEventsQueries.all
-  ? TimelineEventsAllStrategyResponse
-  : T extends TimelineEventsQueries.details
-  ? TimelineEventsDetailsStrategyResponse
-  : T extends TimelineEventsQueries.kpi
-  ? TimelineKpiStrategyResponse
-  : T extends TimelineEventsQueries.lastEventTime
-  ? TimelineEventsLastEventTimeStrategyResponse
-  : never;
+export type TimelineStrategyResponseType<T extends TimelineFactoryQueryTypes> =
+  T extends TimelineEventsQueries.all
+    ? TimelineEventsAllStrategyResponse
+    : T extends TimelineEventsQueries.details
+    ? TimelineEventsDetailsStrategyResponse
+    : T extends TimelineEventsQueries.kpi
+    ? TimelineKpiStrategyResponse
+    : T extends TimelineEventsQueries.lastEventTime
+    ? TimelineEventsLastEventTimeStrategyResponse
+    : never;
 
-export type TimelineStrategyRequestType<
-  T extends TimelineFactoryQueryTypes
-> = T extends TimelineEventsQueries.all
-  ? TimelineEventsAllRequestOptions
-  : T extends TimelineEventsQueries.details
-  ? TimelineEventsDetailsRequestOptions
-  : T extends TimelineEventsQueries.kpi
-  ? TimelineRequestBasicOptions
-  : T extends TimelineEventsQueries.lastEventTime
-  ? TimelineEventsLastEventTimeRequestOptions
-  : never;
+export type TimelineStrategyRequestType<T extends TimelineFactoryQueryTypes> =
+  T extends TimelineEventsQueries.all
+    ? TimelineEventsAllRequestOptions
+    : T extends TimelineEventsQueries.details
+    ? TimelineEventsDetailsRequestOptions
+    : T extends TimelineEventsQueries.kpi
+    ? TimelineRequestBasicOptions
+    : T extends TimelineEventsQueries.lastEventTime
+    ? TimelineEventsLastEventTimeRequestOptions
+    : never;
 
 export interface ColumnHeaderInput {
   aggregatable?: Maybe<boolean>;
@@ -163,25 +166,6 @@ export interface DateRangePickerInput {
 export interface SortTimelineInput {
   columnId?: Maybe<string>;
   sortDirection?: Maybe<string>;
-}
-
-export enum RowRendererId {
-  alerts = 'alerts',
-  auditd = 'auditd',
-  auditd_file = 'auditd_file',
-  library = 'library',
-  netflow = 'netflow',
-  plain = 'plain',
-  registry = 'registry',
-  suricata = 'suricata',
-  system = 'system',
-  system_dns = 'system_dns',
-  system_endgame_process = 'system_endgame_process',
-  system_file = 'system_file',
-  system_fim = 'system_fim',
-  system_security_event = 'system_security_event',
-  system_socket = 'system_socket',
-  zeek = 'zeek',
 }
 
 export interface TimelineInput {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiSpacer,
@@ -23,8 +23,9 @@ import {
 import { deleteJobs } from '../utils';
 import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 import { DeleteJobCheckModal } from '../../../../components/delete_job_check_modal';
+import { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 
-type ShowFunc = (jobs: Array<{ id: string }>) => void;
+type ShowFunc = (jobs: MlSummaryJob[]) => void;
 
 interface Props {
   setShowFunction(showFunc: ShowFunc): void;
@@ -49,18 +50,18 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
     };
   }, []);
 
-  function showModal(jobs: any[]) {
+  const showModal = useCallback((jobs: MlSummaryJob[]) => {
     setJobIds(jobs.map(({ id }) => id));
     setModalVisible(true);
     setDeleting(false);
-  }
+  }, []);
 
-  function closeModal() {
+  const closeModal = useCallback(() => {
     setModalVisible(false);
     setCanDelete(false);
-  }
+  }, []);
 
-  function deleteJob() {
+  const deleteJob = useCallback(() => {
     setDeleting(true);
     deleteJobs(jobIds.map((id) => ({ id })));
 
@@ -68,7 +69,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
       closeModal();
       refreshJobs();
     }, DELETING_JOBS_REFRESH_INTERVAL_MS);
-  }
+  }, [jobIds, refreshJobs]);
 
   if (modalVisible === false || jobIds.length === 0) {
     return null;

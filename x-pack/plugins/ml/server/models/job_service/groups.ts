@@ -7,7 +7,6 @@
 
 import { CalendarManager } from '../calendar';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
-import { Job } from '../../../common/types/anomaly_detection_jobs';
 import { MlJobsResponse } from '../../../common/types/job_service';
 import type { MlClient } from '../../lib/ml_client';
 
@@ -78,10 +77,10 @@ export function groupsProvider(mlClient: MlClient) {
       .map((g) => groups[g]);
   }
 
-  async function updateGroups(jobs: Job[]) {
+  async function updateGroups(jobs: Array<{ jobId: string; groups: string[] }>) {
     const results: Results = {};
     for (const job of jobs) {
-      const { job_id: jobId, groups } = job;
+      const { jobId, groups } = job;
       try {
         await mlClient.updateJob({ job_id: jobId, body: { groups } });
         results[jobId] = { success: true };

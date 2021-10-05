@@ -7,9 +7,9 @@
 
 export enum CONSTANTS {
   appQuery = 'query',
+  alertsPage = 'alerts.page',
   caseDetails = 'case.details',
   casePage = 'case.page',
-  detectionsPage = 'detections.page',
   filters = 'filters',
   hostsDetails = 'hosts.details',
   hostsPage = 'hosts.page',
@@ -26,10 +26,13 @@ export enum CONSTANTS {
 }
 
 export type UrlStateType =
+  | 'administration'
+  | 'alerts'
   | 'case'
-  | 'detections'
+  | 'exceptions'
   | 'host'
   | 'network'
   | 'overview'
+  | 'rules'
   | 'timeline'
-  | 'administration';
+  | 'ueba';

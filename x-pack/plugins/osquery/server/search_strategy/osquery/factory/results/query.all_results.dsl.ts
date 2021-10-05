@@ -43,8 +43,13 @@ export const buildResultsQuery = ({
       aggs: {
         count_by_agent_id: {
           terms: {
-            field: 'agent.id',
+            field: 'elastic_agent.id',
             size: 10000,
+          },
+        },
+        unique_agents: {
+          cardinality: {
+            field: 'elastic_agent.id',
           },
         },
       },
@@ -52,14 +57,13 @@ export const buildResultsQuery = ({
       from: activePage * querySize,
       size: querySize,
       track_total_hits: true,
-      fields: agentId ? ['osquery.*'] : ['agent.*', 'osquery.*'],
-      sort: [
-        {
-          [sort.field]: {
-            order: sort.direction,
+      fields: ['elastic_agent.*', 'agent.*', 'osquery.*'],
+      sort:
+        sort?.map((sortConfig) => ({
+          [sortConfig.field]: {
+            order: sortConfig.direction,
           },
-        },
-      ],
+        })) ?? [],
     },
   };
 

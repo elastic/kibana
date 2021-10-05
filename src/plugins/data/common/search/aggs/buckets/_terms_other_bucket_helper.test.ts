@@ -16,8 +16,8 @@ import { AggConfigs, CreateAggConfigParams } from '../agg_configs';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketAggConfig } from './bucket_agg_type';
 import { mockAggTypesRegistry } from '../test_helpers';
-import type { IndexPatternField } from '../../../index_patterns';
-import { IndexPattern } from '../../../index_patterns/index_patterns/index_pattern';
+import type { IndexPatternField } from '../../..';
+import { IndexPattern } from '../../..';
 
 const indexPattern = {
   id: '1234',
@@ -42,7 +42,7 @@ const indexPattern = {
   ],
 } as IndexPattern;
 
-indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
+indexPattern.fields.getByName = (name) => ({ name } as unknown as IndexPatternField);
 
 const singleTerm = {
   aggs: [
@@ -159,6 +159,57 @@ const nestedTermResponse = {
           '2': {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 8325,
+            buckets: [
+              { key: 'ios', doc_count: 1850 },
+              { key: 'win xp', doc_count: 1830 },
+              { key: '__missing__', doc_count: 130 },
+            ],
+          },
+          key: 'IN-with-dash',
+          doc_count: 2830,
+        },
+      ],
+    },
+  },
+  status: 200,
+};
+
+const exhaustiveNestedTermResponse = {
+  took: 10,
+  timed_out: false,
+  _shards: {
+    total: 1,
+    successful: 1,
+    skipped: 0,
+    failed: 0,
+  },
+  hits: {
+    total: 14005,
+    max_score: 0,
+    hits: [],
+  },
+  aggregations: {
+    '1': {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 8325,
+      buckets: [
+        {
+          '2': {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              { key: 'ios', doc_count: 2850 },
+              { key: 'win xp', doc_count: 2830 },
+              { key: '__missing__', doc_count: 1430 },
+            ],
+          },
+          key: 'US-with-dash',
+          doc_count: 2850,
+        },
+        {
+          '2': {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
             buckets: [
               { key: 'ios', doc_count: 1850 },
               { key: 'win xp', doc_count: 1830 },
@@ -324,6 +375,97 @@ describe('Terms Agg Other bucket helper', () => {
       if (agg) {
         expect(agg()).toEqual(expectedResponse);
       }
+    });
+
+    test('correctly builds query for nested terms agg with one disabled', () => {
+      const oneDisabledNestedTerms = {
+        aggs: [
+          {
+            id: '2',
+            type: BUCKET_TYPES.TERMS,
+            enabled: false,
+            params: {
+              field: {
+                name: 'machine.os.raw',
+                indexPattern,
+                filterable: true,
+              },
+              size: 2,
+              otherBucket: false,
+              missingBucket: true,
+            },
+          },
+          {
+            id: '1',
+            type: BUCKET_TYPES.TERMS,
+            params: {
+              field: {
+                name: 'geo.src',
+                indexPattern,
+                filterable: true,
+              },
+              size: 2,
+              otherBucket: true,
+              missingBucket: false,
+            },
+          },
+        ],
+      };
+      const aggConfigs = getAggConfigs(oneDisabledNestedTerms.aggs);
+      const agg = buildOtherBucketAgg(
+        aggConfigs,
+        aggConfigs.aggs[1] as IBucketAggConfig,
+        singleTermResponse
+      );
+      const expectedResponse = {
+        'other-filter': {
+          aggs: undefined,
+          filters: {
+            filters: {
+              '': {
+                bool: {
+                  filter: [
+                    {
+                      exists: {
+                        field: 'geo.src',
+                      },
+                    },
+                  ],
+                  must: [],
+                  must_not: [
+                    {
+                      match_phrase: {
+                        'geo.src': 'ios',
+                      },
+                    },
+                    {
+                      match_phrase: {
+                        'geo.src': 'win xp',
+                      },
+                    },
+                  ],
+                  should: [],
+                },
+              },
+            },
+          },
+        },
+      };
+      expect(agg).toBeDefined();
+      if (agg) {
+        expect(agg()).toEqual(expectedResponse);
+      }
+    });
+
+    test('does not build query if sum_other_doc_count is 0 (exhaustive terms)', () => {
+      const aggConfigs = getAggConfigs(nestedTerm.aggs);
+      expect(
+        buildOtherBucketAgg(
+          aggConfigs,
+          aggConfigs.aggs[1] as IBucketAggConfig,
+          exhaustiveNestedTermResponse
+        )
+      ).toBeFalsy();
     });
 
     test('excludes exists filter for scripted fields', () => {

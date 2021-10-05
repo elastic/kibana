@@ -48,7 +48,7 @@ describe('ES search strategy', () => {
   const mockLogger: any = {
     debug: () => {},
   };
-  const mockDeps = ({
+  const mockDeps = {
     uiSettingsClient: {
       get: jest.fn(),
     },
@@ -63,7 +63,7 @@ describe('ES search strategy', () => {
       },
     },
     searchSessionsClient: createSearchSessionsClientMock(),
-  } as unknown) as SearchStrategyDependencies;
+  } as unknown as SearchStrategyDependencies;
   const mockLegacyConfig$ = new BehaviorSubject<any>({
     elasticsearch: {
       shardTimeout: {
@@ -171,7 +171,7 @@ describe('ES search strategy', () => {
         expect(request.index).toEqual(params.index);
         expect(request.body).toEqual(params.body);
 
-        expect(request).toHaveProperty('keep_alive', '60000ms');
+        expect(request).toHaveProperty('keep_alive', '604800000ms');
       });
 
       it('makes a GET request to async search without keepalive', async () => {
@@ -293,7 +293,7 @@ describe('ES search strategy', () => {
 
       expect(mockGetCaller).toBeCalled();
       const request = mockGetCaller.mock.calls[0][0];
-      expect(request).toEqual({ id, body: { keep_alive: keepAlive } });
+      expect(request).toEqual({ id, keep_alive: keepAlive });
     });
 
     it('throws normalized error on ElasticsearchClientError', async () => {

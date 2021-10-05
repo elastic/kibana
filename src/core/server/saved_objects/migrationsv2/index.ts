@@ -9,12 +9,15 @@
 import { ElasticsearchClient } from '../../elasticsearch';
 import { IndexMapping } from '../mappings';
 import { Logger } from '../../logging';
-import { SavedObjectsMigrationVersion } from '../types';
+import type { SavedObjectsMigrationVersion } from '../types';
+import type { TransformRawDocs } from './types';
 import { MigrationResult } from '../migrations/core';
-import { next, TransformRawDocs } from './next';
-import { createInitialState, model } from './model';
+import { next } from './next';
+import { model } from './model';
+import { createInitialState } from './initial_state';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
+import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 
 /**
  * Migrates the provided indexPrefix index using a resilient algorithm that is
@@ -31,6 +34,7 @@ export async function runResilientMigrator({
   migrationVersionPerType,
   indexPrefix,
   migrationsConfig,
+  typeRegistry,
 }: {
   client: ElasticsearchClient;
   kibanaVersion: string;
@@ -41,6 +45,7 @@ export async function runResilientMigrator({
   migrationVersionPerType: SavedObjectsMigrationVersion;
   indexPrefix: string;
   migrationsConfig: SavedObjectsMigrationConfigType;
+  typeRegistry: ISavedObjectTypeRegistry;
 }): Promise<MigrationResult> {
   const initialState = createInitialState({
     kibanaVersion,
@@ -49,11 +54,13 @@ export async function runResilientMigrator({
     migrationVersionPerType,
     indexPrefix,
     migrationsConfig,
+    typeRegistry,
   });
   return migrationStateActionMachine({
     initialState,
     logger,
     next: next(client, transformRawDocs),
     model,
+    client,
   });
 }

@@ -23,10 +23,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const searchSessions = getService('searchSessions');
 
-  describe('discover in space', () => {
+  // FLAKY https://github.com/elastic/kibana/issues/112913
+  describe.skip('discover in space', () => {
     describe('Storing search sessions in space', () => {
       before(async () => {
-        await esArchiver.load('dashboard/session_in_space');
+        await esArchiver.load('x-pack/test/functional/es_archives/dashboard/session_in_space');
 
         await security.role.create('data_analyst', {
           elasticsearch: {
@@ -59,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await security.role.delete('data_analyst');
         await security.user.delete('analyst');
 
-        await esArchiver.unload('dashboard/session_in_space');
+        await esArchiver.unload('x-pack/test/functional/es_archives/dashboard/session_in_space');
         await PageObjects.security.forceLogout();
       });
 
@@ -99,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
     describe('Disabled storing search sessions in space', () => {
       before(async () => {
-        await esArchiver.load('dashboard/session_in_space');
+        await esArchiver.load('x-pack/test/functional/es_archives/dashboard/session_in_space');
 
         await security.role.create('data_analyst', {
           elasticsearch: {
@@ -132,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await security.role.delete('data_analyst');
         await security.user.delete('analyst');
 
-        await esArchiver.unload('dashboard/session_in_space');
+        await esArchiver.unload('x-pack/test/functional/es_archives/dashboard/session_in_space');
         await PageObjects.security.forceLogout();
       });
 

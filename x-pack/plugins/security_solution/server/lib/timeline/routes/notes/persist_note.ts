@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { NOTE_URL } from '../../../../../common/constants';
@@ -13,7 +14,7 @@ import { SetupPlugins } from '../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../utils/build_validation/route_validation';
 import { ConfigType } from '../../../..';
 
-import { transformError, buildSiemResponse } from '../../../detection_engine/routes/utils';
+import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../utils/common';
 import { persistNoteSchema } from '../../schemas/notes';
@@ -41,18 +42,16 @@ export const persistNoteRoute = (
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
         const { note } = request.body;
         const noteId = request.body?.noteId ?? null;
-        const version = request.body?.version ?? null;
 
-        const res = await persistNote(
-          frameworkRequest,
+        const res = await persistNote({
+          request: frameworkRequest,
           noteId,
-          version,
-          {
+          note: {
             ...note,
             timelineId: note.timelineId || null,
           },
-          true
-        );
+          overrideOwner: true,
+        });
 
         return response.ok({
           body: { data: { persistNote: res } },

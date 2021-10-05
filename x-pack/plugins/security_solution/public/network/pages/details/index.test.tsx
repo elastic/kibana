@@ -27,7 +27,6 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
@@ -149,7 +148,7 @@ describe('Network Details', () => {
     );
     expect(
       wrapper
-        .find('[data-test-subj="network-details-headline"] [data-test-subj="header-page-title"]')
+        .find('[data-test-subj="network-details-headline"] h1[data-test-subj="header-page-title"]')
         .text()
     ).toEqual('fe80::24ce:f7ff:fede:a571');
   });

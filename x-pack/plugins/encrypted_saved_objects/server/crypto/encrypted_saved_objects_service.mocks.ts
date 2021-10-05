@@ -12,14 +12,15 @@ import type {
 } from './encrypted_saved_objects_service';
 
 function createEncryptedSavedObjectsServiceMock() {
-  return ({
+  return {
     isRegistered: jest.fn(),
     stripOrDecryptAttributes: jest.fn(),
     encryptAttributes: jest.fn(),
     decryptAttributes: jest.fn(),
     encryptAttributesSync: jest.fn(),
     decryptAttributesSync: jest.fn(),
-  } as unknown) as jest.Mocked<EncryptedSavedObjectsService>;
+    stripOrDecryptAttributesSync: jest.fn(),
+  } as unknown as jest.Mocked<EncryptedSavedObjectsService>;
 }
 
 export const encryptedSavedObjectsServiceMock = {

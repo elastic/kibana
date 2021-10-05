@@ -21,6 +21,13 @@ export const CONTENT_SUMMARY_TITLE = i18n.translate(
   }
 );
 
+export const CONTENT_SUMMARY_LOADING_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.contentSummaryLoading.text',
+  {
+    defaultMessage: 'Loading summary details...',
+  }
+);
+
 export const CONTENT_TYPE_HEADER = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.contentType.header',
   {
@@ -222,6 +229,20 @@ export const SOURCE_CONTENT_TITLE = i18n.translate(
   }
 );
 
+export const SEARCH_CONTENT_PLACEHOLDER = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceContent.searchBar.search.placeholder',
+  {
+    defaultMessage: 'Search content...',
+  }
+);
+
+export const FILTER_CONTENT_PLACEHOLDER = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceContent.searchBar.filter.placeholder',
+  {
+    defaultMessage: 'Filter content...',
+  }
+);
+
 export const CONTENT_LOADING_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.contentLoading.text',
   {
@@ -257,6 +278,13 @@ export const READY_TEXT = i18n.translate(
   }
 );
 
+export const SOURCE_SETTINGS_HEADING = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.settings.heading',
+  {
+    defaultMessage: 'Settings',
+  }
+);
+
 export const SOURCE_SETTINGS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.settings.title',
   {
@@ -278,24 +306,59 @@ export const SOURCE_CONFIG_TITLE = i18n.translate(
   }
 );
 
-export const SOURCE_CONFIG_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.config.description',
+export const SYNC_MANAGEMENT_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementTitle',
   {
-    defaultMessage: 'Edit content source connector settings to change.',
+    defaultMessage: 'Sync management',
+  }
+);
+
+export const SYNC_MANAGEMENT_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementDescription',
+  {
+    defaultMessage: 'Enable and disable extraction of specific content for this source.',
+  }
+);
+
+export const SYNC_MANAGEMENT_SYNCHRONIZE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementSynchronizeLabel',
+  {
+    defaultMessage: 'Synchronize this source',
+  }
+);
+
+export const SYNC_MANAGEMENT_THUMBNAILS_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementThumbnailsLabel',
+  {
+    defaultMessage: 'Sync thumbnails',
+  }
+);
+
+export const SYNC_MANAGEMENT_THUMBNAILS_GLOBAL_CONFIG_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementGlobalConfigLabel',
+  {
+    defaultMessage: 'Sync thumbnails - disabled at global configuration level',
+  }
+);
+
+export const SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementContentExtractionLabel',
+  {
+    defaultMessage: 'Sync all text and content',
   }
 );
 
 export const SOURCE_CONFIG_LINK = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.config.link',
   {
-    defaultMessage: 'Edit content source connector settings',
+    defaultMessage: 'Edit connector settings',
   }
 );
 
 export const SOURCE_REMOVE_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.remove.title',
   {
-    defaultMessage: 'Remove this source',
+    defaultMessage: 'Remove this content source',
   }
 );
 
@@ -364,35 +427,6 @@ export const PRIVATE_LINK_TITLE = i18n.translate(
   }
 );
 
-export const PRIVATE_CAN_CREATE_PAGE_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.private.canCreate.title',
-  {
-    defaultMessage: 'Manage private content sources',
-  }
-);
-
-export const PRIVATE_VIEW_ONLY_PAGE_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.private.vewOnly.title',
-  {
-    defaultMessage: 'Review Group Sources',
-  }
-);
-
-export const PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.private.vewOnly.description',
-  {
-    defaultMessage: 'Review the status of all sources shared with your Group.',
-  }
-);
-
-export const PRIVATE_CAN_CREATE_PAGE_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.private.canCreate.description',
-  {
-    defaultMessage:
-      'Review the status of all connected private sources, and manage private sources for your account.',
-  }
-);
-
 export const PRIVATE_HEADER_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.private.header.title',
   {
@@ -407,10 +441,10 @@ export const PRIVATE_HEADER_DESCRIPTION = i18n.translate(
   }
 );
 
-export const PRIVATE_SHARED_SOURCES_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.private.privateShared.header.title',
+export const PRIVATE_ORG_SOURCES_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.private.privateOrg.header.title',
   {
-    defaultMessage: 'Shared content sources',
+    defaultMessage: 'Organizational content sources',
   }
 );
 
@@ -420,15 +454,15 @@ export const PRIVATE_EMPTY_TITLE = i18n.translate(
     defaultMessage: 'You have no private sources',
   }
 );
-export const SHARED_EMPTY_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.shared.empty.title',
+export const ORG_SOURCES_EMPTY_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.org.empty.title',
   {
     defaultMessage: 'No content source available',
   }
 );
 
-export const SHARED_EMPTY_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.shared.empty.description',
+export const ORG_SOURCES_EMPTY_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.org.empty.description',
   {
     defaultMessage:
       'Once content sources are shared with you, they will be displayed here, and available via the search experience.',
@@ -485,10 +519,195 @@ export const UNDERSTAND_BUTTON = i18n.translate(
   }
 );
 
-export const PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.privateDashboard.readOnlyMode.warning',
+export const PERSONAL_DASHBOARD_READ_ONLY_MODE_WARNING = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.personalDashboard.readOnlyMode.warning',
   {
     defaultMessage:
       'Workplace Search is currently available for search only, due to regular maintenance. Contact your system administrator for more information.',
+  }
+);
+
+export const PERSONAL_DASHBOARD_SOURCE_ERROR = (error: string) =>
+  i18n.translate('xpack.enterpriseSearch.workplaceSearch.personalDashboardSourceError', {
+    defaultMessage:
+      'Could not connect the source, reach out to your admin for help. Error message: {error}',
+    values: { error },
+  });
+
+export const SOURCE_OVERVIEW_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceOverviewTitle',
+  {
+    defaultMessage: 'Source overview',
+  }
+);
+
+export const SOURCE_SYNCRONIZATION_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncronizationDescription',
+  {
+    defaultMessage:
+      'DO NOT TRANSLATE, temporary placeholder: Sync chupa chups dragée gummi bears jelly beans brownie. Fruitcake pie chocolate cake caramels carrot cake cotton candy dragée sweet roll soufflé.',
+  }
+);
+
+export const SOURCE_FREQUENCY_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceFrequencyDescription',
+  {
+    defaultMessage:
+      'DO NOT TRANSLATE, temporary placeholder: Frequency chupa chups dragée gummi bears jelly beans brownie. Fruitcake pie chocolate cake caramels carrot cake cotton candy dragée sweet roll soufflé.',
+  }
+);
+
+export const SOURCE_OBJECTS_AND_ASSETS_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceObjectsAndAssetsDescription',
+  {
+    defaultMessage:
+      'DO NOT TRANSLATE, temporary placeholder: Objects chupa chups dragée gummi bears jelly beans brownie. Fruitcake pie chocolate cake caramels carrot cake cotton candy dragée sweet roll soufflé.',
+  }
+);
+
+export const SOURCE_SYNCRONIZATION_TOGGLE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncronizationToggleLabel',
+  {
+    defaultMessage: 'Synchronize this source',
+  }
+);
+
+export const SOURCE_SYNCRONIZATION_TOGGLE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncronizationToggleDescription',
+  {
+    defaultMessage: 'Source content will automatically be kept in sync.',
+  }
+);
+
+export const SOURCE_SYNCRONIZATION_FREQUENCY_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncronizationFrequencyTitle',
+  {
+    defaultMessage: 'Syncronization frequency',
+  }
+);
+
+export const SOURCE_SYNC_FREQUENCY_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncFrequencyTitle',
+  {
+    defaultMessage: 'Sync frequency',
+  }
+);
+
+export const BLOCKED_TIME_WINDOWS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.blockedWindowsTitle',
+  {
+    defaultMessage: 'Blocked time windows',
+  }
+);
+
+export const SYNCHRONIZATION_LINK_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.synchronizationLinkLabel',
+  {
+    defaultMessage: 'Learn more about synchronization',
+  }
+);
+
+export const SYNCHRONIZATION_DISABLED_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.synchronizationDisabledTitle',
+  {
+    defaultMessage: 'Source synchronization is disabled.',
+  }
+);
+
+export const SYNCHRONIZATION_DISABLED_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.synchronizationDisabledDescription',
+  {
+    defaultMessage: 'Contact your administrator to enable synchronization controls.',
+  }
+);
+
+export const DIFFERENT_SYNC_TYPES_LINK_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.differentSyncTypesLinkLabel',
+  {
+    defaultMessage: 'Learn more about different sync types',
+  }
+);
+
+export const SYNC_BEST_PRACTICES_LINK_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncBestPracticesLinkLabel',
+  {
+    defaultMessage: 'Learn more about sync best practices',
+  }
+);
+
+export const SYNC_OBJECTS_TYPES_LINK_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncObjectsTypesLinkLabel',
+  {
+    defaultMessage: 'Learn more about sync objects types',
+  }
+);
+
+export const FULL_SYNC_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.fullSyncLabel',
+  {
+    defaultMessage: 'Full sync',
+  }
+);
+
+export const FULL_SYNC_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.fullSyncDescription',
+  {
+    defaultMessage: 'Retrieves all the documents possible from the content source',
+  }
+);
+
+export const INCREMENTAL_SYNC_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.incrementalSyncLabel',
+  {
+    defaultMessage: 'Incremental sync',
+  }
+);
+
+export const INCREMENTAL_SYNC_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.incrementalSyncDescription',
+  {
+    defaultMessage: 'Retrieves documents/updates since the last sync job',
+  }
+);
+
+export const DELETION_SYNC_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.deletionSyncLabel',
+  {
+    defaultMessage: 'Deletion sync',
+  }
+);
+
+export const DELETION_SYNC_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.deletionSyncDescription',
+  {
+    defaultMessage: 'Removes documents that no longer exist in the content source',
+  }
+);
+
+export const PERMISSIONS_SYNC_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.permissionsSyncLabel',
+  {
+    defaultMessage: 'Permissions sync',
+  }
+);
+
+export const PERMISSIONS_SYNC_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.permissionsSyncDescription',
+  {
+    defaultMessage: 'Retrieves all permission changes since the last sync job',
+  }
+);
+
+export const BLOCKED_EMPTY_STATE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.blockedEmptyStateTitle',
+  {
+    defaultMessage: 'You have no blocked time windows',
+  }
+);
+
+export const BLOCKED_EMPTY_STATE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.blockedEmptyStateDescription',
+  {
+    defaultMessage: 'Add a blocked time window to only perform syncs at the right time.',
   }
 );

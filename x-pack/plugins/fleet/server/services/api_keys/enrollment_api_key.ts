@@ -11,16 +11,19 @@ import { i18n } from '@kbn/i18n';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
-import { esKuery } from '../../../../../../src/plugins/data/server';
-import type { ESSearchResponse as SearchResponse } from '../../../../../../typings/elasticsearch';
+import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
+
+import type { ESSearchResponse as SearchResponse } from '../../../../../../src/core/types/elasticsearch';
 import type { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
+import { IngestManagerError } from '../../errors';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
 import { escapeSearchQueryPhrase } from '../saved_object';
 
 import { invalidateAPIKeys } from './security';
 
-const uuidRegex = /^\([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}\)$/;
+const uuidRegex =
+  /^\([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}\)$/;
 
 export async function listEnrollmentApiKeys(
   esClient: ElasticsearchClient,
@@ -28,10 +31,12 @@ export async function listEnrollmentApiKeys(
     page?: number;
     perPage?: number;
     kuery?: string;
+    query?: ReturnType<typeof toElasticsearchQuery>;
     showInactive?: boolean;
   }
 ): Promise<{ items: EnrollmentAPIKey[]; total: any; page: any; perPage: any }> {
   const { page = 1, perPage = 20, kuery } = options;
+  const query = options.query ?? (kuery && toElasticsearchQuery(fromKueryExpression(kuery)));
 
   const res = await esClient.search<SearchResponse<FleetServerEnrollmentAPIKey, {}>>({
     index: ENROLLMENT_API_KEYS_INDEX,
@@ -40,12 +45,10 @@ export async function listEnrollmentApiKeys(
     sort: 'created_at:desc',
     track_total_hits: true,
     ignore_unavailable: true,
-    body: kuery
-      ? { query: esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kuery)) }
-      : undefined,
+    body: query ? { query } : undefined,
   });
 
-  // @ts-expect-error @elastic/elasticsearch
+  // @ts-expect-error @elastic/elasticsearch _source is optional
   const items = res.body.hits.hits.map(esDocToEnrollmentApiKey);
 
   return {
@@ -159,7 +162,7 @@ export async function generateEnrollmentAPIKey(
       const { items } = await listEnrollmentApiKeys(esClient, {
         page: page++,
         perPage: 100,
-        kuery: `policy_id:"${agentPolicyId}" AND name:${providedKeyName.replace(/ /g, '\\ ')}*`,
+        query: getQueryForExistingKeyNameOnPolicy(agentPolicyId, providedKeyName),
       });
       if (items.length === 0) {
         hasMore = false;
@@ -176,7 +179,7 @@ export async function generateEnrollmentAPIKey(
         k.name?.replace(providedKeyName, '').trim().match(uuidRegex)
       )
     ) {
-      throw new Error(
+      throw new IngestManagerError(
         i18n.translate('xpack.fleet.serverError.enrollmentKeyDuplicate', {
           defaultMessage:
             'An enrollment key named {providedKeyName} already exists for agent policy {agentPolicyId}',
@@ -195,7 +198,6 @@ export async function generateEnrollmentAPIKey(
     .createApiKey({
       body: {
         name,
-        // @ts-expect-error Metadata in api keys
         metadata: {
           managed_by: 'fleet',
           managed: true,
@@ -252,6 +254,29 @@ export async function generateEnrollmentAPIKey(
     id: res.body._id,
     ...body,
   };
+}
+
+function getQueryForExistingKeyNameOnPolicy(agentPolicyId: string, providedKeyName: string) {
+  const query = {
+    bool: {
+      filter: [
+        {
+          bool: {
+            should: [{ match_phrase: { policy_id: agentPolicyId } }],
+            minimum_should_match: 1,
+          },
+        },
+        {
+          bool: {
+            should: [{ query_string: { fields: ['name'], query: `(${providedKeyName}) *` } }],
+            minimum_should_match: 1,
+          },
+        },
+      ],
+    },
+  };
+
+  return query;
 }
 
 export async function getEnrollmentAPIKeyById(esClient: ElasticsearchClient, apiKeyId: string) {

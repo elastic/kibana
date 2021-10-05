@@ -13,7 +13,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import useObservable from 'react-use/lib/useObservable';
 import { KibanaFeature } from '../../../features/common';
 import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constants';
-import { ActionTypeRegistryContract, AlertTypeRegistryContract } from '../types';
+import { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { PluginStartContract as AlertingStart } from '../../../alerting/public';
@@ -26,7 +26,7 @@ import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common
 import { setSavedObjectsClient } from '../common/lib/data_apis';
 import { KibanaContextProvider } from '../common/lib/kibana';
 
-const TriggersActionsUIHome = lazy(async () => import('./home'));
+const TriggersActionsUIHome = lazy(() => import('./home'));
 const AlertDetailsRoute = lazy(
   () => import('./sections/alert_details/components/alert_details_route')
 );
@@ -37,9 +37,10 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
   storage?: Storage;
+  isCloud: boolean;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
-  alertTypeRegistry: AlertTypeRegistryContract;
+  ruleTypeRegistry: RuleTypeRegistryContract;
   history: ScopedHistory;
   kibanaFeatures: KibanaFeature[];
   element: HTMLElement;

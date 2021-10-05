@@ -10,7 +10,7 @@ import {
   mockHttpValues,
   mockFlashMessageHelpers,
   mockKibanaValues,
-} from '../../../__mocks__';
+} from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test/jest';
 
@@ -20,9 +20,10 @@ describe('MetaEngineCreationLogic', () => {
   const { mount } = new LogicMounter(MetaEngineCreationLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const { setQueuedSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
+  const { flashSuccessToast, flashAPIErrors } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
+    isLoading: false,
     indexedEngineNames: [],
     name: '',
     rawName: '',
@@ -74,6 +75,28 @@ describe('MetaEngineCreationLogic', () => {
           'two',
           'three',
         ]);
+      });
+    });
+
+    describe('submitEngine', () => {
+      it('sets isLoading to true', () => {
+        mount({ isLoading: false });
+        MetaEngineCreationLogic.actions.submitEngine();
+        expect(MetaEngineCreationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          isLoading: true,
+        });
+      });
+    });
+
+    describe('onSubmitError', () => {
+      it('resets isLoading to false', () => {
+        mount({ isLoading: true });
+        MetaEngineCreationLogic.actions.onSubmitError();
+        expect(MetaEngineCreationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          isLoading: false,
+        });
       });
     });
   });
@@ -129,8 +152,8 @@ describe('MetaEngineCreationLogic', () => {
         MetaEngineCreationLogic.actions.onEngineCreationSuccess();
       });
 
-      it('should set a success message', () => {
-        expect(setQueuedSuccessMessage).toHaveBeenCalledWith('Successfully created meta engine.');
+      it('should show a success message', () => {
+        expect(flashSuccessToast).toHaveBeenCalledWith("Meta engine 'test' was created");
       });
 
       it('should navigate the user to the engine page', () => {
@@ -144,14 +167,14 @@ describe('MetaEngineCreationLogic', () => {
         mount({ rawName: 'test', selectedIndexedEngineNames: ['foo'] });
       });
 
-      it('POSTS to /api/app_search/engines', () => {
+      it('POSTS to /internal/app_search/engines', () => {
         const body = JSON.stringify({
           name: 'test',
           type: 'meta',
           source_engines: ['foo'],
         });
         MetaEngineCreationLogic.actions.submitEngine();
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/engines', { body });
+        expect(http.post).toHaveBeenCalledWith('/internal/app_search/engines', { body });
       });
 
       it('calls onEngineCreationSuccess on valid submission', async () => {

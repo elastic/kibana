@@ -18,7 +18,7 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../common/mock';
-import { SiemNavigation } from '../../common/components/navigation';
+import { SecuritySolutionTabNavigation } from '../../common/components/navigation';
 import { inputsActions } from '../../common/store/inputs';
 import { State, createStore } from '../../common/store';
 import { Hosts } from './hosts';
@@ -102,7 +102,7 @@ describe('Hosts - rendering', () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find(SiemNavigation).exists()).toBe(true);
+    expect(wrapper.find(SecuritySolutionTabNavigation).exists()).toBe(true);
   });
 
   test('it should add the new filters after init', async () => {
@@ -155,7 +155,7 @@ describe('Hosts - rendering', () => {
     myStore.dispatch(inputsActions.setSearchBarFilter({ id: 'global', filters: newFilters }));
     wrapper.update();
     expect(wrapper.find(HostsTabs).props().filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"ItRocks"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"ItRocks"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
     );
   });
 });

@@ -19,7 +19,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const toasts = getService('toasts');
   const deployment = getService('deployment');
-  const dataGrid = getService('dataGrid');
 
   describe('shared links', function describeIndexTests() {
     let baseUrl: string;
@@ -38,8 +37,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
 
       await kibanaServer.uiSettings.replace({
         'state:storeInSessionStorage': storeStateInSessionStorage,
@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should allow for copying the snapshot URL as a short URL', async function () {
-          const re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
+          const re = new RegExp(baseUrl + '/goto/.+$');
           await PageObjects.share.checkShortenUrl();
           await retry.try(async () => {
             const actualUrl = await PageObjects.share.getSharedUrl();
@@ -129,13 +129,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             return url.includes('sort:!(!(%27@timestamp%27,desc))');
           });
 
-          const row = await dataGrid.getRow({ rowIndex: 0 });
-          const firstRowText = await Promise.all(
-            row.map(async (cell) => await cell.getVisibleText())
-          );
-
-          // sorting requested by ES should be correct
-          expect(firstRowText).to.contain('Sep 22, 2015 @ 23:50:13.253');
+          await retry.waitFor('document table to contain the right timestamp', async () => {
+            const firstRowText = await PageObjects.discover.getDocTableIndex(1);
+            return firstRowText.includes('Sep 22, 2015 @ 23:50:13.253');
+          });
         });
       });
     });
@@ -151,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should allow for copying the snapshot URL as a short URL and should open it', async function () {
-        const re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
+        const re = new RegExp(baseUrl + '/goto/.+$');
         await PageObjects.share.checkShortenUrl();
         let actualUrl: string = '';
         await retry.try(async () => {

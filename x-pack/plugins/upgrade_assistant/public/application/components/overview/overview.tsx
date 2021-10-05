@@ -8,70 +8,30 @@
 import React, { FunctionComponent, useEffect } from 'react';
 
 import {
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiSteps,
   EuiText,
   EuiPageHeader,
-  EuiPageBody,
   EuiButtonEmpty,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiSpacer,
   EuiLink,
-  EuiFormRow,
+  EuiPageBody,
+  EuiPageContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { RouteComponentProps } from 'react-router-dom';
 import { useAppContext } from '../../app_context';
-import { LatestMinorBanner } from '../latest_minor_banner';
-import { ESDeprecationStats } from './es_stats';
-import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
+import { getReviewLogsStep } from './review_logs_step';
+import { getFixDeprecationLogsStep } from './fix_deprecation_logs_step';
+import { getUpgradeStep } from './upgrade_step';
 
-const i18nTexts = {
-  pageTitle: i18n.translate('xpack.upgradeAssistant.pageTitle', {
-    defaultMessage: 'Upgrade Assistant',
-  }),
-  getPageDescription: (nextMajor: string) =>
-    i18n.translate('xpack.upgradeAssistant.pageDescription', {
-      defaultMessage:
-        'Prepare to upgrade by identifying deprecated settings and updating your configuration. Enable deprecation logging to see if your are using deprecated features that will not be available after you upgrade to Elastic {nextMajor}.',
-      values: {
-        nextMajor,
-      },
-    }),
-  getDeprecationLoggingLabel: (href: string) => (
-    <FormattedMessage
-      id="xpack.upgradeAssistant.deprecationLoggingDescription"
-      defaultMessage="Log deprecated actions. {learnMore}"
-      values={{
-        learnMore: (
-          <EuiLink href={href} target="_blank">
-            {i18n.translate('xpack.upgradeAssistant.deprecationLoggingDescription.learnMoreLink', {
-              defaultMessage: 'Learn more.',
-            })}
-          </EuiLink>
-        ),
-      }}
-    />
-  ),
-  docLink: i18n.translate('xpack.upgradeAssistant.documentationLinkText', {
-    defaultMessage: 'Documentation',
-  }),
-};
-
-interface Props {
-  history: RouteComponentProps['history'];
-}
-
-export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
+export const Overview: FunctionComponent = () => {
   const { kibanaVersionInfo, breadcrumbs, docLinks, api } = useAppContext();
   const { nextMajor } = kibanaVersionInfo;
 
   useEffect(() => {
     async function sendTelemetryData() {
-      await api.sendTelemetryData({
+      await api.sendPageTelemetryData({
         overview: true,
       });
     }
@@ -84,10 +44,16 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
   }, [breadcrumbs]);
 
   return (
-    <EuiPageBody>
-      <EuiPageContent data-test-subj="overviewPageContent">
+    <EuiPageBody restrictWidth={true}>
+      <EuiPageContent horizontalPosition="center" color="transparent" paddingSize="none">
         <EuiPageHeader
-          pageTitle={i18nTexts.pageTitle}
+          bottomBorder
+          pageTitle={i18n.translate('xpack.upgradeAssistant.overview.pageTitle', {
+            defaultMessage: 'Upgrade Assistant',
+          })}
+          description={i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
+            defaultMessage: 'Get ready for the next version of the Elastic Stack!',
+          })}
           rightSideItems={[
             <EuiButtonEmpty
               href={docLinks.links.upgradeAssistant}
@@ -95,42 +61,33 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
               iconType="help"
               data-test-subj="documentationLink"
             >
-              {i18nTexts.docLink}
+              <FormattedMessage
+                id="xpack.upgradeAssistant.overview.documentationLinkText"
+                defaultMessage="Documentation"
+              />
             </EuiButtonEmpty>,
           ]}
+        >
+          <EuiText data-test-subj="whatsNewLink">
+            <EuiLink href={docLinks.links.elasticsearch.releaseHighlights} target="_blank">
+              <FormattedMessage
+                id="xpack.upgradeAssistant.overview.whatsNewLink"
+                defaultMessage="What's new in version {nextMajor}.0?"
+                values={{ nextMajor }}
+              />
+            </EuiLink>
+          </EuiText>
+        </EuiPageHeader>
+
+        <EuiSpacer size="l" />
+
+        <EuiSteps
+          steps={[
+            getReviewLogsStep({ nextMajor }),
+            getFixDeprecationLogsStep(),
+            getUpgradeStep({ docLinks, nextMajor }),
+          ]}
         />
-
-        <EuiPageContentBody>
-          <>
-            <EuiText data-test-subj="overviewDetail" grow={false}>
-              <p>{i18nTexts.getPageDescription(`${nextMajor}.x`)}</p>
-            </EuiText>
-
-            <EuiSpacer />
-
-            {/* Remove this in last minor of the current major (e.g., 7.15) */}
-            <LatestMinorBanner />
-
-            <EuiSpacer size="xl" />
-
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false} style={{ minWidth: 400 }}>
-                <ESDeprecationStats history={history} />
-
-                <EuiSpacer />
-
-                <EuiFormRow
-                  helpText={i18nTexts.getDeprecationLoggingLabel(
-                    docLinks.links.elasticsearch.deprecationLogging
-                  )}
-                  data-test-subj="deprecationLoggingFormRow"
-                >
-                  <DeprecationLoggingToggle />
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        </EuiPageContentBody>
       </EuiPageContent>
     </EuiPageBody>
   );

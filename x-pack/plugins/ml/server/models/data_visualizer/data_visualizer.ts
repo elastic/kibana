@@ -304,46 +304,44 @@ export const getHistogramsForFields = async (
   const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
   const aggregations = aggsPath.length > 0 ? get(body.aggregations, aggsPath) : body.aggregations;
 
-  const chartsData: ChartData[] = fields.map(
-    (field): ChartData => {
-      const fieldName = field.fieldName;
-      const fieldType = field.type;
-      const id = stringHash(field.fieldName);
+  const chartsData: ChartData[] = fields.map((field): ChartData => {
+    const fieldName = field.fieldName;
+    const fieldType = field.type;
+    const id = stringHash(field.fieldName);
 
-      if (fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE) {
-        if (aggIntervals[id] === undefined) {
-          return {
-            type: 'numeric',
-            data: [],
-            interval: 0,
-            stats: [0, 0],
-            id: fieldName,
-          };
-        }
-
+    if (fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE) {
+      if (aggIntervals[id] === undefined) {
         return {
-          data: aggregations[`${id}_histogram`].buckets,
-          interval: aggIntervals[id].interval,
-          stats: [aggIntervals[id].min, aggIntervals[id].max],
           type: 'numeric',
-          id: fieldName,
-        };
-      } else if (fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) {
-        return {
-          type: fieldType === KBN_FIELD_TYPES.STRING ? 'ordinal' : 'boolean',
-          cardinality:
-            fieldType === KBN_FIELD_TYPES.STRING ? aggregations[`${id}_cardinality`].value : 2,
-          data: aggregations[`${id}_terms`].buckets,
+          data: [],
+          interval: 0,
+          stats: [0, 0],
           id: fieldName,
         };
       }
 
       return {
-        type: 'unsupported',
+        data: aggregations[`${id}_histogram`].buckets,
+        interval: aggIntervals[id].interval,
+        stats: [aggIntervals[id].min, aggIntervals[id].max],
+        type: 'numeric',
+        id: fieldName,
+      };
+    } else if (fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) {
+      return {
+        type: fieldType === KBN_FIELD_TYPES.STRING ? 'ordinal' : 'boolean',
+        cardinality:
+          fieldType === KBN_FIELD_TYPES.STRING ? aggregations[`${id}_cardinality`].value : 2,
+        data: aggregations[`${id}_terms`].buckets,
         id: fieldName,
       };
     }
-  );
+
+    return {
+      type: 'unsupported',
+      id: fieldName,
+    };
+  });
 
   return chartsData;
 };
@@ -367,9 +365,9 @@ export class DataVisualizer {
     aggregatableFields: string[],
     nonAggregatableFields: string[],
     samplerShardSize: number,
-    timeFieldName: string,
-    earliestMs: number,
-    latestMs: number,
+    timeFieldName: string | undefined,
+    earliestMs: number | undefined,
+    latestMs: number | undefined,
     runtimeMappings?: RuntimeMappings
   ) {
     const stats = {
@@ -472,10 +470,10 @@ export class DataVisualizer {
     query: any,
     fields: Field[],
     samplerShardSize: number,
-    timeFieldName: string,
-    earliestMs: number,
-    latestMs: number,
-    intervalMs: number,
+    timeFieldName: string | undefined,
+    earliestMs: number | undefined,
+    latestMs: number | undefined,
+    intervalMs: number | undefined,
     maxExamples: number,
     runtimeMappings: RuntimeMappings
   ): Promise<BatchStats[]> {
@@ -529,16 +527,18 @@ export class DataVisualizer {
             } else {
               // Will only ever be one document count card,
               // so no value in batching up the single request.
-              const stats = await this.getDocumentCountStats(
-                indexPatternTitle,
-                query,
-                timeFieldName,
-                earliestMs,
-                latestMs,
-                intervalMs,
-                runtimeMappings
-              );
-              batchStats.push(stats);
+              if (intervalMs !== undefined) {
+                const stats = await this.getDocumentCountStats(
+                  indexPatternTitle,
+                  query,
+                  timeFieldName,
+                  earliestMs,
+                  latestMs,
+                  intervalMs,
+                  runtimeMappings
+                );
+                batchStats.push(stats);
+              }
             }
             break;
           case ML_JOB_FIELD_TYPES.KEYWORD:
@@ -612,7 +612,7 @@ export class DataVisualizer {
     query: any,
     aggregatableFields: string[],
     samplerShardSize: number,
-    timeFieldName: string,
+    timeFieldName: string | undefined,
     earliestMs?: number,
     latestMs?: number,
     datafeedConfig?: Datafeed,
@@ -738,9 +738,9 @@ export class DataVisualizer {
     indexPatternTitle: string,
     query: any,
     field: string,
-    timeFieldName: string,
-    earliestMs: number,
-    latestMs: number,
+    timeFieldName: string | undefined,
+    earliestMs: number | undefined,
+    latestMs: number | undefined,
     runtimeMappings?: RuntimeMappings
   ) {
     const index = indexPatternTitle;
@@ -769,9 +769,9 @@ export class DataVisualizer {
   async getDocumentCountStats(
     indexPatternTitle: string,
     query: any,
-    timeFieldName: string,
-    earliestMs: number,
-    latestMs: number,
+    timeFieldName: string | undefined,
+    earliestMs: number | undefined,
+    latestMs: number | undefined,
     intervalMs: number,
     runtimeMappings: RuntimeMappings
   ): Promise<DocumentCountStats> {
@@ -832,9 +832,9 @@ export class DataVisualizer {
     query: object,
     fields: Field[],
     samplerShardSize: number,
-    timeFieldName: string,
-    earliestMs: number,
-    latestMs: number,
+    timeFieldName: string | undefined,
+    earliestMs: number | undefined,
+    latestMs: number | undefined,
     runtimeMappings?: RuntimeMappings
   ) {
     const index = indexPatternTitle;
@@ -982,9 +982,9 @@ export class DataVisualizer {
     query: object,
     fields: Field[],
     samplerShardSize: number,
-    timeFieldName: string,
-    earliestMs: number,
-    latestMs: number,
+    timeFieldName: string | undefined,
+    earliestMs: number | undefined,
+    latestMs: number | undefined,
     runtimeMappings?: RuntimeMappings
   ) {
     const index = indexPatternTitle;
@@ -1074,9 +1074,9 @@ export class DataVisualizer {
     query: object,
     fields: Field[],
     samplerShardSize: number,
-    timeFieldName: string,
-    earliestMs: number,
-    latestMs: number,
+    timeFieldName: string | undefined,
+    earliestMs: number | undefined,
+    latestMs: number | undefined,
     runtimeMappings?: RuntimeMappings
   ) {
     const index = indexPatternTitle;
@@ -1142,9 +1142,9 @@ export class DataVisualizer {
     query: object,
     fields: Field[],
     samplerShardSize: number,
-    timeFieldName: string,
-    earliestMs: number,
-    latestMs: number,
+    timeFieldName: string | undefined,
+    earliestMs: number | undefined,
+    latestMs: number | undefined,
     runtimeMappings?: RuntimeMappings
   ) {
     const index = indexPatternTitle;
@@ -1211,9 +1211,9 @@ export class DataVisualizer {
     indexPatternTitle: string,
     query: any,
     field: string,
-    timeFieldName: string,
-    earliestMs: number,
-    latestMs: number,
+    timeFieldName: string | undefined,
+    earliestMs: number | undefined,
+    latestMs: number | undefined,
     maxExamples: number,
     runtimeMappings?: RuntimeMappings
   ): Promise<FieldExamples> {

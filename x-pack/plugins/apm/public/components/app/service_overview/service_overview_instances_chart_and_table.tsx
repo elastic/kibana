@@ -11,7 +11,9 @@ import React, { useState } from 'react';
 import uuid from 'uuid';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { InstancesLatencyDistributionChart } from '../../shared/charts/instances_latency_distribution_chart';
 import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
@@ -25,22 +27,17 @@ interface ServiceOverviewInstancesChartAndTableProps {
   serviceName: string;
 }
 
-export interface MainStatsServiceInstanceItem {
-  serviceNodeName: string;
-  errorRate: number;
-  throughput: number;
-  latency: number;
-  cpuUsage: number;
-  memoryUsage: number;
-}
+type ApiResponseMainStats =
+  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+type ApiResponseDetailedStats =
+  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
 const INITIAL_STATE_MAIN_STATS = {
-  mainStatsItems: [] as MainStatsServiceInstanceItem[],
-  mainStatsRequestId: undefined,
-  mainStatsItemCount: 0,
+  currentPeriodItems: [] as ApiResponseMainStats['currentPeriod'],
+  previousPeriodItems: [] as ApiResponseMainStats['previousPeriod'],
+  requestId: undefined,
+  currentPeriodItemsCount: 0,
 };
-
-type ApiResponseDetailedStats = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
 const INITIAL_STATE_DETAILED_STATISTICS: ApiResponseDetailedStats = {
   currentPeriod: {},
@@ -76,16 +73,14 @@ export function ServiceOverviewInstancesChartAndTable({
   const { direction, field } = sort;
 
   const {
-    urlParams: {
-      environment,
-      kuery,
-      latencyAggregationType,
-      start,
-      end,
-      comparisonType,
-      comparisonEnabled,
-    },
+    query: { environment, kuery, rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}/overview');
+
+  const {
+    urlParams: { latencyAggregationType, comparisonType, comparisonEnabled },
   } = useUrlParams();
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
@@ -117,28 +112,17 @@ export function ServiceOverviewInstancesChartAndTable({
             start,
             end,
             transactionType,
+            comparisonStart,
+            comparisonEnd,
           },
         },
       }).then((response) => {
-        const mainStatsItems = orderBy(
-          // need top-level sortable fields for the managed table
-          response.serviceInstances.map((item) => ({
-            ...item,
-            latency: item.latency ?? 0,
-            throughput: item.throughput ?? 0,
-            errorRate: item.errorRate ?? 0,
-            cpuUsage: item.cpuUsage ?? 0,
-            memoryUsage: item.memoryUsage ?? 0,
-          })),
-          field,
-          direction
-        ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
-
         return {
           // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
-          mainStatsRequestId: uuid(),
-          mainStatsItems,
-          mainStatsItemCount: response.serviceInstances.length,
+          requestId: uuid(),
+          currentPeriodItems: response.currentPeriod,
+          currentPeriodItemsCount: response.currentPeriod.length,
+          previousPeriodItems: response.previousPeriod,
         };
       });
     },
@@ -162,78 +146,90 @@ export function ServiceOverviewInstancesChartAndTable({
   );
 
   const {
-    mainStatsItems,
-    mainStatsRequestId,
-    mainStatsItemCount,
+    currentPeriodItems,
+    previousPeriodItems,
+    requestId,
+    currentPeriodItemsCount,
   } = mainStatsData;
 
-  const {
-    data: detailedStatsData = INITIAL_STATE_DETAILED_STATISTICS,
-    status: detailedStatsStatus,
-  } = useFetcher(
-    (callApmApi) => {
-      if (
-        !start ||
-        !end ||
-        !transactionType ||
-        !latencyAggregationType ||
-        !mainStatsItemCount
-      ) {
-        return;
-      }
+  const currentPeriodOrderedItems = orderBy(
+    // need top-level sortable fields for the managed table
+    currentPeriodItems.map((item) => ({
+      ...item,
+      latency: item.latency ?? 0,
+      throughput: item.throughput ?? 0,
+      errorRate: item.errorRate ?? 0,
+      cpuUsage: item.cpuUsage ?? 0,
+      memoryUsage: item.memoryUsage ?? 0,
+    })),
+    field,
+    direction
+  ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
 
-      return callApmApi({
-        endpoint:
-          'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
-        params: {
-          path: {
-            serviceName,
+  const { data: detailedStatsData = INITIAL_STATE_DETAILED_STATISTICS } =
+    useFetcher(
+      (callApmApi) => {
+        if (
+          !start ||
+          !end ||
+          !transactionType ||
+          !latencyAggregationType ||
+          !currentPeriodItemsCount
+        ) {
+          return;
+        }
+
+        return callApmApi({
+          endpoint:
+            'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
+          params: {
+            path: {
+              serviceName,
+            },
+            query: {
+              environment,
+              kuery,
+              latencyAggregationType,
+              start,
+              end,
+              numBuckets: 20,
+              transactionType,
+              serviceNodeIds: JSON.stringify(
+                currentPeriodOrderedItems.map((item) => item.serviceNodeName)
+              ),
+              comparisonStart,
+              comparisonEnd,
+            },
           },
-          query: {
-            environment,
-            kuery,
-            latencyAggregationType,
-            start,
-            end,
-            numBuckets: 20,
-            transactionType,
-            serviceNodeIds: JSON.stringify(
-              mainStatsItems.map((item) => item.serviceNodeName)
-            ),
-            comparisonStart,
-            comparisonEnd,
-          },
-        },
-      });
-    },
-    // only fetches detailed statistics when requestId is invalidated by main statistics api call
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mainStatsRequestId],
-    { preservePreviousData: false }
-  );
+        });
+      },
+      // only fetches detailed statistics when requestId is invalidated by main statistics api call
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [requestId],
+      { preservePreviousData: false }
+    );
 
   return (
     <>
       <EuiFlexItem grow={3}>
         <InstancesLatencyDistributionChart
           height={chartHeight}
-          items={mainStatsItems}
+          items={currentPeriodItems}
           status={mainStatsStatus}
+          comparisonItems={previousPeriodItems}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={7}>
-        <EuiPanel>
+        <EuiPanel hasBorder={true}>
           <ServiceOverviewInstancesTable
-            mainStatsItems={mainStatsItems}
+            mainStatsItems={currentPeriodOrderedItems}
             mainStatsStatus={mainStatsStatus}
-            mainStatsItemCount={mainStatsItemCount}
+            mainStatsItemCount={currentPeriodItemsCount}
             detailedStatsData={detailedStatsData}
             serviceName={serviceName}
             tableOptions={tableOptions}
-            isLoading={
-              mainStatsStatus === FETCH_STATUS.LOADING ||
-              detailedStatsStatus === FETCH_STATUS.LOADING
-            }
+            isLoading={mainStatsStatus === FETCH_STATUS.LOADING}
+            isNotInitiated={mainStatsStatus === FETCH_STATUS.NOT_INITIATED}
             onChangeTableOptions={(newTableOptions) => {
               setTableOptions({
                 pageIndex: newTableOptions.page?.index ?? 0,

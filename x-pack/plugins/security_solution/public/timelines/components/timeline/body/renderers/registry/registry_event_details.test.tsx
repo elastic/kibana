@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import {
   mockEndpointRegistryModificationEvent,
   TestProviders,
@@ -18,11 +17,12 @@ import { MODIFIED_REGISTRY_KEY } from '../system/translations';
 
 import { RegistryEventDetails } from './registry_event_details';
 
+jest.mock('../../../../../../common/lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
@@ -34,7 +34,6 @@ describe('RegistryEventDetails', () => {
     const wrapper = mount(
       <TestProviders>
         <RegistryEventDetails
-          browserFields={mockBrowserFields}
           contextId="test-context"
           data={mockEndpointRegistryModificationEvent}
           text={MODIFIED_REGISTRY_KEY}

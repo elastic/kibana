@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { DefaultFormatEditor } from '../../components/field_format_editor';
+import { FieldFormatEditorFactory } from '../../components/field_format_editor';
 
 export class FieldFormatEditors {
-  private editors: Array<typeof DefaultFormatEditor> = [];
+  private editors: FieldFormatEditorFactory[] = [];
 
-  public setup(defaultFieldEditors: FieldFormatEditors['editors'] = []) {
+  public setup(defaultFieldEditors: FieldFormatEditorFactory[] = []) {
     this.editors = defaultFieldEditors;
 
     return {
-      register: (editor: typeof DefaultFormatEditor) => {
+      register: (editor: FieldFormatEditorFactory) => {
         this.editors.push(editor);
       },
     };

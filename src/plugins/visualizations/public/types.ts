@@ -8,23 +8,23 @@
 
 import { SavedObject } from '../../../plugins/saved_objects/public';
 import {
-  AggConfigOptions,
   IAggConfigs,
   SearchSourceFields,
   TimefilterContract,
+  AggConfigSerialized,
 } from '../../../plugins/data/public';
 import { ExpressionAstExpression } from '../../expressions/public';
 
-import { SerializedVis, Vis } from './vis';
-import { PersistedState } from './persisted_state';
-import { VisParams } from '../common';
+import type { SerializedVis, Vis } from './vis';
+import type { PersistedState } from './persisted_state';
+import type { VisParams } from '../common';
 
-export { Vis, SerializedVis, VisParams };
+export type { Vis, SerializedVis, VisParams };
 export interface SavedVisState {
   title: string;
   type: string;
   params: VisParams;
-  aggs: AggConfigOptions[];
+  aggs: AggConfigSerialized[];
 }
 
 export interface ISavedVis {

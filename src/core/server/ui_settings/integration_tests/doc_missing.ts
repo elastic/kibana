@@ -11,10 +11,10 @@ import { getServices, chance } from './lib';
 export const docMissingSuite = (savedObjectsIndex: string) => () => {
   // ensure the kibana index has no documents
   beforeEach(async () => {
-    const { callCluster } = getServices();
+    const { esClient } = getServices();
 
     // delete all docs from kibana index to ensure savedConfig is not found
-    await callCluster('deleteByQuery', {
+    await esClient.deleteByQuery({
       index: savedObjectsIndex,
       body: {
         query: { match_all: {} },

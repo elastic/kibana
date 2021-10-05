@@ -7,6 +7,7 @@
 
 import {
   GetTrustedAppsRequestSchema,
+  GetTrustedAppsSummaryRequestSchema,
   PostTrustedAppCreateRequestSchema,
   PutTrustedAppUpdateRequestSchema,
 } from './trusted_apps';
@@ -77,6 +78,22 @@ describe('When invoking Trusted Apps Schema', () => {
         expect(() => {
           query.validate(getListQueryParams(1, -1));
         }).toThrowError();
+      });
+    });
+  });
+
+  describe('for GET Summary', () => {
+    const getListQueryParams = (kuery?: string) => ({ kuery });
+    const query = GetTrustedAppsSummaryRequestSchema.query;
+
+    describe('query param validation', () => {
+      it('should return query params if valid without kuery', () => {
+        expect(query.validate(getListQueryParams())).toEqual({});
+      });
+
+      it('should return query params if valid with kuery', () => {
+        const kuery = `exception-list-agnostic.attributes.tags:"policy:caf1a334-53f3-4be9-814d-a32245f43d34" OR exception-list-agnostic.attributes.tags:"policy:all"`;
+        expect(query.validate(getListQueryParams(kuery))).toEqual({ kuery });
       });
     });
   });
@@ -243,6 +260,30 @@ describe('When invoking Trusted Apps Schema', () => {
       it('should validate `entry.operator` accepts known values', () => {
         const bodyMsg = createNewTrustedApp({
           entries: [createConditionEntry({ operator: 'included' })],
+        });
+        expect(() => body.validate(bodyMsg)).not.toThrow();
+      });
+
+      it('should validate `entry.type` does not accept `wildcard` when field is NOT PATH', () => {
+        const bodyMsg = createNewTrustedApp({
+          entries: [
+            createConditionEntry({
+              field: ConditionEntryField.HASH,
+              type: 'wildcard',
+            }),
+          ],
+        });
+        expect(() => body.validate(bodyMsg)).toThrow();
+      });
+
+      it('should validate `entry.type` accepts `wildcard` when field is PATH', () => {
+        const bodyMsg = createNewTrustedApp({
+          entries: [
+            createConditionEntry({
+              field: ConditionEntryField.PATH,
+              type: 'wildcard',
+            }),
+          ],
         });
         expect(() => body.validate(bodyMsg)).not.toThrow();
       });

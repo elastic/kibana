@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { Provider } from 'react-redux';
 
-import { useInitSourcerer } from '.';
+import { getScopeFromPath, useInitSourcerer } from '.';
 import { mockPatterns } from './mocks';
 // import { SourcererScopeName } from '../../store/sourcerer/model';
 import { RouteSpyState } from '../../utils/route/types';
@@ -51,6 +49,11 @@ jest.mock('../../utils/route/use_route_spy', () => ({
   useRouteSpy: () => [mockRouteSpy],
 }));
 jest.mock('../../lib/kibana', () => ({
+  useToasts: jest.fn().mockReturnValue({
+    addError: jest.fn(),
+    addSuccess: jest.fn(),
+    addWarning: jest.fn(),
+  }),
   useKibana: jest.fn().mockReturnValue({
     services: {
       application: {
@@ -173,5 +176,20 @@ describe('Sourcerer Hooks', () => {
         payload: { id: 'detections', selectedPatterns: ['signals-*'] },
       });
     });
+  });
+});
+
+describe('getScopeFromPath', () => {
+  it('should return default scope', async () => {
+    expect(getScopeFromPath('/')).toBe(SourcererScopeName.default);
+    expect(getScopeFromPath('/exceptions')).toBe(SourcererScopeName.default);
+    expect(getScopeFromPath('/rules')).toBe(SourcererScopeName.default);
+    expect(getScopeFromPath('/rules/create')).toBe(SourcererScopeName.default);
+  });
+
+  it('should return detections scope', async () => {
+    expect(getScopeFromPath('/alerts')).toBe(SourcererScopeName.detections);
+    expect(getScopeFromPath('/rules/id/foo')).toBe(SourcererScopeName.detections);
+    expect(getScopeFromPath('/rules/id/foo/edit')).toBe(SourcererScopeName.detections);
   });
 });

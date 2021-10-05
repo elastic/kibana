@@ -4,15 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import * as t from 'io-ts';
-import { jsonRt } from '@kbn/io-ts-utils';
-import { LocalUIFilterName } from '../../common/ui_filter';
-import {
-  Setup,
-  setupRequest,
-  SetupTimeRange,
-} from '../lib/helpers/setup_request';
+import { Logger } from 'kibana/server';
+import { isoToEpochRt } from '@kbn/io-ts-utils';
+import { setupRequest, Setup } from '../lib/helpers/setup_request';
 import { getClientMetrics } from '../lib/rum_client/get_client_metrics';
 import { getJSErrors } from '../lib/rum_client/get_js_errors';
 import { getLongTaskMetrics } from '../lib/rum_client/get_long_task_metrics';
@@ -24,14 +19,37 @@ import { getUrlSearch } from '../lib/rum_client/get_url_search';
 import { getVisitorBreakdown } from '../lib/rum_client/get_visitor_breakdown';
 import { getWebCoreVitals } from '../lib/rum_client/get_web_core_vitals';
 import { hasRumData } from '../lib/rum_client/has_rum_data';
-import { getLocalUIFilters } from '../lib/rum_client/ui_filters/local_ui_filters';
-import { localUIFilterNames } from '../lib/rum_client/ui_filters/local_ui_filters/config';
-import { getRumPageLoadTransactionsProjection } from '../projections/rum_page_load_transactions';
-import { Projection } from '../projections/typings';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { rangeRt } from './default_api_types';
-import { APMRouteHandlerResources } from './typings';
+import { UxUIFilters } from '../../typings/ui_filters';
+import { APMRouteHandlerResources } from '../routes/typings';
+
+export type SetupUX = Setup & {
+  uiFilters: UxUIFilters;
+};
+
+interface SetupRequestParams {
+  query: {
+    _inspect?: boolean;
+
+    /**
+     * Timestamp in ms since epoch
+     */
+    start?: number;
+
+    /**
+     * Timestamp in ms since epoch
+     */
+    end?: number;
+  };
+}
+
+type SetupUXRequestParams = Omit<SetupRequestParams, 'query'> & {
+  query: SetupRequestParams['query'] & {
+    uiFilters?: string;
+  };
+};
 
 export const percentileRangeRt = t.partial({
   minPercentile: t.string,
@@ -53,16 +71,18 @@ const rumClientMetricsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
-    const setup = await setupRequest(resources);
+    const setup = await setupUXRequest(resources);
 
     const {
-      query: { urlQuery, percentile },
+      query: { urlQuery, percentile, start, end },
     } = resources.params;
 
     return getClientMetrics({
       setup,
       urlQuery,
       percentile: percentile ? Number(percentile) : undefined,
+      start,
+      end,
     });
   },
 });
@@ -74,10 +94,10 @@ const rumPageLoadDistributionRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
-    const setup = await setupRequest(resources);
+    const setup = await setupUXRequest(resources);
 
     const {
-      query: { minPercentile, maxPercentile, urlQuery },
+      query: { minPercentile, maxPercentile, urlQuery, start, end },
     } = resources.params;
 
     const pageLoadDistribution = await getPageLoadDistribution({
@@ -85,6 +105,8 @@ const rumPageLoadDistributionRoute = createApmServerRoute({
       minPercentile,
       maxPercentile,
       urlQuery,
+      start,
+      end,
     });
 
     return { pageLoadDistribution };
@@ -102,10 +124,10 @@ const rumPageLoadDistBreakdownRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
-    const setup = await setupRequest(resources);
+    const setup = await setupUXRequest(resources);
 
     const {
-      query: { minPercentile, maxPercentile, breakdown, urlQuery },
+      query: { minPercentile, maxPercentile, breakdown, urlQuery, start, end },
     } = resources.params;
 
     const pageLoadDistBreakdown = await getPageLoadDistBreakdown({
@@ -114,6 +136,8 @@ const rumPageLoadDistBreakdownRoute = createApmServerRoute({
       maxPercentile: Number(maxPercentile),
       breakdown,
       urlQuery,
+      start,
+      end,
     });
 
     return { pageLoadDistBreakdown };
@@ -127,16 +151,18 @@ const rumPageViewsTrendRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
-    const setup = await setupRequest(resources);
+    const setup = await setupUXRequest(resources);
 
     const {
-      query: { breakdowns, urlQuery },
+      query: { breakdowns, urlQuery, start, end },
     } = resources.params;
 
     return getPageViewTrends({
       setup,
       breakdowns,
       urlQuery,
+      start,
+      end,
     });
   },
 });
@@ -148,9 +174,11 @@ const rumServicesRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
-    const setup = await setupRequest(resources);
-
-    const rumServices = await getRumServices({ setup });
+    const setup = await setupUXRequest(resources);
+    const {
+      query: { start, end },
+    } = resources.params;
+    const rumServices = await getRumServices({ setup, start, end });
     return { rumServices };
   },
 });
@@ -162,15 +190,17 @@ const rumVisitorsBreakdownRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
-    const setup = await setupRequest(resources);
+    const setup = await setupUXRequest(resources);
 
     const {
-      query: { urlQuery },
+      query: { urlQuery, start, end },
     } = resources.params;
 
     return getVisitorBreakdown({
       setup,
       urlQuery,
+      start,
+      end,
     });
   },
 });
@@ -182,16 +212,18 @@ const rumWebCoreVitals = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
-    const setup = await setupRequest(resources);
+    const setup = await setupUXRequest(resources);
 
     const {
-      query: { urlQuery, percentile },
+      query: { urlQuery, percentile, start, end },
     } = resources.params;
 
     return getWebCoreVitals({
       setup,
       urlQuery,
       percentile: percentile ? Number(percentile) : undefined,
+      start,
+      end,
     });
   },
 });
@@ -203,16 +235,18 @@ const rumLongTaskMetrics = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
-    const setup = await setupRequest(resources);
+    const setup = await setupUXRequest(resources);
 
     const {
-      query: { urlQuery, percentile },
+      query: { urlQuery, percentile, start, end },
     } = resources.params;
 
     return getLongTaskMetrics({
       setup,
       urlQuery,
       percentile: percentile ? Number(percentile) : undefined,
+      start,
+      end,
     });
   },
 });
@@ -224,13 +258,19 @@ const rumUrlSearch = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
-    const setup = await setupRequest(resources);
+    const setup = await setupUXRequest(resources);
 
     const {
-      query: { urlQuery, percentile },
+      query: { urlQuery, percentile, start, end },
     } = resources.params;
 
-    return getUrlSearch({ setup, urlQuery, percentile: Number(percentile) });
+    return getUrlSearch({
+      setup,
+      urlQuery,
+      percentile: Number(percentile),
+      start,
+      end,
+    });
   },
 });
 
@@ -246,10 +286,10 @@ const rumJSErrors = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
-    const setup = await setupRequest(resources);
+    const setup = await setupUXRequest(resources);
 
     const {
-      query: { pageSize, pageIndex, urlQuery },
+      query: { pageSize, pageIndex, urlQuery, start, end },
     } = resources.params;
 
     return getJSErrors({
@@ -257,6 +297,8 @@ const rumJSErrors = createApmServerRoute({
       urlQuery,
       pageSize: Number(pageSize),
       pageIndex: Number(pageIndex),
+      start,
+      end,
     });
   },
 });
@@ -264,107 +306,49 @@ const rumJSErrors = createApmServerRoute({
 const rumHasDataRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/observability_overview/has_rum_data',
   params: t.partial({
-    query: t.intersection([uiFiltersRt, rangeRt]),
+    query: t.partial({
+      uiFilters: t.string,
+      start: isoToEpochRt,
+      end: isoToEpochRt,
+    }),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
-    const setup = await setupRequest(resources);
-    return await hasRumData({ setup });
+    const setup = await setupUXRequest(resources);
+    const {
+      query: { start, end },
+    } = resources.params;
+    return await hasRumData({ setup, start, end });
   },
 });
 
-// Everything below here was originally in ui_filters.ts but now is here, since
-// UX is the only part of APM using UI filters now.
-
-const filterNamesRt = t.type({
-  filterNames: jsonRt.pipe(
-    t.array(
-      t.keyof(
-        Object.fromEntries(
-          localUIFilterNames.map((filterName) => [filterName, null])
-        ) as Record<LocalUIFilterName, null>
-      )
-    )
-  ),
-});
-
-const localUiBaseQueryRt = t.intersection([
-  filterNamesRt,
-  uiFiltersRt,
-  rangeRt,
-]);
-
-function createLocalFiltersRoute<
-  TEndpoint extends string,
-  TProjection extends Projection,
-  TQueryRT extends t.HasProps
->({
-  endpoint,
-  getProjection,
-  queryRt,
-}: {
-  endpoint: TEndpoint;
-  getProjection: GetProjection<
-    TProjection,
-    t.IntersectionC<[TQueryRT, BaseQueryType]>
-  >;
-  queryRt: TQueryRT;
-}) {
-  return createApmServerRoute({
-    endpoint,
-    params: t.type({
-      query: t.intersection([localUiBaseQueryRt, queryRt]),
-    }),
-    options: { tags: ['access:apm'] },
-    handler: async (resources) => {
-      const setup = await setupRequest(resources);
-      const { uiFilters } = setup;
-
-      const { query } = resources.params;
-
-      const { filterNames } = query;
-      const projection = await getProjection({
-        query,
-        resources,
-        setup,
-      });
-
-      const localUiFilters = await getLocalUIFilters({
-        projection,
-        setup,
-        uiFilters,
-        localFilterNames: filterNames,
-      });
-
-      return { localUiFilters };
-    },
-  });
+function decodeUiFilters(
+  logger: Logger,
+  uiFiltersEncoded?: string
+): UxUIFilters {
+  if (!uiFiltersEncoded) {
+    return {};
+  }
+  try {
+    return JSON.parse(uiFiltersEncoded);
+  } catch (error) {
+    logger.error(error);
+    return {};
+  }
 }
 
-const rumOverviewLocalFiltersRoute = createLocalFiltersRoute({
-  endpoint: 'GET /api/apm/rum/local_filters',
-  getProjection: async ({ setup }) => {
-    return getRumPageLoadTransactionsProjection({
-      setup,
-    });
-  },
-  queryRt: t.type({}),
-});
-
-type BaseQueryType = typeof localUiBaseQueryRt;
-
-type GetProjection<
-  TProjection extends Projection,
-  TQueryRT extends t.HasProps
-> = ({
-  query,
-  setup,
-  resources,
-}: {
-  query: t.TypeOf<TQueryRT>;
-  setup: Setup & SetupTimeRange;
-  resources: APMRouteHandlerResources;
-}) => Promise<TProjection> | TProjection;
+async function setupUXRequest<TParams extends SetupUXRequestParams>(
+  resources: APMRouteHandlerResources & { params: TParams }
+) {
+  const setup = await setupRequest(resources);
+  return {
+    ...setup,
+    uiFilters: decodeUiFilters(
+      resources.logger,
+      resources.params.query.uiFilters
+    ),
+  };
+}
 
 export const rumRouteRepository = createApmServerRouteRepository()
   .add(rumClientMetricsRoute)
@@ -377,5 +361,4 @@ export const rumRouteRepository = createApmServerRouteRepository()
   .add(rumLongTaskMetrics)
   .add(rumUrlSearch)
   .add(rumJSErrors)
-  .add(rumHasDataRoute)
-  .add(rumOverviewLocalFiltersRoute);
+  .add(rumHasDataRoute);

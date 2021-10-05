@@ -8,11 +8,20 @@
 import yargs from 'yargs';
 import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
-import { CaseResponse, CaseType, ConnectorTypes } from '../../../common/api';
-import { CommentType } from '../../../common/api/cases/comment';
-import { CASES_URL } from '../../../common/constants';
+import {
+  CaseResponse,
+  CaseType,
+  CommentType,
+  ConnectorTypes,
+  CASES_URL,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../common';
 import { ActionResult, ActionTypeExecutorResult } from '../../../../actions/common';
 import { ContextTypeGeneratedAlertType, createAlertsString } from '../../connectors';
+import {
+  getCreateConnectorUrl,
+  getExecuteConnectorUrl,
+} from '../../../common/utils/connectors_api';
 
 main();
 
@@ -66,7 +75,7 @@ async function handleGenGroupAlerts(argv: any) {
 
   try {
     const createdAction = await client.request<ActionResult>({
-      path: '/api/actions/action',
+      path: getCreateConnectorUrl(),
       method: 'POST',
       body: {
         name: 'A case connector',
@@ -103,6 +112,7 @@ async function handleGenGroupAlerts(argv: any) {
 
     console.log('Case id: ', caseID);
     const comment: ContextTypeGeneratedAlertType = {
+      owner: SECURITY_SOLUTION_OWNER,
       type: CommentType.generatedAlert,
       alerts: createAlertsString(
         argv.ids.map((id: string) => ({
@@ -115,7 +125,7 @@ async function handleGenGroupAlerts(argv: any) {
     };
 
     const executeResp = await client.request<ActionTypeExecutorResult<CaseResponse>>({
-      path: `/api/actions/action/${createdAction.data.id}/_execute`,
+      path: getExecuteConnectorUrl(createdAction.data.id),
       method: 'POST',
       body: {
         params: {

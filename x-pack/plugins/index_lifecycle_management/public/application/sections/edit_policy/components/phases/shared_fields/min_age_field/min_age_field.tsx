@@ -21,48 +21,14 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 
+import { PhaseWithTiming } from '../../../../../../../../common/types';
 import { getFieldValidityAndErrorMessage, useFormData } from '../../../../../../../shared_imports';
 import { UseField, useConfiguration, useGlobalFields } from '../../../../form';
 import { getPhaseMinAgeInMilliseconds } from '../../../../lib';
+import { timeUnits } from '../../../../constants';
 import { getUnitsAriaLabelForPhase, getTimingLabelForPhase } from './util';
 
-type PhaseWithMinAgeAction = 'warm' | 'cold' | 'delete';
-
 const i18nTexts = {
-  daysOptionLabel: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.daysOptionLabel', {
-    defaultMessage: 'days',
-  }),
-
-  hoursOptionLabel: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.hoursOptionLabel', {
-    defaultMessage: 'hours',
-  }),
-  minutesOptionLabel: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.minutesOptionLabel', {
-    defaultMessage: 'minutes',
-  }),
-
-  secondsOptionLabel: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.secondsOptionLabel', {
-    defaultMessage: 'seconds',
-  }),
-  millisecondsOptionLabel: i18n.translate(
-    'xpack.indexLifecycleMgmt.editPolicy.milliSecondsOptionLabel',
-    {
-      defaultMessage: 'milliseconds',
-    }
-  ),
-
-  microsecondsOptionLabel: i18n.translate(
-    'xpack.indexLifecycleMgmt.editPolicy.microSecondsOptionLabel',
-    {
-      defaultMessage: 'microseconds',
-    }
-  ),
-
-  nanosecondsOptionLabel: i18n.translate(
-    'xpack.indexLifecycleMgmt.editPolicy.nanoSecondsOptionLabel',
-    {
-      defaultMessage: 'nanoseconds',
-    }
-  ),
   rolloverToolTipDescription: i18n.translate(
     'xpack.indexLifecycleMgmt.editPolicy.minimumAge.rolloverToolTipDescription',
     {
@@ -77,7 +43,7 @@ const i18nTexts = {
 };
 
 interface Props {
-  phase: PhaseWithMinAgeAction;
+  phase: PhaseWithTiming;
 }
 
 export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactElement => {
@@ -87,9 +53,8 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
   const { isUsingRollover } = useConfiguration();
   const globalFields = useGlobalFields();
 
-  const { setValue: setMillisecondValue } = globalFields[
-    `${phase}MinAgeMilliSeconds` as 'coldMinAgeMilliSeconds'
-  ];
+  const { setValue: setMillisecondValue } =
+    globalFields[`${phase}MinAgeMilliSeconds` as 'coldMinAgeMilliSeconds'];
   const [formData] = useFormData({ watch: [minAgeValuePath, minAgeUnitPath] });
   const minAgeValue = get(formData, minAgeValuePath);
   const minAgeUnit = get(formData, minAgeUnitPath);
@@ -154,9 +119,8 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                   <EuiFlexItem grow={true} style={{ minWidth: 165 }}>
                     <UseField path={minAgeUnitPath}>
                       {(unitField) => {
-                        const { isInvalid: isUnitFieldInvalid } = getFieldValidityAndErrorMessage(
-                          unitField
-                        );
+                        const { isInvalid: isUnitFieldInvalid } =
+                          getFieldValidityAndErrorMessage(unitField);
                         const icon = (
                           <>
                             {/* This element is rendered for testing purposes only */}
@@ -168,11 +132,10 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                             />
                           </>
                         );
-                        const selectAppendValue: Array<
-                          string | React.ReactElement
-                        > = isUsingRollover
-                          ? [i18nTexts.minAgeUnitFieldSuffix, icon]
-                          : [i18nTexts.minAgeUnitFieldSuffix];
+                        const selectAppendValue: Array<string | React.ReactElement> =
+                          isUsingRollover
+                            ? [i18nTexts.minAgeUnitFieldSuffix, icon]
+                            : [i18nTexts.minAgeUnitFieldSuffix];
                         return (
                           <EuiSelect
                             compressed
@@ -184,36 +147,7 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                             append={selectAppendValue}
                             data-test-subj={`${phase}-selectedMinimumAgeUnits`}
                             aria-label={getUnitsAriaLabelForPhase(phase)}
-                            options={[
-                              {
-                                value: 'd',
-                                text: i18nTexts.daysOptionLabel,
-                              },
-                              {
-                                value: 'h',
-                                text: i18nTexts.hoursOptionLabel,
-                              },
-                              {
-                                value: 'm',
-                                text: i18nTexts.minutesOptionLabel,
-                              },
-                              {
-                                value: 's',
-                                text: i18nTexts.secondsOptionLabel,
-                              },
-                              {
-                                value: 'ms',
-                                text: i18nTexts.millisecondsOptionLabel,
-                              },
-                              {
-                                value: 'micros',
-                                text: i18nTexts.microsecondsOptionLabel,
-                              },
-                              {
-                                value: 'nanos',
-                                text: i18nTexts.nanosecondsOptionLabel,
-                              },
-                            ]}
+                            options={timeUnits}
                           />
                         );
                       }}

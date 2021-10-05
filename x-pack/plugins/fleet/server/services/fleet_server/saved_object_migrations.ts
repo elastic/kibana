@@ -28,11 +28,12 @@ import { invalidateAPIKeys } from '../api_keys';
 import { settingsService } from '..';
 
 export async function runFleetServerMigration() {
+  await settingsService.settingsSetup(getInternalUserSOClient());
   await Promise.all([migrateEnrollmentApiKeys(), migrateAgentPolicies(), migrateAgents()]);
 }
 
 function getInternalUserSOClient() {
-  const fakeRequest = ({
+  const fakeRequest = {
     headers: {},
     getBasePath: () => '',
     path: '/',
@@ -45,7 +46,7 @@ function getInternalUserSOClient() {
         url: '/',
       },
     },
-  } as unknown) as KibanaRequest;
+  } as unknown as KibanaRequest;
 
   return appContextService.getInternalUserSOClient(fakeRequest);
 }
@@ -73,9 +74,7 @@ async function migrateAgents() {
 
     for (const so of res.saved_objects) {
       try {
-        const {
-          attributes,
-        } = await appContextService
+        const { attributes } = await appContextService
           .getEncryptedSavedObjects()
           .getDecryptedAsInternalUser<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, so.id);
 
@@ -191,11 +190,7 @@ async function migrateAgentPolicies() {
 
       // @ts-expect-error value is number | TotalHits
       if (res.body.hits.total.value === 0) {
-        return agentPolicyService.createFleetPolicyChangeFleetServer(
-          soClient,
-          esClient,
-          agentPolicy.id
-        );
+        return agentPolicyService.createFleetServerPolicy(soClient, agentPolicy.id);
       }
     })
   );

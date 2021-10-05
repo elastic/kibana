@@ -8,6 +8,7 @@
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { toBooleanRt } from '@kbn/io-ts-utils';
+import { maxSuggestions } from '../../../../observability/common';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceNames } from '../../lib/settings/agent_configuration/get_service_names';
 import { createOrUpdateConfiguration } from '../../lib/settings/agent_configuration/create_or_update_configuration';
@@ -25,6 +26,7 @@ import {
 } from '../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
 import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
+import { syncAgentConfigsToApmPackagePolicies } from '../../lib/fleet/sync_agent_configs_to_apm_package_policies';
 
 // get list of configurations
 const agentConfigurationRoute = createApmServerRoute({
@@ -78,7 +80,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
   }),
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { params, logger } = resources;
+    const { params, logger, core, telemetryUsageCounter } = resources;
 
     const { service } = params.body;
 
@@ -95,10 +97,24 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
       `Deleting config ${service.name}/${service.environment} (${config._id})`
     );
 
-    return await deleteConfiguration({
+    const deleteConfigurationResult = await deleteConfiguration({
       configurationId: config._id,
       setup,
     });
+
+    if (resources.plugins.fleet) {
+      await syncAgentConfigsToApmPackagePolicies({
+        core,
+        fleetPluginStart: await resources.plugins.fleet.start(),
+        setup,
+        telemetryUsageCounter,
+      });
+      logger.info(
+        `Updated Fleet integration policy for APM to remove the deleted agent configuration.`
+      );
+    }
+
+    return deleteConfigurationResult;
   },
 });
 
@@ -114,7 +130,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
   ]),
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { params, logger } = resources;
+    const { params, logger, core, telemetryUsageCounter } = resources;
     const { body, query } = params;
 
     // if the config already exists, it is fetched and updated
@@ -142,6 +158,18 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
       configurationIntake: body,
       setup,
     });
+
+    if (resources.plugins.fleet) {
+      await syncAgentConfigsToApmPackagePolicies({
+        core,
+        fleetPluginStart: await resources.plugins.fleet.start(),
+        setup,
+        telemetryUsageCounter,
+      });
+      logger.info(
+        `Saved latest agent settings to Fleet integration policy for APM.`
+      );
+    }
   },
 });
 
@@ -178,19 +206,27 @@ const agentConfigurationSearchRoute = createApmServerRoute({
       logger.debug(
         `[Central configuration] Config was not found for ${service.name}/${service.environment}`
       );
-      throw Boom.notFound();
+      return null;
     }
 
-    logger.info(`Config was found for ${service.name}/${service.environment}`);
-
-    // update `applied_by_agent` field
-    // when `markAsAppliedByAgent` is true (Jaeger agent doesn't have etags)
-    // or if etags match.
-    // this happens in the background and doesn't block the response
-    if (
+    // whether to update `applied_by_agent` field
+    // It will be set to true of the etags match or if `markAsAppliedByAgent=true`
+    // `markAsAppliedByAgent=true` means "force setting it to true regardless of etag". This is needed for Jaeger agent that doesn't have etags
+    const willMarkAsApplied =
       (markAsAppliedByAgent || etag === config._source.etag) &&
-      !config._source.applied_by_agent
-    ) {
+      !config._source.applied_by_agent;
+
+    logger.debug(
+      `[Central configuration] Config was found for:
+        service.name = ${service.name},
+        service.environment = ${service.environment},
+        etag (requested) = ${etag},
+        etag (existing) = ${config._source.etag},
+        markAsAppliedByAgent = ${markAsAppliedByAgent},
+        willMarkAsApplied = ${willMarkAsApplied}`
+    );
+
+    if (willMarkAsApplied) {
       markAppliedByAgent({ id: config._id, body: config._source, setup });
     }
 
@@ -208,12 +244,21 @@ const listAgentConfigurationServicesRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
+    const { start, end } = resources.params.query;
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      apmEventClient: setup.apmEventClient,
+      config: setup.config,
+      kuery: '',
+      start,
+      end,
+    });
+    const size = await resources.context.core.uiSettings.client.get<number>(
+      maxSuggestions
     );
     const serviceNames = await getServiceNames({
-      setup,
       searchAggregatedTransactions,
+      setup,
+      size,
     });
 
     return { serviceNames };
@@ -229,17 +274,24 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { params } = resources;
+    const { context, params } = resources;
 
-    const { serviceName } = params.query;
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
+    const { serviceName, start, end } = params.query;
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      apmEventClient: setup.apmEventClient,
+      config: setup.config,
+      kuery: '',
+      start,
+      end,
+    });
+    const size = await context.core.uiSettings.client.get<number>(
+      maxSuggestions
     );
-
     const environments = await getEnvironments({
       serviceName,
       setup,
       searchAggregatedTransactions,
+      size,
     });
 
     return { environments };
@@ -262,12 +314,13 @@ const agentConfigurationAgentNameRoute = createApmServerRoute({
   },
 });
 
-export const agentConfigurationRouteRepository = createApmServerRouteRepository()
-  .add(agentConfigurationRoute)
-  .add(getSingleAgentConfigurationRoute)
-  .add(deleteAgentConfigurationRoute)
-  .add(createOrUpdateAgentConfigurationRoute)
-  .add(agentConfigurationSearchRoute)
-  .add(listAgentConfigurationServicesRoute)
-  .add(listAgentConfigurationEnvironmentsRoute)
-  .add(agentConfigurationAgentNameRoute);
+export const agentConfigurationRouteRepository =
+  createApmServerRouteRepository()
+    .add(agentConfigurationRoute)
+    .add(getSingleAgentConfigurationRoute)
+    .add(deleteAgentConfigurationRoute)
+    .add(createOrUpdateAgentConfigurationRoute)
+    .add(agentConfigurationSearchRoute)
+    .add(listAgentConfigurationServicesRoute)
+    .add(listAgentConfigurationEnvironmentsRoute)
+    .add(agentConfigurationAgentNameRoute);

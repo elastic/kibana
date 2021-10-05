@@ -10,15 +10,8 @@ import { ValidationResult } from '../../../../triggers_actions_ui/public';
 import { GeoContainmentAlertParams } from './types';
 
 export const validateExpression = (alertParams: GeoContainmentAlertParams): ValidationResult => {
-  const {
-    index,
-    geoField,
-    entity,
-    dateField,
-    boundaryType,
-    boundaryIndexTitle,
-    boundaryGeoField,
-  } = alertParams;
+  const { index, geoField, entity, dateField, boundaryType, boundaryIndexTitle, boundaryGeoField } =
+    alertParams;
   const validationResult = { errors: {} };
   const errors = {
     index: new Array<string>(),

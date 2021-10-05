@@ -1,5 +1,10 @@
 {
   "id": "securityOss",
+  "owner": {
+    "name": "Platform Security",
+    "githubTeam": "kibana-security"
+  },
+  "description": "This plugin exposes a limited set of security functionality to OSS plugins.",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["security"],

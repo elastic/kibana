@@ -9,18 +9,14 @@ import { isEmpty } from 'lodash/fp';
 
 import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
 import {
-  getDetectionEngineTabUrl,
   getRulesUrl,
   getRuleDetailsUrl,
-  getCreateRuleUrl,
-  getEditRuleUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
-import * as i18nDetections from '../translations';
 import * as i18nRules from './translations';
 import { RouteSpyState } from '../../../../common/utils/route/types';
 import { GetUrlForApp } from '../../../../common/components/navigation/types';
 import { SecurityPageName } from '../../../../app/types';
-import { APP_ID } from '../../../../../common/constants';
+import { APP_ID, RULES_PATH } from '../../../../../common/constants';
 import { RuleStep, RuleStepsOrder } from './types';
 
 export const ruleStepsOrder: RuleStepsOrder = [
@@ -30,22 +26,14 @@ export const ruleStepsOrder: RuleStepsOrder = [
   RuleStep.ruleActions,
 ];
 
-const getTabBreadcrumb = (pathname: string, search: string[], getUrlForApp: GetUrlForApp) => {
+const getRulesBreadcrumb = (pathname: string, search: string[], getUrlForApp: GetUrlForApp) => {
   const tabPath = pathname.split('/')[1];
-
-  if (tabPath === 'alerts') {
-    return {
-      text: i18nDetections.ALERT,
-      href: getUrlForApp(`${APP_ID}:${SecurityPageName.detections}`, {
-        path: getDetectionEngineTabUrl(tabPath, !isEmpty(search[0]) ? search[0] : ''),
-      }),
-    };
-  }
 
   if (tabPath === 'rules') {
     return {
       text: i18nRules.PAGE_TITLE,
-      href: getUrlForApp(`${APP_ID}:${SecurityPageName.detections}`, {
+      href: getUrlForApp(APP_ID, {
+        deepLinkId: SecurityPageName.rules,
         path: getRulesUrl(!isEmpty(search[0]) ? search[0] : ''),
       }),
     };
@@ -53,29 +41,22 @@ const getTabBreadcrumb = (pathname: string, search: string[], getUrlForApp: GetU
 };
 
 const isRuleCreatePage = (pathname: string) =>
-  pathname.includes('/rules') && pathname.includes('/create');
+  pathname.includes(RULES_PATH) && pathname.includes('/create');
 
 const isRuleEditPage = (pathname: string) =>
-  pathname.includes('/rules') && pathname.includes('/edit');
+  pathname.includes(RULES_PATH) && pathname.includes('/edit');
 
 export const getBreadcrumbs = (
   params: RouteSpyState,
   search: string[],
   getUrlForApp: GetUrlForApp
 ): ChromeBreadcrumb[] => {
-  let breadcrumb = [
-    {
-      text: i18nDetections.BREADCRUMB_TITLE,
-      href: getUrlForApp(`${APP_ID}:${SecurityPageName.detections}`, {
-        path: !isEmpty(search[0]) ? search[0] : '',
-      }),
-    },
-  ];
+  let breadcrumb: ChromeBreadcrumb[] = [];
 
-  const tabBreadcrumb = getTabBreadcrumb(params.pathName, search, getUrlForApp);
+  const rulesBreadcrumb = getRulesBreadcrumb(params.pathName, search, getUrlForApp);
 
-  if (tabBreadcrumb) {
-    breadcrumb = [...breadcrumb, tabBreadcrumb];
+  if (rulesBreadcrumb) {
+    breadcrumb = [...breadcrumb, rulesBreadcrumb];
   }
 
   if (params.detailName && params.state?.ruleName) {
@@ -83,7 +64,8 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: params.state.ruleName,
-        href: getUrlForApp(`${APP_ID}:${SecurityPageName.detections}`, {
+        href: getUrlForApp(APP_ID, {
+          deepLinkId: SecurityPageName.rules,
           path: getRuleDetailsUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
         }),
       },
@@ -95,9 +77,7 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: i18nRules.ADD_PAGE_TITLE,
-        href: getUrlForApp(`${APP_ID}:${SecurityPageName.detections}`, {
-          path: getCreateRuleUrl(!isEmpty(search[0]) ? search[0] : ''),
-        }),
+        href: '',
       },
     ];
   }
@@ -107,9 +87,7 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: i18nRules.EDIT_PAGE_TITLE,
-        href: getUrlForApp(`${APP_ID}:${SecurityPageName.detections}`, {
-          path: getEditRuleUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
-        }),
+        href: '',
       },
     ];
   }

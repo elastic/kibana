@@ -542,14 +542,8 @@ function SearchInspector({
 
 function useAppState({ data }: { data: DataPublicPluginStart }) {
   const stateContainer = useMemo(() => {
-    const {
-      filters,
-      time,
-      searchSessionId,
-      numericFieldName,
-      indexPatternId,
-      query,
-    } = getInitialStateFromUrl();
+    const { filters, time, searchSessionId, numericFieldName, indexPatternId, query } =
+      getInitialStateFromUrl();
 
     if (filters) {
       data.query.filterManager.setFilters(filters);
@@ -702,7 +696,6 @@ function doSearch(
   const startTs = performance.now();
 
   // Submit the search request using the `data.search` service.
-  // @ts-expect-error request.params is incompatible. Filter is not assignable to QueryContainer
   return data.search
     .search(req, { sessionId })
     .pipe(

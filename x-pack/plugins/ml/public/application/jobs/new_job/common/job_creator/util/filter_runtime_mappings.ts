@@ -4,12 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import type { RuntimeMappings } from '../../../../../../../common/types/fields';
 import type { Datafeed, Job } from '../../../../../../../common/types/anomaly_detection_jobs';
@@ -106,6 +100,8 @@ function findFieldsInQuery(obj: object) {
     if (isPopulatedObject(val)) {
       fields.push(key);
       fields.push(...findFieldsInQuery(val));
+    } else if (typeof val === 'string') {
+      fields.push(val);
     } else {
       fields.push(key);
     }

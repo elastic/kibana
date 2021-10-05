@@ -23,8 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useKibanaVersion } from '../../../../../hooks';
 import { isAgentUpgradeable } from '../../../../../services';
-import { AgentPolicyPackageBadges } from '../../../components/agent_policy_package_badges';
-import { AgentPolicySummaryLine } from '../../../../../components';
+import { AgentPolicyPackageBadges, AgentPolicySummaryLine } from '../../../../../components';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -36,6 +35,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
   agentPolicy?: AgentPolicy;
 }> = memo(({ agent, agentPolicy }) => {
   const kibanaVersion = useKibanaVersion();
+
   return (
     <EuiPanel>
       <EuiDescriptionList compressed>
@@ -133,33 +133,37 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
             title: i18n.translate('xpack.fleet.agentDetails.monitorLogsLabel', {
               defaultMessage: 'Monitor logs',
             }),
-            description: agentPolicy?.monitoring_enabled?.includes('logs') ? (
-              <FormattedMessage
-                id="xpack.fleet.agentList.monitorLogsEnabledText"
-                defaultMessage="True"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.fleet.agentList.monitorLogsDisabledText"
-                defaultMessage="False"
-              />
-            ),
+            description: Array.isArray(agentPolicy?.monitoring_enabled) ? (
+              agentPolicy?.monitoring_enabled?.includes('logs') ? (
+                <FormattedMessage
+                  id="xpack.fleet.agentList.monitorLogsEnabledText"
+                  defaultMessage="True"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.fleet.agentList.monitorLogsDisabledText"
+                  defaultMessage="False"
+                />
+              )
+            ) : null,
           },
           {
             title: i18n.translate('xpack.fleet.agentDetails.monitorMetricsLabel', {
               defaultMessage: 'Monitor metrics',
             }),
-            description: agentPolicy?.monitoring_enabled?.includes('metrics') ? (
-              <FormattedMessage
-                id="xpack.fleet.agentList.monitorMetricsEnabledText"
-                defaultMessage="True"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.fleet.agentList.monitorMetricsDisabledText"
-                defaultMessage="False"
-              />
-            ),
+            description: Array.isArray(agentPolicy?.monitoring_enabled) ? (
+              agentPolicy?.monitoring_enabled?.includes('metrics') ? (
+                <FormattedMessage
+                  id="xpack.fleet.agentList.monitorMetricsEnabledText"
+                  defaultMessage="True"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.fleet.agentList.monitorMetricsDisabledText"
+                  defaultMessage="False"
+                />
+              )
+            ) : null,
           },
         ].map(({ title, description }) => {
           return (

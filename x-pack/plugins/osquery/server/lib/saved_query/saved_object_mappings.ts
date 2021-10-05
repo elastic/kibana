@@ -14,26 +14,32 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
     description: {
       type: 'text',
     },
-    name: {
-      type: 'text',
+    id: {
+      type: 'keyword',
     },
     query: {
       type: 'text',
     },
-    created: {
+    created_at: {
       type: 'date',
     },
-    createdBy: {
+    created_by: {
       type: 'text',
     },
     platform: {
       type: 'keyword',
     },
-    updated: {
+    version: {
+      type: 'keyword',
+    },
+    updated_at: {
       type: 'date',
     },
-    updatedBy: {
+    updated_by: {
       type: 'text',
+    },
+    interval: {
+      type: 'keyword',
     },
   },
 };
@@ -41,7 +47,7 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
 export const savedQueryType: SavedObjectsType = {
   name: savedQuerySavedObjectType,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
   mappings: savedQuerySavedObjectMappings,
 };
 
@@ -53,16 +59,16 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
     name: {
       type: 'text',
     },
-    created: {
+    created_at: {
       type: 'date',
     },
-    createdBy: {
+    created_by: {
       type: 'text',
     },
-    updated: {
+    updated_at: {
       type: 'date',
     },
-    updatedBy: {
+    updated_by: {
       type: 'text',
     },
     queries: {
@@ -81,6 +87,6 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
 export const packType: SavedObjectsType = {
   name: packSavedObjectType,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
   mappings: packSavedObjectMappings,
 };

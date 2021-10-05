@@ -146,7 +146,7 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
 
     if (!wsToUse && walkStates.length > 1 && !includeAutoComplete) {
       console.info(
-        "more then one context active for current path, but autocomplete isn't requested",
+        "more than one context active for current path, but autocomplete isn't requested",
         walkStates
       );
     }

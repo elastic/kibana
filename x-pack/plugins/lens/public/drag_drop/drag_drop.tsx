@@ -485,14 +485,18 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
   }, [order, registerDropTarget, dropTypes, keyboardMode]);
 
   useEffect(() => {
+    let isMounted = true;
     if (activeDropTarget && activeDropTarget.id !== value.id) {
       setIsInZone(false);
     }
     setTimeout(() => {
-      if (!activeDropTarget) {
+      if (!activeDropTarget && isMounted) {
         setIsInZone(false);
       }
     }, 1000);
+    return () => {
+      isMounted = false;
+    };
   }, [activeDropTarget, setIsInZone, value.id]);
 
   const dragEnter = () => {
@@ -699,13 +703,8 @@ const ReorderableDrag = memo(function ReorderableDrag(
     setReorderState,
   } = useContext(ReorderContext);
 
-  const {
-    value,
-    setActiveDropTarget,
-    activeDraggingProps,
-    reorderableGroup,
-    setA11yMessage,
-  } = props;
+  const { value, setActiveDropTarget, activeDraggingProps, reorderableGroup, setA11yMessage } =
+    props;
 
   const keyboardMode = activeDraggingProps?.keyboardMode;
   const activeDropTarget = activeDraggingProps?.activeDropTarget;

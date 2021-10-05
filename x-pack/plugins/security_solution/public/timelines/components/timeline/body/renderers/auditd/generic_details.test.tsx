@@ -15,11 +15,12 @@ import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { AuditdGenericDetails, AuditdGenericLine } from './generic_details';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 
+jest.mock('../../../../../../common/lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });

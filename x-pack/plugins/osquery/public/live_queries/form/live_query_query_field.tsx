@@ -5,86 +5,74 @@
  * 2.0.
  */
 
-// import { find } from 'lodash/fp';
-// import { EuiCodeBlock, EuiSuperSelect, EuiText, EuiSpacer } from '@elastic/eui';
-import React, { useCallback } from 'react';
-// import { useQuery } from 'react-query';
+import { EuiCodeBlock, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useRef } from 'react';
+import styled from 'styled-components';
 
+import { OsquerySchemaLink } from '../../components/osquery_schema_link';
 import { FieldHook } from '../../shared_imports';
-// import { useKibana } from '../../common/lib/kibana';
 import { OsqueryEditor } from '../../editor';
+import {
+  SavedQueriesDropdown,
+  SavedQueriesDropdownRef,
+} from '../../saved_queries/saved_queries_dropdown';
+import { useKibana } from '../../common/lib/kibana';
+
+const StyledEuiCodeBlock = styled(EuiCodeBlock)`
+  min-height: 150px;
+`;
 
 interface LiveQueryQueryFieldProps {
   disabled?: boolean;
-  field: FieldHook<{
-    id: string | null;
-    query: string;
-  }>;
+  field: FieldHook<string>;
 }
 
 const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ disabled, field }) => {
-  // const { http } = useKibana().services;
-  // const { data } = useQuery('savedQueryList', () =>
-  //   http.get('/internal/osquery/saved_query', {
-  //     query: {
-  //       pageIndex: 0,
-  //       pageSize: 100,
-  //       sortField: 'updated_at',
-  //       sortDirection: 'desc',
-  //     },
-  //   })
-  // );
+  const permissions = useKibana().services.application.capabilities.osquery;
+  const { value, setValue, errors } = field;
+  const error = errors[0]?.message;
+  const savedQueriesDropdownRef = useRef<SavedQueriesDropdownRef>(null);
 
-  // const queryOptions =
-  //   // @ts-expect-error update types
-  //   data?.saved_objects.map((savedQuery) => ({
-  //     value: savedQuery,
-  //     inputDisplay: savedQuery.attributes.name,
-  //     dropdownDisplay: (
-  //       <>
-  //         <strong>{savedQuery.attributes.name}</strong>
-  //         <EuiText size="s" color="subdued">
-  //           <p className="euiTextColor--subdued">{savedQuery.attributes.description}</p>
-  //         </EuiText>
-  //         <EuiCodeBlock language="sql" fontSize="s" paddingSize="s">
-  //           {savedQuery.attributes.query}
-  //         </EuiCodeBlock>
-  //       </>
-  //     ),
-  //   })) ?? [];
-
-  const { value, setValue } = field;
-
-  // const handleSavedQueryChange = useCallback(
-  //   (newValue) => {
-  //     setValue({
-  //       id: newValue.id,
-  //       query: newValue.attributes.query,
-  //     });
-  //   },
-  //   [setValue]
-  // );
+  const handleSavedQueryChange = useCallback(
+    (savedQuery) => {
+      setValue(savedQuery?.query ?? '');
+    },
+    [setValue]
+  );
 
   const handleEditorChange = useCallback(
     (newValue) => {
-      setValue({
-        id: null,
-        query: newValue,
-      });
+      savedQueriesDropdownRef.current?.clearSelection();
+      setValue(newValue);
     },
     [setValue]
   );
 
   return (
-    <>
-      {/* <EuiSuperSelect
-        valueOfSelected={find(['id', value.id], data?.saved_objects)}
-        options={queryOptions}
-        onChange={handleSavedQueryChange}
-      />
-      <EuiSpacer /> */}
-      <OsqueryEditor defaultValue={value.query} disabled={disabled} onChange={handleEditorChange} />
-    </>
+    <EuiFormRow isInvalid={typeof error === 'string'} error={error} fullWidth>
+      <>
+        <SavedQueriesDropdown
+          ref={savedQueriesDropdownRef}
+          disabled={disabled || !permissions.runSavedQueries}
+          onChange={handleSavedQueryChange}
+        />
+        <EuiSpacer />
+        <EuiFormRow fullWidth labelAppend={<OsquerySchemaLink />}>
+          {!permissions.writeLiveQueries || disabled ? (
+            <StyledEuiCodeBlock
+              language="sql"
+              fontSize="m"
+              paddingSize="m"
+              transparentBackground={!value.length}
+            >
+              {value}
+            </StyledEuiCodeBlock>
+          ) : (
+            <OsqueryEditor defaultValue={value} onChange={handleEditorChange} />
+          )}
+        </EuiFormRow>
+      </>
+    </EuiFormRow>
   );
 };
 

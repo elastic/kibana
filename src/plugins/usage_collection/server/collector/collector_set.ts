@@ -7,17 +7,19 @@
  */
 
 import { snakeCase } from 'lodash';
-import {
+import type {
   Logger,
   ElasticsearchClient,
-  ISavedObjectsRepository,
   SavedObjectsClientContract,
   KibanaRequest,
 } from 'src/core/server';
-import { Collector, CollectorOptions } from './collector';
+import { Collector } from './collector';
+import type { ICollector, CollectorOptions } from './types';
 import { UsageCollector, UsageCollectorOptions } from './usage_collector';
 
-type AnyCollector = Collector<any, any>;
+// Needed for the general array containing all the collectors. We don't really care about their types here
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyCollector = ICollector<any, any>;
 
 interface CollectorSetConfig {
   logger: Logger;
@@ -84,11 +86,6 @@ export class CollectorSet {
     }
 
     this.collectors.set(collector.type, collector);
-
-    if (collector.init) {
-      this.logger.debug(`Initializing ${collector.type} collector`);
-      collector.init();
-    }
   };
 
   public getCollectorByType = (type: string) => {
@@ -144,7 +141,7 @@ export class CollectorSet {
 
   public bulkFetch = async (
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClientContract | ISavedObjectsRepository,
+    soClient: SavedObjectsClientContract,
     kibanaRequest: KibanaRequest | undefined, // intentionally `| undefined` to enforce providing the parameter
     collectors: Map<string, AnyCollector> = this.collectors
   ) => {
@@ -183,7 +180,7 @@ export class CollectorSet {
 
   public bulkFetchUsage = async (
     esClient: ElasticsearchClient,
-    savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository,
+    savedObjectsClient: SavedObjectsClientContract,
     kibanaRequest: KibanaRequest | undefined // intentionally `| undefined` to enforce providing the parameter
   ) => {
     const usageCollectors = this.getFilteredCollectorSet((c) => c instanceof UsageCollector);

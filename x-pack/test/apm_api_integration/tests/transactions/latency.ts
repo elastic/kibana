@@ -14,10 +14,11 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { registry } from '../../common/registry';
 
-type LatencyChartReturnType = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/latency'>;
+type LatencyChartReturnType =
+  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/latency'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';
 
@@ -69,6 +70,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               latencyAggregationType: 'avg',
               transactionType: 'request',
               environment: 'testing',
+              kuery: '',
             },
           })
         );
@@ -101,6 +103,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 latencyAggregationType: 'avg',
                 transactionType: 'request',
                 environment: 'testing',
+                kuery: '',
               },
             })
           );
@@ -110,7 +113,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(response.status).to.be(200);
           const latencyChartReturn = response.body as LatencyChartReturnType;
           expect(latencyChartReturn.currentPeriod.overallAvgDuration).not.to.be(null);
-          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(61);
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(31);
         });
       });
 
@@ -125,6 +128,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 latencyAggregationType: 'p95',
                 transactionType: 'request',
                 environment: 'testing',
+                kuery: '',
               },
             })
           );
@@ -134,7 +138,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(response.status).to.be(200);
           const latencyChartReturn = response.body as LatencyChartReturnType;
           expect(latencyChartReturn.currentPeriod.overallAvgDuration).not.to.be(null);
-          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(61);
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(31);
         });
       });
 
@@ -149,6 +153,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 latencyAggregationType: 'p99',
                 transactionType: 'request',
                 environment: 'testing',
+                kuery: '',
               },
             })
           );
@@ -157,8 +162,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('returns average duration and timeseries', async () => {
           expect(response.status).to.be(200);
           const latencyChartReturn = response.body as LatencyChartReturnType;
+
           expect(latencyChartReturn.currentPeriod.overallAvgDuration).not.to.be(null);
-          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(61);
+          expectSnapshot(latencyChartReturn.currentPeriod.overallAvgDuration).toMatchInline(
+            `53906.6603773585`
+          );
+
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(31);
         });
       });
 
@@ -174,6 +184,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 comparisonStart: start,
                 comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
@@ -182,13 +194,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('returns some data', async () => {
           expect(response.status).to.be(200);
           const latencyChartReturn = response.body as LatencyChartReturnType;
-          const currentPeriodNonNullDataPoints = latencyChartReturn.currentPeriod.latencyTimeseries.filter(
-            ({ y }) => y !== null
-          );
+          const currentPeriodNonNullDataPoints =
+            latencyChartReturn.currentPeriod.latencyTimeseries.filter(({ y }) => y !== null);
           expect(currentPeriodNonNullDataPoints.length).to.be.greaterThan(0);
-          const previousPeriodNonNullDataPoints = latencyChartReturn.previousPeriod.latencyTimeseries.filter(
-            ({ y }) => y !== null
-          );
+          const previousPeriodNonNullDataPoints =
+            latencyChartReturn.previousPeriod.latencyTimeseries.filter(({ y }) => y !== null);
           expect(previousPeriodNonNullDataPoints.length).to.be.greaterThan(0);
 
           expectSnapshot(currentPeriodNonNullDataPoints).toMatch();
@@ -200,6 +210,36 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(latencyChartReturn.currentPeriod.latencyTimeseries.map(({ x }) => x)).to.be.eql(
             latencyChartReturn.previousPeriod.latencyTimeseries.map(({ x }) => x)
           );
+        });
+      });
+
+      describe('with a non-existing environment', () => {
+        before(async () => {
+          response = await supertest.get(
+            url.format({
+              pathname: `/api/apm/services/opbeans-node/transactions/charts/latency`,
+              query: {
+                start,
+                end,
+                latencyAggregationType: 'avg',
+                transactionType: 'request',
+                environment: 'does-not-exist',
+                kuery: '',
+              },
+            })
+          );
+        });
+
+        it('returns average duration and timeseries', async () => {
+          expect(response.status).to.be(200);
+          const latencyChartReturn = response.body as LatencyChartReturnType;
+
+          expect(latencyChartReturn.currentPeriod.overallAvgDuration).to.be(null);
+
+          const currentPeriodNonNullDataPoints =
+            latencyChartReturn.currentPeriod.latencyTimeseries.filter(({ y }) => y !== null);
+
+          expect(currentPeriodNonNullDataPoints).to.be.empty();
         });
       });
     }
@@ -223,6 +263,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 latencyAggregationType: 'avg',
                 transactionType,
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
@@ -244,6 +286,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 latencyAggregationType: 'avg',
                 transactionType,
                 environment: 'production',
+                kuery: '',
               },
             })
           );
@@ -258,7 +301,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(latencyChartReturn).to.have.property('anomalyTimeseries');
           expect(latencyChartReturn.anomalyTimeseries).to.have.property('jobId');
           expectSnapshot(latencyChartReturn.anomalyTimeseries?.jobId).toMatchInline(
-            `"apm-production-1369-high_mean_transaction_duration"`
+            `"apm-production-6117-high_mean_transaction_duration"`
           );
         });
 
@@ -268,42 +311,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(latencyChartReturn.anomalyTimeseries?.anomalyBoundaries?.length).to.be.greaterThan(
             0
           );
-          expectSnapshot(latencyChartReturn.anomalyTimeseries?.anomalyBoundaries).toMatch();
-        });
-      });
-
-      describe('when not defined environments is seleted', () => {
-        before(async () => {
-          response = await supertest.get(
-            url.format({
-              pathname: `/api/apm/services/opbeans-python/transactions/charts/latency`,
-              query: {
-                start,
-                end,
-                latencyAggregationType: 'avg',
-                transactionType,
-                environment: 'ENVIRONMENT_NOT_DEFINED',
-              },
-            })
-          );
-        });
-
-        it('should have a successful response', () => {
-          expect(response.status).to.eql(200);
-        });
-
-        it('should return the ML job id for anomalies with no defined environment', () => {
-          const latencyChartReturn = response.body as LatencyChartReturnType;
-          expect(latencyChartReturn).to.have.property('anomalyTimeseries');
-          expect(latencyChartReturn.anomalyTimeseries).to.have.property('jobId');
-          expectSnapshot(latencyChartReturn.anomalyTimeseries?.jobId).toMatchInline(
-            `"apm-environment_not_defined-5626-high_mean_transaction_duration"`
-          );
-        });
-
-        it('should return the correct anomaly boundaries', () => {
-          const latencyChartReturn = response.body as LatencyChartReturnType;
-          expect(latencyChartReturn).to.have.property('anomalyTimeseries');
           expectSnapshot(latencyChartReturn.anomalyTimeseries?.anomalyBoundaries).toMatch();
         });
       });
@@ -319,6 +326,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 latencyAggregationType: 'avg',
                 transactionType,
                 environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );

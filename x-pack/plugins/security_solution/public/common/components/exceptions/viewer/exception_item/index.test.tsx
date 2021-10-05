@@ -45,6 +45,31 @@ describe('ExceptionItem', () => {
     expect(wrapper.find('ExceptionEntries')).toHaveLength(1);
   });
 
+  it('it renders ExceptionDetails with Name and Modified info when showName and showModified are true ', () => {
+    const exceptionItem = getExceptionListItemSchemaMock();
+
+    const wrapper = mount(
+      <ThemeProvider theme={mockTheme}>
+        <ExceptionItem
+          loadingItemIds={[]}
+          commentsAccordionId={'accordion--comments'}
+          onDeleteException={jest.fn()}
+          onEditException={jest.fn()}
+          exceptionItem={exceptionItem}
+          showModified={true}
+          showName={true}
+        />
+      </ThemeProvider>
+    );
+
+    expect(wrapper.find('ExceptionDetails').props()).toEqual(
+      expect.objectContaining({
+        showModified: true,
+        showName: true,
+      })
+    );
+  });
+
   it('it invokes "onEditException" when edit button clicked', () => {
     const mockOnEditException = jest.fn();
     const exceptionItem = getExceptionListItemSchemaMock();

@@ -6,96 +6,112 @@
  */
 
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { FilterValueButton } from './filter_value_btn';
-import { mockUrlStorage, mockUseSeriesFilter, mockUseValuesList, render } from '../../rtl_helpers';
+import { mockUxSeries, mockUseSeriesFilter, mockUseValuesList, render } from '../../rtl_helpers';
 import {
   USER_AGENT_NAME,
   USER_AGENT_VERSION,
 } from '../../configurations/constants/elasticsearch_fieldnames';
 
 describe('FilterValueButton', function () {
-  it('should render properly', async function () {
+  it('renders', async () => {
     render(
       <FilterValueButton
         field={USER_AGENT_NAME}
-        seriesId={'series-id'}
+        seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: '', negate: false }}
         setIsNestedOpen={jest.fn()}
         negate={false}
+        series={mockUxSeries}
       />
     );
 
-    screen.getByText('Chrome');
-  });
-
-  it('should render display negate state', async function () {
-    render(
-      <FilterValueButton
-        field={USER_AGENT_NAME}
-        seriesId={'series-id'}
-        value={'Chrome'}
-        isNestedOpen={{ value: '', negate: false }}
-        setIsNestedOpen={jest.fn()}
-        negate={true}
-      />
-    );
-
-    screen.getByText('Not Chrome');
-    screen.getByTitle('Not Chrome');
-    const btn = screen.getByRole('button');
-    expect(btn.classList).toContain('euiButtonEmpty--danger');
-  });
-
-  it('should call set filter on click', async function () {
-    const { setFilter, removeFilter } = mockUseSeriesFilter();
-
-    render(
-      <FilterValueButton
-        field={USER_AGENT_NAME}
-        seriesId={'series-id'}
-        value={'Chrome'}
-        isNestedOpen={{ value: '', negate: false }}
-        setIsNestedOpen={jest.fn()}
-        negate={true}
-        allSelectedValues={['Firefox']}
-      />
-    );
-
-    fireEvent.click(screen.getByText('Not Chrome'));
-
-    expect(removeFilter).toHaveBeenCalledTimes(0);
-    expect(setFilter).toHaveBeenCalledTimes(1);
-
-    expect(setFilter).toHaveBeenCalledWith({
-      field: 'user_agent.name',
-      negate: true,
-      value: 'Chrome',
+    await waitFor(() => {
+      expect(screen.getByText('Chrome')).toBeInTheDocument();
     });
   });
-  it('should remove filter on click if already selected', async function () {
-    mockUrlStorage({});
-    const { removeFilter } = mockUseSeriesFilter();
 
-    render(
-      <FilterValueButton
-        field={USER_AGENT_NAME}
-        seriesId={'series-id'}
-        value={'Chrome'}
-        isNestedOpen={{ value: '', negate: false }}
-        setIsNestedOpen={jest.fn()}
-        negate={false}
-        allSelectedValues={['Chrome', 'Firefox']}
-      />
-    );
+  describe('when negate is true', () => {
+    it('displays negate stats', async () => {
+      render(
+        <FilterValueButton
+          field={USER_AGENT_NAME}
+          seriesId={0}
+          value={'Chrome'}
+          isNestedOpen={{ value: '', negate: false }}
+          setIsNestedOpen={jest.fn()}
+          negate={true}
+          series={mockUxSeries}
+        />
+      );
 
-    fireEvent.click(screen.getByText('Chrome'));
+      await waitFor(() => {
+        expect(screen.getByText('Not Chrome')).toBeInTheDocument();
+        expect(screen.getByTitle('Not Chrome')).toBeInTheDocument();
+        const btn = screen.getByRole('button');
+        expect(btn.classList).toContain('euiButtonEmpty--danger');
+      });
+    });
 
-    expect(removeFilter).toHaveBeenCalledWith({
-      field: 'user_agent.name',
-      negate: false,
-      value: 'Chrome',
+    it('calls setFilter on click', async () => {
+      const { setFilter, removeFilter } = mockUseSeriesFilter();
+
+      render(
+        <FilterValueButton
+          field={USER_AGENT_NAME}
+          seriesId={0}
+          value={'Chrome'}
+          isNestedOpen={{ value: '', negate: false }}
+          setIsNestedOpen={jest.fn()}
+          negate={true}
+          allSelectedValues={['Firefox']}
+          series={mockUxSeries}
+        />
+      );
+
+      fireEvent.click(screen.getByText('Not Chrome'));
+
+      await waitFor(() => {
+        expect(removeFilter).toHaveBeenCalledTimes(0);
+        expect(setFilter).toHaveBeenCalledTimes(1);
+
+        expect(setFilter).toHaveBeenCalledWith({
+          field: 'user_agent.name',
+          negate: true,
+          value: 'Chrome',
+        });
+      });
+    });
+  });
+
+  describe('when selected', () => {
+    it('removes the filter on click', async () => {
+      const { removeFilter } = mockUseSeriesFilter();
+
+      render(
+        <FilterValueButton
+          field={USER_AGENT_NAME}
+          seriesId={0}
+          value={'Chrome'}
+          isNestedOpen={{ value: '', negate: false }}
+          setIsNestedOpen={jest.fn()}
+          negate={false}
+          allSelectedValues={['Chrome', 'Firefox']}
+          series={mockUxSeries}
+        />
+      );
+
+      fireEvent.click(screen.getByText('Chrome'));
+
+      await waitFor(() => {
+        expect(removeFilter).toHaveBeenCalledWith({
+          field: 'user_agent.name',
+          negate: false,
+          value: 'Chrome',
+        });
+      });
     });
   });
 
@@ -105,21 +121,24 @@ describe('FilterValueButton', function () {
     render(
       <FilterValueButton
         field={USER_AGENT_NAME}
-        seriesId={'series-id'}
+        seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: '', negate: false }}
         setIsNestedOpen={jest.fn()}
         negate={true}
         allSelectedValues={['Chrome', 'Firefox']}
+        series={mockUxSeries}
       />
     );
 
     fireEvent.click(screen.getByText('Not Chrome'));
 
-    expect(removeFilter).toHaveBeenCalledWith({
-      field: 'user_agent.name',
-      negate: true,
-      value: 'Chrome',
+    await waitFor(() => {
+      expect(removeFilter).toHaveBeenCalledWith({
+        field: 'user_agent.name',
+        negate: true,
+        value: 'Chrome',
+      });
     });
   });
 
@@ -130,29 +149,32 @@ describe('FilterValueButton', function () {
     render(
       <FilterValueButton
         field={USER_AGENT_NAME}
-        seriesId={'series-id'}
+        seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: 'Chrome', negate: false }}
         setIsNestedOpen={jest.fn()}
         negate={false}
         allSelectedValues={['Chrome', 'Firefox']}
         nestedField={USER_AGENT_VERSION}
+        series={mockUxSeries}
       />
     );
 
-    expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toBeCalledWith(
-      expect.objectContaining({
-        filters: [
-          {
-            term: {
-              [USER_AGENT_NAME]: 'Chrome',
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledTimes(2);
+      expect(spy).toBeCalledWith(
+        expect.objectContaining({
+          filters: [
+            {
+              term: {
+                [USER_AGENT_NAME]: 'Chrome',
+              },
             },
-          },
-        ],
-        sourceField: 'user_agent.version',
-      })
-    );
+          ],
+          sourceField: 'user_agent.version',
+        })
+      );
+    });
   });
   it('should set isNestedOpen on click', async function () {
     mockUseSeriesFilter();
@@ -161,29 +183,32 @@ describe('FilterValueButton', function () {
     render(
       <FilterValueButton
         field={USER_AGENT_NAME}
-        seriesId={'series-id'}
+        seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: 'Chrome', negate: false }}
         setIsNestedOpen={jest.fn()}
         negate={false}
         allSelectedValues={['Chrome', 'Firefox']}
         nestedField={USER_AGENT_VERSION}
+        series={mockUxSeries}
       />
     );
 
-    expect(spy).toHaveBeenCalledTimes(2);
-    expect(spy).toBeCalledWith(
-      expect.objectContaining({
-        filters: [
-          {
-            term: {
-              [USER_AGENT_NAME]: 'Chrome',
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledTimes(6);
+      expect(spy).toBeCalledWith(
+        expect.objectContaining({
+          filters: [
+            {
+              term: {
+                [USER_AGENT_NAME]: 'Chrome',
+              },
             },
-          },
-        ],
-        sourceField: USER_AGENT_VERSION,
-      })
-    );
+          ],
+          sourceField: USER_AGENT_VERSION,
+        })
+      );
+    });
   });
 
   it('should set call setIsNestedOpen on click selected', async function () {
@@ -195,20 +220,22 @@ describe('FilterValueButton', function () {
     render(
       <FilterValueButton
         field={USER_AGENT_NAME}
-        seriesId={'series-id'}
+        seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: '', negate: false }}
         setIsNestedOpen={setIsNestedOpen}
         negate={false}
         allSelectedValues={['Chrome', 'Firefox']}
         nestedField={USER_AGENT_VERSION}
+        series={mockUxSeries}
       />
     );
 
     fireEvent.click(screen.getByText('Chrome'));
-
-    expect(setIsNestedOpen).toHaveBeenCalledTimes(1);
-    expect(setIsNestedOpen).toHaveBeenCalledWith({ negate: false, value: '' });
+    await waitFor(() => {
+      expect(setIsNestedOpen).toHaveBeenCalledTimes(1);
+      expect(setIsNestedOpen).toHaveBeenCalledWith({ negate: false, value: '' });
+    });
   });
 
   it('should set call setIsNestedOpen on click not selected', async function () {
@@ -220,19 +247,21 @@ describe('FilterValueButton', function () {
     render(
       <FilterValueButton
         field={USER_AGENT_NAME}
-        seriesId={'series-id'}
+        seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: '', negate: true }}
         setIsNestedOpen={setIsNestedOpen}
         negate={true}
         allSelectedValues={['Firefox']}
         nestedField={USER_AGENT_VERSION}
+        series={mockUxSeries}
       />
     );
 
     fireEvent.click(screen.getByText('Not Chrome'));
-
-    expect(setIsNestedOpen).toHaveBeenCalledTimes(1);
-    expect(setIsNestedOpen).toHaveBeenCalledWith({ negate: true, value: 'Chrome' });
+    await waitFor(() => {
+      expect(setIsNestedOpen).toHaveBeenCalledTimes(1);
+      expect(setIsNestedOpen).toHaveBeenCalledWith({ negate: true, value: 'Chrome' });
+    });
   });
 });

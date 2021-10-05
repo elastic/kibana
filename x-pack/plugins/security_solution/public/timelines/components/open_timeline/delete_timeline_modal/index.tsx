@@ -9,8 +9,13 @@ import { EuiModal } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { createGlobalStyle } from 'styled-components';
 
+import { useParams } from 'react-router-dom';
 import { DeleteTimelineModal, DELETE_TIMELINE_MODAL_WIDTH } from './delete_timeline_modal';
 import { DeleteTimelines } from '../types';
+import { TimelineType } from '../../../../../common/types/timeline';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import * as i18n from '../translations';
+
 const RemovePopover = createGlobalStyle`
 div.euiPopover__panel-isOpen {
   display: none;
@@ -29,19 +34,29 @@ interface Props {
  */
 export const DeleteTimelineModalOverlay = React.memo<Props>(
   ({ deleteTimelines, isModalOpen, savedObjectIds, title, onComplete }) => {
+    const { addSuccess } = useAppToasts();
+    const { tabName: timelineType } = useParams<{ tabName: TimelineType }>();
+
     const internalCloseModal = useCallback(() => {
       if (onComplete != null) {
         onComplete();
       }
     }, [onComplete]);
     const onDelete = useCallback(() => {
-      if (savedObjectIds != null) {
+      if (savedObjectIds.length > 0) {
         deleteTimelines(savedObjectIds);
+
+        addSuccess({
+          title:
+            timelineType === TimelineType.template
+              ? i18n.SUCCESSFULLY_DELETED_TIMELINE_TEMPLATES(savedObjectIds.length)
+              : i18n.SUCCESSFULLY_DELETED_TIMELINES(savedObjectIds.length),
+        });
       }
       if (onComplete != null) {
         onComplete();
       }
-    }, [deleteTimelines, savedObjectIds, onComplete]);
+    }, [deleteTimelines, savedObjectIds, onComplete, addSuccess, timelineType]);
     return (
       <>
         {isModalOpen && <RemovePopover data-test-subj="remove-popover" />}

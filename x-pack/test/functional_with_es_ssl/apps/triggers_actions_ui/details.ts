@@ -93,14 +93,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function getAlertInstanceSummary(alertId: string) {
     const { body: summary } = await supertest
-      .get(`/internal/alerting/rule/${alertId}/_alert_summary`)
+      .get(`/internal/alerting/rule/${encodeURIComponent(alertId)}/_alert_summary`)
       .expect(200);
     return summary;
   }
 
   async function muteAlertInstance(alertId: string, alertInstanceId: string) {
     const { body: response } = await supertest
-      .post(`/api/alerting/rule/${alertId}/alert/${alertInstanceId}/_mute`)
+      .post(
+        `/api/alerting/rule/${encodeURIComponent(alertId)}/alert/${encodeURIComponent(
+          alertInstanceId
+        )}/_mute`
+      )
       .set('kbn-xsrf', 'foo')
       .expect(204);
 
@@ -132,7 +136,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('renders the alert details', async () => {
         const headingText = await pageObjects.alertDetailsUI.getHeadingText();
-        expect(headingText).to.be(`test-alert-${testRunUuid}`);
+        expect(headingText.includes(`test-alert-${testRunUuid}`)).to.be(true);
 
         const alertType = await pageObjects.alertDetailsUI.getAlertType();
         expect(alertType).to.be(`Always Firing`);
@@ -142,23 +146,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should disable the alert', async () => {
-        const disableSwitch = await testSubjects.find('disableSwitch');
+        const enableSwitch = await testSubjects.find('enableSwitch');
 
-        const isChecked = await disableSwitch.getAttribute('aria-checked');
-        expect(isChecked).to.eql('false');
+        const isChecked = await enableSwitch.getAttribute('aria-checked');
+        expect(isChecked).to.eql('true');
 
-        await disableSwitch.click();
+        await enableSwitch.click();
 
-        const disableSwitchAfterDisabling = await testSubjects.find('disableSwitch');
+        const disableSwitchAfterDisabling = await testSubjects.find('enableSwitch');
         const isCheckedAfterDisabling = await disableSwitchAfterDisabling.getAttribute(
           'aria-checked'
         );
-        expect(isCheckedAfterDisabling).to.eql('true');
+        expect(isCheckedAfterDisabling).to.eql('false');
       });
 
       it('shouldnt allow you to mute a disabled alert', async () => {
-        const disabledDisableSwitch = await testSubjects.find('disableSwitch');
-        expect(await disabledDisableSwitch.getAttribute('aria-checked')).to.eql('true');
+        const disabledEnableSwitch = await testSubjects.find('enableSwitch');
+        expect(await disabledEnableSwitch.getAttribute('aria-checked')).to.eql('false');
 
         const muteSwitch = await testSubjects.find('muteSwitch');
         expect(await muteSwitch.getAttribute('aria-checked')).to.eql('false');
@@ -173,18 +177,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should reenable a disabled the alert', async () => {
-        const disableSwitch = await testSubjects.find('disableSwitch');
+        const enableSwitch = await testSubjects.find('enableSwitch');
 
-        const isChecked = await disableSwitch.getAttribute('aria-checked');
-        expect(isChecked).to.eql('true');
+        const isChecked = await enableSwitch.getAttribute('aria-checked');
+        expect(isChecked).to.eql('false');
 
-        await disableSwitch.click();
+        await enableSwitch.click();
 
-        const disableSwitchAfterReenabling = await testSubjects.find('disableSwitch');
+        const disableSwitchAfterReenabling = await testSubjects.find('enableSwitch');
         const isCheckedAfterDisabling = await disableSwitchAfterReenabling.getAttribute(
           'aria-checked'
         );
-        expect(isCheckedAfterDisabling).to.eql('false');
+        expect(isCheckedAfterDisabling).to.eql('true');
       });
 
       it('should mute the alert', async () => {
@@ -275,7 +279,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(toastTitle).to.eql(`Updated '${updatedAlertName}'`);
 
         const headingText = await pageObjects.alertDetailsUI.getHeadingText();
-        expect(headingText).to.be(updatedAlertName);
+        expect(headingText.includes(updatedAlertName)).to.be(true);
       });
 
       it('should reset alert when canceling an edit', async () => {
@@ -640,18 +644,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('renders the muted inactive alert instances', async () => {
         // mute an alert instance that doesn't exist
-        await muteAlertInstance(alert.id, 'eu-east');
+        await muteAlertInstance(alert.id, 'eu/east');
 
         // refresh to see alert
         await browser.refresh();
 
         const instancesList: any[] = await pageObjects.alertDetailsUI.getAlertInstancesList();
         expect(
-          instancesList.filter((alertInstance) => alertInstance.instance === 'eu-east')
+          instancesList.filter((alertInstance) => alertInstance.instance === 'eu/east')
         ).to.eql([
           {
-            instance: 'eu-east',
-            status: 'OK',
+            instance: 'eu/east',
+            status: 'Recovered',
             start: '',
             duration: '',
           },
@@ -693,14 +697,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('allows the user unmute an inactive instance', async () => {
-        log.debug(`Ensuring eu-east is muted`);
-        await pageObjects.alertDetailsUI.ensureAlertInstanceMute('eu-east', true);
+        log.debug(`Ensuring eu/east is muted`);
+        await pageObjects.alertDetailsUI.ensureAlertInstanceMute('eu/east', true);
 
-        log.debug(`Unmuting eu-east`);
-        await pageObjects.alertDetailsUI.clickAlertInstanceMuteButton('eu-east');
+        log.debug(`Unmuting eu/east`);
+        await pageObjects.alertDetailsUI.clickAlertInstanceMuteButton('eu/east');
 
-        log.debug(`Ensuring eu-east is removed from list`);
-        await pageObjects.alertDetailsUI.ensureAlertInstanceExistance('eu-east', false);
+        log.debug(`Ensuring eu/east is removed from list`);
+        await pageObjects.alertDetailsUI.ensureAlertInstanceExistance('eu/east', false);
       });
     });
 

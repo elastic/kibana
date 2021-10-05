@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from 'kibana/server';
-import { WriteSettings } from '../../common';
+import { WriteSettings } from '../../common/types';
 
 export async function writeDataToIndex(
   index: string,
@@ -26,7 +26,7 @@ export async function writeDataToIndex(
         })
       );
     }
-    const settings: WriteSettings = { index, body: data };
+    const settings: WriteSettings = { index, body: data, refresh: true };
     const { body: resp } = await asCurrentUser.index(settings);
     if (resp.result === 'Error') {
       throw resp;

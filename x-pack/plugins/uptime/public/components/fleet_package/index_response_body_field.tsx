@@ -38,7 +38,7 @@ export const ResponseBodyIndexField = ({ defaultValue, onChange }: Props) => {
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem>
+      <EuiFlexItem data-test-subj="syntheticsIndexResponseBody">
         <EuiCheckbox
           id="uptimeFleetIndexResponseBody"
           checked={checked}

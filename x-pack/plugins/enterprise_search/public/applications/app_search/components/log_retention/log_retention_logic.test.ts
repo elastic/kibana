@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues, mockFlashMessageHelpers } from '../../../__mocks__';
+import {
+  LogicMounter,
+  mockHttpValues,
+  mockFlashMessageHelpers,
+} from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test/jest';
 
@@ -192,7 +196,7 @@ describe('LogRetentionLogic', () => {
 
         LogRetentionLogic.actions.saveLogRetention(LogRetentionOptions.Analytics, true);
 
-        expect(http.put).toHaveBeenCalledWith('/api/app_search/log_settings', {
+        expect(http.put).toHaveBeenCalledWith('/internal/app_search/log_settings', {
           body: JSON.stringify({
             analytics: {
               enabled: true,
@@ -316,7 +320,7 @@ describe('LogRetentionLogic', () => {
         jest.runAllTimers();
         await nextTick();
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/log_settings');
+        expect(http.get).toHaveBeenCalledWith('/internal/app_search/log_settings');
         expect(LogRetentionLogic.actions.updateLogRetention).toHaveBeenCalledWith(
           TYPICAL_CLIENT_LOG_RETENTION
         );

@@ -18,6 +18,7 @@ exports[`Storyshots components/ToolTipShortcut with alt 1`] = `
     >
       <div
         className="euiTextColor euiTextColor--ghost"
+        style={Object {}}
       >
         ⌥  +  P
       </div>
@@ -44,6 +45,7 @@ exports[`Storyshots components/ToolTipShortcut with cmd 1`] = `
     >
       <div
         className="euiTextColor euiTextColor--ghost"
+        style={Object {}}
       >
         ⌘  +  D
       </div>
@@ -70,6 +72,7 @@ exports[`Storyshots components/ToolTipShortcut with down arrow 1`] = `
     >
       <div
         className="euiTextColor euiTextColor--ghost"
+        style={Object {}}
       >
         ⌘  +  SHIFT  +  ↓
       </div>
@@ -96,6 +99,7 @@ exports[`Storyshots components/ToolTipShortcut with left arrow 1`] = `
     >
       <div
         className="euiTextColor euiTextColor--ghost"
+        style={Object {}}
       >
         ←
       </div>
@@ -122,6 +126,7 @@ exports[`Storyshots components/ToolTipShortcut with right arrow 1`] = `
     >
       <div
         className="euiTextColor euiTextColor--ghost"
+        style={Object {}}
       >
         →
       </div>
@@ -148,6 +153,7 @@ exports[`Storyshots components/ToolTipShortcut with shortcut 1`] = `
     >
       <div
         className="euiTextColor euiTextColor--ghost"
+        style={Object {}}
       >
         G
       </div>
@@ -174,6 +180,7 @@ exports[`Storyshots components/ToolTipShortcut with up arrow 1`] = `
     >
       <div
         className="euiTextColor euiTextColor--ghost"
+        style={Object {}}
       >
         ⌘  +  SHIFT  +  ↑
       </div>

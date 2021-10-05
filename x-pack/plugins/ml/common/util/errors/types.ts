@@ -12,6 +12,7 @@ export interface EsErrorRootCause {
   type: string;
   reason: string;
   caused_by?: EsErrorRootCause;
+  script?: string;
 }
 
 export interface EsErrorBody {
@@ -72,5 +73,5 @@ export function isMLResponseError(error: any): error is MLResponseError {
 }
 
 export function isBoomError(error: any): error is Boom.Boom {
-  return error.isBoom === true;
+  return error?.isBoom === true;
 }

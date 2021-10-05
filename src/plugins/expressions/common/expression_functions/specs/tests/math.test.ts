@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { errors, math } from '../math';
+import { errors, math, MathArguments, MathInput } from '../math';
 import { emptyTable, functionWrapper, testTable } from './utils';
 
 describe('math', () => {
-  const fn = functionWrapper<unknown>(math);
+  const fn = functionWrapper(math);
 
   it('evaluates math expressions without reference to context', () => {
-    expect(fn(null, { expression: '10.5345' })).toBe(10.5345);
-    expect(fn(null, { expression: '123 + 456' })).toBe(579);
-    expect(fn(null, { expression: '100 - 46' })).toBe(54);
+    expect(fn(null as unknown as MathInput, { expression: '10.5345' })).toBe(10.5345);
+    expect(fn(null as unknown as MathInput, { expression: '123 + 456' })).toBe(579);
+    expect(fn(null as unknown as MathInput, { expression: '100 - 46' })).toBe(54);
     expect(fn(1, { expression: '100 / 5' })).toBe(20);
-    expect(fn('foo', { expression: '100 / 5' })).toBe(20);
-    expect(fn(true, { expression: '100 / 5' })).toBe(20);
+    expect(fn('foo' as unknown as MathInput, { expression: '100 / 5' })).toBe(20);
+    expect(fn(true as unknown as MathInput, { expression: '100 / 5' })).toBe(20);
     expect(fn(testTable, { expression: '100 * 5' })).toBe(500);
     expect(fn(emptyTable, { expression: '100 * 5' })).toBe(500);
   });
@@ -27,7 +27,7 @@ describe('math', () => {
     expect(fn(-103, { expression: 'abs(value)' })).toBe(103);
   });
 
-  it('evaluates math expressions with references to columns in a datatable', () => {
+  it('evaluates math expressions with references to columns by id in a datatable', () => {
     expect(fn(testTable, { expression: 'unique(in_stock)' })).toBe(2);
     expect(fn(testTable, { expression: 'sum(quantity)' })).toBe(2508);
     expect(fn(testTable, { expression: 'mean(price)' })).toBe(320);
@@ -36,10 +36,25 @@ describe('math', () => {
     expect(fn(testTable, { expression: 'max(price)' })).toBe(605);
   });
 
+  it('does not use the name for math', () => {
+    expect(() => fn(testTable, { expression: 'unique("in_stock label")' })).toThrow(
+      'Unknown variable'
+    );
+    expect(() => fn(testTable, { expression: 'sum("quantity label")' })).toThrow(
+      'Unknown variable'
+    );
+    expect(() => fn(testTable, { expression: 'mean("price label")' })).toThrow('Unknown variable');
+    expect(() => fn(testTable, { expression: 'min("price label")' })).toThrow('Unknown variable');
+    expect(() => fn(testTable, { expression: 'median("quantity label")' })).toThrow(
+      'Unknown variable'
+    );
+    expect(() => fn(testTable, { expression: 'max("price label")' })).toThrow('Unknown variable');
+  });
+
   describe('args', () => {
     describe('expression', () => {
       it('sets the math expression to be evaluted', () => {
-        expect(fn(null, { expression: '10' })).toBe(10);
+        expect(fn(null as unknown as MathInput, { expression: '10' })).toBe(10);
         expect(fn(23.23, { expression: 'floor(value)' })).toBe(23);
         expect(fn(testTable, { expression: 'count(price)' })).toBe(9);
         expect(fn(testTable, { expression: 'count(name)' })).toBe(9);
@@ -84,11 +99,11 @@ describe('math', () => {
     it('throws when missing expression', () => {
       expect(() => fn(testTable)).toThrow(new RegExp(errors.emptyExpression().message));
 
-      expect(() => fn(testTable, { expession: '' })).toThrow(
+      expect(() => fn(testTable, { expession: '' } as unknown as MathArguments)).toThrow(
         new RegExp(errors.emptyExpression().message)
       );
 
-      expect(() => fn(testTable, { expession: ' ' })).toThrow(
+      expect(() => fn(testTable, { expession: ' ' } as unknown as MathArguments)).toThrow(
         new RegExp(errors.emptyExpression().message)
       );
     });

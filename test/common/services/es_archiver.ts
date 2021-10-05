@@ -8,8 +8,6 @@
 
 import { EsArchiver } from '@kbn/es-archiver';
 import { FtrProviderContext } from '../ftr_provider_context';
-
-// @ts-ignore not TS yet
 import * as KibanaServer from './kibana_server';
 
 export function EsArchiverProvider({ getService }: FtrProviderContext): EsArchiver {
@@ -19,15 +17,8 @@ export function EsArchiverProvider({ getService }: FtrProviderContext): EsArchiv
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
 
-  if (!config.get('esArchiver')) {
-    throw new Error(`esArchiver can't be used unless you specify it's config in your config file`);
-  }
-
-  const dataDir = config.get('esArchiver.directory');
-
   const esArchiver = new EsArchiver({
     client,
-    dataDir,
     log,
     kbnClient: kibanaServer,
   });

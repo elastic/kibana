@@ -8,7 +8,6 @@
 import { createStaticIndexPattern } from '../lib/index_pattern/create_static_index_pattern';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getApmIndexPatternTitle } from '../lib/index_pattern/get_apm_index_pattern_title';
 import { getDynamicIndexPattern } from '../lib/index_pattern/get_dynamic_index_pattern';
 import { createApmServerRoute } from './create_apm_server_route';
 
@@ -32,12 +31,12 @@ const staticIndexPatternRoute = createApmServerRoute({
 
     const spaceId = spaces?.setup.spacesService.getSpaceId(request);
 
-    const didCreateIndexPattern = await createStaticIndexPattern(
+    const didCreateIndexPattern = await createStaticIndexPattern({
       setup,
       config,
       savedObjectsClient,
-      spaceId
-    );
+      spaceId,
+    });
 
     return { created: didCreateIndexPattern };
   },
@@ -56,17 +55,6 @@ const dynamicIndexPatternRoute = createApmServerRoute({
   },
 });
 
-const indexPatternTitleRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/index_pattern/title',
-  options: { tags: ['access:apm'] },
-  handler: async ({ config }) => {
-    return {
-      indexPatternTitle: getApmIndexPatternTitle(config),
-    };
-  },
-});
-
 export const indexPatternRouteRepository = createApmServerRouteRepository()
   .add(staticIndexPatternRoute)
-  .add(dynamicIndexPatternRoute)
-  .add(indexPatternTitleRoute);
+  .add(dynamicIndexPatternRoute);

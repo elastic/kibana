@@ -18,7 +18,13 @@ import { JobIcon } from '../../../../components/job_message_icon';
 import { JobSpacesList } from '../../../../components/job_spaces_list';
 import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 
-import { EuiBasicTable, EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiIcon,
+  EuiScreenReaderOnly,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AnomalyDetectionJobIdLink } from './job_id_link';
@@ -98,7 +104,7 @@ export class JobsList extends Component {
   render() {
     const { loading, isManagementTable, spacesApi } = this.props;
     const selectionControls = {
-      selectable: (job) => job.deleting !== true,
+      selectable: (job) => job.blocked === undefined,
       selectableMessage: (selectable, rowItem) =>
         selectable === false
           ? i18n.translate('xpack.ml.jobsList.cannotSelectRowForJobMessage', {
@@ -134,7 +140,7 @@ export class JobsList extends Component {
         render: (item) => (
           <EuiButtonIcon
             onClick={() => this.toggleRow(item)}
-            isDisabled={item.deleting === true}
+            isDisabled={item.blocked !== undefined}
             iconType={this.state.itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
             aria-label={
               this.state.itemIdToExpandedRowMap[item.id]
@@ -161,7 +167,7 @@ export class JobsList extends Component {
         }),
         sortable: true,
         truncateText: false,
-        width: '20%',
+        width: '15%',
         scope: 'row',
         render: isManagementTable ? (id) => this.getJobIdLink(id) : undefined,
       },
@@ -172,12 +178,44 @@ export class JobsList extends Component {
             <p>
               <FormattedMessage
                 id="xpack.ml.jobsList.auditMessageColumn.screenReaderDescription"
-                defaultMessage="This column display icons when there are errors or warnings for the job in the past 24 hours"
+                defaultMessage="This column displays icons when there are errors or warnings for the job in the past 24 hours"
               />
             </p>
           </EuiScreenReaderOnly>
         ),
         render: (item) => <JobIcon message={item} showTooltip={true} />,
+      },
+      {
+        field: 'alertingRules',
+        name: (
+          <EuiScreenReaderOnly>
+            <p>
+              <FormattedMessage
+                id="xpack.ml.jobsList.alertingRules.screenReaderDescription"
+                defaultMessage="This column displays icons when there are alert rules associated with a job"
+              />
+            </p>
+          </EuiScreenReaderOnly>
+        ),
+        width: '30px',
+        render: (item) => {
+          return Array.isArray(item) ? (
+            <EuiToolTip
+              position="bottom"
+              content={
+                <FormattedMessage
+                  id="xpack.ml.jobsList.alertingRules.tooltipContent"
+                  defaultMessage="Job has {rulesCount} associated alert {rulesCount, plural, one { rule} other { rules}}"
+                  values={{ rulesCount: item.length }}
+                />
+              }
+            >
+              <EuiIcon type="bell" />
+            </EuiToolTip>
+          ) : (
+            <span />
+          );
+        },
       },
       {
         name: i18n.translate('xpack.ml.jobsList.descriptionLabel', {
@@ -239,6 +277,7 @@ export class JobsList extends Component {
           defaultMessage: 'Actions',
         }),
         render: (item) => <ResultLinks jobs={[item]} />,
+        width: '8%',
       },
     ];
 
@@ -258,6 +297,7 @@ export class JobsList extends Component {
               refresh={this.props.refreshJobs}
             />
           ),
+          'data-test-subj': 'mlJobListColumnSpaces',
         });
       }
       // Remove actions if Ml not enabled in current space
@@ -298,10 +338,12 @@ export class JobsList extends Component {
         actions: actionsMenuContent(
           this.props.showEditJobFlyout,
           this.props.showDeleteJobModal,
+          this.props.showResetJobModal,
           this.props.showStartDatafeedModal,
           this.props.refreshJobs,
           this.props.showCreateAlertFlyout
         ),
+        width: '40px',
       });
     }
 

@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
-import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import {
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../common/elasticsearch_fieldnames';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../server/utils/queries';
+import { rangeQuery, kqlQuery } from '../../../observability/server';
+import { environmentQuery } from '../../common/utils/environment_query';
 import { SERVICE_NODE_NAME_MISSING } from '../../common/service_nodes';
 import { ProcessorEvent } from '../../common/processor_event';
 
@@ -34,25 +30,25 @@ function getServiceNodeNameFilters(serviceNodeName?: string) {
 export function getMetricsProjection({
   environment,
   kuery,
-  setup,
   serviceName,
   serviceNodeName,
+  start,
+  end,
 }: {
-  environment?: string;
-  kuery?: string;
-  setup: Setup & SetupTimeRange;
+  environment: string;
+  kuery: string;
   serviceName: string;
   serviceNodeName?: string;
+  start: number;
+  end: number;
 }) {
-  const { start, end } = setup;
-
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     ...getServiceNodeNameFilters(serviceNodeName),
     ...rangeQuery(start, end),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
-  ] as QueryContainer[];
+  ] as QueryDslQueryContainer[];
 
   return {
     apm: {

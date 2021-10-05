@@ -30,11 +30,11 @@ import {
   registerTelemetryUsageCollector,
   registerTelemetryPluginUsageCollector,
 } from './collectors';
-import { TelemetryConfigType } from './config';
+import type { TelemetryConfigType } from './config';
 import { FetcherTask } from './fetcher';
 import { handleOldSettings } from './handle_old_settings';
 import { getTelemetrySavedObject } from './telemetry_repository';
-import { getTelemetryOptIn } from '../common/telemetry_config';
+import { getTelemetryOptIn, getTelemetryChannelEndpoint } from '../common/telemetry_config';
 
 interface TelemetryPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;
@@ -45,6 +45,9 @@ interface TelemetryPluginsDepsStart {
   telemetryCollectionManager: TelemetryCollectionManagerPluginStart;
 }
 
+/**
+ * Server's setup exposed APIs by the telemetry plugin
+ */
 export interface TelemetryPluginSetup {
   /**
    * Resolves into the telemetry Url used to send telemetry.
@@ -53,6 +56,9 @@ export interface TelemetryPluginSetup {
   getTelemetryUrl: () => Promise<URL>;
 }
 
+/**
+ * Server's start exposed APIs by the telemetry plugin
+ */
 export interface TelemetryPluginStart {
   /**
    * Resolves `true` if the user has opted into send Elastic usage data.
@@ -111,8 +117,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     return {
       getTelemetryUrl: async () => {
-        const config = await config$.pipe(take(1)).toPromise();
-        return new URL(config.url);
+        const { sendUsageTo } = await config$.pipe(take(1)).toPromise();
+        const telemetryUrl = getTelemetryChannelEndpoint({ env: sendUsageTo, channelName: 'main' });
+
+        return new URL(telemetryUrl);
       },
     };
   }

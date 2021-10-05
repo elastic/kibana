@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient } from 'src/core/server';
 import pMap from 'p-map';
 
-import { AGENT_EVENT_SAVED_OBJECT_TYPE, AGENT_SAVED_OBJECT_TYPE } from '../../constants';
+import type { KueryNode } from '@kbn/es-query';
+import { fromKueryExpression } from '@kbn/es-query';
+
+import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import type { AgentStatus } from '../../types';
 import { AgentStatusKueryHelper } from '../../../common/services';
-import { esKuery } from '../../../../../../src/plugins/data/server';
-import type { KueryNode } from '../../../../../../src/plugins/data/server';
 
 import { getAgentById, getAgentsByKuery, removeSOAttributes } from './crud';
 
@@ -20,8 +21,7 @@ export async function getAgentStatusById(
   esClient: ElasticsearchClient,
   agentId: string
 ): Promise<AgentStatus> {
-  const agent = await getAgentById(esClient, agentId);
-  return AgentStatusKueryHelper.getAgentStatus(agent);
+  return (await getAgentById(esClient, agentId)).status!;
 }
 
 export const getAgentStatus = AgentStatusKueryHelper.getAgentStatus;
@@ -33,9 +33,7 @@ function joinKuerys(...kuerys: Array<string | undefined>) {
       if (kuery === undefined) {
         return acc;
       }
-      const normalizedKuery: KueryNode = esKuery.fromKueryExpression(
-        removeSOAttributes(kuery || '')
-      );
+      const normalizedKuery: KueryNode = fromKueryExpression(removeSOAttributes(kuery || ''));
 
       if (!acc) {
         return normalizedKuery;
@@ -50,7 +48,6 @@ function joinKuerys(...kuerys: Array<string | undefined>) {
 }
 
 export async function getAgentStatusForAgentPolicy(
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   agentPolicyId?: string,
   filterKuery?: string
@@ -84,7 +81,6 @@ export async function getAgentStatusForAgentPolicy(
   );
 
   return {
-    events: await getEventsCount(soClient, agentPolicyId),
     total: allActive.total,
     inactive: all.total - allActive.total,
     online: online.total,
@@ -92,20 +88,7 @@ export async function getAgentStatusForAgentPolicy(
     offline: offline.total,
     updating: updating.total,
     other: all.total - online.total - error.total - offline.total,
+    /* @deprecated Agent events do not exists anymore */
+    events: 0,
   };
-}
-
-async function getEventsCount(soClient: SavedObjectsClientContract, agentPolicyId?: string) {
-  const { total } = await soClient.find({
-    type: AGENT_EVENT_SAVED_OBJECT_TYPE,
-    searchFields: ['policy_id'],
-    search: agentPolicyId,
-    perPage: 0,
-    page: 1,
-    sortField: 'timestamp',
-    sortOrder: 'desc',
-    defaultSearchOperator: 'AND',
-  });
-
-  return total;
 }

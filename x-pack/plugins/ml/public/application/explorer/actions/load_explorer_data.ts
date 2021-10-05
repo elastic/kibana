@@ -37,8 +37,8 @@ import { TimefilterContract } from '../../../../../../../src/plugins/data/public
 import { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
 import { CombinedJob } from '../../../../common/types/anomaly_detection_jobs';
 import { InfluencersFilterQuery } from '../../../../common/types/es_client';
-import { ExplorerChartsData } from '../explorer_charts/explorer_charts_container_service';
 import { mlJobService } from '../../services/job_service';
+import { TimeBucketsInterval } from '../../util/time_buckets';
 
 // Memoize the data fetching methods.
 // wrapWithLastRefreshArg() wraps any given function and preprends a `lastRefresh` argument
@@ -56,13 +56,11 @@ const memoize = <T extends (...a: any[]) => any>(func: T, context?: any) => {
   return memoizeOne(wrapWithLastRefreshArg<T>(func, context) as any, memoizeIsEqual);
 };
 
-const memoizedLoadOverallAnnotations = memoize<typeof loadOverallAnnotations>(
-  loadOverallAnnotations
-);
+const memoizedLoadOverallAnnotations =
+  memoize<typeof loadOverallAnnotations>(loadOverallAnnotations);
 
-const memoizedLoadAnnotationsTableData = memoize<typeof loadAnnotationsTableData>(
-  loadAnnotationsTableData
-);
+const memoizedLoadAnnotationsTableData =
+  memoize<typeof loadAnnotationsTableData>(loadAnnotationsTableData);
 const memoizedLoadFilteredTopInfluencers = memoize<typeof loadFilteredTopInfluencers>(
   loadFilteredTopInfluencers
 );
@@ -75,7 +73,7 @@ export interface LoadExplorerDataConfig {
   noInfluencersConfigured: boolean;
   selectedCells: AppStateSelectedCells | undefined;
   selectedJobs: ExplorerJob[];
-  swimlaneBucketInterval: any;
+  swimlaneBucketInterval: TimeBucketsInterval;
   swimlaneLimit: number;
   tableInterval: string;
   tableSeverity: number;
@@ -83,6 +81,7 @@ export interface LoadExplorerDataConfig {
   viewByFromPage: number;
   viewByPerPage: number;
   swimlaneContainerWidth: number;
+  swimLaneSeverity: number;
 }
 
 export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfig => {
@@ -135,6 +134,7 @@ const loadExplorerDataProvider = (
       swimlaneContainerWidth,
       viewByFromPage,
       viewByPerPage,
+      swimLaneSeverity,
     } = config;
 
     const combinedJobRecords: Record<string, CombinedJob> = selectedJobs.reduce((acc, job) => {
@@ -155,7 +155,6 @@ const loadExplorerDataProvider = (
     const dateFormatTz = getDateFormatTz();
 
     const interval = swimlaneBucketInterval.asSeconds();
-
     // First get the data where we have all necessary args at hand using forkJoin:
     // annotationsData, anomalyChartRecords, influencers, overallState, tableData, topFieldValues
     return forkJoin({
@@ -193,7 +192,13 @@ const loadExplorerDataProvider = (
               influencersFilterQuery
             )
           : Promise.resolve({}),
-      overallState: memoizedLoadOverallData(lastRefresh, selectedJobs, swimlaneContainerWidth),
+      overallState: memoizedLoadOverallData(
+        lastRefresh,
+        selectedJobs,
+        swimlaneContainerWidth,
+        undefined,
+        swimLaneSeverity
+      ),
       tableData: memoizedLoadAnomaliesTableData(
         lastRefresh,
         selectedCells,
@@ -216,7 +221,9 @@ const loadExplorerDataProvider = (
               swimlaneLimit,
               viewByPerPage,
               viewByFromPage,
-              swimlaneContainerWidth
+              swimlaneContainerWidth,
+              selectionInfluencers,
+              influencersFilterQuery
             )
           : Promise.resolve([]),
     }).pipe(
@@ -224,7 +231,21 @@ const loadExplorerDataProvider = (
       // show the view-by loading indicator
       // and pass on the data we already fetched.
       tap(explorerService.setViewBySwimlaneLoading),
-      tap(explorerService.setChartsDataLoading),
+      tap(({ anomalyChartRecords, topFieldValues }) => {
+        memoizedAnomalyDataChange(
+          lastRefresh,
+          explorerService,
+          combinedJobRecords,
+          swimlaneContainerWidth,
+          selectedCells !== undefined && Array.isArray(anomalyChartRecords)
+            ? anomalyChartRecords
+            : [],
+          timerange.earliestMs,
+          timerange.latestMs,
+          timefilter,
+          tableSeverity
+        );
+      }),
       mergeMap(
         ({
           overallAnnotations,
@@ -236,18 +257,6 @@ const loadExplorerDataProvider = (
           tableData,
         }) =>
           forkJoin({
-            anomalyChartsData: memoizedAnomalyDataChange(
-              lastRefresh,
-              combinedJobRecords,
-              swimlaneContainerWidth,
-              selectedCells !== undefined && Array.isArray(anomalyChartRecords)
-                ? anomalyChartRecords
-                : [],
-              timerange.earliestMs,
-              timerange.latestMs,
-              timefilter,
-              tableSeverity
-            ),
             filteredTopInfluencers:
               (selectionInfluencers.length > 0 || influencersFilterQuery !== undefined) &&
               anomalyChartRecords !== undefined &&
@@ -277,12 +286,11 @@ const loadExplorerDataProvider = (
               viewByPerPage,
               viewByFromPage,
               swimlaneContainerWidth,
-              influencersFilterQuery
+              influencersFilterQuery,
+              undefined,
+              swimLaneSeverity
             ),
           }).pipe(
-            tap(({ anomalyChartsData }) => {
-              explorerService.setCharts(anomalyChartsData as ExplorerChartsData);
-            }),
             map(({ viewBySwimlaneState, filteredTopInfluencers }) => {
               return {
                 overallAnnotations,

@@ -7,6 +7,7 @@
 
 import { notFound } from '@hapi/boom';
 import { debounce } from 'lodash';
+import { nodeBuilder, fromKueryExpression } from '@kbn/es-query';
 import {
   CoreSetup,
   CoreStart,
@@ -20,11 +21,13 @@ import {
 import {
   IKibanaSearchRequest,
   ISearchOptions,
-  nodeBuilder,
   ENHANCED_ES_SEARCH_STRATEGY,
   SEARCH_SESSION_TYPE,
 } from '../../../../../../src/plugins/data/common';
-import { esKuery, ISearchSessionService } from '../../../../../../src/plugins/data/server';
+import {
+  ISearchSessionService,
+  NoSearchIdInSessionError,
+} from '../../../../../../src/plugins/data/server';
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../../security/server';
 import {
   TaskManagerSetupContract,
@@ -39,11 +42,26 @@ import { createRequestHash } from './utils';
 import { ConfigSchema } from '../../../config';
 import {
   registerSearchSessionsTask,
-  scheduleSearchSessionsTasks,
+  scheduleSearchSessionsTask,
   unscheduleSearchSessionsTask,
-} from './monitoring_task';
+} from './setup_task';
 import { SearchSessionsConfig, SearchStatus } from './types';
 import { DataEnhancedStartDependencies } from '../../type';
+import {
+  checkPersistedSessionsProgress,
+  SEARCH_SESSIONS_TASK_ID,
+  SEARCH_SESSIONS_TASK_TYPE,
+} from './check_persisted_sessions';
+import {
+  SEARCH_SESSIONS_CLEANUP_TASK_TYPE,
+  checkNonPersistedSessions,
+  SEARCH_SESSIONS_CLEANUP_TASK_ID,
+} from './check_non_persisted_sessions';
+import {
+  SEARCH_SESSIONS_EXPIRE_TASK_TYPE,
+  SEARCH_SESSIONS_EXPIRE_TASK_ID,
+  checkPersistedCompletedSessionExpiration,
+} from './expire_persisted_sessions';
 
 export interface SearchSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;
@@ -72,24 +90,50 @@ function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 export class SearchSessionService
-  implements ISearchSessionService<SearchSessionSavedObjectAttributes> {
+  implements ISearchSessionService<SearchSessionSavedObjectAttributes>
+{
   private sessionConfig: SearchSessionsConfig;
   private readonly updateOrCreateBatchQueue: UpdateOrCreateQueueEntry[] = [];
 
   constructor(
     private readonly logger: Logger,
     private readonly config: ConfigSchema,
+    private readonly version: string,
     private readonly security?: SecurityPluginSetup
   ) {
     this.sessionConfig = this.config.search.sessions;
   }
 
   public setup(core: CoreSetup<DataEnhancedStartDependencies>, deps: SetupDependencies) {
-    registerSearchSessionsTask(core, {
+    const taskDeps = {
       config: this.config,
       taskManager: deps.taskManager,
       logger: this.logger,
-    });
+    };
+
+    registerSearchSessionsTask(
+      core,
+      taskDeps,
+      SEARCH_SESSIONS_TASK_TYPE,
+      'persisted session progress',
+      checkPersistedSessionsProgress
+    );
+
+    registerSearchSessionsTask(
+      core,
+      taskDeps,
+      SEARCH_SESSIONS_CLEANUP_TASK_TYPE,
+      'non persisted session cleanup',
+      checkNonPersistedSessions
+    );
+
+    registerSearchSessionsTask(
+      core,
+      taskDeps,
+      SEARCH_SESSIONS_EXPIRE_TASK_TYPE,
+      'complete session expiration',
+      checkPersistedCompletedSessionExpiration
+    );
   }
 
   public async start(core: CoreStart, deps: StartDependencies) {
@@ -99,14 +143,37 @@ export class SearchSessionService
   public stop() {}
 
   private setupMonitoring = async (core: CoreStart, deps: StartDependencies) => {
+    const taskDeps = {
+      config: this.config,
+      taskManager: deps.taskManager,
+      logger: this.logger,
+    };
+
     if (this.sessionConfig.enabled) {
-      scheduleSearchSessionsTasks(
-        deps.taskManager,
-        this.logger,
+      scheduleSearchSessionsTask(
+        taskDeps,
+        SEARCH_SESSIONS_TASK_ID,
+        SEARCH_SESSIONS_TASK_TYPE,
         this.sessionConfig.trackingInterval
       );
+
+      scheduleSearchSessionsTask(
+        taskDeps,
+        SEARCH_SESSIONS_CLEANUP_TASK_ID,
+        SEARCH_SESSIONS_CLEANUP_TASK_TYPE,
+        this.sessionConfig.cleanupInterval
+      );
+
+      scheduleSearchSessionsTask(
+        taskDeps,
+        SEARCH_SESSIONS_EXPIRE_TASK_ID,
+        SEARCH_SESSIONS_EXPIRE_TASK_TYPE,
+        this.sessionConfig.expireInterval
+      );
     } else {
-      unscheduleSearchSessionsTask(deps.taskManager, this.logger);
+      unscheduleSearchSessionsTask(taskDeps, SEARCH_SESSIONS_TASK_ID);
+      unscheduleSearchSessionsTask(taskDeps, SEARCH_SESSIONS_CLEANUP_TASK_ID);
+      unscheduleSearchSessionsTask(taskDeps, SEARCH_SESSIONS_EXPIRE_TASK_ID);
     }
   };
 
@@ -264,6 +331,7 @@ export class SearchSessionService
         touched: new Date().toISOString(),
         idMapping: {},
         persisted: false,
+        version: this.version,
         realmType,
         realmName,
         username,
@@ -307,9 +375,7 @@ export class SearchSessionService
             nodeBuilder.is(`${SEARCH_SESSION_TYPE}.attributes.username`, `${user.username}`),
           ];
     const filterKueryNode =
-      typeof options.filter === 'string'
-        ? esKuery.fromKueryExpression(options.filter)
-        : options.filter;
+      typeof options.filter === 'string' ? fromKueryExpression(options.filter) : options.filter;
     const filter = nodeBuilder.and(userFilters.concat(filterKueryNode ?? []));
     return savedObjectsClient.find<SearchSessionSavedObjectAttributes>({
       ...options,
@@ -436,7 +502,7 @@ export class SearchSessionService
     const requestHash = createRequestHash(searchRequest.params);
     if (!session.attributes.idMapping.hasOwnProperty(requestHash)) {
       this.logger.error(`getId | ${sessionId} | ${requestHash} not found`);
-      throw new Error('No search ID in this session matching the given search request');
+      throw new NoSearchIdInSessionError();
     }
     this.logger.debug(`getId | ${sessionId} | ${requestHash}`);
 

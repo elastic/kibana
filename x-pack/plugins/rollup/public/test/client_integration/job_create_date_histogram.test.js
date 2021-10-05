@@ -7,9 +7,9 @@
 
 import moment from 'moment-timezone';
 
-import { setHttp } from '../../crud_app/services';
+import { setHttp, init as initDocumentation } from '../../crud_app/services';
 import { mockHttpRequest, pageHelpers } from './helpers';
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { docLinksServiceMock, coreMock } from '../../../../../../src/core/public/mocks';
 
 jest.mock('lodash', () => ({
   ...jest.requireActual('lodash'),
@@ -30,6 +30,7 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
   beforeAll(() => {
     startMock = coreMock.createStart();
     setHttp(startMock.http);
+    initDocumentation(docLinksServiceMock.createStartContract());
   });
   beforeEach(() => {
     // Set "default" mock responses by not providing any arguments

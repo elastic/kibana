@@ -19,7 +19,7 @@ export const ArtifactConstants = {
    * @deprecated
    */
   SAVED_OBJECT_TYPE: 'endpoint:user-artifact',
-  SUPPORTED_OPERATING_SYSTEMS: ['macos', 'windows'],
+  SUPPORTED_OPERATING_SYSTEMS: ['macos', 'windows', 'linux'],
   SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS: ['macos', 'windows', 'linux'],
   GLOBAL_TRUSTED_APPS_NAME: 'endpoint-trustlist',
 

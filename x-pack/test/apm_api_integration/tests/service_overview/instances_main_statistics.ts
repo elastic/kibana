@@ -7,16 +7,17 @@
 
 import expect from '@kbn/expect';
 import { pick, sortBy } from 'lodash';
+import moment from 'moment';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { registry } from '../../common/registry';
-import { createApmApiSupertest } from '../../common/apm_api_supertest';
+
 import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const apmApiSupertest = createApmApiSupertest(getService('supertest'));
+  const apmApiClient = getService('apmApiClient');
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
@@ -27,28 +28,32 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('when data is not loaded', () => {
         it('handles the empty state', async () => {
-          const response = await apmApiSupertest({
+          const response = await apmApiClient.readUser({
             endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-java' },
               query: {
                 latencyAggregationType: LatencyAggregationType.avg,
-                start,
-                end,
                 transactionType: 'request',
+                start: moment(end).subtract(15, 'minutes').toISOString(),
+                end,
+                comparisonStart: start,
+                comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             },
           });
-
           expect(response.status).to.be(200);
-          expect(response.body.serviceInstances).to.eql([]);
+          expect(response.body.currentPeriod).to.eql([]);
+          expect(response.body.previousPeriod).to.eql([]);
         });
       });
     }
   );
 
   registry.when(
-    'Service overview instances main statistics when data is loaded',
+    'Service overview instances main statistics when data is loaded without comparison',
     { config: 'basic', archives: [archiveName] },
     () => {
       describe('fetching java data', () => {
@@ -57,7 +62,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         };
 
         beforeEach(async () => {
-          response = await apmApiSupertest({
+          response = await apmApiClient.readUser({
             endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-java' },
@@ -66,17 +71,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 start,
                 end,
                 transactionType: 'request',
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             },
           });
         });
 
         it('returns a service node item', () => {
-          expect(response.body.serviceInstances.length).to.be.greaterThan(0);
+          expect(response.body.currentPeriod.length).to.be.greaterThan(0);
         });
 
         it('returns statistics for each service node', () => {
-          const item = response.body.serviceInstances[0];
+          const item = response.body.currentPeriod[0];
 
           expect(isFiniteNumber(item.cpuUsage)).to.be(true);
           expect(isFiniteNumber(item.memoryUsage)).to.be(true);
@@ -86,7 +93,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns the right data', () => {
-          const items = sortBy(response.body.serviceInstances, 'serviceNodeName');
+          const items = sortBy(response.body.currentPeriod, 'serviceNodeName');
 
           const serviceNodeNames = items.map((item) => item.serviceNodeName);
 
@@ -94,7 +101,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expectSnapshot(serviceNodeNames).toMatchInline(`
             Array [
-              "02950c4c5fbb0fda1cc98c47bf4024b473a8a17629db6530d95dcee68bd54c6c",
+              "31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad",
             ]
           `);
 
@@ -110,11 +117,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expectSnapshot(values).toMatchInline(`
             Object {
-              "cpuUsage": 0.0120166666666667,
-              "errorRate": 0.16,
-              "latency": 237339.813333333,
-              "memoryUsage": 0.941324615478516,
-              "throughput": 2.5,
+              "cpuUsage": 0.002,
+              "errorRate": 0.0252659574468085,
+              "latency": 411589.785714286,
+              "memoryUsage": 0.786029688517253,
+              "throughput": 25.0666666666667,
             }
           `);
         });
@@ -126,7 +133,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         };
 
         beforeEach(async () => {
-          response = await apmApiSupertest({
+          response = await apmApiClient.readUser({
             endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-ruby' },
@@ -135,13 +142,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 start,
                 end,
                 transactionType: 'request',
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             },
           });
         });
 
         it('returns statistics for each service node', () => {
-          const item = response.body.serviceInstances[0];
+          const item = response.body.currentPeriod[0];
 
           expect(isFiniteNumber(item.cpuUsage)).to.be(true);
           expect(isFiniteNumber(item.memoryUsage)).to.be(true);
@@ -151,7 +160,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns the right data', () => {
-          const items = sortBy(response.body.serviceInstances, 'serviceNodeName');
+          const items = sortBy(response.body.currentPeriod, 'serviceNodeName');
 
           const serviceNodeNames = items.map((item) => item.serviceNodeName);
 
@@ -159,7 +168,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expectSnapshot(serviceNodeNames).toMatchInline(`
             Array [
-              "_service_node_name_missing_",
+              "b4c600993a0b233120cd333b8c4a7e35e73ee8f18f95b5854b8d7f6442531466",
             ]
           `);
 
@@ -169,14 +178,102 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expectSnapshot(values).toMatchInline(`
             Object {
-              "cpuUsage": 0.00111666666666667,
-              "errorRate": 0.0373134328358209,
-              "latency": 70518.9328358209,
-              "throughput": 4.46666666666667,
+              "cpuUsage": 0.001,
+              "errorRate": 0.000907441016333938,
+              "latency": 40989.5802047782,
+              "throughput": 36.7333333333333,
             }
           `);
 
           expectSnapshot(values);
+        });
+      });
+    }
+  );
+
+  registry.when(
+    'Service overview instances main statistics when data is loaded with comparison',
+    { config: 'basic', archives: [archiveName] },
+    () => {
+      describe('fetching java data', () => {
+        let response: {
+          body: APIReturnType<`GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`>;
+        };
+
+        beforeEach(async () => {
+          response = await apmApiClient.readUser({
+            endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
+            params: {
+              path: { serviceName: 'opbeans-java' },
+              query: {
+                latencyAggregationType: LatencyAggregationType.avg,
+                transactionType: 'request',
+                start: moment(end).subtract(15, 'minutes').toISOString(),
+                end,
+                comparisonStart: start,
+                comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
+              },
+            },
+          });
+        });
+
+        it('returns a service node item', () => {
+          expect(response.body.currentPeriod.length).to.be.greaterThan(0);
+          expect(response.body.previousPeriod.length).to.be.greaterThan(0);
+        });
+
+        it('returns statistics for each service node', () => {
+          const currentItem = response.body.currentPeriod[0];
+
+          expect(isFiniteNumber(currentItem.cpuUsage)).to.be(true);
+          expect(isFiniteNumber(currentItem.memoryUsage)).to.be(true);
+          expect(isFiniteNumber(currentItem.errorRate)).to.be(true);
+          expect(isFiniteNumber(currentItem.throughput)).to.be(true);
+          expect(isFiniteNumber(currentItem.latency)).to.be(true);
+
+          const previousItem = response.body.previousPeriod[0];
+
+          expect(isFiniteNumber(previousItem.cpuUsage)).to.be(true);
+          expect(isFiniteNumber(previousItem.memoryUsage)).to.be(true);
+          expect(isFiniteNumber(previousItem.errorRate)).to.be(true);
+          expect(isFiniteNumber(previousItem.throughput)).to.be(true);
+          expect(isFiniteNumber(previousItem.latency)).to.be(true);
+        });
+
+        it('returns the right data', () => {
+          const items = sortBy(response.body.previousPeriod, 'serviceNodeName');
+
+          const serviceNodeNames = items.map((item) => item.serviceNodeName);
+
+          expectSnapshot(items.length).toMatchInline(`1`);
+
+          expectSnapshot(serviceNodeNames).toMatchInline(`
+            Array [
+              "31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad",
+            ]
+          `);
+
+          const item = items[0];
+
+          const values = pick(item, [
+            'cpuUsage',
+            'memoryUsage',
+            'errorRate',
+            'throughput',
+            'latency',
+          ]);
+
+          expectSnapshot(values).toMatchInline(`
+            Object {
+              "cpuUsage": 0.00223333333333333,
+              "errorRate": 0.0268292682926829,
+              "latency": 739013.634146341,
+              "memoryUsage": 0.783296203613281,
+              "throughput": 27.3333333333333,
+            }
+          `);
         });
       });
     }

@@ -21,7 +21,7 @@ describe('AllRulesTables', () => {
         <AllRulesTables
           selectedTab={AllRulesTabs.rules}
           euiBasicTableSelectionProps={{}}
-          hasNoPermissions={false}
+          hasPermissions
           monitoringColumns={[]}
           rules={[]}
           rulesColumns={[]}
@@ -56,7 +56,7 @@ describe('AllRulesTables', () => {
         <AllRulesTables
           selectedTab={AllRulesTabs.rules}
           euiBasicTableSelectionProps={{}}
-          hasNoPermissions={false}
+          hasPermissions
           monitoringColumns={[]}
           rules={[]}
           rulesColumns={[]}
@@ -92,7 +92,7 @@ describe('AllRulesTables', () => {
         <AllRulesTables
           selectedTab={AllRulesTabs.monitoring}
           euiBasicTableSelectionProps={{}}
-          hasNoPermissions={false}
+          hasPermissions
           monitoringColumns={[]}
           rules={[]}
           rulesColumns={[]}

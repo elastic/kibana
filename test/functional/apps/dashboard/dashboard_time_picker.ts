@@ -12,9 +12,16 @@ import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const dashboardExpect = getService('dashboardExpect');
   const pieChart = getService('pieChart');
   const dashboardVisualizations = getService('dashboardVisualizations');
-  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'dashboard',
+    'header',
+    'visualize',
+    'timePicker',
+    'discover',
+  ]);
   const browser = getService('browser');
   const log = getService('log');
   const kibanaServer = getService('kibanaServer');
@@ -49,16 +56,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         name: 'saved search',
         fields: ['bytes', 'agent'],
       });
-      const initialRows = await dataGrid.getDocTableRows();
-      expect(initialRows.length).to.be(11);
 
-      // Set to time range with no data
-      await PageObjects.timePicker.setAbsoluteRange(
-        'Jan 1, 2000 @ 00:00:00.000',
-        'Jan 1, 2000 @ 01:00:00.000'
-      );
-      const noResults = await dataGrid.hasNoResults();
-      expect(noResults).to.be.ok();
+      const isLegacyDefault = await PageObjects.discover.useLegacyTable();
+      if (isLegacyDefault) {
+        await dashboardExpect.docTableFieldCount(150);
+
+        // Set to time range with no data
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Jan 1, 2000 @ 00:00:00.000',
+          'Jan 1, 2000 @ 01:00:00.000'
+        );
+        await dashboardExpect.docTableFieldCount(0);
+      } else {
+        const initialRows = await dataGrid.getDocTableRows();
+        expect(initialRows.length).to.above(10);
+
+        // Set to time range with no data
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Jan 1, 2000 @ 00:00:00.000',
+          'Jan 1, 2000 @ 01:00:00.000'
+        );
+        const noResults = await dataGrid.hasNoResults();
+        expect(noResults).to.be.ok();
+      }
     });
 
     it('Timepicker start, end, interval values are set by url', async () => {

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { ShareToSpaceFlyoutProps } from 'src/plugins/spaces_oss/public';
+import type { ShareToSpaceFlyoutProps } from '../types';
 
 export const getShareToSpaceFlyoutComponent = async (): Promise<
   React.FC<ShareToSpaceFlyoutProps>
