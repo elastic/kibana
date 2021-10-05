@@ -26,7 +26,14 @@ export async function getDefaultMetricsCharts({
 }) {
   const charts = await Promise.all([
     getCPUChartData({ environment, kuery, setup, serviceAgentIds, start, end }),
-    getMemoryChartData({ environment, kuery, setup, serviceAgentIds, start, end }),
+    getMemoryChartData({
+      environment,
+      kuery,
+      setup,
+      serviceAgentIds,
+      start,
+      end,
+    }),
   ]);
 
   return { charts };

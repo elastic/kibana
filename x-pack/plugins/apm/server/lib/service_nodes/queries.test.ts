@@ -73,7 +73,8 @@ describe('service node queries', () => {
   });
 
   it('fetches services nodes', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams(
+      (setup) =>
         getServiceNodes({
           setup,
           serviceName: 'foo',
@@ -89,7 +90,8 @@ describe('service node queries', () => {
   });
 
   it('fetches metadata for a service node', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams(
+      (setup) =>
         getServiceNodeMetadata({
           setup,
           serviceName: 'foo',
@@ -105,7 +107,8 @@ describe('service node queries', () => {
   });
 
   it('fetches metadata for unidentified service nodes', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams(
+      (setup) =>
         getServiceNodeMetadata({
           setup,
           serviceName: 'foo',
