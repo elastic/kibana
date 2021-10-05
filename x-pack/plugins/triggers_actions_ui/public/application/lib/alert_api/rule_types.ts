@@ -21,6 +21,7 @@ const rewriteBodyReq: RewriteRequestCase<AlertType> = ({
   minimum_license_required: minimumLicenseRequired,
   action_variables: actionVariables,
   authorized_consumers: authorizedConsumers,
+  rule_task_timeout: ruleTaskTimeout,
   ...rest
 }: AsApiContract<AlertType>) => ({
   enabledInLicense,
@@ -30,6 +31,7 @@ const rewriteBodyReq: RewriteRequestCase<AlertType> = ({
   minimumLicenseRequired,
   actionVariables,
   authorizedConsumers,
+  ruleTaskTimeout,
   ...rest,
 });
 
