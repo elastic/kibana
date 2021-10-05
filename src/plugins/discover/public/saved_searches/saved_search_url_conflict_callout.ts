@@ -8,7 +8,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { getSavedSearchUrl, savedSearchHasUrlConflict } from './saved_searches_utils';
-import { SAVED_SEARCH_TYPE } from './constants';
 
 import type { SavedSearch } from './types';
 import type { SpacesApi } from '../../../../../x-pack/plugins/spaces/public';
@@ -28,10 +27,9 @@ export const SavedSearchURLConflictCallout = ({
     if (otherObjectId) {
       return spaces.ui.components.getLegacyUrlConflict({
         objectNoun: i18n.translate('discover.savedSearchURLConflictCallout.objectNoun', {
-          defaultMessage: '{savedSearch} {type}',
+          defaultMessage: '{savedSearch} search',
           values: {
             savedSearch: savedSearch.title,
-            type: SAVED_SEARCH_TYPE,
           },
         }),
         currentObjectId: savedSearch.id,

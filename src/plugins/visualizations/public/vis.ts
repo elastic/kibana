@@ -61,13 +61,13 @@ export interface VisData {
 
 const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?: string) => {
   if (savedSearchId) {
-    const savedSearchSearch = await getSavedSearch(savedSearchId, {
+    const savedSearch = await getSavedSearch(savedSearchId, {
       search: getSearch(),
       savedObjectsClient: getSavedObjects().client,
     });
 
-    if (savedSearchSearch?.searchSource) {
-      return savedSearchSearch?.searchSource;
+    if (savedSearch?.searchSource) {
+      inputSearchSource.setParent(savedSearch.searchSource);
     }
   }
   return inputSearchSource;
