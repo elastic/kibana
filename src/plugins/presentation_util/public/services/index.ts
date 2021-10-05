@@ -12,6 +12,7 @@ import { PresentationCapabilitiesService } from './capabilities';
 import { PresentationDashboardsService } from './dashboards';
 import { PresentationLabsService } from './labs';
 import { registry as stubRegistry } from './stub';
+import { PresentationOverlaysService } from './overlays';
 
 export { PresentationCapabilitiesService } from './capabilities';
 export { PresentationDashboardsService } from './dashboards';
@@ -19,6 +20,7 @@ export { PresentationLabsService } from './labs';
 export interface PresentationUtilServices {
   dashboards: PresentationDashboardsService;
   capabilities: PresentationCapabilitiesService;
+  overlays: PresentationOverlaysService;
   labs: PresentationLabsService;
 }
 

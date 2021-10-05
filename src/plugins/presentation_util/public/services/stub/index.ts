@@ -11,6 +11,7 @@ import { dashboardsServiceFactory } from './dashboards';
 import { labsServiceFactory } from './labs';
 import { PluginServiceProviders, PluginServiceProvider, PluginServiceRegistry } from '../create';
 import { PresentationUtilServices } from '..';
+import { overlaysServiceFactory } from './overlays';
 
 export { dashboardsServiceFactory } from './dashboards';
 export { capabilitiesServiceFactory } from './capabilities';
@@ -18,6 +19,7 @@ export { capabilitiesServiceFactory } from './capabilities';
 export const providers: PluginServiceProviders<PresentationUtilServices> = {
   dashboards: new PluginServiceProvider(dashboardsServiceFactory),
   capabilities: new PluginServiceProvider(capabilitiesServiceFactory),
+  overlays: new PluginServiceProvider(overlaysServiceFactory),
   labs: new PluginServiceProvider(labsServiceFactory),
 };
 

@@ -19,6 +19,16 @@ export const OptionsListStrings = {
         defaultMessage: 'Select...',
       }),
   },
+  editor: {
+    getIndexPatternTitle: () =>
+      i18n.translate('presentationUtil.inputControls.optionsList.editor.indexPatternTitle', {
+        defaultMessage: 'Index pattern',
+      }),
+    getFieldTitle: () =>
+      i18n.translate('presentationUtil.inputControls.optionsList.editor.fieldTitle', {
+        defaultMessage: 'Field',
+      }),
+  },
   popover: {
     getLoadingMessage: () =>
       i18n.translate('presentationUtil.inputControls.optionsList.popover.loading', {
