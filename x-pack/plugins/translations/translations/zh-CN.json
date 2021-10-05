@@ -2388,6 +2388,7 @@
     "discover.doc.failedToLocateDocumentDescription": "无法找到文档",
     "discover.doc.loadingDescription": "正在加载……",
     "discover.doc.somethingWentWrongDescription": "{indexName} 缺失。",
+    "discover.doc.somethingWentWrongDescriptionAddon": "请确保索引存在。",
     "discover.docTable.documentsNavigation": "文档导航",
     "discover.docTable.limitedSearchResultLabel": "仅限于 {resultCount} 个结果。优化您的搜索。",
     "discover.docTable.noResultsTitle": "找不到结果",

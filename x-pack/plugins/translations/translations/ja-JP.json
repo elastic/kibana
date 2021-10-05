@@ -2366,6 +2366,7 @@
     "discover.doc.failedToLocateDocumentDescription": "ドキュメントが見つかりませんでした",
     "discover.doc.loadingDescription": "読み込み中…",
     "discover.doc.somethingWentWrongDescription": "{indexName}が見つかりません。",
+    "discover.doc.somethingWentWrongDescriptionAddon": "インデックスが存在することを確認してください。",
     "discover.docTable.documentsNavigation": "ドキュメントナビゲーション",
     "discover.docTable.limitedSearchResultLabel": "{resultCount}件の結果のみが表示されます。検索結果を絞り込みます。",
     "discover.docTable.noResultsTitle": "結果が見つかりませんでした",

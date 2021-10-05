@@ -98,7 +98,7 @@ export function Doc(props: DocProps) {
             <EuiLink href={indexExistsLink} target="_blank">
               <FormattedMessage
                 id="discover.doc.somethingWentWrongDescriptionAddon"
-                defaultMessage="Please ensure the data view exists."
+                defaultMessage="Please ensure the index exists."
               />
             </EuiLink>
           </EuiCallOut>
