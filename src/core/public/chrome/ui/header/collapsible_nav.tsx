@@ -33,6 +33,7 @@ import {
   createRecentNavLink,
   isModifiedOrPrevented,
   createEuiButtonItem,
+  createOverviewLink,
 } from './nav_link';
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
@@ -101,20 +102,27 @@ export function CollapsibleNav({
   ...observables
 }: Props) {
   const allLinks = useObservable(observables.navLinks$, []);
+  // Filterting out hidden links, overview pages, and integrations link in favor of a specific Add Data button at the bottom
   const allowedLinks = useMemo(
     () =>
       allLinks.filter(
-        // Filterting out hidden links and the integrations one in favor of a specific Add Data button at the bottom
-        (link) => !link.hidden && link.id !== 'integrations'
+        (link) => !link.hidden && link.id !== 'integrations' && link.title !== 'Overview'
       ),
     [allLinks]
   );
+  // Find just the integrations link
   const integrationsLink = useMemo(
-    () =>
-      allLinks.find(
-        // Find just the integrations link
-        (link) => link.id === 'integrations'
-      ),
+    () => allLinks.find((link) => link.id === 'integrations'),
+    [allLinks]
+  );
+  // Find all the overview (landing page) links
+  const overviewLinks = useMemo(
+    () => allLinks.filter((link) => link.title === 'Overview'),
+    [allLinks]
+  );
+  // Find all the Stack Management link to use as the Management "overview" page
+  const stackManagmentLink = useMemo(
+    () => allLinks.find((link) => link.id === 'management'),
     [allLinks]
   );
   const recentlyAccessed = useObservable(observables.recentlyAccessed$, []);
@@ -270,13 +278,32 @@ export function CollapsibleNav({
         {/* Kibana, Observability, Security, and Management sections */}
         {orderedCategories.map((categoryName) => {
           const category = categoryDictionary[categoryName]!;
+          const overviewLink =
+            category.label === 'Management'
+              ? stackManagmentLink
+              : overviewLinks.find((link) => link.category === category);
 
           return (
             <EuiCollapsibleNavGroup
               key={category.id}
               iconType={category.euiIconType}
               iconSize="m"
-              title={category.label}
+              title={
+                overviewLink ? (
+                  <a
+                    className="eui-textInheritColor"
+                    {...createOverviewLink({
+                      link: overviewLink,
+                      navigateToUrl,
+                      onClick: closeNav,
+                    })}
+                  >
+                    {category.label}
+                  </a>
+                ) : (
+                  category.label
+                )
+              }
               isCollapsible={true}
               initialIsOpen={getIsCategoryOpen(category.id, storage)}
               onToggle={(isCategoryOpen) => setIsCategoryOpen(category.id, isCategoryOpen, storage)}
@@ -355,7 +382,6 @@ export function CollapsibleNav({
                 link: integrationsLink,
                 navigateToUrl,
                 onClick: closeNav,
-                dataTestSubj: `collapsibleNavAppButton-${integrationsLink.id}`,
               })}
               fill
               fullWidth
