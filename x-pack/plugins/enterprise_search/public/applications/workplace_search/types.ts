@@ -145,6 +145,7 @@ interface SyncIndexItem<T> {
 
 interface IndexingSchedule extends SyncIndexItem<string> {
   estimates: SyncIndexItem<SyncEstimate>;
+  blockedWindows?: BlockedWindow[];
 }
 
 export type SyncJobType = 'full' | 'incremental' | 'delete' | 'permissions';
