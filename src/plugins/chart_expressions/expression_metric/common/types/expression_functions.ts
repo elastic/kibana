@@ -9,24 +9,21 @@
 import {
   Datatable,
   ExpressionFunctionDefinition,
-  Range,
   ExpressionValueRender,
   Style,
 } from '../../../../expressions';
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { ColorSchemas, ColorMode } from '../../../../charts/common';
+import { ColorMode, CustomPaletteState, PaletteOutput } from '../../../../charts/common';
 import { VisParams, visType } from './expression_renderers';
 import { EXPRESSION_METRIC_NAME } from '../constants';
 
 export interface MetricArguments {
   percentageMode: boolean;
-  colorSchema: ColorSchemas;
   colorMode: ColorMode;
-  invertColors: boolean;
   showLabels: boolean;
   bgFill: string;
   subText: string;
-  colorRange: Range[];
+  palette: PaletteOutput<CustomPaletteState>;
   font: Style;
   metric: ExpressionValueVisDimension[];
   bucket: ExpressionValueVisDimension;

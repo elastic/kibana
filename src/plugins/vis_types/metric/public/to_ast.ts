@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
+import { get, last } from 'lodash';
 import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '../../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
 import {
@@ -14,6 +14,7 @@ import {
   IndexPatternLoadExpressionFunctionDefinition,
 } from '../../../data/public';
 import { VisParams } from './types';
+import { getStopsWithColorsFromRanges } from './utils';
 
 const prepareDimension = (params: SchemaConfig) => {
   const visdimension = buildExpressionFunction('visdimension', { accessor: params.accessor });
@@ -75,13 +76,17 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
     metricVis.addArgument('subText', style.subText);
   }
 
-  if (colorsRange) {
-    colorsRange.forEach((range: any) => {
-      metricVis.addArgument(
-        'colorRange',
-        buildExpression(`range from=${range.from} to=${range.to}`)
-      );
+  if (colorsRange && colorsRange.length) {
+    const stopsWithColors = getStopsWithColorsFromRanges(colorsRange, colorSchema, invertColors);
+    const palette = buildExpressionFunction('palette', {
+      ...stopsWithColors,
+      range: percentageMode ? 'percent' : 'number',
+      rangeMin: colorsRange[0].from,
+      rangeMax: last(colorsRange)?.to,
+      reverse: invertColors,
     });
+
+    metricVis.addArgument('palette', buildExpression([palette]));
   }
 
   if (schemas.group) {

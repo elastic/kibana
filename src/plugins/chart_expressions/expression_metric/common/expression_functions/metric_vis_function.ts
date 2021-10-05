@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { visType } from '../types';
 import { prepareLogTable, Dimension } from '../../../../visualizations/common/prepare_log_table';
-import { vislibColorMaps, ColorMode, ColorSchemas } from '../../../../charts/common';
+import { ColorMode } from '../../../../charts/common';
 import { MetricVisExpressionFunctionDefinition } from '../types';
 import { EXPRESSION_METRIC_NAME } from '../constants';
 
@@ -30,27 +30,12 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       }),
     },
     /* ---- Should support or remove? ---- */
-    colorSchema: {
-      types: ['string'],
-      default: `"${ColorSchemas.GreenToRed}"`,
-      options: Object.values(vislibColorMaps).map((value: any) => value.id),
-      help: i18n.translate('expressionMetricVis.function.colorSchema.help', {
-        defaultMessage: 'Color schema to use',
-      }),
-    },
     colorMode: {
       types: ['string'],
       default: `"${ColorMode.None}"`,
       options: [ColorMode.None, ColorMode.Labels, ColorMode.Background],
       help: i18n.translate('expressionMetricVis.function.colorMode.help', {
         defaultMessage: 'Which part of metric to color',
-      }),
-    },
-    invertColors: {
-      types: ['boolean'],
-      default: false,
-      help: i18n.translate('expressionMetricVis.function.invertColors.help', {
-        defaultMessage: 'Inverts the color ranges',
       }),
     },
     /* --------------------------- */
@@ -64,13 +49,10 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       }),
     },
     /* --------------------------- */
-    colorRange: {
-      types: ['range'],
-      multi: true,
-      default: '{range from=0 to=10000}',
-      help: i18n.translate('expressionMetricVis.function.colorRange.help', {
-        defaultMessage:
-          'A range object specifying groups of values to which different colors should be applied.',
+    palette: {
+      types: ['palette'],
+      help: i18n.translate('expressionMetricVis.function.palette.help', {
+        defaultMessage: '!!!! TODO add description',
       }),
     },
 
@@ -114,7 +96,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     },
   },
   fn(input, args, handlers) {
-    if (args.percentageMode && (!args.colorRange || args.colorRange.length === 0)) {
+    if (args.percentageMode && !args.palette) {
       throw new Error('colorRange must be provided when using percentageMode');
     }
 
@@ -149,14 +131,12 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         visType,
         visConfig: {
           metric: {
+            palette: args.palette.params,
             percentageMode: args.percentageMode,
-            colorSchema: args.colorSchema,
             metricColorMode: args.colorMode,
-            colorsRange: args.colorRange,
             labels: {
               show: args.showLabels,
             },
-            invertColors: args.invertColors,
             style: {
               bgFill: args.bgFill,
               bgColor: args.colorMode === ColorMode.Background,
