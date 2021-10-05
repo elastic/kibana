@@ -340,7 +340,7 @@ test('format() meta can not override tracing properties', () => {
       })
     )
   ).toStrictEqual({
-    ecs: { version: '1.9.0' },
+    ecs: { version: expect.any(String) },
     '@timestamp': '2012-02-01T09:30:22.011-05:00',
     message: 'foo',
     log: {
