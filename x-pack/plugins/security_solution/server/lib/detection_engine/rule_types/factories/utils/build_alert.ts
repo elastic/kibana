@@ -73,6 +73,7 @@ export const buildParent = (doc: SimpleHit): Ancestor => {
  * @param doc The parent event for which to extend the ancestry.
  */
 export const buildAncestors = (doc: SimpleHit): Ancestor[] => {
+  // TODO: handle alerts-on-legacy-alerts
   const newAncestor = buildParent(doc);
   const existingAncestors: Ancestor[] = getField(doc, 'signal.ancestors') ?? [];
   return [...existingAncestors, newAncestor];

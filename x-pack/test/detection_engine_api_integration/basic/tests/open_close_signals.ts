@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import type { estypes } from '@elastic/elasticsearch';
-import { Signal } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
@@ -92,12 +91,11 @@ export default ({ getService }: FtrProviderContext) => {
           .send(setSignalStatus({ signalIds, status: 'closed' }))
           .expect(200);
 
-        const { body: signalsClosed }: { body: estypes.SearchResponse<{ signal: Signal }> } =
-          await supertest
-            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds(signalIds))
-            .expect(200);
+        const { body: signalsClosed }: { body: estypes.SearchResponse<RACAlert> } = await supertest
+          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getQuerySignalIds(signalIds))
+          .expect(200);
         expect(signalsClosed.hits.hits.length).to.equal(10);
       });
 

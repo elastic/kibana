@@ -79,7 +79,7 @@ describe('buildAlert', () => {
       [ALERT_WORKFLOW_STATUS]: 'open',
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
         author: [],
-        docId: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
+        uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
         created_at: new Date(ANCHOR_DATE).toISOString(),
         updated_at: new Date(ANCHOR_DATE).toISOString(),
         created_by: 'elastic',
@@ -159,7 +159,7 @@ describe('buildAlert', () => {
       [ALERT_WORKFLOW_STATUS]: 'open',
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
         author: [],
-        docId: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
+        uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
         created_at: new Date(ANCHOR_DATE).toISOString(),
         updated_at: new Date(ANCHOR_DATE).toISOString(),
         created_by: 'elastic',

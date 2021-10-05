@@ -161,15 +161,15 @@ describe('Events Details Helpers', () => {
         isObjectArray: false,
       },
       {
-        category: 'signal',
+        category: 'kibana',
         field: 'kibana.alert.workflow_status',
         values: ['open'],
         originalValue: ['open'],
         isObjectArray: false,
       },
       {
-        category: 'signal',
-        field: 'signal.rule.name',
+        category: 'kibana',
+        field: 'kibana.alert.rule.name',
         values: ['Rawr'],
         originalValue: ['Rawr'],
         isObjectArray: false,

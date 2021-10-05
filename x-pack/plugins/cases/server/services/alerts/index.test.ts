@@ -113,11 +113,11 @@ describe('updateAlertsStatus', () => {
               },
               "script": Object {
                 "lang": "painless",
-                "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                      ctx._source['kibana.alert.workflow_status'] = 'acknowledged'
+                "source": "if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
+                      ctx._source['${ALERT_WORKFLOW_STATUS}'] = 'acknowledged'
                     }
                     if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'closed'
+                      ctx._source.signal.status = 'acknowledged'
                     }",
               },
             },
@@ -161,7 +161,7 @@ describe('updateAlertsStatus', () => {
                     }
                     if (ctx._source.signal != null && ctx._source.signal.status != null) {
                       ctx._source.signal.status = 'closed'
-                    }
+                    }"
               },
             },
             "conflicts": "abort",
@@ -189,7 +189,7 @@ describe('updateAlertsStatus', () => {
                       ctx._source['${ALERT_WORKFLOW_STATUS}'] = 'open'
                     }
                     if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'closed'
+                      ctx._source.signal.status = 'open'
                     }",
               },
             },

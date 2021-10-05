@@ -23,6 +23,7 @@ import {
   waitForIndexToPopulate,
 } from '../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
+import { RACAlert } from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/types';
 
 interface CreateResponse {
   index: string;
@@ -97,7 +98,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const [{ migration_index: newIndex }] = createResponses;
       await waitForIndexToPopulate(es, newIndex);
-      const { body: migrationResults } = await es.search<{ signal: Signal }>({ index: newIndex });
+      const { body: migrationResults } = await es.search<RACAlert>({ index: newIndex });
 
       expect(migrationResults.hits.hits).length(1);
       const migratedSignal = migrationResults.hits.hits[0]._source?.signal;

@@ -13,6 +13,7 @@ export const filterDuplicateSignals = (
   signals: SimpleHit[],
   isRuleRegistryEnabled: boolean
 ) => {
+  // TODO: handle alerts-on-legacy-alerts
   if (!isRuleRegistryEnabled) {
     return (signals as WrappedSignalHit[]).filter(
       (doc) => !doc._source.signal?.ancestors.some((ancestor) => ancestor.rule === ruleId)
