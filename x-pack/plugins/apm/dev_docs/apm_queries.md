@@ -34,6 +34,8 @@ A pre-aggregated document where `_doc_count` is the number of original transacti
 }
 ```
 
+The decision to use aggregated transactions or not is determined in [`getSearchAggregatedTransactions`](https://github.com/elastic/kibana/blob/a2ac439f56313b7a3fc4708f54a4deebf2615136/x-pack/plugins/apm/server/lib/helpers/aggregated_transactions/index.ts#L53-L79) and then used to [specify the index](https://github.com/elastic/kibana/blob/a2ac439f56313b7a3fc4708f54a4deebf2615136/x-pack/plugins/apm/server/lib/suggestions/get_suggestions.ts#L30-L32) and the [latency field](https://github.com/elastic/kibana/blob/a2ac439f56313b7a3fc4708f54a4deebf2615136/x-pack/plugins/apm/server/lib/alerts/chart_preview/get_transaction_duration.ts#L62-L65)
+
 ### Latency
 
 Latency is the duration of a transaction. This can be calculated using transaction events or metric events (aggregated transactions).
