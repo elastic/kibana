@@ -54,7 +54,7 @@ describe('RuleDetailsPageComponent', () => {
     ]);
   });
 
-  it('renders correctly', async () => {
+  it('renders reported rule failures correctly', async () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Router history={mockHistory}>
@@ -65,6 +65,7 @@ describe('RuleDetailsPageComponent', () => {
 
     await waitFor(() => {
       expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
+      // ensure the expected error message is displayed in the table
       expect(wrapper.find('EuiTableRowCell').at(2).find('div').at(1).text()).toEqual(
         'my fake failure message'
       );
@@ -83,16 +84,5 @@ describe('FailureHistory', () => {
     });
 
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
-  });
-
-  // WORKING
-
-  it('renders incorrectly', () => {
-    (useRuleStatus as jest.Mock).mockReturnValue([true, null]);
-    const wrapper = shallow(<FailureHistory id="id" />, {
-      wrappingComponent: TestProviders,
-    });
-
-    expect(wrapper.find('EuiPanel')).toHaveLength(1);
   });
 });
