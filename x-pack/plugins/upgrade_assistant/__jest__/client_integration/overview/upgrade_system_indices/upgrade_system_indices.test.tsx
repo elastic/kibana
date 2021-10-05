@@ -105,7 +105,7 @@ describe('Overview - Upgrade system indices - Step', () => {
       httpRequestsMockHelpers.setLoadSystemIndicesUpgradeStatus({
         upgrade_status: 'UPGRADE_NEEDED',
       });
-      httpRequestsMockHelpers.setUpgradeSystemIndicesStatus(undefined, {
+      httpRequestsMockHelpers.setUpgradeSystemIndicesResponse(undefined, {
         statusCode: 400,
         message: 'error',
       });

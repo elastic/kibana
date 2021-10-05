@@ -601,6 +601,7 @@ export interface DocLinksStart {
         readonly upgradeAssistant: {
             readonly overview: string;
             readonly batchReindex: string;
+            readonly systemFeaturesUpgrade: string;
         };
         readonly rollupJobs: string;
         readonly elasticsearch: Record<string, string>;

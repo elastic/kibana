@@ -8,7 +8,8 @@
 import { act } from 'react-dom/test-utils';
 
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
-import { setupEnvironment } from '../../helpers';
+import { setupEnvironment, advanceTime } from '../../helpers';
+import { SYSTEM_INDICES_UPGRADE_POLL_INTERVAL_MS } from '../../../../common/constants';
 
 describe('Overview - Upgrade system indices - Step status', () => {
   let testBed: OverviewTestBed;
@@ -48,5 +49,38 @@ describe('Overview - Upgrade system indices - Step status', () => {
     component.update();
 
     expect(exists(`upgradeSystemIndicesStep-incomplete`)).toBe(true);
+  });
+
+  describe('Poll for new status', () => {
+    beforeEach(async () => {
+      jest.useFakeTimers();
+
+      // First request should make the step be incomplete
+      httpRequestsMockHelpers.setLoadSystemIndicesUpgradeStatus({
+        upgrade_status: 'UPGRADE_NEEDED',
+      });
+
+      testBed = await setupOverviewPage();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    test('renders step as complete when a upgraded needed status is followed by a no upgrade needed', async () => {
+      const { exists } = testBed;
+
+      expect(exists(`upgradeSystemIndicesStep-incomplete`)).toBe(true);
+
+      httpRequestsMockHelpers.setLoadSystemIndicesUpgradeStatus({
+        upgrade_status: 'NO_UPGRADE_NEEDED',
+      });
+
+      // Resolve the polling timeout.
+      await advanceTime(SYSTEM_INDICES_UPGRADE_POLL_INTERVAL_MS);
+      testBed.component.update();
+
+      expect(exists(`upgradeSystemIndicesStep-complete`)).toBe(true);
+    });
   });
 });

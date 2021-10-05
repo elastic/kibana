@@ -39,7 +39,7 @@ describe('Overview - Upgrade system indices - Flyout', () => {
     expect(exists(`flyoutDetails.featureError`)).toBe(true);
   });
 
-  test('NO_UPGRADE_NEEDED features are not shown in the table', async () => {
+  test(`features that don't need to be upgraded are not shown in the table`, async () => {
     const { actions, table } = testBed;
 
     await actions.clickViewSystemIndicesState();

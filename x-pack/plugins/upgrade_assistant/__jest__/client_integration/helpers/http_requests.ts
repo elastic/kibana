@@ -170,7 +170,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
-  const setUpgradeSystemIndicesStatus = (response?: object, error?: ResponseError) => {
+  const setUpgradeSystemIndicesResponse = (response?: object, error?: ResponseError) => {
     const status = error ? error.statusCode || 400 : 200;
     const body = error ? error : response;
 
@@ -192,7 +192,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setUpgradeMlSnapshotStatusResponse,
     setLoadDeprecationLogsCountResponse,
     setLoadSystemIndicesUpgradeStatus,
-    setUpgradeSystemIndicesStatus,
+    setUpgradeSystemIndicesResponse,
     setStartReindexingResponse,
     setReindexStatusResponse,
     setLoadMlUpgradeModeResponse,
