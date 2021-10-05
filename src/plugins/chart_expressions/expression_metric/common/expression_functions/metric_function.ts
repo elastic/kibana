@@ -14,7 +14,7 @@ import { vislibColorMaps, ColorMode } from '../../../../charts/common';
 import { MetricVisExpressionFunctionDefinition } from '../types';
 import { EXPRESSION_METRIC_NAME } from '../constants';
 
-export const metricFunction = (): MetricVisExpressionFunctionDefinition => ({
+export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
   name: EXPRESSION_METRIC_NAME,
   type: 'render',
   inputTypes: ['datatable'],

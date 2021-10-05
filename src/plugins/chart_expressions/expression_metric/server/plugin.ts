@@ -8,7 +8,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { ExpressionsServerStart, ExpressionsServerSetup } from '../../../expressions/server';
-import { metricFunction } from '../common';
+import { metricVisFunction } from '../common';
 
 interface SetupDeps {
   expressions: ExpressionsServerSetup;
@@ -25,7 +25,7 @@ export class ExpressionMetricPlugin
   implements Plugin<ExpressionMetricPluginSetup, ExpressionMetricPluginStart, SetupDeps, StartDeps>
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionMetricPluginSetup {
-    expressions.registerFunction(metricFunction);
+    expressions.registerFunction(metricVisFunction);
   }
 
   public start(core: CoreStart): ExpressionMetricPluginStart {}

@@ -20,6 +20,6 @@ export type {
   MetricOptions,
 } from './types';
 
-export { metricFunction } from './expression_functions';
+export { metricVisFunction } from './expression_functions';
 
 export { EXPRESSION_METRIC_NAME } from './constants';

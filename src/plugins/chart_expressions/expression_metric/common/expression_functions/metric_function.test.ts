@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { metricFunction } from './metric_function';
+import { metricVisFunction } from './metric_function';
 import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
 import { Datatable } from '../../../../expressions/common/expression_types/specs';
 
 describe('interpreter/functions#metric', () => {
-  const fn = functionWrapper(metricFunction());
+  const fn = functionWrapper(metricVisFunction());
   const context = {
     type: 'datatable',
     rows: [{ 'col-0-1': 0 }],

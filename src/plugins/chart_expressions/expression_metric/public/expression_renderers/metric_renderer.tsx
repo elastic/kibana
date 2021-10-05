@@ -15,7 +15,7 @@ import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig } from '../../common';
 // @ts-ignore
 const MetricVisComponent = lazy(() => import('../components/metric_component'));
 
-export const metricRenderer: () => ExpressionRenderDefinition<MetricVisRenderConfig> = () => ({
+export const metricVisRenderer: () => ExpressionRenderDefinition<MetricVisRenderConfig> = () => ({
   name: EXPRESSION_METRIC_NAME,
   displayName: 'metric visualization',
   reuseDomNode: true,

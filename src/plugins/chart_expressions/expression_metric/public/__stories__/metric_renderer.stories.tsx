@@ -12,7 +12,7 @@ import { ExpressionValueVisDimension } from '../../../../visualizations/common';
 import { DatatableColumn, Range } from '../../../../expressions';
 import { Render } from '../../../../presentation_util/public/__stories__';
 import { ColorMode, ColorSchemas } from '../../../../charts/common';
-import { metricRenderer } from '../expression_renderers';
+import { metricVisRenderer } from '../expression_renderers';
 import { MetricVisRenderConfig, visType } from '../../common/types';
 
 const config: MetricVisRenderConfig = {
@@ -114,12 +114,12 @@ const containerSize = {
 
 storiesOf('renderers/visMetric', module)
   .add('Default', () => {
-    return <Render renderer={metricRenderer} config={config} {...containerSize} />;
+    return <Render renderer={metricVisRenderer} config={config} {...containerSize} />;
   })
   .add('Without labels', () => {
     return (
       <Render
-        renderer={metricRenderer}
+        renderer={metricVisRenderer}
         config={{
           ...config,
           visConfig: {
@@ -134,7 +134,7 @@ storiesOf('renderers/visMetric', module)
   .add('With custom font size', () => {
     return (
       <Render
-        renderer={metricRenderer}
+        renderer={metricVisRenderer}
         config={{
           ...config,
           visConfig: {
@@ -152,7 +152,7 @@ storiesOf('renderers/visMetric', module)
   .add('With color ranges, background color mode', () => {
     return (
       <Render
-        renderer={metricRenderer}
+        renderer={metricVisRenderer}
         config={{
           ...config,
           visConfig: {
@@ -175,7 +175,7 @@ storiesOf('renderers/visMetric', module)
   .add('With color ranges, labels color mode', () => {
     return (
       <Render
-        renderer={metricRenderer}
+        renderer={metricVisRenderer}
         config={{
           ...config,
           visConfig: {
@@ -198,7 +198,7 @@ storiesOf('renderers/visMetric', module)
   .add('With color ranges, labels color mode, reverse mode', () => {
     return (
       <Render
-        renderer={metricRenderer}
+        renderer={metricVisRenderer}
         config={{
           ...config,
           visConfig: {
@@ -222,7 +222,7 @@ storiesOf('renderers/visMetric', module)
   .add('With bucket', () => {
     return (
       <Render
-        renderer={metricRenderer}
+        renderer={metricVisRenderer}
         config={{
           ...config,
           visData: {
@@ -242,7 +242,7 @@ storiesOf('renderers/visMetric', module)
   .add('With empty results', () => {
     return (
       <Render
-        renderer={metricRenderer}
+        renderer={metricVisRenderer}
         config={{ ...config, visData: { ...config.visData, rows: [] } }}
         {...containerSize}
       />
