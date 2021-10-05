@@ -14,17 +14,12 @@ import { GlobalStateContext } from '../../global_state_context';
 import { TabMenuItem } from '../page_template';
 import { Overview } from '../../../components/cluster/overview';
 import { ExternalConfigContext } from '../../external_config_context';
-import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
 const CODE_PATHS = [CODE_PATH_ALL];
-interface SetupModeProps {
-  setupMode: any;
-  flyoutComponent: any;
-  bottomBarComponent: any;
-}
 
 export const ClusterOverview: React.FC<{}> = () => {
   const state = useContext(GlobalStateContext);
