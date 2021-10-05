@@ -38,7 +38,7 @@ import {
 } from '../../actions';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { DocumentsTransformFailed, DocumentsTransformSuccess } from '../../../migrations/core';
 import { TaskEither } from 'fp-ts/lib/TaskEither';
 import Path from 'path';
@@ -412,7 +412,7 @@ describe('migration actions', () => {
       await expect(cloneIndexPromise).resolves.toMatchObject({
         _tag: 'Left',
         left: {
-          error: expect.any(ResponseError),
+          error: expect.any(errors.ResponseError),
           message: expect.stringMatching(/\"timed_out\":true/),
           type: 'retryable_es_client_error',
         },
@@ -810,7 +810,7 @@ describe('migration actions', () => {
       await expect(task()).resolves.toMatchObject({
         _tag: 'Left',
         left: {
-          error: expect.any(ResponseError),
+          error: expect.any(errors.ResponseError),
           message: expect.stringMatching(
             /\[timeout_exception\] Timed out waiting for completion of \[org.elasticsearch.index.reindex.BulkByScrollTask/
           ),
@@ -1169,7 +1169,7 @@ describe('migration actions', () => {
       await expect(task()).resolves.toMatchObject({
         _tag: 'Left',
         left: {
-          error: expect.any(ResponseError),
+          error: expect.any(errors.ResponseError),
           message: expect.stringMatching(
             /\[timeout_exception\] Timed out waiting for completion of \[org.elasticsearch.index.reindex.BulkByScrollTask/
           ),
