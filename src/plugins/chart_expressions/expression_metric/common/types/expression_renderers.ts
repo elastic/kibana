@@ -37,7 +37,7 @@ export interface VisParams {
 }
 
 export interface MetricOptions {
-  value: any;
+  value: string;
   label: string;
   color?: string;
   bgColor?: string;

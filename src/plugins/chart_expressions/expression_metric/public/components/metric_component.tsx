@@ -129,13 +129,13 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
       const formatter = getFormatService().deserialize(metric.format);
       table.rows.forEach((row, rowIndex) => {
         let title = column.name;
-        let value: any = row[column.id];
+        let value: number = row[column.id];
         const color = this.getColor(value, labels, colors);
 
         if (isPercentageMode) {
           value = (value - min) / (max - min);
         }
-        value = this.getFormattedValue(formatter, value, 'html');
+        const formattedValue = this.getFormattedValue(formatter, value, 'html');
         if (bucketColumnId) {
           const bucketValue = this.getFormattedValue(bucketFormatter, row[bucketColumnId]);
           title = `${bucketValue} - ${title}`;
@@ -145,7 +145,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
 
         metrics.push({
           label: title,
-          value,
+          value: formattedValue,
           color: shouldColor && config.style.labelColor ? color : undefined,
           bgColor: shouldColor && config.style.bgColor ? color : undefined,
           lightText: shouldColor && config.style.bgColor && this.needsLightText(color),
