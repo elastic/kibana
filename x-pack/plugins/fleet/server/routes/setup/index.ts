@@ -10,9 +10,11 @@ import type { IRouter } from 'src/core/server';
 import { PLUGIN_ID, AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
 import type { FleetConfigType } from '../../../common';
 
+import type { FleetRequestHandlerContext } from '../../types/request_context';
+
 import { getFleetStatusHandler, fleetSetupHandler } from './handlers';
 
-export const registerFleetSetupRoute = (router: IRouter) => {
+export const registerFleetSetupRoute = (router: IRouter<FleetRequestHandlerContext>) => {
   router.post(
     {
       path: SETUP_API_ROUTE,
@@ -26,7 +28,7 @@ export const registerFleetSetupRoute = (router: IRouter) => {
 };
 
 // That route is used by agent to setup Fleet
-export const registerCreateFleetSetupRoute = (router: IRouter) => {
+export const registerCreateFleetSetupRoute = (router: IRouter<FleetRequestHandlerContext>) => {
   router.post(
     {
       path: AGENTS_SETUP_API_ROUTES.CREATE_PATTERN,
@@ -37,7 +39,7 @@ export const registerCreateFleetSetupRoute = (router: IRouter) => {
   );
 };
 
-export const registerGetFleetStatusRoute = (router: IRouter) => {
+export const registerGetFleetStatusRoute = (router: IRouter<FleetRequestHandlerContext>) => {
   router.get(
     {
       path: AGENTS_SETUP_API_ROUTES.INFO_PATTERN,
@@ -48,7 +50,10 @@ export const registerGetFleetStatusRoute = (router: IRouter) => {
   );
 };
 
-export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
+export const registerRoutes = (
+  router: IRouter<FleetRequestHandlerContext>,
+  config: FleetConfigType
+) => {
   // Ingest manager setup
   registerFleetSetupRoute(router);
 
