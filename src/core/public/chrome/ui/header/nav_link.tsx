@@ -113,7 +113,7 @@ export function createOverviewLink({
       event.preventDefault();
       navigateToUrl(url);
     },
-    'data-test-subj': `collapsibleNavAppButton-${id}`,
+    'data-test-subj': `collapsibleNavAppLink`,
   };
 }
 
