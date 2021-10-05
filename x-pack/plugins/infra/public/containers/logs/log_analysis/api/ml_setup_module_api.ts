@@ -117,6 +117,7 @@ const datafeedSetupResponseRT = rt.intersection([
     success: rt.boolean,
   }),
   rt.partial({
+    awaitingNodeAssignment: rt.boolean,
     error: setupErrorResponseRT,
   }),
 ]);
