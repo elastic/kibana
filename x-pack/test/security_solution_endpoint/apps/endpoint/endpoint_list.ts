@@ -34,6 +34,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'Last active',
       'Actions',
     ],
+    ['Host-9fafsc3tqe', 'x', 'x', 'Warning', 'Windows', '10.231.117.28', '7.17.12', 'x', ''],
     [
       'Host-ku5jy6j0pw',
       'x',
@@ -45,7 +46,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'x',
       '',
     ],
-    ['Host-9fafsc3tqe', 'x', 'x', 'Warning', 'Windows', '10.231.117.28', '7.17.12', 'x', ''],
     [
       'Host-o07wj6uaa5',
       'x',
@@ -99,7 +99,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await browser.refresh();
         await pageObjects.endpoint.waitForTableToHaveNumberOfEntries('endpointListTable', 3, 90000);
         const tableData = await formattedTableData();
-        expect(tableData).to.eql(expectedData);
+        expect(tableData.sort()).to.eql(expectedData.sort());
       });
     });
 
@@ -125,7 +125,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('displays table data', async () => {
         const tableData = await formattedTableData();
-        expect(tableData).to.eql(expectedData);
+        expect(tableData.sort()).to.eql(expectedData.sort());
       });
 
       it('does not show the details flyout initially', async () => {
@@ -245,7 +245,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         ];
         await pageObjects.endpoint.waitForTableToHaveData('endpointListTable');
         const tableData = await formattedTableData();
-        expect(tableData).to.eql(expectedDataFromQuery);
+        expect(tableData.sort()).to.eql(expectedDataFromQuery.sort());
       });
     });
   });
