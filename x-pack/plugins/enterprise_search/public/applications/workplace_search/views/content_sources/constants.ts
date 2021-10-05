@@ -545,7 +545,7 @@ export const SOURCE_SYNCRONIZATION_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncronizationDescription',
   {
     defaultMessage:
-      'Sync chupa chups dragée gummi bears jelly beans brownie. Fruitcake pie chocolate cake caramels carrot cake cotton candy dragée sweet roll soufflé.',
+      'DO NOT TRANSLATE, temporary placeholder: Sync chupa chups dragée gummi bears jelly beans brownie. Fruitcake pie chocolate cake caramels carrot cake cotton candy dragée sweet roll soufflé.',
   }
 );
 
@@ -553,7 +553,7 @@ export const SOURCE_FREQUENCY_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.sourceFrequencyDescription',
   {
     defaultMessage:
-      'Frequency chupa chups dragée gummi bears jelly beans brownie. Fruitcake pie chocolate cake caramels carrot cake cotton candy dragée sweet roll soufflé.',
+      'DO NOT TRANSLATE, temporary placeholder: Frequency chupa chups dragée gummi bears jelly beans brownie. Fruitcake pie chocolate cake caramels carrot cake cotton candy dragée sweet roll soufflé.',
   }
 );
 
@@ -561,7 +561,7 @@ export const SOURCE_OBJECTS_AND_ASSETS_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.sourceObjectsAndAssetsDescription',
   {
     defaultMessage:
-      'Objects chupa chups dragée gummi bears jelly beans brownie. Fruitcake pie chocolate cake caramels carrot cake cotton candy dragée sweet roll soufflé.',
+      'DO NOT TRANSLATE, temporary placeholder: Objects chupa chups dragée gummi bears jelly beans brownie. Fruitcake pie chocolate cake caramels carrot cake cotton candy dragée sweet roll soufflé.',
   }
 );
 
