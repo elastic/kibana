@@ -12,12 +12,10 @@ import * as kbnTestServer from '../../../test_helpers/kbn_server';
 describe('http resources service', () => {
   describe('register', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
-    const defaultCspRules = "script-src 'self'";
+    const defaultCspRules =
+      "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'";
     beforeEach(async () => {
       root = kbnTestServer.createRoot({
-        csp: {
-          rules: [defaultCspRules],
-        },
         plugins: { initialize: false },
         elasticsearch: { skipStartupConnectionCheck: true },
       });
@@ -44,7 +42,7 @@ describe('http resources service', () => {
         expect(response.text.length).toBeGreaterThan(0);
       });
 
-      it('attaches CSP header', async () => {
+      it('applies default CSP header', async () => {
         const { http, httpResources } = await root.setup();
 
         const router = http.createRouter('');
@@ -56,6 +54,10 @@ describe('http resources service', () => {
         await root.start();
         const response = await kbnTestServer.request.get(root, '/render-core').expect(200);
 
+        const scriptSrcCspHeader = response.header['content-security-policy']
+          .split(';')
+          .filter((cspRule: string) => cspRule.startsWith('script-src'));
+        expect(scriptSrcCspHeader.includes('self'));
         expect(response.header['content-security-policy']).toBe(defaultCspRules);
       });
 
@@ -67,7 +69,7 @@ describe('http resources service', () => {
         resources.register({ path: '/render-core', validate: false }, (context, req, res) =>
           res.renderAnonymousCoreApp({
             headers: {
-              'content-security-policy': "script-src 'unsafe-eval'",
+              'content-security-policy': `${defaultCspRules}`,
               'x-kibana': '42',
             },
           })
