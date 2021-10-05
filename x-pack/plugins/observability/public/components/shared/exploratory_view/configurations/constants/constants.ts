@@ -126,4 +126,5 @@ export const PERCENTILE_RANKS = [
   '95th' as OperationType,
   '90th' as OperationType,
   '75th' as OperationType,
+  '50th' as OperationType,
 ];
