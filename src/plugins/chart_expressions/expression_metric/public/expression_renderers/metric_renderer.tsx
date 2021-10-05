@@ -12,6 +12,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { VisualizationContainer } from '../../../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../../../expressions/common/expression_renderers';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig } from '../../common';
+
 // @ts-ignore
 const MetricVisComponent = lazy(() => import('../components/metric_component'));
 

@@ -8,10 +8,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
-import { VisualizationsSetup } from '../../../visualizations/public';
-
 import { metricVisFunction } from '../common';
-import { ChartsPluginSetup } from '../../../charts/public';
 import { setFormatService } from './format_service';
 import { metricVisRenderer } from './expression_renderers';
 import { FieldFormatsStart } from '../../../field_formats/public';
@@ -19,8 +16,6 @@ import { FieldFormatsStart } from '../../../field_formats/public';
 /** @internal */
 export interface ExpressionMetricPluginSetup {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
-  visualizations: VisualizationsSetup;
-  charts: ChartsPluginSetup;
 }
 
 /** @internal */
