@@ -10,7 +10,6 @@ import { PluginInitializerContext } from '../../../core/server';
 import { BfetchServerPlugin } from './plugin';
 
 export { BfetchServerSetup, BfetchServerStart, BatchProcessingRouteParams } from './plugin';
-export { StreamingRequestHandler } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new BfetchServerPlugin(initializerContext);
