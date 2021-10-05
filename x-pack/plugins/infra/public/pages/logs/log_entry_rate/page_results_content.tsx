@@ -33,6 +33,7 @@ import { useLogAnalysisResultsUrlState } from './use_log_entry_rate_results_url_
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LogsPageTemplate } from '../page_template';
 import { ManageJobsButton } from '../../../components/logging/log_analysis_setup/manage_jobs_button';
+import { MLJobsAwaitingNodeWarning } from '../../../../../ml/public';
 
 export const SORT_DEFAULTS = {
   direction: 'desc' as const,
@@ -234,6 +235,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
             onRecreateMlJobForReconfiguration={showLogEntryRateSetup}
             onRecreateMlJobForUpdate={showLogEntryRateSetup}
           />
+          <MLJobsAwaitingNodeWarning jobIds={jobIds} />
           <CategoryJobNoticesSection
             hasOutdatedJobConfigurations={hasOutdatedLogEntryCategoriesJobConfigurations}
             hasOutdatedJobDefinitions={hasOutdatedLogEntryCategoriesJobDefinitions}

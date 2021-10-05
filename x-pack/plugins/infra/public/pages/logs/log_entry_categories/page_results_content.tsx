@@ -32,6 +32,7 @@ import { RecreateJobButton } from '../../../components/logging/log_analysis_setu
 import { AnalyzeInMlButton } from '../../../components/logging/log_analysis_results';
 import { useMlHref, ML_PAGES } from '../../../../../ml/public';
 import { DatasetsSelector } from '../../../components/logging/log_analysis_results/datasets_selector';
+import { MLJobsAwaitingNodeWarning } from '../../../../../ml/public';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
@@ -246,6 +247,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
+              <MLJobsAwaitingNodeWarning jobIds={Object.values(jobIds)} />
               <CategoryJobNoticesSection
                 hasOutdatedJobConfigurations={hasOutdatedJobConfigurations}
                 hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
