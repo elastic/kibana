@@ -27,7 +27,7 @@ interface Props {
   /** Dashboard container */
   dashboardContainer: DashboardContainer;
   /** Handler for creating new visualization of a specified type */
-  createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;
+  createNewVisType: (visType: BaseVisType | VisTypeAlias | undefined) => () => void;
 }
 
 interface FactoryGroup {
@@ -128,7 +128,9 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
       name: titleInWizard || title,
       icon: icon as string,
       onClick:
-        group === VisGroups.AGGBASED ? createNewAggsBasedVis(visType) : createNewVisType(visType),
+        group === VisGroups.AGGBASED && visType.options.showIndexSelection
+          ? createNewAggsBasedVis(visType)
+          : createNewVisType(visType),
       'data-test-subj': `visType-${name}`,
       toolTipContent: description,
     };
