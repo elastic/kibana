@@ -60,7 +60,7 @@ export function createEuiListItem({
         navigateToUrl(url);
       }
     },
-    isActive: appId === id,
+    isActive: !externalLink && appId === id,
     isDisabled: disabled,
     'data-test-subj': dataTestSubj,
     ...(basePath && {

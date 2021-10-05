@@ -160,11 +160,7 @@ export function CollapsibleNav({
       {customNavLink && (
         <Fragment>
           <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-            <EuiCollapsibleNavGroup
-              background="light"
-              className="eui-yScroll"
-              style={{ maxHeight: '40vh' }}
-            >
+            <EuiCollapsibleNavGroup className="eui-yScroll" style={{ maxHeight: '40vh' }}>
               <EuiListGroup
                 listItems={[
                   createEuiListItem({
@@ -177,7 +173,6 @@ export function CollapsibleNav({
                   }),
                 ]}
                 maxWidth="none"
-                color="text"
                 gutterSize="none"
                 size="s"
               />
