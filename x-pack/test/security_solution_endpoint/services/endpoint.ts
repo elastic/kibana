@@ -9,8 +9,8 @@ import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { Client } from '@elastic/elasticsearch';
 import { FtrService } from '../../functional/ftr_provider_context';
 import {
+  metadataCurrentIndexPattern,
   metadataTransformPrefix,
-  METADATA_UNITED_INDEX,
 } from '../../../plugins/security_solution/common/endpoint/constants';
 import { EndpointError } from '../../../plugins/security_solution/server';
 import {
@@ -71,12 +71,8 @@ export class EndpointTestResources extends FtrService {
     /** Used to update the transform installed with the given package version */
     endpointPackageVersion?: string
   ): Promise<void> {
-    const metadataTransform = await this.getTransform(endpointPackageVersion).catch(
-      catchAndWrapError
-    );
-    await this.transform.api
-      .updateTransform(metadataTransform.id, { frequency })
-      .catch(catchAndWrapError);
+    const transform = await this.getTransform(endpointPackageVersion).catch(catchAndWrapError);
+    await this.transform.api.updateTransform(transform.id, { frequency }).catch(catchAndWrapError);
   }
 
   /**
@@ -175,7 +171,7 @@ export class EndpointTestResources extends FtrService {
     await this.retry.waitFor('wait for endpoints hosts', async () => {
       try {
         const searchResponse = await this.esClient.search({
-          index: METADATA_UNITED_INDEX,
+          index: metadataCurrentIndexPattern,
           size,
           body,
           rest_total_hits_as_int: true,

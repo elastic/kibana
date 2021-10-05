@@ -233,13 +233,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           ],
           [
             'Host-ku5jy6j0pw',
-            undefined,
-            'With Eventingrev. 3',
+            'x',
+            'x',
             'Warning',
             'Windows',
             '10.246.87.11, 10.145.117.106,10.109.242.136',
             '7.0.13',
-            undefined,
+            'x',
             '',
           ],
         ];
