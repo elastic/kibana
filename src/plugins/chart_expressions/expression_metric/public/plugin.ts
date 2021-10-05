@@ -8,19 +8,14 @@
 
 import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
-import { VisualizationsSetup } from '../../../visualizations/public';
-
-import { metricFunction } from '../common';
-import { ChartsPluginSetup } from '../../../charts/public';
+import { metricVisFunction } from '../common';
 import { setFormatService } from './format_service';
-import { metricRenderer } from './expression_renderers';
+import { metricVisRenderer } from './expression_renderers';
 import { FieldFormatsStart } from '../../../field_formats/public';
 
 /** @internal */
 export interface ExpressionMetricPluginSetup {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
-  visualizations: VisualizationsSetup;
-  charts: ChartsPluginSetup;
 }
 
 /** @internal */
@@ -31,8 +26,8 @@ export interface ExpressionMetricPluginStart {
 /** @internal */
 export class ExpressionMetricPlugin implements Plugin<void, void> {
   public setup(core: CoreSetup, { expressions }: ExpressionMetricPluginSetup) {
-    expressions.registerFunction(metricFunction);
-    expressions.registerRenderer(metricRenderer);
+    expressions.registerFunction(metricVisFunction);
+    expressions.registerRenderer(metricVisRenderer);
   }
 
   public start(core: CoreStart, { fieldFormats }: ExpressionMetricPluginStart) {

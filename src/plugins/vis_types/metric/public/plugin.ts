@@ -7,23 +7,13 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
 import { VisualizationsSetup } from '../../../visualizations/public';
 import { createMetricVisTypeDefinition } from './metric_vis_type';
-import { ChartsPluginSetup } from '../../../charts/public';
-import { DataPublicPluginStart } from '../../../data/public';
 import { ConfigSchema } from '../config';
 
 /** @internal */
 export interface MetricVisPluginSetupDependencies {
-  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
-  charts: ChartsPluginSetup;
-}
-
-/** @internal */
-export interface MetricVisPluginStartDependencies {
-  data: DataPublicPluginStart;
 }
 
 /** @internal */

@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { metricRenderer } from './metric_renderer';
+export { metricVisRenderer } from './metric_vis_renderer';

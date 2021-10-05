@@ -104,10 +104,10 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
   }
 
   private processTableGroups(table: Datatable) {
-    const { dimensions, metric: metricConfig } = this.props.visParams;
+    const { metric: metricConfig, dimensions } = this.props.visParams;
     const { percentageMode: isPercentageMode, colorsRange, style } = metricConfig;
-    const min = colorsRange?.[0]?.from ?? 0;
-    const max = last(colorsRange)?.to ?? 0;
+    const min = colorsRange?.[0]?.from;
+    const max = last(colorsRange)?.to;
     const colors = this.getColors();
     const labels = this.getLabels();
 
@@ -125,10 +125,10 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
         const formatter = getFormatService().deserialize(metric.format);
         const metrics = table.rows.map((row, rowIndex) => {
           let title = column.name;
-          let value = row[column.id];
+          let value: number = row[column.id];
           const color = this.getColor(value, labels, colors);
 
-          if (isPercentageMode) {
+          if (isPercentageMode && colorsRange?.length && max !== undefined && min !== undefined) {
             value = (value - min) / (max - min);
           }
           value = this.getFormattedValue(formatter, value, 'html');
