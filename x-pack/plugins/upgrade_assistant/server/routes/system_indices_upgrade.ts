@@ -16,7 +16,7 @@ import {
 const mockedResponse = {
   features: [
     {
-      feature_name: 'security',
+      feature_name: 'log_stash',
       minimum_index_version: '7.1.1',
       upgrade_status: 'NO_UPGRADE_NEEDED',
       indices: [
@@ -29,6 +29,17 @@ const mockedResponse = {
     {
       feature_name: 'security',
       minimum_index_version: '7.1.1',
+      upgrade_status: 'ERROR',
+      indices: [
+        {
+          index: '.security-7',
+          index_version: '7.1.1',
+        },
+      ],
+    },
+    {
+      feature_name: 'kibana',
+      minimum_index_version: '7.1.1',
       upgrade_status: 'IN_PROGRESS',
       indices: [
         {
@@ -38,7 +49,7 @@ const mockedResponse = {
       ],
     },
     {
-      feature_name: 'security',
+      feature_name: 'machine_learning',
       minimum_index_version: '7.1.1',
       upgrade_status: 'UPGRADE_NEEDED',
       indices: [
@@ -74,7 +85,7 @@ export function registerSystemIndicesUpgradeRoutes({
           const status = await getESSystemIndicesUpgradeStatus(client.asCurrentUser);
 
           return response.ok({
-            body: status,
+            body: mockedResponse,
           });
         } catch (error) {
           return handleEsError({ error, response });
@@ -97,7 +108,6 @@ export function registerSystemIndicesUpgradeRoutes({
       ) => {
         try {
           const status = await startESSystemIndicesUpgrade(client.asCurrentUser);
-          // throw new Error('PEPE');
 
           return response.ok({
             body: status,

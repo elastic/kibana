@@ -34,22 +34,9 @@ describe('Overview - Upgrade system indices - Flyout', () => {
 
     await actions.clickViewSystemIndicesState();
 
+    expect(exists(`flyoutDetails.featureNoUpgradeNeeded`)).toBe(true);
     expect(exists(`flyoutDetails.featureUpgradeNeeded`)).toBe(true);
     expect(exists(`flyoutDetails.featureInProgress`)).toBe(true);
     expect(exists(`flyoutDetails.featureError`)).toBe(true);
-  });
-
-  test(`features that don't need to be upgraded are not shown in the table`, async () => {
-    const { actions, table } = testBed;
-
-    await actions.clickViewSystemIndicesState();
-
-    const { rows } = table.getMetaData('featuresTable');
-
-    const featuresCount = systemIndicesUpgradeStatus.features.filter(
-      (feature) => feature.upgrade_status !== 'NO_UPGRADE_NEEDED'
-    ).length;
-
-    expect(rows.length).toEqual(featuresCount);
   });
 });

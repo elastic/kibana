@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -72,6 +72,21 @@ const i18nTexts = {
 };
 
 const renderMigrationStatus = (status: UPGRADE_STATUS) => {
+  if (status === 'NO_UPGRADE_NEEDED') {
+    return (
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="checkInCircleFilled" color="success" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText color="green" size="s" data-test-subj="featureNoUpgradeNeeded">
+            <p>{i18nTexts.upgradeCompleteLabel}</p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   if (status === 'UPGRADE_NEEDED') {
     return (
       <EuiText size="s" data-test-subj="featureUpgradeNeeded">
@@ -129,11 +144,6 @@ const columns = [
 ];
 
 export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutProps) => {
-  // There's no need to show features in the UI if they dont need to be upgraded.
-  const resolvableFeatures = useMemo(() => {
-    return data.features.filter((feature) => feature.upgrade_status !== 'NO_UPGRADE_NEEDED');
-  }, [data]);
-
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -149,7 +159,7 @@ export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutPr
         <EuiInMemoryTable<SystemIndicesUpgradeFeature>
           data-test-subj="featuresTable"
           itemId="feature_name"
-          items={resolvableFeatures}
+          items={data.features}
           columns={columns}
           pagination={true}
           sorting={true}
