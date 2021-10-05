@@ -15,7 +15,7 @@ import { AppMountParameters } from 'kibana/public';
 import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
 import { useKibana } from '../../../../kibana_react/public';
-import { urlFor, getFullPath } from '../../../../visualizations/public';
+import { urlFor } from '../../../../visualizations/public';
 import {
   SavedVisInstance,
   VisualizeAppState,
@@ -65,7 +65,7 @@ export const VisualizeEditorCommon = ({
       if (services.spaces && sharingSavedObjectProps?.outcome === 'aliasMatch') {
         // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
         const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
-        const newPath = `${getFullPath(newObjectId!)}${services.history.location.search}`;
+        const newPath = `${urlFor(newObjectId!)}${services.history.location.search}`;
         await services.spaces.ui.redirectLegacyUrl(
           newPath,
           i18n.translate('visualize.legacyUrlConflict.objectNoun', {
