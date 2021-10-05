@@ -167,13 +167,11 @@ export class VectorStyle implements IVectorStyle {
   static createDescriptor(
     properties: Partial<VectorStylePropertiesDescriptor> = {},
     isTimeAware = true,
-    customIcons: CustomIcon[] = [],
   ) {
     return {
       type: LAYER_STYLE_TYPE.VECTOR,
       properties: { ...getDefaultStaticProperties(), ...properties },
       isTimeAware,
-      customIcons,
     };
   }
 
@@ -192,7 +190,7 @@ export class VectorStyle implements IVectorStyle {
     this._descriptor = descriptor
       ? {
           ...descriptor,
-          ...VectorStyle.createDescriptor(descriptor.properties, descriptor.isTimeAware, descriptor.customIcons),
+          ...VectorStyle.createDescriptor(descriptor.properties, descriptor.isTimeAware),
         }
       : VectorStyle.createDescriptor();
 
@@ -457,23 +455,22 @@ export class VectorStyle implements IVectorStyle {
       : (this._lineWidthStyleProperty as StaticSizeProperty).getOptions().size !== 0;
   }
 
-  renderEditor(onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void) {
+  renderEditor(
+    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
+    onCustomIconsChange: (customIcons: CustomIcon[]) => void,
+    customIcons: CustomIcon[],
+  ) {
     const rawProperties = this.getRawProperties();
     const handlePropertyChange = (propertyName: VECTOR_STYLES, stylePropertyDescriptor: any) => {
       rawProperties[propertyName] = stylePropertyDescriptor; // override single property, but preserve the rest
-      const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties, this.isTimeAware(), this.customIcons());
+      const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties, this.isTimeAware());
       onStyleDescriptorChange(vectorStyleDescriptor);
     };
 
     const onIsTimeAwareChange = (isTimeAware: boolean) => {
-      const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties, isTimeAware, this.customIcons());
+      const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties, isTimeAware);
       onStyleDescriptorChange(vectorStyleDescriptor);
     };
-
-    const onCustomIconsChange = (customIcons: CustomIcon[]) => {
-      const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties, this.isTimeAware(), customIcons);
-      onStyleDescriptorChange(vectorStyleDescriptor);
-    }
 
     const propertiesWithFieldMeta = this.getDynamicPropertiesArray().filter((dynamicStyleProp) => {
       return dynamicStyleProp.isFieldMetaEnabled();
@@ -495,7 +492,7 @@ export class VectorStyle implements IVectorStyle {
         onCustomIconsChange={onCustomIconsChange}
         isTimeAware={this.isTimeAware()}
         showIsTimeAware={propertiesWithFieldMeta.length > 0}
-        customIcons={this.customIcons()}
+        customIcons={customIcons}
         hasBorder={this._hasBorder()}
       />
     );
@@ -673,10 +670,6 @@ export class VectorStyle implements IVectorStyle {
 
   isTimeAware() {
     return this._descriptor.isTimeAware;
-  }
-
-  customIcons() {
-    return this._descriptor.customIcons;
   }
 
   getRawProperties(): VectorStylePropertiesDescriptor {

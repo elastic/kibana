@@ -184,7 +184,7 @@ export type SizeStylePropertyDescriptor =
 
 export type CustomIcon = {
   symbolId: string;
-  icon: string; //svg string
+  svg: string; //svg string
   name: string; // user given name
 };
 
@@ -249,7 +249,6 @@ export type StyleMetaDescriptor = {
 
 export type VectorStyleDescriptor = StyleDescriptor & {
   properties: VectorStylePropertiesDescriptor;
-  customIcons: CustomIcon[];
   isTimeAware: boolean;
   __styleMeta?: StyleMetaDescriptor;
 };

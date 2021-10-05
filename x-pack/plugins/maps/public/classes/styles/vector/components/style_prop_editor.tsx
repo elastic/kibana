@@ -28,6 +28,7 @@ export interface Props<StaticOptions, DynamicOptions> {
   defaultDynamicStyleOptions: DynamicOptions;
   disabled?: boolean;
   disabledBy?: VECTOR_STYLES;
+  customIcons?: CustomIcon[];
   fields: StyleField[];
   onDynamicStyleChange: (propertyName: VECTOR_STYLES, options: DynamicOptions) => void;
   onStaticStyleChange: (propertyName: VECTOR_STYLES, options: StaticOptions) => void;

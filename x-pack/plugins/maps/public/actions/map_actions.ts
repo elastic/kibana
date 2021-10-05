@@ -58,7 +58,13 @@ import {
 } from './data_request_actions';
 import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import { MapSettings } from '../reducers/map';
-import { DrawState, MapCenterAndZoom, MapExtent, Timeslice } from '../../common/descriptor_types';
+import {
+  CustomIcon,
+  DrawState,
+  MapCenterAndZoom,
+  MapExtent,
+  Timeslice,
+} from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
 import { VectorLayer } from '../classes/layers/vector_layer';
@@ -343,6 +349,12 @@ export function updateEditLayer(layerId: string | null) {
       type: UPDATE_EDIT_STATE,
       editState: layerId ? { layerId } : undefined,
     });
+  };
+}
+
+export function upsertCustomIcon(icons: CustomIcon[]) {
+  return async (dispatch: Dispatch, getState: () => MapStoreState) => {
+    await dispatch(updateMapSetting('customIcons', icons));
   };
 }
 

@@ -33,17 +33,27 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
 
   syncIconWithMb(symbolLayerId: string, mbMap: MbMap, iconPixelSize: number) {
     if (this._isIconDynamicConfigComplete()) {
-      this._getMbIconImageExpression(iconPixelSize, mbMap).then((expr) => {
+      this._syncCustomIconsWithMb(mbMap).then(() => {
         mbMap.setLayoutProperty(
           symbolLayerId,
           'icon-image',
-          expr
+          this._getMbIconImageExpression(iconPixelSize)
         );
+        mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', this._getMbIconAnchorExpression());
       });
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', this._getMbIconAnchorExpression());
     } else {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-image', null);
       mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', null);
+    }
+  }
+
+  async _syncCustomIconsWithMb(mbMap: MbMap) {
+    if (this._options.useCustomIconMap && this._options.customIconStops) {
+      await Promise.all(this._options.customIconStops.map(({ stop, icon, svg }) => {
+        if (icon.startsWith(CUSTOM_ICON_PREFIX) && svg) {
+          this._customIconCheck(icon, svg, mbMap)
+        }
+      }));
     }
   }
 
@@ -79,7 +89,7 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     });
   }
 
-  async _getMbIconImageExpression(iconPixelSize: number, mbMap: MbMap) {
+  _getMbIconImageExpression(iconPixelSize: number) {
     const { stops, fallbackSymbolId } = this._getPaletteStops();
 
     if (stops.length < 1 || !fallbackSymbolId) {
@@ -88,21 +98,19 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     }
 
     const mbStops = [];
-    const addIconsToMap: Promise<void>[] = [];
-    stops.forEach(({ stop, style, svg }) => {
+    stops.forEach(({ stop, style }) => {
       mbStops.push(`${stop}`);
-      if (style.startsWith(CUSTOM_ICON_PREFIX) && svg) {
-        addIconsToMap.push(this._customIconCheck(style, svg, mbMap));
+      if (style.startsWith(CUSTOM_ICON_PREFIX)) {
         mbStops.push(style);
       } else {
         mbStops.push(getMakiIconId(style, iconPixelSize));
       }
     });
 
-    await Promise.all(addIconsToMap);
-
     if (fallbackSymbolId) {
-      mbStops.push(getMakiIconId(fallbackSymbolId, iconPixelSize)); // last item is fallback style for anything that does not match provided stops
+      mbStops.push(
+        fallbackSymbolId.startsWith(CUSTOM_ICON_PREFIX) ? fallbackSymbolId : getMakiIconId(fallbackSymbolId, iconPixelSize)
+      ); // last item is fallback style for anything that does not match provided stops
     }
     return ['match', ['to-string', ['get', this.getFieldName()]], ...mbStops];
   }
@@ -118,10 +126,13 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     const mbStops = [];
     stops.forEach(({ stop, style }) => {
       mbStops.push(`${stop}`);
-      mbStops.push(getMakiSymbolAnchor(style));
+      if (!style.startsWith(CUSTOM_ICON_PREFIX)) {
+        // then use maki anchor
+        mbStops.push(getMakiSymbolAnchor(style));
+      }
     });
 
-    if (fallbackSymbolId) {
+    if (fallbackSymbolId && !fallbackSymbolId.startsWith(CUSTOM_ICON_PREFIX)) {
       mbStops.push(getMakiSymbolAnchor(fallbackSymbolId)); // last item is fallback style for anything that does not match provided stops
     }
     return ['match', ['to-string', ['get', this.getFieldName()]], ...mbStops];
