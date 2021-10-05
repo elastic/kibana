@@ -8,6 +8,10 @@
 import { API_BASE_PATH } from '../../common/constants';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { RouteDependencies } from '../types';
+import {
+  getESSystemIndicesUpgradeStatus,
+  startESSystemIndicesUpgrade,
+} from '../lib/es_system_indices_upgrade';
 
 const mockedResponse = {
   features: [
@@ -54,33 +58,54 @@ export function registerSystemIndicesUpgradeRoutes({
   router,
   lib: { handleEsError },
 }: RouteDependencies) {
-  // GET most recent Cloud snapshot
   router.get(
     { path: `${API_BASE_PATH}/system_indices_upgrade`, validate: false },
-    versionCheckHandlerWrapper(async (context, request, response) => {
-      try {
-        return response.ok({
-          body: mockedResponse,
-        });
-      } catch (error) {
-        return handleEsError({ error, response });
+    versionCheckHandlerWrapper(
+      async (
+        {
+          core: {
+            elasticsearch: { client },
+          },
+        },
+        request,
+        response
+      ) => {
+        try {
+          const status = await getESSystemIndicesUpgradeStatus(client.asCurrentUser);
+
+          return response.ok({
+            body: status,
+          });
+        } catch (error) {
+          return handleEsError({ error, response });
+        }
       }
-    })
+    )
   );
 
   router.post(
     { path: `${API_BASE_PATH}/system_indices_upgrade`, validate: false },
-    versionCheckHandlerWrapper(async (context, request, response) => {
-      try {
-        throw new Error('PEPE');
-        return response.ok({
-          body: {
-            accepted: true,
+    versionCheckHandlerWrapper(
+      async (
+        {
+          core: {
+            elasticsearch: { client },
           },
-        });
-      } catch (error) {
-        return handleEsError({ error, response });
+        },
+        request,
+        response
+      ) => {
+        try {
+          const status = await startESSystemIndicesUpgrade(client.asCurrentUser);
+          // throw new Error('PEPE');
+
+          return response.ok({
+            body: status,
+          });
+        } catch (error) {
+          return handleEsError({ error, response });
+        }
       }
-    })
+    )
   );
 }

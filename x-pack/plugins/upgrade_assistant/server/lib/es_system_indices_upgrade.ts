@@ -7,7 +7,11 @@
 
 import { flow, flatMap, map, flatten, uniq } from 'lodash/fp';
 import { ElasticsearchClient } from 'src/core/server';
-import { SystemIndicesUpgradeStatus, SystemIndicesUpgradeFeature } from '../../common/types';
+import {
+  SystemIndicesUpgradeStatus,
+  SystemIndicesUpgradeFeature,
+  SystemIndicesUpgradeStarted,
+} from '../../common/types';
 
 export const convertFeaturesToIndicesArray = (
   features: SystemIndicesUpgradeFeature[]
@@ -33,4 +37,15 @@ export const getESSystemIndicesUpgradeStatus = async (
   });
 
   return body as SystemIndicesUpgradeStatus;
+};
+
+export const startESSystemIndicesUpgrade = async (
+  client: ElasticsearchClient
+): Promise<SystemIndicesUpgradeStarted> => {
+  const { body } = await client.transport.request({
+    method: 'POST',
+    path: '/_migration/system_features',
+  });
+
+  return body as SystemIndicesUpgradeStarted;
 };

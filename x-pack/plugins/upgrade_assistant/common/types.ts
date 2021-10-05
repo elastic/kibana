@@ -276,3 +276,7 @@ export interface SystemIndicesUpgradeStatus {
   features: SystemIndicesUpgradeFeature[];
   upgrade_status: UPGRADE_STATUS;
 }
+export interface SystemIndicesUpgradeStarted {
+  features: SystemIndicesUpgradeFeature[];
+  accepted: boolean;
+}
