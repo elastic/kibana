@@ -72,7 +72,7 @@ export class MapsPlugin implements Plugin {
     const sampleDataLinkLabel = i18n.translate('xpack.maps.sampleDataLinkLabel', {
       defaultMessage: 'Map',
     });
- 
+
     home.sampleData.addSavedObjectsToSampleDataset('ecommerce', getEcommerceSavedObjects());
 
     home.sampleData.addAppLinksToSampleDataset('ecommerce', [
