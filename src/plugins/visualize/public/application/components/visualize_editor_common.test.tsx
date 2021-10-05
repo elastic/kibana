@@ -105,7 +105,7 @@ describe('VisualizeEditorCommon', () => {
       />
     );
     expect(mockRedirectLegacyUrl).toHaveBeenCalledWith(
-      '/app/visualize#/edit/alias_id?_g=test',
+      '#/edit/alias_id?_g=test',
       'TSVB visualization'
     );
   });
