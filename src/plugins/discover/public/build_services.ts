@@ -27,8 +27,9 @@ import {
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { SharePluginStart } from 'src/plugins/share/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
-
 import { UiCounterMetricType } from '@kbn/analytics';
+import { Storage } from '../../kibana_utils/public';
+
 import { DiscoverStartPlugins } from './plugin';
 import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
 import { getHistory } from './kibana_services';
@@ -62,6 +63,7 @@ export interface DiscoverServices {
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
   http: HttpStart;
+  storage: Storage;
 }
 
 export function buildServices(
@@ -75,6 +77,7 @@ export function buildServices(
   };
   const savedObjectService = createSavedSearchesLoader(services);
   const { usageCollection } = plugins;
+  const storage = new Storage(localStorage);
 
   return {
     addBasePath: core.http.basePath.prepend,
@@ -100,6 +103,7 @@ export function buildServices(
     timefilter: plugins.data.query.timefilter.timefilter,
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
+    storage,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
     indexPatternFieldEditor: plugins.indexPatternFieldEditor,
     http: core.http,

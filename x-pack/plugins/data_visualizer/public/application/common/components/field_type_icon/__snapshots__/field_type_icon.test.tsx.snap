@@ -2,6 +2,7 @@
 
 exports[`FieldTypeIcon render component when type matches a field type 1`] = `
 <EuiToolTip
+  anchorClassName="dvFieldTypeIcon__anchor"
   content="keyword type"
   delay="regular"
   display="inlineBlock"
@@ -9,8 +10,7 @@ exports[`FieldTypeIcon render component when type matches a field type 1`] = `
 >
   <FieldTypeIconContainer
     ariaLabel="keyword type"
-    color="euiColorVis0"
-    iconType="tokenText"
+    iconType="tokenKeyword"
     needsAria={false}
   />
 </EuiToolTip>
