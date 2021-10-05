@@ -7,6 +7,7 @@
  */
 
 import { IRouter, Logger } from 'kibana/server';
+import { SemVer } from 'semver';
 
 import { EsLegacyConfigService, SpecDefinitionsService } from '../services';
 import { ESConfigForProxy } from '../types';
@@ -18,8 +19,8 @@ import { registerSpecDefinitionsRoute } from './api/console/spec_definitions';
 
 export interface ProxyDependencies {
   readLegacyESConfig: () => Promise<ESConfigForProxy>;
-  pathFilters: RegExp[];
-  proxyConfigCollection: ProxyConfigCollection;
+  pathFilters?: RegExp[]; // Only present in 7.x
+  proxyConfigCollection?: ProxyConfigCollection; // Only present in 7.x
 }
 
 export interface RouteDependencies {
@@ -30,6 +31,7 @@ export interface RouteDependencies {
     esLegacyConfigService: EsLegacyConfigService;
     specDefinitionService: SpecDefinitionsService;
   };
+  kibanaVersion: SemVer;
 }
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
