@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { History } from 'history';
 import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { getSavedSearchUrl } from './saved_searches_utils';
@@ -16,11 +17,13 @@ import type { SpacesApi } from '../../../../../x-pack/plugins/spaces/public';
 interface SavedSearchAliasMatchRedirectProps {
   savedSearch?: SavedSearch;
   spaces?: SpacesApi;
+  history: () => History;
 }
 
 export const useSavedSearchAliasMatchRedirect = ({
   savedSearch,
   spaces,
+  history,
 }: SavedSearchAliasMatchRedirectProps) => {
   useEffect(() => {
     async function aliasMatchRedirect() {
@@ -29,7 +32,7 @@ export const useSavedSearchAliasMatchRedirect = ({
 
         if (spaces && aliasTargetId && outcome === 'aliasMatch') {
           await spaces.ui.redirectLegacyUrl(
-            getSavedSearchUrl(aliasTargetId),
+            `${getSavedSearchUrl(aliasTargetId)}${history().location.search}`,
             i18n.translate('discover.savedSearchAliasMatchRedirect.objectNoun', {
               defaultMessage: '{savedSearch} search',
               values: {
@@ -42,5 +45,5 @@ export const useSavedSearchAliasMatchRedirect = ({
     }
 
     aliasMatchRedirect();
-  }, [savedSearch, spaces]);
+  }, [savedSearch, spaces, history]);
 };

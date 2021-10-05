@@ -7,6 +7,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import type { History } from 'history';
 
 import { useSavedSearchAliasMatchRedirect } from './saved_search_alias_match_redirect';
 import type { SavedSearch } from './types';
@@ -15,9 +16,16 @@ import { spacesPluginMock } from '../../../../../x-pack/plugins/spaces/public/mo
 
 describe('useSavedSearchAliasMatchRedirect', () => {
   let spaces: ReturnType<typeof spacesPluginMock.createStartContract>;
+  let history: () => History;
 
   beforeEach(() => {
     spaces = spacesPluginMock.createStartContract();
+    history = () =>
+      ({
+        location: {
+          search: '?_g=foo',
+        },
+      } as History);
   });
 
   test('should redirect in case of aliasMatch', () => {
@@ -29,9 +37,12 @@ describe('useSavedSearchAliasMatchRedirect', () => {
       },
     } as SavedSearch;
 
-    renderHook(() => useSavedSearchAliasMatchRedirect({ spaces, savedSearch }));
+    renderHook(() => useSavedSearchAliasMatchRedirect({ spaces, savedSearch, history }));
 
-    expect(spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith('#/view/aliasTargetId', ' search');
+    expect(spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith(
+      '#/view/aliasTargetId?_g=foo',
+      ' search'
+    );
   });
 
   test('should not redirect if outcome !== aliasMatch', () => {
@@ -42,7 +53,7 @@ describe('useSavedSearchAliasMatchRedirect', () => {
       },
     } as SavedSearch;
 
-    renderHook(() => useSavedSearchAliasMatchRedirect({ spaces, savedSearch }));
+    renderHook(() => useSavedSearchAliasMatchRedirect({ spaces, savedSearch, history }));
 
     expect(spaces.ui.redirectLegacyUrl).not.toHaveBeenCalled();
   });
@@ -55,7 +66,7 @@ describe('useSavedSearchAliasMatchRedirect', () => {
       },
     } as SavedSearch;
 
-    renderHook(() => useSavedSearchAliasMatchRedirect({ spaces, savedSearch }));
+    renderHook(() => useSavedSearchAliasMatchRedirect({ spaces, savedSearch, history }));
 
     expect(spaces.ui.redirectLegacyUrl).not.toHaveBeenCalled();
   });

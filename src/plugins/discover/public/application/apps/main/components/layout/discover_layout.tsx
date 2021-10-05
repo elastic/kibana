@@ -69,10 +69,18 @@ export function DiscoverLayout({
   state,
   stateContainer,
 }: DiscoverLayoutProps) {
-  const { trackUiMetric, capabilities, indexPatterns, data, uiSettings, filterManager, storage } =
-    services;
+  const {
+    trackUiMetric,
+    capabilities,
+    indexPatterns,
+    data,
+    uiSettings,
+    filterManager,
+    storage,
+    history,
+    spaces,
+  } = services;
   const { main$, charts$, totalHits$ } = savedSearchData$;
-
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
   const fetchCounter = useRef<number>(0);
@@ -84,7 +92,7 @@ export function DiscoverLayout({
     }
   }, [dataState.fetchStatus]);
 
-  useSavedSearchAliasMatchRedirect({ savedSearch, spaces: services.spaces });
+  useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
   const timeField = useMemo(() => {
     return indexPattern.type !== 'rollup' ? indexPattern.timeFieldName : undefined;
@@ -180,7 +188,11 @@ export function DiscoverLayout({
         resetSavedSearch={resetSavedSearch}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
-        <SavedSearchURLConflictCallout savedSearch={savedSearch} spaces={services.spaces} />
+        <SavedSearchURLConflictCallout
+          savedSearch={savedSearch}
+          spaces={spaces}
+          history={history}
+        />
         <h1 id="savedSearchTitle" className="euiScreenReaderOnly">
           {savedSearch.title}
         </h1>

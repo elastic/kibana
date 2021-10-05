@@ -7,6 +7,8 @@
  */
 
 import React from 'react';
+import type { History } from 'history';
+
 import { mountWithIntl } from '@kbn/test/jest';
 import { SavedSearchURLConflictCallout } from './saved_search_url_conflict_callout';
 import type { SavedSearch } from './types';
@@ -15,10 +17,17 @@ import { spacesPluginMock } from '../../../../../x-pack/plugins/spaces/public/mo
 
 describe('SavedSearchURLConflictCallout', () => {
   let spaces: ReturnType<typeof spacesPluginMock.createStartContract>;
+  let history: () => History;
 
   beforeEach(() => {
     spaces = spacesPluginMock.createStartContract();
     spaces.ui.components.getLegacyUrlConflict = jest.fn().mockReturnValue('callout');
+    history = () =>
+      ({
+        location: {
+          search: '?_g=foo',
+        },
+      } as History);
   });
 
   test("should render URLConflictCallout in case of id's conflicts", () => {
@@ -31,7 +40,7 @@ describe('SavedSearchURLConflictCallout', () => {
     } as SavedSearch;
 
     const component = mountWithIntl(
-      <SavedSearchURLConflictCallout spaces={spaces} savedSearch={savedSearch} />
+      <SavedSearchURLConflictCallout spaces={spaces} savedSearch={savedSearch} history={history} />
     );
 
     expect(component.children()).toMatchInlineSnapshot(`"callout"`);
@@ -44,7 +53,7 @@ describe('SavedSearchURLConflictCallout', () => {
     } as SavedSearch;
 
     const component = mountWithIntl(
-      <SavedSearchURLConflictCallout spaces={spaces} savedSearch={savedSearch} />
+      <SavedSearchURLConflictCallout spaces={spaces} savedSearch={savedSearch} history={history} />
     );
 
     expect(component.children()).toMatchInlineSnapshot(`null`);
