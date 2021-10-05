@@ -111,7 +111,7 @@ export function OperationTypeComponent({
           : undefined
       }
       data-test-subj="operationTypeSelect"
-      valueOfSelected={operationType || defaultOperationType}
+      valueOfSelected={operationType}
       options={options}
       onChange={onChange}
     />
