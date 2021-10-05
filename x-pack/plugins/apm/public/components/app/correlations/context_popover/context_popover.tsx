@@ -40,7 +40,7 @@ export function CorrelationsContextPopover({
     type: '+' | '-'
   ) => void;
 }) {
-  const [infoIsOpen, setOpen] = useState(false);
+  const [infoIsOpen, setInfoOpen] = useState(false);
   const theme = useTheme();
 
   if (!isTopValuesStats(stats)) return null;
@@ -72,7 +72,7 @@ export function CorrelationsContextPopover({
           <EuiButtonIcon
             iconType="inspect"
             onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-              setOpen(true);
+              setInfoOpen(!infoIsOpen);
             }}
             aria-label={i18n.translate(
               'xpack.apm.correlations.fieldContextPopover.topFieldValuesAriaLabel',
@@ -86,7 +86,7 @@ export function CorrelationsContextPopover({
         </EuiToolTip>
       }
       isOpen={infoIsOpen}
-      closePopover={() => setOpen(false)}
+      closePopover={() => setInfoOpen(false)}
       anchorPosition="rightCenter"
       data-test-subj={'apmCorrelationsContextPopover'}
     >
