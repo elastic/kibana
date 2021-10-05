@@ -43,7 +43,7 @@ describe('EnrollmentTokenForm', () => {
     fireEvent.change(await findByLabelText('Enrollment token'), {
       target: { value: btoa(JSON.stringify(token)) },
     });
-    fireEvent.click(await findByRole('button', { name: 'Connect to cluster', hidden: true }));
+    fireEvent.click(await findByRole('button', { name: 'Configure Elastic', hidden: true }));
 
     await waitFor(() => {
       expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/interactive_setup/enroll', {
@@ -67,7 +67,7 @@ describe('EnrollmentTokenForm', () => {
       </Providers>
     );
 
-    fireEvent.click(await findByRole('button', { name: 'Connect to cluster', hidden: true }));
+    fireEvent.click(await findByRole('button', { name: 'Configure Elastic', hidden: true }));
 
     await findAllByText(/Enter an enrollment token/i);
 

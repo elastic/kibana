@@ -53,7 +53,7 @@ describe('ClusterConfigurationForm', () => {
       target: { value: 'changeme' },
     });
     fireEvent.click(await findByLabelText('Certificate authority'));
-    fireEvent.click(await findByRole('button', { name: 'Connect to cluster', hidden: true }));
+    fireEvent.click(await findByRole('button', { name: 'Configure Elastic', hidden: true }));
 
     await waitFor(() => {
       expect(coreStart.http.post).toHaveBeenLastCalledWith(
@@ -95,7 +95,7 @@ describe('ClusterConfigurationForm', () => {
       </Providers>
     );
 
-    fireEvent.click(await findByRole('button', { name: 'Connect to cluster', hidden: true }));
+    fireEvent.click(await findByRole('button', { name: 'Configure Elastic', hidden: true }));
 
     await findAllByText(/Enter a password/i);
     await findAllByText(/Confirm that you recognize and trust this certificate/i);
@@ -104,7 +104,7 @@ describe('ClusterConfigurationForm', () => {
       target: { value: 'elastic' },
     });
 
-    await findAllByText(/User 'elastic' can't be used as Kibana system user/i);
+    await findAllByText(/User 'elastic' can't be used as the Kibana system user/i);
 
     expect(coreStart.http.post).not.toHaveBeenCalled();
   });

@@ -63,7 +63,7 @@ describe('ClusterAddressForm', () => {
 
     fireEvent.click(await findByRole('button', { name: 'Check address', hidden: true }));
 
-    await findAllByText(/Enter a valid address including protocol/i);
+    await findAllByText(/Enter a valid address/i);
 
     expect(coreStart.http.post).not.toHaveBeenCalled();
   });
