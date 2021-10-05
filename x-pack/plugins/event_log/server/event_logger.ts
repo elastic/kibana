@@ -66,8 +66,6 @@ export class EventLogger implements IEventLogger {
 
   // non-blocking, but spawns an async task to do the work
   logEvent(eventProperties: IEvent): void {
-    if (!this.eventLogService.isEnabled()) return;
-
     const event: IEvent = {};
     const fixedProperties = {
       ecs: {
