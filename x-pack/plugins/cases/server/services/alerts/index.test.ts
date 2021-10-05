@@ -261,7 +261,7 @@ describe('updateAlertsStatus', () => {
                       ctx._source['${ALERT_WORKFLOW_STATUS}'] = 'open'
                     }
                     if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'closed'
+                      ctx._source.signal.status = 'open'
                     }",
               },
             },
