@@ -22,7 +22,7 @@ interface Props {
   checkpoint: string;
 }
 
-const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) => {
+export const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) => {
   const results = await dataService.dataViews.find(DEPRECATION_LOGS_INDEX_PATTERN);
   // Since the find might return also results with wildcard matchers we need to find the
   // index pattern that has an exact match with our title.
@@ -33,10 +33,20 @@ const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) 
   if (deprecationIndexPattern) {
     return deprecationIndexPattern.id;
   } else {
+    // When creating the index pattern, we need to be careful when creating an indexPattern
+    // for an index that doesnt exist. Since the deprecation logs data stream is only created
+    // when a deprecation log is indexed it could be possible that it might not exist at the
+    // time we need to render the DiscoveryAppLink.
+    // So in order to avoid those errors we need to make sure that the indexPattern is created
+    // with allowNoIndex and that we skip fetching fields to from the source index.
+    const override = false;
+    const skipFetchFields = true;
+    // prettier-ignore
     const newIndexPattern = await dataService.dataViews.createAndSave({
       title: DEPRECATION_LOGS_INDEX_PATTERN,
       allowNoIndex: true,
-    });
+    }, override, skipFetchFields);
+
     return newIndexPattern.id;
   }
 };

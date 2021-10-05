@@ -45,6 +45,7 @@ import {
   importTimelinesRoute,
   patchTimelinesRoute,
   persistFavoriteRoute,
+  resolveTimelineRoute,
 } from '../lib/timeline/routes/timelines';
 import { getDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/get_draft_timelines';
 import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/clean_draft_timelines';
@@ -56,6 +57,8 @@ import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
+// eslint-disable-next-line no-restricted-imports
+import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -74,6 +77,9 @@ export const initRoutes = (
   patchRulesRoute(router, ml, isRuleRegistryEnabled);
   deleteRulesRoute(router, isRuleRegistryEnabled);
   findRulesRoute(router, isRuleRegistryEnabled);
+
+  // Once we no longer have the legacy notifications system/"side car actions" this should be removed.
+  legacyCreateLegacyNotificationRoute(router);
 
   // TODO: pass isRuleRegistryEnabled to all relevant routes
 
@@ -94,6 +100,7 @@ export const initRoutes = (
   exportTimelinesRoute(router, config, security);
   getDraftTimelinesRoute(router, config, security);
   getTimelineRoute(router, config, security);
+  resolveTimelineRoute(router, config, security);
   getTimelinesRoute(router, config, security);
   cleanDraftTimelinesRoute(router, config, security);
   deleteTimelinesRoute(router, config, security);

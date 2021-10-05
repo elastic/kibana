@@ -76,7 +76,7 @@ async function uploadData() {
 
   const sampleDocuments = await generateSampleDocuments({
     collectTelemetryParams: {
-      logger: (console as unknown) as Logger,
+      logger: console as unknown as Logger,
       indices: {
         ...config,
         apmCustomLinkIndex: '.apm-custom-links',

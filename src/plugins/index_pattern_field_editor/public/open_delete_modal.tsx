@@ -35,54 +35,52 @@ interface Dependencies {
   usageCollection: UsageCollectionStart;
 }
 
-export const getFieldDeleteModalOpener = ({
-  core,
-  indexPatternService,
-  usageCollection,
-}: Dependencies) => (options: OpenFieldDeleteModalOptions): CloseEditor => {
-  const { overlays, notifications } = core;
+export const getFieldDeleteModalOpener =
+  ({ core, indexPatternService, usageCollection }: Dependencies) =>
+  (options: OpenFieldDeleteModalOptions): CloseEditor => {
+    const { overlays, notifications } = core;
 
-  let overlayRef: OverlayRef | null = null;
+    let overlayRef: OverlayRef | null = null;
 
-  const openDeleteModal = ({
-    onDelete,
-    fieldName,
-    ctx: { indexPattern },
-  }: OpenFieldDeleteModalOptions): CloseEditor => {
-    const fieldsToDelete = Array.isArray(fieldName) ? fieldName : [fieldName];
-    const closeModal = () => {
-      if (overlayRef) {
-        overlayRef.close();
-        overlayRef = null;
-      }
+    const openDeleteModal = ({
+      onDelete,
+      fieldName,
+      ctx: { indexPattern },
+    }: OpenFieldDeleteModalOptions): CloseEditor => {
+      const fieldsToDelete = Array.isArray(fieldName) ? fieldName : [fieldName];
+      const closeModal = () => {
+        if (overlayRef) {
+          overlayRef.close();
+          overlayRef = null;
+        }
+      };
+
+      const onConfirmDelete = async () => {
+        closeModal();
+
+        await removeFields(fieldsToDelete, indexPattern, {
+          indexPatternService,
+          usageCollection,
+          notifications,
+        });
+
+        if (onDelete) {
+          onDelete(fieldsToDelete);
+        }
+      };
+
+      overlayRef = overlays.openModal(
+        toMountPoint(
+          <DeleteFieldModal
+            fieldsToDelete={fieldsToDelete}
+            closeModal={closeModal}
+            confirmDelete={onConfirmDelete}
+          />
+        )
+      );
+
+      return closeModal;
     };
 
-    const onConfirmDelete = async () => {
-      closeModal();
-
-      await removeFields(fieldsToDelete, indexPattern, {
-        indexPatternService,
-        usageCollection,
-        notifications,
-      });
-
-      if (onDelete) {
-        onDelete(fieldsToDelete);
-      }
-    };
-
-    overlayRef = overlays.openModal(
-      toMountPoint(
-        <DeleteFieldModal
-          fieldsToDelete={fieldsToDelete}
-          closeModal={closeModal}
-          confirmDelete={onConfirmDelete}
-        />
-      )
-    );
-
-    return closeModal;
+    return openDeleteModal(options);
   };
-
-  return openDeleteModal(options);
-};

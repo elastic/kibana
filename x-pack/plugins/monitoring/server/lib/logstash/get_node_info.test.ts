@@ -188,7 +188,7 @@ describe('get_logstash_info', () => {
     const callWithRequest = jest.fn().mockReturnValue({
       then: jest.fn(),
     });
-    const req = ({
+    const req = {
       server: {
         plugins: {
           elasticsearch: {
@@ -198,7 +198,7 @@ describe('get_logstash_info', () => {
           },
         },
       },
-    } as unknown) as LegacyRequest;
+    } as unknown as LegacyRequest;
     await getNodeInfo(req, '.monitoring-logstash-*', {
       clusterUuid: STANDALONE_CLUSTER_CLUSTER_UUID,
       logstashUuid: 'logstash_uuid',

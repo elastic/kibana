@@ -35,7 +35,7 @@ import {
   Ecs,
 } from '../../../common';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { parseString } from '../../containers/utils';
+import { parseStringAsExternalService } from '../../common/user_actions';
 import { OnUpdateFields } from '../case_view';
 import {
   getConnectorLabelTitle,
@@ -150,7 +150,11 @@ export const UserActionTree = React.memo(
     useFetchAlertData,
     userCanCrud,
   }: UserActionTreeProps) => {
-    const { detailName: caseId, commentId, subCaseId } = useParams<{
+    const {
+      detailName: caseId,
+      commentId,
+      subCaseId,
+    } = useParams<{
       detailName: string;
       commentId?: string;
       subCaseId?: string;
@@ -162,12 +166,8 @@ export const UserActionTree = React.memo(
     const currentUser = useCurrentUser();
     const [manageMarkdownEditIds, setManageMarkdownEditIds] = useState<string[]>([]);
     const commentRefs = useRef<Record<string, any>>({});
-    const {
-      clearDraftComment,
-      draftComment,
-      hasIncomingLensState,
-      openLensModal,
-    } = useLensDraftComment();
+    const { clearDraftComment, draftComment, hasIncomingLensState, openLensModal } =
+      useLensDraftComment();
 
     const [loadingAlertData, manualAlertsData] = useFetchAlertData(
       getManualAlertIdsWithNoRuleId(caseData.comments)
@@ -512,10 +512,14 @@ export const UserActionTree = React.memo(
 
             // Pushed information
             if (action.actionField.length === 1 && action.actionField[0] === 'pushed') {
-              const parsedValue = parseString(`${action.newValue}`);
+              const parsedExternalService = parseStringAsExternalService(
+                action.newValConnectorId,
+                action.newValue
+              );
+
               const { firstPush, parsedConnectorId, parsedConnectorName } = getPushInfo(
                 caseServices,
-                parsedValue,
+                parsedExternalService,
                 index
               );
 

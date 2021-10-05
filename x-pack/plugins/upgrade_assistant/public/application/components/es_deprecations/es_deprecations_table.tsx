@@ -26,6 +26,7 @@ import {
   Query,
 } from '@elastic/eui';
 import { EnrichedDeprecationInfo } from '../../../../common/types';
+import { useAppContext } from '../../app_context';
 import {
   MlSnapshotsTableRow,
   DefaultTableRow,
@@ -101,10 +102,19 @@ const cellToLabelMap = {
 const cellTypes = Object.keys(cellToLabelMap) as DeprecationTableColumns[];
 const pageSizeOptions = PAGINATION_CONFIG.pageSizeOptions;
 
-const renderTableRowCells = (deprecation: EnrichedDeprecationInfo) => {
+const renderTableRowCells = (
+  deprecation: EnrichedDeprecationInfo,
+  mlUpgradeModeEnabled: boolean
+) => {
   switch (deprecation.correctiveAction?.type) {
     case 'mlSnapshot':
-      return <MlSnapshotsTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
+      return (
+        <MlSnapshotsTableRow
+          deprecation={deprecation}
+          rowFieldNames={cellTypes}
+          mlUpgradeModeEnabled={mlUpgradeModeEnabled}
+        />
+      );
 
     case 'indexSetting':
       return <IndexSettingsTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
@@ -146,6 +156,13 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
   deprecations = [],
   reload,
 }) => {
+  const {
+    services: { api },
+  } = useAppContext();
+
+  const { data } = api.useLoadMlUpgradeMode();
+  const mlUpgradeModeEnabled = !!data?.mlUpgradeModeEnabled;
+
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     isSortAscending: true,
     sortField: 'isCritical',
@@ -160,11 +177,10 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
     getSortedItems(deprecations, sortConfig)
   );
 
-  const pager = useMemo(() => new Pager(deprecations.length, itemsPerPage, currentPageIndex), [
-    currentPageIndex,
-    deprecations,
-    itemsPerPage,
-  ]);
+  const pager = useMemo(
+    () => new Pager(deprecations.length, itemsPerPage, currentPageIndex),
+    [currentPageIndex, deprecations, itemsPerPage]
+  );
 
   const visibleDeprecations = useMemo(
     () => filteredDeprecations.slice(pager.firstItemIndex, pager.lastItemIndex + 1),
@@ -225,9 +241,9 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
                 field: 'type',
                 name: i18nTexts.typeFilterLabel,
                 multiSelect: false,
-                options: (Object.keys(DEPRECATION_TYPE_MAP) as Array<
-                  keyof typeof DEPRECATION_TYPE_MAP
-                >).map((type) => ({
+                options: (
+                  Object.keys(DEPRECATION_TYPE_MAP) as Array<keyof typeof DEPRECATION_TYPE_MAP>
+                ).map((type) => ({
                   value: type,
                   name: DEPRECATION_TYPE_MAP[type],
                 })),
@@ -292,7 +308,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
             {visibleDeprecations.map((deprecation, index) => {
               return (
                 <EuiTableRow data-test-subj="deprecationTableRow" key={`deprecation-row-${index}`}>
-                  {renderTableRowCells(deprecation)}
+                  {renderTableRowCells(deprecation, mlUpgradeModeEnabled)}
                 </EuiTableRow>
               );
             })}

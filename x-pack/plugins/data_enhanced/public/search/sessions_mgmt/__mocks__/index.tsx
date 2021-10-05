@@ -14,6 +14,6 @@ export function LocaleWrapper({ children }: { children?: ReactNode }) {
   return <IntlProvider locale="en">{children}</IntlProvider>;
 }
 
-export const mockUrls = ({
+export const mockUrls = {
   getUrlGenerator: (id: string) => ({ createUrl: () => `hello-cool-${id}-url` }),
-} as unknown) as UrlGeneratorsStart;
+} as unknown as UrlGeneratorsStart;

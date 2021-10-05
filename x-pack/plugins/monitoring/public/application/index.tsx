@@ -18,8 +18,19 @@ import { GlobalStateProvider } from './global_state_context';
 import { ExternalConfigContext, ExternalConfig } from './external_config_context';
 import { createPreserveQueryHistory } from './preserve_query_history';
 import { RouteInit } from './route_init';
+import { NoDataPage } from './pages/no_data';
 import { ElasticsearchOverviewPage } from './pages/elasticsearch/overview';
-import { CODE_PATH_ELASTICSEARCH } from '../../common/constants';
+import { BeatsOverviewPage } from './pages/beats/overview';
+import { BeatsInstancesPage } from './pages/beats/instances';
+import { BeatsInstancePage } from './pages/beats/instance';
+import { KibanaOverviewPage } from './pages/kibana/overview';
+import { CODE_PATH_ELASTICSEARCH, CODE_PATH_BEATS, CODE_PATH_KIBANA } from '../../common/constants';
+import { ElasticsearchNodesPage } from './pages/elasticsearch/nodes_page';
+import { ElasticsearchIndicesPage } from './pages/elasticsearch/indices_page';
+import { ElasticsearchIndexPage } from './pages/elasticsearch/index_page';
+import { ElasticsearchIndexAdvancedPage } from './pages/elasticsearch/index_advanced_page';
+import { ElasticsearchNodePage } from './pages/elasticsearch/node_page';
+import { ElasticsearchNodeAdvancedPage } from './pages/elasticsearch/node_advanced_page';
 import { MonitoringTimeContainer } from './hooks/use_monitoring_time';
 import { BreadcrumbContainer } from './hooks/use_breadcrumbs';
 
@@ -54,7 +65,7 @@ const MonitoringApp: React.FC<{
             <BreadcrumbContainer.Provider history={history}>
               <Router history={history}>
                 <Switch>
-                  <Route path="/no-data" component={NoData} />
+                  <Route path="/no-data" component={NoDataPage} />
                   <Route path="/loading" component={LoadingPage} />
                   <RouteInit
                     path="/license"
@@ -76,12 +87,86 @@ const MonitoringApp: React.FC<{
                   />
 
                   {/* ElasticSearch Views */}
+
+                  <RouteInit
+                    path="/elasticsearch/indices/:index/advanced"
+                    component={ElasticsearchIndexAdvancedPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/elasticsearch/indices/:index"
+                    component={ElasticsearchIndexPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/elasticsearch/indices"
+                    component={ElasticsearchIndicesPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/elasticsearch/nodes/:node/advanced"
+                    component={ElasticsearchNodeAdvancedPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/elasticsearch/nodes/:node"
+                    component={ElasticsearchNodePage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/elasticsearch/nodes"
+                    component={ElasticsearchNodesPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
                   <RouteInit
                     path="/elasticsearch"
                     component={ElasticsearchOverviewPage}
                     codePaths={[CODE_PATH_ELASTICSEARCH]}
                     fetchAllClusters={false}
                   />
+
+                  {/* Beats Views */}
+                  <RouteInit
+                    path="/beats/beat/:instance"
+                    component={BeatsInstancePage}
+                    codePaths={[CODE_PATH_BEATS]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/beats/beats"
+                    component={BeatsInstancesPage}
+                    codePaths={[CODE_PATH_BEATS]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/beats"
+                    component={BeatsOverviewPage}
+                    codePaths={[CODE_PATH_BEATS]}
+                    fetchAllClusters={false}
+                  />
+
+                  {/* Kibana Views */}
+                  <RouteInit
+                    path="/kibana"
+                    component={KibanaOverviewPage}
+                    codePaths={[CODE_PATH_KIBANA]}
+                    fetchAllClusters={false}
+                  />
+
                   <Redirect
                     to={{
                       pathname: '/loading',
@@ -96,10 +181,6 @@ const MonitoringApp: React.FC<{
       </ExternalConfigContext.Provider>
     </KibanaContextProvider>
   );
-};
-
-const NoData: React.FC<{}> = () => {
-  return <div>No data page</div>;
 };
 
 const Home: React.FC<{}> = () => {

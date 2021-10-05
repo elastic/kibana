@@ -18,7 +18,7 @@ pageLoadAssetSize:
   devTools: 38781
   discover: 99999
   discoverEnhanced: 42730
-  embeddable: 242753
+  embeddable: 99999
   embeddableEnhanced: 41145
   enterpriseSearch: 35741
   features: 21723
@@ -73,9 +73,9 @@ pageLoadAssetSize:
   tileMap: 65337
   transform: 41151
   triggersActionsUi: 100000
-  uiActions: 95074
-  uiActionsEnhanced: 313011
-  upgradeAssistant: 80966
+  uiActions: 97717
+  uiActionsEnhanced: 48000
+  upgradeAssistant: 81241
   uptime: 40825
   urlDrilldown: 70674
   urlForwarding: 32579
@@ -118,3 +118,5 @@ pageLoadAssetSize:
   securitySolution: 232514
   share: 100298
   snapshotRestore: 63225
+  customIntegrations: 28810
+  dataViews: 42000

@@ -18,10 +18,10 @@ describe.each([
   it('should call rulesClient.disable if the rule was enabled and enabled is false', async () => {
     const rulesOptionsMock = getUpdateRulesOptionsMock(isRuleRegistryEnabled);
     rulesOptionsMock.ruleUpdate.enabled = false;
-    ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).get.mockResolvedValue(
+    (rulesOptionsMock.rulesClient as unknown as RulesClientMock).get.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
-    ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).update.mockResolvedValue(
+    (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
 
@@ -38,11 +38,11 @@ describe.each([
     const rulesOptionsMock = getUpdateRulesOptionsMock(isRuleRegistryEnabled);
     rulesOptionsMock.ruleUpdate.enabled = true;
 
-    ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).get.mockResolvedValue({
+    (rulesOptionsMock.rulesClient as unknown as RulesClientMock).get.mockResolvedValue({
       ...getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
       enabled: false,
     });
-    ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).update.mockResolvedValue(
+    (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
 
@@ -59,11 +59,11 @@ describe.each([
     const rulesOptionsMock = getUpdateMlRulesOptionsMock(isRuleRegistryEnabled);
     rulesOptionsMock.ruleUpdate.enabled = true;
 
-    ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).update.mockResolvedValue(
+    (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getMlRuleParams())
     );
 
-    ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).get.mockResolvedValue(
+    (rulesOptionsMock.rulesClient as unknown as RulesClientMock).get.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getMlRuleParams())
     );
 

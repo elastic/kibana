@@ -15,7 +15,8 @@ export interface SavedObjectsManagementServiceRegistryEntry {
   title: string;
 }
 
-export type ISavedObjectsManagementServiceRegistry = PublicMethodsOf<SavedObjectsManagementServiceRegistry>;
+export type ISavedObjectsManagementServiceRegistry =
+  PublicMethodsOf<SavedObjectsManagementServiceRegistry>;
 
 export class SavedObjectsManagementServiceRegistry {
   private readonly registry = new Map<string, SavedObjectsManagementServiceRegistryEntry>();

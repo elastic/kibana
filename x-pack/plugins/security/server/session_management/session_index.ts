@@ -151,13 +151,11 @@ export class SessionIndex {
    */
   async get(sid: string) {
     try {
-      const {
-        body: response,
-        statusCode,
-      } = await this.options.elasticsearchClient.get<SessionIndexValue>(
-        { id: sid, index: this.indexName },
-        { ignore: [404] }
-      );
+      const { body: response, statusCode } =
+        await this.options.elasticsearchClient.get<SessionIndexValue>(
+          { id: sid, index: this.indexName },
+          { ignore: [404] }
+        );
 
       const docNotFound = response.found === false;
       const indexNotFound = statusCode === 404;

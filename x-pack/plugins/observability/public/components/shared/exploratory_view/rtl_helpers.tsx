@@ -39,6 +39,7 @@ import { createStubIndexPattern } from '../../../../../../../src/plugins/data/co
 import { AppDataType, UrlFilter } from './types';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { ListItem } from '../../../hooks/use_values_list';
+import { casesPluginMock } from '../../../../../cases/public/mocks';
 
 interface KibanaProps {
   services?: KibanaServices;
@@ -77,19 +78,19 @@ interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore
 
 function getSetting<T = any>(key: string): T {
   if (key === 'timepicker:quickRanges') {
-    return ([
+    return [
       {
         display: 'Today',
         from: 'now/d',
         to: 'now/d',
       },
-    ] as unknown) as T;
+    ] as unknown as T;
   }
-  return ('MMM D, YYYY @ HH:mm:ss.SSS' as unknown) as T;
+  return 'MMM D, YYYY @ HH:mm:ss.SSS' as unknown as T;
 }
 
 function setSetting$<T = any>(key: string): T {
-  return (of('MMM D, YYYY @ HH:mm:ss.SSS') as unknown) as T;
+  return of('MMM D, YYYY @ HH:mm:ss.SSS') as unknown as T;
 }
 
 /* default mock core */
@@ -118,6 +119,7 @@ export const mockCore: () => Partial<CoreStart & ObservabilityPublicPluginsStart
     },
     lens: lensPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
+    cases: casesPluginMock.createStartContract(),
   };
 
   return core;
@@ -131,10 +133,10 @@ export function MockKibanaProvider<ExtraCore extends Partial<CoreStart>>({
 }: MockKibanaProviderProps<ExtraCore>) {
   const indexPattern = mockIndexPattern;
 
-  setIndexPatterns(({
+  setIndexPatterns({
     ...[indexPattern],
     get: async () => indexPattern,
-  } as unknown) as IndexPatternsContract);
+  } as unknown as IndexPatternsContract);
 
   return (
     <KibanaContextProvider services={{ ...core }} {...kibanaProps}>
@@ -236,7 +238,7 @@ export const mockAppIndexPattern = () => {
     loading: false,
     hasAppData: { ux: true } as any,
     loadIndexPattern,
-    indexPatterns: ({ ux: mockIndexPattern } as unknown) as Record<AppDataType, IndexPattern>,
+    indexPatterns: { ux: mockIndexPattern } as unknown as Record<AppDataType, IndexPattern>,
   });
   return { spy, loadIndexPattern };
 };

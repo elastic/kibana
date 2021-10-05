@@ -30,8 +30,7 @@ const i18nTexts = {
     />
   ),
   calloutBody: i18n.translate('xpack.upgradeAssistant.overview.verifyChanges.calloutBody', {
-    defaultMessage:
-      'Reset the counter after making changes and continue monitoring to verify that you are no longer using deprecated APIs.',
+    defaultMessage: `After making changes, reset the counter and continue monitoring to verify you're no longer using deprecated features.`,
   }),
   loadingError: i18n.translate('xpack.upgradeAssistant.overview.verifyChanges.loadingError', {
     defaultMessage: 'An error occurred while retrieving the count of deprecation logs',
@@ -61,9 +60,8 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
   const {
     services: { api },
   } = useAppContext();
-  const { data, error, isLoading, resendRequest, isInitialRequest } = api.getDeprecationLogsCount(
-    checkpoint
-  );
+  const { data, error, isLoading, resendRequest, isInitialRequest } =
+    api.getDeprecationLogsCount(checkpoint);
 
   const logsCount = data?.count || 0;
   const hasLogs = logsCount > 0;

@@ -152,9 +152,7 @@ interface ObjectTypeAndId {
   type: string;
 }
 
-const getObjectsToFetch = (
-  queue: Array<BatchGetQueueEntry | BatchResolveQueueEntry>
-): ObjectTypeAndId[] => {
+const getObjectsToFetch = (queue: BatchGetQueueEntry[]): ObjectTypeAndId[] => {
   const objects: ObjectTypeAndId[] = [];
   const inserted = new Set<string>();
   queue.forEach(({ id, type }) => {
@@ -164,6 +162,24 @@ const getObjectsToFetch = (
     }
   });
   return objects;
+};
+
+const getObjectsToResolve = (queue: BatchResolveQueueEntry[]) => {
+  const responseIndices: number[] = [];
+  const objectsToResolve: ObjectTypeAndId[] = [];
+  const inserted = new Map<string, number>();
+  queue.forEach(({ id, type }) => {
+    const key = `${type}|${id}`;
+    const indexForTypeAndId = inserted.get(key);
+    if (indexForTypeAndId === undefined) {
+      inserted.set(key, objectsToResolve.length);
+      responseIndices.push(objectsToResolve.length);
+      objectsToResolve.push({ id, type });
+    } else {
+      responseIndices.push(indexForTypeAndId);
+    }
+  });
+  return { objectsToResolve, responseIndices };
 };
 
 /**
@@ -225,28 +241,18 @@ export class SavedObjectsClient {
       this.batchResolveQueue = [];
 
       try {
-        const objectsToFetch = getObjectsToFetch(queue);
-        const { resolved_objects: savedObjects } = await this.performBulkResolve(objectsToFetch);
+        const { objectsToResolve, responseIndices } = getObjectsToResolve(queue);
+        const { resolved_objects: resolvedObjects } = await this.performBulkResolve(
+          objectsToResolve
+        );
 
-        queue.forEach((queueItem) => {
-          const foundObject = savedObjects.find((resolveResponse) => {
-            return (
-              resolveResponse.saved_object.id === queueItem.id &&
-              resolveResponse.saved_object.type === queueItem.type
-            );
-          });
-
-          if (foundObject) {
-            // multiple calls may have been requested the same object.
-            // we need to clone to avoid sharing references between the instances
-            queueItem.resolve(this.createResolvedSavedObject(cloneDeep(foundObject)));
-          } else {
-            queueItem.resolve(
-              this.createResolvedSavedObject({
-                saved_object: pick(queueItem, ['id', 'type']),
-              } as SavedObjectsResolveResponse)
-            );
-          }
+        queue.forEach((queueItem, i) => {
+          // This differs from the older processBatchGetQueue approach because the resolved object IDs are *not* guaranteed to be the same.
+          // Instead, we rely on the guarantee that the objects in the bulkResolve response will be in the same order as the requests.
+          // However, we still need to clone the response object because we deduplicate batched requests.
+          const responseIndex = responseIndices[i];
+          const clone = cloneDeep(resolvedObjects[responseIndex]);
+          queueItem.resolve(this.createResolvedSavedObject(clone));
         });
       } catch (err) {
         queue.forEach((queueItem) => {

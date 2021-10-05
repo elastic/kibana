@@ -6,7 +6,7 @@
  */
 
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 import { getServiceTransactionDetailedStatistics } from './get_service_transaction_detailed_statistics';
 
 export async function getServicesDetailedStatistics({
@@ -16,13 +16,17 @@ export async function getServicesDetailedStatistics({
   setup,
   searchAggregatedTransactions,
   offset,
+  start,
+  end,
 }: {
   serviceNames: string[];
   environment: string;
   kuery: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
   offset?: string;
+  start: number;
+  end: number;
 }) {
   return withApmSpan('get_service_detailed_statistics', async () => {
     const commonProps = {
@@ -31,6 +35,8 @@ export async function getServicesDetailedStatistics({
       kuery,
       setup,
       searchAggregatedTransactions,
+      start,
+      end,
     };
 
     const [currentPeriod, previousPeriod] = await Promise.all([

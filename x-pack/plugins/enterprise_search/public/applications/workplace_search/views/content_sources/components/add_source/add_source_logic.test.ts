@@ -569,9 +569,7 @@ describe('AddSourceLogic', () => {
 
           expect(clearFlashMessages).toHaveBeenCalled();
           expect(AddSourceLogic.values.buttonLoading).toEqual(true);
-          expect(
-            http.put
-          ).toHaveBeenCalledWith(
+          expect(http.put).toHaveBeenCalledWith(
             `/internal/workplace_search/org/settings/connectors/${sourceConfigData.serviceType}`,
             { body: JSON.stringify(params) }
           );

@@ -41,7 +41,7 @@ function createLayerMock(
   for (let i = 0; i < numFields; i++) {
     fields.push(new MockField({ fieldName: `field${i}`, origin: FIELD_ORIGIN.SOURCE }));
   }
-  return ({
+  return {
     getStyleEditorFields: async () => {
       return fields;
     },
@@ -49,16 +49,16 @@ function createLayerMock(
       return layerType;
     },
     getSource: () => {
-      return ({
+      return {
         getSupportedShapeTypes: async () => {
           return supportedShapeTypes;
         },
         isESSource() {
           return isESSource;
         },
-      } as unknown) as IVectorSource;
+      } as unknown as IVectorSource;
     },
-  } as unknown) as IVectorLayer;
+  } as unknown as IVectorLayer;
 }
 
 const vectorStyleDescriptor = {
@@ -68,8 +68,8 @@ const vectorStyleDescriptor = {
 };
 const vectorStyle = new VectorStyle(
   vectorStyleDescriptor,
-  ({} as unknown) as IVectorSource,
-  ({} as unknown) as IVectorLayer
+  {} as unknown as IVectorSource,
+  {} as unknown as IVectorLayer
 );
 const styleProperties: StyleProperties = {};
 vectorStyle.getAllStyleProperties().forEach((styleProperty) => {

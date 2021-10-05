@@ -13,7 +13,8 @@ import { APIReturnType } from '../../../../plugins/apm/public/services/rest/crea
 import { getServiceNodeIds } from './get_service_node_ids';
 import { createApmApiClient } from '../../common/apm_api_supertest';
 
-type ServiceOverviewInstanceDetails = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
+type ServiceOverviewInstanceDetails =
+  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('legacySupertestAsApmReadUser');

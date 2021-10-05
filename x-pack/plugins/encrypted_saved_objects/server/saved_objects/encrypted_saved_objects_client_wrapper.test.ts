@@ -1478,7 +1478,7 @@ describe('#bulkResolve', () => {
     };
 
     mockBaseClient.bulkResolve.mockResolvedValue(
-      (mockedResponse as unknown) as SavedObjectsBulkResolveResponse
+      mockedResponse as unknown as SavedObjectsBulkResolveResponse
     );
 
     const bulkResolveParams = [
@@ -1527,7 +1527,7 @@ describe('#bulkResolve', () => {
     };
 
     mockBaseClient.bulkResolve.mockResolvedValue(
-      (mockedResponse as unknown) as SavedObjectsBulkResolveResponse
+      mockedResponse as unknown as SavedObjectsBulkResolveResponse
     );
 
     const bulkResolveParams = [
@@ -1601,7 +1601,7 @@ describe('#bulkResolve', () => {
     };
 
     mockBaseClient.bulkResolve.mockResolvedValue(
-      (mockedResponse as unknown) as SavedObjectsBulkResolveResponse
+      mockedResponse as unknown as SavedObjectsBulkResolveResponse
     );
 
     const decryptionError = new EncryptionError(
@@ -1679,7 +1679,7 @@ describe('#bulkResolve', () => {
       ],
     };
     mockBaseClient.bulkResolve.mockResolvedValue(
-      (mockedResponse as unknown) as SavedObjectsBulkResolveResponse
+      mockedResponse as unknown as SavedObjectsBulkResolveResponse
     );
     const bulkGetParams = [{ type: 'known-type', id: 'bad' }];
 

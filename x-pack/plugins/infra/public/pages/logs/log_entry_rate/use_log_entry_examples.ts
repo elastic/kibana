@@ -53,9 +53,10 @@ export const useLogEntryExamples = ({
     [dataset, endTime, exampleCount, sourceId, startTime]
   );
 
-  const isLoadingLogEntryExamples = useMemo(() => getLogEntryExamplesRequest.state === 'pending', [
-    getLogEntryExamplesRequest.state,
-  ]);
+  const isLoadingLogEntryExamples = useMemo(
+    () => getLogEntryExamplesRequest.state === 'pending',
+    [getLogEntryExamplesRequest.state]
+  );
 
   const hasFailedLoadingLogEntryExamples = useMemo(
     () => getLogEntryExamplesRequest.state === 'rejected',

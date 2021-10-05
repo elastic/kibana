@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog, getTimeReporter } from '@kbn/dev-utils';
 import {
   Extractor,
   IConfigFile,
@@ -26,6 +26,9 @@ const log = new ToolingLog({
   level: 'info',
   writeTo: process.stdout,
 });
+
+const runStartTime = Date.now();
+const reportTime = getTimeReporter(log, 'scripts/check_published_api_changes');
 
 /*
  * Step 1: execute build:types
@@ -184,6 +187,7 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
       log.error(e);
       return false;
     }
+
     log.info(`${folder} API: updated documentation ✔`);
   }
 
@@ -195,7 +199,7 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
 
 (async () => {
   const extraFlags: string[] = [];
-  const opts = (getopts(process.argv.slice(2), {
+  const opts = getopts(process.argv.slice(2), {
     boolean: ['accept', 'docs', 'help'],
     string: ['filter'],
     default: {
@@ -205,7 +209,7 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
       extraFlags.push(name);
       return false;
     },
-  }) as any) as Options;
+  }) as any as Options;
 
   if (extraFlags.length > 0) {
     for (const flag of extraFlags) {
@@ -262,9 +266,22 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
   }
 
   if (results.includes(false)) {
+    reportTime(runStartTime, 'error', {
+      success: false,
+      ...opts,
+    });
     process.exitCode = 1;
+  } else {
+    reportTime(runStartTime, 'total', {
+      success: true,
+      ...opts,
+    });
   }
 })().catch((e) => {
+  reportTime(runStartTime, 'error', {
+    success: false,
+    error: e.message,
+  });
   log.error(e);
   process.exitCode = 1;
 });

@@ -13,6 +13,7 @@ import type { GetLicense } from './';
 import { getExportStats } from './get_export_stats';
 import { getExportTypesHandler } from './get_export_type_handler';
 import type {
+  AggregationBuckets,
   AggregationResultBuckets,
   AvailableTotal,
   FeatureAvailabilityMap,
@@ -33,6 +34,8 @@ const OBJECT_TYPES_FIELD = 'meta.objectType.keyword';
 const STATUS_TYPES_KEY = 'statusTypes';
 const STATUS_BY_APP_KEY = 'statusByApp';
 const STATUS_TYPES_FIELD = 'status';
+const OUTPUT_SIZES_KEY = 'sizes';
+const OUTPUT_SIZES_FIELD = 'output.size';
 
 const DEFAULT_TERMS_SIZE = 10;
 const PRINTABLE_PDF_JOBTYPE = 'printable_pdf';
@@ -64,13 +67,14 @@ const getAppStatuses = (buckets: StatusByAppBucket[]) =>
   }, {});
 
 function getAggStats(aggs: AggregationResultBuckets): Partial<RangeStats> {
-  const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY];
+  const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY] as AggregationBuckets;
   const jobTypes = jobBuckets.reduce((accum: JobTypes, bucket) => {
-    const { key, doc_count: count, isDeprecated } = bucket;
+    const { key, doc_count: count, isDeprecated, sizes } = bucket;
     const deprecatedCount = isDeprecated?.doc_count;
     const total: Omit<AvailableTotal, 'available'> = {
       total: count,
       deprecated: deprecatedCount,
+      sizes: sizes?.values,
     };
     return { ...accum, [key]: total };
   }, {} as JobTypes);
@@ -97,7 +101,13 @@ function getAggStats(aggs: AggregationResultBuckets): Partial<RangeStats> {
     statusByApp = getAppStatuses(statusAppBuckets);
   }
 
-  return { _all: all, status: statusTypes, statuses: statusByApp, ...jobTypes };
+  return {
+    _all: all,
+    status: statusTypes,
+    statuses: statusByApp,
+    output_size: get(aggs[OUTPUT_SIZES_KEY], 'values') ?? undefined,
+    ...jobTypes,
+  };
 }
 
 type RangeStatSets = Partial<RangeStats> & {
@@ -135,7 +145,6 @@ export async function getReportingUsage(
   exportTypesRegistry: ExportTypesRegistry
 ): Promise<ReportingUsageType> {
   const reportingIndex = config.get('index');
-
   const params = {
     index: `${reportingIndex}-*`,
     filterPath: 'aggregations.*.buckets',
@@ -152,8 +161,14 @@ export async function getReportingUsage(
           aggs: {
             [JOB_TYPES_KEY]: {
               terms: { field: JOB_TYPES_FIELD, size: DEFAULT_TERMS_SIZE },
-              aggs: { isDeprecated: { filter: { term: { [OBJECT_TYPE_DEPRECATED_KEY]: true } } } },
+              aggs: {
+                isDeprecated: { filter: { term: { [OBJECT_TYPE_DEPRECATED_KEY]: true } } },
+                [OUTPUT_SIZES_KEY]: {
+                  percentiles: { field: OUTPUT_SIZES_FIELD },
+                },
+              },
             },
+
             [STATUS_TYPES_KEY]: { terms: { field: STATUS_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } },
             [STATUS_BY_APP_KEY]: {
               terms: { field: 'status', size: DEFAULT_TERMS_SIZE },
@@ -161,18 +176,23 @@ export async function getReportingUsage(
                 jobTypes: {
                   terms: { field: JOB_TYPES_FIELD, size: DEFAULT_TERMS_SIZE },
                   aggs: {
-                    appNames: { terms: { field: OBJECT_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } }, // NOTE Discover/CSV export is missing the 'meta.objectType' field, so Discover/CSV results are missing for this agg
+                    appNames: { terms: { field: OBJECT_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } },
                   },
                 },
               },
             },
             [OBJECT_TYPES_KEY]: {
               filter: { term: { jobtype: PRINTABLE_PDF_JOBTYPE } },
-              aggs: { pdf: { terms: { field: OBJECT_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } } },
+              aggs: {
+                pdf: { terms: { field: OBJECT_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } },
+              },
             },
             [LAYOUT_TYPES_KEY]: {
               filter: { term: { jobtype: PRINTABLE_PDF_JOBTYPE } },
               aggs: { pdf: { terms: { field: LAYOUT_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } } },
+            },
+            [OUTPUT_SIZES_KEY]: {
+              percentiles: { field: OUTPUT_SIZES_FIELD },
             },
           },
         },
@@ -184,26 +204,24 @@ export async function getReportingUsage(
   return esClient
     .search(params)
     .then(({ body: response }) => handleResponse(response))
-    .then(
-      (usage: Partial<RangeStatSets>): ReportingUsageType => {
-        // Allow this to explicitly throw an exception if/when this config is deprecated,
-        // because we shouldn't collect browserType in that case!
-        const browserType = config.get('capture', 'browser', 'type');
+    .then((usage: Partial<RangeStatSets>): ReportingUsageType => {
+      // Allow this to explicitly throw an exception if/when this config is deprecated,
+      // because we shouldn't collect browserType in that case!
+      const browserType = config.get('capture', 'browser', 'type');
 
-        const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
-        const availability = exportTypesHandler.getAvailability(
-          featureAvailability
-        ) as FeatureAvailabilityMap;
+      const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
+      const availability = exportTypesHandler.getAvailability(
+        featureAvailability
+      ) as FeatureAvailabilityMap;
 
-        const { last7Days, ...all } = usage;
+      const { last7Days, ...all } = usage;
 
-        return {
-          available: true,
-          browser_type: browserType,
-          enabled: true,
-          last7Days: getExportStats(last7Days, availability, exportTypesHandler),
-          ...getExportStats(all, availability, exportTypesHandler),
-        };
-      }
-    );
+      return {
+        available: true,
+        browser_type: browserType,
+        enabled: true,
+        last7Days: getExportStats(last7Days, availability, exportTypesHandler),
+        ...getExportStats(all, availability, exportTypesHandler),
+      };
+    });
 }

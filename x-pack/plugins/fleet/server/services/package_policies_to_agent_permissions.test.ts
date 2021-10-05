@@ -13,7 +13,7 @@ import type { PackagePolicy, RegistryDataStream } from '../types';
 
 import { getPackageInfo } from './epm/packages';
 import {
-  getDataStreamPermissions,
+  getDataStreamPrivileges,
   storedPackagePoliciesToAgentPermissions,
 } from './package_policies_to_agent_permissions';
 
@@ -380,12 +380,12 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
   });
 });
 
-describe('getDataStreamPermissions()', () => {
-  it('returns defaults for a datastream with no permissions', () => {
+describe('getDataStreamPrivileges()', () => {
+  it('returns defaults for a datastream with no privileges', () => {
     const dataStream = { type: 'logs', dataset: 'test' } as RegistryDataStream;
-    const permissions = getDataStreamPermissions(dataStream);
+    const privileges = getDataStreamPrivileges(dataStream);
 
-    expect(permissions).toMatchObject({
+    expect(privileges).toMatchObject({
       names: ['logs-test-*'],
       privileges: ['auto_configure', 'create_doc'],
     });
@@ -393,9 +393,9 @@ describe('getDataStreamPermissions()', () => {
 
   it('adds the namespace to the index name', () => {
     const dataStream = { type: 'logs', dataset: 'test' } as RegistryDataStream;
-    const permissions = getDataStreamPermissions(dataStream, 'namespace');
+    const privileges = getDataStreamPrivileges(dataStream, 'namespace');
 
-    expect(permissions).toMatchObject({
+    expect(privileges).toMatchObject({
       names: ['logs-test-namespace'],
       privileges: ['auto_configure', 'create_doc'],
     });
@@ -407,9 +407,9 @@ describe('getDataStreamPermissions()', () => {
       dataset: 'test',
       dataset_is_prefix: true,
     } as RegistryDataStream;
-    const permissions = getDataStreamPermissions(dataStream, 'namespace');
+    const privileges = getDataStreamPrivileges(dataStream, 'namespace');
 
-    expect(permissions).toMatchObject({
+    expect(privileges).toMatchObject({
       names: ['logs-test.*-namespace'],
       privileges: ['auto_configure', 'create_doc'],
     });
@@ -421,25 +421,27 @@ describe('getDataStreamPermissions()', () => {
       dataset: 'test',
       hidden: true,
     } as RegistryDataStream;
-    const permissions = getDataStreamPermissions(dataStream, 'namespace');
+    const privileges = getDataStreamPrivileges(dataStream, 'namespace');
 
-    expect(permissions).toMatchObject({
+    expect(privileges).toMatchObject({
       names: ['.logs-test-namespace'],
       privileges: ['auto_configure', 'create_doc'],
     });
   });
 
-  it('uses custom permissions if they are present in the datastream', () => {
+  it('uses custom privileges if they are present in the datastream', () => {
     const dataStream = {
       type: 'logs',
       dataset: 'test',
-      permissions: { indices: ['read', 'write'] },
+      elasticsearch: {
+        privileges: { indices: ['read', 'monitor'] },
+      },
     } as RegistryDataStream;
-    const permissions = getDataStreamPermissions(dataStream, 'namespace');
+    const privileges = getDataStreamPrivileges(dataStream, 'namespace');
 
-    expect(permissions).toMatchObject({
+    expect(privileges).toMatchObject({
       names: ['logs-test-namespace'],
-      privileges: ['read', 'write'],
+      privileges: ['read', 'monitor'],
     });
   });
 });

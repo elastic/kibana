@@ -33,13 +33,13 @@ const observabilityOverviewRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { bucketSize } = resources.params.query;
+    const { bucketSize, start, end } = resources.params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
-      start: setup.start,
-      end: setup.end,
+      start,
+      end,
       kuery: '',
     });
 
@@ -48,11 +48,15 @@ const observabilityOverviewRoute = createApmServerRoute({
         getServiceCount({
           setup,
           searchAggregatedTransactions,
+          start,
+          end,
         }),
         getTransactionsPerMinute({
           setup,
           bucketSize,
           searchAggregatedTransactions,
+          start,
+          end,
         }),
       ]);
       return { serviceCount, transactionPerMinute };
@@ -60,6 +64,7 @@ const observabilityOverviewRoute = createApmServerRoute({
   },
 });
 
-export const observabilityOverviewRouteRepository = createApmServerRouteRepository()
-  .add(observabilityOverviewRoute)
-  .add(observabilityOverviewHasDataRoute);
+export const observabilityOverviewRouteRepository =
+  createApmServerRouteRepository()
+    .add(observabilityOverviewRoute)
+    .add(observabilityOverviewHasDataRoute);

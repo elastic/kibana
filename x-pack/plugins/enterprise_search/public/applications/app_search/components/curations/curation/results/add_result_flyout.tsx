@@ -43,9 +43,8 @@ export const AddResultFlyout: React.FC = () => {
   const { search } = useActions(searchLogic);
 
   const { promotedIds, hiddenIds } = useValues(CurationLogic);
-  const { addPromotedId, removePromotedId, addHiddenId, removeHiddenId } = useActions(
-    CurationLogic
-  );
+  const { addPromotedId, removePromotedId, addHiddenId, removeHiddenId } =
+    useActions(CurationLogic);
 
   return (
     <EuiPortal>

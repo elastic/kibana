@@ -124,9 +124,11 @@ export function Detail() {
     semverLt(packageInfo.savedObject.attributes.version, packageInfo.latestVersion);
 
   // Fetch package info
-  const { data: packageInfoData, error: packageInfoError, isLoading } = useGetPackageInfoByKey(
-    pkgkey
-  );
+  const {
+    data: packageInfoData,
+    error: packageInfoError,
+    isLoading,
+  } = useGetPackageInfoByKey(pkgkey);
 
   const showCustomTab =
     useUIExtension(packageInfoData?.response.name ?? '', 'package-detail-custom') !== undefined;
@@ -303,7 +305,7 @@ export function Detail() {
                   <EuiFlexGroup gutterSize="s">
                     <EuiFlexItem>{packageInfo.version}</EuiFlexItem>
                     {updateAvailable ? (
-                      <EuiFlexItem>
+                      <EuiFlexItem grow={false}>
                         <UpdateIcon />
                       </EuiFlexItem>
                     ) : null}

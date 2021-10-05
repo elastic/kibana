@@ -56,7 +56,8 @@ export class HomePublicPlugin
       HomePublicPluginStart,
       HomePluginSetupDependencies,
       HomePluginStartDependencies
-    > {
+    >
+{
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
   private readonly environmentService = new EnvironmentService();
   private readonly tutorialService = new TutorialService();
@@ -76,10 +77,8 @@ export class HomePublicPlugin
         const trackUiMetric = usageCollection
           ? usageCollection.reportUiCounter.bind(usageCollection, 'Kibana_home')
           : () => {};
-        const [
-          coreStart,
-          { telemetry, data, urlForwarding: urlForwardingStart },
-        ] = await core.getStartServices();
+        const [coreStart, { telemetry, data, urlForwarding: urlForwardingStart }] =
+          await core.getStartServices();
         setServices({
           share,
           trackUiMetric,

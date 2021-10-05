@@ -145,7 +145,7 @@ describe('Executor', () => {
         executor.extendContext({ foo });
         const execution = executor.createExecution('foo bar="baz"');
 
-        expect((execution.context as any).foo).toBe(foo);
+        expect(execution.context).toHaveProperty('foo', foo);
       });
     });
   });
@@ -173,12 +173,12 @@ describe('Executor', () => {
         return injectFn(state);
       },
       migrations: {
-        '7.10.0': (((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
+        '7.10.0': ((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
           return migrateFn(state, version);
-        }) as any) as MigrateFunction,
-        '7.10.1': (((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
+        }) as unknown as MigrateFunction,
+        '7.10.1': ((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
           return migrateFn(state, version);
-        }) as any) as MigrateFunction,
+        }) as unknown as MigrateFunction,
       },
       fn: jest.fn(),
     };

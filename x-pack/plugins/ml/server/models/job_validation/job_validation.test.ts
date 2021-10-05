@@ -22,12 +22,12 @@ const callAs = {
 
 const authHeader: AuthorizationHeader = {};
 
-const mlClusterClient = ({
+const mlClusterClient = {
   asCurrentUser: callAs,
   asInternalUser: callAs,
-} as unknown) as IScopedClusterClient;
+} as unknown as IScopedClusterClient;
 
-const mlClient = ({
+const mlClient = {
   info: () =>
     Promise.resolve({
       body: {
@@ -38,16 +38,16 @@ const mlClient = ({
       },
     }),
   previewDatafeed: () => Promise.resolve({ body: [{}] }),
-} as unknown) as MlClient;
+} as unknown as MlClient;
 
 // Note: The tests cast `payload` as any
 // so we can simulate possible runtime payloads
 // that don't satisfy the TypeScript specs.
 describe('ML - validateJob', () => {
   it('basic validation messages', async () => {
-    const payload = ({
+    const payload = {
       job: { analysis_config: { detectors: [] } },
-    } as unknown) as ValidateJobPayload;
+    } as unknown as ValidateJobPayload;
 
     return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
       const ids = messages.map((m) => m.id);
@@ -63,12 +63,12 @@ describe('ML - validateJob', () => {
 
   const jobIdTests = (testIds: string[], messageId: string) => {
     const promises = testIds.map(async (id) => {
-      const payload = ({
+      const payload = {
         job: {
           analysis_config: { detectors: [] },
           job_id: id,
         },
-      } as unknown) as ValidateJobPayload;
+      } as unknown as ValidateJobPayload;
       return validateJob(mlClusterClient, mlClient, payload, authHeader).catch(() => {
         new Error('Promise should not fail for jobIdTests.');
       });
@@ -86,9 +86,9 @@ describe('ML - validateJob', () => {
   };
 
   const jobGroupIdTest = (testIds: string[], messageId: string) => {
-    const payload = ({
+    const payload = {
       job: { analysis_config: { detectors: [] }, groups: testIds },
-    } as unknown) as ValidateJobPayload;
+    } as unknown as ValidateJobPayload;
 
     return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
       const ids = messages.map((m) => m.id);
@@ -127,9 +127,9 @@ describe('ML - validateJob', () => {
 
   const bucketSpanFormatTests = (testFormats: string[], messageId: string) => {
     const promises = testFormats.map((format) => {
-      const payload = ({
+      const payload = {
         job: { analysis_config: { bucket_span: format, detectors: [] } },
-      } as unknown) as ValidateJobPayload;
+      } as unknown as ValidateJobPayload;
       return validateJob(mlClusterClient, mlClient, payload, authHeader).catch(() => {
         new Error('Promise should not fail for bucketSpanFormatTests.');
       });
@@ -155,9 +155,9 @@ describe('ML - validateJob', () => {
   });
 
   it('at least one detector function is empty', async () => {
-    const payload = ({
+    const payload = {
       job: { analysis_config: { detectors: [] as Array<{ function?: string }> } },
-    } as unknown) as ValidateJobPayload;
+    } as unknown as ValidateJobPayload;
     payload.job.analysis_config.detectors.push({
       function: 'count',
     });
@@ -176,9 +176,9 @@ describe('ML - validateJob', () => {
   });
 
   it('detector function is not empty', async () => {
-    const payload = ({
+    const payload = {
       job: { analysis_config: { detectors: [] as Array<{ function?: string }> } },
-    } as unknown) as ValidateJobPayload;
+    } as unknown as ValidateJobPayload;
     payload.job.analysis_config.detectors.push({
       function: 'count',
     });
@@ -190,10 +190,10 @@ describe('ML - validateJob', () => {
   });
 
   it('invalid index fields', async () => {
-    const payload = ({
+    const payload = {
       job: { analysis_config: { detectors: [] } },
       fields: {},
-    } as unknown) as ValidateJobPayload;
+    } as unknown as ValidateJobPayload;
 
     return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
       const ids = messages.map((m) => m.id);
@@ -202,10 +202,10 @@ describe('ML - validateJob', () => {
   });
 
   it('valid index fields', async () => {
-    const payload = ({
+    const payload = {
       job: { analysis_config: { detectors: [] } },
       fields: { testField: {} },
-    } as unknown) as ValidateJobPayload;
+    } as unknown as ValidateJobPayload;
 
     return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
       const ids = messages.map((m) => m.id);
@@ -426,10 +426,10 @@ describe('ML - validateJob', () => {
       fields: { testField: {} },
     };
 
-    const mlClientEmptyDatafeedPreview = ({
+    const mlClientEmptyDatafeedPreview = {
       ...mlClient,
       previewDatafeed: () => Promise.resolve({ body: [] }),
-    } as unknown) as MlClient;
+    } as unknown as MlClient;
 
     return validateJob(mlClusterClient, mlClientEmptyDatafeedPreview, payload, authHeader).then(
       (messages) => {
@@ -468,10 +468,10 @@ describe('ML - validateJob', () => {
       fields: { testField: {} },
     };
 
-    const mlClientEmptyDatafeedPreview = ({
+    const mlClientEmptyDatafeedPreview = {
       ...mlClient,
       previewDatafeed: () => Promise.reject({}),
-    } as unknown) as MlClient;
+    } as unknown as MlClient;
 
     return validateJob(mlClusterClient, mlClientEmptyDatafeedPreview, payload, authHeader).then(
       (messages) => {

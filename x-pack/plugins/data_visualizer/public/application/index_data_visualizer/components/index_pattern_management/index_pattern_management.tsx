@@ -31,7 +31,8 @@ export function DataVisualizerIndexPatternManagement(
   } = useDataVisualizerKibana();
 
   const { useNewFieldsApi, currentIndexPattern } = props;
-  const indexPatternFieldEditPermission = indexPatternFieldEditor?.userPermissions.editIndexPattern();
+  const indexPatternFieldEditPermission =
+    indexPatternFieldEditor?.userPermissions.editIndexPattern();
   const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
   const [isAddIndexPatternFieldPopoverOpen, setIsAddIndexPatternFieldPopoverOpen] = useState(false);
 

@@ -11,12 +11,12 @@ import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 
 describe('Chart helper', () => {
   describe('onBrushEnd', () => {
-    const history = ({
+    const history = {
       push: jest.fn(),
       location: {
         search: '',
       },
-    } as unknown) as History;
+    } as unknown as History;
     it("doesn't push a new history when x is not defined", () => {
       onBrushEnd({ x: undefined, history });
       expect(history.push).not.toBeCalled();

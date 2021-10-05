@@ -29,15 +29,9 @@ export const accountManagementApp = Object.freeze({
       navLinkStatus: AppNavLinkStatus.hidden,
       appRoute: '/security/account',
       async mount({ element }: AppMountParameters) {
-        const [
-          [coreStart],
-          { renderAccountManagementPage },
-          { UserAPIClient },
-        ] = await Promise.all([
-          getStartServices(),
-          import('./account_management_page'),
-          import('../management'),
-        ]);
+        const [[coreStart], { renderAccountManagementPage }, { UserAPIClient }] = await Promise.all(
+          [getStartServices(), import('./account_management_page'), import('../management')]
+        );
 
         coreStart.chrome.setBreadcrumbs([{ text: title }]);
 

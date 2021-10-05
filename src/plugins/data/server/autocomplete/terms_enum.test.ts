@@ -31,7 +31,7 @@ describe('_terms_enum suggestions', () => {
     savedObjectsClientMock = requestHandlerContext.savedObjects.client;
     esClientMock = requestHandlerContext.elasticsearch.client.asCurrentUser;
     esClientMock.termsEnum.mockResolvedValue(
-      (mockResponse as unknown) as ApiResponse<TermsEnumResponse>
+      mockResponse as unknown as ApiResponse<TermsEnumResponse>
     );
   });
 

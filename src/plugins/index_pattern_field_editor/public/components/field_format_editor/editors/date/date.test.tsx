@@ -34,7 +34,7 @@ describe('DateFormatEditor', () => {
     const component = shallow(
       <DateFormatEditor
         fieldType={fieldType}
-        format={(format as unknown) as FieldFormat}
+        format={format as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}

@@ -32,6 +32,7 @@ import { defaultControlColumn } from '../../../timelines/components/timeline/bod
 import { EventsViewer } from './events_viewer';
 import * as i18n from './translations';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
+
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 const leadingControlColumns: ControlColumnProps[] = [
   {
@@ -177,8 +178,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         <InspectButtonContainer>
           {tGridEnabled ? (
             timelinesUi.getTGrid<'embedded'>({
-              id,
-              type: 'embedded',
+              additionalFilters,
               browserFields,
               bulkActions,
               columns,
@@ -189,9 +189,12 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               end,
               entityType,
               filters: globalFilters,
+              filterStatus: currentFilter,
               globalFullScreen,
+              graphEventId,
               graphOverlay,
               hasAlertsCrud,
+              id,
               indexNames: selectedPatterns,
               indexPattern,
               isLive,
@@ -199,19 +202,17 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               itemsPerPage,
               itemsPerPageOptions: itemsPerPageOptions!,
               kqlMode,
-              query,
+              leadingControlColumns,
               onRuleChange,
+              query,
               renderCellValue,
               rowRenderers,
               setQuery,
-              start,
               sort,
-              additionalFilters,
-              graphEventId,
-              filterStatus: currentFilter,
-              leadingControlColumns,
-              trailingControlColumns,
+              start,
               tGridEventRenderedViewEnabled,
+              trailingControlColumns,
+              type: 'embedded',
               unit,
             })
           ) : (

@@ -80,7 +80,7 @@ export const Overview: FunctionComponent = () => {
           })}
           rightSideItems={[
             <EuiButtonEmpty
-              href={docLinks.links.upgradeAssistant}
+              href={docLinks.links.upgradeAssistant.overview}
               target="_blank"
               iconType="help"
               data-test-subj="documentationLink"

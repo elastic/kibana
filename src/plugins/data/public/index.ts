@@ -45,7 +45,6 @@ import {
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
-  isDefault,
   validateDataView,
   flattenHitWrapper,
 } from './data_views';
@@ -58,7 +57,6 @@ export const indexPatterns = {
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
-  isDefault,
   isFilterable,
   isNestedField,
   validate: validateDataView,
@@ -85,13 +83,11 @@ export {
   IndexPatternLoadExpressionFunctionDefinition,
   fieldList,
   GetFieldsOptions,
-  INDEX_PATTERN_SAVED_OBJECT_TYPE,
   AggregationRestrictions,
   IndexPatternType,
   IndexPatternListItem,
+  DuplicateDataViewError,
 } from '../common';
-
-export { DuplicateDataViewError } from '../common/data_views/errors';
 
 /*
  * Autocomplete query suggestions:
