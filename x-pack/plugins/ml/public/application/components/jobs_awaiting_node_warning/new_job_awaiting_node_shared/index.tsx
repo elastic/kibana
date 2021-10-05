@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export const SetupModeRenderer: FunctionComponent<Props>;
-
-export interface SetupModeProps {
-  setupMode: any;
-  flyoutComponent: any;
-  bottomBarComponent: any;
-}
+export { MLJobsAwaitingNodeWarning } from './lazy_loader';

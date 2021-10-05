@@ -12,42 +12,43 @@ import { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../global_state_context';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useTable } from '../../hooks/use_table';
-import { BeatsTemplate } from './beats_template';
+import { KibanaTemplate } from './kibana_template';
 // @ts-ignore
-import { Listing } from '../../../components/beats/listing';
+import { KibanaInstances } from '../../../components/kibana/instances';
+// @ts-ignore
 import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
-export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
-  const globalState = useContext(GlobalStateContext);
+export const KibanaInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
+  const { cluster_uuid: clusterUuid, ccs } = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
   const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
-  const { updateTotalItemCount, getPaginationTableProps } = useTable('beats.instances');
-  const clusterUuid = globalState.cluster_uuid;
-  const ccs = globalState.ccs;
+  const { updateTotalItemCount, getPaginationTableProps } = useTable('kibana.instances');
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
   }) as any;
   const [data, setData] = useState({} as any);
 
-  const title = i18n.translate('xpack.monitoring.beats.routeTitle', { defaultMessage: 'Beats' });
+  const title = i18n.translate('xpack.monitoring.kibana.instances.routeTitle', {
+    defaultMessage: 'Kibana - Instances',
+  });
 
-  const pageTitle = i18n.translate('xpack.monitoring.beats.listing.pageTitle', {
-    defaultMessage: 'Beats listing',
+  const pageTitle = i18n.translate('xpack.monitoring.kibana.instances.pageTitle', {
+    defaultMessage: 'Kibana instances',
   });
 
   useEffect(() => {
     if (cluster) {
       generateBreadcrumbs(cluster.cluster_name, {
-        inBeats: true,
+        inKibana: true,
       });
     }
   }, [cluster, generateBreadcrumbs]);
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
-    const url = `../api/monitoring/v1/clusters/${clusterUuid}/beats/beats`;
+    const url = `../api/monitoring/v1/clusters/${clusterUuid}/kibana/instances`;
     const response = await services.http?.fetch(url, {
       method: 'POST',
       body: JSON.stringify({
@@ -70,22 +71,23 @@ export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   ]);
 
   return (
-    <BeatsTemplate
+    <KibanaTemplate
       title={title}
       pageTitle={pageTitle}
       getPageData={getPageData}
-      data-test-subj="beatsListingPage"
+      data-test-subj="kibanaInstancesPage"
     >
-      <div data-test-subj="monitoringBeatsInstancesApp">
+      <div data-test-subj="monitoringKibanaInstancesApp">
         <SetupModeRenderer
-          productName="beats"
+          productName="kibana"
           render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
             <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}
-              <Listing
-                stats={data.stats}
-                data={data.listing}
+              <KibanaInstances
+                alerts={{}}
+                instances={data.kibanas}
                 setupMode={setupMode}
+                clusterStatus={data.clusterStatus}
                 {...getPaginationTableProps()}
               />
               {bottomBarComponent}
@@ -93,6 +95,6 @@ export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
           )}
         />
       </div>
-    </BeatsTemplate>
+    </KibanaTemplate>
   );
 };
