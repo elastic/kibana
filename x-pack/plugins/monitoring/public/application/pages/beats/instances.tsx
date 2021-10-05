@@ -15,15 +15,9 @@ import { useTable } from '../../hooks/use_table';
 import { BeatsTemplate } from './beats_template';
 // @ts-ignore
 import { Listing } from '../../../components/beats/listing';
-import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
-
-interface SetupModeProps {
-  setupMode: any;
-  flyoutComponent: any;
-  bottomBarComponent: any;
-}
 
 export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -81,10 +75,10 @@ export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
       pageTitle={pageTitle}
       getPageData={getPageData}
       data-test-subj="beatsListingPage"
-      cluster={cluster}
     >
       <div data-test-subj="monitoringBeatsInstancesApp">
         <SetupModeRenderer
+          productName="beats"
           render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
             <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}
