@@ -6,13 +6,28 @@
  */
 
 import expect from '@kbn/expect';
-import { SavedTimeline } from '../../../../plugins/security_solution/common/types/timeline';
+import {
+  noteSavedObjectType,
+  pinnedEventSavedObjectType,
+  timelineSavedObjectType,
+} from '../../../../plugins/security_solution/server/lib/timeline/saved_object_mappings';
+import { TimelineWithoutExternalRefs } from '../../../../plugins/security_solution/common/types/timeline';
+import { NoteWithoutExternalRefs } from '../../../../plugins/security_solution/common/types/timeline/note';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getSavedObjectFromES } from './utils';
+import { PinnedEventWithoutExternalRefs } from '../../../../plugins/security_solution/common/types/timeline/pinned_event';
 
 interface TimelineWithoutSavedQueryId {
-  'siem-ui-timeline': Omit<SavedTimeline, 'savedQueryId'>;
+  [timelineSavedObjectType]: TimelineWithoutExternalRefs;
+}
+
+interface NoteWithoutTimelineId {
+  [noteSavedObjectType]: NoteWithoutExternalRefs;
+}
+
+interface PinnedEventWithoutTimelineId {
+  [pinnedEventSavedObjectType]: PinnedEventWithoutExternalRefs;
 }
 
 export default function ({ getService }: FtrProviderContext) {
@@ -34,37 +49,133 @@ export default function ({ getService }: FtrProviderContext) {
           'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0'
         );
       });
+      describe('notes timelineId', () => {
+        it('removes the timelineId in the saved object', async () => {
+          const timelines = await getSavedObjectFromES<NoteWithoutTimelineId>(
+            es,
+            noteSavedObjectType,
+            {
+              ids: {
+                values: [
+                  'siem-ui-timeline-note:989002c0-126e-11ec-83d2-db1096c73738',
+                  'siem-ui-timeline-note:f09b5980-1271-11ec-83d2-db1096c73738',
+                ],
+              },
+            }
+          );
 
-      it('removes the savedQueryId', async () => {
-        const timelines = await getSavedObjectFromES<TimelineWithoutSavedQueryId>(
-          es,
-          'siem-ui-timeline',
-          {
-            ids: { values: ['siem-ui-timeline:8dc70950-1012-11ec-9ad3-2d7c6600c0f7'] },
-          }
-        );
+          expect(timelines.body.hits.hits[0]._source?.[noteSavedObjectType]).to.not.have.property(
+            'timelineId'
+          );
 
-        expect(timelines.body.hits.hits[0]._source?.['siem-ui-timeline']).to.not.have.property(
-          'savedQueryId'
-        );
+          expect(timelines.body.hits.hits[1]._source?.[noteSavedObjectType]).to.not.have.property(
+            'timelineId'
+          );
+        });
+
+        it('preserves the eventId in the saved object after migration', async () => {
+          const resp = await supertest
+            .get('/api/timeline')
+            .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
+
+          expect(resp.body.data.getOneTimeline.notes[0].eventId).to.be('Edo00XsBEVtyvU-8LGNe');
+        });
+
+        it('returns the timelineId in the response', async () => {
+          const resp = await supertest
+            .get('/api/timeline')
+            .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
+
+          expect(resp.body.data.getOneTimeline.notes[0].timelineId).to.be(
+            '6484cc90-126e-11ec-83d2-db1096c73738'
+          );
+          expect(resp.body.data.getOneTimeline.notes[1].timelineId).to.be(
+            '6484cc90-126e-11ec-83d2-db1096c73738'
+          );
+        });
       });
 
-      it('preserves the title in the saved object after migration', async () => {
-        const resp = await supertest
-          .get('/api/timeline')
-          .query({ id: '8dc70950-1012-11ec-9ad3-2d7c6600c0f7' })
-          .set('kbn-xsrf', 'true');
+      describe('savedQueryId', () => {
+        it('removes the savedQueryId', async () => {
+          const timelines = await getSavedObjectFromES<TimelineWithoutSavedQueryId>(
+            es,
+            timelineSavedObjectType,
+            {
+              ids: { values: ['siem-ui-timeline:8dc70950-1012-11ec-9ad3-2d7c6600c0f7'] },
+            }
+          );
 
-        expect(resp.body.data.getOneTimeline.title).to.be('Awesome Timeline');
+          expect(
+            timelines.body.hits.hits[0]._source?.[timelineSavedObjectType]
+          ).to.not.have.property('savedQueryId');
+        });
+
+        it('preserves the title in the saved object after migration', async () => {
+          const resp = await supertest
+            .get('/api/timeline')
+            .query({ id: '8dc70950-1012-11ec-9ad3-2d7c6600c0f7' });
+
+          expect(resp.body.data.getOneTimeline.title).to.be('Awesome Timeline');
+        });
+
+        it('returns the savedQueryId in the response', async () => {
+          const resp = await supertest
+            .get('/api/timeline')
+            .query({ id: '8dc70950-1012-11ec-9ad3-2d7c6600c0f7' });
+
+          expect(resp.body.data.getOneTimeline.savedQueryId).to.be("It's me");
+        });
       });
 
-      it('returns the savedQueryId in the response', async () => {
-        const resp = await supertest
-          .get('/api/timeline')
-          .query({ id: '8dc70950-1012-11ec-9ad3-2d7c6600c0f7' })
-          .set('kbn-xsrf', 'true');
+      describe('pinned events timelineId', () => {
+        it('removes the timelineId in the saved object', async () => {
+          const timelines = await getSavedObjectFromES<PinnedEventWithoutTimelineId>(
+            es,
+            pinnedEventSavedObjectType,
+            {
+              ids: {
+                values: [
+                  'siem-ui-timeline-pinned-event:7a9a5540-126e-11ec-83d2-db1096c73738',
+                  'siem-ui-timeline-pinned-event:98d919b0-126e-11ec-83d2-db1096c73738',
+                ],
+              },
+            }
+          );
 
-        expect(resp.body.data.getOneTimeline.savedQueryId).to.be("It's me");
+          expect(
+            timelines.body.hits.hits[0]._source?.[pinnedEventSavedObjectType]
+          ).to.not.have.property('timelineId');
+
+          expect(
+            timelines.body.hits.hits[1]._source?.[pinnedEventSavedObjectType]
+          ).to.not.have.property('timelineId');
+        });
+
+        it('preserves the eventId in the saved object after migration', async () => {
+          const resp = await supertest
+            .get('/api/timeline')
+            .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
+
+          expect(resp.body.data.getOneTimeline.pinnedEventsSaveObject[0].eventId).to.be(
+            'DNo00XsBEVtyvU-8LGNe'
+          );
+          expect(resp.body.data.getOneTimeline.pinnedEventsSaveObject[1].eventId).to.be(
+            'Edo00XsBEVtyvU-8LGNe'
+          );
+        });
+
+        it('returns the timelineId in the response', async () => {
+          const resp = await supertest
+            .get('/api/timeline')
+            .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
+
+          expect(resp.body.data.getOneTimeline.pinnedEventsSaveObject[0].timelineId).to.be(
+            '6484cc90-126e-11ec-83d2-db1096c73738'
+          );
+          expect(resp.body.data.getOneTimeline.pinnedEventsSaveObject[1].timelineId).to.be(
+            '6484cc90-126e-11ec-83d2-db1096c73738'
+          );
+        });
       });
     });
   });

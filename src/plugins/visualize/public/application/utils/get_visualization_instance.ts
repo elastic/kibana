@@ -33,12 +33,8 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   vis: Vis,
   visualizeServices: VisualizeServices
 ) => {
-  const {
-    data,
-    createVisEmbeddableFromObject,
-    savedObjects,
-    savedObjectsPublic,
-  } = visualizeServices;
+  const { data, createVisEmbeddableFromObject, savedObjects, savedObjectsPublic } =
+    visualizeServices;
   const embeddableHandler = (await createVisEmbeddableFromObject(vis, {
     id: '',
     timeRange: data.query.timefilter.timefilter.getTime(),
@@ -49,7 +45,7 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   embeddableHandler.getOutput$().subscribe((output) => {
     if (output.error && !isErrorRelatedToRuntimeFields(output.error)) {
       data.search.showError(
-        ((output.error as unknown) as ExpressionValueError['error']).original || output.error
+        (output.error as unknown as ExpressionValueError['error']).original || output.error
       );
     }
   });

@@ -138,7 +138,8 @@ export function TransactionDistribution({
     trackApmEvent({ metric: 'transaction_distribution_chart_clear_selection' });
   };
 
-  const transactionDistributionChartData: TransactionDistributionChartData[] = [];
+  const transactionDistributionChartData: TransactionDistributionChartData[] =
+    [];
 
   if (Array.isArray(overallHistogram)) {
     transactionDistributionChartData.push({

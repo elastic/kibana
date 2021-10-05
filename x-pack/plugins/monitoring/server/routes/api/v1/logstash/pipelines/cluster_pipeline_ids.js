@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { handleError } from '../../../../../lib/errors';
-import { prefixIndexPattern } from '../../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../../common/ccs_utils';
 import { INDEX_PATTERN_LOGSTASH } from '../../../../../../common/constants';
 import { getLogstashPipelineIds } from '../../../../../lib/logstash/get_pipeline_ids';
 

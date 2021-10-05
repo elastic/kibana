@@ -17,7 +17,7 @@ pageLoadAssetSize:
   devTools: 38637
   discover: 99999
   discoverEnhanced: 42730
-  embeddable: 312874
+  embeddable: 99999
   embeddableEnhanced: 41145
   enterpriseSearch: 35741
   esUiShared: 326654
@@ -73,7 +73,7 @@ pageLoadAssetSize:
   transform: 41007
   triggersActionsUi: 100000
   uiActions: 97717
-  uiActionsEnhanced: 313011
+  uiActionsEnhanced: 32000
   upgradeAssistant: 81241
   uptime: 40825
   urlDrilldown: 70674
@@ -115,3 +115,5 @@ pageLoadAssetSize:
   expressionTagcloud: 27505
   expressions: 239290
   securitySolution: 231753
+  customIntegrations: 28810
+  dataViews: 42000

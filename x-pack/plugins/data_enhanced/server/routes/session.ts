@@ -32,15 +32,8 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
       },
     },
     async (context, request, res) => {
-      const {
-        sessionId,
-        name,
-        expires,
-        initialState,
-        restoreState,
-        appId,
-        urlGeneratorId,
-      } = request.body;
+      const { sessionId, name, expires, initialState, restoreState, appId, urlGeneratorId } =
+        request.body;
 
       try {
         const response = await context.search!.saveSession(sessionId, {

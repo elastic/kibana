@@ -77,5 +77,5 @@ export async function fetchHitsInInterval(
     .fetch();
 
   // TODO: There's a difference in the definition of SearchResponse and EsHitRecord
-  return ((response.hits?.hits as unknown) as EsHitRecord[]) || [];
+  return (response.hits?.hits as unknown as EsHitRecord[]) || [];
 }

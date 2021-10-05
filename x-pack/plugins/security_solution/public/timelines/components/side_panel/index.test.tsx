@@ -117,7 +117,8 @@ describe('Details Panel Component', () => {
     });
 
     test('it should not render the DetailsPanel if an expanded detail with a panelView, but not params have been set', () => {
-      state.timeline.timelineById.test.expandedDetail = dataLessExpandedDetail as TimelineExpandedDetail; // Casting as the dataless doesn't meet the actual type requirements
+      state.timeline.timelineById.test.expandedDetail =
+        dataLessExpandedDetail as TimelineExpandedDetail; // Casting as the dataless doesn't meet the actual type requirements
       const wrapper = mount(
         <TestProviders store={store}>
           <DetailsPanel {...mockProps} />
@@ -224,7 +225,8 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel:HostDetails: rendering', () => {
     beforeEach(() => {
-      state.timeline.timelineById.test.expandedDetail = hostExpandedDetail as TimelineExpandedDetail;
+      state.timeline.timelineById.test.expandedDetail =
+        hostExpandedDetail as TimelineExpandedDetail;
       store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 
@@ -241,7 +243,8 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel:NetworkDetails: rendering', () => {
     beforeEach(() => {
-      state.timeline.timelineById.test.expandedDetail = networkExpandedDetail as TimelineExpandedDetail;
+      state.timeline.timelineById.test.expandedDetail =
+        networkExpandedDetail as TimelineExpandedDetail;
       store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 

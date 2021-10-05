@@ -23,12 +23,12 @@ import { getQueryRuleParams } from '../../../schemas/rule_schemas.mock';
 
 const SPACE_ID = 'space';
 
-const loggerMock = ({
+const loggerMock = {
   debug: jest.fn(),
   info: jest.fn(),
   warn: jest.fn(),
   error: jest.fn(),
-} as unknown) as Logger;
+} as unknown as Logger;
 
 describe('buildAlert', () => {
   beforeEach(() => {

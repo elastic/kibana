@@ -10,6 +10,7 @@ import { sortBy } from 'lodash';
 import { AssetReference } from '../../../../plugins/fleet/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -35,8 +36,10 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   describe('installs and uninstalls all assets', async () => {
+    skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
+
     describe('installs all assets when installing a package for the first time', async () => {
-      skipIfNoDockerRegistry(providerContext);
       before(async () => {
         if (!server.enabled) return;
         await installPackage(pkgKey);
@@ -56,7 +59,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('uninstalls all assets when uninstalling a package', async () => {
-      skipIfNoDockerRegistry(providerContext);
       before(async () => {
         if (!server.enabled) return;
         // these tests ensure that uninstall works properly so make sure that the package gets installed and uninstalled
@@ -287,7 +289,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('reinstalls all assets', async () => {
-      skipIfNoDockerRegistry(providerContext);
       before(async () => {
         if (!server.enabled) return;
         await installPackage(pkgKey);
@@ -617,6 +618,7 @@ const expectAssetsInstalled = ({
       install_status: 'installed',
       install_started_at: res.attributes.install_started_at,
       install_source: 'registry',
+      keep_policies_up_to_date: false,
     });
   });
 };

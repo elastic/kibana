@@ -6,7 +6,7 @@
  */
 
 import { ApplicationStart } from 'kibana/public';
-import { PackagePolicy, UpdatePackagePolicy } from '../../../../fleet/common';
+import { Agent, PackagePolicy, UpdatePackagePolicy } from '../../../../fleet/common';
 import { ManifestSchema } from '../schema/manifest';
 
 export * from './actions';
@@ -546,6 +546,16 @@ export type HostMetadata = Immutable<{
   data_stream: DataStream;
 }>;
 
+export type UnitedAgentMetadata = Immutable<{
+  agent: {
+    id: string;
+  };
+  united: {
+    endpoint: HostMetadata;
+    agent: Agent;
+  };
+}>;
+
 export interface LegacyEndpointEvent {
   '@timestamp': number;
   endgame: {
@@ -860,8 +870,7 @@ type KbnConfigSchemaInputObjectTypeOf<P extends Record<string, unknown>> = {
   [K in Exclude<keyof P, keyof KbnConfigSchemaNonOptionalProps<P>>]?: KbnConfigSchemaInputTypeOf<
     P[K]
   >;
-} &
-  { [K in keyof KbnConfigSchemaNonOptionalProps<P>]: KbnConfigSchemaInputTypeOf<P[K]> };
+} & { [K in keyof KbnConfigSchemaNonOptionalProps<P>]: KbnConfigSchemaInputTypeOf<P[K]> };
 
 /**
  * Takes the props of a schema.object type, and returns a version that excludes
@@ -1094,7 +1103,8 @@ export interface HostPolicyResponseAppliedAction {
   message: string;
 }
 
-export type HostPolicyResponseConfiguration = HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations'];
+export type HostPolicyResponseConfiguration =
+  HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations'];
 
 interface HostPolicyResponseConfigurationStatus {
   status: HostPolicyResponseActionStatus;

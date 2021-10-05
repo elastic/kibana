@@ -9,7 +9,7 @@
 import { relative } from 'path';
 import * as Rx from 'rxjs';
 import { startWith, switchMap, take } from 'rxjs/operators';
-import { withProcRunner, ToolingLog } from '@kbn/dev-utils';
+import { withProcRunner, ToolingLog, REPO_ROOT, getTimeReporter } from '@kbn/dev-utils';
 import dedent from 'dedent';
 
 import {
@@ -72,37 +72,49 @@ export async function runTests(options: RunTestsParams) {
     log.warning('❗️❗️❗️');
   }
 
+  const log = options.createLogger();
+
+  if (options.assertNoneExcluded) {
+    log.write('--- asserting that all tests belong to a ciGroup');
+    for (const configPath of options.configs) {
+      log.info('loading', configPath);
+      log.indent(4);
+      try {
+        await assertNoneExcluded({ configPath, options: { ...options, log } });
+      } finally {
+        log.indent(-4);
+      }
+      continue;
+    }
+
+    return;
+  }
+
+  log.write('--- determining which ftr configs to run');
+  const configPathsWithTests: string[] = [];
   for (const configPath of options.configs) {
-    const log = options.createLogger();
-    const opts = {
-      ...options,
-      log,
-    };
-
-    log.info('Running', configPath);
-    log.indent(2);
-
-    if (options.assertNoneExcluded) {
-      await assertNoneExcluded({ configPath, options: opts });
-      continue;
+    log.info('testing', configPath);
+    log.indent(4);
+    try {
+      if (await hasTests({ configPath, options: { ...options, log } })) {
+        configPathsWithTests.push(configPath);
+      }
+    } finally {
+      log.indent(-4);
     }
+  }
 
-    if (!(await hasTests({ configPath, options: opts }))) {
-      log.info('Skipping', configPath, 'since all tests are excluded');
-      continue;
-    }
-
-    // eslint-disable-next-line no-console
-    console.log(`--- Running ${relative(process.cwd(), configPath)}`);
+  for (const configPath of configPathsWithTests) {
+    log.write(`--- Running ${relative(REPO_ROOT, configPath)}`);
 
     await withProcRunner(log, async (procs) => {
       const config = await readConfigFile(log, configPath);
 
       let es;
       try {
-        es = await runElasticsearch({ config, options: opts });
-        await runKibanaServer({ procs, config, options: opts });
-        await runFtr({ configPath, options: opts });
+        es = await runElasticsearch({ config, options: { ...options, log } });
+        await runKibanaServer({ procs, config, options });
+        await runFtr({ configPath, options: { ...options, log } });
       } finally {
         try {
           const delay = config.get('kbnTestServer.delayShutdown');
@@ -135,7 +147,14 @@ interface StartServerOptions {
   useDefaultConfig?: boolean;
 }
 
-export async function startServers(options: StartServerOptions) {
+export async function startServers({ ...options }: StartServerOptions) {
+  const runStartTime = Date.now();
+  const toolingLog = new ToolingLog({
+    level: 'info',
+    writeTo: process.stdout,
+  });
+  const reportTime = getTimeReporter(toolingLog, 'scripts/functional_tests_server');
+
   const log = options.createLogger();
   const opts = {
     ...options,
@@ -156,6 +175,11 @@ export async function startServers(options: StartServerOptions) {
           ...(options.installDir ? [] : ['--dev', '--no-dev-config']),
         ],
       },
+    });
+
+    reportTime(runStartTime, 'ready', {
+      success: true,
+      ...options,
     });
 
     // wait for 5 seconds of silence before logging the

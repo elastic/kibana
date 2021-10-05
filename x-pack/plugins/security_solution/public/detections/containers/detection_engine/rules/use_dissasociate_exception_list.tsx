@@ -43,31 +43,31 @@ export const useDissasociateExceptionList = ({
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
-    const dissasociateListFromRule = (id: string) => async (
-      exceptionLists: List[]
-    ): Promise<void> => {
-      try {
-        if (isSubscribed) {
-          setLoading(true);
+    const dissasociateListFromRule =
+      (id: string) =>
+      async (exceptionLists: List[]): Promise<void> => {
+        try {
+          if (isSubscribed) {
+            setLoading(true);
 
-          await patchRule({
-            ruleProperties: {
-              rule_id: id,
-              exceptions_list: exceptionLists,
-            },
-            signal: abortCtrl.signal,
-          });
+            await patchRule({
+              ruleProperties: {
+                rule_id: id,
+                exceptions_list: exceptionLists,
+              },
+              signal: abortCtrl.signal,
+            });
 
-          onSuccess();
-          setLoading(false);
+            onSuccess();
+            setLoading(false);
+          }
+        } catch (err) {
+          if (isSubscribed) {
+            setLoading(false);
+            onError(err);
+          }
         }
-      } catch (err) {
-        if (isSubscribed) {
-          setLoading(false);
-          onError(err);
-        }
-      }
-    };
+      };
 
     dissasociateList.current = dissasociateListFromRule(ruleRuleId);
 

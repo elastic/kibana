@@ -56,13 +56,11 @@ const memoize = <T extends (...a: any[]) => any>(func: T, context?: any) => {
   return memoizeOne(wrapWithLastRefreshArg<T>(func, context) as any, memoizeIsEqual);
 };
 
-const memoizedLoadOverallAnnotations = memoize<typeof loadOverallAnnotations>(
-  loadOverallAnnotations
-);
+const memoizedLoadOverallAnnotations =
+  memoize<typeof loadOverallAnnotations>(loadOverallAnnotations);
 
-const memoizedLoadAnnotationsTableData = memoize<typeof loadAnnotationsTableData>(
-  loadAnnotationsTableData
-);
+const memoizedLoadAnnotationsTableData =
+  memoize<typeof loadAnnotationsTableData>(loadAnnotationsTableData);
 const memoizedLoadFilteredTopInfluencers = memoize<typeof loadFilteredTopInfluencers>(
   loadFilteredTopInfluencers
 );

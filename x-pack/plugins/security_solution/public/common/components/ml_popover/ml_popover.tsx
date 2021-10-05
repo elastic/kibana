@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
-import React, { Dispatch, useCallback, useReducer, useState } from 'react';
+import React, { Dispatch, useCallback, useReducer, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { useKibana } from '../../lib/kibana';
@@ -30,6 +30,7 @@ import * as i18n from './translations';
 import { JobsFilters, SecurityJob } from './types';
 import { UpgradeContents } from './upgrade_contents';
 import { useSecurityJobs } from './hooks/use_security_jobs';
+import { MLJobsAwaitingNodeWarning } from '../../../../../ml/public';
 
 const PopoverContentsDiv = styled.div`
   max-width: 684px;
@@ -96,9 +97,12 @@ export const MlPopover = React.memo(() => {
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [filterProperties, setFilterProperties] = useState(defaultFilterProps);
-  const { isMlAdmin, isLicensed, loading: isLoadingSecurityJobs, jobs } = useSecurityJobs(
-    refreshToggle
-  );
+  const {
+    isMlAdmin,
+    isLicensed,
+    loading: isLoadingSecurityJobs,
+    jobs,
+  } = useSecurityJobs(refreshToggle);
   const [, dispatchToaster] = useStateToaster();
   const docLinks = useKibana().services.docLinks;
   const handleJobStateChange = useCallback(
@@ -113,6 +117,10 @@ export const MlPopover = React.memo(() => {
   });
 
   const incompatibleJobCount = jobs.filter((j) => !j.isCompatible).length;
+  const installedJobsIds = useMemo(
+    () => jobs.filter((j) => j.isInstalled).map((j) => j.id),
+    [jobs]
+  );
 
   if (!isLicensed) {
     // If the user does not have platinum show upgrade UI
@@ -213,6 +221,7 @@ export const MlPopover = React.memo(() => {
             </>
           )}
 
+          <MLJobsAwaitingNodeWarning jobIds={installedJobsIds} />
           <JobsTable
             isLoading={isLoadingSecurityJobs || isLoading}
             jobs={filteredJobs}

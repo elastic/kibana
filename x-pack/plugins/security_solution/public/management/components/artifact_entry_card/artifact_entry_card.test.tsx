@@ -6,53 +6,12 @@
  */
 
 import React from 'react';
-import { cloneDeep } from 'lodash';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { ArtifactEntryCard, ArtifactEntryCardProps } from './artifact_entry_card';
-import { TrustedAppGenerator } from '../../../../common/endpoint/data_generators/trusted_app_generator';
 import { act, fireEvent, getByTestId } from '@testing-library/react';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { AnyArtifact } from './types';
-import { isTrustedApp } from './hooks/use_normalized_artifact';
-
-const getCommonItemDataOverrides = () => {
-  return {
-    name: 'some internal app',
-    description: 'this app is trusted by the company',
-    created_at: new Date('2021-07-01').toISOString(),
-  };
-};
-
-const getTrustedAppProvider = () =>
-  new TrustedAppGenerator('seed').generate(getCommonItemDataOverrides());
-
-const getExceptionProvider = () => {
-  // cloneDeep needed because exception mock generator uses state across instances
-  return cloneDeep(
-    getExceptionListItemSchemaMock({
-      ...getCommonItemDataOverrides(),
-      os_types: ['windows'],
-      updated_at: new Date().toISOString(),
-      created_by: 'Justa',
-      updated_by: 'Mara',
-      entries: [
-        {
-          field: 'process.hash.*',
-          operator: 'included',
-          type: 'match',
-          value: '1234234659af249ddf3e40864e9fb241',
-        },
-        {
-          field: 'process.executable.caseless',
-          operator: 'included',
-          type: 'match',
-          value: '/one/two/three',
-        },
-      ],
-      tags: ['policy:all'],
-    })
-  );
-};
+import { isTrustedApp } from './utils';
+import { getTrustedAppProvider, getExceptionProvider } from './test_utils';
 
 describe.each([
   ['trusted apps', getTrustedAppProvider],

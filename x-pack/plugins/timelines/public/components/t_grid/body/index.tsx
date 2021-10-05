@@ -74,6 +74,7 @@ import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/com
 import { ViewSelection } from '../event_rendered_view/selector';
 import { EventRenderedView } from '../event_rendered_view';
 import { useDataGridHeightHack } from './height_hack';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 
 const StatefulAlertStatusBulkActions = lazy(
   () => import('../toolbar/bulk_actions/alert_status_bulk_actions')
@@ -86,6 +87,7 @@ interface OwnProps {
   bulkActions?: BulkActionsProp;
   data: TimelineItem[];
   defaultCellActions?: TGridCellAction[];
+  filters?: Filter[];
   filterQuery: string;
   filterStatus?: AlertStatus;
   id: string;
@@ -197,7 +199,6 @@ const transformControlColumns = ({
   controlColumns.map(
     ({ id: columnId, headerCellRender = EmptyHeaderCellRender, rowCellRender, width }, i) => ({
       id: `${columnId}`,
-      // eslint-disable-next-line react/display-name
       headerCellRender: () => {
         const HeaderActions = headerCellRender;
         return (
@@ -220,7 +221,6 @@ const transformControlColumns = ({
           </>
         );
       },
-      // eslint-disable-next-line react/display-name
       rowCellRender: ({
         isDetails,
         isExpandable,
@@ -300,15 +300,18 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     data,
     defaultCellActions,
     filterQuery,
+    filters,
     filterStatus,
+    hasAlertsCrud,
+    hasAlertsCrudPermissions,
     id,
     indexNames,
     isEventViewer = false,
+    isLoading,
     isSelectAllChecked,
     itemsPerPageOptions,
     leadingControlColumns = EMPTY_CONTROL_COLUMNS,
     loadingEventIds,
-    isLoading,
     loadPage,
     onRuleChange,
     pageSize,
@@ -322,11 +325,9 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     tableView = 'gridView',
     tabType,
     totalItems,
+    totalSelectAllAlerts,
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
     unit = defaultUnit,
-    hasAlertsCrud,
-    hasAlertsCrudPermissions,
-    totalSelectAllAlerts,
   }) => {
     const dispatch = useDispatch();
     const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
@@ -334,10 +335,10 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       getManageTimeline(state, id)
     );
 
-    const alertCountText = useMemo(() => `${totalItems.toLocaleString()} ${unit(totalItems)}`, [
-      totalItems,
-      unit,
-    ]);
+    const alertCountText = useMemo(
+      () => `${totalItems.toLocaleString()} ${unit(totalItems)}`,
+      [totalItems, unit]
+    );
 
     const selectedCount = useMemo(() => Object.keys(selectedEventIds).length, [selectedEventIds]);
 
@@ -641,10 +642,11 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         columnHeaders.map((header) => {
           const buildAction = (tGridCellAction: TGridCellAction) =>
             tGridCellAction({
-              data: data.map((row) => row.data),
               browserFields,
-              timelineId: id,
+              data: data.map((row) => row.data),
+              globalFilters: filters,
               pageSize,
+              timelineId: id,
             });
 
           return {
@@ -653,7 +655,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               header.tGridCellActions?.map(buildAction) ?? defaultCellActions?.map(buildAction),
           };
         }),
-      [browserFields, columnHeaders, data, defaultCellActions, id, pageSize]
+      [browserFields, columnHeaders, data, defaultCellActions, id, pageSize, filters]
     );
 
     const renderTGridCellValue = useMemo(() => {
@@ -717,20 +719,16 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     const onChangeItemsPerPage = useCallback(
       (itemsChangedPerPage) => {
-        clearSelected({ id });
-        dispatch(tGridActions.setTGridSelectAll({ id, selectAll: false }));
         dispatch(tGridActions.updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage }));
       },
-      [id, dispatch, clearSelected]
+      [id, dispatch]
     );
 
     const onChangePage = useCallback(
       (page) => {
-        clearSelected({ id });
-        dispatch(tGridActions.setTGridSelectAll({ id, selectAll: false }));
         loadPage(page);
       },
-      [id, loadPage, dispatch, clearSelected]
+      [loadPage]
     );
 
     const height = useDataGridHeightHack(pageSize, data.length);

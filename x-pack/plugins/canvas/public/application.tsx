@@ -77,7 +77,7 @@ export const renderApp = ({
           <presentationUtil.ContextProvider>
             <I18nProvider>
               <Provider store={canvasStore}>
-                <App />
+                <App history={params.history} />
               </Provider>
             </I18nProvider>
           </presentationUtil.ContextProvider>
@@ -98,11 +98,10 @@ export const initializeCanvas = async (
   setupPlugins: CanvasSetupDeps,
   startPlugins: CanvasStartDeps,
   registries: SetupRegistries,
-  appUpdater: BehaviorSubject<AppUpdater>,
-  pluginServices: PluginServices<CanvasPluginServices>
+  appUpdater: BehaviorSubject<AppUpdater>
 ) => {
   await startLegacyServices(coreSetup, coreStart, setupPlugins, startPlugins, appUpdater);
-  const { expressions } = pluginServices.getServices();
+  const { expressions } = setupPlugins;
 
   // Adding these functions here instead of in plugin.ts.
   // Some of these functions have deep dependencies into Canvas, which was bulking up the size

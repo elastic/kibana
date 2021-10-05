@@ -12,8 +12,8 @@ import { Observable } from 'rxjs';
 import type { Datatable, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { buildExpressionFunction } from '../../../../../../plugins/expressions/common';
 
-import { IndexPatternExpressionType } from '../../../index_patterns/expressions';
-import { IndexPatternsContract } from '../../../index_patterns/index_patterns';
+import { IndexPatternExpressionType } from '../../../../../data_views/common/expressions';
+import { IndexPatternsContract } from '../../..';
 
 import { AggsStart, AggExpressionType, aggCountFnName } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';

@@ -53,7 +53,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('', function () {
-      this.tags('ciGroup13');
+      this.tags('ciGroup8');
 
       before(async () => {
         await ml.securityCommon.createMlRoles();
