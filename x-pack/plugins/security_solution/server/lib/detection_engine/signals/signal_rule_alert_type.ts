@@ -86,10 +86,10 @@ export const signalRulesAlertType = ({
   ruleDataService,
 }: {
   logger: Logger;
-  eventsTelemetry: TelemetryEventsSender | undefined;
+  eventsTelemetry?: TelemetryEventsSender;
   experimentalFeatures: ExperimentalFeatures;
   version: string;
-  ml: SetupPlugins['ml'];
+  ml?: SetupPlugins['ml'];
   lists: SetupPlugins['lists'] | undefined;
   mergeStrategy: ConfigType['alertMergeStrategy'];
   ignoreFields: ConfigType['alertIgnoreFields'];

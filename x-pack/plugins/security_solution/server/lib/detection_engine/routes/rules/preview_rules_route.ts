@@ -6,7 +6,6 @@
  */
 import moment from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { ISavedObjectsRepository, SavedObject } from 'kibana/server';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import {
   DEFAULT_SEARCH_AFTER_PAGE_SIZE,
@@ -22,8 +21,6 @@ import { previewRulesSchema } from '../../../../../common/detection_engine/schem
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { convertPreviewAPIToInternalSchema } from '../../schemas/rule_converters';
 import { PreviewRuleOptions } from '../../rule_types/types';
-import { AlertAttributes, ThresholdAlertState } from '../../signals/types';
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import {
   Alert,
   AlertInstanceContext,
@@ -31,31 +28,11 @@ import {
   AlertTypeParams,
   AlertTypeState,
 } from '../../../../../../alerting/common';
-import {
-  EqlRuleParams,
-  InternalRuleCreate,
-  MachineLearningRuleParams,
-  QueryRuleParams,
-  RuleParams,
-  ThreatRuleParams,
-  ThresholdRuleParams,
-} from '../../schemas/rule_schemas';
-import {
-  createEqlAlertType,
-  createIndicatorMatchAlertType,
-  createMlAlertType,
-  createQueryAlertType,
-  createThresholdAlertType,
-} from '../../rule_types';
-import { PersistenceServices } from '../../../../../../rule_registry/server';
+import { RuleParams } from '../../schemas/rule_schemas';
 import { ExecutorType } from '../../../../../../alerting/server/types';
 import { parseInterval } from '../../signals/utils';
 import { AlertInstance } from '../../../../../../alerting/server/alert_instance';
-import { queryExecutor } from '../../signals/executors/query';
-import { eqlExecutor } from '../../signals/executors/eql';
-import { threatMatchExecutor } from '../../signals/executors/threat_match';
-import { thresholdExecutor } from '../../signals/executors/threshold';
-import { mlExecutor } from '../../signals/executors/ml';
+import { signalRulesAlertType } from '../../signals/signal_rule_alert_type';
 
 export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
@@ -102,25 +79,19 @@ export const previewRulesRoute = async (
 
         await context.lists?.getExceptionListClient().createEndpointList();
 
-        const mockRuleSO: SavedObject<
-          Pick<Alert<RuleParams>, 'createdBy' | 'createdAt' | 'updatedBy'>
-        > = {
-          id: 'preview_rule_so_id',
-          references: [],
-          type: 'rule',
-          attributes: {
-            createdBy: 'elastic_preview',
-            createdAt: new Date(),
-            updatedBy: 'elastic_preview',
-            ...internalRule,
-          },
-        };
-
-        const mockSavedObjectsClient = {
-          get: (ruleId: string) => mockRuleSO,
-        } as unknown as ISavedObjectsRepository;
-
-        const { logger, ignoreFields, mergeStrategy } = previewRuleOptions;
+        // const mockRuleSO: SavedObject<
+        //   Pick<Alert<RuleParams>, 'createdBy' | 'createdAt' | 'updatedBy'>
+        // > = {
+        //   id: 'preview_rule_so_id',
+        //   references: [],
+        //   type: 'rule',
+        //   attributes: {
+        //     createdBy: 'elastic_preview',
+        //     createdAt: new Date(),
+        //     updatedBy: 'elastic_preview',
+        //     ...internalRule,
+        //   },
+        // };
 
         const previewRuleParams = internalRule.params;
 
@@ -129,7 +100,7 @@ export const previewRulesRoute = async (
           TState extends AlertTypeState,
           TInstanceState extends AlertInstanceState,
           TInstanceContext extends AlertInstanceContext,
-          TActionGroupIds extends string
+          TActionGroupIds extends string = ''
         >(
           executor: ExecutorType<
             TParams,
@@ -184,13 +155,25 @@ export const previewRulesRoute = async (
               alertId: 'alertId',
               services: {
                 alertInstanceFactory,
-                savedObjectsClient: mockSavedObjectsClient,
-                scopedClusterClient: {},
+                savedObjectsClient: context.core.savedObjects.client,
+                scopedClusterClient: context.core.elasticsearch.client,
               },
               spaceId: 'asdf',
               updatedBy: 'preview-fake-user',
+              createdBy: 'preview-fake-user',
               params,
-              actionGroupIds: '',
+              tags: [],
+              name: 'preview',
+              rule: {
+                ...internalRule,
+                createdBy: 'preview-fake-user',
+                updatedBy: 'preview-fake-user',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                producer: 'preview-fake-producer',
+                ruleTypeId: 'preview-fake-ruleTypeId',
+                ruleTypeName: 'preview',
+              },
             })) as TState;
             previousStartedAt = startedAt.toDate();
             startedAt.add(parseInterval(internalRule.schedule.interval));
@@ -201,24 +184,7 @@ export const previewRulesRoute = async (
         // TODO: pass the real savedObjectsClient but refactor the executor implementation not to use it for fetching rules, as we already have everything we need to execute the rule
         // TODO: preview rule status client should keep the errors & warnings in memory and return with the preview POST response
 
-        switch (previewRuleParams.type) {
-          case 'threat_match':
-            await runExecutors(threatMatchExecutor, previewRuleParams);
-            break;
-          case 'eql':
-            await runExecutors(eqlExecutor, previewRuleParams);
-            break;
-          case 'query':
-            await runExecutors(queryExecutor, previewRuleParams);
-            break;
-          case 'threshold':
-            await runExecutors(thresholdExecutor, previewRuleParams);
-            break;
-          case 'machine_learning':
-            await runExecutors(mlExecutor, previewRuleParams);
-            break;
-          default:
-        }
+        await runExecutors(signalRulesAlertType(previewRuleOptions).executor, previewRuleParams);
 
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
