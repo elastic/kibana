@@ -66,10 +66,10 @@ export const App = (props: {
         <EuiPageContent>
           <EuiPageContentBody style={{ maxWidth: 800, margin: '0 auto', height: '70vh' }}>
             <p>
-              This app embeds a Observability Exploratory view as embeddable component. Make sure
-              you have data in heartbeat-* index for this demo to work
+              This app embeds an Observability Exploratory view as embeddable component. Make sure
+              you have data in heartbeat-* index within last 5 days for this demo to work.
             </p>
-            <EuiFlexGroup>
+            <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiButton aria-label="Open in exploratory view" href={hrefLink} target="_blank">
                   Edit in exploratory view (new tab)
