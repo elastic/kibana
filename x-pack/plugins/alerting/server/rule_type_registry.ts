@@ -48,6 +48,7 @@ export interface RegistryRuleType
     | 'producer'
     | 'minimumLicenseRequired'
     | 'isExportable'
+    | 'ruleTaskTimeout'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -287,6 +288,7 @@ export class RuleTypeRegistry {
             producer,
             minimumLicenseRequired,
             isExportable,
+            ruleTaskTimeout,
           },
         ]: [string, UntypedNormalizedAlertType]) => ({
           id,
@@ -298,6 +300,7 @@ export class RuleTypeRegistry {
           producer,
           minimumLicenseRequired,
           isExportable,
+          ruleTaskTimeout,
           enabledInLicense: !!this.licenseState.getLicenseCheckForAlertType(
             id,
             name,

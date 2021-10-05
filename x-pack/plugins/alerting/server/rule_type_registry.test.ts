@@ -441,6 +441,7 @@ describe('list()', () => {
       ],
       defaultActionGroupId: 'testActionGroup',
       isExportable: true,
+      ruleTaskTimeout: '20m',
       minimumLicenseRequired: 'basic',
       executor: jest.fn(),
       producer: 'alerts',
@@ -475,6 +476,7 @@ describe('list()', () => {
             "id": "recovered",
             "name": "Recovered",
           },
+          "ruleTaskTimeout": "20m",
         },
       }
     `);
