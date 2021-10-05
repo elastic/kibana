@@ -45,6 +45,7 @@ import {
   importTimelinesRoute,
   patchTimelinesRoute,
   persistFavoriteRoute,
+  resolveTimelineRoute,
 } from '../lib/timeline/routes/timelines';
 import { getDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/get_draft_timelines';
 import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/clean_draft_timelines';
@@ -99,6 +100,7 @@ export const initRoutes = (
   exportTimelinesRoute(router, config, security);
   getDraftTimelinesRoute(router, config, security);
   getTimelineRoute(router, config, security);
+  resolveTimelineRoute(router, config, security);
   getTimelinesRoute(router, config, security);
   cleanDraftTimelinesRoute(router, config, security);
   deleteTimelinesRoute(router, config, security);
