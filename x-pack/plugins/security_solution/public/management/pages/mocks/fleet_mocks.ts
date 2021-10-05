@@ -21,7 +21,7 @@ import {
   PACKAGE_POLICY_API_ROUTES,
 } from '../../../../../fleet/common';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { PolicyData } from '../../../../common/endpoint/types';
+import { GetPolicyListResponse, GetPolicyResponse } from '../policy/types';
 
 export type FleetGetPackageListHttpMockInterface = ResponseProvidersInterface<{
   packageList: () => GetPackagesResponse;
@@ -43,7 +43,7 @@ export const fleetGetPackageListHttpMock =
   ]);
 
 export type FleetGetEndpointPackagePolicyHttpMockInterface = ResponseProvidersInterface<{
-  endpointPackagePolicy: () => PolicyData;
+  endpointPackagePolicy: () => GetPolicyResponse;
 }>;
 export const fleetGetEndpointPackagePolicyHttpMock =
   httpHandlerMockFactory<FleetGetEndpointPackagePolicyHttpMockInterface>([
@@ -52,7 +52,37 @@ export const fleetGetEndpointPackagePolicyHttpMock =
       path: PACKAGE_POLICY_API_ROUTES.INFO_PATTERN,
       method: 'get',
       handler: () => {
-        return new EndpointDocGenerator('seed').generatePolicyPackagePolicy();
+        return {
+          items: new EndpointDocGenerator('seed').generatePolicyPackagePolicy(),
+        };
+      },
+    },
+  ]);
+
+export type FleetGetEndpointPackagePolicyListHttpMockInterface = ResponseProvidersInterface<{
+  endpointPackagePolicyList: () => GetPolicyListResponse;
+}>;
+export const fleetGetEndpointPackagePolicyListHttpMock =
+  httpHandlerMockFactory<FleetGetEndpointPackagePolicyListHttpMockInterface>([
+    {
+      id: 'endpointPackagePolicyList',
+      path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
+      method: 'get',
+      handler: () => {
+        const generator = new EndpointDocGenerator('seed');
+
+        const items = Array.from({ length: 5 }, (_, index) => {
+          const policy = generator.generatePolicyPackagePolicy();
+          policy.name += ` ${index}`;
+          return policy;
+        });
+
+        return {
+          items,
+          total: 1,
+          page: 1,
+          perPage: 10,
+        };
       },
     },
   ]);

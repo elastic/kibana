@@ -14,6 +14,8 @@ import { PolicyTrustedAppsList } from './policy_trusted_apps_list';
 import React from 'react';
 import { policyDetailsPageAllApiHttpMocks } from '../../../test_utils';
 import { isLoadedResourceState } from '../../../../../state';
+import { fireEvent, within, act, waitFor } from '@testing-library/react';
+import { APP_ID } from '../../../../../../../common/constants';
 
 describe('when rendering the PolicyTrustedAppsList', () => {
   let appTestContext: AppContextTestRender;
@@ -21,6 +23,40 @@ describe('when rendering the PolicyTrustedAppsList', () => {
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
   let apiResponseProviders: ReturnType<typeof policyDetailsPageAllApiHttpMocks>;
   let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
+
+  const getCardByIndexPosition = (cardIndex: number = 0) => {
+    const card = renderResult.getAllByTestId('policyTrustedAppsGrid-card')[cardIndex];
+
+    if (!card) {
+      throw new Error(`Card at index [${cardIndex}] not found`);
+    }
+
+    return card;
+  };
+
+  const toggleCardExpandCollapse = (cardIndex: number = 0) => {
+    act(() => {
+      fireEvent.click(
+        within(getCardByIndexPosition(cardIndex)).getByTestId(
+          'policyTrustedAppsGrid-card-header-expandCollapse'
+        )
+      );
+    });
+  };
+
+  const toggleCardActionMenu = async (cardIndex: number = 0) => {
+    act(() => {
+      fireEvent.click(
+        within(getCardByIndexPosition(cardIndex)).getByTestId(
+          'policyTrustedAppsGrid-card-header-actions-button'
+        )
+      );
+    });
+
+    await waitFor(() =>
+      renderResult.getByTestId('policyTrustedAppsGrid-card-header-actions-contextMenuPanel')
+    );
+  };
 
   beforeEach(() => {
     appTestContext = createAppRootMockRenderer();
@@ -30,7 +66,9 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     waitForAction = appTestContext.middlewareSpy.waitForAction;
 
     render = async () => {
-      appTestContext.history.push(getPolicyDetailsArtifactsListPath('1'));
+      appTestContext.history.push(
+        getPolicyDetailsArtifactsListPath('ddf6570b-9175-4a6d-b288-61a09771c647')
+      );
       const trustedAppDataReceived = waitForAction('assignedTrustedAppsListStateChanged', {
         validate({ payload }) {
           return isLoadedResourceState(payload);
@@ -49,20 +87,111 @@ describe('when rendering the PolicyTrustedAppsList', () => {
 
   it('should show total number of of items being displayed', async () => {
     await render();
+
     expect(renderResult.getByTestId('policyDetailsTrustedAppsCount').textContent).toBe(
-      'Showing 10 trusted applications'
+      'Showing 20 trusted applications'
     );
   });
 
-  it.todo('should show card grid');
+  it('should show card grid', async () => {
+    await render();
 
-  it.todo('should expand card and collapse card');
+    expect(renderResult.getByTestId('policyTrustedAppsGrid')).toBeTruthy();
+    await expect(renderResult.findAllByTestId('policyTrustedAppsGrid-card')).resolves.toHaveLength(
+      10
+    );
+  });
 
-  it.todo('should show action menu on card');
+  it('should expand cards', async () => {
+    await render();
+    // expand
+    toggleCardExpandCollapse();
+    toggleCardExpandCollapse(4);
 
-  it.todo('should have navigate to trusted apps page when view full details action is clicked');
+    await waitFor(() =>
+      expect(
+        renderResult.queryAllByTestId('policyTrustedAppsGrid-card-criteriaConditions')
+      ).toHaveLength(2)
+    );
+  });
 
-  it.todo('should display policy names on assignment context menu');
+  it('should collapse cards', async () => {
+    await render();
+
+    // expand
+    toggleCardExpandCollapse();
+    toggleCardExpandCollapse(4);
+
+    await waitFor(() =>
+      expect(
+        renderResult.queryAllByTestId('policyTrustedAppsGrid-card-criteriaConditions')
+      ).toHaveLength(2)
+    );
+
+    // collapse
+    toggleCardExpandCollapse();
+    toggleCardExpandCollapse(4);
+
+    await waitFor(() =>
+      expect(
+        renderResult.queryAllByTestId('policyTrustedAppsGrid-card-criteriaConditions')
+      ).toHaveLength(0)
+    );
+  });
+
+  it('should show action menu on card', async () => {
+    await render();
+    expect(
+      renderResult.getAllByTestId('policyTrustedAppsGrid-card-header-actions-button')
+    ).toHaveLength(10);
+  });
+
+  it('should navigate to trusted apps page when view full details action is clicked', async () => {
+    await render();
+    await toggleCardActionMenu();
+    act(() => {
+      fireEvent.click(renderResult.getByTestId('policyTrustedAppsGrid-viewFullDetailsAction'));
+    });
+
+    expect(appTestContext.coreStart.application.navigateToApp).toHaveBeenCalledWith(
+      APP_ID,
+      expect.objectContaining({
+        path: '/administration/trusted_apps?show=edit&id=89f72d8a-05b5-4350-8cad-0dc3661d6e67',
+      })
+    );
+  });
+
+  it('should display policy names on assignment context menu', async () => {
+    const retrieveAllPolicies = waitForAction('policyDetailsListOfAllPoliciesStateChanged', {
+      validate({ payload }) {
+        return isLoadedResourceState(payload);
+      },
+    });
+    await render();
+    act(() => {
+      fireEvent.click(
+        within(getCardByIndexPosition(2)).getByTestId(
+          'policyTrustedAppsGrid-card-header-effectScope-popupMenu-button'
+        )
+      );
+    });
+    await waitFor(() =>
+      renderResult.getByTestId(
+        'policyTrustedAppsGrid-card-header-effectScope-popupMenu-popoverPanel'
+      )
+    );
+
+    expect(
+      renderResult.getByTestId('policyTrustedAppsGrid-card-header-effectScope-popupMenu-item-0')
+        .textContent
+    ).toEqual('Endpoint Policy 0');
+    expect(
+      renderResult.getByTestId('policyTrustedAppsGrid-card-header-effectScope-popupMenu-item-1')
+        .textContent
+    ).toEqual('Endpoint Policy 1');
+  });
 
   it.todo('should handle pagination changes');
+
+  it.toto('should reset `pageIndex` when a new pageSize is selected');
 });
