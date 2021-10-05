@@ -6,9 +6,13 @@
  */
 
 import { EventEmitter } from 'events';
+import { Stats } from './types';
 
 class MapAdapter extends EventEmitter {
-  setMapState({ stats, style }) {
+  private stats?: Stats;
+  private style?: string;
+
+  setMapState({ stats, style }: { stats: Stats; style: string }) {
     this.stats = stats;
     this.style = style;
     this._onChange();
