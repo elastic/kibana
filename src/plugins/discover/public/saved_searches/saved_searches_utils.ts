@@ -17,20 +17,27 @@ export const getSavedSearchFullPathUrl = (id?: string) => `/app/discover${getSav
 export const savedSearchHasUrlConflict = (savedSearch: SavedSearch) =>
   savedSearch?.sharingSavedObject?.outcome === 'conflict';
 
-export const throwErrorOnUrlConflict = async (savedSearch: SavedSearch, spaces?: SpacesApi) => {
+export const getSavedSearchUrlConflictMessage = async (
+  savedSearch: SavedSearch,
+  spaces?: SpacesApi
+) =>
+  i18n.translate('discover.savedSearchEmbeddable.legacyURLConflict.errorMessage', {
+    defaultMessage: `This search has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
+    values: {
+      json: JSON.stringify({
+        sourceId: savedSearch.id,
+        targetType: SAVED_SEARCH_TYPE,
+        targetSpace: ((await spaces?.getActiveSpace()) ?? {}).id || 'default',
+      }),
+    },
+  });
+
+export const throwErrorOnSavedSearchUrlConflict = async (
+  savedSearch: SavedSearch,
+  spaces?: SpacesApi
+) => {
   if (savedSearchHasUrlConflict(savedSearch)) {
-    throw new Error(
-      i18n.translate('discover.savedSearchEmbeddable.legacyURLConflict.errorMessage', {
-        defaultMessage: `This search has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
-        values: {
-          json: JSON.stringify({
-            sourceId: savedSearch.id,
-            targetType: SAVED_SEARCH_TYPE,
-            targetSpace: ((await spaces?.getActiveSpace()) ?? {}).id || 'default',
-          }),
-        },
-      })
-    );
+    throw new Error(await getSavedSearchUrlConflictMessage(savedSearch, spaces));
   }
 };
 

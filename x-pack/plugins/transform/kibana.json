@@ -14,7 +14,8 @@
   ],
   "optionalPlugins": [
     "security",
-    "usageCollection"
+    "usageCollection",
+    "spaces"
   ],
   "configPath": ["xpack", "transform"],
   "requiredBundles": [

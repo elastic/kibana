@@ -13,7 +13,8 @@ export {
   getSavedSearchUrl,
   getSavedSearchFullPathUrl,
   savedSearchHasUrlConflict,
-  throwErrorOnUrlConflict,
+  getSavedSearchUrlConflictMessage,
+  throwErrorOnSavedSearchUrlConflict,
 } from './saved_searches_utils';
 export { useSavedSearchAliasMatchRedirect } from './saved_search_alias_match_redirect';
 export { SavedSearchURLConflictCallout } from './saved_search_url_conflict_callout';

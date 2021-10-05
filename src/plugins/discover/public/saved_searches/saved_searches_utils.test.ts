@@ -11,7 +11,7 @@ import {
   getSavedSearchFullPathUrl,
   fromSavedSearchAttributes,
   toSavedSearchAttributes,
-  throwErrorOnUrlConflict,
+  throwErrorOnSavedSearchUrlConflict,
 } from './saved_searches_utils';
 
 import { createSearchSourceMock } from '../../../data/public/mocks';
@@ -79,12 +79,12 @@ describe('saved_searches_utils', () => {
     });
   });
 
-  describe('throwErrorOnUrlConflict', () => {
+  describe('throwErrorOnSavedSearchUrlConflict', () => {
     test('should throw an error on url conflict', async () => {
       let error = 'no error';
 
       try {
-        await throwErrorOnUrlConflict({
+        await throwErrorOnSavedSearchUrlConflict({
           id: 'id',
           sharingSavedObject: {
             outcome: 'conflict',

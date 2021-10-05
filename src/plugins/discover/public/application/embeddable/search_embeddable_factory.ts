@@ -23,9 +23,7 @@ import { SavedSearchEmbeddable } from './saved_search_embeddable';
 import {
   getSavedSearch,
   getSavedSearchUrl,
-  savedSearchHasUrlConflict,
-  throwErrorOnUrlConflict,
-  SAVED_SEARCH_TYPE,
+  throwErrorOnSavedSearchUrlConflict,
 } from '../../saved_searches';
 
 interface StartServices {
@@ -76,7 +74,7 @@ export class SearchEmbeddableFactory
         savedObjectsClient: services.core.savedObjects.client,
       });
 
-      await throwErrorOnUrlConflict(savedSearch, services.spaces);
+      await throwErrorOnSavedSearchUrlConflict(savedSearch, services.spaces);
 
       const indexPattern = savedSearch.searchSource.getField('index');
       const { executeTriggerActions } = await this.getStartServices();
