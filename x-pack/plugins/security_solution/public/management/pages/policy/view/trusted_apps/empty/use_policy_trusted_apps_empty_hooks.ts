@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useNavigateToAppEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
