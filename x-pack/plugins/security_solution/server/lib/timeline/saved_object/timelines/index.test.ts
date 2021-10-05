@@ -8,11 +8,24 @@
 import { FrameworkRequest } from '../../../framework';
 import { mockGetTimelineValue, mockSavedObject } from '../../__mocks__/import_timelines';
 
-import { convertStringToBase64, getExistingPrepackagedTimelines, getAllTimeline } from '.';
+import {
+  convertStringToBase64,
+  getExistingPrepackagedTimelines,
+  getAllTimeline,
+  resolveTimelineOrNull,
+} from '.';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { getNotesByTimelineId } from '../notes/saved_object';
 import { getAllPinnedEventsByTimelineId } from '../pinned_events';
-import { AllTimelinesResponse } from '../../../../../common/types/timeline';
+import {
+  AllTimelinesResponse,
+  ResolvedTimelineWithOutcomeSavedObject,
+} from '../../../../../common/types/timeline';
+import {
+  mockResolvedSavedObject,
+  mockResolvedTimeline,
+  mockResolveTimelineResponse,
+} from '../../__mocks__/resolve_timeline';
 
 jest.mock('./convert_saved_object_to_savedtimeline', () => ({
   convertSavedObjectToSavedTimeline: jest.fn(),
@@ -151,7 +164,7 @@ describe('saved_object', () => {
       (getAllPinnedEventsByTimelineId as jest.Mock).mockClear();
     });
 
-    test('should send correct options if no filters applys', async () => {
+    test('should send correct options if no filters applies', async () => {
       expect(mockFindSavedObject.mock.calls[0][0]).toEqual({
         filter: 'not siem-ui-timeline.attributes.status: draft',
         page: pageInfo.pageIndex,
@@ -226,7 +239,7 @@ describe('saved_object', () => {
       );
     });
 
-    test('should retuen correct result', async () => {
+    test('should return correct result', async () => {
       expect(result).toEqual({
         totalCount: 1,
         customTemplateTimelineCount: 0,
@@ -246,6 +259,54 @@ describe('saved_object', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('resolveTimelineOrNull', () => {
+    let mockResolveSavedObject: jest.Mock;
+    let mockRequest: FrameworkRequest;
+    let result: ResolvedTimelineWithOutcomeSavedObject | null = null;
+    beforeEach(async () => {
+      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(mockResolvedTimeline);
+      mockResolveSavedObject = jest.fn().mockReturnValue(mockResolvedSavedObject);
+      mockRequest = {
+        user: {
+          username: 'username',
+        },
+        context: {
+          core: {
+            savedObjects: {
+              client: {
+                resolve: mockResolveSavedObject,
+              },
+            },
+          },
+        },
+      } as unknown as FrameworkRequest;
+
+      result = await resolveTimelineOrNull(mockRequest, '760d3d20-2142-11ec-a46f-051cb8e3154c');
+    });
+
+    afterEach(() => {
+      mockResolveSavedObject.mockClear();
+      (getNotesByTimelineId as jest.Mock).mockClear();
+      (getAllPinnedEventsByTimelineId as jest.Mock).mockClear();
+    });
+
+    test('should call getNotesByTimelineId', async () => {
+      expect((getNotesByTimelineId as jest.Mock).mock.calls[0][1]).toEqual(
+        mockResolvedSavedObject.saved_object.id
+      );
+    });
+
+    test('should call getAllPinnedEventsByTimelineId', async () => {
+      expect((getAllPinnedEventsByTimelineId as jest.Mock).mock.calls[0][1]).toEqual(
+        mockResolvedSavedObject.saved_object.id
+      );
+    });
+
+    test('should return the timeline with resolve attributes', async () => {
+      expect(result).toEqual(mockResolveTimelineResponse);
     });
   });
 });
