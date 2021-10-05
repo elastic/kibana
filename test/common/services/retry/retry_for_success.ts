@@ -53,9 +53,12 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
   let lastError;
 
   while (true) {
-    if (lastError && Date.now() - start > timeout) {
-      await onFailure(lastError);
-      throw new Error('expected onFailure() option to throw an error');
+    if (Date.now() - start > timeout) {
+      if (lastError) {
+        await onFailure(lastError);
+        throw new Error('expected onFailure() option to throw an error');
+      }
+      throw new Error(`${methodName} timeout`);
     } else if (lastError && onFailureBlock) {
       const before = await runAttempt(onFailureBlock);
       if ('error' in before) {
