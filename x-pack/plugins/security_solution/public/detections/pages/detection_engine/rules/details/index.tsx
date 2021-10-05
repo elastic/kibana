@@ -299,10 +299,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         );
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rule]);
+  }, [rule, basePath, spacesApi]);
 
-  const getLegacyUrlConflictCallout = () => {
+  const getLegacyUrlConflictCallout = useMemo(() => {
     const outcome = rule?.outcome;
     if (spacesApi && outcome === 'conflict') {
       const aliasTargetId = rule?.alias_target_id!; // This is always defined if outcome === 'conflict'
@@ -327,7 +326,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       );
     }
     return null;
-  };
+  }, [rule, basePath, spacesApi]);
 
   useEffect(() => {
     if (!hasIndexRead) {
@@ -773,7 +772,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 </EuiFlexGroup>
               </DetectionEngineHeaderPage>
               {ruleError}
-              {getLegacyUrlConflictCallout()}
+              {getLegacyUrlConflictCallout}
               <EuiSpacer />
               <EuiFlexGroup>
                 <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>
