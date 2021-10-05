@@ -58,8 +58,8 @@ import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { TableRowActions } from './components/table_row_actions';
 import { EndpointAgentStatus } from './components/endpoint_agent_status';
 import { CallOut } from '../../../../common/components/callouts';
-import { WARNING_TRANSFORM_STATES } from '../types';
 import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
+import { WARNING_TRANSFORM_STATES } from '../../../../../common/constants';
 
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
