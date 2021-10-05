@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 
-import { IScopedClusterClient, KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
-import { DatafeedOverride, JobOverride } from '../../common/types/modules';
+import type {
+  IScopedClusterClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from 'kibana/server';
+import type { PluginStart as DataViewsPluginStart } from '../../../../../src/plugins/data_views/server';
+import type { DatafeedOverride, JobOverride } from '../../common/types/modules';
 import { wrapError } from '../client/error_wrapper';
-import { DataRecognizer } from '../models/data_recognizer';
+import { dataRecognizerFactory } from '../models/data_recognizer';
 import {
   moduleIdParamSchema,
   optionalModuleIdParamSchema,
   modulesIndexPatternTitleSchema,
   setupModuleBodySchema,
 } from './schemas/modules';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import type { MlClient } from '../lib/ml_client';
 import type { JobSavedObjectService } from '../saved_objects';
 
@@ -25,14 +30,16 @@ function recognize(
   client: IScopedClusterClient,
   mlClient: MlClient,
   savedObjectsClient: SavedObjectsClientContract,
+  getDataViews: () => DataViewsPluginStart | null,
   jobSavedObjectService: JobSavedObjectService,
   request: KibanaRequest,
   indexPatternTitle: string
 ) {
-  const dr = new DataRecognizer(
+  const dr = dataRecognizerFactory(
     client,
     mlClient,
     savedObjectsClient,
+    getDataViews,
     jobSavedObjectService,
     request
   );
@@ -43,14 +50,16 @@ function getModule(
   client: IScopedClusterClient,
   mlClient: MlClient,
   savedObjectsClient: SavedObjectsClientContract,
+  getDataViews: () => DataViewsPluginStart | null,
   jobSavedObjectService: JobSavedObjectService,
   request: KibanaRequest,
   moduleId?: string
 ) {
-  const dr = new DataRecognizer(
+  const dr = dataRecognizerFactory(
     client,
     mlClient,
     savedObjectsClient,
+    getDataViews,
     jobSavedObjectService,
     request
   );
@@ -65,6 +74,7 @@ function setup(
   client: IScopedClusterClient,
   mlClient: MlClient,
   savedObjectsClient: SavedObjectsClientContract,
+  getDataViews: () => DataViewsPluginStart | null,
   jobSavedObjectService: JobSavedObjectService,
   request: KibanaRequest,
   moduleId: string,
@@ -81,10 +91,11 @@ function setup(
   estimateModelMemory?: boolean,
   applyToAllSpaces?: boolean
 ) {
-  const dr = new DataRecognizer(
+  const dr = dataRecognizerFactory(
     client,
     mlClient,
     savedObjectsClient,
+    getDataViews,
     jobSavedObjectService,
     request
   );
@@ -109,14 +120,16 @@ function dataRecognizerJobsExist(
   client: IScopedClusterClient,
   mlClient: MlClient,
   savedObjectsClient: SavedObjectsClientContract,
+  getDataViews: () => DataViewsPluginStart | null,
   jobSavedObjectService: JobSavedObjectService,
   request: KibanaRequest,
   moduleId: string
 ) {
-  const dr = new DataRecognizer(
+  const dr = dataRecognizerFactory(
     client,
     mlClient,
     savedObjectsClient,
+    getDataViews,
     jobSavedObjectService,
     request
   );
@@ -126,7 +139,10 @@ function dataRecognizerJobsExist(
 /**
  * Recognizer routes.
  */
-export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
+export function dataRecognizer(
+  { router, routeGuard }: RouteInitialization,
+  getDataViews: () => DataViewsPluginStart | null
+) {
   /**
    * @apiGroup Modules
    *
@@ -173,6 +189,7 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
             client,
             mlClient,
             context.core.savedObjects.client,
+            getDataViews,
             jobSavedObjectService,
             request,
             indexPatternTitle
@@ -317,6 +334,7 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
             client,
             mlClient,
             context.core.savedObjects.client,
+            getDataViews,
             jobSavedObjectService,
             request,
             moduleId
@@ -505,6 +523,7 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
             client,
             mlClient,
             context.core.savedObjects.client,
+            getDataViews,
             jobSavedObjectService,
             request,
             moduleId,
@@ -600,6 +619,7 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
             client,
             mlClient,
             context.core.savedObjects.client,
+            getDataViews,
             jobSavedObjectService,
             request,
             moduleId

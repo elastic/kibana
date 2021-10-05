@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import {
+import type {
   IClusterClient,
   IScopedClusterClient,
   SavedObjectsClientContract,
   UiSettingsServiceStart,
 } from 'kibana/server';
-import { SpacesPluginStart } from '../../../spaces/server';
+import type { SpacesPluginStart } from '../../../spaces/server';
 import { KibanaRequest } from '../../.././../../src/core/server';
 import { MlLicense } from '../../common/license';
 
 import type { CloudSetup } from '../../../cloud/server';
+import { PluginStart as DataViewsPluginStart } from '../../../../../src/plugins/data_views/server';
 import type { SecurityPluginSetup } from '../../../security/server';
 import { licenseChecks } from './license_checks';
 import { MlSystemProvider, getMlSystemProvider } from './providers/system';
@@ -26,7 +27,7 @@ import {
   AnomalyDetectorsProvider,
   getAnomalyDetectorsProvider,
 } from './providers/anomaly_detectors';
-import { ResolveMlCapabilities, MlCapabilitiesKey } from '../../common/types/capabilities';
+import type { ResolveMlCapabilities, MlCapabilitiesKey } from '../../common/types/capabilities';
 import { hasMlCapabilitiesProvider, HasMlCapabilities } from '../lib/capabilities';
 import {
   MLClusterClientUninitialized,
@@ -90,6 +91,7 @@ export function createSharedServices(
   getInternalSavedObjectsClient: () => SavedObjectsClientContract | null,
   getUiSettings: () => UiSettingsServiceStart | null,
   getFieldsFormat: () => FieldFormatsStart | null,
+  getDataViews: () => DataViewsPluginStart | null,
   isMlReady: () => Promise<void>
 ): {
   sharedServicesProviders: SharedServices;
@@ -101,6 +103,7 @@ export function createSharedServices(
     savedObjectsClient: SavedObjectsClientContract
   ): Guards {
     const internalSavedObjectsClient = getInternalSavedObjectsClient();
+
     if (internalSavedObjectsClient === null) {
       throw new Error('Internal saved object client not initialized');
     }
@@ -153,7 +156,7 @@ export function createSharedServices(
     sharedServicesProviders: {
       ...getJobServiceProvider(getGuards),
       ...getAnomalyDetectorsProvider(getGuards),
-      ...getModulesProvider(getGuards),
+      ...getModulesProvider(getGuards, getDataViews),
       ...getResultsServiceProvider(getGuards),
       ...getMlSystemProvider(getGuards, mlLicense, getSpaces, cloud, resolveMlCapabilities),
       ...getAlertingServiceProvider(getGuards),
