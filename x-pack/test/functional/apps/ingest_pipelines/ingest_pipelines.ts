@@ -28,10 +28,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('Loads the app', async () => {
-      log.debug('Checking for section heading to say Ingest Node Pipelines.');
+      log.debug('Checking for section heading to say Ingest Pipelines.');
 
       const headingText = await pageObjects.ingestPipelines.sectionHeadingText();
-      expect(headingText).to.be('Ingest Node Pipelines');
+      expect(headingText).to.be('Ingest Pipelines');
     });
 
     it('Creates a pipeline', async () => {
