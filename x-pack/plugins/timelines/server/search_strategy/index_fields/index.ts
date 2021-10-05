@@ -120,9 +120,10 @@ export const requestIndexFieldSearch = async (
     indicesExist = await findExistingIndices(patternList, esClient.asCurrentUser);
     existingIndices = patternList.filter((index, i) => indicesExist[i]);
     if (!request.onlyCheckIfIndicesExist) {
+      const dataViewSpec = dataView.toSpec();
       // type cast because index pattern type is FieldSpec and timeline type is FieldDescriptor, same diff
-      const fieldDescriptor = [Object.values(dataView.fields.toSpec()) as FieldDescriptor[]];
-      runtimeMappings = dataView.toSpec().runtimeFieldMap ?? {};
+      const fieldDescriptor = [Object.values(dataViewSpec.fields ?? {}) as FieldDescriptor[]];
+      runtimeMappings = dataViewSpec.runtimeFieldMap ?? {};
       indexFields = await formatIndexFields(beatFields, fieldDescriptor, patternList);
     }
   } else if ('indices' in request) {

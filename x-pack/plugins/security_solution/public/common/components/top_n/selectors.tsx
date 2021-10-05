@@ -20,14 +20,11 @@ export const getIndicesSelector = () => {
   const getScopeSelector = sourcererSelectors.scopeIdSelector();
 
   return (state: State, scopeId: SourcererScopeName): IndicesSelector => {
-    const raw: string[] = [];
     const signalIndexName = getSignalIndexNameSelector(state);
     const { selectedPatterns } = getScopeSelector(state, scopeId);
-    selectedPatterns.forEach((index) => {
-      if (!isSignalIndex(index, signalIndexName)) {
-        raw.push(index);
-      }
-    });
+    const raw: string[] = selectedPatterns.filter(
+      (index) => !isSignalIndex(index, signalIndexName)
+    );
 
     return {
       all: signalIndexName != null ? [...raw, signalIndexName] : [...raw],
