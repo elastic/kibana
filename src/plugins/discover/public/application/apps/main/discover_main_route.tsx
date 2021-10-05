@@ -8,6 +8,9 @@
 import React, { useEffect, useState, memo } from 'react';
 import { History } from 'history';
 import { useParams } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { EuiEmptyPrompt } from '@elastic/eui';
+
 import { IndexPatternAttributes, ISearchSource, SavedObject } from 'src/plugins/data/common';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch, getSavedSearch, getSavedSearchFullPathUrl } from '../../../saved_searches';
@@ -36,6 +39,21 @@ interface DiscoverLandingParams {
   id: string;
 }
 
+const DiscoverError = ({ error }: { error: Error }) => (
+  <EuiEmptyPrompt
+    iconType="alert"
+    iconColor="danger"
+    title={
+      <h2>
+        {i18n.translate('discover.discoverError.title', {
+          defaultMessage: 'Error loading Discover',
+        })}
+      </h2>
+    }
+    body={<p>{error.message}</p>}
+  />
+);
+
 export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
   const {
     core,
@@ -45,7 +63,7 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
     toastNotifications,
     http: { basePath },
   } = services;
-
+  const [error, setError] = useState<Error>();
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
   const indexPattern = savedSearch?.searchSource?.getField('index');
   const [indexPatternList, setIndexPatternList] = useState<
@@ -58,16 +76,21 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
     const savedSearchId = id;
 
     async function loadDefaultOrCurrentIndexPattern(searchSource: ISearchSource) {
-      await data.indexPatterns.ensureDefaultDataView();
-      const { appStateContainer } = getState({ history, uiSettings: config });
-      const { index } = appStateContainer.getState();
-      const ip = await loadIndexPattern(index || '', data.indexPatterns, config);
-      const ipList = ip.list as Array<SavedObject<IndexPatternAttributes>>;
-      const indexPatternData = await resolveIndexPattern(ip, searchSource, toastNotifications);
+      try {
+        await data.indexPatterns.ensureDefaultDataView();
+        const { appStateContainer } = getState({ history, uiSettings: config });
+        const { index } = appStateContainer.getState();
+        const ip = await loadIndexPattern(index || '', data.indexPatterns, config);
 
-      setIndexPatternList(ipList);
+        const ipList = ip.list as Array<SavedObject<IndexPatternAttributes>>;
+        const indexPatternData = await resolveIndexPattern(ip, searchSource, toastNotifications);
 
-      return indexPatternData;
+        setIndexPatternList(ipList);
+
+        return indexPatternData;
+      } catch (e) {
+        setError(e);
+      }
     }
 
     async function loadSavedSearch() {
@@ -135,6 +158,10 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
         : getRootBreadcrumbs()
     );
   }, [chrome, savedSearch]);
+
+  if (error) {
+    return <DiscoverError error={error} />;
+  }
 
   if (!indexPattern || !savedSearch) {
     return <LoadingIndicator />;
