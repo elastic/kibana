@@ -24,7 +24,7 @@ import { getMetricsDateHistogramParams } from '../../helpers/metrics';
 import { MAX_KPIS } from './constants';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
 
-export async function getTransactionBreakdown({
+export async function getSpanBreakdown({
   environment,
   kuery,
   setup,
@@ -49,11 +49,6 @@ export async function getTransactionBreakdown({
     sum_all_self_times: {
       sum: {
         field: SPAN_SELF_TIME_SUM,
-      },
-    },
-    total_transaction_breakdown_count: {
-      sum: {
-        field: TRANSACTION_BREAKDOWN_COUNT,
       },
     },
     types: {
