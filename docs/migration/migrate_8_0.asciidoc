@@ -42,6 +42,15 @@ for example, `logstash-*`.
 
 *Impact:* Users who relied on changing these settings to achieve multitenancy should use *Spaces*, cross-cluster replication, or cross-cluster search instead. To migrate to *Spaces*, users are encouraged to use saved object management to export their saved objects from a tenant into the default tenant in a space. Improvements are planned to improve on this workflow. See https://github.com/elastic/kibana/issues/82020 for more details.   
 
+// tag::notable-breaking-changes[]
+[float]
+==== Disabling most plugins with the `{plugin_name}.enabled` setting is no longer supported
+*Details:* The ability for most plugins to be disabled using the `{plugin_name}.enabled` config option has been removed.
+
+*Impact:* Some plugins, such as `telemetry`, `newsfeed`, `reporting`, and the various `vis_type` plugins will continue to support this setting, however the rest of the plugins that ship with Kibana will not. By default, any newly created plugins will not support this configuration unless it is explicitly added to the plugin's `configSchema`.
+
+If you are currently using one of these settings in your Kibana config, please remove it before upgrading to 8.0. If you were using these settings to control user access to certain Kibana applications, we recommend leveraging Feature Controls instead.
+
 [float]
 ==== Legacy browsers are now rejected by default
 *Details:* `csp.strict` is now enabled by default, so Kibana will fail to load for older, legacy browsers that do not enforce basic Content Security Policy protections - notably Internet Explorer 11.
