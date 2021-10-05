@@ -9,7 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBetaBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
-import { DataViewLabels } from '../configurations/constants';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { LastUpdated } from './last_updated';
 import { combineTimeRanges } from '../lens_embeddable';
