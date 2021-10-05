@@ -21,7 +21,8 @@ jest.mock('../components/user_privileges', () => {
 });
 jest.mock('../lib/kibana');
 
-describe('When using the `useUpgradeSecurityPackages()` hook', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/112910
+describe.skip('When using the `useUpgradeSecurityPackages()` hook', () => {
   let renderResult: RenderHookResult<object, void>;
   let renderHook: () => RenderHookResult<object, void>;
   let kibana: ReturnType<typeof useKibana>;
