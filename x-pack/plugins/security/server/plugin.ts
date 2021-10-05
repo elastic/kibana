@@ -30,7 +30,7 @@ import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
 import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import type { SecurityLicense } from '../common/licensing';
 import { SecurityLicenseService } from '../common/licensing';
-import type { AuthenticatedUser } from '../common/model';
+import type { AuthenticatedUser, PrivilegeDeprecationsService } from '../common/model';
 import type { AnonymousAccessServiceStart } from './anonymous_access';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuditServiceSetup } from './audit';
@@ -44,6 +44,7 @@ import type { AuthorizationServiceSetup, AuthorizationServiceSetupInternal } fro
 import { AuthorizationService } from './authorization';
 import type { ConfigSchema, ConfigType } from './config';
 import { createConfig } from './config';
+import { getPrivilegeDeprecationsService } from './deprecations';
 import { ElasticsearchService } from './elasticsearch';
 import type { SecurityFeatureUsageServiceStart } from './feature_usage';
 import { SecurityFeatureUsageService } from './feature_usage';
@@ -85,6 +86,10 @@ export interface SecurityPluginSetup {
    * Exposes services for audit logging.
    */
   audit: AuditServiceSetup;
+  /**
+   * Exposes services to access kibana roles per feature id with the GetDeprecationsContext
+   */
+  privilegeDeprecationsService: PrivilegeDeprecationsService;
 }
 
 /**
@@ -321,9 +326,7 @@ export class SecurityPlugin
         asScoped: this.auditSetup.asScoped,
         getLogger: this.auditSetup.getLogger,
       },
-
       authc: { getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request) },
-
       authz: {
         actions: this.authorizationSetup.actions,
         checkPrivilegesWithRequest: this.authorizationSetup.checkPrivilegesWithRequest,
@@ -333,8 +336,12 @@ export class SecurityPlugin
           this.authorizationSetup.checkSavedObjectsPrivilegesWithRequest,
         mode: this.authorizationSetup.mode,
       },
-
       license,
+      privilegeDeprecationsService: getPrivilegeDeprecationsService(
+        this.authorizationSetup,
+        license,
+        this.logger.get('deprecations')
+      ),
     });
   }
 

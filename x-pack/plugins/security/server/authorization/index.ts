@@ -13,3 +13,4 @@ export {
 } from './authorization_service';
 export { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
 export { CheckPrivilegesPayload } from './types';
+export { transformElasticsearchRoleToRole, ElasticsearchRole } from './roles';
