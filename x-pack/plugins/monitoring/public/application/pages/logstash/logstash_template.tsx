@@ -14,6 +14,7 @@ interface LogstashTemplateProps extends PageTemplateProps {
   instance?: any;
   pipelineId?: string;
   pipelineVersions?: string[];
+  tabsDisabled?: boolean;
 }
 
 export const LogstashTemplate: React.FC<LogstashTemplateProps> = ({
@@ -21,54 +22,56 @@ export const LogstashTemplate: React.FC<LogstashTemplateProps> = ({
   instance,
   pipelineId,
   pipelineVersions,
+  tabsDisabled,
   ...props
 }) => {
   const tabs: TabMenuItem[] = [];
-
-  if (!instance && !pipelineId) {
-    tabs.push({
-      id: 'overview',
-      label: i18n.translate('xpack.monitoring.logstashNavigation.overviewLinkText', {
-        defaultMessage: 'Overview',
-      }),
-      route: '/logstash',
-    });
-    tabs.push({
-      id: 'nodes',
-      label: i18n.translate('xpack.monitoring.logstashNavigation.nodesLinkText', {
-        defaultMessage: 'Nodes',
-      }),
-      route: '/logstash/nodes',
-    });
-    tabs.push({
-      id: 'pipelines',
-      label: i18n.translate('xpack.monitoring.logstashNavigation.pipelinesLinkText', {
-        defaultMessage: 'Pipelines',
-      }),
-      route: '/logstash/pipelines',
-    });
-  } else if (instance) {
-    tabs.push({
-      id: 'overview',
-      label: i18n.translate('xpack.monitoring.logstashNavigation.instance.overviewLinkText', {
-        defaultMessage: 'Overview',
-      }),
-      route: `/logstash/node/${instance.nodeSummary?.uuid}`, // IDK if this is right
-    });
-    tabs.push({
-      id: 'pipeline',
-      label: i18n.translate('xpack.monitoring.logstashNavigation.instance.pipelinesLinkText', {
-        defaultMessage: 'Pipelines',
-      }),
-      route: `/logstash/node/${instance.nodeSummary?.uuid}/pipelines`, // IDK if this is right
-    });
-    tabs.push({
-      id: 'advanced',
-      label: i18n.translate('xpack.monitoring.logstashNavigation.instance.advancedLinkText', {
-        defaultMessage: 'Advanced',
-      }),
-      route: `/logstash/node/${instance.nodeSummary?.uuid}/advanced`, // IDK if this is right
-    });
+  if (!tabsDisabled) {
+    if (!instance && !pipelineId) {
+      tabs.push({
+        id: 'overview',
+        label: i18n.translate('xpack.monitoring.logstashNavigation.overviewLinkText', {
+          defaultMessage: 'Overview',
+        }),
+        route: '/logstash',
+      });
+      tabs.push({
+        id: 'nodes',
+        label: i18n.translate('xpack.monitoring.logstashNavigation.nodesLinkText', {
+          defaultMessage: 'Nodes',
+        }),
+        route: '/logstash/nodes',
+      });
+      tabs.push({
+        id: 'pipelines',
+        label: i18n.translate('xpack.monitoring.logstashNavigation.pipelinesLinkText', {
+          defaultMessage: 'Pipelines',
+        }),
+        route: '/logstash/pipelines',
+      });
+    } else if (instance) {
+      tabs.push({
+        id: 'overview',
+        label: i18n.translate('xpack.monitoring.logstashNavigation.instance.overviewLinkText', {
+          defaultMessage: 'Overview',
+        }),
+        route: `/logstash/node/${instance.nodeSummary?.uuid}`, // IDK if this is right
+      });
+      tabs.push({
+        id: 'pipeline',
+        label: i18n.translate('xpack.monitoring.logstashNavigation.instance.pipelinesLinkText', {
+          defaultMessage: 'Pipelines',
+        }),
+        route: `/logstash/node/${instance.nodeSummary?.uuid}/pipelines`, // IDK if this is right
+      });
+      tabs.push({
+        id: 'advanced',
+        label: i18n.translate('xpack.monitoring.logstashNavigation.instance.advancedLinkText', {
+          defaultMessage: 'Advanced',
+        }),
+        route: `/logstash/node/${instance.nodeSummary?.uuid}/advanced`, // IDK if this is right
+      });
+    }
   }
 
   if (pipelineVersions && pipelineVersions.length) {
