@@ -20,6 +20,7 @@ import {
   ScaleType,
   Settings,
   XYChartElementEvent,
+  XYBrushEvent,
 } from '@elastic/charts';
 import moment from 'moment';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
@@ -91,7 +92,7 @@ export const DocumentCountChart: FC<Props> = ({
     [data]
   );
 
-  const onBrushEnd: BrushEndListener = ({ x }) => {
+  const onBrushEnd = ({ x }: XYBrushEvent) => {
     if (!x) {
       return;
     }
@@ -117,7 +118,11 @@ export const DocumentCountChart: FC<Props> = ({
           height: 120,
         }}
       >
-        <Settings xDomain={xDomain} onBrushEnd={onBrushEnd} onElementClick={onElementClick} />
+        <Settings
+          xDomain={xDomain}
+          onBrushEnd={onBrushEnd as BrushEndListener}
+          onElementClick={onElementClick}
+        />
         <Axis
           id="bottom"
           position={Position.Bottom}

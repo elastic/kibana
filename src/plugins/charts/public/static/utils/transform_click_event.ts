@@ -9,7 +9,7 @@
 import {
   XYChartSeriesIdentifier,
   GeometryValue,
-  XYBrushArea,
+  XYBrushEvent,
   Accessor,
   AccessorFn,
   Datum,
@@ -261,7 +261,7 @@ export const getFilterFromSeriesFn =
  */
 export const getBrushFromChartBrushEventFn =
   (table: Datatable, xAccessor: Accessor | AccessorFn) =>
-  ({ x: selectedRange }: XYBrushArea): BrushTriggerEvent => {
+  ({ x: selectedRange }: XYBrushEvent): BrushTriggerEvent => {
     const [start, end] = selectedRange ?? [0, 0];
     const range: [number, number] = [start, end];
     const column = table.columns.findIndex(({ id }) => validateAccessorId(id, xAccessor));

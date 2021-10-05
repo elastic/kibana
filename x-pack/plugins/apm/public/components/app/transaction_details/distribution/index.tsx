@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { BrushEndListener, XYBrushArea } from '@elastic/charts';
+import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -61,7 +61,7 @@ export function getFormattedSelection(selection: Selection): string {
 }
 
 interface TransactionDistributionProps {
-  onChartSelection: BrushEndListener;
+  onChartSelection: (event: XYBrushEvent) => void;
   onClearSelection: () => void;
   selection?: Selection;
   traceSamples: TabContentProps['traceSamples'];
@@ -126,10 +126,8 @@ export function TransactionDistribution({
 
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
-  const onTrackedChartSelection: BrushEndListener = (
-    brushArea: XYBrushArea
-  ) => {
-    onChartSelection(brushArea);
+  const onTrackedChartSelection = (brushEvent: XYBrushEvent) => {
+    onChartSelection(brushEvent);
     trackApmEvent({ metric: 'transaction_distribution_chart_selection' });
   };
 
@@ -216,7 +214,7 @@ export function TransactionDistribution({
         markerCurrentTransaction={markerCurrentTransaction}
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
         markerValue={response.percentileThresholdValue ?? 0}
-        onChartSelection={onTrackedChartSelection}
+        onChartSelection={onTrackedChartSelection as BrushEndListener}
         hasData={hasData}
         selection={selection}
         status={status}

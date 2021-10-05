@@ -25,6 +25,8 @@ import {
   LayoutDirection,
   ElementClickListener,
   BrushEndListener,
+  XYBrushEvent,
+  BrushEvent,
   CurveType,
   LegendPositionConfig,
   LabelOverflowConstraint,
@@ -480,7 +482,7 @@ export function XYChart({
     onClickValue(context);
   };
 
-  const brushHandler: BrushEndListener = ({ x }) => {
+  const brushHandler = ({ x }: XYBrushEvent) => {
     if (!x) {
       return;
     }
@@ -555,7 +557,7 @@ export function XYChart({
         allowBrushingLastHistogramBucket={Boolean(isTimeViz)}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
-        onBrushEnd={interactive ? brushHandler : undefined}
+        onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
         onElementClick={interactive ? clickHandler : undefined}
         legendAction={getLegendAction(
           filteredLayers,

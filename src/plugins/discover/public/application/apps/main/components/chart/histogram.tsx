@@ -14,6 +14,7 @@ import dateMath from '@elastic/datemath';
 import {
   Axis,
   BrushEndListener,
+  XYBrushEvent,
   Chart,
   ElementClickListener,
   HistogramBarSeries,
@@ -65,8 +66,8 @@ export function DiscoverHistogram({
   const timeZone = getTimezone(uiSettings);
   const { chartData, fetchStatus } = dataState;
 
-  const onBrushEnd: BrushEndListener = useCallback(
-    ({ x }) => {
+  const onBrushEnd = useCallback(
+    ({ x }: XYBrushEvent) => {
       if (!x) {
         return;
       }
@@ -184,7 +185,7 @@ export function DiscoverHistogram({
         <Chart size="100%">
           <Settings
             xDomain={xDomain}
-            onBrushEnd={onBrushEnd}
+            onBrushEnd={onBrushEnd as BrushEndListener}
             onElementClick={onElementClick(xInterval)}
             tooltip={tooltipProps}
             theme={chartTheme}
