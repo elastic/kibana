@@ -26,13 +26,11 @@ export function RumHome() {
   const PageTemplateComponent = observability.navigation.PageTemplate;
 
   return (
-      <CsmSharedContextProvider>
-        <PageTemplateComponent
-          pageHeader={{ children: <PageHeader /> }}
-        >
-            <RumOverview />
-        </PageTemplateComponent>
-      </CsmSharedContextProvider>
+    <CsmSharedContextProvider>
+      <PageTemplateComponent pageHeader={{ children: <PageHeader /> }}>
+        <RumOverview />
+      </PageTemplateComponent>
+    </CsmSharedContextProvider>
   );
 }
 
