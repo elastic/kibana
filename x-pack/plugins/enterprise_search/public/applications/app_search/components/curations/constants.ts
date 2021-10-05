@@ -50,6 +50,13 @@ export const RESTORE_CONFIRMATION = i18n.translate(
   }
 );
 
+export const CONVERT_TO_MANUAL_CONFIRMATION = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.curations.convertToManualCurationConfirmation',
+  {
+    defaultMessage: 'Are you sure you want to convert this to a manual curation?',
+  }
+);
+
 export const RESULT_ACTIONS_DIRECTIONS = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.resultActionsDescription',
   { defaultMessage: 'Promote results by clicking the star, hide them by clicking the eye.' }
@@ -82,3 +89,13 @@ export const SHOW_DOCUMENT_ACTION = {
   iconType: 'eye',
   iconColor: 'primary' as EuiButtonIconColor,
 };
+
+export const AUTOMATED_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.curation.automatedLabel',
+  { defaultMessage: 'Automated' }
+);
+
+export const COVERT_TO_MANUAL_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.curation.convertToManualCurationButtonLabel',
+  { defaultMessage: 'Convert to manual curation' }
+);
