@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/elasticsearch_fieldnames';
+import {
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+} from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { ProcessorEvent } from '../../../common/processor_event';
@@ -69,6 +72,13 @@ export async function getThroughputChartsForBackend({
             min_doc_count: 0,
             extended_bounds: { min: startWithOffset, max: endWithOffset },
           },
+          aggs: {
+            sumSpanDestination: {
+              sum: {
+                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+              },
+            },
+          },
         },
       },
     },
@@ -80,7 +90,7 @@ export async function getThroughputChartsForBackend({
         x: bucket.key + offsetInMs,
         y: calculateThroughputWithInterval({
           bucketSize,
-          value: bucket.doc_count,
+          value: bucket.sumSpanDestination.value || 0,
         }),
       };
     }) ?? []

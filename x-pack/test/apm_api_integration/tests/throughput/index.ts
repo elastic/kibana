@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { mean, sum } from 'lodash';
-import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
+import { meanBy, sumBy } from 'lodash';
 import { BackendNode } from '../../../../plugins/apm/common/connections';
+import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
 import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import { createApmApiSupertest } from '../../common/apm_api_supertest';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
@@ -35,11 +35,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       environment: 'ENVIRONMENT_ALL',
     };
     const [
-      serviceApiResponse,
-      serviceThroughputApiResponse,
-      transactionsDetailsApiResponse,
+      serviceAPIResponse,
+      serviceThroughputAPIResponse,
+      transactionsDetailsAPIResponse,
       serviceDependencyAPIResponse,
       topBackendsAPIResponse,
+      backendThroughputChartAPIResponse,
     ] = await Promise.all([
       apmApiSupertest({
         endpoint: 'GET /api/apm/services',
@@ -94,15 +95,29 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         },
       }),
+      apmApiSupertest({
+        endpoint: `GET /api/apm/backends/{backendName}/charts/throughput`,
+        params: {
+          path: { backendName: 'elasticsearch' },
+          query: {
+            ...commonQuery,
+            kuery: '',
+          },
+        },
+      }),
     ]);
-    const serviceApiThroughput = serviceApiResponse.body.items[0].throughput;
+    const serviceApiThroughput = serviceAPIResponse.body.items[0].throughput;
 
-    const throughputChartApiMean = mean(
-      serviceThroughputApiResponse.body.currentPeriod.map((d) => d.y)
+    const throughputChartApiMean = meanBy(serviceThroughputAPIResponse.body.currentPeriod, 'y');
+
+    const transactionsThroughputSum = sumBy(
+      transactionsDetailsAPIResponse.body.transactionGroups,
+      'throughput'
     );
 
-    const transactionsThroughputSum = sum(
-      transactionsDetailsApiResponse.body.transactionGroups.map((data) => data.throughput)
+    const backendThroughputChartMean = meanBy(
+      backendThroughputChartAPIResponse.body.currentTimeseries,
+      'y'
     );
 
     return {
@@ -117,6 +132,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         backendName: (item.location as BackendNode).backendName,
         throughputValue: item.currentStats.throughput.value,
       })),
+      backendThroughputChartMean,
     };
   }
 
@@ -146,7 +162,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('matches throughput value between service dependencies and top backends', () => {
           const { topDependencies, serviceDependencies } = throughputValues;
-          expect(serviceDependencies).to.equal(topDependencies);
+          expect(serviceDependencies).to.eql(topDependencies);
+        });
+
+        it('matches throughput value between service dependencies and backend throughput chart', () => {
+          const { backendThroughputChartMean, serviceDependencies } = throughputValues;
+          expect(roundNumber(serviceDependencies[0].throughputValue)).to.equal(
+            roundNumber(backendThroughputChartMean)
+          );
         });
       });
 
@@ -170,7 +193,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('matches throughput value between service dependencies and top backends', () => {
           const { topDependencies, serviceDependencies } = throughputValues;
-          expect(serviceDependencies).to.equal(topDependencies);
+          expect(serviceDependencies).to.eql(topDependencies);
+        });
+
+        it('matches throughput value between service dependencies and backend throughput chart', () => {
+          const { backendThroughputChartMean, serviceDependencies } = throughputValues;
+          expect(roundNumber(serviceDependencies[0].throughputValue)).to.equal(
+            roundNumber(backendThroughputChartMean)
+          );
         });
       });
     }
