@@ -18,6 +18,11 @@ export const fieldStatsSearchServiceStateProvider = () => {
     ccsWarning = d;
   }
 
+  const errorLog: string[] = [];
+  function addErrorMessage(message: string) {
+    errorLog.push(message);
+  }
+
   let error: Error;
   function setError(d: Error) {
     error = d;
@@ -37,10 +42,6 @@ export const fieldStatsSearchServiceStateProvider = () => {
   }
 
   const fieldsStats: FieldStat[] = [];
-  function addFieldStats(d: FieldStat) {
-    fieldsStats.push(d);
-  }
-
   function addFieldsStats(d: FieldStat[]) {
     fieldsStats.push(...d);
   }
@@ -68,6 +69,7 @@ export const fieldStatsSearchServiceStateProvider = () => {
       isRunning,
       progress,
       fieldsStats,
+      errorLog,
     };
   }
 
@@ -81,7 +83,7 @@ export const fieldStatsSearchServiceStateProvider = () => {
     setIsRunning,
     setProgress,
     addFieldsStats,
-    addFieldStats,
+    addErrorMessage,
   };
 };
 

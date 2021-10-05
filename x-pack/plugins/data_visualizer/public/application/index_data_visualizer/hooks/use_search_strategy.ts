@@ -19,11 +19,11 @@ import type {
 } from '../../../../common/search_strategy/types';
 import { useDataVisualizerKibana } from '../../kibana_context';
 
-const getInitialRawResponse = <TRawResponse extends FieldStatRawResponse>(): TRawResponse =>
+const getInitialRawResponse = (): FieldStatRawResponse =>
   ({
     ccsWarning: false,
     took: 0,
-  } as TRawResponse);
+  } as FieldStatRawResponse);
 
 const getInitialProgress = (): FieldStatsSearchStrategyProgress => ({
   isRunning: false,
@@ -38,21 +38,16 @@ const getReducer =
     ...update,
   });
 
-export function useFieldStatsSearchStrategy<
-  TRawResponse extends FieldStatRawResponse,
-  TParams extends FieldStatsSearchStrategyParams
->(searchStrategyParams: TParams | undefined): FieldStatsSearchStrategyReturnBase<TRawResponse> {
+export function useFieldStatsSearchStrategy<TParams extends FieldStatsSearchStrategyParams>(
+  searchStrategyParams: TParams | undefined
+): FieldStatsSearchStrategyReturnBase<FieldStatRawResponse> {
   const {
     services: { data },
   } = useDataVisualizerKibana();
 
-  useEffect(() => {
-    console.log('searchStrategyParams updated');
-  }, [searchStrategyParams]);
-
   const [rawResponse, setRawResponse] = useReducer(
-    getReducer<TRawResponse>(),
-    getInitialRawResponse<TRawResponse>()
+    getReducer<FieldStatRawResponse>(),
+    getInitialRawResponse()
   );
 
   const [fetchState, setFetchState] = useReducer(
@@ -87,6 +82,7 @@ export function useFieldStatsSearchStrategy<
         next: (response) => {
           // Setting results to latest even if the response is still partial
 
+          console.log('response.rawResponse', response);
           setRawResponse(response.rawResponse);
 
           setFetchState({

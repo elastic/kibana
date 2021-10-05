@@ -43,7 +43,7 @@ export const getFieldStats = async (
         return fetchNumericFieldStats(esClient, params, field);
         break;
       case JOB_FIELD_TYPES.KEYWORD:
-      case JOB_FIELD_TYPES.IP:
+        // case JOB_FIELD_TYPES.IP:
         return fetchStringFieldStats(esClient, params, field);
         break;
       case JOB_FIELD_TYPES.DATE:
@@ -54,6 +54,10 @@ export const getFieldStats = async (
         break;
       case JOB_FIELD_TYPES.TEXT:
         return fetchFieldExamples(esClient, params, field);
+        break;
+      // @todo: fix field.fieldName &  move to keyword
+      case JOB_FIELD_TYPES.IP:
+        return fetchStringFieldStats(esClient, params, field.fieldName);
         break;
       // default:
       //   // Use an exists filter on the the field name to get

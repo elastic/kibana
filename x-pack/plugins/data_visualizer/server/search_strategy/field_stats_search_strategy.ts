@@ -170,7 +170,7 @@ export const fieldStatsSearchServiceProvider = (
         let fieldsLoadedCnt = 0;
 
         if (params !== undefined && fields.length > 0) {
-          const batches = chunk(fields, 5);
+          const batches = chunk(fields, 10);
           for (let i = 0; i < batches.length; i++) {
             const batchedResults: FieldStats[] = [];
 
@@ -184,14 +184,21 @@ export const fieldStatsSearchServiceProvider = (
                     safeFieldName: getSafeAggregationName(field.fieldName ?? '', idx),
                   });
                 }),
-                timeout(2000),
+                // @todo: throttle
+                timeout(1000),
               ]);
 
-              results.forEach((r) => {
+              results.forEach((r, idx) => {
                 if (r.status === 'fulfilled' && r.value !== undefined) {
                   batchedResults.push(r.value);
                 } else {
-                  fieldsWithError.push(r);
+                  if (r.status === 'rejected' && r.reason) {
+                    const fieldWithError = batches[i][idx];
+                    const reason = r.reason.meta.body.error?.reason ?? r.reason;
+                    state.addErrorMessage(
+                      `Error fetching field stats for ${fieldWithError.type} field ${fieldWithError.fieldName} because '${reason}'`
+                    );
+                  }
                 }
               });
 
@@ -210,6 +217,7 @@ export const fieldStatsSearchServiceProvider = (
     } catch (e) {
       state.setError(e);
     }
+
     if (state.getState().error !== undefined) {
       state.setCcsWarning(true);
     }
@@ -225,8 +233,7 @@ export const fieldStatsSearchServiceProvider = (
   fetchFieldStats();
 
   return () => {
-    const { ccsWarning, error, isRunning, fieldsStats } = state.getState();
-
+    const { ccsWarning, error, isRunning, fieldsStats, errorLog } = state.getState();
     return {
       cancel,
       error,
@@ -242,6 +249,7 @@ export const fieldStatsSearchServiceProvider = (
         log: [],
         took: 0,
         fieldStats: fieldsStats,
+        errorLog,
       },
     };
   };

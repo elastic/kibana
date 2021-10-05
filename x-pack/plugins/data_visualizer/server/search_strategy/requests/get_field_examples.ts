@@ -25,7 +25,7 @@ export const getFieldExamplesRequest = (params: FieldStatsCommonRequestParams, f
 
   // Use an exists filter to return examples of the field.
   filterCriteria.push({
-    exists: { field },
+    exists: { field: field.fieldName },
   });
 
   const searchBody = {
