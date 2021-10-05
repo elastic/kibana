@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { VIEW_BUTTON_LABEL } from '../../../../shared/constants';
@@ -37,7 +37,22 @@ const columns: Array<EuiBasicTableColumn<CurationSuggestion>> = [
       'xpack.enterpriseSearch.appSearch.engine.curations.suggestionsTable.column.queryTableHeader',
       { defaultMessage: 'Query' }
     ),
-    render: (query: string) => <EuiLinkTo to={getSuggestionRoute(query)}>{query}</EuiLinkTo>,
+    render: (query: string, curation: CurationSuggestion) => (
+      <EuiLinkTo to={getSuggestionRoute(query)}>
+        {query}
+        {curation.override_curation_id && (
+          <>
+            {' '}
+            <EuiBadge iconType="warning" color="warning">
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.curations.suggestionsTable.overridesLabel',
+                { defaultMessage: 'Overrides' }
+              )}
+            </EuiBadge>
+          </>
+        )}
+      </EuiLinkTo>
+    ),
   },
   {
     field: 'updated_at',
