@@ -182,8 +182,8 @@ function computeStaticValueForGroup(
           }
         } else {
           const value = accessors.reduce((v, { id }) => v + (row[id] || 0), 0);
-          tableMax = Math.max(value, columnMax);
-          tableMin = Math.min(value, columnMin);
+          tableMax = Math.max(value, tableMax);
+          tableMin = Math.min(value, tableMin);
         }
       }
       columnMax = Math.max(tableMax, columnMax);
