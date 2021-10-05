@@ -16,7 +16,6 @@ import type { Query, Filter, TimeRange, IndexPattern } from 'src/plugins/data/co
 import {
   getData,
   getCoreChrome,
-  getHttp,
   getMapsCapabilities,
   getNavigation,
   getSpacesApi,
@@ -356,9 +355,7 @@ export class MapApp extends React.Component<Props, State> {
     if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch') {
       // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
       const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
-      const newPath = getHttp().basePath.prepend(
-        `${getFullPath(newObjectId)}${this.props.history.location.search}`
-      );
+      const newPath = `${getEditPath(newObjectId)}${this.props.history.location.hash}`;
       await spaces.ui.redirectLegacyUrl(newPath, getMapEmbeddableDisplayName());
       return;
     }
@@ -456,12 +453,14 @@ export class MapApp extends React.Component<Props, State> {
   _renderLegacyUrlConflict() {
     const sharingSavedObjectProps = this.props.savedMap.getSharingSavedObjectProps();
     const spaces = getSpacesApi();
-    return sharingSavedObjectProps && spaces && sharingSavedObjectProps?.outcome === 'conflict'
+    return spaces && sharingSavedObjectProps?.outcome === 'conflict'
       ? spaces.ui.components.getLegacyUrlConflict({
           objectNoun: getMapEmbeddableDisplayName(),
           currentObjectId: this.props.savedMap.getSavedObjectId()!,
           otherObjectId: sharingSavedObjectProps.aliasTargetId!,
-          otherObjectPath: getEditPath(sharingSavedObjectProps.aliasTargetId!),
+          otherObjectPath: `${getEditPath(sharingSavedObjectProps.aliasTargetId!)}${
+            this.props.history.location.hash
+          }`,
         })
       : null;
   }
