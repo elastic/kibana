@@ -444,6 +444,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'labs:discover:enable_ui': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'labs:discover:enableNewTable': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
