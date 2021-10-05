@@ -27,6 +27,8 @@ import { useTable } from '../../hooks/use_table';
 import { ExternalConfigContext } from '../../external_config_context';
 import { formatTimestampToDuration } from '../../../../common';
 import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { PipelineVersions } from './pipeline_versions_dropdown';
 
 export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => {
   const match = useRouteMatch<{ id: string | undefined; hash: string | undefined }>();
@@ -137,13 +139,23 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
     [getPageData]
   );
 
+  const onChangePipelineHash = useCallback(() => {
+    window.location.hash = getSafeForExternalLink(
+      `#/logstash/pipelines/${pipelineId}/${pipelineHash}`
+    );
+  }, [pipelineId, pipelineHash])
+
   return (
     <LogstashTemplate
+      tabsDisabled={true}
       title={title}
       pageTitle={pageTitle}
       getPageData={getPageData}
       cluster={cluster}
     >
+      <div>
+        <PipelineVersions pipelineVersions={data.versions} onChangePipelineHash={onChangePipelineHash} pipelineHash={pipelineHash} />
+      </div>
       <div>
         {pipelineState && (
           <PipelineViewer
