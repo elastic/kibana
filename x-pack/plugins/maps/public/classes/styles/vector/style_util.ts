@@ -63,11 +63,11 @@ export function assignCategoriesToPalette({
   paletteValues: string[];
 }) {
   const stops = [];
-  let fallbackSymbolId = null;
+  let fallbackSymbol = null;
 
   if (categories.length && paletteValues.length) {
     const maxLength = Math.min(paletteValues.length, categories.length + 1);
-    fallbackSymbolId = paletteValues[maxLength - 1];
+    fallbackSymbol = { icon: paletteValues[maxLength - 1], stop: null };
     for (let i = 0; i < maxLength - 1; i++) {
       stops.push({
         stop: categories[i].key,
@@ -78,7 +78,7 @@ export function assignCategoriesToPalette({
 
   return {
     stops,
-    fallbackSymbolId,
+    fallbackSymbol,
   };
 }
 

@@ -10,14 +10,14 @@ import _ from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { Category } from './category';
 import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
-import { IconStaticOptions } from '../../../../../../common/descriptor_types';
 
 const EMPTY_VALUE = '';
 
 export interface Break {
   color: string;
   label: ReactElement<any> | string | number;
-  icon?: IconStaticOptions;
+  svg?: string;
+  symbolId: string;
 }
 
 interface Props {
@@ -68,6 +68,7 @@ export class BreakedLegend extends Component<Props, State> {
     }
 
     const categories = this.props.breaks.map((brk, index) => {
+      const icon = { value: brk.symbolId, svg: brk.svg };
       return (
         <EuiFlexItem key={index}>
           <Category
@@ -76,7 +77,7 @@ export class BreakedLegend extends Component<Props, State> {
             color={brk.color}
             isLinesOnly={this.props.isLinesOnly}
             isPointsOnly={this.props.isPointsOnly}
-            icon={brk.icon}
+            icon={icon}
           />
         </EuiFlexItem>
       );

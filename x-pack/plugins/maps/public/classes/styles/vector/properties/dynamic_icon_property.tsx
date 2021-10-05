@@ -49,7 +49,7 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
 
   async _syncCustomIconsWithMb(mbMap: MbMap) {
     if (this._options.useCustomIconMap && this._options.customIconStops) {
-      await Promise.all(this._options.customIconStops.map(({ stop, icon, svg }) => {
+      await Promise.all(this._options.customIconStops.map(({ icon, svg }) => {
         if (icon.startsWith(CUSTOM_ICON_PREFIX) && svg) {
           this._customIconCheck(icon, svg, mbMap)
         }
@@ -77,9 +77,8 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
       }
 
       return {
-        fallbackSymbolId:
-          this._options.customIconStops.length > 0 ? this._options.customIconStops[0].icon : null,
         stops,
+        fallbackSymbol: this._options.customIconStops.length > 0 ? this._options.customIconStops[0] : null,
       };
     }
 
@@ -90,9 +89,9 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
   }
 
   _getMbIconImageExpression(iconPixelSize: number) {
-    const { stops, fallbackSymbolId } = this._getPaletteStops();
+    const { stops, fallbackSymbol } = this._getPaletteStops();
 
-    if (stops.length < 1 || !fallbackSymbolId) {
+    if (stops.length < 1 || !fallbackSymbol) {
       // occurs when no data
       return null;
     }
@@ -107,18 +106,19 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
       }
     });
 
-    if (fallbackSymbolId) {
+    if (fallbackSymbol) {
+      const { icon } = fallbackSymbol;
       mbStops.push(
-        fallbackSymbolId.startsWith(CUSTOM_ICON_PREFIX) ? fallbackSymbolId : getMakiIconId(fallbackSymbolId, iconPixelSize)
+        icon.startsWith(CUSTOM_ICON_PREFIX) ? icon : getMakiIconId(icon, iconPixelSize)
       ); // last item is fallback style for anything that does not match provided stops
     }
     return ['match', ['to-string', ['get', this.getFieldName()]], ...mbStops];
   }
 
   _getMbIconAnchorExpression() {
-    const { stops, fallbackSymbolId } = this._getPaletteStops();
+    const { stops, fallbackSymbol } = this._getPaletteStops();
 
-    if (stops.length < 1 || !fallbackSymbolId) {
+    if (stops.length < 1 || !fallbackSymbol) {
       // occurs when no data
       return null;
     }
@@ -132,8 +132,10 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
       }
     });
 
-    if (fallbackSymbolId && !fallbackSymbolId.startsWith(CUSTOM_ICON_PREFIX)) {
-      mbStops.push(getMakiSymbolAnchor(fallbackSymbolId)); // last item is fallback style for anything that does not match provided stops
+    const { icon } = fallbackSymbol;
+
+    if (icon && !icon.startsWith(CUSTOM_ICON_PREFIX)) {
+      mbStops.push(getMakiSymbolAnchor(icon)); // last item is fallback style for anything that does not match provided stops
     }
     return ['match', ['to-string', ['get', this.getFieldName()]], ...mbStops];
   }
@@ -143,23 +145,26 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
   }
 
   renderLegendDetailRow({ isPointsOnly, isLinesOnly }: LegendProps) {
-    const { stops, fallbackSymbolId } = this._getPaletteStops();
+    const { stops, fallbackSymbol } = this._getPaletteStops();
     const breaks = [];
-    stops.forEach(({ stop, style }) => {
+    stops.forEach(({ stop, style, svg }) => {
       if (stop) {
         breaks.push({
           color: 'grey',
           label: this.formatField(stop),
           symbolId: style,
+          svg,
         });
       }
     });
 
-    if (fallbackSymbolId) {
+    if (fallbackSymbol) {
+      const { icon, svg } = fallbackSymbol;
       breaks.push({
         color: 'grey',
         label: <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>,
-        symbolId: fallbackSymbolId,
+        symbolId: icon,
+        svg,
       });
     }
 
