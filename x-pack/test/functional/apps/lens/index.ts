@@ -24,7 +24,7 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
       );
       // changing the timepicker default here saves us from having to set it in Discover (~8s)
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
+      await kibanaServer.uiSettings.update({ defaultIndex: 'logstash-*', 'dateFormat:tz': 'UTC' });
     });
 
     after(async () => {
