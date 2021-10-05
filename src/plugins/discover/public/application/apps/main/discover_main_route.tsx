@@ -72,9 +72,6 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
 
     async function loadSavedSearch() {
       try {
-        // force a refresh if a given saved search without id was saved
-        setSavedSearch(undefined);
-
         const currentSavedSearch = await getSavedSearch(savedSearchId, {
           search: services.data.search,
           savedObjectsClient: core.savedObjects.client,

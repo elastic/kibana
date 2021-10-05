@@ -96,6 +96,7 @@ export function useDiscoverState({
 
   useEffect(() => {
     const stopSync = stateContainer.initializeAndSync(indexPattern, filterManager, data);
+
     return () => stopSync();
   }, [stateContainer, filterManager, data, indexPattern]);
 
@@ -213,16 +214,13 @@ export function useDiscoverState({
   }, [config, data, savedSearch, reset, stateContainer]);
 
   /**
-   * Initial data fetching, also triggered when index pattern changes
+   * Trigger data fetching on indexPattern or savedSearch changes
    */
   useEffect(() => {
-    if (!indexPattern) {
-      return;
-    }
-    if (initialFetchStatus === FetchStatus.LOADING) {
+    if (indexPattern) {
       refetch$.next();
     }
-  }, [initialFetchStatus, refetch$, indexPattern]);
+  }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
 
   return {
     data$,

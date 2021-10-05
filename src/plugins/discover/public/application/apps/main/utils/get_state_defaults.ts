@@ -48,6 +48,7 @@ export function getStateDefaults({
     interval: 'auto',
     filters: cloneDeep(searchSource.getOwnField('filter')),
     hideChart: undefined,
+    savedQuery: undefined,
   } as AppState;
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;
