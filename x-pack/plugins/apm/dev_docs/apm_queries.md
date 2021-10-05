@@ -18,7 +18,7 @@ A single transaction with a latency of 2ms
 or
 
 #### Aggregated (metric) document
-A pre-aggregated document where `_doc_count` is the number of original transactions. 
+A pre-aggregated document where `_doc_count` is the number of original transactions, and `transaction.duration.histogram` is the latency distribution. 
 
 ```json
 {
@@ -36,7 +36,7 @@ A pre-aggregated document where `_doc_count` is the number of original transacti
 
 ### Latency
 
-Latency is the duration of transactions. This can be calculated using transaction events or metric events (aggregated transactions).
+Latency is the duration of a transaction. This can be calculated using transaction events or metric events (aggregated transactions).
 
 Noteworthy fields: `transaction.duration.us`, `transaction.duration.histogram`
 
@@ -79,9 +79,9 @@ Please note: `metricset.name: transaction` was only recently introduced. To reta
 
 ### Throughput
 
-Throughput is the number of transactions per minute. This can be calculated using transaction events or metric events.
+Throughput is the number of transactions per minute. This can be calculated using transaction events or metric events (aggregated transactions).
 
-Note-worthy fields: None (based on doc count)
+Noteworthy fields: None (based on `doc_count`)
 
 ```js
 {
@@ -97,13 +97,15 @@ Note-worthy fields: None (based on doc count)
 
 ### Failed transaction rate
 
-The number of transactions with `event.outcome=failure` per minute.
-Note-worthy fields: `event.outcome`
+Failed transaction rate is the number of transactions with `event.outcome=failure` per minute.
+Noteworthy fields: `event.outcome`
 
-```json
+```js
 {
   "size": 0,
-  "query": {},
+  "query": {
+    // same filters as for latency
+  },
   "aggs": {
     "outcomes": {
       "terms": {
@@ -121,7 +123,10 @@ System metrics are captured periodically (every 60 seconds by default).
 
 ### CPU
 
-Note-worthy fields: `system.cpu.total.norm.pct`, `system.process.cpu.total.norm.pct`
+![image](https://user-images.githubusercontent.com/209966/135935426-000e17f2-1ff4-4699-a41d-463e97e24fa6.png)
+
+
+Noteworthy fields: `system.cpu.total.norm.pct`, `system.process.cpu.total.norm.pct`
 
 #### Sample document
 
@@ -158,6 +163,9 @@ Note-worthy fields: `system.cpu.total.norm.pct`, `system.process.cpu.total.norm.
 ```
 
 ### Memory
+
+![image](https://user-images.githubusercontent.com/209966/135935447-7227fd1c-c3e9-4072-b4b0-13abeb220b8d.png)
+
 
 Note-worthy fields: `system.memory.actual.free`, `system.memory.total`,
 
@@ -205,29 +213,38 @@ Note-worthy fields: `system.memory.actual.free`, `system.memory.total`,
 
 Above example is overly simplified. In reality [we do a bit more](https://github.com/elastic/kibana/blob/fe9b5332e157fd456f81aecfd4ffa78d9e511a66/x-pack/plugins/apm/server/lib/metrics/by_agent/shared/memory/index.ts#L51-L71) to properly calculate memory usage inside containers
 
-# Transaction breakdown metrics
+
+# Breakdown metrics 
+
+Breakdown metrics are used to power the "Time spent by span type" graph. Agents collect summarized metrics about the timings of spans and transactions, broken down by transaction or span type.
+
+![image](https://user-images.githubusercontent.com/209966/135936818-1521bd21-90e9-48c0-b516-9de74e93b31e.png)
+
+## Transaction breakdown metrics (`transaction_breakdown`)
 
 A pre-aggregations of transaction documents where `transaction.breakdown.count` is the number of original transactions.
 
-Note-worthy fields: `transaction.type`
+Noteworthy fields: `transaction.name`, `transaction.type`
 
 #### Sample document
 
 ```json
-{
-  "@timestamp": "2021-09-27T21:59:59.828Z",
-  "processor.event": "metric",
-  "metricset.name": "transaction_breakdown",
-  "transaction.breakdown.count": 12,
-  "transaction.type": "request"
+  {
+    "@timestamp": "2021-09-27T21:59:59.828Z",
+    "processor.event": "metric",
+    "metricset.name": "transaction_breakdown",
+    "transaction.breakdown.count": 12,
+    "transaction.name": "GET /api/products",
+    "transaction.type": "request"
+  }
 }
 ```
 
-# Span breakdown metrics
+## Span breakdown metrics (`span_breakdown`)
 
-A pre-aggregations of span documents where `span.self_time.count` is the number of original spans.
+A pre-aggregations of span documents where `span.self_time.count` is the number of original spans. Measures the "self-time" for a span type, and optional subtype, within a transaction group. 
 
-Note-worthy fields: `span.type`, `span.subtype`, `span.self_time.*`
+Noteworthy fields: `transaction.name`, `transaction.type`, `span.type`, `span.subtype`, `span.self_time.*`
 
 #### Sample document
 
@@ -236,6 +253,8 @@ Note-worthy fields: `span.type`, `span.subtype`, `span.self_time.*`
   "@timestamp": "2021-09-27T21:59:59.828Z",
   "processor.event": "metric",
   "metricset.name": "span_breakdown",
+  "transaction.name": "GET /api/products",
+  "transaction.type": "request"  
   "span.self_time.sum.us": 1028,
   "span.self_time.count": 12,
   "span.type": "db",
@@ -278,8 +297,13 @@ Note-worthy fields: `span.type`, `span.subtype`, `span.self_time.*`
 # Service destination metrics
 
 Pre-aggregations of span documents, where `span.destination.service.response_time.count` is the number of original spans.
+These metrics measure the count and total duration of requests from one service to another service.
 
-Note-worthy fields: `span.destination.service.*`
+![image](https://user-images.githubusercontent.com/209966/135985142-986651c4-b819-4c98-93cf-7e5b6534ff9c.png)
+
+Used in: [Dependencies (latency)](https://github.com/elastic/kibana/blob/00bb59713ed115343eb70d4e39059476edafbade/x-pack/plugins/apm/server/lib/backends/get_latency_charts_for_backend.ts#L68-L79), [Dependencies (throughput)](https://github.com/elastic/kibana/blob/00bb59713ed115343eb70d4e39059476edafbade/x-pack/plugins/apm/server/lib/backends/get_throughput_charts_for_backend.ts#L67-L74) and [Service Map](https://github.com/elastic/kibana/blob/00bb59713ed115343eb70d4e39059476edafbade/x-pack/plugins/apm/server/lib/service_map/get_service_map_backend_node_info.ts#L57-L67)
+
+Noteworthy fields: `span.destination.service.*`
 
 #### Sample document
 
