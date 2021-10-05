@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { schema } from '@kbn/config-schema';
 import { BASE_SCHEDULE } from '../../../common/constants';
 import { ReportingCore } from '../../core';
@@ -43,8 +44,8 @@ export function registerScheduleInfoRoutes(reporting: ReportingCore) {
               bool: {
                 must: [
                   { term: { 'task.taskType': 'report:execute' } },
-                  { term: { 'task.user': user ? user.username : user } },
-                ],
+                  ...[user ? { term: { 'task.user': user.username } } : undefined],
+                ].filter(Boolean) as unknown as QueryDslQueryContainer[],
               },
             },
           },
