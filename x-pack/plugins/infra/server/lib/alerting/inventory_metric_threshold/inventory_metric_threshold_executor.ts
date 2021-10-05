@@ -7,7 +7,7 @@
 
 import { first, get, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_RULE_PARAMS } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
@@ -79,6 +79,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         id,
         fields: {
           [ALERT_REASON]: reason,
+          [ALERT_RULE_PARAMS]: JSON.stringify(params),
         },
       });
 
