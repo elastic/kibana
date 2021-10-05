@@ -12,9 +12,7 @@ export interface CurationSuggestion {
   query: string;
   updated_at: string;
   promoted: string[];
-  status: 'pending' | 'applied' | 'automated' | 'rejected' | 'disabled';
 }
-
 export interface Curation {
   id: string;
   last_updated: string;
@@ -22,7 +20,6 @@ export interface Curation {
   promoted: CurationResult[];
   hidden: CurationResult[];
   organic: Result[];
-  suggestion?: CurationSuggestion;
 }
 
 export interface CurationsAPIResponse {

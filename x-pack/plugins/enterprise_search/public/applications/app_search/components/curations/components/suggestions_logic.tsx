@@ -15,7 +15,7 @@ import { updateMetaPageIndex } from '../../../../shared/table_pagination';
 import { EngineLogic } from '../../engine';
 import { CurationSuggestion } from '../types';
 
-export interface SuggestionsAPIResponse {
+interface SuggestionsAPIResponse {
   results: CurationSuggestion[];
   meta: Meta;
 }
