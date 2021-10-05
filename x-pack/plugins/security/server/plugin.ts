@@ -18,7 +18,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/server';
-import type { SecurityOssPluginSetup } from 'src/plugins/security_oss/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import type {
@@ -106,7 +105,6 @@ export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
   taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
-  securityOss?: SecurityOssPluginSetup;
   spaces?: SpacesPluginSetup;
 }
 
@@ -199,14 +197,7 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies>,
-    {
-      features,
-      licensing,
-      taskManager,
-      usageCollection,
-      securityOss,
-      spaces,
-    }: PluginSetupDependencies
+    { features, licensing, taskManager, usageCollection, spaces }: PluginSetupDependencies
   ) {
     this.configSubscription = combineLatest([
       this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
@@ -234,13 +225,6 @@ export class SecurityPlugin
     const { license } = this.securityLicenseService.setup({
       license$: licensing.license$,
     });
-
-    if (securityOss) {
-      license.features$.subscribe(({ allowRbac }) => {
-        const showInsecureClusterWarning = !allowRbac;
-        securityOss.showInsecureClusterWarning$.next(showInsecureClusterWarning);
-      });
-    }
 
     securityFeatures.forEach((securityFeature) =>
       features.registerElasticsearchFeature(securityFeature)

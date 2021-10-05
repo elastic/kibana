@@ -23,6 +23,7 @@ import { defineAuthenticationRoutes } from './authentication';
 import { defineAuthorizationRoutes } from './authorization';
 import { defineIndicesRoutes } from './indices';
 import { defineRoleMappingRoutes } from './role_mapping';
+import { defineSecurityCheckupGetStateRoutes } from './security_checkup';
 import { defineSessionManagementRoutes } from './session_management';
 import { defineUsersRoutes } from './users';
 import { defineViewRoutes } from './views';
@@ -55,4 +56,5 @@ export function defineRoutes(params: RouteDefinitionParams) {
   defineRoleMappingRoutes(params);
   defineViewRoutes(params);
   defineAnonymousAccessRoutes(params);
+  defineSecurityCheckupGetStateRoutes(params);
 }

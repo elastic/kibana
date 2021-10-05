@@ -65,6 +65,7 @@ describe('config schema', () => {
           "idleTimeout": "PT1H",
           "lifespan": "P30D",
         },
+        "showInsecureClusterWarning": true,
       }
     `);
 
@@ -117,6 +118,7 @@ describe('config schema', () => {
           "idleTimeout": "PT1H",
           "lifespan": "P30D",
         },
+        "showInsecureClusterWarning": true,
       }
     `);
 
@@ -168,6 +170,7 @@ describe('config schema', () => {
           "idleTimeout": "PT1H",
           "lifespan": "P30D",
         },
+        "showInsecureClusterWarning": true,
       }
     `);
   });
