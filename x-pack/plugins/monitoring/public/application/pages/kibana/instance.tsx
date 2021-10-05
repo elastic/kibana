@@ -113,13 +113,7 @@ export const KibanaInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
   const [data, setData] = useState({} as any);
   const [instanceName, setInstanceName] = useState('');
 
-  const title = i18n.translate('xpack.monitoring.kibana.instance.routeTitle', {
-    defaultMessage: 'Kibana - {instanceName}',
-    values: {
-      instanceName,
-    },
-  });
-
+  const title = `Kibana - ${instanceName}`;
   const pageTitle = i18n.translate('xpack.monitoring.kibana.instance.pageTitle', {
     defaultMessage: 'Kibana instance: {instanceName}',
     values: {
