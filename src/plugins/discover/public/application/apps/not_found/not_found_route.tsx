@@ -24,7 +24,8 @@ let bannerId: string | undefined;
 
 export function NotFoundRoute(props: NotFoundRouteProps) {
   const { services } = props;
-  const { urlForwarding, core } = services;
+  const { urlForwarding, core, history } = services;
+  const currentLocation = history().location.pathname;
 
   useEffect(() => {
     const path = window.location.hash.substr(1);
@@ -42,7 +43,10 @@ export function NotFoundRoute(props: NotFoundRouteProps) {
           <p data-test-subj="invalidRouteMessage">
             <FormattedMessage
               id="discover.noMatchRoute.bannerText"
-              defaultMessage="Discover application doesn't recognize this route."
+              defaultMessage="Discover application doesn't recognize this route: {route}"
+              values={{
+                route: history().location.state.referrer,
+              }}
             />
           </p>
         </EuiCallOut>
@@ -55,7 +59,7 @@ export function NotFoundRoute(props: NotFoundRouteProps) {
         core.overlays.banners.remove(bannerId);
       }
     }, 15000);
-  }, [core.overlays.banners, urlForwarding]);
+  }, [core.overlays.banners, history, urlForwarding]);
 
-  return <Redirect to="/" />;
+  return <Redirect to={{ pathname: '/', state: { referrer: currentLocation } }} />;
 }

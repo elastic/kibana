@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const invalidLink = await testSubjects.find('invalidRouteMessage');
         expect(await invalidLink.getVisibleText()).to.be(
-          `Discover application doesn't recognize this route.`
+          `Discover application doesn't recognize this route: /invalid-route`
         );
       });
     });
