@@ -240,7 +240,7 @@ export class FleetPlugin
       })
     );
 
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<FleetRequestHandlerContext>();
 
     // Register usage collection
     registerFleetUsageCollector(core, config, deps.usageCollection);

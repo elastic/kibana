@@ -9,7 +9,7 @@ import path from 'path';
 
 import type { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
-import type { RequestHandler, ResponseHeaders, KnownHeaders } from 'src/core/server';
+import type { ResponseHeaders, KnownHeaders } from 'src/core/server';
 
 import type {
   GetInfoResponse,
@@ -35,7 +35,6 @@ import type {
   GetStatsRequestSchema,
   FleetRequestHandler,
 } from '../../types';
-import { appContextService } from '../../services';
 import {
   bulkInstallPackages,
   getCategories,
