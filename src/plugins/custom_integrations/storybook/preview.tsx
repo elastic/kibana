@@ -7,12 +7,11 @@
  */
 
 import React from 'react';
-import { addDecorator } from '@storybook/react';
 import { Title, Subtitle, Description, Primary, Stories } from '@storybook/addon-docs/blocks';
 
 import { getCustomIntegrationsContextDecorator } from './decorator';
 
-addDecorator(getCustomIntegrationsContextDecorator());
+export const decorators = [getCustomIntegrationsContextDecorator()];
 
 export const parameters = {
   docs: {

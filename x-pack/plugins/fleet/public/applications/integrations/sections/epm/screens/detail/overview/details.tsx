@@ -18,6 +18,10 @@ import {
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 
+import styled, { useTheme } from 'styled-components';
+
+import type { EuiTheme } from '../../../../../../../../../../../src/plugins/kibana_react/common';
+
 import type {
   PackageInfo,
   PackageSpecCategory,
@@ -42,6 +46,7 @@ interface Props {
 }
 
 export const Details: React.FC<Props> = memo(({ packageInfo }) => {
+  const theme = useTheme() as EuiTheme;
   const { data: categoriesData, isLoading: isLoadingCategories } = useGetCategories();
   const packageCategories: string[] = useMemo(() => {
     if (!isLoadingCategories && categoriesData && categoriesData.response) {
@@ -170,6 +175,23 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
     toggleNoticeModal,
   ]);
 
+  const Replacements = styled(EuiFlexItem)`
+    margin: 0;
+
+    & .euiAccordion {
+      padding-top: ${parseInt(theme.eui.euiSizeL, 10) * 2}px;
+
+      &::before {
+        content: '';
+        display: block;
+        border-top: 1px solid ${theme.eui.euiColorLightShade};
+        position: relative;
+        top: -${theme.eui.euiSizeL};
+        margin: 0 ${theme.eui.euiSizeXS};
+      }
+    }
+  `;
+
   return (
     <>
       <EuiPortal>
@@ -188,9 +210,9 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
         <EuiFlexItem>
           <EuiDescriptionList type="column" compressed listItems={listItems} />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <Replacements>
           <ReplacementCard eprOverlap={packageInfo.name} />
-        </EuiFlexItem>
+        </Replacements>
       </EuiFlexGroup>
     </>
   );

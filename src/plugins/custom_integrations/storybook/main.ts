@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { defaultConfigWebFinal } from '@kbn/storybook';
+import { defaultConfig } from '@kbn/storybook';
 
-module.exports = {
-  ...defaultConfigWebFinal,
-  addons: ['@storybook/addon-essentials'],
-};
+module.exports = defaultConfig;

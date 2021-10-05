@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { Meta } from '@storybook/react';
 
 import { ReplacementCard as ConnectedComponent } from './replacement_card';
 import { ReplacementCard as PureComponent } from './replacement_card.component';
@@ -16,11 +17,20 @@ export default {
   description:
     'An accordion panel which can display information about Beats alternatives to a given EPR module, (if available)',
   decorators: [
-    (storyFn: any) => (
-      <div style={{ padding: 40, backgroundColor: '#fff', width: 350 }}>{storyFn()}</div>
+    (storyFn, { globals }) => (
+      <div
+        style={{
+          padding: 40,
+          backgroundColor:
+            globals.euiTheme === 'v8.dark' || globals.euiTheme === 'v7.dark' ? '#1D1E24' : '#FFF',
+          width: 350,
+        }}
+      >
+        {storyFn()}
+      </div>
     ),
   ],
-};
+} as Meta;
 
 interface Args {
   eprOverlap: string;

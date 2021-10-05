@@ -21,15 +21,15 @@ export interface Props {
  */
 export const ReplacementCard = ({ eprOverlap }: Props) => {
   const { findReplacementIntegrations } = useFindService();
-  const replacements = useAsync(async () => {
+  const integrations = useAsync(async () => {
     return await findReplacementIntegrations({ shipper: 'beats', eprOverlap });
   }, [eprOverlap]);
 
-  const { loading, value: integrations } = replacements;
+  const { loading, value: replacements } = integrations;
 
-  if (loading || !integrations || integrations.length === 0) {
+  if (loading || !replacements || replacements.length === 0) {
     return null;
   }
 
-  return <Component replacements={integrations} />;
+  return <Component {...{ replacements }} />;
 };
