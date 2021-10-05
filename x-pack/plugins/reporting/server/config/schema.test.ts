@@ -63,10 +63,6 @@ describe('Reporting Config Schema', () => {
             "renderComplete": "PT30S",
             "waitForElements": "PT30S",
           },
-          "viewport": Object {
-            "height": 1200,
-            "width": 1950,
-          },
           "zoom": 2,
         },
         "csv": Object {
@@ -168,10 +164,6 @@ describe('Reporting Config Schema', () => {
             "openUrl": "PT1M",
             "renderComplete": "PT30S",
             "waitForElements": "PT30S",
-          },
-          "viewport": Object {
-            "height": 1200,
-            "width": 1950,
           },
           "zoom": 2,
         },
