@@ -107,11 +107,10 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
   }
 
   private processTableGroups(table: Datatable) {
-    const config = this.props.visParams.metric;
-    const dimensions = this.props.visParams.dimensions;
-    const isPercentageMode = config.percentageMode;
-    const min = config.colorsRange?.[0]?.from ?? 0;
-    const max = last(config.colorsRange)?.to ?? 0;
+    const { metric: metricConfig, dimensions } = this.props.visParams;
+    const { percentageMode: isPercentageMode, colorsRange, style } = metricConfig;
+    const min = colorsRange?.[0]?.from;
+    const max = last(colorsRange)?.to;
     const colors = this.getColors();
     const labels = this.getLabels();
     const metrics: MetricOptions[] = [];
@@ -132,7 +131,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
         let value: number = row[column.id];
         const color = this.getColor(value, labels, colors);
 
-        if (isPercentageMode) {
+        if (isPercentageMode && colorsRange?.length && max !== undefined && min !== undefined) {
           value = (value - min) / (max - min);
         }
         const formattedValue = this.getFormattedValue(formatter, value, 'html');
@@ -141,14 +140,14 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
           title = `${bucketValue} - ${title}`;
         }
 
-        const shouldColor = config.colorsRange.length > 1;
+        const shouldColor = colorsRange && colorsRange.length > 1;
 
         metrics.push({
           label: title,
           value: formattedValue,
-          color: shouldColor && config.style.labelColor ? color : undefined,
-          bgColor: shouldColor && config.style.bgColor ? color : undefined,
-          lightText: shouldColor && config.style.bgColor && this.needsLightText(color),
+          color: shouldColor && style.labelColor ? color : undefined,
+          bgColor: shouldColor && style.bgColor ? color : undefined,
+          lightText: shouldColor && style.bgColor && this.needsLightText(color),
           rowIndex,
         });
       });
