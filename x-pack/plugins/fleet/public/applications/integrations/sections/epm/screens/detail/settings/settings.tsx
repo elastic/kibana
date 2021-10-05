@@ -39,8 +39,6 @@ import {
   DEFAULT_PACKAGES,
 } from '../../../../../constants';
 
-import { toMountPoint } from '../../../../../../../../../../../src/plugins/kibana_react/public';
-
 import { KeepPoliciesUpToDateSwitch } from '../components';
 
 import { InstallButton } from './install_button';
@@ -130,27 +128,20 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
         });
 
         notifications.toasts.addSuccess({
-          title: toMountPoint(
-            <FormattedMessage
-              id="xpack.fleet.integrations.integrationSaved"
-              defaultMessage="Integration settings saved"
-            />
-          ),
-          text: toMountPoint(
-            !keepPoliciesUpToDateSwitchValue ? (
-              <FormattedMessage
-                id="xpack.fleet.integrations.keepPoliciesUpToDateEnabledSuccess"
-                defaultMessage="Fleet will automatically keep integration policies up to date for {title}"
-                values={{ title }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.fleet.integrations.keepPoliciesUpToDateDisabledSuccess"
-                defaultMessage="Fleet will not automatically keep integration policies up to date for {title}"
-                values={{ title }}
-              />
-            )
-          ),
+          title: i18n.translate('xpack.fleet.integrations.integrationSaved', {
+            defaultMessage: 'Integration settings saved',
+          }),
+          text: !keepPoliciesUpToDateSwitchValue
+            ? i18n.translate('xpack.fleet.integrations.keepPoliciesUpToDateEnabledSuccess', {
+                defaultMessage:
+                  'Fleet will automatically keep integration policies up to date for {title}',
+                values: { title },
+              })
+            : i18n.translate('xpack.fleet.integrations.keepPoliciesUpToDateDisabledSuccess', {
+                defaultMessage:
+                  'Fleet will not automatically keep integration policies up to date for {title}',
+                values: { title },
+              }),
         });
       } catch (error) {
         notifications.toasts.addError(error, {
