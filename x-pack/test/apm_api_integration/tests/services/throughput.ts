@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getGoAgentDefaults, service, timerange } from '@elastic/apm-generator';
 import expect from '@kbn/expect';
 import { first, last, mean } from 'lodash';
 import moment from 'moment';
@@ -18,9 +19,65 @@ type ThroughputReturn = APIReturnType<'GET /api/apm/services/{serviceName}/throu
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
+  const generator = getService('generator');
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
+
+  registry.when(
+    'Throughput when data is not empty',
+    { config: 'basic', archives: ['apm_8.0.0_empty'] },
+    () => {
+      const start = new Date('2021-01-01T00:00:00.000Z').getTime();
+      const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
+
+      before(async () => {
+        const instance = service('synth-go', 'production', 'go')
+          .instance('instance-a')
+          .defaults(getGoAgentDefaults());
+
+        const timestamps = timerange(start, end).every('1s', 10);
+
+        await generator.generate(
+          timestamps.flatMap((timestamp) =>
+            instance
+              .transaction('GET /api/product/list')
+              .duration(1000)
+              .timestamp(timestamp)
+              .serialize()
+          )
+        );
+      });
+
+      after(async () => {
+        await generator.clean();
+      });
+
+      it('succesfully runs', async () => {
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+          params: {
+            path: {
+              serviceName: 'synth-go',
+            },
+            query: {
+              start: new Date(start).toISOString(),
+              end: new Date(end).toISOString(),
+              transactionType: 'request',
+              environment: 'production',
+              kuery: 'processor.event:transaction',
+              _inspect: true,
+            },
+          },
+        });
+
+        const throughputValues = response.body.currentPeriod.map(({ y }) => y);
+
+        expect(throughputValues.every((y) => y === 10)).to.be(true);
+        expect(response.body.throughputUnit).to.eql('second');
+      });
+    }
+  );
 
   registry.when('Throughput when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles the empty state', async () => {
