@@ -8,3 +8,4 @@
 
 export * from './ci_stats_reporter';
 export * from './ship_ci_stats_cli';
+export { getTimeReporter } from './report_time';

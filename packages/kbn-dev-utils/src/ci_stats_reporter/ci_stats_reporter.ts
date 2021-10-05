@@ -82,6 +82,7 @@ export class CiStatsReporter {
     const upstreamBranch = options.upstreamBranch ?? this.getUpstreamBranch();
     const kibanaUuid = options.kibanaUuid === undefined ? this.getKibanaUuid() : options.kibanaUuid;
     let email;
+    let branch;
 
     try {
       const { stdout } = await execa('git', ['config', 'user.email']);
@@ -90,19 +91,33 @@ export class CiStatsReporter {
       this.log.debug(e.message);
     }
 
+    try {
+      const { stdout } = await execa('git', ['branch', '--show-current']);
+      branch = stdout;
+    } catch (e) {
+      this.log.debug(e.message);
+    }
+
+    const memUsage = process.memoryUsage();
     const isElasticCommitter = email && email.endsWith('@elastic.co') ? true : false;
 
     const defaultMetadata = {
+      kibanaUuid,
+      isElasticCommitter,
       committerHash: email
         ? crypto.createHash('sha256').update(email).digest('hex').substring(0, 20)
         : undefined,
+      email: isElasticCommitter ? email : undefined,
+      branch: isElasticCommitter ? branch : undefined,
       cpuCount: Os.cpus()?.length,
       cpuModel: Os.cpus()[0]?.model,
       cpuSpeed: Os.cpus()[0]?.speed,
-      email: isElasticCommitter ? email : undefined,
       freeMem: Os.freemem(),
-      isElasticCommitter,
-      kibanaUuid,
+      memoryUsageRss: memUsage.rss,
+      memoryUsageHeapTotal: memUsage.heapTotal,
+      memoryUsageHeapUsed: memUsage.heapUsed,
+      memoryUsageExternal: memUsage.external,
+      memoryUsageArrayBuffers: memUsage.arrayBuffers,
       nestedTiming: process.env.CI_STATS_NESTED_TIMING ? true : false,
       osArch: Os.arch(),
       osPlatform: Os.platform(),
