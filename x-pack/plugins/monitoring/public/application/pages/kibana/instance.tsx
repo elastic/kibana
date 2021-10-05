@@ -115,9 +115,9 @@ export const KibanaInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
 
   const title = `Kibana - ${instanceName}`;
   const pageTitle = i18n.translate('xpack.monitoring.kibana.instance.pageTitle', {
-    defaultMessage: 'Kibana instance: {instanceName}',
+    defaultMessage: 'Kibana instance: {instance}',
     values: {
-      instanceName,
+      instance: instanceName,
     },
   });
 
