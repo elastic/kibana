@@ -732,3 +732,10 @@ export const SYNC_UNSAVED_CHANGES_MESSAGE = i18n.translate(
     defaultMessage: 'Your changes have not been saved. Are you sure you want to leave?',
   }
 );
+
+export const NEXT_SYNC_RUNNING_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.nextSyncRunningMessage',
+  {
+    defaultMessage: 'as soon as the currently running job finishes',
+  }
+);
