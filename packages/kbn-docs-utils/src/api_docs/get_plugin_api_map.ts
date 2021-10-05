@@ -7,7 +7,6 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-import { memoryUsage } from 'process';
 import { Project } from 'ts-morph';
 import { getPluginApi } from './get_plugin_api';
 import {
@@ -41,11 +40,6 @@ export function getPluginApiMap(
       plugins,
       log,
       captureReferences
-    );
-    log.info(
-      `Heap size after parsing ${plugin.manifest.id}: ${Math.round(
-        memoryUsage().heapUsed / 1000000
-      )}MB / ${Math.round(memoryUsage().heapTotal / 1000000)}`
     );
   });
 
