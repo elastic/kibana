@@ -2269,7 +2269,8 @@
 
 "@elastic/charts@37.0.0":
   version "37.0.0"
-  resolved "../elastic-charts/packages/charts/elastic-charts-37.0.0.tgz#c498d19c3cbfe8778ff5a0ebecb8ab904e58a4ff"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-37.0.0.tgz#a94526461c404b449953cca4fe34f8bf3620413e"
+  integrity sha512-Pfm58/voERWVPJlxy13DphwgRoBGYhnSyz65kdsPg6lYGxN5ngWvuTuJ3477fyApYV01Pz4Ckt9yj1BSQue80Q==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
