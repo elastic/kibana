@@ -27,6 +27,7 @@ import { CODE_PATH_ELASTICSEARCH, CODE_PATH_BEATS } from '../../common/constants
 import { ElasticsearchNodesPage } from './pages/elasticsearch/nodes_page';
 import { ElasticsearchIndicesPage } from './pages/elasticsearch/indices_page';
 import { ElasticsearchNodePage } from './pages/elasticsearch/node_page';
+import { ElasticsearchMLJobsPage } from './pages/elasticsearch/ml_jobs_page';
 import { MonitoringTimeContainer } from './hooks/use_monitoring_time';
 import { BreadcrumbContainer } from './hooks/use_breadcrumbs';
 
@@ -83,6 +84,13 @@ const MonitoringApp: React.FC<{
                   />
 
                   {/* ElasticSearch Views */}
+                  <RouteInit
+                    path="/elasticsearch/ml_jobs"
+                    component={ElasticsearchMLJobsPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
                   <RouteInit
                     path="/elasticsearch/indices"
                     component={ElasticsearchIndicesPage}
