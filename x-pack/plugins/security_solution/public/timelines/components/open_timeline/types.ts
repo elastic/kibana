@@ -235,3 +235,5 @@ export interface TemplateTimelineFilter {
   withNext: boolean;
   count: number | undefined;
 }
+
+export type TimelineErrorCallback = (error: Error, timelineId: string) => void;
