@@ -7,7 +7,7 @@
  */
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Redirect } from 'react-router-dom';
 import { toMountPoint } from '../../../../../kibana_react/public';
@@ -24,8 +24,7 @@ let bannerId: string | undefined;
 
 export function NotFoundRoute(props: NotFoundRouteProps) {
   const { services } = props;
-  const { urlForwarding, core, history } = services;
-  const currentLocation = history().location.pathname;
+  const { urlForwarding, core } = services;
 
   useEffect(() => {
     const path = window.location.hash.substr(1);
@@ -40,17 +39,10 @@ export function NotFoundRoute(props: NotFoundRouteProps) {
       bannerId,
       toMountPoint(
         <EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage}>
-          <p>
+          <p data-test-subj="invalidRouteMessage">
             <FormattedMessage
               id="discover.noMatchRoute.bannerText"
-              defaultMessage="Discover application doesn't recognize this route: {route}"
-              values={{
-                route: (
-                  <EuiLink data-test-subj="invalidRouteHref" href={window.location.href}>
-                    {history().location.state.referrer}
-                  </EuiLink>
-                ),
-              }}
+              defaultMessage="Discover application doesn't recognize this route."
             />
           </p>
         </EuiCallOut>
@@ -63,7 +55,7 @@ export function NotFoundRoute(props: NotFoundRouteProps) {
         core.overlays.banners.remove(bannerId);
       }
     }, 15000);
-  }, [core.overlays.banners, history, urlForwarding]);
+  }, [core.overlays.banners, urlForwarding]);
 
-  return <Redirect to={{ pathname: '/', state: { referrer: currentLocation } }} />;
+  return <Redirect to="/" />;
 }

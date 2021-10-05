@@ -42,8 +42,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await PageObjects.header.awaitKibanaChrome();
 
-        const invalidLink = await testSubjects.find('invalidRouteHref');
-        expect(await invalidLink.getVisibleText()).to.be('/invalid-route');
+        const invalidLink = await testSubjects.find('invalidRouteMessage');
+        expect(await invalidLink.getVisibleText()).to.be(
+          `Discover application doesn't recognize this route.`
+        );
       });
     });
   });
