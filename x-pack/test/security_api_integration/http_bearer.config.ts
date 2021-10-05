@@ -12,7 +12,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   return {
-    testFiles: [require.resolve('./tests/http_basic')],
+    testFiles: [require.resolve('./tests/http_bearer')],
     servers: xPackAPITestsConfig.get('servers'),
     security: { disableTestUser: true },
     services,
