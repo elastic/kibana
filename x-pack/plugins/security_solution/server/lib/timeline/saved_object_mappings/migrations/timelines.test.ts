@@ -27,7 +27,7 @@ describe('timeline migrations', () => {
       const migratedDoc = migrateSavedQueryIdToReferences({
         id: '1',
         type: 'awesome',
-        attributes: ({ awesome: 'yes', savedQueryId: '123' } as unknown) as SavedQueryId,
+        attributes: { awesome: 'yes', savedQueryId: '123' } as unknown as SavedQueryId,
       });
 
       expect(migratedDoc.attributes).toEqual({ awesome: 'yes' });

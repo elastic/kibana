@@ -7,7 +7,7 @@
  */
 
 import { tabifyAggResponse } from './tabify';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
+import { IndexPattern } from '../..';
 import { AggConfigs, IAggConfig, IAggConfigs } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { metricOnly, threeTermBuckets } from './fixtures/fake_hierarchical_data';
@@ -20,7 +20,7 @@ describe('tabifyAggResponse Integration', () => {
       name: '@timestamp',
     };
 
-    const indexPattern = ({
+    const indexPattern = {
       id: '1234',
       title: 'logstash-*',
       fields: {
@@ -30,12 +30,12 @@ describe('tabifyAggResponse Integration', () => {
       getFormatterForField: () => ({
         toJSON: () => '{}',
       }),
-    } as unknown) as IndexPattern;
+    } as unknown as IndexPattern;
 
     return new AggConfigs(indexPattern, aggs, { typesRegistry });
   };
 
-  const mockAggConfig = (agg: any): IAggConfig => (agg as unknown) as IAggConfig;
+  const mockAggConfig = (agg: any): IAggConfig => agg as unknown as IAggConfig;
 
   test('transforms a simple response properly', () => {
     const aggConfigs = createAggConfigs([{ type: 'count' } as any]);

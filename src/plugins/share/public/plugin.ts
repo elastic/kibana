@@ -8,7 +8,7 @@
 
 import './index.scss';
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
 import type { SecurityOssPluginSetup, SecurityOssPluginStart } from '../../security_oss/public';
 import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
@@ -19,7 +19,9 @@ import {
   UrlGeneratorsStart,
 } from './url_generators/url_generator_service';
 import { UrlService } from '../common/url_service';
-import { RedirectManager, RedirectOptions } from './url_service';
+import { RedirectManager } from './url_service';
+import type { RedirectOptions } from '../common/url_service/locators/redirect';
+import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
 
 export interface ShareSetupDependencies {
   securityOss?: SecurityOssPluginSetup;
@@ -79,10 +81,15 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   private redirectManager?: RedirectManager;
   private url?: UrlService;
 
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
+
   public setup(core: CoreSetup, plugins: ShareSetupDependencies): SharePluginSetup {
-    core.application.register(createShortUrlRedirectApp(core, window.location));
+    const { application, http } = core;
+    const { basePath } = http;
 
     this.url = new UrlService({
+      baseUrl: basePath.publicBaseUrl || basePath.serverBasePath,
+      version: this.initializerContext.env.packageInfo.version,
       navigate: async ({ app, path, state }, { replace = false } = {}) => {
         const [start] = await core.getStartServices();
         await start.application.navigateToApp(app, {
@@ -99,7 +106,27 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
         });
         return url;
       },
+      shortUrls: {
+        get: () => ({
+          create: async () => {
+            throw new Error('Not implemented');
+          },
+          get: async () => {
+            throw new Error('Not implemented');
+          },
+          delete: async () => {
+            throw new Error('Not implemented');
+          },
+          resolve: async () => {
+            throw new Error('Not implemented.');
+          },
+        }),
+      },
     });
+
+    this.url.locators.create(new LegacyShortUrlLocatorDefinition());
+
+    application.register(createShortUrlRedirectApp(core, window.location, this.url));
 
     this.redirectManager = new RedirectManager({
       url: this.url,

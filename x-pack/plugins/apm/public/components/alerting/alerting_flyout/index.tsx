@@ -44,9 +44,10 @@ export function AlertingFlyout(props: Props) {
   const { services } = useKibana<ApmPluginStartDeps>();
   const initialValues = getInitialAlertValues(alertType, serviceName);
 
-  const onCloseAddFlyout = useCallback(() => setAddFlyoutVisibility(false), [
-    setAddFlyoutVisibility,
-  ]);
+  const onCloseAddFlyout = useCallback(
+    () => setAddFlyoutVisibility(false),
+    [setAddFlyoutVisibility]
+  );
 
   const addAlertFlyout = useMemo(
     () =>

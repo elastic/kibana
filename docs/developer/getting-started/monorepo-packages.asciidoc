@@ -74,7 +74,6 @@ yarn kbn watch
 - @kbn/i18n
 - @kbn/interpreter
 - @kbn/io-ts-utils
-- @kbn/legacy-logging
 - @kbn/logging
 - @kbn/mapbox-gl
 - @kbn/monaco
@@ -103,6 +102,7 @@ yarn kbn watch
 - @kbn/test-subj-selector
 - @kbn/tinymath
 - @kbn/ui-framework
-- @kbn/ui-shared-deps
+- @kbn/ui-shared-deps-npm
+- @kbn/ui-shared-deps-src
 - @kbn/utility-types
 - @kbn/utils

@@ -13,7 +13,7 @@ import type { ElasticsearchClient } from '../../elasticsearch';
 import { getErrorMessage, getRequestDebugMeta } from '../../elasticsearch';
 import { Model, Next, stateActionMachine } from './state_action_machine';
 import { cleanup } from './migrations_state_machine_cleanup';
-import { ReindexSourceToTempIndex, ReindexSourceToTempIndexBulk, State } from './types';
+import { ReindexSourceToTempTransform, ReindexSourceToTempIndexBulk, State } from './types';
 import { SavedObjectsRawDoc } from '../serialization';
 
 interface StateTransitionLogMeta extends LogMeta {
@@ -115,7 +115,9 @@ export async function migrationStateActionMachine({
         const redactedNewState = {
           ...newState,
           ...{
-            outdatedDocuments: ((newState as ReindexSourceToTempIndex).outdatedDocuments ?? []).map(
+            outdatedDocuments: (
+              (newState as ReindexSourceToTempTransform).outdatedDocuments ?? []
+            ).map(
               (doc) =>
                 ({
                   _id: doc._id,

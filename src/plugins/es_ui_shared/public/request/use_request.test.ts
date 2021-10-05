@@ -118,12 +118,8 @@ describe('useRequest hook', () => {
       });
 
       it('surfaces body-shaped errors from requests', async () => {
-        const {
-          setupErrorWithBodyRequest,
-          completeRequest,
-          hookResult,
-          getErrorWithBodyResponse,
-        } = helpers;
+        const { setupErrorWithBodyRequest, completeRequest, hookResult, getErrorWithBodyResponse } =
+          helpers;
 
         setupErrorWithBodyRequest();
         await completeRequest();
@@ -310,6 +306,24 @@ describe('useRequest hook', () => {
       // Complete scheduled poll request.
       await completeRequest();
       expect(getSendRequestSpy().callCount).toBe(2);
+    });
+
+    it(`changing pollIntervalMs to undefined cancels the poll`, async () => {
+      const { setupErrorRequest, setErrorResponse, completeRequest, getSendRequestSpy } = helpers;
+      // Send initial request.
+      setupErrorRequest({ pollIntervalMs: REQUEST_TIME });
+
+      // Setting the poll to undefined will cancel subsequent requests.
+      setErrorResponse({ pollIntervalMs: undefined });
+
+      // Complete initial request.
+      await completeRequest();
+
+      // If there were another scheduled poll request, this would complete it.
+      await completeRequest();
+
+      // But because we canceled the poll, we only see 1 request instead of 2.
+      expect(getSendRequestSpy().callCount).toBe(1);
     });
 
     it('when the path changes after a request is scheduled, the scheduled request is sent with that path', async () => {

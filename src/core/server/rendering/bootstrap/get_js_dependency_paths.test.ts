@@ -21,12 +21,14 @@ describe('getJsDependencyPaths', () => {
       publicPath: 'plugin2/public-path',
     });
 
-    expect(getJsDependencyPaths('/regular-bundle-path', bundlePaths)).toEqual([
-      '/regular-bundle-path/kbn-ui-shared-deps/kbn-ui-shared-deps.@elastic.js',
-      '/regular-bundle-path/kbn-ui-shared-deps/kbn-ui-shared-deps.js',
-      '/regular-bundle-path/core/core.entry.js',
-      'plugin1/bundle-path.js',
-      'plugin2/bundle-path.js',
-    ]);
+    expect(getJsDependencyPaths('/regular-bundle-path', bundlePaths)).toMatchInlineSnapshot(`
+      Array [
+        "/regular-bundle-path/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.dll.js",
+        "/regular-bundle-path/kbn-ui-shared-deps-src/kbn-ui-shared-deps-src.js",
+        "/regular-bundle-path/core/core.entry.js",
+        "plugin1/bundle-path.js",
+        "plugin2/bundle-path.js",
+      ]
+    `);
   });
 });

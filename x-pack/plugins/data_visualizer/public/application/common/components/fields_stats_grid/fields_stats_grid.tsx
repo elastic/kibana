@@ -25,7 +25,7 @@ interface Props {
 
 export const getDefaultDataVisualizerListState = (): DataVisualizerTableState => ({
   pageIndex: 0,
-  pageSize: 10,
+  pageSize: 25,
   sortField: 'fieldName',
   sortDirection: 'asc',
   visibleFieldTypes: [],
@@ -49,9 +49,8 @@ function getItemIdToExpandedRowMap(
 export const FieldsStatsGrid: FC<Props> = ({ results }) => {
   const restorableDefaults = getDefaultDataVisualizerListState();
 
-  const [dataVisualizerListState, setDataVisualizerListState] = useState<DataVisualizerTableState>(
-    restorableDefaults
-  );
+  const [dataVisualizerListState, setDataVisualizerListState] =
+    useState<DataVisualizerTableState>(restorableDefaults);
 
   const visibleFieldTypes =
     dataVisualizerListState.visibleFieldTypes ?? restorableDefaults.visibleFieldTypes;

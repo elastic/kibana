@@ -692,8 +692,7 @@ describe('successful migrations', () => {
           references: [
             'https://www.fireeye.com/blog/threat-research/2018/08/fin7-pursuing-an-enigmatic-and-evasive-global-criminal-operation.html',
           ],
-          note:
-            'In the event this rule identifies benign domains in your environment, the `destination.domain` field in the rule can be modified to include those domains. Example: `...AND NOT destination.domain:(zoom.us OR benign.domain1 OR benign.domain2)`.',
+          note: 'In the event this rule identifies benign domains in your environment, the `destination.domain` field in the rule can be modified to include those domains. Example: `...AND NOT destination.domain:(zoom.us OR benign.domain1 OR benign.domain2)`.',
           version: 1,
           exceptionsList: null,
           threshold: {
@@ -734,8 +733,7 @@ describe('successful migrations', () => {
             references: [
               'https://www.fireeye.com/blog/threat-research/2018/08/fin7-pursuing-an-enigmatic-and-evasive-global-criminal-operation.html',
             ],
-            note:
-              'In the event this rule identifies benign domains in your environment, the `destination.domain` field in the rule can be modified to include those domains. Example: `...AND NOT destination.domain:(zoom.us OR benign.domain1 OR benign.domain2)`.',
+            note: 'In the event this rule identifies benign domains in your environment, the `destination.domain` field in the rule can be modified to include those domains. Example: `...AND NOT destination.domain:(zoom.us OR benign.domain1 OR benign.domain2)`.',
             version: 1,
             exceptionsList: [],
             threshold: {
@@ -806,8 +804,7 @@ describe('successful migrations', () => {
           references: [
             'https://www.fireeye.com/blog/threat-research/2018/08/fin7-pursuing-an-enigmatic-and-evasive-global-criminal-operation.html',
           ],
-          note:
-            'In the event this rule identifies benign domains in your environment, the `destination.domain` field in the rule can be modified to include those domains. Example: `...AND NOT destination.domain:(zoom.us OR benign.domain1 OR benign.domain2)`.',
+          note: 'In the event this rule identifies benign domains in your environment, the `destination.domain` field in the rule can be modified to include those domains. Example: `...AND NOT destination.domain:(zoom.us OR benign.domain1 OR benign.domain2)`.',
           version: 1,
           exceptionsList: ['exceptions-list'],
         },
@@ -1697,6 +1694,223 @@ describe('successful migrations', () => {
           ...rule.attributes,
           legacyId: rule.id,
         },
+      });
+    });
+
+    test('security solution is migrated to saved object references if it has a "ruleAlertId"', () => {
+      const migration7160 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.16.0'];
+      const alert = getMockData({
+        alertTypeId: 'siem.notifications',
+        params: {
+          ruleAlertId: '123',
+        },
+      });
+
+      expect(migration7160(alert, migrationContext)).toEqual({
+        ...alert,
+        attributes: {
+          ...alert.attributes,
+          legacyId: alert.id,
+        },
+        references: [
+          {
+            name: 'param:alert_0',
+            id: '123',
+            type: 'alert',
+          },
+        ],
+      });
+    });
+
+    test('security solution does not migrate anything if its type is not siem.notifications', () => {
+      const migration7160 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.16.0'];
+      const alert = getMockData({
+        alertTypeId: 'other-type',
+        params: {
+          ruleAlertId: '123',
+        },
+      });
+
+      expect(migration7160(alert, migrationContext)).toEqual({
+        ...alert,
+        attributes: {
+          ...alert.attributes,
+          legacyId: alert.id,
+        },
+      });
+    });
+    test('security solution does not change anything if "ruleAlertId" is missing', () => {
+      const migration7160 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.16.0'];
+      const alert = getMockData({
+        alertTypeId: 'siem.notifications',
+        params: {},
+      });
+
+      expect(migration7160(alert, migrationContext)).toEqual({
+        ...alert,
+        attributes: {
+          ...alert.attributes,
+          legacyId: alert.id,
+        },
+      });
+    });
+
+    test('security solution will keep existing references if we do not have a "ruleAlertId" but we do already have references', () => {
+      const migration7160 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.16.0'];
+      const alert = {
+        ...getMockData({
+          alertTypeId: 'siem.notifications',
+          params: {},
+        }),
+        references: [
+          {
+            name: 'param:alert_0',
+            id: '123',
+            type: 'alert',
+          },
+        ],
+      };
+
+      expect(migration7160(alert, migrationContext)).toEqual({
+        ...alert,
+        attributes: {
+          ...alert.attributes,
+          legacyId: alert.id,
+        },
+        references: [
+          {
+            name: 'param:alert_0',
+            id: '123',
+            type: 'alert',
+          },
+        ],
+      });
+    });
+
+    test('security solution will keep any foreign references if they exist but still migrate other "ruleAlertId" references', () => {
+      const migration7160 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.16.0'];
+      const alert = {
+        ...getMockData({
+          alertTypeId: 'siem.notifications',
+          params: {
+            ruleAlertId: '123',
+          },
+        }),
+        references: [
+          {
+            name: 'foreign-name',
+            id: '999',
+            type: 'foreign-name',
+          },
+        ],
+      };
+
+      expect(migration7160(alert, migrationContext)).toEqual({
+        ...alert,
+        attributes: {
+          ...alert.attributes,
+          legacyId: alert.id,
+        },
+        references: [
+          {
+            name: 'foreign-name',
+            id: '999',
+            type: 'foreign-name',
+          },
+          {
+            name: 'param:alert_0',
+            id: '123',
+            type: 'alert',
+          },
+        ],
+      });
+    });
+
+    test('security solution is idempotent and if re-run on the same migrated data will keep the same items "ruleAlertId" references', () => {
+      const migration7160 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.16.0'];
+      const alert = {
+        ...getMockData({
+          alertTypeId: 'siem.notifications',
+          params: {
+            ruleAlertId: '123',
+          },
+        }),
+        references: [
+          {
+            name: 'param:alert_0',
+            id: '123',
+            type: 'alert',
+          },
+        ],
+      };
+
+      expect(migration7160(alert, migrationContext)).toEqual({
+        ...alert,
+        attributes: {
+          ...alert.attributes,
+          legacyId: alert.id,
+        },
+        references: [
+          {
+            name: 'param:alert_0',
+            id: '123',
+            type: 'alert',
+          },
+        ],
+      });
+    });
+
+    test('security solution will not migrate "ruleAlertId" if it is invalid data', () => {
+      const migration7160 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.16.0'];
+      const alert = {
+        ...getMockData({
+          alertTypeId: 'siem.notifications',
+          params: {
+            ruleAlertId: 55, // This is invalid if it is a number and not a string
+          },
+        }),
+      };
+
+      expect(migration7160(alert, migrationContext)).toEqual({
+        ...alert,
+        attributes: {
+          ...alert.attributes,
+          legacyId: alert.id,
+        },
+      });
+    });
+
+    test('security solution will not migrate "ruleAlertId" if it is invalid data but will keep existing references', () => {
+      const migration7160 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.16.0'];
+      const alert = {
+        ...getMockData({
+          alertTypeId: 'siem.notifications',
+          params: {
+            ruleAlertId: 456, // This is invalid if it is a number and not a string
+          },
+        }),
+        references: [
+          {
+            name: 'param:alert_0',
+            id: '123',
+            type: 'alert',
+          },
+        ],
+      };
+
+      expect(migration7160(alert, migrationContext)).toEqual({
+        ...alert,
+        attributes: {
+          ...alert.attributes,
+          legacyId: alert.id,
+        },
+        references: [
+          {
+            name: 'param:alert_0',
+            id: '123',
+            type: 'alert',
+          },
+        ],
       });
     });
   });

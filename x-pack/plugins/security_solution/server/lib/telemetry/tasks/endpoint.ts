@@ -167,7 +167,7 @@ export class TelemetryEndpointTask {
       return 0;
     }
 
-    const { body: endpointMetricsResponse } = (endpointData.endpointMetrics as unknown) as {
+    const { body: endpointMetricsResponse } = endpointData.endpointMetrics as unknown as {
       body: EndpointMetricsAggregation;
     };
 
@@ -190,13 +190,11 @@ export class TelemetryEndpointTask {
      *
      * As the policy id + policy version does not exist on the Endpoint Metrics document
      * we need to fetch information about the Fleet Agent and sync the metrics document
-     * with the Fleet agent's policy data.
+     * with the Agent's policy data.
      *
-     * 7.14 ~ An issue was created with the Endpoint agent team to add the policy id +
-     * policy version to the metrics document to circumvent and refactor away from
-     * this expensive join operation.
      */
     const agentsResponse = endpointData.fleetAgentsResponse;
+
     if (agentsResponse === undefined) {
       this.logger.debug('no fleet agent information available');
       return 0;
@@ -250,7 +248,7 @@ export class TelemetryEndpointTask {
      * the last 24h or no failures/warnings in the policy applied.
      *
      */
-    const { body: failedPolicyResponses } = (endpointData.epPolicyResponse as unknown) as {
+    const { body: failedPolicyResponses } = endpointData.epPolicyResponse as unknown as {
       body: EndpointPolicyResponseAggregation;
     };
 
@@ -286,7 +284,7 @@ export class TelemetryEndpointTask {
           policyConfig = endpointPolicyCache.get(policyInformation) || null;
 
           if (policyConfig) {
-            failedPolicy = policyResponses.get(policyConfig?.id);
+            failedPolicy = policyResponses.get(endpointAgentId);
           }
         }
 
@@ -294,7 +292,6 @@ export class TelemetryEndpointTask {
 
         return {
           '@timestamp': executeTo,
-          agent_id: fleetAgentId,
           endpoint_id: endpointAgentId,
           endpoint_version: endpoint.endpoint_version,
           endpoint_package_version: policyConfig?.package?.version || null,

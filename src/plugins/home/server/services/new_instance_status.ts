@@ -7,7 +7,6 @@
  */
 
 import type { IScopedClusterClient, SavedObjectsClientContract } from '../../../../core/server';
-import type { IndexPatternSavedObjectAttrs } from '../../../data/common/index_patterns/index_patterns';
 
 const LOGS_INDEX_PATTERN = 'logs-*';
 const METRICS_INDEX_PATTERN = 'metrics-*';
@@ -23,7 +22,7 @@ interface Deps {
 }
 
 export const isNewInstance = async ({ esClient, soClient }: Deps): Promise<boolean> => {
-  const indexPatterns = await soClient.find<IndexPatternSavedObjectAttrs>({
+  const indexPatterns = await soClient.find<{ title: string }>({
     type: 'index-pattern',
     fields: ['title'],
     search: `*`,

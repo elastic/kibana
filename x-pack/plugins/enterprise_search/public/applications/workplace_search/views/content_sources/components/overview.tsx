@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiListGroup,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -29,7 +30,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiPanelTo } from '../../../../shared/react_router_helpers';
+import { EuiListGroupItemTo } from '../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../app_logic';
 import aclImage from '../../../assets/supports_acl.svg';
 import { ComponentLoader } from '../../../components/shared/component_loader';
@@ -234,22 +235,18 @@ export const Overview: React.FC = () => {
         <h5>{GROUP_ACCESS_TITLE}</h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="GroupsSummary">
-        {groups.map((group, index) => (
-          <EuiFlexItem key={index}>
-            <EuiPanelTo
-              hasShadow={false}
-              color="subdued"
+      <EuiPanel color="subdued">
+        <EuiListGroup flush maxWidth={false} data-test-subj="GroupsSummary">
+          {groups.map((group, index) => (
+            <EuiListGroupItemTo
+              label={group.name}
+              key={index}
               to={getGroupPath(group.id)}
               data-test-subj="SourceGroupLink"
-            >
-              <EuiText size="s" className="eui-textTruncate">
-                <strong>{group.name}</strong>
-              </EuiText>
-            </EuiPanelTo>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
+            />
+          ))}
+        </EuiListGroup>
+      </EuiPanel>
     </>
   );
 

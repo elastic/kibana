@@ -19,7 +19,7 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
     agents:
-      queue: c2-8
+      queue: c2-16
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
 
@@ -28,8 +28,8 @@ steps:
     parallelism: 13
     agents:
       queue: ci-group-6
-    artifact_paths: target/junit/**/*.xml
     depends_on: build
+    timeout_in_minutes: 150
     key: default-cigroup
     retry:
       automatic:
@@ -40,8 +40,8 @@ steps:
     label: 'Docker CI Group'
     agents:
       queue: ci-group-6
-    artifact_paths: target/junit/**/*.xml
     depends_on: build
+    timeout_in_minutes: 120
     key: default-cigroup-docker
     retry:
       automatic:
@@ -50,11 +50,11 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/oss_cigroup.sh
     label: 'OSS CI Group'
-    parallelism: 12
+    parallelism: 11
     agents:
       queue: ci-group-4d
-    artifact_paths: target/junit/**/*.xml
     depends_on: build
+    timeout_in_minutes: 120
     key: oss-cigroup
     retry:
       automatic:
@@ -64,8 +64,8 @@ steps:
   - command: .buildkite/scripts/steps/test/jest_integration.sh
     label: 'Jest Integration Tests'
     agents:
-      queue: jest
-    artifact_paths: target/junit/**/*.xml
+      queue: n2-4
+    timeout_in_minutes: 120
     key: jest-integration
     retry:
       automatic:
@@ -76,7 +76,7 @@ steps:
     label: 'API Integration Tests'
     agents:
       queue: jest
-    artifact_paths: target/junit/**/*.xml
+    timeout_in_minutes: 120
     key: api-integration
 
   - command: .buildkite/scripts/steps/es_snapshots/trigger_promote.sh
@@ -87,13 +87,6 @@ steps:
       - oss-cigroup
       - jest-integration
       - api-integration
-
-  - wait: ~
-    continue_on_failure: true
-
-  - plugins:
-      - junit-annotate#v1.9.0:
-          artifacts: target/junit/**/*.xml
 
   - wait: ~
     continue_on_failure: true

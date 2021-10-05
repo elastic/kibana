@@ -80,9 +80,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
           ruleConfig: rule,
           ruleParams: params,
           alertId,
-        };
-
-        const buildRuleMessage = buildRuleMessageFactory({
+        };const buildRuleMessage = buildRuleMessageFactory({
           id: alertId,
           ruleId,
           name,
@@ -175,8 +173,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
           interval,
           maxSignals: DEFAULT_MAX_SIGNALS,
           buildRuleMessage,
-          startedAt,
-        });
+        startedAt,});
         if (remainingGap.asMilliseconds() > 0) {
           const gapString = remainingGap.humanize();
           const gapMessage = buildRuleMessage(

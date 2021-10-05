@@ -7,7 +7,7 @@
 
 import { first, get, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_RULE_PARAMS } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
@@ -70,13 +70,8 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     InventoryMetricThresholdAlertInstanceContext,
     InventoryMetricThresholdAllowedActionGroups
   >(async ({ services, params }) => {
-    const {
-      criteria,
-      filterQuery,
-      sourceId,
-      nodeType,
-      alertOnNoData,
-    } = params as InventoryMetricThresholdParams;
+    const { criteria, filterQuery, sourceId, nodeType, alertOnNoData } =
+      params as InventoryMetricThresholdParams;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
     const { alertWithLifecycle, savedObjectsClient } = services;
     const alertInstanceFactory: InventoryMetricThresholdAlertInstanceFactory = (id, reason) =>
@@ -84,6 +79,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         id,
         fields: {
           [ALERT_REASON]: reason,
+          [ALERT_RULE_PARAMS]: JSON.stringify(params),
         },
       });
 
@@ -185,7 +181,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
            * TODO: We're lying to the compiler here as explicitly  calling `scheduleActions` on
            * the RecoveredActionGroup isn't allowed
            */
-          (actionGroupId as unknown) as InventoryMetricThresholdAllowedActionGroups,
+          actionGroupId as unknown as InventoryMetricThresholdAllowedActionGroups,
           {
             group: item,
             alertState: stateToAlertMessage[nextState],

@@ -85,10 +85,12 @@ describe('palette panel', () => {
     });
 
     function changePaletteIn(instance: ReactWrapper, newPaletteName: string) {
-      return ((instance
-        .find('[data-test-subj="lnsPalettePanel_dynamicColoring_palette_picker"]')
-        .at(1)
-        .prop('onChange') as unknown) as (value: string) => void)?.(newPaletteName);
+      return (
+        instance
+          .find('[data-test-subj="lnsPalettePanel_dynamicColoring_palette_picker"]')
+          .at(1)
+          .prop('onChange') as unknown as (value: string) => void
+      )?.(newPaletteName);
     }
 
     it('should show only dynamic coloring enabled palette + custom option', () => {

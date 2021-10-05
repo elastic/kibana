@@ -88,26 +88,28 @@ describe('xy_suggestions', () => {
 
   test('partially maps invalid combinations, but hides them', () => {
     expect(
-      ([
-        {
-          isMultiRow: true,
-          columns: [dateCol('a')],
-          layerId: 'first',
-          changeType: 'unchanged',
-        },
-        {
-          isMultiRow: true,
-          columns: [strCol('foo'), strCol('bar')],
-          layerId: 'first',
-          changeType: 'unchanged',
-        },
-        {
-          isMultiRow: false,
-          columns: [numCol('bar')],
-          layerId: 'first',
-          changeType: 'unchanged',
-        },
-      ] as TableSuggestion[]).map((table) => {
+      (
+        [
+          {
+            isMultiRow: true,
+            columns: [dateCol('a')],
+            layerId: 'first',
+            changeType: 'unchanged',
+          },
+          {
+            isMultiRow: true,
+            columns: [strCol('foo'), strCol('bar')],
+            layerId: 'first',
+            changeType: 'unchanged',
+          },
+          {
+            isMultiRow: false,
+            columns: [numCol('bar')],
+            layerId: 'first',
+            changeType: 'unchanged',
+          },
+        ] as TableSuggestion[]
+      ).map((table) => {
         const suggestions = getSuggestions({ table, keptLayerIds: [] });
         expect(suggestions.every((suggestion) => suggestion.hide)).toEqual(true);
         expect(suggestions).toHaveLength(10);
@@ -117,20 +119,22 @@ describe('xy_suggestions', () => {
 
   test('rejects incomplete configurations if there is a state already but no sub visualization id', () => {
     expect(
-      ([
-        {
-          isMultiRow: true,
-          columns: [dateCol('a')],
-          layerId: 'first',
-          changeType: 'reduced',
-        },
-        {
-          isMultiRow: false,
-          columns: [numCol('bar')],
-          layerId: 'first',
-          changeType: 'reduced',
-        },
-      ] as TableSuggestion[]).map((table) => {
+      (
+        [
+          {
+            isMultiRow: true,
+            columns: [dateCol('a')],
+            layerId: 'first',
+            changeType: 'reduced',
+          },
+          {
+            isMultiRow: false,
+            columns: [numCol('bar')],
+            layerId: 'first',
+            changeType: 'reduced',
+          },
+        ] as TableSuggestion[]
+      ).map((table) => {
         const suggestions = getSuggestions({
           table,
           keptLayerIds: [],
@@ -231,16 +235,7 @@ describe('xy_suggestions', () => {
 
     expect(suggestions).toHaveLength(visualizationTypes.length);
     expect(suggestions.map(({ state }) => state.layers.length)).toEqual([
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
+      1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     ]);
     expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
       'bar_stacked',

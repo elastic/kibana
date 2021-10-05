@@ -16,16 +16,22 @@ function collectDeprecations(
 ) {
   const deprecations = provider(configDeprecationFactory);
   const deprecationMessages: string[] = [];
+  const deprecationLevels: string[] = [];
   const { config: migrated } = applyDeprecations(
     settings,
     deprecations.map((deprecation) => ({
       deprecation,
       path,
     })),
-    () => ({ message }) => deprecationMessages.push(message)
+    () =>
+      ({ message, level }) => {
+        deprecationMessages.push(message);
+        deprecationLevels.push(level ?? '');
+      }
   );
   return {
     messages: deprecationMessages,
+    levels: deprecationLevels,
     migrated,
   };
 }

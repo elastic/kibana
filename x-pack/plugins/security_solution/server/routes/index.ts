@@ -1,10 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import { Logger } from 'src/core/server';
 import { IRuleDataClient, RuleDataPluginService } from '../../../rule_registry/server';
 
@@ -46,6 +39,7 @@ import {
   importTimelinesRoute,
   patchTimelinesRoute,
   persistFavoriteRoute,
+  resolveTimelineRoute,
 } from '../lib/timeline/routes/timelines';
 import { getDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/get_draft_timelines';
 import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/clean_draft_timelines';
@@ -59,6 +53,8 @@ import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import { previewRulesRoute } from '../lib/detection_engine/routes/rules/preview_rules_route';
 import { CreateRuleOptions } from '../lib/detection_engine/rule_types/types';
+// eslint-disable-next-line no-restricted-imports
+import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -80,6 +76,9 @@ export const initRoutes = (
   findRulesRoute(router, isRuleRegistryEnabled);
   previewRulesRoute(router, ml, previewRuleOptions);
 
+  // Once we no longer have the legacy notifications system/"side car actions" this should be removed.
+  legacyCreateLegacyNotificationRoute(router);
+
   // TODO: pass isRuleRegistryEnabled to all relevant routes
 
   addPrepackedRulesRoute(router, config, security, isRuleRegistryEnabled);
@@ -99,6 +98,7 @@ export const initRoutes = (
   exportTimelinesRoute(router, config, security);
   getDraftTimelinesRoute(router, config, security);
   getTimelineRoute(router, config, security);
+  resolveTimelineRoute(router, config, security);
   getTimelinesRoute(router, config, security);
   cleanDraftTimelinesRoute(router, config, security);
   deleteTimelinesRoute(router, config, security);

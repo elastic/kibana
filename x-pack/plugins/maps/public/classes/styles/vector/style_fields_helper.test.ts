@@ -28,9 +28,7 @@ class MockField extends AbstractField {
 
 describe('StyleFieldHelper', () => {
   describe('isFieldDataTypeCompatibleWithStyleType', () => {
-    async function createHelper(
-      supportsAutoDomain: boolean
-    ): Promise<{
+    async function createHelper(supportsAutoDomain: boolean): Promise<{
       styleFieldHelper: StyleFieldsHelper;
       stringField: IField;
       numberField: IField;

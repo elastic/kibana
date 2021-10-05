@@ -5,57 +5,37 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
-
-import type { ConfigType } from '../../../../config';
-import { filterDuplicateSignals } from '../../signals/filter_duplicate_signals';
-import { SearchAfterAndBulkCreateParams, SimpleHit, WrapHits } from '../../signals/types';
-import { generateId } from '../../signals/utils';
-import { buildBulkBody } from './utils/build_bulk_body';
-import { SanitizedRuleConfig } from '../../../../../../alerting/common';
-import { CompleteRule, RuleParams } from '../../schemas/rule_schemas';
+import { SearchAfterAndBulkCreateParams, WrapHits, WrappedSignalHit } from './types';
+import { generateId } from './utils';
+import { buildBulkBody } from './build_bulk_body';
+import { filterDuplicateSignals } from './filter_duplicate_signals';
+import type { ConfigType } from '../../../config';
 
 export const wrapHitsFactory =
   ({
-    logger,
-    ignoreFields,
+    ruleSO,
+    signalsIndex,
     mergeStrategy,
-    completeRule,
-    spaceId,
+    ignoreFields,
   }: {
-    logger: Logger;
-    ruleConfig: SanitizedRuleConfig;
-    completeRule: CompleteRule;
+    ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
+    signalsIndex: string;
     mergeStrategy: ConfigType['alertMergeStrategy'];
     ignoreFields: ConfigType['alertIgnoreFields'];
-    spaceId: string | null | undefined;
   }): WrapHits =>
   (events, buildReasonMessage) => {
-    try {
-      const wrappedDocs = events.map((event) => {
-        return {
-          _index: '',
-          _id: generateId(
-            event._index,
-            event._id,
-            String(event._version),
-            completeRule.ruleParams.ruleId ?? ''
-          ),
-          _source: buildBulkBody(
-            spaceId,
-            completeRule,
-            event as SimpleHit,
-            mergeStrategy,
-            ignoreFields,
-            true,
-            buildReasonMessage
-          ),
-        };
-      });
+    const wrappedDocs: WrappedSignalHit[] = events.flatMap((doc) => [
+      {
+        _index: signalsIndex,
+        _id: generateId(
+          doc._index,
+          doc._id,
+          String(doc._version),
+          ruleSO.attributes.params.ruleId ?? ''
+        ),
+        _source: buildBulkBody(ruleSO, doc, mergeStrategy, ignoreFields, buildReasonMessage),
+      },
+    ]);
 
-      return filterDuplicateSignals(completeRule.alertId, wrappedDocs, true);
-    } catch (error) {
-      logger.error(error);
-      return [];
-    }
+    return filterDuplicateSignals(ruleSO.id, wrappedDocs, false);
   };

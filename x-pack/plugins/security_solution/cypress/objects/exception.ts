@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 export interface Exception {
   field: string;
   operator: string;
@@ -35,8 +37,10 @@ export const getException = (): Exception => ({
   values: ['suricata-iowa'],
 });
 
-export const expectedExportedExceptionList = (exceptionListResponse: Cypress.Response): string => {
+export const expectedExportedExceptionList = (
+  exceptionListResponse: Cypress.Response<ExceptionListItemSchema>
+): string => {
   const jsonrule = exceptionListResponse.body;
 
-  return `{"_version":"${jsonrule._version}","created_at":"${jsonrule.created_at}","created_by":"elastic","description":"${jsonrule.description}","id":"${jsonrule.id}","immutable":false,"list_id":"test_exception_list","name":"Test exception list","namespace_type":"single","os_types":[],"tags":[],"tie_breaker_id":"${jsonrule.tie_breaker_id}","type":"detection","updated_at":"${jsonrule.updated_at}","updated_by":"elastic","version":1}\n"\n""\n{"exception_list_items_details":"{"exported_count":0}\n"}`;
+  return `"{\\"_version\\":\\"${jsonrule._version}\\",\\"created_at\\":\\"${jsonrule.created_at}\\",\\"created_by\\":\\"elastic\\",\\"description\\":\\"${jsonrule.description}\\",\\"id\\":\\"${jsonrule.id}\\",\\"immutable\\":false,\\"list_id\\":\\"test_exception_list\\",\\"name\\":\\"Test exception list\\",\\"namespace_type\\":\\"single\\",\\"os_types\\":[],\\"tags\\":[],\\"tie_breaker_id\\":\\"${jsonrule.tie_breaker_id}\\",\\"type\\":\\"detection\\",\\"updated_at\\":\\"${jsonrule.updated_at}\\",\\"updated_by\\":\\"elastic\\",\\"version\\":1}\\n"\n""\n{"exception_list_items_details":"{\\"exported_count\\":0}\\n"}\n`;
 };

@@ -189,5 +189,5 @@ function getMockMonitoredHealth(overrides = {}): MonitoredHealth {
       },
     },
   };
-  return (merge(stub, overrides) as unknown) as MonitoredHealth;
+  return merge(stub, overrides) as unknown as MonitoredHealth;
 }
