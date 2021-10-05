@@ -166,7 +166,7 @@ export const pureFetchRuleById = async ({
   http,
   signal,
 }: FetchRuleProps & { http: HttpStart }): Promise<Rule> =>
-  http.fetch(DETECTION_ENGINE_RULES_URL, {
+  http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
     method: 'GET',
     query: { id },
     signal,
