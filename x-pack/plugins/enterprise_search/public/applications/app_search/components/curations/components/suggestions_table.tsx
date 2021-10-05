@@ -26,6 +26,8 @@ import { convertToDate } from '../utils';
 
 import { SuggestionsLogic } from './suggestions_logic';
 
+import './suggestions_table.scss';
+
 const getSuggestionRoute = (query: string) => {
   return generateEnginePath(ENGINE_CURATION_SUGGESTION_PATH, { query });
 };
@@ -42,8 +44,7 @@ const columns: Array<EuiBasicTableColumn<CurationSuggestion>> = [
         {query}
         {curation.override_curation_id && (
           <>
-            {' '}
-            <EuiBadge iconType="alert" color="warning">
+            <EuiBadge iconType="alert" color="warning" className="suggestionsTableBadge">
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engine.curations.suggestionsTable.overridesLabel',
                 { defaultMessage: 'Overrides' }
@@ -94,7 +95,23 @@ const columns: Array<EuiBasicTableColumn<CurationSuggestion>> = [
 
 export const SuggestionsTable: React.FC = () => {
   const { loadSuggestions, onPaginate } = useActions(SuggestionsLogic);
-  const { meta, suggestions, dataLoading } = useValues(SuggestionsLogic);
+  const { meta, dataLoading } = useValues(SuggestionsLogic);
+
+  const suggestions: CurationSuggestion[] = [
+    {
+      query: 'mountains',
+      updated_at: '2021-07-08T14:35:50Z',
+      promoted: ['1', '2'],
+      status: 'pending',
+    },
+    {
+      query: 'rivers',
+      updated_at: '2021-07-08T14:35:50Z',
+      promoted: ['1', '2'],
+      status: 'pending',
+      override_curation_id: '1-2-3',
+    },
+  ];
 
   useEffect(() => {
     loadSuggestions();
@@ -104,6 +121,7 @@ export const SuggestionsTable: React.FC = () => {
 
   return (
     <DataPanel
+      className="suggestionsTable"
       iconType={LightbulbIcon}
       title={
         <h2>

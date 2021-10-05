@@ -23,10 +23,12 @@ import { DataPanel } from '../../data_panel';
 import { generateEnginePath } from '../../engine';
 
 import { CurationsLogic } from '../curations_logic';
-import { Curation } from '../types';
+import { Curation, CurationSuggestion } from '../types';
 import { convertToDate } from '../utils';
 
 import { AutomatedIcon } from './automated_icon';
+
+import './curations_table.scss';
 
 export const CurationsTable: React.FC = () => {
   const { dataLoading, curations, meta } = useValues(CurationsLogic);
@@ -47,8 +49,7 @@ export const CurationsTable: React.FC = () => {
           {queries.join(', ')}
           {curation.suggestion?.status === 'automated' && (
             <>
-              {' '}
-              <EuiBadge color="accent" iconType={AutomatedIcon}>
+              <EuiBadge color="accent" iconType={AutomatedIcon} className="curationsTableBadge">
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.engine.curations.table.automatedLabel',
                   { defaultMessage: 'Automated' }
@@ -58,8 +59,7 @@ export const CurationsTable: React.FC = () => {
           )}
           {curation.suggestion?.status === 'pending' && (
             <>
-              {' '}
-              <EuiBadge color="default">
+              <EuiBadge color="default" className="curationsTableBadge">
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.engine.curations.table.newSuggestionLabel',
                   { defaultMessage: 'New suggestion' }
@@ -127,6 +127,7 @@ export const CurationsTable: React.FC = () => {
 
   return (
     <DataPanel
+      className="curationsTable"
       hasBorder
       iconType="package"
       title={
@@ -139,7 +140,11 @@ export const CurationsTable: React.FC = () => {
     >
       <EuiBasicTable
         columns={columns}
-        items={curations}
+        items={curations.map((curation, index) => {
+          curation.suggestion = curation.suggestion || ({} as CurationSuggestion);
+          curation.suggestion.status = index % 2 ? 'pending' : 'automated';
+          return curation;
+        })}
         responsive
         hasActions
         loading={dataLoading}
