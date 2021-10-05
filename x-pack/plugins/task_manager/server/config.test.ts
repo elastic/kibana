@@ -12,7 +12,6 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
-        "enabled": true,
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -71,7 +70,6 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
-        "enabled": true,
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -117,7 +115,6 @@ describe('config validation', () => {
     };
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
-        "enabled": true,
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,

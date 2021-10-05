@@ -29,7 +29,6 @@ describe('config validation', () => {
           "idleInterval": "PT1H",
           "pageSize": 100,
         },
-        "enabled": true,
         "enabledActionTypes": Array [
           "*",
         ],
@@ -70,7 +69,6 @@ describe('config validation', () => {
           "idleInterval": "PT1H",
           "pageSize": 100,
         },
-        "enabled": true,
         "enabledActionTypes": Array [
           "*",
         ],
@@ -196,7 +194,6 @@ describe('config validation', () => {
           "idleInterval": "PT1H",
           "pageSize": 100,
         },
-        "enabled": true,
         "enabledActionTypes": Array [
           "*",
         ],

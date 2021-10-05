@@ -439,7 +439,6 @@ describe('create()', () => {
 
   test('throws error creating action with disabled actionType', async () => {
     const localConfigUtils = getActionsConfigurationUtilities({
-      enabled: true,
       enabledActionTypes: ['some-not-ignored-action-type'],
       allowedHosts: ['*'],
       preconfiguredAlertHistoryEsIndex: false,
