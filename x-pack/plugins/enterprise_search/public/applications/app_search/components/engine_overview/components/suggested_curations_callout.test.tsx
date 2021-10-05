@@ -11,7 +11,7 @@ import { setMockValues } from '../../../../__mocks__/kea_logic';
 import React from 'react';
 
 import { shallow } from 'enzyme';
-import { cloneDeep, set } from 'lodash';
+import { set } from 'lodash/fp';
 
 import { SuggestionsCallout } from '../../curations/components/suggestions_callout';
 
@@ -49,8 +49,7 @@ describe('SuggestedCurationsCallout', () => {
   });
 
   it('is empty when no pending curations', () => {
-    const values = cloneDeep(MOCK_VALUES); // set mutates so we cloneDeep first
-    set(values, 'engine.search_relevance_suggestions.curation.pending', 0);
+    const values = set('engine.search_relevance_suggestions.curation.pending', 0, MOCK_VALUES);
     setMockValues(values);
 
     const wrapper = shallow(<SuggestedCurationsCallout />);
