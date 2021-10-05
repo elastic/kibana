@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getSavedSearchUrl } from './saved_searches_utils';
+import { getSavedSearchUrl, savedSearchHasUrlConflict } from './saved_searches_utils';
 import { SAVED_SEARCH_TYPE } from './constants';
 
 import type { SavedSearch } from './types';
@@ -22,7 +22,7 @@ export const SavedSearchURLConflictCallout = ({
   savedSearch,
   spaces,
 }: SavedSearchURLConflictCalloutProps) => {
-  if (spaces && savedSearch?.id && savedSearch?.sharingSavedObject?.outcome === 'conflict') {
+  if (spaces && savedSearch?.id && savedSearchHasUrlConflict(savedSearch)) {
     const otherObjectId = savedSearch.sharingSavedObject?.aliasTargetId;
 
     if (otherObjectId) {

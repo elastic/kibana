@@ -12,6 +12,9 @@ export const getSavedSearchUrl = (id?: string) => (id ? `#/view/${encodeURICompo
 
 export const getSavedSearchFullPathUrl = (id?: string) => `/app/discover${getSavedSearchUrl(id)}`;
 
+export const savedSearchHasUrlConflict = (savedSearch: SavedSearch) =>
+  savedSearch?.sharingSavedObject?.outcome === 'conflict';
+
 export const fromSavedSearchAttributes = (
   id: string,
   attributes: SavedSearchAttributes,
