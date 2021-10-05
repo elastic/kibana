@@ -123,8 +123,7 @@ System metrics are captured periodically (every 60 seconds by default).
 
 ### CPU
 
-![image](https://user-images.githubusercontent.com/209966/135935426-000e17f2-1ff4-4699-a41d-463e97e24fa6.png)
-
+![image](https://user-images.githubusercontent.com/209966/135989855-cd6869d3-2fa0-4b71-a82a-cfb182114ac6.png)
 
 Noteworthy fields: `system.cpu.total.norm.pct`, `system.process.cpu.total.norm.pct`
 
@@ -218,7 +217,7 @@ Above example is overly simplified. In reality [we do a bit more](https://github
 
 Breakdown metrics are used to power the "Time spent by span type" graph. Agents collect summarized metrics about the timings of spans and transactions, broken down by transaction or span type.
 
-![image](https://user-images.githubusercontent.com/209966/135936818-1521bd21-90e9-48c0-b516-9de74e93b31e.png)
+![image](https://user-images.githubusercontent.com/209966/135989975-2b9e3c5f-d8e4-4e12-b68c-d98147366aff.png)
 
 ## Transaction breakdown metrics (`transaction_breakdown`)
 
@@ -254,7 +253,7 @@ Noteworthy fields: `transaction.name`, `transaction.type`, `span.type`, `span.su
   "processor.event": "metric",
   "metricset.name": "span_breakdown",
   "transaction.name": "GET /api/products",
-  "transaction.type": "request"  
+  "transaction.type": "request",
   "span.self_time.sum.us": 1028,
   "span.self_time.count": 12,
   "span.type": "db",
@@ -299,7 +298,7 @@ Noteworthy fields: `transaction.name`, `transaction.type`, `span.type`, `span.su
 Pre-aggregations of span documents, where `span.destination.service.response_time.count` is the number of original spans.
 These metrics measure the count and total duration of requests from one service to another service.
 
-![image](https://user-images.githubusercontent.com/209966/135985142-986651c4-b819-4c98-93cf-7e5b6534ff9c.png)
+![image](https://user-images.githubusercontent.com/209966/135990117-170070da-2fc5-4014-a597-0dda0970854c.png)
 
 Used in: [Dependencies (latency)](https://github.com/elastic/kibana/blob/00bb59713ed115343eb70d4e39059476edafbade/x-pack/plugins/apm/server/lib/backends/get_latency_charts_for_backend.ts#L68-L79), [Dependencies (throughput)](https://github.com/elastic/kibana/blob/00bb59713ed115343eb70d4e39059476edafbade/x-pack/plugins/apm/server/lib/backends/get_throughput_charts_for_backend.ts#L67-L74) and [Service Map](https://github.com/elastic/kibana/blob/00bb59713ed115343eb70d4e39059476edafbade/x-pack/plugins/apm/server/lib/service_map/get_service_map_backend_node_info.ts#L57-L67)
 
