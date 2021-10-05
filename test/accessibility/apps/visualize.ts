@@ -13,7 +13,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
 
   describe('Visualize', () => {
-
     it('visualize', async () => {
       await a11y.testAppSnapshot();
     });

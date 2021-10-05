@@ -26,24 +26,24 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
           useActualUrl: true,
         });
         await PageObjects.home.removeSampleDataSet('flights');
-        await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern', 'visualization', 'dashboard'] });
+        await kibanaServer.savedObjects.clean({
+          types: ['search', 'index-pattern', 'visualization', 'dashboard'],
+        });
       });
-  
-      loadTestFile(require.resolve('./dashboard')),
-      loadTestFile(require.resolve('./dashboard_panel')),
-      loadTestFile(require.resolve('./filter_panel')),
-      loadTestFile(require.resolve('./home')),
-      loadTestFile(require.resolve('./discover')),
-      loadTestFile(require.resolve('./visualize')),
-      loadTestFile(require.resolve('./kibana_overview_with_data'))
-     });
 
-    describe('not using sample data', function () {
-
-      loadTestFile(require.resolve('./management')),
-      loadTestFile(require.resolve('./console')),
-      loadTestFile(require.resolve('./kibana_overview_without_data'))
+      loadTestFile(require.resolve('./dashboard'));
+      loadTestFile(require.resolve('./dashboard_panel'));
+      loadTestFile(require.resolve('./filter_panel'));
+      loadTestFile(require.resolve('./home'));
+      loadTestFile(require.resolve('./discover'));
+      loadTestFile(require.resolve('./visualize'));
+      loadTestFile(require.resolve('./kibana_overview_with_data'));
     });
 
+    describe('not using sample data', function () {
+      loadTestFile(require.resolve('./management'));
+      loadTestFile(require.resolve('./console'));
+      loadTestFile(require.resolve('./kibana_overview_without_data'));
+    });
   });
 }

@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Discover a11y tests', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days')
+      await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
     });
 
     it('Discover main page', async () => {

@@ -13,7 +13,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
 
   describe('Kibana overview with data', () => {
-
     it('Overview view', async () => {
       await PageObjects.common.navigateToApp('kibanaOverview');
       await a11y.testAppSnapshot();
