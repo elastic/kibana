@@ -18,6 +18,10 @@ import {
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 
+import styled, { useTheme } from 'styled-components';
+
+import type { EuiTheme } from '../../../../../../../../../../../src/plugins/kibana_react/common';
+
 import type {
   PackageInfo,
   PackageSpecCategory,
@@ -28,13 +32,21 @@ import { entries } from '../../../../../types';
 import { useGetCategories } from '../../../../../hooks';
 import { AssetTitleMap, DisplayedAssets, ServiceTitleMap } from '../../../constants';
 
+import {
+  withSuspense,
+  LazyReplacementCard,
+} from '../../../../../../../../../../../src/plugins/custom_integrations/public';
+
 import { NoticeModal } from './notice_modal';
+
+const ReplacementCard = withSuspense(LazyReplacementCard);
 
 interface Props {
   packageInfo: PackageInfo;
 }
 
 export const Details: React.FC<Props> = memo(({ packageInfo }) => {
+  const theme = useTheme() as EuiTheme;
   const { data: categoriesData, isLoading: isLoadingCategories } = useGetCategories();
   const packageCategories: string[] = useMemo(() => {
     if (!isLoadingCategories && categoriesData && categoriesData.response) {
@@ -163,6 +175,23 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
     toggleNoticeModal,
   ]);
 
+  const Replacements = styled(EuiFlexItem)`
+    margin: 0;
+
+    & .euiAccordion {
+      padding-top: ${parseInt(theme.eui.euiSizeL, 10) * 2}px;
+
+      &::before {
+        content: '';
+        display: block;
+        border-top: 1px solid ${theme.eui.euiColorLightShade};
+        position: relative;
+        top: -${theme.eui.euiSizeL};
+        margin: 0 ${theme.eui.euiSizeXS};
+      }
+    }
+  `;
+
   return (
     <>
       <EuiPortal>
@@ -181,6 +210,9 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
         <EuiFlexItem>
           <EuiDescriptionList type="column" compressed listItems={listItems} />
         </EuiFlexItem>
+        <Replacements>
+          <ReplacementCard eprPackageName={packageInfo.name} />
+        </Replacements>
       </EuiFlexGroup>
     </>
   );

@@ -10,6 +10,7 @@ import type {
   CustomIntegration,
   IntegrationCategory,
 } from '../../../../../src/plugins/custom_integrations/common';
+import { filterCustomIntegrations } from '../../../../../src/plugins/custom_integrations/public';
 
 // Export this as a utility to find replacements for a package (e.g. in the overview-page for an EPR package)
 function findReplacementsForEprPackage(
@@ -20,9 +21,7 @@ function findReplacementsForEprPackage(
   if (release === 'ga') {
     return [];
   }
-  return replacements.filter((customIntegration: CustomIntegration) => {
-    return customIntegration.eprOverlap === packageName;
-  });
+  return filterCustomIntegrations(replacements, { eprPackageName: packageName });
 }
 
 export function useMergeEprPackagesWithReplacements(
