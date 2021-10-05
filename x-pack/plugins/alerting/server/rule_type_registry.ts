@@ -200,7 +200,7 @@ export class RuleTypeRegistry {
           i18n.translate(
             'xpack.alerting.ruleTypeRegistry.register.invalidMinimumTimeoutAlertTypeError',
             {
-              defaultMessage: 'Rule type "{id}" has invalid minumum interval: {errorMessage}.',
+              defaultMessage: 'Rule type "{id}" has invalid minimum interval: {errorMessage}.',
               values: {
                 id: alertType.id,
                 errorMessage: invalidMinimumTimeout,

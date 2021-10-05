@@ -112,6 +112,58 @@ describe('register()', () => {
     );
   });
 
+  test('throws if defaultInterval isnt valid', () => {
+    const alertType: AlertType<never, never, never, never, never, 'default'> = {
+      id: '123',
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      executor: jest.fn(),
+      producer: 'alerts',
+      defaultInterval: 'foobar',
+    };
+    const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+
+    expect(() => registry.register(alertType)).toThrowError(
+      new Error(
+        `Rule type \"123\" has invalid default interval: string is not a valid duration: foobar.`
+      )
+    );
+  });
+
+  test('throws if minimumInterval isnt valid', () => {
+    const alertType: AlertType<never, never, never, never, never, 'default'> = {
+      id: '123',
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      executor: jest.fn(),
+      producer: 'alerts',
+      minimumInterval: 'foobar',
+    };
+    const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+
+    expect(() => registry.register(alertType)).toThrowError(
+      new Error(
+        `Rule type \"123\" has invalid minimum interval: string is not a valid duration: foobar.`
+      )
+    );
+  });
+
   test('throws if RuleType action groups contains reserved group id', () => {
     const alertType: AlertType<never, never, never, never, never, 'default' | 'NotReserved'> = {
       id: 'test',
@@ -415,9 +467,11 @@ describe('list()', () => {
             "state": Array [],
           },
           "defaultActionGroupId": "testActionGroup",
+          "defaultInterval": undefined,
           "enabledInLicense": false,
           "id": "test",
           "isExportable": true,
+          "minimumInterval": undefined,
           "minimumLicenseRequired": "basic",
           "name": "Test",
           "producer": "alerts",

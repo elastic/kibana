@@ -19,7 +19,8 @@ import {
   AlertAddProps,
   AlertTypeIndex,
 } from '../../../types';
-import { AlertForm, getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_form';
+import { AlertForm } from './alert_form';
+import { getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_errors';
 import { alertReducer, InitialAlert, InitialAlertReducer } from './alert_reducer';
 import { createAlert, loadAlertTypes } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';

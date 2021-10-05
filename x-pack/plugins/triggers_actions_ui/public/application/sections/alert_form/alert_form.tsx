@@ -35,12 +35,11 @@ import {
   EuiToolTip,
   EuiCallOut,
 } from '@elastic/eui';
-import { capitalize, isObject } from 'lodash';
+import { capitalize } from 'lodash';
 import { KibanaFeature } from '../../../../../features/public';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
-  parseDuration,
 } from '../../../../../alerting/common/parse_duration';
 import { loadAlertTypes } from '../../lib/alert_api';
 import { AlertReducerAction, InitialAlert } from './alert_reducer';
@@ -51,7 +50,6 @@ import {
   AlertAction,
   AlertTypeIndex,
   AlertType,
-  ValidationResult,
   RuleTypeRegistryContract,
   ActionTypeRegistryContract,
 } from '../../../types';
@@ -78,119 +76,6 @@ import { SectionLoading } from '../../components/section_loading';
 import { DEFAULT_ALERT_INTERVAL } from '../../constants';
 
 const ENTER_KEY = 13;
-
-export function validateBaseProperties(
-  alertObject: InitialAlert,
-  serverAlertType?: AlertType<string, string>
-): ValidationResult {
-  const validationResult = { errors: {} };
-  const errors = {
-    name: new Array<string>(),
-    interval: new Array<string>(),
-    alertTypeId: new Array<string>(),
-    actionConnectors: new Array<string>(),
-  };
-  validationResult.errors = errors;
-  if (!alertObject.name) {
-    errors.name.push(
-      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredNameText', {
-        defaultMessage: 'Name is required.',
-      })
-    );
-  }
-  if (alertObject.schedule.interval.length < 2) {
-    errors.interval.push(
-      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredIntervalText', {
-        defaultMessage: 'Check interval is required.',
-      })
-    );
-  } else if (serverAlertType?.minimumInterval) {
-    const duration = parseDuration(alertObject.schedule.interval);
-    const minimumDuration = parseDuration(serverAlertType.minimumInterval);
-    if (duration < minimumDuration) {
-      errors.interval.push(
-        i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.belowMinimumText', {
-          defaultMessage: 'Interval is below minimum ({minimum}) for this rule type',
-          values: {
-            minimum: serverAlertType.minimumInterval,
-          },
-        })
-      );
-    }
-  }
-
-  if (!alertObject.alertTypeId) {
-    errors.alertTypeId.push(
-      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredRuleTypeIdText', {
-        defaultMessage: 'Rule type is required.',
-      })
-    );
-  }
-  const emptyConnectorActions = alertObject.actions.find(
-    (actionItem) => /^\d+$/.test(actionItem.id) && Object.keys(actionItem.params).length > 0
-  );
-  if (emptyConnectorActions !== undefined) {
-    errors.actionConnectors.push(
-      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredActionConnector', {
-        defaultMessage: 'Action for {actionTypeId} connector is required.',
-        values: { actionTypeId: emptyConnectorActions.actionTypeId },
-      })
-    );
-  }
-  return validationResult;
-}
-
-export function getAlertErrors(
-  alert: Alert,
-  alertTypeModel: AlertTypeModel | null,
-  serverAlertType?: AlertType<string, string>
-) {
-  const alertParamsErrors: IErrorObject = alertTypeModel
-    ? alertTypeModel.validate(alert.params).errors
-    : [];
-  const alertBaseErrors = validateBaseProperties(alert, serverAlertType).errors as IErrorObject;
-  const alertErrors = {
-    ...alertParamsErrors,
-    ...alertBaseErrors,
-  } as IErrorObject;
-
-  return {
-    alertParamsErrors,
-    alertBaseErrors,
-    alertErrors,
-  };
-}
-
-export async function getAlertActionErrors(
-  alert: Alert,
-  actionTypeRegistry: ActionTypeRegistryContract
-): Promise<IErrorObject[]> {
-  return await Promise.all(
-    alert.actions.map(
-      async (alertAction: AlertAction) =>
-        (
-          await actionTypeRegistry.get(alertAction.actionTypeId)?.validateParams(alertAction.params)
-        ).errors
-    )
-  );
-}
-
-export const hasObjectErrors: (errors: IErrorObject) => boolean = (errors) =>
-  !!Object.values(errors).find((errorList) => {
-    if (isObject(errorList)) return hasObjectErrors(errorList as IErrorObject);
-    return errorList.length >= 1;
-  });
-
-export function isValidAlert(
-  alertObject: InitialAlert | Alert,
-  validationResult: IErrorObject,
-  actionsErrors: IErrorObject[]
-): alertObject is Alert {
-  return (
-    !hasObjectErrors(validationResult) &&
-    actionsErrors.every((error: IErrorObject) => !hasObjectErrors(error))
-  );
-}
 
 function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[]) {
   return kibanaFeatures.find((featureItem) => featureItem.id === producer)?.name;
