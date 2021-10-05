@@ -22,17 +22,19 @@ export interface Engine {
   };
 }
 
-interface SearchRelevanceSuggestions {
+interface CurationSuggestionDetails {
   count: number;
-  curation: {
-    count: number;
-    pending: number;
-    applied: number;
-    automated: number;
-    rejected: number;
-    disabled: number;
-    last_updated: string;
-  };
+  pending: number;
+  applied: number;
+  automated: number;
+  rejected: number;
+  disabled: number;
+  last_updated: string;
+}
+
+interface SearchRelevanceSuggestionDetails {
+  count: number;
+  curation: CurationSuggestionDetails;
 }
 
 export interface EngineDetails extends Engine {
@@ -51,7 +53,7 @@ export interface EngineDetails extends Engine {
   isMeta: boolean;
   engine_count?: number;
   includedEngines?: EngineDetails[];
-  search_relevance_suggestions?: SearchRelevanceSuggestions;
+  search_relevance_suggestions?: SearchRelevanceSuggestionDetails;
 }
 
 interface ResultField {
