@@ -15,7 +15,7 @@ import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_trans
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceTransactionGroups } from '../lib/services/get_service_transaction_groups';
 import { getServiceTransactionGroupDetailedStatisticsPeriods } from '../lib/services/get_service_transaction_group_detailed_statistics';
-import { getTransactionBreakdown } from '../lib/transactions/breakdown';
+import { getSpanBreakdown } from '../lib/transactions/breakdown';
 import { getTransactionTraceSamples } from '../lib/transactions/trace_samples';
 import { getAnomalySeries } from '../lib/transactions/get_anomaly_data';
 import { getLatencyPeriods } from '../lib/transactions/get_latency_charts';
@@ -306,7 +306,7 @@ const transactionChartsBreakdownRoute = createApmServerRoute({
     const { environment, kuery, transactionName, transactionType, start, end } =
       params.query;
 
-    return getTransactionBreakdown({
+    return getSpanBreakdown({
       environment,
       kuery,
       serviceName,
