@@ -166,7 +166,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
         ...selection,
         visualizationState: selection.getVisualizationState(),
       },
-      'SWITCH_VISUALIZATION'
+      true
     );
 
     if (
