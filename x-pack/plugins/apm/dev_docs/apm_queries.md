@@ -123,7 +123,7 @@ System metrics are captured periodically (every 60 seconds by default).
 
 ### CPU
 
-![image](https://user-images.githubusercontent.com/209966/135989855-cd6869d3-2fa0-4b71-a82a-cfb182114ac6.png)
+![image](https://user-images.githubusercontent.com/209966/135990500-f85bd8d9-b5a5-4b7c-b9e1-0759eefb8a29.png)
 
 Noteworthy fields: `system.cpu.total.norm.pct`, `system.process.cpu.total.norm.pct`
 
@@ -163,10 +163,9 @@ Noteworthy fields: `system.cpu.total.norm.pct`, `system.process.cpu.total.norm.p
 
 ### Memory
 
-![image](https://user-images.githubusercontent.com/209966/135935447-7227fd1c-c3e9-4072-b4b0-13abeb220b8d.png)
+![image](https://user-images.githubusercontent.com/209966/135990556-31716990-2812-46c3-a926-8c2a64c7c89f.png)
 
-
-Note-worthy fields: `system.memory.actual.free`, `system.memory.total`,
+Noteworthy fields: `system.memory.actual.free`, `system.memory.total`,
 
 #### Sample document
 
