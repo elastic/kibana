@@ -13,17 +13,17 @@ import { useFindService } from '../../services';
 import { ReplacementCard as Component } from './replacement_card.component';
 
 export interface Props {
-  eprOverlap: string;
+  eprPackageName: string;
 }
 
 /**
  * A data-connected component which can query about Beats-based replacement options for a given EPR module.
  */
-export const ReplacementCard = ({ eprOverlap }: Props) => {
+export const ReplacementCard = ({ eprPackageName }: Props) => {
   const { findReplacementIntegrations } = useFindService();
   const integrations = useAsync(async () => {
-    return await findReplacementIntegrations({ shipper: 'beats', eprOverlap });
-  }, [eprOverlap]);
+    return await findReplacementIntegrations({ shipper: 'beats', eprPackageName });
+  }, [eprPackageName]);
 
   const { loading, value: replacements } = integrations;
 

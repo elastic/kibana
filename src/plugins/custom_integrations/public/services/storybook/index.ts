@@ -12,10 +12,12 @@ import {
   PluginServiceRegistry,
 } from '../../../../presentation_util/public';
 
-import { findServiceFactory } from '../stub/find';
 import { CustomIntegrationsServices } from '..';
+import { findServiceFactory } from '../stub/find';
+import { platformServiceFactory } from '../stub/platform';
 
 export { findServiceFactory } from '../stub/find';
+export { platformServiceFactory } from '../stub/platform';
 
 /**
  * A set of `PluginServiceProvider`s for use in Storybook.
@@ -23,6 +25,7 @@ export { findServiceFactory } from '../stub/find';
  */
 export const providers: PluginServiceProviders<CustomIntegrationsServices> = {
   find: new PluginServiceProvider(findServiceFactory),
+  platform: new PluginServiceProvider(platformServiceFactory),
 };
 
 /**

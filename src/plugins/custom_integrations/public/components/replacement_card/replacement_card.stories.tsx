@@ -33,15 +33,15 @@ export default {
 } as Meta;
 
 interface Args {
-  eprOverlap: string;
+  eprPackageName: string;
 }
 
 const args: Args = {
-  eprOverlap: 'nginx',
+  eprPackageName: 'nginx',
 };
 
 const argTypes = {
-  eprOverlap: {
+  eprPackageName: {
     control: {
       type: 'radio',
       options: ['nginx', 'okta', 'aws', 'apache'],
@@ -49,8 +49,8 @@ const argTypes = {
   },
 };
 
-export function ReplacementCard({ eprOverlap }: Args) {
-  return <ConnectedComponent {...{ eprOverlap }} />;
+export function ReplacementCard({ eprPackageName }: Args) {
+  return <ConnectedComponent {...{ eprPackageName }} />;
 }
 
 ReplacementCard.args = args;

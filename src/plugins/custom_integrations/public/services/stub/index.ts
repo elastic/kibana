@@ -12,13 +12,16 @@ import {
   PluginServiceRegistry,
 } from '../../../../presentation_util/public';
 
-import { findServiceFactory } from './find';
 import { CustomIntegrationsServices } from '..';
+import { findServiceFactory } from './find';
+import { platformServiceFactory } from './platform';
 
 export { findServiceFactory } from './find';
+export { platformServiceFactory } from './platform';
 
 export const providers: PluginServiceProviders<CustomIntegrationsServices> = {
   find: new PluginServiceProvider(findServiceFactory),
+  platform: new PluginServiceProvider(platformServiceFactory),
 };
 
 export const registry = new PluginServiceRegistry<CustomIntegrationsServices>(providers);

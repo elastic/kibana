@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ReplacementCard } from './replacement_card';
-
-export { ReplacementCard, Props } from './replacement_card';
-
-// required for dynamic import using React.lazy()
-// eslint-disable-next-line import/no-default-export
-export default ReplacementCard;
+export interface CustomIntegrationsPlatformService {
+  getBasePath: () => string;
+  getAbsolutePath: (path: string) => string;
+}

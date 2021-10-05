@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CustomIntegration, IntegrationCategory } from '../../common';
+import { CustomIntegration } from '../../common';
 
 interface FindParams {
-  categories?: IntegrationCategory[];
-  eprOverlap?: string;
+  eprPackageName?: string;
   shipper?: string;
 }
 
@@ -23,26 +22,20 @@ export interface CustomIntegrationsFindService {
 }
 
 /**
- * Filter a set of integrations by category, eprOverlap, and/or shipper.
+ * Filter a set of integrations by eprPackageName, and/or shipper.
  */
 export const filterCustomIntegrations = (
   integrations: CustomIntegration[],
-  { categories = [], eprOverlap, shipper }: FindParams = {}
+  { eprPackageName, shipper }: FindParams = {}
 ) => {
-  if (categories.length === 0 && !eprOverlap && !shipper) {
+  if (!eprPackageName && !shipper) {
     return integrations;
   }
 
   let result = integrations;
 
-  if (categories.length > 0) {
-    result = result.filter((integration) =>
-      categories.every((category) => integration.categories.includes(category))
-    );
-  }
-
-  if (eprOverlap) {
-    result = result.filter((integration) => integration.eprOverlap === eprOverlap);
+  if (eprPackageName) {
+    result = result.filter((integration) => integration.eprOverlap === eprPackageName);
   }
 
   if (shipper) {

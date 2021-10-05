@@ -77,83 +77,19 @@ describe('Custom Integrations Find Service', () => {
       expect(result.length).toBe(0);
     });
     test('filters on eprOverlap', () => {
-      let result = filterCustomIntegrations(integrations, { eprOverlap: 'eprValue' });
+      let result = filterCustomIntegrations(integrations, { eprPackageName: 'eprValue' });
       expect(result.length).toBe(2);
-      result = filterCustomIntegrations(integrations, { eprOverlap: 'eprOtherValue' });
+      result = filterCustomIntegrations(integrations, { eprPackageName: 'eprOtherValue' });
       expect(result.length).toBe(1);
-      result = filterCustomIntegrations(integrations, { eprOverlap: 'otherValue' });
+      result = filterCustomIntegrations(integrations, { eprPackageName: 'otherValue' });
       expect(result.length).toBe(0);
     });
-    test('filters on categories', () => {
-      let result = filterCustomIntegrations(integrations, { categories: ['aws'] });
-      expect(result.length).toBe(2);
-      result = filterCustomIntegrations(integrations, { categories: ['cloud'] });
-      expect(result.length).toBe(3);
-      result = filterCustomIntegrations(integrations, { categories: ['aws', 'cloud'] });
-      expect(result.length).toBe(1);
-      result = filterCustomIntegrations(integrations, { categories: ['azure', 'cloud'] });
-      expect(result.length).toBe(0);
-      result = filterCustomIntegrations(integrations, { categories: ['aws', 'azure', 'cloud'] });
-      expect(result.length).toBe(0);
-      result = filterCustomIntegrations(integrations, { categories: ['azure'] });
-      expect(result.length).toBe(0);
-    });
-    test('filters on categories and shipper', () => {
-      let result = filterCustomIntegrations(integrations, {
-        categories: ['aws'],
-        shipper: 'other',
-      });
-      expect(result.length).toBe(1);
-      result = filterCustomIntegrations(integrations, {
-        categories: ['aws', 'cloud'],
-        shipper: 'other',
-      });
-      expect(result.length).toBe(0);
-      result = filterCustomIntegrations(integrations, {
-        categories: ['aws', 'cloud'],
-        shipper: 'tests',
-      });
-      expect(result.length).toBe(1);
-      result = filterCustomIntegrations(integrations, {
-        categories: ['azure', 'cloud'],
-        shipper: 'tests',
-      });
-      expect(result.length).toBe(0);
-      result = filterCustomIntegrations(integrations, {
-        categories: ['azure', 'cloud'],
-        shipper: 'other',
-      });
-      expect(result.length).toBe(0);
-    });
-    test('filters on categories and eprOverlap', () => {
-      let result = filterCustomIntegrations(integrations, {
-        categories: ['aws'],
-        eprOverlap: 'eprValue',
-      });
-      expect(result.length).toBe(1);
-      result = filterCustomIntegrations(integrations, {
-        categories: ['aws', 'cloud'],
-        eprOverlap: 'eprValue',
-      });
-      expect(result.length).toBe(0);
-      result = filterCustomIntegrations(integrations, {
-        categories: ['cloud'],
-        eprOverlap: 'eprValue',
-      });
-      expect(result.length).toBe(1);
-      result = filterCustomIntegrations(integrations, {
-        categories: ['cloud'],
-        eprOverlap: 'eprOtherValue',
-      });
-      expect(result.length).toBe(1);
-    });
-    test('filters on categories, shipper, eprOverlap', () => {
+    test('filters on categories and shipper, eprOverlap', () => {
       const result = filterCustomIntegrations(integrations, {
-        categories: ['aws'],
         shipper: 'other',
-        eprOverlap: 'eprValue',
+        eprPackageName: 'eprValue',
       });
-      expect(result.length).toBe(1);
+      expect(result.length).toBe(2);
     });
   });
 });

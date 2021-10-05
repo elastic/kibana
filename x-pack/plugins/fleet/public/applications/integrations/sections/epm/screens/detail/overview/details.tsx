@@ -211,7 +211,7 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
           <EuiDescriptionList type="column" compressed listItems={listItems} />
         </EuiFlexItem>
         <Replacements>
-          <ReplacementCard eprOverlap={packageInfo.name} />
+          <ReplacementCard eprPackageName={packageInfo.name} />
         </Replacements>
       </EuiFlexGroup>
     </>

@@ -17,8 +17,10 @@ import { CustomIntegrationsServices } from '..';
 import { CustomIntegrationsStartDependencies } from '../../types';
 
 import { findServiceFactory } from './find';
+import { platformServiceFactory } from './platform';
 
 export { findServiceFactory } from './find';
+export { platformServiceFactory } from './platform';
 
 /**
  * A set of `PluginServiceProvider`s for use in Kibana.
@@ -29,6 +31,7 @@ export const pluginServiceProviders: PluginServiceProviders<
   KibanaPluginServiceParams<CustomIntegrationsStartDependencies>
 > = {
   find: new PluginServiceProvider(findServiceFactory),
+  platform: new PluginServiceProvider(platformServiceFactory),
 };
 
 /**

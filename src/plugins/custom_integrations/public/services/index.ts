@@ -9,12 +9,14 @@
 import { PluginServices } from '../../../presentation_util/public';
 
 import { CustomIntegrationsFindService } from './find';
+import { CustomIntegrationsPlatformService } from './platform';
 
 /**
  * Services used by the custom integrations plugin.
  */
 export interface CustomIntegrationsServices {
   find: CustomIntegrationsFindService;
+  platform: CustomIntegrationsPlatformService;
 }
 
 /**
@@ -27,3 +29,8 @@ export const pluginServices = new PluginServices<CustomIntegrationsServices>();
  * A React hook that provides connections to the `CustomIntegrationsFindService`.
  */
 export const useFindService = () => (() => pluginServices.getHooks().find.useService())();
+
+/**
+ * A React hook that provides connections to the `CustomIntegrationsPlatformService`.
+ */
+export const usePlatformService = () => (() => pluginServices.getHooks().platform.useService())();

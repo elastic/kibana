@@ -24,10 +24,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { CustomIntegration } from '../../../common';
+import { usePlatformService } from '../../services';
 
 export interface Props {
   replacements: Array<Pick<CustomIntegration, 'id' | 'uiInternalPath' | 'title'>>;
 }
+
+// TODO - clintandrewhall: should use doc-links service
+const URL_COMPARISON = 'https://ela.st/beats-agent-comparison';
 
 const idGenerator = htmlIdGenerator('replacementCard');
 const alsoAvailable = i18n.translate('customIntegrations.components.replacementAccordionLabel', {
@@ -35,7 +39,11 @@ const alsoAvailable = i18n.translate('customIntegrations.components.replacementA
 });
 
 const link = (
-  <EuiLink href="#">
+  <EuiLink
+    href={URL_COMPARISON}
+    data-test-subj="customIntegrationsBeatsAgentComparisonLink"
+    external
+  >
     <FormattedMessage
       id="customIntegrations.components.replacementAccordion.comparisonPageLinkLabel"
       defaultMessage="comparison page"
@@ -48,6 +56,7 @@ const link = (
  */
 export const ReplacementCard = ({ replacements }: Props) => {
   const { euiTheme } = useEuiTheme();
+  const { getAbsolutePath } = usePlatformService();
 
   if (replacements.length === 0) {
     return null;
@@ -58,7 +67,7 @@ export const ReplacementCard = ({ replacements }: Props) => {
       <span>
         <EuiButton
           key={replacement.id}
-          href={replacement.uiInternalPath}
+          href={getAbsolutePath(replacement.uiInternalPath)}
           fullWidth={false}
           size="s"
         >
