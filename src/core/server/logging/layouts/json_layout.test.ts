@@ -84,7 +84,7 @@ test('`format()` correctly formats record.', () => {
   }
 });
 
-test('`format()` correctly formats record with meta-data', () => {
+test('`format()` correctly formats record with meta-data and correct ECS version', () => {
   const layout = new JsonLayout();
 
   expect(
@@ -104,7 +104,7 @@ test('`format()` correctly formats record with meta-data', () => {
       })
     )
   ).toStrictEqual({
-    ecs: { version: '1.9.0' },
+    ecs: { version: '1.12.0' },
     '@timestamp': '2012-02-01T09:30:22.011-05:00',
     log: {
       level: 'DEBUG',
@@ -146,7 +146,7 @@ test('`format()` correctly formats error record with meta-data', () => {
       })
     )
   ).toStrictEqual({
-    ecs: { version: '1.9.0' },
+    ecs: { version: expect.any(String) },
     '@timestamp': '2012-02-01T09:30:22.011-05:00',
     log: {
       level: 'DEBUG',
@@ -186,7 +186,7 @@ test('format() meta can merge override logs', () => {
       })
     )
   ).toStrictEqual({
-    ecs: { version: '1.9.0' },
+    ecs: { version: expect.any(String) },
     '@timestamp': '2012-02-01T09:30:22.011-05:00',
     message: 'foo',
     log: {
@@ -216,7 +216,7 @@ test('format() meta can not override message', () => {
       })
     )
   ).toStrictEqual({
-    ecs: { version: '1.9.0' },
+    ecs: { version: expect.any(String) },
     '@timestamp': '2012-02-01T09:30:22.011-05:00',
     message: 'foo',
     log: {
@@ -245,7 +245,7 @@ test('format() meta can not override ecs version', () => {
       })
     )
   ).toStrictEqual({
-    ecs: { version: '1.9.0' },
+    ecs: { version: expect.any(String) },
     '@timestamp': '2012-02-01T09:30:22.011-05:00',
     message: 'foo',
     log: {
@@ -277,7 +277,7 @@ test('format() meta can not override logger or level', () => {
       })
     )
   ).toStrictEqual({
-    ecs: { version: '1.9.0' },
+    ecs: { version: expect.any(String) },
     '@timestamp': '2012-02-01T09:30:22.011-05:00',
     message: 'foo',
     log: {
@@ -306,7 +306,7 @@ test('format() meta can not override timestamp', () => {
       })
     )
   ).toStrictEqual({
-    ecs: { version: '1.9.0' },
+    ecs: { version: expect.any(String) },
     '@timestamp': '2012-02-01T09:30:22.011-05:00',
     message: 'foo',
     log: {
