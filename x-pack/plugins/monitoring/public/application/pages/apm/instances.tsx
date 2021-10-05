@@ -89,26 +89,24 @@ export const ApmInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
       getPageData={getPageData}
       data-test-subj="apmInstancesPage"
     >
-      <div id="apmInstancesReact">
-        <SetupModeRenderer
-          productName="apm"
-          render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
-            <SetupModeContext.Provider value={{ setupModeSupported: true }}>
-              {flyoutComponent}
-              <ApmServerInstances
-                setupMode={setupMode}
-                apms={{
-                  pagination,
-                  sorting,
-                  onTableChange,
-                  data,
-                }}
-              />
-              {bottomBarComponent}
-            </SetupModeContext.Provider>
-          )}
-        />
-      </div>
+      <SetupModeRenderer
+        productName="apm"
+        render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
+          <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+            {flyoutComponent}
+            <ApmServerInstances
+              setupMode={setupMode}
+              apms={{
+                pagination,
+                sorting,
+                onTableChange,
+                data,
+              }}
+            />
+            {bottomBarComponent}
+          </SetupModeContext.Provider>
+        )}
+      />
     </ApmTemplate>
   );
 };

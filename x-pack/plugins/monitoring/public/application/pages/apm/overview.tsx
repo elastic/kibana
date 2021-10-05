@@ -71,9 +71,7 @@ export const ApmOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
       getPageData={getPageData}
       data-test-subj="apmOverviewPage"
     >
-      <div id="apmOverviewReact">
-        {data && <ApmOverview {...data} onBrush={onBrush} zoomInfo={zoomInfo} />}
-      </div>
+      {data && <ApmOverview {...data} onBrush={onBrush} zoomInfo={zoomInfo} />}
     </ApmTemplate>
   );
 };

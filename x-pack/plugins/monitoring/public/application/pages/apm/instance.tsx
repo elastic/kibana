@@ -82,14 +82,12 @@ export const ApmInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
       instance={instance}
       data-test-subj="apmInstancePage"
     >
-      <div id="apmInstanceReact">
-        <ApmServerInstance
-          summary={data.apmSummary || {}}
-          metrics={data.metrics || {}}
-          onBrush={onBrush}
-          zoomInfo={zoomInfo}
-        />
-      </div>
+      <ApmServerInstance
+        summary={data.apmSummary || {}}
+        metrics={data.metrics || {}}
+        onBrush={onBrush}
+        zoomInfo={zoomInfo}
+      />
     </ApmTemplate>
   );
 };
