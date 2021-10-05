@@ -35,10 +35,11 @@ interface FieldSubType {
 
 export class IndexPatternsFetcher {
   private elasticsearchClient: ElasticsearchClient;
-  constructor(elasticsearchClient: ElasticsearchClient) {
+  private allowNoIndices: boolean;
+  constructor(elasticsearchClient: ElasticsearchClient, allowNoIndices: boolean = false) {
     this.elasticsearchClient = elasticsearchClient;
+    this.allowNoIndices = allowNoIndices;
   }
-
   /**
    *  Get a list of field objects for an index pattern that may contain wildcards
    *
@@ -51,21 +52,28 @@ export class IndexPatternsFetcher {
   async getFieldsForWildcard(options: {
     pattern: string | string[];
     metaFields?: string[];
+    fieldCapsOptions?: { allow_no_indices: boolean };
     type?: string;
     rollupIndex?: string;
   }): Promise<FieldDescriptor[]> {
-    const { pattern, metaFields, type, rollupIndex } = options;
+    const { pattern, metaFields, fieldCapsOptions, type, rollupIndex } = options;
     const patternList = Array.isArray(pattern) ? pattern : pattern.split(',');
-
+    let patternListActive: string[] = patternList;
+    // if only one pattern, don't bother with validation. We let getFieldCapabilities fail if the single pattern is bad regardless
+    if (patternList.length > 1) {
+      patternListActive = await this.validatePatternListActive(patternList);
+    }
     const fieldCapsResponse = await getFieldCapabilities(
       this.elasticsearchClient,
-      patternList,
+      // if none of the patterns are active, pass the original list to get an error
+      patternListActive.length > 0 ? patternListActive : patternList,
       metaFields,
       {
-        allow_no_indices: true,
+        allow_no_indices: fieldCapsOptions
+          ? fieldCapsOptions.allow_no_indices
+          : this.allowNoIndices,
       }
     );
-
     if (type === 'rollup' && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];
       const rollupIndexCapabilities = getCapabilitiesForRollupIndices(
@@ -76,13 +84,11 @@ export class IndexPatternsFetcher {
         ).body
       )[rollupIndex].aggs;
       const fieldCapsResponseObj = keyBy(fieldCapsResponse, 'name');
-
       // Keep meta fields
       metaFields!.forEach(
         (field: string) =>
           fieldCapsResponseObj[field] && rollupFields.push(fieldCapsResponseObj[field])
       );
-
       return mergeCapabilitiesWithFields(
         rollupIndexCapabilities,
         fieldCapsResponseObj,
@@ -115,5 +121,32 @@ export class IndexPatternsFetcher {
       throw createNoMatchingIndicesError(pattern);
     }
     return await getFieldCapabilities(this.elasticsearchClient, indices, metaFields);
+  }
+
+  /**
+   *  Returns an index pattern list of only those index pattern strings in the given list that return indices
+   *
+   *  @param patternList string[]
+   *  @return {Promise<string[]>}
+   */
+  async validatePatternListActive(patternList: string[]) {
+    const result = await Promise.all(
+      patternList
+        .map(async (index) => {
+          const searchResponse = await this.elasticsearchClient.fieldCaps({
+            index,
+            fields: '_id',
+            ignore_unavailable: true,
+            allow_no_indices: false,
+          });
+          return searchResponse.body.indices.length > 0;
+        })
+        .map((p) => p.catch(() => false))
+    );
+    return result.reduce(
+      (acc: string[], isValid, patternListIndex) =>
+        isValid ? [...acc, patternList[patternListIndex]] : acc,
+      []
+    );
   }
 }
