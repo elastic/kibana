@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { Curations } from './curations';
-export { CurationCreation } from './curation_creation';
 export { CurationSuggestion } from './curation_suggestion';
