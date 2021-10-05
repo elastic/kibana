@@ -15,7 +15,6 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
   describe('a11y tests', function () {
     describe('using flights sample data', function () {
       before(async () => {
-        console.log('this is the index file');
         await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
           useActualUrl: true,
         });
