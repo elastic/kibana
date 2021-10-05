@@ -151,9 +151,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     ? [
         {
           shortMessage: '',
-          longMessage: i18n.translate('xpack.lens.indexPattern.missingIndexPattern', {
+          longMessage: i18n.translate('xpack.lens.indexPattern.missingDataView', {
             defaultMessage:
-              'The {count, plural, one {index pattern} other {index patterns}} ({count, plural, one {id} other {ids}}: {indexpatterns}) cannot be found',
+              'The {count, plural, one {data view} other {data views}} ({count, plural, one {id} other {ids}}: {indexpatterns}) cannot be found',
             values: {
               count: missingIndexPatterns.length,
               indexpatterns: missingIndexPatterns.join(', '),
@@ -275,7 +275,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     if (suggestionForDraggedField) {
       trackUiEvent('drop_onto_workspace');
       trackUiEvent(expressionExists ? 'drop_non_empty' : 'drop_empty');
-      switchToSuggestion(dispatchLens, suggestionForDraggedField, 'SWITCH_VISUALIZATION');
+      switchToSuggestion(dispatchLens, suggestionForDraggedField, true);
     }
   }, [suggestionForDraggedField, expressionExists, dispatchLens]);
 
@@ -569,8 +569,8 @@ export const VisualizationWrapper = ({
                     })}
                     data-test-subj="configuration-failure-reconfigure-indexpatterns"
                   >
-                    {i18n.translate('xpack.lens.editorFrame.indexPatternReconfigure', {
-                      defaultMessage: `Recreate it in the index pattern management page`,
+                    {i18n.translate('xpack.lens.editorFrame.dataViewReconfigure', {
+                      defaultMessage: `Recreate it in the data view management page`,
                     })}
                   </a>
                 </RedirectAppLinks>
@@ -580,8 +580,8 @@ export const VisualizationWrapper = ({
               <>
                 <p className="eui-textBreakWord" data-test-subj="missing-refs-failure">
                   <FormattedMessage
-                    id="xpack.lens.editorFrame.indexPatternNotFound"
-                    defaultMessage="Index pattern not found"
+                    id="xpack.lens.editorFrame.dataViewNotFound"
+                    defaultMessage="Data view not found"
                   />
                 </p>
                 <p className="eui-textBreakWord lnsSelectableErrorMessage">
