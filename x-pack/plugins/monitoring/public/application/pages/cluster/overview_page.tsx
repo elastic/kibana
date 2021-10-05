@@ -78,8 +78,6 @@ export const ClusterOverview: React.FC<{}> = () => {
       });
 
       setClusters(formatClusters(response));
-    } catch (err) {
-      // TODO: handle errors
     } finally {
       setLoaded(true);
     }

@@ -14,6 +14,7 @@ import { MonitoringTimeContainer } from '../hooks/use_monitoring_time';
 import { PageLoading } from '../../components';
 import { getSetupModeState, isSetupModeFeatureEnabled } from '../setup_mode/setup_mode';
 import { SetupModeFeature } from '../../../common/enums';
+import { ajaxErrorHandlersProvider } from '../../lib/ajax_error_handler';
 
 export interface TabMenuItem {
   id: string;
@@ -55,7 +56,8 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
 
   const onRefresh = () => {
     getPageData?.().catch((err) => {
-      // TODO: handle errors
+      const errorHandler = ajaxErrorHandlersProvider();
+      errorHandler(err);
     });
   };
 

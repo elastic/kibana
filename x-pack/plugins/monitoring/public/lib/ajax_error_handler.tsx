@@ -13,22 +13,43 @@ import { Legacy } from '../legacy_shims';
 import { formatMsg } from '../../../../../src/plugins/kibana_legacy/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 
+function formatAngularErrors(err: any) {
+  return (
+    <EuiText>
+      <p>{err.data.message}</p>
+      <EuiText size="xs">
+        <FormattedMessage
+          id="xpack.monitoring.ajaxErrorHandler.httpErrorMessage"
+          defaultMessage="HTTP {errStatus}"
+          values={{ errStatus: err.status }}
+        />
+      </EuiText>
+    </EuiText>
+  );
+}
+
+function formatReactErrors(err: any) {
+  return (
+    <EuiText>
+      <p>{err.body.message}</p>
+      <EuiText size="xs">
+        <FormattedMessage
+          id="xpack.monitoring.ajaxErrorHandler.httpErrorMessage"
+          defaultMessage="HTTP {errStatus}"
+          values={{ errStatus: err.body.statusCode }}
+        />
+      </EuiText>
+    </EuiText>
+  );
+}
+
 export function formatMonitoringError(err: any) {
   // TODO: We should stop using Boom for errors and instead write a custom handler to return richer error objects
   // then we can do better messages, such as highlighting the Cluster UUID instead of requiring it be part of the message
   if (err.status && err.status !== -1 && err.data) {
-    return (
-      <EuiText>
-        <p>{err.data.message}</p>
-        <EuiText size="xs">
-          <FormattedMessage
-            id="xpack.monitoring.ajaxErrorHandler.httpErrorMessage"
-            defaultMessage="HTTP {errStatus}"
-            values={{ errStatus: err.status }}
-          />
-        </EuiText>
-      </EuiText>
-    );
+    return formatAngularErrors(err);
+  } else if (err.body) {
+    return formatReactErrors(err);
   }
 
   return formatMsg(err);
