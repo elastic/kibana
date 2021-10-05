@@ -285,10 +285,13 @@ const HostRiskDataBlock: React.FC<{
 
       {hostRisk.loading && <EuiLoadingSpinner />}
 
-      {!hostRisk.loading && (!hostRisk.isModuleEnabled || !hostRisk.result) && (
-        <EuiText color="subdued" size="xs">
-          {i18n.NO_HOST_RISK_DATA_DESCRIPTION}
-        </EuiText>
+      {!hostRisk.loading && (!hostRisk.isModuleEnabled || hostRisk.result?.length === 0) && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText color="subdued" size="xs">
+            {i18n.NO_HOST_RISK_DATA_DESCRIPTION}
+          </EuiText>
+        </>
       )}
 
       {hostRisk.isModuleEnabled && hostRisk.result && hostRisk.result.length > 0 && (

@@ -106,7 +106,7 @@ export const useHostsRiskScore = ({
     }
   }, [start, data, timerange, hostName, riskyHostsFeatureEnabled]);
 
-  if (!hostName && !timerange) {
+  if ((!hostName && !timerange) || !riskyHostsFeatureEnabled) {
     return null;
   }
 
