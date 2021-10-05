@@ -10,7 +10,6 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import {
   EuiTitle,
-  EuiLoadingSpinner,
   EuiPanel,
   EuiHorizontalRule,
   EuiFlexGroup,
@@ -18,11 +17,8 @@ import {
   EuiSpacer,
   EuiIcon,
   EuiToolTip,
-  EuiLink,
-  EuiText,
 } from '@elastic/eui';
 import { partition } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
 import * as i18n from './translations';
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 import { getEnrichmentIdentifiers, isInvestigationTimeEnrichment } from './helpers';
@@ -31,8 +27,8 @@ import { FieldsData } from '../types';
 import { ActionCell } from '../table/action_cell';
 import { BrowserField, BrowserFields, TimelineEventsDetailsItem } from '../../../../../common';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
-import { RISKY_HOSTS_DOC_LINK } from '../../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
 import { HostRisk } from '../../../../overview/containers/overview_risky_host_links/use_hosts_risk_score';
+import { HostRiskData } from './host_risk_data';
 
 export interface ThreatSummaryDescription {
   browserField: BrowserField;
@@ -127,7 +123,7 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
-const EnrichedDataRow: React.FC<{ field: string | undefined; value: React.ReactNode }> = ({
+export const EnrichedDataRow: React.FC<{ field: string | undefined; value: React.ReactNode }> = ({
   field,
   value,
 }) => (
@@ -139,10 +135,10 @@ const EnrichedDataRow: React.FC<{ field: string | undefined; value: React.ReactN
   </StyledEuiFlexGroup>
 );
 
-const ThreatSummaryPanelHeader: React.FC<{ title: string; toolTipContent: React.ReactNode }> = ({
-  title,
-  toolTipContent,
-}) => (
+export const ThreatSummaryPanelHeader: React.FC<{
+  title: string;
+  toolTipContent: React.ReactNode;
+}> = ({ title, toolTipContent }) => (
   <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
     <EuiFlexItem>
       <ThreatSummaryPanelTitle>{title}</ThreatSummaryPanelTitle>
@@ -258,51 +254,6 @@ const ThreatSummaryEnrichmentData: React.FC<{
   );
 };
 
-const HostRiskDataBlock: React.FC<{
-  hostRisk: HostRisk;
-}> = ({ hostRisk }) => (
-  <>
-    <EuiPanel hasBorder paddingSize="s" grow={false}>
-      <ThreatSummaryPanelHeader
-        title={i18n.HOST_RISK_DATA_TITLE}
-        toolTipContent={
-          <FormattedMessage
-            id="xpack.securitySolution.alertDetails.overview.hostDataTooltipContent"
-            defaultMessage="Risk classification is displayed only when available for a host. Ensure {hostsRiskScoreDocumentationLink} is enabled within your environment."
-            values={{
-              hostsRiskScoreDocumentationLink: (
-                <EuiLink href={RISKY_HOSTS_DOC_LINK} target="_blank">
-                  <FormattedMessage
-                    id="xpack.securitySolution.alertDetails.overview.hostsRiskScoreLink"
-                    defaultMessage="Host Risk Score"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        }
-      />
-
-      {hostRisk.loading && <EuiLoadingSpinner />}
-
-      {!hostRisk.loading && (!hostRisk.isModuleEnabled || hostRisk.result?.length === 0) && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText color="subdued" size="xs">
-            {i18n.NO_HOST_RISK_DATA_DESCRIPTION}
-          </EuiText>
-        </>
-      )}
-
-      {hostRisk.isModuleEnabled && hostRisk.result && hostRisk.result.length > 0 && (
-        <>
-          <EnrichedDataRow field={'host.risk.keyword'} value={hostRisk.result[0].risk} />
-        </>
-      )}
-    </EuiPanel>
-  </>
-);
-
 const ThreatSummaryViewComponent: React.FC<{
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
@@ -325,7 +276,7 @@ const ThreatSummaryViewComponent: React.FC<{
       </EuiTitle>
       <EuiSpacer size="m" />
 
-      {hostRisk && <HostRiskDataBlock hostRisk={hostRisk} />}
+      {hostRisk && <HostRiskData hostRisk={hostRisk} />}
 
       {hostRisk && enrichments.length > 0 && <EuiSpacer size="m" />}
 
