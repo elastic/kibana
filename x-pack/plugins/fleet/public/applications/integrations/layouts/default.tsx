@@ -103,12 +103,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, ch
           ),
           isSelected: section === 'manage',
           href: getHref('integrations_installed'),
-          tooltipContent: (
-            <Fragment>
-              View installed Elastic Agent integrations.
-              <a href={learnMoreBlogPost}>Learn more.</a>
-            </Fragment>
-          ),
+          tooltipContent: <Fragment>View installed Elastic Agent integrations.</Fragment>,
         },
       ]}
     >
