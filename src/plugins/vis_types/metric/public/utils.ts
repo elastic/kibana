@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ColorSchemas, getHeatmapColors } from 'src/plugins/charts/common';
+import { ColorSchemas, getHeatmapColors } from '../../../charts/common';
 import { Range } from '../../../expressions';
 
 export interface PaletteConfig {
