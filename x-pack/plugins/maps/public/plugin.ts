@@ -74,7 +74,8 @@ import {
   MapsAppRegionMapLocatorDefinition,
   MapsAppTileMapLocatorDefinition,
 } from './locators';
-import { SecurityPluginStart } from '../../security/public';
+import type { SecurityPluginStart } from '../../security/public';
+import type { SpacesPluginStart } from '../../spaces/public';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -103,6 +104,7 @@ export interface MapsPluginStartDependencies {
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   security: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 /**
