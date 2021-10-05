@@ -257,3 +257,19 @@ export interface DeprecationLoggingStatus {
   isDeprecationLogIndexingEnabled: boolean;
   isDeprecationLoggingEnabled: boolean;
 }
+
+export type UPGRADE_STATUS = 'UPGRADE_NEEDED' | 'NO_UPGRADE_NEEDED' | 'IN_PROGRESS';
+export interface SystemIndicesUpgradeFeature {
+  id?: string;
+  feature_name: string;
+  minimum_index_version: string;
+  upgrade_status: UPGRADE_STATUS;
+  indices: Array<{
+    index: string;
+    version: string;
+  }>;
+}
+export interface SystemIndicesUpgradeStatus {
+  features: SystemIndicesUpgradeFeature[];
+  upgrade_status: UPGRADE_STATUS;
+}
