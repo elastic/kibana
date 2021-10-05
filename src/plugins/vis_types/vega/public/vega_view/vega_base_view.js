@@ -191,6 +191,11 @@ export class VegaBaseView {
     return idxObj.id;
   }
 
+  handleExternalUrlError(externalUrlError) {
+    this.onError(externalUrlError);
+    throw externalUrlError;
+  }
+
   createViewConfig() {
     const config = {
       expr: expressionInterpreter,
@@ -206,9 +211,9 @@ export class VegaBaseView {
         // because user can only supply pure JSON data structure.
         uri = uri.url;
       } else if (!this._enableExternalUrls) {
-        this.onError(getExternalUrlsAreNotEnabledError());
-      } else if (!this._externalUrl.validateUrl(uri)) {
-        this.onError(getExternalUrlServiceError(uri));
+        this.handleExternalUrlError(getExternalUrlsAreNotEnabledError());
+      } else if (this._externalUrl.validateUrl(uri)) {
+        this.handleExternalUrlError(getExternalUrlServiceError(uri));
       }
       const result = await originalSanitize(uri, options);
       // This will allow Vega users to load images from any domain.
