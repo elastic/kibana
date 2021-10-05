@@ -43,7 +43,7 @@ const columns: Array<EuiBasicTableColumn<CurationSuggestion>> = [
         {curation.override_curation_id && (
           <>
             {' '}
-            <EuiBadge iconType="warning" color="warning">
+            <EuiBadge iconType="alert" color="warning">
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engine.curations.suggestionsTable.overridesLabel',
                 { defaultMessage: 'Overrides' }
