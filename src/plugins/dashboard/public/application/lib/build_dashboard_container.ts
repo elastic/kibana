@@ -153,6 +153,27 @@ export const buildDashboardContainer = async ({
     );
   }
 
+  // TEMPORARY
+  const TEMP_FIELD = {
+    name: 'category.keyword',
+    type: 'string',
+    aggregatable: true,
+  };
+
+  const TEMP_INDEX_PATTERN = {
+    title: 'kibana_sample_data_ecommerce',
+    fields: [TEMP_FIELD],
+  };
+
+  const TEMP_INPUT = {
+    id: 'blah blah',
+    field: TEMP_FIELD,
+    indexPattern: TEMP_INDEX_PATTERN,
+    multiSelect: false,
+  };
+
+  dashboardContainer.addNewEmbeddable<EmbeddableInput>('optionsListControl', TEMP_INPUT);
+
   return dashboardContainer;
 };
 

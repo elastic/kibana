@@ -54,6 +54,13 @@ export {
   SolutionToolbarPopover,
 } from './components/solution_toolbar';
 
+export {
+  OptionsListEmbeddableFactory,
+  OptionsListEmbeddable,
+  OptionsListDataFetcher,
+  OptionsListDataFetchProps,
+} from './components/input_controls/control_types/options_list';
+
 export function plugin() {
   return new PresentationUtilPlugin();
 }
