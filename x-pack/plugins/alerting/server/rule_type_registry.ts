@@ -171,6 +171,21 @@ export class RuleTypeRegistry {
         })
       );
     }
+    // validate ruleTypeTimeout here
+    if (alertType.ruleTaskTimeout) {
+      const invalidTimeout = validateDurationSchema(alertType.ruleTaskTimeout);
+      if (invalidTimeout) {
+        throw new Error(
+          i18n.translate('xpack.alerting.ruleTypeRegistry.register.invalidTimeoutAlertTypeError', {
+            defaultMessage: 'Rule type "{id}" has invalid timeout: {errorMessage}.',
+            values: {
+              id: alertType.id,
+              errorMessage: invalidTimeout,
+            },
+          })
+        );
+      }
+    }
     alertType.actionVariables = normalizedActionVariables(alertType.actionVariables);
 
     // validate defaultInterval here
@@ -229,6 +244,7 @@ export class RuleTypeRegistry {
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
         title: alertType.name,
+        timeout: alertType.ruleTaskTimeout,
         createTaskRunner: (context: RunContext) =>
           this.taskRunnerFactory.create<
             Params,

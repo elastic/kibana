@@ -159,8 +159,8 @@ export interface AlertType<
   isExportable: boolean;
   defaultInterval?: string;
   minimumInterval?: string;
+  ruleTaskTimeout?: string;
 }
-
 export type UntypedAlertType = AlertType<
   AlertTypeParams,
   AlertTypeState,
