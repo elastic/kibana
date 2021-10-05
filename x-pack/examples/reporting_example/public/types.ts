@@ -26,4 +26,4 @@ export interface StartDeps {
   reporting: ReportingStart;
 }
 
-export type MyForwardableState = Record<string, unknown>;
+export type MyForwardableState = Record<string, unknown> & { captureTest: 'printOptimized' };

@@ -23,41 +23,41 @@ import {
   EuiTitle,
   EuiCodeBlock,
   EuiSpacer,
+  EuiLink,
+  EuiContextMenuProps,
 } from '@elastic/eui';
 import moment from 'moment';
 import { I18nProvider } from '@kbn/i18n/react';
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
+import { parsePath } from 'history';
+import { BrowserRouter as Router, useHistory } from 'react-router-dom';
 import * as Rx from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
-import { constants, ReportingStart } from '../../../../../x-pack/plugins/reporting/public';
+import { constants, ReportingStart } from '../../../../plugins/reporting/public';
 import type { JobParamsPDFV2 } from '../../../../plugins/reporting/server/export_types/printable_pdf_v2/types';
 import type { JobParamsPNGV2 } from '../../../../plugins/reporting/server/export_types/png_v2/types';
 
 import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
 
-import { MyForwardableState } from '../types';
+import { useApplicationContext } from '../application_context';
+import { ROUTES } from '../constants';
 
 interface ReportingExampleAppProps {
   basename: string;
   reporting: ReportingStart;
   screenshotMode: ScreenshotModePluginSetup;
-  forwardedParams?: MyForwardableState;
 }
 
 const sourceLogos = ['Beats', 'Cloud', 'Logging', 'Kibana'];
 
-export const ReportingExampleApp = ({
-  basename,
-  reporting,
-  screenshotMode,
-  forwardedParams,
-}: ReportingExampleAppProps) => {
+export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAppProps) => {
+  const history = useHistory();
+  const { forwardedState } = useApplicationContext();
   useEffect(() => {
     // eslint-disable-next-line no-console
-    console.log('forwardedParams', forwardedParams);
-  }, [forwardedParams]);
+    console.log('forwardedState', forwardedState);
+  }, [forwardedState]);
 
   // Context Menu
   const [isPopoverOpen, setPopover] = useState(false);
@@ -123,12 +123,13 @@ export const ReportingExampleApp = ({
     };
   };
 
-  const panels = [
+  const panels: EuiContextMenuProps['panels'] = [
     {
       id: 0,
       items: [
         { name: 'PDF Reports', icon: 'document', panel: 1 },
         { name: 'PNG Reports', icon: 'document', panel: 7 },
+        { name: 'Capture test', icon: 'document', panel: 8, 'data-test-subj': 'captureTest' },
       ],
     },
     {
@@ -140,6 +141,12 @@ export const ReportingExampleApp = ({
         { name: 'Default layout V2', icon: 'document', panel: 4 },
         { name: 'Canvas Layout Option', icon: 'canvasApp', panel: 3 },
       ],
+    },
+    {
+      id: 8,
+      initialFocusedItemIndex: 0,
+      title: 'Capture test',
+      items: [{ name: 'Print optimised PDF', icon: 'document', panel: 9 }],
     },
     {
       id: 7,
@@ -188,6 +195,16 @@ export const ReportingExampleApp = ({
         />
       ),
     },
+    {
+      id: 9,
+      title: 'Print optimised PNG',
+      content: (
+        <reporting.components.ReportingPanelPNGV2
+          getJobParams={getPNGJobParamsDefaultV2} // TODO: Get the correct params here!
+          onClose={closePopover}
+        />
+      ),
+    },
   ];
 
   return (
@@ -207,30 +224,41 @@ export const ReportingExampleApp = ({
                 </EuiTitle>
                 <EuiSpacer />
                 <EuiText>
-                  <EuiPopover
-                    id="contextMenuExample"
-                    button={<EuiButton onClick={onButtonClick}>Share</EuiButton>}
-                    isOpen={isPopoverOpen}
-                    closePopover={closePopover}
-                    panelPaddingSize="none"
-                    anchorPosition="downLeft"
-                  >
-                    <EuiContextMenu initialPanelId={0} panels={panels} />
-                  </EuiPopover>
+                  <EuiFlexGroup alignItems="center" gutterSize="l">
+                    <EuiFlexItem grow={false}>
+                      <EuiPopover
+                        id="contextMenuExample"
+                        button={<EuiButton onClick={onButtonClick}>Share</EuiButton>}
+                        isOpen={isPopoverOpen}
+                        closePopover={closePopover}
+                        panelPaddingSize="none"
+                        anchorPosition="downLeft"
+                      >
+                        <EuiContextMenu initialPanelId={0} panels={panels} />
+                      </EuiPopover>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <EuiLink href={history.createHref(parsePath(ROUTES.captureTest))}>
+                          Go to capture test
+                        </EuiLink>
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
 
                   <EuiHorizontalRule />
 
                   <div data-shared-items-container data-shared-items-count="5">
                     <EuiFlexGroup gutterSize="l">
                       <EuiFlexItem data-shared-item>
-                        {forwardedParams ? (
+                        {forwardedState ? (
                           <>
                             <EuiText>
                               <p>
                                 <strong>Forwarded app state</strong>
                               </p>
                             </EuiText>
-                            <EuiCodeBlock>{JSON.stringify(forwardedParams)}</EuiCodeBlock>
+                            <EuiCodeBlock>{JSON.stringify(forwardedState)}</EuiCodeBlock>
                           </>
                         ) : (
                           <>
