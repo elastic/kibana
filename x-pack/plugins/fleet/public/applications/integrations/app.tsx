@@ -201,13 +201,15 @@ export const IntegrationsAppContext: React.FC<{
                 <EuiThemeProvider darkMode={isDarkMode}>
                   <UIExtensionsContext.Provider value={extensions}>
                     <FleetStatusProvider>
-                      <Router history={history}>
-                        <AgentPolicyContextProvider>
-                          <PackageInstallProvider notifications={startServices.notifications}>
-                            {children}
-                          </PackageInstallProvider>
-                        </AgentPolicyContextProvider>
-                      </Router>
+                      <startServices.customIntegrations.ContextProvider>
+                        <Router history={history}>
+                          <AgentPolicyContextProvider>
+                            <PackageInstallProvider notifications={startServices.notifications}>
+                              {children}
+                            </PackageInstallProvider>
+                          </AgentPolicyContextProvider>
+                        </Router>
+                      </startServices.customIntegrations.ContextProvider>
                     </FleetStatusProvider>
                   </UIExtensionsContext.Provider>
                 </EuiThemeProvider>
