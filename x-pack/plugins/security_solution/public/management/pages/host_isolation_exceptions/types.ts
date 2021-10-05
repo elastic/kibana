@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  ExceptionListItemSchema,
+  FoundExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { AsyncResourceState } from '../../state/async_resource_state';
 
 export interface HostIsolationExceptionsPageLocation {
@@ -20,4 +23,8 @@ export interface HostIsolationExceptionsPageLocation {
 export interface HostIsolationExceptionsPageState {
   entries: AsyncResourceState<FoundExceptionListItemSchema>;
   location: HostIsolationExceptionsPageLocation;
+  deletion: {
+    item?: ExceptionListItemSchema;
+    status: AsyncResourceState<ExceptionListItemSchema>;
+  };
 }

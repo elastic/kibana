@@ -20,6 +20,7 @@ import {
 import {
   getLastLoadedResourceState,
   isFailedResourceState,
+  isLoadedResourceState,
   isLoadingResourceState,
 } from '../../../state/async_resource_state';
 import { HostIsolationExceptionsPageState } from '../types';
@@ -73,3 +74,37 @@ export const getListFetchError: HostIsolationExceptionsSelector<
 export const getCurrentLocation: HostIsolationExceptionsSelector<StoreState['location']> = (
   state
 ) => state.location;
+
+export const getDeletionState: HostIsolationExceptionsSelector<StoreState['deletion']> =
+  createSelector(getCurrentListPageState, (listState) => listState.deletion);
+
+export const showDeleteModal: HostIsolationExceptionsSelector<boolean> = createSelector(
+  getDeletionState,
+  ({ item }) => {
+    return Boolean(item);
+  }
+);
+
+export const getItemToDelete: HostIsolationExceptionsSelector<StoreState['deletion']['item']> =
+  createSelector(getDeletionState, ({ item }) => item);
+
+export const isDeletionInProgress: HostIsolationExceptionsSelector<boolean> = createSelector(
+  getDeletionState,
+  ({ status }) => {
+    return isLoadingResourceState(status);
+  }
+);
+
+export const wasDeletionSuccessful: HostIsolationExceptionsSelector<boolean> = createSelector(
+  getDeletionState,
+  ({ status }) => {
+    return isLoadedResourceState(status);
+  }
+);
+
+export const getDeleteError: HostIsolationExceptionsSelector<ServerApiError | undefined> =
+  createSelector(getDeletionState, ({ status }) => {
+    if (isFailedResourceState(status)) {
+      return status.error;
+    }
+  });

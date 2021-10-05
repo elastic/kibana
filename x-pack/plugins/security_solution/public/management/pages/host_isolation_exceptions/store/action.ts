@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Action } from 'redux';
 import { HostIsolationExceptionsPageState } from '../types';
 
@@ -13,4 +14,19 @@ export type HostIsolationExceptionsPageDataChanged =
     payload: HostIsolationExceptionsPageState['entries'];
   };
 
-export type HostIsolationExceptionsPageAction = HostIsolationExceptionsPageDataChanged;
+export type HostIsolationExceptionsDeleteItem = Action<'hostIsolationExceptionsMarkToDelete'> & {
+  payload?: ExceptionListItemSchema;
+};
+
+export type HostIsolationExceptionsSubmitDelete = Action<'hostIsolationExceptionsSubmitDelete'>;
+
+export type HostIsolationExceptionsDeleteStatusChanged =
+  Action<'hostIsolationExceptionsDeleteStatusChanged'> & {
+    payload: HostIsolationExceptionsPageState['deletion']['status'];
+  };
+
+export type HostIsolationExceptionsPageAction =
+  | HostIsolationExceptionsPageDataChanged
+  | HostIsolationExceptionsDeleteItem
+  | HostIsolationExceptionsSubmitDelete
+  | HostIsolationExceptionsDeleteStatusChanged;

@@ -16,4 +16,8 @@ export const initialHostIsolationExceptionsPageState = (): HostIsolationExceptio
     page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
     filter: '',
   },
+  deletion: {
+    item: undefined,
+    status: createUninitialisedResourceState(),
+  },
 });
