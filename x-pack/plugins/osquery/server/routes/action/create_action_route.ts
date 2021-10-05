@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { reduce, pick } from 'lodash';
+import { pickBy } from 'lodash';
 import uuid from 'uuid';
 import moment from 'moment-timezone';
 
@@ -23,6 +23,7 @@ import {
 
 import { incrementCount } from '../usage';
 import { getInternalSavedObjectsClient } from '../../usage/collector';
+import { convertECSMappingToObject } from '../utils';
 
 export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
@@ -65,18 +66,6 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
         const savedQuery =
           request.body.savedQueryId &&
           (await soClient.get(savedQuerySavedObjectType, request.body.savedQueryId));
-        const ecsMappingObject = savedQuery?.attributes.ecs_mapping
-          ? {
-              ecs_mapping: reduce(
-                savedQuery?.attributes.ecs_mapping,
-                (acc, { value, field }) => {
-                  acc[value] = { field };
-                  return acc;
-                },
-                {}
-              ),
-            }
-          : {};
 
         const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
         const action = {
@@ -87,11 +76,11 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           input_type: 'osquery',
           agents: selectedAgents,
           user_id: currentUser,
-          data: {
+          data: pickBy({
             id: uuid.v4(),
             query: request.body.query,
-            ...ecsMappingObject,
-          },
+            ecs_mapping: convertECSMappingToObject(savedQuery?.attributes.ecs_mapping),
+          }),
         };
         const actionResponse = await esClient.index<{}, {}>({
           index: '.fleet-actions',

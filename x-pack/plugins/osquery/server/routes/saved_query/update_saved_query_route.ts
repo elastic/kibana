@@ -7,14 +7,11 @@
 
 import { pickBy } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { produce } from 'immer';
 
 import { PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
-import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
+import { savedQuerySavedObjectType } from '../../../common/types';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PackagePolicy } from '../../../../fleet/common';
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 
 export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {

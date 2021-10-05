@@ -25,6 +25,7 @@ interface UseSavedQueryFormProps {
 export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryFormProps) => {
   const { data } = useSavedQueries({});
   const ids: string[] = useMemo<string[]>(
+    // @ts-expect-error update types
     () => data?.saved_objects.map((obj) => obj.attributes.id) ?? [],
     [data]
   );
@@ -42,7 +43,6 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
     id: SAVED_QUERY_FORM_ID + uuid.v4(),
     schema: formSchema,
     onSubmit: async (formData, isValid) => {
-      console.error('formData', formData, isValid);
       if (isValid) {
         try {
           await handleSubmit(formData);
@@ -72,6 +72,7 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
           // @ts-expect-error update types
           delete draft.ecs_mapping;
         }
+        // @ts-expect-error update types
         draft.interval = draft.interval + '';
         return draft;
       }),

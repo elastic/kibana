@@ -51,10 +51,7 @@ const NewSavedQueryPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn}>
-      {
-        // @ts-expect-error update types
-        <NewSavedQueryForm handleSubmit={mutateAsync} />
-      }
+      <NewSavedQueryForm handleSubmit={mutateAsync} />
     </WithHeaderLayout>
   );
 };

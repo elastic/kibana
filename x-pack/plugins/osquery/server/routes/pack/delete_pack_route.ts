@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { has, filter } from 'lodash';
+import { has, filter, unset } from 'lodash';
 import { produce } from 'immer';
 import { schema } from '@kbn/config-schema';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../fleet/common';
@@ -21,7 +21,9 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
     {
       path: '/internal/osquery/packs/{id}',
       validate: {
-        params: schema.object({}, { unknowns: 'allow' }),
+        params: schema.object({
+          id: schema.string(),
+        }),
       },
       options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
     },
@@ -30,17 +32,20 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       const savedObjectsClient = context.core.savedObjects.client;
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
 
-      const currentPackSO = await savedObjectsClient.get(packSavedObjectType, request.params.id);
+      const currentPackSO = await savedObjectsClient.get<{ name: string }>(
+        packSavedObjectType,
+        request.params.id
+      );
 
       await savedObjectsClient.delete(packSavedObjectType, request.params.id, {
         refresh: 'wait_for',
       });
 
-      const { items: packagePolicies } = await packagePolicyService?.list(savedObjectsClient, {
+      const { items: packagePolicies } = (await packagePolicyService?.list(savedObjectsClient, {
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
         perPage: 1000,
         page: 1,
-      });
+      })) ?? { items: [] };
       const currentPackagePolicies = filter(packagePolicies, (packagePolicy) =>
         has(packagePolicy, `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}`)
       );
@@ -52,8 +57,11 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             esClient,
             packagePolicy.id,
             produce(packagePolicy, (draft) => {
-              delete packagePolicy.id;
-              delete draft.inputs[0].config.osquery.value.packs[currentPackSO.attributes.name];
+              unset(draft, 'id');
+              unset(
+                draft,
+                `inputs[0].config.osquery.value.packs.${[currentPackSO.attributes.name]}`
+              );
               return draft;
             })
           )

@@ -6,20 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import {
-  set,
-  unset,
-  has,
-  difference,
-  filter,
-  find,
-  map,
-  mapKeys,
-  pickBy,
-  uniq,
-  reduce,
-  pick,
-} from 'lodash';
+import { set, unset, has, difference, filter, find, map, mapKeys, pickBy, uniq } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
 import {
@@ -30,9 +17,10 @@ import {
 import { IRouter } from '../../../../../../src/core/server';
 
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
-import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
+import { packSavedObjectType } from '../../../common/types';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
+import { convertSOQueriesToPack, convertPackQueriesToSO } from './utils';
 
 export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.put(
@@ -94,73 +82,27 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         : {};
       const agentPolicyIds = Object.keys(agentPolicies);
 
-      const normalizedQueries =
-        queries &&
-        reduce(
-          queries,
-          (acc, value, key) => {
-            const ecsMapping =
-              value.ecs_mapping &&
-              reduce(
-                value.ecs_mapping,
-                (acc, value, key) => {
-                  acc.push({ value: key, ...value });
-                  return acc;
-                },
-                []
-              );
-            acc.push({
-              id: key,
-              ...pick(value, ['query', 'interval', 'platform', 'version']),
-              ...(ecsMapping?.length ? { ecs_mapping: ecsMapping } : {}),
-            });
-            return acc;
-          },
-          []
-        );
-
       await savedObjectsClient.update(
         packSavedObjectType,
         request.params.id,
         {
           enabled,
-          ...(normalizedQueries ? { queries: normalizedQueries } : {}),
           ...pickBy({
             name,
             description,
+            queries: convertPackQueriesToSO(queries),
             updated_at: moment().toISOString(),
             updated_by: currentUser,
           }),
         },
-        policy_ids || queries
+        policy_ids
           ? {
               refresh: 'wait_for',
-              references: produce(currentPackSO.references, (draft) => {
-                const nonAgentPolicyOrSavedQueryReferences = filter(
-                  draft,
-                  (reference) =>
-                    ![AGENT_POLICY_SAVED_OBJECT_TYPE, savedQuerySavedObjectType].includes(
-                      reference.type
-                    )
-                );
-                const agentPolicyReferences = filter(
-                  draft,
-                  (reference) => AGENT_POLICY_SAVED_OBJECT_TYPE === reference.type
-                );
-
-                draft = [
-                  ...nonAgentPolicyOrSavedQueryReferences,
-                  ...(policy_ids
-                    ? policy_ids.map((id) => ({
-                        id,
-                        name: agentPolicies[id].name,
-                        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-                      }))
-                    : agentPolicyReferences),
-                ];
-
-                return draft;
-              }),
+              references: policy_ids.map((id) => ({
+                id,
+                name: agentPolicies[id].name,
+                type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+              })),
             }
           : {
               refresh: 'wait_for',
@@ -175,32 +117,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       const updatedPackSO = await savedObjectsClient.get<{
         name: string;
         enabled: boolean;
-        queries: Record<string, any>;
+        queries: Record<string, unknown>;
       }>(packSavedObjectType, request.params.id);
 
-      const packagePolicyQueries = reduce(
-        updatedPackSO.attributes.queries,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        (acc, { id: queryId, ecs_mapping, ...query }) => {
-          acc[queryId] = {
-            ...query,
-            ecs_mapping: reduce(
-              ecs_mapping,
-              (acc2, { value, field }) => {
-                acc2[value] = {
-                  field,
-                };
-                return acc2;
-              },
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              {} as Record<string, any>
-            ),
-          };
-          return acc;
-        },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        {} as Record<string, any>
-      );
+      updatedPackSO.attributes.queries = convertSOQueriesToPack(updatedPackSO.attributes.queries);
 
       if (enabled != null && enabled !== currentPackSO.attributes.enabled) {
         if (enabled) {
@@ -224,7 +144,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       draft,
                       `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                       {
-                        queries: packagePolicyQueries,
+                        queries: updatedPackSO.attributes.queries,
                       }
                     );
                     return draft;
@@ -260,10 +180,6 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           difference(currentAgentPolicyIds, agentPolicyIdsToRemove)
         );
         const agentPolicyIdsToAdd = uniq(difference(agentPolicyIds, currentAgentPolicyIds));
-
-        // console.log('agentPolicyToRemove', agentPolicyIdsToRemove);
-        // console.log('agentPolicyIdsToUpdate', agentPolicyIdsToUpdate);
-        // console.log('agentPolicyToAdd', agentPolicyIdsToAdd);
 
         await Promise.all(
           agentPolicyIdsToRemove.map((agentPolicyId) => {
@@ -307,7 +223,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     draft,
                     `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                     {
-                      queries: packagePolicyQueries,
+                      queries: updatedPackSO.attributes.queries,
                     }
                   );
                   return draft;
@@ -335,7 +251,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     draft,
                     `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                     {
-                      queries: packagePolicyQueries,
+                      queries: updatedPackSO.attributes.queries,
                     }
                   );
                   return draft;

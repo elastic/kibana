@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { has, mapKeys, reduce, pick, set, unset, find } from 'lodash';
+import { has, mapKeys, set, unset, find } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
 import {
@@ -19,6 +19,7 @@ import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
+import { convertPackQueriesToSO } from './utils';
 
 export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
@@ -83,35 +84,12 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           }))
         : [];
 
-      const normalizedQueries = reduce(
-        queries,
-        (acc, value, key) => {
-          const ecsMapping =
-            value.ecs_mapping &&
-            reduce(
-              value.ecs_mapping,
-              (acc, value, key) => {
-                acc.push({ value: key, ...value });
-                return acc;
-              },
-              []
-            );
-          acc.push({
-            id: key,
-            ...pick(value, ['query', 'interval', 'platform', 'version']),
-            ecs_mapping: ecsMapping,
-          });
-          return acc;
-        },
-        []
-      );
-
       const packSO = await savedObjectsClient.create(
         packSavedObjectType,
         {
           name,
           description,
-          queries: normalizedQueries,
+          queries: convertPackQueriesToSO(queries),
           enabled,
           created_at: moment().toISOString(),
           created_by: currentUser,
@@ -148,6 +126,9 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           })
         );
       }
+
+      // @ts-expect-error update types
+      packSO.attributes.queries = queries;
 
       return response.ok({ body: packSO });
     }

@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
 import { savedQuerySavedObjectType } from '../../../common/types';
+import { convertECSMappingToObject } from '../utils';
 
 export const readSavedQueryRoute = (router: IRouter) => {
   router.get(
