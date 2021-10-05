@@ -12,7 +12,13 @@ import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRulesActionsSavedObject } from './legacy_get_rule_actions_saved_object';
 // eslint-disable-next-line no-restricted-imports
-import { legacyGetThrottleOptions } from './legacy_utils';
+import {
+  legacyGetActionReference,
+  legacyGetRuleReference,
+  legacyGetThrottleOptions,
+  legacyTransformActionToReference,
+  legacyTransformLegacyRuleAlertActionToReference,
+} from './legacy_utils';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
 import { AlertAction } from '../../../../../alerting/common';
@@ -40,19 +46,11 @@ export const legacyUpdateRuleActionsSavedObject = async ({
   throttle,
   ruleActions,
 }: LegacyUpdateRuleActionsSavedObject): Promise<void> => {
-  const referenceWithAlertId = [{ id: ruleAlertId, type: 'alert', name: 'alert_0' }];
+  const referenceWithAlertId = [legacyGetRuleReference(ruleAlertId)];
   const actionReferences =
     actions != null
-      ? actions.map((action, index) => ({
-          id: action.id,
-          type: 'action',
-          name: `action_${index}`,
-        }))
-      : ruleActions.actions.map((action, index) => ({
-          id: action.id,
-          type: 'action',
-          name: `action_${index}`,
-        }));
+      ? actions.map((action, index) => legacyGetActionReference(action.id, index))
+      : ruleActions.actions.map((action, index) => legacyGetActionReference(action.id, index));
 
   const references: SavedObjectReference[] = [...referenceWithAlertId, ...actionReferences];
   const throttleOptions = throttle
@@ -65,19 +63,10 @@ export const legacyUpdateRuleActionsSavedObject = async ({
   const attributes: LegacyIRuleActionsAttributesSavedObjectAttributes = {
     actions:
       actions != null
-        ? actions.map(({ group, params, actionTypeId }, index) => ({
-            actionRef: `action_${index}`,
-            group,
-            params,
-            action_type_id: actionTypeId,
-          }))
-        : // eslint-disable-next-line @typescript-eslint/naming-convention
-          ruleActions.actions.map(({ group, params, action_type_id }, index) => ({
-            actionRef: `action_${index}`,
-            group,
-            params,
-            action_type_id,
-          })),
+        ? actions.map((alertAction, index) => legacyTransformActionToReference(alertAction, index))
+        : ruleActions.actions.map((alertAction, index) =>
+            legacyTransformLegacyRuleAlertActionToReference(alertAction, index)
+          ),
     ...throttleOptions,
   };
 

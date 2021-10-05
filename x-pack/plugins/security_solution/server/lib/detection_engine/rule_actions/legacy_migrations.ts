@@ -19,6 +19,12 @@ import {
   LegacyRuleAlertAction,
   LegacyRuleAlertSavedObjectAction,
 } from './legacy_types';
+// eslint-disable-next-line no-restricted-imports
+import {
+  legacyGetActionReference,
+  legacyGetRuleReference,
+  legacyTransformLegacyRuleAlertActionToReference,
+} from './legacy_utils';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -224,23 +230,17 @@ export const legacyMigrateRuleAlertId = (
         return [];
       }
       return [
-        {
-          // we as cast it to the pre-7.16 version to get the old id from it
-          id: (action as unknown as LegacyRuleAlertAction).id,
-          name: `action_${index}`,
-          type: 'action',
-        },
+        // we as cast it to the pre-7.16 version to get the old id from it
+        legacyGetActionReference((action as unknown as LegacyRuleAlertAction).id, index),
       ];
     });
 
-    const actionsWithRef = actions.map<LegacyRuleAlertSavedObjectAction>(
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      ({ group, params, action_type_id }, index) => ({
-        group,
-        params,
-        action_type_id,
-        actionRef: `action_${index}`,
-      })
+    const actionsWithRef = actions.map((action, index) =>
+      // we as cast it to the pre-7.16 version to pass it to get the actions with ref.
+      legacyTransformLegacyRuleAlertActionToReference(
+        action as unknown as LegacyRuleAlertAction,
+        index
+      )
     );
     return {
       ...doc,
@@ -273,12 +273,6 @@ export const legacyMigrateAlertId = ({
   if (existingReferenceFound) {
     return [];
   } else {
-    return [
-      {
-        id: ruleAlertId,
-        name: 'alert_0',
-        type: 'alert',
-      },
-    ];
+    return [legacyGetRuleReference(ruleAlertId)];
   }
 };

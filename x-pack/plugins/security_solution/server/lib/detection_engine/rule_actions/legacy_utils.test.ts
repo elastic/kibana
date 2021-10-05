@@ -6,14 +6,26 @@
  */
 
 import { SavedObjectsUpdateResponse } from 'kibana/server';
+import { AlertAction } from '../../../../../alerting/common';
+
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
 
 // eslint-disable-next-line no-restricted-imports
-import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
+import {
+  LegacyIRuleActionsAttributesSavedObjectAttributes,
+  LegacyRuleAlertAction,
+} from './legacy_types';
 
 // eslint-disable-next-line no-restricted-imports
-import { legacyGetRuleActionsFromSavedObject, legacyGetThrottleOptions } from './legacy_utils';
+import {
+  legacyGetActionReference,
+  legacyGetRuleActionsFromSavedObject,
+  legacyGetRuleReference,
+  legacyGetThrottleOptions,
+  legacyTransformActionToReference,
+  legacyTransformLegacyRuleAlertActionToReference,
+} from './legacy_utils';
 
 describe('legacy_utils', () => {
   describe('legacyGetRuleActionsFromSavedObject', () => {
@@ -286,6 +298,106 @@ describe('legacy_utils', () => {
       expect(legacyGetThrottleOptions('rule')).toEqual<FuncReturn>({
         alertThrottle: null,
         ruleThrottle: 'rule',
+      });
+    });
+  });
+
+  describe('legacyGetRuleReference', () => {
+    type FuncReturn = ReturnType<typeof legacyGetRuleReference>;
+
+    test('it returns the id transformed', () => {
+      expect(legacyGetRuleReference('123')).toEqual<FuncReturn>({
+        id: '123',
+        name: 'alert_0',
+        type: 'alert',
+      });
+    });
+  });
+
+  describe('legacyGetActionReference', () => {
+    type FuncReturn = ReturnType<typeof legacyGetActionReference>;
+
+    test('it returns the id and index transformed with the index at 0', () => {
+      expect(legacyGetActionReference('123', 0)).toEqual<FuncReturn>({
+        id: '123',
+        name: 'action_0',
+        type: 'action',
+      });
+    });
+
+    test('it returns the id and index transformed with the index at 1', () => {
+      expect(legacyGetActionReference('123', 1)).toEqual<FuncReturn>({
+        id: '123',
+        name: 'action_1',
+        type: 'action',
+      });
+    });
+  });
+
+  describe('legacyTransformActionToReference', () => {
+    type FuncReturn = ReturnType<typeof legacyTransformActionToReference>;
+    const alertAction: AlertAction = {
+      id: '123',
+      group: 'group_1',
+      params: {
+        test: '123',
+      },
+      actionTypeId: '567',
+    };
+
+    test('it returns the id and index transformed with the index at 0', () => {
+      expect(legacyTransformActionToReference(alertAction, 0)).toEqual<FuncReturn>({
+        actionRef: 'action_0',
+        action_type_id: '567',
+        group: 'group_1',
+        params: {
+          test: '123',
+        },
+      });
+    });
+
+    test('it returns the id and index transformed with the index at 1', () => {
+      expect(legacyTransformActionToReference(alertAction, 1)).toEqual<FuncReturn>({
+        actionRef: 'action_1',
+        action_type_id: '567',
+        group: 'group_1',
+        params: {
+          test: '123',
+        },
+      });
+    });
+  });
+
+  describe('legacyTransformLegacyRuleAlertActionToReference', () => {
+    type FuncReturn = ReturnType<typeof legacyTransformLegacyRuleAlertActionToReference>;
+    const alertAction: LegacyRuleAlertAction = {
+      id: '123',
+      group: 'group_1',
+      params: {
+        test: '123',
+      },
+      action_type_id: '567',
+    };
+
+    test('it returns the id and index transformed with the index at 0', () => {
+      expect(legacyTransformLegacyRuleAlertActionToReference(alertAction, 0)).toEqual<FuncReturn>({
+        actionRef: 'action_0',
+        action_type_id: '567',
+        group: 'group_1',
+        params: {
+          test: '123',
+        },
+      });
+    });
+
+    test('it returns the id and index transformed with the index at 1', () => {
+      expect(legacyTransformLegacyRuleAlertActionToReference(alertAction, 1)).toEqual<FuncReturn>({
+        actionRef: 'action_1',
+        action_type_id: '567',
+        group: 'group_1',
+        params: {
+          test: '123',
+        },
       });
     });
   });

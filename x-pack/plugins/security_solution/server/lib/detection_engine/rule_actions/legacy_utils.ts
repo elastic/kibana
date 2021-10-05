@@ -6,11 +6,13 @@
  */
 
 import { SavedObjectsUpdateResponse } from 'kibana/server';
+import { AlertAction } from '../../../../../alerting/common';
 
 // eslint-disable-next-line no-restricted-imports
 import {
   LegacyIRuleActionsAttributesSavedObjectAttributes,
   LegacyRuleAlertAction,
+  LegacyRuleAlertSavedObjectAction,
 } from './legacy_types';
 
 /**
@@ -70,3 +72,58 @@ export const legacyGetRuleActionsFromSavedObject = (
         : savedObject.attributes.ruleThrottle,
   };
 };
+
+/**
+ * Given an id this returns a legacy rule reference.
+ * @param id The id of the alert
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ */
+export const legacyGetRuleReference = (id: string) => ({
+  id,
+  type: 'alert',
+  name: 'alert_0',
+});
+
+/**
+ * Given an id this returns a legacy action reference.
+ * @param id The id of the action
+ * @param index The index of the action
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ */
+export const legacyGetActionReference = (id: string, index: number) => ({
+  id,
+  type: 'action',
+  name: `action_${index}`,
+});
+
+/**
+ * Given an alertAction this returns a transformed legacy action as a reference.
+ * @param alertAction The alertAction
+ * @param index The index of the action
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ */
+export const legacyTransformActionToReference = (
+  alertAction: AlertAction,
+  index: number
+): LegacyRuleAlertSavedObjectAction => ({
+  actionRef: `action_${index}`,
+  group: alertAction.group,
+  params: alertAction.params,
+  action_type_id: alertAction.actionTypeId,
+});
+
+/**
+ * Given an alertAction this returns a transformed legacy action as a reference.
+ * @param alertAction The alertAction
+ * @param index The index of the action
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ */
+export const legacyTransformLegacyRuleAlertActionToReference = (
+  alertAction: LegacyRuleAlertAction,
+  index: number
+): LegacyRuleAlertSavedObjectAction => ({
+  actionRef: `action_${index}`,
+  group: alertAction.group,
+  params: alertAction.params,
+  action_type_id: alertAction.action_type_id,
+});

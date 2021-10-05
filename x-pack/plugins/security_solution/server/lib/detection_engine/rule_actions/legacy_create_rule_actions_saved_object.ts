@@ -12,7 +12,12 @@ import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings
 // eslint-disable-next-line no-restricted-imports
 import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
 // eslint-disable-next-line no-restricted-imports
-import { legacyGetThrottleOptions } from './legacy_utils';
+import {
+  legacyGetActionReference,
+  legacyGetRuleReference,
+  legacyGetThrottleOptions,
+  legacyTransformActionToReference,
+} from './legacy_utils';
 import { AlertAction } from '../../../../../alerting/common';
 
 /**
@@ -37,24 +42,17 @@ export const legacyCreateRuleActionsSavedObject = async ({
   actions = [],
   throttle,
 }: LegacyCreateRuleActionsSavedObject): Promise<void> => {
-  const referenceWithAlertId: SavedObjectReference[] = [
-    { id: ruleAlertId, type: 'alert', name: 'alert_0' },
-  ];
-  const actionReferences: SavedObjectReference[] = actions.map((action, index) => ({
-    id: action.id,
-    type: 'action',
-    name: `action_${index}`,
-  }));
+  const referenceWithAlertId: SavedObjectReference[] = [legacyGetRuleReference(ruleAlertId)];
+  const actionReferences: SavedObjectReference[] = actions.map((action, index) =>
+    legacyGetActionReference(action.id, index)
+  );
   const references: SavedObjectReference[] = [...referenceWithAlertId, ...actionReferences];
   await savedObjectsClient.create<LegacyIRuleActionsAttributesSavedObjectAttributes>(
     legacyRuleActionsSavedObjectType,
     {
-      actions: actions.map(({ group, params, actionTypeId }, index) => ({
-        actionRef: `action_${index}`,
-        group,
-        params,
-        action_type_id: actionTypeId,
-      })),
+      actions: actions.map((alertAction, index) =>
+        legacyTransformActionToReference(alertAction, index)
+      ),
       ...legacyGetThrottleOptions(throttle),
     },
     { references }

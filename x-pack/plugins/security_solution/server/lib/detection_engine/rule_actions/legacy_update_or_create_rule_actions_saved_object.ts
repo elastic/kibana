@@ -28,6 +28,7 @@ interface LegacyUpdateOrCreateRuleActionsSavedObject {
  * NOTE: This should _only_ be seen to be used within the legacy route of "legacyCreateLegacyNotificationRoute" and not exposed and not
  * used anywhere else. If you see it being used anywhere else, that would be a bug.
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ * @see legacyCreateLegacyNotificationRoute
  */
 export const legacyUpdateOrCreateRuleActionsSavedObject = async ({
   savedObjectsClient,
