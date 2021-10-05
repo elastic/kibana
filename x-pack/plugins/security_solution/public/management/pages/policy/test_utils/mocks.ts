@@ -17,6 +17,10 @@ import {
 import { TRUSTED_APPS_LIST_API } from '../../../../../common/endpoint/constants';
 import { TrustedAppGenerator } from '../../../../../common/endpoint/data_generators/trusted_app_generator';
 import { createSampleTrustedApps, createSampleTrustedApp } from '../../trusted_apps/test_utils';
+import {
+  PolicyDetailsArtifactsPageListLocationParams,
+  PolicyDetailsArtifactsPageLocation,
+} from '../types';
 
 export const getMockListResponse: () => GetTrustedAppsListResponse = () => ({
   data: createSampleTrustedApps({}),
@@ -24,6 +28,29 @@ export const getMockListResponse: () => GetTrustedAppsListResponse = () => ({
   page: 1,
   total: 100,
 });
+
+export const getMockPolicyDetailsArtifactsPageLocationUrlParams = (
+  overrides: Partial<PolicyDetailsArtifactsPageLocation> = {}
+): PolicyDetailsArtifactsPageLocation => {
+  return {
+    page_index: 0,
+    page_size: 10,
+    filter: '',
+    show: undefined,
+    ...overrides,
+  };
+};
+
+export const getMockPolicyDetailsArtifactListUrlParams = (
+  overrides: Partial<PolicyDetailsArtifactsPageListLocationParams> = {}
+): PolicyDetailsArtifactsPageListLocationParams => {
+  return {
+    page_index: 0,
+    page_size: 10,
+    filter: '',
+    ...overrides,
+  };
+};
 
 export const getMockCreateResponse: () => PostTrustedAppCreateResponse = () =>
   createSampleTrustedApp(1) as unknown as unknown as PostTrustedAppCreateResponse;
