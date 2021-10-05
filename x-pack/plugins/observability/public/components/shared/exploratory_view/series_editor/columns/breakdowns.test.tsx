@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { Breakdowns } from './breakdowns';
-import { mockIndexPattern, render } from '../../rtl_helpers';
+import { mockIndexPattern, mockUxSeries, render } from '../../rtl_helpers';
 import { getDefaultConfigs } from '../../configurations/default_configs';
 import { USER_AGENT_OS } from '../../configurations/constants/elasticsearch_fieldnames';
 
@@ -20,13 +20,7 @@ describe('Breakdowns', function () {
   });
 
   it('should render properly', async function () {
-    render(
-      <Breakdowns
-        seriesId={'series-id'}
-        breakdowns={dataViewSeries.breakdownFields}
-        seriesConfig={dataViewSeries}
-      />
-    );
+    render(<Breakdowns seriesId={0} seriesConfig={dataViewSeries} series={mockUxSeries} />);
 
     screen.getAllByText('Browser family');
   });
@@ -36,9 +30,9 @@ describe('Breakdowns', function () {
 
     const { setSeries } = render(
       <Breakdowns
-        seriesId={'series-id'}
-        breakdowns={dataViewSeries.breakdownFields}
+        seriesId={0}
         seriesConfig={dataViewSeries}
+        series={{ ...mockUxSeries, breakdown: USER_AGENT_OS }}
       />,
       { initSeries }
     );
@@ -49,10 +43,14 @@ describe('Breakdowns', function () {
 
     fireEvent.click(screen.getByText('Browser family'));
 
-    expect(setSeries).toHaveBeenCalledWith('series-id', {
+    expect(setSeries).toHaveBeenCalledWith(0, {
       breakdown: 'user_agent.name',
       dataType: 'ux',
-      reportType: 'data-distribution',
+      name: 'performance-distribution',
+      reportDefinitions: {
+        'service.name': ['elastic-co'],
+      },
+      selectedMetricField: 'transaction.duration.us',
       time: { from: 'now-15m', to: 'now' },
     });
     expect(setSeries).toHaveBeenCalledTimes(1);

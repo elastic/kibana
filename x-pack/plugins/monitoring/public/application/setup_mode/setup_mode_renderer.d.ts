@@ -6,3 +6,9 @@
  */
 
 export const SetupModeRenderer: FunctionComponent<Props>;
+
+export interface SetupModeProps {
+  setupMode: any;
+  flyoutComponent: any;
+  bottomBarComponent: any;
+}
