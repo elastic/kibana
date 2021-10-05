@@ -180,7 +180,16 @@ describe('Host Isolation', () => {
         (startContract.security.authc.getCurrentUser as jest.Mock).mockImplementationOnce(
           () => asUser
         );
+
         const ctx = createRouteHandlerContext(mockScopedClient, mockSavedObjectClient);
+        ctx.core.elasticsearch.client.asInternalUser.indices.existsIndexTemplate = jest
+          .fn()
+          .mockImplementationOnce(() =>
+            Promise.resolve({
+              body: false,
+              statusCode: 404,
+            })
+          );
         const withIdxResp = idxResponse ? idxResponse : { statusCode: 201 };
         ctx.core.elasticsearch.client.asCurrentUser.index = jest
           .fn()
