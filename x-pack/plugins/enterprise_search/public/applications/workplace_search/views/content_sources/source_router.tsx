@@ -21,6 +21,7 @@ import {
   SOURCE_SCHEMAS_PATH,
   SOURCE_DISPLAY_SETTINGS_PATH,
   SOURCE_SETTINGS_PATH,
+  SOURCE_SYNCHRONIZATION_PATH,
   getContentSourcePath as sourcePath,
   getSourcesPath,
 } from '../../routes';
@@ -32,6 +33,7 @@ import { Schema } from './components/schema';
 import { SchemaChangeErrors } from './components/schema/schema_change_errors';
 import { SourceContent } from './components/source_content';
 import { SourceSettings } from './components/source_settings';
+import { SynchronizationRouter } from './components/synchronization';
 import { SourceLogic } from './source_logic';
 
 export const SourceRouter: React.FC = () => {
@@ -59,6 +61,7 @@ export const SourceRouter: React.FC = () => {
 
   const { serviceType } = contentSource;
   const isCustomSource = serviceType === CUSTOM_SERVICE_TYPE;
+  const showSynchronization = !isCustomSource && isOrganization;
 
   return (
     <Switch>
@@ -68,6 +71,11 @@ export const SourceRouter: React.FC = () => {
       <Route exact path={sourcePath(SOURCE_CONTENT_PATH, sourceId, isOrganization)}>
         <SourceContent />
       </Route>
+      {showSynchronization && (
+        <Route path={sourcePath(SOURCE_SYNCHRONIZATION_PATH, sourceId, isOrganization)}>
+          <SynchronizationRouter />
+        </Route>
+      )}
       {isCustomSource && (
         <Route exact path={sourcePath(SOURCE_SCHEMAS_PATH, sourceId, isOrganization)}>
           <Schema />
