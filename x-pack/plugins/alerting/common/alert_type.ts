@@ -21,6 +21,7 @@ export interface AlertType<
   producer: string;
   minimumLicenseRequired: LicenseType;
   isExportable: boolean;
+  ruleTaskTimeout?: string;
 }
 
 export interface ActionGroup<ActionGroupIds extends string> {

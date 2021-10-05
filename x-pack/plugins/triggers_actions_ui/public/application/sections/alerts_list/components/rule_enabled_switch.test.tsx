@@ -40,7 +40,7 @@ describe('RuleEnabledSwitch', () => {
       enabledInLicense: true,
       isEditable: false,
       notifyWhen: null,
-      tagsText: 'test',
+      index: 0,
       updatedAt: new Date('2020-08-20T19:23:38Z'),
     },
     onAlertChanged: jest.fn(),
@@ -84,7 +84,7 @@ describe('RuleEnabledSwitch', () => {
             enabledInLicense: true,
             isEditable: true,
             notifyWhen: null,
-            tagsText: 'test',
+            index: 0,
             updatedAt: new Date('2020-08-20T19:23:38Z'),
           },
         }}

@@ -75,7 +75,7 @@ describe('CollapsedItemActions', () => {
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
       },
       actionsCount: 1,
-      tagsText: 'tag1',
+      index: 0,
       alertType: 'Test Alert Type',
       isEditable: true,
       enabledInLicense: true,
