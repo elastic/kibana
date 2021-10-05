@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { ElasticsearchRole, transformElasticsearchRoleToRole } from '../../../../authorization';
-export { getPutPayloadSchema, transformPutPayloadToElasticsearchRole } from './put_payload';
+/**
+ * getKibanaRolesByFeature
+ */
+
+export { getPrivilegeDeprecationsService } from './privilege_deprecations';
