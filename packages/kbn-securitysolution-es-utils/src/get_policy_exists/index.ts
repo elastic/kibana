@@ -5,17 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ElasticsearchClient } from '../elasticsearch_client';
+import type { ElasticsearchClient } from '../elasticsearch_client';
 
 export const getPolicyExists = async (
   esClient: ElasticsearchClient,
   policy: string
 ): Promise<boolean> => {
   try {
-    await esClient.transport.request({
-      path: `/_ilm/policy/${policy}`,
-      method: 'GET',
+    await esClient.ilm.getLifecycle({
+      policy,
     });
     // Return true that there exists a policy which is not 404 or some error
     // Since there is not a policy exists API, this is how we create one by calling
