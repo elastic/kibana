@@ -11,6 +11,7 @@ import {
   MAX_TIME_COMPLETE_INSTALL,
   ASSETS_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
 } from '../../../../common';
 import type { InstallablePackage, InstallSource, PackageAssetReference } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
@@ -213,7 +214,7 @@ export async function _installPackage({
     if (updatedPackage.attributes.keep_policies_up_to_date) {
       const policyIdsToUpgrade = await packagePolicyService.listIds(savedObjectsClient, {
         page: 1,
-        perPage: 10000,
+        perPage: SO_SEARCH_LIMIT,
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
       });
 
