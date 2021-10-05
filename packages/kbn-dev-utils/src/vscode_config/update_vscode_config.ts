@@ -71,7 +71,7 @@ const addManagedProp = (
   key: string,
   value: string | Record<string, any> | boolean | number
 ) => {
-  if (['number', 'string', 'bolean'].includes(typeof value)) {
+  if (['number', 'string', 'boolean'].includes(typeof value)) {
     ast.properties.push(createManagedProp(key, value));
   } else {
     ast.properties.push(createObjectPropOfManagedValues(key, value as Record<string, any>));
