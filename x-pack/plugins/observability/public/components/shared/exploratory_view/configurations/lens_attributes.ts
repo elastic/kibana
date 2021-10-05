@@ -616,7 +616,7 @@ export class LensAttributes {
       layers[layerId] = {
         columnOrder: [
           `x-axis-column-${layerId}`,
-          ...(breakdown && sourceField !== USE_BREAK_DOWN_COLUMN && breakdown !== 'percentile'
+          ...(breakdown && sourceField !== USE_BREAK_DOWN_COLUMN && breakdown !== PERCENTILE
             ? [`breakdown-column-${layerId}`]
             : []),
           `y-axis-column-${layerId}`,
@@ -630,7 +630,7 @@ export class LensAttributes {
             filter: { query: columnFilter, language: 'kuery' },
             ...(timeShift ? { timeShift } : {}),
           },
-          ...(breakdown && sourceField !== USE_BREAK_DOWN_COLUMN && breakdown !== 'percentile'
+          ...(breakdown && sourceField !== USE_BREAK_DOWN_COLUMN && breakdown !== PERCENTILE
             ? // do nothing since this will be used a x axis source
               {
                 [`breakdown-column-${layerId}`]: this.getBreakdownColumn({
