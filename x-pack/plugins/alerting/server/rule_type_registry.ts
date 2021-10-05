@@ -25,6 +25,7 @@ import {
   getBuiltinActionGroups,
   RecoveredActionGroupId,
   ActionGroup,
+  validateDurationSchema,
 } from '../common';
 import { ILicenseState } from './lib/license_state';
 import { getAlertTypeFeatureUsageName } from './lib/get_alert_type_feature_usage_name';
@@ -170,6 +171,21 @@ export class RuleTypeRegistry {
         })
       );
     }
+    // validate ruleTypeTimeout here
+    if (alertType.ruleTaskTimeout) {
+      const invalidTimeout = validateDurationSchema(alertType.ruleTaskTimeout);
+      if (invalidTimeout) {
+        throw new Error(
+          i18n.translate('xpack.alerting.ruleTypeRegistry.register.invalidTimeoutAlertTypeError', {
+            defaultMessage: 'Rule type "{id}" has invalid timeout: {errorMessage}.',
+            values: {
+              id: alertType.id,
+              errorMessage: invalidTimeout,
+            },
+          })
+        );
+      }
+    }
     alertType.actionVariables = normalizedActionVariables(alertType.actionVariables);
 
     const normalizedAlertType = augmentActionGroupsWithReserved<
@@ -190,6 +206,7 @@ export class RuleTypeRegistry {
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
         title: alertType.name,
+        timeout: alertType.ruleTaskTimeout,
         createTaskRunner: (context: RunContext) =>
           this.taskRunnerFactory.create<
             Params,
