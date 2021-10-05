@@ -14,7 +14,7 @@ import { GlobalStateContext } from '../../global_state_context';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useCharts } from '../../hooks/use_charts';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
-import { ApmTemplate } from './template';
+import { ApmTemplate } from './apm_template';
 // @ts-ignore
 import { ApmServerInstance } from '../../../components/apm/instance';
 

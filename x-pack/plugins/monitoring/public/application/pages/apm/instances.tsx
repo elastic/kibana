@@ -12,7 +12,7 @@ import { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../global_state_context';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useTable } from '../../hooks/use_table';
-import { ApmTemplate } from './template';
+import { ApmTemplate } from './apm_template';
 // @ts-ignore
 import { ApmServerInstances } from '../../../components/apm/instances';
 import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
