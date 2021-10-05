@@ -20,4 +20,8 @@ export const initialHostIsolationExceptionsPageState = (): HostIsolationExceptio
     entry: undefined,
     status: createUninitialisedResourceState(),
   },
+  deletion: {
+    item: undefined,
+    status: createUninitialisedResourceState(),
+  },
 });

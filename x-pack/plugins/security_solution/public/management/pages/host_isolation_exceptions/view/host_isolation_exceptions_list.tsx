@@ -7,12 +7,14 @@
 
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
+import React, { Dispatch, useCallback } from 'react';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useDispatch } from 'react-redux';
 import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
 import {
   getCurrentLocation,
+  getItemToDelete,
   getListFetchError,
   getListIsLoading,
   getListItems,
@@ -28,6 +30,8 @@ import { AdministrationListPage } from '../../../components/administration_list_
 import { SearchExceptions } from '../../../components/search_exceptions';
 import { ArtifactEntryCard, ArtifactEntryCardProps } from '../../../components/artifact_entry_card';
 import { HostIsolationExceptionsEmptyState } from './components/empty';
+import { HostIsolationExceptionsPageAction } from '../store/action';
+import { HostIsolationExceptionDeleteModal } from './components/delete_modal';
 import { HostIsolationExceptionsFormFlyout } from './components/form_flyout';
 
 type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
@@ -35,12 +39,21 @@ type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   typeof ExceptionItem
 >;
 
+const DELETE_HOST_ISOLATION_EXCEPTION_LABEL = i18n.translate(
+  'xpack.securitySolution.hostIsolationExceptions.list.actions.delete',
+  {
+    defaultMessage: 'Delete Exception',
+  }
+);
+
 export const HostIsolationExceptionsList = () => {
   const listItems = useHostIsolationExceptionsSelector(getListItems);
   const pagination = useHostIsolationExceptionsSelector(getListPagination);
   const isLoading = useHostIsolationExceptionsSelector(getListIsLoading);
   const fetchError = useHostIsolationExceptionsSelector(getListFetchError);
   const location = useHostIsolationExceptionsSelector(getCurrentLocation);
+  const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
+  const itemToDelete = useHostIsolationExceptionsSelector(getItemToDelete);
 
   const showFlyout = !!location.show;
 
@@ -56,6 +69,19 @@ export const HostIsolationExceptionsList = () => {
   const handleItemComponentProps = (element: ExceptionListItemSchema): ArtifactEntryCardProps => ({
     item: element,
     'data-test-subj': `hostIsolationExceptionsCard`,
+    actions: [
+      {
+        icon: 'trash',
+        onClick: () => {
+          dispatch({
+            type: 'hostIsolationExceptionsMarkToDelete',
+            payload: element,
+          });
+        },
+        'data-test-subj': 'deleteHostIsolationException',
+        children: DELETE_HOST_ISOLATION_EXCEPTION_LABEL,
+      },
+    ],
   });
 
   const handlePaginatedContentChange: HostIsolationExceptionPaginatedContent['onChange'] =
@@ -123,6 +149,7 @@ export const HostIsolationExceptionsList = () => {
         )}
       />
       <EuiSpacer size="l" />
+      {itemToDelete ? <HostIsolationExceptionDeleteModal /> : null}
       <PaginatedContent<ExceptionListItemSchema, typeof ArtifactEntryCard>
         items={listItems}
         ItemComponent={ArtifactEntryCard}
