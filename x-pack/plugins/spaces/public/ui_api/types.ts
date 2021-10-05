@@ -12,6 +12,7 @@ import type { CoreStart } from 'src/core/public';
 import type { CopyToSpaceFlyoutProps } from '../copy_saved_objects_to_space';
 import type {
   LegacyUrlConflictProps,
+  SavedObjectConflictMessageProps,
   ShareToSpaceFlyoutProps,
 } from '../share_saved_objects_to_space';
 import type { SpaceAvatarProps } from '../space_avatar';
@@ -109,4 +110,8 @@ export interface SpacesApiUiComponent {
    * Displays an avatar for the given space.
    */
   getSpaceAvatar: LazyComponentFn<SpaceAvatarProps>;
+  /**
+   * Displays a saved object conflict message that directs user to disable legacy URL alias
+   */
+  getSavedObjectConflictMessage: LazyComponentFn<SavedObjectConflictMessageProps>;
 }

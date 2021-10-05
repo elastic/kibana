@@ -212,6 +212,7 @@ export class LensPlugin {
         uiActions: plugins.uiActions,
         usageCollection,
         inspector: plugins.inspector,
+        spaces: plugins.spaces,
       };
     };
 

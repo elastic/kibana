@@ -6,3 +6,11 @@
   z-index: 1;
   min-height: 0; // Absolute must for Firefox to scroll contents
 }
+
+.mapEmbeddedError {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+}
