@@ -23,6 +23,11 @@ export type HostIsolationExceptionsFormEntryChanged =
     payload: HostIsolationExceptionsPageState['form']['entry'];
   };
 
+export type HostIsolationExceptionsCreateEntry = Action<'hostIsolationExceptionsCreateEntry'> & {
+  payload: HostIsolationExceptionsPageState['form']['entry'];
+};
+
 export type HostIsolationExceptionsPageAction =
   | HostIsolationExceptionsPageDataChanged
+  | HostIsolationExceptionsCreateEntry
   | HostIsolationExceptionsFormStateChanged;

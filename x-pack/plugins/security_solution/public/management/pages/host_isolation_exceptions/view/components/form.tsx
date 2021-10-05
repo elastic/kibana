@@ -43,8 +43,8 @@ export const HostIsolationExceptionsForm: React.FC<{
 }> = memo(({ exception, onError, onChange }) => {
   const [hasBeenInputNameVisited, setHasBeenInputNameVisited] = useState(false);
   const [hasBeenInputIpVisited, setHasBeenInputIpVisited] = useState(false);
-  const [hasNameError, setHasNameError] = useState(false);
-  const [hasIpError, setHasIpError] = useState(false);
+  const [hasNameError, setHasNameError] = useState(true);
+  const [hasIpError, setHasIpError] = useState(true);
 
   useEffect(() => {
     onError(hasNameError || hasIpError);

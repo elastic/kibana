@@ -72,13 +72,20 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{
     onCancel();
   }, [creationInProgress, onCancel]);
 
+  const handleOnSubmit = useCallback(() => {
+    dispatch({
+      type: 'hostIsolationExceptionsCreateEntry',
+      payload: exception,
+    });
+  }, [dispatch, exception]);
+
   const confirmButtonMemo = useMemo(
     () => (
       <EuiButton
         data-test-subj="add-exception-confirm-button"
         fill
         disabled={formHasError || creationInProgress}
-        onClick={() => {}} // TODO - actually create something
+        onClick={handleOnSubmit}
         isLoading={creationInProgress}
       >
         <FormattedMessage
@@ -87,7 +94,7 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{
         />
       </EuiButton>
     ),
-    [formHasError, creationInProgress]
+    [formHasError, creationInProgress, handleOnSubmit]
   );
 
   return exception ? (
