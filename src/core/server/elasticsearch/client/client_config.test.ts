@@ -37,12 +37,13 @@ describe('parseClientOptions', () => {
     );
   });
 
-  it('specifies `headers.maxSockets` Infinity by default', () => {
+  it('specifies `headers.maxSockets` Infinity and `keepAlive` true by default', () => {
     const config = createConfig({});
 
     expect(parseClientOptions(config, false)).toEqual(
       expect.objectContaining({
         agent: {
+          keepAlive: true,
           maxSockets: Infinity,
         },
       })
@@ -101,7 +102,7 @@ describe('parseClientOptions', () => {
 
       it('`keepAlive` is undefined', () => {
         const options = parseClientOptions(createConfig({}), false);
-        expect(options.agent).toHaveProperty('keepAlive', undefined);
+        expect(options.agent).toHaveProperty('keepAlive', true);
       });
     });
 

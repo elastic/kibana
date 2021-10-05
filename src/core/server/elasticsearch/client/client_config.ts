@@ -61,7 +61,7 @@ export function parseClientOptions(
     disablePrototypePoisoningProtection: true,
     agent: {
       maxSockets: Infinity,
-      keepAlive: config.keepAlive,
+      keepAlive: config.keepAlive ?? true,
     },
   };
 
