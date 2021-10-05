@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { DocLinksStart } from 'src/core/public';
@@ -23,7 +23,16 @@ import {
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
+import type { OverviewStepProps } from '../../types';
 import { useSystemIndicesUpgrade } from './use_system_indices_upgrade';
+
+interface Props {
+  setIsComplete: OverviewStepProps['setIsComplete'];
+}
+
+interface StepProps extends OverviewStepProps {
+  docLinks: DocLinksStart;
+}
 
 const i18nTexts = {
   title: i18n.translate('xpack.upgradeAssistant.overview.system_indices.title', {
@@ -78,9 +87,17 @@ const i18nTexts = {
   }),
 };
 
-const UpgradeSystemIndicesStep: FunctionComponent = () => {
+const UpgradeSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) => {
   const { beginSystemIndicesUpgrade, startUpgradeStatus, upgradeStatus, setShowFlyout } =
     useSystemIndicesUpgrade();
+
+  useEffect(() => {
+    if (upgradeStatus.data?.upgrade_status === 'NO_UPGRADE_NEEDED') {
+      setIsComplete(true);
+    }
+    // Depending upon setIsComplete would create an infinite loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [upgradeStatus.data?.upgrade_status]);
 
   if (upgradeStatus.error) {
     return (
@@ -167,12 +184,15 @@ const UpgradeSystemIndicesStep: FunctionComponent = () => {
 
 export const getUpgradeSystemIndicesStep = ({
   docLinks,
-}: {
-  docLinks: DocLinksStart;
-}): EuiStepProps => {
+  isComplete,
+  setIsComplete,
+}: StepProps): EuiStepProps => {
+  const status = isComplete ? 'complete' : 'incomplete';
+
   return {
     title: i18nTexts.title,
-    status: 'incomplete',
+    status,
+    'data-test-subj': `upgradeSystemIndicesStep-${status}`,
     children: (
       <>
         <EuiText>
@@ -181,7 +201,7 @@ export const getUpgradeSystemIndicesStep = ({
 
         <EuiSpacer size="m" />
 
-        <UpgradeSystemIndicesStep />
+        <UpgradeSystemIndicesStep setIsComplete={setIsComplete} />
       </>
     ),
   };

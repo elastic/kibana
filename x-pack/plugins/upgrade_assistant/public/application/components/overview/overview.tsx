@@ -27,7 +27,7 @@ import { getFixLogsStep } from './fix_logs_step';
 import { getUpgradeStep } from './upgrade_step';
 import { getUpgradeSystemIndicesStep } from './upgrade_system_indices';
 
-type OverviewStep = 'backup' | 'fix_issues' | 'fix_logs';
+type OverviewStep = 'backup' | 'update_system_indices' | 'fix_issues' | 'fix_logs';
 
 export const Overview: FunctionComponent = () => {
   const {
@@ -56,6 +56,7 @@ export const Overview: FunctionComponent = () => {
 
   const [completedStepsMap, setCompletedStepsMap] = useState({
     backup: false,
+    update_system_indices: false,
     fix_issues: false,
     fix_logs: false,
   });
@@ -113,7 +114,11 @@ export const Overview: FunctionComponent = () => {
               isComplete: isStepComplete('backup'),
               setIsComplete: setCompletedStep.bind(null, 'backup'),
             }),
-            getUpgradeSystemIndicesStep({ docLinks }),
+            getUpgradeSystemIndicesStep({
+              docLinks,
+              isComplete: isStepComplete('update_system_indices'),
+              setIsComplete: setCompletedStep.bind(null, 'update_system_indices'),
+            }),
             getFixIssuesStep({
               nextMajor,
               isComplete: isStepComplete('fix_issues'),

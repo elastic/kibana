@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import uuid from 'uuid';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -58,6 +57,12 @@ const i18nTexts = {
       defaultMessage: 'Upgrade complete',
     }
   ),
+  needsUpgradingLabel: i18n.translate(
+    'xpack.upgradeAssistant.overview.system_indices.needsUpgradingLabel',
+    {
+      defaultMessage: 'Requires upgrading',
+    }
+  ),
   upgradingLabel: i18n.translate('xpack.upgradeAssistant.overview.system_indices.upgradingLabel', {
     defaultMessage: 'Upgrading…',
   }),
@@ -66,7 +71,7 @@ const i18nTexts = {
   }),
 };
 
-const renderMigrationStatus = (status: UPGRADE_STATUS /* , data: SystemIndicesUpgradeStatus*/) => {
+const renderMigrationStatus = (status: UPGRADE_STATUS) => {
   if (status === 'NO_UPGRADE_NEEDED') {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -79,6 +84,14 @@ const renderMigrationStatus = (status: UPGRADE_STATUS /* , data: SystemIndicesUp
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
+    );
+  }
+
+  if (status === 'UPGRADE_NEEDED') {
+    return (
+      <EuiText size="s">
+        <p>{i18nTexts.needsUpgradingLabel}</p>
+      </EuiText>
     );
   }
 
@@ -114,7 +127,7 @@ const renderMigrationStatus = (status: UPGRADE_STATUS /* , data: SystemIndicesUp
 const columns = [
   {
     field: 'feature_name',
-    name: 'Index name',
+    name: 'Feature name',
     sortable: true,
     truncateText: true,
   },
@@ -127,13 +140,6 @@ const columns = [
 ];
 
 export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutProps) => {
-  const featuresWithId = useMemo(() => {
-    return data.features.map((feature) => ({
-      ...feature,
-      id: uuid.v4(),
-    }));
-  }, [data]);
-
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -147,7 +153,8 @@ export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutPr
         </EuiText>
         <EuiSpacer size="l" />
         <EuiInMemoryTable<SystemIndicesUpgradeFeature>
-          items={featuresWithId}
+          itemId="feature_name"
+          items={data.features}
           columns={columns}
           pagination={true}
           sorting={true}
