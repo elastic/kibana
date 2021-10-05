@@ -29,8 +29,8 @@ import {
   pendingActionsHttpMock,
   PendingActionsHttpMockInterface,
 } from '../../../common/lib/endpoint_pending_actions/mocks';
-import { TRANSFORM_STATS_URL } from '../../../../common/constants';
-import { TRANSFORM_STATE, TransformStatsResponse } from './types';
+import { METADATA_TRANSFORM_STATS_URL, TRANSFORM_STATES } from '../../../../common/constants';
+import { TransformStatsResponse } from './types';
 import {
   fleetGetAgentPolicyListHttpMock,
   FleetGetAgentPolicyListHttpMockInterface,
@@ -158,14 +158,14 @@ export const failedTransformStateMock = {
   count: 1,
   transforms: [
     {
-      state: TRANSFORM_STATE.FAILED,
+      state: TRANSFORM_STATES.FAILED,
     },
   ],
 };
 export const transformsHttpMocks = httpHandlerMockFactory<TransformHttpMocksInterface>([
   {
     id: 'metadataTransformStats',
-    path: TRANSFORM_STATS_URL,
+    path: METADATA_TRANSFORM_STATS_URL,
     method: 'get',
     handler: () => failedTransformStateMock,
   },
