@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { ExpressionAstExpression } from '../ast';
+
 export interface ExpressionRenderDefinition<Config = unknown> {
   /**
    * Technical name of the renderer, used as ID to identify renderer in
@@ -46,6 +48,7 @@ export interface ExpressionRenderDefinition<Config = unknown> {
   ) => void | Promise<void>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyExpressionRenderDefinition = ExpressionRenderDefinition<any>;
 
 /**
@@ -59,24 +62,34 @@ export type AnyExpressionRenderDefinition = ExpressionRenderDefinition<any>;
  */
 export type RenderMode = 'edit' | 'preview' | 'view';
 
+export interface IInterpreterRenderUpdateParams<Params = unknown> {
+  newExpression?: string | ExpressionAstExpression;
+  newParams: Params;
+}
+
+export interface IInterpreterRenderEvent<Context = unknown> {
+  name: string;
+  data?: Context;
+}
+
 export interface IInterpreterRenderHandlers {
   /**
    * Done increments the number of rendering successes
    */
-  done: () => void;
-  onDestroy: (fn: () => void) => void;
-  reload: () => void;
-  update: (params: any) => void;
-  event: (event: any) => void;
-  hasCompatibleActions?: (event: any) => Promise<boolean>;
-  getRenderMode: () => RenderMode;
+  done(): void;
+  onDestroy(fn: () => void): void;
+  reload(): void;
+  update(params: IInterpreterRenderUpdateParams): void;
+  event(event: IInterpreterRenderEvent): void;
+  hasCompatibleActions?(event: IInterpreterRenderEvent): Promise<boolean>;
+  getRenderMode(): RenderMode;
 
   /**
    * The chart is rendered in a non-interactive environment and should not provide any affordances for interaction like brushing.
    */
-  isInteractive: () => boolean;
+  isInteractive(): boolean;
 
-  isSyncColorsEnabled: () => boolean;
+  isSyncColorsEnabled(): boolean;
   /**
    * This uiState interface is actually `PersistedState` from the visualizations plugin,
    * but expressions cannot know about vis or it creates a mess of circular dependencies.
