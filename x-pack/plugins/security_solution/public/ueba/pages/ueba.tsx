@@ -30,6 +30,7 @@ import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { esQuery } from '../../../../../../src/plugins/data/public';
+import { OverviewEmpty } from '../../overview/components/overview_empty';
 import { Display } from './display';
 import { UebaTabs } from './ueba_tabs';
 import { navTabsUeba } from './nav_tabs';
@@ -77,7 +78,7 @@ const UebaComponent = () => {
   const { uiSettings } = useKibana().services;
   const tabsFilters = filters;
 
-  const { docValueFields, indexPattern, selectedPatterns } = useSourcererScope();
+  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
@@ -127,44 +128,53 @@ const UebaComponent = () => {
 
   return (
     <>
-      <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
-        <EuiWindowEvent event="resize" handler={noop} />
-        <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-          <SiemSearchBar indexPattern={indexPattern} id="global" />
-        </FiltersGlobal>
+      {indicesExist ? (
+        <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
+          <EuiWindowEvent event="resize" handler={noop} />
+          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+            <SiemSearchBar indexPattern={indexPattern} id="global" />
+          </FiltersGlobal>
 
-        <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
-          <Display show={!globalFullScreen}>
-            <HeaderPage
-              subtitle={
-                <LastEventTime
-                  docValueFields={docValueFields}
-                  indexKey={LastEventIndexKey.ueba}
-                  indexNames={selectedPatterns}
-                />
-              }
-              title={i18n.PAGE_TITLE}
+          <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
+            <Display show={!globalFullScreen}>
+              <HeaderPage
+                subtitle={
+                  <LastEventTime
+                    docValueFields={docValueFields}
+                    indexKey={LastEventIndexKey.ueba}
+                    indexNames={selectedPatterns}
+                  />
+                }
+                title={i18n.PAGE_TITLE}
+              />
+
+              <SecuritySolutionTabNavigation navTabs={navTabsUeba} />
+
+              <EuiSpacer />
+            </Display>
+
+            <UebaTabs
+              deleteQuery={deleteQuery}
+              docValueFields={docValueFields}
+              filterQuery={tabsFilterQuery || ''}
+              from={from}
+              indexNames={selectedPatterns}
+              isInitializing={isInitializing}
+              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+              setQuery={setQuery}
+              to={to}
+              type={uebaModel.UebaType.page}
             />
+          </SecuritySolutionPageWrapper>
+        </StyledFullHeightContainer>
+      ) : (
+        <SecuritySolutionPageWrapper>
+          <HeaderPage border title={i18n.PAGE_TITLE} />
 
-            <SecuritySolutionTabNavigation navTabs={navTabsUeba} />
-
-            <EuiSpacer />
-          </Display>
-
-          <UebaTabs
-            deleteQuery={deleteQuery}
-            docValueFields={docValueFields}
-            filterQuery={tabsFilterQuery || ''}
-            from={from}
-            indexNames={selectedPatterns}
-            isInitializing={isInitializing}
-            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-            setQuery={setQuery}
-            to={to}
-            type={uebaModel.UebaType.page}
-          />
+          <OverviewEmpty />
         </SecuritySolutionPageWrapper>
-      </StyledFullHeightContainer>
+      )}
+
       <SpyRoute pageName={SecurityPageName.ueba} />
     </>
   );

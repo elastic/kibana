@@ -278,6 +278,51 @@ describe('Overview', () => {
       expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
       wrapper.unmount();
     });
+
+    describe('when no index is available', () => {
+      beforeEach(() => {
+        mockUseSourcererScope.mockReturnValue({
+          selectedPatterns: [],
+          indicesExist: false,
+        });
+        mockUseUserPrivileges.mockReturnValue(loadedUserPrivilegesState({ canAccessFleet: false }));
+        mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
+      });
+
+      it('renders the Setup Instructions text', () => {
+        const wrapper = mount(
+          <TestProviders>
+            <MemoryRouter>
+              <Overview />
+            </MemoryRouter>
+          </TestProviders>
+        );
+        expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
+      });
+
+      it('does not show Endpoint get ready button when ingest is not enabled', () => {
+        const wrapper = mount(
+          <TestProviders>
+            <MemoryRouter>
+              <Overview />
+            </MemoryRouter>
+          </TestProviders>
+        );
+        expect(wrapper.find('[data-test-subj="empty-page-endpoint-action"]').exists()).toBe(false);
+      });
+
+      it('shows Endpoint get ready button when ingest is enabled', () => {
+        mockUseUserPrivileges.mockReturnValue(loadedUserPrivilegesState({ canAccessFleet: true }));
+        const wrapper = mount(
+          <TestProviders>
+            <MemoryRouter>
+              <Overview />
+            </MemoryRouter>
+          </TestProviders>
+        );
+        expect(wrapper.find('[data-test-subj="empty-page-endpoint-action"]').exists()).toBe(true);
+      });
+    });
   });
 
   describe('Threat Intel Dashboard Links', () => {
