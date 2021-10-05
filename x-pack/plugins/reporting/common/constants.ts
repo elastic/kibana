@@ -7,6 +7,8 @@
 
 export const PLUGIN_ID = 'reporting';
 
+export const REPORTING_SYSTEM_INDEX = '.reporting';
+
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
   'xpack.reporting.jobCompletionNotifications';
 
