@@ -32,10 +32,7 @@ interface MapItem {
   references?: SavedObjectReference[];
 }
 
-const savedObjectsTagging = getSavedObjectsTagging();
-const searchFilters = savedObjectsTagging
-  ? [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })]
-  : [];
+const searchFilters = [getSavedObjectsTagging().ui.getSearchBarFilter({ useName: true })];
 
 const tableColumns: Array<EuiBasicTableColumn<any>> = [
   {
@@ -64,10 +61,8 @@ const tableColumns: Array<EuiBasicTableColumn<any>> = [
     dataType: 'string',
     sortable: true,
   },
+  getSavedObjectsTagging().ui.getTableColumnDefinition(),
 ];
-if (savedObjectsTagging) {
-  tableColumns.push(savedObjectsTagging.ui.getTableColumnDefinition());
-}
 
 function navigateToNewMap() {
   const navigateToApp = getNavigateToApp();
@@ -77,16 +72,11 @@ function navigateToNewMap() {
 }
 
 async function findMaps(searchQuery: string) {
-  let searchTerm = searchQuery;
-  let tagReferences;
-
-  if (savedObjectsTagging) {
-    const parsed = savedObjectsTagging.ui.parseSearchQuery(searchQuery, {
-      useName: true,
-    });
-    searchTerm = parsed.searchTerm;
-    tagReferences = parsed.tagReferences;
-  }
+  const parsed = getSavedObjectsTagging().ui.parseSearchQuery(searchQuery, {
+    useName: true,
+  });
+  const searchTerm = parsed.searchTerm;
+  const tagReferences = parsed.tagReferences;
 
   const resp = await getSavedObjectsClient().find<MapSavedObjectAttributes>({
     type: MAP_SAVED_OBJECT_TYPE,

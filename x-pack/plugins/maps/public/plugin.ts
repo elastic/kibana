@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
 import type { UiActionsStart } from 'src/plugins/ui_actions/public';
 import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
@@ -88,13 +87,13 @@ import type { SpacesPluginStart } from '../../spaces/public';
 export interface MapsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   inspector: InspectorSetupContract;
-  home?: HomePublicPluginSetup;
+  home: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
   mapsEms: MapsEmsPluginSetup;
   share: SharePluginSetup;
   licensing: LicensingPluginSetup;
-  usageCollection?: UsageCollectionSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 export interface MapsPluginStartDependencies {
@@ -110,10 +109,10 @@ export interface MapsPluginStartDependencies {
   visualizations: VisualizationsStart;
   savedObjects: SavedObjectsStart;
   dashboard: DashboardStart;
-  savedObjectsTagging?: SavedObjectTaggingPluginStart;
+  savedObjectsTagging: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   security: SecurityPluginStart;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
 }
 
 /**
@@ -168,9 +167,7 @@ export class MapsPlugin
     );
 
     plugins.inspector.registerView(MapInspectorView);
-    if (plugins.home) {
-      plugins.home.featureCatalogue.register(featureCatalogueEntry);
-    }
+    plugins.home.featureCatalogue.register(featureCatalogueEntry);
     plugins.visualizations.registerAlias(getMapsVisTypeAlias(plugins.visualizations));
     plugins.embeddable.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
 
@@ -182,10 +179,11 @@ export class MapsPlugin
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.kibana,
       async mount(params: AppMountParameters) {
-        const UsageTracker =
-          plugins.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
         const { renderApp } = await lazyLoadMapModules();
-        return renderApp(params, UsageTracker);
+        return renderApp(
+          params,
+          plugins.usageCollection.components.ApplicationUsageTrackingProvider
+        );
       },
     });
 

@@ -351,12 +351,11 @@ export class MapApp extends React.Component<Props, State> {
     }
 
     const sharingSavedObjectProps = this.props.savedMap.getSharingSavedObjectProps();
-    const spaces = getSpacesApi();
-    if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch') {
+    if (sharingSavedObjectProps?.outcome === 'aliasMatch') {
       // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
       const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
       const newPath = `${getEditPath(newObjectId)}${this.props.history.location.hash}`;
-      await spaces.ui.redirectLegacyUrl(newPath, getMapEmbeddableDisplayName());
+      await getSpacesApi().ui.redirectLegacyUrl(newPath, getMapEmbeddableDisplayName());
       return;
     }
 

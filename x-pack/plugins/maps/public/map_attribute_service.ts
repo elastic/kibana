@@ -89,7 +89,7 @@ export function getMapAttributeService(): MapAttributeService {
           aliasTargetId,
           outcome,
           errorJSON:
-            outcome === 'conflict' && getSpacesApi()
+            outcome === 'conflict'
               ? JSON.stringify({
                   targetType: MAP_SAVED_OBJECT_TYPE,
                   sourceId: savedObjectId,

@@ -138,13 +138,14 @@ export function getTopNavConfig({
           selectedTags = newTags;
         }
 
-        const savedObjectsTagging = getSavedObjectsTagging();
-        const tagSelector = savedObjectsTagging ? (
-          <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
+        const SavedObjectSaveModalTagSelector =
+          getSavedObjectsTagging().ui.components.SavedObjectSaveModalTagSelector;
+        const tagSelector = (
+          <SavedObjectSaveModalTagSelector
             initialSelection={selectedTags}
             onTagsSelected={onTagsSelected}
           />
-        ) : undefined;
+        );
 
         const saveModalProps = {
           onSave: async (

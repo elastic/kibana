@@ -356,15 +356,14 @@ export class MapEmbeddable
     }
 
     const sharingSavedObjectProps = this._savedMap.getSharingSavedObjectProps();
-    const spaces = getSpacesApi();
     const content =
-      sharingSavedObjectProps && spaces && sharingSavedObjectProps?.outcome === 'conflict' ? (
+      sharingSavedObjectProps && sharingSavedObjectProps?.outcome === 'conflict' ? (
         <div className="mapEmbeddedError">
           <EuiEmptyPrompt
             iconType="alert"
             iconColor="danger"
             data-test-subj="embeddable-maps-failure"
-            body={spaces.ui.components.getSavedObjectConflictMessage({
+            body={getSpacesApi().ui.components.getSavedObjectConflictMessage({
               json: sharingSavedObjectProps.errorJSON!,
             })}
           />

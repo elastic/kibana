@@ -104,9 +104,8 @@ export class SavedMap {
       if (sharingSavedObjectProps) {
         this._sharingSavedObjectProps = sharingSavedObjectProps;
       }
-      const savedObjectsTagging = getSavedObjectsTagging();
-      if (savedObjectsTagging && references && references.length) {
-        this._tags = savedObjectsTagging.ui.getTagIdsFromReferences(references);
+      if (references && references.length) {
+        this._tags = getSavedObjectsTagging().ui.getTagIdsFromReferences(references);
       }
     }
 

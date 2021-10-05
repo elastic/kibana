@@ -9,10 +9,6 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getMapsTelemetry, MapsUsage } from '../maps_telemetry';
 
 export function registerMapsUsageCollector(usageCollection: UsageCollectionSetup): void {
-  if (!usageCollection) {
-    return;
-  }
-
   const mapsUsageCollector = usageCollection.makeUsageCollector<MapsUsage>({
     type: 'maps',
     isReady: () => true,

@@ -473,7 +473,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     if (!(await this._isDrawingIndex())) {
       return {};
     }
-    const user = await getSecurityService()?.authc.getCurrentUser();
+    const user = await getSecurityService().authc.getCurrentUser();
     const timestamp = new Date().toISOString();
     return {
       created: {
