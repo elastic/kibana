@@ -10879,8 +10879,6 @@
     "xpack.fleet.integrations.updatePackage.updatePackageButtonLabel": "最新バージョンに更新",
     "xpack.fleet.integrationsAppTitle": "統合",
     "xpack.fleet.integrationsHeaderTitle": "Elasticエージェント統合",
-    "xpack.fleet.integrationsPermissionDeniedErrorMessage": "統合にアクセスする権限がありません。統合には{roleName}権限が必要です。",
-    "xpack.fleet.integrationsSecurityRequiredErrorMessage": "統合を使用するには、KibanaとElasticsearchでセキュリティを有効にする必要があります。",
     "xpack.fleet.invalidLicenseDescription": "現在のライセンスは期限切れです。登録されたビートエージェントは引き続き動作しますが、Elastic Fleet インターフェイスにアクセスするには有効なライセンスが必要です。",
     "xpack.fleet.invalidLicenseTitle": "ライセンスの期限切れ",
     "xpack.fleet.multiTextInput.addRow": "行の追加",

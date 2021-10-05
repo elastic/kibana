@@ -103,7 +103,8 @@ export interface FleetAppContext {
   data: DataPluginStart;
   encryptedSavedObjectsStart?: EncryptedSavedObjectsPluginStart;
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
-  security?: SecurityPluginStart;
+  securitySetup?: SecurityPluginSetup;
+  securityStart?: SecurityPluginStart;
   config$?: Observable<FleetConfigType>;
   configInitialValue: FleetConfigType;
   savedObjects: SavedObjectsServiceStart;
@@ -164,14 +165,15 @@ export class FleetPlugin
   private licensing$!: Observable<ILicense>;
   private config$: Observable<FleetConfigType>;
   private configInitialValue: FleetConfigType;
-  private cloud: CloudSetup | undefined;
-  private logger: Logger | undefined;
+  private cloud?: CloudSetup;
+  private logger?: Logger;
 
   private isProductionMode: FleetAppContext['isProductionMode'];
   private kibanaVersion: FleetAppContext['kibanaVersion'];
   private kibanaBranch: FleetAppContext['kibanaBranch'];
-  private httpSetup: HttpServiceSetup | undefined;
-  private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
+  private httpSetup?: HttpServiceSetup;
+  private securitySetup?: SecurityPluginSetup;
+  private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -187,6 +189,7 @@ export class FleetPlugin
     this.licensing$ = deps.licensing.license$;
     this.encryptedSavedObjectsSetup = deps.encryptedSavedObjects;
     this.cloud = deps.cloud;
+    this.securitySetup = deps.security;
     const config = this.configInitialValue;
 
     registerSavedObjects(core.savedObjects, deps.encryptedSavedObjects);
@@ -233,6 +236,10 @@ export class FleetPlugin
 
     // Always register app routes for permissions checking
     registerAppRoutes(router);
+    // Allow read-only users access to endpoints necessary for Integrations UI
+    // Only some endpoints require superuser so we pass a raw IRouter here
+    registerEPMRoutes(router);
+
     // For all the routes we enforce the user to have role superuser
     const routerSuperuserOnly = makeRouterEnforcingSuperuser(router);
     // Register rest of routes only if security is enabled
@@ -243,7 +250,6 @@ export class FleetPlugin
       registerOutputRoutes(routerSuperuserOnly);
       registerSettingsRoutes(routerSuperuserOnly);
       registerDataStreamRoutes(routerSuperuserOnly);
-      registerEPMRoutes(routerSuperuserOnly);
       registerPreconfigurationRoutes(routerSuperuserOnly);
 
       // Conditional config routes
@@ -260,7 +266,8 @@ export class FleetPlugin
       data: plugins.data,
       encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
       encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
-      security: plugins.security,
+      securitySetup: this.securitySetup,
+      securityStart: plugins.security,
       configInitialValue: this.configInitialValue,
       config$: this.config$,
       savedObjects: core.savedObjects,

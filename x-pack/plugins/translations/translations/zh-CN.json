@@ -10993,8 +10993,6 @@
     "xpack.fleet.integrations.updatePackage.updatePackageButtonLabel": "更新到最新版本",
     "xpack.fleet.integrationsAppTitle": "集成",
     "xpack.fleet.integrationsHeaderTitle": "Elastic 代理集成",
-    "xpack.fleet.integrationsPermissionDeniedErrorMessage": "您无权访问“集成”。“集成”需要 {roleName} 权限。",
-    "xpack.fleet.integrationsSecurityRequiredErrorMessage": "必须在 Kibana 和 Elasticsearch 中启用安全性，才能使用“集成”。",
     "xpack.fleet.invalidLicenseDescription": "您当前的许可证已过期。已注册 Beats 代理将继续工作，但您需要有效的许可证，才能访问 Elastic Fleet 界面。",
     "xpack.fleet.invalidLicenseTitle": "已过期许可证",
     "xpack.fleet.multiTextInput.addRow": "添加行",

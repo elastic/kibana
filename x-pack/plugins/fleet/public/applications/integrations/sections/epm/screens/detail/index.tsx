@@ -30,6 +30,7 @@ import {
   useUIExtension,
   useBreadcrumbs,
   useStartServices,
+  usePermissionCheck,
 } from '../../../../hooks';
 import {
   PLUGIN_ID,
@@ -95,7 +96,8 @@ export function Detail() {
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref } = useLink();
-  const hasWriteCapabilites = useCapabilities().write;
+  const hasWriteCapabilities = useCapabilities().write;
+  const permissionCheck = usePermissionCheck();
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
@@ -127,8 +129,10 @@ export function Detail() {
   const {
     data: packageInfoData,
     error: packageInfoError,
-    isLoading,
+    isLoading: packageInfoLoading,
   } = useGetPackageInfoByKey(pkgkey);
+
+  const isLoading = packageInfoLoading || permissionCheck.isLoading;
 
   const showCustomTab =
     useUIExtension(packageInfoData?.response.name ?? '', 'package-detail-custom') !== undefined;
@@ -330,7 +334,7 @@ export function Detail() {
                   // eslint-disable-next-line @elastic/eui/href-or-on-click
                   <EuiButton
                     fill
-                    isDisabled={!hasWriteCapabilites}
+                    isDisabled={!hasWriteCapabilities}
                     iconType="plusInCircle"
                     href={getHref('add_integration_to_policy', {
                       pkgkey,
@@ -372,7 +376,7 @@ export function Detail() {
     [
       getHref,
       handleAddIntegrationPolicyClick,
-      hasWriteCapabilites,
+      hasWriteCapabilities,
       integration,
       integrationInfo,
       packageInfo,
@@ -407,7 +411,11 @@ export function Detail() {
       },
     ];
 
-    if (packageInstallStatus === InstallStatus.installed) {
+    if (
+      hasWriteCapabilities &&
+      permissionCheck.data?.success &&
+      packageInstallStatus === InstallStatus.installed
+    ) {
       tabs.push({
         id: 'policies',
         name: (
@@ -443,21 +451,23 @@ export function Detail() {
       });
     }
 
-    tabs.push({
-      id: 'settings',
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.epm.packageDetailsNav.settingsLinkText"
-          defaultMessage="Settings"
-        />
-      ),
-      isSelected: panel === 'settings',
-      'data-test-subj': `tab-settings`,
-      href: getHref('integration_details_settings', {
-        pkgkey: packageInfoKey,
-        ...(integration ? { integration } : {}),
-      }),
-    });
+    if (hasWriteCapabilities && permissionCheck.data?.success) {
+      tabs.push({
+        id: 'settings',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsNav.settingsLinkText"
+            defaultMessage="Settings"
+          />
+        ),
+        isSelected: panel === 'settings',
+        'data-test-subj': `tab-settings`,
+        href: getHref('integration_details_settings', {
+          pkgkey: packageInfoKey,
+          ...(integration ? { integration } : {}),
+        }),
+      });
+    }
 
     if (showCustomTab) {
       tabs.push({
@@ -478,7 +488,17 @@ export function Detail() {
     }
 
     return tabs;
-  }, [packageInfo, panel, getHref, integration, packageInstallStatus, showCustomTab, CustomAssets]);
+  }, [
+    packageInfo,
+    panel,
+    getHref,
+    integration,
+    hasWriteCapabilities,
+    permissionCheck.data?.success,
+    packageInstallStatus,
+    CustomAssets,
+    showCustomTab,
+  ]);
 
   return (
     <WithHeaderLayout
