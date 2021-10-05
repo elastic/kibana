@@ -27,7 +27,6 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
-import { isSignalIndex } from '../../store/sourcerer/helpers';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { SelectedDataView } from '../../store/sourcerer/selectors';
 
@@ -265,13 +264,10 @@ export const useIndexFields = (
               // TODO: Steph/sourcerer needs better tests
               if (isCompleteResponse(response)) {
                 const signalIndexName = signalIndexNameSelector
-                  ? `${signalIndexNameSelector}-*`
+                  ? signalIndexNameSelector
                   : newSignalsIndex ?? '';
                 const newSelectedPatterns = selectedPatterns.filter((pattern) =>
-                  // signals index will not be an exact match because stored index has wildcard
-                  isSignalIndex(signalIndexName, pattern)
-                    ? patternList.some((p) => isSignalIndex(p, pattern))
-                    : patternList.includes(pattern)
+                  patternList.includes(pattern)
                 );
                 const patternString = newSelectedPatterns.sort().join();
 

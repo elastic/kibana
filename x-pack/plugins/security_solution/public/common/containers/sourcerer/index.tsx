@@ -157,7 +157,7 @@ export const useInitSourcerer = (
     if (!loadingSignalIndex && signalIndexName != null && signalIndexNameSelector == null) {
       // update signal name also updates sourcerer
       // we hit this the first time signal index is created
-      updateSourcererDataView(`${signalIndexName}-*`);
+      updateSourcererDataView(signalIndexName);
       dispatch(sourcererActions.setSignalIndexName({ signalIndexName }));
     }
   }, [

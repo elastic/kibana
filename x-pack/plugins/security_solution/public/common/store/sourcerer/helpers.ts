@@ -18,14 +18,8 @@ export interface Args {
   state: SourcererModel;
 }
 
-export const isSignalIndex = (index: string, signalIndex: string | null): boolean => {
-  const first = index.split('-*');
-  const second = `${signalIndex}`.split('-*');
-  if (first.length > 2 || second.length > 2) {
-    return false;
-  }
-  return first[0] === second[0];
-};
+export const isSignalIndex = (index: string, signalIndex: string | null): boolean =>
+  index === signalIndex;
 
 export const getScopePatternListSelection = (
   theDataView: KibanaDataView | undefined,
@@ -67,11 +61,7 @@ export const validateSelectedPatterns = (
   const selectedPatterns =
     rest.selectedPatterns != null && dataView != null
       ? [...new Set(rest.selectedPatterns)].filter(
-          (pattern) =>
-            // includes instead of === because the dataView version of signals index
-            // will have a wildcard and the signalIndexName does not include the wildcard
-            dataView.patternList.some((index) => index.includes(pattern)) ||
-            state.signalIndexName == null // this is a hack, but sometimes signal index is deleted and is getting regenerated. it gets set before it is put in the dataView
+          (pattern) => dataView.patternList.includes(pattern) || state.signalIndexName == null // this is a hack, but sometimes signal index is deleted and is getting regenerated. it gets set before it is put in the dataView
         )
       : [];
 
