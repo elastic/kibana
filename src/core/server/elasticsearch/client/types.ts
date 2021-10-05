@@ -8,11 +8,10 @@
 
 import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import type {
-  ApiResponse,
+  TransportResult,
   TransportRequestOptions,
   TransportRequestParams,
-  TransportRequestPromise,
-} from '@elastic/elasticsearch/lib/Transport';
+} from '@elastic/transport';
 
 /**
  * Client used to query the elasticsearch cluster.
@@ -27,7 +26,7 @@ export type ElasticsearchClient = Omit<
     request(
       params: TransportRequestParams,
       options?: TransportRequestOptions
-    ): TransportRequestPromise<ApiResponse>;
+    ): Promise<TransportResult>;
   };
 };
 

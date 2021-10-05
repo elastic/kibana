@@ -8,7 +8,7 @@
 
 import Path from 'path';
 import fs from 'fs/promises';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 import JSON5 from 'json5';

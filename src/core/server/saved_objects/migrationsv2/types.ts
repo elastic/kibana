@@ -8,7 +8,7 @@
 
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ControlState } from './state_action_machine';
 import { AliasAction } from './actions';
 import { IndexMapping } from '../mappings';

@@ -7,7 +7,7 @@
  */
 
 import { omit, isObject } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '../../../elasticsearch/';
 import { isSupportedEsServer, isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 import type { Logger } from '../../../logging';

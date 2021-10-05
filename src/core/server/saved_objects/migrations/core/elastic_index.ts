@@ -12,7 +12,7 @@
  */
 
 import _ from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MigrationEsClient } from './migration_es_client';
 import { IndexMapping } from '../../mappings';
 import { SavedObjectsMigrationVersion } from '../../types';

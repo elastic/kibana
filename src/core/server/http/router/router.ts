@@ -292,7 +292,7 @@ const convertEsUnauthorized = (e: EsNotAuthorizedError): ErrorHttpResponseOption
     const header = Object.entries(e.headers).find(
       ([key]) => key.toLowerCase() === 'www-authenticate'
     );
-    return header ? header[1] : 'Basic realm="Authorization Required"';
+    return header ? (header[1] as string) : 'Basic realm="Authorization Required"';
   };
   return {
     body: e.message,

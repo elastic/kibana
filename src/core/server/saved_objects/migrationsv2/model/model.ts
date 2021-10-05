@@ -9,7 +9,7 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AliasAction, isLeftTypeof } from '../actions';
 import { AllActionStates, MigrationLog, State } from '../types';
 import type { ResponseType } from '../next';
