@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { RouteInitializerDeps } from '../';
 import { API_ROUTE_WORKPAD } from '../../../common/lib/constants';
 import { catchErrorHandler } from '../catch_error_handler';
+import { shimWorkpad } from './shim_workpad';
 
 export function initializeGetWorkpadRoute(deps: RouteInitializerDeps) {
   const { router } = deps;
@@ -24,24 +25,7 @@ export function initializeGetWorkpadRoute(deps: RouteInitializerDeps) {
     catchErrorHandler(async (context, request, response) => {
       const workpad = await context.canvas.workpad.get(request.params.id);
 
-      if (
-        // not sure if we need to be this defensive
-        workpad.type === 'canvas-workpad' &&
-        workpad.attributes &&
-        workpad.attributes.pages &&
-        workpad.attributes.pages.length
-      ) {
-        workpad.attributes.pages.forEach((page) => {
-          const elements = (page.elements || []).filter(
-            ({ id: pageId }) => !pageId.startsWith('group')
-          );
-          const groups = (page.groups || []).concat(
-            (page.elements || []).filter(({ id: pageId }) => pageId.startsWith('group'))
-          );
-          page.elements = elements;
-          page.groups = groups;
-        });
-      }
+      shimWorkpad(workpad);
 
       return response.ok({
         body: {

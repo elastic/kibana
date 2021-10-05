@@ -13,6 +13,7 @@ export { WorkpadRoutingContext, WorkpadRoutingContextType } from './workpad_rout
 
 export interface WorkpadRouteParams {
   id: string;
+  pageNumber?: string;
 }
 
 export interface WorkpadPageRouteParams extends WorkpadRouteParams {
