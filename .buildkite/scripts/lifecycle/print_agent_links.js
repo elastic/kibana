@@ -5,7 +5,8 @@ const { BuildkiteClient } = require('kibana-buildkite-library');
     const client = new BuildkiteClient();
     const build = await client.getCurrentBuild();
 
-    const startTime = new Date(build.started_at);
+    const job = build.jobs.find((j) => j.id === process.env.BUILDKITE_JOB_ID);
+    const startTime = job ? new Date(job.started_at) : new Date().getTime() - 60 * 60 * 1000;
     const twoHours = new Date(startTime.getTime() + 2 * 60 * 60 * 1000);
 
     const METRICS_URL = [
