@@ -308,11 +308,6 @@ describe('Host Isolation', () => {
       ).mock.calls[0][0].body;
       expect(actionDoc.timeout).toEqual(300);
     });
-
-    it('succeeds when just an endpoint ID is provided', async () => {
-      await callRoute(ISOLATE_HOST_ROUTE, { body: { endpoint_ids: ['XYZ'] } });
-      expect(mockResponse.ok).toBeCalled();
-    });
     it('sends the action to the correct agent when endpoint ID is given', async () => {
       const doc = docGen.generateHostMetadata();
       const AgentID = doc.elastic.agent.id;
