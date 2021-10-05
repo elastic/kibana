@@ -97,10 +97,10 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
           ),
           description: (
             <EuiFlexGroup direction="column" gutterSize="xs">
-              {entries(filteredTypes).map(([_type, parts]) => {
+              {entries(filteredTypes).map(([_type, parts], index) => {
                 const type = _type as KibanaAssetType;
                 return (
-                  <EuiFlexItem>
+                  <EuiFlexItem key={`item-${index}`}>
                     <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="spaceBetween">
                       <EuiFlexItem grow={false}>{AssetTitleMap[type]}</EuiFlexItem>
                       <EuiFlexItem grow={false}>
