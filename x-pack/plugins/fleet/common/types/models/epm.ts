@@ -19,6 +19,8 @@ import type {
 } from '../../constants';
 import type { ValueOf } from '../../types';
 
+import type { CustomIntegrationIcon } from '../../../../../../src/plugins/custom_integrations/common';
+
 import type {
   PackageSpecManifest,
   PackageSpecIcon,
@@ -349,6 +351,7 @@ export interface EpmPackageAdditions {
   assets: AssetsGroupedByServiceByType;
   removable?: boolean;
   notice?: string;
+  keepPoliciesUpToDate?: boolean;
 }
 
 type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, keyof SecondType>> &
@@ -368,7 +371,7 @@ export interface IntegrationCardItem {
   name: string;
   title: string;
   version: string;
-  icons: PackageSpecIcon[];
+  icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
   integration: string;
   id: string;
 }
@@ -389,6 +392,7 @@ export interface Installation extends SavedObjectAttributes {
   install_version: string;
   install_started_at: string;
   install_source: InstallSource;
+  keep_policies_up_to_date: boolean;
 }
 
 export interface PackageUsageStats {

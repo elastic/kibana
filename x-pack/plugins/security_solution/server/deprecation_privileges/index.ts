@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 
 import { DeprecationsDetails, DeprecationsServiceSetup } from '../../../../../src/core/server';
-import type { PrivilegeDeprecationsServices } from '../../../security/common/model';
+import type { PrivilegeDeprecationsService } from '../../../security/common/model';
 import { CASES_FEATURE_ID, SERVER_APP_ID } from '../../common/constants';
 
 interface Deps {
   deprecationsService: DeprecationsServiceSetup;
-  getKibanaRolesByFeatureId?: PrivilegeDeprecationsServices['getKibanaRolesByFeatureId'];
+  getKibanaRolesByFeatureId?: PrivilegeDeprecationsService['getKibanaRolesByFeatureId'];
 }
 
 export const updateSecuritySolutionPrivileges = (

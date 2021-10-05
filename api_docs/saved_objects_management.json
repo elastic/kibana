@@ -1589,6 +1589,62 @@
       },
       {
         "parentPluginId": "savedObjectsManagement",
+        "id": "def-common.SavedObjectManagementTypeInfo",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectManagementTypeInfo",
+        "description": [],
+        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectManagementTypeInfo.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectManagementTypeInfo.namespaceType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "namespaceType",
+            "description": [],
+            "signature": [
+              "\"multiple\" | \"single\" | \"multiple-isolated\" | \"agnostic\""
+            ],
+            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectManagementTypeInfo.hidden",
+            "type": "boolean",
+            "tags": [],
+            "label": "hidden",
+            "description": [],
+            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectManagementTypeInfo.displayName",
+            "type": "string",
+            "tags": [],
+            "label": "displayName",
+            "description": [],
+            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjectsManagement",
         "id": "def-common.SavedObjectMetadata",
         "type": "Interface",
         "tags": [],
