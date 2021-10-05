@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/server';
 import {
   TutorialsRegistry,
   TutorialsRegistrySetup,
@@ -30,8 +30,11 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
   constructor(private readonly initContext: PluginInitializerContext) {}
   private readonly tutorialsRegistry = new TutorialsRegistry();
   private readonly sampleDataRegistry = new SampleDataRegistry(this.initContext);
+  private customIntegrations?: CustomIntegrationsPluginSetup;
 
   public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {
+    this.customIntegrations = plugins.customIntegrations;
+
     core.capabilities.registerProvider(capabilitiesProvider);
     core.savedObjects.registerType(sampleDataTelemetry);
 
@@ -40,13 +43,15 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
 
     return {
       tutorials: { ...this.tutorialsRegistry.setup(core, plugins.customIntegrations) },
-      sampleData: { ...this.sampleDataRegistry.setup(core, plugins.usageCollection) },
+      sampleData: {
+        ...this.sampleDataRegistry.setup(core, plugins.usageCollection, plugins.customIntegrations),
+      },
     };
   }
 
-  public start(): HomeServerPluginStart {
+  public start(core: CoreStart): HomeServerPluginStart {
     return {
-      tutorials: { ...this.tutorialsRegistry.start() },
+      tutorials: { ...this.tutorialsRegistry.start(core, this.customIntegrations) },
       sampleData: { ...this.sampleDataRegistry.start() },
     };
   }
