@@ -51,12 +51,17 @@ import { PersistenceServices } from '../../../../../../rule_registry/server';
 import { ExecutorType } from '../../../../../../alerting/server/types';
 import { parseInterval } from '../../signals/utils';
 import { AlertInstance } from '../../../../../../alerting/server/alert_instance';
+import { queryExecutor } from '../../signals/executors/query';
+import { eqlExecutor } from '../../signals/executors/eql';
+import { threatMatchExecutor } from '../../signals/executors/threat_match';
+import { thresholdExecutor } from '../../signals/executors/threshold';
+import { mlExecutor } from '../../signals/executors/ml';
 
 export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
   previewRuleOptions: PreviewRuleOptions
-): void => {
+) => {
   router.post(
     {
       path: DETECTION_ENGINE_RULES_PREVIEW,
@@ -80,7 +85,6 @@ export const previewRulesRoute = async (
         if (!siemClient /* || !rulesClient*/) {
           return siemResponse.error({ statusCode: 404 });
         }
-
         const internalRule = convertPreviewAPIToInternalSchema(request.body, siemClient);
         const runState: Record<string, unknown> = {};
 
@@ -180,7 +184,7 @@ export const previewRulesRoute = async (
               alertId: 'alertId',
               services: {
                 alertInstanceFactory,
-                savedObjectsClient: {},
+                savedObjectsClient: mockSavedObjectsClient,
                 scopedClusterClient: {},
               },
               spaceId: 'asdf',
@@ -199,34 +203,21 @@ export const previewRulesRoute = async (
 
         switch (previewRuleParams.type) {
           case 'threat_match':
-            await runExecutors(
-              createIndicatorMatchAlertType(previewRuleOptions).executor,
-              previewRuleParams
-            );
+            await runExecutors(threatMatchExecutor, previewRuleParams);
             break;
           case 'eql':
-            await runExecutors(createEqlAlertType(previewRuleOptions).executor, previewRuleParams);
+            await runExecutors(eqlExecutor, previewRuleParams);
             break;
           case 'query':
-            await runExecutors<QueryRuleParams, {}>(
-              createQueryAlertType(previewRuleOptions).executor,
-              previewRuleParams
-            );
+            await runExecutors(queryExecutor, previewRuleParams);
             break;
           case 'threshold':
-            await runExecutors<ThresholdRuleParams, ThresholdAlertState>(
-              createThresholdAlertType(previewRuleOptions).executor,
-              previewRuleParams
-            );
+            await runExecutors(thresholdExecutor, previewRuleParams);
             break;
           case 'machine_learning':
-            await runExecutors<MachineLearningRuleParams, {}>(
-              createMlAlertType(previewRuleOptions).executor,
-              previewRuleParams
-            );
+            await runExecutors(mlExecutor, previewRuleParams);
             break;
           default:
-            executor = null;
         }
 
         if (errors != null) {

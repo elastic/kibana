@@ -358,8 +358,12 @@ export type MachineLearningCreateSchema = CreateSchema<
 
 export const createRulesSchema = t.intersection([sharedCreateSchema, createTypeSpecific]);
 export type CreateRulesSchema = t.TypeOf<typeof createRulesSchema>;
-export const previewRulesSchema = t.intersection([sharedCreateSchema, createTypeSpecific]);
-export type PreviewRulesSchema = t.TypeOf<typeof previewRulesSchema> & { invocationCount: number };
+export const previewRulesSchema = t.intersection([
+  sharedCreateSchema,
+  createTypeSpecific,
+  t.type({ invocationCount: t.number }),
+]);
+export type PreviewRulesSchema = t.TypeOf<typeof previewRulesSchema>;
 
 type UpdateSchema<T> = SharedUpdateSchema & T;
 export type EqlUpdateSchema = UpdateSchema<t.TypeOf<typeof eqlCreateParams>>;
