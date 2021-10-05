@@ -12,7 +12,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { CoreStart, HttpStart } from 'kibana/public';
 import { matchPath } from 'react-router-dom';
-import { transformNewItemOutput, transformOutput } from '@kbn/securitysolution-list-hooks';
+import { transformNewItemOutput } from '@kbn/securitysolution-list-hooks';
 import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
 import { ImmutableMiddleware, ImmutableMiddlewareAPI } from '../../../../common/store';
 import { AppAction } from '../../../../common/store/actions';
@@ -73,6 +73,7 @@ async function createHostIsolationException(
       type: 'hostIsolationExceptionsFormStateChanged',
       payload: createLoadedResourceState(response),
     });
+    loadHostIsolationExceptionsList(store, http);
   } catch (error) {
     dispatch({
       type: 'hostIsolationExceptionsFormStateChanged',
