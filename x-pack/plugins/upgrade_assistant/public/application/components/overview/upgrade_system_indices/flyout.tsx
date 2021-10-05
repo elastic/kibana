@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -72,24 +72,9 @@ const i18nTexts = {
 };
 
 const renderMigrationStatus = (status: UPGRADE_STATUS) => {
-  if (status === 'NO_UPGRADE_NEEDED') {
-    return (
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="checkInCircleFilled" color="success" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText color="green" size="s">
-            <p>{i18nTexts.upgradeCompleteLabel}</p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
   if (status === 'UPGRADE_NEEDED') {
     return (
-      <EuiText size="s">
+      <EuiText size="s" data-test-subj="featureUpgradeNeeded">
         <p>{i18nTexts.needsUpgradingLabel}</p>
       </EuiText>
     );
@@ -102,7 +87,7 @@ const renderMigrationStatus = (status: UPGRADE_STATUS) => {
           <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="s">
+          <EuiText color="subdued" size="s" data-test-subj="featureInProgress">
             <p>{i18nTexts.upgradingLabel}</p>
           </EuiText>
         </EuiFlexItem>
@@ -110,18 +95,22 @@ const renderMigrationStatus = (status: UPGRADE_STATUS) => {
     );
   }
 
-  return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="alert" color="danger" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText color="danger" size="s">
-          <p>{i18nTexts.errorLabel}</p>
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  if (status === 'ERROR') {
+    return (
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="alert" color="danger" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText color="danger" size="s" data-test-subj="featureError">
+            <p>{i18nTexts.errorLabel}</p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  return '';
 };
 
 const columns = [
@@ -140,6 +129,11 @@ const columns = [
 ];
 
 export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutProps) => {
+  // There's no need to show features in the UI if they dont need to be upgraded.
+  const resolvableFeatures = useMemo(() => {
+    return data.features.filter((feature) => feature.upgrade_status !== 'NO_UPGRADE_NEEDED');
+  }, [data]);
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -147,14 +141,15 @@ export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutPr
           <h2>{i18nTexts.flyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="flyoutDetails">
         <EuiText>
           <p>{i18nTexts.flyoutDescription}</p>
         </EuiText>
         <EuiSpacer size="l" />
         <EuiInMemoryTable<SystemIndicesUpgradeFeature>
+          data-test-subj="featuresTable"
           itemId="feature_name"
-          items={data.features}
+          items={resolvableFeatures}
           columns={columns}
           pagination={true}
           sorting={true}

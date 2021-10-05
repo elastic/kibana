@@ -1,0 +1,58 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { SystemIndicesUpgradeStatus } from '../../../../common/types';
+
+export const systemIndicesUpgradeStatus: SystemIndicesUpgradeStatus = {
+  upgrade_status: 'UPGRADE_NEEDED',
+  features: [
+    {
+      feature_name: 'security',
+      minimum_index_version: '7.1.1',
+      upgrade_status: 'ERROR',
+      indices: [
+        {
+          index: '.security-7',
+          version: '7.1.1',
+        },
+      ],
+    },
+    {
+      feature_name: 'machine_learning',
+      minimum_index_version: '7.1.1',
+      upgrade_status: 'IN_PROGRESS',
+      indices: [
+        {
+          index: '.security-7',
+          version: '7.1.1',
+        },
+      ],
+    },
+    {
+      feature_name: 'kibana',
+      minimum_index_version: '7.1.1',
+      upgrade_status: 'UPGRADE_NEEDED',
+      indices: [
+        {
+          index: '.security-7',
+          version: '7.1.1',
+        },
+      ],
+    },
+    {
+      feature_name: 'logstash',
+      minimum_index_version: '7.1.1',
+      upgrade_status: 'NO_UPGRADE_NEEDED',
+      indices: [
+        {
+          index: '.security-7',
+          version: '7.1.1',
+        },
+      ],
+    },
+  ],
+};

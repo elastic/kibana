@@ -57,10 +57,21 @@ const createActions = (testBed: TestBed) => {
     component.update();
   };
 
+  const clickViewSystemIndicesState = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('viewSystemIndicesStateButton').simulate('click');
+    });
+
+    component.update();
+  };
+
   return {
     clickDeprecationToggle,
     clickRetryButton,
     clickResetButton,
+    clickViewSystemIndicesState,
   };
 };
 

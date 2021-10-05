@@ -261,7 +261,7 @@ export interface DeprecationLoggingStatus {
   isDeprecationLoggingEnabled: boolean;
 }
 
-export type UPGRADE_STATUS = 'UPGRADE_NEEDED' | 'NO_UPGRADE_NEEDED' | 'IN_PROGRESS';
+export type UPGRADE_STATUS = 'UPGRADE_NEEDED' | 'NO_UPGRADE_NEEDED' | 'IN_PROGRESS' | 'ERROR';
 export interface SystemIndicesUpgradeFeature {
   id?: string;
   feature_name: string;
