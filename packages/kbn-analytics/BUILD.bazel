@@ -4,6 +4,7 @@ load("//src/dev/bazel:index.bzl", "jsts_transpiler", "types_pkg")
 
 PKG_BASE_NAME = "kbn-analytics"
 PKG_REQUIRE_NAME = "@kbn/analytics"
+TYPES_PKG_REQUIRE_NAME = "@types/kbn__analytics"
 
 SOURCE_FILES = glob(
   [
@@ -80,11 +81,9 @@ ts_project(
 
 types_pkg(
   name = "npm_module_types",
-  package_name = "@types/kbn__analytics",
+  package_name = TYPES_PKG_REQUIRE_NAME,
+  tsconfig = ":tsconfig",
   data = SRCS + TYPES_DEPS + [
-    "tsconfig.json",
-    "//:tsconfig.base.json",
-    "//:tsconfig.bazel.json",
     ":tsc_types",
   ]
 )
@@ -108,6 +107,14 @@ filegroup(
   name = "build",
   srcs = [
     ":npm_module",
+  ],
+  visibility = ["//visibility:public"],
+)
+
+filegroup(
+  name = "build_types",
+  srcs = [
+    ":npm_module_types",
   ],
   visibility = ["//visibility:public"],
 )
