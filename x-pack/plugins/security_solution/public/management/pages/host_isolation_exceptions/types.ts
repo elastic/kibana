@@ -24,7 +24,7 @@ export interface HostIsolationExceptionsPageState {
   entries: AsyncResourceState<FoundExceptionListItemSchema>;
   location: HostIsolationExceptionsPageLocation;
   deletion: {
-    item: ExceptionListItemSchema | undefined;
+    item?: ExceptionListItemSchema;
     status: AsyncResourceState<ExceptionListItemSchema>;
   };
 }

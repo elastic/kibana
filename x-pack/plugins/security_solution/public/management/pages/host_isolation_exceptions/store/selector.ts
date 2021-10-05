@@ -75,7 +75,7 @@ export const getCurrentLocation: HostIsolationExceptionsSelector<StoreState['loc
   state
 ) => state.location;
 
-export const getDeletionState = createSelector(
+export const getDeletionState: HostIsolationExceptionsSelector<StoreState['deletion']> = createSelector(
   getCurrentListPageState,
   (listState) => listState.deletion
 );

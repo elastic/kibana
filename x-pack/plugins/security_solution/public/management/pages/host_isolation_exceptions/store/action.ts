@@ -15,7 +15,7 @@ export type HostIsolationExceptionsPageDataChanged =
   };
 
 export type HostIsolationExceptionsDeleteItem = Action<'hostIsolationExceptionsMarkToDelete'> & {
-  payload: ExceptionListItemSchema | undefined;
+  payload?: ExceptionListItemSchema;
 };
 
 export type HostIsolationExceptionsSubmitDelete = Action<'hostIsolationExceptionsSubmitDelete'>;

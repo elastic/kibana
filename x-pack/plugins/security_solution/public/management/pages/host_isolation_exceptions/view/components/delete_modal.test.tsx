@@ -108,7 +108,7 @@ describe('When on the host isolation exceptions delete modal', () => {
     );
   });
 
-  it('should show error toast if error is countered', async () => {
+  it('should show error toast if error is encountered', async () => {
     deleteHostIsolationExceptionItemsMock.mockRejectedValue(
       new Error("That's not true. That's impossible")
     );
