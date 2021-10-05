@@ -41,5 +41,4 @@ export interface ResultAction {
   title: string;
   iconType: string;
   iconColor?: EuiButtonIconColor;
-  disabled?: boolean;
 }
