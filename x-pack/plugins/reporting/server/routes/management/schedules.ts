@@ -6,15 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { API_BASE_URL } from '../../../common/constants';
+import { BASE_SCHEDULE } from '../../../common/constants';
 import { ReportingCore } from '../../core';
 import { reportFromTask } from '../../lib/store';
 import { ScheduledReportTaskParams } from '../../lib/tasks';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { handleUnavailable } from '../lib/request_handler';
-
-// TODO: move this to constants file - will eventually be needed in the UI
-const BASE_SCHEDULE = `${API_BASE_URL}/schedules`;
 
 export function registerScheduleInfoRoutes(reporting: ReportingCore) {
   const setupDeps = reporting.getPluginSetupDeps();
