@@ -217,7 +217,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         }),
         render(_version, { agentPolicy, packagePolicy }) {
           return (
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s" alignItems="center" wrap={true}>
               <EuiFlexItem grow={false}>
                 <EuiText size="s" className="eui-textNoWrap">
                   <FormattedMessage
