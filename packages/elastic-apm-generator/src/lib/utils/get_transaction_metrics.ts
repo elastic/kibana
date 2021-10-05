@@ -82,6 +82,7 @@ export function getTransactionMetrics(events: Fields[]) {
         ['transaction.duration.histogram']: sortAndCompressHistogram(
           metricset['transaction.duration.histogram']
         ),
+        _doc_count: metricset['transaction.duration.histogram']!.values.length,
       };
     }),
   ];
