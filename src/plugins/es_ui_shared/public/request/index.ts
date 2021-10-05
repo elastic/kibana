@@ -6,10 +6,5 @@
  * Side Public License, v 1.
  */
 
-export {
-  SendRequestConfig,
-  SendRequestResponse,
-  sendRequest,
-  ResponseInterceptor,
-} from './send_request';
+export { SendRequestConfig, SendRequestResponse, sendRequest } from './send_request';
 export { UseRequestConfig, UseRequestResponse, useRequest } from './use_request';

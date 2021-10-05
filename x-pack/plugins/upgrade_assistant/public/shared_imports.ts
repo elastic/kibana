@@ -12,7 +12,6 @@ export {
   useRequest,
   UseRequestConfig,
   UseRequestResponse,
-  ResponseInterceptor,
   SectionLoading,
   GlobalFlyout,
   WithPrivileges,

@@ -8,8 +8,6 @@
 
 import { HttpSetup, HttpFetchQuery } from '../../../../../src/core/public';
 
-export type ResponseInterceptor = ({ data, error }: { data: any; error: any }) => void;
-
 export interface SendRequestConfig {
   path: string;
   method: 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head';
@@ -20,7 +18,6 @@ export interface SendRequestConfig {
    * HttpFetchOptions#asSystemRequest.
    */
   asSystemRequest?: boolean;
-  responseInterceptors?: ResponseInterceptor[];
 }
 
 export interface SendRequestResponse<D = any, E = any> {
@@ -28,41 +25,26 @@ export interface SendRequestResponse<D = any, E = any> {
   error: E | null;
 }
 
-// Pass the response sequentially through each interceptor, allowing for
-// side effects to be run.
-const updateResponseInterceptors = (
-  response: any,
-  responseInterceptors: ResponseInterceptor[] = []
-) => {
-  responseInterceptors.forEach((interceptor) => interceptor(response));
-};
-
 export const sendRequest = async <D = any, E = any>(
   httpClient: HttpSetup,
-  { path, method, body, query, asSystemRequest, responseInterceptors }: SendRequestConfig
+  { path, method, body, query, asSystemRequest }: SendRequestConfig
 ): Promise<SendRequestResponse<D, E>> => {
   try {
     const stringifiedBody = typeof body === 'string' ? body : JSON.stringify(body);
-    const rawResponse = await httpClient[method](path, {
+    const response = await httpClient[method](path, {
       body: stringifiedBody,
       query,
       asSystemRequest,
     });
 
-    const response = {
-      data: rawResponse.data ? rawResponse.data : rawResponse,
+    return {
+      data: response.data ? response.data : response,
       error: null,
     };
-
-    updateResponseInterceptors(response, responseInterceptors);
-    return response;
   } catch (e) {
-    const response = {
+    return {
       data: null,
       error: e.response?.data ?? e.body,
     };
-
-    updateResponseInterceptors(response, responseInterceptors);
-    return response;
   }
 };

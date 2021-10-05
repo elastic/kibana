@@ -30,7 +30,6 @@ export {
   UseRequestResponse,
   sendRequest,
   useRequest,
-  ResponseInterceptor,
 } from './request';
 
 export { indices } from './indices';

@@ -7,7 +7,12 @@
 
 import { HttpSetup } from 'src/core/public';
 
-import { ESUpgradeStatus, CloudBackupStatus, ResponseError } from '../../../common/types';
+import {
+  ESUpgradeStatus,
+  CloudBackupStatus,
+  ClusterUpgradeState,
+  ResponseError,
+} from '../../../common/types';
 import {
   API_BASE_PATH,
   DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,
@@ -15,39 +20,55 @@ import {
 } from '../../../common/constants';
 import {
   UseRequestConfig,
-  ResponseInterceptor,
+  UseRequestResponse,
   SendRequestConfig,
   SendRequestResponse,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
 } from '../../shared_imports';
 
+type ClusterUpgradeStateListener = (clusterUpgradeState: ClusterUpgradeState) => void;
+
 export class ApiService {
   private client: HttpSetup | undefined;
-  private responseInterceptors: ResponseInterceptor[] = [];
+  private clusterUpgradeStateListeners: ClusterUpgradeStateListener[] = [];
 
-  private useRequest<R = any, E = ResponseError>(config: UseRequestConfig) {
-    if (!this.client) {
-      throw new Error('API service has not be initialized.');
+  private handleClusterUpgradeError<ResponseType>(error: ResponseError | null) {
+    const isClusterUpgradeError = Boolean(error && error.statusCode === 426);
+    if (isClusterUpgradeError) {
+      const clusterUpgradeState = error!.attributes!.allNodesUpgraded
+        ? 'isUpgradeComplete'
+        : 'isUpgrading';
+      this.clusterUpgradeStateListeners.forEach((listener) => listener(clusterUpgradeState));
     }
-    return _useRequest<R, ResponseError>(this.client, config);
   }
 
-  private sendRequest<D = any, E = ResponseError>(
-    config: SendRequestConfig
-  ): Promise<SendRequestResponse<D, E>> {
+  private useRequest<R = any>(config: UseRequestConfig) {
     if (!this.client) {
-      throw new Error('API service has not be initialized.');
+      throw new Error('API service has not been initialized.');
     }
-    return _sendRequest<D, E>(this.client, config);
+    const response = _useRequest<R, ResponseError>(this.client, config);
+    this.handleClusterUpgradeError<UseRequestResponse<R, ResponseError>>(response.error);
+    return response;
+  }
+
+  private async sendRequest<R = any>(
+    config: SendRequestConfig
+  ): Promise<SendRequestResponse<R, ResponseError>> {
+    if (!this.client) {
+      throw new Error('API service has not been initialized.');
+    }
+    const response = await _sendRequest<R, ResponseError>(this.client, config);
+    this.handleClusterUpgradeError<SendRequestResponse>(response.error);
+    return response;
   }
 
   public setup(httpClient: HttpSetup): void {
     this.client = httpClient;
   }
 
-  public addResponseInterceptor(interceptor: ResponseInterceptor): void {
-    this.responseInterceptors.push(interceptor);
+  public onClusterUpgradeStateChange(listener: ClusterUpgradeStateListener): void {
+    this.clusterUpgradeStateListeners.push(listener);
   }
 
   public useLoadCloudBackupStatus() {
@@ -55,7 +76,6 @@ export class ApiService {
       path: `${API_BASE_PATH}/cloud_backup_status`,
       method: 'get',
       pollIntervalMs: CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS,
-      responseInterceptors: this.responseInterceptors,
     });
   }
 
@@ -63,18 +83,15 @@ export class ApiService {
     return this.useRequest<ESUpgradeStatus>({
       path: `${API_BASE_PATH}/es_deprecations`,
       method: 'get',
-      responseInterceptors: this.responseInterceptors,
     });
   }
 
   public async sendPageTelemetryData(telemetryData: { [tabName: string]: boolean }) {
-    const result = await this.sendRequest({
+    return await this.sendRequest({
       path: `${API_BASE_PATH}/stats/ui_open`,
       method: 'put',
       body: JSON.stringify(telemetryData),
     });
-
-    return result;
   }
 
   public useLoadDeprecationLogging() {
@@ -84,19 +101,15 @@ export class ApiService {
     }>({
       path: `${API_BASE_PATH}/deprecation_logging`,
       method: 'get',
-      responseInterceptors: this.responseInterceptors,
     });
   }
 
   public async updateDeprecationLogging(loggingData: { isEnabled: boolean }) {
-    const result = await this.sendRequest({
+    return await this.sendRequest({
       path: `${API_BASE_PATH}/deprecation_logging`,
       method: 'put',
       body: JSON.stringify(loggingData),
-      responseInterceptors: this.responseInterceptors,
     });
-
-    return result;
   }
 
   public getDeprecationLogsCount(from: string) {
@@ -107,42 +120,32 @@ export class ApiService {
       method: 'get',
       query: { from },
       pollIntervalMs: DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,
-      responseInterceptors: this.responseInterceptors,
     });
   }
 
   public async updateIndexSettings(indexName: string, settings: string[]) {
-    const result = await this.sendRequest({
+    return await this.sendRequest({
       path: `${API_BASE_PATH}/${indexName}/index_settings`,
       method: 'post',
       body: {
         settings: JSON.stringify(settings),
       },
-      responseInterceptors: this.responseInterceptors,
     });
-
-    return result;
   }
 
   public async upgradeMlSnapshot(body: { jobId: string; snapshotId: string }) {
-    const result = await this.sendRequest({
+    return await this.sendRequest({
       path: `${API_BASE_PATH}/ml_snapshots`,
       method: 'post',
       body,
-      responseInterceptors: this.responseInterceptors,
     });
-
-    return result;
   }
 
   public async deleteMlSnapshot({ jobId, snapshotId }: { jobId: string; snapshotId: string }) {
-    const result = await this.sendRequest({
+    return await this.sendRequest({
       path: `${API_BASE_PATH}/ml_snapshots/${jobId}/${snapshotId}`,
       method: 'delete',
-      responseInterceptors: this.responseInterceptors,
     });
-
-    return result;
   }
 
   public async getMlSnapshotUpgradeStatus({
@@ -155,7 +158,6 @@ export class ApiService {
     return await this.sendRequest({
       path: `${API_BASE_PATH}/ml_snapshots/${jobId}/${snapshotId}`,
       method: 'get',
-      responseInterceptors: this.responseInterceptors,
     });
   }
 
@@ -165,25 +167,21 @@ export class ApiService {
     }>({
       path: `${API_BASE_PATH}/ml_upgrade_mode`,
       method: 'get',
-      responseInterceptors: this.responseInterceptors,
     });
   }
 
   public async sendReindexTelemetryData(telemetryData: { [key: string]: boolean }) {
-    const result = await this.sendRequest({
+    return await this.sendRequest({
       path: `${API_BASE_PATH}/stats/ui_reindex`,
       method: 'put',
       body: JSON.stringify(telemetryData),
     });
-
-    return result;
   }
 
   public async getReindexStatus(indexName: string) {
     return await this.sendRequest({
       path: `${API_BASE_PATH}/reindex/${indexName}`,
       method: 'get',
-      responseInterceptors: this.responseInterceptors,
     });
   }
 
@@ -191,7 +189,6 @@ export class ApiService {
     return await this.sendRequest({
       path: `${API_BASE_PATH}/reindex/${indexName}`,
       method: 'post',
-      responseInterceptors: this.responseInterceptors,
     });
   }
 
@@ -199,7 +196,6 @@ export class ApiService {
     return await this.sendRequest({
       path: `${API_BASE_PATH}/reindex/${indexName}/cancel`,
       method: 'post',
-      responseInterceptors: this.responseInterceptors,
     });
   }
 }

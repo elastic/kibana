@@ -27,16 +27,7 @@ export interface UseRequestResponse<D = any, E = Error> {
 
 export const useRequest = <D = any, E = Error>(
   httpClient: HttpSetup,
-  {
-    path,
-    method,
-    query,
-    body,
-    pollIntervalMs,
-    initialData,
-    deserializer,
-    responseInterceptors,
-  }: UseRequestConfig
+  { path, method, query, body, pollIntervalMs, initialData, deserializer }: UseRequestConfig
 ): UseRequestResponse<D, E> => {
   const isMounted = useRef(false);
 
@@ -89,7 +80,7 @@ export const useRequest = <D = any, E = Error>(
       // Any requests that are sent in the background (without user interaction) should be flagged as "system requests". This should not be
       // confused with any terminology in Elasticsearch. This is a Kibana-specific construct that allows the server to differentiate between
       // user-initiated and requests "system"-initiated requests, for purposes like security features.
-      const requestPayload = { ...requestBody, asSystemRequest, responseInterceptors };
+      const requestPayload = { ...requestBody, asSystemRequest };
       const response = await sendRequest<D, E>(httpClient, requestPayload);
       const { data: serializedResponseData, error: responseError } = response;
 
@@ -115,7 +106,7 @@ export const useRequest = <D = any, E = Error>(
       // Setting isLoading to false also acts as a signal for scheduling the next poll request.
       setIsLoading(false);
     },
-    [requestBody, httpClient, deserializer, clearPollInterval, responseInterceptors]
+    [requestBody, httpClient, deserializer, clearPollInterval]
   );
 
   const scheduleRequest = useCallback(() => {

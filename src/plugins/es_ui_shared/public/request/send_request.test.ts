@@ -29,29 +29,8 @@ describe('sendRequest function', () => {
     const { sendErrorRequest, getSendRequestSpy, getErrorResponse } = helpers;
 
     // For some reason sinon isn't throwing an error on rejection, as an awaited Promise normally would.
-    const errorResponse = await sendErrorRequest();
+    const error = await sendErrorRequest();
     sinon.assert.calledOnce(getSendRequestSpy());
-    expect(errorResponse).toEqual(getErrorResponse());
-  });
-
-  it('calls responseInterceptors with successful responses', async () => {
-    const { sendSuccessRequest, getSuccessResponse } = helpers;
-    const successInterceptorSpy = sinon.spy();
-    const successInterceptors = [successInterceptorSpy];
-
-    await sendSuccessRequest(successInterceptors);
-    sinon.assert.calledOnce(successInterceptorSpy);
-    sinon.assert.calledWith(successInterceptorSpy, getSuccessResponse());
-  });
-
-  it('calls responseInterceptors with errors', async () => {
-    const { sendErrorRequest, getErrorResponse } = helpers;
-    const errorInterceptorSpy = sinon.spy();
-    const errorInterceptors = [errorInterceptorSpy];
-
-    // For some reason sinon isn't throwing an error on rejection, as an awaited Promise normally would.
-    await sendErrorRequest(errorInterceptors);
-    sinon.assert.calledOnce(errorInterceptorSpy);
-    sinon.assert.calledWith(errorInterceptorSpy, getErrorResponse());
+    expect(error).toEqual(getErrorResponse());
   });
 });

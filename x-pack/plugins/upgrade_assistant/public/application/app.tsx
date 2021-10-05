@@ -13,17 +13,13 @@ import { ScopedHistory } from 'src/core/public';
 
 import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 import { API_BASE_PATH } from '../../common/constants';
-import { ClusterUpgradeState, ResponseError } from '../../common/types';
+import { ClusterUpgradeState } from '../../common/types';
 import { APP_WRAPPER_CLASS, GlobalFlyout, AuthorizationProvider } from '../shared_imports';
 import { AppDependencies } from '../types';
 import { AppContextProvider, useAppContext } from './app_context';
 import { EsDeprecations, ComingSoonPrompt, KibanaDeprecations, Overview } from './components';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
-
-const isClusterUpgradeStateError = (error: ResponseError | null): boolean => {
-  return Boolean(error && error.statusCode === 426);
-};
 
 const App: React.FunctionComponent = () => {
   const {
@@ -34,26 +30,11 @@ const App: React.FunctionComponent = () => {
   const [clusterUpgradeState, setClusterUpradeState] =
     useState<ClusterUpgradeState>('isPreparingForUpgrade');
 
-  const handleClusterUpgradeStateError = useCallback(
-    (error: ResponseError | null) => {
-      if (error && error.attributes) {
-        setClusterUpradeState(
-          error.attributes.allNodesUpgraded ? 'isUpgradeComplete' : 'isUpgrading'
-        );
-      }
-    },
-    [setClusterUpradeState]
-  );
-
   useEffect(() => {
-    api.addResponseInterceptor((response: ResponseError | null) => {
-      const { error } = response;
-      if (isClusterUpgradeStateError(error)) {
-        handleClusterUpgradeStateError(error);
-      }
-      return error;
+    api.onClusterUpgradeStateChange((newClusterUpgradeState: ClusterUpgradeState) => {
+      setClusterUpradeState(newClusterUpgradeState);
     });
-  }, [api, handleClusterUpgradeStateError]);
+  }, [api, setClusterUpradeState]);
 
   // Read-only mode will be enabled up until the last minor before the next major release
   if (isReadOnlyMode) {
