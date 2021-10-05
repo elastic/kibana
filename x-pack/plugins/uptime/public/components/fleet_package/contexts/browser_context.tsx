@@ -22,6 +22,12 @@ interface IBrowserSimpleFieldsContextProvider {
 
 export const initialValues: IBrowserSimpleFields = {
   ...commonDefaultValues,
+  [ConfigKeys.METADATA]: {
+    script_source: {
+      is_generated_script: false,
+      file_name: '',
+    },
+  },
   [ConfigKeys.MONITOR_TYPE]: DataStream.BROWSER,
   [ConfigKeys.SOURCE_ZIP_URL]: '',
   [ConfigKeys.SOURCE_ZIP_USERNAME]: '',

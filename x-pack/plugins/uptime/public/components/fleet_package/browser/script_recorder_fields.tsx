@@ -9,28 +9,33 @@ import React, { useState, useCallback } from 'react';
 
 import {
   EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutHeader,
+  EuiFormRow,
   EuiCodeBlock,
   EuiTitle,
-  EuiButtonEmpty,
+  EuiButton,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+import { usePolicyConfigContext } from '../contexts/policy_config_context';
 import { Uploader } from './uploader';
 
 interface Props {
-  onChange: (script: string) => void;
+  onChange: ({ scriptText, fileName }: { scriptText: string; fileName: string }) => void;
   script: string;
+  fileName: string;
 }
 
-export function ScriptRecorderFields({ onChange, script }: Props) {
+export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
   const [showScript, setShowScript] = useState(false);
-  const [fileName, setFileName] = useState('');
+  const { isEditable } = usePolicyConfigContext();
 
   const handleUpload = useCallback(
-    ({ scriptText, scriptName }: { scriptText: string; scriptName: string }) => {
-      setFileName(scriptName);
-      onChange(scriptText);
+    ({ scriptText, fileName: fileNameT }: { scriptText: string; fileName: string }) => {
+      onChange({ scriptText, fileName: fileNameT });
     },
     [onChange]
   );
@@ -42,15 +47,42 @@ export function ScriptRecorderFields({ onChange, script }: Props) {
         Download the Elastic Synthetics Recorder
       </EuiLink>
       <EuiSpacer size="m" />
-      <Uploader onUpload={handleUpload} />
+      {isEditable && script ? (
+        <EuiFormRow label="Testing script">
+          <EuiText size="s">
+            <strong>{fileName}</strong>
+          </EuiText>
+        </EuiFormRow>
+      ) : (
+        <Uploader onUpload={handleUpload} />
+      )}
       {script && (
-        <EuiButtonEmpty
-          onClick={() => setShowScript(true)}
-          iconType="editorCodeBlock"
-          iconSide="right"
-        >
-          Show script
-        </EuiButtonEmpty>
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={() => setShowScript(true)}
+                iconType="editorCodeBlock"
+                iconSide="right"
+              >
+                Show script
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {isEditable && (
+                <EuiButton
+                  onClick={() => onChange({ scriptText: '', fileName: '' })}
+                  iconType="trash"
+                  iconSide="right"
+                  color="danger"
+                >
+                  Remove script
+                </EuiButton>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       )}
       {showScript && (
         <EuiFlyout
@@ -64,13 +96,7 @@ export function ScriptRecorderFields({ onChange, script }: Props) {
             </EuiTitle>
           </EuiFlyoutHeader>
           <div style={{ height: '100%' }}>
-            <EuiCodeBlock
-              language="js"
-              overflowHeight={'100%'}
-              fontSize="m"
-              isCopyable
-              isVirtualized
-            >
+            <EuiCodeBlock language="js" overflowHeight={'100%'} fontSize="m" isCopyable>
               {script}
             </EuiCodeBlock>
           </div>

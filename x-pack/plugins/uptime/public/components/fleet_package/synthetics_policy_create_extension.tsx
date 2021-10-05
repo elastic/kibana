@@ -18,7 +18,7 @@ import {
   BrowserFields,
 } from './types';
 import {
-  useMonitorTypeContext,
+  usePolicyConfigContext,
   useTCPSimpleFieldsContext,
   useTCPAdvancedFieldsContext,
   useICMPSimpleFieldsContext,
@@ -64,7 +64,7 @@ export const defaultConfig: PolicyConfig = {
  */
 export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtensionComponentProps>(
   ({ newPolicy, onChange }) => {
-    const { monitorType } = useMonitorTypeContext();
+    const { monitorType } = usePolicyConfigContext();
     const { fields: httpSimpleFields } = useHTTPSimpleFieldsContext();
     const { fields: tcpSimpleFields } = useTCPSimpleFieldsContext();
     const { fields: icmpSimpleFields } = useICMPSimpleFieldsContext();
@@ -130,7 +130,7 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    return <CustomFields typeEditable validate={validate[monitorType]} dataStreams={dataStreams} />;
+    return <CustomFields validate={validate[monitorType]} dataStreams={dataStreams} />;
   }
 );
 SyntheticsPolicyCreateExtension.displayName = 'SyntheticsPolicyCreateExtension';

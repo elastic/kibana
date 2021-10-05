@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { PackagePolicyEditExtensionComponentProps } from '../../../../fleet/public';
 import { useTrackPageview } from '../../../../observability/public';
 import {
-  useMonitorTypeContext,
+  usePolicyConfigContext,
   useTCPSimpleFieldsContext,
   useTCPAdvancedFieldsContext,
   useICMPSimpleFieldsContext,
@@ -47,7 +47,7 @@ export const SyntheticsPolicyEditExtension = memo<SyntheticsPolicyEditExtensionP
   ({ newPolicy, onChange, defaultConfig, isTLSEnabled }) => {
     useTrackPageview({ app: 'fleet', path: 'syntheticsEdit' });
     useTrackPageview({ app: 'fleet', path: 'syntheticsEdit', delay: 15000 });
-    const { monitorType } = useMonitorTypeContext();
+    const { monitorType } = usePolicyConfigContext();
     const { fields: httpSimpleFields } = useHTTPSimpleFieldsContext();
     const { fields: tcpSimpleFields } = useTCPSimpleFieldsContext();
     const { fields: icmpSimpleFields } = useICMPSimpleFieldsContext();

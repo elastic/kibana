@@ -25,6 +25,7 @@ import { MonacoEditorLangId } from '../types';
 
 enum SourceType {
   INLINE = 'syntheticsBrowserInlineConfig',
+  SCRIPT_RECORDER = 'syntheticsBrowserScriptRecorderConfig',
   ZIP = 'syntheticsBrowserZipURLConfig',
 }
 
@@ -35,6 +36,8 @@ interface SourceConfig {
   password: string;
   inlineScript: string;
   params: string;
+  isGeneratedScript: boolean;
+  fileName: string;
 }
 
 interface Props {
@@ -49,12 +52,22 @@ const defaultValues = {
   password: '',
   inlineScript: '',
   params: '',
+  isGeneratedScript: false,
+  fileName: '',
+};
+
+const getDefaultTab = (defaultConfig: SourceConfig) => {
+  if (defaultConfig.inlineScript && defaultConfig.isGeneratedScript) {
+    return SourceType.SCRIPT_RECORDER;
+  } else if (defaultConfig.inlineScript) {
+    return SourceType.INLINE;
+  }
+
+  return SourceType.ZIP;
 };
 
 export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) => {
-  const [sourceType, setSourceType] = useState<SourceType>(
-    defaultConfig.inlineScript ? SourceType.INLINE : SourceType.ZIP
-  );
+  const [sourceType, setSourceType] = useState<SourceType>(getDefaultTab(defaultConfig));
   const [config, setConfig] = useState<SourceConfig>(defaultConfig);
 
   useEffect(() => {
@@ -259,8 +272,16 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
       'data-test-subj': 'syntheticsSourceTab__scriptRecorder',
       content: (
         <ScriptRecorderFields
-          onChange={(code) => setConfig((prevConfig) => ({ ...prevConfig, inlineScript: code }))}
+          onChange={({ scriptText, fileName }) =>
+            setConfig((prevConfig) => ({
+              ...prevConfig,
+              inlineScript: scriptText,
+              isGeneratedScript: true,
+              fileName,
+            }))
+          }
           script={config.inlineScript}
+          fileName={config.fileName}
         />
       ),
     },
@@ -272,10 +293,10 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
       initialSelectedTab={tabs.find((tab) => tab.id === sourceType)}
       autoFocus="selected"
       onTabClick={(tab) => {
-        setSourceType(tab.id as SourceType);
         if (tab.id !== sourceType) {
-          setConfig(defaultValues);
+          setConfig(defaultConfig);
         }
+        setSourceType(tab.id as SourceType);
       }}
     />
   );

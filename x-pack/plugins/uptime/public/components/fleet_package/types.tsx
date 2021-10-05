@@ -77,6 +77,7 @@ export enum ConfigKeys {
   APM_SERVICE_NAME = 'service.name',
   HOSTS = 'hosts',
   MAX_REDIRECTS = 'max_redirects',
+  METADATA = 'metadata',
   MONITOR_TYPE = 'type',
   NAME = 'name',
   PASSWORD = 'password',
@@ -113,6 +114,13 @@ export enum ConfigKeys {
   URLS = 'urls',
   USERNAME = 'username',
   WAIT = 'wait',
+}
+
+export interface BrowserMetadata {
+  script_source: {
+    is_generated_script: boolean;
+    file_name: string;
+  };
 }
 
 export interface ICommonFields {
@@ -187,6 +195,7 @@ export interface ITCPAdvancedFields {
 }
 
 export type IBrowserSimpleFields = {
+  [ConfigKeys.METADATA]: BrowserMetadata;
   [ConfigKeys.SOURCE_INLINE]: string;
   [ConfigKeys.SOURCE_ZIP_URL]: string;
   [ConfigKeys.SOURCE_ZIP_FOLDER]: string;

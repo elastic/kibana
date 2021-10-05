@@ -10,7 +10,7 @@ import { PackagePolicyEditExtensionComponentProps } from '../../../../fleet/publ
 import { PolicyConfig, ConfigKeys, DataStream, ITLSFields, ICustomFields } from './types';
 import { SyntheticsPolicyEditExtension } from './synthetics_policy_edit_extension';
 import {
-  MonitorTypeContextProvider,
+  PolicyConfigContextProvider,
   HTTPContextProvider,
   TCPContextProvider,
   ICMPSimpleFieldsContextProvider,
@@ -87,7 +87,7 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
     }, [currentPolicy]);
 
     return (
-      <MonitorTypeContextProvider defaultValue={monitorType}>
+      <PolicyConfigContextProvider defaultMonitorType={monitorType} isEditable={true}>
         <TLSFieldsContextProvider defaultValues={isTLSEnabled ? defaultTLSConfig : undefined}>
           <HTTPContextProvider defaultValues={fullDefaultConfig?.[DataStream.HTTP]}>
             <TCPContextProvider defaultValues={fullDefaultConfig?.[DataStream.TCP]}>
@@ -104,7 +104,7 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
             </TCPContextProvider>
           </HTTPContextProvider>
         </TLSFieldsContextProvider>
-      </MonitorTypeContextProvider>
+      </PolicyConfigContextProvider>
     );
   }
 );

@@ -19,7 +19,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { ConfigKeys, DataStream, Validation } from './types';
-import { useMonitorTypeContext } from './contexts';
+import { usePolicyConfigContext } from './contexts';
 import { TLSFields, TLSRole } from './tls_fields';
 import { HTTPSimpleFields } from './http/simple_fields';
 import { HTTPAdvancedFields } from './http/advanced_fields';
@@ -30,21 +30,15 @@ import { BrowserSimpleFields } from './browser/simple_fields';
 import { BrowserAdvancedFields } from './browser/advanced_fields';
 
 interface Props {
-  typeEditable?: boolean;
   isTLSEnabled?: boolean;
   validate: Validation;
   dataStreams?: DataStream[];
 }
 
 export const CustomFields = memo<Props>(
-  ({
-    typeEditable = false,
-    isTLSEnabled: defaultIsTLSEnabled = false,
-    validate,
-    dataStreams = [],
-  }) => {
+  ({ isTLSEnabled: defaultIsTLSEnabled = false, validate, dataStreams = [] }) => {
     const [isTLSEnabled, setIsTLSEnabled] = useState<boolean>(defaultIsTLSEnabled);
-    const { monitorType, setMonitorType } = useMonitorTypeContext();
+    const { monitorType, setMonitorType, isEditable } = usePolicyConfigContext();
 
     const isHTTP = monitorType === DataStream.HTTP;
     const isTCP = monitorType === DataStream.TCP;
@@ -96,7 +90,7 @@ export const CustomFields = memo<Props>(
         >
           <EuiFlexGroup>
             <EuiFlexItem>
-              {typeEditable && (
+              {!isEditable && (
                 <EuiFormRow
                   label={
                     <FormattedMessage
