@@ -196,7 +196,7 @@ export const getUpgradeSystemIndicesStep = ({
     children: (
       <>
         <EuiText>
-          <p>{i18nTexts.bodyDescription(docLinks.links.elasticsearch.docsBase)}</p>
+          <p>{i18nTexts.bodyDescription(docLinks.links.upgradeAssistant.systemFeaturesUpgrade)}</p>
         </EuiText>
 
         <EuiSpacer size="m" />
