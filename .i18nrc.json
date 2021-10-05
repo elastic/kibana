@@ -5,6 +5,7 @@
     "kbnConfig": "packages/kbn-config/src",
     "console": "src/plugins/console",
     "core": "src/core",
+    "customIntegrations": "src/plugins/custom_integrations",
     "discover": "src/plugins/discover",
     "bfetch": "src/plugins/bfetch",
     "dashboard": "src/plugins/dashboard",

@@ -29,7 +29,7 @@ const args: Args = {
   release: 'ga',
   id: 'id',
   version: '1.0.0',
-  uiInternalPathUrl: '/',
+  url: '/',
   icons: [],
   integration: '',
 };
