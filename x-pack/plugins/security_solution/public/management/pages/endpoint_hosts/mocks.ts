@@ -31,7 +31,16 @@ import {
 } from '../../../common/lib/endpoint_pending_actions/mocks';
 import { TRANSFORM_STATS_URL } from '../../../../common/constants';
 import { TRANSFORM_STATE, TransformStatsResponse } from './types';
-import { fleetApisHttpMock, FleetApisHttpMockInterface } from '../mocks';
+import {
+  fleetGetAgentPolicyListHttpMock,
+  FleetGetAgentPolicyListHttpMockInterface,
+  FleetGetAgentStatusHttpMockInterface,
+  fleetGetCheckPermissionsHttpMock,
+  FleetGetCheckPermissionsInterface,
+  FleetGetEndpointPackagePolicyHttpMockInterface,
+  fleetGetPackageListHttpMock,
+  FleetGetPackageListHttpMockInterface,
+} from '../mocks';
 
 type EndpointMetadataHttpMocksInterface = ResponseProvidersInterface<{
   metadataList: () => HostResultList;
@@ -162,10 +171,24 @@ export const transformsHttpMocks = httpHandlerMockFactory<TransformHttpMocksInte
   },
 ]);
 
+export type EndpointListFleetApisHttpMockInterface = FleetGetPackageListHttpMockInterface &
+  FleetGetAgentPolicyListHttpMockInterface &
+  FleetGetCheckPermissionsInterface &
+  FleetGetAgentStatusHttpMockInterface &
+  FleetGetEndpointPackagePolicyHttpMockInterface;
+/**
+ * Mocks all Fleet apis
+ */
+export const endpointListFleetApisHttpMock =
+  composeHttpHandlerMocks<EndpointListFleetApisHttpMockInterface>([
+    fleetGetPackageListHttpMock,
+    fleetGetAgentPolicyListHttpMock,
+    fleetGetCheckPermissionsHttpMock,
+  ]);
 type EndpointPageHttpMockInterface = EndpointMetadataHttpMocksInterface &
   EndpointPolicyResponseHttpMockInterface &
   EndpointActivityLogHttpMockInterface &
-  FleetApisHttpMockInterface &
+  EndpointListFleetApisHttpMockInterface &
   PendingActionsHttpMockInterface &
   TransformHttpMocksInterface;
 /**
@@ -175,7 +198,7 @@ export const endpointPageHttpMock = composeHttpHandlerMocks<EndpointPageHttpMock
   endpointMetadataHttpMocks,
   endpointPolicyResponseHttpMock,
   endpointActivityLogHttpMock,
-  fleetApisHttpMock,
+  endpointListFleetApisHttpMock,
   pendingActionsHttpMock,
   transformsHttpMocks,
 ]);

@@ -6,6 +6,7 @@
  */
 
 import {
+  composeHttpHandlerMocks,
   httpHandlerMockFactory,
   ResponseProvidersInterface,
 } from '../../../../common/mock/endpoint/http_handler_mock_factory';
@@ -21,6 +22,12 @@ import {
   PolicyDetailsArtifactsPageListLocationParams,
   PolicyDetailsArtifactsPageLocation,
 } from '../types';
+import {
+  fleetGetAgentStatusHttpMock,
+  FleetGetAgentStatusHttpMockInterface,
+  fleetGetEndpointPackagePolicyHttpMock,
+  FleetGetEndpointPackagePolicyHttpMockInterface,
+} from '../../mocks';
 
 export const getMockListResponse: () => GetTrustedAppsListResponse = () => ({
   data: createSampleTrustedApps({}),
@@ -77,13 +84,25 @@ export const policyDetailsTrustedAppsHttpMocks =
       handler: ({ query }): GetTrustedAppsListResponse => {
         const apiQueryParams = query as GetTrustedAppsListRequest;
         const generator = new TrustedAppGenerator('seed');
+        const perPage = apiQueryParams.per_page ?? 10;
 
         return {
           page: apiQueryParams.page ?? 1,
-          per_page: apiQueryParams.per_page ?? 10,
-          total: 1,
-          data: [generator.generate()],
+          per_page: perPage,
+          total: 20,
+          data: Array.from({ length: Math.min(perPage, 10) }, () => generator.generate()),
         };
       },
     },
+  ]);
+
+export type PolicyDetailsPageAllApiHttpMocksInterface =
+  FleetGetEndpointPackagePolicyHttpMockInterface &
+    FleetGetAgentStatusHttpMockInterface &
+    PolicyDetailsTrustedAppsHttpMocksInterface;
+export const policyDetailsPageAllApiHttpMocks =
+  composeHttpHandlerMocks<PolicyDetailsPageAllApiHttpMocksInterface>([
+    fleetGetEndpointPackagePolicyHttpMock,
+    fleetGetAgentStatusHttpMock,
+    policyDetailsTrustedAppsHttpMocks,
   ]);
