@@ -67,7 +67,7 @@ const i18nTexts = {
     defaultMessage: 'Upgrading…',
   }),
   errorLabel: i18n.translate('xpack.upgradeAssistant.overview.system_indices.errorLabel', {
-    defaultMessage: 'Error: TODO',
+    defaultMessage: 'Error upgrading indices',
   }),
 };
 
