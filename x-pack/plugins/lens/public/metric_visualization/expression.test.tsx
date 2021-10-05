@@ -90,9 +90,7 @@ describe('metric_expression', () => {
           reportDescription="Fancy chart description"
           reportTitle="My fanci metric chart"
         >
-          <AutoScale
-            key="3"
-          >
+          <AutoScale>
             <div
               data-test-subj="lns_metric_value"
               style={
@@ -137,9 +135,7 @@ describe('metric_expression', () => {
           reportDescription="Fancy chart description"
           reportTitle="My fanci metric chart"
         >
-          <AutoScale
-            key="last"
-          >
+          <AutoScale>
             <div
               data-test-subj="lns_metric_value"
               style={
@@ -183,9 +179,7 @@ describe('metric_expression', () => {
           reportDescription=""
           reportTitle=""
         >
-          <AutoScale
-            key="3"
-          >
+          <AutoScale>
             <div
               data-test-subj="lns_metric_value"
               style={
@@ -317,9 +311,7 @@ describe('metric_expression', () => {
           reportDescription=""
           reportTitle=""
         >
-          <AutoScale
-            key="0"
-          >
+          <AutoScale>
             <div
               data-test-subj="lns_metric_value"
               style={
