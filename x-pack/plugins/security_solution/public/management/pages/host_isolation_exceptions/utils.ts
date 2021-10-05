@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
 
@@ -22,9 +21,6 @@ export const createEmptyHostIsolationException = (): CreateExceptionListItemSche
   ],
   item_id: undefined,
   list_id: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
-  meta: {
-    temporaryUuid: uuid.v4(),
-  },
   name: '',
   namespace_type: 'agnostic',
   tags: ['policy:all'],

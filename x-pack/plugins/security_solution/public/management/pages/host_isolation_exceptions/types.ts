@@ -26,7 +26,7 @@ export interface HostIsolationExceptionsPageState {
   entries: AsyncResourceState<FoundExceptionListItemSchema>;
   location: HostIsolationExceptionsPageLocation;
   form: {
-    entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema | undefined;
+    entry: CreateExceptionListItemSchema | undefined;
     status: AsyncResourceState<ExceptionListItemSchema>;
   };
 }

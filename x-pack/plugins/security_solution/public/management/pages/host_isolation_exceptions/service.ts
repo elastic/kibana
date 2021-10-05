@@ -6,6 +6,7 @@
  */
 
 import {
+  CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -63,4 +64,17 @@ export async function getHostIsolationExceptionItems({
     },
   });
   return entries;
+}
+
+export async function crateHostIsolationExceptionItem({
+  http,
+  exception,
+}: {
+  http: HttpStart;
+  exception: CreateExceptionListItemSchema;
+}): Promise<ExceptionListItemSchema> {
+  await ensureHostIsolationExceptionsListExists(http);
+  return http.post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+    body: JSON.stringify(exception),
+  });
 }
