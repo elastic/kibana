@@ -23,13 +23,22 @@ import { ElasticsearchOverviewPage } from './pages/elasticsearch/overview';
 import { BeatsOverviewPage } from './pages/beats/overview';
 import { BeatsInstancesPage } from './pages/beats/instances';
 import { BeatsInstancePage } from './pages/beats/instance';
+import { ApmOverviewPage, ApmInstancesPage, ApmInstancePage } from './pages/apm';
 import { KibanaOverviewPage } from './pages/kibana/overview';
-import { CODE_PATH_ELASTICSEARCH, CODE_PATH_BEATS, CODE_PATH_KIBANA } from '../../common/constants';
 import { ElasticsearchNodesPage } from './pages/elasticsearch/nodes_page';
 import { ElasticsearchIndicesPage } from './pages/elasticsearch/indices_page';
+import { ElasticsearchIndexPage } from './pages/elasticsearch/index_page';
+import { ElasticsearchIndexAdvancedPage } from './pages/elasticsearch/index_advanced_page';
 import { ElasticsearchNodePage } from './pages/elasticsearch/node_page';
+import { ElasticsearchNodeAdvancedPage } from './pages/elasticsearch/node_advanced_page';
 import { MonitoringTimeContainer } from './hooks/use_monitoring_time';
 import { BreadcrumbContainer } from './hooks/use_breadcrumbs';
+import {
+  CODE_PATH_ELASTICSEARCH,
+  CODE_PATH_KIBANA,
+  CODE_PATH_BEATS,
+  CODE_PATH_APM,
+} from '../../common/constants';
 
 export const renderApp = (
   core: CoreStart,
@@ -85,8 +94,29 @@ const MonitoringApp: React.FC<{
 
                   {/* ElasticSearch Views */}
                   <RouteInit
+                    path="/elasticsearch/indices/:index/advanced"
+                    component={ElasticsearchIndexAdvancedPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/elasticsearch/indices/:index"
+                    component={ElasticsearchIndexPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
                     path="/elasticsearch/indices"
                     component={ElasticsearchIndicesPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/elasticsearch/nodes/:node/advanced"
+                    component={ElasticsearchNodeAdvancedPage}
                     codePaths={[CODE_PATH_ELASTICSEARCH]}
                     fetchAllClusters={false}
                   />
@@ -112,6 +142,14 @@ const MonitoringApp: React.FC<{
                     fetchAllClusters={false}
                   />
 
+                  {/* Kibana Views */}
+                  <RouteInit
+                    path="/kibana"
+                    component={KibanaOverviewPage}
+                    codePaths={[CODE_PATH_KIBANA]}
+                    fetchAllClusters={false}
+                  />
+
                   {/* Beats Views */}
                   <RouteInit
                     path="/beats/beat/:instance"
@@ -134,11 +172,25 @@ const MonitoringApp: React.FC<{
                     fetchAllClusters={false}
                   />
 
-                  {/* Kibana Views */}
+                  {/* APM Views */}
                   <RouteInit
-                    path="/kibana"
-                    component={KibanaOverviewPage}
-                    codePaths={[CODE_PATH_KIBANA]}
+                    path="/apm/instances/:instance"
+                    component={ApmInstancePage}
+                    codePaths={[CODE_PATH_APM]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/apm/instances"
+                    component={ApmInstancesPage}
+                    codePaths={[CODE_PATH_APM]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/apm"
+                    component={ApmOverviewPage}
+                    codePaths={[CODE_PATH_APM]}
                     fetchAllClusters={false}
                   />
 
