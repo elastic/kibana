@@ -79,7 +79,6 @@ export const ApmInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
       title={title}
       pageTitle={pageTitle}
       getPageData={getPageData}
-      instance={instance}
       data-test-subj="apmInstancePage"
     >
       <ApmServerInstance

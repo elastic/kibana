@@ -9,11 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { PageTemplate } from '../page_template';
 import { TabMenuItem, PageTemplateProps } from '../page_template';
 
-interface ApmTemplateProps extends PageTemplateProps {
-  instance?: any;
-}
-
-export const ApmTemplate: React.FC<ApmTemplateProps> = ({ instance, ...props }) => {
+export const ApmTemplate: React.FC<PageTemplateProps> = ({ ...props }) => {
   const tabs: TabMenuItem[] = [
     {
       id: 'overview',
