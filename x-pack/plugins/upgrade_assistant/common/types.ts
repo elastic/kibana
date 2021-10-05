@@ -269,7 +269,7 @@ export interface SystemIndicesUpgradeFeature {
   upgrade_status: UPGRADE_STATUS;
   indices: Array<{
     index: string;
-    index_version: string;
+    version: string;
   }>;
 }
 export interface SystemIndicesUpgradeStatus {
