@@ -47,7 +47,7 @@ describe('SuggestionsCallout', () => {
     jest.clearAllMocks();
     setMockLastDismissedTimestamp(tenMinutesAgo);
     (useLocation as jest.Mock).mockImplementationOnce(() => ({
-      pathname: 'app/enterprise_search/app_search/engines/some-engine',
+      pathname: '/engines/some-engine',
     }));
   });
 
