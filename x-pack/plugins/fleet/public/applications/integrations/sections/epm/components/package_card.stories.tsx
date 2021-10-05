@@ -66,6 +66,7 @@ export const Installed = ({ width, ...props }: Args) => {
       install_status: 'installed',
       install_source: 'registry',
       install_started_at: '2020-01-01T00:00:00.000Z',
+      keep_policies_up_to_date: false,
     },
     references: [],
   };

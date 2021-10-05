@@ -1085,7 +1085,98 @@ describe('Package policy service', () => {
   });
 
   describe('overridePackageInputs', () => {
-    it('should override variable in base package policy', () => {
+    describe('when variable is already defined', () => {
+      it('preserves original variable value without overwriting', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          output_id: 'xxxx',
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                path: {
+                  type: 'text',
+                  value: ['/var/log/logfile.log'],
+                },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [
+                    {
+                      name: 'path',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            streams: [],
+            vars: {
+              path: {
+                type: 'text',
+                value: '/var/log/new-logfile.log',
+              },
+            },
+          },
+        ];
+
+        const result = overridePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[],
+          false
+        );
+        expect(result.inputs[0]?.vars?.path.value).toEqual(['/var/log/logfile.log']);
+      });
+    });
+  });
+
+  describe('when variable is undefined in original object', () => {
+    it('adds the variable definition to the resulting object', () => {
       const basePackagePolicy: NewPackagePolicy = {
         name: 'base-package-policy',
         description: 'Base Package Policy',
@@ -1138,6 +1229,10 @@ describe('Package policy service', () => {
                     name: 'path',
                     type: 'text',
                   },
+                  {
+                    name: 'path_2',
+                    type: 'text',
+                  },
                 ],
               },
             ],
@@ -1157,6 +1252,10 @@ describe('Package policy service', () => {
               type: 'text',
               value: '/var/log/new-logfile.log',
             },
+            path_2: {
+              type: 'text',
+              value: '/var/log/custom.log',
+            },
           },
         },
       ];
@@ -1169,7 +1268,7 @@ describe('Package policy service', () => {
         inputsOverride as InputsOverride[],
         false
       );
-      expect(result.inputs[0]?.vars?.path.value).toBe('/var/log/new-logfile.log');
+      expect(result.inputs[0]?.vars?.path_2.value).toEqual('/var/log/custom.log');
     });
   });
 });

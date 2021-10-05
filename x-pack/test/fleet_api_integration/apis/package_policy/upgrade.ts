@@ -162,6 +162,122 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('when upgrading to a version with no breaking changes', function () {
+      withTestPackageVersion('0.2.5-non-breaking-change');
+
+      beforeEach(async function () {
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test policy',
+            namespace: 'default',
+          })
+          .expect(200);
+
+        agentPolicyId = agentPolicyResponse.item.id;
+
+        const { body: packagePolicyResponse } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'package_policy_upgrade_1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            output_id: '',
+            inputs: [
+              {
+                policy_template: 'package_policy_upgrade',
+                type: 'test_input',
+                enabled: true,
+                streams: [
+                  {
+                    id: 'test-package_policy_upgrade-xxxx',
+                    enabled: true,
+                    data_stream: {
+                      type: 'test_stream',
+                      dataset: 'package_policy_upgrade.test_stream',
+                    },
+                    vars: {
+                      test_var: {
+                        value: 'My custom test value',
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+            package: {
+              name: 'package_policy_upgrade',
+              title: 'This is a test package for upgrading package policies',
+              version: '0.2.0-add-non-required-test-var',
+            },
+          })
+          .expect(200);
+
+        packagePolicyId = packagePolicyResponse.item.id;
+      });
+
+      afterEach(async function () {
+        await supertest
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [packagePolicyId] })
+          .expect(200);
+
+        await supertest
+          .post('/api/fleet/agent_policies/delete')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId })
+          .expect(200);
+      });
+
+      describe('dry run', function () {
+        it('returns a valid diff', async function () {
+          const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
+            .post(`/api/fleet/package_policies/upgrade`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              packagePolicyIds: [packagePolicyId],
+              dryRun: true,
+            })
+            .expect(200);
+
+          expect(body.length).to.be(1);
+          expect(body[0].diff?.length).to.be(2);
+          expect(body[0].hasErrors).to.be(false);
+
+          const [currentPackagePolicy, proposedPackagePolicy] = body[0].diff ?? [];
+
+          expect(currentPackagePolicy?.package?.version).to.be('0.2.0-add-non-required-test-var');
+          expect(proposedPackagePolicy?.package?.version).to.be('0.2.5-non-breaking-change');
+
+          const testInput = proposedPackagePolicy?.inputs.find(({ type }) => type === 'test_input');
+          const testStream = testInput?.streams[0];
+
+          expect(testStream?.vars?.test_var.value).to.be('My custom test value');
+        });
+      });
+
+      describe('upgrade', function () {
+        it('successfully upgrades package policy', async function () {
+          const { body }: { body: UpgradePackagePolicyResponse } = await supertest
+            .post(`/api/fleet/package_policies/upgrade`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              packagePolicyIds: [packagePolicyId],
+              dryRun: false,
+            })
+            .expect(200);
+
+          expect(body.length).to.be(1);
+          expect(body[0].success).to.be(true);
+        });
+      });
+    });
+
     describe('when upgrading to a version where a non-required variable has been added', function () {
       withTestPackageVersion('0.2.0-add-non-required-test-var');
 

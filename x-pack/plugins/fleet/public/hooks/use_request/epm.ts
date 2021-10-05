@@ -17,6 +17,8 @@ import type {
   GetInfoResponse,
   InstallPackageResponse,
   DeletePackageResponse,
+  UpdatePackageRequest,
+  UpdatePackageResponse,
 } from '../../types';
 import type { GetStatsResponse } from '../../../common';
 
@@ -111,5 +113,13 @@ export const sendRemovePackage = (pkgkey: string) => {
   return sendRequest<DeletePackageResponse>({
     path: epmRouteService.getRemovePath(pkgkey),
     method: 'delete',
+  });
+};
+
+export const sendUpdatePackage = (pkgkey: string, body: UpdatePackageRequest['body']) => {
+  return sendRequest<UpdatePackageResponse>({
+    path: epmRouteService.getUpdatePath(pkgkey),
+    method: 'put',
+    body,
   });
 };
