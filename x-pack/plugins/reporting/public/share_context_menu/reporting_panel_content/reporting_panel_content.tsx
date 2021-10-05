@@ -31,11 +31,7 @@ import {
 import { BaseParams } from '../../../common/types';
 import { ReportingAPIClient } from '../../lib/reporting_api_client';
 import { WarningUnsavedWorkPanel, ErrorUrlTooLongPanel } from './components';
-
-/**
- * Based on {@link URL_MAX_LENGTH} exported from core/public.
- */
-const CHROMIUM_MAX_URL_LENGTH = 25000;
+import { getMaxUrlLength } from './constants';
 
 export interface ReportingPanelProps {
   apiClient: ReportingAPIClient;
@@ -168,7 +164,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
       );
     }
 
-    const exceedsMaxLength = this.state.absoluteUrl.length >= CHROMIUM_MAX_URL_LENGTH;
+    const exceedsMaxLength = this.state.absoluteUrl.length >= getMaxUrlLength();
 
     return (
       <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
