@@ -32,7 +32,7 @@ export const NoFieldsCallout = ({
         size="s"
         color="warning"
         title={i18n.translate('xpack.lens.indexPatterns.noFieldsLabel', {
-          defaultMessage: 'No fields exist in this index pattern.',
+          defaultMessage: 'No fields exist in this data view.',
         })}
       />
     );

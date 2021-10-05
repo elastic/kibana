@@ -12,14 +12,14 @@ import { pageObjects } from './page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
+  console.log('this is the config file');
 
   return {
     ...functionalConfig.getAll(),
-
     testFiles: [
       require.resolve('./apps'),
-      // // these 5 tests all load addSampleDataSet('flights')
-      // // only the last test does removeSampleDataSet('flights')
+      // these 5 tests all load addSampleDataSet('flights')
+      // only the last test does removeSampleDataSet('flights')
       // require.resolve('./apps/dashboard'),
       // require.resolve('./apps/dashboard_panel'),
       // require.resolve('./apps/filter_panel'),
