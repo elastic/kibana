@@ -42,7 +42,7 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
   const [data, setData] = useState({} as any);
   const [nodesByIndicesData, setNodesByIndicesData] = useState([]);
 
-  const title = i18n.translate('xpack.monitoring.elasticsearch.node.overview.routeTitle', {
+  const title = i18n.translate('xpack.monitoring.elasticsearch.node.overview.title', {
     defaultMessage: 'Elasticsearch - Nodes - {nodeName} - Overview',
     values: {
       nodeName: data?.nodeSummary?.name,

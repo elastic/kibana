@@ -83,13 +83,11 @@ export {
   IndexPatternLoadExpressionFunctionDefinition,
   fieldList,
   GetFieldsOptions,
-  INDEX_PATTERN_SAVED_OBJECT_TYPE,
   AggregationRestrictions,
   IndexPatternType,
   IndexPatternListItem,
+  DuplicateDataViewError,
 } from '../common';
-
-export { DuplicateDataViewError } from '../common/data_views/errors';
 
 /*
  * Autocomplete query suggestions:
