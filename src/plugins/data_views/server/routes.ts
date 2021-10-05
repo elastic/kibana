@@ -90,7 +90,13 @@ export function registerRoutes(
     async (context, request, response) => {
       const { asCurrentUser } = context.core.elasticsearch.client;
       const indexPatterns = new IndexPatternsFetcher(asCurrentUser);
-      const { pattern, meta_fields: metaFields, type, rollup_index: rollupIndex } = request.query;
+      const {
+        pattern,
+        meta_fields: metaFields,
+        type,
+        rollup_index: rollupIndex,
+        allow_no_index: allowNoIndex,
+      } = request.query;
 
       let parsedFields: string[] = [];
       try {
@@ -105,6 +111,9 @@ export function registerRoutes(
           metaFields: parsedFields,
           type,
           rollupIndex,
+          fieldCapsOptions: {
+            allow_no_indices: allowNoIndex || false,
+          },
         });
 
         return response.ok({

@@ -24,8 +24,14 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
   ) {
     this.esClient = elasticsearchClient;
   }
-  async getFieldsForWildcard({ pattern, metaFields, type, rollupIndex }: GetFieldsOptions) {
-    const indexPatterns = new IndexPatternsFetcher(this.esClient);
+  async getFieldsForWildcard({
+    pattern,
+    metaFields,
+    type,
+    rollupIndex,
+    allowNoIndex,
+  }: GetFieldsOptions) {
+    const indexPatterns = new IndexPatternsFetcher(this.esClient, allowNoIndex);
     return await indexPatterns
       .getFieldsForWildcard({
         pattern,
