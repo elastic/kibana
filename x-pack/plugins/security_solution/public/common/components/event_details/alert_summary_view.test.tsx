@@ -134,8 +134,6 @@ describe('AlertSummaryView', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper.find(`[data-test-subj="event-field-${props.eventId}-signal.rule.name"]`).exists()
-    ).toEqual(false);
+    expect(wrapper.find(`[data-test-subj="event-field-signal.rule.name"]`).exists()).toEqual(false);
   });
 });

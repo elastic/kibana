@@ -86,7 +86,7 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
   if (!data || !value) return null;
   const key = `alert-details-value-formatted-field-value-${timelineId}-${eventId}-${data.field}-${value}-${index}-${provider}`;
   return (
-    <EuiFlexGroup key={key} direction={'row'} gutterSize={'none'} alignItems="center">
+    <EuiFlexGroup key={key} direction="row" gutterSize="none" alignItems="center">
       <EuiFlexItem grow={false}>
         <div className="eui-textBreakAll">
           <FormattedFieldValue

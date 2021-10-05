@@ -1,10 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AlertSummaryView Behavior event code renders additional summary rows 1`] = `
-.c1 {
-  line-height: 1.7rem;
-}
-
 .c0 .euiTableHeaderCell,
 .c0 .euiTableRowCell {
   border: none;
@@ -22,6 +18,10 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
 .c0 .flyoutOverviewDescription:hover .timelines__hoverActionButton,
 .c0 .flyoutOverviewDescription:hover .securitySolution__hoverActionButton {
   opacity: 1;
+}
+
+.c1 {
+  line-height: 1.7rem;
 }
 
 .c2 {
@@ -138,7 +138,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31-signal.status"
+                data-test-subj="event-field-signal.status"
               >
                 <div
                   class="euiText euiText--extraSmall"
@@ -204,7 +204,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31-@timestamp"
+                data-test-subj="event-field-@timestamp"
               >
                 <div
                   class="eventFieldsTable__fieldValue"
@@ -274,7 +274,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31-signal.rule.name"
+                data-test-subj="event-field-signal.rule.name"
               >
                 <div
                   class="euiText euiText--extraSmall"
@@ -340,7 +340,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31-signal.rule.severity"
+                data-test-subj="event-field-signal.rule.severity"
               >
                 <div
                   class="euiText euiText--extraSmall"
@@ -406,7 +406,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31-signal.rule.risk_score"
+                data-test-subj="event-field-signal.rule.risk_score"
               >
                 <div
                   class="euiText euiText--extraSmall"
@@ -472,7 +472,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31-host.name"
+                data-test-subj="event-field-host.name"
               >
                 <div
                   class="euiText euiText--extraSmall"
@@ -538,7 +538,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31-user.name"
+                data-test-subj="event-field-user.name"
               >
                 <div
                   class="euiText euiText--extraSmall"
@@ -604,7 +604,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31-source.ip"
+                data-test-subj="event-field-source.ip"
               >
                 <div
                   class="eventFieldsTable__fieldValue"
@@ -663,10 +663,6 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
 `;
 
 exports[`AlertSummaryView Memory event code renders additional summary rows 1`] = `
-.c1 {
-  line-height: 1.7rem;
-}
-
 .c0 .euiTableHeaderCell,
 .c0 .euiTableRowCell {
   border: none;
@@ -684,6 +680,10 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
 .c0 .flyoutOverviewDescription:hover .timelines__hoverActionButton,
 .c0 .flyoutOverviewDescription:hover .securitySolution__hoverActionButton {
   opacity: 1;
+}
+
+.c1 {
+  line-height: 1.7rem;
 }
 
 .c2 {
@@ -800,7 +800,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31-signal.status"
+                data-test-subj="event-field-signal.status"
               >
                 <div
                   class="euiText euiText--extraSmall"
@@ -866,7 +866,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31-@timestamp"
+                data-test-subj="event-field-@timestamp"
               >
                 <div
                   class="eventFieldsTable__fieldValue"
@@ -936,7 +936,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31-signal.rule.name"
+                data-test-subj="event-field-signal.rule.name"
               >
                 <div
                   class="euiText euiText--extraSmall"
@@ -1002,7 +1002,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31-signal.rule.severity"
+                data-test-subj="event-field-signal.rule.severity"
               >
                 <div
                   class="euiText euiText--extraSmall"
@@ -1068,7 +1068,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31-signal.rule.risk_score"
+                data-test-subj="event-field-signal.rule.risk_score"
               >
                 <div
                   class="euiText euiText--extraSmall"
@@ -1134,7 +1134,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31-host.name"
+                data-test-subj="event-field-host.name"
               >
                 <div
                   class="euiText euiText--extraSmall"
@@ -1200,7 +1200,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31-user.name"
+                data-test-subj="event-field-user.name"
               >
                 <div
                   class="euiText euiText--extraSmall"
@@ -1266,7 +1266,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                data-test-subj="event-field-5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31-source.ip"
+                data-test-subj="event-field-source.ip"
               >
                 <div
                   class="eventFieldsTable__fieldValue"

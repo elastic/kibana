@@ -20,7 +20,7 @@ export const allowedExperimentalValues = Object.freeze({
   excludePoliciesInFilterEnabled: false,
   uebaEnabled: false,
   disableIsolationUIPendingStatuses: false,
-  riskyHostsEnabled: true,
+  riskyHostsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

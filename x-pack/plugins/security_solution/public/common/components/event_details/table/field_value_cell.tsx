@@ -36,7 +36,7 @@ export const FieldValueCell = React.memo(
     values,
   }: FieldValueCellProps) => {
     return (
-      <div data-test-subj={`event-field-${eventId}-${data.field}`}>
+      <div data-test-subj={`event-field-${data.field}`}>
         {values != null &&
           values.map((value, i) => {
             if (fieldFromBrowserField == null) {

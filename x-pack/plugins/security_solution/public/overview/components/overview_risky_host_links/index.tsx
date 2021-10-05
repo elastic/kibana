@@ -10,29 +10,21 @@ import React from 'react';
 import { RiskyHostsEnabledModule } from './risky_hosts_enabled_module';
 import { RiskyHostsDisabledModule } from './risky_hosts_disabled_module';
 import { useHostsRiskScore } from '../../containers/overview_risky_host_links/use_hosts_risk_score';
-import { HostsRiskScore } from '../../../../common';
-import { LinkPanelListItem } from '../link_panel';
 export interface RiskyHostLinksProps {
   timerange: { to: string; from: string };
 }
 
-const getListItemsFromHits = (items: HostsRiskScore[]): LinkPanelListItem[] => {
-  return items.map(({ host, risk_score: count, risk: copy }) => ({
-    title: host.name,
-    count,
-    copy,
-    path: '',
-  }));
-};
-
 const RiskyHostLinksComponent: React.FC<RiskyHostLinksProps> = ({ timerange }) => {
   const hostRiskScore = useHostsRiskScore({ timerange });
-  const listItems = getListItemsFromHits(hostRiskScore?.result || []);
 
   switch (hostRiskScore?.isModuleEnabled) {
     case true:
       return (
-        <RiskyHostsEnabledModule to={timerange.to} from={timerange.from} listItems={listItems} />
+        <RiskyHostsEnabledModule
+          to={timerange.to}
+          from={timerange.from}
+          hostRiskScore={hostRiskScore}
+        />
       );
     case false:
       return <RiskyHostsDisabledModule />;
