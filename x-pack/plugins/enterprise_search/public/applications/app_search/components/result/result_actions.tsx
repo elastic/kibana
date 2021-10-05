@@ -18,7 +18,7 @@ interface Props {
 export const ResultActions: React.FC<Props> = ({ actions }) => {
   return (
     <EuiFlexGroup gutterSize="s" responsive={false}>
-      {actions.map(({ onClick, title, iconType, iconColor, disabled }) => (
+      {actions.map(({ onClick, title, iconType, iconColor }) => (
         <EuiFlexItem key={title} grow={false}>
           <EuiButtonIcon
             iconType={iconType}
@@ -26,7 +26,6 @@ export const ResultActions: React.FC<Props> = ({ actions }) => {
             color={iconColor ? iconColor : 'primary'}
             aria-label={title}
             title={title}
-            disabled={disabled}
           />
         </EuiFlexItem>
       ))}
