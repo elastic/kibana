@@ -68,7 +68,7 @@ export const LogStashNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
     >
       <div>
         <SetupModeRenderer
-          productName='logstash'
+          productName="logstash"
           render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
             <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}
