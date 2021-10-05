@@ -14,6 +14,7 @@ import qs from 'query-string';
 
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiCallOut,
   EuiLink,
   EuiCheckbox,
@@ -33,6 +34,7 @@ import {
   EuiTableRow,
   EuiTableRowCell,
   EuiTableRowCellCheckbox,
+  EuiToolTip,
   EuiText,
 } from '@elastic/eui';
 
@@ -75,6 +77,9 @@ const HEADERS = {
   }),
   data_stream: i18n.translate('xpack.idxMgmt.indexTable.headers.dataStreamHeader', {
     defaultMessage: 'Data stream',
+  }),
+  actions: i18n.translate('xpack.idxMgmt.indexTable.headers.actionsHeader', {
+    defaultMessage: 'Actions',
   }),
 };
 
@@ -307,6 +312,36 @@ export class IndexTable extends Component {
       const { name } = index;
       const value = index[fieldName];
 
+      if (fieldName === 'actions') {
+        const baseUrl = appServices.httpService.client.basePath.prepend('/app/discover');
+        const discoverUrl = `${baseUrl}#/?_a=(index:'${name}')`;
+        return (
+          <th
+            key={`actions`}
+            className="euiTableRowCell"
+            scope="row"
+            data-test-subj={`indexTableCell-actions`}
+          >
+            <div className={`euiTableCellContent`}>
+              <EuiToolTip
+                position="top"
+                content={i18n.translate('xpack.idxMgmt.indexTable.viewIndexInDiscoverTooltip', {
+                  defaultMessage: 'View index in Discover',
+                })}
+              >
+                <EuiButtonIcon
+                  data-test-subj="viewIndexInDiscover"
+                  href={discoverUrl}
+                  iconType="eye"
+                  aria-label={i18n.translate('xpack.idxMgmt.indexTable.viewIndexInDiscover', {
+                    defaultMessage: 'View index in Discover',
+                  })}
+                />
+              </EuiToolTip>
+            </div>
+          </th>
+        );
+      }
       if (fieldName === 'name') {
         return (
           <th
