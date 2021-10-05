@@ -188,7 +188,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('for the kql filtering for united.endpoint.host.hostname : "Host-ku5jy6j0pw", table shows 1 item', async () => {
           const adminSearchBar = await testSubjects.find('adminSearchBar');
           await adminSearchBar.clearValueWithKeyboard();
-          await adminSearchBar.type('united.endpoint.host.hostname : "Host-ku5jy6j0pw" ');
+          await adminSearchBar.type(
+            'united.endpoint.host.hostname : "Host-ku5jy6j0pw" or host.hostname : "Host-003ex9rih7" '
+          );
           const querySubmitButton = await testSubjects.find('querySubmitButton');
           await querySubmitButton.click();
           const expectedDataFromQuery = [
