@@ -9,7 +9,7 @@
 import { Transform, Readable } from 'stream';
 import { inspect } from 'util';
 
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { ToolingLog } from '@kbn/dev-utils';
 

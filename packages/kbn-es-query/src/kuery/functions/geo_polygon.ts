@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
 import { IndexPatternBase, KueryNode, KueryQueryOptions, LatLon } from '../..';
@@ -49,7 +49,6 @@ export function toElasticsearchQuery(
   }
 
   return {
-    // @ts-expect-error @elastic/elasticsearch doesn't support ignore_unmapped in QueryDslGeoPolygonQuery
     geo_polygon: {
       [fieldName]: queryParams,
       ignore_unmapped: true,

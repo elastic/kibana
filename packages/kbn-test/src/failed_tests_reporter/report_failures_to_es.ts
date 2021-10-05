@@ -59,7 +59,7 @@ export async function reportFailuresToEs(log: ToolingLog, failures: TestFailure[
     },
   ]);
 
-  const resp = await client.bulk({ body });
+  const resp = await client.bulk({ body }, { meta: true });
   if (resp?.body?.errors) {
     log.error(JSON.stringify(resp.body.items, null, 2));
   }
