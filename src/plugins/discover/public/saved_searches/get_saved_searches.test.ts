@@ -29,6 +29,36 @@ describe('getSavedSearch', () => {
     expect(savedSearch).toHaveProperty('searchSource');
   });
 
+  test('should throw an error if so not found', async () => {
+    let errorMessage = 'No error thrown.';
+    savedObjectsClient.resolve = jest.fn().mockReturnValue({
+      saved_object: {
+        attributes: {},
+        error: {
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Saved object [search/ccf1af80-2297-11ec-86e0-1155ffb9c7a7] not found',
+        },
+        id: 'ccf1af80-2297-11ec-86e0-1155ffb9c7a7',
+        type: 'search',
+        references: [],
+      },
+    });
+
+    try {
+      await getSavedSearch('ccf1af80-2297-11ec-86e0-1155ffb9c7a7', {
+        savedObjectsClient,
+        search,
+      });
+    } catch (error) {
+      errorMessage = error.message;
+    }
+
+    expect(errorMessage).toBe(
+      'Could not locate that search (id: ccf1af80-2297-11ec-86e0-1155ffb9c7a7)'
+    );
+  });
+
   test('should find saved search', async () => {
     savedObjectsClient.resolve = jest.fn().mockReturnValue({
       saved_object: {

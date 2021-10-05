@@ -13,6 +13,7 @@ import type { SavedSearchAttributes, SavedSearch } from './types';
 import { SAVED_SEARCH_TYPE } from './constants';
 import { fromSavedSearchAttributes } from './saved_searches_utils';
 import { injectSearchSourceReferences, parseSearchSourceJSON } from '../../../data/public';
+import { SavedObjectNotFound } from '../../../kibana_utils/public';
 
 interface GetSavedSearchDependencies {
   search: DataPublicPluginStart['search'];
@@ -36,29 +37,30 @@ const findSavedSearch = async (
     savedSearchId
   );
 
-  if (so) {
-    const savedSearch = so.saved_object;
-
-    if (!savedSearch.error) {
-      const parsedSearchSourceJSON = parseSearchSourceJSON(
-        savedSearch.attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
-      );
-      const searchSourceValues = injectSearchSourceReferences(
-        parsedSearchSourceJSON as Parameters<typeof injectSearchSourceReferences>[0],
-        savedSearch.references
-      );
-
-      return fromSavedSearchAttributes(
-        savedSearchId,
-        savedSearch.attributes,
-        await search.searchSource.create(searchSourceValues),
-        {
-          outcome: so.outcome,
-          aliasTargetId: so.alias_target_id,
-        }
-      );
-    }
+  if (!so.saved_object || so.saved_object.error) {
+    throw new SavedObjectNotFound(SAVED_SEARCH_TYPE, savedSearchId);
   }
+
+  const savedSearch = so.saved_object;
+
+  const parsedSearchSourceJSON = parseSearchSourceJSON(
+    savedSearch.attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
+  );
+
+  const searchSourceValues = injectSearchSourceReferences(
+    parsedSearchSourceJSON as Parameters<typeof injectSearchSourceReferences>[0],
+    savedSearch.references
+  );
+
+  return fromSavedSearchAttributes(
+    savedSearchId,
+    savedSearch.attributes,
+    await search.searchSource.create(searchSourceValues),
+    {
+      outcome: so.outcome,
+      aliasTargetId: so.alias_target_id,
+    }
+  );
 };
 
 /** @public **/
@@ -66,13 +68,7 @@ export const getSavedSearch = async (
   savedSearchId: string | undefined,
   dependencies: GetSavedSearchDependencies
 ) => {
-  if (savedSearchId) {
-    const savedSearch = await findSavedSearch(savedSearchId, dependencies);
-
-    if (savedSearch) {
-      return savedSearch;
-    }
-  }
-
-  return getEmptySavedSearch(dependencies);
+  return savedSearchId
+    ? findSavedSearch(savedSearchId, dependencies)
+    : getEmptySavedSearch(dependencies);
 };

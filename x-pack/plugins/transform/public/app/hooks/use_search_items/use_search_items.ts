@@ -47,14 +47,10 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
     }
 
     try {
-      const savedSearch = await getSavedSearch(id, {
+      fetchedSavedSearch = await getSavedSearch(id, {
         search: appDeps.data.search,
         savedObjectsClient: appDeps.savedObjects.client,
       });
-
-      if (savedSearch.id) {
-        fetchedSavedSearch = savedSearch;
-      }
     } catch (e) {
       // Just let fetchedSavedSearch stay undefined in case it doesn't exist.
     }
