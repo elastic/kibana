@@ -81,9 +81,10 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
 
   const { search } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
-  const queryParamsPolicyId = useMemo(() => queryParams.get('policyId') ?? undefined, [
-    queryParams,
-  ]);
+  const queryParamsPolicyId = useMemo(
+    () => queryParams.get('policyId') ?? undefined,
+    [queryParams]
+  );
 
   /**
    * Please note: policyId can come from one of two sources. The URL param (in the URL path) or
@@ -233,8 +234,8 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     }
     return from === 'policy' && agentPolicyId
       ? getHref('policy_details', {
-        policyId: agentPolicyId,
-      })
+          policyId: agentPolicyId,
+        })
       : getHref('integration_details_overview', { pkgkey: params.pkgkey });
   }, [routeState, from, agentPolicyId, getHref, params.pkgkey]);
 
@@ -306,16 +307,16 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         }),
         text: fromPolicyWithoutAgentsAssigned
           ? i18n.translate(
-            'xpack.fleet.createPackagePolicy.policyContextAddAgentNextNotificationMessage',
-            {
-              defaultMessage: `The policy has been updated. Add an agent to the '{agentPolicyName}' policy to deploy this policy.`,
-              values: {
-                agentPolicyName: agentPolicy!.name,
-              },
-            }
-          )
+              'xpack.fleet.createPackagePolicy.policyContextAddAgentNextNotificationMessage',
+              {
+                defaultMessage: `The policy has been updated. Add an agent to the '{agentPolicyName}' policy to deploy this policy.`,
+                values: {
+                  agentPolicyName: agentPolicy!.name,
+                },
+              }
+            )
           : fromPackageWithoutAgentsAssigned
-            ? toMountPoint(
+          ? toMountPoint(
               // To render the link below we need to mount this JSX in the success toast
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.integrationsContextaddAgentNextNotificationMessage"
@@ -337,14 +338,14 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
                 }}
               />
             )
-            : hasAgentsAssigned
-              ? i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationMessage', {
-                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy.`,
-                values: {
-                  agentPolicyName: agentPolicy!.name,
-                },
-              })
-              : undefined,
+          : hasAgentsAssigned
+          ? i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationMessage', {
+              defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy.`,
+              values: {
+                agentPolicyName: agentPolicy!.name,
+              },
+            })
+          : undefined,
         'data-test-subj': 'packagePolicyCreateSuccessToast',
       });
     } else {
@@ -374,8 +375,8 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     () =>
       (params as AddToPolicyParams).integration
         ? packageInfo?.policy_templates?.find(
-          (policyTemplate) => policyTemplate.name === (params as AddToPolicyParams).integration
-        )
+            (policyTemplate) => policyTemplate.name === (params as AddToPolicyParams).integration
+          )
         : undefined,
     [packageInfo?.policy_templates, params]
   );
