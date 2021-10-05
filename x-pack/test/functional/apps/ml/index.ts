@@ -44,7 +44,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       });
 
       describe('', function () {
-        this.tags('ciGroup2');
+        this.tags('ciGroup8');
         loadTestFile(require.resolve('./permissions'));
         loadTestFile(require.resolve('./pages'));
         loadTestFile(require.resolve('./data_visualizer'));
