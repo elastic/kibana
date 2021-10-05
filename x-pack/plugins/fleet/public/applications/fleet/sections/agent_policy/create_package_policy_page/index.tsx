@@ -27,12 +27,7 @@ import type { ApplicationStart } from 'kibana/public';
 import { safeLoad } from 'js-yaml';
 
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
-import type {
-  AgentPolicy,
-  PackageInfo,
-  NewPackagePolicy,
-  CreatePackagePolicyRouteState,
-} from '../../../types';
+import type { AgentPolicy, NewPackagePolicy, CreatePackagePolicyRouteState } from '../../../types';
 import {
   useLink,
   useBreadcrumbs,
@@ -40,8 +35,9 @@ import {
   useStartServices,
   useConfig,
   sendGetAgentStatus,
+  useGetPackageInfoByKey,
 } from '../../../hooks';
-import { Loading } from '../../../components';
+import { Loading, Error } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
 import { useIntraAppState, useUIExtension } from '../../../hooks';
 import { ExtensionWrapper } from '../../../components';
@@ -74,16 +70,12 @@ interface AddToPolicyParams {
   policyId?: string;
 }
 
-interface AddFromPolicyParams {
-  policyId: string;
-}
-
 export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
-  const { params } = useRouteMatch<AddToPolicyParams | AddFromPolicyParams>();
+  const { params } = useRouteMatch<AddToPolicyParams>();
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const handleNavigateTo = useNavigateToCallback();
@@ -110,10 +102,8 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const from: EditPackagePolicyFrom =
     'policyId' in params || queryParamsPolicyId ? 'policy' : 'package';
 
-  // Agent policy and package info states
+  // Agent policy state
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | undefined>();
-  const [packageInfo, setPackageInfo] = useState<PackageInfo>();
-  const [isLoadingAgentPolicyStep, setIsLoadingAgentPolicyStep] = useState<boolean>(false);
 
   // Retrieve agent count
   const agentPolicyId = agentPolicy?.id;
@@ -142,30 +132,24 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     inputs: [],
   });
 
-  // Package policy validation state
+  // Validation state
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
+  const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
 
   // Form state
-  const [formState, setFormState] = useState<PackagePolicyFormState>('INVALID');
+  const [formState, setFormState] = useState<PackagePolicyFormState>('VALID');
 
-  // Update package info method
-  const updatePackageInfo = useCallback(
-    (updatedPackageInfo: PackageInfo | undefined) => {
-      if (updatedPackageInfo) {
-        setPackageInfo(updatedPackageInfo);
-        if (agentPolicy) {
-          setFormState('VALID');
-        }
-      } else {
-        setFormState('INVALID');
-        setPackageInfo(undefined);
-      }
-
-      // eslint-disable-next-line no-console
-      console.debug('Package info updated', updatedPackageInfo);
-    },
-    [agentPolicy, setPackageInfo, setFormState]
-  );
+  // Fetch package info
+  const {
+    data: packageInfoData,
+    error: packageInfoError,
+    isLoading: isPackageInfoLoading,
+  } = useGetPackageInfoByKey(params.pkgkey);
+  const packageInfo = useMemo(() => {
+    if (packageInfoData && packageInfoData.response) {
+      return packageInfoData.response;
+    }
+  }, [packageInfoData]);
 
   // Update agent policy method
   const updateAgentPolicy = useCallback(
@@ -251,12 +235,12 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     if (routeState && routeState.onCancelUrl) {
       return routeState.onCancelUrl;
     }
-    return from === 'policy'
+    return from === 'policy' && agentPolicyId
       ? getHref('policy_details', {
-          policyId: agentPolicyId || (params as AddFromPolicyParams).policyId,
+          policyId: agentPolicyId,
         })
-      : getHref('integration_details_overview', { pkgkey: (params as AddToPolicyParams).pkgkey });
-  }, [agentPolicyId, params, from, getHref, routeState]);
+      : getHref('integration_details_overview', { pkgkey: params.pkgkey });
+  }, [routeState, from, agentPolicyId, getHref, params.pkgkey]);
 
   const cancelClickHandler: ReactEventHandler = useCallback(
     (ev) => {
@@ -305,7 +289,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         } else {
           history.push(
             getPath('policy_details', {
-              policyId: agentPolicy?.id || (params as AddFromPolicyParams).policyId,
+              policyId: agentPolicy!.id,
             })
           );
         }
@@ -313,8 +297,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
 
       const fromPolicyWithoutAgentsAssigned = from === 'policy' && agentPolicy && agentCount === 0;
 
-      const fromPackageWithoutAgentsAssigned =
-        from === 'package' && packageInfo && agentPolicy && agentCount === 0;
+      const fromPackageWithoutAgentsAssigned = packageInfo && agentPolicy && agentCount === 0;
 
       const hasAgentsAssigned = agentCount && agentPolicy;
 
@@ -379,7 +362,6 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     hasErrors,
     agentCount,
     savePackagePolicy,
-    doOnSaveNavigation,
     from,
     agentPolicy,
     packageInfo,
@@ -390,7 +372,6 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     handleNavigateTo,
     history,
     getPath,
-    params,
   ]);
 
   const integrationInfo = useMemo(
@@ -418,24 +399,23 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const stepSelectAgentPolicy = useMemo(
     () => (
       <StepSelectAgentPolicy
-        pkgkey={(params as AddToPolicyParams).pkgkey}
-        updatePackageInfo={updatePackageInfo}
+        packageInfo={packageInfo}
         defaultAgentPolicyId={queryParamsPolicyId}
         agentPolicy={agentPolicy}
         updateAgentPolicy={updateAgentPolicy}
-        setIsLoadingSecondStep={setIsLoadingAgentPolicyStep}
+        setHasAgentPolicyError={setHasAgentPolicyError}
       />
     ),
-    [params, updatePackageInfo, agentPolicy, updateAgentPolicy, queryParamsPolicyId]
+    [packageInfo, queryParamsPolicyId, agentPolicy, updateAgentPolicy]
   );
 
   const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
 
   const stepConfigurePackagePolicy = useMemo(
     () =>
-      isLoadingAgentPolicyStep ? (
+      isPackageInfoLoading ? (
         <Loading />
-      ) : agentPolicy && packageInfo ? (
+      ) : packageInfo ? (
         <>
           <StepDefinePackagePolicy
             agentPolicy={agentPolicy}
@@ -459,8 +439,8 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             />
           )}
 
-          {/* If an Agent Policy and a package has been selected, then show UI extension (if any) */}
-          {extensionView && packagePolicy.policy_id && packagePolicy.package?.name && (
+          {/* If a package has been loaded, then show UI extension (if any) */}
+          {extensionView && packagePolicy.package?.name && (
             <ExtensionWrapper>
               <extensionView.Component
                 newPolicy={packagePolicy}
@@ -473,7 +453,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         <div />
       ),
     [
-      isLoadingAgentPolicyStep,
+      isPackageInfoLoading,
       agentPolicy,
       packageInfo,
       packagePolicy,
@@ -491,7 +471,6 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       title: i18n.translate('xpack.fleet.createPackagePolicy.stepConfigurePackagePolicyTitle', {
         defaultMessage: 'Configure integration',
       }),
-      status: !packageInfo || !agentPolicy || isLoadingAgentPolicyStep ? 'disabled' : undefined,
       'data-test-subj': 'dataCollectionSetupStep',
       children: stepConfigurePackagePolicy,
     },
@@ -502,6 +481,21 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       children: stepSelectAgentPolicy,
     },
   ];
+
+  // Display package error if there is one
+  if (packageInfoError) {
+    return (
+      <Error
+        title={
+          <FormattedMessage
+            id="xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingPackageTitle"
+            defaultMessage="Error loading package information"
+          />
+        }
+        error={packageInfoError}
+      />
+    );
+  }
 
   return (
     <CreatePackagePolicyPageLayout {...layoutProps} data-test-subj="createPackagePolicy">
@@ -527,10 +521,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         <CustomEuiBottomBar data-test-subj="integrationsBottomBar">
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              {!isLoadingAgentPolicyStep &&
-              agentPolicy &&
-              packageInfo &&
-              formState === 'INVALID' ? (
+              {agentPolicy && packageInfo && formState === 'INVALID' ? (
                 <FormattedMessage
                   id="xpack.fleet.createPackagePolicy.errorOnSaveText"
                   defaultMessage="Your integration policy has errors. Please fix them before saving."
@@ -557,7 +548,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
                   <EuiButton
                     onClick={onSubmit}
                     isLoading={formState === 'LOADING'}
-                    disabled={formState !== 'VALID'}
+                    disabled={formState !== 'VALID' || hasAgentPolicyError}
                     iconType="save"
                     color="primary"
                     fill
