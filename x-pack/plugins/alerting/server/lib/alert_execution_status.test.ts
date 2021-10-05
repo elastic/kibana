@@ -81,7 +81,7 @@ describe('AlertExecutionStatus', () => {
       expect(alertExecutionStatusToRaw({ lastExecutionDate: date, status })).toMatchInlineSnapshot(`
         Object {
           "error": null,
-          "lastDuration": null,
+          "lastDuration": 0,
           "lastExecutionDate": "2020-09-03T16:26:58.000Z",
           "status": "ok",
         }
@@ -96,7 +96,7 @@ describe('AlertExecutionStatus', () => {
             "message": "wops",
             "reason": "decrypt",
           },
-          "lastDuration": null,
+          "lastDuration": 0,
           "lastExecutionDate": "2020-09-03T16:26:58.000Z",
           "status": "ok",
         }
@@ -104,7 +104,7 @@ describe('AlertExecutionStatus', () => {
     });
 
     test('status with a duration', () => {
-      expect(alertExecutionStatusToRaw({ lastExecutionDate: date, status }, 1234))
+      expect(alertExecutionStatusToRaw({ lastExecutionDate: date, status, lastDuration: 1234 }))
         .toMatchInlineSnapshot(`
       Object {
         "error": null,
