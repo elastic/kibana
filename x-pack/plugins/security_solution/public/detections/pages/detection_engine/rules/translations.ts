@@ -364,6 +364,13 @@ export const COLUMN_INDEXING_TIMES = i18n.translate(
   }
 );
 
+export const COLUMN_INDEXING_TIMES_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.indexingTimesTooltip',
+  {
+    defaultMessage: 'Total time spent indexing alerts during last Rule execution',
+  }
+);
+
 export const COLUMN_QUERY_TIMES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.queryTimes',
   {
@@ -371,10 +378,25 @@ export const COLUMN_QUERY_TIMES = i18n.translate(
   }
 );
 
+export const COLUMN_QUERY_TIMES_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.queryTimesTooltip',
+  {
+    defaultMessage: 'Total time spent querying source indices during last Rule execution',
+  }
+);
+
 export const COLUMN_GAP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.gap',
   {
     defaultMessage: 'Last Gap (if any)',
+  }
+);
+
+export const COLUMN_GAP_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltip',
+  {
+    defaultMessage:
+      'Duration of most recent gap in Rule execution. Adjust Rule look-back or see documentation for mitigating gaps ',
   }
 );
 

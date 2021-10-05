@@ -11,6 +11,7 @@ import {
   EuiText,
   EuiHealth,
   EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import * as H from 'history';
@@ -314,6 +315,7 @@ export const getMonitoringColumns = (
   navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>,
   formatUrl: FormatUrl
 ): RulesStatusesColumns[] => {
+  // @ts-ignore
   const cols: RulesStatusesColumns[] = [
     {
       field: 'name',
@@ -344,11 +346,18 @@ export const getMonitoringColumns = (
     },
     {
       field: 'current_status.bulk_create_time_durations',
-      name: i18n.COLUMN_INDEXING_TIMES,
+      name: (
+        <EuiToolTip content={i18n.COLUMN_INDEXING_TIMES_TOOLTIP}>
+          <>
+            {i18n.COLUMN_INDEXING_TIMES}{' '}
+            <EuiIcon size="s" color="subdued" type="iInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
       render: (value: RuleStatus['current_status']['bulk_create_time_durations']) => (
         <EuiText data-test-subj="bulk_create_time_durations" size="s">
           {value != null && value.length > 0
-            ? Math.max(...value?.map((item) => Number.parseFloat(item)))
+            ? value.reduce<number>((prev, cur) => Number(prev) + Number(cur), 0).toFixed(2)
             : getEmptyTagValue()}
         </EuiText>
       ),
@@ -357,11 +366,18 @@ export const getMonitoringColumns = (
     },
     {
       field: 'current_status.search_after_time_durations',
-      name: i18n.COLUMN_QUERY_TIMES,
+      name: (
+        <EuiToolTip content={i18n.COLUMN_QUERY_TIMES_TOOLTIP}>
+          <>
+            {i18n.COLUMN_QUERY_TIMES}{' '}
+            <EuiIcon size="s" color="subdued" type="iInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
       render: (value: RuleStatus['current_status']['search_after_time_durations']) => (
         <EuiText data-test-subj="search_after_time_durations" size="s">
           {value != null && value.length > 0
-            ? Math.max(...value?.map((item) => Number.parseFloat(item)))
+            ? value.reduce<number>((prev, cur) => Number(prev) + Number(cur), 0).toFixed(2)
             : getEmptyTagValue()}
         </EuiText>
       ),
@@ -370,7 +386,14 @@ export const getMonitoringColumns = (
     },
     {
       field: 'current_status.gap',
-      name: i18n.COLUMN_GAP,
+      name: (
+        <EuiToolTip content={i18n.COLUMN_GAP_TOOLTIP}>
+          <>
+            {i18n.COLUMN_GAP}{' '}
+            <EuiIcon size="s" color="subdued" type="iInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
       render: (value: RuleStatus['current_status']['gap']) => (
         <EuiText data-test-subj="gap" size="s">
           {value ?? getEmptyTagValue()}
