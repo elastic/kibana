@@ -37,9 +37,7 @@ export function createGenerateDocRecordsStream({
             scroll: SCROLL_TIMEOUT,
             size: SCROLL_SIZE,
             _source: 'true',
-            body: {
-              query,
-            },
+            query,
             rest_total_hits_as_int: true,
           },
           {
