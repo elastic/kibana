@@ -6,6 +6,7 @@
  */
 import { config } from './index';
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import { configDeprecationsMock } from 'src/core/server/mocks';
 
 const CONFIG_PATH = 'xpack.actions';
 const applyStackAlertDeprecations = (settings: Record<string, unknown> = {}) => {
@@ -19,6 +20,7 @@ const applyStackAlertDeprecations = (settings: Record<string, unknown> = {}) => 
     deprecations.map((deprecation) => ({
       deprecation,
       path: CONFIG_PATH,
+      context: configDeprecationsMock.createContext(),
     })),
     () =>
       ({ message }) =>
