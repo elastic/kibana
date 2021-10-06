@@ -81,7 +81,7 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
             onFilterAdded={onFilterAdded ?? noop}
             ownFocus={false}
             paddingSize="none"
-            showLegend={false}
+            showLegend
             showTopN={showTopN}
             showTooltip={false}
             timelineId={timelineId}
