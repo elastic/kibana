@@ -16,7 +16,6 @@ import {
   deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleOutput,
-  resolveSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
