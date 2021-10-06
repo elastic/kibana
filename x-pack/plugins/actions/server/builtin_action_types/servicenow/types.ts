@@ -20,6 +20,7 @@ import {
   ExecutorParamsSchemaSIR,
   ExecutorSubActionPushParamsSchemaSIR,
   ExecutorSubActionGetChoicesParamsSchema,
+  ExecutorParamsSchemaITOM,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { Logger } from '../../../../../../src/core/server';
@@ -276,9 +277,21 @@ export interface ExternalServiceSIR extends ExternalService {
   ) => Promise<ObservableResponse[]>;
 }
 
+type ExternalServices = ExternalServiceSIR | ExternalService | ExternalServiceITOM;
+
 export type ServiceFactory = (
   credentials: ExternalServiceCredentials,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities,
   serviceConfig: SNProductsConfigValue
-) => ExternalServiceSIR | ExternalService;
+) => ExternalServices;
+
+/**
+ * ITOM
+ */
+
+export type ExecutorParamsITOM = TypeOf<typeof ExecutorParamsSchemaITOM>;
+
+export interface ExternalServiceITOM {
+  addEvent: (params: ExecutorParamsITOM) => Promise<void>;
+}

@@ -80,6 +80,21 @@ export const ExecutorSubActionPushParamsSchemaSIR = schema.object({
   comments: CommentsSchema,
 });
 
+// Schema for ServiceNow ITOM
+export const ExecutorSubActionAddEventParamsSchema = schema.object({
+  source: schema.nullable(schema.string()),
+  event_class: schema.nullable(schema.string()),
+  resource: schema.nullable(schema.string()),
+  node: schema.nullable(schema.string()),
+  metric_name: schema.nullable(schema.string()),
+  type: schema.nullable(schema.string()),
+  severity: schema.nullable(schema.string()),
+  description: schema.nullable(schema.string()),
+  additional_info: schema.nullable(schema.string()),
+  message_key: schema.nullable(schema.string()),
+  time_of_event: schema.nullable(schema.string()),
+});
+
 export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
   externalId: schema.string(),
 });
@@ -136,5 +151,13 @@ export const ExecutorParamsSchemaSIR = schema.oneOf([
   schema.object({
     subAction: schema.literal('getChoices'),
     subActionParams: ExecutorSubActionGetChoicesParamsSchema,
+  }),
+]);
+
+// Executor parameters for ITOM
+export const ExecutorParamsSchemaITOM = schema.oneOf([
+  schema.object({
+    subAction: schema.literal('addEvent'),
+    subActionParams: ExecutorSubActionAddEventParamsSchema,
   }),
 ]);

@@ -14,6 +14,7 @@ import {
   ExternalServiceSIR,
   ObservableResponse,
   ServiceFactory,
+  ExternalService,
 } from './types';
 
 import { Logger } from '../../../../../../src/core/server';
@@ -40,7 +41,7 @@ export const createExternalServiceSIR: ServiceFactory = (
     logger,
     configurationUtilities,
     serviceConfig
-  );
+  ) as ExternalService;
 
   const { username, password } = credentials.secrets as ServiceNowSecretConfigurationType;
   const axiosInstance = axios.create({
