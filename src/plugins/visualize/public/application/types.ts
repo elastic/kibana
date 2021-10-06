@@ -8,7 +8,6 @@
 
 import type { EventEmitter } from 'events';
 import type { History } from 'history';
-
 import type { SerializableRecord } from '@kbn/utility-types';
 
 import type {
@@ -46,6 +45,7 @@ import type { DashboardStart } from '../../../dashboard/public';
 import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 import type { UsageCollectionStart } from '../../../usage_collection/public';
 import type { SavedSearch } from '../../../discover/public';
+import type { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
 
 import { PureVisState } from '../../common/types';
 
@@ -106,6 +106,7 @@ export interface VisualizeServices extends CoreStart {
   presentationUtil: PresentationUtilPluginStart;
   usageCollection?: UsageCollectionStart;
   getKibanaVersion: () => string;
+  spaces?: SpacesPluginStart;
 }
 
 export interface VisInstance {

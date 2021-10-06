@@ -23,6 +23,7 @@ import {
   setOverlays,
   setEmbeddable,
   setDocLinks,
+  setSpaces,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
@@ -63,6 +64,8 @@ import type {
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '../../../plugins/data/public';
 import type { ExpressionsSetup, ExpressionsStart } from '../../expressions/public';
 import type { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
+import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
+
 import { createVisAsync } from './vis_async';
 
 /**
@@ -100,6 +103,7 @@ export interface VisualizationsStartDeps {
   getAttributeService: EmbeddableStart['getAttributeService'];
   savedObjects: SavedObjectsStart;
   savedObjectsClient: SavedObjectsClientContract;
+  spaces?: SpacesPluginStart;
 }
 
 /**
@@ -146,7 +150,7 @@ export class VisualizationsPlugin
 
   public start(
     core: CoreStart,
-    { data, expressions, uiActions, embeddable, savedObjects }: VisualizationsStartDeps
+    { data, expressions, uiActions, embeddable, savedObjects, spaces }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
     setTypes(types);
@@ -163,6 +167,11 @@ export class VisualizationsPlugin
     setAggs(data.search.aggs);
     setOverlays(core.overlays);
     setChrome(core.chrome);
+
+    if (spaces) {
+      setSpaces(spaces);
+    }
+
     const savedVisualizationsLoader = createSavedVisLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: data.indexPatterns,

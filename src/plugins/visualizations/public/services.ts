@@ -18,12 +18,14 @@ import type {
 } from '../../../core/public';
 import type { TypesStart } from './vis_types';
 import { createGetterSetter } from '../../../plugins/kibana_utils/public';
-import { DataPublicPluginStart, TimefilterContract } from '../../../plugins/data/public';
-import { UsageCollectionSetup } from '../../../plugins/usage_collection/public';
-import { ExpressionsStart } from '../../../plugins/expressions/public';
-import { UiActionsStart } from '../../../plugins/ui_actions/public';
-import { SavedVisualizationsLoader } from './saved_visualizations';
-import { EmbeddableStart } from '../../embeddable/public';
+import type { DataPublicPluginStart, TimefilterContract } from '../../../plugins/data/public';
+import type { UsageCollectionSetup } from '../../../plugins/usage_collection/public';
+import type { ExpressionsStart } from '../../../plugins/expressions/public';
+import type { UiActionsStart } from '../../../plugins/ui_actions/public';
+import type { SavedVisualizationsLoader } from './saved_visualizations';
+import type { EmbeddableStart } from '../../embeddable/public';
+
+import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -62,3 +64,18 @@ export const [getAggs, setAggs] =
 export const [getOverlays, setOverlays] = createGetterSetter<OverlayStart>('Overlays');
 
 export const [getChrome, setChrome] = createGetterSetter<ChromeStart>('Chrome');
+
+const [_getSpaces, setSpaces] = createGetterSetter<SpacesPluginStart>('Spaces');
+
+/** "spaces" is optional, in case if that plugin is turned off "_getSpaces" method trigger the exception  **/
+const getSpaces = () => {
+  let spaces: SpacesPluginStart | undefined;
+  try {
+    spaces = _getSpaces();
+  } catch {
+    // nothing to be here
+  }
+  return spaces;
+};
+
+export { getSpaces, setSpaces };

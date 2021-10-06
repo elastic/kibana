@@ -67,7 +67,7 @@ const findSavedSearch = async (
           ? JSON.stringify({
               targetType: SAVED_SEARCH_TYPE,
               sourceId: savedSearchId,
-              targetSpace: (await spaces!.getActiveSpace()).id,
+              targetSpace: (await spaces.getActiveSpace()).id,
             })
           : undefined,
     }

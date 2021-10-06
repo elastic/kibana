@@ -36,7 +36,7 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   vis: Vis,
   visualizeServices: VisualizeServices
 ) => {
-  const { data, createVisEmbeddableFromObject, savedObjects } = visualizeServices;
+  const { data, createVisEmbeddableFromObject, savedObjects, spaces } = visualizeServices;
   const embeddableHandler = (await createVisEmbeddableFromObject(vis, {
     id: '',
     timeRange: data.query.timefilter.timefilter.getTime(),
@@ -58,6 +58,7 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
     savedSearch = await getSavedSearch(vis.data.savedSearchId, {
       search: data.search,
       savedObjectsClient: savedObjects.client,
+      spaces,
     });
 
     await throwErrorOnSavedSearchUrlConflict(savedSearch);

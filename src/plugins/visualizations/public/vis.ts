@@ -21,7 +21,7 @@ import { Assign } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 
 import { PersistedState } from './persisted_state';
-import { getTypes, getAggs, getSearch, getSavedObjects } from './services';
+import { getTypes, getAggs, getSearch, getSavedObjects, getSpaces } from './services';
 import {
   IAggConfigs,
   IndexPattern,
@@ -64,6 +64,7 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
     const savedSearch = await getSavedSearch(savedSearchId, {
       search: getSearch(),
       savedObjectsClient: getSavedObjects().client,
+      spaces: getSpaces(),
     });
 
     await throwErrorOnSavedSearchUrlConflict(savedSearch);

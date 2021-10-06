@@ -44,6 +44,7 @@ import type { EmbeddableStart } from '../../embeddable/public';
 import type { DashboardStart } from '../../dashboard/public';
 import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
 import type { UsageCollectionStart } from '../../usage_collection/public';
+import type { SpacesApi } from '../../../../x-pack/plugins/spaces/public';
 
 import { setVisEditorsRegistry, setUISettings, setUsageCollector } from './services';
 import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
@@ -61,6 +62,7 @@ export interface VisualizePluginStartDependencies {
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   usageCollection?: UsageCollectionStart;
+  spaces?: SpacesApi;
 }
 
 export interface VisualizePluginSetupDependencies {
@@ -212,6 +214,7 @@ export class VisualizePlugin
           presentationUtil: pluginsStart.presentationUtil,
           usageCollection: pluginsStart.usageCollection,
           getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
+          spaces: pluginsStart.spaces,
         };
 
         params.element.classList.add('visAppWrapper');

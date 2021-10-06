@@ -27,6 +27,7 @@ jest.mock('../../../../discover/public', () => ({
     title: 'savedSearchTitle',
     searchSource: {},
   }),
+  throwErrorOnSavedSearchUrlConflict: jest.fn(),
 }));
 
 describe('getVisualizationInstance', () => {
