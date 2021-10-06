@@ -22,22 +22,46 @@ import {
 } from '../../../../routes';
 import { BlockedWindow, IndexingSchedule } from '../../../../types';
 
-import {
-  SYNC_ENABLED_MESSAGE,
-  SYNC_DISABLED_MESSAGE,
-  SYNC_SETTINGS_UPDATED_MESSAGE,
-} from '../../constants';
+import { SYNC_SETTINGS_UPDATED_MESSAGE } from '../../constants';
 import { SourceLogic } from '../../source_logic';
+
+interface ServerBlockedWindow {
+  job_type: string;
+  day: string;
+  start: string;
+  end: string;
+}
+
+interface ServerSyncSettingsBody {
+  content_source: {
+    indexing: {
+      enabled?: boolean;
+      features?: {
+        content_extraction: { enabled: boolean };
+        thumbnails: { enabled: boolean };
+      };
+      schedule?: {
+        full: string;
+        incremental: string;
+        delete: string;
+        permissions?: string;
+        blocked_windows: ServerBlockedWindow[];
+      };
+    };
+  };
+}
 
 interface SynchronizationActions {
   setNavigatingBetweenTabs(navigatingBetweenTabs: boolean): boolean;
   handleSelectedTabChanged(tabId: TabId): TabId;
   addBlockedWindow(): void;
   updateSyncSettings(): void;
+  updateObjectsAndAssetsSettings(): void;
   resetSyncSettings(): void;
   updateSyncEnabled(enabled: boolean): boolean;
   setThumbnailsChecked(checked: boolean): boolean;
   setContentExtractionChecked(checked: boolean): boolean;
+  updateServerSettings(body: ServerSyncSettingsBody): ServerSyncSettingsBody;
 }
 
 interface SynchronizationValues {
@@ -68,7 +92,9 @@ export const SynchronizationLogic = kea<
     updateSyncEnabled: (enabled: boolean) => enabled,
     setThumbnailsChecked: (checked: boolean) => checked,
     setContentExtractionChecked: (checked: boolean) => checked,
+    updateServerSettings: (body: ServerSyncSettingsBody) => body,
     updateSyncSettings: true,
+    updateObjectsAndAssetsSettings: true,
     resetSyncSettings: true,
     addBlockedWindow: true,
   },
@@ -156,37 +182,31 @@ export const SynchronizationLogic = kea<
       actions.setNavigatingBetweenTabs(false);
     },
     updateSyncEnabled: async (enabled) => {
-      const { id: sourceId } = props.contentSource;
-      const route = `/internal/workplace_search/org/sources/${sourceId}/settings`;
-      const successMessage = enabled ? SYNC_ENABLED_MESSAGE : SYNC_DISABLED_MESSAGE;
-
-      try {
-        const response = await HttpLogic.values.http.patch(route, {
-          body: JSON.stringify({ content_source: { indexing: { enabled } } }),
-        });
-
-        SourceLogic.actions.setContentSource(response);
-        flashSuccessToast(successMessage);
-      } catch (e) {
-        flashAPIErrors(e);
-      }
+      actions.updateServerSettings({
+        content_source: {
+          indexing: { enabled },
+        },
+      });
     },
-    updateSyncSettings: async () => {
+    updateObjectsAndAssetsSettings: () => {
+      actions.updateServerSettings({
+        content_source: {
+          indexing: {
+            features: {
+              content_extraction: { enabled: values.contentExtractionChecked },
+              thumbnails: { enabled: values.thumbnailsChecked },
+            },
+          },
+        },
+      });
+    },
+    updateServerSettings: async (body: ServerSyncSettingsBody) => {
       const { id: sourceId } = props.contentSource;
       const route = `/internal/workplace_search/org/sources/${sourceId}/settings`;
 
       try {
         const response = await HttpLogic.values.http.patch(route, {
-          body: JSON.stringify({
-            content_source: {
-              indexing: {
-                features: {
-                  content_extraction: { enabled: values.contentExtractionChecked },
-                  thumbnails: { enabled: values.thumbnailsChecked },
-                },
-              },
-            },
-          }),
+          body: JSON.stringify(body),
         });
 
         SourceLogic.actions.setContentSource(response);
