@@ -14,8 +14,6 @@ import {
 } from '../../../../../common/mock/endpoint';
 import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import userEvent from '@testing-library/user-event';
-import { act } from 'react-dom/test-utils';
-import { fireEvent } from '@testing-library/dom';
 
 describe('When on the host isolation exceptions add entry form', () => {
   let render: (
