@@ -84,7 +84,6 @@ export function DatePicker({ rangeFrom, rangeTo, refreshPaused, refreshInterval 
 
   function onTimeChange({ start, end }: { start: string; end: string }) {
     updateUrl({ rangeFrom: start, rangeTo: end });
-    onRefreshTimeRange();
   }
 
   return (
@@ -96,7 +95,7 @@ export function DatePicker({ rangeFrom, rangeTo, refreshPaused, refreshInterval 
       refreshInterval={refreshInterval}
       onRefreshChange={onRefreshChange}
       commonlyUsedRanges={commonlyUsedRanges}
-      onRefresh={onTimeChange}
+      onRefresh={onRefreshTimeRange}
     />
   );
 }
