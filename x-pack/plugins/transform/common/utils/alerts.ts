@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import './app/index.scss';
-import { TransformUiPlugin } from './plugin';
+import type { TransformHealthRuleTestsConfig } from '../types/alerting';
 
-/** @public */
-export const plugin = () => {
-  return new TransformUiPlugin();
-};
-
-export { getTransformHealthRuleType } from './alerting';
+export function getResultTestConfig(config: TransformHealthRuleTestsConfig) {
+  return {
+    notStarted: {
+      enabled: config?.notStarted?.enabled ?? true,
+    },
+  };
+}
