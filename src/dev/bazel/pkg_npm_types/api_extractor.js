@@ -20,6 +20,7 @@ console.log(process.cwd());
 const { format, parseTsconfig } = require('@bazel/typescript');
 const { Extractor, ExtractorConfig } = require('@microsoft/api-extractor');
 const fs = require('fs');
+const Mustache = require('mustache');
 const path = require('path');
 const DEBUG = false;
 
@@ -84,6 +85,34 @@ function runMain(tsConfig, entryPoint, dtsBundleOut, apiReviewFolder, acceptApiU
 
 exports.runMain = runMain;
 
+function generatePkgNpmTypesPackageJsonOutput(
+  outputBasePath,
+  packageJsonTemplatePath,
+  rawPackageJsonTemplateArgs
+) {
+  const packageJsonTemplateArgsInTuples = rawPackageJsonTemplateArgs.reduce(
+    (a, v) => {
+      const lastTupleIdx = a.length - 1;
+      const lastTupleSize = a[lastTupleIdx].length;
+
+      if (lastTupleSize < 2) {
+        a[lastTupleIdx].push(v);
+
+        return a;
+      }
+
+      return a.push([v]);
+    },
+    [[]]
+  );
+  const packageJsonTemplateArgs = Object.fromEntries(new Map(packageJsonTemplateArgsInTuples));
+  console.log(packageJsonTemplateArgs);
+  const template = fs.readFileSync(packageJsonTemplatePath);
+  const renderedTemplate = Mustache.render(template.toString(), packageJsonTemplateArgs);
+  console.log(renderedTemplate);
+  fs.writeFileSync(path.resolve(outputBasePath, 'package.json'), renderedTemplate);
+}
+
 // Entry point
 if (require.main === module) {
   if (DEBUG) {
@@ -94,18 +123,19 @@ api-extractor: running with
     ${process.argv.join('\n    ')}
   `);
   }
-  const [tsConfig, entryPoint, dtsBundleOut] = process.argv.slice(2);
-  const entryPoints = entryPoint.split(',');
-  const dtsBundleOuts = dtsBundleOut.split(',');
-  if (entryPoints.length !== entryPoints.length) {
-    throw new Error(
-      `Entry points count (${entryPoints.length}) does not match Bundle out count (${dtsBundleOuts.length})`
-    );
-  }
-  for (let i = 0; i < entryPoints.length; i++) {
-    process.exitCode = runMain(tsConfig, entryPoints[i], dtsBundleOuts[i]);
-    if (process.exitCode !== 0) {
-      break;
-    }
-  }
+  const [
+    outputBasePath,
+    packageJsonTemplatePath,
+    stringifiedPackageJsonTemplateArgs,
+    tsConfig,
+    entryPoint,
+  ] = process.argv.slice(2);
+  const dtsBundleOutput = path.resolve(outputBasePath, 'index.d.ts');
+
+  generatePkgNpmTypesPackageJsonOutput(
+    outputBasePath,
+    packageJsonTemplatePath,
+    stringifiedPackageJsonTemplateArgs.split(',')
+  );
+  process.exitCode = runMain(tsConfig, entryPoint, dtsBundleOutput);
 }

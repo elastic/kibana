@@ -4,18 +4,18 @@ load("@build_bazel_rules_nodejs//internal/node:node.bzl", "nodejs_binary")
 
 exports_files(
   [
-    "package_json.tpl",
+    "package_json.mustache",
     "api_extractor.js"
   ],
   visibility = ["//visibility:public"]
 )
 
 nodejs_binary(
-  name = "api_extractor",
+  name = "_packager",
   data = [
     "@npm//@bazel/typescript",
     "@npm//@microsoft/api-extractor",
-    ":api_extractor.js",
+    "@npm//mustache"
   ],
   entry_point = ":api_extractor.js",
 )

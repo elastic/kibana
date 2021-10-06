@@ -1,6 +1,6 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler", "types_pkg")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm_types")
 
 PKG_BASE_NAME = "elastic-datemath"
 PKG_REQUIRE_NAME = "@elastic/datemath"
@@ -58,19 +58,10 @@ ts_project(
   tsconfig = ":tsconfig",
 )
 
-types_pkg(
-  name = "npm_module_types",
-  package_name = TYPES_PKG_REQUIRE_NAME,
-  tsconfig = ":tsconfig",
-  data = SRCS + DEPS + [
-    ":tsc_types",
-  ]
-)
-
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = DEPS + [":target_node", ":tsc_types", ":npm_module_types"],
+  deps = DEPS + [":target_node", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -88,6 +79,15 @@ filegroup(
     ":npm_module",
   ],
   visibility = ["//visibility:public"],
+)
+
+pkg_npm_types(
+  name = "npm_module_types",
+  package_name = TYPES_PKG_REQUIRE_NAME,
+  tsconfig = ":tsconfig",
+  data = SRCS + DEPS + [
+    ":tsc_types",
+  ]
 )
 
 filegroup(

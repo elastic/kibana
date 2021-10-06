@@ -6,12 +6,10 @@
 # Side Public License, v 1.
 #
 
-"""Public API interface for all Kibana Bazel custom rules.
-Please do not import from any other files when looking to use a custom rule
+"""Public API interface for pkg_npm_types rule.
+Please do not import from any other files when looking to this rule
 """
 
-load("//src/dev/bazel:jsts_transpiler.bzl", _jsts_transpiler = "jsts_transpiler")
-load("//src/dev/bazel/pkg_npm_types:index.bzl", _pkg_npm_types = "pkg_npm_types")
+load(":pkg_npm_types.bzl", _pkg_npm_types = "pkg_npm_types")
 
-jsts_transpiler = _jsts_transpiler
 pkg_npm_types = _pkg_npm_types
