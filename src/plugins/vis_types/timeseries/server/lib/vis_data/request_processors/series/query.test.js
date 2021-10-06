@@ -124,14 +124,16 @@ describe('query', () => {
   test('returns doc with global query', async () => {
     req.body.filters = [
       {
-        bool: {
-          must: [
-            {
-              term: {
-                host: 'example',
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  host: 'example',
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       },
     ];
@@ -234,14 +236,16 @@ describe('query', () => {
   test('returns doc with panel filter and global', async () => {
     req.body.filters = [
       {
-        bool: {
-          must: [
-            {
-              term: {
-                host: 'example',
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  host: 'example',
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       },
     ];
