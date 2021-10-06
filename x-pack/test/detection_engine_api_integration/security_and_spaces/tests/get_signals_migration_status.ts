@@ -22,10 +22,10 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('Signals migration status', () => {
     let legacySignalsIndexName: string;
     beforeEach(async () => {
-      await createSignalsIndex(supertest);
       legacySignalsIndexName = getIndexNameFromLoad(
         await esArchiver.load('x-pack/test/functional/es_archives/signals/legacy_signals_index')
       );
+      await createSignalsIndex(supertest);
     });
 
     afterEach(async () => {
@@ -68,18 +68,6 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       expect(body.indices).to.eql([
-        {
-          index: '.internal.alerts-security.alerts-default-000001',
-          is_outdated: true,
-          migrations: [],
-          signal_versions: [
-            {
-              count: 2007,
-              version: 0,
-            },
-          ],
-          version: 0,
-        },
         {
           index: legacySignalsIndexName,
           is_outdated: true,

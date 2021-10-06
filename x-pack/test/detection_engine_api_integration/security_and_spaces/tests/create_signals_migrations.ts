@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 
 import {
   DEFAULT_SIGNALS_INDEX,
+  DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
 } from '../../../../plugins/security_solution/common/constants';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
@@ -39,14 +40,13 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   // Skipping as migrations work only on legacy indices
-  describe.skip('Creating signals migrations', () => {
+  describe('Creating signals migrations', () => {
     let createdMigrations: CreateResponse[];
     let legacySignalsIndexName: string;
     let outdatedSignalsIndexName: string;
 
     beforeEach(async () => {
       createdMigrations = [];
-      await createSignalsIndex(supertest);
 
       legacySignalsIndexName = getIndexNameFromLoad(
         await esArchiver.load('x-pack/test/functional/es_archives/signals/legacy_signals_index')
@@ -54,9 +54,18 @@ export default ({ getService }: FtrProviderContext): void => {
       outdatedSignalsIndexName = getIndexNameFromLoad(
         await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
+      await createSignalsIndex(supertest);
     });
 
     afterEach(async () => {
+      // Finalize the migration after each test so that the .siem-signals alias gets added to the migrated index -
+      // this allows deleteSignalsIndex to find and delete the migrated index
+      await supertest
+        .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
+        .set('kbn-xsrf', 'true')
+        .send({ migration_ids: createdMigrations.map((m) => m.migration_id) })
+        .expect(200);
+
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/legacy_signals_index');
       await deleteMigrations({
