@@ -14,7 +14,10 @@ import { ElasticsearchClient } from 'kibana/server';
 import { Logger } from 'kibana/server';
 import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
 
-import { RuleDataWriteDisabledError } from '../rule_data_plugin_service/errors';
+import {
+  RuleDataWriteDisabledError,
+  RuleDataWriterInitializationError,
+} from '../rule_data_plugin_service/errors';
 import { IndexInfo } from '../rule_data_plugin_service/index_info';
 import { ResourceInstaller } from '../rule_data_plugin_service/resource_installer';
 import { IRuleDataClient, IRuleDataReader, IRuleDataWriter } from './types';
@@ -130,25 +133,21 @@ export class RuleDataClient implements IRuleDataClient {
 
   private initializeWriter(namespace: string): IRuleDataWriter {
     const isWriteEnabled = () => this.writeEnabled;
+    const turnOffWrite = () => (this.writeEnabled = false);
 
     const { indexInfo, resourceInstaller } = this.options;
     const alias = indexInfo.getPrimaryAlias(namespace);
 
     // Wait until both index and namespace level resources have been installed / updated.
     const waitUntilReady = async () => {
-      const failAndTurnOffWrite = (context: string, error: Error) => {
-        this.options.logger.error(
-          `There has been a catastrophic error trying to install ${context} level resources. Writing can no longer continue, and has been disabled for the following registration context: ${indexInfo.indexOptions.registrationContext}. 
-          This may have been due to a non-additive change to the mappings, removal and type changes are not permitted. Full error: ${error}`
-        );
-        this.writeEnabled = false;
-      };
-
       const indexLevelResourcesResult = await this.options.waitUntilReadyForWriting;
 
       if (isLeft(indexLevelResourcesResult)) {
-        failAndTurnOffWrite('index', indexLevelResourcesResult.left);
-        throw indexLevelResourcesResult.left;
+        throw new RuleDataWriterInitializationError(
+          'index',
+          indexInfo.indexOptions.registrationContext,
+          indexLevelResourcesResult.left
+        );
       } else {
         try {
           await pRetry(
@@ -159,8 +158,11 @@ export class RuleDataClient implements IRuleDataClient {
           );
           return indexLevelResourcesResult.right;
         } catch (e) {
-          failAndTurnOffWrite('namespace', e);
-          throw e;
+          throw new RuleDataWriterInitializationError(
+            'namespace',
+            indexInfo.indexOptions.registrationContext,
+            e
+          );
         }
       }
     };
@@ -169,12 +171,12 @@ export class RuleDataClient implements IRuleDataClient {
 
     return {
       bulk: async (request: BulkRequest) => {
-        if (!isWriteEnabled()) {
-          throw new RuleDataWriteDisabledError();
-        }
-
         return waitUntilReadyResult
           .then((clusterClient) => {
+            if (!isWriteEnabled()) {
+              throw new RuleDataWriteDisabledError();
+            }
+
             const requestWithDefaultParameters = {
               ...request,
               require_alias: true,
@@ -190,10 +192,18 @@ export class RuleDataClient implements IRuleDataClient {
             });
           })
           .catch((error) => {
-            this.options.logger.error(
-              `The writer for the Rule Data Client for the ${indexInfo.indexOptions.registrationContext} registration context was not initialized properly, bulk() cannot continue. 
-              Full error: ${error}`
-            );
+            if (error instanceof RuleDataWriterInitializationError) {
+              this.options.logger.error(error);
+              this.options.logger.error(
+                `The writer for the Rule Data Client for the ${indexInfo.indexOptions.registrationContext} registration context was not initialized properly, bulk() cannot continue, and writing will be disabled.`
+              );
+              turnOffWrite();
+            } else if (error instanceof RuleDataWriteDisabledError) {
+              this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
+            } else {
+              this.options.logger.error(error);
+            }
+
             return undefined;
           });
       },
