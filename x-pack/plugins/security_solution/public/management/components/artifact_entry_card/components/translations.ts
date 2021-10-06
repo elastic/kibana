@@ -116,13 +116,13 @@ export const COLLAPSE_ACTION = i18n.translate(
 );
 
 export const SHOW_COMMENTS_LABEL = (count: number = 0) =>
-  i18n.translate('xpack.securitySolution.artifactCard.comments.label', {
+  i18n.translate('xpack.securitySolution.artifactCard.comments.label.show', {
     defaultMessage: 'Show comments ({count})',
     values: { count },
   });
 
 export const HIDE_COMMENTS_LABEL = (count: number = 0) =>
-  i18n.translate('xpack.securitySolution.artifactCard.comments.label', {
+  i18n.translate('xpack.securitySolution.artifactCard.comments.label.hide', {
     defaultMessage: 'Hide comments ({count})',
     values: { count },
   });
