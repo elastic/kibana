@@ -73,6 +73,13 @@ For information about the {kib} 7.15.0 release, review the following information
 [[known-issue-7.15.0]]
 === Known issue
 
+.{kib} is unable to restore *Discover* search sessions with a relative time range
+[%collapsible]
+====
+*Impact* +
+When you restore a *Discover* search session, then run a new search, {kib} displays a `Your search session is still running` message. For more information, refer to {kibana-issue}112562[#112562].
+====
+
 .Upgrade Elastic Agents to use Osquery Manager integration
 [%collapsible]
 ====
