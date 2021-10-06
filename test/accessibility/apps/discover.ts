@@ -11,27 +11,14 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'share', 'timePicker']);
   const a11y = getService('a11y');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
-  const TEST_COLUMN_NAMES = ['extension', 'geo.src'];
+  const TEST_COLUMN_NAMES = ['dayOfWeek', 'DestWeather'];
 
   describe('Discover a11y tests', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
-      await kibanaServer.uiSettings.update({
-        defaultIndex: 'logstash-*',
-        'doc_table:legacy': true,
-      });
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-    });
-
-    after(async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
     });
 
     it('Discover main page', async () => {
