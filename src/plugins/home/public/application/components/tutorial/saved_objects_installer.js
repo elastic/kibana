@@ -14,7 +14,7 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  EuiSteps,
+  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -193,19 +193,23 @@ Click 'Confirm overwrite' to import and overwrite existing objects. Any changes 
       </Fragment>
     );
 
-    return {
-      title: this.props.intl.formatMessage({
-        id: 'home.tutorial.savedObject.loadTitle',
-        defaultMessage: 'Load Kibana objects',
-      }),
-      status: this.state.isInstalled ? 'complete' : 'incomplete',
-      children: installStep,
-      key: 'installStep',
-    };
+    return (
+      <>
+        <EuiTitle size="m">
+          <h2>
+            {this.props.intl.formatMessage({
+              id: 'home.tutorial.savedObject.loadTitle',
+              defaultMessage: 'Load Kibana objects',
+            })}
+          </h2>
+        </EuiTitle>
+        {installStep}
+      </>
+    );
   };
 
   render() {
-    return <EuiSteps steps={[this.renderInstallStep()]} />;
+    return this.renderInstallStep();
   }
 }
 

@@ -41,12 +41,15 @@ function IntroductionUI({
   let exportedFields;
   if (exportedFieldsUrl) {
     exportedFields = (
-      <EuiLink href={exportedFieldsUrl} target="_blank" rel="noopener">
-        <FormattedMessage
-          id="home.tutorial.introduction.viewButtonLabel"
-          defaultMessage="View exported fields"
-        />
-      </EuiLink>
+      <>
+        <br />
+        <EuiLink href={exportedFieldsUrl} target="_blank" rel="noopener">
+          <FormattedMessage
+            id="home.tutorial.introduction.viewButtonLabel"
+            defaultMessage="View exported fields"
+          />
+        </EuiLink>
+      </>
     );
   }
   let betaBadge;

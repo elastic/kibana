@@ -27,6 +27,7 @@ import {
 import * as StatusCheckStates from './status_check_states';
 
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 
 class InstructionSetUi extends React.Component {
   constructor(props) {
@@ -203,7 +204,7 @@ class InstructionSetUi extends React.Component {
     return (
       <>
         <EuiSpacer />
-        <EuiSteps steps={steps} firstStepNumber={this.props.offset} />
+        <EuiSteps titleSize="xs" steps={steps} firstStepNumber={this.props.offset} />
       </>
     );
   };
@@ -273,8 +274,8 @@ class InstructionSetUi extends React.Component {
 
     return (
       <EuiSplitPanel.Outer>
-        <EuiSplitPanel.Inner paddingSize="none">
-          <EuiTabs>{this.renderTabs()}</EuiTabs>
+        <EuiSplitPanel.Inner color="subdued" paddingSize="none">
+          <EuiTabs style={{ padding: `0 ${euiThemeVars.euiSizeL}` }}>{this.renderTabs()}</EuiTabs>
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner paddingSize="l">
           {this.renderHeader()}
