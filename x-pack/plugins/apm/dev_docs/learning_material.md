@@ -1,4 +1,4 @@
-# Suggested reading and learning
+# Suggested reading and learning material
 
 The following list outlines recommened materials for new-comers to APM UI.
 
