@@ -507,6 +507,7 @@ export const AlertsList: React.FunctionComponent = () => {
             {showDurationWarning && (
               <EuiIconTip
                 data-test-subj="ruleDurationWarning"
+                anchorClassName="ruleDurationWarningIcon"
                 type="alert"
                 color="warning"
                 content={i18n.translate(
