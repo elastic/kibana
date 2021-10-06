@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export { TelemetryDiagTask as DiagnosticTask } from './diagnostic';
-export { TelemetryEndpointTask as EndpointTask } from './endpoint';
-export { TelemetryExceptionListsTask as ExceptionListsTask } from './security_lists';
+import { SecurityTelemetryTaskConfig } from '../task';
+import { TelemetryDiagTaskConfig } from './diagnostic';
+import { TelemetryEndpointTaskConfig } from './endpoint';
+import { TelemetrySecurityListTaskConfig } from './security_lists';
+
+export function listTelemetryTaskConfigs(): SecurityTelemetryTaskConfig[] {
+  return [TelemetryDiagTaskConfig, TelemetryEndpointTaskConfig, TelemetrySecurityListTaskConfig];
+}
