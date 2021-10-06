@@ -62,9 +62,9 @@ const comparatorToI18n = (comparator: Comparator, threshold: number[], currentVa
       return ltText;
     case Comparator.GT_OR_EQ:
     case Comparator.LT_OR_EQ: {
-      if (threshold[0] === currentValue) {
+      if (currentValue === threshold[0]) {
         return eqText;
-      } else if (threshold[0] > currentValue) {
+      } else if (currentValue < threshold[0]) {
         return ltText;
       } else {
         return gtText;
