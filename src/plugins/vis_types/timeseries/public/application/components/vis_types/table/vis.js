@@ -17,6 +17,7 @@ import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
+import { ExternalUrlErrorModal } from '../../lib/external_url_error_modal';
 import { FIELD_FORMAT_IDS } from '../../../../../../../../plugins/field_formats/common';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
@@ -53,11 +54,23 @@ class TableVis extends Component {
     const DateFormat = fieldFormatsService.getType(FIELD_FORMAT_IDS.DATE);
 
     this.dateFormatter = new DateFormat({}, this.props.getConfig);
+
+    this.state = {
+      showExternalUrlErrorModal: false,
+    };
   }
 
   get visibleSeries() {
     return get(this.props, 'model.series', []).filter((series) => !series.hidden);
   }
+
+  handleDrilldownUrlClick = (event, url) => {
+    const validatedUrl = getCoreStart().http.externalUrl.validateUrl(url);
+    if (!validatedUrl) {
+      event.preventDefault();
+      this.setState({ accessDeniedDrilldownUrl: url, showExternalUrlErrorModal: true });
+    }
+  };
 
   renderRow = (row) => {
     const { model, fieldFormatMap, getConfig } = this.props;
@@ -74,7 +87,11 @@ class TableVis extends Component {
 
     if (model.drilldown_url) {
       const url = replaceVars(model.drilldown_url, {}, { key: row.key });
-      rowDisplay = <a href={sanitizeUrl(url)}>{rowDisplay}</a>;
+      rowDisplay = (
+        <a href={sanitizeUrl(url)} onClick={(event) => this.handleDrilldownUrlClick(event, url)}>
+          {rowDisplay}
+        </a>
+      );
     }
 
     const columns = row.series
@@ -213,6 +230,8 @@ class TableVis extends Component {
     );
   }
 
+  closeExternalUrlErrorModal = () => this.setState({ showExternalUrlErrorModal: false });
+
   render() {
     const { visData, model } = this.props;
     const header = this.renderHeader();
@@ -239,16 +258,24 @@ class TableVis extends Component {
       );
     }
     return (
-      <RedirectAppLinks
-        application={getCoreStart().application}
-        className="tvbVis"
-        data-test-subj="tableView"
-      >
-        <table className="table">
-          <thead>{header}</thead>
-          <tbody>{rows}</tbody>
-        </table>
-      </RedirectAppLinks>
+      <>
+        <RedirectAppLinks
+          application={getCoreStart().application}
+          className="tvbVis"
+          data-test-subj="tableView"
+        >
+          <table className="table">
+            <thead>{header}</thead>
+            <tbody>{rows}</tbody>
+          </table>
+        </RedirectAppLinks>
+        {this.state.showExternalUrlErrorModal && (
+          <ExternalUrlErrorModal
+            url={this.state.accessDeniedDrilldownUrl}
+            handleClose={this.closeExternalUrlErrorModal}
+          />
+        )}
+      </>
     );
   }
 }
