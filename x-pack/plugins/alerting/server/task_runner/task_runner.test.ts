@@ -4401,4 +4401,136 @@ describe('Task Runner', () => {
       { refresh: false, namespace: undefined }
     );
   });
+
+  test('writes to event log when task is cancelled', async () => {
+    const taskRunner = new TaskRunner(
+      alertType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+
+    rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+
+    await taskRunner.run();
+    await taskRunner.cancel();
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute-start",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert execution start: \\"1\\"",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+              "outcome": "success",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "status": "ok",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert executed: test:1: 'alert-name'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute-timeout",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+            },
+            "message": "rule execution cancelled due to timeout: \\"test1\\"",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+      ]
+    `);
+  });
 });

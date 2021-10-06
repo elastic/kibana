@@ -650,6 +650,43 @@ export class TaskRunner<
       }),
     };
   }
+
+  async cancel(): Promise<void> {
+    // Write event log entry
+    const {
+      params: { alertId, spaceId },
+    } = this.taskInstance;
+    const namespace = this.context.spaceIdToNamespace(spaceId);
+
+    const eventLogger = this.context.eventLogger;
+    const event: IEvent = {
+      '@timestamp': new Date().toISOString(),
+      event: {
+        action: EVENT_LOG_ACTIONS.executeTimeout,
+        kind: 'alert',
+        category: [this.alertType.producer],
+      },
+      message: `rule execution cancelled due to timeout: "${this.alertType.id}${alertId}"`,
+      kibana: {
+        saved_objects: [
+          {
+            rel: SAVED_OBJECT_REL_PRIMARY,
+            type: 'alert',
+            id: alertId,
+            type_id: this.alertType.id,
+            namespace,
+          },
+        ],
+      },
+      rule: {
+        id: alertId,
+        license: this.alertType.minimumLicenseRequired,
+        category: this.alertType.id,
+        ruleset: this.alertType.producer,
+      },
+    };
+    eventLogger.logEvent(event);
+  }
 }
 
 interface TrackAlertDurationsParams<
