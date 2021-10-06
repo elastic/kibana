@@ -65,7 +65,6 @@ describe('custom_host_settings', () => {
 
   describe('resolveCustomHosts()', () => {
     const defaultActionsConfig: ActionsConfig = {
-      enabled: true,
       allowedHosts: [],
       enabledActionTypes: [],
       preconfiguredAlertHistoryEsIndex: false,

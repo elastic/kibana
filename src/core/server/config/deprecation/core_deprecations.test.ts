@@ -19,38 +19,6 @@ describe('core deprecations', () => {
     process.env = { ...initialEnv };
   });
 
-  describe('kibanaPathConf', () => {
-    it('logs a warning if KIBANA_PATH_CONF environ variable is set', () => {
-      process.env.KIBANA_PATH_CONF = 'somepath';
-      const { messages } = applyCoreDeprecations();
-      expect(messages).toMatchInlineSnapshot(`
-        Array [
-          "Environment variable \\"KIBANA_PATH_CONF\\" is deprecated. It has been replaced with \\"KBN_PATH_CONF\\" pointing to a config folder",
-        ]
-      `);
-    });
-
-    it('does not log a warning if KIBANA_PATH_CONF environ variable is unset', () => {
-      delete process.env.KIBANA_PATH_CONF;
-      const { messages } = applyCoreDeprecations();
-      expect(messages).toHaveLength(0);
-    });
-  });
-
-  describe('xsrfDeprecation', () => {
-    it('logs a warning if server.xsrf.whitelist is set', () => {
-      const { migrated, messages } = applyCoreDeprecations({
-        server: { xsrf: { whitelist: ['/path'] } },
-      });
-      expect(migrated.server.xsrf.allowlist).toEqual(['/path']);
-      expect(messages).toMatchInlineSnapshot(`
-        Array [
-          "Setting \\"server.xsrf.whitelist\\" has been replaced by \\"server.xsrf.allowlist\\"",
-        ]
-      `);
-    });
-  });
-
   describe('server.cors', () => {
     it('renames server.cors to server.cors.enabled', () => {
       const { migrated } = applyCoreDeprecations({
@@ -58,8 +26,9 @@ describe('core deprecations', () => {
       });
       expect(migrated.server.cors).toEqual({ enabled: true });
     });
+
     it('logs a warning message about server.cors renaming', () => {
-      const { messages } = applyCoreDeprecations({
+      const { messages, levels } = applyCoreDeprecations({
         server: { cors: true },
       });
       expect(messages).toMatchInlineSnapshot(`
@@ -67,7 +36,13 @@ describe('core deprecations', () => {
           "\\"server.cors\\" is deprecated and has been replaced by \\"server.cors.enabled\\"",
         ]
       `);
+      expect(levels).toMatchInlineSnapshot(`
+        Array [
+          "warning",
+        ]
+      `);
     });
+
     it('does not log deprecation message when server.cors.enabled set', () => {
       const { migrated, messages } = applyCoreDeprecations({
         server: { cors: { enabled: true } },
