@@ -141,11 +141,12 @@ function getAccessorCriteriaForGroup(
   }
 }
 
-function computeStaticValueForGroup(
+// For testing
+export function computeStaticValueForGroup(
   dataLayers: XYLayerConfig[],
   accessorIds: string[],
   activeData: NonNullable<FramePublicAPI['activeData']>,
-  minZeroBased: boolean
+  minZeroOrNegativeBase: boolean = true
 ) {
   const defaultThresholdFactor = 3 / 4;
 
@@ -169,29 +170,30 @@ function computeStaticValueForGroup(
     let columnMax = -Infinity;
     let columnMin = Infinity;
     for (const { tableId, accessors } of tableIds) {
-      let tableMax = -Infinity;
-      let tableMin = Infinity;
-      const isStacked = isStackedChart(
-        dataLayers.find(({ layerId }) => layerId === tableId)!.seriesType
-      );
-      for (const row of activeData[tableId].rows) {
-        if (!isStacked) {
-          for (const { id } of accessors) {
-            tableMax = Math.max(row[id], tableMax);
-            tableMin = Math.min(row[id], tableMin);
+      const layer = dataLayers.find(({ layerId }) => layerId === tableId);
+      if (layer) {
+        let tableMax = -Infinity;
+        let tableMin = Infinity;
+        const isStacked = isStackedChart(layer.seriesType);
+        for (const row of activeData[tableId].rows) {
+          if (!isStacked) {
+            for (const { id } of accessors) {
+              tableMax = Math.max(row[id], tableMax);
+              tableMin = Math.min(row[id], tableMin);
+            }
+          } else {
+            const value = accessors.reduce((v, { id }) => v + (row[id] || 0), 0);
+            tableMax = Math.max(value, tableMax);
+            tableMin = Math.min(value, tableMin);
           }
-        } else {
-          const value = accessors.reduce((v, { id }) => v + (row[id] || 0), 0);
-          tableMax = Math.max(value, tableMax);
-          tableMin = Math.min(value, tableMin);
         }
+        columnMax = Math.max(tableMax, columnMax);
+        columnMin = Math.min(tableMin, columnMin);
       }
-      columnMax = Math.max(tableMax, columnMax);
-      columnMin = Math.min(tableMin, columnMin);
     }
     if (isFinite(columnMin) && isFinite(columnMax)) {
       // Custom axis bounds can go below 0, so consider also lower values than 0
-      const finalMinValue = minZeroBased ? Math.min(0, columnMin) : columnMin;
+      const finalMinValue = minZeroOrNegativeBase ? Math.min(0, columnMin) : columnMin;
       const interval = columnMax - finalMinValue;
       return Number((finalMinValue + interval * defaultThresholdFactor).toFixed(2));
     }
