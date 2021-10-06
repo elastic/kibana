@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+import type { TransportRequestOptions } from '@elastic/transport';
 import { get } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
 

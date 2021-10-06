@@ -13,7 +13,7 @@ import type {
   RequestBody,
   TransportRequestParams,
   TransportRequestOptions,
-} from '@elastic/elasticsearch/lib/Transport';
+} from '@elastic/transport';
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 

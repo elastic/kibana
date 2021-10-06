@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
+import { RequestEvent } from '@elastic/transport';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { MigrationDeprecationInfoResponse } from '@elastic/elasticsearch/api/types';
 

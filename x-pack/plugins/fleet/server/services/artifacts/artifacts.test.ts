@@ -9,7 +9,7 @@ import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 
-import type { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
+import type { ApiResponse } from '@elastic/transport';
 
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
 

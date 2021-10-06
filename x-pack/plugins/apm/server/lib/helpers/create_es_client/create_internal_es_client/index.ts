@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import { TransportRequestPromise } from '@elastic/transport';
 import type { estypes } from '@elastic/elasticsearch';
 import { unwrapEsResponse } from '../../../../../../observability/server';
 import { APMRouteHandlerResources } from '../../../../routes/typings';

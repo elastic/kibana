@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
+import { ApiResponse } from '@elastic/transport';
 import { InfraDatabaseSearchResponse } from '../lib/adapters/framework';
 
 export const getAllCompositeData = async <

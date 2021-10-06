@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import type { TransportRequestPromise } from '@elastic/transport';
 import type { Search } from '@elastic/elasticsearch/api/requestParams';
 import type { IUiSettingsClient, SharedGlobalConfig } from 'kibana/server';
 import { UI_SETTINGS } from '../../../../common';

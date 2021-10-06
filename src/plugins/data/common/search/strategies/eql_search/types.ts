@@ -7,7 +7,7 @@
  */
 
 import { EqlSearch } from '@elastic/elasticsearch/api/requestParams';
-import { ApiResponse, TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+import { ApiResponse, TransportRequestOptions } from '@elastic/transport';
 
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../types';
 

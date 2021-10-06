@@ -7,7 +7,7 @@
  */
 
 import type { Client, ApiResponse } from '@elastic/elasticsearch';
-import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import { TransportRequestPromise } from '@elastic/transport';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { ElasticsearchClient } from './types';
 import { ICustomClusterClient } from './cluster_client';

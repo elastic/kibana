@@ -9,7 +9,7 @@
 import { ConnectionOptions as TlsConnectionOptions } from 'tls';
 import { URL } from 'url';
 import { Duration } from 'moment';
-import { ClientOptions, NodeOptions } from '@elastic/elasticsearch';
+import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import { ElasticsearchConfig } from '../elasticsearch_config';
 import { DEFAULT_HEADERS } from '../default_headers';
 
@@ -94,7 +94,7 @@ export function parseClientOptions(
   clientOptions.nodes = config.hosts.map((host) => convertHost(host));
 
   if (config.ssl) {
-    clientOptions.ssl = generateSslConfig(
+    clientOptions.tls = generateSslConfig(
       config.ssl,
       scoped && !config.ssl.alwaysPresentCertificate
     );
@@ -142,7 +142,7 @@ const generateSslConfig = (
   return ssl;
 };
 
-const convertHost = (host: string): NodeOptions => {
+const convertHost = (host: string): { url: URL } => {
   const url = new URL(host);
   const isHTTPS = url.protocol === 'https:';
   url.port = url.port || (isHTTPS ? '443' : '80');

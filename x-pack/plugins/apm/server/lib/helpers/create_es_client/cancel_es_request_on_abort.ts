@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import { TransportRequestPromise } from '@elastic/transport';
 import { KibanaRequest } from 'src/core/server';
 
 export function cancelEsRequestOnAbort<T extends TransportRequestPromise<any>>(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
+import { ApiResponse } from '@elastic/transport';
 import { estypes } from '@elastic/elasticsearch';
 import { IKibanaSearchRequest } from 'src/plugins/data/common';
 import { ExpressionValueFilter } from '.';

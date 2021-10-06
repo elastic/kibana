@@ -10,7 +10,7 @@ import {
   IndicesGet,
   MlGetBuckets,
 } from '@elastic/elasticsearch/api/requestParams';
-import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
+import { TransportRequestParams } from '@elastic/transport';
 import { estypes } from '@elastic/elasticsearch';
 import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 import {

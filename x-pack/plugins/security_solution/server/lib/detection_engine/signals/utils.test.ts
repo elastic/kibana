@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import sinon from 'sinon';
-import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
+import { ApiResponse } from '@elastic/transport';
 
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
@@ -758,7 +758,7 @@ describe('utils', () => {
     test('returns true when missing timestamp override field', async () => {
       const timestampField = 'event.ingested';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, unknown>> = {
         body: {
           indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
           fields: {
