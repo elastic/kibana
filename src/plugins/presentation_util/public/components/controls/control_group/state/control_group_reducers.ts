@@ -31,4 +31,10 @@ export const controlGroupReducers = {
   ) => {
     Object.keys(state.panels).forEach((panelId) => (state.panels[panelId].width = action.payload));
   },
+  setControlWidth: (
+    state: WritableDraft<ControlGroupInput>,
+    action: PayloadAction<{ width: ControlWidth; embeddableId: string }>
+  ) => {
+    state.panels[action.payload.embeddableId].width = action.payload.width;
+  },
 };

@@ -12,9 +12,18 @@ import { Draft } from 'immer/dist/types/types-external';
 import { isEqual } from 'lodash';
 import { SliceCaseReducers, PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from '../../../../embeddable/public';
+import {
+  IEmbeddable,
+  EmbeddableInput,
+  EmbeddableOutput,
+  IContainer,
+} from '../../../../embeddable/public';
 import { getManagedEmbeddablesStore } from './generic_embeddable_store';
-import { ReduxEmbeddableContextServices, ReduxEmbeddableWrapperProps } from './types';
+import {
+  ReduxContainerContextServices,
+  ReduxEmbeddableContextServices,
+  ReduxEmbeddableWrapperProps,
+} from './types';
 import { ReduxEmbeddableContext, useReduxEmbeddableContext } from './redux_embeddable_context';
 
 const getDefaultProps = <InputType extends EmbeddableInput = EmbeddableInput>(): Required<
@@ -30,6 +39,10 @@ const getDefaultProps = <InputType extends EmbeddableInput = EmbeddableInput>():
   },
 });
 
+const embeddableIsContainer = (
+  embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>
+): embeddable is IContainer => embeddable.isContainer;
+
 export const ReduxEmbeddableWrapper = <InputType extends EmbeddableInput = EmbeddableInput>(
   props: PropsWithChildren<ReduxEmbeddableWrapperProps<InputType>>
 ) => {
@@ -38,36 +51,53 @@ export const ReduxEmbeddableWrapper = <InputType extends EmbeddableInput = Embed
     [props]
   );
 
-  const reduxEmbeddableContext = useMemo(() => {
-    const key = `${embeddable.type}_${embeddable.id}`;
-    const updateEmbeddableReduxState = (
-      state: Draft<InputType>,
-      action: PayloadAction<Partial<InputType>>
-    ) => {
-      return { ...state, ...action.payload };
-    };
+  const containerActions: ReduxContainerContextServices['containerActions'] | undefined =
+    useMemo(() => {
+      if (embeddableIsContainer(embeddable)) {
+        return {
+          untilEmbeddableLoaded: embeddable.untilEmbeddableLoaded.bind(embeddable),
+          updateInputForChild: embeddable.updateInputForChild.bind(embeddable),
+          removeEmbeddable: embeddable.removeEmbeddable.bind(embeddable),
+          addNewEmbeddable: embeddable.addNewEmbeddable.bind(embeddable),
+        };
+      }
+      return;
+    }, [embeddable]);
 
-    const slice = createSlice<InputType, SliceCaseReducers<InputType>>({
-      initialState: embeddable.getInput(),
-      name: key,
-      reducers: { ...reducers, updateEmbeddableReduxState },
-    });
-    const store = getManagedEmbeddablesStore();
+  const reduxEmbeddableContext: ReduxEmbeddableContextServices | ReduxContainerContextServices =
+    useMemo(() => {
+      const key = `${embeddable.type}_${embeddable.id}`;
 
-    store.injectReducer({
-      key,
-      asyncReducer: slice.reducer,
-    });
+      // A generic reducer used to update redux state when the embeddable input changes
+      const updateEmbeddableReduxState = (
+        state: Draft<InputType>,
+        action: PayloadAction<Partial<InputType>>
+      ) => {
+        return { ...state, ...action.payload };
+      };
 
-    const useEmbeddableSelector: TypedUseSelectorHook<InputType> = () =>
-      useSelector((state: ReturnType<typeof store.getState>) => state[key]);
+      const slice = createSlice<InputType, SliceCaseReducers<InputType>>({
+        initialState: embeddable.getInput(),
+        name: key,
+        reducers: { ...reducers, updateEmbeddableReduxState },
+      });
+      const store = getManagedEmbeddablesStore();
 
-    return {
-      useEmbeddableDispatch: () => useDispatch<typeof store.dispatch>(),
-      useEmbeddableSelector,
-      actions: slice.actions as ReduxEmbeddableContextServices['actions'],
-    };
-  }, [reducers, embeddable]);
+      store.injectReducer({
+        key,
+        asyncReducer: slice.reducer,
+      });
+
+      const useEmbeddableSelector: TypedUseSelectorHook<InputType> = () =>
+        useSelector((state: ReturnType<typeof store.getState>) => state[key]);
+
+      return {
+        useEmbeddableDispatch: () => useDispatch<typeof store.dispatch>(),
+        useEmbeddableSelector,
+        actions: slice.actions as ReduxEmbeddableContextServices['actions'],
+        containerActions,
+      };
+    }, [reducers, embeddable, containerActions]);
 
   return (
     <Provider store={getManagedEmbeddablesStore()}>

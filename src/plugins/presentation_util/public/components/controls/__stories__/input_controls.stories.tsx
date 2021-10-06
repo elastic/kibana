@@ -10,9 +10,9 @@ import React, { useEffect, useMemo } from 'react';
 import uuid from 'uuid';
 
 import { decorators } from './decorators';
-import { providers } from '../../../services/storybook';
-import { getControlsServiceStub } from './controls_service_stub';
-import { ControlGroupContainerFactory } from '../control_group/control_group_container_factory';
+import { pluginServices, registry } from '../../../services/storybook';
+import { populateStorybookControlFactories } from './storybook_control_factories';
+import { ControlGroupContainerFactory } from '../control_group/embeddable/control_group_container_factory';
 
 export default {
   title: 'Controls',
@@ -20,17 +20,15 @@ export default {
   decorators,
 };
 
-const ControlGroupStoryComponent = () => {
+const EmptyControlGroupStoryComponent = () => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
-  providers.overlays.start({});
-  const overlays = providers.overlays.getService();
-
-  const controlsServiceStub = getControlsServiceStub();
+  pluginServices.setRegistry(registry.start({}));
+  populateStorybookControlFactories(pluginServices.getServices().controls);
 
   useEffect(() => {
     (async () => {
-      const factory = new ControlGroupContainerFactory(controlsServiceStub, overlays);
+      const factory = new ControlGroupContainerFactory();
       const controlGroupContainerEmbeddable = await factory.create({
         inheritParentState: {
           useQuery: false,
@@ -45,9 +43,9 @@ const ControlGroupStoryComponent = () => {
         controlGroupContainerEmbeddable.render(embeddableRoot.current);
       }
     })();
-  }, [embeddableRoot, controlsServiceStub, overlays]);
+  }, [embeddableRoot]);
 
   return <div ref={embeddableRoot} />;
 };
 
-export const ControlGroupStory = () => <ControlGroupStoryComponent />;
+export const EmptyControlGroupStory = () => <EmptyControlGroupStoryComponent />;

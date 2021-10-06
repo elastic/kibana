@@ -6,12 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { PluginServices, PluginServiceProviders, PluginServiceProvider } from '../create';
+import {
+  PluginServices,
+  PluginServiceProviders,
+  PluginServiceProvider,
+  PluginServiceRegistry,
+} from '../create';
 import { dashboardsServiceFactory } from '../stub/dashboards';
 import { labsServiceFactory } from './labs';
 import { capabilitiesServiceFactory } from './capabilities';
 import { PresentationUtilServices } from '..';
 import { overlaysServiceFactory } from './overlays';
+import { controlsServiceFactory } from './controls';
 
 export { PluginServiceProviders, PluginServiceProvider, PluginServiceRegistry } from '../create';
 export { PresentationUtilServices } from '..';
@@ -27,7 +33,10 @@ export const providers: PluginServiceProviders<PresentationUtilServices, Storybo
   capabilities: new PluginServiceProvider(capabilitiesServiceFactory),
   dashboards: new PluginServiceProvider(dashboardsServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
+  controls: new PluginServiceProvider(controlsServiceFactory),
   labs: new PluginServiceProvider(labsServiceFactory),
 };
 
 export const pluginServices = new PluginServices<PresentationUtilServices>();
+
+export const registry = new PluginServiceRegistry<PresentationUtilServices>(providers);

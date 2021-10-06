@@ -30,24 +30,25 @@ import {
 } from '@dnd-kit/core';
 
 import { ControlGroupInput } from '../types';
+import { pluginServices } from '../../../../services';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlGroupContainer } from '../control_group_container';
-import { controlGroupReducers } from '../state/control_group_reducers';
+import { CreateControlButton } from '../editor/create_control';
+import { EditControlGroup } from '../editor/edit_control_group';
+import { forwardAllContext } from '../editor/forward_all_context';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
-import { OPTIONS_LIST_CONTROL } from '../../control_types/options_list/options_list_embeddable';
-import { useReduxEmbeddableContext } from '../../../redux_embeddables/redux_embeddable_context';
+import { useReduxContainerContext } from '../../../redux_embeddables/redux_embeddable_context';
 
-interface ControlGroupProps {
-  controlGroupContainer: ControlGroupContainer;
-}
+export const ControlGroup = () => {
+  // Presentation Services Context
+  const { overlays } = pluginServices.getHooks();
+  const { openFlyout } = overlays.useService();
 
-export const ControlGroup = ({ controlGroupContainer }: ControlGroupProps) => {
-  const reduxEmbeddableContext = useReduxEmbeddableContext<
-    ControlGroupInput,
-    typeof controlGroupReducers
-  >();
+  // Redux embeddable container Context
+  const reduxContainerContext = useReduxContainerContext<ControlGroupInput>();
+  const { useEmbeddableSelector } = reduxContainerContext;
 
-  const { controlStyle, panels } = reduxEmbeddableContext.useEmbeddableSelector((state) => state);
+  // current state
+  const { panels } = useEmbeddableSelector((state) => state);
   const [controlIds, setControlIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -111,29 +112,19 @@ export const ControlGroup = ({ controlGroupContainer }: ControlGroupProps) => {
               gutterSize={'m'}
               wrap={true}
             >
-              {controlIds.map((controlId, index) => (
-                <SortableControl
-                  onEdit={() => controlGroupContainer.editControl(controlId)}
-                  onRemove={() => controlGroupContainer.removeEmbeddable(controlId)}
-                  dragInfo={{ index, draggingIndex }}
-                  container={controlGroupContainer}
-                  width={panels[controlId].width}
-                  controlStyle={controlStyle}
-                  embeddableId={controlId}
-                  key={controlId}
-                />
-              ))}
+              {controlIds.map(
+                (controlId, index) =>
+                  panels[controlId] && (
+                    <SortableControl
+                      dragInfo={{ index, draggingIndex }}
+                      embeddableId={controlId}
+                      key={controlId}
+                    />
+                  )
+              )}
             </EuiFlexGroup>
           </SortableContext>
-          <DragOverlay>
-            {draggingId ? (
-              <ControlClone
-                width={panels[draggingId].width}
-                container={controlGroupContainer}
-                embeddableId={draggingId}
-              />
-            ) : null}
-          </DragOverlay>
+          <DragOverlay>{draggingId ? <ControlClone draggingId={draggingId} /> : null}</DragOverlay>
         </DndContext>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -145,19 +136,15 @@ export const ControlGroup = ({ controlGroupContainer }: ControlGroupProps) => {
                 iconType="gear"
                 color="text"
                 data-test-subj="inputControlsSortingButton"
-                onClick={() => controlGroupContainer.editControlGroup(reduxEmbeddableContext)}
+                onClick={() =>
+                  openFlyout(forwardAllContext(<EditControlGroup />, reduxContainerContext))
+                }
               />
             </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>
-              <EuiButtonIcon
-                aria-label={ControlGroupStrings.management.getManageButtonTitle()}
-                iconType="plus"
-                color="text"
-                data-test-subj="inputControlsSortingButton"
-                onClick={() => controlGroupContainer.createNewControl(OPTIONS_LIST_CONTROL)} // use popover when there are multiple types of control
-              />
+              <CreateControlButton />
             </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>

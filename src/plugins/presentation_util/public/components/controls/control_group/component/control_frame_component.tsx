@@ -15,32 +15,28 @@ import {
   EuiFormRow,
   EuiToolTip,
 } from '@elastic/eui';
-import { ControlGroupContainer } from '../control_group/control_group_container';
-import { useChildEmbeddable } from '../hooks/use_child_embeddable';
-import { ControlStyle } from '../types';
-import { ControlFrameStrings } from './control_frame_strings';
+
+import { ControlGroupInput } from '../types';
+import { EditControlButton } from '../editor/edit_control';
+import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
+import { useReduxContainerContext } from '../../../redux_embeddables/redux_embeddable_context';
+import { ControlGroupStrings } from '../control_group_strings';
 
 export interface ControlFrameProps {
-  container: ControlGroupContainer;
   customPrepend?: JSX.Element;
-  controlStyle: ControlStyle;
   enableActions?: boolean;
-  onRemove?: () => void;
   embeddableId: string;
-  onEdit?: () => void;
 }
 
-export const ControlFrame = ({
-  customPrepend,
-  enableActions,
-  embeddableId,
-  controlStyle,
-  container,
-  onRemove,
-  onEdit,
-}: ControlFrameProps) => {
+export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: ControlFrameProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
-  const embeddable = useChildEmbeddable({ container, embeddableId });
+  const {
+    useEmbeddableSelector,
+    containerActions: { untilEmbeddableLoaded, removeEmbeddable },
+  } = useReduxContainerContext<ControlGroupInput>();
+  const { controlStyle } = useEmbeddableSelector((state) => state);
+
+  const embeddable = useChildEmbeddable({ untilEmbeddableLoaded, embeddableId });
 
   const [title, setTitle] = useState<string>();
 
@@ -61,18 +57,13 @@ export const ControlFrame = ({
         'controlFrame--floatingActions-oneLine': !usingTwoLineLayout,
       })}
     >
-      <EuiToolTip content={ControlFrameStrings.floatingActions.getEditButtonTitle()}>
-        <EuiButtonIcon
-          aria-label={ControlFrameStrings.floatingActions.getEditButtonTitle()}
-          iconType="pencil"
-          onClick={onEdit}
-          color="text"
-        />
+      <EuiToolTip content={ControlGroupStrings.floatingActions.getEditButtonTitle()}>
+        <EditControlButton embeddableId={embeddableId} />
       </EuiToolTip>
-      <EuiToolTip content={ControlFrameStrings.floatingActions.getRemoveButtonTitle()}>
+      <EuiToolTip content={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}>
         <EuiButtonIcon
-          aria-label={ControlFrameStrings.floatingActions.getRemoveButtonTitle()}
-          onClick={onRemove}
+          aria-label={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}
+          onClick={() => removeEmbeddable(embeddableId)}
           iconType="cross"
           color="danger"
         />

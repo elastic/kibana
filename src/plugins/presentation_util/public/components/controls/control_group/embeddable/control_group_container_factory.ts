@@ -20,13 +20,11 @@ import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   ErrorEmbeddable,
-} from '../../../../../embeddable/public';
-import { ControlGroupInput } from './types';
-import { ControlsService } from '../controls_service';
-import { ControlGroupStrings } from './control_group_strings';
-import { CONTROL_GROUP_TYPE } from './control_group_constants';
+} from '../../../../../../embeddable/public';
+import { ControlGroupInput } from '../types';
+import { ControlGroupStrings } from '../control_group_strings';
+import { CONTROL_GROUP_TYPE } from '../control_group_constants';
 import { ControlGroupContainer } from './control_group_container';
-import { PresentationOverlaysService } from '../../../services/overlays';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   ControlGroupInput,
@@ -38,13 +36,6 @@ export class ControlGroupContainerFactory
 {
   public readonly isContainerType = true;
   public readonly type = CONTROL_GROUP_TYPE;
-  public readonly controlsService: ControlsService;
-  private readonly overlays: PresentationOverlaysService;
-
-  constructor(controlsService: ControlsService, overlays: PresentationOverlaysService) {
-    this.overlays = overlays;
-    this.controlsService = controlsService;
-  }
 
   public isEditable = async () => false;
 
@@ -67,6 +58,6 @@ export class ControlGroupContainerFactory
     initialInput: ControlGroupInput,
     parent?: Container
   ): Promise<ControlGroupContainer | ErrorEmbeddable> => {
-    return new ControlGroupContainer(initialInput, this.controlsService, this.overlays, parent);
+    return new ControlGroupContainer(initialInput, parent);
   };
 }

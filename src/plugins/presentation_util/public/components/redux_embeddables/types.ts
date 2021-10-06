@@ -14,12 +14,17 @@ import {
   PayloadAction,
 } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook } from 'react-redux';
-import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '../../../../embeddable/public';
+import {
+  EmbeddableInput,
+  EmbeddableOutput,
+  IContainer,
+  IEmbeddable,
+} from '../../../../embeddable/public';
 
 export interface GenericEmbeddableReducers<InputType> {
   /**
    * PayloadAction of type any is strategic here because we want to allow payloads of any shape in generic reducers.
-   * This type will be overridden to be type safe when returned by ReduxEmbeddableContextServices
+   * This type will be overridden to remove any and be type safe when returned by ReduxEmbeddableContextServices.
    */
   [key: string]: CaseReducer<InputType, PayloadAction<any>>;
 }
@@ -31,7 +36,7 @@ export interface ReduxEmbeddableWrapperProps<InputType extends EmbeddableInput =
 }
 
 /**
- * This context allows components underneath the redux embeddable wrapper to get access to the actions, selector, and dispatch.
+ * This context allows components underneath the redux embeddable wrapper to get access to the actions, selector, dispatch, and containerActions.
  */
 export interface ReduxEmbeddableContextServices<
   InputType extends EmbeddableInput = EmbeddableInput,
@@ -45,3 +50,13 @@ export interface ReduxEmbeddableContextServices<
   useEmbeddableSelector: TypedUseSelectorHook<InputType>;
   useEmbeddableDispatch: () => Dispatch<AnyAction>;
 }
+
+export type ReduxContainerContextServices<
+  InputType extends EmbeddableInput = EmbeddableInput,
+  ReducerType extends GenericEmbeddableReducers<InputType> = GenericEmbeddableReducers<InputType>
+> = ReduxEmbeddableContextServices<InputType, ReducerType> & {
+  containerActions: Pick<
+    IContainer,
+    'untilEmbeddableLoaded' | 'removeEmbeddable' | 'addNewEmbeddable' | 'updateInputForChild'
+  >;
+};
