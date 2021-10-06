@@ -17,31 +17,44 @@ import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { StartServicesAccessor } from 'src/core/public';
 
+import { DocumentationLinksService } from '../../lib';
+import type { PluginsStart } from '../../plugin';
 import type { SpacesManager } from '../../spaces_manager';
 import type { EmbeddableLegacyUrlConflictProps } from '../types';
 
 export interface InternalProps {
   spacesManager: SpacesManager;
+  getStartServices: StartServicesAccessor<PluginsStart>;
 }
 
 export const EmbeddableLegacyUrlConflictInternal = (
   props: InternalProps & EmbeddableLegacyUrlConflictProps
 ) => {
-  const { spacesManager, targetType, sourceId } = props;
-  const [aliasJsonString, setAliasJsonString] = useState('');
+  const { spacesManager, getStartServices, targetType, sourceId } = props;
+  const [aliasJsonString, setAliasJsonString] = useState<string>();
+  const [docLink, setDocLink] = useState<string>();
 
   useEffect(() => {
     async function setup() {
       const activeSpace = await spacesManager.getActiveSpace();
+      const [{ docLinks }] = await getStartServices();
+      const docLinksService = new DocumentationLinksService(docLinks);
       setAliasJsonString(
         JSON.stringify({ targetSpace: activeSpace.id, targetType, sourceId }, null, 2)
       );
+      setDocLink(docLinksService.getKibanaDisableLegacyUrlAliasesApiDocUrl());
     }
     setup();
-  }, [spacesManager, targetType, sourceId]);
+  }, [spacesManager, getStartServices, targetType, sourceId]);
 
   const [expandError, setExpandError] = useState(false);
+
+  if (!aliasJsonString || !docLink) {
+    return null;
+  }
+
   return (
     <>
       <FormattedMessage
@@ -58,11 +71,7 @@ export const EmbeddableLegacyUrlConflictInternal = (
                 defaultMessage="Copy this JSON and use it with the {documentationLink}"
                 values={{
                   documentationLink: (
-                    <EuiLink
-                      external
-                      href="https://www.elastic.co/guide/en/kibana/master/spaces-api-disable-legacy-url-aliases.html"
-                      target="_blank"
-                    >
+                    <EuiLink external href={docLink} target="_blank">
                       {i18n.translate('xpack.spaces.legacyURLConflict.documentationLinkText', {
                         defaultMessage: '_disable_legacy_url_aliases API',
                       })}

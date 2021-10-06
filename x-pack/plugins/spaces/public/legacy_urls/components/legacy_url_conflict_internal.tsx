@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import type { ApplicationStart, StartServicesAccessor } from 'src/core/public';
 
 import { DEFAULT_OBJECT_NOUN } from '../../constants';
+import { DocumentationLinksService } from '../../lib';
 import type { PluginsStart } from '../../plugin';
 import type { LegacyUrlConflictProps } from '../types';
 
@@ -42,18 +43,21 @@ export const LegacyUrlConflictInternal = (props: InternalProps & LegacyUrlConfli
   const [applicationStart, setApplicationStart] = useState<ApplicationStart>();
   const [isDismissed, setIsDismissed] = useState(false);
   const [appId, setAppId] = useState<string>();
+  const [docLink, setDocLink] = useState<string>();
 
   useEffect(() => {
     async function setup() {
-      const [{ application }] = await getStartServices();
+      const [{ application, docLinks }] = await getStartServices();
       const appIdValue = await application.currentAppId$.pipe(first()).toPromise(); // retrieve the most recent value from the BehaviorSubject
+      const docLinksService = new DocumentationLinksService(docLinks);
       setApplicationStart(application);
+      setDocLink(docLinksService.getKibanaLegacyUrlAliasesDocUrl());
       setAppId(appIdValue);
     }
     setup();
   }, [getStartServices]);
 
-  if (!applicationStart || !appId || isDismissed) {
+  if (!applicationStart || !appId || !docLink || isDismissed) {
     return null;
   }
 
@@ -82,11 +86,7 @@ export const LegacyUrlConflictInternal = (props: InternalProps & LegacyUrlConfli
         values={{
           objectNoun,
           documentationLink: (
-            <EuiLink
-              external
-              href="https://www.elastic.co/guide/en/kibana/master/legacy-url-aliases.html"
-              target="_blank"
-            >
+            <EuiLink external href={docLink} target="_blank">
               {i18n.translate('xpack.spaces.legacyURLConflict.documentationLinkText', {
                 defaultMessage: 'Learn more',
               })}

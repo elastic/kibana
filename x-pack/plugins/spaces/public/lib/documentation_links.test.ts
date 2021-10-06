@@ -24,4 +24,22 @@ describe('DocumentationLinksService', () => {
       );
     });
   });
+
+  describe('#getKibanaLegacyUrlAliasesDocUrl', () => {
+    it('returns expected value', () => {
+      const { service } = setup();
+      expect(service.getKibanaLegacyUrlAliasesDocUrl()).toMatchInlineSnapshot(
+        `"https://www.elastic.co/guide/en/kibana/mocked-test-branch/legacy-url-aliases.html"`
+      );
+    });
+  });
+
+  describe('#getKibanaDisableLegacyUrlAliasesApiDocUrl', () => {
+    it('returns expected value', () => {
+      const { service } = setup();
+      expect(service.getKibanaDisableLegacyUrlAliasesApiDocUrl()).toMatchInlineSnapshot(
+        `"https://www.elastic.co/guide/en/kibana/mocked-test-branch/spaces-api-disable-legacy-url-aliases.html"`
+      );
+    });
+  });
 });

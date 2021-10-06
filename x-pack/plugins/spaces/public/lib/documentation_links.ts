@@ -9,12 +9,24 @@ import type { DocLinksStart } from 'src/core/public';
 
 export class DocumentationLinksService {
   private readonly kbnPrivileges: string;
+  private readonly kbnLegacyUrlAliases: string;
+  private readonly kbnDisableLegacyUrlAliasesApi: string;
 
   constructor(docLinks: DocLinksStart) {
-    this.kbnPrivileges = `${docLinks.links.security.kibanaPrivileges}`;
+    this.kbnPrivileges = docLinks.links.security.kibanaPrivileges;
+    this.kbnLegacyUrlAliases = docLinks.links.spaces.kibanaLegacyUrlAliases;
+    this.kbnDisableLegacyUrlAliasesApi = docLinks.links.spaces.kibanaDisableLegacyUrlAliasesApi;
   }
 
   public getKibanaPrivilegesDocUrl() {
-    return `${this.kbnPrivileges}`;
+    return this.kbnPrivileges;
+  }
+
+  public getKibanaLegacyUrlAliasesDocUrl() {
+    return this.kbnLegacyUrlAliases;
+  }
+
+  public getKibanaDisableLegacyUrlAliasesApiDocUrl() {
+    return this.kbnDisableLegacyUrlAliasesApi;
   }
 }

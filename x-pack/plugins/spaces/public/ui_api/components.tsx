@@ -53,7 +53,7 @@ export const getComponents = ({
     getCopyToSpaceFlyout: wrapLazy(getCopyToSpaceFlyoutComponent, { showLoadingSpinner: false }),
     getSpaceList: wrapLazy(getSpaceListComponent),
     getEmbeddableLegacyUrlConflict: wrapLazy(() =>
-      getEmbeddableLegacyUrlConflict({ spacesManager })
+      getEmbeddableLegacyUrlConflict({ spacesManager, getStartServices })
     ),
     getLegacyUrlConflict: wrapLazy(() => getLegacyUrlConflict({ getStartServices })),
     getSpaceAvatar: wrapLazy(getSpaceAvatarComponent),
