@@ -10,7 +10,14 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiDragDropContext, EuiDraggable, EuiEmptyPrompt, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiDragDropContext,
+  EuiDraggable,
+  EuiEmptyPrompt,
+  EuiButtonEmpty,
+  EuiBadge,
+  EuiIcon,
+} from '@elastic/eui';
 
 import { mountWithIntl } from '../../../../../test_helpers';
 import { DataPanel } from '../../../data_panel';
@@ -46,6 +53,14 @@ describe('PromotedDocuments', () => {
   const getDraggableChildren = (draggableWrapper: any) => {
     return draggableWrapper.renderProp('children')({}, {}, {});
   };
+
+  it('displays the number of documents in a badge', () => {
+    const wrapper = shallow(<PromotedDocuments />);
+    const Icon = wrapper.prop('iconType');
+    const iconWrapper = shallow(<Icon />);
+
+    expect(iconWrapper.find(EuiBadge).prop('children')).toEqual(4);
+  });
 
   it('renders a list of draggable promoted documents', () => {
     const wrapper = shallow(<PromotedDocuments />);

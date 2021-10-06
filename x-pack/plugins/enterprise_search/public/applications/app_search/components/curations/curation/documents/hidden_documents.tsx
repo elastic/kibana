@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { DataPanel } from '../../../data_panel';
@@ -26,10 +26,12 @@ export const HiddenDocuments: React.FC = () => {
   const documents = curation.hidden;
   const hasDocuments = documents.length > 0;
 
+  const CountBadge: React.FC = () => <EuiBadge color="accent">{documents.length}</EuiBadge>;
+
   return (
     <DataPanel
       filled
-      iconType="eyeClosed"
+      iconType={CountBadge}
       title={<h2>{HIDDEN_DOCUMENTS_TITLE}</h2>}
       subtitle={i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.curations.hiddenDocuments.description',

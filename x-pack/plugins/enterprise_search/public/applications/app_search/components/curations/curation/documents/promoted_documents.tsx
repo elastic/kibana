@@ -19,6 +19,7 @@ import {
   EuiDroppable,
   EuiDraggable,
   euiDragDropReorder,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -43,10 +44,12 @@ export const PromotedDocuments: React.FC = () => {
     }
   };
 
+  const CountBadge: React.FC = () => <EuiBadge color="accent">{documents.length}</EuiBadge>;
+
   return (
     <DataPanel
       filled
-      iconType="starFilled"
+      iconType={CountBadge}
       title={<h2>{PROMOTED_DOCUMENTS_TITLE}</h2>}
       subtitle={
         isAutomated ? (
