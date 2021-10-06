@@ -130,7 +130,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
         );
       }
     });
-  }, [actions, sortedData, actionsKeys]);
+  }, [sortedData, actionsKeys, solution]);
 
   return (
     <div className="kbnNoDataPageContents">
