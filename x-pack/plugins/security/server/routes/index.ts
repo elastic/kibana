@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpResources, IBasePath, Logger } from 'src/core/server';
 
@@ -37,6 +39,7 @@ export interface RouteDefinitionParams {
   httpResources: HttpResources;
   logger: Logger;
   config: ConfigType;
+  config$: Observable<ConfigType>;
   authz: AuthorizationServiceSetupInternal;
   getSession: () => PublicMethodsOf<Session>;
   license: SecurityLicense;

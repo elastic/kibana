@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Capabilities, CoreStart } from 'src/core/public';
+import type { Capabilities, HttpStart } from 'src/core/public';
 
 import type {
   AnonymousAccessServiceContract,
@@ -19,11 +19,11 @@ const DEFAULT_ANONYMOUS_ACCESS_STATE = Object.freeze<AnonymousAccessState>({
 });
 
 interface SetupDeps {
-  share: SharePluginSetup;
+  share: Pick<SharePluginSetup, 'setAnonymousAccessServiceProvider'>;
 }
 
 interface StartDeps {
-  core: Pick<CoreStart, 'http'>;
+  http: HttpStart;
 }
 
 /**
@@ -36,14 +36,14 @@ export class AnonymousAccessService {
     share.setAnonymousAccessServiceProvider(() => this.internalService);
   }
 
-  start({ core }: StartDeps) {
+  start({ http }: StartDeps) {
     this.internalService = {
       getCapabilities: () =>
-        core.http.get<Capabilities>('/internal/security/anonymous_access/capabilities'),
+        http.get<Capabilities>('/internal/security/anonymous_access/capabilities'),
       getState: () =>
-        core.http.anonymousPaths.isAnonymous(window.location.pathname)
+        http.anonymousPaths.isAnonymous(window.location.pathname)
           ? Promise.resolve(DEFAULT_ANONYMOUS_ACCESS_STATE)
-          : core.http
+          : http
               .get<AnonymousAccessState>('/internal/security/anonymous_access/state')
               .catch(() => DEFAULT_ANONYMOUS_ACCESS_STATE),
     };

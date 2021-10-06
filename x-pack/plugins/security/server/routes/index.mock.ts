@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { BehaviorSubject } from 'rxjs';
+
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import {
   coreMock,
@@ -23,15 +25,19 @@ import type { SecurityRequestHandlerContext } from '../types';
 import type { RouteDefinitionParams } from './';
 
 export const routeDefinitionParamsMock = {
-  create: (config: Record<string, unknown> = {}) =>
-    ({
+  create: (rawConfig: Record<string, unknown> = {}) => {
+    const config = createConfig(
+      ConfigSchema.validate(rawConfig),
+      loggingSystemMock.create().get(),
+      { isTLSEnabled: false }
+    );
+    return {
       router: httpServiceMock.createRouter(),
       basePath: httpServiceMock.createBasePath(),
       csp: httpServiceMock.createSetupContract().csp,
       logger: loggingSystemMock.create().get(),
-      config: createConfig(ConfigSchema.validate(config), loggingSystemMock.create().get(), {
-        isTLSEnabled: false,
-      }),
+      config,
+      config$: new BehaviorSubject(config).asObservable(),
       authz: authorizationMock.create(),
       license: licenseMock.create(),
       httpResources: httpResourcesMock.createRegistrar(),
@@ -40,7 +46,8 @@ export const routeDefinitionParamsMock = {
       getSession: jest.fn().mockReturnValue(sessionMock.create()),
       getAuthenticationService: jest.fn().mockReturnValue(authenticationServiceMock.createStart()),
       getAnonymousAccessService: jest.fn(),
-    } as unknown as DeeplyMockedKeys<RouteDefinitionParams>),
+    } as unknown as DeeplyMockedKeys<RouteDefinitionParams>;
+  },
 };
 
 export const securityRequestHandlerContextMock = {

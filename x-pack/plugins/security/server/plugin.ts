@@ -204,14 +204,15 @@ export class SecurityPlugin
     core: CoreSetup<PluginStartDependencies>,
     { features, licensing, taskManager, usageCollection, spaces }: PluginSetupDependencies
   ) {
+    const config$ = this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
+      map((rawConfig) =>
+        createConfig(rawConfig, this.initializerContext.logger.get('config'), {
+          isTLSEnabled: core.http.getServerInfo().protocol === 'https',
+        })
+      )
+    );
     this.configSubscription = combineLatest([
-      this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
-        map((rawConfig) =>
-          createConfig(rawConfig, this.initializerContext.logger.get('config'), {
-            isTLSEnabled: core.http.getServerInfo().protocol === 'https',
-          })
-        )
-      ),
+      config$,
       this.initializerContext.config.legacy.globalConfig$,
     ]).subscribe(([config, { kibana }]) => {
       this.config = config;
@@ -295,6 +296,7 @@ export class SecurityPlugin
       httpResources: core.http.resources,
       logger: this.initializerContext.logger.get('routes'),
       config,
+      config$,
       authz: this.authorizationSetup,
       license,
       getSession: this.getSession,

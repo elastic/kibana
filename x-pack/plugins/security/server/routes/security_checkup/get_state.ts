@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { combineLatest } from 'rxjs';
+
 import type { RouteDefinitionParams } from '..';
 import type { SecurityCheckupState } from '../../../common/types';
 import { createClusterDataCheck } from '../../security_checkup';
@@ -15,12 +17,12 @@ import { createClusterDataCheck } from '../../security_checkup';
 export function defineSecurityCheckupGetStateRoutes({
   router,
   logger,
-  config,
+  config$,
   license,
 }: RouteDefinitionParams) {
   let showInsecureClusterWarning = false;
 
-  license.features$.subscribe(({ allowRbac }) => {
+  combineLatest([config$, license.features$]).subscribe(([config, { allowRbac }]) => {
     showInsecureClusterWarning = config.showInsecureClusterWarning && !allowRbac;
   });
 

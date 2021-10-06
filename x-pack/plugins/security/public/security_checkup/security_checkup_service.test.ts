@@ -29,75 +29,76 @@ jest.mock('./components', () => {
   };
 });
 
-interface InitOpts {
+interface TestParams {
+  showInsecureClusterWarning: boolean;
+  displayAlert: boolean;
   tenant?: string;
+  storageValue?: string;
 }
 
-function initCore({ tenant = '/server-base-path' }: InitOpts = {}) {
+async function setupAndStart({
+  showInsecureClusterWarning,
+  displayAlert,
+  tenant = '/server-base-path',
+  storageValue,
+}: TestParams) {
   const coreSetup = coreMock.createSetup();
   (coreSetup.http.basePath.serverBasePath as string) = tenant;
 
   const coreStart = coreMock.createStart();
+  coreStart.http.get.mockResolvedValue({ displayAlert });
   coreStart.notifications.toasts.addWarning.mockReturnValue({ id: 'mock_alert_id' });
-  return { coreSetup, coreStart };
+
+  const config = { showInsecureClusterWarning } as ConfigType;
+  const storage = coreMock.createStorage();
+  if (storageValue) {
+    storage.getItem.mockReturnValue(storageValue);
+  }
+
+  const service = new SecurityCheckupService(config, storage);
+  service.setup(coreSetup);
+  service.start(coreStart);
+  await nextTick();
+
+  return { coreSetup, coreStart, storage };
 }
 
 describe('SecurityCheckupService', () => {
   describe('display scenarios', () => {
     it('does not display an alert when the warning is explicitly disabled via config', async () => {
-      const config = { showInsecureClusterWarning: false } as ConfigType;
-      const { coreSetup, coreStart } = initCore();
-      const storage = coreMock.createStorage();
-
-      coreStart.http.get.mockResolvedValue({ displayAlert: true });
-
-      const service = new SecurityCheckupService(config, storage);
-      service.setup({ core: coreSetup });
-      service.start({ core: coreStart });
-
-      await nextTick();
+      const testParams = {
+        showInsecureClusterWarning: false,
+        displayAlert: true,
+      };
+      const { coreStart, storage } = await setupAndStart(testParams);
 
       expect(coreStart.http.get).not.toHaveBeenCalled();
       expect(coreStart.notifications.toasts.addWarning).not.toHaveBeenCalled();
-
       expect(coreStart.notifications.toasts.remove).not.toHaveBeenCalled();
       expect(storage.setItem).not.toHaveBeenCalled();
     });
 
     it('does not display an alert when state indicates that alert should not be shown', async () => {
-      const config = { showInsecureClusterWarning: true } as ConfigType;
-      const { coreSetup, coreStart } = initCore();
-      const storage = coreMock.createStorage();
-
-      coreStart.http.get.mockResolvedValue({ displayAlert: false });
-
-      const service = new SecurityCheckupService(config, storage);
-      service.setup({ core: coreSetup });
-      service.start({ core: coreStart });
-
-      await nextTick();
+      const testParams = {
+        showInsecureClusterWarning: true,
+        displayAlert: false,
+      };
+      const { coreStart, storage } = await setupAndStart(testParams);
 
       expect(coreStart.http.get).toHaveBeenCalledTimes(1);
       expect(coreStart.notifications.toasts.addWarning).not.toHaveBeenCalled();
-
       expect(coreStart.notifications.toasts.remove).not.toHaveBeenCalled();
       expect(storage.setItem).not.toHaveBeenCalled();
     });
 
     it('only reads storage information from the current tenant', async () => {
-      const config = { showInsecureClusterWarning: true } as ConfigType;
-      const { coreSetup, coreStart } = initCore({ tenant: '/my-specific-tenant' });
-
-      const storage = coreMock.createStorage();
-      storage.getItem.mockReturnValue(JSON.stringify({ show: false }));
-
-      coreStart.http.get.mockResolvedValue({ displayAlert: true });
-
-      const service = new SecurityCheckupService(config, storage);
-      service.setup({ core: coreSetup });
-      service.start({ core: coreStart });
-
-      await nextTick();
+      const testParams = {
+        showInsecureClusterWarning: true,
+        displayAlert: false,
+        tenant: '/my-specific-tenant',
+        storageValue: JSON.stringify({ show: false }),
+      };
+      const { storage } = await setupAndStart(testParams);
 
       expect(storage.getItem).toHaveBeenCalledTimes(1);
       expect(storage.getItem).toHaveBeenCalledWith(
@@ -106,61 +107,39 @@ describe('SecurityCheckupService', () => {
     });
 
     it('does not display an alert when hidden via storage', async () => {
-      const config = { showInsecureClusterWarning: true } as ConfigType;
-      const { coreSetup, coreStart } = initCore();
-
-      const storage = coreMock.createStorage();
-      storage.getItem.mockReturnValue(JSON.stringify({ show: false }));
-
-      coreStart.http.get.mockResolvedValue({ displayAlert: true });
-
-      const service = new SecurityCheckupService(config, storage);
-      service.setup({ core: coreSetup });
-      service.start({ core: coreStart });
-
-      await nextTick();
+      const testParams = {
+        showInsecureClusterWarning: true,
+        displayAlert: true,
+        storageValue: JSON.stringify({ show: false }),
+      };
+      const { coreStart, storage } = await setupAndStart(testParams);
 
       expect(coreStart.http.get).not.toHaveBeenCalled();
       expect(coreStart.notifications.toasts.addWarning).not.toHaveBeenCalled();
-
       expect(coreStart.notifications.toasts.remove).not.toHaveBeenCalled();
       expect(storage.setItem).not.toHaveBeenCalled();
     });
 
     it('displays an alert when persisted preference is corrupted', async () => {
-      const config = { showInsecureClusterWarning: true } as ConfigType;
-      const { coreSetup, coreStart } = initCore();
-
-      const storage = coreMock.createStorage();
-      storage.getItem.mockReturnValue('{ this is a string of invalid JSON');
-
-      coreStart.http.get.mockResolvedValue({ displayAlert: true });
-
-      const service = new SecurityCheckupService(config, storage);
-      service.setup({ core: coreSetup });
-      service.start({ core: coreStart });
-
-      await nextTick();
+      const testParams = {
+        showInsecureClusterWarning: true,
+        displayAlert: true,
+        storageValue: '{ this is a string of invalid JSON',
+      };
+      const { coreStart, storage } = await setupAndStart(testParams);
 
       expect(coreStart.http.get).toHaveBeenCalledTimes(1);
       expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
-
       expect(coreStart.notifications.toasts.remove).not.toHaveBeenCalled();
       expect(storage.setItem).not.toHaveBeenCalled();
     });
 
     it('displays an alert when enabled via config and endpoint checks', async () => {
-      const config = { showInsecureClusterWarning: true } as ConfigType;
-      const { coreSetup, coreStart } = initCore();
-      const storage = coreMock.createStorage();
-
-      coreStart.http.get.mockResolvedValue({ displayAlert: true });
-
-      const service = new SecurityCheckupService(config, storage);
-      service.setup({ core: coreSetup });
-      service.start({ core: coreStart });
-
-      await nextTick();
+      const testParams = {
+        showInsecureClusterWarning: true,
+        displayAlert: true,
+      };
+      const { coreStart, storage } = await setupAndStart(testParams);
 
       expect(coreStart.http.get).toHaveBeenCalledTimes(1);
       expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
@@ -182,23 +161,16 @@ describe('SecurityCheckupService', () => {
     });
 
     it('dismisses the alert when requested, and remembers this preference', async () => {
-      const config = { showInsecureClusterWarning: true } as ConfigType;
-      const { coreSetup, coreStart } = initCore();
-      const storage = coreMock.createStorage();
-
-      coreStart.http.get.mockResolvedValue({ displayAlert: true });
-
-      const service = new SecurityCheckupService(config, storage);
-      service.setup({ core: coreSetup });
-      service.start({ core: coreStart });
-
-      await nextTick();
+      const testParams = {
+        showInsecureClusterWarning: true,
+        displayAlert: true,
+      };
+      const { coreStart, storage } = await setupAndStart(testParams);
 
       expect(coreStart.http.get).toHaveBeenCalledTimes(1);
       expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
 
       mockOnDismissCallback(true);
-
       expect(coreStart.notifications.toasts.remove).toHaveBeenCalledTimes(1);
       expect(storage.setItem).toHaveBeenCalledWith(
         'insecureClusterWarningVisibility/server-base-path',

@@ -83,7 +83,7 @@ export class SecurityPlugin
 
     const { license } = this.securityLicenseService.setup({ license$: licensing.license$ });
 
-    this.securityCheckupService.setup({ core });
+    this.securityCheckupService.setup({ http: core.http });
 
     this.authc = this.authenticationService.setup({
       application: core.application,
@@ -147,14 +147,18 @@ export class SecurityPlugin
     { management, share }: PluginStartDependencies
   ): SecurityPluginStart {
     this.sessionTimeout.start();
-    this.securityCheckupService.start({ core });
+    this.securityCheckupService.start({
+      http: core.http,
+      notifications: core.notifications,
+      docLinks: core.docLinks,
+    });
 
     if (management) {
       this.managementService.start({ capabilities: core.application.capabilities });
     }
 
     if (share) {
-      this.anonymousAccessService.start({ core });
+      this.anonymousAccessService.start({ http: core.http });
     }
 
     return {

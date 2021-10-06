@@ -8,18 +8,26 @@
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
-import type { CoreSetup, CoreStart, HttpStart, Toast } from 'src/core/public';
+import type {
+  DocLinksStart,
+  HttpSetup,
+  HttpStart,
+  NotificationsStart,
+  Toast,
+} from 'src/core/public';
 
 import type { SecurityCheckupState } from '../../common/types';
 import type { ConfigType } from '../config';
 import { insecureClusterAlertText, insecureClusterAlertTitle } from './components';
 
 interface SetupDeps {
-  core: Pick<CoreSetup, 'http'>;
+  http: HttpSetup;
 }
 
 interface StartDeps {
-  core: Pick<CoreStart, 'http' | 'notifications' | 'application' | 'docLinks'>;
+  http: HttpStart;
+  notifications: NotificationsStart;
+  docLinks: DocLinksStart;
 }
 
 const DEFAULT_SECURITY_CHECKUP_STATE = Object.freeze<SecurityCheckupState>({
@@ -43,21 +51,21 @@ export class SecurityCheckupService {
     this.alertVisibility$ = new BehaviorSubject(this.enabled);
   }
 
-  public setup({ core }: SetupDeps) {
-    const tenant = core.http.basePath.serverBasePath;
+  public setup({ http }: SetupDeps) {
+    const tenant = http.basePath.serverBasePath;
     this.storageKey = `insecureClusterWarningVisibility${tenant}`;
     this.enabled = this.enabled && this.getPersistedVisibilityPreference();
     this.alertVisibility$.next(this.enabled);
   }
 
-  public start({ core }: StartDeps) {
+  public start(startDeps: StartDeps) {
     if (this.enabled) {
-      this.initializeAlert(core);
+      this.initializeAlert(startDeps);
     }
   }
 
-  private initializeAlert(core: StartDeps['core']) {
-    const appState$ = from(this.getSecurityCheckupState(core.http));
+  private initializeAlert({ http, notifications, docLinks }: StartDeps) {
+    const appState$ = from(this.getSecurityCheckupState(http));
 
     // 10 days is reasonably long enough to call "forever" for a page load.
     // Can't go too much longer than this. See https://github.com/elastic/kibana/issues/64264#issuecomment-618400354
@@ -71,10 +79,10 @@ export class SecurityCheckupService {
       )
       .subscribe((showAlert) => {
         if (showAlert && !this.alertToast) {
-          this.alertToast = core.notifications.toasts.addWarning(
+          this.alertToast = notifications.toasts.addWarning(
             {
               title: insecureClusterAlertTitle,
-              text: insecureClusterAlertText(core.docLinks, (persist: boolean) =>
+              text: insecureClusterAlertText(docLinks, (persist: boolean) =>
                 this.setAlertVisibility(false, persist)
               ),
               iconType: 'alert',
@@ -84,7 +92,7 @@ export class SecurityCheckupService {
             }
           );
         } else if (!showAlert && this.alertToast) {
-          core.notifications.toasts.remove(this.alertToast);
+          notifications.toasts.remove(this.alertToast);
           this.alertToast = undefined;
         }
       });
