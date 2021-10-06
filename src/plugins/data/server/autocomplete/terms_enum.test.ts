@@ -12,7 +12,7 @@ import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { ConfigSchema } from '../../config';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import type { ApiResponse } from '@elastic/elasticsearch';
-import { TermsEnumResponse } from '@elastic/elasticsearch/api/types';
+import { TermsEnumResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 let savedObjectsClientMock: jest.Mocked<SavedObjectsClientContract>;
 let esClientMock: DeeplyMockedKeys<ElasticsearchClient>;

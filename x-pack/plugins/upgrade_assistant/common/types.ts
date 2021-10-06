@@ -8,7 +8,7 @@
 import {
   MigrationDeprecationInfoDeprecation,
   MigrationDeprecationInfoResponse,
-} from '@elastic/elasticsearch/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SavedObject, SavedObjectAttributes } from 'src/core/public';
 
 export enum ReindexStep {

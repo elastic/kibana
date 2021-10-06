@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import { RequestEvent } from '@elastic/transport';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import { MigrationDeprecationInfoResponse } from '@elastic/elasticsearch/api/types';
+import { MigrationDeprecationInfoResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { getESUpgradeStatus } from './es_deprecations_status';
 import fakeDeprecations from './__fixtures__/fake_deprecations.json';

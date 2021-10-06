@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/api/types';
+import {
+  AggregationsAggregate,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ElasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import {

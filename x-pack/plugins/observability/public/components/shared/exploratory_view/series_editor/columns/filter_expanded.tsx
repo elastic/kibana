@@ -17,7 +17,7 @@ import {
 import styled from 'styled-components';
 import { rgba } from 'polished';
 import { i18n } from '@kbn/i18n';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { map } from 'lodash';
 import { ExistsFilter, isExistsFilter } from '@kbn/es-query';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';

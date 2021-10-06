@@ -8,7 +8,7 @@
 import type {
   TermsEnumRequest,
   TermsEnumResponse,
-} from '@elastic/elasticsearch/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ValuesType } from 'utility-types';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import { Profile } from '../../../../../typings/es_schemas/ui/profile';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { MgetHit } from '@elastic/elasticsearch/api/types';
+import type { MgetHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   CORE_USAGE_STATS_ID,

@@ -38,7 +38,7 @@ export function registerPolicyRoutes({
           body: {
             policies: Object.entries(policiesByName).map(([name, policy]) => {
               // TODO: Figure out why our {@link SlmPolicyEs} is not compatible with:
-              // import type { SnapshotLifecyclePolicyMetadata } from '@elastic/elasticsearch/api/types';
+              // import type { SnapshotLifecyclePolicyMetadata } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
               return deserializePolicy(name, policy as SlmPolicyEs, managedPolicies);
             }),
           },

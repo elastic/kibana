@@ -9,7 +9,7 @@ import { TypeOf } from '@kbn/config-schema';
 import type {
   SnapshotGetRepositoryResponse,
   SnapshotRepositorySettings,
-} from '@elastic/elasticsearch/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common/constants';
 import { Repository, RepositoryType } from '../../../common/types';
