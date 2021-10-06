@@ -114,52 +114,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Coming from different app', () => {
-      describe('when opening existing Lens', () => {
-        before(async () => {
-          await PageObjects.visualize.gotoVisualizationLandingPage();
-          await listingTable.searchForItemWithName('lnsTableVis');
-          await PageObjects.lens.clickVisualizeListItemTitle('lnsTableVis');
-          await PageObjects.lens.goToTimeRange();
-          await PageObjects.navigationalSearch.focus();
-          await PageObjects.navigationalSearch.searchFor('type:application lens');
-          await PageObjects.navigationalSearch.clickOnOption(0);
-          await PageObjects.lens.waitForEmptyWorkspace();
-          await PageObjects.lens.switchToVisualization('lnsMetric');
-          await PageObjects.lens.dragFieldToWorkspace('@timestamp');
-        });
-        it('the context is passed to visualization', async () => {
-          expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal(
-            '404 › Median of bytes'
-          );
-          expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal(
-            '503 › Median of bytes'
-          );
-          expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('TG');
-          expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('9,931');
-        });
-        it('preserves time range', async () => {
-          const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
-          expect(timePickerValues.start).to.eql(PageObjects.timePicker.defaultStartTime);
-          expect(timePickerValues.end).to.eql(PageObjects.timePicker.defaultEndTime);
-          // data is correct and top nav is correct
-        });
-        it('loads query', async () => {
-          const query = await queryBar.getQueryString();
-          expect(query).to.equal('extension.raw : "jpg" or extension.raw : "gif" ');
-        });
-        it('loads filters', async () => {
-          const filterCount = await filterBar.getFilterCount();
-          expect(filterCount).to.equal(1);
-        });
-      });
-      describe('when opening empty Lens', () => {
-        it('preserves time range', () => {});
-        it('cleans filters', () => {});
-        it('cleans query', () => {});
-      });
-    });
-
     describe('Switching in Visualize App', () => {
       describe('from empty visualization to existing one', () => {
         before(async () => {
