@@ -15,6 +15,7 @@ import {
 import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
+import { fireEvent } from '@testing-library/dom';
 
 describe('When on the host isolation exceptions add entry form', () => {
   let render: (
@@ -36,8 +37,9 @@ describe('When on the host isolation exceptions add entry form', () => {
   });
 
   describe('When creating a new exception', () => {
+    let newException: CreateExceptionListItemSchema;
     beforeEach(() => {
-      const newException = createEmptyHostIsolationException();
+      newException = createEmptyHostIsolationException();
       renderResult = render(newException);
     });
     it('should render the form with empty inputs', () => {
@@ -47,7 +49,7 @@ describe('When on the host isolation exceptions add entry form', () => {
         renderResult.getByTestId('hostIsolationExceptions-form-description-input')
       ).toHaveValue('');
     });
-    it('should call onError with true when a wrong value is introduced', () => {
+    it('should call onError with true when a wrong ip value is introduced', () => {
       const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
       userEvent.type(ipInput, 'not an ip');
       expect(onError).toHaveBeenCalledWith(true);
@@ -64,19 +66,11 @@ describe('When on the host isolation exceptions add entry form', () => {
     it('should call onChange when a value is introduced in a field', () => {
       const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
       userEvent.type(ipInput, '10.0.0.1');
-      expect(onChange).toHaveBeenCalledWith({
-        comments: [],
-        description: '',
+      expect(onChange).toHaveBeenLastCalledWith({
+        ...newException,
         entries: [
           { field: 'destination.ip', operator: 'included', type: 'match', value: '10.0.0.1' },
         ],
-        item_id: undefined,
-        list_id: 'endpoint_host_isolation_exceptions',
-        name: '',
-        namespace_type: 'agnostic',
-        os_types: ['windows', 'linux', 'macos'],
-        tags: ['policy:all'],
-        type: 'simple',
       });
     });
   });
