@@ -60,7 +60,7 @@ export async function getEsGridTile({
       exact_bounds: false,
       extent: 4096, // full resolution,
       query: requestBody.query,
-      grid_type: requestType === RENDER_AS.GRID ? 'grid' : 'point',
+      grid_type: requestType === RENDER_AS.GRID ? 'grid' : 'centroid',
       aggs,
       fields,
       runtime_mappings: requestBody.runtime_mappings,
