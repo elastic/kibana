@@ -6,6 +6,7 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
+import { cloneDeep } from 'lodash';
 import moment from 'moment';
 
 export type TabId = 'source_sync_frequency' | 'blocked_time_windows';
@@ -19,7 +20,7 @@ import {
   BLOCKED_TIME_WINDOWS_PATH,
   getContentSourcePath,
 } from '../../../../routes';
-import { BlockedWindow } from '../../../../types';
+import { BlockedWindow, IndexingSchedule } from '../../../../types';
 
 import {
   SYNC_ENABLED_MESSAGE,
@@ -27,6 +28,8 @@ import {
   SYNC_SETTINGS_UPDATED_MESSAGE,
 } from '../../constants';
 import { SourceLogic } from '../../source_logic';
+
+const SECONDS_IN_MS = 1000;
 
 interface SynchronizationActions {
   setNavigatingBetweenTabs(navigatingBetweenTabs: boolean): boolean;
@@ -77,7 +80,7 @@ export const SynchronizationLogic = kea<
       },
     ],
     blockedWindows: [
-      [],
+      props.contentSource.indexing.schedule.blockedWindows || [],
       {
         addBlockedWindow: (state, _) => [...state, emptyBlockedWindow],
       },
@@ -187,3 +190,21 @@ export const SynchronizationLogic = kea<
     },
   }),
 });
+
+const getDurationMS = (time: string): number => moment.duration(time).seconds() * SECONDS_IN_MS;
+const getISOString = (time: string): string =>
+  moment.duration(time).subtract(getDurationMS(time)).toISOString();
+
+// The API allows for setting schedule values with seconds. The UI feature does not allow for setting
+// values with seconds. This function strips the seconds from the schedule values for equality checks
+// to determine if the user has unsaved changes.
+const stripScheduleSeconds = (schedule: IndexingSchedule): IndexingSchedule => {
+  const _schedule = cloneDeep(schedule);
+  const { full, incremental, delete: _delete, permissions } = _schedule;
+  _schedule.full = getISOString(full);
+  _schedule.incremental = getISOString(incremental);
+  _schedule.delete = getISOString(_delete);
+  if (permissions) _schedule.permissions = getISOString(permissions);
+
+  return _schedule;
+};
