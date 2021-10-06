@@ -10,49 +10,43 @@ import { find } from 'lodash';
 import { ElasticsearchTemplate } from './elasticsearch_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../global_state_context';
-import { ElasticsearchIndices } from '../../../components/elasticsearch';
+import { ElasticsearchMLJobs } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
-import { useLocalStorage } from '../../hooks/use_local_storage';
+import type { MLJobs } from '../../../types';
 
-export const ElasticsearchIndicesPage: React.FC<ComponentProps> = ({ clusters }) => {
+interface SetupModeProps {
+  setupMode: any;
+  flyoutComponent: any;
+  bottomBarComponent: any;
+}
+
+export const ElasticsearchMLJobsPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
-  const { getPaginationTableProps } = useTable('elasticsearch.indices');
+  const { getPaginationTableProps } = useTable('elasticsearch.mlJobs');
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
   });
   const [data, setData] = useState({} as any);
-  const [showSystemIndices, setShowSystemIndices] = useLocalStorage<boolean>(
-    'showSystemIndices',
-    false
-  );
 
-  const title = i18n.translate('xpack.monitoring.elasticsearch.indices.routeTitle', {
-    defaultMessage: 'Elasticsearch - Indices',
+  const title = i18n.translate('xpack.monitoring.elasticsearch.mlJobs.routeTitle', {
+    defaultMessage: 'Elasticsearch - Machine Learning Jobs',
   });
 
-  const pageTitle = i18n.translate('xpack.monitoring.elasticsearch.indices.pageTitle', {
-    defaultMessage: 'Elasticsearch indices',
+  const pageTitle = i18n.translate('xpack.monitoring.elasticsearch.mlJobs.pageTitle', {
+    defaultMessage: 'Elasticsearch machine learning jobs',
   });
-
-  const toggleShowSystemIndices = useCallback(
-    () => setShowSystemIndices(!showSystemIndices),
-    [showSystemIndices, setShowSystemIndices]
-  );
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
-    const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/indices`;
+    const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/ml_jobs`;
     const response = await services.http?.fetch(url, {
       method: 'POST',
-      query: {
-        show_system_indices: showSystemIndices,
-      },
       body: JSON.stringify({
         ccs,
         timeRange: {
@@ -61,14 +55,20 @@ export const ElasticsearchIndicesPage: React.FC<ComponentProps> = ({ clusters })
         },
       }),
     });
-    setData(response);
-  }, [
-    ccs,
-    showSystemIndices,
-    clusterUuid,
-    services.data?.query.timefilter.timefilter,
-    services.http,
-  ]);
+    setData({
+      clusterStatus: response.clusterStatus,
+      jobs: (response.rows as MLJobs).map((job) => {
+        if ('ml' in job && job.ml?.job) {
+          return {
+            ...job.ml.job,
+            node: job.node,
+            job_id: job.ml.job.id,
+          };
+        }
+        return job;
+      }),
+    });
+  }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http]);
 
   return (
     <ElasticsearchTemplate
@@ -78,17 +78,14 @@ export const ElasticsearchIndicesPage: React.FC<ComponentProps> = ({ clusters })
       data-test-subj="elasticsearchOverviewPage"
       cluster={cluster}
     >
-      <div data-test-subj="elasticsearchIndicesListingPage">
+      <div data-test-subj="elasticsearchMLJobsListingPage">
         <SetupModeRenderer
           render={({ flyoutComponent, bottomBarComponent }: SetupModeProps) => (
             <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}
-              <ElasticsearchIndices
+              <ElasticsearchMLJobs
                 clusterStatus={data.clusterStatus}
-                indices={data.indices}
-                alerts={{}}
-                showSystemIndices={showSystemIndices}
-                toggleShowSystemIndices={toggleShowSystemIndices}
+                jobs={data.jobs}
                 {...getPaginationTableProps()}
               />
               {bottomBarComponent}

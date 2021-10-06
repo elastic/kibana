@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { StatusIcon } from '../../status_icon';
 import { i18n } from '@kbn/i18n';
+import { StatusIcon } from '../../status_icon';
 
-export function MachineLearningJobStatusIcon({ status }) {
+export function MachineLearningJobStatusIcon({ status }: { status: string }) {
   const type = (() => {
     const statusKey = status.toUpperCase();
 
