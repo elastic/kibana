@@ -62,7 +62,6 @@ export const ManualCuration: React.FC = () => {
       }}
       isLoading={dataLoading}
     >
-      <SuggestedDocumentsCallout />
       <EuiFlexGroup alignItems="flexEnd" gutterSize="xl" responsive={false}>
         <EuiFlexItem>
           <ActiveQuerySelect />
@@ -71,7 +70,13 @@ export const ManualCuration: React.FC = () => {
           <ManageQueriesModal />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="xl" />
+      <EuiSpacer />
+      {selectedPageTab === 'promoted' && (
+        <>
+          <SuggestedDocumentsCallout />
+          <EuiSpacer />
+        </>
+      )}
       {selectedPageTab === 'promoted' && <PromotedDocuments />}
       {selectedPageTab === 'hidden' && <HiddenDocuments />}
       <EuiSpacer />

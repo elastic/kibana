@@ -41,6 +41,7 @@ export const EngineOverviewMetrics: React.FC = () => {
       data-test-subj="EngineOverview"
     >
       <SuggestedCurationsCallout />
+      <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <TotalStats />
