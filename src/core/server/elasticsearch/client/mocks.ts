@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Client } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import type { TransportResult } from '@elastic/transport';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { ElasticsearchClient } from './types';
@@ -16,7 +16,7 @@ import { PRODUCT_RESPONSE_HEADER } from '../supported_server_response_check';
 // use jest.requireActual() to prevent weird errors when people mock @elastic/elasticsearch
 const { Client: UnmockedClient } = jest.requireActual('@elastic/elasticsearch');
 
-const createInternalClientMock = (res?: Promise<unknown>): DeeplyMockedKeys<Client> => {
+const createInternalClientMock = (res?: Promise<unknown>): DeeplyMockedKeys<KibanaClient> => {
   // we mimic 'reflection' on a concrete instance of the client to generate the mocked functions.
   const client = new UnmockedClient({
     node: 'http://localhost',
@@ -84,7 +84,7 @@ const createInternalClientMock = (res?: Promise<unknown>): DeeplyMockedKeys<Clie
     request: jest.fn(),
   };
 
-  return client as DeeplyMockedKeys<Client>;
+  return client as DeeplyMockedKeys<KibanaClient>;
 };
 
 export type ElasticsearchClientMock = DeeplyMockedKeys<ElasticsearchClient>;
