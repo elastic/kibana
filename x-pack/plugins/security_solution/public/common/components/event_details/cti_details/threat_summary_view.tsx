@@ -7,7 +7,7 @@
 
 import styled from 'styled-components';
 import { get } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiTitle,
   EuiPanel,
@@ -15,8 +15,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiIcon,
-  EuiToolTip,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiButtonIcon,
+  EuiText,
 } from '@elastic/eui';
 import { partition } from 'lodash';
 import * as i18n from './translations';
@@ -138,18 +140,48 @@ export const EnrichedDataRow: React.FC<{ field: string | undefined; value: React
 export const ThreatSummaryPanelHeader: React.FC<{
   title: string;
   toolTipContent: React.ReactNode;
-}> = ({ title, toolTipContent }) => (
-  <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
-    <EuiFlexItem>
-      <ThreatSummaryPanelTitle>{title}</ThreatSummaryPanelTitle>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiToolTip title={title} content={toolTipContent}>
-        <EuiIcon type="iInCircle" size="m" />
-      </EuiToolTip>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+}> = ({ title, toolTipContent }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const onClick = useCallback(() => {
+    setIsPopoverOpen(!isPopoverOpen);
+  }, [isPopoverOpen, setIsPopoverOpen]);
+
+  const closePopover = useCallback(() => {
+    setIsPopoverOpen(false);
+  }, [setIsPopoverOpen]);
+
+  return (
+    <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
+      <EuiFlexItem>
+        <ThreatSummaryPanelTitle>{title}</ThreatSummaryPanelTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          isOpen={isPopoverOpen}
+          repositionOnScroll={true}
+          closePopover={closePopover}
+          anchorPosition="leftCenter"
+          button={
+            <EuiButtonIcon
+              color="text"
+              size="xs"
+              iconSize="m"
+              iconType="iInCircle"
+              aria-label={i18n.INFORMATION_ARIA_LABEL}
+              onClick={onClick}
+            />
+          }
+        >
+          <EuiPopoverTitle>{title}</EuiPopoverTitle>
+          <EuiText size="s" style={{ width: '270px' }}>
+            {toolTipContent}
+          </EuiText>
+        </EuiPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 const ThreatSummaryEnrichmentData: React.FC<{
   browserFields: BrowserFields;
@@ -274,7 +306,7 @@ const ThreatSummaryViewComponent: React.FC<{
       </EuiTitle>
       <EuiSpacer size="m" />
 
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="column" gutterSize="m" style={{ flexGrow: 0 }}>
         {hostRisk && (
           <EuiFlexItem grow={false}>
             <HostRiskData hostRisk={hostRisk} />

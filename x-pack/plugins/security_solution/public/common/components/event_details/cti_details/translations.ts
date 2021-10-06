@@ -43,6 +43,13 @@ export const INDICATOR_TOOLTIP_CONTENT = i18n.translate(
   }
 );
 
+export const INFORMATION_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.eventDetails.ctiSummary.informationAriaLabel',
+  {
+    defaultMessage: 'Information',
+  }
+);
+
 export const INVESTIGATION_TOOLTIP_CONTENT = i18n.translate(
   'xpack.securitySolution.eventDetails.ctiSummary.investigationEnrichmentTooltipContent',
   {
