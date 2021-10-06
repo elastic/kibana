@@ -88,9 +88,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResults).to.have.length(3);
-      expect(searchResults[0].name).to.eql('a');
-      expect(searchResults[1].name).to.eql('b');
-      expect(searchResults[2].name).to.eql('c');
+      // rule list shows name and rule type id
+      expect(searchResults[0].name).to.eql('aTest: Noop');
+      expect(searchResults[1].name).to.eql('bTest: Noop');
+      expect(searchResults[2].name).to.eql('cTest: Noop');
     });
 
     it('should search for alert', async () => {
