@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export const euiTableStorageGetter: (string) => any;
-export const euiTableStorageSetter: (string) => any;
-export const EuiMonitoringTable: FunctionComponent<Props>;
+export { ElasticsearchMLJobs } from './ml_jobs';
