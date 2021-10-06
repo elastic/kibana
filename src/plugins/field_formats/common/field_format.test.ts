@@ -88,7 +88,7 @@ describe('FieldFormat class', () => {
 
         expect(text).not.toBe(html);
         expect(text && text('formatted')).toBe('formatted');
-        expect(html && html('formatted')).toBe('<span>formatted</span>');
+        expect(html && html('formatted')).toBe('formatted');
       });
 
       test('can be an object, with separate text and html converter', () => {
@@ -98,7 +98,7 @@ describe('FieldFormat class', () => {
 
         expect(text).not.toBe(html);
         expect(text && text('formatted text')).toBe('formatted text');
-        expect(html && html('formatted html')).toBe('<span>formatted html</span>');
+        expect(html && html('formatted html')).toBe('formatted html');
       });
 
       test('does not escape the output of the text converter', () => {
@@ -119,7 +119,7 @@ describe('FieldFormat class', () => {
         const f = getTestFormat(undefined, constant('<img>'), constant('<img>'));
 
         expect(f.convert('', 'text')).toBe('<img>');
-        expect(f.convert('', 'html')).toBe('<span><img></span>');
+        expect(f.convert('', 'html')).toBe('<img>');
       });
     });
 
@@ -133,7 +133,7 @@ describe('FieldFormat class', () => {
       test('formats a value as html, when specified via second param', () => {
         const f = getTestFormat(undefined, constant('text'), constant('html'));
 
-        expect(f.convert('val', 'html')).toBe('<span>html</span>');
+        expect(f.convert('val', 'html')).toBe('html');
       });
 
       test('formats a value as " - " when no value is specified', () => {
