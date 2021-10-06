@@ -59,13 +59,21 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
   }, [getPageData, currentTimerange]);
 
   const onRefresh = () => {
+    const errorHandler = ajaxErrorHandlersProvider();
+
     const requests = [getPageData?.()];
     if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
       requests.push(updateSetupModeData());
     }
 
     Promise.allSettled(requests).then((results) => {
-      // TODO: handle errors
+      results
+        .filter((p) => p.status === 'rejected')
+        .forEach((result) =>
+          errorHandler((result as unknown as PromiseRejectedResult | undefined)?.reason).catch(
+            () => {}
+          )
+        );
     });
   };
 
