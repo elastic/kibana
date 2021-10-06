@@ -10,7 +10,7 @@ import { EffectScope, TrustedApp } from '../../../../common/endpoint/types';
 import { ContextMenuItemNavByRouterProps } from '../context_menu_with_router_support/context_menu_item_nav_by_router';
 
 export type AnyArtifact = ExceptionListItemSchema & TrustedApp;
-interface ArtifactInfoEntry {
+export interface ArtifactInfoEntry {
   field: string;
   type: string;
   operator: string;

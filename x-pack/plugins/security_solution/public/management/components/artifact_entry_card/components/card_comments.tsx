@@ -14,6 +14,7 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { CardActionsFlexItemProps } from './card_actions_flex_item';
 import { AnyArtifact } from '../types';
@@ -44,7 +45,7 @@ export const CardComments = memo<CardCommentsProps>(
       [comments.length, showComments]
     );
 
-    return (
+    return !isEmpty(comments) ? (
       <>
         <EuiSpacer size="s" />
         <EuiButtonEmpty
@@ -63,7 +64,7 @@ export const CardComments = memo<CardCommentsProps>(
           />
         </EuiAccordion>
       </>
-    );
+    ) : null;
   }
 );
 
