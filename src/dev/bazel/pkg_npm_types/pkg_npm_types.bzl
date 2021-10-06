@@ -9,6 +9,14 @@
 load("@npm//@bazel/typescript/internal:ts_config.bzl", "TsConfigInfo")
 load("@build_bazel_rules_nodejs//:providers.bzl", "run_node", "LinkablePackageInfo")
 
+
+#### TODO
+###### improve provided types entry point to summarise logic
+###### refact api_extractor file into packager folder with better js code architecture
+###### link pkg npm types into node modules for migrated modules
+###### study around completely split types and code trees for all packages (also test if we can symlink pkg npm into /npm_module instead of base folder)
+###### source maps for api extractor
+
 def _tsconfig_inputs(ctx):
   """Returns all transitively referenced tsconfig files from "tsconfig" """
   inputs = []
