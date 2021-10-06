@@ -63,14 +63,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       describe('logs landing page without data', () => {
-        it(`shows 'Change source configuration' button`, async () => {
+        it(`shows the 'No data' page`, async () => {
           await PageObjects.common.navigateToUrlWithBrowserHistory('infraLogs', '', undefined, {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('infraLogsPage');
-          await testSubjects.existOrFail('logsViewSetupInstructionsButton');
-          await testSubjects.existOrFail('configureSourceButton');
+          await testSubjects.existOrFail('~infraLogsPage');
+          await testSubjects.existOrFail('~noDataPage');
         });
 
         it(`doesn't show read-only badge`, async () => {
@@ -126,14 +125,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       describe('logs landing page without data', () => {
-        it(`doesn't show 'Change source configuration' button`, async () => {
+        it(`Shows the 'No data' page`, async () => {
           await PageObjects.common.navigateToUrlWithBrowserHistory('infraLogs', '', undefined, {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
+<<<<<<< HEAD
           await testSubjects.existOrFail('infraLogsPage');
           await testSubjects.existOrFail('logsViewSetupInstructionsButton');
           await testSubjects.missingOrFail('configureSourceButton');
+=======
+          await testSubjects.existOrFail('~infraLogsPage');
+          await testSubjects.existOrFail('~noDataPage');
+>>>>>>> 74da7d30de2 ([Observability] New "No Data" screens (#107709))
         });
 
         it(`shows read-only badge`, async () => {
