@@ -71,9 +71,10 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
   const calloutIcon = hasLogs ? 'alert' : 'check';
   const calloutTestId = hasLogs ? 'hasWarningsCallout' : 'noWarningsCallout';
 
-  const onResetClick = () => {
+  const onResetClick = async () => {
     const now = moment().toISOString();
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_RESET_LOGS_COUNTER_CLICK);
+    api.deleteDeprecationLogsCache();
     setCheckpoint(now);
   };
 

@@ -96,6 +96,15 @@ export class ApiService {
     });
   }
 
+  public async deleteDeprecationLogsCache() {
+    const result = await this.sendRequest({
+      path: `${API_BASE_PATH}/deprecation_logging/deprecation_cache`,
+      method: 'delete',
+    });
+
+    return result;
+  }
+
   public async updateIndexSettings(indexName: string, settings: string[]) {
     const result = await this.sendRequest({
       path: `${API_BASE_PATH}/${indexName}/index_settings`,
