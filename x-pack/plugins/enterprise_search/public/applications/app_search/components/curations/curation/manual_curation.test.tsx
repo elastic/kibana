@@ -21,6 +21,7 @@ import { getPageTitle, getPageHeaderActions, getPageHeaderTabs } from '../../../
 jest.mock('./curation_logic', () => ({ CurationLogic: jest.fn() }));
 import { CurationLogic } from './curation_logic';
 
+import { DeleteCurationButton } from './delete_curation_button';
 import { PromotedDocuments, HiddenDocuments } from './documents';
 import { ManualCuration } from './manual_curation';
 import { ActiveQuerySelect, ManageQueriesModal } from './queries';
@@ -109,38 +110,26 @@ describe('ManualCuration', () => {
     expect(CurationLogic).toHaveBeenCalledWith({ curationId: 'hello-world' });
   });
 
-  it('contains a button to manage queries and an active query selector', () => {
-    const wrapper = shallow(<ManualCuration />);
-
-    expect(getPageHeaderActions(wrapper).find(ManageQueriesModal)).toHaveLength(1);
-    expect(wrapper.find(ActiveQuerySelect)).toHaveLength(1);
-  });
-
-  describe('restore defaults button', () => {
-    let restoreDefaultsButton: ShallowWrapper;
-    let confirmSpy: jest.SpyInstance;
+  describe('page header actions', () => {
+    let pageHeaderActions: ShallowWrapper;
 
     beforeAll(() => {
       const wrapper = shallow(<ManualCuration />);
-      restoreDefaultsButton = getPageHeaderActions(wrapper).find(EuiButton);
-
-      confirmSpy = jest.spyOn(window, 'confirm');
+      pageHeaderActions = getPageHeaderActions(wrapper);
     });
 
-    afterAll(() => {
-      confirmSpy.mockRestore();
+    it('contains a button to manage queries and an active query selector', () => {
+      expect(pageHeaderActions.find(ManageQueriesModal)).toHaveLength(1);
     });
 
-    it('resets the curation upon user confirmation', () => {
-      confirmSpy.mockReturnValueOnce(true);
-      restoreDefaultsButton.simulate('click');
-      expect(actions.deleteCuration).toHaveBeenCalled();
+    it('contains a button to delete the curation', () => {
+      expect(pageHeaderActions.find(DeleteCurationButton)).toHaveLength(1);
     });
+  });
 
-    it('does not reset the curation if the user cancels', () => {
-      confirmSpy.mockReturnValueOnce(false);
-      restoreDefaultsButton.simulate('click');
-      expect(actions.deleteCuration).not.toHaveBeenCalled();
-    });
+  it('contains an active query selector', () => {
+    const wrapper = shallow(<ManualCuration />);
+
+    expect(wrapper.find(ActiveQuerySelect)).toHaveLength(1);
   });
 });
