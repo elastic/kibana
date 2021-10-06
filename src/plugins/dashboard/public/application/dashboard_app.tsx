@@ -115,8 +115,8 @@ export function DashboardApp({
   }, [data.search.session]);
 
   useEffect(() => {
-    chrome.setIsVisible(!printLayoutDetected);
-  }, [chrome, printLayoutDetected]);
+    if (!embedSettings) chrome.setIsVisible(!printLayoutDetected);
+  }, [chrome, printLayoutDetected, embedSettings]);
 
   return (
     <>
