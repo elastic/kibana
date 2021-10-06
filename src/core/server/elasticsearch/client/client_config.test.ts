@@ -37,6 +37,19 @@ describe('parseClientOptions', () => {
     );
   });
 
+  it('specifies `headers.maxSockets` Infinity and `keepAlive` true by default', () => {
+    const config = createConfig({});
+
+    expect(parseClientOptions(config, false)).toEqual(
+      expect.objectContaining({
+        agent: {
+          keepAlive: true,
+          maxSockets: Infinity,
+        },
+      })
+    );
+  });
+
   describe('basic options', () => {
     it('`customHeaders` option', () => {
       const config = createConfig({
@@ -76,11 +89,21 @@ describe('parseClientOptions', () => {
       );
     });
 
-    it('`keepAlive` option', () => {
-      expect(parseClientOptions(createConfig({ keepAlive: true }), false)).toEqual(
-        expect.objectContaining({ agent: { keepAlive: true } })
-      );
-      expect(parseClientOptions(createConfig({ keepAlive: false }), false).agent).toBeUndefined();
+    describe('`keepAlive option`', () => {
+      it('`keepAlive` is true', () => {
+        const options = parseClientOptions(createConfig({ keepAlive: true }), false);
+        expect(options.agent).toHaveProperty('keepAlive', true);
+      });
+
+      it('`keepAlive` is false', () => {
+        const options = parseClientOptions(createConfig({ keepAlive: false }), false);
+        expect(options.agent).toHaveProperty('keepAlive', false);
+      });
+
+      it('`keepAlive` is undefined', () => {
+        const options = parseClientOptions(createConfig({}), false);
+        expect(options.agent).toHaveProperty('keepAlive', true);
+      });
     });
 
     it('`sniffOnStart` options', () => {
