@@ -68,6 +68,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values: { tableCaption },
         description: 'Screen reader text to describe the pagination controls',
       }),
+    'euiBasicTable.noItemsMessage': i18n.translate('core.euiBasicTable.noItemsMessage', {
+      defaultMessage: 'No items found',
+    }),
     'euiBottomBar.customScreenReaderAnnouncement': ({ landmarkHeading }: EuiValues) =>
       i18n.translate('core.euiBottomBar.customScreenReaderAnnouncement', {
         defaultMessage:
