@@ -59,13 +59,6 @@ describe('OrganicDocuments', () => {
     expect(titleText).toEqual('Top organic documents for "world"');
   });
 
-  it('shows a title when the curation is manual', () => {
-    setMockValues({ ...values, isAutomated: false });
-    const wrapper = shallow(<OrganicDocuments />);
-
-    expect(wrapper.find(DataPanel).prop('subtitle')).toContain('Promote results');
-  });
-
   it('renders a loading state', () => {
     setMockValues({ ...values, organicDocumentsLoading: true });
     const wrapper = shallow(<OrganicDocuments />);

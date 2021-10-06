@@ -16,7 +16,6 @@ import {
   EuiEmptyPrompt,
   EuiButtonEmpty,
   EuiBadge,
-  EuiIcon,
 } from '@elastic/eui';
 
 import { mountWithIntl } from '../../../../../test_helpers';
@@ -70,22 +69,6 @@ describe('PromotedDocuments', () => {
     wrapper.find(EuiDraggable).forEach((draggableWrapper) => {
       expect(getDraggableChildren(draggableWrapper).find(CurationResult).exists()).toBe(true);
     });
-  });
-
-  it('informs the user documents can be re-ordered if the curation is manual', () => {
-    setMockValues({ ...values, isAutomated: false });
-    const wrapper = shallow(<PromotedDocuments />);
-    const subtitle = mountWithIntl(wrapper.prop('subtitle'));
-
-    expect(subtitle.text()).toContain('Documents can be re-ordered');
-  });
-
-  it('informs the user the curation is managed if the curation is automated', () => {
-    setMockValues({ ...values, isAutomated: true });
-    const wrapper = shallow(<PromotedDocuments />);
-    const subtitle = mountWithIntl(wrapper.prop('subtitle'));
-
-    expect(subtitle.text()).toContain('managed by App Search');
   });
 
   describe('empty state', () => {
