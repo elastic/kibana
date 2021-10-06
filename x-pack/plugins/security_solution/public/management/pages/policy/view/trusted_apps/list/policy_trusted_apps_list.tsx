@@ -34,6 +34,7 @@ import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_ID } from '../../../../../../../common/constants';
 import { ContextMenuItemNavByRouterProps } from '../../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 import { ArtifactEntryCollapsibleCardProps } from '../../../../../components/artifact_entry_card';
+import { RemoveTrustedAppFromPolicyModal } from './remove_trusted_app_from_policy_modal';
 
 export const PolicyTrustedAppsList = memo(() => {
   const history = useHistory();
@@ -47,6 +48,8 @@ export const PolicyTrustedAppsList = memo(() => {
   const allPoliciesById = usePolicyDetailsSelector(getTrustedAppsAllPoliciesById);
 
   const [isCardExpanded, setCardExpanded] = useState<Record<string, boolean>>({});
+  const [trustedAppsForRemoval, setTrustedAppsForRemoval] = useState<typeof trustedAppItems>([]);
+  const [showRemovalModal, setShowRemovalModal] = useState<boolean>(false);
 
   // TODO:PT show load errors if any
 
@@ -93,6 +96,7 @@ export const PolicyTrustedAppsList = memo(() => {
     const newCardProps = new Map();
 
     for (const trustedApp of trustedAppItems) {
+      const isGlobal = trustedApp.effectScope.type === 'global';
       const viewUrlPath = getTrustedAppsListPath({ id: trustedApp.id, show: 'edit' });
       const assignedPoliciesMenuItems: ArtifactEntryCollapsibleCardProps['policies'] =
         trustedApp.effectScope.type === 'global'
@@ -134,6 +138,28 @@ export const PolicyTrustedAppsList = memo(() => {
             navigateAppId: APP_ID,
             navigateOptions: { path: viewUrlPath },
           },
+          {
+            icon: 'trash',
+            children: i18n.translate(
+              'xpack.securitySolution.endpoint.policy.trustedApps.list.removeAction',
+              { defaultMessage: 'Remove from policy' }
+            ),
+            onClick: () => {
+              setTrustedAppsForRemoval([trustedApp]);
+              setShowRemovalModal(true);
+            },
+            disabled: isGlobal,
+            toolTipContent: isGlobal
+              ? i18n.translate(
+                  'xpack.securitySolution.endpoint.policy.trustedApps.list.removeActionNotAllowed',
+                  {
+                    defaultMessage:
+                      'Globally applied trusted applications cannot be removed from policy.',
+                  }
+                )
+              : undefined,
+            toolTipPosition: 'top',
+          },
         ],
         policies: assignedPoliciesMenuItems,
       };
@@ -150,6 +176,10 @@ export const PolicyTrustedAppsList = memo(() => {
     },
     [cardProps]
   );
+
+  const handleRemoveModalClose = useCallback(() => {
+    setShowRemovalModal(false);
+  }, []);
 
   // Anytime a new set of data (trusted apps) is retrieved, reset the card expand state
   useEffect(() => {
@@ -186,6 +216,13 @@ export const PolicyTrustedAppsList = memo(() => {
         pagination={pagination as Pagination}
         data-test-subj="policyTrustedAppsGrid"
       />
+
+      {showRemovalModal && (
+        <RemoveTrustedAppFromPolicyModal
+          trustedApps={trustedAppsForRemoval}
+          onClose={handleRemoveModalClose}
+        />
+      )}
     </>
   );
 });
