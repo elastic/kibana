@@ -217,7 +217,7 @@ export interface StatusServiceSetup {
    * By default, plugins inherit this derived status from their dependencies.
    * Calling {@link StatusSetup.set} overrides this default status.
    *
-   * This may emit multliple times for a single status change event as propagates
+   * This may emit multiple times for a single status change event as propagates
    * through the dependency tree
    */
   derivedStatus$: Observable<ServiceStatus>;
