@@ -54,7 +54,7 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     });
 
     await waitFor(() =>
-      renderResult.getByTestId('policyTrustedAppsGrid-card-header-actions-contextMenuPanel')
+      expect(renderResult.getByTestId('policyTrustedAppsGrid-card-header-actions-contextMenuPanel'))
     );
   };
 
@@ -179,8 +179,10 @@ describe('when rendering the PolicyTrustedAppsList', () => {
       );
     });
     await waitFor(() =>
-      renderResult.getByTestId(
-        'policyTrustedAppsGrid-card-header-effectScope-popupMenu-popoverPanel'
+      expect(
+        renderResult.getByTestId(
+          'policyTrustedAppsGrid-card-header-effectScope-popupMenu-popoverPanel'
+        )
       )
     );
 
@@ -214,12 +216,14 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     act(() => {
       fireEvent.click(renderResult.getByTestId('pagination-button-next'));
     });
-    await waitFor(() => !!window.location.search);
+    await waitFor(() => {
+      expect(appTestContext.history.location.search).toBeTruthy();
+    });
 
     // now change the page size
     await act(async () => {
       fireEvent.click(renderResult.getByTestId('tablePaginationPopoverButton'));
-      await waitFor(() => renderResult.getByTestId('tablePagination-50-rows'));
+      await waitFor(() => expect(renderResult.getByTestId('tablePagination-50-rows')));
     });
     act(() => {
       fireEvent.click(renderResult.getByTestId('tablePagination-50-rows'));
