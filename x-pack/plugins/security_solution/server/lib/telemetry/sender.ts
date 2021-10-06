@@ -22,7 +22,7 @@ import { listTelemetryTaskConfigs } from './tasks';
 import { createUsageCounterLabel } from './helpers';
 import { TelemetryEvent } from './types';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
-import { SecurityTelemetryTask, SecurityTelemetryTaskConfig } from './task';
+import { SecurityTelemetryTask } from './task';
 
 const usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
 
