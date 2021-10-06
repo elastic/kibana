@@ -47,7 +47,7 @@ const i18nTexts = {
     }
   ),
   errorToastTitle: i18n.translate('xpack.upgradeAssistant.overview.verifyChanges.errorToastTitle', {
-    defaultMessage: 'Could not clear deprecation logs cache',
+    defaultMessage: 'Could not delete deprecation logs cache',
   }),
 };
 
