@@ -30,6 +30,7 @@ import {
   LoadedResourceState,
 } from '../../../../../state';
 import { getCurrentArtifactsLocation } from './policy_common_selectors';
+import { ServerApiError } from '../../../../../../common/types';
 
 export const doesPolicyHaveTrustedApps = (
   state: PolicyDetailsState
@@ -180,4 +181,12 @@ export const getTrustedAppsAllPoliciesById: PolicyDetailsSelector<
     mapById[policy.id] = policy;
     return mapById;
   }, {}) as Immutable<Record<string, Immutable<PolicyData>>>;
+});
+
+export const getPolicyTrustedAppListError: PolicyDetailsSelector<
+  Immutable<ServerApiError> | undefined
+> = createSelector(getCurrentPolicyAssignedTrustedAppsState, (currentAssignedTrustedAppsState) => {
+  if (isFailedResourceState(currentAssignedTrustedAppsState)) {
+    return currentAssignedTrustedAppsState.error;
+  }
 });
