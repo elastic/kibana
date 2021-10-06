@@ -4,16 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { Fragment } from 'react';
+import React from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { IndexPatternField } from '../../../../../../../../src/plugins/data/common';
 import { TopValuesStats } from '../../../../../common/search_strategies/field_stats_types';
@@ -32,14 +30,7 @@ interface Props {
 }
 
 export function TopValues({ stats, onAddFilter, fieldValue }: Props) {
-  const {
-    topValues,
-    topValuesSampleSize,
-    topValuesSamplerShardSize,
-    count,
-    isTopValuesSampled,
-    fieldName,
-  } = stats;
+  const { topValues, topValuesSampleSize, count, fieldName } = stats;
   const theme = useTheme();
 
   const progressBarMax = topValuesSampleSize ?? count;
@@ -53,10 +44,14 @@ export function TopValues({ stats, onAddFilter, fieldValue }: Props) {
     >
       {Array.isArray(topValues) &&
         topValues.map((value) => {
-          const barColor =
-            fieldValue !== undefined && value.key === fieldValue
-              ? 'accent'
+          const isHighlighted =
+            fieldValue !== undefined && value.key === fieldValue;
+          const barColor = isHighlighted ? 'accent' : undefined;
+          const valueText =
+            progressBarMax !== undefined
+              ? asPercent(value.doc_count, progressBarMax)
               : undefined;
+
           return (
             <>
               <EuiSpacer size="s" />
@@ -73,9 +68,12 @@ export function TopValues({ stats, onAddFilter, fieldValue }: Props) {
                     label={value.key}
                     className="eui-textTruncate"
                     aria-label={value.key.toString()}
-                    valueText={
-                      progressBarMax !== undefined
-                        ? asPercent(value.doc_count, progressBarMax)
+                    valueText={valueText}
+                    labelProps={
+                      isHighlighted
+                        ? {
+                            style: { fontWeight: 'bold' },
+                          }
                         : undefined
                     }
                   />
@@ -148,20 +146,6 @@ export function TopValues({ stats, onAddFilter, fieldValue }: Props) {
             </>
           );
         })}
-      {isTopValuesSampled === true && (
-        <Fragment>
-          <EuiSpacer size="s" />
-          <EuiText size="xs" textAlign={'center'}>
-            <FormattedMessage
-              id="xpack.apm.correlations.fieldContextPopover.topValues.calculatedFromSampleDescription"
-              defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"
-              values={{
-                topValuesSamplerShardSize,
-              }}
-            />
-          </EuiText>
-        </Fragment>
-      )}
     </div>
   );
 }
