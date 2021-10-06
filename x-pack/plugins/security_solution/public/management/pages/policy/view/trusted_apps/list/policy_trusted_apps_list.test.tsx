@@ -13,14 +13,15 @@ import { getPolicyDetailsArtifactsListPath } from '../../../../../common/routing
 import { PolicyTrustedAppsList } from './policy_trusted_apps_list';
 import React from 'react';
 import { policyDetailsPageAllApiHttpMocks } from '../../../test_utils';
-import { isLoadedResourceState } from '../../../../../state';
+import { isFailedResourceState, isLoadedResourceState } from '../../../../../state';
 import { fireEvent, within, act, waitFor } from '@testing-library/react';
 import { APP_ID } from '../../../../../../../common/constants';
 
 describe('when rendering the PolicyTrustedAppsList', () => {
   let appTestContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
-  let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
+  let render: (waitForLoadedState?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
+  let mockedApis: ReturnType<typeof policyDetailsPageAllApiHttpMocks>;
   let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
 
   const getCardByIndexPosition = (cardIndex: number = 0) => {
@@ -60,19 +61,21 @@ describe('when rendering the PolicyTrustedAppsList', () => {
   beforeEach(() => {
     appTestContext = createAppRootMockRenderer();
 
-    policyDetailsPageAllApiHttpMocks(appTestContext.coreStart.http);
+    mockedApis = policyDetailsPageAllApiHttpMocks(appTestContext.coreStart.http);
     appTestContext.setExperimentalFlag({ trustedAppsByPolicyEnabled: true });
     waitForAction = appTestContext.middlewareSpy.waitForAction;
 
-    render = async () => {
+    render = async (waitForLoadedState: boolean = true) => {
       appTestContext.history.push(
         getPolicyDetailsArtifactsListPath('ddf6570b-9175-4a6d-b288-61a09771c647')
       );
-      const trustedAppDataReceived = waitForAction('assignedTrustedAppsListStateChanged', {
-        validate({ payload }) {
-          return isLoadedResourceState(payload);
-        },
-      });
+      const trustedAppDataReceived = waitForLoadedState
+        ? waitForAction('assignedTrustedAppsListStateChanged', {
+            validate({ payload }) {
+              return isLoadedResourceState(payload);
+            },
+          })
+        : Promise.resolve();
 
       renderResult = appTestContext.render(<PolicyTrustedAppsList />);
       await trustedAppDataReceived;
@@ -223,5 +226,24 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     });
 
     expect(appTestContext.history.location.search).toMatch('?page_size=50');
+  });
+
+  it('should show toast message if trusted app list api call fails', async () => {
+    const error = new Error('oh no');
+    // @ts-expect-error
+    mockedApis.responseProvider.policyTrustedAppsList.mockRejectedValue(error);
+    await render(false);
+    await act(async () => {
+      await waitForAction('assignedTrustedAppsListStateChanged', {
+        validate: ({ payload }) => isFailedResourceState(payload),
+      });
+    });
+
+    expect(appTestContext.startServices.notifications.toasts.addError).toHaveBeenCalledWith(
+      error,
+      expect.objectContaining({
+        title: expect.any(String),
+      })
+    );
   });
 });
