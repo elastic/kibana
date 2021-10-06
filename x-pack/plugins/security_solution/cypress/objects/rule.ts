@@ -326,6 +326,24 @@ export const getEqlRule = (): CustomRule => ({
   maxSignals: 100,
 });
 
+export const getCCSEqlRule = (): CustomRule => ({
+  customQuery: 'any where process.name == "run-parts"',
+  name: 'New EQL Rule',
+  index: [`${ccsRemoteName}:run-parts`],
+  description: 'New EQL rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [getMitre1(), getMitre2()],
+  note: '# test markdown',
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
+  timeline: getTimeline(),
+  maxSignals: 100,
+});
+
 export const getEqlSequenceRule = (): CustomRule => ({
   customQuery:
     'sequence with maxspan=30s\
