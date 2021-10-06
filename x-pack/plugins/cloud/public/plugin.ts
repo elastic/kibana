@@ -250,8 +250,8 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     }
 
     // Get performance information from the browser (non standard property
-    // @ts-expect-error
     const memoryInfo = mapKeys(
+      // @ts-expect-error
       window.performance.memory || {},
       (_, key) => `${snakeCase(key)}_int`
     );
