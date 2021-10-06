@@ -55,6 +55,12 @@ NOTE:
 |The data plugin provides common data access services, such as search and query, for solutions and application developers.
 
 
+|{kib-repo}blob/{branch}/src/plugins/data_views/README.mdx[dataViews]
+|The data views API provides a consistent method of structuring and formatting documents
+and field lists across the various Kibana apps. Its typically used in conjunction with
+<DocLink id="kibDevTutorialDataSearchAndSessions" section="high-level-search" text="SearchSource" /> for composing queries.
+
+
 |{kib-repo}blob/{branch}/src/plugins/dev_tools/README.md[devTools]
 |The ui/registry/dev_tools is removed in favor of the devTools plugin which exposes a register method in the setup contract.
 Registering app works mostly the same as registering apps in core.application.register.
@@ -464,7 +470,7 @@ the infrastructure monitoring use-case within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ingest_pipelines/README.md[ingestPipelines]
-|The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest nodes. Please refer to the Elasticsearch documentation for more details.
+|The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest pipelines.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/lens/readme.md[lens]

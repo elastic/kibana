@@ -6,30 +6,4 @@
  * Side Public License, v 1.
  */
 
-export {
-  ILLEGAL_CHARACTERS_KEY,
-  CONTAINS_SPACES_KEY,
-  ILLEGAL_CHARACTERS_VISIBLE,
-  ILLEGAL_CHARACTERS,
-  validateDataView,
-} from '../../common/data_views/lib';
-export {
-  flattenHitWrapper,
-  formatHitProvider,
-  onRedirectNoIndexPattern,
-  onUnsupportedTimePattern,
-} from './data_views';
-
-export { IndexPatternField, IIndexPatternFieldList, TypeMeta } from '../../common/data_views';
-
-export {
-  IndexPatternsService,
-  IndexPatternsContract,
-  IndexPattern,
-  DataViewsApiClient,
-  DataViewsService,
-  DataViewsContract,
-  DataView,
-} from './data_views';
-export { UiSettingsPublicToCommon } from './ui_settings_wrapper';
-export { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper';
+export * from '../../../data_views/public';

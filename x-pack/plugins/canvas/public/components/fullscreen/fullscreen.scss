@@ -63,4 +63,9 @@ body.canvas-isFullscreen {
     box-shadow: none;
     overflow: hidden;
   }
+
+  // When in fullscreen, we want to make sure to hide the "there was a conflict" resolve callout
+  .canvasContainer > .euiCallOut {
+    display: none;
+  }
 }
