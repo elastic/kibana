@@ -115,5 +115,3 @@ Changing these settings may disable features of the APM App.
 |===
 
 // end::general-apm-settings[]
-
-
