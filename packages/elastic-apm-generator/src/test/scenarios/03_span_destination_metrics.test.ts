@@ -24,7 +24,8 @@ describe('span destination metrics', () => {
 
     events = getSpanDestinationMetrics(
       range
-        .every('1m', 25)
+        .interval('1m')
+        .rate(25)
         .flatMap((timestamp) =>
           javaInstance
             .transaction('GET /api/product/list')
@@ -43,7 +44,8 @@ describe('span destination metrics', () => {
         )
         .concat(
           range
-            .every('1m', 50)
+            .interval('1m')
+            .rate(50)
             .flatMap((timestamp) =>
               javaInstance
                 .transaction('GET /api/product/list')

@@ -25,27 +25,30 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const metadata = archives_metadata[archiveName];
 
   registry.when(
-    'Throughput when data is not empty',
+    'Throughput when data is empty',
     { config: 'basic', archives: ['apm_8.0.0_empty'] },
     () => {
       const start = new Date('2021-01-01T00:00:00.000Z').getTime();
       const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
       before(async () => {
-        const instance = service('synth-go', 'production', 'go')
-          .instance('instance-a')
-          .defaults(getGoAgentDefaults());
+        const instance = service('synth-go', 'production', 'go').instance('instance-a');
 
-        const timestamps = timerange(start, end).every('1s', 10);
+        const timestamps = timerange(start, end).interval('1s').rate(5);
 
         await generator.generate(
-          timestamps.flatMap((timestamp) =>
-            instance
+          timestamps.flatMap((timestamp) => [
+            ...instance
               .transaction('GET /api/product/list')
               .duration(1000)
               .timestamp(timestamp)
-              .serialize()
-          )
+              .serialize(),
+            ...instance
+              .transaction('GET /api/product/:id')
+              .duration(500)
+              .timestamp(timestamp)
+              .serialize(),
+          ])
         );
       });
 
@@ -65,8 +68,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               end: new Date(end).toISOString(),
               transactionType: 'request',
               environment: 'production',
-              kuery: 'processor.event:transaction',
-              _inspect: true,
+              kuery: '',
             },
           },
         });

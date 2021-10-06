@@ -24,7 +24,8 @@ describe('transaction metrics', () => {
 
     events = getTransactionMetrics(
       range
-        .every('1m', 25)
+        .interval('1m')
+        .rate(25)
         .flatMap((timestamp) =>
           javaInstance
             .transaction('GET /api/product/list')
@@ -35,7 +36,8 @@ describe('transaction metrics', () => {
         )
         .concat(
           range
-            .every('1m', 50)
+            .interval('1m')
+            .rate(50)
             .flatMap((timestamp) =>
               javaInstance
                 .transaction('GET /api/product/list')

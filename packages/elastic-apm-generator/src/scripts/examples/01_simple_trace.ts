@@ -24,7 +24,8 @@ export function simpleTrace(from: number, to: number) {
   const transactionName = '100rpm (75% success) failed 1000ms';
 
   const successfulTraceEvents = range
-    .every('1m', 75)
+    .interval('1m')
+    .rate(75)
     .flatMap((timestamp) =>
       instance
         .transaction(transactionName)
@@ -44,7 +45,8 @@ export function simpleTrace(from: number, to: number) {
     );
 
   const failedTraceEvents = range
-    .every('1m', 25)
+    .interval('1m')
+    .rate(25)
     .flatMap((timestamp) =>
       instance
         .transaction(transactionName)

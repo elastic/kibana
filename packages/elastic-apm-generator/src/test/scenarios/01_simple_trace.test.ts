@@ -21,21 +21,24 @@ describe('simple trace', () => {
       new Date('2021-01-01T00:15:00.000Z').getTime() - 1
     );
 
-    events = range.every('1m', 1).flatMap((timestamp) =>
-      javaInstance
-        .transaction('GET /api/product/list')
-        .duration(1000)
-        .success()
-        .timestamp(timestamp)
-        .children(
-          javaInstance
-            .span('GET apm-*/_search', 'db', 'elasticsearch')
-            .success()
-            .duration(900)
-            .timestamp(timestamp + 50)
-        )
-        .serialize()
-    );
+    events = range
+      .interval('1m')
+      .rate(1)
+      .flatMap((timestamp) =>
+        javaInstance
+          .transaction('GET /api/product/list')
+          .duration(1000)
+          .success()
+          .timestamp(timestamp)
+          .children(
+            javaInstance
+              .span('GET apm-*/_search', 'db', 'elasticsearch')
+              .success()
+              .duration(900)
+              .timestamp(timestamp + 50)
+          )
+          .serialize()
+      );
   });
 
   it('generates the same data every time', () => {

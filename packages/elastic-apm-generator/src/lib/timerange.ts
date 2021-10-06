@@ -6,26 +6,13 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
+import { Interval } from './interval';
 
-class Timerange {
+export class Timerange {
   constructor(private from: number, private to: number) {}
 
-  // maybe name this something else? perMinute()/perSecond()/rate()
-  every(interval: string, repeated = 1) {
-    let now = this.from;
-    const args = interval.match(/(.*)(s|m|h|d)/);
-    if (!args) {
-      throw new Error('Failed to parse interval');
-    }
-    const timestamps: number[] = [];
-    while (now <= this.to) {
-      timestamps.push(...new Array<number>(repeated).fill(now));
-      now = moment(now)
-        .add(Number(args[1]), args[2] as any)
-        .valueOf();
-    }
-    return timestamps;
+  interval(interval: string) {
+    return new Interval(this.from, this.to, interval);
   }
 }
 
