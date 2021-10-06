@@ -28,7 +28,7 @@ export const OrganicDocuments: React.FC = () => {
   const { addPromotedId, addHiddenId } = useActions(CurationLogic);
   const { curation, activeQuery, isAutomated, organicDocumentsLoading } = useValues(CurationLogic);
 
-  const documents = curation.organic;
+  const documents = curation.organic || [];
   const hasDocuments = documents.length > 0 && !organicDocumentsLoading;
   const currentQuery = activeQuery;
 

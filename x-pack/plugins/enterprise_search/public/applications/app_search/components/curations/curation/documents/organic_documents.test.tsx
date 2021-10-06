@@ -74,8 +74,15 @@ describe('OrganicDocuments', () => {
   });
 
   describe('empty state', () => {
-    it('renders', () => {
+    it('renders when organic results is empty', () => {
       setMockValues({ ...values, curation: { organic: [] } });
+      const wrapper = shallow(<OrganicDocuments />);
+
+      expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+    });
+
+    it('renders when organic results is undefined', () => {
+      setMockValues({ ...values, curation: { organic: undefined } });
       const wrapper = shallow(<OrganicDocuments />);
 
       expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
