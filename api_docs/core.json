@@ -2113,7 +2113,7 @@
             "signature": [
               "() => Readonly<Record<string, Pick<",
               "UiSettingsParams",
-              "<unknown>, \"type\" | \"options\" | \"description\" | \"name\" | \"order\" | \"value\" | \"category\" | \"metric\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\"> & ",
+              "<unknown>, \"type\" | \"options\" | \"description\" | \"name\" | \"order\" | \"value\" | \"category\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\" | \"metric\"> & ",
               "UserProvidedValues",
               "<any>>>"
             ],
@@ -6656,7 +6656,9 @@
           "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
         ],
         "signature": [
-          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; metric?: { type: ",
+          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
+          "DeprecationSettings",
+          " | undefined; metric?: { type: ",
           {
             "pluginId": "@kbn/analytics",
             "scope": "common",
@@ -6664,9 +6666,7 @@
             "section": "def-common.UiCounterMetricType",
             "text": "UiCounterMetricType"
           },
-          "; name: string; } | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
-          "DeprecationSettings",
-          " | undefined; }"
+          "; name: string; } | undefined; }"
         ],
         "path": "src/core/types/ui_settings.ts",
         "deprecated": false,
@@ -12876,7 +12876,7 @@
             "signature": [
               "() => Readonly<Record<string, Pick<",
               "UiSettingsParams",
-              "<unknown>, \"type\" | \"options\" | \"description\" | \"name\" | \"order\" | \"value\" | \"category\" | \"metric\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\">>>"
+              "<unknown>, \"type\" | \"options\" | \"description\" | \"name\" | \"order\" | \"value\" | \"category\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\" | \"metric\">>>"
             ],
             "path": "src/core/server/ui_settings/types.ts",
             "deprecated": false,
@@ -16726,8 +16726,6 @@
           " | ",
           "FileAppenderConfig",
           " | ",
-          "LegacyAppenderConfig",
-          " | ",
           "RewriteAppenderConfig",
           " | ",
           "RollingFileAppenderConfig"
@@ -18196,7 +18194,9 @@
           "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
         ],
         "signature": [
-          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; metric?: { type: ",
+          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
+          "DeprecationSettings",
+          " | undefined; metric?: { type: ",
           {
             "pluginId": "@kbn/analytics",
             "scope": "common",
@@ -18204,9 +18204,7 @@
             "section": "def-common.UiCounterMetricType",
             "text": "UiCounterMetricType"
           },
-          "; name: string; } | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
-          "DeprecationSettings",
-          " | undefined; }"
+          "; name: string; } | undefined; }"
         ],
         "path": "src/core/types/ui_settings.ts",
         "deprecated": false,

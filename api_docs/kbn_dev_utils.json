@@ -2072,6 +2072,65 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
+        "id": "def-server.getTimeReporter",
+        "type": "Function",
+        "tags": [],
+        "label": "getTimeReporter",
+        "description": [],
+        "signature": [
+          "(log: ",
+          {
+            "pluginId": "@kbn/dev-utils",
+            "scope": "server",
+            "docId": "kibKbnDevUtilsPluginApi",
+            "section": "def-server.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ", group: string) => (startTime: number, id: string, meta: Record<string, any>) => Promise<void>"
+        ],
+        "path": "packages/kbn-dev-utils/src/ci_stats_reporter/report_time.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.getTimeReporter.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/dev-utils",
+                "scope": "server",
+                "docId": "kibKbnDevUtilsPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/report_time.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.getTimeReporter.$2",
+            "type": "string",
+            "tags": [],
+            "label": "group",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/report_time.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
         "id": "def-server.isAxiosRequestError",
         "type": "Function",
         "tags": [],

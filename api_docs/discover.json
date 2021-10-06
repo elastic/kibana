@@ -1174,6 +1174,10 @@
           "deprecated": true,
           "references": [
             {
+              "plugin": "observability",
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/hooks/use_discover_link.tsx"
+            },
+            {
               "plugin": "osquery",
               "path": "x-pack/plugins/osquery/public/scheduled_query_groups/scheduled_query_group_queries_status_table.tsx"
             },

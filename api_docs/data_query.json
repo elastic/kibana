@@ -865,9 +865,9 @@
           "TimefilterSetup",
           "; getEsQuery: (indexPattern: ",
           {
-            "pluginId": "data",
+            "pluginId": "dataViews",
             "scope": "common",
-            "docId": "kibDataDataViewsPluginApi",
+            "docId": "kibDataViewsPluginApi",
             "section": "def-common.IndexPattern",
             "text": "IndexPattern"
           },
@@ -994,9 +994,9 @@
               "TimefilterSetup",
               "; getEsQuery: (indexPattern: ",
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataDataViewsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IndexPattern",
                 "text": "IndexPattern"
               },
@@ -1301,9 +1301,9 @@
           },
           ", field: string | ",
           {
-            "pluginId": "data",
+            "pluginId": "dataViews",
             "scope": "common",
-            "docId": "kibDataDataViewsPluginApi",
+            "docId": "kibDataViewsPluginApi",
             "section": "def-common.IFieldType",
             "text": "IFieldType"
           },
@@ -1354,9 +1354,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataDataViewsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IFieldType",
                 "text": "IFieldType"
               }
@@ -1472,9 +1472,9 @@
           },
           ", indexPatterns: ",
           {
-            "pluginId": "data",
+            "pluginId": "dataViews",
             "scope": "common",
-            "docId": "kibDataDataViewsPluginApi",
+            "docId": "kibDataViewsPluginApi",
             "section": "def-common.IIndexPattern",
             "text": "IIndexPattern"
           },
@@ -1512,9 +1512,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataDataViewsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IIndexPattern",
                 "text": "IIndexPattern"
               },
@@ -1586,9 +1586,9 @@
           "TimefilterSetup",
           "; getEsQuery: (indexPattern: ",
           {
-            "pluginId": "data",
+            "pluginId": "dataViews",
             "scope": "common",
-            "docId": "kibDataDataViewsPluginApi",
+            "docId": "kibDataViewsPluginApi",
             "section": "def-common.IndexPattern",
             "text": "IndexPattern"
           },
@@ -1707,9 +1707,9 @@
               "TimefilterSetup",
               "; getEsQuery: (indexPattern: ",
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataDataViewsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IndexPattern",
                 "text": "IndexPattern"
               },
@@ -2295,9 +2295,9 @@
           "TimefilterSetup",
           "; getEsQuery: (indexPattern: ",
           {
-            "pluginId": "data",
+            "pluginId": "dataViews",
             "scope": "common",
-            "docId": "kibDataDataViewsPluginApi",
+            "docId": "kibDataViewsPluginApi",
             "section": "def-common.IndexPattern",
             "text": "IndexPattern"
           },
@@ -2414,9 +2414,9 @@
           },
           ">) => void; createFilter: (indexPattern: ",
           {
-            "pluginId": "data",
+            "pluginId": "dataViews",
             "scope": "common",
-            "docId": "kibDataDataViewsPluginApi",
+            "docId": "kibDataViewsPluginApi",
             "section": "def-common.IIndexPattern",
             "text": "IIndexPattern"
           },
@@ -2448,9 +2448,9 @@
           "MatchAllRangeFilter",
           " | undefined; createRelativeFilter: (indexPattern: ",
           {
-            "pluginId": "data",
+            "pluginId": "dataViews",
             "scope": "common",
-            "docId": "kibDataDataViewsPluginApi",
+            "docId": "kibDataViewsPluginApi",
             "section": "def-common.IIndexPattern",
             "text": "IIndexPattern"
           },
@@ -2731,9 +2731,9 @@
         "signature": [
           "(indexPattern: ",
           {
-            "pluginId": "data",
+            "pluginId": "dataViews",
             "scope": "common",
-            "docId": "kibDataDataViewsPluginApi",
+            "docId": "kibDataViewsPluginApi",
             "section": "def-common.IIndexPattern",
             "text": "IIndexPattern"
           },
@@ -2777,9 +2777,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataDataViewsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IIndexPattern",
                 "text": "IIndexPattern"
               },
@@ -2861,9 +2861,9 @@
         "signature": [
           "(indexPattern: ",
           {
-            "pluginId": "data",
+            "pluginId": "dataViews",
             "scope": "common",
-            "docId": "kibDataDataViewsPluginApi",
+            "docId": "kibDataViewsPluginApi",
             "section": "def-common.IIndexPattern",
             "text": "IIndexPattern"
           },
@@ -2907,9 +2907,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataDataViewsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IIndexPattern",
                 "text": "IIndexPattern"
               },

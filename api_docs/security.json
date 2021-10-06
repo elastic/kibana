@@ -1771,6 +1771,21 @@
           ],
           "path": "x-pack/plugins/security/server/plugin.ts",
           "deprecated": false
+        },
+        {
+          "parentPluginId": "security",
+          "id": "def-server.SecurityPluginSetup.privilegeDeprecationsService",
+          "type": "Object",
+          "tags": [],
+          "label": "privilegeDeprecationsService",
+          "description": [
+            "\nExposes services to access kibana roles per feature id with the GetDeprecationsContext"
+          ],
+          "signature": [
+            "PrivilegeDeprecationsService"
+          ],
+          "path": "x-pack/plugins/security/server/plugin.ts",
+          "deprecated": false
         }
       ],
       "lifecycle": "setup",

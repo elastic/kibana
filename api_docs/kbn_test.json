@@ -1314,7 +1314,7 @@
           "\nConverts a config and a pathname to a url"
         ],
         "signature": [
-          "(config: UrlParam, app: App) => string"
+          "(config: UrlParam, app: UrlParam) => string"
         ],
         "path": "packages/kbn-test/src/jest/utils/get_url.ts",
         "deprecated": false,
@@ -1345,7 +1345,7 @@
               "The params to append\nexample:\n{\npathname: 'app/kibana',\nhash: '/discover'\n}"
             ],
             "signature": [
-              "App"
+              "UrlParam"
             ],
             "path": "packages/kbn-test/src/jest/utils/get_url.ts",
             "deprecated": false,
@@ -1570,7 +1570,7 @@
         "label": "startServers",
         "description": [],
         "signature": [
-          "(options: StartServerOptions) => Promise<void>"
+          "({ ...options }: StartServerOptions) => Promise<void>"
         ],
         "path": "packages/kbn-test/src/functional_tests/tasks.ts",
         "deprecated": false,
@@ -1580,7 +1580,7 @@
             "id": "def-server.startServers.$1",
             "type": "Object",
             "tags": [],
-            "label": "options",
+            "label": "{ ...options }",
             "description": [],
             "signature": [
               "StartServerOptions"

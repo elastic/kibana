@@ -45,7 +45,7 @@
         "label": "Config",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; }"
+          "{}"
         ],
         "path": "x-pack/plugins/stack_alerts/common/config.ts",
         "deprecated": false,
@@ -82,15 +82,7 @@
             "section": "def-server.ObjectType",
             "text": "ObjectType"
           },
-          "<{ enabled: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
-            "text": "Type"
-          },
-          "<boolean>; }>"
+          "<{}>"
         ],
         "path": "x-pack/plugins/stack_alerts/common/config.ts",
         "deprecated": false,
