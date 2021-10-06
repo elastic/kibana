@@ -151,8 +151,6 @@ const RolesSchema = schema.object({
   allow: schema.arrayOf(schema.string(), { defaultValue: ['reporting_user'] }),
 });
 
-const IndexSchema = schema.string({ defaultValue: '.reporting' });
-
 // Browser side polling: job completion notifier, management table auto-refresh
 // NOTE: can not use schema.duration, a bug prevents it being passed to the browser correctly
 const PollSchema = schema.object({
@@ -174,7 +172,6 @@ export const ConfigSchema = schema.object({
   csv: CsvSchema,
   encryptionKey: EncryptionKeySchema,
   roles: RolesSchema,
-  index: IndexSchema,
   poll: PollSchema,
 });
 
