@@ -16,7 +16,6 @@ import {
   deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleOutput,
-  resolveSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
@@ -61,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql(resolveSimpleRuleOutput());
+        expect(bodyToCompare).to.eql(getSimpleRuleOutput());
       });
 
       it('should be able to read a single rule with an auto-generated rule_id', async () => {

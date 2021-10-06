@@ -17,7 +17,6 @@ import {
   getSimpleRule,
   getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
-  resolveSimpleRuleOutputWithoutRuleId,
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
@@ -77,7 +76,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
-        expect(bodyToCompare).to.eql(resolveSimpleRuleOutputWithoutRuleId());
+        expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
       });
 
       it('should return an error if the ruled_id does not exist when trying to delete a rule_id', async () => {
@@ -127,7 +126,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
         expect([bodyToCompare, body[1]]).to.eql([
-          resolveSimpleRuleOutputWithoutRuleId(),
+          getSimpleRuleOutputWithoutRuleId(),
           {
             id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612',
             error: {
@@ -189,7 +188,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
-        expect(bodyToCompare).to.eql(resolveSimpleRuleOutputWithoutRuleId());
+        expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
       });
 
       it('should return an error if the ruled_id does not exist when trying to delete a rule_id', async () => {
@@ -239,7 +238,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
         expect([bodyToCompare, body[1]]).to.eql([
-          resolveSimpleRuleOutputWithoutRuleId(),
+          getSimpleRuleOutputWithoutRuleId(),
           {
             id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612',
             error: {

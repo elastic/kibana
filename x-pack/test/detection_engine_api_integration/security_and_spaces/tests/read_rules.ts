@@ -26,16 +26,250 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const spaces = getService('spaces');
+  const es = getService('es');
 
   describe('read_rules', () => {
     describe('reading rules', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
+        await spaces.create({ id: '714-space', name: '714-space' });
+
+        // migrated rule SO
+        await es.index({
+          id: 'alert:90e3ca0e-71f7-513a-b60a-ac678efd8887',
+          index: '.kibana',
+          refresh: true,
+          body: {
+            alert: {
+              name: 'test 7.14',
+              tags: [
+                '__internal_rule_id:82747bb8-bae0-4b59-8119-7f65ac564e14',
+                '__internal_immutable:false',
+              ],
+              alertTypeId: 'siem.signals',
+              consumer: 'siem',
+              params: {
+                author: [],
+                description: 'test',
+                ruleId: '82747bb8-bae0-4b59-8119-7f65ac564e14',
+                falsePositives: [],
+                from: 'now-3615s',
+                immutable: false,
+                license: '',
+                outputIndex: '.siem-signals-devin-hurley-714-space',
+                meta: {
+                  from: '1h',
+                  kibana_siem_app_url: 'http://0.0.0.0:5601/s/714-space/app/security',
+                },
+                maxSignals: 100,
+                riskScore: 21,
+                riskScoreMapping: [],
+                severity: 'low',
+                severityMapping: [],
+                threat: [],
+                to: 'now',
+                references: [],
+                version: 1,
+                exceptionsList: [],
+                type: 'query',
+                language: 'kuery',
+                index: [
+                  'apm-*-transaction*',
+                  'traces-apm*',
+                  'auditbeat-*',
+                  'endgame-*',
+                  'filebeat-*',
+                  'logs-*',
+                  'packetbeat-*',
+                  'winlogbeat-*',
+                ],
+                query: '*:*',
+                filters: [],
+              },
+              schedule: {
+                interval: '15s',
+              },
+              enabled: true,
+              actions: [],
+              throttle: null,
+              notifyWhen: 'onActiveAlert',
+              apiKeyOwner: 'elastic',
+              apiKey:
+                'HvwrIJ8NBshJav9vf3BSEEa2P7fXLTpmEKAx2bSyBF51N2cadFkltWLRRcFnj65RXsPzvRm3VKzAde4b1iGzsjxY/IVmfGGyiO0rk6vZVJVLeMSD+CAiflnwweypoKM8WgwXJnI0Oa/SWqKMtrDiFxCcZCwIuAhS0sjenaiEuedbAuStZv513zz/clpqRKFXBydJXKyjJUQLTA==',
+              createdBy: 'elastic',
+              updatedBy: 'elastic',
+              createdAt: '2021-10-05T19:52:25.865Z',
+              updatedAt: '2021-10-05T19:52:25.865Z',
+              muteAll: false,
+              mutedInstanceIds: [],
+              executionStatus: {
+                status: 'ok',
+                lastExecutionDate: '2021-10-05T19:52:51.260Z',
+                error: null,
+              },
+              meta: {
+                versionApiKeyLastmodified: '7.14.2',
+              },
+              scheduledTaskId: 'c4005e90-2615-11ec-811e-db7211397897',
+              legacyId: 'c364e1e0-2615-11ec-811e-db7211397897',
+            },
+            type: 'alert',
+            references: [],
+            namespaces: ['714-space'],
+            originId: 'c364e1e0-2615-11ec-811e-db7211397897',
+            migrationVersion: {
+              alert: '8.0.0',
+            },
+            coreMigrationVersion: '8.0.0',
+            updated_at: '2021-10-05T19:52:56.014Z',
+          },
+        });
+
+        // legacy-url-alias SO that maps old SO id to new SO id
+        await es.index({
+          index: '.kibana',
+          id: 'legacy-url-alias:714-space:alert:c364e1e0-2615-11ec-811e-db7211397897',
+          body: {
+            'legacy-url-alias': {
+              sourceId: 'c364e1e0-2615-11ec-811e-db7211397897',
+              targetNamespace: '714-space',
+              targetType: 'alert',
+              targetId: '90e3ca0e-71f7-513a-b60a-ac678efd8887',
+              resolveCounter: 10,
+              lastResolved: '2021-10-05T22:00:22.544Z',
+            },
+            type: 'legacy-url-alias',
+            references: [],
+            migrationVersion: {},
+            coreMigrationVersion: '8.0.0',
+            updated_at: '2021-10-05T22:00:22.544Z',
+          },
+        });
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
+        await spaces.delete('714-space');
+      });
+
+      it('should create a "migrated" rule where querying for the new SO _id will resolve the new object and not return the outcome field when outcome === exactMatch', async () => {
+        // link to the new URL with migrated SO id
+        const URL = `/s/714-space${DETECTION_ENGINE_RULES_URL}?id=90e3ca0e-71f7-513a-b60a-ac678efd8887`;
+
+        const readRulesRes = await supertest.get(URL).set('kbn-xsrf', 'true').send().expect(200);
+
+        expect(readRulesRes.body.outcome).to.eql(undefined);
+      });
+
+      it('should create a "migrated" rule where querying for the old SO _id will resolve the new object with outcome: "aliasMatch', async () => {
+        // try to do a deep link to the old URL
+        const URL = `/s/714-space${DETECTION_ENGINE_RULES_URL}?id=c364e1e0-2615-11ec-811e-db7211397897`;
+
+        const readRulesRes = await supertest.get(URL).set('kbn-xsrf', 'true').send().expect(200);
+
+        expect(readRulesRes.body.outcome).to.eql('aliasMatch');
+      });
+
+      it('should create a rule and a "conflicting rule" where the SO _id matches the originId of a migrated rule', async () => {
+        // rule SO that was inserted accidentally
+        await es.index({
+          id: 'alert:c364e1e0-2615-11ec-811e-db7211397897',
+          index: '.kibana',
+          refresh: true,
+          body: {
+            alert: {
+              name: 'test 7.14',
+              tags: [
+                '__internal_rule_id:82747bb8-bae0-4b59-8119-7f65ac564e14',
+                '__internal_immutable:false',
+              ],
+              alertTypeId: 'siem.signals',
+              consumer: 'siem',
+              params: {
+                author: [],
+                description: 'test',
+                ruleId: '82747bb8-bae0-4b59-8119-7f65ac564e14',
+                falsePositives: [],
+                from: 'now-3615s',
+                immutable: false,
+                license: '',
+                outputIndex: '.siem-signals-devin-hurley-714-space',
+                meta: {
+                  from: '1h',
+                  kibana_siem_app_url: 'http://0.0.0.0:5601/s/714-space/app/security',
+                },
+                maxSignals: 100,
+                riskScore: 21,
+                riskScoreMapping: [],
+                severity: 'low',
+                severityMapping: [],
+                threat: [],
+                to: 'now',
+                references: [],
+                version: 1,
+                exceptionsList: [],
+                type: 'query',
+                language: 'kuery',
+                index: [
+                  'apm-*-transaction*',
+                  'traces-apm*',
+                  'auditbeat-*',
+                  'endgame-*',
+                  'filebeat-*',
+                  'logs-*',
+                  'packetbeat-*',
+                  'winlogbeat-*',
+                ],
+                query: '*:*',
+                filters: [],
+              },
+              schedule: {
+                interval: '15s',
+              },
+              enabled: true,
+              actions: [],
+              throttle: null,
+              notifyWhen: 'onActiveAlert',
+              apiKeyOwner: 'elastic',
+              apiKey:
+                'HvwrIJ8NBshJav9vf3BSEEa2P7fXLTpmEKAx2bSyBF51N2cadFkltWLRRcFnj65RXsPzvRm3VKzAde4b1iGzsjxY/IVmfGGyiO0rk6vZVJVLeMSD+CAiflnwweypoKM8WgwXJnI0Oa/SWqKMtrDiFxCcZCwIuAhS0sjenaiEuedbAuStZv513zz/clpqRKFXBydJXKyjJUQLTA==',
+              createdBy: 'elastic',
+              updatedBy: 'elastic',
+              createdAt: '2021-10-05T19:52:25.865Z',
+              updatedAt: '2021-10-05T19:52:25.865Z',
+              muteAll: false,
+              mutedInstanceIds: [],
+              executionStatus: {
+                status: 'ok',
+                lastExecutionDate: '2021-10-05T19:52:51.260Z',
+                error: null,
+              },
+              meta: {
+                versionApiKeyLastmodified: '7.14.2',
+              },
+              scheduledTaskId: 'c4005e90-2615-11ec-811e-db7211397897',
+              legacyId: 'c364e1e0-2615-11ec-811e-db7211397897',
+            },
+            type: 'alert',
+            references: [],
+            namespaces: ['714-space'],
+            originId: 'c364e1e0-2615-11ec-811e-db7211397897',
+            migrationVersion: {
+              alert: '8.0.0',
+            },
+            coreMigrationVersion: '8.0.0',
+            updated_at: '2021-10-05T19:52:56.014Z',
+          },
+        });
+
+        // try to do a deep link to the old URL
+        const URL = `/s/714-space${DETECTION_ENGINE_RULES_URL}?id=c364e1e0-2615-11ec-811e-db7211397897`;
+
+        const readRulesRes = await supertest.get(URL).set('kbn-xsrf', 'true').send().expect(200);
+
+        expect(readRulesRes.body.outcome).to.eql('conflict');
       });
 
       it('should be able to read a single rule using rule_id', async () => {
@@ -61,7 +295,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql(resolveSimpleRuleOutput());
+        expect(bodyToCompare).to.eql(getSimpleRuleOutput());
       });
 
       it('should be able to read a single rule with an auto-generated rule_id', async () => {

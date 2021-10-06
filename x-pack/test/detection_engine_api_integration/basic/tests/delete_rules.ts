@@ -17,7 +17,6 @@ import {
   getSimpleRule,
   getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
-  resolveSimpleRuleOutputWithoutRuleId,
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
@@ -74,7 +73,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
-        expect(bodyToCompare).to.eql(resolveSimpleRuleOutputWithoutRuleId());
+        expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
       });
 
       it('should return an error if the id does not exist when trying to delete it', async () => {

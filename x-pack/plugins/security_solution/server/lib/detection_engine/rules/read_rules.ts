@@ -31,6 +31,10 @@ export const readRules = async ({
     try {
       const rule = await rulesClient.resolve({ id });
       if (isAlertType(isRuleRegistryEnabled, rule)) {
+        if (rule?.outcome === 'exactMatch') {
+          const { outcome, ...restOfRule } = rule;
+          return restOfRule;
+        }
         return rule;
       } else {
         return null;
