@@ -225,6 +225,14 @@ export class TaskRunner<
     }
   }
 
+  private shouldLogAndScheduleActionsForAlerts() {
+    // Returns true if
+    // - execution is not cancelled
+    // OR
+    // - alerting config disables skip behavior AND rule type disables skip behavior
+    return !this.cancelled$.getValue();
+  }
+
   async executeAlertInstance(
     alertInstanceId: string,
     alertInstance: AlertInstance<InstanceState, InstanceContext>,
@@ -379,19 +387,21 @@ export class TaskRunner<
       recoveredAlerts: recoveredAlertInstances,
     });
 
-    generateNewAndRecoveredInstanceEvents({
-      eventLogger,
-      originalAlertInstances,
-      currentAlertInstances: instancesWithScheduledActions,
-      recoveredAlertInstances,
-      alertId,
-      alertLabel,
-      namespace,
-      ruleType: alertType,
-      rule: alert,
-    });
+    if (this.shouldLogAndScheduleActionsForAlerts()) {
+      generateNewAndRecoveredInstanceEvents({
+        eventLogger,
+        originalAlertInstances,
+        currentAlertInstances: instancesWithScheduledActions,
+        recoveredAlertInstances,
+        alertId,
+        alertLabel,
+        namespace,
+        ruleType: alertType,
+        rule: alert,
+      });
+    }
 
-    if (!muteAll) {
+    if (!muteAll && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedInstanceIdsSet = new Set(mutedInstanceIds);
 
       scheduleActionsForRecoveredInstances<InstanceState, InstanceContext, RecoveryActionGroupId>({
@@ -446,7 +456,14 @@ export class TaskRunner<
         )
       );
     } else {
-      this.logger.debug(`no scheduling of actions for alert ${alertLabel}: alert is muted.`);
+      if (muteAll) {
+        this.logger.debug(`no scheduling of actions for alert ${alertLabel}: alert is muted.`);
+      }
+      if (this.cancelled$.getValue()) {
+        this.logger.debug(
+          `no scheduling of actions for alert ${alertLabel}: alert execution has been cancelled.`
+        );
+      }
     }
 
     return {
