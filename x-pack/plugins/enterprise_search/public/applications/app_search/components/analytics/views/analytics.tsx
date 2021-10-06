@@ -62,7 +62,6 @@ export const Analytics: React.FC = () => {
   return (
     <AnalyticsLayout isAnalyticsView title={ANALYTICS_TITLE}>
       <SuggestedCurationsCallout />
-      <EuiSpacer />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={1}>
           <AnalyticsCards

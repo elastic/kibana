@@ -48,36 +48,39 @@ export const SuggestionsCallout: React.FC<SuggestionsCalloutProps> = ({
   }
 
   return (
-    <EuiCallOut color="success" iconType={LightbulbIcon} title={title}>
-      <EuiText size="s">
-        <p>{description}</p>
-      </EuiText>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiButtonTo to={buttonTo} color="success" fill size="s">
-            {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engine.curations.suggestionsCallout.reviewSuggestionsButtonLabel',
-              { defaultMessage: 'Review suggestions' }
-            )}
-          </EuiButtonTo>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            color="success"
-            iconType="eyeClosed"
-            size="s"
-            onClick={() => {
-              setLastDismissedTimestamp(new Date().toISOString());
-            }}
-          >
-            {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engine.curations.suggestionsCallout.hideForNowLabel',
-              { defaultMessage: 'Hide this for now' }
-            )}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiCallOut>
+    <>
+      <EuiCallOut color="success" iconType={LightbulbIcon} title={title}>
+        <EuiText size="s">
+          <p>{description}</p>
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButtonTo to={buttonTo} color="success" fill size="s">
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.curations.suggestionsCallout.reviewSuggestionsButtonLabel',
+                { defaultMessage: 'Review suggestions' }
+              )}
+            </EuiButtonTo>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              color="success"
+              iconType="eyeClosed"
+              size="s"
+              onClick={() => {
+                setLastDismissedTimestamp(new Date().toISOString());
+              }}
+            >
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.curations.suggestionsCallout.hideForNowLabel',
+                { defaultMessage: 'Hide this for now' }
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiCallOut>
+      <EuiSpacer />
+    </>
   );
 };
