@@ -247,6 +247,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async waitForEmptyWorkspace() {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`empty-workspace`);
+      });
+    },
+
+    async waitForWorkspaceWithVisualization() {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`lnsVisualizationContainer`);
+      });
+    },
+
     async waitForFieldMissing(field: string) {
       await retry.try(async () => {
         await testSubjects.missingOrFail(`lnsFieldListPanelField-${field}`);
