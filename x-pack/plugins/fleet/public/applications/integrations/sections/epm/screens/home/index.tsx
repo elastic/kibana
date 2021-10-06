@@ -21,7 +21,8 @@ import {
   useGetCategories,
   useGetPackages,
   useBreadcrumbs,
-  useGetAddableCustomIntegrations,
+  useGetAppendCustomIntegrations,
+  useGetReplacementCustomIntegrations,
   useLink,
 } from '../../../../hooks';
 import { doesPackageHaveIntegrations } from '../../../../services';
@@ -35,7 +36,9 @@ import type { PackageListItem } from '../../../../types';
 
 import type { IntegrationCardItem } from '../../../../../../../common/types/models';
 
-import type { Category } from '../../../../../../../../../../src/plugins/custom_integrations/common';
+import type { IntegrationCategory } from '../../../../../../../../../../src/plugins/custom_integrations/common';
+
+import { useMergeEprPackagesWithReplacements } from '../../../../../../hooks/use_merge_epr_with_replacements';
 
 import { mergeAndReplaceCategoryCounts } from './util';
 import { CategoryFacets } from './category_facets';
@@ -86,7 +89,7 @@ function mapToCard(
     title: item.title,
     version: 'version' in item ? item.version || '' : '',
     release: 'release' in item ? item.release : undefined,
-    uiInternalPathUrl,
+    url: uiInternalPathUrl,
   };
 }
 
@@ -209,6 +212,7 @@ const InstalledPackages: React.FC = memo(() => {
 
   const controls = (
     <CategoryFacets
+      showCounts={true}
       categories={categories}
       selectedCategory={selectedCategory}
       onCategoryChange={({ id }: CategoryFacet) => setSelectedCategory(id)}
@@ -266,6 +270,7 @@ const AvailablePackages: React.FC = memo(() => {
   const { data: categoriesRes, isLoading: isLoadingCategories } = useGetCategories({
     include_policy_templates: true,
   });
+
   const eprPackages = useMemo(
     () => packageListToIntegrationsList(categoryPackagesRes?.response || []),
     [categoryPackagesRes]
@@ -276,14 +281,23 @@ const AvailablePackages: React.FC = memo(() => {
     [allCategoryPackagesRes]
   );
 
-  const { loading: isLoadingAddableCustomIntegrations, value: addableCustomIntegrations } =
-    useGetAddableCustomIntegrations();
-  const filteredAddableIntegrations = addableCustomIntegrations
-    ? addableCustomIntegrations.filter((integration: CustomIntegration) => {
+  const { value: replacementCustomIntegrations } = useGetReplacementCustomIntegrations();
+
+  const mergedEprPackages: Array<PackageListItem | CustomIntegration> =
+    useMergeEprPackagesWithReplacements(
+      eprPackages || [],
+      replacementCustomIntegrations || [],
+      selectedCategory as IntegrationCategory
+    );
+
+  const { loading: isLoadingAppendCustomIntegrations, value: appendCustomIntegrations } =
+    useGetAppendCustomIntegrations();
+  const filteredAddableIntegrations = appendCustomIntegrations
+    ? appendCustomIntegrations.filter((integration: CustomIntegration) => {
         if (!selectedCategory) {
           return true;
         }
-        return integration.categories.indexOf(selectedCategory as Category) >= 0;
+        return integration.categories.indexOf(selectedCategory as IntegrationCategory) >= 0;
       })
     : [];
 
@@ -296,7 +310,7 @@ const AvailablePackages: React.FC = memo(() => {
   );
 
   const eprAndCustomPackages: Array<CustomIntegration | PackageListItem> = [
-    ...eprPackages,
+    ...mergedEprPackages,
     ...filteredAddableIntegrations,
   ];
   eprAndCustomPackages.sort((a, b) => {
@@ -306,37 +320,38 @@ const AvailablePackages: React.FC = memo(() => {
   const categories = useMemo(() => {
     const eprAndCustomCategories: CategoryFacet[] =
       isLoadingCategories ||
-      isLoadingAddableCustomIntegrations ||
-      !addableCustomIntegrations ||
+      isLoadingAppendCustomIntegrations ||
+      !appendCustomIntegrations ||
       !categoriesRes
         ? []
         : mergeAndReplaceCategoryCounts(
             categoriesRes.response as CategoryFacet[],
-            addableCustomIntegrations
+            appendCustomIntegrations
           );
     return [
       {
         id: '',
-        count: (allEprPackages?.length || 0) + (addableCustomIntegrations?.length || 0),
+        count: (allEprPackages?.length || 0) + (appendCustomIntegrations?.length || 0),
       },
       ...(eprAndCustomCategories ? eprAndCustomCategories : []),
     ] as CategoryFacet[];
   }, [
     allEprPackages?.length,
-    addableCustomIntegrations,
+    appendCustomIntegrations,
     categoriesRes,
-    isLoadingAddableCustomIntegrations,
+    isLoadingAppendCustomIntegrations,
     isLoadingCategories,
   ]);
 
-  if (!categoryExists(selectedCategory, categories)) {
+  if (!isLoadingCategories && !categoryExists(selectedCategory, categories)) {
     history.replace(pagePathGetters.integrations_all({ category: '', searchTerm: searchParam })[1]);
     return null;
   }
 
   const controls = categories ? (
     <CategoryFacets
-      isLoading={isLoadingCategories || isLoadingAllPackages || isLoadingAddableCustomIntegrations}
+      showCounts={false}
+      isLoading={isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations}
       categories={categories}
       selectedCategory={selectedCategory}
       onCategoryChange={({ id }: CategoryFacet) => {
