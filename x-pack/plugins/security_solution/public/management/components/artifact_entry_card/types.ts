@@ -10,6 +10,13 @@ import { EffectScope, TrustedApp } from '../../../../common/endpoint/types';
 import { ContextMenuItemNavByRouterProps } from '../context_menu_with_router_support/context_menu_item_nav_by_router';
 
 export type AnyArtifact = ExceptionListItemSchema & TrustedApp;
+interface ArtifactInfoEntry {
+  field: string;
+  type: string;
+  operator: string;
+  value: string;
+}
+type ArtifactInfoEntries = ArtifactInfoEntry & { entries?: ArtifactInfoEntry[] };
 
 /**
  * A normalized structured that is used internally through out the card's components.
@@ -21,12 +28,7 @@ export interface ArtifactInfo
   > {
   effectScope: EffectScope;
   os: string;
-  entries: Array<{
-    field: string;
-    type: string;
-    operator: string;
-    value: string;
-  }>;
+  entries: ArtifactInfoEntries[];
 }
 
 export interface MenuItemPropsByPolicyId {

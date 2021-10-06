@@ -6,11 +6,19 @@
  */
 
 import React, { memo, useMemo, useCallback, useState } from 'react';
-import { CommonProps, EuiAccordion, EuiCommentList, EuiCommentProps } from '@elastic/eui';
+import {
+  CommonProps,
+  EuiAccordion,
+  EuiCommentList,
+  EuiCommentProps,
+  EuiButtonEmpty,
+  EuiSpacer,
+} from '@elastic/eui';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { CardActionsFlexItemProps } from './card_actions_flex_item';
 import { AnyArtifact } from '../types';
 import { getFormattedComments } from '../utils/get_formatted_comments';
+import { SHOW_COMMENTS_LABEL, HIDE_COMMENTS_LABEL } from './translations';
 
 export interface CardCommentsProps
   extends CardActionsFlexItemProps,
@@ -22,7 +30,7 @@ export const CardComments = memo<CardCommentsProps>(
   ({ comments, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
-    const [showComments, setShowComments] = useState(true);
+    const [showComments, setShowComments] = useState(false);
     const onCommentsClick = useCallback((): void => {
       setShowComments(!showComments);
     }, [setShowComments, showComments]);
@@ -30,15 +38,31 @@ export const CardComments = memo<CardCommentsProps>(
       return getFormattedComments(comments);
     }, [comments]);
 
+    const getButtonText = useCallback(
+      () =>
+        showComments ? HIDE_COMMENTS_LABEL(comments.length) : SHOW_COMMENTS_LABEL(comments.length),
+      [comments.length, showComments]
+    );
+
     return (
-      <EuiAccordion
-        id={'1'}
-        arrowDisplay="none"
-        forceState={showComments ? 'open' : 'closed'}
-        data-test-subj="exceptionsViewerCommentAccordion"
-      >
-        <EuiCommentList comments={formattedComments} />
-      </EuiAccordion>
+      <>
+        <EuiSpacer size="s" />
+        <EuiButtonEmpty
+          onClick={onCommentsClick}
+          flush="left"
+          size="xs"
+          data-test-subj={getTestId('comments-label')}
+        >
+          {getButtonText()}
+        </EuiButtonEmpty>
+        <EuiAccordion id={'1'} arrowDisplay="none" forceState={showComments ? 'open' : 'closed'}>
+          <EuiSpacer size="m" />
+          <EuiCommentList
+            comments={formattedComments}
+            data-test-subj={getTestId('comments-list')}
+          />
+        </EuiAccordion>
+      </>
     );
   }
 );

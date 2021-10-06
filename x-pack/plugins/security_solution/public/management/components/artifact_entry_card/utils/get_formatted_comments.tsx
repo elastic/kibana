@@ -26,7 +26,7 @@ export const getFormattedComments = (comments: CommentsArray): EuiCommentProps[]
       <EuiAvatar
         size="s"
         color={euiLightVars.euiColorLightestShade}
-        name={commentItem.created_by.toUpperCase()}
+        name={commentItem.created_by}
       />
     ),
     children: <EuiText size="s">{commentItem.comment}</EuiText>,
