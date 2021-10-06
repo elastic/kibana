@@ -157,7 +157,7 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={handleOnCancel}>
+            <EuiButtonEmpty data-test-subj="add-exception-cancel-button" onClick={handleOnCancel}>
               <FormattedMessage
                 id="xpack.securitySolution.hostIsolationExceptions.flyout.cancel"
                 defaultMessage="Cancel"
