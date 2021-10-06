@@ -209,7 +209,29 @@ describe('When on the Trusted Apps Page', () => {
         });
       };
 
-      describe('and the license is downgraded to gold or below', () => {
+      const renderWithListDataAndClickAddButton = async (): Promise<
+        ReturnType<AppContextTestRender['render']>
+      > => {
+        renderResult = await renderWithListData();
+
+        act(() => {
+          const addButton = renderResult.getByTestId('trustedAppsListAddButton');
+          fireEvent.click(addButton, { button: 1 });
+        });
+
+        // Wait for the policies to be loaded
+        await act(async () => {
+          await waitForAction('trustedAppsPoliciesStateChanged', {
+            validate: (action) => {
+              return isLoadedResourceState(action.payload);
+            },
+          });
+        });
+
+        return renderResult;
+      };
+
+      describe('the license is downgraded to gold or below and the user is editing a per policy TA', () => {
         beforeEach(async () => {
           (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
           useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
@@ -224,14 +246,37 @@ describe('When on the Trusted Apps Page', () => {
               },
             };
           });
-
           await renderWithListDataAndClickOnEditCard();
         });
 
-        it('shows a message at the top of the flyout to inform the user their license is expired', async () => {
+        it('shows a message at the top of the flyout to inform the user their license is expired', () => {
           expect(
             renderResult.queryByTestId('addTrustedAppFlyout-expired-license-callout')
           ).toBeTruthy();
+        });
+      });
+
+      describe('the license is downgraded to gold or below and the user is adding a new TA', () => {
+        beforeEach(async () => {
+          (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+          useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+
+          const originalFakeTrustedAppProvider = getFakeTrustedApp.getMockImplementation();
+          getFakeTrustedApp.mockImplementation(() => {
+            return {
+              ...originalFakeTrustedAppProvider!(),
+              effectScope: {
+                type: 'policy',
+                policies: ['abc123'],
+              },
+            };
+          });
+          await renderWithListDataAndClickAddButton();
+        });
+        it('does not show the expired license message at the top of the flyout', async () => {
+          expect(
+            renderResult.queryByTestId('addTrustedAppFlyout-expired-license-callout')
+          ).toBeNull();
         });
       });
 
