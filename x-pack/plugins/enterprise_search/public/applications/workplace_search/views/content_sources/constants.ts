@@ -306,20 +306,6 @@ export const SOURCE_CONFIG_TITLE = i18n.translate(
   }
 );
 
-export const SYNC_MANAGEMENT_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementTitle',
-  {
-    defaultMessage: 'Sync management',
-  }
-);
-
-export const SYNC_MANAGEMENT_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementDescription',
-  {
-    defaultMessage: 'Enable and disable extraction of specific content for this source.',
-  }
-);
-
 export const SYNC_MANAGEMENT_SYNCHRONIZE_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementSynchronizeLabel',
   {
@@ -344,7 +330,7 @@ export const SYNC_MANAGEMENT_THUMBNAILS_GLOBAL_CONFIG_LABEL = i18n.translate(
 export const SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementContentExtractionLabel',
   {
-    defaultMessage: 'Sync all text and content',
+    defaultMessage: 'Sync full-text from files',
   }
 );
 
@@ -565,6 +551,13 @@ export const SOURCE_OBJECTS_AND_ASSETS_DESCRIPTION = i18n.translate(
   }
 );
 
+export const SOURCE_OBJECTS_AND_ASSETS_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceObjectsAndAssetsLabel',
+  {
+    defaultMessage: 'Object and details to include in search results',
+  }
+);
+
 export const SOURCE_SYNCRONIZATION_TOGGLE_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncronizationToggleLabel',
   {
@@ -709,5 +702,40 @@ export const BLOCKED_EMPTY_STATE_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.blockedEmptyStateDescription',
   {
     defaultMessage: 'Add a blocked time window to only perform syncs at the right time.',
+  }
+);
+
+export const SYNC_ENABLED_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncEnabledMessage',
+  {
+    defaultMessage: 'Source synchronization enabled.',
+  }
+);
+
+export const SYNC_DISABLED_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncDisabledMessage',
+  {
+    defaultMessage: 'Source synchronization disabled.',
+  }
+);
+
+export const SYNC_SETTINGS_UPDATED_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncSettingsUpdatedMessage',
+  {
+    defaultMessage: 'Source synchronization settings updated.',
+  }
+);
+
+export const SYNC_UNSAVED_CHANGES_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncUnsavedChangesMessage',
+  {
+    defaultMessage: 'Your changes have not been saved. Are you sure you want to leave?',
+  }
+);
+
+export const NEXT_SYNC_RUNNING_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.nextSyncRunningMessage',
+  {
+    defaultMessage: 'as soon as the currently running job finishes',
   }
 );
