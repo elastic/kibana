@@ -19,7 +19,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   // url parameters
   const start = encodeURIComponent(metadata.start);
   const end = encodeURIComponent(metadata.end);
-  const bucketSize = '60s';
+  const intervalString = '60s';
+  const bucketSize = 60;
 
   registry.when(
     'Observability overview when data is not loaded',
@@ -28,7 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('when data is not loaded', () => {
         it('handles the empty state', async () => {
           const response = await supertest.get(
-            `/api/apm/observability_overview?start=${start}&end=${end}&bucketSize=${bucketSize}`
+            `/api/apm/observability_overview?start=${start}&end=${end}&bucketSize=${bucketSize}&intervalString=${intervalString}`
           );
           expect(response.status).to.be(200);
 
@@ -45,7 +46,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       it('returns the service count and transaction coordinates', async () => {
         const response = await supertest.get(
-          `/api/apm/observability_overview?start=${start}&end=${end}&bucketSize=${bucketSize}`
+          `/api/apm/observability_overview?start=${start}&end=${end}&bucketSize=${bucketSize}&intervalString=${intervalString}`
         );
         expect(response.status).to.be(200);
 
