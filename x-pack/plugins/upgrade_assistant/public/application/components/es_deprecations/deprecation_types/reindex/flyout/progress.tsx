@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { IndexGroup, ReindexStatus, ReindexStep } from '../../../../../../../common/types';
+import { ReindexStatus, ReindexStep } from '../../../../../../../common/types';
 import { LoadingState } from '../../../../types';
 import type { ReindexState } from '../use_reindex_state';
 import { StepProgress, StepProgressStep } from './step_progress';
@@ -118,7 +118,7 @@ export const ReindexProgress: React.FunctionComponent<{
   reindexState: ReindexState;
   cancelReindex: () => void;
 }> = (props) => {
-  const { errorMessage, indexGroup, lastCompletedStep = -1, status } = props.reindexState;
+  const { errorMessage, lastCompletedStep = -1, status } = props.reindexState;
   const stepDetails = (thisStep: ReindexStep): Pick<StepProgressStep, 'status' | 'children'> => {
     const previousStep = orderedSteps[orderedSteps.indexOf(thisStep) - 1];
 
@@ -224,47 +224,6 @@ export const ReindexProgress: React.FunctionComponent<{
       ...stepDetails(ReindexStep.aliasCreated),
     },
   ];
-
-  // If this index is part of an index group, add the approriate group services steps.
-  if (indexGroup === IndexGroup.ml) {
-    steps.unshift({
-      title: (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.pauseMlStepTitle"
-          defaultMessage="Pausing Machine Learning jobs"
-        />
-      ),
-      ...stepDetails(ReindexStep.indexGroupServicesStopped),
-    });
-    steps.push({
-      title: (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.resumeMlStepTitle"
-          defaultMessage="Resuming Machine Learning jobs"
-        />
-      ),
-      ...stepDetails(ReindexStep.indexGroupServicesStarted),
-    });
-  } else if (indexGroup === IndexGroup.watcher) {
-    steps.unshift({
-      title: (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.stopWatcherStepTitle"
-          defaultMessage="Stopping Watcher"
-        />
-      ),
-      ...stepDetails(ReindexStep.indexGroupServicesStopped),
-    });
-    steps.push({
-      title: (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.resumeWatcherStepTitle"
-          defaultMessage="Resuming Watcher"
-        />
-      ),
-      ...stepDetails(ReindexStep.indexGroupServicesStarted),
-    });
-  }
 
   return <StepProgress steps={steps} />;
 };
