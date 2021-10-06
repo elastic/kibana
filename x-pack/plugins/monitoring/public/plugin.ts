@@ -203,7 +203,6 @@ export class MonitoringPlugin
     const { createMemoryUsageAlertType } = await import('./alerts/memory_usage_alert');
     const { createCCRReadExceptionsAlertType } = await import('./alerts/ccr_read_exceptions_alert');
     const { createLargeShardSizeAlertType } = await import('./alerts/large_shard_size_alert');
-    const { createTransformHealthRuleType } = await import('../../transform/public');
 
     ruleTypeRegistry.register(createCpuUsageAlertType(config));
     ruleTypeRegistry.register(createDiskUsageAlertType(config));
@@ -225,7 +224,6 @@ export class MonitoringPlugin
     );
     ruleTypeRegistry.register(createCCRReadExceptionsAlertType(config));
     ruleTypeRegistry.register(createLargeShardSizeAlertType(config));
-    ruleTypeRegistry.register(createTransformHealthRuleType());
     const legacyAlertTypes = createLegacyAlertTypes(config);
     for (const legacyAlertType of legacyAlertTypes) {
       ruleTypeRegistry.register(legacyAlertType);

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Logger } from 'src/core/server';
 import type {
   ActionGroup,
   AlertInstanceContext,
@@ -16,6 +17,8 @@ import { PLUGIN, TRANSFORM_RULE_TYPE } from '../../../../common/constants';
 import { transformHealthRuleParams, TransformHealthRuleParams } from './schema';
 import { AlertType } from '../../../../../alerting/server';
 import { transformHealthServiceProvider } from './transform_health_service';
+import type { PluginSetupContract as AlertingSetup } from '../../../../../alerting/server';
+import { STACK_ALERTS_FEATURE_ID } from '../../../../../stack_alerts/common';
 
 export interface BaseResponse {
   transform_id: string;
@@ -44,6 +47,16 @@ export const TRANSFORM_ISSUE_DETECTED: ActionGroup<TransformIssue> = {
     defaultMessage: 'Issue detected',
   }),
 };
+
+interface RegisterParams {
+  logger: Logger;
+  alerting: AlertingSetup;
+}
+
+export function registerTransformHealthRuleType(params: RegisterParams) {
+  const { alerting } = params;
+  alerting.registerType(getTransformHealthRuleType());
+}
 
 export function getTransformHealthRuleType(): AlertType<
   TransformHealthRuleParams,
@@ -83,7 +96,7 @@ export function getTransformHealthRuleType(): AlertType<
         },
       ],
     },
-    producer: 'monitoring',
+    producer: STACK_ALERTS_FEATURE_ID,
     minimumLicenseRequired: PLUGIN.MINIMUM_LICENSE_REQUIRED,
     isExportable: true,
     async executor(options) {

@@ -16,6 +16,7 @@ import type { SharePluginStart } from 'src/plugins/share/public';
 import { registerFeature } from './register_feature';
 import type { PluginSetupContract as AlertingSetup } from '../../alerting/public';
 import type { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
+import { getTransformHealthRuleType } from './alerting';
 
 export interface PluginsDependencies {
   data: DataPublicPluginStart;
@@ -29,7 +30,7 @@ export interface PluginsDependencies {
 
 export class TransformUiPlugin {
   public setup(coreSetup: CoreSetup<PluginsDependencies>, pluginsSetup: PluginsDependencies): void {
-    const { management, home } = pluginsSetup;
+    const { management, home, triggersActionsUi } = pluginsSetup;
 
     // Register management section
     const esSection = management.sections.section.data;
@@ -45,6 +46,10 @@ export class TransformUiPlugin {
       },
     });
     registerFeature(home);
+
+    if (triggersActionsUi) {
+      triggersActionsUi.ruleTypeRegistry.register(getTransformHealthRuleType());
+    }
   }
 
   public start() {}

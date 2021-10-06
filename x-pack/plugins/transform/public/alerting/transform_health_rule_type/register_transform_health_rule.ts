@@ -11,7 +11,7 @@ import { TRANSFORM_RULE_TYPE } from '../../../common';
 import type { TransformHealthRuleParams } from '../../../common/types/alerting';
 import type { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 
-export function createTransformHealthRuleType(): AlertTypeModel<TransformHealthRuleParams> {
+export function getTransformHealthRuleType(): AlertTypeModel<TransformHealthRuleParams> {
   return {
     id: TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH,
     description: i18n.translate('xpack.transform.alertingRuleTypes.transformHealth.description', {
