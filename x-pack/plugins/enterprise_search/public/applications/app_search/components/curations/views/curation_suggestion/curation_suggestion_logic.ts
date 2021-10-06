@@ -179,7 +179,7 @@ export const CurationSuggestionLogic = kea<
 
         setQueuedSuccessMessage(
           i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.successfullyAppliedMessage',
+            'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.successfullyAutomatedMessage',
             {
               defaultMessage:
                 'Suggestion was succefully applied and all future suggestions for the query "{query}" will be automatically applied.',
@@ -206,7 +206,7 @@ export const CurationSuggestionLogic = kea<
 
         setQueuedSuccessMessage(
           i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.successfullyAppliedMessage',
+            'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.successfullyRejectedMessage',
             {
               defaultMessage: 'Suggestion was succefully rejected.',
               values: { query: suggestion!.query },
@@ -228,7 +228,7 @@ export const CurationSuggestionLogic = kea<
 
         setQueuedSuccessMessage(
           i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.successfullyAppliedMessage',
+            'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.successfullyDisabledMessage',
             {
               defaultMessage:
                 'Suggestion was succefully rejected and you will no longer receive suggestions for the query "{query}".',
