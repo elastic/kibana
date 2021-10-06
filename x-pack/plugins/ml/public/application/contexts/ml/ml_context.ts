@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
-import { IndexPattern, IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
+import { DataView, DataViewsContract } from '../../../../../../../src/plugins/data_views/public';
 import { SavedSearchSavedObject } from '../../../../common/types/kibana';
 import { MlServicesContext } from '../../app';
 
 export interface MlContextValue {
   combinedQuery: any;
-  currentIndexPattern: IndexPattern; // TODO this should be IndexPattern or null
+  currentIndexPattern: DataView; // TODO this should be IndexPattern or null
   currentSavedSearch: SavedSearchSavedObject | null;
-  indexPatterns: IndexPatternsContract;
+  indexPatterns: DataViewsContract;
   kibanaConfig: any; // IUiSettingsClient;
   kibanaVersion: string;
 }
