@@ -58,7 +58,7 @@ export const EmbeddableLegacyUrlConflictInternal = (
   return (
     <>
       <FormattedMessage
-        id="xpack.spaces.legacyURLConflict.longMessage"
+        id="xpack.spaces.embeddableLegacyUrlConflict.messageText"
         defaultMessage="We found 2 saved objects for this panel. Disable the legacy URL alias to fix this error."
       />
       <EuiSpacer />
@@ -67,14 +67,17 @@ export const EmbeddableLegacyUrlConflictInternal = (
           <EuiCallOut
             title={
               <FormattedMessage
-                id="xpack.spaces.legacyURLConflict.expandErrorText"
+                id="xpack.spaces.embeddableLegacyUrlConflict.calloutTitle"
                 defaultMessage="Copy this JSON and use it with the {documentationLink}"
                 values={{
                   documentationLink: (
                     <EuiLink external href={docLink} target="_blank">
-                      {i18n.translate('xpack.spaces.legacyURLConflict.documentationLinkText', {
-                        defaultMessage: '_disable_legacy_url_aliases API',
-                      })}
+                      {i18n.translate(
+                        'xpack.spaces.embeddableLegacyUrlConflict.documentationLinkText',
+                        {
+                          defaultMessage: '_disable_legacy_url_aliases API',
+                        }
+                      )}
                     </EuiLink>
                   ),
                 }}
@@ -90,7 +93,7 @@ export const EmbeddableLegacyUrlConflictInternal = (
         </EuiTextAlign>
       ) : (
         <EuiButtonEmpty onClick={() => setExpandError(true)}>
-          {i18n.translate('xpack.spaces.legacyURLConflict.expandError', {
+          {i18n.translate('xpack.spaces.embeddableLegacyUrlConflict.detailsButton', {
             defaultMessage: `View details`,
           })}
         </EuiButtonEmpty>

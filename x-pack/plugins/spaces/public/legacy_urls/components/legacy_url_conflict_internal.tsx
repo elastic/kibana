@@ -75,19 +75,19 @@ export const LegacyUrlConflictInternal = (props: InternalProps & LegacyUrlConfli
       iconType="help"
       title={
         <FormattedMessage
-          id="xpack.spaces.shareToSpace.legacyUrlConflictTitle"
+          id="xpack.spaces.legacyUrlConflict.calloutTitle"
           defaultMessage="2 saved objects use this URL"
         />
       }
     >
       <FormattedMessage
-        id="xpack.spaces.shareToSpace.legacyUrlConflictBody"
+        id="xpack.spaces.legacyUrlConflict.calloutBodyText"
         defaultMessage="Check that this is the {objectNoun} that you are looking for. Otherwise, go to the other one. {documentationLink}"
         values={{
           objectNoun,
           documentationLink: (
             <EuiLink external href={docLink} target="_blank">
-              {i18n.translate('xpack.spaces.legacyURLConflict.documentationLinkText', {
+              {i18n.translate('xpack.spaces.legacyUrlConflict.documentationLinkText', {
                 defaultMessage: 'Learn more',
               })}
             </EuiLink>
@@ -115,7 +115,7 @@ export const LegacyUrlConflictInternal = (props: InternalProps & LegacyUrlConfli
               data-test-subj="legacy-url-conflict-go-to-other-button"
             >
               <FormattedMessage
-                id="xpack.spaces.shareToSpace.legacyUrlConflictLinkButton"
+                id="xpack.spaces.legacyUrlConflict.linkButton"
                 defaultMessage="Go to other {objectNoun}"
                 values={{ objectNoun }}
               />
@@ -131,7 +131,7 @@ export const LegacyUrlConflictInternal = (props: InternalProps & LegacyUrlConfli
             data-test-subj="legacy-url-conflict-dismiss-button"
           >
             <FormattedMessage
-              id="xpack.spaces.shareToSpace.legacyUrlConflictDismissButton"
+              id="xpack.spaces.legacyUrlConflict.dismissButton"
               defaultMessage="Dismiss"
             />
           </EuiButtonEmpty>

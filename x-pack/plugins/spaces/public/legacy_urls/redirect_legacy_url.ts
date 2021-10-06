@@ -22,10 +22,10 @@ export function createRedirectLegacyUrl(
     const { currentAppId$, navigateToApp } = application;
     const appId = await currentAppId$.pipe(first()).toPromise(); // retrieve the most recent value from the BehaviorSubject
 
-    const title = i18n.translate('xpack.spaces.shareToSpace.redirectLegacyUrlToast.title', {
+    const title = i18n.translate('xpack.spaces.redirectLegacyUrlToast.title', {
       defaultMessage: `We redirected you to a new URL`,
     });
-    const text = i18n.translate('xpack.spaces.shareToSpace.redirectLegacyUrlToast.text', {
+    const text = i18n.translate('xpack.spaces.redirectLegacyUrlToast.text', {
       defaultMessage: `The {objectNoun} you're looking for has a new location. Use this URL from now on.`,
       values: { objectNoun },
     });
