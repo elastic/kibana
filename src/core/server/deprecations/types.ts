@@ -11,10 +11,16 @@ import type { IScopedClusterClient } from '../elasticsearch';
 
 type MaybePromise<T> = T | Promise<T>;
 
+/**
+ * @internal
+ */
 export interface DomainDeprecationDetails extends DeprecationsDetails {
   domainId: string;
 }
 
+/**
+ * @public
+ */
 export interface DeprecationsDetails {
   /**
    * The title of the deprecation.
@@ -43,11 +49,11 @@ export interface DeprecationsDetails {
    * across kibana deprecations.
    */
   deprecationType?: 'config' | 'feature';
-  /* (optional) link to the documentation for more details on the deprecation. */
+  /** (optional) link to the documentation for more details on the deprecation. */
   documentationUrl?: string;
-  /* (optional) specify the fix for this deprecation requires a full kibana restart. */
+  /** (optional) specify the fix for this deprecation requires a full kibana restart. */
   requireRestart?: boolean;
-  /* corrective action needed to fix this deprecation. */
+  /** corrective action needed to fix this deprecation. */
   correctiveActions: {
     /**
      * (optional) The api to be called to automatically fix the deprecation
@@ -55,11 +61,11 @@ export interface DeprecationsDetails {
      * handle their deprecations.
      */
     api?: {
-      /* Kibana route path. Passing a query string is allowed */
+      /** Kibana route path. Passing a query string is allowed */
       path: string;
-      /* Kibana route method: 'POST' or 'PUT'. */
+      /** Kibana route method: 'POST' or 'PUT'. */
       method: 'POST' | 'PUT';
-      /* Additional details to be passed to the route. */
+      /** Additional details to be passed to the route. */
       body?: {
         [key: string]: any;
       };
@@ -74,15 +80,24 @@ export interface DeprecationsDetails {
   };
 }
 
+/**
+ * @public
+ */
 export interface RegisterDeprecationsConfig {
   getDeprecations: (context: GetDeprecationsContext) => MaybePromise<DeprecationsDetails[]>;
 }
 
+/**
+ * @public
+ */
 export interface GetDeprecationsContext {
   esClient: IScopedClusterClient;
   savedObjectsClient: SavedObjectsClientContract;
 }
 
+/**
+ * @public
+ */
 export interface DeprecationsGetResponse {
   deprecations: DomainDeprecationDetails[];
 }
