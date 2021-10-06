@@ -124,13 +124,13 @@ export const registerPrivilegeDeprecations = ({
 
           return {
             title: i18n.translate(
-              'xpack.securitySolution.deprecation.casesSubfeaturePrivileges.title',
+              'xpack.securitySolution.privilegeDeprecations.casesSubFeaturePrivileges.title',
               {
-                defaultMessage: 'Deprecate cases sub-feature privileges in Security',
+                defaultMessage: 'Deprecate cases sub-feature privileges in security solution',
               }
             ),
             message: i18n.translate(
-              'xpack.securitySolution.deprecation.ccasesSubfeaturePrivileges.message',
+              'xpack.securitySolution.privilegeDeprecations.casesSubFeaturePrivileges.message',
               {
                 defaultMessage:
                   'The "securitySolutions" feature privilege has been populated with siem feature or cases sub feature if existing.',
@@ -150,7 +150,7 @@ export const registerPrivilegeDeprecations = ({
       } catch (err) {
         const errMsg = err instanceof Error ? err.message : 'n/a';
         const message = i18n.translate(
-          'xpack.securitySolutions.privilegeDeprecations.error.convertingRoles.message',
+          'xpack.securitySolution.privilegeDeprecations.error.casesSubFeaturePrivileges.message',
           {
             defaultMessage: `Failed to create cases roles from siem roles, unexpected error: {message}`,
             values: {
@@ -163,15 +163,18 @@ export const registerPrivilegeDeprecations = ({
         );
         return [
           {
-            title: i18n.translate('xpack.securitySolutions.privilegeDeprecations.error.title', {
-              defaultMessage: `Error in security solution to deprecate cases sub feature`,
-            }),
+            title: i18n.translate(
+              'xpack.securitySolution.privilegeDeprecations.error.casesSubFeaturePrivileges.title',
+              {
+                defaultMessage: `Error in security solution to deprecate cases sub feature`,
+              }
+            ),
             level: 'fetch_error',
             message,
             correctiveActions: {
               manualSteps: [
                 i18n.translate(
-                  'xpack.securitySolutions.privilegeDeprecations.manualSteps.message',
+                  'xpack.securitySolution.privilegeDeprecations.manualSteps.casesSubFeaturePrivileges.message',
                   {
                     defaultMessage:
                       'A user will have to set cases privileges manually in your associated role',
