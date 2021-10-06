@@ -83,13 +83,15 @@ describe('Phrase filter builder', () => {
         index: 'id',
         field: 'script number',
       },
-      script: {
+      query: {
         script: {
-          lang: 'expression',
-          params: {
-            value: 5,
+          script: {
+            lang: 'expression',
+            params: {
+              value: 5,
+            },
+            source: '(1234) == value',
           },
-          source: '(1234) == value',
         },
       },
     });
@@ -103,13 +105,15 @@ describe('Phrase filter builder', () => {
         index: 'id',
         field: 'script number',
       },
-      script: {
+      query: {
         script: {
-          lang: 'expression',
-          params: {
-            value: 5,
+          script: {
+            lang: 'expression',
+            params: {
+              value: 5,
+            },
+            source: '(1234) == value',
           },
-          source: '(1234) == value',
         },
       },
     });

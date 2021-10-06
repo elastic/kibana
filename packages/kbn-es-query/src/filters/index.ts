@@ -30,7 +30,6 @@ export {
 export {
   isExistsFilter,
   isMatchAllFilter,
-  isMissingFilter,
   isPhraseFilter,
   isPhrasesFilter,
   isRangeFilter,
@@ -69,7 +68,6 @@ export {
   RangeFilterMeta,
   MatchAllFilter,
   CustomFilter,
-  MissingFilter,
   RangeFilterParams,
   QueryStringFilter,
 } from './build_filters';

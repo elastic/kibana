@@ -65,10 +65,9 @@ const state: State = {
             },
           },
           query: {
-            match: {
+            match_phrase: {
               'host.os.name': {
                 query: 'Linux',
-                type: 'phrase',
               },
             },
           },
@@ -121,10 +120,9 @@ const state: State = {
               type: 'phrase',
             },
             query: {
-              match: {
+              match_phrase: {
                 'source.port': {
                   query: '30045',
-                  type: 'phrase',
                 },
               },
             },
@@ -256,7 +254,7 @@ describe('StatefulTopN', () => {
             key: 'host.os.name',
             params: { query: 'Linux' },
           },
-          query: { match: { 'host.os.name': { query: 'Linux', type: 'phrase' } } },
+          query: { match_phrase: { 'host.os.name': { query: 'Linux' } } },
         },
       ]);
     });

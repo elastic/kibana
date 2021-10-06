@@ -84,8 +84,10 @@ const existFilter: Filter = {
     key: 'transaction.marks.navigationTiming.fetchStart',
     value: 'exists',
   },
-  exists: {
-    field: 'transaction.marks.navigationTiming.fetchStart',
+  query: {
+    exists: {
+      field: 'transaction.marks.navigationTiming.fetchStart',
+    },
   },
 };
 
@@ -108,7 +110,7 @@ export const useMapFilters = (): Filter[] => {
   } = uxUiFilters;
 
   return useMemo(() => {
-    const filters = [existFilter];
+    const filters: Filter[] = [existFilter];
     if (serviceName) {
       filters.push(getMatchFilter(SERVICE_NAME, serviceName));
     }

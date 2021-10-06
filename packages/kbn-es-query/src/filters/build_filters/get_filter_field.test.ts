@@ -28,10 +28,8 @@ describe('getFilterField', function () {
   it('should return undefined for filters that do not target a specific field', () => {
     const filter = buildQueryFilter(
       {
-        query: {
-          query_string: {
-            query: 'response:200 and extension:jpg',
-          },
+        query_string: {
+          query: 'response:200 and extension:jpg',
         },
       },
       indexPattern.id!,

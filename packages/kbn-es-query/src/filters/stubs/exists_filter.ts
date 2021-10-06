@@ -20,4 +20,5 @@ export const existsFilter: ExistsFilter = {
   $state: {
     store: FilterStateStore.APP_STATE,
   },
+  query: {},
 };

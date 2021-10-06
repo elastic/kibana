@@ -28,11 +28,7 @@ describe('filter manager utilities', () => {
   describe('extractTimeFilter()', () => {
     test('should detect timeFilter', async () => {
       const filters: Filter[] = [
-        buildQueryFilter(
-          { _type: { match: { query: 'apache', type: 'phrase' } } },
-          'logstash-*',
-          ''
-        ),
+        buildQueryFilter({ query_string: { query: 'apache' } }, 'logstash-*', ''),
         buildRangeFilter(
           { name: 'time' } as IFieldType,
           { gt: 1388559600000, lt: 1388646000000 },
@@ -47,11 +43,7 @@ describe('filter manager utilities', () => {
 
     test("should not return timeFilter when name doesn't match", async () => {
       const filters: Filter[] = [
-        buildQueryFilter(
-          { _type: { match: { query: 'apache', type: 'phrase' } } },
-          'logstash-*',
-          ''
-        ),
+        buildQueryFilter({ query_string: { query: 'apache' } }, 'logstash-*', ''),
         buildRangeFilter(
           { name: '@timestamp' } as IFieldType,
           { from: 1, to: 2 },
@@ -67,11 +59,7 @@ describe('filter manager utilities', () => {
 
     test('should not return a non range filter, even when names match', async () => {
       const filters: Filter[] = [
-        buildQueryFilter(
-          { _type: { match: { query: 'apache', type: 'phrase' } } },
-          'logstash-*',
-          ''
-        ),
+        buildQueryFilter({ query_string: { query: 'apache' } }, 'logstash-*', ''),
         buildPhraseFilter({ name: 'time' } as IFieldType, 'banana', indexPattern),
       ];
       const result = await extractTimeFilter('time', filters);
