@@ -25,6 +25,7 @@ import { EngineLogic } from '../../../engine';
 import { AppSearchPageTemplate } from '../../../layout';
 import { Result } from '../../../result';
 import { Result as ResultType } from '../../../result/types';
+import { convertToResultFormat } from '../../curation/results';
 import { getCurationsBreadcrumbs } from '../../utils';
 
 import { CurationActionBar } from './curation_action_bar';
@@ -35,14 +36,15 @@ import { DATA } from './temp_data';
 
 export const CurationSuggestion: React.FC = () => {
   const { query } = useDecodedParams();
+  const { engine, isMetaEngine } = useValues(EngineLogic);
   const curationSuggestionLogic = CurationSuggestionLogic({ query });
   const { loadSuggestion } = useActions(curationSuggestionLogic);
-  const { engine, isMetaEngine } = useValues(EngineLogic);
-  const { suggestion, suggestedPromotedDocuments, dataLoading } =
+  const { suggestion, suggestedPromotedDocuments, curation, dataLoading } =
     useValues(curationSuggestionLogic);
   const [showOrganicResults, setShowOrganicResults] = useState(false);
   const currentOrganicResults = [...DATA].splice(5, 4);
   const proposedOrganicResults = [...DATA].splice(2, 4);
+  const existingCurationResults = curation ? curation.promoted.map(convertToResultFormat) : [];
 
   const suggestionQuery = suggestion?.query || '';
 
@@ -79,7 +81,7 @@ export const CurationSuggestion: React.FC = () => {
             </h2>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <CurationResultPanel variant="current" results={[...DATA].splice(0, 3)} />
+          <CurationResultPanel variant="current" results={existingCurationResults} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="xxs">
