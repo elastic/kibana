@@ -1,5 +1,3 @@
-env:
-  REPORT_FAILED_TESTS_TO_GITHUB: 'true'
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
@@ -19,7 +17,7 @@ steps:
     agents:
       queue: ci-group-6
     depends_on: build
-    timeout_in_minutes: 150
+    timeout_in_minutes: 120
     key: default-cigroup
     retry:
       automatic:
@@ -155,9 +153,3 @@ steps:
     agents:
       queue: c2-4
     key: storybooks
-
-  - wait: ~
-    continue_on_failure: true
-
-  - command: .buildkite/scripts/lifecycle/post_build.sh
-    label: Post-Build
