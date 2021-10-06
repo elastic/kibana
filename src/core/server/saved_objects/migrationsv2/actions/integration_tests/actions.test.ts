@@ -280,7 +280,7 @@ describe('migration actions', () => {
         index: 'red_then_yellow_index',
         body: {
           // Enable all shard allocation so that the index status turns yellow
-          settings: { routing: { allocation: { enable: 'all' } } },
+          routing: { allocation: { enable: 'all' } },
         },
       });
 
@@ -350,7 +350,7 @@ describe('migration actions', () => {
           index: 'clone_red_then_yellow_index',
           body: {
             // Enable all shard allocation so that the index status goes yellow
-            settings: { routing: { allocation: { enable: 'all' } } },
+            routing: { allocation: { enable: 'all' } },
           },
         });
         indexYellow = true;
@@ -1444,7 +1444,7 @@ describe('migration actions', () => {
           index: 'red_then_yellow_index',
           body: {
             // Disable all shard allocation so that the index status is red
-            settings: { routing: { allocation: { enable: 'all' } } },
+            routing: { allocation: { enable: 'all' } },
           },
         });
         indexYellow = true;
