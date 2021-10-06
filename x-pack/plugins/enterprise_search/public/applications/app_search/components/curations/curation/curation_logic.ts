@@ -16,6 +16,8 @@ import { EngineLogic, generateEnginePath } from '../../engine';
 import { Curation } from '../types';
 import { addDocument, removeDocument } from '../utils';
 
+type CurationPageTabs = 'promoted' | 'hidden';
+
 interface CurationValues {
   dataLoading: boolean;
   curation: Curation;
@@ -28,6 +30,7 @@ interface CurationValues {
   hiddenIds: string[];
   hiddenDocumentsLoading: boolean;
   isAutomated: boolean;
+  selectedPageTab: CurationPageTabs;
 }
 
 interface CurationActions {
@@ -46,6 +49,7 @@ interface CurationActions {
   removeHiddenId(id: string): { id: string };
   clearHiddenIds(): void;
   resetCuration(): void;
+  onSelectPageTab(pageTab: CurationPageTabs): { pageTab: CurationPageTabs };
 }
 
 interface CurationProps {
@@ -70,6 +74,7 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
     removeHiddenId: (id) => ({ id }),
     clearHiddenIds: true,
     resetCuration: true,
+    onSelectPageTab: (pageTab) => ({ pageTab }),
   }),
   reducers: () => ({
     dataLoading: [
@@ -162,6 +167,12 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
         clearHiddenIds: () => true,
         onCurationLoad: () => false,
         onCurationError: () => false,
+      },
+    ],
+    selectedPageTab: [
+      'promoted',
+      {
+        onSelectPageTab: (_, { pageTab }) => pageTab,
       },
     ],
   }),
