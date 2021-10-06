@@ -14,6 +14,7 @@ import { getCopyToSpaceFlyoutComponent } from '../copy_saved_objects_to_space';
 import type { PluginsStart } from '../plugin';
 import {
   getLegacyUrlConflict,
+  getSavedObjectConflictMessage,
   getShareToSpaceFlyoutComponent,
 } from '../share_saved_objects_to_space';
 import { getSpaceAvatarComponent } from '../space_avatar';
@@ -56,5 +57,6 @@ export const getComponents = ({
     getSpaceList: wrapLazy(getSpaceListComponent),
     getLegacyUrlConflict: wrapLazy(() => getLegacyUrlConflict({ getStartServices })),
     getSpaceAvatar: wrapLazy(getSpaceAvatarComponent),
+    getSavedObjectConflictMessage: wrapLazy(() => getSavedObjectConflictMessage()),
   };
 };
