@@ -9036,7 +9036,7 @@ class CiStatsReporter {
 
     const memUsage = process.memoryUsage();
     const isElasticCommitter = email && email.endsWith('@elastic.co') ? true : false;
-    const defaultMetadata = {
+    const defaultMeta = {
       kibanaUuid,
       isElasticCommitter,
       committerHash: email ? _crypto.default.createHash('sha256').update(email).digest('hex').substring(0, 20) : undefined,
@@ -9057,15 +9057,15 @@ class CiStatsReporter {
       osRelease: _os.default.release(),
       totalMem: _os.default.totalmem()
     };
-    this.log.debug('CIStatsReporter committerHash: %s', defaultMetadata.committerHash);
+    this.log.debug('CIStatsReporter committerHash: %s', defaultMeta.committerHash);
     return await this.req({
       auth: !!buildId,
       path: '/v1/timings',
       body: {
         buildId,
         upstreamBranch,
-        timings,
-        defaultMetadata
+        defaultMeta,
+        timings
       },
       bodyDesc: timings.length === 1 ? `${timings.length} timing` : `${timings.length} timings`
     });
@@ -9076,7 +9076,7 @@ class CiStatsReporter {
    */
 
 
-  async metrics(metrics) {
+  async metrics(metrics, options) {
     var _this$config4;
 
     if (!this.hasBuildConfig()) {
@@ -9094,6 +9094,7 @@ class CiStatsReporter {
       path: '/v1/metrics',
       body: {
         buildId,
+        defaultMeta: options === null || options === void 0 ? void 0 : options.defaultMeta,
         metrics
       },
       bodyDesc: `metrics: ${metrics.map(({
