@@ -53,6 +53,18 @@ Changing these settings may disable features of the APM App.
 | `xpack.apm.serviceMapFingerprintGlobalBucketSize`
   | Maximum number of unique transaction combinations sampled for generating the global service map. Defaults to `100`.
 
+| `xpack.apm.serviceMapEnabled`
+  | Set to `false` to disable service maps. Defaults to `true`.
+
+| `xpack.apm.serviceMapTraceIdBucketSize`
+  | Maximum number of trace IDs sampled for generating service map focused on a specific service. Defaults to `65`.
+
+| `xpack.apm.serviceMapTraceIdGlobalBucketSize`
+  | Maximum number of trace IDs sampled for generating the global service map. Defaults to `6`.
+
+| `xpack.apm.serviceMapMaxTracesPerRequest`
+  | Maximum number of traces per request for generating the global service map. Defaults to `50`.
+
 | `xpack.apm.ui.enabled` {ess-icon}
   | Set to `false` to hide the APM app from the main menu. Defaults to `true`.
 
@@ -68,6 +80,15 @@ Changing these settings may disable features of the APM App.
 | `xpack.apm.searchAggregatedTransactions`
   | experimental[] Enables Transaction histogram metrics. Defaults to `never` and aggregated transactions are not used. When set to `auto`, the UI will use metric indices over transaction indices for transactions if aggregated transactions are found. When set to `always`, additional configuration in APM Server is required.
     See {apm-server-ref-v}/transaction-metrics.html[Configure transaction metrics] for more information.
+
+| `xpack.apm.telemetryCollectionEnabled`
+  | Set to `false` to disable the APM data telemetry. Defaults to `true`.
+
+| `xpack.apm.metricsInterval`
+  | Sets a `fixed_interval` for date histograms in metrics aggregations. Defaults to `30`.
+
+| `xpack.apm.agent.migrations.enabled`
+  | Set to `false` to disable cloud APM migrations. Defaults to `true`.
 
 | `apm_oss.indexPattern` {ess-icon}
   | The index pattern used for integrations with Machine Learning and Query Bar.
@@ -94,3 +115,5 @@ Changing these settings may disable features of the APM App.
 |===
 
 // end::general-apm-settings[]
+
+
