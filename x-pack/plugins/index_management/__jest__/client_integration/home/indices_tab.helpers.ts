@@ -101,7 +101,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
       getIncludeHiddenIndicesToggleStatus,
       clickIncludeHiddenIndicesToggle,
       clickDataStreamAt,
-      clickManageContextMenuButton
+      clickManageContextMenuButton,
     },
     findDataStreamDetailPanel,
     findDataStreamDetailPanelTitle,
