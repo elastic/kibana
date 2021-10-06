@@ -119,8 +119,8 @@ export const SeriesConfig = (props) => {
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
           <EuiFormRow
-            label={i18n.translate('visTypeTimeseries.seriesConfig.overrideIndexPatternLabel', {
-              defaultMessage: 'Override Index Pattern?',
+            label={i18n.translate('visTypeTimeseries.seriesConfig.overrideDataViewLabel', {
+              defaultMessage: 'Override data view?',
             })}
           >
             <YesNo
