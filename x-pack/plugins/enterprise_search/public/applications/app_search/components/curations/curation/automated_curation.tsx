@@ -10,7 +10,14 @@ import { useParams } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiSpacer, EuiButton, EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiButton,
+  EuiBadge,
+  EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 
 import { AppSearchPageTemplate } from '../../layout';
 import { AutomatedIcon } from '../components/automated_icon';
@@ -24,6 +31,7 @@ import { getCurationsBreadcrumbs } from '../utils';
 
 import { HIDDEN_DOCUMENTS_TITLE, PROMOTED_DOCUMENTS_TITLE } from './constants';
 import { CurationLogic } from './curation_logic';
+import { DeleteCurationButton } from './delete_curation_button';
 import { PromotedDocuments, OrganicDocuments } from './documents';
 
 export const AutomatedCuration: React.FC = () => {
@@ -58,16 +66,23 @@ export const AutomatedCuration: React.FC = () => {
           </>
         ),
         rightSideItems: [
-          <EuiButton
-            color="primary"
-            fill
-            iconType="exportAction"
-            onClick={() => {
-              if (window.confirm(CONVERT_TO_MANUAL_CONFIRMATION)) convertToManual();
-            }}
-          >
-            {COVERT_TO_MANUAL_BUTTON_LABEL}
-          </EuiButton>,
+          <EuiFlexGroup gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <DeleteCurationButton />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color="primary"
+                fill
+                iconType="exportAction"
+                onClick={() => {
+                  if (window.confirm(CONVERT_TO_MANUAL_CONFIRMATION)) convertToManual();
+                }}
+              >
+                {COVERT_TO_MANUAL_BUTTON_LABEL}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>,
         ],
         tabs: pageTabs,
       }}

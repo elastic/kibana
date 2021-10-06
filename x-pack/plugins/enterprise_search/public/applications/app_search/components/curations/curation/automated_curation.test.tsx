@@ -14,7 +14,7 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiBadge, EuiLoadingSpinner, EuiTab } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiLoadingSpinner, EuiTab } from '@elastic/eui';
 
 import { getPageHeaderActions, getPageHeaderTabs, getPageTitle } from '../../../../test_helpers';
 
@@ -25,6 +25,7 @@ import { AppSearchPageTemplate } from '../../layout';
 import { AutomatedCuration } from './automated_curation';
 import { CurationLogic } from './curation_logic';
 
+import { DeleteCurationButton } from './delete_curation_button';
 import { PromotedDocuments, OrganicDocuments } from './documents';
 
 describe('AutomatedCuration', () => {
@@ -98,13 +99,20 @@ describe('AutomatedCuration', () => {
     expect(pageTitle.find(EuiLoadingSpinner)).toHaveLength(1);
   });
 
+  it('contains a button to delete the curation', () => {
+    const wrapper = shallow(<AutomatedCuration />);
+    const pageHeaderActions = getPageHeaderActions(wrapper);
+
+    expect(pageHeaderActions.find(DeleteCurationButton)).toHaveLength(1);
+  });
+
   describe('convert to manual button', () => {
     let convertToManualButton: ShallowWrapper;
     let confirmSpy: jest.SpyInstance;
 
     beforeAll(() => {
       const wrapper = shallow(<AutomatedCuration />);
-      convertToManualButton = getPageHeaderActions(wrapper).childAt(0);
+      convertToManualButton = getPageHeaderActions(wrapper).find(EuiButton);
 
       confirmSpy = jest.spyOn(window, 'confirm');
     });
@@ -116,12 +124,14 @@ describe('AutomatedCuration', () => {
     it('converts the curation upon user confirmation', () => {
       confirmSpy.mockReturnValueOnce(true);
       convertToManualButton.simulate('click');
+
       expect(actions.convertToManual).toHaveBeenCalled();
     });
 
     it('does not convert the curation if the user cancels', () => {
       confirmSpy.mockReturnValueOnce(false);
       convertToManualButton.simulate('click');
+
       expect(actions.convertToManual).not.toHaveBeenCalled();
     });
   });
