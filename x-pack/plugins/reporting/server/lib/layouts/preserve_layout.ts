@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import path from 'path';
 import { CustomPageSize } from 'pdfmake/interfaces';
 import { LAYOUT_TYPES } from '../../../common/constants';
 import { PageSizeParams, Size } from '../../../common/types';

@@ -18,7 +18,7 @@ import {
   getDashboardTitle,
   leaveConfirmStrings,
 } from '../dashboard_strings';
-import { EmbeddableRenderer, ViewMode } from '../services/embeddable';
+import { EmbeddableRenderer } from '../services/embeddable';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
