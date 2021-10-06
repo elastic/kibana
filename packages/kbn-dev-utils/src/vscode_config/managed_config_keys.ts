@@ -8,7 +8,7 @@
 
 export interface ManagedConfigKey {
   key: string;
-  value: string | Record<string, any> | boolean;
+  value: string | Record<string, any> | boolean | number;
 }
 
 /**
@@ -45,5 +45,9 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
   {
     key: 'typescript.enablePromptUseWorkspaceTsdk',
     value: true,
+  },
+  {
+    key: 'typescript.tsserver.maxTsServerMemory',
+    value: 4096,
   },
 ];

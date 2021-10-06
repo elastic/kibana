@@ -147,6 +147,7 @@ interface PlainRoute {
   children?: PlainRoute[];
   params?: t.Type<any>;
   defaults?: Record<string, Record<string, string>>;
+  pre?: ReactElement;
 }
 
 interface ReadonlyPlainRoute {
@@ -155,6 +156,7 @@ interface ReadonlyPlainRoute {
   readonly children?: readonly ReadonlyPlainRoute[];
   readonly params?: t.Type<any>;
   readonly defaults?: Record<string, Record<string, string>>;
+  pre?: ReactElement;
 }
 
 export type Route = PlainRoute | ReadonlyPlainRoute;
@@ -209,6 +211,10 @@ export type TypeAsArgs<TObject> = keyof TObject extends never
   ? [TObject] | []
   : [TObject];
 
+export type FlattenRoutesOf<TRoutes extends Route[]> = Array<
+  Omit<ValuesType<MapRoutes<TRoutes>>, 'parents'>
+>;
+
 export interface Router<TRoutes extends Route[]> {
   matchRoutes<TPath extends PathsOf<TRoutes>>(
     path: TPath,
@@ -245,6 +251,7 @@ export interface Router<TRoutes extends Route[]> {
     ...args: TypeAsArgs<TypeOf<TRoutes, TPath, false>>
   ): string;
   getRoutePath(route: Route): string;
+  getRoutesToMatch(path: string): FlattenRoutesOf<TRoutes>;
 }
 
 type AppendPath<
@@ -256,23 +263,21 @@ type MaybeUnion<T extends Record<string, any>, U extends Record<string, any>> = 
   [key in keyof U]: key extends keyof T ? T[key] | U[key] : U[key];
 };
 
-type MapRoute<TRoute extends Route, TParents extends Route[] = []> = TRoute extends Route
-  ? MaybeUnion<
-      {
-        [key in TRoute['path']]: TRoute & { parents: TParents };
-      },
-      TRoute extends { children: Route[] }
-        ? MaybeUnion<
-            MapRoutes<TRoute['children'], [...TParents, TRoute]>,
-            {
-              [key in AppendPath<TRoute['path'], '*'>]: ValuesType<
-                MapRoutes<TRoute['children'], [...TParents, TRoute]>
-              >;
-            }
-          >
-        : {}
-    >
-  : {};
+type MapRoute<TRoute extends Route, TParents extends Route[] = []> = MaybeUnion<
+  {
+    [key in TRoute['path']]: TRoute & { parents: TParents };
+  },
+  TRoute extends { children: Route[] }
+    ? MaybeUnion<
+        MapRoutes<TRoute['children'], [...TParents, TRoute]>,
+        {
+          [key in AppendPath<TRoute['path'], '*'>]: ValuesType<
+            MapRoutes<TRoute['children'], [...TParents, TRoute]>
+          >;
+        }
+      >
+    : {}
+>;
 
 type MapRoutes<TRoutes, TParents extends Route[] = []> = TRoutes extends [Route]
   ? MapRoute<TRoutes[0], TParents>
