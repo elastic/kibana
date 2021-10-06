@@ -1,6 +1,11 @@
-import { Logger } from 'src/core/server';
-import { IRuleDataClient, RuleDataPluginService } from '../../../rule_registry/server';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
+import { RuleDataPluginService } from '../../../rule_registry/server';
 import { SecuritySolutionPluginRouter } from '../types';
 
 import { createRulesRoute } from '../lib/detection_engine/routes/rules/create_rules_route';

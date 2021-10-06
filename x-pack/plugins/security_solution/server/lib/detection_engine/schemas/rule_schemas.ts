@@ -206,6 +206,42 @@ export interface CompleteRule {
   ruleConfig: SanitizedRuleConfig;
 }
 
+export interface MlCompleteRule {
+  alertId: string;
+  ruleParams: MachineLearningRuleParams;
+  ruleConfig: SanitizedRuleConfig;
+}
+
+export interface ThresholdCompleteRule {
+  alertId: string;
+  ruleParams: ThresholdRuleParams;
+  ruleConfig: SanitizedRuleConfig;
+}
+
+export interface ThreatCompleteRule {
+  alertId: string;
+  ruleParams: ThreatRuleParams;
+  ruleConfig: SanitizedRuleConfig;
+}
+
+export interface QueryCompleteRule {
+  alertId: string;
+  ruleParams: QueryRuleParams;
+  ruleConfig: SanitizedRuleConfig;
+}
+
+export interface EqlCompleteRule {
+  alertId: string;
+  ruleParams: EqlRuleParams;
+  ruleConfig: SanitizedRuleConfig;
+}
+
+export interface SavedQueryCompleteRule {
+  alertId: string;
+  ruleParams: SavedQueryRuleParams;
+  ruleConfig: SanitizedRuleConfig;
+}
+
 export const notifyWhen = t.union([
   t.literal('onActionGroupChange'),
   t.literal('onActiveAlert'),

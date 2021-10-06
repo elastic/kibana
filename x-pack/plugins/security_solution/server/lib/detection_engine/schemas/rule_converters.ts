@@ -40,7 +40,6 @@ import {
   transformActions,
 } from '../rules/utils';
 import { ruleTypeMappings } from '../signals/utils';
-import { RulesSchema } from '../../../../common/detection_engine/schemas/response';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRuleActions } from '../rule_actions/legacy_types';
 

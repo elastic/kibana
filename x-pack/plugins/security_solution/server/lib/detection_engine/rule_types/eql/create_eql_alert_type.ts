@@ -67,7 +67,7 @@ export const createEqlAlertType = (createOptions: CreateRuleOptions) => {
         runOpts: {
           bulkCreate,
           exceptionItems,
-          rule,
+          completeRule,
           searchAfterSize,
           tuple,
           wrapHits,
@@ -82,7 +82,7 @@ export const createEqlAlertType = (createOptions: CreateRuleOptions) => {
         exceptionItems,
         experimentalFeatures,
         logger,
-        rule,
+        completeRule,
         searchAfterSize,
         services,
         tuple,

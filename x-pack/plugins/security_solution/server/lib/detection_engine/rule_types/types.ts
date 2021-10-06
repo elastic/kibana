@@ -11,7 +11,6 @@ import { SearchHit } from '@elastic/elasticsearch/api/types';
 import { Logger } from '@kbn/logging';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { SavedObject } from '../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -31,9 +30,9 @@ import { BaseHit } from '../../../../common/detection_engine/types';
 import { ConfigType } from '../../../config';
 import { SetupPlugins } from '../../../plugin';
 import { IRuleDataPluginService } from '../rule_execution_log/types';
-import { RuleParams } from '../schemas/rule_schemas';
+import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
 import { BuildRuleMessage } from '../signals/rule_messages';
-import { AlertAttributes, BulkCreate, WrapHits, WrapSequences } from '../signals/types';
+import { BulkCreate, WrapHits, WrapSequences } from '../signals/types';
 import { AlertsFieldMap, RulesFieldMap } from './field_maps';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
 
@@ -61,7 +60,7 @@ export interface RunOpts<TParams extends RuleParams> {
   bulkCreate: BulkCreate;
   exceptionItems: ExceptionListItemSchema[];
   listClient: ListClient;
-  rule: SavedObject<AlertAttributes<TParams>>;
+  completeRule: CompleteRule;
   searchAfterSize: number;
   tuple: {
     to: Moment;

@@ -6,13 +6,12 @@
  */
 
 import { TIMESTAMP } from '@kbn/rule-data-utils';
-import { SavedObject } from 'src/core/types';
 import { BaseHit } from '../../../../../../common/detection_engine/types';
 import type { ConfigType } from '../../../../../config';
 import { buildRuleWithOverrides, buildRuleWithoutOverrides } from '../../../signals/build_rule';
 import { BuildReasonMessage } from '../../../signals/reason_formatters';
 import { getMergeStrategy } from '../../../signals/source_fields_merging/strategies';
-import { AlertAttributes, SignalSource, SignalSourceHit, SimpleHit } from '../../../signals/types';
+import { SignalSource, SignalSourceHit, SimpleHit } from '../../../signals/types';
 import { RACAlert } from '../../types';
 import { additionalAlertFields, buildAlert } from './build_alert';
 import { filterSource } from './filter_source';

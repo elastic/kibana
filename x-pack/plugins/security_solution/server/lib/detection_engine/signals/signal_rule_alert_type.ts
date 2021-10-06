@@ -62,6 +62,7 @@ import {
   ruleParams,
   RuleParams,
   savedQueryRuleParams,
+  CompleteRule,
 } from '../schemas/rule_schemas';
 import { bulkCreateFactory } from './bulk_create_factory';
 import { wrapHitsFactory } from './wrap_hits_factory';
@@ -143,11 +144,15 @@ export const signalRulesAlertType = ({
       });
 
       const savedObject = await services.savedObjectsClient.get<AlertAttributes>('alert', alertId);
+      // TODO: conversion below is broken, MUST FIX
+      const completeRule = convertRuleSOtoCompleteRule(savedObject, alertId);
+
       const {
         actions,
         name,
         schedule: { interval },
-      } = savedObject.attributes;
+      } = completeRule.ruleConfig;
+
       const refresh = actions.length ? 'wait_for' : false;
       const buildRuleMessage = buildRuleMessageFactory({
         id: alertId,
@@ -237,6 +242,7 @@ export const signalRulesAlertType = ({
         interval,
         maxSignals,
         buildRuleMessage,
+        startedAt,
       });
       if (remainingGap.asMilliseconds() > 0) {
         const gapString = remainingGap.humanize();
@@ -275,24 +281,27 @@ export const signalRulesAlertType = ({
         );
 
         const wrapHits = wrapHitsFactory({
-          ruleSO: savedObject,
+          completeRule,
           signalsIndex: params.outputIndex,
           mergeStrategy,
           ignoreFields,
         });
 
         const wrapSequences = wrapSequencesFactory({
-          ruleSO: savedObject,
+          completeRule,
           signalsIndex: params.outputIndex,
           mergeStrategy,
           ignoreFields,
         });
 
         if (isMlRule(type)) {
-          const mlRuleSO = asTypeSpecificSO(savedObject, machineLearningRuleParams);
+          const mlRuleCompleteRule = asTypeSpecificCompleteRule(
+            completeRule,
+            machineLearningRuleParams
+          );
           for (const tuple of tuples) {
             result = await mlExecutor({
-              rule: mlRuleSO,
+              completeRule: mlRuleCompleteRule,
               tuple,
               ml,
               listClient,
@@ -305,10 +314,13 @@ export const signalRulesAlertType = ({
             });
           }
         } else if (isThresholdRule(type)) {
-          const thresholdRuleSO = asTypeSpecificSO(savedObject, thresholdRuleParams);
+          const thresholdCompleteRule = asTypeSpecificCompleteRule(
+            completeRule,
+            thresholdRuleParams
+          );
           for (const tuple of tuples) {
             result = await thresholdExecutor({
-              rule: thresholdRuleSO,
+              completeRule: thresholdCompleteRule,
               tuple,
               exceptionItems,
               experimentalFeatures,
@@ -323,10 +335,10 @@ export const signalRulesAlertType = ({
             });
           }
         } else if (isThreatMatchRule(type)) {
-          const threatRuleSO = asTypeSpecificSO(savedObject, threatRuleParams);
+          const threatCompleteRule = asTypeSpecificCompleteRule(completeRule, threatRuleParams);
           for (const tuple of tuples) {
             result = await threatMatchExecutor({
-              rule: threatRuleSO,
+              completeRule: threatCompleteRule,
               tuple,
               listClient,
               exceptionItems,
@@ -342,10 +354,10 @@ export const signalRulesAlertType = ({
             });
           }
         } else if (isQueryRule(type)) {
-          const queryRuleSO = validateQueryRuleTypes(savedObject);
+          const queryCompleteRule = validateQueryRuleTypes(completeRule);
           for (const tuple of tuples) {
             result = await queryExecutor({
-              rule: queryRuleSO,
+              completeRule: queryCompleteRule,
               tuple,
               listClient,
               exceptionItems,
@@ -361,10 +373,10 @@ export const signalRulesAlertType = ({
             });
           }
         } else if (isEqlRule(type)) {
-          const eqlRuleSO = asTypeSpecificSO(savedObject, eqlRuleParams);
+          const eqlCompleteRule = asTypeSpecificCompleteRule(completeRule, eqlRuleParams);
           for (const tuple of tuples) {
             result = await eqlExecutor({
-              rule: eqlRuleSO,
+              completeRule: eqlCompleteRule,
               tuple,
               exceptionItems,
               experimentalFeatures,
@@ -509,11 +521,11 @@ export const signalRulesAlertType = ({
   };
 };
 
-const validateQueryRuleTypes = (ruleSO: SavedObject<AlertAttributes>) => {
-  if (ruleSO.attributes.params.type === 'query') {
-    return asTypeSpecificSO(ruleSO, queryRuleParams);
+const validateQueryRuleTypes = (completeRule: CompleteRule) => {
+  if (completeRule.ruleParams.type === 'query') {
+    return asTypeSpecificCompleteRule(completeRule, queryRuleParams);
   } else {
-    return asTypeSpecificSO(ruleSO, savedQueryRuleParams);
+    return asTypeSpecificCompleteRule(completeRule, savedQueryRuleParams);
   }
 };
 
@@ -524,22 +536,74 @@ const validateQueryRuleTypes = (ruleSO: SavedObject<AlertAttributes>) => {
  * checks if the required type specific fields actually exist on the SO and prevents rule executors from
  * accessing fields that only exist on other rule types.
  *
- * @param ruleSO SavedObject typed as an object with all fields from all different rule types
+ * @param completeRule rule typed as an object with all fields from all different rule types
  * @param schema io-ts schema for the specific rule type the SavedObject claims to be
  */
-export const asTypeSpecificSO = <T extends t.Mixed>(
-  ruleSO: SavedObject<AlertAttributes>,
+export const asTypeSpecificCompleteRule = <T extends t.Mixed>(
+  completeRule: CompleteRule,
   schema: T
 ) => {
-  const [validated, errors] = validateNonExact(ruleSO.attributes.params, schema);
+  const [validated, errors] = validateNonExact(completeRule.ruleParams, schema);
   if (validated == null || errors != null) {
     throw new Error(`Rule attempted to execute with invalid params: ${errors}`);
   }
   return {
-    ...ruleSO,
-    attributes: {
-      ...ruleSO.attributes,
-      params: validated,
+    ...completeRule,
+    ruleParams: validated,
+  };
+};
+
+// TODO this conversion is broken - MUST FIX
+const convertRuleSOtoCompleteRule = (
+  ruleSO: SavedObject<AlertAttributes>,
+  alertId: string
+): CompleteRule => {
+  const {
+    name,
+    tags,
+    // @ts-ignore
+    consumer,
+    enabled,
+    schedule,
+    actions,
+    createdBy,
+    updatedBy,
+    createdAt,
+    // @ts-ignore
+    updatedAt,
+    throttle,
+    // @ts-ignore
+    notifyWhen,
+    params,
+    // @ts-ignore
+    producer,
+    // @ts-ignore
+    ruleTypeId,
+    // @ts-ignore
+    ruleTypeName,
+  } = ruleSO.attributes;
+
+  return {
+    alertId,
+    ruleParams: params,
+    ruleConfig: {
+      name,
+      tags,
+      consumer,
+      enabled,
+      schedule,
+      // @ts-ignore
+      actions,
+      createdBy,
+      updatedBy,
+      // @ts-ignore
+      createdAt,
+      updatedAt,
+      throttle,
+      notifyWhen,
+      producer,
+      ruleTypeId,
+      ruleTypeName,
     },
   };
 };

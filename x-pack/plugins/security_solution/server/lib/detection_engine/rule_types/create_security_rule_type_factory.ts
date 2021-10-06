@@ -80,7 +80,9 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
           ruleConfig: rule,
           ruleParams: params,
           alertId,
-        };const buildRuleMessage = buildRuleMessageFactory({
+        };
+
+        const buildRuleMessage = buildRuleMessageFactory({
           id: alertId,
           ruleId,
           name,
@@ -173,7 +175,9 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
           interval,
           maxSignals: DEFAULT_MAX_SIGNALS,
           buildRuleMessage,
-        startedAt,});
+          startedAt,
+        });
+
         if (remainingGap.asMilliseconds() > 0) {
           const gapString = remainingGap.humanize();
           const gapMessage = buildRuleMessage(
@@ -213,11 +217,11 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
           );
 
           const wrapHits = wrapHitsFactory({
-            logger,
             ignoreFields,
             mergeStrategy,
             completeRule,
             spaceId,
+            signalsIndex: '',
           });
 
           const wrapSequences = wrapSequencesFactory({
@@ -300,7 +304,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
               if (rule.throttle != null) {
                 await scheduleThrottledNotificationActions({
                   alertInstance: services.alertInstanceFactory(alertId),
-                  throttle: completeRule.ruleConfig.throttle,
+                  throttle: completeRule.ruleConfig.throttle ?? '',
                   startedAt,
                   id: alertId,
                   kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)

@@ -7,10 +7,7 @@
 import moment from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import {
-  DEFAULT_SEARCH_AFTER_PAGE_SIZE,
-  DETECTION_ENGINE_RULES_PREVIEW,
-} from '../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_PREVIEW } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildMlAuthz } from '../../../machine_learning/authz';
@@ -22,17 +19,18 @@ import { createRuleValidateTypeDependents } from '../../../../../common/detectio
 import { convertPreviewAPIToInternalSchema } from '../../schemas/rule_converters';
 import { PreviewRuleOptions } from '../../rule_types/types';
 import {
-  Alert,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeParams,
   AlertTypeState,
 } from '../../../../../../alerting/common';
 import { RuleParams } from '../../schemas/rule_schemas';
-import { ExecutorType } from '../../../../../../alerting/server/types';
 import { parseInterval } from '../../signals/utils';
-import { AlertInstance } from '../../../../../../alerting/server/alert_instance';
 import { signalRulesAlertType } from '../../signals/signal_rule_alert_type';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ExecutorType } from '../../../../../../alerting/server/types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AlertInstance } from '../../../../../../alerting/server/alert_instance';
 
 export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
@@ -65,8 +63,8 @@ export const previewRulesRoute = async (
         const internalRule = convertPreviewAPIToInternalSchema(request.body, siemClient);
         const runState: Record<string, unknown> = {};
 
-        const { maxSignals } = internalRule.params;
-        const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
+        // const { maxSignals } = internalRule.params;
+        // const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
         let invocationCount = internalRule.invocationCount;
 
         const mlAuthz = buildMlAuthz({
@@ -179,17 +177,22 @@ export const previewRulesRoute = async (
             startedAt.add(parseInterval(internalRule.schedule.interval));
             invocationCount--;
           }
+
+          return [null, 'PLACEHOLDER_previewDataIdToQueryThePreviewIndex'];
         };
 
         // TODO: pass the real savedObjectsClient but refactor the executor implementation not to use it for fetching rules, as we already have everything we need to execute the rule
         // TODO: preview rule status client should keep the errors & warnings in memory and return with the preview POST response
 
-        await runExecutors(signalRulesAlertType(previewRuleOptions).executor, previewRuleParams);
+        const [errors, previewId] = await runExecutors(
+          signalRulesAlertType(previewRuleOptions).executor,
+          previewRuleParams
+        );
 
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {
-          return response.ok({ body: previewData ?? {} });
+          return response.ok({ body: previewId ?? '' });
         }
       } catch (err) {
         const error = transformError(err as Error);
