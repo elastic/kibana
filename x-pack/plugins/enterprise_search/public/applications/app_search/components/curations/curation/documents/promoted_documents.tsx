@@ -77,9 +77,9 @@ export const PromotedDocuments: React.FC = () => {
       {hasDocuments ? (
         <EuiDragDropContext onDragEnd={reorderPromotedIds}>
           <EuiDroppable droppableId="PromotedDocuments" spacing="m">
-            {documents.map((document, i: number) => (
+            {documents.map((document, index) => (
               <EuiDraggable
-                index={i}
+                index={index}
                 key={document.id}
                 draggableId={document.id}
                 customDragHandle
@@ -89,6 +89,7 @@ export const PromotedDocuments: React.FC = () => {
                 {(provided) => (
                   <CurationResult
                     key={document.id}
+                    index={index}
                     result={convertToResultFormat(document)}
                     actions={
                       isAutomated

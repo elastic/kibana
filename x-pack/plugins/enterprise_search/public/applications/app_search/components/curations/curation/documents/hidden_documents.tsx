@@ -52,10 +52,11 @@ export const HiddenDocuments: React.FC = () => {
       isLoading={hiddenDocumentsLoading}
     >
       {hasDocuments ? (
-        documents.map((document) => (
+        documents.map((document, index) => (
           <CurationResult
             key={document.id}
             result={convertToResultFormat(document)}
+            index={index}
             actions={[
               {
                 ...SHOW_DOCUMENT_ACTION,
