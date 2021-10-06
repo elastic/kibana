@@ -19,7 +19,7 @@ import { roundNumber } from '../../utils';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiSupertest = createApmApiSupertest(getService('supertest'));
 
-  const archiveName = 'apm_data_generation_8.0.0';
+  const archiveName = 'apm_synthetic_8.0.0';
   const metadata = archives_metadata[archiveName];
 
   async function getThroughputValues({

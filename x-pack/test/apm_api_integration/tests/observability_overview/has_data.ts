@@ -44,7 +44,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Observability overview when APM data is loaded',
-    { config: 'basic', archives: ['apm_8.0.0'] },
+    { config: 'basic', archives: ['apm_opbeans_8.0.0'] },
     () => {
       it('returns true when there is at least one document on transaction, error or metrics indices', async () => {
         const response = await apmApiSupertest({

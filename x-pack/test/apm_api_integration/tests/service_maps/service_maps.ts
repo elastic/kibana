@@ -18,7 +18,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
   const supertest = getService('supertest');
   const supertestAsApmReadUserWithoutMlAccess = getService('supertestAsApmReadUserWithoutMlAccess');
 
-  const archiveName = 'apm_8.0.0';
+  const archiveName = 'apm_opbeans_8.0.0';
   const metadata = archives_metadata[archiveName];
   const start = encodeURIComponent(metadata.start);
   const end = encodeURIComponent(metadata.end);
@@ -98,31 +98,34 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
     });
   });
 
-  registry.when('Service Map with data', { config: 'trial', archives: ['apm_8.0.0'] }, () => {
-    describe('/api/apm/service-map', () => {
-      let response: PromiseReturnType<typeof supertest.get>;
+  registry.when(
+    'Service Map with data',
+    { config: 'trial', archives: ['apm_opbeans_8.0.0'] },
+    () => {
+      describe('/api/apm/service-map', () => {
+        let response: PromiseReturnType<typeof supertest.get>;
 
-      before(async () => {
-        response = await supertest.get(
-          `/api/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
-        );
-      });
+        before(async () => {
+          response = await supertest.get(
+            `/api/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
+          );
+        });
 
-      it('returns service map elements', () => {
-        expect(response.status).to.be(200);
-        expect(response.body.elements.length).to.be.greaterThan(0);
-      });
+        it('returns service map elements', () => {
+          expect(response.status).to.be(200);
+          expect(response.body.elements.length).to.be.greaterThan(0);
+        });
 
-      it('returns the correct data', () => {
-        const elements: Array<{ data: Record<string, any> }> = response.body.elements;
+        it('returns the correct data', () => {
+          const elements: Array<{ data: Record<string, any> }> = response.body.elements;
 
-        const serviceNames = uniq(
-          elements
-            .filter((element) => element.data['service.name'] !== undefined)
-            .map((element) => element.data['service.name'])
-        ).sort();
+          const serviceNames = uniq(
+            elements
+              .filter((element) => element.data['service.name'] !== undefined)
+              .map((element) => element.data['service.name'])
+          ).sort();
 
-        expectSnapshot(serviceNames).toMatchInline(`
+          expectSnapshot(serviceNames).toMatchInline(`
           Array [
             "auditbeat",
             "opbeans-dotnet",
@@ -135,13 +138,13 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           ]
         `);
 
-        const externalDestinations = uniq(
-          elements
-            .filter((element) => element.data.target?.startsWith('>'))
-            .map((element) => element.data.target)
-        ).sort();
+          const externalDestinations = uniq(
+            elements
+              .filter((element) => element.data.target?.startsWith('>'))
+              .map((element) => element.data.target)
+          ).sort();
 
-        expectSnapshot(externalDestinations).toMatchInline(`
+          expectSnapshot(externalDestinations).toMatchInline(`
           Array [
             ">elasticsearch",
             ">postgresql",
@@ -150,41 +153,43 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           ]
         `);
 
-        expectSnapshot(elements).toMatch();
-      });
+          expectSnapshot(elements).toMatch();
+        });
 
-      describe('with ML data', () => {
-        describe('with the default apm user', () => {
-          before(async () => {
-            response = await supertest.get(
-              `/api/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
-            );
-          });
-
-          it('returns service map elements with anomaly stats', () => {
-            expect(response.status).to.be(200);
-            const dataWithAnomalies = response.body.elements.filter(
-              (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
-            );
-
-            expect(dataWithAnomalies).not.to.be.empty();
-
-            dataWithAnomalies.forEach(({ data }: any) => {
-              expect(
-                Object.values(data.serviceAnomalyStats).filter((value) => isEmpty(value))
-              ).to.not.empty();
+        describe('with ML data', () => {
+          describe('with the default apm user', () => {
+            before(async () => {
+              response = await supertest.get(
+                `/api/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
+              );
             });
-          });
 
-          it('returns the correct anomaly stats', () => {
-            const dataWithAnomalies = response.body.elements.filter(
-              (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
-            );
+            it('returns service map elements with anomaly stats', () => {
+              expect(response.status).to.be(200);
+              const dataWithAnomalies = response.body.elements.filter(
+                (el: { data: { serviceAnomalyStats?: {} } }) =>
+                  !isEmpty(el.data.serviceAnomalyStats)
+              );
 
-            expect(dataWithAnomalies).not.to.be.empty();
+              expect(dataWithAnomalies).not.to.be.empty();
 
-            expectSnapshot(dataWithAnomalies.length).toMatchInline(`7`);
-            expectSnapshot(dataWithAnomalies.slice(0, 3)).toMatchInline(`
+              dataWithAnomalies.forEach(({ data }: any) => {
+                expect(
+                  Object.values(data.serviceAnomalyStats).filter((value) => isEmpty(value))
+                ).to.not.empty();
+              });
+            });
+
+            it('returns the correct anomaly stats', () => {
+              const dataWithAnomalies = response.body.elements.filter(
+                (el: { data: { serviceAnomalyStats?: {} } }) =>
+                  !isEmpty(el.data.serviceAnomalyStats)
+              );
+
+              expect(dataWithAnomalies).not.to.be.empty();
+
+              expectSnapshot(dataWithAnomalies.length).toMatchInline(`7`);
+              expectSnapshot(dataWithAnomalies.slice(0, 3)).toMatchInline(`
               Array [
                 Object {
                   "data": Object {
@@ -237,63 +242,64 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
               ]
             `);
 
-            expectSnapshot(response.body).toMatch();
+              expectSnapshot(response.body).toMatch();
+            });
+          });
+
+          describe('with a user that does not have access to ML', () => {
+            before(async () => {
+              response = await supertestAsApmReadUserWithoutMlAccess.get(
+                `/api/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
+              );
+            });
+
+            it('returns service map elements without anomaly stats', () => {
+              expect(response.status).to.be(200);
+
+              const dataWithAnomalies = response.body.elements.filter(
+                (el: { data: { serviceAnomalyStats?: {} } }) =>
+                  !isEmpty(el.data.serviceAnomalyStats)
+              );
+
+              expect(dataWithAnomalies).to.be.empty();
+            });
           });
         });
 
-        describe('with a user that does not have access to ML', () => {
-          before(async () => {
-            response = await supertestAsApmReadUserWithoutMlAccess.get(
-              `/api/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
-            );
-          });
+        describe('with a single service', () => {
+          describe('when ENVIRONMENT_ALL is selected', () => {
+            it('returns service map elements', async () => {
+              response = await supertest.get(
+                url.format({
+                  pathname: '/api/apm/service-map',
+                  query: {
+                    environment: 'ENVIRONMENT_ALL',
+                    start: metadata.start,
+                    end: metadata.end,
+                    serviceName: 'opbeans-java',
+                  },
+                })
+              );
 
-          it('returns service map elements without anomaly stats', () => {
-            expect(response.status).to.be(200);
-
-            const dataWithAnomalies = response.body.elements.filter(
-              (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
-            );
-
-            expect(dataWithAnomalies).to.be.empty();
+              expect(response.status).to.be(200);
+              expect(response.body.elements.length).to.be.greaterThan(1);
+            });
           });
         });
       });
 
-      describe('with a single service', () => {
-        describe('when ENVIRONMENT_ALL is selected', () => {
-          it('returns service map elements', async () => {
-            response = await supertest.get(
-              url.format({
-                pathname: '/api/apm/service-map',
-                query: {
-                  environment: 'ENVIRONMENT_ALL',
-                  start: metadata.start,
-                  end: metadata.end,
-                  serviceName: 'opbeans-java',
-                },
-              })
-            );
-
-            expect(response.status).to.be(200);
-            expect(response.body.elements.length).to.be.greaterThan(1);
+      describe('/api/apm/service-map/service/{serviceName}', () => {
+        it('returns an object with data', async () => {
+          const q = querystring.stringify({
+            start: metadata.start,
+            end: metadata.end,
+            environment: 'ENVIRONMENT_ALL',
           });
-        });
-      });
-    });
+          const response = await supertest.get(`/api/apm/service-map/service/opbeans-node?${q}`);
 
-    describe('/api/apm/service-map/service/{serviceName}', () => {
-      it('returns an object with data', async () => {
-        const q = querystring.stringify({
-          start: metadata.start,
-          end: metadata.end,
-          environment: 'ENVIRONMENT_ALL',
-        });
-        const response = await supertest.get(`/api/apm/service-map/service/opbeans-node?${q}`);
+          expect(response.status).to.be(200);
 
-        expect(response.status).to.be(200);
-
-        expectSnapshot(response.body).toMatchInline(`
+          expectSnapshot(response.body).toMatchInline(`
           Object {
             "avgCpuUsage": 0.240216666666667,
             "avgErrorRate": 0,
@@ -304,21 +310,21 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             },
           }
         `);
-      });
-    });
-
-    describe('/api/apm/service-map/backend/{backendName}', () => {
-      it('returns an object with data', async () => {
-        const q = querystring.stringify({
-          start: metadata.start,
-          end: metadata.end,
-          environment: 'ENVIRONMENT_ALL',
         });
-        const response = await supertest.get(`/api/apm/service-map/backend/postgresql?${q}`);
+      });
 
-        expect(response.status).to.be(200);
+      describe('/api/apm/service-map/backend/{backendName}', () => {
+        it('returns an object with data', async () => {
+          const q = querystring.stringify({
+            start: metadata.start,
+            end: metadata.end,
+            environment: 'ENVIRONMENT_ALL',
+          });
+          const response = await supertest.get(`/api/apm/service-map/backend/postgresql?${q}`);
 
-        expectSnapshot(response.body).toMatchInline(`
+          expect(response.status).to.be(200);
+
+          expectSnapshot(response.body).toMatchInline(`
           Object {
             "avgErrorRate": 0,
             "transactionStats": Object {
@@ -327,7 +333,8 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             },
           }
         `);
+        });
       });
-    });
-  });
+    }
+  );
 }

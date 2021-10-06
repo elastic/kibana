@@ -19,7 +19,7 @@ type LatencyChartReturnType = APIReturnType<'GET /api/apm/services/{serviceName}
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  const archiveName = 'apm_8.0.0';
+  const archiveName = 'apm_opbeans_8.0.0';
 
   const { start, end } = archives_metadata[archiveName];
 

@@ -25,7 +25,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiSupertest = createApmApiSupertest(getService('supertest'));
   const es = getService('es');
 
-  const archiveName = 'apm_8.0.0';
+  const archiveName = 'apm_opbeans_8.0.0';
   const { start, end } = archives[archiveName];
 
   function getName(node: Node) {

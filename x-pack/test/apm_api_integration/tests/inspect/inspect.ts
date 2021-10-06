@@ -14,7 +14,7 @@ import archives_metadata from '../../common/fixtures/es_archiver/archives_metada
 export default function customLinksTests({ getService }: FtrProviderContext) {
   const supertestRead = createApmApiSupertest(getService('supertest'));
 
-  const archiveName = 'apm_8.0.0';
+  const archiveName = 'apm_opbeans_8.0.0';
   const metadata = archives_metadata[archiveName];
 
   registry.when('Inspect feature', { config: 'trial', archives: [archiveName] }, () => {

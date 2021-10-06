@@ -17,7 +17,7 @@ type ErrorGroupsMainStatistics = APIReturnType<'GET /api/apm/services/{serviceNa
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  const archiveName = 'apm_8.0.0';
+  const archiveName = 'apm_opbeans_8.0.0';
   const metadata = archives_metadata[archiveName];
   const { start, end } = metadata;
 

@@ -13,7 +13,7 @@ import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiSupertest = createApmApiSupertest(getService('supertest'));
-  const archiveName = 'apm_8.0.0';
+  const archiveName = 'apm_opbeans_8.0.0';
   const { end } = archives[archiveName];
   const start = new Date(Date.parse(end) - 600000).toISOString();
 

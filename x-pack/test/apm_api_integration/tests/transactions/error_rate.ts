@@ -19,7 +19,7 @@ type ErrorRate = APIReturnType<'GET /api/apm/services/{serviceName}/transactions
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  const archiveName = 'apm_8.0.0';
+  const archiveName = 'apm_opbeans_8.0.0';
 
   // url parameters
   const { start, end } = archives_metadata[archiveName];

@@ -19,7 +19,7 @@ import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_a
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiSupertest = createApmApiSupertest(getService('supertest'));
 
-  const archiveName = 'apm_8.0.0';
+  const archiveName = 'apm_opbeans_8.0.0';
   const { start, end } = archives[archiveName];
 
   registry.when(

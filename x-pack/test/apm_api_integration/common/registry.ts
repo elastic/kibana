@@ -14,14 +14,14 @@ import { APMFtrConfigName } from '../configs';
 import { FtrProviderContext } from './ftr_provider_context';
 
 type ArchiveName =
-  | 'apm_8.0.0'
+  | 'apm_opbeans_8.0.0'
   | '8.0.0'
   | 'metrics_8.0.0'
   | 'ml_8.0.0'
   | 'observability_overview'
   | 'rum_8.0.0'
   | 'rum_test_data'
-  | 'apm_data_generation_8.0.0';
+  | 'apm_synthetic_8.0.0';
 
 interface RunCondition {
   config: APMFtrConfigName;

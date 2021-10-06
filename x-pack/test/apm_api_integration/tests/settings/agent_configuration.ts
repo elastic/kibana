@@ -19,7 +19,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
   const log = getService('log');
 
-  const archiveName = 'apm_8.0.0';
+  const archiveName = 'apm_opbeans_8.0.0';
 
   function getServices() {
     return supertestRead({

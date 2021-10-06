@@ -16,7 +16,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
   const supertestWrite = createApmApiSupertest(getService('supertestAsApmWriteUser'));
   const log = getService('log');
 
-  const archiveName = 'apm_8.0.0';
+  const archiveName = 'apm_opbeans_8.0.0';
 
   registry.when('Custom links with a basic license', { config: 'basic', archives: [] }, () => {
     it('returns a 403 forbidden', async () => {

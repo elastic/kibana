@@ -20,7 +20,7 @@ type ThroughputReturn = APIReturnType<'GET /api/apm/services/{serviceName}/throu
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiSupertest = createApmApiSupertest(getService('supertest'));
 
-  const archiveName = 'apm_data_generation_8.0.0';
+  const archiveName = 'apm_synthetic_8.0.0';
   const metadata = archives_metadata[archiveName];
 
   registry.when('Throughput when data is not loaded', { config: 'basic', archives: [] }, () => {

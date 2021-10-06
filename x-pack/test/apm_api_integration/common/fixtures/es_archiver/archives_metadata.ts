@@ -6,11 +6,11 @@
  */
 
 export default {
-  'apm_8.0.0': {
+  'apm_opbeans_8.0.0': {
     start: '2021-08-03T06:50:15.910Z',
     end: '2021-08-03T07:20:15.910Z',
   },
-  'apm_data_generation_8.0.0': {
+  'apm_synthetic_8.0.0': {
     start: '2021-10-05T13:21:00.000Z',
     end: '2021-10-05T13:36:59.999Z',
   },

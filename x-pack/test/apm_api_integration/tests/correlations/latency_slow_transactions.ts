@@ -14,7 +14,7 @@ import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const archiveName = 'apm_8.0.0';
+  const archiveName = 'apm_opbeans_8.0.0';
   const range = archives_metadata[archiveName];
 
   const url = format({
@@ -45,7 +45,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'correlations latency slow transactions with data and default args',
-    { config: 'trial', archives: ['apm_8.0.0'] },
+    { config: 'trial', archives: ['apm_opbeans_8.0.0'] },
     () => {
       type ResponseBody = APIReturnType<'GET /api/apm/correlations/latency/slow_transactions'>;
       let response: {

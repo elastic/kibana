@@ -18,7 +18,7 @@ type ServicesDetailedStatisticsReturn = APIReturnType<'GET /api/apm/services/det
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  const archiveName = 'apm_8.0.0';
+  const archiveName = 'apm_opbeans_8.0.0';
   const metadata = archives_metadata[archiveName];
   const { start, end } = metadata;
   const serviceNames = ['opbeans-java', 'opbeans-go'];
