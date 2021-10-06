@@ -13,9 +13,8 @@ import { useValues, useActions } from 'kea';
 import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 
 import { DELETE_BUTTON_LABEL } from '../../../../shared/constants';
-import { RESTORE_DEFAULTS_BUTTON_LABEL } from '../../../constants';
 import { AppSearchPageTemplate } from '../../layout';
-import { MANAGE_CURATION_TITLE, RESTORE_CONFIRMATION } from '../constants';
+import { DELETE_CONFIRMATION_MESSAGE, MANAGE_CURATION_TITLE } from '../constants';
 import { getCurationsBreadcrumbs } from '../utils';
 
 import { PROMOTED_DOCUMENTS_TITLE, HIDDEN_DOCUMENTS_TITLE } from './constants';
@@ -27,7 +26,7 @@ import { SuggestedDocumentsCallout } from './suggested_documents_callout';
 
 export const ManualCuration: React.FC = () => {
   const { curationId } = useParams() as { curationId: string };
-  const { onSelectPageTab, resetCuration } = useActions(CurationLogic({ curationId }));
+  const { onSelectPageTab, deleteCuration } = useActions(CurationLogic({ curationId }));
   const { dataLoading, queries, selectedPageTab } = useValues(CurationLogic({ curationId }));
   const { isFlyoutOpen } = useValues(AddResultLogic);
 
@@ -54,11 +53,12 @@ export const ManualCuration: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 color="danger"
+                iconType="trash"
                 onClick={() => {
-                  if (window.confirm(RESTORE_CONFIRMATION)) resetCuration();
+                  if (window.confirm(DELETE_CONFIRMATION_MESSAGE)) deleteCuration();
                 }}
               >
-                {RESTORE_DEFAULTS_BUTTON_LABEL}
+                {DELETE_BUTTON_LABEL}
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

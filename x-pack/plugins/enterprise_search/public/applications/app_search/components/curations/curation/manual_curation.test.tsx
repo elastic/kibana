@@ -35,7 +35,7 @@ describe('ManualCuration', () => {
     selectedPageTab: 'promoted',
   };
   const actions = {
-    resetCuration: jest.fn(),
+    deleteCuration: jest.fn(),
     onSelectPageTab: jest.fn(),
   };
 
@@ -134,13 +134,13 @@ describe('ManualCuration', () => {
     it('resets the curation upon user confirmation', () => {
       confirmSpy.mockReturnValueOnce(true);
       restoreDefaultsButton.simulate('click');
-      expect(actions.resetCuration).toHaveBeenCalled();
+      expect(actions.deleteCuration).toHaveBeenCalled();
     });
 
     it('does not reset the curation if the user cancels', () => {
       confirmSpy.mockReturnValueOnce(false);
       restoreDefaultsButton.simulate('click');
-      expect(actions.resetCuration).not.toHaveBeenCalled();
+      expect(actions.deleteCuration).not.toHaveBeenCalled();
     });
   });
 });
