@@ -23,14 +23,20 @@ import {
   KBN_FIELD_TYPES,
   UI_SETTINGS,
 } from '../../../../../../../src/plugins/data/common';
-import { extractErrorProperties } from '../utils/error_utils';
 import { FieldVisConfig } from '../../common/components/stats_table/types';
-import { FieldRequestConfig, JOB_FIELD_TYPES } from '../../../../common';
+import {
+  FieldRequestConfig,
+  JOB_FIELD_TYPES,
+  NON_AGGREGATABLE_FIELD_TYPES,
+  OMIT_FIELDS,
+} from '../../../../common';
 import { kbnTypeToJobType } from '../../common/util/field_types_utils';
 import { getActions } from '../../common/components/field_data_row/action_menu';
 import { DataVisualizerGridEmbeddableInput } from '../embeddables/grid_embeddable/grid_embeddable';
 import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
-import { useFieldStatsSearchStrategy } from './use_search_strategy';
+import { useFieldStatsSearchStrategy } from './use_field_stats';
+import { useOverallStats } from './use_overall_stats';
+import { OverallStatsSearchStrategyParams } from '../../../../common/search_strategy/types';
 
 const defaults = getDefaultPageState();
 
@@ -61,6 +67,10 @@ export const useDataVisualizerGridData = (
       currentFilters: input?.filters,
     }),
     [input]
+  );
+  const dataLoader = useMemo(
+    () => new DataLoader(currentIndexPattern, toasts),
+    [currentIndexPattern, toasts]
   );
 
   /** Prepare required params to pass to search strategy **/
@@ -118,8 +128,6 @@ export const useDataVisualizerGridData = (
     autoRefreshSelector: true,
   });
 
-  const [overallStats, setOverallStats] = useState(defaults.overallStats);
-
   const [documentCountStats, setDocumentCountStats] = useState(defaults.documentCountStats);
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
   const [metricsLoaded, setMetricsLoaded] = useState(defaults.metricsLoaded);
@@ -129,7 +137,7 @@ export const useDataVisualizerGridData = (
   const [nonMetricsLoaded, setNonMetricsLoaded] = useState(defaults.nonMetricsLoaded);
 
   /** Search strategy **/
-  const fieldStatsRequest = useMemo(() => {
+  const fieldStatsRequest: OverallStatsSearchStrategyParams = useMemo(() => {
     // Obtain the interval to use for date histogram aggregations
     // (such as the document count chart). Aim for 75 bars.
     const buckets = _timeBuckets;
@@ -153,6 +161,44 @@ export const useDataVisualizerGridData = (
     buckets.setBarTarget(BAR_TARGET);
     const aggInterval = buckets.getInterval();
 
+    const aggregatableFields: string[] = [];
+    const nonAggregatableFields: string[] = [];
+    currentIndexPattern.fields.forEach((field) => {
+      const fieldName = field.displayName !== undefined ? field.displayName : field.name;
+      if (!OMIT_FIELDS.includes(fieldName)) {
+        if (field.aggregatable === true && !NON_AGGREGATABLE_FIELD_TYPES.has(field.type)) {
+          aggregatableFields.push(field.name);
+        } else {
+          nonAggregatableFields.push(field.name);
+        }
+      }
+    });
+    return {
+      earliest,
+      latest,
+      aggInterval,
+      intervalMs: aggInterval?.asMilliseconds(),
+      searchQuery,
+      samplerShardSize,
+      sessionId: searchSessionId,
+      index: currentIndexPattern.title,
+      timeFieldName: currentIndexPattern.timeFieldName,
+      runtimeFieldMap: currentIndexPattern.getComputedFields().runtimeFields,
+      aggregatableFields,
+      nonAggregatableFields,
+      lastRefresh,
+    };
+  }, [
+    _timeBuckets,
+    timefilter,
+    currentIndexPattern,
+    searchQuery,
+    samplerShardSize,
+    searchSessionId,
+    lastRefresh,
+  ]);
+
+  const configsWithoutStats = useMemo(() => {
     const existMetricFields: FieldRequestConfig[] = metricConfigs.map((config) => {
       const props = { fieldName: config.fieldName, type: config.type, cardinality: 0 };
       if (config.stats !== undefined && config.stats.cardinality !== undefined) {
@@ -170,37 +216,10 @@ export const useDataVisualizerGridData = (
       }
       return props;
     });
-
-    return {
-      earliest,
-      latest,
-      aggInterval,
-      intervalMs: aggInterval?.asMilliseconds(),
-      searchQuery,
-      samplerShardSize,
-      sessionId: searchSessionId,
-      index: currentIndexPattern.title,
-      timeFieldName: currentIndexPattern.timeFieldName,
-      runtimeFieldMap: currentIndexPattern.getComputedFields().runtimeFields,
-      metricConfigs: existMetricFields,
-      nonMetricConfigs: existNonMetricFields,
-    };
-  }, [
-    _timeBuckets,
-    timefilter,
-    currentIndexPattern,
-    searchQuery,
-    samplerShardSize,
-    searchSessionId,
-    metricConfigs,
-    nonMetricConfigs,
-  ]);
-
-  const strategyResponse = useFieldStatsSearchStrategy(fieldStatsRequest);
-  const dataLoader = useMemo(
-    () => new DataLoader(currentIndexPattern, toasts),
-    [currentIndexPattern, toasts]
-  );
+    return { metricConfigs: existMetricFields, nonMetricConfigs: existNonMetricFields };
+  }, [metricConfigs, nonMetricConfigs]);
+  const overallStats = useOverallStats(fieldStatsRequest);
+  const strategyResponse = useFieldStatsSearchStrategy(fieldStatsRequest, configsWithoutStats);
 
   useEffect(() => {
     const timeUpdateSubscription = merge(
@@ -218,42 +237,6 @@ export const useDataVisualizerGridData = (
     () => currentIndexPattern.fields,
     [currentIndexPattern]
   );
-
-  async function loadOverallStats() {
-    const tf = timefilter as any;
-    let earliest;
-    let latest;
-
-    const activeBounds = tf.getActiveBounds();
-
-    if (currentIndexPattern.timeFieldName !== undefined && activeBounds === undefined) {
-      return;
-    }
-
-    if (currentIndexPattern.timeFieldName !== undefined) {
-      earliest = activeBounds.min.valueOf();
-      latest = activeBounds.max.valueOf();
-    }
-
-    try {
-      const allStats = await dataLoader.loadOverallData(
-        searchQuery,
-        samplerShardSize,
-        earliest,
-        latest
-      );
-      // Because load overall stats perform queries in batches
-      // there could be multiple errors
-      if (Array.isArray(allStats.errors) && allStats.errors.length > 0) {
-        allStats.errors.forEach((err: any) => {
-          dataLoader.displayError(extractErrorProperties(err));
-        });
-      }
-      setOverallStats(allStats);
-    } catch (err) {
-      dataLoader.displayError(err.body ?? err);
-    }
-  }
 
   const createMetricCards = useCallback(() => {
     const configs: FieldVisConfig[] = [];
@@ -422,11 +405,6 @@ export const useDataVisualizerGridData = (
     overallStats,
     showEmptyFields,
   ]);
-
-  useEffect(() => {
-    loadOverallStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery, samplerShardSize, lastRefresh]);
 
   useEffect(() => {
     createMetricCards();

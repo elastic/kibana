@@ -20,7 +20,7 @@ export type NonAggregatableField = Omit<AggregatableField, 'stats'>;
 export interface OverallStats {
   totalCount: number;
   aggregatableExistsFields: AggregatableField[];
-  aggregatableNotExistsFields: NonAggregatableField[];
-  nonAggregatableExistsFields: AggregatableField[];
+  aggregatableNotExistsFields: AggregatableField[];
+  nonAggregatableExistsFields: NonAggregatableField[];
   nonAggregatableNotExistsFields: NonAggregatableField[];
 }

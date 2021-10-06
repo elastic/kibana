@@ -28,6 +28,21 @@ export interface FieldStatsCommonRequestParams {
   query: estypes.QueryDslQueryContainer;
 }
 
+export interface OverallStatsSearchStrategyParams {
+  sessionId?: string;
+  earliest?: number;
+  latest?: number;
+  aggInterval: TimeBucketsInterval;
+  intervalMs?: number;
+  searchQuery?: any;
+  samplerShardSize: number;
+  index: string;
+  timeFieldName?: string;
+  runtimeFieldMap: Record<string, RuntimeField>;
+  aggregatableFields: string[];
+  nonAggregatableFields: string[];
+}
+
 export interface FieldStatsSearchStrategyParams {
   sessionId?: string;
   earliest?: number;
@@ -37,10 +52,10 @@ export interface FieldStatsSearchStrategyParams {
   searchQuery?: any;
   samplerShardSize: number;
   index: string;
-  metricConfigs: FieldRequestConfig[];
-  nonMetricConfigs: FieldRequestConfig[];
   timeFieldName?: string;
   runtimeFieldMap: Record<string, RuntimeField>;
+  metricConfigs: FieldRequestConfig[];
+  nonMetricConfigs: FieldRequestConfig[];
 }
 
 export function isFieldStatsSearchStrategyParams(
@@ -73,3 +88,37 @@ export interface FieldStatsSearchStrategyProgress {
 }
 
 export type FieldStatsSearchStrategy = ISearchStrategy<FieldStatsRequest, FieldStatsResponse>;
+
+export interface FieldData {
+  fieldName: string;
+  existsInDocs: boolean;
+  stats?: {
+    sampleCount?: number;
+    count?: number;
+    cardinality?: number;
+  };
+}
+
+export interface Field {
+  fieldName: string;
+  type: string;
+  cardinality: number;
+  safeFieldName: string;
+}
+
+export interface Aggs {
+  [key: string]: any;
+}
+
+export interface FieldAggCardinality {
+  field: string;
+  percent?: any;
+}
+
+export interface ScriptAggCardinality {
+  script: any;
+}
+
+export interface AggCardinality {
+  cardinality: FieldAggCardinality | ScriptAggCardinality;
+}

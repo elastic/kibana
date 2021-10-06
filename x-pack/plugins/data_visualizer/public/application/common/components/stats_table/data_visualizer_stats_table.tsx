@@ -39,6 +39,7 @@ import { BooleanContentPreview } from './components/field_data_row';
 import { calculateTableColumnsDimensions } from './utils';
 import { DistinctValues } from './components/field_data_row/distinct_values';
 import { FieldTypeIcon } from '../field_type_icon';
+import './_index.scss';
 
 const FIELD_NAME = 'fieldName';
 

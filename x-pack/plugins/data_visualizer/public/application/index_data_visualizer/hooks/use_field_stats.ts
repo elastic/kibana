@@ -8,16 +8,15 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { Subscription } from 'rxjs';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
-import { FIELD_STATS_SEARCH_STRATEGY } from '../../../../common/search_strategy/constants';
 import type {
   FieldStatRawResponse,
-  FieldStatsRequest,
-  FieldStatsResponse,
   FieldStatsSearchStrategyParams,
   FieldStatsSearchStrategyProgress,
   FieldStatsSearchStrategyReturnBase,
 } from '../../../../common/search_strategy/types';
 import { useDataVisualizerKibana } from '../../kibana_context';
+import { FieldRequestConfig } from '../../../../common';
+import { FIELD_STATS_SEARCH_STRATEGY } from '../../../../common/search_strategy/constants';
 
 const getInitialRawResponse = (): FieldStatRawResponse =>
   ({
@@ -37,9 +36,14 @@ const getReducer =
     ...prev,
     ...update,
   });
+interface FieldStatsParams {
+  metricConfigs: FieldRequestConfig[];
+  nonMetricConfigs: FieldRequestConfig[];
+}
 
 export function useFieldStatsSearchStrategy<TParams extends FieldStatsSearchStrategyParams>(
-  searchStrategyParams: TParams | undefined
+  searchStrategyParams: TParams | undefined,
+  fieldStatsParams: FieldStatsParams | undefined
 ): FieldStatsSearchStrategyReturnBase<FieldStatRawResponse> {
   const {
     services: { data },
@@ -67,13 +71,19 @@ export function useFieldStatsSearchStrategy<TParams extends FieldStatsSearchStra
       error: undefined,
     });
 
-    const request = {
-      params: searchStrategyParams,
-    };
+    if (!searchStrategyParams || !fieldStatsParams) return;
+    if (
+      fieldStatsParams.metricConfigs.length === 0 &&
+      fieldStatsParams.nonMetricConfigs.length === 0
+    )
+      return;
 
+    const request = {
+      params: { ...searchStrategyParams, ...fieldStatsParams },
+    };
     // Submit the search request using the `data.search` service.
     searchSubscription$.current = data.search
-      .search<FieldStatsRequest, FieldStatsResponse>(request, {
+      .search(request, {
         strategy: FIELD_STATS_SEARCH_STRATEGY,
         abortSignal: abortCtrl.current.signal,
         sessionId: searchStrategyParams?.sessionId,
@@ -81,8 +91,6 @@ export function useFieldStatsSearchStrategy<TParams extends FieldStatsSearchStra
       .subscribe({
         next: (response) => {
           // Setting results to latest even if the response is still partial
-
-          console.log('response.rawResponse', response);
           setRawResponse(response.rawResponse);
 
           setFetchState({
@@ -112,7 +120,7 @@ export function useFieldStatsSearchStrategy<TParams extends FieldStatsSearchStra
           });
         },
       });
-  }, [data.search, searchStrategyParams]);
+  }, [data.search, searchStrategyParams, fieldStatsParams]);
 
   const cancelFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();
