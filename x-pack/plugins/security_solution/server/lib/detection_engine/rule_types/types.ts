@@ -22,11 +22,7 @@ import {
 import { ListClient } from '../../../../../lists/server';
 import { TechnicalRuleFieldMap } from '../../../../../rule_registry/common/assets/field_maps/technical_rule_field_map';
 import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
-import {
-  PersistenceServices,
-  IRuleDataClient,
-  PersistenceAlertType,
-} from '../../../../../rule_registry/server';
+import { PersistenceServices, IRuleDataClient } from '../../../../../rule_registry/server';
 import { BaseHit } from '../../../../common/detection_engine/types';
 import { ConfigType } from '../../../config';
 import { SetupPlugins } from '../../../plugin';

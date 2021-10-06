@@ -41,6 +41,7 @@ import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './fact
 import { RuleExecutionLogClient } from '../rule_execution_log/rule_execution_log_client';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
+import { AlertAttributes } from '../signals/types';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
@@ -71,7 +72,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           savedObjectsClient,
           ruleDataService,
         });
-        const ruleSO = await savedObjectsClient.get('alert', alertId);
+        const ruleSO = await savedObjectsClient.get<AlertAttributes<typeof params>>(
+          'alert',
+          alertId
+        );
 
         const {
           actions,
