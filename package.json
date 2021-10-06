@@ -435,7 +435,6 @@
     "@bazel/typescript": "^3.8.0",
     "@cypress/snapshot": "^2.1.7",
     "@cypress/webpack-preprocessor": "^5.6.0",
-    "@elastic/apm-generator": "link:bazel-bin/packages/elastic-apm-generator",
     "@elastic/eslint-config-kibana": "link:bazel-bin/packages/elastic-eslint-config-kibana",
     "@elastic/eslint-plugin-eui": "0.0.2",
     "@elastic/github-checks-reporter": "0.0.20b3",
