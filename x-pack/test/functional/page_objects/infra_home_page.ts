@@ -141,7 +141,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async getNoMetricsIndicesPrompt() {
-      return await testSubjects.find('noMetricsIndicesPrompt');
+      return await testSubjects.find('noDataPage');
     },
 
     async getNoMetricsDataPrompt() {
