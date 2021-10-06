@@ -135,6 +135,7 @@ describe('When using the Trusted App Form', () => {
       'data-test-subj': dataTestSubjForForm,
       trustedApp: latestUpdatedTrustedApp,
       isEditMode: false,
+      isDirty: false,
       onChange: jest.fn((updates) => {
         latestUpdatedTrustedApp = updates.item;
       }),
@@ -352,13 +353,14 @@ describe('When using the Trusted App Form', () => {
       render();
       const globalButton = renderResult.getByTestId(
         `${dataTestSubjForForm}-effectedPolicies-global`
-      ) as HTMLButtonElement;
+      );
+
+      const globalButtonInput = renderResult.getByTestId('globalPolicy') as HTMLButtonElement;
 
       reactTestingLibrary.act(() => {
-        fireEvent.click(globalButton, { button: 1 });
+        fireEvent.click(globalButtonInput);
       });
 
-      rerenderWithLatestTrustedApp();
       expect(globalButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
     });
     it('hides the policy assignment section if the TA is set to global', () => {
