@@ -31,7 +31,7 @@ describe('lensSlice', () => {
 
     it('updateState: updates state with updater', () => {
       const customUpdater = jest.fn((state) => ({ ...state, query: customQuery }));
-      store.dispatch(updateState({ subType: 'UPDATE', updater: customUpdater }));
+      store.dispatch(updateState({ updater: customUpdater }));
       const changedState = store.getState().lens;
       expect(changedState).toEqual({ ...defaultState, query: customQuery });
     });

@@ -14,6 +14,7 @@ import { generateId } from '../../../id_generator';
 import { ConfigPanelWrapperProps } from './types';
 import { useFocusUpdate } from './use_focus_update';
 import {
+  setLayerDefaultDimension,
   useLensDispatch,
   removeOrClearLayer,
   addLayer,
@@ -23,9 +24,8 @@ import {
   setToggleFullscreen,
   useLensSelector,
   selectVisualization,
-  LensAppState,
 } from '../../../state_management';
-import { AddLayerButton, getLayerType } from './add_layer';
+import { AddLayerButton } from './add_layer';
 import { getRemoveOperation } from '../../../utils';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
@@ -97,7 +97,6 @@ export function LayerPanels(
       setTimeout(() => {
         dispatchLens(
           updateState({
-            subType: 'UPDATE_ALL_STATES',
             updater: (prevState) => {
               const updatedDatasourceState =
                 typeof newDatasourceState === 'function'
@@ -120,7 +119,6 @@ export function LayerPanels(
                   ...prevState.visualization,
                   state: updatedVisualizationState,
                 },
-                stagedPreview: undefined,
               };
             },
           })
@@ -170,22 +168,10 @@ export function LayerPanels(
                 datasourceMap[activeDatasourceId]?.initializeDimension
               ) {
                 dispatchLens(
-                  updateState({
-                    subType: 'LAYER_DEFAULT_DIMENSION',
-                    updater: (state) =>
-                      addInitialValueIfAvailable({
-                        ...props,
-                        state,
-                        activeDatasourceId,
-                        layerId,
-                        layerType: getLayerType(
-                          activeVisualization,
-                          state.visualization.state,
-                          layerId
-                        ),
-                        columnId,
-                        groupId,
-                      }),
+                  setLayerDefaultDimension({
+                    layerId,
+                    columnId,
+                    groupId,
                   })
                 );
               }
@@ -217,68 +203,4 @@ export function LayerPanels(
       />
     </EuiForm>
   );
-}
-
-function addInitialValueIfAvailable({
-  state,
-  activeVisualization,
-  framePublicAPI,
-  layerType,
-  activeDatasourceId,
-  datasourceMap,
-  layerId,
-  columnId,
-  groupId,
-}: ConfigPanelWrapperProps & {
-  state: LensAppState;
-  activeDatasourceId: string;
-  activeVisualization: Visualization;
-  layerId: string;
-  layerType: string;
-  columnId?: string;
-  groupId?: string;
-}) {
-  const layerInfo = activeVisualization
-    .getSupportedLayers(state.visualization.state, framePublicAPI)
-    .find(({ type }) => type === layerType);
-
-  const activeDatasource = datasourceMap[activeDatasourceId];
-
-  if (layerInfo?.initialDimensions && activeDatasource?.initializeDimension) {
-    const info = groupId
-      ? layerInfo.initialDimensions.find(({ groupId: id }) => id === groupId)
-      : // pick the first available one if not passed
-        layerInfo.initialDimensions[0];
-
-    if (info) {
-      return {
-        ...state,
-        datasourceStates: {
-          ...state.datasourceStates,
-          [activeDatasourceId]: {
-            ...state.datasourceStates[activeDatasourceId],
-            state: activeDatasource.initializeDimension(
-              state.datasourceStates[activeDatasourceId].state,
-              layerId,
-              {
-                ...info,
-                columnId: columnId || info.columnId,
-              }
-            ),
-          },
-        },
-        visualization: {
-          ...state.visualization,
-          state: activeVisualization.setDimension({
-            groupId: info.groupId,
-            layerId,
-            columnId: columnId || info.columnId,
-            prevState: state.visualization.state,
-            frame: framePublicAPI,
-          }),
-        },
-      };
-    }
-  }
-  return state;
 }

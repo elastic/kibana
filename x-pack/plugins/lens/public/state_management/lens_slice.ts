@@ -17,6 +17,7 @@ import { LensAppState, LensStoreDeps, VisualizationState } from './types';
 import { Datasource, Visualization } from '../types';
 import { generateId } from '../id_generator';
 import type { LayerType } from '../../common/types';
+import { getLayerType } from '../editor_frame_service/editor_frame/config_panel/add_layer';
 import {
   getVisualizeFieldSuggestions,
   Suggestion,
@@ -83,7 +84,6 @@ export const setState = createAction<Partial<LensAppState>>('lens/setState');
 export const onActiveDataChange = createAction<TableInspectorAdapter>('lens/onActiveDataChange');
 export const setSaveable = createAction<boolean>('lens/setSaveable');
 export const updateState = createAction<{
-  subType: string;
   updater: (prevState: LensAppState) => LensAppState;
 }>('lens/updateState');
 export const updateDatasourceState = createAction<{
@@ -153,6 +153,12 @@ export const addLayer = createAction<{
   layerType: LayerType;
 }>('lens/addLayer');
 
+export const setLayerDefaultDimension = createAction<{
+  layerId: string;
+  columnId: string;
+  groupId: string;
+}>('lens/setLayerDefaultDimension');
+
 export const lensActions = {
   setState,
   onActiveDataChange,
@@ -173,6 +179,7 @@ export const lensActions = {
   removeLayers,
   removeOrClearLayer,
   addLayer,
+  setLayerDefaultDimension,
 };
 
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {
@@ -198,14 +205,19 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
     },
     [updateState.type]: (
       state,
-      action: {
+      {
+        payload: { updater },
+      }: {
         payload: {
-          subType: string;
           updater: (prevState: LensAppState) => LensAppState;
         };
       }
     ) => {
-      return action.payload.updater(current(state) as LensAppState);
+      const newState = updater(current(state) as LensAppState);
+      return {
+        ...newState,
+        stagedPreview: undefined,
+      };
     },
     [removeOrClearLayer.type]: (
       state,
@@ -616,6 +628,44 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       state.visualization.state = activeVisualizationState;
       state.datasourceStates[state.activeDatasourceId].state = activeDatasourceState;
       state.stagedPreview = undefined;
+    },
+    [setLayerDefaultDimension.type]: (
+      state,
+      {
+        payload: { layerId, columnId, groupId },
+      }: {
+        payload: {
+          layerId: string;
+          columnId: string;
+          groupId: string;
+        };
+      }
+    ) => {
+      if (!state.activeDatasourceId || !state.visualization.activeId) {
+        return state;
+      }
+
+      const activeDatasource = datasourceMap[state.activeDatasourceId];
+      const activeVisualization = visualizationMap[state.visualization.activeId];
+      const layerType = getLayerType(activeVisualization, state.visualization.state, layerId);
+      const { activeDatasourceState, activeVisualizationState } = addInitialValueIfAvailable({
+        datasourceState: state.datasourceStates[state.activeDatasourceId].state,
+        visualizationState: state.visualization.state,
+        framePublicAPI: {
+          // any better idea to avoid `as`?
+          activeData: state.activeData as TableInspectorAdapter,
+          datasourceLayers: getDatasourceLayers(state.datasourceStates, datasourceMap),
+        },
+        activeVisualization,
+        activeDatasource,
+        layerId,
+        layerType,
+        columnId,
+        groupId,
+      });
+
+      state.visualization.state = activeVisualizationState;
+      state.datasourceStates[state.activeDatasourceId].state = activeDatasourceState;
     },
   });
 };

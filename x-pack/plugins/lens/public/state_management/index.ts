@@ -36,6 +36,7 @@ export const {
   removeLayers,
   removeOrClearLayer,
   addLayer,
+  setLayerDefaultDimension,
 } = lensActions;
 
 export const makeConfigureStore = (
