@@ -7,17 +7,17 @@
 
 import React from 'react';
 
+import { useActions } from 'kea';
+
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { CurationActionsPopover } from './curation_actions_popover';
+import { CurationSuggestionLogic } from './curation_suggestion_logic';
 
-interface Props {
-  onAcceptClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  onRejectClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-}
+export const CurationActionBar: React.FC = () => {
+  const { acceptSuggestion, rejectSuggestion } = useActions(CurationSuggestionLogic);
 
-export const CurationActionBar: React.FC<Props> = ({ onAcceptClick, onRejectClick }) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -41,7 +41,7 @@ export const CurationActionBar: React.FC<Props> = ({ onAcceptClick, onRejectClic
                     color="danger"
                     iconType="crossInACircleFilled"
                     data-test-subj="rejectButton"
-                    onClick={onRejectClick}
+                    onClick={rejectSuggestion}
                   >
                     {i18n.translate(
                       'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.rejectButtonLabel',
@@ -55,7 +55,7 @@ export const CurationActionBar: React.FC<Props> = ({ onAcceptClick, onRejectClic
                     color="success"
                     iconType="checkInCircleFilled"
                     data-test-subj="acceptButton"
-                    onClick={onAcceptClick}
+                    onClick={acceptSuggestion}
                   >
                     {i18n.translate(
                       'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.acceptButtonLabel',
@@ -64,12 +64,7 @@ export const CurationActionBar: React.FC<Props> = ({ onAcceptClick, onRejectClic
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <CurationActionsPopover
-                    onAccept={() => {}}
-                    onAutomate={() => {}}
-                    onReject={() => {}}
-                    onTurnOff={() => {}}
-                  />
+                  <CurationActionsPopover />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

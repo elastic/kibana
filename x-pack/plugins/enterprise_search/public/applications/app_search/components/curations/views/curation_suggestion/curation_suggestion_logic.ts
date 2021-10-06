@@ -10,10 +10,15 @@ import { HttpSetup } from 'kibana/public';
 
 import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
-import { EngineLogic } from '../../../engine';
+import { KibanaLogic } from '../../../../../shared/kibana';
+import { ENGINE_CURATIONS_PATH, ENGINE_CURATION_PATH } from '../../../../routes';
+import { EngineLogic, generateEnginePath } from '../../../engine';
 import { Result } from '../../../result/types';
 import { Curation, CurationSuggestion } from '../../types';
 
+interface Error {
+  error: string;
+}
 interface CurationSuggestionValues {
   dataLoading: boolean;
   suggestion: CurationSuggestion | null;
@@ -36,6 +41,10 @@ interface CurationSuggestionActions {
     suggestedPromotedDocuments: Result[];
     curation: Curation;
   };
+  acceptSuggestion(): void;
+  acceptAndAutomateSuggestion(): void;
+  rejectSuggestion(): void;
+  rejectAndDisableSuggestion(): void;
 }
 
 interface CurationSuggestionProps {
@@ -53,6 +62,10 @@ export const CurationSuggestionLogic = kea<
       suggestedPromotedDocuments,
       curation,
     }),
+    acceptSuggestion: true,
+    acceptAndAutomateSuggestion: true,
+    rejectSuggestion: true,
+    rejectAndDisableSuggestion: true,
   }),
   reducers: () => ({
     dataLoading: [
@@ -81,7 +94,7 @@ export const CurationSuggestionLogic = kea<
       },
     ],
   }),
-  listeners: ({ actions, props }) => ({
+  listeners: ({ actions, values, props }) => ({
     loadSuggestion: async () => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
@@ -116,8 +129,108 @@ export const CurationSuggestionLogic = kea<
         flashAPIErrors(e);
       }
     },
+    acceptSuggestion: async () => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+      const { suggestion } = values;
+
+      try {
+        const updatedSuggestion = await updateSuggestion(
+          http,
+          engineName,
+          suggestion!.query,
+          'applied'
+        );
+
+        // Show flash success here?
+        KibanaLogic.values.navigateToUrl(
+          generateEnginePath(ENGINE_CURATION_PATH, {
+            curationId: updatedSuggestion.curation_id,
+          })
+        );
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
+    acceptAndAutomateSuggestion: async () => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+      const { suggestion } = values;
+
+      try {
+        const updatedSuggestion = await updateSuggestion(
+          http,
+          engineName,
+          suggestion!.query,
+          'automated'
+        );
+
+        // Show flash success here?
+        KibanaLogic.values.navigateToUrl(
+          generateEnginePath(ENGINE_CURATION_PATH, {
+            curationId: updatedSuggestion.curation_id,
+          })
+        );
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
+    rejectSuggestion: async () => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+      const { suggestion } = values;
+
+      try {
+        await updateSuggestion(http, engineName, suggestion!.query, 'rejected');
+
+        // Show flash success here?
+        KibanaLogic.values.navigateToUrl(generateEnginePath(ENGINE_CURATIONS_PATH));
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
+    rejectAndDisableSuggestion: async () => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+      const { suggestion } = values;
+
+      try {
+        await updateSuggestion(http, engineName, suggestion!.query, 'disabled');
+
+        // Show flash success here?
+        KibanaLogic.values.navigateToUrl(generateEnginePath(ENGINE_CURATIONS_PATH));
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
   }),
 });
+
+const updateSuggestion = async (
+  http: HttpSetup,
+  engineName: string,
+  query: string,
+  status: string
+) => {
+  const response = await http.put<{ results: Array<CurationSuggestion | Error> }>(
+    `/internal/app_search/engines/${engineName}/search_relevance_suggestions`,
+    {
+      body: JSON.stringify([
+        {
+          query,
+          type: 'curation',
+          status,
+        },
+      ]),
+    }
+  );
+
+  if (response.results[0].hasOwnProperty('error')) {
+    throw (response.results[0] as Error).error;
+  }
+
+  return response.results[0] as CurationSuggestion;
+};
 
 const getSuggestions = async (
   http: HttpSetup,
