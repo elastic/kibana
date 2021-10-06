@@ -77,5 +77,33 @@ export default function ({ getPageObjects, getService }) {
         'fill-opacity': 1,
       });
     });
+    it('should filter out the metadata feature', async () => {
+      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+
+      const layer = mapboxStyle.layers.find((mbLayer) => {
+        return mbLayer.id === `${VECTOR_SOURCE_ID}_toomanyfeatures`;
+      });
+
+      expect(layer).to.eql({
+        id: 'caffa63a-ebfb-466d-8ff6-d797975b88ab_toomanyfeatures',
+        type: 'line',
+        source: 'caffa63a-ebfb-466d-8ff6-d797975b88ab',
+        'source-layer': 'meta',
+        minzoom: 0,
+        maxzoom: 24,
+        filter: [
+          'all',
+          ['==', ['get', 'hits.total.relation'], 'gte'],
+          ['>=', ['get', 'hits.total.value'], 10000],
+        ],
+        layout: { visibility: 'visible' },
+        paint: {
+          'line-color': '#FF0000',
+          'line-width': 2,
+          'line-dasharray': [2, 1],
+          'line-opacity': 1,
+        },
+      });
+    });
   });
 }
