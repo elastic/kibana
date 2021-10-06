@@ -17,14 +17,14 @@ import {
 import { isEmpty } from 'lodash/fp';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { CardActionsFlexItemProps } from './card_actions_flex_item';
-import { AnyArtifact } from '../types';
+import { ArtifactInfo } from '../types';
 import { getFormattedComments } from '../utils/get_formatted_comments';
 import { SHOW_COMMENTS_LABEL, HIDE_COMMENTS_LABEL } from './translations';
 
 export interface CardCommentsProps
   extends CardActionsFlexItemProps,
     Pick<CommonProps, 'data-test-subj'> {
-  comments: AnyArtifact['comments'];
+  comments: ArtifactInfo['comments'];
 }
 
 export const CardComments = memo<CardCommentsProps>(
