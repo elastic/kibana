@@ -247,7 +247,6 @@ async function createServer(useHttps: boolean = false): Promise<CreateServerResu
 }
 
 const BaseActionsConfig: ActionsConfig = {
-  enabled: true,
   allowedHosts: ['*'],
   enabledActionTypes: ['*'],
   preconfiguredAlertHistoryEsIndex: false,
