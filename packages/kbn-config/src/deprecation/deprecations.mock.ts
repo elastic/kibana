@@ -6,16 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { Filter, isMissingFilter, FILTERS } from '@kbn/es-query';
+import type { ConfigDeprecationContext } from './types';
 
-export const mapMissing = (filter: Filter) => {
-  if (isMissingFilter(filter)) {
-    return {
-      type: FILTERS.MISSING,
-      value: FILTERS.MISSING,
-      key: filter.missing.field,
-    };
-  }
+const createMockedContext = (): ConfigDeprecationContext => {
+  return {
+    branch: 'master',
+    version: '8.0.0',
+  };
+};
 
-  throw filter;
+export const configDeprecationsMock = {
+  createContext: createMockedContext,
 };
