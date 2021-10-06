@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import seedrandom from 'seedrandom';
 import semverLte from 'semver/functions/lte';
 import { assertNever } from '@kbn/std';
