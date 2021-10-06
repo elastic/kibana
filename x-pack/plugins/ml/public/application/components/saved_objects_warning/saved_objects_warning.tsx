@@ -37,7 +37,9 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRe
 
       const { result } = await syncCheck(jobType);
 
-      setShowWarning(showSyncFlyout || result);
+      if (mounted.current === true) {
+        setShowWarning(showSyncFlyout || result);
+      }
     } catch (error) {
       console.log('Saved object synchronization check could not be performed.'); // eslint-disable-line no-console
     }
