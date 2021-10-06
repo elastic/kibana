@@ -825,7 +825,7 @@ describe('SearchSource', () => {
     test('should serialize filters', () => {
       const filter = [
         {
-          query: { q: 'query' },
+          query: { query_string: { query: 'query' } },
           meta: {
             alias: 'alias',
             disabled: false,
@@ -843,7 +843,7 @@ describe('SearchSource', () => {
       searchSource.setField('index', indexPattern123);
       const filter = [
         {
-          query: { q: 'query' },
+          query: { query_string: { query: 'query' } },
           meta: {
             alias: 'alias',
             disabled: false,
@@ -886,7 +886,7 @@ describe('SearchSource', () => {
   describe('getSerializedFields', () => {
     const filter: Filter[] = [
       {
-        query: { q: 'query' },
+        query: { query_string: { query: 'query' } },
         meta: {
           alias: 'alias',
           disabled: false,
@@ -916,7 +916,9 @@ describe('SearchSource', () => {
                 "negate": false,
               },
               "query": Object {
-                "q": "query",
+                "query_string": Object {
+                  "query": "query",
+                },
               },
             },
           ],
