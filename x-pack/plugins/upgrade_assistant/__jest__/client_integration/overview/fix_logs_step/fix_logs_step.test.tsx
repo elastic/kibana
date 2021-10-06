@@ -346,6 +346,7 @@ describe('Overview - Fix deprecation logs step', () => {
       };
 
       httpRequestsMockHelpers.setDeleteLogsCacheResponse(undefined, error);
+      // Initially we want to have the callout to have a warning state
       httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 10 });
 
       const addDanger = jest.fn();
@@ -373,9 +374,9 @@ describe('Overview - Fix deprecation logs step', () => {
 
       // The toast should always be shown if the delete logs cache fails.
       expect(addDanger).toHaveBeenCalled();
-      // Even though a stub for the API call getting the count was set to return 0,
-      // given that the delete logs cache API call will fail the callout remains in
-      // warning state.
+      // Even though we changed the response of the getLogsCountResponse, when the
+      // deleteLogsCache fails the getLogsCount api should not be called and the
+      // status of the callout should remain the same it initially was.
       expect(exists('hasWarningsCallout')).toBe(true);
     });
 
