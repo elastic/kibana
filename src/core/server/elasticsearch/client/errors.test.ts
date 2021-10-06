@@ -7,7 +7,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { ApiResponse } from '@elastic/elasticsearch';
+import { TransportResult } from '@elastic/transport';
 import { isResponseError, isUnauthorizedError } from './errors';
 
 const createApiResponseError = ({
@@ -18,7 +18,7 @@ const createApiResponseError = ({
   statusCode?: number;
   headers?: Record<string, string>;
   body?: Record<string, any>;
-} = {}): ApiResponse => {
+} = {}): TransportResult => {
   return {
     body,
     statusCode,

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/transport';
 import {
   TransformGetTransformStatsResponse,
   TransformGetTransformStatsTransformStats,
@@ -104,7 +104,7 @@ export class CheckMetadataTransformsTask {
     const [{ elasticsearch }] = await core.getStartServices();
     const esClient = elasticsearch.client.asInternalUser;
 
-    let transformStatsResponse: ApiResponse<TransformGetTransformStatsResponse>;
+    let transformStatsResponse: TransportResult<TransformGetTransformStatsResponse>;
     try {
       transformStatsResponse = await esClient?.transform.getTransformStats({
         transform_id: METADATA_TRANSFORMS_PATTERN,

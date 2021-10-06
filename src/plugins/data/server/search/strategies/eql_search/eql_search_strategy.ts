@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/transport';
 import { tap } from 'rxjs/operators';
 import type { IScopedClusterClient, Logger } from 'kibana/server';
 import {
@@ -57,7 +57,7 @@ export const eqlSearchStrategyProvider = (
           : // @ts-expect-error EqlRequestParams | undefined is not assignable to EqlRequestParams
             client.search(params as EqlSearchStrategyRequest['params'], request.options);
         const response = await shimAbortSignal(promise, options.abortSignal);
-        return toEqlKibanaSearchResponse(response as ApiResponse<EqlSearchResponse>);
+        return toEqlKibanaSearchResponse(response as TransportResult<EqlSearchResponse>);
       };
 
       const cancel = async () => {

@@ -24,7 +24,7 @@ import { listMock } from '../../../../../lists/server/mocks';
 import { getListClientMock } from '../../../../../lists/server/services/lists/list_client.mock';
 import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { ApiResponse } from '@elastic/transport';
+import { TransportResult } from '@elastic/transport';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { queryExecutor } from './executors/query';
@@ -158,7 +158,7 @@ describe('signal_rule_alert_type', () => {
     (mlExecutor as jest.Mock).mockClear();
     (mlExecutor as jest.Mock).mockResolvedValue(executorReturnValue);
     (parseScheduleDates as jest.Mock).mockReturnValue(moment(100));
-    const value: Partial<ApiResponse<estypes.FieldCapsResponse>> = {
+    const value: Partial<TransportResult<estypes.FieldCapsResponse>> = {
       statusCode: 200,
       body: {
         indices: ['index1', 'index2', 'index3', 'index4'],
@@ -175,7 +175,7 @@ describe('signal_rule_alert_type', () => {
       },
     };
     alertServices.scopedClusterClient.asCurrentUser.fieldCaps.mockResolvedValue(
-      value as ApiResponse<estypes.FieldCapsResponse>
+      value as TransportResult<estypes.FieldCapsResponse>
     );
     const ruleAlert = getAlertMock(false, getQueryRuleParams());
     alertServices.savedObjectsClient.get.mockResolvedValue({

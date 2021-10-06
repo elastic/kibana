@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Client, ApiResponse } from '@elastic/elasticsearch';
-import { TransportRequestPromise } from '@elastic/transport';
+import type { Client } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/transport';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { ElasticsearchClient } from './types';
 import { ICustomClusterClient } from './cluster_client';
@@ -16,9 +16,7 @@ import { PRODUCT_RESPONSE_HEADER } from '../supported_server_response_check';
 // use jest.requireActual() to prevent weird errors when people mock @elastic/elasticsearch
 const { Client: UnmockedClient } = jest.requireActual('@elastic/elasticsearch');
 
-const createInternalClientMock = (
-  res?: MockedTransportRequestPromise<unknown>
-): DeeplyMockedKeys<Client> => {
+const createInternalClientMock = (res?: Promise<unknown>): DeeplyMockedKeys<Client> => {
   // we mimic 'reflection' on a concrete instance of the client to generate the mocked functions.
   const client = new UnmockedClient({
     node: 'http://localhost',
@@ -91,7 +89,7 @@ const createInternalClientMock = (
 
 export type ElasticsearchClientMock = DeeplyMockedKeys<ElasticsearchClient>;
 
-const createClientMock = (res?: MockedTransportRequestPromise<unknown>): ElasticsearchClientMock =>
+const createClientMock = (res?: Promise<unknown>): ElasticsearchClientMock =>
   createInternalClientMock(res) as unknown as ElasticsearchClientMock;
 
 export interface ScopedClusterClientMock {
@@ -139,31 +137,25 @@ const createCustomClusterClientMock = () => {
   return mock;
 };
 
-export type MockedTransportRequestPromise<T> = TransportRequestPromise<T> & {
-  abort: jest.MockedFunction<() => undefined>;
-};
-
 const createSuccessTransportRequestPromise = <T>(
   body: T,
   { statusCode = 200 }: { statusCode?: number } = {},
   headers: Record<string, string | string[]> = { [PRODUCT_RESPONSE_HEADER]: 'Elasticsearch' }
-): MockedTransportRequestPromise<ApiResponse<T>> => {
+): Promise<TransportResult<T>> => {
   const response = createApiResponse({ body, statusCode, headers });
-  const promise = Promise.resolve(response);
-  (promise as MockedTransportRequestPromise<ApiResponse<T>>).abort = jest.fn();
+  const promise = Promise.resolve(response) as Promise<TransportResult<T>>;
 
-  return promise as MockedTransportRequestPromise<ApiResponse<T>>;
+  return promise;
 };
 
-const createErrorTransportRequestPromise = (err: any): MockedTransportRequestPromise<never> => {
+const createErrorTransportRequestPromise = (err: any): Promise<never> => {
   const promise = Promise.reject(err);
-  (promise as MockedTransportRequestPromise<never>).abort = jest.fn();
-  return promise as MockedTransportRequestPromise<never>;
+  return promise;
 };
 
 function createApiResponse<TResponse = Record<string, any>>(
-  opts: Partial<ApiResponse<TResponse>> = {}
-): ApiResponse<TResponse> {
+  opts: Partial<TransportResult<TResponse>> = {}
+): TransportResult<TResponse> {
   return {
     body: {} as any,
     statusCode: 200,

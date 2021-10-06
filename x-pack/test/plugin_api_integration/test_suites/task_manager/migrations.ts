@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/transport';
 import { TaskInstanceWithDeprecatedFields } from '../../../../plugins/task_manager/server/task';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { SavedObjectsUtils } from '../../../../../src/core/server/saved_objects';
@@ -43,7 +44,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     it('8.0.0 migrates actions tasks from legacy id to saved object ids', async () => {
-      const searchResult: ApiResponse<
+      const searchResult: TransportResult<
         estypes.SearchResponse<{ task: TaskInstanceWithDeprecatedFields }>
       > = await es.search({
         index: '.kibana_task_manager',

@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/transport';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -423,7 +424,7 @@ export default ({ getService }: FtrProviderContext): void => {
        * around 30 seconds which seemed too slow
        */
       const getAllCasesSortedByCreatedAtAsc = async () => {
-        const cases: ApiResponse<estypes.SearchResponse<CaseAttributes>> = await es.search({
+        const cases: TransportResult<estypes.SearchResponse<CaseAttributes>> = await es.search({
           index: '.kibana',
           body: {
             size: 10000,

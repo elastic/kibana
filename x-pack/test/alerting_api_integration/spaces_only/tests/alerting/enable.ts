@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/transport';
 import { Spaces } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -30,7 +31,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
     after(() => objectRemover.removeAll());
 
     async function getScheduledTask(id: string): Promise<TaskManagerDoc> {
-      const scheduledTask: ApiResponse<estypes.GetResponse<TaskManagerDoc>> = await es.get({
+      const scheduledTask: TransportResult<estypes.GetResponse<TaskManagerDoc>> = await es.get({
         id: `task:${id}`,
         index: '.kibana_task_manager',
       });

@@ -10,7 +10,7 @@ import { coreMock } from '../../../../core/server/mocks';
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { ConfigSchema } from '../../config';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/transport';
 import { termsAggSuggestions } from './terms_agg';
 import type { estypes } from '@elastic/elasticsearch';
 import { duration } from 'moment';
@@ -32,7 +32,7 @@ const mockResponse = {
       },
     },
   },
-} as ApiResponse<estypes.SearchResponse<any>>;
+} as TransportResult<estypes.SearchResponse<any>>;
 
 jest.mock('../data_views');
 

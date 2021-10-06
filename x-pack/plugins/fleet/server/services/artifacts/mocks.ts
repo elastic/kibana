@@ -6,7 +6,7 @@
  */
 import { URL } from 'url';
 
-import type { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/transport';
 import { errors } from '@elastic/elasticsearch';
 
 import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
@@ -69,7 +69,7 @@ export interface GenerateEsRequestErrorApiResponseMockProps {
 
 export const generateEsRequestErrorApiResponseMock = (
   { statusCode = 500 }: GenerateEsRequestErrorApiResponseMockProps = { statusCode: 500 }
-): ApiResponse => {
+): TransportResult => {
   return generateEsApiResponseMock(
     {
       _index: '.fleet-artifacts_1',
@@ -127,8 +127,8 @@ export const generateArtifactEsSearchResultHitsMock = (): ESSearchResponse<
 
 export const generateEsApiResponseMock = <TBody extends Record<string, any>>(
   body: TBody,
-  otherProps: Partial<Exclude<ApiResponse, 'body'>> = {}
-): ApiResponse => {
+  otherProps: Partial<Exclude<TransportResult, 'body'>> = {}
+): TransportResult => {
   return elasticsearchServiceMock.createApiResponse({
     body,
     headers: {

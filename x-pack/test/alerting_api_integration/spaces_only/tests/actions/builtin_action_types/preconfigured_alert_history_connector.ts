@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/transport';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getTestAlertData, ObjectRemover } from '../../../../common/lib';
 import { AlertHistoryDefaultIndexName } from '../../../../../../plugins/actions/common';
@@ -66,7 +67,7 @@ export default function preconfiguredAlertHistoryConnectorTests({
       await waitForStatus(response.body.id, new Set(['active']));
 
       await retry.try(async () => {
-        const result: ApiResponse<estypes.SearchResponse<any>> = await es.search({
+        const result: TransportResult<estypes.SearchResponse<any>> = await es.search({
           index: AlertHistoryDefaultIndexName,
         });
         const indexedItems = result.body.hits.hits;
@@ -104,7 +105,7 @@ export default function preconfiguredAlertHistoryConnectorTests({
       await waitForStatus(response.body.id, new Set(['active']));
 
       await retry.try(async () => {
-        const result: ApiResponse<estypes.SearchResponse<any>> = await es.search({
+        const result: TransportResult<estypes.SearchResponse<any>> = await es.search({
           index: ALERT_HISTORY_OVERRIDE_INDEX,
         });
         const indexedItems = result.body.hits.hits;

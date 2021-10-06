@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/transport';
 import { ElasticsearchClient } from 'src/core/server';
 import { SearchStatus } from './types';
 import { SearchSessionRequestInfo } from '../../../../../../src/plugins/data/common';
@@ -19,7 +19,7 @@ export async function getSearchStatus(
   // TODO: Handle strategies other than the default one
   try {
     // @ts-expect-error start_time_in_millis: EpochMillis is string | number
-    const apiResponse: ApiResponse<AsyncSearchStatusResponse> = await client.asyncSearch.status({
+    const apiResponse: TransportResult<AsyncSearchStatusResponse> = await client.asyncSearch.status({
       id: asyncId,
     });
     const response = apiResponse.body;

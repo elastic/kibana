@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/transport';
 
 function createApiResponseMock<TResponse, TContext>(
-  apiResponse: Pick<ApiResponse<TResponse, TContext>, 'body'> &
-    Partial<Omit<ApiResponse<TResponse, TContext>, 'body'>>
-): ApiResponse<TResponse, TContext> {
+  apiResponse: Pick<TransportResult<TResponse, TContext>, 'body'> &
+    Partial<Omit<TransportResult<TResponse, TContext>, 'body'>>
+): TransportResult<TResponse, TContext> {
   return {
     statusCode: null,
     headers: null,

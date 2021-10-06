@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/transport';
 
 import { licenseMock } from '../common/licensing/index.mock';
 import type { MockAuthenticatedUserProps } from '../common/model/authenticated_user.mock';
@@ -50,9 +50,9 @@ function createStartMock() {
 }
 
 function createApiResponseMock<TResponse, TContext>(
-  apiResponse: Pick<ApiResponse<TResponse, TContext>, 'body'> &
-    Partial<Omit<ApiResponse<TResponse, TContext>, 'body'>>
-): ApiResponse<TResponse, TContext> {
+  apiResponse: Pick<TransportResult<TResponse, TContext>, 'body'> &
+    Partial<Omit<TransportResult<TResponse, TContext>, 'body'>>
+): TransportResult<TResponse, TContext> {
   return {
     statusCode: null,
     headers: null,

@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/transport';
 import { getUrlPrefix } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import type { RawAlert, RawAlertAction } from '../../../../../plugins/alerting/server/types';
@@ -201,7 +202,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     it('7.16.0 migrates existing alerts to contain legacyId field', async () => {
-      const searchResult: ApiResponse<estypes.SearchResponse<RawAlert>> = await es.search({
+      const searchResult: TransportResult<estypes.SearchResponse<RawAlert>> = await es.search({
         index: '.kibana',
         body: {
           query: {
@@ -220,7 +221,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     it('7.16.0 migrates existing rules so predefined connectors are not stored in references', async () => {
-      const searchResult: ApiResponse<estypes.SearchResponse<RawAlert>> = await es.search({
+      const searchResult: TransportResult<estypes.SearchResponse<RawAlert>> = await es.search({
         index: '.kibana',
         body: {
           query: {

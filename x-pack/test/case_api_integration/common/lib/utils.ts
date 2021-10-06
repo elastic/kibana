@@ -7,7 +7,8 @@
 
 import { omit } from 'lodash';
 import expect from '@kbn/expect';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/transport';
 import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 
 import type SuperTest from 'supertest';
@@ -78,7 +79,7 @@ export const getSignalsWithES = async ({
   indices: string | string[];
   ids: string | string[];
 }): Promise<Map<string, Map<string, estypes.SearchHit<SignalHit>>>> => {
-  const signals: ApiResponse<estypes.SearchResponse<SignalHit>> = await es.search({
+  const signals: TransportResult<estypes.SearchResponse<SignalHit>> = await es.search({
     index: indices,
     body: {
       size: 10000,
@@ -590,7 +591,7 @@ interface ConnectorMappingsSavedObject {
  * Returns connector mappings saved objects from Elasticsearch directly.
  */
 export const getConnectorMappingsFromES = async ({ es }: { es: KibanaClient }) => {
-  const mappings: ApiResponse<estypes.SearchResponse<ConnectorMappingsSavedObject>> =
+  const mappings: TransportResult<estypes.SearchResponse<ConnectorMappingsSavedObject>> =
     await es.search({
       index: '.kibana',
       body: {
@@ -615,7 +616,7 @@ interface ConfigureSavedObject {
  * Returns configure saved objects from Elasticsearch directly.
  */
 export const getConfigureSavedObjectsFromES = async ({ es }: { es: KibanaClient }) => {
-  const configure: ApiResponse<estypes.SearchResponse<ConfigureSavedObject>> = await es.search({
+  const configure: TransportResult<estypes.SearchResponse<ConfigureSavedObject>> = await es.search({
     index: '.kibana',
     body: {
       query: {
@@ -632,7 +633,7 @@ export const getConfigureSavedObjectsFromES = async ({ es }: { es: KibanaClient 
 };
 
 export const getCaseSavedObjectsFromES = async ({ es }: { es: KibanaClient }) => {
-  const configure: ApiResponse<estypes.SearchResponse<{ cases: ESCaseAttributes }>> =
+  const configure: TransportResult<estypes.SearchResponse<{ cases: ESCaseAttributes }>> =
     await es.search({
       index: '.kibana',
       body: {

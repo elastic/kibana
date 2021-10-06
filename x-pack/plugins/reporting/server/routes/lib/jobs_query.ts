@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/transport';
 import {
   DeleteResponse,
   SearchHit,
@@ -53,7 +53,7 @@ interface JobsQueryFactory {
   count(jobTypes: string[], user: ReportingUser): Promise<number>;
   get(user: ReportingUser, id: string): Promise<ReportApiJSON | void>;
   getError(id: string): Promise<string>;
-  delete(deleteIndex: string, id: string): Promise<ApiResponse<DeleteResponse>>;
+  delete(deleteIndex: string, id: string): Promise<TransportResult<DeleteResponse>>;
 }
 
 export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory {
@@ -102,7 +102,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
 
       const response = (await execQuery((elasticsearchClient) =>
         elasticsearchClient.search({ body, index: getIndex() })
-      )) as ApiResponse<SearchResponse<ReportSource>>;
+      )) as TransportResult<SearchResponse<ReportSource>>;
 
       return (
         response?.body.hits?.hits.map((report: SearchHit<ReportSource>) => {

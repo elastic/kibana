@@ -7,7 +7,8 @@
 
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { Response as SupertestResponse } from 'supertest';
 import { RecoveredActionGroup } from '../../../../../plugins/alerting/common';
 import { Space } from '../../../common/types';
@@ -379,7 +380,7 @@ instanceStateValue: true
       const scheduledActionTask: estypes.SearchHit<
         TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>
       > = await retry.try(async () => {
-        const searchResult: ApiResponse<
+        const searchResult: TransportResult<
           estypes.SearchResponse<TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>>
         > = await es.search({
           index: '.kibana_task_manager',

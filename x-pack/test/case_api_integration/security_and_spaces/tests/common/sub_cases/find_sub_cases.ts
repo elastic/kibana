@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { findSubCasesResp, postCollectionReq } from '../../../../common/lib/mock';
@@ -313,16 +314,18 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         const getAllCasesSortedByCreatedAtAsc = async () => {
-          const cases: ApiResponse<estypes.SearchResponse<SubCaseAttributes>> = await es.search({
-            index: '.kibana',
-            body: {
-              size: 10000,
-              sort: [{ 'cases-sub-case.created_at': { unmapped_type: 'date', order: 'asc' } }],
-              query: {
-                term: { type: 'cases-sub-case' },
+          const cases: TransportResult<estypes.SearchResponse<SubCaseAttributes>> = await es.search(
+            {
+              index: '.kibana',
+              body: {
+                size: 10000,
+                sort: [{ 'cases-sub-case.created_at': { unmapped_type: 'date', order: 'asc' } }],
+                query: {
+                  term: { type: 'cases-sub-case' },
+                },
               },
-            },
-          });
+            }
+          );
           return cases.body.hits.hits.map((hit) => hit._source);
         };
 

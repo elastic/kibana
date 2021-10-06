@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/transport';
 import { BulkResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/logging';
 import { ESSearchRequest } from 'src/core/types/elasticsearch';
@@ -28,7 +28,7 @@ export type PersistenceAlertService<
     fields: Record<string, unknown>;
   }>,
   refresh: boolean | 'wait_for'
-) => Promise<ApiResponse<BulkResponse, unknown>>;
+) => Promise<TransportResult<BulkResponse, unknown>>;
 
 export type PersistenceAlertQueryService = (
   query: ESSearchRequest

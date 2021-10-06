@@ -11,7 +11,7 @@ import { coreMock } from '../../../../core/server/mocks';
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { ConfigSchema } from '../../config';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/transport';
 import { TermsEnumResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 let savedObjectsClientMock: jest.Mocked<SavedObjectsClientContract>;
@@ -31,7 +31,7 @@ describe('_terms_enum suggestions', () => {
     savedObjectsClientMock = requestHandlerContext.savedObjects.client;
     esClientMock = requestHandlerContext.elasticsearch.client.asCurrentUser;
     esClientMock.termsEnum.mockResolvedValue(
-      mockResponse as unknown as ApiResponse<TermsEnumResponse>
+      mockResponse as unknown as TransportResult<TermsEnumResponse>
     );
   });
 

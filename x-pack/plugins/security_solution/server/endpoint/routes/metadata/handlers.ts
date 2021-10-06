@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/transport';
 import { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { TypeOf } from '@kbn/config-schema';
@@ -458,7 +458,7 @@ async function queryUnitedIndex(
     endpointPolicyIds
   );
 
-  let unitedMetadataQueryResponse: ApiResponse<SearchResponse<UnitedAgentMetadata>>;
+  let unitedMetadataQueryResponse: TransportResult<SearchResponse<UnitedAgentMetadata>>;
   try {
     unitedMetadataQueryResponse =
       await context.core.elasticsearch.client.asCurrentUser.search<UnitedAgentMetadata>(

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ApiResponse, estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/transport';
 import { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { JsonObject, JsonArray } from '@kbn/utility-types';
 
@@ -13,7 +14,7 @@ export async function getSavedObjectFromES<T>(
   es: KibanaClient,
   savedObjectType: string,
   query?: object
-): Promise<ApiResponse<estypes.SearchResponse<T>, unknown>> {
+): Promise<TransportResult<estypes.SearchResponse<T>, unknown>> {
   return await es.search<T>({
     index: '.kibana',
     body: {

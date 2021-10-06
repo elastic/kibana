@@ -7,7 +7,8 @@
 
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/transport';
 import { UserAtSpaceScenarios, Superuser } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -534,7 +535,7 @@ instanceStateValue: true
               const scheduledActionTask: estypes.SearchHit<
                 TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>
               > = await retry.try(async () => {
-                const searchResult: ApiResponse<
+                const searchResult: TransportResult<
                   estypes.SearchResponse<TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>>
                 > = await es.search({
                   index: '.kibana_task_manager',

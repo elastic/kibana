@@ -6,7 +6,7 @@
  */
 
 import { KbnClient } from '@kbn/test';
-import type { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/transport';
 import type { estypes } from '@elastic/elasticsearch';
 import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import type SuperTest from 'supertest';
@@ -794,7 +794,7 @@ export const waitFor = async (
  * @param timeoutWait Time to wait before trying again (has default)
  */
 export const countDownES = async (
-  esFunction: () => Promise<ApiResponse<Record<string, any>, unknown>>,
+  esFunction: () => Promise<TransportResult<Record<string, any>, unknown>>,
   esFunctionName: string,
   retryCount: number = 20,
   timeoutWait = 250
