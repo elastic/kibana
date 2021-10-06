@@ -5,4 +5,7 @@
  * 2.0.
  */
 
+export { getEmbeddableLegacyUrlConflict, getLegacyUrlConflict } from './components';
 export { createRedirectLegacyUrl } from './redirect_legacy_url';
+
+export type { EmbeddableLegacyUrlConflictProps, LegacyUrlConflictProps } from './types';

@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const DEFAULT_OBJECT_NOUN = i18n.translate('xpack.spaces.shareToSpace.objectNoun', {
-  defaultMessage: 'object',
-});
+export { getEmbeddableLegacyUrlConflict } from './embeddable_legacy_url_conflict';
+export { getLegacyUrlConflict } from './legacy_url_conflict';

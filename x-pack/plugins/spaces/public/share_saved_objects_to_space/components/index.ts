@@ -6,5 +6,3 @@
  */
 
 export { getShareToSpaceFlyoutComponent } from './share_to_space_flyout';
-export { getSavedObjectConflictMessage } from './get_saved_object_conflict_message';
-export { getLegacyUrlConflict } from './legacy_url_conflict';

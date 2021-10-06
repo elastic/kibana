@@ -11,9 +11,9 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { SavedObjectConflictMessageProps } from '../types';
+import type { EmbeddableLegacyUrlConflictProps } from '../types';
 
-export const SavedObjectConflictMessage = ({ json }: SavedObjectConflictMessageProps) => {
+export const EmbeddableLegacyUrlConflictInternal = ({ json }: EmbeddableLegacyUrlConflictProps) => {
   const [expandError, setExpandError] = useState(false);
   return (
     <>

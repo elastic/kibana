@@ -364,7 +364,7 @@ export class MapEmbeddable
             iconType="alert"
             iconColor="danger"
             data-test-subj="embeddable-maps-failure"
-            body={spaces.ui.components.getSavedObjectConflictMessage({
+            body={spaces.ui.components.getEmbeddableLegacyUrlConflict({
               json: sharingSavedObjectProps.errorJSON!,
             })}
           />

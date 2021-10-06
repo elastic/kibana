@@ -19,31 +19,6 @@ export interface ShareSavedObjectsToSpaceResponse {
 }
 
 /**
- * Properties for the LegacyUrlConflict component.
- */
-export interface LegacyUrlConflictProps {
-  /**
-   * The string that is used to describe the object in the callout, e.g., _There is a legacy URL for this page that points to a different
-   * **object**_.
-   *
-   * Default value is 'object'.
-   */
-  objectNoun?: string;
-  /**
-   * The ID of the object that is currently shown on the page.
-   */
-  currentObjectId: string;
-  /**
-   * The ID of the other object that the legacy URL alias points to.
-   */
-  otherObjectId: string;
-  /**
-   * The path to use for the new URL, optionally including `search` and/or `hash` URL components.
-   */
-  otherObjectPath: string;
-}
-
-/**
  * Properties for the ShareToSpaceFlyout.
  */
 export interface ShareToSpaceFlyoutProps {
@@ -139,11 +114,4 @@ export interface ShareToSpaceSavedObjectTarget {
    * Default value is 'object'.
    */
   noun?: string;
-}
-
-/**
- * Properties for the SavedObjectConflictMessage component.
- */
-export interface SavedObjectConflictMessageProps {
-  json: string;
 }
