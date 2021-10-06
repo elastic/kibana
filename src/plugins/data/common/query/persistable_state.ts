@@ -7,7 +7,7 @@
  */
 
 import uuid from 'uuid';
-import { Filter, migrateFilter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { SavedObjectReference } from '../../../../core/types';
 
