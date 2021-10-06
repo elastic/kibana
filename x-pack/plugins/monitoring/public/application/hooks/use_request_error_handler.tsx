@@ -13,18 +13,19 @@ import { formatMsg } from '../../../../../../src/plugins/kibana_legacy/public';
 import { toMountPoint, useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { MonitoringStartPluginDependencies } from '../../types';
 
-export function formatMonitoringError(err: any) {
+export async function formatMonitoringError(err: IHttpFetchError) {
   // TODO: We should stop using Boom for errors and instead write a custom handler to return richer error objects
   // then we can do better messages, such as highlighting the Cluster UUID instead of requiring it be part of the message
-  if (err.status && err.status !== -1 && err.data) {
+  if (err.response?.status && err.response?.status !== -1) {
+    const body = await err.response?.json();
     return (
       <EuiText>
-        <p>{err.data.message}</p>
+        <p>{body.message}</p>
         <EuiText size="xs">
           <FormattedMessage
             id="xpack.monitoring.ajaxErrorHandler.httpErrorMessage"
             defaultMessage="HTTP {errStatus}"
-            values={{ errStatus: err.status }}
+            values={{ errStatus: err.response?.status }}
           />
         </EuiText>
       </EuiText>
@@ -37,12 +38,13 @@ export function formatMonitoringError(err: any) {
 export const useRequestErrorHandler = () => {
   const { services } = useKibana<MonitoringStartPluginDependencies>();
   return useCallback(
-    (err: IHttpFetchError) => {
+    async (err: IHttpFetchError) => {
       if (err.response?.status === 403) {
         // redirect to error message view
         history.replaceState(null, '', '#/access-denied');
       } else if (err.response?.status === 404 && !includes(window.location.hash, 'no-data')) {
         // pass through if this is a 404 and we're already on the no-data page
+        const formattedError = await formatMonitoringError(err);
         services.notifications?.toasts.addDanger({
           title: toMountPoint(
             <FormattedMessage
@@ -52,7 +54,7 @@ export const useRequestErrorHandler = () => {
           ),
           text: toMountPoint(
             <div>
-              {formatMonitoringError(err)}
+              {formattedError}
               <EuiSpacer />
               <EuiButton size="s" color="danger" onClick={() => window.location.reload()}>
                 <FormattedMessage

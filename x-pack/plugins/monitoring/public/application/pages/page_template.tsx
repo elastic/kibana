@@ -52,9 +52,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
   const handleRequestError = useRequestErrorHandler();
   useEffect(() => {
     getPageData?.()
-      .catch((err) => {
-        handleRequestError(err);
-      })
+      .catch(handleRequestError)
       .finally(() => {
         setLoaded(true);
       });
@@ -66,9 +64,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
       requests.push(updateSetupModeData());
     }
 
-    Promise.allSettled(requests).catch((err) => {
-      handleRequestError(err);
-    });
+    Promise.allSettled(requests).catch(handleRequestError);
   };
 
   const createHref = (route: string) => history.createHref({ pathname: route });

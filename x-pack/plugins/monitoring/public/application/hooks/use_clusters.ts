@@ -36,7 +36,7 @@ export function useClusters(clusterUuid?: string | null, ccs?: any, codePaths?: 
           setClusters(response);
         }
       } catch (e) {
-        handleRequestError(e);
+        await handleRequestError(e);
       } finally {
         setLoaded(true);
       }
