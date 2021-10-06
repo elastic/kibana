@@ -36,6 +36,7 @@ export const AssetsFacetGroup = ({ width }: Args) => {
             lens: [],
             security_rule: [],
             ml_module: [],
+            tag: [],
           },
           elasticsearch: {
             component_template: [],

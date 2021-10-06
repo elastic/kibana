@@ -37,6 +37,7 @@ export const AssetTitleMap: Record<DisplayedAssetType, string> = {
   security_rule: 'Security rules',
   ml_module: 'ML modules',
   view: 'Views',
+  tag: 'Tag',
 };
 
 export const ServiceTitleMap: Record<ServiceName, string> = {
@@ -53,6 +54,7 @@ export const AssetIcons: Record<KibanaAssetType, IconType> = {
   lens: 'lensApp',
   security_rule: 'securityApp',
   ml_module: 'mlApp',
+  tag: 'tagApp',
 };
 
 export const ServiceIcons: Record<ServiceName, IconType> = {

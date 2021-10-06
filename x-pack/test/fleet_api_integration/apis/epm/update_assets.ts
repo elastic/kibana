@@ -342,6 +342,10 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_ml_module',
             type: 'ml-module',
           },
+          {
+            id: 'sample_tag',
+            type: 'tag',
+          },
         ],
         installed_es: [
           {
@@ -421,6 +425,7 @@ export default function (providerContext: FtrProviderContext) {
           { id: '4281a436-45a8-54ab-9724-fda6849f789d', type: 'epm-packages-assets' },
           { id: '2e56f08b-1d06-55ed-abee-4708e1ccf0aa', type: 'epm-packages-assets' },
           { id: '4035007b-9c33-5227-9803-2de8a17523b5', type: 'epm-packages-assets' },
+          { id: '537da518-0651-53ac-8050-401186e772e3', type: 'epm-packages-assets' },
           { id: 'c7bf1a39-e057-58a0-afde-fb4b48751d8c', type: 'epm-packages-assets' },
           { id: '8c665f28-a439-5f43-b5fd-8fda7b576735', type: 'epm-packages-assets' },
         ],

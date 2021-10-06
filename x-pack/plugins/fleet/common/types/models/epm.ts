@@ -69,6 +69,7 @@ export enum KibanaAssetType {
   lens = 'lens',
   securityRule = 'security_rule',
   mlModule = 'ml_module',
+  tag = 'tag',
 }
 
 /*
@@ -83,6 +84,7 @@ export enum KibanaSavedObjectType {
   lens = 'lens',
   mlModule = 'ml-module',
   securityRule = 'security-rule',
+  tag = 'tag',
 }
 
 export enum ElasticsearchAssetType {
