@@ -83,7 +83,7 @@ export class TelemetryReceiver {
           policy_responses: {
             terms: {
               size: this.max_records,
-              field: 'Endpoint.policy.applied.id',
+              field: 'agent.id',
             },
             aggs: {
               latest_response: {

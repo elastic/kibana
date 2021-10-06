@@ -7491,7 +7491,6 @@
     "xpack.apm.ux.localFilters.titles.webApplication": "Webアプリケーション",
     "xpack.apm.ux.median": "中間",
     "xpack.apm.ux.metrics": "メトリック",
-    "xpack.apm.ux.overview": "ダッシュボード",
     "xpack.apm.ux.overview.heading": "ダッシュボード",
     "xpack.apm.ux.percentile.50thMedian": "50 番目（中央値）",
     "xpack.apm.ux.percentile.75th": "75番目",
