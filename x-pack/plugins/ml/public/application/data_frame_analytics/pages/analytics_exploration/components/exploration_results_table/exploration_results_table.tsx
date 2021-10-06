@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 
-import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../../../../src/plugins/data_views/public';
 
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 import { useMlKibana } from '../../../../../contexts/kibana';
@@ -22,7 +22,7 @@ import { ExpandableSectionResults } from '../expandable_section';
 import { useExplorationResults } from './use_exploration_results';
 
 interface Props {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus?: DataFrameTaskStateType;
   needsDestIndexPattern: boolean;
