@@ -116,6 +116,7 @@ export const Overview: FunctionComponent = () => {
             }),
             getMigrateSystemIndicesStep({
               docLinks,
+              nextMajor,
               isComplete: isStepComplete('migrate_system_indices'),
               setIsComplete: setCompletedStep.bind(null, 'migrate_system_indices'),
             }),

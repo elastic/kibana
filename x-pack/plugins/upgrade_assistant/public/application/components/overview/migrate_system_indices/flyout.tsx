@@ -33,6 +33,7 @@ import {
 export interface SystemIndicesFlyoutProps {
   closeFlyout: () => void;
   data: SystemIndicesMigrationStatus;
+  nextMajor: number;
 }
 
 const i18nTexts = {
@@ -45,13 +46,12 @@ const i18nTexts = {
   flyoutTitle: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.flyoutTitle', {
     defaultMessage: 'Migrate system indices',
   }),
-  flyoutDescription: i18n.translate(
-    'xpack.upgradeAssistant.overview.systemIndices.flyoutDescription',
-    {
+  flyoutDescription: (nextMajor: number) =>
+    i18n.translate('xpack.upgradeAssistant.overview.systemIndices.flyoutDescription', {
       defaultMessage:
-        'Migrate the indices that store information for the following features before you upgrade to 8.0.',
-    }
-  ),
+        'Migrate the indices that store information for the following features before you upgrade to {nextMajor}.0.',
+      values: { nextMajor },
+    }),
   migrationCompleteLabel: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.migrationCompleteLabel',
     {
@@ -157,7 +157,7 @@ const columns = [
   },
 ];
 
-export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutProps) => {
+export const SystemIndicesFlyout = ({ closeFlyout, data, nextMajor }: SystemIndicesFlyoutProps) => {
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -167,7 +167,7 @@ export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutPr
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="flyoutDetails">
         <EuiText>
-          <p>{i18nTexts.flyoutDescription}</p>
+          <p>{i18nTexts.flyoutDescription(nextMajor)}</p>
         </EuiText>
         <EuiSpacer size="l" />
         <EuiInMemoryTable<SystemIndicesMigrationFeature>

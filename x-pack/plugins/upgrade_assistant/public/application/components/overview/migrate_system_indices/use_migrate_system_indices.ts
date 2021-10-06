@@ -20,6 +20,7 @@ const { useGlobalFlyout } = GlobalFlyout;
 export const useMigrateSystemIndices = () => {
   const {
     services: { api },
+    kibanaVersionInfo: { nextMajor },
   } = useAppContext();
 
   const [showFlyout, setShowFlyout] = useState(false);
@@ -33,8 +34,7 @@ export const useMigrateSystemIndices = () => {
     api.useLoadSystemIndicesMigrationStatus();
   const isInProgress = data?.upgrade_status === 'IN_PROGRESS';
 
-  // We only want to poll for the status while the upgrading process
-  // is in progress.
+  // We only want to poll for the status while the migration process is in progress.
   useInterval(resendRequest, isInProgress ? SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS : null);
 
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
@@ -52,6 +52,7 @@ export const useMigrateSystemIndices = () => {
         Component: SystemIndicesFlyout,
         props: {
           data: data!,
+          nextMajor,
           closeFlyout,
         },
         flyoutProps: {
@@ -59,7 +60,7 @@ export const useMigrateSystemIndices = () => {
         },
       });
     }
-  }, [addContentToGlobalFlyout, data, showFlyout, closeFlyout]);
+  }, [addContentToGlobalFlyout, data, showFlyout, closeFlyout, nextMajor]);
 
   const beginSystemIndicesMigration = useCallback(async () => {
     const { error: startMigrationError } = await api.migrateSystemIndices();

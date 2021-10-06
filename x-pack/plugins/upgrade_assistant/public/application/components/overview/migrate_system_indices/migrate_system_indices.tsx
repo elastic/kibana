@@ -32,17 +32,19 @@ interface Props {
 
 interface StepProps extends OverviewStepProps {
   docLinks: DocLinksStart;
+  nextMajor: number;
 }
 
 const i18nTexts = {
   title: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.title', {
     defaultMessage: 'Migrate system indices',
   }),
-  bodyDescription: (docLink: string) => (
+  bodyDescription: (docLink: string, nextMajor: number) => (
     <FormattedMessage
       id="xpack.upgradeAssistant.overview.systemIndices.body"
-      defaultMessage="Migrate the indices that store system information before you upgrade to 8.0. {learnMoreLink}."
+      defaultMessage="Migrate the indices that store system information before you upgrade to {nextMajor}.0. {learnMoreLink}."
       values={{
+        nextMajor,
         learnMoreLink: (
           <EuiLink href={docLink} target="_blank">
             Learn more
@@ -70,7 +72,7 @@ const i18nTexts = {
     }
   ),
   viewSystemIndicesStatus: i18n.translate(
-    'xpack.upgradeAssistant.systemIndices.overview.systemIndices.viewSystemIndicesStatus',
+    'xpack.upgradeAssistant.overview.systemIndices.viewSystemIndicesStatus',
     {
       defaultMessage: 'View system indices',
     }
@@ -181,6 +183,7 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
 
 export const getMigrateSystemIndicesStep = ({
   docLinks,
+  nextMajor,
   isComplete,
   setIsComplete,
 }: StepProps): EuiStepProps => {
@@ -193,7 +196,12 @@ export const getMigrateSystemIndicesStep = ({
     children: (
       <>
         <EuiText>
-          <p>{i18nTexts.bodyDescription(docLinks.links.upgradeAssistant.systemFeaturesUpgrade)}</p>
+          <p>
+            {i18nTexts.bodyDescription(
+              docLinks.links.upgradeAssistant.systemFeaturesUpgrade,
+              nextMajor
+            )}
+          </p>
         </EuiText>
 
         <EuiSpacer size="m" />
