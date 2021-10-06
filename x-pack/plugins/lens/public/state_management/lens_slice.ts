@@ -119,7 +119,6 @@ export const navigateAway = createAction<void>('lens/navigateAway');
 export const loadInitial = createAction<{
   initialInput?: LensEmbeddableInput;
   redirectCallback: (savedObjectId?: string) => void;
-  emptyState: LensAppState;
   history: History<unknown>;
 }>('lens/loadInitial');
 export const initEmpty = createAction(
