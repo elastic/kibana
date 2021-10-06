@@ -18,12 +18,19 @@ import { MetricsServiceSetup } from '../../../metrics';
 import { HttpService, InternalHttpServiceSetup } from '../../../http';
 
 import { registerStatusRoute } from '../status';
-import { ServiceStatus, ServiceStatusLevels } from '../../types';
+import { ServiceStatus, ServiceStatusLevels, ServiceStatusLevel } from '../../types';
 import { statusServiceMock } from '../../status_service.mock';
 import { executionContextServiceMock } from '../../../execution_context/execution_context_service.mock';
 import { contextServiceMock } from '../../../context/context_service.mock';
 
 const coreId = Symbol('core');
+
+const createServiceStatus = (
+  level: ServiceStatusLevel = ServiceStatusLevels.available
+): ServiceStatus => ({
+  level,
+  summary: 'status summary',
+});
 
 describe('GET /api/status', () => {
   let server: HttpService;
@@ -31,7 +38,10 @@ describe('GET /api/status', () => {
   let metrics: jest.Mocked<MetricsServiceSetup>;
   let incrementUsageCounter: jest.Mock;
 
-  const setupServer = async ({ allowAnonymous = true }: { allowAnonymous?: boolean } = {}) => {
+  const setupServer = async ({
+    allowAnonymous = true,
+    coreOverall,
+  }: { allowAnonymous?: boolean; coreOverall?: ServiceStatus } = {}) => {
     const coreContext = createCoreContext({ coreId });
     const contextService = new ContextService(coreContext);
 
@@ -43,7 +53,12 @@ describe('GET /api/status', () => {
     });
 
     metrics = metricsServiceMock.createSetupContract();
-    const status = statusServiceMock.createSetupContract();
+
+    const status = statusServiceMock.createInternalSetupContract();
+    if (coreOverall) {
+      status.coreOverall$ = new BehaviorSubject(coreOverall);
+    }
+
     const pluginsStatus$ = new BehaviorSubject<Record<string, ServiceStatus>>({
       a: { level: ServiceStatusLevels.available, summary: 'a is available' },
       b: { level: ServiceStatusLevels.degraded, summary: 'b is degraded' },
@@ -71,6 +86,7 @@ describe('GET /api/status', () => {
       metrics,
       status: {
         overall$: status.overall$,
+        coreOverall$: status.coreOverall$,
         core$: status.core$,
         plugins$: pluginsStatus$,
       },
@@ -316,6 +332,62 @@ describe('GET /api/status', () => {
         .get('/api/status?v8format=false&v7format=true')
         .expect(400);
       expect(incrementUsageCounter).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('status level and http response code', () => {
+    describe('using standard format', () => {
+      it('respond with a 200 when core.overall.status is available', async () => {
+        await setupServer({
+          coreOverall: createServiceStatus(ServiceStatusLevels.available),
+        });
+        await supertest(httpSetup.server.listener).get('/api/status?v8format=true').expect(200);
+      });
+      it('respond with a 200 when core.overall.status is degraded', async () => {
+        await setupServer({
+          coreOverall: createServiceStatus(ServiceStatusLevels.degraded),
+        });
+        await supertest(httpSetup.server.listener).get('/api/status?v8format=true').expect(200);
+      });
+      it('respond with a 503 when core.overall.status is unavailable', async () => {
+        await setupServer({
+          coreOverall: createServiceStatus(ServiceStatusLevels.unavailable),
+        });
+        await supertest(httpSetup.server.listener).get('/api/status?v8format=true').expect(503);
+      });
+      it('respond with a 503 when core.overall.status is critical', async () => {
+        await setupServer({
+          coreOverall: createServiceStatus(ServiceStatusLevels.critical),
+        });
+        await supertest(httpSetup.server.listener).get('/api/status?v8format=true').expect(503);
+      });
+    });
+
+    describe('using legacy format', () => {
+      it('respond with a 200 when core.overall.status is available', async () => {
+        await setupServer({
+          coreOverall: createServiceStatus(ServiceStatusLevels.available),
+        });
+        await supertest(httpSetup.server.listener).get('/api/status?v7format=true').expect(200);
+      });
+      it('respond with a 200 when core.overall.status is degraded', async () => {
+        await setupServer({
+          coreOverall: createServiceStatus(ServiceStatusLevels.degraded),
+        });
+        await supertest(httpSetup.server.listener).get('/api/status?v7format=true').expect(200);
+      });
+      it('respond with a 503 when core.overall.status is unavailable', async () => {
+        await setupServer({
+          coreOverall: createServiceStatus(ServiceStatusLevels.unavailable),
+        });
+        await supertest(httpSetup.server.listener).get('/api/status?v7format=true').expect(503);
+      });
+      it('respond with a 503 when core.overall.status is critical', async () => {
+        await setupServer({
+          coreOverall: createServiceStatus(ServiceStatusLevels.critical),
+        });
+        await supertest(httpSetup.server.listener).get('/api/status?v7format=true').expect(503);
+      });
     });
   });
 });
