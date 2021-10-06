@@ -77,7 +77,7 @@ Noteworthy fields: `transaction.duration.us`, `transaction.duration.histogram`
 }
 ```
 
-Please note: `metricset.name: transaction` was only recently introduced. To retain backwards compatability we still use the old filter `{ "exists": { "field": "transaction.duration.histogram" }}` when filtering for aggregated transactions.
+Please note: `metricset.name: transaction` was only recently introduced. To retain backwards compatability we still use the old filter `{ "exists": { "field": "transaction.duration.histogram" }}` when filtering for aggregated transactions ([see example](https://github.com/elastic/kibana/blob/2c8686770e64b82cf8e1db5a22327d40d5f8ce45/x-pack/plugins/apm/server/lib/helpers/aggregated_transactions/index.ts#L89-L95)).
 
 ### Throughput
 
