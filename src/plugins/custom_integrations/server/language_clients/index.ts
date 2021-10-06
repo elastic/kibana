@@ -105,7 +105,7 @@ export const integrations: LanguageIntegration[] = [
       defaultMessage:
         'Start building your custom application on top of Elasticsearch with the official Perl client.',
     }),
-    docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/perl-api/{branch}/index.html`,
+    docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/perl-api/current/index.html`,
   },
   {
     id: 'python',
@@ -129,7 +129,7 @@ export const integrations: LanguageIntegration[] = [
       defaultMessage:
         'Start building your custom application on top of Elasticsearch with the official Rust client.',
     }),
-    docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/rust-api/{branch}/index.html`,
+    docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/rust-api/current/index.html`,
   },
   {
     id: 'java',
