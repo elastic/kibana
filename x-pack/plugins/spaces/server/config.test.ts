@@ -42,10 +42,10 @@ describe('spaces config', () => {
         const { messages, migrated } = applyConfigDeprecations({ ...originalConfig });
 
         expect(messages).toMatchInlineSnapshot(`
-        Array [
-          "Disabling the Spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)",
-        ]
-      `);
+          Array [
+            "This setting will be removed in 8.0 and the Spaces plugin will always be enabled.",
+          ]
+        `);
         expect(migrated).toEqual(originalConfig);
       });
 
@@ -58,12 +58,16 @@ describe('spaces config', () => {
         expect(migrated).toEqual(originalConfig);
       });
 
-      it('does not log a warning if xpack.spaces.enabled is set to true', () => {
+      it('logs a warning if xpack.spaces.enabled is set to true', () => {
         const originalConfig = deepFreeze({ xpack: { spaces: { enabled: true } } });
 
         const { messages, migrated } = applyConfigDeprecations({ ...originalConfig });
 
-        expect(messages).toMatchInlineSnapshot(`Array []`);
+        expect(messages).toMatchInlineSnapshot(`
+          Array [
+            "This setting will be removed in 8.0 and the Spaces plugin will always be enabled.",
+          ]
+        `);
         expect(migrated).toEqual(originalConfig);
       });
     });
