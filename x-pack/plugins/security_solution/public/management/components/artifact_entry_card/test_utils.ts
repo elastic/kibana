@@ -23,14 +23,22 @@ export const getTrustedAppProviderMock = (): TrustedApp =>
   new TrustedAppGenerator('seed').generate(getCommonItemDataOverrides());
 
 export const getExceptionProviderMock = (): ExceptionListItemSchema => {
+  // Grab the properties from the generated Trusted App that should be the same across both types
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { name, description, created_at, updated_at, updated_by, created_by, id } =
+    getTrustedAppProviderMock();
+
   // cloneDeep needed because exception mock generator uses state across instances
   return cloneDeep(
     getExceptionListItemSchemaMock({
-      ...getCommonItemDataOverrides(),
+      name,
+      description,
+      created_at,
+      updated_at,
+      updated_by,
+      created_by,
+      id,
       os_types: ['windows'],
-      updated_at: new Date().toISOString(),
-      created_by: 'Justa',
-      updated_by: 'Mara',
       entries: [
         {
           field: 'process.hash.*',

@@ -48,10 +48,10 @@ describe.each([
       'some internal app'
     );
     expect(renderResult.getByTestId('testCard-subHeader-touchedBy-createdBy').textContent).toEqual(
-      'Created byJJusta'
+      'Created byMMarty'
     );
     expect(renderResult.getByTestId('testCard-subHeader-touchedBy-updatedBy').textContent).toEqual(
-      'Updated byMMara'
+      'Updated byEEllamae'
     );
   });
 
