@@ -18,7 +18,6 @@ import { transformHealthRuleParams, TransformHealthRuleParams } from './schema';
 import { AlertType } from '../../../../../alerting/server';
 import { transformHealthServiceProvider } from './transform_health_service';
 import type { PluginSetupContract as AlertingSetup } from '../../../../../alerting/server';
-import { STACK_ALERTS_FEATURE_ID } from '../../../../../stack_alerts/common';
 
 export interface BaseResponse {
   transform_id: string;
@@ -96,7 +95,7 @@ export function getTransformHealthRuleType(): AlertType<
         },
       ],
     },
-    producer: STACK_ALERTS_FEATURE_ID,
+    producer: 'stackAlerts',
     minimumLicenseRequired: PLUGIN.MINIMUM_LICENSE_REQUIRED,
     isExportable: true,
     async executor(options) {

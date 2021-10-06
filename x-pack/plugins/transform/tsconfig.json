@@ -21,6 +21,5 @@
     { "path": "../license_management/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     { "path": "../ml/tsconfig.json" },
-    { "path": "../stack_alerts/tsconfig.json" }
   ]
 }
