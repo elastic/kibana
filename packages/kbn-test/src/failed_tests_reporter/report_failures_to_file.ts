@@ -82,13 +82,19 @@ export function reportFailuresToFile(log: ToolingLog, failures: TestFailure[]) {
       ? ` #${parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10) + 1}`
       : '';
 
+    const buildUrl = process.env.BUILDKITE_BUILD_URL || '';
+    const jobUrl = process.env.BUILDKITE_JOB_ID
+      ? `${buildUrl}#${process.env.BUILDKITE_JOB_ID}`
+      : '';
+
     const failureJSON = JSON.stringify(
       {
         ...failure,
         hash,
         buildId: process.env.BUJILDKITE_BUILD_ID || '',
         jobId: process.env.BUILDKITE_JOB_ID || '',
-        url: process.env.BUILDKITE_BUILD_URL || '',
+        url: buildUrl,
+        jobUrl,
         jobName: process.env.BUILDKITE_LABEL
           ? `${process.env.BUILDKITE_LABEL}${jobNumberSuffix}`
           : '',
@@ -140,6 +146,16 @@ export function reportFailuresToFile(log: ToolingLog, failures: TestFailure[]) {
             }
           </small>
         </p>
+        ${
+          jobUrl
+            ? `<p>
+              <small>
+                <strong>Buildkite Job</strong><br />
+                <a href="${jobUrl}">${jobUrl}</a>
+              </small>
+            </p>`
+            : ''
+        }
         <pre>${escape(failure.failure)}</pre>
         ${screenshotHtml}
         <pre>${escape(failure['system-out'] || '')}</pre>
