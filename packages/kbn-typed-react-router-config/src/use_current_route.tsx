@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { createContext, useContext } from 'react';
+import { OutletContextProvider } from './outlet';
 import { RouteMatch } from './types';
 
 const CurrentRouteContext = createContext<
@@ -23,7 +24,7 @@ export const CurrentRouteContextProvider = ({
 }) => {
   return (
     <CurrentRouteContext.Provider value={{ match, element }}>
-      {children}
+      <OutletContextProvider element={element}>{children}</OutletContextProvider>
     </CurrentRouteContext.Provider>
   );
 };
