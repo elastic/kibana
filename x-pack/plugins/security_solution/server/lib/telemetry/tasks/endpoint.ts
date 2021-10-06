@@ -33,7 +33,7 @@ const EmptyFleetAgentResponse = {
   perPage: 0,
 };
 
-export const TelemetryDiagTaskConfig = {
+export const TelemetryEndpointTaskConfig = {
   type: 'security:endpoint-meta-telemetry',
   title: 'Security Solution Telemetry Endpoint Metrics and Info task',
   interval: '24h',
