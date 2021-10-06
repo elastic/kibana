@@ -351,6 +351,7 @@ export interface EpmPackageAdditions {
   assets: AssetsGroupedByServiceByType;
   removable?: boolean;
   notice?: string;
+  keepPoliciesUpToDate?: boolean;
 }
 
 type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, keyof SecondType>> &
@@ -364,7 +365,7 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
 };
 
 export interface IntegrationCardItem {
-  uiInternalPathUrl: string;
+  url: string;
   release?: 'beta' | 'experimental' | 'ga';
   description: string;
   name: string;
@@ -391,6 +392,7 @@ export interface Installation extends SavedObjectAttributes {
   install_version: string;
   install_started_at: string;
   install_source: InstallSource;
+  keep_policies_up_to_date: boolean;
 }
 
 export interface PackageUsageStats {
