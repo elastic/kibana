@@ -78,6 +78,7 @@ export const SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM =
 // Parent ID for a transaction or span
 export const PARENT_ID = 'parent.id';
 
+export const ERROR_ID = 'error.id';
 export const ERROR_GROUP_ID = 'error.grouping_key';
 export const ERROR_CULPRIT = 'error.culprit';
 export const ERROR_LOG_LEVEL = 'error.log.level';
