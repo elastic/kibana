@@ -65,6 +65,7 @@ import {
   ALERTS_FEATURE_ID,
   AlertExecutionStatusErrorReasons,
   formatDuration,
+  parseDuration,
 } from '../../../../../../alerting/common';
 import { alertsStatusesTranslationsMapping, ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -477,7 +478,15 @@ export const AlertsList: React.FunctionComponent = () => {
       truncateText: false,
       'data-test-subj': 'alertsTableCell-interval',
       render: (value: number, item: AlertTableItem) => {
-        // const ruleType = alertTypesState.data.get(item.alertTypeId)?.ruleTaskTimeout;
+        const ruleTypeTimeout: string | undefined = alertTypesState.data.get(
+          item.alertTypeId
+        )?.ruleTaskTimeout;
+        const ruleTypeTimeoutMillis: number | undefined = ruleTypeTimeout
+          ? parseDuration(ruleTypeTimeout)
+          : undefined;
+        const showDurationWarning: boolean = ruleTypeTimeoutMillis
+          ? value > ruleTypeTimeoutMillis
+          : false;
         const duration = moment.duration(value);
         const durationString = [duration.hours(), duration.minutes(), duration.seconds()]
           .map((v: number) => padStart(`${v}`, 2, '0'))
@@ -487,19 +496,22 @@ export const AlertsList: React.FunctionComponent = () => {
         const millisString = padStart(`${duration.milliseconds()}`, 3, '0');
         return (
           <>
-            `${durationString}.${millisString}`
-            <EuiIconTip
-              data-test-subj="ruleDurationWarning"
-              type="alert"
-              color="warning"
-              content={i18n.translate(
-                'xpack.triggersActionsUI.checkAlertTypeEnabled.ruleTypeExcessDurationMessage',
-                {
-                  defaultMessage: 'This exceeds the expected maximum execution time for this rule.',
-                }
-              )}
-              position="right"
-            />
+            {`${durationString}.${millisString}`}
+            {showDurationWarning && (
+              <EuiIconTip
+                data-test-subj="ruleDurationWarning"
+                type="alert"
+                color="warning"
+                content={i18n.translate(
+                  'xpack.triggersActionsUI.checkAlertTypeEnabled.ruleTypeExcessDurationMessage',
+                  {
+                    defaultMessage:
+                      'This exceeds the expected maximum execution time for this rule.',
+                  }
+                )}
+                position="right"
+              />
+            )}
           </>
         );
       },
