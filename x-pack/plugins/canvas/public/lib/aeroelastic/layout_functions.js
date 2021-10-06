@@ -228,34 +228,33 @@ const getContentShapes = (allShapes, shapes) => {
 
 const primaryShape = (shape) => (shape.type === 'annotation' ? shape.parent : shape.id);
 
-const rotationManipulation = (config) => ({
-  shape,
-  directShape,
-  cursorPosition: { x, y },
-  alterSnapGesture,
-}) => {
-  // rotate around a Z-parallel line going through the shape center (ie. around the center)
-  if (!shape || !directShape) {
-    return { transforms: [], shapes: [] };
-  }
-  const center = shape.transformMatrix;
-  const centerPosition = mvMultiply(center, ORIGIN);
-  const vector = mvMultiply(multiply(center, directShape.localTransformMatrix), ORIGIN);
-  const oldAngle = Math.atan2(centerPosition[1] - vector[1], centerPosition[0] - vector[0]);
-  const newAngle = Math.atan2(centerPosition[1] - y, centerPosition[0] - x);
-  const closest45deg = (Math.round(newAngle / (Math.PI / 12)) * Math.PI) / 12;
-  const radius = Math.sqrt(Math.pow(centerPosition[0] - x, 2) + Math.pow(centerPosition[1] - y, 2));
-  const closest45degPosition = [Math.cos(closest45deg) * radius, Math.sin(closest45deg) * radius];
-  const pixelDifference = Math.sqrt(
-    Math.pow(closest45degPosition[0] - (centerPosition[0] - x), 2) +
-      Math.pow(closest45degPosition[1] - (centerPosition[1] - y), 2)
-  );
-  const relaxed = alterSnapGesture.indexOf('relax') !== -1;
-  const newSnappedAngle =
-    pixelDifference < config.rotateSnapInPixels && !relaxed ? closest45deg : newAngle;
-  const result = rotateZ(oldAngle - newSnappedAngle);
-  return { transforms: [result], shapes: [shape.id] };
-};
+const rotationManipulation =
+  (config) =>
+  ({ shape, directShape, cursorPosition: { x, y }, alterSnapGesture }) => {
+    // rotate around a Z-parallel line going through the shape center (ie. around the center)
+    if (!shape || !directShape) {
+      return { transforms: [], shapes: [] };
+    }
+    const center = shape.transformMatrix;
+    const centerPosition = mvMultiply(center, ORIGIN);
+    const vector = mvMultiply(multiply(center, directShape.localTransformMatrix), ORIGIN);
+    const oldAngle = Math.atan2(centerPosition[1] - vector[1], centerPosition[0] - vector[0]);
+    const newAngle = Math.atan2(centerPosition[1] - y, centerPosition[0] - x);
+    const closest45deg = (Math.round(newAngle / (Math.PI / 12)) * Math.PI) / 12;
+    const radius = Math.sqrt(
+      Math.pow(centerPosition[0] - x, 2) + Math.pow(centerPosition[1] - y, 2)
+    );
+    const closest45degPosition = [Math.cos(closest45deg) * radius, Math.sin(closest45deg) * radius];
+    const pixelDifference = Math.sqrt(
+      Math.pow(closest45degPosition[0] - (centerPosition[0] - x), 2) +
+        Math.pow(closest45degPosition[1] - (centerPosition[1] - y), 2)
+    );
+    const relaxed = alterSnapGesture.indexOf('relax') !== -1;
+    const newSnappedAngle =
+      pixelDifference < config.rotateSnapInPixels && !relaxed ? closest45deg : newAngle;
+    const result = rotateZ(oldAngle - newSnappedAngle);
+    return { transforms: [result], shapes: [shape.id] };
+  };
 
 const minimumSize = (min, { a, b, baseAB }, vector) => {
   // don't allow an element size of less than the minimumElementSize
@@ -266,71 +265,75 @@ const minimumSize = (min, { a, b, baseAB }, vector) => {
   ];
 };
 
-const centeredResizeManipulation = (config) => ({ gesture, shape, directShape }) => {
-  const transform = gesture.cumulativeTransform;
-  // scaling such that the center remains in place (ie. the other side of the shape can grow/shrink)
-  if (!shape || !directShape) {
-    return { transforms: [], shapes: [] };
-  }
-  // transform the incoming `transform` so that resizing is aligned with shape orientation
-  const vector = mvMultiply(
-    multiply(
-      invert(compositeComponent(shape.localTransformMatrix)), // rid the translate component
-      transform
-    ),
-    ORIGIN
-  );
-  const orientationMask = [
-    resizeMultiplierHorizontal[directShape.horizontalPosition],
-    resizeMultiplierVertical[directShape.verticalPosition],
-    0,
-  ];
-  const orientedVector = componentProduct2d(vector, orientationMask);
-  const cappedOrientedVector = minimumSize(config.minimumElementSize, shape, orientedVector);
-  return {
-    cumulativeTransforms: [],
-    cumulativeSizes: [gesture.sizes || translate2d(...cappedOrientedVector)],
-    shapes: [shape.id],
-  };
-};
-
-const asymmetricResizeManipulation = (config) => ({ gesture, shape, directShape }) => {
-  const transform = gesture.cumulativeTransform;
-  // scaling such that the center remains in place (ie. the other side of the shape can grow/shrink)
-  if (!shape || !directShape) {
-    return { transforms: [], shapes: [] };
-  }
-  // transform the incoming `transform` so that resizing is aligned with shape orientation
-  const composite = compositeComponent(shape.localTransformMatrix);
-  const inv = invert(composite); // rid the translate component
-  const vector = mvMultiply(multiply(inv, transform), ORIGIN);
-  const orientationMask = [
-    resizeMultiplierHorizontal[directShape.horizontalPosition] / 2,
-    resizeMultiplierVertical[directShape.verticalPosition] / 2,
-    0,
-  ];
-  const orientedVector = componentProduct2d(vector, orientationMask);
-  const cappedOrientedVector = minimumSize(config.minimumElementSize, shape, orientedVector);
-
-  const antiRotatedVector = mvMultiply(
-    multiply(
-      composite,
-      scale(
-        resizeMultiplierHorizontal[directShape.horizontalPosition],
-        resizeMultiplierVertical[directShape.verticalPosition],
-        1
+const centeredResizeManipulation =
+  (config) =>
+  ({ gesture, shape, directShape }) => {
+    const transform = gesture.cumulativeTransform;
+    // scaling such that the center remains in place (ie. the other side of the shape can grow/shrink)
+    if (!shape || !directShape) {
+      return { transforms: [], shapes: [] };
+    }
+    // transform the incoming `transform` so that resizing is aligned with shape orientation
+    const vector = mvMultiply(
+      multiply(
+        invert(compositeComponent(shape.localTransformMatrix)), // rid the translate component
+        transform
       ),
-      translate(cappedOrientedVector[0], cappedOrientedVector[1], 0)
-    ),
-    ORIGIN
-  );
-  const sizeMatrix = gesture.sizes || translate2d(...cappedOrientedVector);
-  return {
-    cumulativeTransforms: [translate(antiRotatedVector[0], antiRotatedVector[1], 0)],
-    cumulativeSizes: [sizeMatrix],
-    shapes: [shape.id],
+      ORIGIN
+    );
+    const orientationMask = [
+      resizeMultiplierHorizontal[directShape.horizontalPosition],
+      resizeMultiplierVertical[directShape.verticalPosition],
+      0,
+    ];
+    const orientedVector = componentProduct2d(vector, orientationMask);
+    const cappedOrientedVector = minimumSize(config.minimumElementSize, shape, orientedVector);
+    return {
+      cumulativeTransforms: [],
+      cumulativeSizes: [gesture.sizes || translate2d(...cappedOrientedVector)],
+      shapes: [shape.id],
+    };
   };
-};
+
+const asymmetricResizeManipulation =
+  (config) =>
+  ({ gesture, shape, directShape }) => {
+    const transform = gesture.cumulativeTransform;
+    // scaling such that the center remains in place (ie. the other side of the shape can grow/shrink)
+    if (!shape || !directShape) {
+      return { transforms: [], shapes: [] };
+    }
+    // transform the incoming `transform` so that resizing is aligned with shape orientation
+    const composite = compositeComponent(shape.localTransformMatrix);
+    const inv = invert(composite); // rid the translate component
+    const vector = mvMultiply(multiply(inv, transform), ORIGIN);
+    const orientationMask = [
+      resizeMultiplierHorizontal[directShape.horizontalPosition] / 2,
+      resizeMultiplierVertical[directShape.verticalPosition] / 2,
+      0,
+    ];
+    const orientedVector = componentProduct2d(vector, orientationMask);
+    const cappedOrientedVector = minimumSize(config.minimumElementSize, shape, orientedVector);
+
+    const antiRotatedVector = mvMultiply(
+      multiply(
+        composite,
+        scale(
+          resizeMultiplierHorizontal[directShape.horizontalPosition],
+          resizeMultiplierVertical[directShape.verticalPosition],
+          1
+        ),
+        translate(cappedOrientedVector[0], cappedOrientedVector[1], 0)
+      ),
+      ORIGIN
+    );
+    const sizeMatrix = gesture.sizes || translate2d(...cappedOrientedVector);
+    return {
+      cumulativeTransforms: [translate(antiRotatedVector[0], antiRotatedVector[1], 0)],
+      cumulativeSizes: [sizeMatrix],
+      shapes: [shape.id],
+    };
+  };
 
 const directShapeTranslateManipulation = (cumulativeTransforms, directShapes) => {
   const shapes = directShapes
@@ -577,15 +580,6 @@ export const applyLocalTransforms = (shapes, transformIntents) => {
   return shapes.map(shapeApplyLocalTransforms(transformIntents));
 };
 
-// eslint-disable-next-line
-const getUpstreamTransforms = (shapes, shape) =>
-  shape.parent
-    ? getUpstreamTransforms(
-        shapes,
-        shapes.find((s) => s.id === shape.parent)
-      ).concat([shape.localTransformMatrix])
-    : [shape.localTransformMatrix];
-
 const getUpstreams = (shapes, shape) =>
   shape.parent
     ? getUpstreams(
@@ -808,55 +802,59 @@ export const getRotationTooltipAnnotation = (config, proper, shape, intents, cur
       ]
     : [];
 
-const resizePointAnnotations = (config, parent, a, b) => ([x, y, cursorAngle]) => {
-  const markerPlace = translate(x * a, y * b, config.resizeAnnotationOffsetZ);
-  const pixelOffset = translate(
-    -x * config.resizeAnnotationOffset,
-    -y * config.resizeAnnotationOffset,
-    config.atopZ + 10
-  );
-  const transform = multiply(markerPlace, pixelOffset);
-  const xName = xNames[x];
-  const yName = yNames[y];
-  return {
-    id: [config.resizeHandleName, xName, yName, parent.id].join('_'),
-    type: 'annotation',
-    subtype: config.resizeHandleName,
-    horizontalPosition: xName,
-    verticalPosition: yName,
-    cursorAngle,
-    interactive: true,
-    parent: parent.id,
-    localTransformMatrix: transform,
-    backgroundColor: 'rgb(0,255,0,1)',
-    a: config.resizeAnnotationSize,
-    b: config.resizeAnnotationSize,
+const resizePointAnnotations =
+  (config, parent, a, b) =>
+  ([x, y, cursorAngle]) => {
+    const markerPlace = translate(x * a, y * b, config.resizeAnnotationOffsetZ);
+    const pixelOffset = translate(
+      -x * config.resizeAnnotationOffset,
+      -y * config.resizeAnnotationOffset,
+      config.atopZ + 10
+    );
+    const transform = multiply(markerPlace, pixelOffset);
+    const xName = xNames[x];
+    const yName = yNames[y];
+    return {
+      id: [config.resizeHandleName, xName, yName, parent.id].join('_'),
+      type: 'annotation',
+      subtype: config.resizeHandleName,
+      horizontalPosition: xName,
+      verticalPosition: yName,
+      cursorAngle,
+      interactive: true,
+      parent: parent.id,
+      localTransformMatrix: transform,
+      backgroundColor: 'rgb(0,255,0,1)',
+      a: config.resizeAnnotationSize,
+      b: config.resizeAnnotationSize,
+    };
   };
-};
 
-const resizeEdgeAnnotations = (config, parent, a, b) => ([[x0, y0], [x1, y1]]) => {
-  const x = a * mean(x0, x1);
-  const y = b * mean(y0, y1);
-  const markerPlace = translate(x, y, config.atopZ - 10);
-  const transform = markerPlace; // no offset etc. at the moment
-  const horizontal = y0 === y1;
-  const length = horizontal ? a * Math.abs(x1 - x0) : b * Math.abs(y1 - y0);
-  const sectionHalfLength = Math.max(0, length / 2 - config.resizeAnnotationConnectorOffset);
-  const width = 0.5;
-  return {
-    id: [config.resizeConnectorName, xNames[x0], yNames[y0], xNames[x1], yNames[y1], parent].join(
-      '_'
-    ),
-    type: 'annotation',
-    subtype: config.resizeConnectorName,
-    interactive: true,
-    parent: parent.id,
-    localTransformMatrix: transform,
-    backgroundColor: config.devColor,
-    a: horizontal ? sectionHalfLength : width,
-    b: horizontal ? width : sectionHalfLength,
+const resizeEdgeAnnotations =
+  (config, parent, a, b) =>
+  ([[x0, y0], [x1, y1]]) => {
+    const x = a * mean(x0, x1);
+    const y = b * mean(y0, y1);
+    const markerPlace = translate(x, y, config.atopZ - 10);
+    const transform = markerPlace; // no offset etc. at the moment
+    const horizontal = y0 === y1;
+    const length = horizontal ? a * Math.abs(x1 - x0) : b * Math.abs(y1 - y0);
+    const sectionHalfLength = Math.max(0, length / 2 - config.resizeAnnotationConnectorOffset);
+    const width = 0.5;
+    return {
+      id: [config.resizeConnectorName, xNames[x0], yNames[y0], xNames[x1], yNames[y1], parent].join(
+        '_'
+      ),
+      type: 'annotation',
+      subtype: config.resizeConnectorName,
+      interactive: true,
+      parent: parent.id,
+      localTransformMatrix: transform,
+      backgroundColor: config.devColor,
+      a: horizontal ? sectionHalfLength : width,
+      b: horizontal ? width : sectionHalfLength,
+    };
   };
-};
 
 const groupedShape = (properShape) => (shape) => shape.parent === properShape.id;
 const magic = (config, shape, shapes) => {
@@ -951,79 +949,80 @@ const crystallizeConstraint = (shape) => {
   return result;
 };
 
-const translateShapeSnap = (horizontalConstraint, verticalConstraint, draggedElement) => (
-  shape
-) => {
-  const constrainedX = horizontalConstraint && horizontalConstraint.constrained === shape.id;
-  const constrainedY = verticalConstraint && verticalConstraint.constrained === shape.id;
-  const snapOffsetX = constrainedX ? -horizontalConstraint.signedDistance : 0;
-  const snapOffsetY = constrainedY ? -verticalConstraint.signedDistance : 0;
-  if (constrainedX || constrainedY) {
-    if (!snapOffsetX && !snapOffsetY) {
+const translateShapeSnap =
+  (horizontalConstraint, verticalConstraint, draggedElement) => (shape) => {
+    const constrainedX = horizontalConstraint && horizontalConstraint.constrained === shape.id;
+    const constrainedY = verticalConstraint && verticalConstraint.constrained === shape.id;
+    const snapOffsetX = constrainedX ? -horizontalConstraint.signedDistance : 0;
+    const snapOffsetY = constrainedY ? -verticalConstraint.signedDistance : 0;
+    if (constrainedX || constrainedY) {
+      if (!snapOffsetX && !snapOffsetY) {
+        return shape;
+      }
+      const snapOffset = translateComponent(
+        multiply(
+          rotateZ(matrixToAngle(draggedElement.localTransformMatrix)),
+          translate(snapOffsetX, snapOffsetY, 0)
+        )
+      );
+      return {
+        ...shape,
+        snapDeltaMatrix: snapOffset,
+      };
+    } else if (shape.snapDeltaMatrix || shape.snapResizeVector) {
+      return crystallizeConstraint(shape);
+    } else {
       return shape;
     }
-    const snapOffset = translateComponent(
-      multiply(
-        rotateZ(matrixToAngle(draggedElement.localTransformMatrix)),
-        translate(snapOffsetX, snapOffsetY, 0)
-      )
-    );
-    return {
-      ...shape,
-      snapDeltaMatrix: snapOffset,
-    };
-  } else if (shape.snapDeltaMatrix || shape.snapResizeVector) {
-    return crystallizeConstraint(shape);
-  } else {
-    return shape;
-  }
-};
+  };
 
-const resizeShapeSnap = (
-  horizontalConstraint,
-  verticalConstraint,
-  draggedElement,
-  symmetric,
-  horizontalPosition,
-  verticalPosition
-) => (shape) => {
-  const constrainedShape = draggedElement && shape.id === draggedElement.id;
-  const constrainedX = horizontalConstraint && horizontalConstraint.constrained === shape.id;
-  const constrainedY = verticalConstraint && verticalConstraint.constrained === shape.id;
-  const snapOffsetX = constrainedX ? horizontalConstraint.signedDistance : 0;
-  const snapOffsetY = constrainedY ? -verticalConstraint.signedDistance : 0;
-  if (constrainedX || constrainedY) {
-    const multiplier = symmetric ? 1 : 0.5;
-    const angle = matrixToAngle(draggedElement.localTransformMatrix);
-    const horizontalSign = -resizeMultiplierHorizontal[horizontalPosition]; // fixme unify sign
-    const verticalSign = resizeMultiplierVertical[verticalPosition];
-    // todo turn it into matrix algebra via matrix2d.js
-    const sin = Math.sin(angle);
-    const cos = Math.cos(angle);
-    const snapOffsetA = horizontalSign * (cos * snapOffsetX - sin * snapOffsetY);
-    const snapOffsetB = verticalSign * (sin * snapOffsetX + cos * snapOffsetY);
-    const snapTranslateOffset = translateComponent(
-      multiply(
-        rotateZ(angle),
-        translate((1 - multiplier) * -snapOffsetX, (1 - multiplier) * snapOffsetY, 0)
-      )
-    );
-    const snapSizeOffset = [multiplier * snapOffsetA, multiplier * snapOffsetB];
-    return {
-      ...shape,
-      snapDeltaMatrix: snapTranslateOffset,
-      snapResizeVector: snapSizeOffset,
-    };
-  } else if (constrainedShape) {
-    return {
-      ...shape,
-      snapDeltaMatrix: null,
-      snapResizeVector: null,
-    };
-  } else {
-    return crystallizeConstraint(shape);
-  }
-};
+const resizeShapeSnap =
+  (
+    horizontalConstraint,
+    verticalConstraint,
+    draggedElement,
+    symmetric,
+    horizontalPosition,
+    verticalPosition
+  ) =>
+  (shape) => {
+    const constrainedShape = draggedElement && shape.id === draggedElement.id;
+    const constrainedX = horizontalConstraint && horizontalConstraint.constrained === shape.id;
+    const constrainedY = verticalConstraint && verticalConstraint.constrained === shape.id;
+    const snapOffsetX = constrainedX ? horizontalConstraint.signedDistance : 0;
+    const snapOffsetY = constrainedY ? -verticalConstraint.signedDistance : 0;
+    if (constrainedX || constrainedY) {
+      const multiplier = symmetric ? 1 : 0.5;
+      const angle = matrixToAngle(draggedElement.localTransformMatrix);
+      const horizontalSign = -resizeMultiplierHorizontal[horizontalPosition]; // fixme unify sign
+      const verticalSign = resizeMultiplierVertical[verticalPosition];
+      // todo turn it into matrix algebra via matrix2d.js
+      const sin = Math.sin(angle);
+      const cos = Math.cos(angle);
+      const snapOffsetA = horizontalSign * (cos * snapOffsetX - sin * snapOffsetY);
+      const snapOffsetB = verticalSign * (sin * snapOffsetX + cos * snapOffsetY);
+      const snapTranslateOffset = translateComponent(
+        multiply(
+          rotateZ(angle),
+          translate((1 - multiplier) * -snapOffsetX, (1 - multiplier) * snapOffsetY, 0)
+        )
+      );
+      const snapSizeOffset = [multiplier * snapOffsetA, multiplier * snapOffsetB];
+      return {
+        ...shape,
+        snapDeltaMatrix: snapTranslateOffset,
+        snapResizeVector: snapSizeOffset,
+      };
+    } else if (constrainedShape) {
+      return {
+        ...shape,
+        snapDeltaMatrix: null,
+        snapResizeVector: null,
+      };
+    } else {
+      return crystallizeConstraint(shape);
+    }
+  };
 
 const dissolveGroups = (groupsToDissolve, shapes, selectedShapes) => {
   return {

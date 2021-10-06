@@ -5,14 +5,26 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'src/core/server';
+import {
+  CoreSetup,
+  Logger,
+  SavedObject,
+  SavedObjectsExportTransformContext,
+  SavedObjectsType,
+} from 'src/core/server';
 import { CASE_SAVED_OBJECT } from '../../common';
+import { ESCaseAttributes } from '../services/cases/types';
+import { handleExport } from './import_export/export';
 import { caseMigrations } from './migrations';
 
-export const caseSavedObjectType: SavedObjectsType = {
+export const createCaseSavedObjectType = (
+  coreSetup: CoreSetup,
+  logger: Logger
+): SavedObjectsType => ({
   name: CASE_SAVED_OBJECT,
   hidden: true,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
       closed_at: {
@@ -106,7 +118,7 @@ export const caseSavedObjectType: SavedObjectsType = {
         type: 'keyword',
       },
       title: {
-        type: 'keyword',
+        type: 'text',
       },
       status: {
         type: 'keyword',
@@ -144,4 +156,14 @@ export const caseSavedObjectType: SavedObjectsType = {
     },
   },
   migrations: caseMigrations,
-};
+  management: {
+    importableAndExportable: true,
+    defaultSearchField: 'title',
+    icon: 'folderExclamation',
+    getTitle: (savedObject: SavedObject<ESCaseAttributes>) => savedObject.attributes.title,
+    onExport: async (
+      context: SavedObjectsExportTransformContext,
+      objects: Array<SavedObject<ESCaseAttributes>>
+    ) => handleExport({ context, objects, coreSetup, logger }),
+  },
+});

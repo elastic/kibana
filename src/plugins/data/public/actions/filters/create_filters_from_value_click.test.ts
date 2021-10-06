@@ -61,7 +61,7 @@ describe('createFiltersFromValueClick', () => {
 
     const dataStart = dataPluginMock.createStartContract();
     setSearchService(dataStart.search);
-    setIndexPatterns(({
+    setIndexPatterns({
       ...dataStart.indexPatterns,
       get: async () => ({
         id: 'logstash-*',
@@ -71,7 +71,7 @@ describe('createFiltersFromValueClick', () => {
         },
         getFormatterForField: () => new BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
       }),
-    } as unknown) as IndexPatternsContract);
+    } as unknown as IndexPatternsContract);
   });
 
   test('ignores event when value for rows is not provided', async () => {
@@ -86,7 +86,7 @@ describe('createFiltersFromValueClick', () => {
     const filters = await createFiltersFromValueClickAction({ data: dataPoints });
 
     expect(filters.length).toEqual(1);
-    expect(filters[0].query?.match_phrase.bytes).toEqual('2048');
+    expect(filters[0].query?.match_phrase?.bytes).toEqual('2048');
   });
 
   test('handles an event when aggregations type is not terms', async () => {
@@ -95,8 +95,8 @@ describe('createFiltersFromValueClick', () => {
     expect(filters.length).toEqual(1);
 
     const [rangeFilter] = filters as RangeFilter[];
-    expect(rangeFilter.range.bytes.gte).toEqual(2048);
-    expect(rangeFilter.range.bytes.lt).toEqual(2078);
+    expect(rangeFilter.query.range.bytes.gte).toEqual(2048);
+    expect(rangeFilter.query.range.bytes.lt).toEqual(2078);
   });
 
   test('handles non-unique filters', async () => {

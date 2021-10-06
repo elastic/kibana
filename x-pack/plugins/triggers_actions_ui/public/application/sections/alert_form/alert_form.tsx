@@ -145,8 +145,9 @@ export async function getAlertActionErrors(
   return await Promise.all(
     alert.actions.map(
       async (alertAction: AlertAction) =>
-        (await actionTypeRegistry.get(alertAction.actionTypeId)?.validateParams(alertAction.params))
-          .errors
+        (
+          await actionTypeRegistry.get(alertAction.actionTypeId)?.validateParams(alertAction.params)
+        ).errors
     )
   );
 }
@@ -475,6 +476,7 @@ export const AlertForm = ({
               );
               return (
                 <EuiListGroupItem
+                  wrapText
                   key={index}
                   data-test-subj={`${item.id}-SelectOption`}
                   color="primary"

@@ -27,10 +27,8 @@ const resolverComponentInstanceID = 'resolverComponentInstanceID';
 describe("Resolver, when rendered with the `indices` prop set to `[]` and the `databaseDocumentID` prop set to `_id`, and when the document is found in an index called 'awesome_index'", () => {
   beforeEach(async () => {
     // create a mock data access layer
-    const {
-      metadata: dataAccessLayerMetadata,
-      dataAccessLayer,
-    } = noAncestorsTwoChildenInIndexCalledAwesomeIndex();
+    const { metadata: dataAccessLayerMetadata, dataAccessLayer } =
+      noAncestorsTwoChildenInIndexCalledAwesomeIndex();
 
     // save a reference to the entity IDs exposed by the mock data layer
     entityIDs = dataAccessLayerMetadata.entityIDs;
@@ -421,10 +419,8 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
 describe('Resolver, when analyzing a tree that has 2 related registry and 1 related event of all other categories for the origin node', () => {
   beforeEach(async () => {
     // create a mock data access layer with related events
-    const {
-      metadata: dataAccessLayerMetadata,
-      dataAccessLayer,
-    } = noAncestorsTwoChildrenWithRelatedEventsOnOrigin();
+    const { metadata: dataAccessLayerMetadata, dataAccessLayer } =
+      noAncestorsTwoChildrenWithRelatedEventsOnOrigin();
 
     // save a reference to the entity IDs exposed by the mock data layer
     entityIDs = dataAccessLayerMetadata.entityIDs;

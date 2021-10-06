@@ -12,7 +12,9 @@ import { DatasourceComponent } from './datasource_component';
 
 export const Datasource = (props) => {
   const { datasource, stateDatasource } = props;
-  if (!datasource || !stateDatasource) return <NoDatasource {...props} />;
+  if (!datasource || !stateDatasource) {
+    return <NoDatasource {...props} />;
+  }
 
   return <DatasourceComponent {...props} />;
 };

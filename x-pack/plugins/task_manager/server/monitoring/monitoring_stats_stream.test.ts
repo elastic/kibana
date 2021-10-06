@@ -17,7 +17,6 @@ beforeEach(() => {
 
 describe('createMonitoringStatsStream', () => {
   const configuration: TaskManagerConfig = {
-    enabled: true,
     max_workers: 10,
     index: 'foo',
     max_attempts: 9,

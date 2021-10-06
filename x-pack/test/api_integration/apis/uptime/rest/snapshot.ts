@@ -34,8 +34,8 @@ export default function ({ getService }: FtrProviderContext) {
       const scheduleEvery = 10000; // fake monitor checks every 10s
       let dateRange: { start: string; end: string };
 
-      [true, false].forEach(async (includeTimespan: boolean) => {
-        [true, false].forEach(async (includeObserver: boolean) => {
+      [true, false].forEach((includeTimespan: boolean) => {
+        [true, false].forEach((includeObserver: boolean) => {
           describe(`with timespans=${includeTimespan} and observer=${includeObserver}`, async () => {
             before(async () => {
               const promises: Array<Promise<any>> = [];

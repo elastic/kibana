@@ -153,7 +153,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
           <span data-test-subj="appTitle">
             <FormattedMessage
               id="xpack.ingestPipelines.list.listTitle"
-              defaultMessage="Ingest Node Pipelines"
+              defaultMessage="Ingest Pipelines"
             />
           </span>
         }
@@ -172,7 +172,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
           >
             <FormattedMessage
               id="xpack.ingestPipelines.list.pipelinesDocsLinkText"
-              defaultMessage="Ingest Node Pipelines docs"
+              defaultMessage="Ingest Pipelines docs"
             />
           </EuiButtonEmpty>,
         ]}

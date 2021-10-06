@@ -25,6 +25,7 @@ import {
   getBuiltinActionGroups,
   RecoveredActionGroupId,
   ActionGroup,
+  validateDurationSchema,
 } from '../common';
 import { ILicenseState } from './lib/license_state';
 import { getAlertTypeFeatureUsageName } from './lib/get_alert_type_feature_usage_name';
@@ -170,6 +171,21 @@ export class RuleTypeRegistry {
         })
       );
     }
+    // validate ruleTypeTimeout here
+    if (alertType.ruleTaskTimeout) {
+      const invalidTimeout = validateDurationSchema(alertType.ruleTaskTimeout);
+      if (invalidTimeout) {
+        throw new Error(
+          i18n.translate('xpack.alerting.ruleTypeRegistry.register.invalidTimeoutAlertTypeError', {
+            defaultMessage: 'Rule type "{id}" has invalid timeout: {errorMessage}.',
+            values: {
+              id: alertType.id,
+              errorMessage: invalidTimeout,
+            },
+          })
+        );
+      }
+    }
     alertType.actionVariables = normalizedActionVariables(alertType.actionVariables);
 
     const normalizedAlertType = augmentActionGroupsWithReserved<
@@ -185,11 +201,12 @@ export class RuleTypeRegistry {
     this.ruleTypes.set(
       alertIdSchema.validate(alertType.id),
       /** stripping the typing is required in order to store the AlertTypes in a Map */
-      (normalizedAlertType as unknown) as UntypedNormalizedAlertType
+      normalizedAlertType as unknown as UntypedNormalizedAlertType
     );
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
         title: alertType.name,
+        timeout: alertType.ruleTaskTimeout,
         createTaskRunner: (context: RunContext) =>
           this.taskRunnerFactory.create<
             Params,
@@ -245,7 +262,7 @@ export class RuleTypeRegistry {
      * This means that returning a typed AlertType in `get` is an inherently
      * unsafe operation. Down casting to `unknown` is the only way to achieve this.
      */
-    return (this.ruleTypes.get(id)! as unknown) as NormalizedAlertType<
+    return this.ruleTypes.get(id)! as unknown as NormalizedAlertType<
       Params,
       ExtractedParams,
       State,

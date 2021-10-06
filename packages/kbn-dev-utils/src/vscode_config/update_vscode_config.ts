@@ -25,10 +25,19 @@ const isManaged = (node?: t.Node) =>
     (c) => c.type === 'CommentLine' && c.value.trim().toLocaleLowerCase() === '@managed'
   );
 
-const isSelfManaged = (node?: t.Node) =>
-  !!node?.leadingComments?.some(
+const isSelfManaged = (node?: t.Node) => {
+  const result = !!node?.leadingComments?.some(
     (c) => c.type === 'CommentLine' && c.value.trim().toLocaleLowerCase() === 'self managed'
   );
+
+  // if we find a node which is both managed and self managed remove the managed comment
+  if (result && node && isManaged(node)) {
+    node.leadingComments =
+      node.leadingComments?.filter((c) => c.value.trim() !== '@managed') ?? null;
+  }
+
+  return result;
+};
 
 const remove = <T>(arr: T[], value: T) => {
   const index = arr.indexOf(value);
@@ -37,16 +46,16 @@ const remove = <T>(arr: T[], value: T) => {
   }
 };
 
-const createManagedChildProp = (key: string, value: any) => {
+const createManagedProp = (key: string, value: any) => {
   const childProp = t.objectProperty(t.stringLiteral(key), parseExpression(JSON.stringify(value)));
   t.addComment(childProp, 'leading', ' @managed', true);
   return childProp;
 };
 
-const createManagedProp = (key: string, value: Record<string, any>) => {
+const createObjectPropOfManagedValues = (key: string, value: Record<string, any>) => {
   return t.objectProperty(
     t.stringLiteral(key),
-    t.objectExpression(Object.entries(value).map(([k, v]) => createManagedChildProp(k, v)))
+    t.objectExpression(Object.entries(value).map(([k, v]) => createManagedProp(k, v)))
   );
 };
 
@@ -57,8 +66,16 @@ const createManagedProp = (key: string, value: Record<string, any>) => {
  * @param key the key name to add
  * @param value managed value which should be set at `key`
  */
-const addManagedProp = (ast: t.ObjectExpression, key: string, value: Record<string, any>) => {
-  ast.properties.push(createManagedProp(key, value));
+const addManagedProp = (
+  ast: t.ObjectExpression,
+  key: string,
+  value: string | Record<string, any> | boolean | number
+) => {
+  if (['number', 'string', 'boolean'].includes(typeof value)) {
+    ast.properties.push(createManagedProp(key, value));
+  } else {
+    ast.properties.push(createObjectPropOfManagedValues(key, value as Record<string, any>));
+  }
 };
 
 /**
@@ -72,7 +89,7 @@ const addManagedProp = (ast: t.ObjectExpression, key: string, value: Record<stri
 const replaceManagedProp = (
   ast: t.ObjectExpression,
   existing: BasicObjectProp,
-  value: Record<string, any>
+  value: string | Record<string, any> | boolean | number
 ) => {
   remove(ast.properties, existing);
   addManagedProp(ast, existing.key.value, value);
@@ -98,15 +115,11 @@ const mergeManagedProperties = (
 
     if (!existing) {
       // add the new managed prop
-      properties.push(createManagedChildProp(key, value));
+      properties.push(createManagedProp(key, value));
       continue;
     }
 
     if (isSelfManaged(existing)) {
-      // strip "// @managed" comment if conflicting with "// self managed"
-      existing.leadingComments = (existing.leadingComments ?? []).filter(
-        (c) => c.value.trim() !== '@managed'
-      );
       continue;
     }
 
@@ -119,7 +132,7 @@ const mergeManagedProperties = (
     // take over the unmanaged child prop by deleting the previous prop and replacing it
     // with a brand new one
     remove(properties, existing);
-    properties.push(createManagedChildProp(key, value));
+    properties.push(createManagedProp(key, value));
   }
 
   // iterate through the props to find "// @managed" props which are no longer in
@@ -170,20 +183,29 @@ export function updateVscodeConfig(keys: ManagedConfigKey[], infoText: string, j
       continue;
     }
 
-    if (existingProp && existingProp.value.type === 'ObjectExpression') {
-      // setting exists and is an object so merge properties of `value` with it
-      mergeManagedProperties(existingProp.value.properties, value);
+    if (typeof value === 'object') {
+      if (existingProp && existingProp.value.type === 'ObjectExpression') {
+        // setting exists and is an object so merge properties of `value` with it
+        mergeManagedProperties(existingProp.value.properties, value);
+        continue;
+      }
+
+      if (existingProp) {
+        // setting exists but its value is not an object expression so replace it
+        replaceManagedProp(ast, existingProp, value);
+        continue;
+      }
+
+      // setting isn't in config file so create it
+      addManagedProp(ast, key, value);
       continue;
     }
 
     if (existingProp) {
-      // setting exists but its value is not an object expression so replace it
       replaceManagedProp(ast, existingProp, value);
-      continue;
+    } else {
+      addManagedProp(ast, key, value);
     }
-
-    // setting isn't in config file so create it
-    addManagedProp(ast, key, value);
   }
 
   ast.leadingComments = [

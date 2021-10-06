@@ -44,23 +44,27 @@ describe('query_field_value_pairs', () => {
         'myFieldCandidate3',
       ];
 
-      const esClientSearchMock = jest.fn((req: estypes.SearchRequest): {
-        body: estypes.SearchResponse;
-      } => {
-        return {
-          body: ({
-            aggregations: {
-              attribute_terms: {
-                buckets: [{ key: 'myValue1' }, { key: 'myValue2' }],
+      const esClientSearchMock = jest.fn(
+        (
+          req: estypes.SearchRequest
+        ): {
+          body: estypes.SearchResponse;
+        } => {
+          return {
+            body: {
+              aggregations: {
+                attribute_terms: {
+                  buckets: [{ key: 'myValue1' }, { key: 'myValue2' }],
+                },
               },
-            },
-          } as unknown) as estypes.SearchResponse,
-        };
-      });
+            } as unknown as estypes.SearchResponse,
+          };
+        }
+      );
 
-      const esClientMock = ({
+      const esClientMock = {
         search: esClientSearchMock,
-      } as unknown) as ElasticsearchClient;
+      } as unknown as ElasticsearchClient;
 
       const { addLogMessage, getLogMessages } = searchServiceLogProvider();
       const state = latencyCorrelationsSearchServiceStateProvider();

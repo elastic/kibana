@@ -12,3 +12,5 @@ import { TransformUiPlugin } from './plugin';
 export const plugin = () => {
   return new TransformUiPlugin();
 };
+
+export { getTransformHealthRuleType } from './alerting';

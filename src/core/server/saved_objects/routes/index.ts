@@ -26,6 +26,9 @@ import { registerResolveImportErrorsRoute } from './resolve_import_errors';
 import { registerMigrateRoute } from './migrate';
 import { registerLegacyImportRoute } from './legacy_import_export/import';
 import { registerLegacyExportRoute } from './legacy_import_export/export';
+import { registerBulkResolveRoute } from './bulk_resolve';
+import { registerDeleteUnknownTypesRoute } from './deprecations';
+import { KibanaConfigType } from '../../kibana_config';
 
 export function registerRoutes({
   http,
@@ -34,6 +37,7 @@ export function registerRoutes({
   config,
   migratorPromise,
   kibanaVersion,
+  kibanaConfig,
 }: {
   http: InternalHttpServiceSetup;
   coreUsageData: InternalCoreUsageDataSetup;
@@ -41,6 +45,7 @@ export function registerRoutes({
   config: SavedObjectConfig;
   migratorPromise: Promise<IKibanaMigrator>;
   kibanaVersion: string;
+  kibanaConfig: KibanaConfigType;
 }) {
   const router = http.createRouter('/api/saved_objects/');
 
@@ -52,6 +57,7 @@ export function registerRoutes({
   registerUpdateRoute(router, { coreUsageData });
   registerBulkGetRoute(router, { coreUsageData });
   registerBulkCreateRoute(router, { coreUsageData });
+  registerBulkResolveRoute(router, { coreUsageData });
   registerBulkUpdateRoute(router, { coreUsageData });
   registerExportRoute(router, { config, coreUsageData });
   registerImportRoute(router, { config, coreUsageData });
@@ -68,4 +74,5 @@ export function registerRoutes({
   const internalRouter = http.createRouter('/internal/saved_objects/');
 
   registerMigrateRoute(internalRouter, migratorPromise);
+  registerDeleteUnknownTypesRoute(internalRouter, { config, kibanaConfig, kibanaVersion });
 }

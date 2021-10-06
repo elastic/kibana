@@ -102,7 +102,6 @@ describe('buildAlert', () => {
         status_date: '2020-02-22T16:47:50.047Z',
         last_success_at: '2020-02-22T16:47:50.047Z',
         last_success_message: 'succeeded',
-        output_index: '.siem-signals-default',
         max_signals: 100,
         risk_score: 55,
         risk_score_mapping: [],
@@ -179,7 +178,6 @@ describe('buildAlert', () => {
         status_date: '2020-02-22T16:47:50.047Z',
         last_success_at: '2020-02-22T16:47:50.047Z',
         last_success_message: 'succeeded',
-        output_index: '.siem-signals-default',
         max_signals: 100,
         risk_score: 55,
         risk_score_mapping: [],
@@ -364,13 +362,13 @@ describe('buildAlert', () => {
 
     test('it will remove a "signal" numeric clash', () => {
       const sampleDoc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-      const doc = ({
+      const doc = {
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
           signal: 127,
         },
-      } as unknown) as SignalDoc;
+      } as unknown as SignalDoc;
       const output = removeClashes(doc);
       const timestamp = output._source[TIMESTAMP];
       expect(output).toEqual({
@@ -384,13 +382,13 @@ describe('buildAlert', () => {
 
     test('it will remove a "signal" object clash', () => {
       const sampleDoc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-      const doc = ({
+      const doc = {
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
           signal: { child_1: { child_2: 'Test nesting' } },
         },
-      } as unknown) as SignalDoc;
+      } as unknown as SignalDoc;
       const output = removeClashes(doc);
       const timestamp = output._source[TIMESTAMP];
       expect(output).toEqual({
@@ -404,13 +402,13 @@ describe('buildAlert', () => {
 
     test('it will not remove a "signal" if that is signal is one of our signals', () => {
       const sampleDoc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-      const doc = ({
+      const doc = {
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
           signal: { rule: { id: '123' } },
         },
-      } as unknown) as SignalDoc;
+      } as unknown as SignalDoc;
       const output = removeClashes(doc);
       const timestamp = output._source[TIMESTAMP];
       const expected = {

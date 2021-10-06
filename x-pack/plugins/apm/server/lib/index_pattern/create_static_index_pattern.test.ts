@@ -13,24 +13,24 @@ import { InternalSavedObjectsClient } from '../helpers/get_internal_saved_object
 import { APMConfig } from '../..';
 
 function getMockSavedObjectsClient(existingIndexPatternTitle: string) {
-  return ({
+  return {
     get: jest.fn(() => ({
       attributes: {
         title: existingIndexPatternTitle,
       },
     })),
     create: jest.fn(),
-  } as unknown) as InternalSavedObjectsClient;
+  } as unknown as InternalSavedObjectsClient;
 }
 
-const setup = ({
+const setup = {
   indices: {
     'apm_oss.transactionIndices': 'apm-*-transaction-*',
     'apm_oss.spanIndices': 'apm-*-span-*',
     'apm_oss.errorIndices': 'apm-*-error-*',
     'apm_oss.metricsIndices': 'apm-*-metrics-*',
   },
-} as unknown) as Setup;
+} as unknown as Setup;
 
 describe('createStaticIndexPattern', () => {
   it(`should not create index pattern if 'xpack.apm.autocreateApmIndexPattern=false'`, async () => {

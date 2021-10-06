@@ -15,12 +15,8 @@ export default function deleteSpaceTestSuite({ getService }: FtrProviderContext)
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  const {
-    deleteTest,
-    expectEmptyResult,
-    expectReservedSpaceResult,
-    expectNotFound,
-  } = deleteTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
+  const { deleteTest, expectEmptyResult, expectReservedSpaceResult, expectNotFound } =
+    deleteTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
 
   describe('delete', () => {
     [

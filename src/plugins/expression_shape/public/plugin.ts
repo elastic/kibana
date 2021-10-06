@@ -23,7 +23,8 @@ export type ExpressionShapePluginSetup = void;
 export type ExpressionShapePluginStart = void;
 
 export class ExpressionShapePlugin
-  implements Plugin<ExpressionShapePluginSetup, ExpressionShapePluginStart, SetupDeps, StartDeps> {
+  implements Plugin<ExpressionShapePluginSetup, ExpressionShapePluginStart, SetupDeps, StartDeps>
+{
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionShapePluginSetup {
     expressions.registerFunction(shapeFunction);
     expressions.registerFunction(progressFunction);

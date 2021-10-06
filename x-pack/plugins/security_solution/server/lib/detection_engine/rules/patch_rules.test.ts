@@ -22,7 +22,7 @@ describe.each([
       ...rulesOptionsMock,
       enabled: false,
     };
-    ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).update.mockResolvedValue(
+    (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
     await patchRules(ruleOptions);
@@ -42,7 +42,7 @@ describe.each([
     if (ruleOptions.rule != null) {
       ruleOptions.rule.enabled = false;
     }
-    ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).update.mockResolvedValue(
+    (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
     await patchRules(ruleOptions);
@@ -62,7 +62,7 @@ describe.each([
     if (ruleOptions.rule != null) {
       ruleOptions.rule.enabled = false;
     }
-    ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).update.mockResolvedValue(
+    (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
     await patchRules(ruleOptions);
@@ -88,7 +88,7 @@ describe.each([
     if (ruleOptions.rule != null) {
       ruleOptions.rule.enabled = false;
     }
-    ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).update.mockResolvedValue(
+    (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
     await patchRules(ruleOptions);
@@ -120,7 +120,7 @@ describe.each([
           },
         ],
       };
-      ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).update.mockResolvedValue(
+      (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
         getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
       );
       await patchRules(ruleOptions);
@@ -157,7 +157,7 @@ describe.each([
           },
         ];
       }
-      ((ruleOptions.rulesClient as unknown) as RulesClientMock).update.mockResolvedValue(
+      (ruleOptions.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
         getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
       );
       await patchRules(ruleOptions);

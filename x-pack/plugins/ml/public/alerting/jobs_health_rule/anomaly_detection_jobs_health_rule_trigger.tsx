@@ -22,7 +22,8 @@ import { ALL_JOBS_SELECTION } from '../../../common/constants/alerts';
 import { BetaBadge } from '../beta_badge';
 import { isDefined } from '../../../common/types/guards';
 
-export type MlAnomalyAlertTriggerProps = AlertTypeParamsExpressionProps<MlAnomalyDetectionJobsHealthRuleParams>;
+export type MlAnomalyAlertTriggerProps =
+  AlertTypeParamsExpressionProps<MlAnomalyDetectionJobsHealthRuleParams>;
 
 const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   alertParams,
@@ -49,11 +50,10 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   );
 
   const onAlertParamChange = useCallback(
-    <T extends keyof MlAnomalyDetectionJobsHealthRuleParams>(param: T) => (
-      update: MlAnomalyDetectionJobsHealthRuleParams[T]
-    ) => {
-      setAlertParams(param, update);
-    },
+    <T extends keyof MlAnomalyDetectionJobsHealthRuleParams>(param: T) =>
+      (update: MlAnomalyDetectionJobsHealthRuleParams[T]) => {
+        setAlertParams(param, update);
+      },
     []
   );
 

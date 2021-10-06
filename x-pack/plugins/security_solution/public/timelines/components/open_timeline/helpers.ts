@@ -50,7 +50,12 @@ import {
   DEFAULT_COLUMN_MIN_WIDTH,
 } from '../timeline/body/constants';
 
-import { OpenTimelineResult, UpdateTimeline, DispatchUpdateTimeline } from './types';
+import {
+  OpenTimelineResult,
+  UpdateTimeline,
+  DispatchUpdateTimeline,
+  TimelineErrorCallback,
+} from './types';
 import { createNote } from '../notes/helpers';
 import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
@@ -313,6 +318,7 @@ export interface QueryTimelineById<TCache> {
   graphEventId?: string;
   timelineId: string;
   timelineType?: TimelineType;
+  onError?: TimelineErrorCallback;
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
   updateIsLoading: ({
@@ -331,6 +337,7 @@ export const queryTimelineById = <TCache>({
   graphEventId = '',
   timelineId,
   timelineType,
+  onError,
   onOpenTimeline,
   openTimeline = true,
   updateIsLoading,
@@ -372,91 +379,99 @@ export const queryTimelineById = <TCache>({
         })();
       }
     })
+    .catch((error) => {
+      if (onError != null) {
+        onError(error, timelineId);
+      }
+    })
     .finally(() => {
       updateIsLoading({ id: TimelineId.active, isLoading: false });
     });
 };
 
-export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeline => ({
-  duplicate,
-  id,
-  forceNotes = false,
-  from,
-  notes,
-  timeline,
-  to,
-  ruleNote,
-}: UpdateTimeline): (() => void) => () => {
-  if (!isEmpty(timeline.indexNames)) {
-    dispatch(
-      sourcererActions.initTimelineIndexPatterns({
-        id: SourcererScopeName.timeline,
-        selectedPatterns: timeline.indexNames,
-        eventType: timeline.eventType,
-      })
-    );
-  }
-  if (
-    timeline.status === TimelineStatus.immutable &&
-    timeline.timelineType === TimelineType.template
-  ) {
-    dispatch(
-      dispatchSetRelativeRangeDatePicker({
-        id: 'timeline',
-        fromStr: 'now-24h',
-        toStr: 'now',
-        from: DEFAULT_FROM_MOMENT.toISOString(),
-        to: DEFAULT_TO_MOMENT.toISOString(),
-      })
-    );
-  } else {
-    dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
-  }
-  dispatch(dispatchAddTimeline({ id, timeline, savedTimeline: duplicate }));
-  if (
-    timeline.kqlQuery != null &&
-    timeline.kqlQuery.filterQuery != null &&
-    timeline.kqlQuery.filterQuery.kuery != null &&
-    timeline.kqlQuery.filterQuery.kuery.expression !== ''
-  ) {
-    dispatch(
-      dispatchApplyKqlFilterQuery({
-        id,
-        filterQuery: {
-          kuery: {
-            kind: timeline.kqlQuery.filterQuery.kuery.kind ?? 'kuery',
-            expression: timeline.kqlQuery.filterQuery.kuery.expression || '',
+export const dispatchUpdateTimeline =
+  (dispatch: Dispatch): DispatchUpdateTimeline =>
+  ({
+    duplicate,
+    id,
+    forceNotes = false,
+    from,
+    notes,
+    timeline,
+    to,
+    ruleNote,
+  }: UpdateTimeline): (() => void) =>
+  () => {
+    if (!isEmpty(timeline.indexNames)) {
+      dispatch(
+        sourcererActions.initTimelineIndexPatterns({
+          id: SourcererScopeName.timeline,
+          selectedPatterns: timeline.indexNames,
+          eventType: timeline.eventType,
+        })
+      );
+    }
+    if (
+      timeline.status === TimelineStatus.immutable &&
+      timeline.timelineType === TimelineType.template
+    ) {
+      dispatch(
+        dispatchSetRelativeRangeDatePicker({
+          id: 'timeline',
+          fromStr: 'now-24h',
+          toStr: 'now',
+          from: DEFAULT_FROM_MOMENT.toISOString(),
+          to: DEFAULT_TO_MOMENT.toISOString(),
+        })
+      );
+    } else {
+      dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
+    }
+    dispatch(dispatchAddTimeline({ id, timeline, savedTimeline: duplicate }));
+    if (
+      timeline.kqlQuery != null &&
+      timeline.kqlQuery.filterQuery != null &&
+      timeline.kqlQuery.filterQuery.kuery != null &&
+      timeline.kqlQuery.filterQuery.kuery.expression !== ''
+    ) {
+      dispatch(
+        dispatchApplyKqlFilterQuery({
+          id,
+          filterQuery: {
+            kuery: {
+              kind: timeline.kqlQuery.filterQuery.kuery.kind ?? 'kuery',
+              expression: timeline.kqlQuery.filterQuery.kuery.expression || '',
+            },
+            serializedQuery: timeline.kqlQuery.filterQuery.serializedQuery || '',
           },
-          serializedQuery: timeline.kqlQuery.filterQuery.serializedQuery || '',
-        },
-      })
-    );
-  }
+        })
+      );
+    }
 
-  if (duplicate && ruleNote != null && !isEmpty(ruleNote)) {
-    const newNote = createNote({ newNote: ruleNote });
-    dispatch(dispatchUpdateNote({ note: newNote }));
-    dispatch(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));
-  }
+    if (duplicate && ruleNote != null && !isEmpty(ruleNote)) {
+      const newNote = createNote({ newNote: ruleNote });
+      dispatch(dispatchUpdateNote({ note: newNote }));
+      dispatch(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));
+    }
 
-  if (!duplicate || forceNotes) {
-    dispatch(
-      dispatchAddNotes({
-        notes:
-          notes != null
-            ? notes.map((note: NoteResult) => ({
-                created: note.created != null ? new Date(note.created) : new Date(),
-                id: note.noteId,
-                lastEdit: note.updated != null ? new Date(note.updated) : new Date(),
-                note: note.note || '',
-                user: note.updatedBy || 'unknown',
-                saveObjectId: note.noteId,
-                version: note.version,
-                eventId: note.eventId ?? null,
-                timelineId: note.timelineId ?? null,
-              }))
-            : [],
-      })
-    );
-  }
-};
+    if (!duplicate || forceNotes) {
+      dispatch(
+        dispatchAddNotes({
+          notes:
+            notes != null
+              ? notes.map((note: NoteResult) => ({
+                  created: note.created != null ? new Date(note.created) : new Date(),
+                  id: note.noteId,
+                  lastEdit: note.updated != null ? new Date(note.updated) : new Date(),
+                  note: note.note || '',
+                  user: note.updatedBy || 'unknown',
+                  saveObjectId: note.noteId,
+                  version: note.version,
+                  eventId: note.eventId ?? null,
+                  timelineId: note.timelineId ?? null,
+                }))
+              : [],
+        })
+      );
+    }
+  };

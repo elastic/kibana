@@ -24,9 +24,11 @@ export const ComponentTemplateClone: FunctionComponent<RouteComponentProps<Param
 
   const { toasts, api } = useComponentTemplatesContext();
 
-  const { error, data: componentTemplateToClone, isLoading } = api.useLoadComponentTemplate(
-    decodedSourceName
-  );
+  const {
+    error,
+    data: componentTemplateToClone,
+    isLoading,
+  } = api.useLoadComponentTemplate(decodedSourceName);
 
   useEffect(() => {
     if (error && !isLoading) {

@@ -23,7 +23,11 @@ interface CommonProps {
   compressed?: boolean;
   asFilterButton?: boolean;
   showCount?: boolean;
+  usePrependLabel?: boolean;
+  allowExclusions?: boolean;
   allowAllValuesSelection?: boolean;
+  cardinalityField?: string;
+  required?: boolean;
 }
 
 export type FieldValueSuggestionsProps = CommonProps & {

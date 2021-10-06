@@ -251,9 +251,9 @@ describe('policy details: ', () => {
 
       expect(http.put).toHaveBeenCalledTimes(2);
 
-      const lastPutCallPayload = ((http.put.mock.calls[
-        http.put.mock.calls.length - 1
-      ] as unknown) as [string, HttpFetchOptions])[1];
+      const lastPutCallPayload = (
+        http.put.mock.calls[http.put.mock.calls.length - 1] as unknown as [string, HttpFetchOptions]
+      )[1];
 
       // license is below platinum in this test, paid features are off
       expect(JSON.parse(lastPutCallPayload.body as string)).toEqual({

@@ -19,6 +19,8 @@ import type {
 } from '../../constants';
 import type { ValueOf } from '../../types';
 
+import type { CustomIntegrationIcon } from '../../../../../../src/plugins/custom_integrations/common';
+
 import type {
   PackageSpecManifest,
   PackageSpecIcon,
@@ -281,7 +283,6 @@ export enum RegistryDataStreamKeys {
   ingest_pipeline = 'ingest_pipeline',
   elasticsearch = 'elasticsearch',
   dataset_is_prefix = 'dataset_is_prefix',
-  permissions = 'permissions',
 }
 
 export interface RegistryDataStream {
@@ -297,15 +298,15 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.ingest_pipeline]?: string;
   [RegistryDataStreamKeys.elasticsearch]?: RegistryElasticsearch;
   [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
-  [RegistryDataStreamKeys.permissions]?: RegistryDataStreamPermissions;
 }
 
 export interface RegistryElasticsearch {
+  privileges?: RegistryDataStreamPrivileges;
   'index_template.settings'?: estypes.IndicesIndexSettings;
   'index_template.mappings'?: estypes.MappingTypeMapping;
 }
 
-export interface RegistryDataStreamPermissions {
+export interface RegistryDataStreamPrivileges {
   cluster?: string[];
   indices?: string[];
 }
@@ -350,6 +351,7 @@ export interface EpmPackageAdditions {
   assets: AssetsGroupedByServiceByType;
   removable?: boolean;
   notice?: string;
+  keepPoliciesUpToDate?: boolean;
 }
 
 type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, keyof SecondType>> &
@@ -361,6 +363,18 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
   integration?: string;
   id: string;
 };
+
+export interface IntegrationCardItem {
+  url: string;
+  release?: 'beta' | 'experimental' | 'ga';
+  description: string;
+  name: string;
+  title: string;
+  version: string;
+  icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
+  integration: string;
+  id: string;
+}
 
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
@@ -378,6 +392,7 @@ export interface Installation extends SavedObjectAttributes {
   install_version: string;
   install_started_at: string;
   install_source: InstallSource;
+  keep_policies_up_to_date: boolean;
 }
 
 export interface PackageUsageStats {

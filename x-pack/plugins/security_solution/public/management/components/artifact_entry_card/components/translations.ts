@@ -32,7 +32,7 @@ export const GLOBAL_EFFECT_SCOPE = i18n.translate(
 
 export const POLICY_EFFECT_SCOPE = (policyCount = 0) => {
   return i18n.translate('xpack.securitySolution.artifactCard.policyEffectScope', {
-    defaultMessage: 'Applied to {count} policies',
+    defaultMessage: 'Applied to {count} {count, plural, one {policy} other {policies}}',
     values: {
       count: policyCount,
     },
@@ -100,3 +100,17 @@ export const OS_LINUX = i18n.translate('xpack.securitySolution.artifactCard.cond
 export const OS_MAC = i18n.translate('xpack.securitySolution.artifactCard.conditions.macos', {
   defaultMessage: 'Mac',
 });
+
+export const EXPAND_ACTION = i18n.translate(
+  'xpack.securitySolution.artifactExpandableCard.expand',
+  {
+    defaultMessage: 'Expand',
+  }
+);
+
+export const COLLAPSE_ACTION = i18n.translate(
+  'xpack.securitySolution.artifactExpandableCard.collpase',
+  {
+    defaultMessage: 'Collapse',
+  }
+);

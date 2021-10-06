@@ -87,6 +87,7 @@ export function CorrelationsTable<T extends FieldValuePair>({
         status === FETCH_STATUS.LOADING ? loadingText : noDataText
       }
       loading={status === FETCH_STATUS.LOADING}
+      error={status === FETCH_STATUS.FAILURE ? errorMessage : ''}
       columns={columns}
       rowProps={(term) => {
         return {
@@ -120,4 +121,9 @@ const loadingText = i18n.translate(
 const noDataText = i18n.translate(
   'xpack.apm.correlations.correlationsTable.noDataText',
   { defaultMessage: 'No data' }
+);
+
+const errorMessage = i18n.translate(
+  'xpack.apm.correlations.correlationsTable.errorMessage',
+  { defaultMessage: 'Failed to fetch' }
 );

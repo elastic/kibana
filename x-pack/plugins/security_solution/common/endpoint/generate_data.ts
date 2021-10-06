@@ -860,8 +860,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         direction: 'outgoing',
       },
       registry: {
-        path:
-          'HKEY_USERS\\S-1-5-21-2460036010-3910878774-3458087990-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\chrome',
+        path: 'HKEY_USERS\\S-1-5-21-2460036010-3910878774-3458087990-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\chrome',
         value: processName,
         data: {
           strings: `C:/fake_behavior/${processName}`,
@@ -1664,6 +1663,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           install_status: 'installed',
           install_started_at: '2020-06-24T14:41:23.098Z',
           install_source: 'registry',
+          keep_policies_up_to_date: false,
         },
         references: [],
         updated_at: '2020-06-24T14:41:23.098Z',
@@ -1853,8 +1853,8 @@ export class EndpointDocGenerator extends BaseDataGenerator {
             status: this.commonInfo.Endpoint.policy.applied.status,
             version: policyVersion,
             name: this.commonInfo.Endpoint.policy.applied.name,
-            endpoint_policy_version: this.commonInfo.Endpoint.policy.applied
-              .endpoint_policy_version,
+            endpoint_policy_version:
+              this.commonInfo.Endpoint.policy.applied.endpoint_policy_version,
           },
         },
       },

@@ -25,8 +25,6 @@ import { i18n } from '@kbn/i18n';
 
 async function getDeprecations({ esClient, savedObjectsClient }: GetDeprecationsContext): Promise<DeprecationsDetails[]> {
   const deprecations: DeprecationsDetails[] = [];
-
-  // Example of an api correctiveAction
   const count = await getFooCount(savedObjectsClient);
   if (count > 0) {
     deprecations.push({
@@ -42,12 +40,12 @@ async function getDeprecations({ esClient, savedObjectsClient }: GetDeprecations
       level: 'warning',
       correctiveActions: {
         manualSteps: [
-            i18n.translate('xpack.foo.deprecations.manualStepOneMessage', {
-              defaultMessage: 'Navigate to the Kibana Dashboard and click "Create dashboard".',
-            }),
-            i18n.translate('xpack.foo.deprecations.manualStepTwoMessage', {
-              defaultMessage: 'Select Foo from the "New Visualization" window.',
-            }),
+           i18n.translate('xpack.foo.deprecations.manualStepOneMessage', {
+             defaultMessage: 'Navigate to the Kibana Dashboard and click "Create dashboard".',
+           }),
+           i18n.translate('xpack.foo.deprecations.manualStepTwoMessage', {
+             defaultMessage: 'Select Foo from the "New Visualization" window.',
+           }),
         ],
         api: {
           path: '/internal/security/users/test_dashboard_user',
@@ -68,7 +66,6 @@ async function getDeprecations({ esClient, savedObjectsClient }: GetDeprecations
       },
     });
   }
-
   return deprecations;
 }
 

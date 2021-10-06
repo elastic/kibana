@@ -62,17 +62,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows metrics navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Alerts', 'Metrics', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Metrics', 'Stack Management']);
       });
 
       describe('infrastructure landing page without data', () => {
-        it(`shows 'Change source configuration' button`, async () => {
+        it('shows no data page', async () => {
           await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('~infrastructureViewSetupInstructionsButton');
-          await testSubjects.existOrFail('~configureSourceButton');
+          await testSubjects.existOrFail('~noDataPage');
         });
 
         it(`doesn't show read-only badge`, async () => {
@@ -160,17 +159,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows metrics navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Alerts', 'Metrics', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Metrics', 'Stack Management']);
       });
 
       describe('infrastructure landing page without data', () => {
-        it(`doesn't show 'Change source configuration' button`, async () => {
+        it('shows No data page', async () => {
           await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('~infrastructureViewSetupInstructionsButton');
-          await testSubjects.missingOrFail('~configureSourceButton');
+          await testSubjects.existOrFail('~noDataPage');
         });
 
         it(`shows read-only badge`, async () => {

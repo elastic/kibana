@@ -20,6 +20,11 @@ export const CleanCommand: ICommand = {
   description: 'Deletes output directories, node_modules and resets internal caches.',
   name: 'clean',
 
+  reportTiming: {
+    group: 'scripts/kbn clean',
+    id: 'total',
+  },
+
   async run(projects) {
     log.warning(dedent`
       This command is only necessary for the rare circumstance where you need to recover a consistent
