@@ -13,7 +13,7 @@ import React from 'react';
 
 import { shallow, ReactWrapper } from 'enzyme';
 
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable } from '@elastic/eui';
 
 import { mountWithIntl } from '../../../../test_helpers';
 
@@ -29,11 +29,17 @@ describe('CurationsTable', () => {
         id: 'cur-id-1',
         last_updated: 'January 1, 1970 at 12:00PM',
         queries: ['hiking'],
+        suggestion: {
+          status: 'automated',
+        },
       },
       {
         id: 'cur-id-2',
         last_updated: 'January 2, 1970 at 12:00PM',
         queries: ['mountains', 'valleys'],
+        suggestion: {
+          status: 'pending',
+        },
       },
     ],
     meta: {
@@ -82,14 +88,18 @@ describe('CurationsTable', () => {
       expect(tableContent).toContain('Jan 2, 1970 12:00 PM');
     });
 
-    it('renders queries with curation links', () => {
-      expect(
-        wrapper.find('EuiLinkTo[data-test-subj="CurationsTableQueriesLink"]').first().prop('to')
-      ).toEqual('/engines/some-engine/curations/cur-id-1');
+    it('renders queries with curation links and curation suggestion badges', () => {
+      const firstQueryLink = wrapper
+        .find('EuiLinkTo[data-test-subj="CurationsTableQueriesLink"]')
+        .first();
+      const secondQueryLink = wrapper
+        .find('EuiLinkTo[data-test-subj="CurationsTableQueriesLink"]')
+        .last();
 
-      expect(
-        wrapper.find('EuiLinkTo[data-test-subj="CurationsTableQueriesLink"]').last().prop('to')
-      ).toEqual('/engines/some-engine/curations/cur-id-2');
+      expect(firstQueryLink.prop('to')).toEqual('/engines/some-engine/curations/cur-id-1');
+      expect(firstQueryLink.find(EuiBadge).prop('children')).toEqual('Automated');
+      expect(secondQueryLink.prop('to')).toEqual('/engines/some-engine/curations/cur-id-2');
+      expect(secondQueryLink.find(EuiBadge).prop('children')).toEqual('New suggestion');
     });
 
     describe('action column', () => {
