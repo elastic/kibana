@@ -25,7 +25,7 @@ import {
   DeprecatedConfigDetails,
   ChangedDeprecatedPaths,
 } from './deprecation';
-import { LegacyObjectToConfigAdapter } from './legacy';
+import { ObjectToConfigAdapter } from './object_to_config_adapter';
 
 /** @internal */
 export type IConfigService = PublicMethodsOf<ConfigService>;
@@ -72,7 +72,7 @@ export class ConfigService {
       map(([rawConfig, deprecations]) => {
         const migrated = applyDeprecations(rawConfig, deprecations);
         this.deprecatedConfigPaths.next(migrated.changedPaths);
-        return new LegacyObjectToConfigAdapter(migrated.config);
+        return new ObjectToConfigAdapter(migrated.config);
       }),
       tap((config) => {
         this.lastConfig = config;
