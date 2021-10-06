@@ -33,15 +33,6 @@ const applyStackAlertDeprecations = (settings: Record<string, unknown> = {}) => 
 
 describe('index', () => {
   describe('deprecations', () => {
-    it('should deprecate .enabled flag', () => {
-      const { messages } = applyStackAlertDeprecations({ enabled: false });
-      expect(messages).toMatchInlineSnapshot(`
-        Array [
-          "\\"xpack.actions.enabled\\" is deprecated. The ability to disable this plugin will be removed in 8.0.0.",
-        ]
-      `);
-    });
-
     it('should properly unset deprecated configs', () => {
       const { messages, changedPaths } = applyStackAlertDeprecations({
         customHostSettings: [{ ssl: { rejectUnauthorized: false } }],
