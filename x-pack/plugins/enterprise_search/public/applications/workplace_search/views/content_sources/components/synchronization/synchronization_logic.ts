@@ -205,7 +205,7 @@ const getISOStringWithoutSeconds = (time: string): string =>
 // The API allows for setting schedule values with seconds. The UI feature does not allow for setting
 // values with seconds. This function strips the seconds from the schedule values for equality checks
 // to determine if the user has unsaved changes.
-const stripScheduleSeconds = (schedule: IndexingSchedule): IndexingSchedule => {
+export const stripScheduleSeconds = (schedule: IndexingSchedule): IndexingSchedule => {
   const _schedule = cloneDeep(schedule);
   const { full, incremental, delete: _delete, permissions } = _schedule;
   _schedule.full = getISOStringWithoutSeconds(full);
