@@ -16,6 +16,7 @@ import { SetupModeEnterButton } from '../../components/setup_mode/enter_button';
 import { SetupModeFeature } from '../../../common/enums';
 import { ISetupModeContext } from '../../components/setup_mode/setup_mode_context';
 import { State as GlobalState } from '../../application/global_state_context';
+import { ajaxErrorHandlersProvider } from '../../lib/ajax_error_handler';
 
 function isOnPage(hash: string) {
   return includes(window.location.hash, hash);
@@ -36,6 +37,8 @@ const setupModeState: ISetupModeState = {
   callback: null,
   hideBottomBar: false,
 };
+
+const errorHandler = ajaxErrorHandlersProvider();
 
 export const getSetupModeState = () => setupModeState;
 
@@ -65,8 +68,7 @@ export const fetchCollectionData = async (uuid?: string, fetchWithoutClusterUuid
     });
     return response;
   } catch (err) {
-    // TODO: handle errors
-    throw new Error(err);
+    return errorHandler(err);
   }
 };
 
@@ -122,8 +124,7 @@ export const disableElasticsearchInternalCollection = async () => {
     const response = await httpService.post(url);
     return response;
   } catch (err) {
-    // TODO: handle errors
-    throw new Error(err);
+    errorHandler(err).catch(() => {});
   }
 };
 

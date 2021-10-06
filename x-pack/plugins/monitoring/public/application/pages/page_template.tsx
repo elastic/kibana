@@ -66,25 +66,19 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
 
   const onRefresh = () => {
     const requests = [
-      getPageData?.().then((result) => {
-        setHasError(false);
-        return result;
-      }),
+      getPageData?.()
+        .then((result) => {
+          setHasError(false);
+          return result;
+        })
+        .catch((err) => {
+          errorHandler(err);
+        }),
     ];
+
     if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
       requests.push(updateSetupModeData());
     }
-
-    Promise.allSettled(requests).then((results) => {
-      results
-        .filter((p) => p.status === 'rejected')
-        .forEach((result) =>
-          // TODO: remove the empty catch when errorHandler don't return a rejected promise anymore
-          errorHandler((result as unknown as PromiseRejectedResult | undefined)?.reason).catch(
-            () => {}
-          )
-        );
-    });
   };
 
   const createHref = (route: string) => history.createHref({ pathname: route });
