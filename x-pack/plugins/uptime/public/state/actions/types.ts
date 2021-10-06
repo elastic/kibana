@@ -48,6 +48,7 @@ export interface MonitorDetailsActionPayload {
 export interface CreateMLJobSuccess {
   count: number;
   jobId: string;
+  awaitingNodeAssignment: boolean;
 }
 
 export interface DeleteJobResults {
