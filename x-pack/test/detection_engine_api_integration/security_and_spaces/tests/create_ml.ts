@@ -141,7 +141,7 @@ export default ({ getService }: FtrProviderContext) => {
         user: { name: ['root'] },
         process: { name: ['store'] },
         host: { name: ['mothra'] },
-        event: { kind: 'signal' },
+        'event.kind': 'signal',
         [ALERT_ANCESTORS]: [
           {
             id: 'linux_anomalous_network_activity_ecs_record_1586274300000_900_0_-96106189301704594950079884115725560577_5',
