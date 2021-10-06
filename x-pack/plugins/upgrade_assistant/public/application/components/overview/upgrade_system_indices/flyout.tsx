@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { startCase } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -42,33 +43,45 @@ const i18nTexts = {
     }
   ),
   flyoutTitle: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.flyoutTitle', {
-    defaultMessage: 'Upgrade system indices',
+    defaultMessage: 'Migrate system indices',
   }),
   flyoutDescription: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.flyoutDescription',
     {
       defaultMessage:
-        'The following features contain system indices that need to be migrated before upgrading:',
+        'Migrate the indices that store information for the following features before you upgrade to 8.0.',
     }
   ),
   upgradeCompleteLabel: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.upgradeCompleteLabel',
     {
-      defaultMessage: 'Upgrade complete',
+      defaultMessage: 'Migration complete',
     }
   ),
   needsUpgradingLabel: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.needsUpgradingLabel',
     {
-      defaultMessage: 'Requires upgrading',
+      defaultMessage: 'Migration required',
     }
   ),
   upgradingLabel: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.upgradingLabel', {
-    defaultMessage: 'Upgrading…',
+    defaultMessage: 'Migration in progress',
   }),
   errorLabel: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.errorLabel', {
-    defaultMessage: 'Error upgrading indices',
+    defaultMessage: 'Migration failed',
   }),
+  featureNameTableColumn: i18n.translate(
+    'xpack.upgradeAssistant.overview.systemIndices.featureNameTableColumn',
+    {
+      defaultMessage: 'Feature',
+    }
+  ),
+  statusTableColumn: i18n.translate(
+    'xpack.upgradeAssistant.overview.systemIndices.statusTableColumn',
+    {
+      defaultMessage: 'Status',
+    }
+  ),
 };
 
 const renderMigrationStatus = (status: UPGRADE_STATUS) => {
@@ -131,13 +144,14 @@ const renderMigrationStatus = (status: UPGRADE_STATUS) => {
 const columns = [
   {
     field: 'feature_name',
-    name: 'Feature name',
+    name: i18nTexts.featureNameTableColumn,
     sortable: true,
     truncateText: true,
+    render: (name: string) => startCase(name),
   },
   {
     field: 'upgrade_status',
-    name: 'Status',
+    name: i18nTexts.statusTableColumn,
     sortable: true,
     render: renderMigrationStatus,
   },

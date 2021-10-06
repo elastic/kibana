@@ -36,12 +36,12 @@ interface StepProps extends OverviewStepProps {
 
 const i18nTexts = {
   title: i18n.translate('xpack.upgradeAssistant.overview.system_indices.title', {
-    defaultMessage: 'Upgrade system indices',
+    defaultMessage: 'Migrate system indices',
   }),
   bodyDescription: (docLink: string) => (
     <FormattedMessage
       id="xpack.upgradeAssistant.overview.system_indices.body"
-      defaultMessage="Upgrade your system indices to keep them happy. In addition to regular checkups, it is recommended that you brush and floss your indices twice per day. {learnMoreLink}."
+      defaultMessage="Migrate the indices that store system information before you upgrade to 8.0. {learnMoreLink}."
       values={{
         learnMoreLink: (
           <EuiLink href={docLink} target="_blank">
@@ -54,35 +54,35 @@ const i18nTexts = {
   startButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.overview.system_indices.startButtonLabel',
     {
-      defaultMessage: 'Begin upgrading system indices',
+      defaultMessage: 'Migrate indices',
     }
   ),
   inProgressButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.overview.system_indices.inProgressButtonLabel',
     {
-      defaultMessage: 'Upgrading system indices',
+      defaultMessage: 'Migration in progress',
     }
   ),
   noUpgradeNeeded: i18n.translate(
     'xpack.upgradeAssistant.overview.system_indices.noUpgradeNeeded',
     {
-      defaultMessage: 'All system indices have been upgraded',
+      defaultMessage: 'Migration complete',
     }
   ),
   viewSystemIndicesStatus: i18n.translate(
     'xpack.upgradeAssistant.system_indices.overview.system_indices.viewSystemIndicesStatus',
     {
-      defaultMessage: 'View status',
+      defaultMessage: 'View system indices',
     }
   ),
   retryButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.overview.system_indices.retryButtonLabel',
     {
-      defaultMessage: 'Try again',
+      defaultMessage: 'Retry migration',
     }
   ),
   loadingError: i18n.translate('xpack.upgradeAssistant.overview.system_indices.loadingError', {
-    defaultMessage: 'An error occurred while retrieving the status of system indices',
+    defaultMessage: 'Could not retrieve the system indices status',
   }),
 };
 

@@ -3,20 +3,20 @@
 exports[`Overview - Upgrade system indices - Flyout shows correct features in flyout table 1`] = `
 Array [
   Array [
-    "security",
-    "Error upgrading indices",
+    "Security",
+    "Migration failed",
   ],
   Array [
-    "machine_learning",
-    "Upgrading…",
+    "Machine Learning",
+    "Migration in progress",
   ],
   Array [
-    "kibana",
-    "Requires upgrading",
+    "Kibana",
+    "Migration required",
   ],
   Array [
-    "logstash",
-    "Upgrade complete",
+    "Logstash",
+    "Migration complete",
   ],
 ]
 `;
