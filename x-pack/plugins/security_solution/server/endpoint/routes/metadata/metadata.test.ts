@@ -33,7 +33,10 @@ import {
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { Agent, ElasticsearchAssetType } from '../../../../../fleet/common/types/models';
-import { legacyMetadataSearchResponse, unitedMetadataSearchResponse } from './support/test_support';
+import {
+  legacyMetadataSearchResponseMock,
+  unitedMetadataSearchResponseMock,
+} from './support/test_support';
 import { PackageService } from '../../../../../fleet/server/services';
 import {
   HOST_METADATA_LIST_ROUTE,
@@ -149,7 +152,7 @@ describe('test endpoint route', () => {
 
     it('should fallback to legacy index if index not found', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({});
-      const response = legacyMetadataSearchResponse(
+      const response = legacyMetadataSearchResponseMock(
         new EndpointDocGenerator().generateHostMetadata()
       );
       (mockScopedClient.asCurrentUser.search as jest.Mock)
@@ -210,7 +213,7 @@ describe('test endpoint route', () => {
       const esSearchMock = mockScopedClient.asCurrentUser.search as jest.Mock;
       esSearchMock.mockImplementationOnce(() =>
         Promise.resolve({
-          body: unitedMetadataSearchResponse(metadata),
+          body: unitedMetadataSearchResponseMock(metadata),
         })
       );
       [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
@@ -409,7 +412,7 @@ describe('test endpoint route', () => {
 
     it('test find the latest of all endpoints', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({});
-      const response = legacyMetadataSearchResponse(
+      const response = legacyMetadataSearchResponseMock(
         new EndpointDocGenerator().generateHostMetadata()
       );
       (mockScopedClient.asCurrentUser.search as jest.Mock)
@@ -463,7 +466,9 @@ describe('test endpoint route', () => {
         })
         .mockImplementationOnce(() =>
           Promise.resolve({
-            body: legacyMetadataSearchResponse(new EndpointDocGenerator().generateHostMetadata()),
+            body: legacyMetadataSearchResponseMock(
+              new EndpointDocGenerator().generateHostMetadata()
+            ),
           })
         );
       [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
@@ -523,7 +528,9 @@ describe('test endpoint route', () => {
         })
         .mockImplementationOnce(() =>
           Promise.resolve({
-            body: legacyMetadataSearchResponse(new EndpointDocGenerator().generateHostMetadata()),
+            body: legacyMetadataSearchResponseMock(
+              new EndpointDocGenerator().generateHostMetadata()
+            ),
           })
         );
       [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
@@ -599,7 +606,7 @@ describe('test endpoint route', () => {
         const mockRequest = httpServerMock.createKibanaRequest({ params: { id: 'BADID' } });
 
         (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
-          Promise.resolve({ body: legacyMetadataSearchResponse() })
+          Promise.resolve({ body: legacyMetadataSearchResponseMock() })
         );
 
         mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
@@ -627,7 +634,7 @@ describe('test endpoint route', () => {
       });
 
       it('should return a single endpoint with status healthy', async () => {
-        const response = legacyMetadataSearchResponse(
+        const response = legacyMetadataSearchResponseMock(
           new EndpointDocGenerator().generateHostMetadata()
         );
         const mockRequest = httpServerMock.createKibanaRequest({
@@ -663,7 +670,7 @@ describe('test endpoint route', () => {
       });
 
       it('should return a single endpoint with status unhealthy when AgentService throw 404', async () => {
-        const response = legacyMetadataSearchResponse(
+        const response = legacyMetadataSearchResponseMock(
           new EndpointDocGenerator().generateHostMetadata()
         );
 
@@ -700,7 +707,7 @@ describe('test endpoint route', () => {
       });
 
       it('should return a single endpoint with status unhealthy when status is not offline, online or enrolling', async () => {
-        const response = legacyMetadataSearchResponse(
+        const response = legacyMetadataSearchResponseMock(
           new EndpointDocGenerator().generateHostMetadata()
         );
 
@@ -738,7 +745,7 @@ describe('test endpoint route', () => {
       });
 
       it('should throw error when endpoint agent is not active', async () => {
-        const response = legacyMetadataSearchResponse(
+        const response = legacyMetadataSearchResponseMock(
           new EndpointDocGenerator().generateHostMetadata()
         );
 

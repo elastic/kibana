@@ -15,6 +15,15 @@ import { KibanaRequest } from '../../../../../../../src/core/server';
 import { EndpointAppContext } from '../../types';
 import { buildStatusesKuery } from './support/agent_status';
 
+/**
+ * 00000000-0000-0000-0000-000000000000 is initial Elastic Agent id sent by Endpoint before policy is configured
+ * 11111111-1111-1111-1111-111111111111 is Elastic Agent id sent by Endpoint when policy does not contain an id
+ */
+const IGNORED_ELASTIC_AGENT_IDS = [
+  '00000000-0000-0000-0000-000000000000',
+  '11111111-1111-1111-1111-111111111111',
+];
+
 export interface QueryBuilderOptions {
   unenrolledAgentIds?: string[];
   statusAgentIds?: string[];
@@ -53,7 +62,7 @@ export async function kibanaRequestToMetadataListESQuery(
     body: {
       query: buildQueryBody(
         request,
-        queryBuilderOptions?.unenrolledAgentIds,
+        IGNORED_ELASTIC_AGENT_IDS.concat(queryBuilderOptions?.unenrolledAgentIds ?? []),
         queryBuilderOptions?.statusAgentIds
       ),
       track_total_hits: true,
@@ -82,7 +91,7 @@ async function getPagingProperties(
   }
   return {
     pageSize: pagingProperties.page_size || config.endpointResultListDefaultPageSize,
-    pageIndex: pagingProperties.page_index || config.endpointResultListDefaultFirstPageIndex,
+    pageIndex: pagingProperties.page_index ?? config.endpointResultListDefaultFirstPageIndex,
   };
 }
 
@@ -218,7 +227,6 @@ export async function buildUnitedIndexQuery(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<any, any, any>,
   endpointAppContext: EndpointAppContext,
-  ignoredAgentIds: string[] | undefined,
   endpointPolicyIds: string[] = []
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<Record<string, any>> {
@@ -226,12 +234,9 @@ export async function buildUnitedIndexQuery(
   const statusesToFilter = request?.body?.filters?.host_status ?? [];
   const statusesKuery = buildStatusesKuery(statusesToFilter);
 
-  const filterIgnoredAgents =
-    ignoredAgentIds && ignoredAgentIds.length > 0
-      ? {
-          must_not: { terms: { 'agent.id': ignoredAgentIds } },
-        }
-      : null;
+  const filterIgnoredAgents = {
+    must_not: { terms: { 'agent.id': IGNORED_ELASTIC_AGENT_IDS } },
+  };
   const filterEndpointPolicyAgents = {
     filter: [
       // must contain an endpoint policy id
@@ -260,12 +265,7 @@ export async function buildUnitedIndexQuery(
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let query: Record<string, any> =
-    filterIgnoredAgents || filterEndpointPolicyAgents
-      ? idFilter
-      : {
-          match_all: {},
-        };
+  let query: Record<string, any> = idFilter;
 
   if (statusesKuery || request?.body?.filters?.kql) {
     const kqlQuery = toElasticsearchQuery(fromKueryExpression(request.body.filters.kql));

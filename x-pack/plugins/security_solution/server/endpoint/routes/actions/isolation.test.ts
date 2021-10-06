@@ -44,7 +44,7 @@ import {
   LogsEndpointAction,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { legacyMetadataSearchResponse } from '../metadata/support/test_support';
+import { legacyMetadataSearchResponseMock } from '../metadata/support/test_support';
 import { AGENT_ACTIONS_INDEX, ElasticsearchAssetType } from '../../../../../fleet/common';
 import { CasesClientMock } from '../../../../../cases/server/client/mocks';
 
@@ -207,7 +207,7 @@ describe('Host Isolation', () => {
         const mockSearchResponse = jest
           .fn()
           .mockImplementation(() =>
-            Promise.resolve({ body: legacyMetadataSearchResponse(searchResponse) })
+            Promise.resolve({ body: legacyMetadataSearchResponseMock(searchResponse) })
           );
         if (indexExists) {
           ctx.core.elasticsearch.client.asInternalUser.index = mockIndexResponse;

@@ -55,19 +55,6 @@ describe('query builder', () => {
       });
     });
 
-    it('queries for all endpoints when no specific parameters requested', async () => {
-      const mockRequest = httpServerMock.createKibanaRequest({
-        body: {},
-      });
-      const query = await kibanaRequestToMetadataListESQuery(mockRequest, {
-        logFactory: loggingSystemMock.create(),
-        service: new EndpointAppContextService(),
-        config: () => Promise.resolve(createMockConfig()),
-        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
-      });
-      expect(query.body.query).toHaveProperty('match_all');
-    });
-
     it('excludes unenrolled elastic agents when they exist, by default', async () => {
       const unenrolledElasticAgentId = '1fdca33f-799f-49f4-939c-ea4383c77672';
       const mockRequest = httpServerMock.createKibanaRequest({
@@ -89,8 +76,24 @@ describe('query builder', () => {
       expect(query.body.query).toEqual({
         bool: {
           must_not: [
-            { terms: { 'elastic.agent.id': [unenrolledElasticAgentId] } },
-            { terms: { 'HostDetails.elastic.agent.id': [unenrolledElasticAgentId] } },
+            {
+              terms: {
+                'elastic.agent.id': [
+                  '00000000-0000-0000-0000-000000000000',
+                  '11111111-1111-1111-1111-111111111111',
+                  unenrolledElasticAgentId,
+                ],
+              },
+            },
+            {
+              terms: {
+                'HostDetails.elastic.agent.id': [
+                  '00000000-0000-0000-0000-000000000000',
+                  '11111111-1111-1111-1111-111111111111',
+                  unenrolledElasticAgentId,
+                ],
+              },
+            },
           ],
         },
       });
@@ -154,31 +157,42 @@ describe('query builder', () => {
           }
         );
 
-        expect(query.body.query.bool.must).toContainEqual({
-          bool: {
-            must_not: [
-              // both of these should exist, since the schema can be *either*
-              { terms: { 'elastic.agent.id': [unenrolledElasticAgentId] } },
-              { terms: { 'HostDetails.elastic.agent.id': [unenrolledElasticAgentId] } },
-            ],
-          },
-        });
-        expect(query.body.query.bool.must).toContainEqual({
-          bool: {
-            must_not: {
-              bool: {
-                should: [
-                  {
-                    match: {
-                      'host.ip': '10.140.73.246',
-                    },
+        expect(query.body.query.bool.must).toEqual([
+          {
+            bool: {
+              must_not: [
+                {
+                  terms: {
+                    'elastic.agent.id': [
+                      '00000000-0000-0000-0000-000000000000',
+                      '11111111-1111-1111-1111-111111111111',
+                      '1fdca33f-799f-49f4-939c-ea4383c77672',
+                    ],
                   },
-                ],
-                minimum_should_match: 1,
+                },
+                {
+                  terms: {
+                    'HostDetails.elastic.agent.id': [
+                      '00000000-0000-0000-0000-000000000000',
+                      '11111111-1111-1111-1111-111111111111',
+                      '1fdca33f-799f-49f4-939c-ea4383c77672',
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            bool: {
+              must_not: {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [{ match: { 'host.ip': '10.140.73.246' } }],
+                },
               },
             },
           },
-        });
+        ]);
       }
     );
   });
@@ -224,9 +238,17 @@ describe('query builder', () => {
     });
 
     it('correctly builds empty query', async () => {
-      const query = await buildUnitedIndexQuery(mockRequest, mockEndpointAppContext, [], []);
+      const query = await buildUnitedIndexQuery(mockRequest, mockEndpointAppContext, []);
       const expected = {
         bool: {
+          must_not: {
+            terms: {
+              'agent.id': [
+                '00000000-0000-0000-0000-000000000000',
+                '11111111-1111-1111-1111-111111111111',
+              ],
+            },
+          },
           filter: [
             {
               terms: {
@@ -259,12 +281,10 @@ describe('query builder', () => {
     it('correctly builds query', async () => {
       mockRequest.body.filters.kql = 'united.endpoint.host.os.name : *';
       mockRequest.body.filters.host_status = ['healthy'];
-      const ignoredAgentIds: string[] = ['test-agent-id'];
       const endpointPolicyIds: string[] = ['test-endpoint-policy-id'];
       const query = await buildUnitedIndexQuery(
         mockRequest,
         mockEndpointAppContext,
-        ignoredAgentIds,
         endpointPolicyIds
       );
       const expected = expectedCompleteUnitedIndexQuery;

@@ -5,13 +5,22 @@
  * 2.0.
  */
 
+import { ApiResponse } from '@elastic/elasticsearch';
+import { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/api/types';
 import {
   ElasticsearchClient,
   Logger,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
+  KibanaRequest,
 } from 'kibana/server';
-import { HostInfo, HostMetadata } from '../../../../common/endpoint/types';
+
+import {
+  HostInfo,
+  HostMetadata,
+  HostResultList,
+  UnitedAgentMetadata,
+} from '../../../../common/endpoint/types';
 import { Agent, AgentPolicy, PackagePolicy } from '../../../../../fleet/common';
 import {
   AgentNotFoundError,
@@ -27,6 +36,7 @@ import {
 import {
   getESQueryHostMetadataByFleetAgentIds,
   getESQueryHostMetadataByID,
+  buildUnitedIndexQuery,
 } from '../../routes/metadata/query_builders';
 import {
   queryResponseToHostListResult,
@@ -40,6 +50,7 @@ import {
 } from '../../utils';
 import { EndpointError } from '../../errors';
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
+import { EndpointAppContext } from '../../types';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];
@@ -246,5 +257,117 @@ export class EndpointMetadataService {
     throw new FleetAgentPolicyNotFoundError(
       `Fleet agent policy with id ${agentPolicyId} not found`
     );
+  }
+
+  // Retrieve list of host metadata. Only supports new united index.
+  async getHostMetadataList(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    request: KibanaRequest,
+    endpointAppContext: EndpointAppContext,
+    endpointPolicies: PackagePolicy[]
+  ): Promise<{
+    unitedIndexExists: boolean;
+    unitedQueryResponse: HostResultList;
+  }> {
+    const endpointPolicyIds = endpointPolicies.map((policy) => policy.policy_id);
+    const unitedIndexQuery = await buildUnitedIndexQuery(
+      request,
+      endpointAppContext,
+      endpointPolicyIds
+    );
+
+    let unitedMetadataQueryResponse: ApiResponse<SearchResponse<UnitedAgentMetadata>>;
+    try {
+      unitedMetadataQueryResponse = await esClient.search<UnitedAgentMetadata>(unitedIndexQuery);
+    } catch (error) {
+      const errorType = error?.meta?.body?.error?.type ?? '';
+
+      // no united index means that the endpoint package hasn't been upgraded yet
+      // this is expected so we fall back to the legacy query
+      // errors other than index_not_found_exception are unexpected
+      if (errorType !== 'index_not_found_exception') {
+        const err = wrapErrorIfNeeded(error);
+        this.logger?.error(err);
+        throw err;
+      }
+      return {
+        unitedIndexExists: false,
+        unitedQueryResponse: {} as HostResultList,
+      };
+    }
+
+    const { hits: docs, total: docsCount } = unitedMetadataQueryResponse?.body?.hits || {};
+    const agentPolicyIds: string[] = docs.map((doc) => doc._source?.united?.agent?.policy_id ?? '');
+
+    const agentPolicies =
+      (await this.agentPolicyService
+        .getByIds(soClient, agentPolicyIds)
+        ?.catch(catchAndWrapError)) ?? [];
+
+    const agentPoliciesMap: Record<string, AgentPolicy> = agentPolicies.reduce(
+      (acc, agentPolicy) => ({
+        ...acc,
+        [agentPolicy.id]: {
+          ...agentPolicy,
+        },
+      }),
+      {}
+    );
+
+    const endpointPoliciesMap: Record<string, PackagePolicy> = endpointPolicies.reduce(
+      (acc, packagePolicy) => ({
+        ...acc,
+        [packagePolicy.policy_id]: packagePolicy,
+      }),
+      {}
+    );
+
+    const hosts = docs
+      .filter((doc) => {
+        const { endpoint: metadata, agent } = doc?._source?.united ?? {};
+        return metadata && agent;
+      })
+      .map((doc) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const { endpoint: metadata, agent } = doc!._source!.united;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const agentPolicy = agentPoliciesMap[agent.policy_id!];
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const endpointPolicy = endpointPoliciesMap[agent.policy_id!];
+        return {
+          metadata,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          host_status: fleetAgentStatusToEndpointHostStatus(agent.last_checkin_status!),
+          policy_info: {
+            agent: {
+              applied: {
+                id: agent.policy_id || '',
+                revision: agent.policy_revision || 0,
+              },
+              configured: {
+                id: agentPolicy?.id || '',
+                revision: agentPolicy?.revision || 0,
+              },
+            },
+            endpoint: {
+              id: endpointPolicy?.id || '',
+              revision: endpointPolicy?.revision || 0,
+            },
+          },
+        } as HostInfo;
+      });
+
+    const unitedQueryResponse: HostResultList = {
+      request_page_size: unitedIndexQuery.size,
+      request_page_index: unitedIndexQuery.from,
+      total: (docsCount as SearchTotalHits).value,
+      hosts,
+    };
+
+    return {
+      unitedIndexExists: true,
+      unitedQueryResponse,
+    };
   }
 }
