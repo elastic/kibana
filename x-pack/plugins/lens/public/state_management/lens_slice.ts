@@ -432,14 +432,12 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         return state;
       }
       const activeVisualization = visualizationMap[payload.visualizationId];
-
-      return {
-        ...state,
-        visualization: {
-          ...state.visualization,
-          state: activeVisualization.onEditAction!(state.visualization.state, payload.event),
-        },
-      };
+      if (activeVisualization?.onEditAction) {
+        state.visualization.state = activeVisualization.onEditAction(
+          state.visualization.state,
+          payload.event
+        );
+      }
     },
     [insertLayer.type]: (
       state,
