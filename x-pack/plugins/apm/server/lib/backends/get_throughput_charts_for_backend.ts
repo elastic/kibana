@@ -73,7 +73,7 @@ export async function getThroughputChartsForBackend({
             extended_bounds: { min: startWithOffset, max: endWithOffset },
           },
           aggs: {
-            sumSpanDestination: {
+            spanDestinationLatencySum: {
               sum: {
                 field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
               },
@@ -90,7 +90,7 @@ export async function getThroughputChartsForBackend({
         x: bucket.key + offsetInMs,
         y: calculateThroughputWithInterval({
           bucketSize,
-          value: bucket.sumSpanDestination.value || 0,
+          value: bucket.spanDestinationLatencySum.value || 0,
         }),
       };
     }) ?? []

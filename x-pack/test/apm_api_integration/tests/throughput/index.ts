@@ -35,7 +35,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       environment: 'ENVIRONMENT_ALL',
     };
     const [
-      serviceAPIResponse,
+      serviceInventoryAPIResponse,
       serviceThroughputAPIResponse,
       transactionsDetailsAPIResponse,
       serviceDependencyAPIResponse,
@@ -106,7 +106,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         },
       }),
     ]);
-    const serviceApiThroughput = serviceAPIResponse.body.items[0].throughput;
+    const serviceInventoryThroughput = serviceInventoryAPIResponse.body.items[0].throughput;
 
     const throughputChartApiMean = meanBy(serviceThroughputAPIResponse.body.currentPeriod, 'y');
 
@@ -121,7 +121,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     );
 
     return {
-      serviceApiThroughput,
+      serviceInventoryThroughput,
       throughputChartApiMean,
       transactionsThroughputSum,
       serviceDependencies: serviceDependencyAPIResponse.body.serviceDependencies.map((item) => ({
@@ -136,73 +136,82 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     };
   }
 
-  let throughputValues: PromiseReturnType<typeof getThroughputValues>;
+  let throughputMetricValues: PromiseReturnType<typeof getThroughputValues>;
+  let throughputTransactionValues: PromiseReturnType<typeof getThroughputValues>;
 
-  registry.when(
-    'Throughput value across apis',
-    { config: 'basic', archives: [archiveName] },
-    () => {
-      describe('with kql filter to force transaction-based UI', () => {
-        before(async () => {
-          throughputValues = await getThroughputValues({
+  registry.when('Throughput value', { config: 'basic', archives: [archiveName] }, () => {
+    describe('compare throughput value across different APIs', () => {
+      before(async () => {
+        [throughputTransactionValues, throughputMetricValues] = await Promise.all([
+          getThroughputValues({
             serviceName: 'opbeans-go',
             processorEvent: 'transaction',
-          });
-        });
-
-        it('matches throughput value between service, throughput chart and transactions apis ', () => {
-          const {
-            serviceApiThroughput,
-            throughputChartApiMean,
-            transactionsThroughputSum,
-          } = throughputValues;
-          expect(roundNumber(serviceApiThroughput)).to.be(roundNumber(throughputChartApiMean));
-          expect(roundNumber(serviceApiThroughput)).to.be(roundNumber(transactionsThroughputSum));
-        });
-
-        it('matches throughput value between service dependencies and top backends', () => {
-          const { topDependencies, serviceDependencies } = throughputValues;
-          expect(serviceDependencies).to.eql(topDependencies);
-        });
-
-        it('matches throughput value between service dependencies and backend throughput chart', () => {
-          const { backendThroughputChartMean, serviceDependencies } = throughputValues;
-          expect(roundNumber(serviceDependencies[0].throughputValue)).to.equal(
-            roundNumber(backendThroughputChartMean)
-          );
-        });
-      });
-
-      describe('with kql filter to force metric-based UI', () => {
-        before(async () => {
-          throughputValues = await getThroughputValues({
+          }),
+          getThroughputValues({
             serviceName: 'opbeans-go',
             processorEvent: 'metric',
-          });
-        });
+          }),
+        ]);
+      });
 
-        it('matches throughput value between service, throughput chart and transactions apis ', () => {
+      describe('compare throughput value between service inventory, throughput chart and transactions apis', () => {
+        it('matches transactions throughput values', () => {
           const {
-            serviceApiThroughput,
+            serviceInventoryThroughput,
             throughputChartApiMean,
             transactionsThroughputSum,
-          } = throughputValues;
-          expect(roundNumber(serviceApiThroughput)).to.be(roundNumber(throughputChartApiMean));
-          expect(roundNumber(serviceApiThroughput)).to.be(roundNumber(transactionsThroughputSum));
+          } = throughputTransactionValues;
+          expect(roundNumber(serviceInventoryThroughput)).to.be(
+            roundNumber(throughputChartApiMean)
+          );
+          expect(roundNumber(serviceInventoryThroughput)).to.be(
+            roundNumber(transactionsThroughputSum)
+          );
         });
-
-        it('matches throughput value between service dependencies and top backends', () => {
-          const { topDependencies, serviceDependencies } = throughputValues;
-          expect(serviceDependencies).to.eql(topDependencies);
+        it('matches metrics throughput values', () => {
+          const {
+            serviceInventoryThroughput,
+            throughputChartApiMean,
+            transactionsThroughputSum,
+          } = throughputMetricValues;
+          expect(roundNumber(serviceInventoryThroughput)).to.be(
+            roundNumber(throughputChartApiMean)
+          );
+          expect(roundNumber(serviceInventoryThroughput)).to.be(
+            roundNumber(transactionsThroughputSum)
+          );
         });
-
-        it('matches throughput value between service dependencies and backend throughput chart', () => {
-          const { backendThroughputChartMean, serviceDependencies } = throughputValues;
-          expect(roundNumber(serviceDependencies[0].throughputValue)).to.equal(
-            roundNumber(backendThroughputChartMean)
+        it('has same throughput value for metrics and transactions data', () => {
+          expect(roundNumber(throughputMetricValues.serviceInventoryThroughput)).to.be(
+            roundNumber(throughputTransactionValues.serviceInventoryThroughput)
+          );
+          expect(roundNumber(throughputMetricValues.throughputChartApiMean)).to.be(
+            roundNumber(throughputTransactionValues.throughputChartApiMean)
+          );
+          expect(roundNumber(throughputMetricValues.transactionsThroughputSum)).to.be(
+            roundNumber(throughputTransactionValues.transactionsThroughputSum)
           );
         });
       });
-    }
-  );
+
+      describe('compare throughput value between service dependencies and top backends', () => {
+        it('matches transactions throughput values', () => {
+          const { topDependencies, serviceDependencies } = throughputTransactionValues;
+          expect(serviceDependencies).to.eql(topDependencies);
+        });
+        it('matches metrics throughput values', () => {
+          const { topDependencies, serviceDependencies } = throughputMetricValues;
+          expect(serviceDependencies).to.eql(topDependencies);
+        });
+        it('has same throughput value for metrics and transactions data', () => {
+          expect(throughputTransactionValues.serviceDependencies).to.eql(
+            throughputMetricValues.serviceDependencies
+          );
+          expect(throughputTransactionValues.topDependencies).to.eql(
+            throughputMetricValues.topDependencies
+          );
+        });
+      });
+    });
+  });
 }
