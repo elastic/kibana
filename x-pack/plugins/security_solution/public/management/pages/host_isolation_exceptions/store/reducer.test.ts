@@ -11,7 +11,6 @@ import { initialHostIsolationExceptionsPageState } from './builders';
 import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants';
 import { hostIsolationExceptionsPageReducer } from './reducer';
 import { getCurrentLocation } from './selector';
-import { HostIsolationExceptionsCreateEntry } from './action';
 import { createEmptyHostIsolationException } from '../utils';
 
 describe('Host Isolation Exceptions Reducer', () => {
