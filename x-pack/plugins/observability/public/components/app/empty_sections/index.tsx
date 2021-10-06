@@ -50,8 +50,8 @@ export function EmptySections() {
             <EuiFlexItem
               key={app.id}
               style={{
-                border: `1px dashed ${theme.eui.euiBorderColor}`,
-                borderRadius: '4px',
+                border: `${theme.eui.euiBorderEditable}`,
+                borderRadius: `${theme.eui.euiBorderRadius}`,
               }}
             >
               <EmptySection section={app} />

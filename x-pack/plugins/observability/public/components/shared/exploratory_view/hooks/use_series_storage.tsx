@@ -25,7 +25,7 @@ export interface SeriesContextValue {
   firstSeries?: SeriesUrl;
   lastRefresh: number;
   setLastRefresh: (val: number) => void;
-  applyChanges: () => void;
+  applyChanges: (onApply?: () => void) => void;
   allSeries: AllSeries;
   setSeries: (seriesIndex: number, newValue: SeriesUrl) => void;
   getSeries: (seriesIndex: number) => SeriesUrl | undefined;
@@ -103,12 +103,18 @@ export function UrlStorageContextProvider({
     [allSeries]
   );
 
-  const applyChanges = useCallback(() => {
-    const allShortSeries = allSeries.map((series) => convertToShortUrl(series));
+  const applyChanges = useCallback(
+    (onApply?: () => void) => {
+      const allShortSeries = allSeries.map((series) => convertToShortUrl(series));
 
-    (storage as IKbnUrlStateStorage).set(allSeriesKey, allShortSeries);
-    setLastRefresh(Date.now());
-  }, [allSeries, storage]);
+      (storage as IKbnUrlStateStorage).set(allSeriesKey, allShortSeries);
+      setLastRefresh(Date.now());
+      if (onApply) {
+        onApply();
+      }
+    },
+    [allSeries, storage]
+  );
 
   const value = {
     applyChanges,
