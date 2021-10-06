@@ -66,7 +66,7 @@ export async function getHostIsolationExceptionItems({
   return entries;
 }
 
-export async function crateHostIsolationExceptionItem({
+export async function createHostIsolationExceptionItem({
   http,
   exception,
 }: {

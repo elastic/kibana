@@ -25,7 +25,7 @@ import {
 import {
   deleteHostIsolationExceptionItems,
   getHostIsolationExceptionItems,
-  crateHostIsolationExceptionItem,
+  createHostIsolationExceptionItem,
 } from '../service';
 import { HostIsolationExceptionsPageState } from '../types';
 import { getCurrentListPageDataState, getCurrentLocation, getItemToDelete } from './selector';
@@ -73,7 +73,7 @@ async function createHostIsolationException(
     },
   });
   try {
-    const response = await crateHostIsolationExceptionItem({
+    const response = await createHostIsolationExceptionItem({
       http,
       exception: entry,
     });

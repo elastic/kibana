@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { applyMiddleware, createStore, Store } from 'redux';
-import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
+import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants';
 import { AppAction } from '../../../../common/store/actions';
 import {
   createSpyMiddleware,
@@ -19,8 +20,13 @@ import {
   isLoadedResourceState,
   isLoadingResourceState,
 } from '../../../state';
-import { getHostIsolationExceptionItems, deleteHostIsolationExceptionItems } from '../service';
+import {
+  createHostIsolationExceptionItem,
+  deleteHostIsolationExceptionItems,
+  getHostIsolationExceptionItems,
+} from '../service';
 import { HostIsolationExceptionsPageState } from '../types';
+import { createEmptyHostIsolationException } from '../utils';
 import { initialHostIsolationExceptionsPageState } from './builders';
 import { createHostIsolationExceptionsPageMiddleware } from './middleware';
 import { hostIsolationExceptionsPageReducer } from './reducer';
@@ -29,6 +35,7 @@ import { getListFetchError } from './selector';
 jest.mock('../service');
 const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
 const deleteHostIsolationExceptionItemsMock = deleteHostIsolationExceptionItems as jest.Mock;
+const createHostIsolationExceptionItemMock = createHostIsolationExceptionItem as jest.Mock;
 
 const fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
 
@@ -81,7 +88,7 @@ describe('Host isolation exceptions middleware', () => {
     };
 
     beforeEach(() => {
-      getHostIsolationExceptionItemsMock.mockClear();
+      getHostIsolationExceptionItemsMock.mockReset();
       getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
     });
 
@@ -145,11 +152,74 @@ describe('Host isolation exceptions middleware', () => {
     });
   });
 
+  describe('When adding an item to host isolation exceptions', () => {
+    let entry: CreateExceptionListItemSchema;
+    beforeEach(() => {
+      createHostIsolationExceptionItemMock.mockReset();
+      entry = {
+        ...createEmptyHostIsolationException(),
+        name: 'test name',
+        description: 'description',
+        entries: [
+          {
+            field: 'destination.ip',
+            operator: 'included',
+            type: 'match',
+            value: '10.0.0.1',
+          },
+        ],
+      };
+    });
+    it('should dispatch a form loading state when an entry is submited', async () => {
+      const waiter = spyMiddleware.waitForAction('hostIsolationExceptionsFormStateChanged', {
+        validate({ payload }) {
+          return isLoadingResourceState(payload);
+        },
+      });
+      store.dispatch({
+        type: 'hostIsolationExceptionsCreateEntry',
+        payload: entry,
+      });
+      await waiter;
+    });
+    it('should dispatch a form success state when an entry is confirmed by the API', async () => {
+      const waiter = spyMiddleware.waitForAction('hostIsolationExceptionsFormStateChanged', {
+        validate({ payload }) {
+          return isLoadedResourceState(payload);
+        },
+      });
+      store.dispatch({
+        type: 'hostIsolationExceptionsCreateEntry',
+        payload: entry,
+      });
+      await waiter;
+      expect(createHostIsolationExceptionItemMock).toHaveBeenCalledWith({
+        http: fakeCoreStart.http,
+        exception: entry,
+      });
+    });
+    it('should dispatch a form failure state when an entry is rejected by the API', async () => {
+      createHostIsolationExceptionItemMock.mockRejectedValue({
+        body: { message: 'error message', statusCode: 500, error: 'Not today' },
+      });
+      const waiter = spyMiddleware.waitForAction('hostIsolationExceptionsFormStateChanged', {
+        validate({ payload }) {
+          return isFailedResourceState(payload);
+        },
+      });
+      store.dispatch({
+        type: 'hostIsolationExceptionsCreateEntry',
+        payload: entry,
+      });
+      await waiter;
+    });
+  });
+
   describe('When deleting an item from host isolation exceptions', () => {
     beforeEach(() => {
-      deleteHostIsolationExceptionItemsMock.mockClear();
+      deleteHostIsolationExceptionItemsMock.mockReset();
       deleteHostIsolationExceptionItemsMock.mockReturnValue(undefined);
-      getHostIsolationExceptionItemsMock.mockClear();
+      getHostIsolationExceptionItemsMock.mockReset();
       getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
       store.dispatch({
         type: 'hostIsolationExceptionsMarkToDelete',
