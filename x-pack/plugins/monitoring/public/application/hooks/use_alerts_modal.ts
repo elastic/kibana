@@ -28,9 +28,9 @@ export const useAlertsModal = () => {
 
   async function enableAlerts() {
     try {
-      const { data } = await services.http?.post('../api/monitoring/v1/alerts/enable', {});
+      const response = await services.http?.post('../api/monitoring/v1/alerts/enable', {});
       window.localStorage.setItem('ALERTS_MODAL_DECISION_MADE', 'true');
-      showAlertsToast(data);
+      showAlertsToast(response);
     } catch (err) {
       const ajaxErrorHandlers = ajaxErrorHandlersProvider();
       return ajaxErrorHandlers(err);
