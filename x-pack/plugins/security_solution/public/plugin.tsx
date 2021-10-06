@@ -33,6 +33,7 @@ import {
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
+import { SOLUTION_NAME } from './common/translations';
 
 import {
   APP_ID,
@@ -104,7 +105,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
         id: APP_ID,
-        title: APP_NAME,
+        title: SOLUTION_NAME,
         description: i18n.translate('xpack.securitySolution.featureCatalogueDescription', {
           defaultMessage:
             'Prevent, collect, detect, and respond to threats for unified protection across your infrastructure.',
@@ -134,7 +135,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.application.register({
       id: APP_ID,
-      title: APP_NAME,
+      title: SOLUTION_NAME,
       appRoute: APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
       navLinkStatus: AppNavLinkStatus.hidden,
@@ -433,7 +434,3 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return this._store;
   }
 }
-
-const APP_NAME = i18n.translate('xpack.securitySolution.security.title', {
-  defaultMessage: 'Security',
-});
