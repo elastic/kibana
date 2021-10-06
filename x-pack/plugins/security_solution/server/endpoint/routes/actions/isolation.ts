@@ -61,19 +61,20 @@ export function registerHostIsolationRoutes(
 }
 
 const doLogsEndpointActionDsExists = async ({
-  esClient,
+  context,
   logger,
   dataStreamName,
 }: {
-  esClient: ElasticsearchClient;
+  context: SecuritySolutionRequestHandlerContext;
   logger: Logger;
   dataStreamName: string;
 }): Promise<boolean> => {
-  let doesIndexTemplateExist;
   try {
-    doesIndexTemplateExist = await esClient.indices.existsIndexTemplate({
+    const esClient = context.core.elasticsearch.client.asInternalUser;
+    const doesIndexTemplateExist = await esClient.indices.existsIndexTemplate({
       name: dataStreamName,
     });
+    return doesIndexTemplateExist.statusCode === 404 ? false : true;
   } catch (error) {
     const errorType = error?.type ?? '';
     if (errorType !== 'resource_not_found_exception') {
@@ -82,7 +83,6 @@ const doLogsEndpointActionDsExists = async ({
     }
     return false;
   }
-  return doesIndexTemplateExist.statusCode === 404 ? false : true;
 };
 
 export const isolationRequestHandler = function (
@@ -139,7 +139,6 @@ export const isolationRequestHandler = function (
     caseIDs = [...new Set(caseIDs)];
 
     // create an Action ID and dispatch it to ES & Fleet Server
-    let esClient = context.core.elasticsearch.client.asInternalUser;
     const actionID = uuid.v4();
 
     let fleetActionIndexResult;
@@ -167,44 +166,44 @@ export const isolationRequestHandler = function (
     };
 
     // if .logs-endpoint.actions data stream exists
-    // create action request record in .logs-endpoint.actions DS as the user
+    // create action request record in .logs-endpoint.actions DS as the current user
     const doesLogsEndpointActionsDsExist = await doLogsEndpointActionDsExists({
-      esClient,
+      context,
       logger: endpointContext.logFactory.get('host-isolation'),
       dataStreamName: ENDPOINT_ACTIONS_DS,
     });
     if (doesLogsEndpointActionsDsExist) {
-      esClient = context.core.elasticsearch.client.asCurrentUser;
       try {
+        const esClient = context.core.elasticsearch.client.asCurrentUser;
         logsEndpointActionsResult = await esClient.index<LogsEndpointAction>({
           index: `${ENDPOINT_ACTIONS_DS}-default`,
           body: {
             ...doc,
           },
         });
+        if (logsEndpointActionsResult.statusCode !== 201) {
+          return res.customError({
+            statusCode: 500,
+            body: {
+              message: logsEndpointActionsResult.body.result,
+            },
+          });
+        }
       } catch (e) {
         return res.customError({
           statusCode: 500,
           body: { message: e },
         });
       }
-
-      if (logsEndpointActionsResult.statusCode !== 201) {
-        return res.customError({
-          statusCode: 500,
-          body: {
-            message: logsEndpointActionsResult.body.result,
-          },
-        });
-      }
     }
 
     // create action request record as system user in .fleet-actions
     try {
-      // we use this check to ensure the user has permission to write to this new index
-      // and thus allow this action to be added to the fleet index by kibana
-      if (!doesLogsEndpointActionsDsExist) {
-        esClient = context.core.elasticsearch.client.asCurrentUser;
+      // we use this check to ensure the user has permission to write to the new index
+      // and thus allow this action record to be added to the fleet index specifically by kibana
+      let esClient = context.core.elasticsearch.client.asCurrentUser;
+      if (doesLogsEndpointActionsDsExist) {
+        esClient = context.core.elasticsearch.client.asInternalUser;
       }
 
       fleetActionIndexResult = await esClient.index<EndpointAction>({
@@ -217,19 +216,18 @@ export const isolationRequestHandler = function (
           user_id: doc.user.id,
         },
       });
+      if (fleetActionIndexResult.statusCode !== 201) {
+        return res.customError({
+          statusCode: 500,
+          body: {
+            message: fleetActionIndexResult.body.result,
+          },
+        });
+      }
     } catch (e) {
       return res.customError({
         statusCode: 500,
         body: { message: e },
-      });
-    }
-
-    if (fleetActionIndexResult.statusCode !== 201) {
-      return res.customError({
-        statusCode: 500,
-        body: {
-          message: fleetActionIndexResult.body.result,
-        },
       });
     }
 
