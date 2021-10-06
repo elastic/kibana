@@ -16,6 +16,7 @@ import {
   PostTrustedAppCreateResponse,
   MaybeImmutable,
   GetTrustedAppsListResponse,
+  TrustedApp,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import {
@@ -78,6 +79,11 @@ export interface PolicyAssignedTrustedApps {
   artifacts: GetTrustedAppsListResponse;
 }
 
+export interface PolicyRemoveTrustedApps {
+  artifacts: TrustedApp[];
+  response: true;
+}
+
 /**
  * Policy artifacts store state
  */
@@ -95,7 +101,7 @@ export interface PolicyArtifactsState {
   /** A list of all available polices */
   policies: AsyncResourceState<GetPolicyListResponse>;
   /** list of artifacts to remove. Holds the ids that were removed and the API response */
-  removeList: AsyncResourceState<{ artifactIds: string[]; response: true }>;
+  removeList: AsyncResourceState<PolicyRemoveTrustedApps>;
 }
 
 export enum OS {

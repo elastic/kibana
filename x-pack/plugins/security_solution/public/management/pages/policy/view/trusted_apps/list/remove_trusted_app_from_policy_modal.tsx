@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -17,6 +17,8 @@ import { usePolicyDetailsSelector } from '../../policy_hooks';
 import {
   getTrustedAppsIsRemoving,
   getTrustedAppsRemovalError,
+  getTrustedAppsWasRemoveSuccessful,
+  policyDetails,
 } from '../../../store/policy_details/selectors';
 import { useToasts } from '../../../../../../common/lib/kibana';
 
@@ -30,10 +32,33 @@ export const RemoveTrustedAppFromPolicyModal = memo<RemoveTrustedAppFromPolicyMo
     const toasts = useToasts();
     const dispatch = useDispatch<Dispatch<AppAction>>();
 
+    const policyName = usePolicyDetailsSelector(policyDetails)?.name;
     const isRemoving = usePolicyDetailsSelector(getTrustedAppsIsRemoving);
     const removeError = usePolicyDetailsSelector(getTrustedAppsRemovalError);
+    const wasSuccessful = usePolicyDetailsSelector(getTrustedAppsWasRemoveSuccessful);
 
-    const handleModalCancel = useCallback(() => {
+    const removedToastMessage = useMemo(() => {
+      const count = trustedApps.length;
+      if (count > 1) {
+        return i18n.translate(
+          'xpack.securitySolution.endpoint.policy.trustedApps.list.removeDialog.successMultiplesToastText',
+          {
+            defaultMessage: '{count} trusted apps have been removed from {policyName} policy',
+            values: { count, policyName },
+          }
+        );
+      }
+
+      return i18n.translate(
+        'xpack.securitySolution.endpoint.policy.trustedApps.list.removeDialog.successToastText',
+        {
+          defaultMessage: '"{trustedAppName}" has been removed from "{policyName}" policy',
+          values: { trustedAppName: trustedApps[0].name, policyName },
+        }
+      );
+    }, [policyName, trustedApps]);
+
+    const handleModalClose = useCallback(() => {
       if (!isRemoving) {
         onClose();
       }
@@ -42,18 +67,20 @@ export const RemoveTrustedAppFromPolicyModal = memo<RemoveTrustedAppFromPolicyMo
     const handleModalConfirm = useCallback(() => {
       dispatch({
         type: 'policyDetailsTrustedAppsRemoveIds',
-        payload: { artifactIds: trustedApps.map((trustedApp) => trustedApp.id) },
+        payload: { artifacts: trustedApps },
       });
     }, [dispatch, trustedApps]);
 
     useEffect(() => {
       // When component is un-mounted, reset the state for remove in the store
-      return () => dispatch({ type: 'policyDetailsArtifactsResetRemove' });
+      return () => {
+        dispatch({ type: 'policyDetailsArtifactsResetRemove' });
+      };
     }, [dispatch]);
 
     useEffect(() => {
       if (removeError) {
-        toasts.addError(removeError, {
+        toasts.addError(removeError as unknown as Error, {
           title: i18n.translate(
             'xpack.securitySolution.endpoint.policy.trustedApps.list.removeDialog.errorToastTitle',
             {
@@ -64,9 +91,22 @@ export const RemoveTrustedAppFromPolicyModal = memo<RemoveTrustedAppFromPolicyMo
       }
     }, [removeError, toasts]);
 
+    useEffect(() => {
+      if (wasSuccessful) {
+        toasts.addSuccess({
+          title: i18n.translate(
+            'xpack.securitySolution.endpoint.policy.trustedApps.list.removeDialog.successToastTitle',
+            { defaultMessage: 'Successfully removed' }
+          ),
+          text: removedToastMessage,
+        });
+        handleModalClose();
+      }
+    }, [handleModalClose, policyName, removedToastMessage, toasts, trustedApps, wasSuccessful]);
+
     return (
       <EuiConfirmModal
-        onCancel={handleModalCancel}
+        onCancel={handleModalClose}
         onConfirm={handleModalConfirm}
         title={i18n.translate(
           'xpack.securitySolution.endpoint.policy.trustedApps.list.removeDialog.title',

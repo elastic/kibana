@@ -198,3 +198,8 @@ export const getTrustedAppsRemovalError: PolicyDetailsSelector<ServerApiError | 
       return removeListState.error;
     }
   });
+
+export const getTrustedAppsWasRemoveSuccessful: PolicyDetailsSelector<boolean> = createSelector(
+  getCurrentTrustedAppsRemoveListState,
+  (removeListState) => isLoadedResourceState(removeListState)
+);

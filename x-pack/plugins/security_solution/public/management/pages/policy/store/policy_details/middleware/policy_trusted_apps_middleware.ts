@@ -14,6 +14,7 @@ import {
   PolicyAssignedTrustedApps,
   PolicyDetailsState,
   PolicyDetailsStore,
+  PolicyRemoveTrustedApps,
 } from '../../../types';
 import {
   doesPolicyTrustedAppsListNeedUpdate,
@@ -27,6 +28,7 @@ import {
   getTrustedAppsPolicyListState,
   isOnPolicyTrustedAppsView,
   isPolicyTrustedAppListLoading,
+  licensedPolicy,
   policyIdFromParams,
 } from '../selectors';
 import {
@@ -50,6 +52,15 @@ import { parseQueryFilterToKQL } from '../../../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../../../../trusted_apps/constants';
 import { PolicyDetailsAction } from '../action';
 import { ServerApiError } from '../../../../../../common/types';
+import { toUpdateTrustedApp } from '../../../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
+import { isGlobalEffectScope } from '../../../../trusted_apps/state/type_guards';
+
+const P_MAP_OPTIONS = Object.freeze<pMap.Options>({
+  concurrency: 5,
+  /** When set to false, instead of stopping when a promise rejects, it will wait for all the promises to settle
+   * and then reject with an aggregated error containing all the errors from the rejected promises. */
+  stopOnError: false,
+});
 
 /** Runs all middleware actions associated with the Trusted Apps view in Policy Details */
 export const policyTrustedAppsMiddlewareRunner: MiddlewareRunner = async (
@@ -98,7 +109,7 @@ export const policyTrustedAppsMiddlewareRunner: MiddlewareRunner = async (
       break;
 
     case 'policyDetailsTrustedAppsRemoveIds':
-      removeTrustedAppsFromPolicy(context, store, action.payload.artifactIds);
+      removeTrustedAppsFromPolicy(context, store, action.payload.artifacts);
 
       break;
   }
@@ -233,12 +244,11 @@ const updateTrustedApps = async (
       }
     }
 
-    const updatedTrustedApps = await pMap(trustedAppsUpdateActions, updateTrustedApp, {
-      concurrency: 5,
-      /** When set to false, instead of stopping when a promise rejects, it will wait for all the promises to settle
-       * and then reject with an aggregated error containing all the errors from the rejected promises. */
-      stopOnError: false,
-    });
+    const updatedTrustedApps = await pMap(
+      trustedAppsUpdateActions,
+      updateTrustedApp,
+      P_MAP_OPTIONS
+    );
 
     store.dispatch({
       type: 'policyArtifactsUpdateTrustedAppsChanged',
@@ -346,7 +356,7 @@ const fetchAllPoliciesIfNeeded = async (
 const removeTrustedAppsFromPolicy = async (
   { trustedAppsService }: MiddlewareRunnerContext,
   { getState, dispatch }: PolicyDetailsStore,
-  trustedAppIds: string[]
+  trustedApps: TrustedApp[]
 ): Promise<void> => {
   const state = getState();
 
@@ -356,17 +366,49 @@ const removeTrustedAppsFromPolicy = async (
 
   dispatch({
     type: 'policyDetailsTrustedAppsRemoveListStateChanged',
+    // @ts-expect-error will be fixed when AsyncResourceState is refactored (#830)
     payload: createLoadingResourceState(getCurrentTrustedAppsRemoveListState(state)),
   });
 
   try {
-    await new Promise((r) => setTimeout(r, 5000));
+    const currentPolicyId = licensedPolicy(state)?.id;
 
-    throw new Error('what just happen?');
+    if (!currentPolicyId) {
+      throw new Error('current policy id not found');
+    }
+
+    await pMap(
+      trustedApps,
+      async (trustedApp) => {
+        await trustedAppsService.updateTrustedApp(
+          { id: trustedApp.id },
+          {
+            ...toUpdateTrustedApp(trustedApp),
+            effectScope: {
+              type: 'policy',
+              policies: (isGlobalEffectScope(trustedApp)
+                ? trustedApp.effectScope.policies
+                : []
+              ).filter((trustedAppPolicyId) => trustedAppPolicyId !== currentPolicyId),
+            },
+          }
+        );
+      },
+      P_MAP_OPTIONS
+    );
+
+    dispatch({
+      type: 'policyDetailsTrustedAppsRemoveListStateChanged',
+      payload: createLoadedResourceState({ artifacts: trustedApps, response: true }),
+    });
+
+    dispatch({
+      type: 'policyDetailsTrustedAppsForceListDataRefresh',
+    });
   } catch (error) {
     dispatch({
       type: 'policyDetailsTrustedAppsRemoveListStateChanged',
-      payload: createFailedResourceState(error),
+      payload: createFailedResourceState<PolicyRemoveTrustedApps>(error.body || error),
     });
   }
 };
