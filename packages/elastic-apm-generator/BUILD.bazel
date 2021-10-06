@@ -7,10 +7,9 @@ PKG_REQUIRE_NAME = "@elastic/apm-generator"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*",
-    "scripts/**/*",
-    "test/**/*",
+    "src/**/*.ts",
   ],
+  exclude = ["**/*.test.*"],
 )
 
 SRCS = SOURCE_FILES
@@ -26,25 +25,25 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
+  "@npm//@elastic/elasticsearch",
   "@npm//lodash",
-  "@npm//utility-types",
-  "@npm//object-hash",
   "@npm//moment",
+  "@npm//object-hash",
+  "@npm//p-limit",
+  "@npm//utility-types",
   "@npm//uuid",
   "@npm//yargs",
-  "@npm//@elastic/elasticsearch",
-  "@npm//p-limit",
 ]
 
 TYPES_DEPS = [
+  "@npm//@elastic/elasticsearch",
+  "@npm//moment",
+  "@npm//p-limit",
   "@npm//@types/jest",
   "@npm//@types/lodash",
   "@npm//@types/node",
   "@npm//@types/uuid",
   "@npm//@types/object-hash",
-  "@npm//moment",
-  "@npm//@elastic/elasticsearch",
-  "@npm//p-limit",
 ]
 
 jsts_transpiler(
@@ -71,8 +70,8 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  source_map = True,
   root_dir = "src",
+  source_map = True,
   tsconfig = ":tsconfig",
 )
 
