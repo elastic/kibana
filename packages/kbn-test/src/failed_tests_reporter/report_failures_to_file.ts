@@ -128,6 +128,18 @@ export function reportFailuresToFile(log: ToolingLog, failures: TestFailure[]) {
           .join('')}
         <hr />
         <p><strong>${escape(failure.name)}</strong></p>
+        <p>
+          <small>
+            <strong>Failures in CI</strong>: <span class="badge rounded-pill bg-danger">${
+              failure.failureCount || 0
+            }</span>
+            ${
+              failure.githubIssue
+                ? `<br /><a href="${failure.githubIssue}">${failure.githubIssue}</a>`
+                : ''
+            }
+          </small>
+        </p>
         <pre>${escape(failure.failure)}</pre>
         ${screenshotHtml}
         <pre>${escape(failure['system-out'] || '')}</pre>
