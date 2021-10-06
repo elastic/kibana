@@ -30,6 +30,7 @@ describe('StatusService', () => {
   });
 
   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
   const available: ServiceStatus<any> = {
     level: ServiceStatusLevels.available,
     summary: 'Available',
@@ -37,6 +38,10 @@ describe('StatusService', () => {
   const degraded: ServiceStatus<any> = {
     level: ServiceStatusLevels.degraded,
     summary: 'This is degraded!',
+  };
+  const critical: ServiceStatus<any> = {
+    level: ServiceStatusLevels.critical,
+    summary: 'This is critical!',
   };
 
   type SetupDeps = Parameters<StatusService['setup']>[0];
@@ -336,6 +341,23 @@ describe('StatusService', () => {
         expect(await setup.coreOverall$.pipe(first()).toPromise()).toMatchObject({
           level: ServiceStatusLevels.degraded,
           summary: '[2] services are degraded',
+        });
+      });
+
+      it('computes the summary depending on the services status', async () => {
+        const setup = await service.setup(
+          setupDeps({
+            elasticsearch: {
+              status$: of(degraded),
+            },
+            savedObjects: {
+              status$: of(critical),
+            },
+          })
+        );
+        expect(await setup.coreOverall$.pipe(first()).toPromise()).toMatchObject({
+          level: ServiceStatusLevels.critical,
+          summary: '[savedObjects]: This is critical!',
         });
       });
 
