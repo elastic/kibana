@@ -169,7 +169,7 @@ export const useSavedSearch = ({
      */
     if (initialFetchStatus === FetchStatus.UNINITIALIZED) {
       fetch$ = fetch$.pipe(skip(1));
-    }    
+    }
 
     const subscription = fetch$.subscribe((val) => {
       if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {
