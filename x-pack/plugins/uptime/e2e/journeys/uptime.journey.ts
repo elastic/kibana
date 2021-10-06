@@ -67,10 +67,4 @@ journey('uptime', ({ page, params }) => {
   step('Click on my monitor', async () => {
     await page.click('[data-test-subj=monitor-page-link-0001-up]');
   });
-
-  step('Navigates to details page', async () => {
-    await waitForLoadingToFinish();
-
-    await page.click('[data-test-subj=uptimeMonitorPage]', { timeout: 60 * 1000 });
-  });
 });
