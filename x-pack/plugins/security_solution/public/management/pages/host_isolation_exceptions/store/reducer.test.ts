@@ -11,6 +11,8 @@ import { initialHostIsolationExceptionsPageState } from './builders';
 import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants';
 import { hostIsolationExceptionsPageReducer } from './reducer';
 import { getCurrentLocation } from './selector';
+import { HostIsolationExceptionsCreateEntry } from './action';
+import { createEmptyHostIsolationException } from '../utils';
 
 describe('Host Isolation Exceptions Reducer', () => {
   let initialState: HostIsolationExceptionsPageState;
@@ -40,5 +42,14 @@ describe('Host Isolation Exceptions Reducer', () => {
         });
       });
     });
+  });
+  it('should set an initial loading state when creating new entries', () => {
+    const entry = createEmptyHostIsolationException();
+    const result = hostIsolationExceptionsPageReducer(initialState, {
+      type: 'hostIsolationExceptionsCreateEntry',
+      payload: entry,
+    });
+    expect(result.form.status).toEqual({ type: 'UninitialisedResourceState' });
+    expect(result.form.entry).toBe(entry);
   });
 });
