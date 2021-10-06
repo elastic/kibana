@@ -43,7 +43,7 @@ export const PlatformCheckBoxGroupField = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <FormattedMessage
-                id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.platformMacOSLabel"
+                id="xpack.osquery.pack.queryFlyoutForm.platformMacOSLabel"
                 defaultMessage="Linux"
               />
             </EuiFlexItem>
@@ -59,7 +59,7 @@ export const PlatformCheckBoxGroupField = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <FormattedMessage
-                id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.platformLinusLabel"
+                id="xpack.osquery.pack.queryFlyoutForm.platformLinusLabel"
                 defaultMessage="macOS"
               />
             </EuiFlexItem>
@@ -75,7 +75,7 @@ export const PlatformCheckBoxGroupField = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <FormattedMessage
-                id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.platformWindowsLabel"
+                id="xpack.osquery.pack.queryFlyoutForm.platformWindowsLabel"
                 defaultMessage="Windows"
               />
             </EuiFlexItem>

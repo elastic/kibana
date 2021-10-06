@@ -15,11 +15,7 @@ export type StaticPage =
   | 'saved_queries'
   | 'saved_query_new';
 
-export type DynamicPage =
-  | 'live_query_details'
-  | 'pack_details'
-  | 'pack_edit'
-  | 'saved_query_edit';
+export type DynamicPage = 'live_query_details' | 'pack_details' | 'pack_edit' | 'saved_query_edit';
 
 export type Page = StaticPage | DynamicPage;
 

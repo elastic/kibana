@@ -5,16 +5,22 @@
  * 2.0.
  */
 
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink, EuiToolTip } from '@elastic/eui';
 import moment from 'moment-timezone';
 import React, { useCallback, useMemo } from 'react';
+import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
 import { PackagePolicy } from '../../../fleet/common';
 import { useRouterNavigate } from '../common/lib/kibana';
 import { usePacks } from './use_packs';
 import { ActiveStateSwitch } from './active_state_switch';
-import { AgentsPolicyLink } from '../agent_policies/agents_policy_link';
+
+const UpdatedBy = styled.span`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
 
 const ScheduledQueryNameComponent = ({ id, name }: { id: string; name: string }) => (
   <EuiLink {...useRouterNavigate(`packs/${id}`)}>{name}</EuiLink>
@@ -22,23 +28,14 @@ const ScheduledQueryNameComponent = ({ id, name }: { id: string; name: string })
 
 const ScheduledQueryName = React.memo(ScheduledQueryNameComponent);
 
-const renderName = (_: unknown, item) => (
+const renderName = (_: unknown, item: { id: string; attributes: { name: string } }) => (
   <ScheduledQueryName id={item.id} name={item.attributes.name} />
 );
 
 const PacksTableComponent = () => {
   const { data } = usePacks({});
 
-  const renderAgentPolicy = useCallback(
-    (policyIds) => (
-      <>
-        {policyIds.map((policyId: string) => (
-          <AgentsPolicyLink key={policyId} policyId={policyId} />
-        ))}
-      </>
-    ),
-    []
-  );
+  const renderAgentPolicy = useCallback((policyIds) => <>{policyIds?.length ?? 0}</>, []);
 
   const renderQueries = useCallback(
     (queries) => <>{(queries && Object.keys(queries).length) ?? 0}</>,
@@ -52,9 +49,16 @@ const PacksTableComponent = () => {
 
     const updatedBy =
       item.updated_by !== item.attributes.created_by ? ` @ ${item.attributes.updated_by}` : '';
-    return updatedAt ? `${moment(updatedAt).fromNow()}${updatedBy}` : '-';
+    return updatedAt ? (
+      <EuiToolTip content={`${moment(updatedAt).fromNow()}${updatedBy}`}>
+        <UpdatedBy>{`${moment(updatedAt).fromNow()}${updatedBy}`}</UpdatedBy>
+      </EuiToolTip>
+    ) : (
+      '-'
+    );
   }, []);
 
+  // @ts-expect-error update types
   const columns: Array<EuiBasicTableColumn<PackagePolicy>> = useMemo(
     () => [
       {

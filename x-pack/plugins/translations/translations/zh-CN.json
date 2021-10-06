@@ -19312,8 +19312,6 @@
     "xpack.osquery.addSavedQuery.form.saveQueryButtonLabel": "保存查询",
     "xpack.osquery.addSavedQuery.pageTitle": "添加已保存查询",
     "xpack.osquery.addSavedQuery.viewSavedQueriesListTitle": "查看所有已保存查询",
-    "xpack.osquery.addScheduledQueryGroup.pageTitle": "添加已计划查询组",
-    "xpack.osquery.addScheduledQueryGroup.viewScheduledQueryGroupsListTitle": "查看所有已计划查询组",
     "xpack.osquery.agent_groups.fetchError": "提取代理组时出错",
     "xpack.osquery.agent_policies.fetchError": "提取代理策略时出错",
     "xpack.osquery.agent_policy_details.fetchError": "提取代理策略详情时出错",

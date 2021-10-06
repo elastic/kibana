@@ -63,9 +63,12 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
 
       try {
         // TODO: Move to the SavedQueryService
-        const savedQuery =
-          request.body.savedQueryId &&
-          (await soClient.get(savedQuerySavedObjectType, request.body.savedQueryId));
+        const savedQuery = request.body.savedQueryId.length
+          ? await soClient.get<{ ecs_mapping: Array<{ field: string; value: string }> }>(
+              savedQuerySavedObjectType,
+              request.body.savedQueryId
+            )
+          : undefined;
 
         const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
         const action = {
@@ -79,7 +82,9 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           data: pickBy({
             id: uuid.v4(),
             query: request.body.query,
-            ecs_mapping: convertECSMappingToObject(savedQuery?.attributes.ecs_mapping),
+            ecs_mapping:
+              savedQuery?.attributes.ecs_mapping &&
+              convertECSMappingToObject(savedQuery?.attributes.ecs_mapping),
           }),
         };
         const actionResponse = await esClient.index<{}, {}>({

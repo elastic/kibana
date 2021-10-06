@@ -50,14 +50,14 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({ viewMode }) =>
           <EuiTitle size="xs">
             <h5>
               <FormattedMessage
-                id="xpack.osquery.savedQueries.form.scheduledQueryGroupConfigSection.title"
+                id="xpack.osquery.savedQueries.form.packConfigSection.title"
                 defaultMessage="Scheduled query group configuration"
               />
             </h5>
           </EuiTitle>
           <EuiText color="subdued">
             <FormattedMessage
-              id="xpack.osquery.savedQueries.form.scheduledQueryGroupConfigSection.description"
+              id="xpack.osquery.savedQueries.form.packConfigSection.description"
               defaultMessage="The options listed below are optional and are only applied when the query is assigned to a scheduled query group."
             />
           </EuiText>
@@ -79,7 +79,7 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({ viewMode }) =>
               noSuggestions: false,
               singleSelection: { asPlainText: true },
               placeholder: i18n.translate(
-                'xpack.osquery.scheduledQueryGroup.queriesTable.osqueryVersionAllLabel',
+                'xpack.osquery.pack.queriesTable.osqueryVersionAllLabel',
                 {
                   defaultMessage: 'ALL',
                 }

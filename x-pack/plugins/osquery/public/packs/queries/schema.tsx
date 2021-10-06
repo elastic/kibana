@@ -21,24 +21,21 @@ import {
 export const createFormSchema = (ids: Set<string>) => ({
   id: {
     type: FIELD_TYPES.TEXT,
-    label: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.idFieldLabel', {
+    label: i18n.translate('xpack.osquery.pack.queryFlyoutForm.idFieldLabel', {
       defaultMessage: 'ID',
     }),
     validations: createIdFieldValidations(ids).map((validator) => ({ validator })),
   },
   description: {
     type: FIELD_TYPES.TEXT,
-    label: i18n.translate(
-      'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.descriptionFieldLabel',
-      {
-        defaultMessage: 'Description',
-      }
-    ),
+    label: i18n.translate('xpack.osquery.pack.queryFlyoutForm.descriptionFieldLabel', {
+      defaultMessage: 'Description',
+    }),
     validations: [],
   },
   query: {
     type: FIELD_TYPES.TEXT,
-    label: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.queryFieldLabel', {
+    label: i18n.translate('xpack.osquery.pack.queryFlyoutForm.queryFieldLabel', {
       defaultMessage: 'Query',
     }),
     validations: [{ validator: queryFieldValidation }],
@@ -46,14 +43,14 @@ export const createFormSchema = (ids: Set<string>) => ({
   interval: {
     defaultValue: 3600,
     type: FIELD_TYPES.NUMBER,
-    label: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.intervalFieldLabel', {
+    label: i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldLabel', {
       defaultMessage: 'Interval (s)',
     }),
     validations: [{ validator: intervalFieldValidation }],
   },
   platform: {
     type: FIELD_TYPES.TEXT,
-    label: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.platformFieldLabel', {
+    label: i18n.translate('xpack.osquery.pack.queryFlyoutForm.platformFieldLabel', {
       defaultMessage: 'Platform',
     }),
     validations: [],
@@ -65,7 +62,7 @@ export const createFormSchema = (ids: Set<string>) => ({
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <FormattedMessage
-            id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.versionFieldLabel"
+            id="xpack.osquery.pack.queryFlyoutForm.versionFieldLabel"
             defaultMessage="Minimum Osquery version"
           />
         </EuiFlexItem>

@@ -63,6 +63,7 @@ const SavedQueriesDropdownComponent = forwardRef<
 
   const queryOptions = useMemo(
     () =>
+      // @ts-expect-error update types
       data?.saved_objects?.map((savedQuery) => ({
         label: savedQuery.attributes.id ?? '',
         value: {

@@ -322,7 +322,7 @@ export interface ECSMappingEditorFieldProps {
   field: FieldHook<string>;
   query: string;
   fieldRef: MutableRefObject<ECSMappingEditorFieldRef>;
-  euiFieldProps: EuiComboBoxProps;
+  euiFieldProps: EuiComboBoxProps<{}>;
 }
 
 interface ECSMappingEditorFormProps {
@@ -338,12 +338,9 @@ const getEcsFieldValidator =
   (editForm: boolean) =>
   (args: ValidationFuncArg<ECSMappingEditorFormData, ECSMappingEditorFormData['key']>) => {
     const fieldRequiredError = fieldValidators.emptyField(
-      i18n.translate(
-        'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.ecsFieldRequiredErrorMessage',
-        {
-          defaultMessage: 'ECS field is required.',
-        }
-      )
+      i18n.translate('xpack.osquery.pack.queryFlyoutForm.ecsFieldRequiredErrorMessage', {
+        defaultMessage: 'ECS field is required.',
+      })
     )(args);
 
     // @ts-expect-error update types
@@ -360,12 +357,9 @@ const getOsqueryResultFieldValidator =
     args: ValidationFuncArg<ECSMappingEditorFormData, ECSMappingEditorFormData['value']['field']>
   ) => {
     const fieldRequiredError = fieldValidators.emptyField(
-      i18n.translate(
-        'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.osqueryResultFieldRequiredErrorMessage',
-        {
-          defaultMessage: 'Osquery result is required.',
-        }
-      )
+      i18n.translate('xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldRequiredErrorMessage', {
+        defaultMessage: 'Osquery result is required.',
+      })
     )(args);
 
     if (fieldRequiredError && ((!editForm && args.formData.key.length) || editForm)) {
@@ -381,7 +375,7 @@ const getOsqueryResultFieldValidator =
           code: 'ERR_FIELD_FORMAT',
           path: args.path,
           message: i18n.translate(
-            'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.osqueryResultFieldValueMissingErrorMessage',
+            'xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldValueMissingErrorMessage',
             {
               defaultMessage: 'The current query does not return a {columnName} field',
               values: {
@@ -418,7 +412,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
     const currentFormData = useRef(defaultValue);
     const formSchema = {
       key: {
-        label: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.ecsFieldLabel', {
+        label: i18n.translate('xpack.osquery.pack.queryFlyoutForm.ecsFieldLabel', {
           defaultMessage: 'ECS field',
         }),
         type: FIELD_TYPES.COMBO_BOX,
@@ -430,12 +424,9 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
         ],
       },
       'value.field': {
-        label: i18n.translate(
-          'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.osqueryResultFieldLabel',
-          {
-            defaultMessage: 'Osquery result',
-          }
-        ),
+        label: i18n.translate('xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldLabel', {
+          defaultMessage: 'Osquery result',
+        }),
         type: FIELD_TYPES.COMBO_BOX,
         fieldsToValidateOnChange: ['key'],
         validations: [
@@ -542,7 +533,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
                     {defaultValue ? (
                       <EuiButtonIcon
                         aria-label={i18n.translate(
-                          'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.deleteECSMappingRowButtonAriaLabel',
+                          'xpack.osquery.pack.queryFlyoutForm.deleteECSMappingRowButtonAriaLabel',
                           {
                             defaultMessage: 'Delete ECS mapping row',
                           }
@@ -554,7 +545,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
                     ) : (
                       <EuiButtonIcon
                         aria-label={i18n.translate(
-                          'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.addECSMappingRowButtonAriaLabel',
+                          'xpack.osquery.pack.queryFlyoutForm.addECSMappingRowButtonAriaLabel',
                           {
                             defaultMessage: 'Add ECS mapping row',
                           }
@@ -819,14 +810,14 @@ export const ECSMappingEditorField = ({
           <EuiTitle size="xs">
             <h5>
               <FormattedMessage
-                id="xpack.osquery.scheduledQueryGroup.form.ecsMappingSection.title"
+                id="xpack.osquery.pack.form.ecsMappingSection.title"
                 defaultMessage="ECS mapping"
               />
             </h5>
           </EuiTitle>
           <EuiText color="subdued">
             <FormattedMessage
-              id="xpack.osquery.scheduledQueryGroup.form.ecsMappingSection.description"
+              id="xpack.osquery.pack.form.ecsMappingSection.description"
               defaultMessage="Use the fields below to map results from this query to ECS fields."
             />
           </EuiText>

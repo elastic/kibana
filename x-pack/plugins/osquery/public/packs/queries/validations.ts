@@ -16,7 +16,7 @@ const idSchemaValidation: ValidationFunc<any, string, string> = ({ value }) => {
   const valueIsValid = idPattern.test(value);
   if (!valueIsValid) {
     return {
-      message: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.invalidIdError', {
+      message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.invalidIdError', {
         defaultMessage: 'Characters must be alphanumeric, _, or -',
       }),
     };
@@ -28,7 +28,7 @@ const createUniqueIdValidation = (ids: Set<string>) => {
   const uniqueIdCheck: ValidationFunc<any, string, string> = ({ value }) => {
     if (ids.has(value)) {
       return {
-        message: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.uniqueIdError', {
+        message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.uniqueIdError', {
           defaultMessage: 'ID must be unique',
         }),
       };
@@ -39,7 +39,7 @@ const createUniqueIdValidation = (ids: Set<string>) => {
 
 export const createIdFieldValidations = (ids: Set<string>) => [
   fieldValidators.emptyField(
-    i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.emptyIdError', {
+    i18n.translate('xpack.osquery.pack.queryFlyoutForm.emptyIdError', {
       defaultMessage: 'ID is required',
     })
   ),
@@ -54,10 +54,7 @@ export const intervalFieldValidation: ValidationFunc<
   number
 > = fieldValidators.numberGreaterThanField({
   than: 0,
-  message: i18n.translate(
-    'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.invalidIntervalField',
-    {
-      defaultMessage: 'A positive interval value is required',
-    }
-  ),
+  message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.invalidIntervalField', {
+    defaultMessage: 'A positive interval value is required',
+  }),
 });

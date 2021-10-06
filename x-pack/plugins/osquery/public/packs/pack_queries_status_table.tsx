@@ -36,14 +36,14 @@ import { usePackQueryLastResults } from './use_pack_query_last_results';
 import { usePackQueryErrors } from './use_pack_query_errors';
 
 const VIEW_IN_DISCOVER = i18n.translate(
-  'xpack.osquery.scheduledQueryGroup.queriesTable.viewDiscoverResultsActionAriaLabel',
+  'xpack.osquery.pack.queriesTable.viewDiscoverResultsActionAriaLabel',
   {
     defaultMessage: 'View in Discover',
   }
 );
 
 const VIEW_IN_LENS = i18n.translate(
-  'xpack.osquery.scheduledQueryGroup.queriesTable.viewLensResultsActionAriaLabel',
+  'xpack.osquery.pack.queriesTable.viewLensResultsActionAriaLabel',
   {
     defaultMessage: 'View in Lens',
   }
@@ -611,42 +611,36 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     () => [
       {
         field: 'id',
-        name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.idColumnTitle', {
+        name: i18n.translate('xpack.osquery.pack.queriesTable.idColumnTitle', {
           defaultMessage: 'ID',
         }),
         width: '15%',
       },
       {
         field: 'interval',
-        name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.intervalColumnTitle', {
+        name: i18n.translate('xpack.osquery.pack.queriesTable.intervalColumnTitle', {
           defaultMessage: 'Interval (s)',
         }),
         width: '80px',
       },
       {
         field: 'query',
-        name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.queryColumnTitle', {
+        name: i18n.translate('xpack.osquery.pack.queriesTable.queryColumnTitle', {
           defaultMessage: 'Query',
         }),
         render: renderQueryColumn,
         width: '20%',
       },
       {
-        name: i18n.translate(
-          'xpack.osquery.scheduledQueryGroup.queriesTable.lastResultsColumnTitle',
-          {
-            defaultMessage: 'Last results',
-          }
-        ),
+        name: i18n.translate('xpack.osquery.pack.queriesTable.lastResultsColumnTitle', {
+          defaultMessage: 'Last results',
+        }),
         render: renderLastResultsColumn,
       },
       {
-        name: i18n.translate(
-          'xpack.osquery.scheduledQueryGroup.queriesTable.viewResultsColumnTitle',
-          {
-            defaultMessage: 'View results',
-          }
-        ),
+        name: i18n.translate('xpack.osquery.pack.queriesTable.viewResultsColumnTitle', {
+          defaultMessage: 'View results',
+        }),
         width: '90px',
         actions: [
           {

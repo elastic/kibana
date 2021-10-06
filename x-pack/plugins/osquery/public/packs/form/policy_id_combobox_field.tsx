@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { reduce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiComboBoxOptionOption } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
@@ -39,7 +40,32 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
   field,
   agentPoliciesById,
 }) => {
-  const { value } = field;
+  const { value, setValue } = field;
+
+  const options = useMemo(
+    () =>
+      Object.entries(agentPoliciesById).map(([agentPolicyId, agentPolicy]) => ({
+        key: agentPolicyId,
+        label: agentPolicy.name,
+      })),
+    [agentPoliciesById]
+  );
+
+  const selectedOptions = useMemo(
+    () =>
+      value.map((policyId) => ({
+        key: policyId,
+        label: agentPoliciesById[policyId]?.name ?? policyId,
+      })),
+    [agentPoliciesById, value]
+  );
+
+  const onChange = useCallback(
+    (newOptions: EuiComboBoxOptionOption[]) => {
+      setValue(newOptions.map((option) => option.key || option.label));
+    },
+    [setValue]
+  );
 
   const renderOption = useCallback(
     (option: EuiComboBoxOptionOption<string>) => (
@@ -71,17 +97,19 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
     [agentPoliciesById]
   );
 
-  // const selectedOptions = useMemo(() => {
-  //   if (!value?.length || !value[0].length) return [];
-
-  //   return value.map((policyId) => ({
-  //     label: agentPoliciesById[policyId]?.name ?? policyId,
-  //   }));
-  // }, [agentPoliciesById, value]);
-
   const helpText = useMemo(() => {
-    if (!value?.length || !value[0].length || !agentPoliciesById || !agentPoliciesById[value[0]])
+    if (!value?.length || !value[0].length || !agentPoliciesById) {
       return;
+    }
+
+    const agentCount = reduce(
+      value,
+      (acc, policyId) => {
+        const agentPolicy = agentPoliciesById && agentPoliciesById[policyId];
+        return acc + (agentPolicy?.agents ?? 0);
+      },
+      0
+    );
 
     return (
       <FormattedMessage
@@ -89,7 +117,7 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
         defaultMessage="{count, plural, one {# agent} other {# agents}} enrolled"
         // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
         values={{
-          count: agentPoliciesById[value[0]].agents ?? 0,
+          count: agentCount,
         }}
       />
     );
@@ -100,11 +128,13 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
       onCreateOption: null,
       noSuggestions: false,
       isClearable: true,
-      // selectedOptions,
+      selectedOptions,
+      options,
       renderOption,
+      onChange,
       ...euiFieldProps,
     }),
-    [euiFieldProps, renderOption]
+    [euiFieldProps, onChange, options, renderOption, selectedOptions]
   );
 
   return (

@@ -64,18 +64,21 @@ export const usePackQueryForm = ({
     id: FORM_ID + uuid.v4(),
     onSubmit: async (formData, isValid) => {
       if (isValid && handleSubmit) {
+        // @ts-expect-error update types
         return handleSubmit(formData, isValid);
       }
     },
     options: {
       stripEmptyFields: true,
     },
+    // @ts-expect-error update types
     defaultValue: defaultValue || {
       id: '',
       query: '',
       interval: 3600,
       ecs_mapping: {},
     },
+    // @ts-expect-error update types
     serializer: (payload) =>
       produce(payload, (draft) => {
         if (isArray(draft.platform)) {
@@ -97,6 +100,7 @@ export const usePackQueryForm = ({
         }
         return draft;
       }),
+    // @ts-expect-error update types
     deserializer: (payload) => {
       if (!payload) return {} as PackFormData;
 
@@ -109,6 +113,7 @@ export const usePackQueryForm = ({
         ecs_mapping: payload.ecs_mapping ?? {},
       };
     },
+    // @ts-expect-error update types
     schema: formSchema,
   });
 };

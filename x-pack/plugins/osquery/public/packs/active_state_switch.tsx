@@ -45,7 +45,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
   const agentCount = useMemo(
     () =>
       item.policy_ids.reduce(
-        (acc, policyId) => acc + (data?.agentPoliciesById[policyId].agents || 0),
+        (acc, policyId) => acc + (data?.agentPoliciesById[policyId]?.agents || 0),
         0
       ),
     [data?.agentPoliciesById, item.policy_ids]

@@ -31,7 +31,9 @@ export const findSavedQueryRoute = (router: IRouter) => {
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
 
-      const savedQueries = await savedObjectsClient.find({
+      const savedQueries = await savedObjectsClient.find<{
+        ecs_mapping: Array<{ field: string; value: string }>;
+      }>({
         type: savedQuerySavedObjectType,
         page: parseInt(request.query.pageIndex ?? '0', 10) + 1,
         perPage: request.query.pageSize,
@@ -41,9 +43,11 @@ export const findSavedQueryRoute = (router: IRouter) => {
       });
 
       const savedObjects = savedQueries.saved_objects.map((savedObject) => {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         const ecs_mapping = savedObject.attributes.ecs_mapping;
 
         if (ecs_mapping) {
+          // @ts-expect-error update types
           savedObject.attributes.ecs_mapping = convertECSMappingToObject(ecs_mapping);
         }
 

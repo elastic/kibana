@@ -25,9 +25,12 @@ export const readSavedQueryRoute = (router: IRouter) => {
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
 
-      const savedQuery = await savedObjectsClient.get(savedQuerySavedObjectType, request.params.id);
+      const savedQuery = await savedObjectsClient.get<{
+        ecs_mapping: Array<{ field: string; value: string }>;
+      }>(savedQuerySavedObjectType, request.params.id);
 
       if (savedQuery.attributes.ecs_mapping) {
+        // @ts-expect-error update types
         savedQuery.attributes.ecs_mapping = convertECSMappingToObject(
           savedQuery.attributes.ecs_mapping
         );

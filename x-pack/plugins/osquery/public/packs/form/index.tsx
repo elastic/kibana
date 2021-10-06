@@ -61,17 +61,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const handleHideConfirmationModal = useCallback(() => setShowConfirmationModal(false), []);
 
-  const { data: { agentPoliciesById, agentPolicies } = {} } = useAgentPolicies();
-  const agentPolicyOptions = useMemo(
-    () =>
-      agentPolicies?.map((agentPolicy) => ({
-        key: agentPolicy.id,
-        // label: agentPolicy.name,
-        label: agentPolicy.id,
-        value: agentPolicy.id,
-      })) ?? [],
-    [agentPolicies]
-  );
+  const { data: { agentPoliciesById } = {} } = useAgentPolicies();
 
   const cancelButtonProps = useRouterNavigate(`packs/${editMode ? defaultValue?.id : ''}`);
 
@@ -159,11 +149,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const { setFieldValue, submit, isSubmitting } = form;
 
-  const policyIdEuiFieldProps = useMemo(
-    () => ({ options: agentPolicyOptions }),
-    [agentPolicyOptions]
-  );
-
   const [{ policy_ids: policyIds }] = useFormData({
     form,
     watch: ['policy_ids'],
@@ -230,7 +215,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
           <CommonUseField
             path="policy_ids"
-            euiFieldProps={policyIdEuiFieldProps}
             component={PolicyIdComboBoxField}
             agentPoliciesById={agentPoliciesById}
           />

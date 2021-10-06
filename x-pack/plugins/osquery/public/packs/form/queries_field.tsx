@@ -174,7 +174,9 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
     () =>
       field.value && field.value.length
         ? field.value.reduce((acc, query) => {
+            // @ts-expect-error update types
             if (query?.id) {
+              // @ts-expect-error update types
               acc.push(query.id);
             }
 
@@ -212,6 +214,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       <EuiSpacer />
       {field.value?.length ? (
         <PackQueriesTable
+          // @ts-expect-error update types
           data={tableData}
           onEditClick={handleEditClick}
           onDeleteClick={handleDeleteClick}
@@ -232,6 +235,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       {showEditQueryFlyout != null && showEditQueryFlyout >= 0 && (
         <QueryFlyout
           uniqueQueryIds={uniqueQueryIds}
+          // @ts-expect-error update types
           defaultValue={field.value[showEditQueryFlyout]}
           integrationPackageVersion={integrationPackageVersion}
           onSave={handleEditQuery}

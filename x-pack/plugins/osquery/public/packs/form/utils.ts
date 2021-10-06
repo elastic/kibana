@@ -13,6 +13,7 @@ export const convertPackQueriesToSO = (queries) =>
     queries,
     (acc, value, key) => {
       acc.push({
+        // @ts-expect-error update types
         id: key,
         ...pick(value, ['query', 'interval', 'platform', 'version', 'ecs_mapping']),
       });
