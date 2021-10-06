@@ -123,12 +123,12 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
           <h2 id="flyoutTitle">
             {isEditMode ? (
               <FormattedMessage
-                id="xpack.osquery.scheduleQueryGroup.queryFlyoutForm.editFormTitle"
+                id="xpack.osquery.queryFlyoutForm.editFormTitle"
                 defaultMessage="Edit query"
               />
             ) : (
               <FormattedMessage
-                id="xpack.osquery.scheduleQueryGroup.queryFlyoutForm.addFormTitle"
+                id="xpack.osqueryqueryFlyoutForm.addFormTitle"
                 defaultMessage="Attach next query"
               />
             )}
@@ -161,7 +161,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiText size="xs" color="subdued">
                       <FormattedMessage
-                        id="xpack.osquery.pack.queryFlyoutForm.versionFieldOptionalLabel"
+                        id="xpack.osqueryqueryFlyoutForm.versionFieldOptionalLabel"
                         defaultMessage="(optional)"
                       />
                     </EuiText>
@@ -172,7 +172,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                   noSuggestions: false,
                   singleSelection: { asPlainText: true },
                   placeholder: i18n.translate(
-                    'xpack.osquery.pack.queriesTable.osqueryVersionAllLabel',
+                    'xpack.osquery.queriesTable.osqueryVersionAllLabel',
                     {
                       defaultMessage: 'ALL',
                     }
@@ -204,7 +204,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
               <FormattedMessage
-                id="xpack.osquery.pack.queryFlyoutForm.cancelButtonLabel"
+                id="xpack.osquery.queryFlyoutForm.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
@@ -212,7 +212,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButton isLoading={isSubmitting} onClick={submit} fill>
               <FormattedMessage
-                id="xpack.osquery.pack.queryFlyoutForm.saveButtonLabel"
+                id="xpack.osquery.queryFlyoutForm.saveButtonLabel"
                 defaultMessage="Save"
               />
             </EuiButton>

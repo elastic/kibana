@@ -105,7 +105,7 @@ const PackDetailsPageComponent = () => {
           <EuiDescriptionList compressed textStyle="reverse" style={{ textAlign: 'right' }}>
             <EuiDescriptionListTitle className="eui-textNoWrap">
               <FormattedMessage
-                id="xpack.osquery.scheduleQueryGroup.kpis.policyLabelText"
+                id="xpack.osquery.packDetailsPage.kpis.policyLabelText"
                 defaultMessage="Policy"
               />
             </EuiDescriptionListTitle>
