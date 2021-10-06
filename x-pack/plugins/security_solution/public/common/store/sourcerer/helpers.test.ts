@@ -19,8 +19,8 @@ const signalIndexName = mockGlobalState.sourcerer.signalIndexName;
 
 const dataView = {
   id: DEFAULT_DATA_VIEW_ID,
-  title: `auditbeat-*,packetbeat-*,${signalIndexName}-*`,
-  patternList: ['packetbeat-*', 'auditbeat-*', `${signalIndexName}-*`],
+  title: `auditbeat-*,packetbeat-*,${signalIndexName}`,
+  patternList: ['packetbeat-*', 'auditbeat-*', `${signalIndexName}`],
 };
 const patternListNoSignals = mockGlobalState.sourcerer.defaultDataView.patternList
   .filter((p) => !isSignalIndex(p, signalIndexName))
@@ -43,7 +43,7 @@ describe('sourcerer store helpers', () => {
         SourcererScopeName.default,
         signalIndexName
       );
-      expect(result).toEqual([`${signalIndexName}-*`, 'auditbeat-*', 'packetbeat-*']);
+      expect(result).toEqual([`${signalIndexName}`, 'auditbeat-*', 'packetbeat-*']);
     });
     it('default data view, SourcererScopeName.timeline, returns patternList sorted', () => {
       const result = getScopePatternListSelection(
@@ -198,33 +198,6 @@ describe('sourcerer store helpers', () => {
         selectedDataViewId: dataView.id,
         selectedPatterns: patternListSignals,
       });
-    });
-  });
-  describe('isSignalIndex', () => {
-    const wildcardIndex = 'index-*';
-    const index = 'index';
-    const doubleWildcardIndex = 'index-*-*';
-    const wrongIndex = 'wrong';
-    it('wildcardIndex, index', () => {
-      expect(isSignalIndex(wildcardIndex, index)).toEqual(true);
-    });
-    it('index, wildcardIndex', () => {
-      expect(isSignalIndex(index, wildcardIndex)).toEqual(true);
-    });
-    it('wildcardIndex, wildcardIndex', () => {
-      expect(isSignalIndex(wildcardIndex, wildcardIndex)).toEqual(true);
-    });
-    it('index, index', () => {
-      expect(isSignalIndex(index, index)).toEqual(true);
-    });
-    it('wildcardIndex, wrongIndex', () => {
-      expect(isSignalIndex(wildcardIndex, wrongIndex)).toEqual(false);
-    });
-    it('wildcardIndex, null', () => {
-      expect(isSignalIndex(wildcardIndex, null)).toEqual(false);
-    });
-    it('doubleWildcardIndex, index', () => {
-      expect(isSignalIndex(doubleWildcardIndex, index)).toEqual(false);
     });
   });
 });

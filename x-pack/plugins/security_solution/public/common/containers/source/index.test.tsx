@@ -93,7 +93,7 @@ describe('source/index.tsx', () => {
     };
     const mockSearchResponse = {
       ...mocksSource,
-      indicesExist: ['auditbeat-*', `${sourcererState.signalIndexName}-*`],
+      indicesExist: ['auditbeat-*', sourcererState.signalIndexName],
       isRestore: false,
       rawResponse: {},
       runtimeMappings: {},
