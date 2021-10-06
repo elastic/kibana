@@ -223,16 +223,19 @@ export class ContentStream extends Duplex {
           return;
         }
 
-        this.decode(content).then((buffer) => {
-          this.push(buffer);
-          this.chunksRead++;
-          this.bytesRead += buffer.byteLength;
+        this.decode(content).then(
+          (buffer) => {
+            this.push(buffer);
+            this.chunksRead++;
+            this.bytesRead += buffer.byteLength;
 
-          if (this.isRead()) {
-            this.logger.debug(`Read ${this.bytesRead} of ${this.jobSize} bytes.`);
-            this.push(null);
-          }
-        }, (err) => this.destroy(err));
+            if (this.isRead()) {
+              this.logger.debug(`Read ${this.bytesRead} of ${this.jobSize} bytes.`);
+              this.push(null);
+            }
+          },
+          (err) => this.destroy(err)
+        );
       })
       .catch((err) => this.destroy(err));
   }
