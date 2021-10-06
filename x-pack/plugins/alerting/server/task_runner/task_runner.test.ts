@@ -4419,8 +4419,10 @@ describe('Task Runner', () => {
       references: [],
     });
 
-    await taskRunner.run();
+    const promise = taskRunner.run();
+    await Promise.resolve();
     await taskRunner.cancel();
+    await promise;
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
@@ -4453,6 +4455,36 @@ describe('Task Runner', () => {
               },
             },
             "message": "alert execution start: \\"1\\"",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute-timeout",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+            },
+            "message": "rule execution cancelled due to timeout: \\"test1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -4500,37 +4532,28 @@ describe('Task Runner', () => {
             },
           },
         ],
-        Array [
-          Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
-            "event": Object {
-              "action": "execute-timeout",
-              "category": Array [
-                "alerts",
-              ],
-              "kind": "alert",
-            },
-            "kibana": Object {
-              "saved_objects": Array [
-                Object {
-                  "id": "1",
-                  "namespace": undefined,
-                  "rel": "primary",
-                  "type": "alert",
-                  "type_id": "test",
-                },
-              ],
-            },
-            "message": "rule execution cancelled due to timeout: \\"test1\\"",
-            "rule": Object {
-              "category": "test",
-              "id": "1",
-              "license": "basic",
-              "ruleset": "alerts",
-            },
-          },
-        ],
       ]
     `);
+
+    expect(
+      taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
+    ).toHaveBeenCalledTimes(1);
+    expect(
+      taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
+    ).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        executionStatus: {
+          error: {
+            message: `rule execution cancelled due to timeout: "test1"`,
+            reason: 'timeout',
+          },
+          lastExecutionDate: '1970-01-01T00:00:00.000Z',
+          status: 'error',
+        },
+      },
+      { refresh: false, namespace: undefined }
+    );
   });
 });

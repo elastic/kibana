@@ -8,6 +8,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
+import { BehaviorSubject } from 'rxjs';
 import { addSpaceIdToPath } from '../../../spaces/server';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -90,6 +91,7 @@ export class TaskRunner<
     RecoveryActionGroupId
   >;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
+  private cancelled$: BehaviorSubject<boolean>;
 
   constructor(
     alertType: NormalizedAlertType<
@@ -109,6 +111,7 @@ export class TaskRunner<
     this.alertType = alertType;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
     this.ruleTypeRegistry = context.ruleTypeRegistry;
+    this.cancelled$ = new BehaviorSubject<boolean>(false);
   }
 
   async getApiKeyForAlertPermissions(alertId: string, spaceId: string) {
@@ -197,6 +200,29 @@ export class TaskRunner<
       supportsEphemeralTasks: this.context.supportsEphemeralTasks,
       maxEphemeralActionsPerAlert: this.context.maxEphemeralActionsPerAlert,
     });
+  }
+
+  private async updateRuleExecutionStatus(
+    alertId: string,
+    namespace: string | undefined,
+    executionStatus: AlertExecutionStatus
+  ) {
+    const client = this.context.internalSavedObjectsRepository;
+    const attributes = {
+      executionStatus: alertExecutionStatusToRaw(executionStatus),
+    };
+
+    try {
+      await partiallyUpdateAlert(client, alertId, attributes, {
+        ignore404: true,
+        namespace,
+        refresh: false,
+      });
+    } catch (err) {
+      this.logger.error(
+        `error updating rule execution status for ${this.alertType.id}:${alertId} ${err.message}`
+      );
+    }
   }
 
   async executeAlertInstance(
@@ -600,21 +626,8 @@ export class TaskRunner<
 
     eventLogger.logEvent(event);
 
-    const client = this.context.internalSavedObjectsRepository;
-    const attributes = {
-      executionStatus: alertExecutionStatusToRaw(executionStatus),
-    };
-
-    try {
-      await partiallyUpdateAlert(client, alertId, attributes, {
-        ignore404: true,
-        namespace,
-        refresh: false,
-      });
-    } catch (err) {
-      this.logger.error(
-        `error updating alert execution status for ${this.alertType.id}:${alertId} ${err.message}`
-      );
+    if (!this.cancelled$.getValue()) {
+      await this.updateRuleExecutionStatus(alertId, namespace, executionStatus);
     }
 
     return {
@@ -652,6 +665,8 @@ export class TaskRunner<
   }
 
   async cancel(): Promise<void> {
+    this.cancelled$.next(true);
+
     // Write event log entry
     const {
       params: { alertId, spaceId },
@@ -686,6 +701,17 @@ export class TaskRunner<
       },
     };
     eventLogger.logEvent(event);
+
+    // Update the rule saved object with execution status
+    const executionStatus: AlertExecutionStatus = {
+      lastExecutionDate: new Date(),
+      status: 'error',
+      error: {
+        reason: AlertExecutionStatusErrorReasons.Timeout,
+        message: `rule execution cancelled due to timeout: "${this.alertType.id}${alertId}"`,
+      },
+    };
+    await this.updateRuleExecutionStatus(alertId, namespace, executionStatus);
   }
 }
 

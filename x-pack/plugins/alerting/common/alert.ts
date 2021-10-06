@@ -30,6 +30,7 @@ export enum AlertExecutionStatusErrorReasons {
   Execute = 'execute',
   Unknown = 'unknown',
   License = 'license',
+  Timeout = 'timeout',
 }
 
 export interface AlertExecutionStatus {
