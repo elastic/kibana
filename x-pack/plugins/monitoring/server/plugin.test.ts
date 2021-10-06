@@ -75,7 +75,6 @@ describe('Monitoring plugin', () => {
     const alerts = AlertsFactory.getAll();
     const plugin = new MonitoringPlugin(initializerContext as any);
     await plugin.setup(coreSetup as any, setupPlugins as any);
-    // provided by the factory + transform health
-    expect(setupPlugins.alerting.registerType).toHaveBeenCalledTimes(alerts.length + 1);
+    expect(setupPlugins.alerting.registerType).toHaveBeenCalledTimes(alerts.length);
   });
 });
