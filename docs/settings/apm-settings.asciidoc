@@ -90,26 +90,26 @@ Changing these settings may disable features of the APM App.
 | `xpack.apm.agent.migrations.enabled`
   | Set to `false` to disable cloud APM migrations. Defaults to `true`.
 
-| `apm_oss.indexPattern` {ess-icon}
+| `xpack.apm.indexPattern` {ess-icon}
   | The index pattern used for integrations with Machine Learning and Query Bar.
   It must match all apm indices. Defaults to `apm-*`.
 
-| `apm_oss.errorIndices` {ess-icon}
+| `xpack.apm.errorIndices` {ess-icon}
   | Matcher for all {apm-server-ref}/error-indices.html[error indices]. Defaults to `apm-*`.
 
-| `apm_oss.onboardingIndices`
+| `xpack.apm.onboardingIndices`
   | Matcher for all onboarding indices. Defaults to `apm-*`.
 
-| `apm_oss.spanIndices` {ess-icon}
+| `xpack.apm.spanIndices` {ess-icon}
   | Matcher for all {apm-server-ref}/span-indices.html[span indices]. Defaults to `apm-*`.
 
-| `apm_oss.transactionIndices` {ess-icon}
+| `xpack.apm.transactionIndices` {ess-icon}
   | Matcher for all {apm-server-ref}/transaction-indices.html[transaction indices]. Defaults to `apm-*`.
 
-| `apm_oss.metricsIndices`
+| `xpack.apm.metricsIndices`
   | Matcher for all {apm-server-ref}/metricset-indices.html[metrics indices]. Defaults to `apm-*`.
 
-| `apm_oss.sourcemapIndices`
+| `xpack.apm.sourcemapIndices`
   | Matcher for all {apm-server-ref}/sourcemap-indices.html[source map indices]. Defaults to `apm-*`.
 
 |===
