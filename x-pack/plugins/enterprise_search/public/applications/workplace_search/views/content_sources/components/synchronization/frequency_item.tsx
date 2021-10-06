@@ -27,6 +27,8 @@ import {
 } from '../../../../../shared/constants';
 import { SyncEstimate } from '../../../../types';
 
+import { NEXT_SYNC_RUNNING_MESSAGE } from '../../constants';
+
 interface Props {
   label: string;
   description: string;
@@ -53,6 +55,8 @@ export const FrequencyItem: React.FC<Props> = ({ label, description, duration, e
   const [interval, unit] = formatDuration(duration);
   const { lastRun, nextStart, duration: durationEstimate } = estimate;
   const estimateDisplay = durationEstimate && moment.duration(durationEstimate).humanize();
+  const nextStartIsPast = moment().isAfter(nextStart);
+  const nextStartTime = nextStartIsPast ? NEXT_SYNC_RUNNING_MESSAGE : moment(nextStart).fromNow();
 
   const onChange = () => '#TODO';
 
@@ -86,6 +90,7 @@ export const FrequencyItem: React.FC<Props> = ({ label, description, duration, e
 
   const nextStartSummary = (
     <FormattedMessage
+      data-test-subj="nextStartSummary"
       id="xpack.enterpriseSearch.workplaceSearch.contentSources.synchronization.nextStartSummary"
       defaultMessage="{nextStartStrong} will begin {nextStartTime}."
       values={{
@@ -97,7 +102,7 @@ export const FrequencyItem: React.FC<Props> = ({ label, description, duration, e
             />
           </strong>
         ),
-        nextStartTime: moment(nextStart).fromNow(),
+        nextStartTime,
       }}
     />
   );

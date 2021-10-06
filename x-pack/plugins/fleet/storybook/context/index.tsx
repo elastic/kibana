@@ -13,12 +13,12 @@ import { createBrowserHistory } from 'history';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import { ScopedHistory } from '../../../../../src/core/public';
+import { getStorybookContextProvider } from '../../../../../src/plugins/custom_integrations/storybook';
 import { IntegrationsAppContext } from '../../public/applications/integrations/app';
 import type { FleetConfigType, FleetStartServices } from '../../public/plugin';
 
-// TODO: This is a contract leak, and should be on the context, rather than a setter.
+// TODO: These are contract leaks, and should be on the context, rather than a setter.
 import { setHttpClient } from '../../public/hooks/use_request';
-
 import { setCustomIntegrations } from '../../public/services/custom_integrations';
 
 import { getApplication } from './application';
@@ -36,7 +36,6 @@ import { stubbedStartServices } from './stubs';
 // Expect this to grow as components that are given Stories need access to mocked services.
 export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
   children: storyChildren,
-  storyContext,
 }) => {
   const basepath = '';
   const browserHistory = createBrowserHistory();
@@ -55,6 +54,9 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
     },
     injectedMetadata: {
       getInjectedVar: () => null,
+    },
+    customIntegrations: {
+      ContextProvider: getStorybookContextProvider(),
     },
     ...stubbedStartServices,
   };
