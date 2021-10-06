@@ -296,7 +296,7 @@ describe('ESGeoGridSource', () => {
     );
 
     it('getLayerName', () => {
-      expect(mvtGeogridSource.getLayerName()).toBe('source_layer');
+      expect(mvtGeogridSource.getLayerName()).toBe('aggs');
     });
 
     it('getMinZoom', () => {
@@ -312,7 +312,7 @@ describe('ESGeoGridSource', () => {
         vectorSourceRequestMeta
       );
 
-      expect(urlTemplateWithMeta.layerName).toBe('source_layer');
+      expect(urlTemplateWithMeta.layerName).toBe('aggs');
       expect(urlTemplateWithMeta.minSourceZoom).toBe(0);
       expect(urlTemplateWithMeta.maxSourceZoom).toBe(24);
       expect(urlTemplateWithMeta.urlTemplate).toEqual(
