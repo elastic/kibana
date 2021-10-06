@@ -49,6 +49,7 @@
     { "path": "../features/tsconfig.json" },
     { "path": "../lens/tsconfig.json" },
     { "path": "../maps/tsconfig.json" },
-    { "path": "../reporting/tsconfig.json" }
+    { "path": "../reporting/tsconfig.json" },
+    { "path": "../spaces/tsconfig.json" },
   ]
 }

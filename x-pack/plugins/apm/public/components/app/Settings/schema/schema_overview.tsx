@@ -148,7 +148,7 @@ export function SchemaOverview({
               'xpack.apm.settings.schema.migrate.classicIndices.description',
               {
                 defaultMessage:
-                  'You are currently using APM Server binary. This legacy option is deprecated since version 7.16 and is being replaced by a manages APM Server in Elastic Agent from version 8.0.',
+                  'You are currently using APM Server binary. This legacy option is deprecated since version 7.16 and is being replaced by a managed APM Server in Elastic Agent from version 8.0.',
               }
             )}
             footer={
@@ -180,7 +180,7 @@ export function SchemaOverview({
               'xpack.apm.settings.schema.migrate.dataStreams.description',
               {
                 defaultMessage:
-                  'Your APM Server will need to be managed by Elastic Agent from version 8.0 and onwards. You can run Elastic Agent on Cloud, ECE or self-managed and install the Elastic APM integration in order to continue ingesting APM data.',
+                  'Starting in version 8.0, Elastic Agent must manage APM Server. Elastic Agent can run on our hosted Elasticsearch Service, ECE, or be self-managed. Then, add the Elastic APM integration to continue ingesting APM data.',
               }
             )}
             footer={

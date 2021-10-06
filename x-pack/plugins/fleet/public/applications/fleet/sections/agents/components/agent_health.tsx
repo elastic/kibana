@@ -9,6 +9,8 @@ import React from 'react';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
+import * as euiVars from '@elastic/eui/dist/eui_theme_light.json';
+
 import type { Agent } from '../../../types';
 
 interface Props {
@@ -27,7 +29,7 @@ const Status = {
     </EuiBadge>
   ),
   Inactive: (
-    <EuiBadge color="default">
+    <EuiBadge color={euiVars.default.euiColorDarkShade}>
       <FormattedMessage id="xpack.fleet.agentHealth.inactiveStatusText" defaultMessage="Inactive" />
     </EuiBadge>
   ),
