@@ -94,6 +94,9 @@ export function ajaxErrorHandlersProvider() {
       });
     }
 
+    // TODO: Returning a rejected promise is needed for angular, mainly for the resolve attribute on controller.
+    // In React, for now, we don't don anything with the error since all the handling happens here. We can
+    // remove it after removing Angular
     return Promise.reject(err);
   };
 }

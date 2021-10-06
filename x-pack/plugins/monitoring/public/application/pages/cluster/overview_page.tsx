@@ -41,7 +41,7 @@ export const ClusterOverview: React.FC<{}> = () => {
     defaultMessage: 'Cluster overview',
   });
 
-  if (loaded) {
+  if (loaded && clusters.length > 0) {
     tabs = [
       {
         id: 'clusterName',

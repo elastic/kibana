@@ -34,6 +34,8 @@ export interface PageTemplateProps {
   product?: string;
 }
 
+const errorHandler = ajaxErrorHandlersProvider();
+
 export const PageTemplate: React.FC<PageTemplateProps> = ({
   title,
   pageTitle,
@@ -46,22 +48,29 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
 
   const { currentTimerange } = useContext(MonitoringTimeContainer.Context);
   const [loaded, setLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const history = useHistory();
 
   useEffect(() => {
     getPageData?.()
       .catch((err) => {
-        // TODO: handle errors
+        setHasError(true);
+        return errorHandler(err);
       })
+      // TODO: remove the empty catch when errorHandler don't return a rejected promise anymore
+      .catch(() => {})
       .finally(() => {
         setLoaded(true);
       });
   }, [getPageData, currentTimerange]);
 
   const onRefresh = () => {
-    const errorHandler = ajaxErrorHandlersProvider();
-
-    const requests = [getPageData?.()];
+    const requests = [
+      getPageData?.().then((result) => {
+        setHasError(false);
+        return result;
+      }),
+    ];
     if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
       requests.push(updateSetupModeData());
     }
@@ -70,6 +79,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
       results
         .filter((p) => p.status === 'rejected')
         .forEach((result) =>
+          // TODO: remove the empty catch when errorHandler don't return a rejected promise anymore
           errorHandler((result as unknown as PromiseRejectedResult | undefined)?.reason).catch(
             () => {}
           )
@@ -80,6 +90,12 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
   const createHref = (route: string) => history.createHref({ pathname: route });
 
   const isTabSelected = (route: string) => history.location.pathname === route;
+
+  const renderContent = () => {
+    if (hasError) return null;
+    if (getPageData && !loaded) return <PageLoading />;
+    return children;
+  };
 
   return (
     <div className="app-container">
@@ -102,7 +118,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
           })}
         </EuiTabs>
       )}
-      <div>{!getPageData ? children : loaded ? children : <PageLoading />}</div>
+      <div>{renderContent()}</div>
     </div>
   );
 };

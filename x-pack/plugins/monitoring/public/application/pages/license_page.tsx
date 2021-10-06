@@ -48,23 +48,19 @@ export const LicensePage: React.FC<{}> = () => {
       url += `/${clusterUuid}`;
     }
 
-    try {
-      const response = await services.http?.fetch(url, {
-        method: 'POST',
-        body: JSON.stringify({
-          ccs,
-          timeRange: {
-            min: bounds.min.toISOString(),
-            max: bounds.max.toISOString(),
-          },
-          codePaths: CODE_PATHS,
-        }),
-      });
+    const response = await services.http?.fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({
+        ccs,
+        timeRange: {
+          min: bounds.min.toISOString(),
+          max: bounds.max.toISOString(),
+        },
+        codePaths: CODE_PATHS,
+      }),
+    });
 
-      setClusters(formatClusters(response));
-    } catch (err) {
-      // TODO handle error
-    }
+    setClusters(formatClusters(response));
   }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http]);
 
   return (
