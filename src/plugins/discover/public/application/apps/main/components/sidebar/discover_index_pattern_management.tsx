@@ -11,6 +11,7 @@ import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } fr
 import { i18n } from '@kbn/i18n';
 import { DiscoverServices } from '../../../../../build_services';
 import { IndexPattern } from '../../../../../../../data/common';
+import { useDataViews } from '../../../../services/use_data_views';
 
 export interface DiscoverIndexPatternManagementProps {
   /**
@@ -39,6 +40,7 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
     indexPatternFieldEditor?.userPermissions.editIndexPattern();
   const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
   const [isAddIndexPatternFieldPopoverOpen, setIsAddIndexPatternFieldPopoverOpen] = useState(false);
+  const { getPersisted } = useDataViews(props.services);
 
   if (!useNewFieldsApi || !selectedIndexPattern || !canEditIndexPatternField) {
     return null;
@@ -46,6 +48,13 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
 
   const addField = () => {
     editField(undefined);
+  };
+
+  const openEditor = async () => {
+    const indexPattern = await getPersisted(props.selectedIndexPattern);
+    await core.application.navigateToApp('management', {
+      path: `/kibana/indexPatterns/patterns/${indexPattern.id}`,
+    });
   };
 
   return (
@@ -93,9 +102,7 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
             data-test-subj="indexPattern-manage-field"
             onClick={() => {
               setIsAddIndexPatternFieldPopoverOpen(false);
-              core.application.navigateToApp('management', {
-                path: `/kibana/indexPatterns/patterns/${props.selectedIndexPattern?.id}`,
-              });
+              openEditor();
             }}
           >
             {i18n.translate('discover.fieldChooser.indexPatterns.manageFieldButton', {

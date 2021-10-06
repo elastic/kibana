@@ -34,7 +34,7 @@ import { AppState } from '../../services/discover_state';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { DataDocuments$ } from '../../services/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
-import { DiscoverDataViewEntry } from '../../../../services/use_data_views';
+import { DiscoverDataViewEntry, useDataViews } from '../../../../services/use_data_views';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -117,6 +117,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const { selectedIndexPattern, onEditRuntimeField, useNewFieldsApi, onChangeIndexPattern } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const { getPersisted } = useDataViews(props.services);
   /**
    * needed for merging new with old field counts, high likely legacy, but kept this behavior
    * because not 100% sure in this case
@@ -178,16 +179,17 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const { indexPatternFieldEditor } = props.services;
 
   const editField = useCallback(
-    (fieldName?: string) => {
+    async (fieldName?: string) => {
       const indexPatternFieldEditPermission =
         indexPatternFieldEditor?.userPermissions.editIndexPattern();
       const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
       if (!canEditIndexPatternField || !selectedIndexPattern) {
         return;
       }
+      const actualIndexPattern = await getPersisted(selectedIndexPattern);
       const ref = indexPatternFieldEditor.openEditor({
         ctx: {
-          indexPattern: selectedIndexPattern,
+          indexPattern: actualIndexPattern,
         },
         fieldName,
         onSave: async () => {
@@ -202,6 +204,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       }
     },
     [
+      getPersisted,
       closeFlyout,
       indexPatternFieldEditor,
       selectedIndexPattern,

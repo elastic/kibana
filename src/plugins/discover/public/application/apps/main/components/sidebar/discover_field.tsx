@@ -29,6 +29,7 @@ import { FieldDetails } from './types';
 import { IndexPatternField, IndexPattern } from '../../../../../../../data/public';
 import { getFieldTypeName } from './lib/get_field_type_name';
 import { DiscoverFieldVisualize } from './discover_field_visualize';
+import { DiscoverServices } from '../../../../../build_services';
 
 function wrapOnDot(str?: string) {
   // u200B is a non-width white-space character, which allows
@@ -251,6 +252,7 @@ export interface DiscoverFieldProps {
    * @param fieldName name of the field to delete
    */
   onDeleteField?: (fieldName: string) => void;
+  services: DiscoverServices;
 }
 
 function DiscoverFieldComponent({
@@ -266,6 +268,7 @@ function DiscoverFieldComponent({
   multiFields,
   onEditField,
   onDeleteField,
+  services,
 }: DiscoverFieldProps) {
   const [infoIsOpen, setOpen] = useState(false);
 
@@ -384,6 +387,7 @@ function DiscoverFieldComponent({
           multiFields={rawMultiFields}
           trackUiMetric={trackUiMetric}
           details={details}
+          services={services}
         />
       </>
     );

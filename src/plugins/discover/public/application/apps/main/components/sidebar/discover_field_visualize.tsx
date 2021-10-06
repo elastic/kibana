@@ -15,6 +15,8 @@ import type { IndexPattern, IndexPatternField } from 'src/plugins/data/common';
 import { triggerVisualizeActions, VisualizeInformation } from './lib/visualize_trigger_utils';
 import type { FieldDetails } from './types';
 import { getVisualizeInformation } from './lib/visualize_trigger_utils';
+import { useDataViews } from '../../../../services/use_data_views';
+import { DiscoverServices } from '../../../../../build_services';
 
 interface Props {
   field: IndexPatternField;
@@ -22,11 +24,13 @@ interface Props {
   details: FieldDetails;
   multiFields?: IndexPatternField[];
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  services: DiscoverServices;
 }
 
 export const DiscoverFieldVisualize: React.FC<Props> = React.memo(
-  ({ field, indexPattern, details, trackUiMetric, multiFields }) => {
+  ({ field, indexPattern, details, trackUiMetric, multiFields, services }) => {
     const [visualizeInfo, setVisualizeInfo] = useState<VisualizeInformation>();
+    const { getPersisted } = useDataViews(services);
 
     useEffect(() => {
       getVisualizeInformation(field, indexPattern.id, details.columns, multiFields).then(
@@ -38,11 +42,15 @@ export const DiscoverFieldVisualize: React.FC<Props> = React.memo(
       return null;
     }
 
-    const handleVisualizeLinkClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    const handleVisualizeLinkClick = async (
+      event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+    ) => {
       // regular link click. let the uiActions code handle the navigation and show popup if needed
+      const actualIndexPattern = await getPersisted(indexPattern);
+
       event.preventDefault();
       trackUiMetric?.(METRIC_TYPE.CLICK, 'visualize_link_click');
-      triggerVisualizeActions(visualizeInfo.field, indexPattern.id, details.columns);
+      triggerVisualizeActions(visualizeInfo.field, actualIndexPattern.id!, details.columns);
     };
 
     return (

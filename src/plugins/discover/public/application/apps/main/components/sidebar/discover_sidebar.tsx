@@ -423,6 +423,7 @@ export function DiscoverSidebarComponent({
                                 multiFields={multiFields?.get(field.name)}
                                 onEditField={canEditIndexPatternField ? editField : undefined}
                                 onDeleteField={canEditIndexPatternField ? deleteField : undefined}
+                                services={services}
                               />
                             </li>
                           );
@@ -482,6 +483,7 @@ export function DiscoverSidebarComponent({
                                 multiFields={multiFields?.get(field.name)}
                                 onEditField={canEditIndexPatternField ? editField : undefined}
                                 onDeleteField={canEditIndexPatternField ? deleteField : undefined}
+                                services={services}
                               />
                             </li>
                           );
@@ -510,6 +512,7 @@ export function DiscoverSidebarComponent({
                             multiFields={multiFields?.get(field.name)}
                             onEditField={canEditIndexPatternField ? editField : undefined}
                             onDeleteField={canEditIndexPatternField ? deleteField : undefined}
+                            services={services}
                           />
                         </li>
                       );

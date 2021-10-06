@@ -68,6 +68,20 @@ export function useDataViews(
     loadList();
   }, [services.data.dataViews, loadList]);
 
+  const getPersisted = useCallback(
+    async (newDataView) => {
+      if (!newDataView.tmp) {
+        return newDataView;
+      }
+      return await services.data.dataViews.createAndSave({
+        id: newDataView.id,
+        title: newDataView.title,
+        timeFieldName: newDataView.timefield,
+      });
+    },
+    [services.data.dataViews]
+  );
+
   useEffect(() => {
     const load = async () => {
       const newDataView = await get(dataViewId, dataViewTimefield);
@@ -77,5 +91,5 @@ export function useDataViews(
       load();
     }
   }, [get, dataViewId, setDataView, dataViewTimefield]);
-  return { getList, get, dataView, list: list.current };
+  return { getList, get, dataView, list: list.current, getPersisted };
 }

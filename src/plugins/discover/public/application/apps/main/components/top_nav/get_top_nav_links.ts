@@ -30,6 +30,7 @@ export const getTopNavLinks = ({
   onOpenInspector,
   searchSource,
   onOpenSavedSearch,
+  getPersisted,
 }: {
   indexPattern: IndexPattern;
   navigateTo: (url: string) => void;
@@ -39,6 +40,7 @@ export const getTopNavLinks = ({
   onOpenInspector: () => void;
   searchSource: ISearchSource;
   onOpenSavedSearch: (id: string) => void;
+  getPersisted: (dataView: IndexPattern) => Promise<IndexPattern>;
 }) => {
   const options = {
     id: 'options',
@@ -77,7 +79,10 @@ export const getTopNavLinks = ({
       defaultMessage: 'Save Search',
     }),
     testId: 'discoverSaveButton',
-    run: () => onSaveSearch({ savedSearch, services, indexPattern, navigateTo, state }),
+    run: async () => {
+      const actualIndexPattern = await getPersisted(indexPattern);
+      onSaveSearch({ savedSearch, services, indexPattern: actualIndexPattern, navigateTo, state });
+    },
   };
 
   const openSearch = {
@@ -109,6 +114,8 @@ export const getTopNavLinks = ({
       if (!services.share) {
         return;
       }
+      const actualIndexPattern = await getPersisted(indexPattern);
+      searchSource.setField('index', actualIndexPattern);
       const sharingData = await getSharingData(
         searchSource,
         state.appStateContainer.getState(),
