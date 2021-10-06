@@ -110,7 +110,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
         }
       }
 
-      if (certificateChain && !values.caCert) {
+      if (certificateChain && certificateChain.length > 0 && !values.caCert) {
         errors.caCert = i18n.translate(
           'interactiveSetup.clusterConfigurationForm.caCertConfirmationRequiredError',
           {
@@ -125,9 +125,9 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
       await http.post('/internal/interactive_setup/configure', {
         body: JSON.stringify({
           host,
-          username: values.username,
-          password: values.password,
-          caCert: values.caCert,
+          username: authRequired ? values.username : undefined,
+          password: authRequired ? values.password : undefined,
+          caCert: certificateChain && certificateChain.length > 0 ? values.caCert : undefined,
           code: getCode(),
         }),
       });

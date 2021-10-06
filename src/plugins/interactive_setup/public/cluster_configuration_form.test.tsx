@@ -21,7 +21,7 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 describe('ClusterConfigurationForm', () => {
   jest.setTimeout(20_000);
 
-  it('calls enrollment API when submitting form', async () => {
+  it('calls enrollment API for https addresses when submitting form', async () => {
     const coreStart = coreMock.createStart();
     coreStart.http.post.mockResolvedValue({});
 
@@ -64,6 +64,37 @@ describe('ClusterConfigurationForm', () => {
             username: 'kibana_system',
             password: 'changeme',
             caCert: 'cert',
+          }),
+        }
+      );
+      expect(onSuccess).toHaveBeenCalled();
+    });
+  });
+
+  it('calls enrollment API for http addresses when submitting form', async () => {
+    const coreStart = coreMock.createStart();
+    coreStart.http.post.mockResolvedValue({});
+
+    const onSuccess = jest.fn();
+
+    const { findByRole } = render(
+      <Providers services={coreStart}>
+        <ClusterConfigurationForm
+          host="http://localhost:9200"
+          authRequired={false}
+          certificateChain={[]}
+          onSuccess={onSuccess}
+        />
+      </Providers>
+    );
+    fireEvent.click(await findByRole('button', { name: 'Configure Elastic', hidden: true }));
+
+    await waitFor(() => {
+      expect(coreStart.http.post).toHaveBeenLastCalledWith(
+        '/internal/interactive_setup/configure',
+        {
+          body: JSON.stringify({
+            host: 'http://localhost:9200',
           }),
         }
       );
