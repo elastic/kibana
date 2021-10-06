@@ -1,0 +1,3 @@
+steps:
+  - label: ":zap: Performance Tests"
+    command: echo "Hello Performance Tests!"
