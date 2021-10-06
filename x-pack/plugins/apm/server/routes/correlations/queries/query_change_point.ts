@@ -7,6 +7,7 @@
 import { uniqBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'kibana/server';
+import { ERROR_CORRELATION_THRESHOLD } from '../../../../common/correlations/constants';
 import { CorrelationsParams } from '../../../../common/correlations/types';
 import { ChangePointParams } from '../../../../common/correlations/change_point/types';
 import { getCorrelationsFilters } from './get_filters';
@@ -16,15 +17,8 @@ export const getChangePointRequest = (
   params: ChangePointParams & CorrelationsParams,
   fieldName: string
 ): estypes.SearchRequest => {
-  const {
-    environment,
-    kuery,
-    serviceName,
-    transactionType,
-    transactionName,
-    start,
-    end,
-  } = params;
+  const { environment, kuery, serviceName, transactionType, transactionName } =
+    params;
 
   const correlationFilters = getCorrelationsFilters({
     environment,
@@ -32,8 +26,6 @@ export const getChangePointRequest = (
     serviceName,
     transactionType,
     transactionName,
-    start,
-    end,
   });
 
   const query = {

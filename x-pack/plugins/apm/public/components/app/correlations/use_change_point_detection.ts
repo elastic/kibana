@@ -113,11 +113,11 @@ export function useChangePointDetection(
           },
         });
 
-        if (pValues.failedTransactionsCorrelations.length > 0) {
-          pValues.failedTransactionsCorrelations.forEach((d) => {
+        if (pValues.length > 0) {
+          pValues.forEach((d) => {
             fieldsToSample.add(d.fieldName);
           });
-          changePoints.push(...pValues.failedTransactionsCorrelations);
+          changePoints.push(...pValues);
           responseUpdate.changePoints = getChangePointsSortedByScore([
             ...changePoints,
           ]);
