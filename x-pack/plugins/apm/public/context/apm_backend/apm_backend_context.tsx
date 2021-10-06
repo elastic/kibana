@@ -15,7 +15,7 @@ export const ApmBackendContext = createContext<
   | {
       backendName: string;
       metadata: {
-        data?: APIReturnType<'GET /api/apm/backends/{backendName}/metadata'>;
+        data?: APIReturnType<'GET /internal/apm/backends/{backendName}/metadata'>;
         status?: FETCH_STATUS;
       };
     }
@@ -41,7 +41,7 @@ export function ApmBackendContextProvider({
       }
 
       return callApmApi({
-        endpoint: 'GET /api/apm/backends/{backendName}/metadata',
+        endpoint: 'GET /internal/apm/backends/{backendName}/metadata',
         params: {
           path: {
             backendName,

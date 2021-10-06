@@ -14,7 +14,7 @@ import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { registry } from '../../common/registry';
 
 type TransactionsGroupsPrimaryStatistics =
-  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('legacySupertestAsApmReadUser');
@@ -29,7 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('handles the empty state', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/main_statistics`,
+            pathname: `/internal/apm/services/opbeans-java/transactions/groups/main_statistics`,
             query: {
               start,
               end,
@@ -57,7 +57,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns the correct data', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/main_statistics`,
+            pathname: `/internal/apm/services/opbeans-java/transactions/groups/main_statistics`,
             query: {
               start,
               end,
@@ -132,7 +132,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns the correct data for latency aggregation 99th percentile', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/main_statistics`,
+            pathname: `/internal/apm/services/opbeans-java/transactions/groups/main_statistics`,
             query: {
               start,
               end,

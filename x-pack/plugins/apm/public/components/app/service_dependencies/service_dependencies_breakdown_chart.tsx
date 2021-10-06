@@ -29,7 +29,8 @@ export function ServiceDependenciesBreakdownChart({
   const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/dependencies/breakdown',
+        endpoint:
+          'GET /internal/apm/services/{serviceName}/dependencies/breakdown',
         params: {
           path: {
             serviceName,

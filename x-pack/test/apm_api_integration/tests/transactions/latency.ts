@@ -15,7 +15,7 @@ import archives_metadata from '../../common/fixtures/es_archiver/archives_metada
 import { registry } from '../../common/registry';
 
 type LatencyChartReturnType =
-  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/latency'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('legacySupertestAsApmReadUser');
@@ -31,7 +31,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns 400 when latencyAggregationType is not informed', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-node/transactions/charts/latency`,
+            pathname: `/internal/apm/services/opbeans-node/transactions/charts/latency`,
             query: {
               start,
               end,
@@ -47,7 +47,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns 400 when transactionType is not informed', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-node/transactions/charts/latency`,
+            pathname: `/internal/apm/services/opbeans-node/transactions/charts/latency`,
             query: {
               start,
               end,
@@ -63,7 +63,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('handles the empty state', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-node/transactions/charts/latency`,
+            pathname: `/internal/apm/services/opbeans-node/transactions/charts/latency`,
             query: {
               start,
               end,
@@ -96,7 +96,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-node/transactions/charts/latency`,
+              pathname: `/internal/apm/services/opbeans-node/transactions/charts/latency`,
               query: {
                 start,
                 end,
@@ -121,7 +121,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-node/transactions/charts/latency`,
+              pathname: `/internal/apm/services/opbeans-node/transactions/charts/latency`,
               query: {
                 start,
                 end,
@@ -146,7 +146,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-node/transactions/charts/latency`,
+              pathname: `/internal/apm/services/opbeans-node/transactions/charts/latency`,
               query: {
                 start,
                 end,
@@ -176,7 +176,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-node/transactions/charts/latency`,
+              pathname: `/internal/apm/services/opbeans-node/transactions/charts/latency`,
               query: {
                 latencyAggregationType: 'avg',
                 transactionType: 'request',
@@ -217,7 +217,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-node/transactions/charts/latency`,
+              pathname: `/internal/apm/services/opbeans-node/transactions/charts/latency`,
               query: {
                 start,
                 end,
@@ -257,7 +257,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-java/transactions/charts/latency`,
+              pathname: `/internal/apm/services/opbeans-java/transactions/charts/latency`,
               query: {
                 start,
                 end,
@@ -279,7 +279,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-python/transactions/charts/latency`,
+              pathname: `/internal/apm/services/opbeans-python/transactions/charts/latency`,
               query: {
                 start,
                 end,
@@ -319,7 +319,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-java/transactions/charts/latency`,
+              pathname: `/internal/apm/services/opbeans-java/transactions/charts/latency`,
               query: {
                 start,
                 end,

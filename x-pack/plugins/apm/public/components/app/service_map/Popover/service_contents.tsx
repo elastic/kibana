@@ -47,7 +47,7 @@ export function ServiceContents({
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/service-map/service/{serviceName}',
+          endpoint: 'GET /internal/apm/service-map/service/{serviceName}',
           params: {
             path: { serviceName },
             query: { environment, start, end },

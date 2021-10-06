@@ -29,7 +29,7 @@ const CentralizedContainer = styled.div`
   align-items: center;
 `;
 
-type APIResponseType = APIReturnType<'GET /api/apm/fleet/has_data'>;
+type APIResponseType = APIReturnType<'GET /internal/apm/fleet/has_data'>;
 
 function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
   const [data, setData] = useState<APIResponseType | undefined>();

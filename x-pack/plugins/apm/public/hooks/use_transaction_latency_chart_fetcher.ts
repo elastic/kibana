@@ -57,7 +57,7 @@ export function useTransactionLatencyChartsFetcher({
       ) {
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/transactions/charts/latency',
+            'GET /internal/apm/services/{serviceName}/transactions/charts/latency',
           params: {
             path: { serviceName },
             query: {

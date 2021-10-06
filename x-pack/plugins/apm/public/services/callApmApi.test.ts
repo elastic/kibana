@@ -24,7 +24,7 @@ describe('callApmApi', () => {
 
   it('should format the pathname with the given path params', async () => {
     await callApmApi({
-      endpoint: 'GET /api/apm/{param1}/to/{param2}',
+      endpoint: 'GET /internal/apm/{param1}/to/{param2}',
       params: {
         path: {
           param1: 'foo',
@@ -43,7 +43,7 @@ describe('callApmApi', () => {
 
   it('should add the query parameters to the options object', async () => {
     await callApmApi({
-      endpoint: 'GET /api/apm',
+      endpoint: 'GET /internal/apm',
       params: {
         query: {
           foo: 'bar',
@@ -66,7 +66,7 @@ describe('callApmApi', () => {
 
   it('should stringify the body and add it to the options object', async () => {
     await callApmApi({
-      endpoint: 'POST /api/apm',
+      endpoint: 'POST /internal/apm',
       params: {
         body: {
           foo: 'bar',

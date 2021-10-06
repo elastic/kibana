@@ -17,7 +17,7 @@ import { useLicenseContext } from '../../../../context/license/use_license_conte
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
 export type AnomalyDetectionApiResponse =
-  APIReturnType<'GET /api/apm/settings/anomaly-detection/jobs'>;
+  APIReturnType<'GET /internal/apm/settings/anomaly-detection/jobs'>;
 
 const DEFAULT_VALUE: AnomalyDetectionApiResponse = {
   jobs: [],
@@ -40,7 +40,7 @@ export function AnomalyDetection() {
     (callApmApi) => {
       if (canGetJobs) {
         return callApmApi({
-          endpoint: `GET /api/apm/settings/anomaly-detection/jobs`,
+          endpoint: `GET /internal/apm/settings/anomaly-detection/jobs`,
         });
       }
     },

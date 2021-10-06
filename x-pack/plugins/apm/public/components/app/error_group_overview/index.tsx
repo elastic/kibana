@@ -44,7 +44,7 @@ export function ErrorGroupOverview() {
 
       if (start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/errors',
+          endpoint: 'GET /internal/apm/services/{serviceName}/errors',
           params: {
             path: {
               serviceName,

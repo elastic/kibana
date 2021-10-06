@@ -46,7 +46,7 @@ const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED =
 const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
 
 type Alert = ValuesType<
-  APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>['alerts']
+  APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>['alerts']
 >;
 
 function getAlertColor({

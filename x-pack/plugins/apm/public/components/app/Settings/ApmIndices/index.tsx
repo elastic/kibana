@@ -76,7 +76,7 @@ async function saveApmIndices({
   apmIndices: Record<string, string>;
 }) {
   await callApmApi({
-    endpoint: 'POST /api/apm/settings/apm-indices/save',
+    endpoint: 'POST /internal/apm/settings/apm-indices/save',
     signal: null,
     params: {
       body: apmIndices,
@@ -86,7 +86,8 @@ async function saveApmIndices({
   clearCache();
 }
 
-type ApiResponse = APIReturnType<`GET /api/apm/settings/apm-index-settings`>;
+type ApiResponse =
+  APIReturnType<`GET /internal/apm/settings/apm-index-settings`>;
 
 // avoid infinite loop by initializing the state outside the component
 const INITIAL_STATE: ApiResponse = { apmIndexSettings: [] };
@@ -103,7 +104,7 @@ export function ApmIndices() {
     (_callApmApi) => {
       if (canSave) {
         return _callApmApi({
-          endpoint: `GET /api/apm/settings/apm-index-settings`,
+          endpoint: `GET /internal/apm/settings/apm-index-settings`,
         });
       }
     },

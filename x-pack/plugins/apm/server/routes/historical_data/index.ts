@@ -11,7 +11,7 @@ import { createApmServerRouteRepository } from '../create_apm_server_route_repos
 import { hasHistoricalAgentData } from './has_historical_agent_data';
 
 const hasDataRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/has_data',
+  endpoint: 'GET /internal/apm/has_data',
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);

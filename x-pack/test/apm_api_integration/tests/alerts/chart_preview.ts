@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     it('transaction_error_rate (without data)', async () => {
       const options = getOptions();
       const response = await apmApiClient.readUser({
-        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
+        endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_error_rate',
         ...options,
       });
 
@@ -46,7 +46,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       options.params.query.transactionType = undefined;
 
       const response = await apmApiClient.readUser({
-        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_count',
+        endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_error_count',
         ...options,
       });
 
@@ -58,7 +58,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const options = getOptions();
 
       const response = await apmApiClient.readUser({
-        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_duration',
+        endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_duration',
         ...options,
       });
 
@@ -71,7 +71,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     it('transaction_error_rate (with data)', async () => {
       const options = getOptions();
       const response = await apmApiClient.readUser({
-        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
+        endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_error_rate',
         ...options,
       });
 
@@ -88,7 +88,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       options.params.query.transactionType = undefined;
 
       const response = await apmApiClient.readUser({
-        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_count',
+        endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_error_count',
         ...options,
       });
 
@@ -104,7 +104,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const options = getOptions();
       const response = await apmApiClient.readUser({
         ...options,
-        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_duration',
+        endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_duration',
       });
 
       expect(response.status).to.be(200);

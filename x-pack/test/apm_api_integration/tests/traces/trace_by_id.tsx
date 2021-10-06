@@ -22,7 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('Trace does not exist', { config: 'basic', archives: [] }, () => {
     it('handles empty state', async () => {
       const response = await apmApiSupertest({
-        endpoint: `GET /api/apm/traces/{traceId}`,
+        endpoint: `GET /internal/apm/traces/{traceId}`,
         params: {
           path: { traceId: 'foo' },
           query: { start, end },
@@ -35,10 +35,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   registry.when('Trace exists', { config: 'basic', archives: [archiveName] }, () => {
-    let response: SupertestReturnType<`GET /api/apm/traces/{traceId}`>;
+    let response: SupertestReturnType<`GET /internal/apm/traces/{traceId}`>;
     before(async () => {
       response = await apmApiSupertest({
-        endpoint: `GET /api/apm/traces/{traceId}`,
+        endpoint: `GET /internal/apm/traces/{traceId}`,
         params: {
           path: { traceId: '64d0014f7530df24e549dd17cc0a8895' },
           query: { start, end },

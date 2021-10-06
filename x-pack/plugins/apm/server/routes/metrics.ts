@@ -13,7 +13,7 @@ import { createApmServerRouteRepository } from './create_apm_server_route_reposi
 import { environmentRt, kueryRt, rangeRt } from './default_api_types';
 
 const metricsChartsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/metrics/charts',
+  endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
   params: t.type({
     path: t.type({
       serviceName: t.string,

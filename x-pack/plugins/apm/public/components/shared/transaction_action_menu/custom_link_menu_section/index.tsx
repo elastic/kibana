@@ -61,7 +61,7 @@ export function CustomLinkMenuSection({
     (callApmApi) =>
       callApmApi({
         isCachable: false,
-        endpoint: 'GET /api/apm/settings/custom_links',
+        endpoint: 'GET /internal/apm/settings/custom_links',
         params: { query: convertFiltersToQuery(filters) },
       }),
     [filters]

@@ -21,7 +21,7 @@ import { CopyCommands } from './copy_commands';
 import { getPolicyOptions, PolicyOption } from './get_policy_options';
 import { PolicySelector } from './policy_selector';
 
-export type APIResponseType = APIReturnType<'GET /api/apm/fleet/agents'>;
+export type APIResponseType = APIReturnType<'GET /internal/apm/fleet/agents'>;
 
 const CentralizedContainer = styled.div`
   display: flex;

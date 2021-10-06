@@ -38,7 +38,7 @@ export function CustomLinkOverview() {
     async (callApmApi) => {
       if (hasValidLicense) {
         return callApmApi({
-          endpoint: 'GET /api/apm/settings/custom_links',
+          endpoint: 'GET /internal/apm/settings/custom_links',
         });
       }
     },

@@ -15,7 +15,7 @@ import { environmentRt, kueryRt, rangeRt } from './default_api_types';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 
 const errorsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/errors',
+  endpoint: 'GET /internal/apm/services/{serviceName}/errors',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -54,7 +54,7 @@ const errorsRoute = createApmServerRoute({
 });
 
 const errorGroupsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/errors/{groupId}',
+  endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -82,7 +82,7 @@ const errorGroupsRoute = createApmServerRoute({
 });
 
 const errorDistributionRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/errors/distribution',
+  endpoint: 'GET /internal/apm/services/{serviceName}/errors/distribution',
   params: t.type({
     path: t.type({
       serviceName: t.string,

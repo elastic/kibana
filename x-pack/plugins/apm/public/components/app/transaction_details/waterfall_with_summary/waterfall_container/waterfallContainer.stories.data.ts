@@ -16,7 +16,7 @@ export const location = {
   hash: '',
 } as Location;
 
-type TraceAPIResponse = APIReturnType<'GET /api/apm/traces/{traceId}'>;
+type TraceAPIResponse = APIReturnType<'GET /internal/apm/traces/{traceId}'>;
 
 export const urlParams = {
   start: '2020-03-22T15:16:38.742Z',

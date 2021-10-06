@@ -69,7 +69,7 @@ export function ServiceOverviewThroughputChart({
     (callApmApi) => {
       if (serviceName && transactionType && start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+          endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
           params: {
             path: {
               serviceName,
