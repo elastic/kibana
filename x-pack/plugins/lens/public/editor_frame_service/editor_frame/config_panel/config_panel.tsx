@@ -11,19 +11,18 @@ import { Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
-import { appendLayer } from './layer_actions';
 import { ConfigPanelWrapperProps } from './types';
 import { useFocusUpdate } from './use_focus_update';
 import {
   useLensDispatch,
   removeOrClearLayer,
+  addLayer,
   updateState,
   updateDatasourceState,
   updateVisualizationState,
   setToggleFullscreen,
   useLensSelector,
   selectVisualization,
-  VisualizationState,
   LensAppState,
 } from '../../../state_management';
 import { AddLayerButton, getLayerType } from './add_layer';
@@ -210,30 +209,10 @@ export function LayerPanels(
         visualizationState={visualization.state}
         layersMeta={props.framePublicAPI}
         onAddLayerClick={(layerType) => {
-          const id = generateId();
-          dispatchLens(
-            updateState({
-              subType: 'ADD_LAYER',
-              updater: (state) => {
-                const newState = appendLayer({
-                  activeVisualization,
-                  generateId: () => id,
-                  trackUiEvent,
-                  activeDatasource: datasourceMap[activeDatasourceId!],
-                  state,
-                  layerType,
-                });
-                return addInitialValueIfAvailable({
-                  ...props,
-                  activeDatasourceId: activeDatasourceId!,
-                  state: newState,
-                  layerId: id,
-                  layerType,
-                });
-              },
-            })
-          );
-          setNextFocusedLayerId(id);
+          const layerId = generateId();
+          dispatchLens(addLayer({ layerId, layerType }));
+          trackUiEvent('layer_added');
+          setNextFocusedLayerId(layerId);
         }}
       />
     </EuiForm>

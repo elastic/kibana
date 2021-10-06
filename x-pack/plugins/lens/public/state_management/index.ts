@@ -35,6 +35,7 @@ export const {
   editVisualizationAction,
   removeLayers,
   removeOrClearLayer,
+  addLayer,
 } = lensActions;
 
 export const makeConfigureStore = (

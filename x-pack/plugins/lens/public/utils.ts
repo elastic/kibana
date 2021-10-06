@@ -16,8 +16,8 @@ import type {
 import type { IUiSettingsClient } from 'kibana/public';
 import type { SavedObjectReference } from 'kibana/public';
 import type { Document } from './persistence/saved_object_store';
-import type { Datasource, DatasourceMap } from './types';
-import type { DatasourceStates } from './state_management';
+import type { Datasource, DatasourceMap, Visualization } from './types';
+import type { DatasourceStates, VisualizationState } from './state_management';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {

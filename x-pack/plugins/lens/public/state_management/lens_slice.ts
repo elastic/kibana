@@ -10,15 +10,18 @@ import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import { mapValues } from 'lodash';
 import { History } from 'history';
 import { LensEmbeddableInput } from '..';
+import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
-import { getInitialDatasourceId, getResolvedDateRange } from '../utils';
+import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
 import { LensAppState, LensStoreDeps, VisualizationState } from './types';
+import { Datasource, Visualization } from '../types';
 import { generateId } from '../id_generator';
+import type { LayerType } from '../../common/types';
 import {
   getVisualizeFieldSuggestions,
   Suggestion,
 } from '../editor_frame_service/editor_frame/suggestion_helpers';
-import { LensEditContextMapping, LensEditEvent } from '../types';
+import { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
 
 export const initialState: LensAppState = {
   persistedDoc: undefined,
@@ -145,10 +148,10 @@ export const removeOrClearLayer = createAction<{
   layerId: string;
   layerIds: string[];
 }>('lens/removeOrClearLayer');
-  }
-  // fallback to generic count check
-  return layerCount === 1 ? 'clear' : 'remove';
-}
+export const addLayer = createAction<{
+  layerId: string;
+  layerType: LayerType;
+}>('lens/addLayer');
 
 export const lensActions = {
   setState,
@@ -169,6 +172,7 @@ export const lensActions = {
   editVisualizationAction,
   removeLayers,
   removeOrClearLayer,
+  addLayer,
 };
 
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {
@@ -565,5 +569,106 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         }
       });
     },
+
+    [addLayer.type]: (
+      state,
+      {
+        payload: { layerId, layerType },
+      }: {
+        payload: {
+          layerId: string;
+          layerType: LayerType;
+        };
+      }
+    ) => {
+      if (!state.activeDatasourceId || !state.visualization.activeId) {
+        return state;
+      }
+
+      const activeDatasource = datasourceMap[state.activeDatasourceId];
+      const activeVisualization = visualizationMap[state.visualization.activeId];
+
+      const datasourceState = activeDatasource.insertLayer(
+        state.datasourceStates[state.activeDatasourceId].state,
+        layerId
+      );
+
+      const visualizationState = activeVisualization.appendLayer!(
+        state.visualization.state,
+        layerId,
+        layerType
+      );
+
+      const { activeDatasourceState, activeVisualizationState } = addInitialValueIfAvailable({
+        datasourceState,
+        visualizationState,
+        framePublicAPI: {
+          // any better idea to avoid `as`?
+          activeData: state.activeData as TableInspectorAdapter,
+          datasourceLayers: getDatasourceLayers(state.datasourceStates, datasourceMap),
+        },
+        activeVisualization,
+        activeDatasource,
+        layerId,
+        layerType,
+      });
+
+      state.visualization.state = activeVisualizationState;
+      state.datasourceStates[state.activeDatasourceId].state = activeDatasourceState;
+      state.stagedPreview = undefined;
+    },
   });
 };
+
+function addInitialValueIfAvailable({
+  visualizationState,
+  datasourceState,
+  activeVisualization,
+  activeDatasource,
+  framePublicAPI,
+  layerType,
+  layerId,
+  columnId,
+  groupId,
+}: {
+  framePublicAPI: FramePublicAPI;
+  visualizationState: unknown;
+  datasourceState: unknown;
+  activeDatasource: Datasource;
+  activeVisualization: Visualization;
+  layerId: string;
+  layerType: string;
+  columnId?: string;
+  groupId?: string;
+}) {
+  const layerInfo = activeVisualization
+    .getSupportedLayers(visualizationState, framePublicAPI)
+    .find(({ type }) => type === layerType);
+
+  if (layerInfo?.initialDimensions && activeDatasource?.initializeDimension) {
+    const info = groupId
+      ? layerInfo.initialDimensions.find(({ groupId: id }) => id === groupId)
+      : // pick the first available one if not passed
+        layerInfo.initialDimensions[0];
+
+    if (info) {
+      return {
+        activeDatasourceState: activeDatasource.initializeDimension(datasourceState, layerId, {
+          ...info,
+          columnId: columnId || info.columnId,
+        }),
+        activeVisualizationState: activeVisualization.setDimension({
+          groupId: info.groupId,
+          layerId,
+          columnId: columnId || info.columnId,
+          prevState: visualizationState,
+          frame: framePublicAPI,
+        }),
+      };
+    }
+  }
+  return {
+    activeDatasourceState: datasourceState,
+    activeVisualizationState: visualizationState,
+  };
+}

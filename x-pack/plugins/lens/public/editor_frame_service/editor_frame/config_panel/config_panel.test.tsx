@@ -16,6 +16,7 @@ import { generateId } from '../../../id_generator';
 import { mountWithProvider } from '../../../mocks';
 import { layerTypes } from '../../../../common';
 import { ReactWrapper } from 'enzyme';
+import { addLayer } from '../../../state_management';
 
 jest.mock('../../../id_generator');
 
@@ -235,7 +236,7 @@ describe('ConfigPanel', () => {
             activeDatasourceId: 'testDatasource',
           },
           dispatch: jest.fn((x) => {
-            if (x.payload.subType === 'ADD_LAYER') {
+            if (x.type === addLayer.type) {
               frame.datasourceLayers.second = datasourceMap.testDatasource.publicAPIMock;
             }
           }),
@@ -298,6 +299,13 @@ describe('ConfigPanel', () => {
 
     it('should not add an initial dimension when not specified', async () => {
       const props = getDefaultProps();
+      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
+        { type: layerTypes.DATA, label: 'Data Layer' },
+        {
+          type: layerTypes.THRESHOLD,
+          label: 'Threshold layer',
+        },
+      ]);
       props.activeVisualization.getSupportedLayers = jest.fn(() => [
         { type: layerTypes.DATA, label: 'Data Layer' },
         {
@@ -346,6 +354,22 @@ describe('ConfigPanel', () => {
 
     it('should use group initial dimension value when adding a new layer if available', async () => {
       const props = getDefaultProps();
+      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
+        { type: layerTypes.DATA, label: 'Data Layer' },
+        {
+          type: layerTypes.THRESHOLD,
+          label: 'Threshold layer',
+          initialDimensions: [
+            {
+              groupId: 'testGroup',
+              columnId: 'myColumn',
+              dataType: 'number',
+              label: 'Initial value',
+              staticValue: 100,
+            },
+          ],
+        },
+      ]);
       props.activeVisualization.getSupportedLayers = jest.fn(() => [
         { type: layerTypes.DATA, label: 'Data Layer' },
         {
