@@ -981,7 +981,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .expect(200)
         .then((res: any) => res.body);
 
-      log.debug('> Trained model crated');
+      log.debug('> Trained model created');
       return model;
     },
 

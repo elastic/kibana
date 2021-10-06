@@ -50,6 +50,7 @@ import {
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 import { timeFormatter } from '../../../../../../../common/util/date_utils';
+import { isPopulatedObject } from '../../../../../../../common';
 import { ListingPageUrlState } from '../../../../../../../common/types/common';
 import { usePageUrlState } from '../../../../../util/url_state';
 import { BUILT_IN_MODEL_TAG } from '../../../../../../../common/constants/data_frame_analytics';
@@ -342,6 +343,7 @@ export const ModelsList: FC = () => {
       description: i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
         defaultMessage: 'Delete model',
       }),
+      'data-test-subj': 'mlModelsTableRowDeleteAction',
       icon: 'trash',
       type: 'icon',
       color: 'danger',
@@ -353,7 +355,7 @@ export const ModelsList: FC = () => {
       enabled: (item) => {
         // TODO check for permissions to delete ingest pipelines.
         // ATM undefined means pipelines fetch failed server-side.
-        return !item.pipelines;
+        return !isPopulatedObject(item.pipelines);
       },
     },
   ];
@@ -389,6 +391,7 @@ export const ModelsList: FC = () => {
           iconType={itemIdToExpandedRowMap[item.model_id] ? 'arrowUp' : 'arrowDown'}
         />
       ),
+      'data-test-subj': 'mlModelsTableRowDetailsToggle',
     },
     {
       field: ModelsTableToConfigMapping.id,
@@ -397,6 +400,7 @@ export const ModelsList: FC = () => {
       }),
       sortable: true,
       truncateText: true,
+      'data-test-subj': 'mlModelsTableColumnId',
     },
     {
       field: ModelsTableToConfigMapping.description,
@@ -406,6 +410,7 @@ export const ModelsList: FC = () => {
       }),
       sortable: false,
       truncateText: true,
+      'data-test-subj': 'mlModelsTableColumnDescription',
     },
     {
       field: ModelsTableToConfigMapping.type,
@@ -418,11 +423,14 @@ export const ModelsList: FC = () => {
         <EuiFlexGroup gutterSize={'xs'} wrap>
           {types.map((type) => (
             <EuiFlexItem key={type} grow={false}>
-              <EuiBadge color="hollow">{type}</EuiBadge>
+              <EuiBadge color="hollow" data-test-subj="mlModelType">
+                {type}
+              </EuiBadge>
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
       ),
+      'data-test-subj': 'mlModelsTableColumnType',
     },
     {
       field: ModelsTableToConfigMapping.createdAt,
@@ -432,12 +440,14 @@ export const ModelsList: FC = () => {
       dataType: 'date',
       render: timeFormatter,
       sortable: true,
+      'data-test-subj': 'mlModelsTableColumnCreatedAt',
     },
     {
       name: i18n.translate('xpack.ml.trainedModels.modelsList.actionsHeader', {
         defaultMessage: 'Actions',
       }),
       actions,
+      'data-test-subj': 'mlModelsTableColumnActions',
     },
   ];
 
@@ -492,8 +502,7 @@ export const ModelsList: FC = () => {
               defaultMessage: 'Select a model',
             });
           }
-
-          if (Array.isArray(item.pipelines) && item.pipelines.length > 0) {
+          if (isPopulatedObject(item.pipelines)) {
             return i18n.translate('xpack.ml.trainedModels.modelsList.disableSelectableMessage', {
               defaultMessage: 'Model has associated pipelines',
             });
@@ -507,7 +516,7 @@ export const ModelsList: FC = () => {
 
           return '';
         },
-        selectable: (item) => !item.pipelines && !isBuiltInModel(item),
+        selectable: (item) => !isPopulatedObject(item.pipelines) && !isBuiltInModel(item),
         onSelectionChange: (selectedItems) => {
           setSelectedModels(selectedItems);
         },
@@ -574,6 +583,7 @@ export const ModelsList: FC = () => {
           pagination={pagination}
           onTableChange={onTableChange}
           sorting={sorting}
+          data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
         />
       </div>
       {modelsToDelete.length > 0 && (
