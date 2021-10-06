@@ -23,7 +23,7 @@ interface IndicatorNestedFields {
 }
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.12/ecs-threat.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-threat.html
  *
  * @internal
  */

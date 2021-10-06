@@ -7,7 +7,7 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.12/ecs-code_signature.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-code_signature.html
  *
  * @internal
  */

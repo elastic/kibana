@@ -17,7 +17,7 @@ interface NestedServerFields {
 }
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.12/ecs-tls.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-tls.html
  *
  * @internal
  */
