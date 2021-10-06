@@ -96,7 +96,7 @@ describe('visiblity', () => {
 });
 
 describe('icon', () => {
-  it('should use no data icon', async () => {
+  it('should use polygon icon by default (this is the default assumption, before any tile-meta is queried)', async () => {
     const layer: TiledVectorLayer = createLayer({}, {});
 
     const iconAndTooltipContent = layer.getCustomIconAndTooltipContent();

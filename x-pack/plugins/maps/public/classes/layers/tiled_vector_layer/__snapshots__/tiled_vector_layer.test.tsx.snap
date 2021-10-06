@@ -1,9 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`icon should use no data icon 1`] = `
-<span
-  color="subdued"
-  data-euiicon-type="minusInCircle"
-  size="m"
+exports[`icon should use polygon icon by default (this is the default assumption, before any tile-meta is queried) 1`] = `
+<PolygonIcon
+  style={
+    Object {
+      "fill": "#54B399",
+      "stroke": "#41937c",
+      "strokeWidth": "1px",
+    }
+  }
 />
 `;
