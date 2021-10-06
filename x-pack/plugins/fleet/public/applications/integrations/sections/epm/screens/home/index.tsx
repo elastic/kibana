@@ -89,7 +89,7 @@ function mapToCard(
     title: item.title,
     version: 'version' in item ? item.version || '' : '',
     release: 'release' in item ? item.release : undefined,
-    uiInternalPathUrl,
+    url: uiInternalPathUrl,
   };
 }
 
@@ -343,7 +343,7 @@ const AvailablePackages: React.FC = memo(() => {
     isLoadingCategories,
   ]);
 
-  if (!categoryExists(selectedCategory, categories)) {
+  if (!isLoadingCategories && !categoryExists(selectedCategory, categories)) {
     history.replace(pagePathGetters.integrations_all({ category: '', searchTerm: searchParam })[1]);
     return null;
   }

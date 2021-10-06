@@ -6,20 +6,21 @@
  * Side Public License, v 1.
  */
 
+import { KnownTypeToString } from '../types';
 import { ArgumentType } from './arguments';
 
-export class ExpressionFunctionParameter {
+export class ExpressionFunctionParameter<T = unknown> {
   name: string;
   required: boolean;
   help: string;
-  types: string[];
-  default: any;
+  types: ArgumentType<T>['types'];
+  default?: ArgumentType<T>['default'];
   aliases: string[];
   multi: boolean;
   resolve: boolean;
-  options: any[];
+  options: T[];
 
-  constructor(name: string, arg: ArgumentType<any>) {
+  constructor(name: string, arg: ArgumentType<T>) {
     const { required, help, types, aliases, multi, resolve, options } = arg;
 
     if (name === '_') {
@@ -38,7 +39,6 @@ export class ExpressionFunctionParameter {
   }
 
   accepts(type: string) {
-    if (!this.types.length) return true;
-    return this.types.indexOf(type) > -1;
+    return !this.types?.length || this.types.includes(type as KnownTypeToString<T>);
   }
 }

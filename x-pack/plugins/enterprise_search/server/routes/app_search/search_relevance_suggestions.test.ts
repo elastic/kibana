@@ -38,6 +38,35 @@ describe('search relevance insights routes', () => {
     });
   });
 
+  describe('PUT /internal/app_search/engines/{name}/search_relevance_suggestions', () => {
+    const mockRouter = new MockRouter({
+      method: 'put',
+      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions',
+    });
+
+    beforeEach(() => {
+      registerSearchRelevanceSuggestionsRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      mockRouter.callRoute({
+        params: { engineName: 'some-engine' },
+        body: {
+          query: 'some query',
+          type: 'curation',
+          status: 'applied',
+        },
+      });
+
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/as/v0/engines/:engineName/search_relevance_suggestions',
+      });
+    });
+  });
+
   describe('GET /internal/app_search/engines/{name}/search_relevance_suggestions/settings', () => {
     const mockRouter = new MockRouter({
       method: 'get',
@@ -83,6 +112,30 @@ describe('search relevance insights routes', () => {
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/api/as/v0/engines/:engineName/search_relevance_suggestions/settings',
+      });
+    });
+  });
+
+  describe('POST /internal/app_search/engines/{name}/search_relevance_suggestions/{query}', () => {
+    const mockRouter = new MockRouter({
+      method: 'post',
+      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions/{query}',
+    });
+
+    beforeEach(() => {
+      registerSearchRelevanceSuggestionsRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      mockRouter.callRoute({
+        params: { engineName: 'some-engine', query: 'foo' },
+      });
+
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/as/v0/engines/:engineName/search_relevance_suggestions/:query',
       });
     });
   });

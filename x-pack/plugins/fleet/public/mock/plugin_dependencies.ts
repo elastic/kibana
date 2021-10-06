@@ -26,5 +26,6 @@ export const createStartDepsMock = (): MockedFleetStartDeps => {
   return {
     data: dataPluginMock.createStartContract(),
     navigation: navigationPluginMock.createStartContract(),
+    customIntegrations: customIntegrationsMock.createStart(),
   };
 };

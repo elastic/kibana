@@ -9,7 +9,7 @@
 import { relative } from 'path';
 import * as Rx from 'rxjs';
 import { startWith, switchMap, take } from 'rxjs/operators';
-import { withProcRunner, ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import { withProcRunner, ToolingLog, REPO_ROOT, getTimeReporter } from '@kbn/dev-utils';
 import dedent from 'dedent';
 
 import {
@@ -147,7 +147,14 @@ interface StartServerOptions {
   useDefaultConfig?: boolean;
 }
 
-export async function startServers(options: StartServerOptions) {
+export async function startServers({ ...options }: StartServerOptions) {
+  const runStartTime = Date.now();
+  const toolingLog = new ToolingLog({
+    level: 'info',
+    writeTo: process.stdout,
+  });
+  const reportTime = getTimeReporter(toolingLog, 'scripts/functional_tests_server');
+
   const log = options.createLogger();
   const opts = {
     ...options,
@@ -168,6 +175,11 @@ export async function startServers(options: StartServerOptions) {
           ...(options.installDir ? [] : ['--dev', '--no-dev-config']),
         ],
       },
+    });
+
+    reportTime(runStartTime, 'ready', {
+      success: true,
+      ...options,
     });
 
     // wait for 5 seconds of silence before logging the

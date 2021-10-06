@@ -18,9 +18,6 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     disableWelcomeScreen: true,
   },
   schema: configSchema,
-  deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('kibana.disableWelcomeScreen', 'home.disableWelcomeScreen'),
-  ],
 };
 
 export const plugin = (initContext: PluginInitializerContext) => new HomeServerPlugin(initContext);

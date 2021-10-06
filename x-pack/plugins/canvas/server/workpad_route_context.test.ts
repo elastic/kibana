@@ -141,6 +141,31 @@ describe('workpad route context', () => {
     });
   });
 
+  describe('RESOLVE', () => {
+    it('injects references to the saved object', async () => {
+      const id = 'so-id';
+      const canvasContext = await workpadRouteContext(
+        mockContext,
+        undefined as any,
+        undefined as any
+      );
+
+      (mockContext.core.savedObjects.client.resolve as jest.Mock).mockResolvedValue({
+        saved_object: { attributes: extractedWorkpad, references },
+        outcome: 'exactMatch',
+      });
+
+      mockedExpressionService.inject.mockReturnValue(fromExpression(injectedExpression));
+
+      const result = await canvasContext.workpad.resolve(id);
+      const { id: ingnoredId, ...expectedAttributes } = injectedWorkpad;
+
+      expect(mockContext.core.savedObjects.client.resolve).toBeCalledWith(CANVAS_TYPE, id);
+
+      expect(result.saved_object.attributes).toEqual(expectedAttributes);
+    });
+  });
+
   describe('UPDATE', () => {
     it('extracts from the given attributes', async () => {
       const id = 'workpad-id';
