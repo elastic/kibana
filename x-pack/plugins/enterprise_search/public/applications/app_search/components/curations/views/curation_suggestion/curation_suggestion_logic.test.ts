@@ -116,7 +116,7 @@ const MOCK_DOCUMENTS_RESPONSE = {
 
 describe('CurationSuggestionLogic', () => {
   const { mount } = new LogicMounter(CurationSuggestionLogic);
-  const { flashAPIErrors } = mockFlashMessageHelpers;
+  const { flashAPIErrors, setQueuedErrorMessage } = mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
 
   const mountLogic = (props: object = {}) => {
@@ -298,6 +298,18 @@ describe('CurationSuggestionLogic', () => {
           suggestedPromotedDocuments: expect.any(Object),
           curation,
         });
+      });
+
+      // This could happen if a user applies a suggestion and then navigates back to a detail page via
+      // the back button, etc. The suggestion still exists, it's just not in a "pending" state
+      // so we can show it.ga
+      it('will redirect if the suggestion is not found', async () => {
+        http.post.mockReturnValueOnce(Promise.resolve(set('results', [], MOCK_RESPONSE)));
+        mountLogic();
+        CurationSuggestionLogic.actions.loadSuggestion();
+        await nextTick();
+        expect(setQueuedErrorMessage).toHaveBeenCalled();
+        expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations');
       });
 
       itHandlesErrors(http.post, () => {

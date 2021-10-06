@@ -8,7 +8,9 @@
 import { kea, MakeLogicType } from 'kea';
 import { HttpSetup } from 'kibana/public';
 
-import { flashAPIErrors } from '../../../../../shared/flash_messages';
+import { i18n } from '@kbn/i18n';
+
+import { flashAPIErrors, setQueuedErrorMessage } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { ENGINE_CURATIONS_PATH, ENGINE_CURATION_PATH } from '../../../../routes';
@@ -100,7 +102,8 @@ export const CurationSuggestionLogic = kea<
       const { engineName } = EngineLogic.values;
 
       try {
-        const suggestion = await getSuggestions(http, engineName, props.query);
+        const suggestion = await getSuggestion(http, engineName, props.query);
+        if (!suggestion) return;
         const promotedIds: string[] = suggestion.promoted;
         const documentDetailsResopnse = getDocumentDetails(http, engineName, promotedIds);
 
@@ -232,11 +235,11 @@ const updateSuggestion = async (
   return response.results[0] as CurationSuggestion;
 };
 
-const getSuggestions = async (
+const getSuggestion = async (
   http: HttpSetup,
   engineName: string,
   query: string
-): Promise<CurationSuggestion> => {
+): Promise<CurationSuggestion | undefined> => {
   const response = await http.post(
     `/internal/app_search/engines/${engineName}/search_relevance_suggestions/${query}`,
     {
@@ -252,6 +255,18 @@ const getSuggestions = async (
       }),
     }
   );
+
+  if (response.results.length < 1) {
+    const message = i18n.translate(
+      'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.notFoundError',
+      {
+        defaultMessage: 'Could not find suggestion, it may have already been applied or rejected.',
+      }
+    );
+    setQueuedErrorMessage(message);
+    KibanaLogic.values.navigateToUrl(generateEnginePath(ENGINE_CURATIONS_PATH));
+    return;
+  }
 
   const suggestion = response.results[0] as CurationSuggestion;
   return suggestion;
