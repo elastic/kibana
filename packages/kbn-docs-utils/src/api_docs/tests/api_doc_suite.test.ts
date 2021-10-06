@@ -10,10 +10,18 @@ import fs from 'fs';
 import Path from 'path';
 
 import { Project } from 'ts-morph';
-import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 
 import { writePluginDocs } from '../mdx/write_plugin_mdx_docs';
-import { ApiDeclaration, ApiStats, PluginApi, Reference, TextWithLinks, TypeKind } from '../types';
+import {
+  ApiDeclaration,
+  ApiStats,
+  PluginApi,
+  PluginOrPackage,
+  Reference,
+  TextWithLinks,
+  TypeKind,
+} from '../types';
 import { getKibanaPlatformPlugin } from './kibana_platform_plugin_mock';
 import { groupPluginApi } from '../utils';
 import { getPluginApiMap } from '../get_plugin_api_map';
@@ -96,7 +104,7 @@ beforeAll(() => {
     Path.resolve(__dirname, '__fixtures__/src/plugin_b')
   );
   pluginA.manifest.serviceFolders = ['foo'];
-  const plugins: KibanaPlatformPlugin[] = [pluginA, pluginB];
+  const plugins: PluginOrPackage[] = [pluginA, pluginB];
 
   const { pluginApiMap } = getPluginApiMap(project, plugins, log, { collectReferences: false });
   const pluginStats: ApiStats = {

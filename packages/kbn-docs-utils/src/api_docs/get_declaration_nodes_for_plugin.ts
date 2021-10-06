@@ -7,9 +7,9 @@
  */
 
 import Path from 'path';
-import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import { Project, SourceFile, Node } from 'ts-morph';
-import { ApiScope } from './types';
+import { ApiScope, PluginOrPackage } from './types';
 import { isNamedNode, getSourceFileMatching } from './tsmorph_utils';
 
 /**
@@ -24,11 +24,17 @@ import { isNamedNode, getSourceFileMatching } from './tsmorph_utils';
  */
 export function getDeclarationNodesForPluginScope(
   project: Project,
-  plugin: KibanaPlatformPlugin,
+  plugin: PluginOrPackage,
   scope: ApiScope,
   log: ToolingLog
 ): Node[] {
-  const path = Path.join(`${plugin.directory}`, scope.toString(), 'index.ts');
+  // Packages specify the intended scope in the package.json, while plugins specify the scope
+  // using folder structure.
+  if (!plugin.isPlugin && scope !== plugin.scope) return [];
+
+  const path = plugin.isPlugin
+    ? Path.join(`${plugin.directory}`, scope.toString(), 'index.ts')
+    : Path.join(`${plugin.directory}`, 'src', 'index.ts');
   const file = getSourceFileMatching(project, path);
 
   if (file) {

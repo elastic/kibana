@@ -297,7 +297,13 @@
             ],
             "signature": [
               "Record<string, ",
-              "Serializable",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.Serializable",
+                "text": "Serializable"
+              },
               "> | undefined"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
@@ -803,7 +809,13 @@
             ],
             "signature": [
               "Record<string, ",
-              "Serializable",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.Serializable",
+                "text": "Serializable"
+              },
               "> | undefined"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",

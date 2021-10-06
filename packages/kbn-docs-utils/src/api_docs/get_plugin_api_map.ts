@@ -6,20 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import { Project } from 'ts-morph';
 import { getPluginApi } from './get_plugin_api';
 import {
   ApiDeclaration,
   MissingApiItemMap,
   PluginApi,
+  PluginOrPackage,
   ReferencedDeprecationsByPlugin,
 } from './types';
 import { removeBrokenLinks } from './utils';
 
 export function getPluginApiMap(
   project: Project,
-  plugins: KibanaPlatformPlugin[],
+  plugins: PluginOrPackage[],
   log: ToolingLog,
   { collectReferences, pluginFilter }: { collectReferences: boolean; pluginFilter?: string[] }
 ): {

@@ -1,0 +1,243 @@
+{
+  "id": "@kbn/crypto",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/crypto",
+        "id": "def-server.createSHA256Hash",
+        "type": "Function",
+        "tags": [],
+        "label": "createSHA256Hash",
+        "description": [],
+        "signature": [
+          "(input: string | Buffer, outputEncoding?: ",
+          "BinaryToTextEncoding",
+          ") => string"
+        ],
+        "path": "packages/kbn-crypto/src/sha256.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/crypto",
+            "id": "def-server.createSHA256Hash.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "string | Buffer"
+            ],
+            "path": "packages/kbn-crypto/src/sha256.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/crypto",
+            "id": "def-server.createSHA256Hash.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "outputEncoding",
+            "description": [],
+            "signature": [
+              "BinaryToTextEncoding"
+            ],
+            "path": "packages/kbn-crypto/src/sha256.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/crypto",
+        "id": "def-server.readPkcs12Keystore",
+        "type": "Function",
+        "tags": [
+          "privateRemarks"
+        ],
+        "label": "readPkcs12Keystore",
+        "description": [
+          "\nReads a private key and certificate chain from a PKCS12 key store.\n"
+        ],
+        "signature": [
+          "(path: string, password?: string | undefined) => ",
+          {
+            "pluginId": "@kbn/crypto",
+            "scope": "server",
+            "docId": "kibKbnCryptoPluginApi",
+            "section": "def-server.Pkcs12ReadResult",
+            "text": "Pkcs12ReadResult"
+          }
+        ],
+        "path": "packages/kbn-crypto/src/pkcs12.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/crypto",
+            "id": "def-server.readPkcs12Keystore.$1",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [
+              "The file path of the PKCS12 key store"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-crypto/src/pkcs12.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/crypto",
+            "id": "def-server.readPkcs12Keystore.$2",
+            "type": "string",
+            "tags": [],
+            "label": "password",
+            "description": [
+              "The optional password of the key store and private key;\nif there is no password, this may be an empty string or `undefined`,\ndepending on how the key store was generated."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-crypto/src/pkcs12.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "the parsed private key and certificate(s) in PEM format"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/crypto",
+        "id": "def-server.readPkcs12Truststore",
+        "type": "Function",
+        "tags": [],
+        "label": "readPkcs12Truststore",
+        "description": [
+          "\nReads a certificate chain from a PKCS12 trust store.\n"
+        ],
+        "signature": [
+          "(path: string, password?: string | undefined) => string[] | undefined"
+        ],
+        "path": "packages/kbn-crypto/src/pkcs12.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/crypto",
+            "id": "def-server.readPkcs12Truststore.$1",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [
+              "The file path of the PKCS12 trust store"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-crypto/src/pkcs12.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/crypto",
+            "id": "def-server.readPkcs12Truststore.$2",
+            "type": "string",
+            "tags": [],
+            "label": "password",
+            "description": [
+              "The optional password of the trust store; if there is\nno password, this may be an empty string or `undefined`, depending on\nhow the trust store was generated."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-crypto/src/pkcs12.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "the parsed certificate(s) in PEM format"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/crypto",
+        "id": "def-server.Pkcs12ReadResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "Pkcs12ReadResult",
+        "description": [],
+        "path": "packages/kbn-crypto/src/pkcs12.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/crypto",
+            "id": "def-server.Pkcs12ReadResult.ca",
+            "type": "Array",
+            "tags": [],
+            "label": "ca",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-crypto/src/pkcs12.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/crypto",
+            "id": "def-server.Pkcs12ReadResult.cert",
+            "type": "string",
+            "tags": [],
+            "label": "cert",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-crypto/src/pkcs12.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/crypto",
+            "id": "def-server.Pkcs12ReadResult.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-crypto/src/pkcs12.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

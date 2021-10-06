@@ -1,0 +1,199 @@
+{
+  "id": "@kbn/ace",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ace",
+        "id": "def-server.addToRules",
+        "type": "Function",
+        "tags": [],
+        "label": "addToRules",
+        "description": [],
+        "signature": [
+          "(otherRules: any, embedUnder: any) => void"
+        ],
+        "path": "packages/kbn-ace/src/ace/modes/lexer_rules/x_json_highlight_rules.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ace",
+            "id": "def-server.addToRules.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "otherRules",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-ace/src/ace/modes/lexer_rules/x_json_highlight_rules.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ace",
+            "id": "def-server.addToRules.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "embedUnder",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-ace/src/ace/modes/lexer_rules/x_json_highlight_rules.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ace",
+        "id": "def-server.ElasticsearchSqlHighlightRules",
+        "type": "Function",
+        "tags": [],
+        "label": "ElasticsearchSqlHighlightRules",
+        "description": [],
+        "signature": [
+          "(this: any) => void"
+        ],
+        "path": "packages/kbn-ace/src/ace/modes/lexer_rules/elasticsearch_sql_highlight_rules.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ace",
+        "id": "def-server.installXJsonMode",
+        "type": "Function",
+        "tags": [],
+        "label": "installXJsonMode",
+        "description": [],
+        "signature": [
+          "(editor: ",
+          "Editor",
+          ") => void"
+        ],
+        "path": "packages/kbn-ace/src/ace/modes/x_json/x_json.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ace",
+            "id": "def-server.installXJsonMode.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "editor",
+            "description": [],
+            "signature": [
+              "Editor"
+            ],
+            "path": "packages/kbn-ace/src/ace/modes/x_json/x_json.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ace",
+        "id": "def-server.ScriptHighlightRules",
+        "type": "Function",
+        "tags": [],
+        "label": "ScriptHighlightRules",
+        "description": [],
+        "signature": [
+          "(this: any) => void"
+        ],
+        "path": "packages/kbn-ace/src/ace/modes/lexer_rules/script_highlight_rules.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ace",
+            "id": "def-server.ScriptHighlightRules.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "this",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-ace/src/ace/modes/lexer_rules/script_highlight_rules.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ace",
+        "id": "def-server.XJsonHighlightRules",
+        "type": "Function",
+        "tags": [],
+        "label": "XJsonHighlightRules",
+        "description": [],
+        "signature": [
+          "(this: any) => void"
+        ],
+        "path": "packages/kbn-ace/src/ace/modes/lexer_rules/x_json_highlight_rules.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ace",
+            "id": "def-server.XJsonHighlightRules.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "this",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-ace/src/ace/modes/lexer_rules/x_json_highlight_rules.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ace",
+        "id": "def-server.XJsonMode",
+        "type": "Any",
+        "tags": [],
+        "label": "XJsonMode",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "packages/kbn-ace/src/ace/modes/x_json/x_json.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

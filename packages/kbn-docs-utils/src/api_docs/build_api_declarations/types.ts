@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
-import { ApiScope } from '../types';
+import { ToolingLog } from '@kbn/dev-utils';
+import { ApiScope, PluginOrPackage } from '../types';
 
 export interface BuildApiDecOpts {
-  plugins: KibanaPlatformPlugin[];
+  plugins: PluginOrPackage[];
   log: ToolingLog;
   currentPluginId: string;
   /**

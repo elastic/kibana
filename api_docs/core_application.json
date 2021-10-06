@@ -2263,7 +2263,7 @@
             "section": "def-public.App",
             "text": "App"
           },
-          "<unknown>, \"status\" | \"id\" | \"title\" | \"order\" | \"category\" | \"navLinkStatus\" | \"defaultPath\" | \"capabilities\" | \"chromeless\" | \"appRoute\" | \"exactRoute\" | \"tooltip\" | \"euiIconType\" | \"icon\"> & { status: ",
+          "<unknown>, \"status\" | \"id\" | \"title\" | \"order\" | \"capabilities\" | \"category\" | \"navLinkStatus\" | \"defaultPath\" | \"chromeless\" | \"appRoute\" | \"exactRoute\" | \"tooltip\" | \"euiIconType\" | \"icon\"> & { status: ",
           {
             "pluginId": "core",
             "scope": "public",

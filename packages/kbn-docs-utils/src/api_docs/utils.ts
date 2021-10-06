@@ -6,8 +6,16 @@
  * Side Public License, v 1.
  */
 import path from 'path';
-import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
-import { ApiDeclaration, ScopeApi, TypeKind, Lifecycle, PluginApi, ApiScope } from './types';
+import { ToolingLog } from '@kbn/dev-utils';
+import {
+  ApiDeclaration,
+  ScopeApi,
+  TypeKind,
+  Lifecycle,
+  PluginApi,
+  ApiScope,
+  PluginOrPackage,
+} from './types';
 
 function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -25,9 +33,15 @@ export const snakeToCamel = (str: string): string =>
  */
 export function getPluginForPath(
   filePath: string,
-  plugins: KibanaPlatformPlugin[]
-): KibanaPlatformPlugin | undefined {
-  return plugins.find((plugin) => filePath.startsWith(plugin.directory + path.sep));
+  plugins: PluginOrPackage[]
+): PluginOrPackage | undefined {
+  if (filePath.indexOf('@') >= 0) {
+    return plugins.find(
+      (plugin) => !plugin.isPlugin && filePath.indexOf(plugin.manifest.id + path.sep) >= 0
+    );
+  } else {
+    return plugins.find((plugin) => filePath.startsWith(plugin.directory + path.sep));
+  }
 }
 
 /**
@@ -86,7 +100,7 @@ export function getPluginApiDocId(
   }
 ) {
   let service = '';
-  const cleanName = id.replace('.', '_');
+  const cleanName = id.replace('@', '').replace(/[./\\]/gi, '_');
   if (serviceInfo) {
     const serviceName = getServiceForPath(serviceInfo.apiPath, serviceInfo.directory);
     const serviceFolder = serviceInfo.serviceFolders?.find((f) => f === serviceName);
@@ -231,6 +245,16 @@ function apiItemExists(name: string, scope: ApiScope, pluginApi: PluginApi): boo
   return (
     pluginApi[scopeAccessor(scope)].findIndex((dec: ApiDeclaration) => dec.label === name) >= 0
   );
+}
+
+export function getFileName(name: string): string {
+  // Remove the initial `@` if one exists, then replace all dots, slashes and dashes with an `_`.
+  return camelToSnake(name.replace(/@/gi, '').replace(/[.\\/-]/gi, '_'));
+}
+
+export function getSlug(name: string): string {
+  // Remove the initial `@` if one exists, then replace all dots and slashes with a `-`.
+  return name.replace(/@/gi, '').replace(/[.\\/]/gi, '-');
 }
 
 function scopeAccessor(scope: ApiScope): 'server' | 'common' | 'client' {

@@ -7,10 +7,11 @@
  */
 
 import { Project } from 'ts-morph';
-import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import { splitApisByFolder } from './write_plugin_split_by_folder';
 import { getPluginApi } from '../get_plugin_api';
 import { getKibanaPlatformPlugin } from '../tests/kibana_platform_plugin_mock';
+import { PluginOrPackage } from '../types';
 
 const log = new ToolingLog({
   level: 'debug',
@@ -44,7 +45,7 @@ export interface Zed = { zed: string }`
   );
 
   const plugin = getKibanaPlatformPlugin('example', '/src/plugins/example');
-  const plugins: KibanaPlatformPlugin[] = [
+  const plugins: PluginOrPackage[] = [
     {
       ...plugin,
       manifest: {
