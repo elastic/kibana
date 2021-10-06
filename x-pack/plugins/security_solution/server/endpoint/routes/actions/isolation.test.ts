@@ -34,6 +34,7 @@ import {
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
   metadataTransformPrefix,
+  ENDPOINT_ACTIONS_INDEX,
 } from '../../../../common/endpoint/constants';
 import {
   EndpointAction,
@@ -44,7 +45,7 @@ import {
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { legacyMetadataSearchResponse } from '../metadata/support/test_support';
-import { ElasticsearchAssetType } from '../../../../../fleet/common';
+import { AGENT_ACTIONS_INDEX, ElasticsearchAssetType } from '../../../../../fleet/common';
 import { CasesClientMock } from '../../../../../cases/server/client/mocks';
 
 interface CallRouteInterface {
@@ -207,9 +208,10 @@ describe('Host Isolation', () => {
           .mockImplementation(() =>
             Promise.resolve({ body: legacyMetadataSearchResponse(searchResponse) })
           );
-        ctx.core.elasticsearch.client.asInternalUser.index = mockIndexResponse;
+        if (indexExists) {
+          ctx.core.elasticsearch.client.asInternalUser.index = mockIndexResponse;
+        }
         ctx.core.elasticsearch.client.asCurrentUser.index = mockIndexResponse;
-        ctx.core.elasticsearch.client.asInternalUser.search = mockSearchResponse;
         ctx.core.elasticsearch.client.asCurrentUser.search = mockSearchResponse;
         const withLicense = license ? license : Platinum;
         licenseEmitter.next(withLicense);
@@ -350,12 +352,18 @@ describe('Host Isolation', () => {
           },
           { endpointDsExists: true }
         );
-        const actionDocs: [LogsEndpointAction, EndpointAction] = [
-          (ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock).mock.calls[0][0].body,
-          (ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock).mock.calls[1][0].body,
+        const actionDocs: [
+          { index: string; body: LogsEndpointAction },
+          { index: string; body: EndpointAction }
+        ] = [
+          (ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock).mock.calls[0][0],
+          (ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock).mock.calls[1][0],
         ];
-        expect(actionDocs[0].EndpointAction.data.command).toEqual('unisolate');
-        expect(actionDocs[1].data.command).toEqual('unisolate');
+
+        expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
+        expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
+        expect(actionDocs[0].body.EndpointAction.data.command).toEqual('unisolate');
+        expect(actionDocs[1].body.data.command).toEqual('unisolate');
       });
 
       it('handles isolation', async () => {
@@ -366,12 +374,40 @@ describe('Host Isolation', () => {
           },
           { endpointDsExists: true }
         );
-        const actionDocs: [LogsEndpointAction, EndpointAction] = [
-          (ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock).mock.calls[0][0].body,
-          (ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock).mock.calls[1][0].body,
+        const actionDocs: [
+          { index: string; body: LogsEndpointAction },
+          { index: string; body: EndpointAction }
+        ] = [
+          (ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock).mock.calls[0][0],
+          (ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock).mock.calls[1][0],
         ];
-        expect(actionDocs[0].EndpointAction.data.command).toEqual('isolate');
-        expect(actionDocs[1].data.command).toEqual('isolate');
+
+        expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
+        expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
+        expect(actionDocs[0].body.EndpointAction.data.command).toEqual('isolate');
+        expect(actionDocs[1].body.data.command).toEqual('isolate');
+      });
+
+      it('handles errors', async () => {
+        const ErrMessage = 'Uh oh!';
+        await callRoute(
+          UNISOLATE_HOST_ROUTE,
+          {
+            body: { endpoint_ids: ['XYZ'] },
+            idxResponse: {
+              statusCode: 500,
+              body: {
+                result: ErrMessage,
+              },
+            },
+          },
+          { endpointDsExists: true }
+        );
+
+        expect(mockResponse.ok).not.toBeCalled();
+        const response = mockResponse.customError.mock.calls[0][0];
+        expect(response.statusCode).toEqual(500);
+        expect((response.body as Error).message).toEqual(ErrMessage);
       });
     });
 
