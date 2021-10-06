@@ -75,6 +75,7 @@ const AlertAdd = ({
   const [alertTypeIndex, setAlertTypeIndex] = useState<AlertTypeIndex | undefined>(
     props.alertTypeIndex
   );
+  const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
 
   const setAlert = (value: InitialAlert) => {
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
@@ -139,11 +140,17 @@ const AlertAdd = ({
   useEffect(() => {
     if (alert.alertTypeId && alertTypeIndex) {
       const type = alertTypeIndex.get(alert.alertTypeId);
-      if (type?.defaultInterval) {
+      if (type?.defaultInterval && !changedFromDefaultInterval) {
         setAlertProperty('schedule', { interval: type.defaultInterval });
       }
     }
-  }, [alert.alertTypeId, alertTypeIndex]);
+  }, [alert.alertTypeId, alertTypeIndex, alert.schedule.interval, changedFromDefaultInterval]);
+
+  useEffect(() => {
+    if (alert.schedule.interval !== DEFAULT_ALERT_INTERVAL && !changedFromDefaultInterval) {
+      setChangedFromDefaultInterval(true);
+    }
+  }, [alert.schedule.interval, changedFromDefaultInterval]);
 
   const checkForChangesAndCloseFlyout = () => {
     if (
