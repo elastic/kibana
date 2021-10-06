@@ -43,15 +43,18 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRe
     }
   }, [showSyncFlyout, setShowWarning]);
 
-  useEffect(() => {
-    mounted.current = true;
-    if (forceRefresh === undefined || forceRefresh === true) {
-      checkStatus();
-    }
-    return () => {
-      mounted.current = false;
-    };
-  }, [forceRefresh, mounted]);
+  useEffect(
+    function initialStatusCheck() {
+      mounted.current = true;
+      if (forceRefresh === undefined || forceRefresh === true) {
+        checkStatus();
+      }
+      return () => {
+        mounted.current = false;
+      };
+    },
+    [forceRefresh, mounted]
+  );
 
   const onClose = useCallback(() => {
     if (forceRefresh === undefined) {
@@ -63,11 +66,14 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRe
     }
   }, [checkStatus, onCloseFlyout, setShowSyncFlyout]);
 
-  useEffect(() => {
-    if (showWarning === false) {
-      setShowSyncFlyout(false);
-    }
-  }, [showWarning, setShowSyncFlyout]);
+  useEffect(
+    function hideSyncFlyoutOnWarningClose() {
+      if (showWarning === false && mounted.current === true) {
+        setShowSyncFlyout(false);
+      }
+    },
+    [showWarning, setShowSyncFlyout]
+  );
 
   return showWarning === false ? null : (
     <>
@@ -93,7 +99,7 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRe
               defaultMessage=" {link}"
               values={{
                 link: (
-                  <EuiLink onClick={() => setShowSyncFlyout(true)}>
+                  <EuiLink onClick={setShowSyncFlyout.bind(null, true)}>
                     <FormattedMessage
                       id="xpack.ml.jobsList.missingSavedObjectWarning.linkToManagement.link"
                       defaultMessage="Synchronize your jobs."
@@ -105,7 +111,7 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRe
           ) : (
             <FormattedMessage
               id="xpack.ml.jobsList.missingSavedObjectWarning.noPermission"
-              defaultMessage="Please synchronize your jobs in Stack Management."
+              defaultMessage="An Administrator can synchronize the jobs in Stack Management."
             />
           )}
           {showSyncFlyout && <JobSpacesSyncFlyout onClose={onClose} />}

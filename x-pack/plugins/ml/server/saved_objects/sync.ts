@@ -271,11 +271,11 @@ export function syncSavedObjectsFactory(
       }
 
       if (
-        (job.checks.datafeedExists === true && job.datafeedId === null) ||
-        (job.checks.datafeedExists === true &&
-          job.datafeedId !== null &&
-          adJobsById[job.jobId] &&
-          adJobsById[job.jobId].datafeedId !== job.datafeedId)
+        job.checks.datafeedExists === true &&
+        (job.datafeedId === null ||
+          (job.datafeedId !== null &&
+            adJobsById[job.jobId] &&
+            adJobsById[job.jobId].datafeedId !== job.datafeedId))
       ) {
         if (simulate === true) {
           results.datafeeds.push({ id: datafeedId, type });
@@ -308,7 +308,7 @@ export function syncSavedObjectsFactory(
       }
     } catch (error) {
       results.success = false;
-      results.error = Boom.boomify(error).output;
+      results.error = Boom.boomify(error);
     }
 
     return results;
