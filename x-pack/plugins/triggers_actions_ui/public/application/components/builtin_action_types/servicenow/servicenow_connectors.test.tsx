@@ -41,7 +41,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
       wrapper.find('[data-test-subj="connector-servicenow-username-form-input"]').length > 0
     ).toBeTruthy();
 
-    expect(wrapper.find('[data-test-subj="apiUrlFromInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="credentialsApiUrlFromInput"]').length > 0).toBeTruthy();
     expect(
       wrapper.find('[data-test-subj="connector-servicenow-password-form-input"]').length > 0
     ).toBeTruthy();
@@ -74,7 +74,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
         isEdit={false}
       />
     );
-    expect(wrapper.find('[data-test-subj="apiUrlFromInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="credentialsApiUrlFromInput"]').length > 0).toBeTruthy();
     expect(
       wrapper.find('[data-test-subj="connector-servicenow-password-form-input"]').length > 0
     ).toBeTruthy();

@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiButtonProps, EuiButton } from '@elastic/eui';
+import { EuiButtonProps, EuiButton, EuiLink } from '@elastic/eui';
 
 import * as i18n from './translations';
 
@@ -18,10 +18,18 @@ interface Props {
 
 const SNStoreButtonComponent: React.FC<Props> = ({ color }) => {
   return (
-    <EuiButton href={STORE_URL} color={color} iconSide="right" iconType="popout">
+    <EuiButton href={STORE_URL} color={color} iconSide="right" iconType="popout" target="_blank">
       {i18n.VISIT_SN_STORE}
     </EuiButton>
   );
 };
 
 export const SNStoreButton = memo(SNStoreButtonComponent);
+
+const SNStoreLinkComponent: React.FC = () => (
+  <EuiLink href={STORE_URL} target="_blank">
+    {i18n.VISIT_SN_STORE}
+  </EuiLink>
+);
+
+export const SNStoreLink = memo(SNStoreLinkComponent);

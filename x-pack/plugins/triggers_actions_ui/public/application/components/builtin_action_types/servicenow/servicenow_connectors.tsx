@@ -17,7 +17,7 @@ import { useGetAppInfo } from './use_get_app_info';
 import { ApplicationRequiredCallout } from './application_required_callout';
 import { isRESTApiError, isLegacyConnector } from './helpers';
 import { InstallationCallout } from './installation_callout';
-import { UpdateConnectorModal } from './update_connector_modal';
+import { UpdateConnector } from './update_connector';
 import { updateActionConnector } from '../../../lib/action_connector_api';
 import { Credentials } from './credentials';
 
@@ -78,10 +78,11 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
       // TODO: Implement
     }, []);
 
-    useEffect(
-      () => setCallbacks({ beforeActionConnectorSave, afterActionConnectorSave }),
-      [afterActionConnectorSave, beforeActionConnectorSave, setCallbacks]
-    );
+    useEffect(() => {
+      if (setCallbacks) {
+        setCallbacks({ beforeActionConnectorSave, afterActionConnectorSave });
+      }
+    }, [afterActionConnectorSave, beforeActionConnectorSave, setCallbacks]);
 
     const onMigrateClick = useCallback(() => setShowModal(true), []);
     const onModalCancel = useCallback(() => setShowModal(false), []);
@@ -120,7 +121,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
     return (
       <>
         {showModal && (
-          <UpdateConnectorModal
+          <UpdateConnector
             action={action}
             applicationInfoErrorMsg={applicationInfoErrorMsg}
             errors={errors}

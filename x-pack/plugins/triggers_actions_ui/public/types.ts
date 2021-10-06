@@ -88,7 +88,7 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   errors: IErrorObject;
   readOnly: boolean;
   consumer?: string;
-  setCallbacks: ActionConnectorFieldsSetCallbacks;
+  setCallbacks?: ActionConnectorFieldsSetCallbacks;
   isEdit: boolean;
 }
 
