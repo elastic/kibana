@@ -10,6 +10,7 @@ import { InfraWaffleMapOptions, InfraFormatterType } from '../../../../lib/lib';
 import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
 
 const options: InfraWaffleMapOptions = {
+  // @ts-expect-error: For some reason it doesn't respect "omit messsage" declaration x-pack/plugins/infra/common/metrics_sources/index.ts
   fields: {
     container: 'container.id',
     pod: 'kubernetes.pod.uid',
