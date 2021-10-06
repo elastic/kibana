@@ -23,7 +23,8 @@ export const createCaseSavedObjectType = (
 ): SavedObjectsType => ({
   name: CASE_SAVED_OBJECT,
   hidden: true,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
       closed_at: {

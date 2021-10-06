@@ -12,7 +12,8 @@ import { subCasesMigrations } from './migrations';
 export const subCaseSavedObjectType: SavedObjectsType = {
   name: SUB_CASE_SAVED_OBJECT,
   hidden: true,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
       closed_at: {
