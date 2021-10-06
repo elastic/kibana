@@ -6,7 +6,7 @@
  */
 /* eslint-disable complexity */
 
-import { Logger, SavedObject } from 'src/core/server';
+import { Logger } from 'src/core/server';
 import isEmpty from 'lodash/isEmpty';
 import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
@@ -29,7 +29,7 @@ import {
 } from '../../../../common/detection_engine/utils';
 import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
-import { AlertAttributes, SignalRuleAlertTypeDefinition, ThresholdAlertState } from './types';
+import { SignalRuleAlertTypeDefinition, ThresholdAlertState } from './types';
 import {
   getListsClient,
   getExceptions,
@@ -85,6 +85,8 @@ export const signalRulesAlertType = ({
   mergeStrategy,
   ignoreFields,
   ruleDataService,
+  indexNameOverride,
+  ruleExecutionLogClientOverride,
 }: {
   logger: Logger;
   eventsTelemetry?: TelemetryEventsSender;
@@ -95,6 +97,8 @@ export const signalRulesAlertType = ({
   mergeStrategy: ConfigType['alertMergeStrategy'];
   ignoreFields: ConfigType['alertIgnoreFields'];
   ruleDataService: IRuleDataPluginService;
+  indexNameOverride?: string;
+  ruleExecutionLogClientOverride?: RuleExecutionLogClient;
 }): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
@@ -132,20 +136,25 @@ export const signalRulesAlertType = ({
       params,
       spaceId,
       updatedBy: updatedByUser,
+      rule,
     }) {
       const { ruleId, maxSignals, meta, outputIndex, timestampOverride, type } = params;
 
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;
       let result = createSearchAfterReturnType();
-      const ruleStatusClient = new RuleExecutionLogClient({
-        ruleDataService,
-        savedObjectsClient: services.savedObjectsClient,
-      });
+      const ruleStatusClient = ruleExecutionLogClientOverride
+        ? ruleExecutionLogClientOverride
+        : new RuleExecutionLogClient({
+            ruleDataService,
+            savedObjectsClient: services.savedObjectsClient,
+          });
 
-      const savedObject = await services.savedObjectsClient.get<AlertAttributes>('alert', alertId);
-      // TODO: conversion below is broken, MUST FIX
-      const completeRule = convertRuleSOtoCompleteRule(savedObject, alertId);
+      const completeRule: CompleteRule = {
+        alertId,
+        ruleConfig: rule,
+        ruleParams: params,
+      };
 
       const {
         actions,
@@ -277,7 +286,8 @@ export const signalRulesAlertType = ({
           logger,
           services.scopedClusterClient.asCurrentUser,
           buildRuleMessage,
-          refresh
+          refresh,
+          indexNameOverride
         );
 
         const wrapHits = wrapHitsFactory({
@@ -407,7 +417,7 @@ export const signalRulesAlertType = ({
             const notificationRuleParams: NotificationRuleTypeParams = {
               ...params,
               name,
-              id: savedObject.id,
+              id: alertId,
             };
 
             const fromInMs = parseScheduleDates(`now-${interval}`)?.format('x');
@@ -415,7 +425,7 @@ export const signalRulesAlertType = ({
             const resultsLink = getNotificationResultsLink({
               from: fromInMs,
               to: toInMs,
-              id: savedObject.id,
+              id: alertId,
               kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
                 ?.kibana_siem_app_url,
             });
@@ -424,12 +434,12 @@ export const signalRulesAlertType = ({
               buildRuleMessage(`Found ${result.createdSignalsCount} signals for notification.`)
             );
 
-            if (savedObject.attributes.throttle != null) {
+            if (completeRule.ruleConfig.throttle != null) {
               await scheduleThrottledNotificationActions({
                 alertInstance: services.alertInstanceFactory(alertId),
-                throttle: savedObject.attributes.throttle,
+                throttle: completeRule.ruleConfig.throttle,
                 startedAt,
-                id: savedObject.id,
+                id: alertId,
                 kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
                   ?.kibana_siem_app_url,
                 outputIndex,
@@ -550,60 +560,5 @@ export const asTypeSpecificCompleteRule = <T extends t.Mixed>(
   return {
     ...completeRule,
     ruleParams: validated,
-  };
-};
-
-// TODO this conversion is broken - MUST FIX
-const convertRuleSOtoCompleteRule = (
-  ruleSO: SavedObject<AlertAttributes>,
-  alertId: string
-): CompleteRule => {
-  const {
-    name,
-    tags,
-    // @ts-ignore
-    consumer,
-    enabled,
-    schedule,
-    actions,
-    createdBy,
-    updatedBy,
-    createdAt,
-    // @ts-ignore
-    updatedAt,
-    throttle,
-    // @ts-ignore
-    notifyWhen,
-    params,
-    // @ts-ignore
-    producer,
-    // @ts-ignore
-    ruleTypeId,
-    // @ts-ignore
-    ruleTypeName,
-  } = ruleSO.attributes;
-
-  return {
-    alertId,
-    ruleParams: params,
-    ruleConfig: {
-      name,
-      tags,
-      consumer,
-      enabled,
-      schedule,
-      // @ts-ignore
-      actions,
-      createdBy,
-      updatedBy,
-      // @ts-ignore
-      createdAt,
-      updatedAt,
-      throttle,
-      notifyWhen,
-      producer,
-      ruleTypeId,
-      ruleTypeName,
-    },
   };
 };

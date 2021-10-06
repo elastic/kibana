@@ -102,7 +102,6 @@ export const buildSignalGroupFromSequence = (
 
   if (
     wrappedBuildingBlocks.some((block) =>
-      // TODO: confirm using alertId is OK here instead of RuleSO.id
       block._source.signal?.ancestors.some((ancestor) => ancestor.rule === completeRule.alertId)
     )
   ) {

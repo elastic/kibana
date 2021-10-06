@@ -134,4 +134,4 @@ export interface CreateRuleOptions {
   ruleDataService: IRuleDataPluginService;
 }
 
-export type PreviewRuleOptions = CreateRuleOptions;
+export type PreviewRuleOptions = CreateRuleOptions & { indexNameOverride: string };

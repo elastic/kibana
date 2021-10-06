@@ -5,7 +5,9 @@
  * 2.0.
  */
 import moment from 'moment';
+import uuid from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { SavedObjectsFindResult } from 'kibana/server';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { DETECTION_ENGINE_RULES_PREVIEW } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
@@ -31,6 +33,17 @@ import { signalRulesAlertType } from '../../signals/signal_rule_alert_type';
 import { ExecutorType } from '../../../../../../alerting/server/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertInstance } from '../../../../../../alerting/server/alert_instance';
+import { RuleExecutionLogClient } from '../../rule_execution_log/rule_execution_log_client';
+import {
+  ExecutionMetric,
+  ExecutionMetricArgs,
+  FindBulkExecutionLogArgs,
+  FindBulkExecutionLogResponse,
+  FindExecutionLogArgs,
+  LogStatusChangeArgs,
+  UpdateExecutionLogArgs,
+} from '../../rule_execution_log/types';
+import { IRuleStatusSOAttributes } from '../../rules/types';
 
 export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
@@ -54,6 +67,8 @@ export const previewRulesRoute = async (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
+        const previewId = uuid.v4();
+
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution?.getAppClient();
 
@@ -77,21 +92,33 @@ export const previewRulesRoute = async (
 
         await context.lists?.getExceptionListClient().createEndpointList();
 
-        // const mockRuleSO: SavedObject<
-        //   Pick<Alert<RuleParams>, 'createdBy' | 'createdAt' | 'updatedBy'>
-        // > = {
-        //   id: 'preview_rule_so_id',
-        //   references: [],
-        //   type: 'rule',
-        //   attributes: {
-        //     createdBy: 'elastic_preview',
-        //     createdAt: new Date(),
-        //     updatedBy: 'elastic_preview',
-        //     ...internalRule,
-        //   },
-        // };
-
         const previewRuleParams = internalRule.params;
+
+        const previewRuleExecutionLogClient: RuleExecutionLogClient = {
+          client: undefined,
+          async delete(id: string): Promise<void> {
+            return Promise.resolve(undefined);
+          },
+          find(
+            args: FindExecutionLogArgs
+          ): Promise<Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>> {
+            return Promise.resolve([]);
+          },
+          findBulk(args: FindBulkExecutionLogArgs): Promise<FindBulkExecutionLogResponse> {
+            return Promise.resolve([]);
+          },
+          async logExecutionMetric<T extends ExecutionMetric>(
+            args: ExecutionMetricArgs<T>
+          ): Promise<void> {
+            return Promise.resolve(undefined);
+          },
+          async logStatusChange(args: LogStatusChangeArgs): Promise<void> {
+            return Promise.resolve(undefined);
+          },
+          async update(args: UpdateExecutionLogArgs): Promise<void> {
+            return Promise.resolve(undefined);
+          },
+        };
 
         const runExecutors = async <
           TParams extends RuleParams,
@@ -116,62 +143,37 @@ export const previewRulesRoute = async (
             startedAt.subtract(parseInterval(internalRule.schedule.interval));
           }
 
-          const alertInstanceFactory = (id: string) => ({
-            getState() {
-              return {} as unknown as TInstanceState;
-            },
-            replaceState(state: TInstanceState) {
-              return new AlertInstance<TInstanceState, TInstanceContext, TActionGroupIds>({
-                state: {} as TInstanceState,
-                meta: { lastScheduledActions: { group: 'default', date: new Date() } },
-              });
-            },
-            scheduleActions(actionGroup: TActionGroupIds, alertcontext: TInstanceContext) {
-              return new AlertInstance<TInstanceState, TInstanceContext, TActionGroupIds>({
-                state: {} as TInstanceState,
-                meta: { lastScheduledActions: { group: 'default', date: new Date() } },
-              });
-            },
-            scheduleActionsWithSubGroup(
-              actionGroup: TActionGroupIds,
-              subgroup: string,
-              alertcontext: TInstanceContext
-            ) {
-              return new AlertInstance<TInstanceState, TInstanceContext, TActionGroupIds>({
-                state: {} as TInstanceState,
-                meta: { lastScheduledActions: { group: 'default', date: new Date() } },
-              });
-            },
-          });
-
           let previousStartedAt = null;
+
+          const rule = {
+            ...internalRule,
+            createdBy: 'preview-fake-user',
+            updatedBy: 'preview-fake-user',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            producer: 'preview-fake-producer',
+            ruleTypeId: 'preview-fake-ruleTypeId',
+            ruleTypeName: 'preview',
+          };
+
           while (invocationCount > 0) {
             statePreview = (await executor({
               previousStartedAt,
               startedAt: startedAt.toDate(),
               state: statePreview,
-              alertId: 'alertId',
+              alertId: previewId,
               services: {
                 alertInstanceFactory,
                 savedObjectsClient: context.core.savedObjects.client,
                 scopedClusterClient: context.core.elasticsearch.client,
               },
-              spaceId: 'asdf',
-              updatedBy: 'preview-fake-user',
-              createdBy: 'preview-fake-user',
+              spaceId: siemClient.getSpaceId(),
+              updatedBy: rule.updatedBy,
+              createdBy: rule.createdBy,
               params,
               tags: [],
               name: 'preview',
-              rule: {
-                ...internalRule,
-                createdBy: 'preview-fake-user',
-                updatedBy: 'preview-fake-user',
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                producer: 'preview-fake-producer',
-                ruleTypeId: 'preview-fake-ruleTypeId',
-                ruleTypeName: 'preview',
-              },
+              rule,
             })) as TState;
             previousStartedAt = startedAt.toDate();
             startedAt.add(parseInterval(internalRule.schedule.interval));
@@ -184,8 +186,11 @@ export const previewRulesRoute = async (
         // TODO: pass the real savedObjectsClient but refactor the executor implementation not to use it for fetching rules, as we already have everything we need to execute the rule
         // TODO: preview rule status client should keep the errors & warnings in memory and return with the preview POST response
 
-        const [errors, previewId] = await runExecutors(
-          signalRulesAlertType(previewRuleOptions).executor,
+        const [errors] = await runExecutors(
+          signalRulesAlertType({
+            ...previewRuleOptions,
+            ruleExecutionLogClientOverride: previewRuleExecutionLogClient,
+          }).executor,
           previewRuleParams
         );
 
@@ -204,3 +209,30 @@ export const previewRulesRoute = async (
     }
   );
 };
+const alertInstanceFactory = (id: string) => ({
+  getState() {
+    return {} as unknown as TInstanceState;
+  },
+  replaceState(state: TInstanceState) {
+    return new AlertInstance<TInstanceState, TInstanceContext, TActionGroupIds>({
+      state: {} as TInstanceState,
+      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+    });
+  },
+  scheduleActions(actionGroup: TActionGroupIds, alertcontext: TInstanceContext) {
+    return new AlertInstance<TInstanceState, TInstanceContext, TActionGroupIds>({
+      state: {} as TInstanceState,
+      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+    });
+  },
+  scheduleActionsWithSubGroup(
+    actionGroup: TActionGroupIds,
+    subgroup: string,
+    alertcontext: TInstanceContext
+  ) {
+    return new AlertInstance<TInstanceState, TInstanceContext, TActionGroupIds>({
+      state: {} as TInstanceState,
+      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+    });
+  },
+});
