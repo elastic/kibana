@@ -7,22 +7,21 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
 import { ApplicationUsageContext, TrackApplicationView } from './track_application_view';
 import { IApplicationUsageTracker } from '../../plugin';
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 
 describe('TrackApplicationView', () => {
   test('it renders the internal component even when no tracker has been set', () => {
-    const component = mountWithIntl(
+    const { unmount } = render(
       <TrackApplicationView viewId={'testView'}>
         <h1>Hello</h1>
       </TrackApplicationView>
     );
-    component.unmount();
+    unmount();
   });
 
-  test('it tracks the component while it is rendered', () => {
+  test('it tracks the component while it is rendered', async () => {
     const applicationUsageTrackerMock: jest.Mocked<IApplicationUsageTracker> = {
       trackApplicationViewUsage: jest.fn(),
       flushTrackedView: jest.fn(),
@@ -30,7 +29,7 @@ describe('TrackApplicationView', () => {
     };
     expect(applicationUsageTrackerMock.trackApplicationViewUsage).not.toHaveBeenCalled();
     const viewId = 'testView';
-    const component = mountWithIntl(
+    const { findByText, unmount } = render(
       <ApplicationUsageContext.Provider value={applicationUsageTrackerMock}>
         <TrackApplicationView viewId={viewId}>
           <h1>Hello</h1>
@@ -39,10 +38,11 @@ describe('TrackApplicationView', () => {
     );
     expect(applicationUsageTrackerMock.trackApplicationViewUsage).toHaveBeenCalledWith(viewId);
     expect(applicationUsageTrackerMock.updateViewClickCounter).not.toHaveBeenCalled();
-    fireEvent.click(component.getDOMNode());
+    const element = await findByText('Hello');
+    fireEvent.click(element);
     expect(applicationUsageTrackerMock.updateViewClickCounter).toHaveBeenCalledWith(viewId);
     expect(applicationUsageTrackerMock.flushTrackedView).not.toHaveBeenCalled();
-    component.unmount();
+    unmount();
     expect(applicationUsageTrackerMock.flushTrackedView).toHaveBeenCalledWith(viewId);
   });
 });

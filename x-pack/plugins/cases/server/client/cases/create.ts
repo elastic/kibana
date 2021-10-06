@@ -22,17 +22,12 @@ import {
   CaseType,
   OWNER_FIELD,
   ENABLE_CASE_CONNECTOR,
+  MAX_TITLE_LENGTH,
 } from '../../../common';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
-import { getConnectorFromConfiguration } from '../utils';
 
 import { Operations } from '../../authorization';
-import {
-  createCaseError,
-  flattenCaseSavedObject,
-  transformCaseConnectorToEsConnector,
-  transformNewCase,
-} from '../../common';
+import { createCaseError, flattenCaseSavedObject, transformNewCase } from '../../common';
 import { CasesClientArgs } from '..';
 
 /**
@@ -47,7 +42,6 @@ export const create = async (
   const {
     unsecuredSavedObjectsClient,
     caseService,
-    caseConfigureService,
     userActionService,
     user,
     logger,
@@ -72,6 +66,12 @@ export const create = async (
     fold(throwErrors(Boom.badRequest), identity)
   );
 
+  if (query.title.length > MAX_TITLE_LENGTH) {
+    throw Boom.badRequest(
+      `The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
+    );
+  }
+
   try {
     const savedObjectID = SavedObjectsUtils.generateId();
 
@@ -83,10 +83,6 @@ export const create = async (
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { username, full_name, email } = user;
     const createdDate = new Date().toISOString();
-    const myCaseConfigure = await caseConfigureService.find({
-      unsecuredSavedObjectsClient,
-    });
-    const caseConfigureConnector = getConnectorFromConfiguration(myCaseConfigure);
 
     const newCase = await caseService.postNewCase({
       unsecuredSavedObjectsClient,
@@ -96,7 +92,7 @@ export const create = async (
         username,
         full_name,
         email,
-        connector: transformCaseConnectorToEsConnector(query.connector ?? caseConfigureConnector),
+        connector: query.connector,
       }),
       id: savedObjectID,
     });
@@ -110,7 +106,7 @@ export const create = async (
           actionBy: { username, full_name, email },
           caseId: newCase.id,
           fields: ['description', 'status', 'tags', 'title', 'connector', 'settings', OWNER_FIELD],
-          newValue: JSON.stringify(query),
+          newValue: query,
           owner: newCase.attributes.owner,
         }),
       ],

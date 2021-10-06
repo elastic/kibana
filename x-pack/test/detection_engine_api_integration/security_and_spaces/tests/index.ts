@@ -14,6 +14,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       this.tags('ciGroup11');
 
       loadTestFile(require.resolve('./aliases'));
+      loadTestFile(require.resolve('./create_endpoint_exceptions'));
       loadTestFile(require.resolve('./add_actions'));
       loadTestFile(require.resolve('./update_actions'));
       loadTestFile(require.resolve('./add_prepackaged_rules'));
@@ -46,6 +47,8 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./delete_signals_migrations'));
       loadTestFile(require.resolve('./timestamps'));
       loadTestFile(require.resolve('./runtime'));
+      loadTestFile(require.resolve('./throttle'));
+      loadTestFile(require.resolve('./ignore_fields'));
     });
 
     // That split here enable us on using a different ciGroup to run the tests
@@ -58,6 +61,10 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     // listed on ./keyword_family/index
     describe('', function () {
       loadTestFile(require.resolve('./keyword_family/index'));
+    });
+
+    describe('', function () {
+      loadTestFile(require.resolve('./alerts/index'));
     });
   });
 };

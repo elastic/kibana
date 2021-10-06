@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiStepProps } from '@elastic/eui';
 import type { ComponentType, LazyExoticComponent } from 'react';
 
 import type { NewPackagePolicy, PackageInfo, PackagePolicy } from './index';
@@ -21,7 +22,8 @@ export interface UIExtensionsStorage {
  * UI Component Extension is used on the pages displaying the ability to edit an
  * Integration Policy
  */
-export type PackagePolicyEditExtensionComponent = ComponentType<PackagePolicyEditExtensionComponentProps>;
+export type PackagePolicyEditExtensionComponent =
+  ComponentType<PackagePolicyEditExtensionComponentProps>;
 
 export interface PackagePolicyEditExtensionComponentProps {
   /** The current integration policy being edited */
@@ -48,14 +50,25 @@ export interface PackagePolicyEditExtensionComponentProps {
 export interface PackagePolicyEditExtension {
   package: string;
   view: 'package-policy-edit';
-  component: LazyExoticComponent<PackagePolicyEditExtensionComponent>;
+  Component: LazyExoticComponent<PackagePolicyEditExtensionComponent>;
+}
+
+/** Extension point registration contract for Integration Policy Edit tabs views */
+export interface PackagePolicyEditTabsExtension {
+  package: string;
+  view: 'package-policy-edit-tabs';
+  tabs: Array<{
+    title: EuiStepProps['title'];
+    Component: LazyExoticComponent<PackagePolicyEditExtensionComponent>;
+  }>;
 }
 
 /**
  * UI Component Extension is used on the pages displaying the ability to Create an
  * Integration Policy
  */
-export type PackagePolicyCreateExtensionComponent = ComponentType<PackagePolicyCreateExtensionComponentProps>;
+export type PackagePolicyCreateExtensionComponent =
+  ComponentType<PackagePolicyCreateExtensionComponentProps>;
 
 export interface PackagePolicyCreateExtensionComponentProps {
   /** The integration policy being created */
@@ -76,7 +89,7 @@ export interface PackagePolicyCreateExtensionComponentProps {
 export interface PackagePolicyCreateExtension {
   package: string;
   view: 'package-policy-create';
-  component: LazyExoticComponent<PackagePolicyCreateExtensionComponent>;
+  Component: LazyExoticComponent<PackagePolicyCreateExtensionComponent>;
 }
 
 /**
@@ -94,11 +107,33 @@ export interface PackageCustomExtensionComponentProps {
 export interface PackageCustomExtension {
   package: string;
   view: 'package-detail-custom';
-  component: LazyExoticComponent<PackageCustomExtensionComponent>;
+  Component: LazyExoticComponent<PackageCustomExtensionComponent>;
+}
+
+/**
+ * UI Component Extension for displaying custom views under the Assets tab for a given Integration
+ */
+export type PackageAssetsComponent = ComponentType<{}>;
+
+/** Extension point registration contract for Integration details Assets view */
+export interface PackageAssetsExtension {
+  package: string;
+  view: 'package-detail-assets';
+  Component: LazyExoticComponent<PackageAssetsComponent>;
+}
+
+export interface AgentEnrollmentFlyoutFinalStepExtension {
+  package: string;
+  view: 'agent-enrollment-flyout';
+  title: EuiStepProps['title'];
+  Component: ComponentType<{}>;
 }
 
 /** Fleet UI Extension Point */
 export type UIExtensionPoint =
   | PackagePolicyEditExtension
+  | PackagePolicyEditTabsExtension
   | PackageCustomExtension
-  | PackagePolicyCreateExtension;
+  | PackagePolicyCreateExtension
+  | PackageAssetsExtension
+  | AgentEnrollmentFlyoutFinalStepExtension;

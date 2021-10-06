@@ -24,8 +24,5 @@
   },
   "engines": {
     "yarn": "^1.21.1"
-  },
-  "devDependencies": {
-    "@kbn/test": "link:../packages/kbn-test"
   }
 }

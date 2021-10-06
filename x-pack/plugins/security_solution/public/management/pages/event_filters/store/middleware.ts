@@ -203,8 +203,7 @@ const checkIfEventFilterDataExist: MiddlewareActionHandler = async (
 ) => {
   dispatch({
     type: 'eventFiltersListPageDataExistsChanged',
-    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
+    // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
     payload: createLoadingResourceState(getListPageDataExistsState(getState())),
   });
 
@@ -233,8 +232,7 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
       type: 'eventFiltersListPageDataChanged',
       payload: {
         type: 'LoadingResourceState',
-        // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-        // @ts-ignore
+        // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
         previousState: getCurrentListPageDataState(state),
       },
     });
@@ -300,8 +298,7 @@ const eventFilterDeleteEntry: MiddlewareActionHandler = async (
 
   dispatch({
     type: 'eventFilterDeleteStatusChanged',
-    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
+    // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
     payload: createLoadingResourceState(getDeletionState(state).status),
   });
 
@@ -349,6 +346,5 @@ export const createEventFiltersPageMiddleware = (
   };
 };
 
-export const eventFiltersPageMiddlewareFactory: ImmutableMiddlewareFactory<EventFiltersListPageState> = (
-  coreStart
-) => createEventFiltersPageMiddleware(new EventFiltersHttpService(coreStart.http));
+export const eventFiltersPageMiddlewareFactory: ImmutableMiddlewareFactory<EventFiltersListPageState> =
+  (coreStart) => createEventFiltersPageMiddleware(new EventFiltersHttpService(coreStart.http));

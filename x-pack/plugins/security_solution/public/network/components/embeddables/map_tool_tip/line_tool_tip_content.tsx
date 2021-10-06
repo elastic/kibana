@@ -20,10 +20,10 @@ import * as i18n from '../translations';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ITooltipProperty } from '../../../../../../maps/public/classes/tooltips/tooltip_property';
 
-const FlowBadge = (styled(EuiBadge)`
+const FlowBadge = styled(EuiBadge)`
   height: 45px;
   min-width: 85px;
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 
 const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   margin: 0 auto;

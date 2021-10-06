@@ -40,13 +40,20 @@ export const DELETE_MESSAGE = i18n.translate(
 );
 export const SUCCESS_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.deleteSuccessMessage',
-  { defaultMessage: 'Successfully removed curation.' }
+  { defaultMessage: 'Your curation was deleted' }
 );
 export const RESTORE_CONFIRMATION = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.restoreConfirmation',
   {
     defaultMessage:
       'Are you sure you want to clear your changes and return to your default results?',
+  }
+);
+
+export const CONVERT_TO_MANUAL_CONFIRMATION = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.curations.convertToManualCurationConfirmation',
+  {
+    defaultMessage: 'Are you sure you want to convert this to a manual curation?',
   }
 );
 
@@ -82,3 +89,13 @@ export const SHOW_DOCUMENT_ACTION = {
   iconType: 'eye',
   iconColor: 'primary' as EuiButtonIconColor,
 };
+
+export const AUTOMATED_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.curation.automatedLabel',
+  { defaultMessage: 'Automated' }
+);
+
+export const COVERT_TO_MANUAL_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.curation.convertToManualCurationButtonLabel',
+  { defaultMessage: 'Convert to manual curation' }
+);

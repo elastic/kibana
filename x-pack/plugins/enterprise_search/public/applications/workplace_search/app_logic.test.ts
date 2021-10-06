@@ -20,24 +20,25 @@ describe('AppLogic', () => {
   const DEFAULT_VALUES = {
     account: {},
     hasInitialized: false,
-    isFederatedAuth: true,
     isOrganization: false,
+    searchOAuth: {},
     organization: {},
   };
 
   const expectedLogicValues = {
     account: {
-      canCreateInvitations: true,
-      canCreatePersonalSources: true,
+      canCreatePrivateSources: true,
       groups: ['Default', 'Cats'],
       id: 'some-id-string',
       isAdmin: true,
-      isCurated: false,
       viewedOnboardingPage: true,
     },
     hasInitialized: true,
-    isFederatedAuth: false,
     isOrganization: false,
+    searchOAuth: {
+      clientId: 'someUID',
+      redirectUrl: 'http://localhost:3002/ws/search_callback',
+    },
     organization: {
       defaultOrgName: 'My Organization',
       name: 'ACME Donuts',
@@ -61,7 +62,6 @@ describe('AppLogic', () => {
       expect(AppLogic.values).toEqual({
         ...DEFAULT_VALUES,
         hasInitialized: true,
-        isFederatedAuth: false,
       });
     });
   });
@@ -79,7 +79,7 @@ describe('AppLogic', () => {
       mount(DEFAULT_INITIAL_APP_DATA);
       AppLogic.actions.setSourceRestriction(true);
 
-      expect(AppLogic.values.account.canCreatePersonalSources).toEqual(true);
+      expect(AppLogic.values.account.canCreatePrivateSources).toEqual(true);
     });
   });
 

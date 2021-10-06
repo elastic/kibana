@@ -32,6 +32,21 @@ export const MONITOR_EVENT_LOOP_DELAYS_RESET = 24 * 60 * 60 * 1000;
 export const MONITOR_EVENT_LOOP_DELAYS_START = 1 * 60 * 1000;
 
 /**
- * Event loop monitoring sampling rate in milliseconds.
+ * Mean event loop delay threshold for logging a warning.
  */
-export const MONITOR_EVENT_LOOP_DELAYS_RESOLUTION = 10;
+export const MONITOR_EVENT_LOOP_WARN_THRESHOLD = 350;
+
+/**
+ * Start monitoring the event loop threshold after 1 minute
+ */
+export const MONITOR_EVENT_LOOP_THRESHOLD_START = 1 * 60 * 1000;
+
+/**
+ * Check the event loop utilization every 30 seconds
+ */
+export const MONITOR_EVENT_LOOP_THRESHOLD_INTERVAL = 30 * 1000;
+
+/**
+ * Nanosecond to milisecond conversion unit
+ */
+export const ONE_MILLISECOND_AS_NANOSECONDS = 1000000;

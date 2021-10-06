@@ -39,6 +39,7 @@ const mockOptions = [
   { label: 'filebeat-*', value: 'filebeat-*' },
   { label: 'logs-*', value: 'logs-*' },
   { label: 'packetbeat-*', value: 'packetbeat-*' },
+  { label: 'traces-apm*', value: 'traces-apm*' },
   { label: 'winlogbeat-*', value: 'winlogbeat-*' },
 ];
 
@@ -109,9 +110,11 @@ describe('Sourcerer component', () => {
       wrapper.find(`[data-test-subj="sourcerer-popover"]`).first().prop('isOpen')
     ).toBeTruthy();
     await waitFor(() => {
-      ((wrapper.find(EuiComboBox).props() as unknown) as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }).onChange([mockOptions[0], mockOptions[1]]);
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onChange: (a: EuiComboBoxOptionOption[]) => void;
+        }
+      ).onChange([mockOptions[0], mockOptions[1]]);
       wrapper.update();
     });
     wrapper.find(`[data-test-subj="add-index"]`).first().simulate('click');

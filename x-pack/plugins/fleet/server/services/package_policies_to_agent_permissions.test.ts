@@ -13,7 +13,7 @@ import type { PackagePolicy, RegistryDataStream } from '../types';
 
 import { getPackageInfo } from './epm/packages';
 import {
-  getDataStreamPermissions,
+  getDataStreamPrivileges,
   storedPackagePoliciesToAgentPermissions,
 } from './package_policies_to_agent_permissions';
 
@@ -274,14 +274,118 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       },
     });
   });
+
+  it('Returns the dataset for osquery_manager package', async () => {
+    getPackageInfoMock.mockResolvedValueOnce({
+      format_version: '1.0.0',
+      name: 'osquery_manager',
+      title: 'Osquery Manager',
+      version: '0.3.0',
+      license: 'basic',
+      description:
+        'Centrally manage osquery deployments, run live queries, and schedule recurring queries',
+      type: 'integration',
+      release: 'beta',
+      categories: ['security', 'os_system', 'config_management'],
+      icons: [
+        {
+          src: '/img/logo_osquery.svg',
+          title: 'logo osquery',
+          size: '32x32',
+          type: 'image/svg+xml',
+        },
+      ],
+      owner: { github: 'elastic/integrations' },
+      readme: '/package/osquery_manager/0.3.0/docs/README.md',
+      data_streams: [
+        {
+          dataset: 'osquery_manager.result',
+          package: 'osquery_manager',
+          ingest_pipeline: 'default',
+          path: 'result',
+          streams: [],
+          title: 'Osquery Manager queries',
+          type: 'logs',
+          release: 'experimental',
+        },
+      ],
+      latestVersion: '0.3.0',
+      removable: true,
+      notice: undefined,
+      status: 'not_installed',
+      assets: {
+        kibana: {
+          dashboard: [],
+          visualization: [],
+          search: [],
+          index_pattern: [],
+          map: [],
+          lens: [],
+          security_rule: [],
+          ml_module: [],
+        },
+        elasticsearch: {
+          component_template: [],
+          ingest_pipeline: [],
+          ilm_policy: [],
+          transform: [],
+          index_template: [],
+          data_stream_ilm_policy: [],
+        },
+      },
+    });
+
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: '12345',
+        name: 'test-policy',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'osquery_manager', version: '0.0.0', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'osquery_manager',
+            enabled: true,
+            streams: [
+              {
+                id: 'test-logs',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'some-logs' },
+                compiled_stream: { data_stream: { dataset: 'compiled' } },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        output_id: '',
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(soClient, packagePolicies);
+    expect(permissions).toMatchObject({
+      'test-policy': {
+        indices: [
+          {
+            names: ['logs-osquery_manager.result-test'],
+            privileges: ['auto_configure', 'create_doc'],
+          },
+        ],
+      },
+    });
+  });
 });
 
-describe('getDataStreamPermissions()', () => {
-  it('returns defaults for a datastream with no permissions', () => {
+describe('getDataStreamPrivileges()', () => {
+  it('returns defaults for a datastream with no privileges', () => {
     const dataStream = { type: 'logs', dataset: 'test' } as RegistryDataStream;
-    const permissions = getDataStreamPermissions(dataStream);
+    const privileges = getDataStreamPrivileges(dataStream);
 
-    expect(permissions).toMatchObject({
+    expect(privileges).toMatchObject({
       names: ['logs-test-*'],
       privileges: ['auto_configure', 'create_doc'],
     });
@@ -289,9 +393,9 @@ describe('getDataStreamPermissions()', () => {
 
   it('adds the namespace to the index name', () => {
     const dataStream = { type: 'logs', dataset: 'test' } as RegistryDataStream;
-    const permissions = getDataStreamPermissions(dataStream, 'namespace');
+    const privileges = getDataStreamPrivileges(dataStream, 'namespace');
 
-    expect(permissions).toMatchObject({
+    expect(privileges).toMatchObject({
       names: ['logs-test-namespace'],
       privileges: ['auto_configure', 'create_doc'],
     });
@@ -303,9 +407,9 @@ describe('getDataStreamPermissions()', () => {
       dataset: 'test',
       dataset_is_prefix: true,
     } as RegistryDataStream;
-    const permissions = getDataStreamPermissions(dataStream, 'namespace');
+    const privileges = getDataStreamPrivileges(dataStream, 'namespace');
 
-    expect(permissions).toMatchObject({
+    expect(privileges).toMatchObject({
       names: ['logs-test.*-namespace'],
       privileges: ['auto_configure', 'create_doc'],
     });
@@ -317,25 +421,27 @@ describe('getDataStreamPermissions()', () => {
       dataset: 'test',
       hidden: true,
     } as RegistryDataStream;
-    const permissions = getDataStreamPermissions(dataStream, 'namespace');
+    const privileges = getDataStreamPrivileges(dataStream, 'namespace');
 
-    expect(permissions).toMatchObject({
+    expect(privileges).toMatchObject({
       names: ['.logs-test-namespace'],
       privileges: ['auto_configure', 'create_doc'],
     });
   });
 
-  it('uses custom permissions if they are present in the datastream', () => {
+  it('uses custom privileges if they are present in the datastream', () => {
     const dataStream = {
       type: 'logs',
       dataset: 'test',
-      permissions: { indices: ['read', 'write'] },
+      elasticsearch: {
+        privileges: { indices: ['read', 'monitor'] },
+      },
     } as RegistryDataStream;
-    const permissions = getDataStreamPermissions(dataStream, 'namespace');
+    const privileges = getDataStreamPrivileges(dataStream, 'namespace');
 
-    expect(permissions).toMatchObject({
+    expect(privileges).toMatchObject({
       names: ['logs-test-namespace'],
-      privileges: ['read', 'write'],
+      privileges: ['read', 'monitor'],
     });
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleDataClient } from '../../../rule_registry/server';
+import { RuleDataPluginService } from '../../../rule_registry/server';
 
 import { SecuritySolutionPluginRouter } from '../types';
 
@@ -45,6 +45,7 @@ import {
   importTimelinesRoute,
   patchTimelinesRoute,
   persistFavoriteRoute,
+  resolveTimelineRoute,
 } from '../lib/timeline/routes/timelines';
 import { getDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/get_draft_timelines';
 import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/clean_draft_timelines';
@@ -56,6 +57,8 @@ import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
+// eslint-disable-next-line no-restricted-imports
+import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -63,36 +66,41 @@ export const initRoutes = (
   hasEncryptionKey: boolean,
   security: SetupPlugins['security'],
   ml: SetupPlugins['ml'],
-  ruleDataClient: RuleDataClient | null
+  ruleDataService: RuleDataPluginService,
+  isRuleRegistryEnabled: boolean
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
-  createRulesRoute(router, ml, ruleDataClient);
-  readRulesRoute(router, ruleDataClient);
-  updateRulesRoute(router, ml, ruleDataClient);
-  patchRulesRoute(router, ml, ruleDataClient);
-  deleteRulesRoute(router, ruleDataClient);
-  findRulesRoute(router, ruleDataClient);
+  createRulesRoute(router, ml, isRuleRegistryEnabled);
+  readRulesRoute(router, isRuleRegistryEnabled);
+  updateRulesRoute(router, ml, isRuleRegistryEnabled);
+  patchRulesRoute(router, ml, isRuleRegistryEnabled);
+  deleteRulesRoute(router, isRuleRegistryEnabled);
+  findRulesRoute(router, isRuleRegistryEnabled);
 
-  // TODO: pass ruleDataClient to all relevant routes
+  // Once we no longer have the legacy notifications system/"side car actions" this should be removed.
+  legacyCreateLegacyNotificationRoute(router);
 
-  addPrepackedRulesRoute(router, config, security);
-  getPrepackagedRulesStatusRoute(router, config, security);
-  createRulesBulkRoute(router, ml);
-  updateRulesBulkRoute(router, ml);
-  patchRulesBulkRoute(router, ml);
-  deleteRulesBulkRoute(router);
-  performBulkActionRoute(router, ml);
+  // TODO: pass isRuleRegistryEnabled to all relevant routes
+
+  addPrepackedRulesRoute(router, config, security, isRuleRegistryEnabled);
+  getPrepackagedRulesStatusRoute(router, config, security, isRuleRegistryEnabled);
+  createRulesBulkRoute(router, ml, isRuleRegistryEnabled);
+  updateRulesBulkRoute(router, ml, isRuleRegistryEnabled);
+  patchRulesBulkRoute(router, ml, isRuleRegistryEnabled);
+  deleteRulesBulkRoute(router, isRuleRegistryEnabled);
+  performBulkActionRoute(router, ml, isRuleRegistryEnabled);
 
   createTimelinesRoute(router, config, security);
   patchTimelinesRoute(router, config, security);
-  importRulesRoute(router, config, ml);
-  exportRulesRoute(router, config);
+  importRulesRoute(router, config, ml, isRuleRegistryEnabled);
+  exportRulesRoute(router, config, isRuleRegistryEnabled);
 
   importTimelinesRoute(router, config, security);
   exportTimelinesRoute(router, config, security);
   getDraftTimelinesRoute(router, config, security);
   getTimelineRoute(router, config, security);
+  resolveTimelineRoute(router, config, security);
   getTimelinesRoute(router, config, security);
   cleanDraftTimelinesRoute(router, config, security);
   deleteTimelinesRoute(router, config, security);
@@ -117,12 +125,12 @@ export const initRoutes = (
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
-  createIndexRoute(router);
+  createIndexRoute(router, ruleDataService, config);
   readIndexRoute(router, config);
   deleteIndexRoute(router);
 
   // Detection Engine tags routes that have the REST endpoints of /api/detection_engine/tags
-  readTagsRoute(router);
+  readTagsRoute(router, isRuleRegistryEnabled);
 
   // Privileges API to get the generic user privileges
   readPrivilegesRoute(router, hasEncryptionKey);

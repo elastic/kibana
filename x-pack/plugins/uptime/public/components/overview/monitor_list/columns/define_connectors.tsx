@@ -6,41 +6,72 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPopover, EuiSwitch, EuiText } from '@elastic/eui';
-import { useRouteMatch } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
+import { EuiSwitch, EuiPopover, EuiText, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
-import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../common/constants';
+import { SETTINGS_ROUTE } from '../../../../../common/constants';
 import { ENABLE_STATUS_ALERT } from './translations';
 
-const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.defineConnector', {
-  defaultMessage: 'Define a default connector',
-});
+interface Props {
+  showPopover?: boolean;
+  showHelpText?: boolean;
+  showLabel?: boolean;
+}
 
-export const DefineAlertConnectors = () => {
+export const DefineAlertConnectors = ({
+  showPopover = false,
+  showHelpText = false,
+  showLabel = false,
+}: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = () => setIsPopoverOpen((val) => !val);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const isMonitorPage = useRouteMatch(MONITOR_ROUTE);
-
   return (
     <EuiPopover
       button={
-        <EuiSwitch
-          id={'defineAlertSettingsSwitch'}
-          label={ENABLE_STATUS_ALERT}
-          showLabel={!!isMonitorPage}
-          aria-label={ENABLE_STATUS_ALERT}
-          onChange={onButtonClick}
-          checked={false}
-          compressed={!isMonitorPage}
-          data-test-subj={'uptimeDisplayDefineConnector'}
-        />
+        <>
+          <EuiFormRow
+            helpText={
+              showHelpText ? (
+                <FormattedMessage
+                  id="xpack.uptime.monitorList.defineConnector.description"
+                  defaultMessage="Define a default connector in {link} to enable monitor status alerts."
+                  values={{
+                    link: (
+                      <ReactRouterEuiLink
+                        to={SETTINGS_ROUTE + '?focusConnectorField=true'}
+                        data-test-subj={'uptimeSettingsLink'}
+                        target="_blank"
+                      >
+                        <FormattedMessage
+                          id="xpack.uptime.page_header.defineConnector.settingsLink"
+                          defaultMessage="Settings"
+                        />
+                      </ReactRouterEuiLink>
+                    ),
+                  }}
+                />
+              ) : undefined
+            }
+          >
+            <EuiSwitch
+              id={'defineAlertSettingsSwitch'}
+              label={ENABLE_STATUS_ALERT}
+              showLabel={showLabel}
+              aria-label={ENABLE_STATUS_ALERT}
+              // this switch is read only, no onChange applied
+              onChange={showPopover ? onButtonClick : () => {}}
+              checked={false}
+              compressed={true}
+              disabled={!showPopover}
+              data-test-subj={'uptimeDisplayDefineConnector'}
+            />
+          </EuiFormRow>
+        </>
       }
-      isOpen={isPopoverOpen}
+      isOpen={showPopover ? isPopoverOpen : false}
       closePopover={closePopover}
     >
       <EuiText style={{ width: '350px' }} data-test-subj={'uptimeSettingsDefineConnector'}>
@@ -48,10 +79,13 @@ export const DefineAlertConnectors = () => {
           to={SETTINGS_ROUTE + '?focusConnectorField=true'}
           data-test-subj={'uptimeSettingsLink'}
         >
-          {SETTINGS_LINK_TEXT}
+          <FormattedMessage
+            id="xpack.uptime.page_header.defineConnector.popover.defaultLink"
+            defaultMessage="Define a default connector"
+          />
         </ReactRouterEuiLink>{' '}
         <FormattedMessage
-          id="xpack.uptime.monitorList.defineConnector.description"
+          id="xpack.uptime.monitorList.defineConnector.popover.description"
           defaultMessage="to receive status alerts."
         />
       </EuiText>

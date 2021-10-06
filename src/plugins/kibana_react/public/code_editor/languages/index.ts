@@ -9,5 +9,6 @@
 import { Lang as CssLang } from './css';
 import { Lang as HandlebarsLang } from './handlebars';
 import { Lang as MarkdownLang } from './markdown';
+import { Lang as YamlLang } from './yaml';
 
-export { CssLang, HandlebarsLang, MarkdownLang };
+export { CssLang, HandlebarsLang, MarkdownLang, YamlLang };

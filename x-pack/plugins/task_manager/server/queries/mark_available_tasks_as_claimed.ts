@@ -102,7 +102,7 @@ if (doc['task.runAt'].size()!=0) {
     },
   },
 };
-export const SortByRunAtAndRetryAt = (SortByRunAtAndRetryAtScript as unknown) as Record<
+export const SortByRunAtAndRetryAt = SortByRunAtAndRetryAtScript as unknown as Record<
   string,
   estypes.SearchSort
 >;

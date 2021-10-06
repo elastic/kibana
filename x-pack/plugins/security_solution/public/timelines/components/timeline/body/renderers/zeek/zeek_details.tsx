@@ -24,15 +24,16 @@ Details.displayName = 'Details';
 interface ZeekDetailsProps {
   browserFields: BrowserFields;
   data: Ecs;
+  isDraggable?: boolean;
   timelineId: string;
 }
 
-export const ZeekDetails = React.memo<ZeekDetailsProps>(({ data, timelineId }) =>
+export const ZeekDetails = React.memo<ZeekDetailsProps>(({ data, isDraggable, timelineId }) =>
   data.zeek != null ? (
     <Details>
-      <ZeekSignature data={data} timelineId={timelineId} />
+      <ZeekSignature data={data} isDraggable={isDraggable} timelineId={timelineId} />
       <EuiSpacer size="s" />
-      <NetflowRenderer data={data} timelineId={timelineId} />
+      <NetflowRenderer data={data} isDraggable={isDraggable} timelineId={timelineId} />
     </Details>
   ) : null
 );

@@ -23,6 +23,20 @@ describe('ensureValidConfiguration', () => {
 
   it('returns normally when there is no unused keys and when the config validates', async () => {
     await expect(ensureValidConfiguration(configService as any)).resolves.toBeUndefined();
+
+    expect(configService.validate).toHaveBeenCalledWith(undefined);
+  });
+
+  it('forwards parameters to the `validate` method', async () => {
+    await expect(
+      ensureValidConfiguration(configService as any, { logDeprecations: false })
+    ).resolves.toBeUndefined();
+    expect(configService.validate).toHaveBeenCalledWith({ logDeprecations: false });
+
+    await expect(
+      ensureValidConfiguration(configService as any, { logDeprecations: true })
+    ).resolves.toBeUndefined();
+    expect(configService.validate).toHaveBeenCalledWith({ logDeprecations: true });
   });
 
   it('throws when config validation fails', async () => {

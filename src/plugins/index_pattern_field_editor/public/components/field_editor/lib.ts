@@ -11,22 +11,22 @@ import { i18n } from '@kbn/i18n';
 import { ValidationFunc, FieldConfig } from '../../shared_imports';
 import { Field } from '../../types';
 import { schema } from './form_schema';
-import { Props } from './field_editor';
+import type { Props } from './field_editor';
 
-const createNameNotAllowedValidator = (
-  namesNotAllowed: string[]
-): ValidationFunc<{}, string, string> => ({ value }) => {
-  if (namesNotAllowed.includes(value)) {
-    return {
-      message: i18n.translate(
-        'indexPatternFieldEditor.editor.runtimeFieldsEditor.existRuntimeFieldNamesValidationErrorMessage',
-        {
-          defaultMessage: 'A field with this name already exists.',
-        }
-      ),
-    };
-  }
-};
+const createNameNotAllowedValidator =
+  (namesNotAllowed: string[]): ValidationFunc<{}, string, string> =>
+  ({ value }) => {
+    if (namesNotAllowed.includes(value)) {
+      return {
+        message: i18n.translate(
+          'indexPatternFieldEditor.editor.runtimeFieldsEditor.existRuntimeFieldNamesValidationErrorMessage',
+          {
+            defaultMessage: 'A field with this name already exists.',
+          }
+        ),
+      };
+    }
+  };
 
 /**
  * Dynamically retrieve the config for the "name" field, adding

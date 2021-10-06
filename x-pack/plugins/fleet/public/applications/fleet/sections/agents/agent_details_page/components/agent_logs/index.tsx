@@ -22,8 +22,8 @@ import { DEFAULT_LOGS_STATE, STATE_STORAGE_KEY } from './constants';
 import type { AgentLogsProps, AgentLogsState } from './agent_logs';
 import { AgentLogsUI, AgentLogsUrlStateHelper } from './agent_logs';
 
-export const AgentLogs: React.FunctionComponent<Pick<AgentLogsProps, 'agent'>> = memo(
-  ({ agent }) => {
+export const AgentLogs: React.FunctionComponent<Pick<AgentLogsProps, 'agent' | 'agentPolicy'>> =
+  memo(({ agent, agentPolicy }) => {
     const stateContainer = useMemo(
       () =>
         createStateContainer<
@@ -34,7 +34,9 @@ export const AgentLogs: React.FunctionComponent<Pick<AgentLogsProps, 'agent'>> =
         >(
           {
             ...DEFAULT_LOGS_STATE,
-            ...getStateFromKbnUrl<AgentLogsState>(STATE_STORAGE_KEY, window.location.href),
+            ...getStateFromKbnUrl<AgentLogsState>(STATE_STORAGE_KEY, window.location.href, {
+              getFromHashQuery: false,
+            }),
           },
           {
             update: (state) => (updatedState) => ({ ...state, ...updatedState }),
@@ -71,8 +73,7 @@ export const AgentLogs: React.FunctionComponent<Pick<AgentLogsProps, 'agent'>> =
 
     return (
       <AgentLogsUrlStateHelper.Provider value={stateContainer}>
-        {isSyncReady ? <AgentLogsConnected agent={agent} /> : null}
+        {isSyncReady ? <AgentLogsConnected agent={agent} agentPolicy={agentPolicy} /> : null}
       </AgentLogsUrlStateHelper.Provider>
     );
-  }
-);
+  });

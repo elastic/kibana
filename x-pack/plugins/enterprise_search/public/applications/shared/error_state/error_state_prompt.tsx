@@ -12,7 +12,7 @@ import { useValues } from 'kea';
 import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { KibanaLogic } from '../../shared/kibana';
+import { KibanaLogic } from '../kibana';
 import { EuiButtonTo } from '../react_router_helpers';
 
 import './error_state_prompt.scss';
@@ -69,13 +69,13 @@ export const ErrorStatePrompt: React.FC = () => {
                 <li>
                   <FormattedMessage
                     id="xpack.enterpriseSearch.errorConnectingState.troubleshootAuthNative"
-                    defaultMessage="You must authenticate using Elasticsearch Native auth or SSO/SAML."
+                    defaultMessage="You must authenticate using Elasticsearch Native auth, SSO/SAML, or OpenID Connect."
                   />
                 </li>
                 <li>
                   <FormattedMessage
                     id="xpack.enterpriseSearch.errorConnectingState.troubleshootAuthSAML"
-                    defaultMessage="If using SSO/SAML, your SAML realm must also be set up on Enterprise Search."
+                    defaultMessage="If using an external SSO provider, such as SAML or OpenID Connect, your SAML/OIDC realm must also be set up on Enterprise Search."
                   />
                 </li>
               </ul>
@@ -92,14 +92,14 @@ export const ErrorStatePrompt: React.FC = () => {
           </ol>
         </>
       }
-      actions={
+      actions={[
         <EuiButtonTo iconType="help" fill to="/setup_guide">
           <FormattedMessage
             id="xpack.enterpriseSearch.errorConnectingState.setupGuideCta"
             defaultMessage="Review setup guide"
           />
-        </EuiButtonTo>
-      }
+        </EuiButtonTo>,
+      ]}
     />
   );
 };

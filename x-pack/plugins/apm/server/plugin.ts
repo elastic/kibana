@@ -15,11 +15,11 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/server';
-import { mapValues, once } from 'lodash';
-import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
+import { isEmpty, mapValues } from 'lodash';
+import { SavedObjectsClient } from '../../../../src/core/server';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
-import { RuleDataClient } from '../../rule_registry/server';
-import { APMConfig, APMXPackConfig } from '.';
+import { Dataset } from '../../rule_registry/server';
+import { APMConfig, APMXPackConfig, APM_SERVER_FEATURE_ID } from '.';
 import { mergeConfigs } from './index';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
@@ -28,11 +28,11 @@ import { registerFleetPolicyCallbacks } from './lib/fleet/register_fleet_policy_
 import { createApmTelemetry } from './lib/apm_telemetry';
 import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
+import { registerSearchStrategies } from './lib/search_strategies';
 import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
 import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
-import { apmIndices, apmTelemetry } from './saved_objects';
-import { uiSettings } from './ui_settings';
+import { apmIndices, apmTelemetry, apmServerSettings } from './saved_objects';
 import type {
   ApmPluginRequestHandlerContext,
   APMRouteHandlerResources,
@@ -51,6 +51,7 @@ import {
   TRANSACTION_TYPE,
 } from '../common/elasticsearch_fieldnames';
 import { tutorialProvider } from './tutorial';
+import { getDeprecations } from './deprecations';
 
 export class APMPlugin
   implements
@@ -59,7 +60,8 @@ export class APMPlugin
       void,
       APMPluginSetupDependencies,
       APMPluginStartDependencies
-    > {
+    >
+{
   private currentConfig?: APMConfig;
   private logger?: Logger;
   constructor(private readonly initContext: PluginInitializerContext) {
@@ -78,20 +80,18 @@ export class APMPlugin
 
     core.savedObjects.registerType(apmIndices);
     core.savedObjects.registerType(apmTelemetry);
-
-    core.uiSettings.register(uiSettings);
+    core.savedObjects.registerType(apmServerSettings);
 
     const currentConfig = mergeConfigs(
       plugins.apmOss.config,
       this.initContext.config.get<APMXPackConfig>()
     );
-
     this.currentConfig = currentConfig;
 
     if (
       plugins.taskManager &&
       plugins.usageCollection &&
-      this.currentConfig['xpack.apm.telemetryCollectionEnabled']
+      currentConfig['xpack.apm.telemetryCollectionEnabled']
     ) {
       createApmTelemetry({
         core,
@@ -103,46 +103,24 @@ export class APMPlugin
       });
     }
 
-    plugins.home?.tutorials.registerTutorial(
-      tutorialProvider({
-        isEnabled: this.currentConfig['xpack.apm.ui.enabled'],
-        indexPatternTitle: this.currentConfig['apm_oss.indexPattern'],
-        cloud: plugins.cloud,
-        indices: {
-          errorIndices: this.currentConfig['apm_oss.errorIndices'],
-          metricsIndices: this.currentConfig['apm_oss.metricsIndices'],
-          onboardingIndices: this.currentConfig['apm_oss.onboardingIndices'],
-          sourcemapIndices: this.currentConfig['apm_oss.sourcemapIndices'],
-          transactionIndices: this.currentConfig['apm_oss.transactionIndices'],
-        },
-      })
-    );
-
     plugins.features.registerKibanaFeature(APM_FEATURE);
 
     registerFeaturesUsage({ licensingPlugin: plugins.licensing });
 
-    const { ruleDataService } = plugins.ruleRegistry;
     const getCoreStart = () =>
       core.getStartServices().then(([coreStart]) => coreStart);
 
-    const ready = once(async () => {
-      const componentTemplateName = ruleDataService.getFullAssetName(
-        'apm-mappings'
-      );
-
-      if (!ruleDataService.isWriteEnabled()) {
-        return;
-      }
-
-      await ruleDataService.createOrUpdateComponentTemplate({
-        name: componentTemplateName,
-        body: {
-          template: {
-            settings: {
-              number_of_shards: 1,
-            },
-            mappings: mappingFromFieldMap({
+    const { ruleDataService } = plugins.ruleRegistry;
+    const ruleDataClient = ruleDataService.initializeIndex({
+      feature: APM_SERVER_FEATURE_ID,
+      registrationContext: 'observability.apm',
+      dataset: Dataset.alerts,
+      componentTemplateRefs: [],
+      componentTemplates: [
+        {
+          name: 'mappings',
+          mappings: mappingFromFieldMap(
+            {
               [SERVICE_NAME]: {
                 type: 'keyword',
               },
@@ -155,36 +133,11 @@ export class APMPlugin
               [PROCESSOR_EVENT]: {
                 type: 'keyword',
               },
-            }),
-          },
+            },
+            'strict'
+          ),
         },
-      });
-
-      await ruleDataService.createOrUpdateIndexTemplate({
-        name: ruleDataService.getFullAssetName('apm-index-template'),
-        body: {
-          index_patterns: [
-            ruleDataService.getFullAssetName('observability-apm*'),
-          ],
-          composed_of: [
-            ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
-            componentTemplateName,
-          ],
-        },
-      });
-    });
-
-    ready().catch((err) => {
-      this.logger!.error(err);
-    });
-
-    const ruleDataClient = new RuleDataClient({
-      alias: ruleDataService.getFullAssetName('observability-apm'),
-      getClusterClient: async () => {
-        const coreStart = await getCoreStart();
-        return coreStart.elasticsearch.client.asInternalUser;
-      },
-      ready,
+      ],
     });
 
     const resourcePlugins = mapValues(plugins, (value, key) => {
@@ -200,6 +153,28 @@ export class APMPlugin
       };
     }) as APMRouteHandlerResources['plugins'];
 
+    const boundGetApmIndices = async () =>
+      getApmIndices({
+        savedObjectsClient: await getInternalSavedObjectsClient(core),
+        config: await mergedConfig$.pipe(take(1)).toPromise(),
+      });
+
+    boundGetApmIndices().then((indices) => {
+      plugins.home?.tutorials.registerTutorial(
+        tutorialProvider({
+          apmConfig: currentConfig,
+          apmIndices: indices,
+          cloud: plugins.cloud,
+          isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
+        })
+      );
+    });
+
+    const telemetryUsageCounter =
+      resourcePlugins.usageCollection?.setup.createUsageCounter(
+        APM_SERVER_FEATURE_ID
+      );
+
     registerRoutes({
       core: {
         setup: core,
@@ -210,13 +185,8 @@ export class APMPlugin
       repository: getGlobalApmServerRouteRepository(),
       ruleDataClient,
       plugins: resourcePlugins,
+      telemetryUsageCounter,
     });
-
-    const boundGetApmIndices = async () =>
-      getApmIndices({
-        savedObjectsClient: await getInternalSavedObjectsClient(core),
-        config: await mergedConfig$.pipe(take(1)).toPromise(),
-      });
 
     if (plugins.alerting) {
       registerApmAlerts({
@@ -231,8 +201,33 @@ export class APMPlugin
     registerFleetPolicyCallbacks({
       plugins: resourcePlugins,
       ruleDataClient,
-      config: this.currentConfig,
+      config: currentConfig,
       logger: this.logger,
+    });
+
+    // search strategies for async partial search results
+    core.getStartServices().then(([coreStart]) => {
+      (async () => {
+        const savedObjectsClient = new SavedObjectsClient(
+          coreStart.savedObjects.createInternalRepository()
+        );
+
+        const includeFrozen = await coreStart.uiSettings
+          .asScopedToClient(savedObjectsClient)
+          .get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
+
+        registerSearchStrategies(
+          plugins.data.search.registerSearchStrategy,
+          boundGetApmIndices,
+          includeFrozen
+        );
+      })();
+    });
+    core.deprecations.registerDeprecations({
+      getDeprecations: getDeprecations({
+        cloudSetup: plugins.cloud,
+        fleet: resourcePlugins.fleet,
+      }),
     });
 
     return {

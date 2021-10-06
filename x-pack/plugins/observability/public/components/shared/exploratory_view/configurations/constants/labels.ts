@@ -72,6 +72,17 @@ export const CLS_LABEL = i18n.translate('xpack.observability.expView.fieldLabels
   defaultMessage: 'Cumulative layout shift',
 });
 
+export const DCL_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.dcl', {
+  defaultMessage: 'DOM content loaded',
+});
+
+export const DOCUMENT_ONLOAD_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.onload',
+  {
+    defaultMessage: 'Document complete (onLoad)',
+  }
+);
+
 export const BACKEND_TIME_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.backend',
   {

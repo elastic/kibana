@@ -14,6 +14,7 @@ import {
   checkForDateHistogram,
   dateBasedOperationToExpression,
   hasDateField,
+  checkForDataLayerType,
 } from './utils';
 import { DEFAULT_TIME_SCALE } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
@@ -111,13 +112,18 @@ export const counterRateOperation: OperationDefinition<
       })
     );
   },
-  getDisabledStatus(indexPattern, layer) {
-    return checkForDateHistogram(
-      layer,
-      i18n.translate('xpack.lens.indexPattern.counterRate', {
-        defaultMessage: 'Counter rate',
-      })
-    )?.join(', ');
+  getDisabledStatus(indexPattern, layer, layerType) {
+    const opName = i18n.translate('xpack.lens.indexPattern.counterRate', {
+      defaultMessage: 'Counter rate',
+    });
+    if (layerType) {
+      const dataLayerErrors = checkForDataLayerType(layerType, opName);
+      if (dataLayerErrors) {
+        return dataLayerErrors.join(', ');
+      }
+    }
+
+    return checkForDateHistogram(layer, opName)?.join(', ');
   },
   timeScalingMode: 'mandatory',
   filterable: true,
@@ -126,7 +132,7 @@ export const counterRateOperation: OperationDefinition<
     signature: i18n.translate('xpack.lens.indexPattern.counterRate.signature', {
       defaultMessage: 'metric: number',
     }),
-    description: i18n.translate('xpack.lens.indexPattern.counterRate.documentation', {
+    description: i18n.translate('xpack.lens.indexPattern.counterRate.documentation.markdown', {
       defaultMessage: `
 Calculates the rate of an ever increasing counter. This function will only yield helpful results on counter metric fields which contain a measurement of some kind monotonically growing over time.
 If the value does get smaller, it will interpret this as a counter reset. To get most precise results, \`counter_rate\` should be calculated on the \`max\` of a field.

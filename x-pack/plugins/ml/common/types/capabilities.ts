@@ -40,6 +40,7 @@ export const adminMlCapabilities = {
   canDeleteJob: false,
   canOpenJob: false,
   canCloseJob: false,
+  canResetJob: false,
   canUpdateJob: false,
   canForecastJob: false,
   canCreateDatafeed: false,
@@ -105,11 +106,7 @@ export function getPluginPrivileges() {
   return {
     admin: {
       ...privilege,
-      api: [
-        'fileUpload:import',
-        'fileUpload:analyzeFile',
-        ...allMlCapabilitiesKeys.map((k) => `ml:${k}`),
-      ],
+      api: ['fileUpload:analyzeFile', ...allMlCapabilitiesKeys.map((k) => `ml:${k}`)],
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
       ui: allMlCapabilitiesKeys,
       savedObject: {

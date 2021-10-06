@@ -18,5 +18,21 @@
     "process.parent.executable.caseless",
     "process.parent.name.caseless",
     "process.parent.working_directory.caseless",
-    "process.working_directory.caseless"
+    "process.working_directory.caseless",
+    "Target.process.Ext.code_signature.status",
+    "Target.process.Ext.code_signature.subject_name",
+    "Target.process.Ext.code_signature.trusted",
+    "Target.process.Ext.code_signature.valid",
+    "Target.process.parent.Ext.code_signature.status",
+    "Target.process.parent.Ext.code_signature.subject_name",
+    "Target.process.parent.Ext.code_signature.trusted",
+    "Target.process.parent.Ext.code_signature.valid",
+    "file.Ext.code_signature.status",
+    "file.Ext.code_signature.subject_name",
+    "file.Ext.code_signature.trusted",
+    "file.Ext.code_signature.valid",
+    "process.parent.Ext.code_signature.status",
+    "process.parent.Ext.code_signature.subject_name",
+    "process.parent.Ext.code_signature.trusted",
+    "process.parent.Ext.code_signature.valid"
 ]  

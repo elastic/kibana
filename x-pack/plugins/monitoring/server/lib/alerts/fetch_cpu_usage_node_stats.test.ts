@@ -201,10 +201,12 @@ describe('fetchCpuUsageNodeStats', () => {
         {} as estypes.SearchResponse
       );
     });
-    await fetchCpuUsageNodeStats(esClient, clusters, index, startMs, endMs, size);
+    const filterQuery =
+      '{"bool":{"should":[{"exists":{"field":"cluster_uuid"}}],"minimum_should_match":1}}';
+    await fetchCpuUsageNodeStats(esClient, clusters, index, startMs, endMs, size, filterQuery);
     expect(params).toStrictEqual({
       index: '.monitoring-es-*',
-      filterPath: ['aggregations'],
+      filter_path: ['aggregations'],
       body: {
         size: 0,
         query: {
@@ -213,6 +215,9 @@ describe('fetchCpuUsageNodeStats', () => {
               { terms: { cluster_uuid: ['abc123'] } },
               { term: { type: 'node_stats' } },
               { range: { timestamp: { format: 'epoch_millis', gte: 0, lte: 0 } } },
+              {
+                bool: { should: [{ exists: { field: 'cluster_uuid' } }], minimum_should_match: 1 },
+              },
             ],
           },
         },

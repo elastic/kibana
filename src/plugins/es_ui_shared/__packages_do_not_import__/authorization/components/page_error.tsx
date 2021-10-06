@@ -43,7 +43,11 @@ export const PageError: React.FunctionComponent<Props> = ({
         body={
           error && (
             <>
-              {cause ? message || errorString : <p>{message || errorString}</p>}
+              {cause ? (
+                message || errorString
+              ) : (
+                <p className="eui-textBreakWord">{message || errorString}</p>
+              )}
               {cause && (
                 <>
                   <EuiSpacer size="s" />

@@ -20,6 +20,8 @@ export default function ({ getService, getPageObjects }) {
           from: 'Aug 23, 2017 @ 21:29:35.267',
           to: 'Aug 23, 2017 @ 21:47:25.556',
         });
+
+        await overview.closeAlertsModal();
       });
 
       after(async () => {
@@ -71,6 +73,8 @@ export default function ({ getService, getPageObjects }) {
           from: 'Aug 29, 2017 @ 17:23:47.528',
           to: 'Aug 29, 2017 @ 17:25:50.701',
         });
+
+        await overview.closeAlertsModal();
       });
 
       after(async () => {
@@ -117,6 +121,8 @@ export default function ({ getService, getPageObjects }) {
           from: 'Aug 29, 2017 @ 17:55:43.879',
           to: 'Aug 29, 2017 @ 18:01:34.958',
         });
+
+        await overview.closeAlertsModal();
       });
 
       after(async () => {

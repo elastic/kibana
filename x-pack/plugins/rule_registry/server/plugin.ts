@@ -5,26 +5,43 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, Plugin, CoreSetup, Logger } from 'src/core/server';
-import { SpacesPluginStart } from '../../spaces/server';
+import {
+  PluginInitializerContext,
+  Plugin,
+  CoreSetup,
+  Logger,
+  KibanaRequest,
+  CoreStart,
+  IContextProvider,
+  SharedGlobalConfig,
+} from 'src/core/server';
+
+import { PluginStartContract as AlertingStart } from '../../alerting/server';
+import { SecurityPluginSetup } from '../../security/server';
 
 import { RuleRegistryPluginConfig } from './config';
 import { RuleDataPluginService } from './rule_data_plugin_service';
-import { EventLogService, IEventLogService } from './event_log';
+import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
+import { AlertsClient } from './alert_data_client/alerts_client';
+import { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
+import { defineRoutes } from './routes';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface RuleRegistryPluginSetupDependencies {}
+export interface RuleRegistryPluginSetupDependencies {
+  security?: SecurityPluginSetup;
+}
 
-interface RuleRegistryPluginStartDependencies {
-  spaces: SpacesPluginStart;
+export interface RuleRegistryPluginStartDependencies {
+  alerting: AlertingStart;
 }
 
 export interface RuleRegistryPluginSetupContract {
   ruleDataService: RuleDataPluginService;
-  eventLogService: IEventLogService;
 }
 
-export type RuleRegistryPluginStartContract = void;
+export interface RuleRegistryPluginStartContract {
+  getRacClientWithRequest: (req: KibanaRequest) => Promise<AlertsClient>;
+  alerting: AlertingStart;
+}
 
 export class RuleRegistryPlugin
   implements
@@ -33,21 +50,31 @@ export class RuleRegistryPlugin
       RuleRegistryPluginStartContract,
       RuleRegistryPluginSetupDependencies,
       RuleRegistryPluginStartDependencies
-    > {
+    >
+{
   private readonly config: RuleRegistryPluginConfig;
+  private readonly legacyConfig: SharedGlobalConfig;
   private readonly logger: Logger;
-  private eventLogService: EventLogService | null;
+  private readonly kibanaVersion: string;
+  private readonly alertsClientFactory: AlertsClientFactory;
+  private ruleDataService: RuleDataPluginService | null;
+  private security: SecurityPluginSetup | undefined;
 
   constructor(initContext: PluginInitializerContext) {
     this.config = initContext.config.get<RuleRegistryPluginConfig>();
+    // TODO: Can be removed in 8.0.0. Exists to work around multi-tenancy users.
+    this.legacyConfig = initContext.config.legacy.get();
     this.logger = initContext.logger.get();
-    this.eventLogService = null;
+    this.kibanaVersion = initContext.env.packageInfo.version;
+    this.ruleDataService = null;
+    this.alertsClientFactory = new AlertsClientFactory();
   }
 
   public setup(
-    core: CoreSetup<RuleRegistryPluginStartDependencies, RuleRegistryPluginStartContract>
+    core: CoreSetup<RuleRegistryPluginStartDependencies, RuleRegistryPluginStartContract>,
+    plugins: RuleRegistryPluginSetupDependencies
   ): RuleRegistryPluginSetupContract {
-    const { config, logger } = this;
+    const { logger, kibanaVersion } = this;
 
     const startDependencies = core.getStartServices().then(([coreStart, pluginStart]) => {
       return {
@@ -56,48 +83,86 @@ export class RuleRegistryPlugin
       };
     });
 
-    const ruleDataService = new RuleDataPluginService({
+    this.security = plugins.security;
+
+    const isWriteEnabled = (config: RuleRegistryPluginConfig, legacyConfig: SharedGlobalConfig) => {
+      const hasEnabledWrite = config.write.enabled;
+      const hasSetCustomKibanaIndex = legacyConfig.kibana.index !== '.kibana';
+      const hasSetUnsafeAccess = config.unsafe.legacyMultiTenancy.enabled;
+
+      if (!hasEnabledWrite) return false;
+
+      // Not using legacy multi-tenancy
+      if (!hasSetCustomKibanaIndex) {
+        return hasEnabledWrite;
+      } else {
+        return hasSetUnsafeAccess;
+      }
+    };
+
+    this.ruleDataService = new RuleDataPluginService({
       logger,
-      isWriteEnabled: config.write.enabled,
-      index: config.index,
+      kibanaVersion,
+      isWriteEnabled: isWriteEnabled(this.config, this.legacyConfig),
+      isIndexUpgradeEnabled: this.config.unsafe.indexUpgrade.enabled,
       getClusterClient: async () => {
         const deps = await startDependencies;
         return deps.core.elasticsearch.client.asInternalUser;
       },
     });
 
-    ruleDataService.init().catch((originalError) => {
-      const error = new Error('Failed installing assets');
-      // @ts-ignore
-      error.stack = originalError.stack;
-      logger.error(error);
-    });
+    this.ruleDataService.initializeService();
 
-    const eventLogService = new EventLogService({
-      config: {
-        indexPrefix: this.config.index,
-        isWriteEnabled: this.config.write.enabled,
-      },
-      dependencies: {
-        clusterClient: startDependencies.then((deps) => deps.core.elasticsearch.client),
-        spacesService: startDependencies.then((deps) => deps.spaces.spacesService),
-        logger: logger.get('eventLog'),
-      },
-    });
+    // ALERTS ROUTES
+    const router = core.http.createRouter<RacRequestHandlerContext>();
+    core.http.registerRouteHandlerContext<RacRequestHandlerContext, 'rac'>(
+      'rac',
+      this.createRouteHandlerContext()
+    );
 
-    this.eventLogService = eventLogService;
-    return { ruleDataService, eventLogService };
+    defineRoutes(router);
+
+    return { ruleDataService: this.ruleDataService };
   }
 
-  public start(): RuleRegistryPluginStartContract {}
+  public start(
+    core: CoreStart,
+    plugins: RuleRegistryPluginStartDependencies
+  ): RuleRegistryPluginStartContract {
+    const { logger, alertsClientFactory, ruleDataService, security } = this;
 
-  public stop() {
-    const { eventLogService, logger } = this;
+    alertsClientFactory.initialize({
+      logger,
+      esClient: core.elasticsearch.client.asInternalUser,
+      // NOTE: Alerts share the authorization client with the alerting plugin
+      getAlertingAuthorization(request: KibanaRequest) {
+        return plugins.alerting.getAlertingAuthorizationWithRequest(request);
+      },
+      securityPluginSetup: security,
+      ruleDataService,
+    });
 
-    if (eventLogService) {
-      eventLogService.stop().catch((e) => {
-        logger.error(e);
-      });
-    }
+    const getRacClientWithRequest = (request: KibanaRequest) => {
+      return alertsClientFactory.create(request);
+    };
+
+    return {
+      getRacClientWithRequest,
+      alerting: plugins.alerting,
+    };
   }
+
+  private createRouteHandlerContext = (): IContextProvider<RacRequestHandlerContext, 'rac'> => {
+    const { alertsClientFactory } = this;
+    return function alertsRouteHandlerContext(context, request): RacApiRequestHandlerContext {
+      return {
+        getAlertsClient: async () => {
+          const createdClient = alertsClientFactory.create(request);
+          return createdClient;
+        },
+      };
+    };
+  };
+
+  public stop() {}
 }

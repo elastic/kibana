@@ -5,27 +5,33 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import React, { useState, useEffect } from 'react';
 
-import { useCreateFromTemplate, useFindTemplatesOnMount } from '../hooks';
+import { useCreateFromTemplate, useFindTemplates } from '../hooks';
 
 import { WorkpadTemplates as Component } from './workpad_templates.component';
+import { CanvasTemplate } from '../../../../types';
+import { Loading } from '../loading';
 
 export const WorkpadTemplates = () => {
-  const [isMounted, templateResponse] = useFindTemplatesOnMount();
+  const findTemplates = useFindTemplates();
+  const [isMounted, setIsMounted] = useState(false);
+  const [templates, setTemplates] = useState<CanvasTemplate[]>([]);
+
+  useEffect(() => {
+    const mount = async () => {
+      const response = await findTemplates();
+      setIsMounted(true);
+      setTemplates(response?.templates || []);
+    };
+    mount();
+  }, [setIsMounted, findTemplates]);
+
   const onCreateWorkpad = useCreateFromTemplate();
 
   if (!isMounted) {
-    return (
-      <EuiFlexGroup justifyContent="spaceAround" alignItems="center" style={{ minHeight: 600 }}>
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="xl" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    return <Loading />;
   }
-  const { templates } = templateResponse;
 
   return <Component {...{ templates, onCreateWorkpad }} />;
 };

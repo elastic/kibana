@@ -36,7 +36,7 @@ import { GroupLogic } from '../group_logic';
 const HEADER_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.sourceProioritization.headerTitle',
   {
-    defaultMessage: 'Shared content source prioritization',
+    defaultMessage: 'Organizational content source prioritization',
   }
 );
 const HEADER_DESCRIPTION = i18n.translate(
@@ -54,7 +54,7 @@ const ZERO_STATE_TITLE = i18n.translate(
 const ZERO_STATE_BUTTON_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.sourceProioritization.zeroStateButtonText',
   {
-    defaultMessage: 'Add shared content sources',
+    defaultMessage: 'Add organizational content sources',
   }
 );
 const SOURCE_TABLE_HEADER = i18n.translate(
@@ -71,9 +71,8 @@ const PRIORITY_TABLE_HEADER = i18n.translate(
 );
 
 export const GroupSourcePrioritization: React.FC = () => {
-  const { updatePriority, saveGroupSourcePrioritization, showSharedSourcesModal } = useActions(
-    GroupLogic
-  );
+  const { updatePriority, saveGroupSourcePrioritization, showOrgSourcesModal } =
+    useActions(GroupLogic);
 
   const {
     group: { contentSources = [], name: groupName },
@@ -118,7 +117,7 @@ export const GroupSourcePrioritization: React.FC = () => {
             )}
           </>
         }
-        actions={<EuiButton onClick={showSharedSourcesModal}>{ZERO_STATE_BUTTON_TEXT}</EuiButton>}
+        actions={<EuiButton onClick={showOrgSourcesModal}>{ZERO_STATE_BUTTON_TEXT}</EuiButton>}
       />
       <EuiSpacer size="xxl" />
     </EuiPanel>

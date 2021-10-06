@@ -35,11 +35,12 @@ const defaultSpanTypeIcons: { [key: string]: string } = {
 };
 
 export const spanTypeIcons: {
-  [type: string]: { [subType: string]: string };
+  [type: string]: { [subtype: string]: string };
 } = {
   aws: {
     servicename: awsIcon,
   },
+  cache: { redis: redisIcon },
   db: {
     cassandra: cassandraIcon,
     cosmosdb: azureIcon,

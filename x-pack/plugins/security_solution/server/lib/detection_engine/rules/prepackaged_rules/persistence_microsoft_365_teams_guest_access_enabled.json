@@ -15,7 +15,7 @@
   "license": "Elastic License v2",
   "name": "Microsoft 365 Teams Guest Access Enabled",
   "note": "## Config\n\nThe Microsoft 365 Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:o365.audit and event.provider:(SkypeForBusiness or MicrosoftTeams) and event.category:web and event.action:\"Set-CsTeamsClientConfiguration\" and o365.audit.Parameters.AllowGuestUser:True and event.outcome:success",
+  "query": "event.dataset:o365.audit and event.provider:(SkypeForBusiness or MicrosoftTeams) and\nevent.category:web and event.action:\"Set-CsTeamsClientConfiguration\" and\no365.audit.Parameters.AllowGuestUser:True and event.outcome:success\n",
   "references": [
     "https://docs.microsoft.com/en-us/powershell/module/skype/get-csteamsclientconfiguration?view=skype-ps"
   ],

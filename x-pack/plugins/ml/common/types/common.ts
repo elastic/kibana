@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlPages } from '../constants/ml_url_generator';
+import { MlPages } from '../constants/locator';
 
 export interface Dictionary<TValue> {
   [id: string]: TValue;

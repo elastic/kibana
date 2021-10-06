@@ -31,47 +31,47 @@ describe('UI Extension services', () => {
 
     it('should store an extension points', () => {
       const LazyCustomView = lazy<PackagePolicyEditExtensionComponent>(async () => {
-        return { default: ((() => {}) as unknown) as PackagePolicyEditExtensionComponent };
+        return { default: (() => {}) as unknown as PackagePolicyEditExtensionComponent };
       });
       register({
         view: 'package-policy-edit',
         package: 'endpoint',
-        component: LazyCustomView,
+        Component: LazyCustomView,
       });
 
       expect(storage.endpoint['package-policy-edit']).toEqual({
         view: 'package-policy-edit',
         package: 'endpoint',
-        component: LazyCustomView,
+        Component: LazyCustomView,
       });
     });
 
     it('should throw if extension point has already registered', () => {
       const LazyCustomView = lazy<PackagePolicyEditExtensionComponent>(async () => {
-        return { default: ((() => {}) as unknown) as PackagePolicyEditExtensionComponent };
+        return { default: (() => {}) as unknown as PackagePolicyEditExtensionComponent };
       });
       const LazyCustomView2 = lazy<PackagePolicyEditExtensionComponent>(async () => {
-        return { default: ((() => {}) as unknown) as PackagePolicyEditExtensionComponent };
+        return { default: (() => {}) as unknown as PackagePolicyEditExtensionComponent };
       });
 
       register({
         view: 'package-policy-edit',
         package: 'endpoint',
-        component: LazyCustomView,
+        Component: LazyCustomView,
       });
 
       expect(() => {
         register({
           view: 'package-policy-edit',
           package: 'endpoint',
-          component: LazyCustomView2,
+          Component: LazyCustomView2,
         });
       }).toThrow();
 
       expect(storage.endpoint['package-policy-edit']).toEqual({
         view: 'package-policy-edit',
         package: 'endpoint',
-        component: LazyCustomView,
+        Component: LazyCustomView,
       });
     });
   });

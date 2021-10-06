@@ -28,20 +28,17 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./alerts/rule_registry'));
     });
 
-    describe('correlations/latency_slow_transactions', function () {
-      loadTestFile(require.resolve('./correlations/latency_slow_transactions'));
+    // correlations
+    describe('correlations/failed_transactions', function () {
+      loadTestFile(require.resolve('./correlations/failed_transactions'));
     });
 
-    describe('correlations/latency_overall', function () {
-      loadTestFile(require.resolve('./correlations/latency_overall'));
+    describe('correlations/latency', function () {
+      loadTestFile(require.resolve('./correlations/latency'));
     });
 
-    describe('correlations/errors_overall', function () {
-      loadTestFile(require.resolve('./correlations/errors_overall'));
-    });
-
-    describe('correlations/errors_failed_transactions', function () {
-      loadTestFile(require.resolve('./correlations/errors_failed_transactions'));
+    describe('metadata/event_metadata', function () {
+      loadTestFile(require.resolve('./metadata/event_metadata'));
     });
 
     describe('metrics_charts/metrics_charts', function () {
@@ -78,8 +75,8 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     });
 
     // Services
-    describe('services/agent_name', function () {
-      loadTestFile(require.resolve('./services/agent_name'));
+    describe('services/agent', function () {
+      loadTestFile(require.resolve('./services/agent'));
     });
 
     describe('services/annotations', function () {
@@ -115,6 +112,10 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./services/error_groups_detailed_statistics'));
     });
 
+    describe('services/detailed_statistics', function () {
+      loadTestFile(require.resolve('./services/services_detailed_statistics'));
+    });
+
     // Settinges
     describe('settings/anomaly_detection/basic', function () {
       loadTestFile(require.resolve('./settings/anomaly_detection/basic'));
@@ -140,9 +141,17 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./settings/custom_link'));
     });
 
+    // suggestions
+    describe('suggestions', function () {
+      loadTestFile(require.resolve('./suggestions/suggestions'));
+    });
+
     // traces
     describe('traces/top_traces', function () {
       loadTestFile(require.resolve('./traces/top_traces'));
+    });
+    describe('/api/apm/traces/{traceId}', function () {
+      loadTestFile(require.resolve('./traces/trace_by_id'));
     });
 
     // transactions
@@ -150,8 +159,8 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./transactions/breakdown'));
     });
 
-    describe('transactions/distribution', function () {
-      loadTestFile(require.resolve('./transactions/distribution'));
+    describe('transactions/trace_samples', function () {
+      loadTestFile(require.resolve('./transactions/trace_samples'));
     });
 
     describe('transactions/error_rate', function () {
@@ -160,14 +169,6 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
 
     describe('transactions/latency', function () {
       loadTestFile(require.resolve('./transactions/latency'));
-    });
-
-    describe('transactions/throughput', function () {
-      loadTestFile(require.resolve('./transactions/throughput'));
-    });
-
-    describe('transactions/top_transaction_groups', function () {
-      loadTestFile(require.resolve('./transactions/top_transaction_groups'));
     });
 
     describe('transactions/transactions_groups_main_statistics', function () {
@@ -214,6 +215,10 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
 
     describe('csm/web_core_vitals', function () {
       loadTestFile(require.resolve('./csm/web_core_vitals'));
+    });
+
+    describe('historical_data/has_data', function () {
+      loadTestFile(require.resolve('./historical_data/has_data'));
     });
 
     registry.run(providerContext);

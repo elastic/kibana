@@ -31,6 +31,7 @@ import {
   getNumericFieldsStats,
   getStringFieldsStats,
 } from './get_fields_stats';
+import { wrapError } from '../../utils/error_wrapper';
 
 export class DataVisualizer {
   private _client: IScopedClusterClient;
@@ -60,6 +61,7 @@ export class DataVisualizer {
       aggregatableNotExistsFields: [] as FieldData[],
       nonAggregatableExistsFields: [] as FieldData[],
       nonAggregatableNotExistsFields: [] as FieldData[],
+      errors: [] as any[],
     };
 
     // To avoid checking for the existence of too many aggregatable fields in one request,
@@ -76,49 +78,61 @@ export class DataVisualizer {
 
     await Promise.all(
       batches.map(async (fields) => {
-        const batchStats = await this.checkAggregatableFieldsExist(
-          indexPatternTitle,
-          query,
-          fields,
-          samplerShardSize,
-          timeFieldName,
-          earliestMs,
-          latestMs,
-          undefined,
-          runtimeMappings
-        );
+        try {
+          const batchStats = await this.checkAggregatableFieldsExist(
+            indexPatternTitle,
+            query,
+            fields,
+            samplerShardSize,
+            timeFieldName,
+            earliestMs,
+            latestMs,
+            undefined,
+            runtimeMappings
+          );
 
-        // Total count will be returned with each batch of fields. Just overwrite.
-        stats.totalCount = batchStats.totalCount;
+          // Total count will be returned with each batch of fields. Just overwrite.
+          stats.totalCount = batchStats.totalCount;
 
-        // Add to the lists of fields which do and do not exist.
-        stats.aggregatableExistsFields.push(...batchStats.aggregatableExistsFields);
-        stats.aggregatableNotExistsFields.push(...batchStats.aggregatableNotExistsFields);
+          // Add to the lists of fields which do and do not exist.
+          stats.aggregatableExistsFields.push(...batchStats.aggregatableExistsFields);
+          stats.aggregatableNotExistsFields.push(...batchStats.aggregatableNotExistsFields);
+        } catch (e) {
+          // If index not found, no need to proceed with other batches
+          if (e.statusCode === 404) {
+            throw e;
+          }
+          stats.errors.push(wrapError(e));
+        }
       })
     );
 
     await Promise.all(
       nonAggregatableFields.map(async (field) => {
-        const existsInDocs = await this.checkNonAggregatableFieldExists(
-          indexPatternTitle,
-          query,
-          field,
-          timeFieldName,
-          earliestMs,
-          latestMs,
-          runtimeMappings
-        );
+        try {
+          const existsInDocs = await this.checkNonAggregatableFieldExists(
+            indexPatternTitle,
+            query,
+            field,
+            timeFieldName,
+            earliestMs,
+            latestMs,
+            runtimeMappings
+          );
 
-        const fieldData: FieldData = {
-          fieldName: field,
-          existsInDocs,
-          stats: {},
-        };
+          const fieldData: FieldData = {
+            fieldName: field,
+            existsInDocs,
+            stats: {},
+          };
 
-        if (existsInDocs === true) {
-          stats.nonAggregatableExistsFields.push(fieldData);
-        } else {
-          stats.nonAggregatableNotExistsFields.push(fieldData);
+          if (existsInDocs === true) {
+            stats.nonAggregatableExistsFields.push(fieldData);
+          } else {
+            stats.nonAggregatableNotExistsFields.push(fieldData);
+          }
+        } catch (e) {
+          stats.errors.push(wrapError(e));
         }
       })
     );

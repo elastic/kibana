@@ -52,6 +52,8 @@ export const getEmbeddableService = () => pluginsStart.embeddable;
 export const getNavigateToApp = () => coreStart.application.navigateToApp;
 export const getSavedObjectsTagging = () => pluginsStart.savedObjectsTagging;
 export const getPresentationUtilContext = () => pluginsStart.presentationUtil.ContextProvider;
+export const getSecurityService = () => pluginsStart.security;
+export const getSpacesApi = () => pluginsStart.spaces;
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;
@@ -76,14 +78,6 @@ export const getEMSSettings = () => {
 
 export const getEmsTileLayerId = () => getKibanaCommonConfig().emsTileLayerId;
 
-export const getRegionmapLayers = () => {
-  const config = getKibanaCommonConfig();
-  if (config.regionmap && config.regionmap.layers) {
-    return config.regionmap.layers;
-  } else {
-    return [];
-  }
-};
 export const getTilemap = () => {
   const config = getKibanaCommonConfig();
   if (config.tilemap) {

@@ -19,6 +19,8 @@ export default function ({ getService, getPageObjects }) {
         from: 'Dec 19, 2017 @ 17:14:09.000',
         to: 'Dec 19, 2017 @ 18:15:09.000',
       });
+
+      await overview.closeAlertsModal();
     });
 
     after(async () => {

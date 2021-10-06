@@ -7,21 +7,27 @@
 
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
-import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
+import {
+  LensAppServices,
+  LensTopNavActions,
+  LensTopNavMenuProps,
+  LensTopNavTooltips,
+} from './types';
 import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { exporters } from '../../../../../src/plugins/data/public';
-
+import { tableHasFormulas } from '../../../../../src/plugins/data/common';
+import { exporters, IndexPattern } from '../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
-  setState as setAppState,
+  setState,
   useLensSelector,
   useLensDispatch,
   LensAppState,
   DispatchSetState,
 } from '../state_management';
+import { getIndexPatternsObjects, getIndexPatternsIds } from '../utils';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
@@ -30,6 +36,7 @@ function getLensTopNavConfig(options: {
   isByValueMode: boolean;
   allowByValue: boolean;
   actions: LensTopNavActions;
+  tooltips: LensTopNavTooltips;
   savingToLibraryPermitted: boolean;
   savingToDashboardPermitted: boolean;
 }): TopNavMenuData[] {
@@ -41,6 +48,7 @@ function getLensTopNavConfig(options: {
     showSaveAndReturn,
     savingToLibraryPermitted,
     savingToDashboardPermitted,
+    tooltips,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
 
@@ -64,6 +72,18 @@ function getLensTopNavConfig(options: {
       });
 
   topNavMenu.push({
+    label: i18n.translate('xpack.lens.app.inspect', {
+      defaultMessage: 'Inspect',
+    }),
+    run: actions.inspect,
+    testId: 'lnsApp_inspectButton',
+    description: i18n.translate('xpack.lens.app.inspectAriaLabel', {
+      defaultMessage: 'inspect',
+    }),
+    disableButton: false,
+  });
+
+  topNavMenu.push({
     label: i18n.translate('xpack.lens.app.downloadCSV', {
       defaultMessage: 'Download as CSV',
     }),
@@ -73,6 +93,7 @@ function getLensTopNavConfig(options: {
       defaultMessage: 'Download the data as CSV file',
     }),
     disableButton: !enableExportToCSV,
+    tooltip: tooltips.showExportWarning,
   });
 
   if (showCancel) {
@@ -122,14 +143,18 @@ export const LensTopNavMenu = ({
   setHeaderActionMenu,
   initialInput,
   indicateNoData,
+  lensInspector,
   setIsSaveModalVisible,
   getIsByValueMode,
   runSave,
   onAppLeave,
   redirectToOrigin,
+  datasourceMap,
+  title,
 }: LensTopNavMenuProps) => {
   const {
     data,
+    fieldFormats,
     navigation,
     uiSettings,
     application,
@@ -139,19 +164,68 @@ export const LensTopNavMenu = ({
 
   const dispatch = useLensDispatch();
   const dispatchSetState: DispatchSetState = React.useCallback(
-    (state: Partial<LensAppState>) => dispatch(setAppState(state)),
+    (state: Partial<LensAppState>) => dispatch(setState(state)),
     [dispatch]
   );
+
+  const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
+  const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
 
   const {
     isSaveable,
     isLinkedToOriginatingApp,
-    indexPatternsForTopNav,
     query,
-    lastKnownDoc,
     activeData,
     savedQuery,
-  } = useLensSelector((state) => state.app);
+    activeDatasourceId,
+    datasourceStates,
+  } = useLensSelector((state) => state.lens);
+  const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
+
+  useEffect(() => {
+    const activeDatasource =
+      datasourceMap && activeDatasourceId && !datasourceStates[activeDatasourceId].isLoading
+        ? datasourceMap[activeDatasourceId]
+        : undefined;
+    if (!activeDatasource) {
+      return;
+    }
+    const indexPatternIds = getIndexPatternsIds({
+      activeDatasources: Object.keys(datasourceStates).reduce(
+        (acc, datasourceId) => ({
+          ...acc,
+          [datasourceId]: datasourceMap[datasourceId],
+        }),
+        {}
+      ),
+      datasourceStates,
+    });
+    const hasIndexPatternsChanged =
+      indexPatterns.length + rejectedIndexPatterns.length !== indexPatternIds.length ||
+      indexPatternIds.some(
+        (id) =>
+          ![...indexPatterns.map((ip) => ip.id), ...rejectedIndexPatterns].find(
+            (loadedId) => loadedId === id
+          )
+      );
+
+    // Update the cached index patterns if the user made a change to any of them
+    if (hasIndexPatternsChanged) {
+      getIndexPatternsObjects(indexPatternIds, data.indexPatterns).then(
+        ({ indexPatterns: indexPatternObjects, rejectedIds }) => {
+          setIndexPatterns(indexPatternObjects);
+          setRejectedIndexPatterns(rejectedIds);
+        }
+      );
+    }
+  }, [
+    datasourceStates,
+    activeDatasourceId,
+    rejectedIndexPatterns,
+    datasourceMap,
+    indexPatterns,
+    data.indexPatterns,
+  ]);
 
   const { TopNavMenu } = navigation.ui;
   const { from, to } = data.query.timefilter.timefilter.getTime();
@@ -178,7 +252,25 @@ export const LensTopNavMenu = ({
         showCancel: Boolean(isLinkedToOriginatingApp),
         savingToLibraryPermitted,
         savingToDashboardPermitted,
+        tooltips: {
+          showExportWarning: () => {
+            if (activeData) {
+              const datatables = Object.values(activeData);
+              const formulaDetected = datatables.some((datatable) => {
+                return tableHasFormulas(datatable.columns, datatable.rows);
+              });
+              if (formulaDetected) {
+                return i18n.translate('xpack.lens.app.downloadButtonFormulasWarning', {
+                  defaultMessage:
+                    'Your CSV contains characters that spreadsheet applications might interpret as formulas.',
+                });
+              }
+            }
+            return undefined;
+          },
+        },
         actions: {
+          inspect: () => lensInspector.inspect({ title }),
           exportToCSV: () => {
             if (!activeData) {
               return;
@@ -190,11 +282,12 @@ export const LensTopNavMenu = ({
                 if (datatable) {
                   const postFix = datatables.length > 1 ? `-${i + 1}` : '';
 
-                  memo[`${lastKnownDoc?.title || unsavedTitle}${postFix}.csv`] = {
+                  memo[`${title || unsavedTitle}${postFix}.csv`] = {
                     content: exporters.datatableToCSV(datatable, {
                       csvSeparator: uiSettings.get('csv:separator', ','),
                       quoteValues: uiSettings.get('csv:quoteValues', true),
-                      formatFactory: data.fieldFormats.deserialize,
+                      formatFactory: fieldFormats.deserialize,
+                      escapeFormulaValues: false,
                     }),
                     type: exporters.CSV_MIME_TYPE,
                   };
@@ -208,14 +301,14 @@ export const LensTopNavMenu = ({
             }
           },
           saveAndReturn: () => {
-            if (savingToDashboardPermitted && lastKnownDoc) {
+            if (savingToDashboardPermitted) {
               // disabling the validation on app leave because the document has been saved.
               onAppLeave((actions) => {
                 return actions.default();
               });
               runSave(
                 {
-                  newTitle: lastKnownDoc.title,
+                  newTitle: title || '',
                   newCopyOnSave: false,
                   isTitleDuplicateConfirmed: false,
                   returnToOrigin: true,
@@ -243,12 +336,12 @@ export const LensTopNavMenu = ({
       activeData,
       attributeService,
       dashboardFeatureFlag.allowByValueEmbeddables,
-      data.fieldFormats.deserialize,
+      fieldFormats.deserialize,
       getIsByValueMode,
       initialInput,
       isLinkedToOriginatingApp,
       isSaveable,
-      lastKnownDoc,
+      title,
       onAppLeave,
       redirectToOrigin,
       runSave,
@@ -257,6 +350,7 @@ export const LensTopNavMenu = ({
       setIsSaveModalVisible,
       uiSettings,
       unsavedTitle,
+      lensInspector,
     ]
   );
 
@@ -321,13 +415,22 @@ export const LensTopNavMenu = ({
       onSaved={onSavedWrapped}
       onSavedQueryUpdated={onSavedQueryUpdatedWrapped}
       onClearSavedQuery={onClearSavedQueryWrapped}
-      indexPatterns={indexPatternsForTopNav}
+      indexPatterns={indexPatterns}
       query={query}
       dateRangeFrom={from}
       dateRangeTo={to}
       indicateNoData={indicateNoData}
       showSearchBar={true}
-      showDatePicker={true}
+      showDatePicker={
+        indexPatterns.some((ip) => ip.isTimeBased()) ||
+        Boolean(
+          allLoaded &&
+            activeDatasourceId &&
+            datasourceMap[activeDatasourceId].isTimeBased(
+              datasourceStates[activeDatasourceId].state
+            )
+        )
+      }
       showQueryBar={true}
       showFilterBar={true}
       data-test-subj="lnsApp_topNav"

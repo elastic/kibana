@@ -5,20 +5,19 @@
  * 2.0.
  */
 import {
-  EuiButton,
   EuiCallOut,
   EuiFieldText,
   EuiFormRow,
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiFieldPassword,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as i18n from '../translations';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useGetApplication } from '../use_get_application';
-import { SwimlaneActionConnector, SwimlaneFieldMappingConfig } from '../types';
+import { SwimlaneActionConnector } from '../types';
 import { IErrorObject } from '../../../../../types';
 
 interface Props {
@@ -27,8 +26,6 @@ interface Props {
   editActionSecrets: (property: string, value: any) => void;
   errors: IErrorObject;
   readOnly: boolean;
-  updateCurrentStep: (step: number) => void;
-  updateFields: (items: SwimlaneFieldMappingConfig[]) => void;
 }
 
 const SwimlaneConnectionComponent: React.FunctionComponent<Props> = ({
@@ -37,33 +34,10 @@ const SwimlaneConnectionComponent: React.FunctionComponent<Props> = ({
   editActionSecrets,
   errors,
   readOnly,
-  updateCurrentStep,
-  updateFields,
 }) => {
-  const {
-    notifications: { toasts },
-  } = useKibana().services;
   const { apiUrl, appId } = action.config;
   const { apiToken } = action.secrets;
   const { docLinks } = useKibana().services;
-  const { getApplication } = useGetApplication({
-    toastNotifications: toasts,
-    apiToken,
-    appId,
-    apiUrl,
-  });
-  const isValid = apiUrl && apiToken && appId;
-
-  const connectSwimlane = useCallback(async () => {
-    // fetch swimlane application configuration
-    const application = await getApplication();
-
-    if (application?.fields) {
-      const allFields = application.fields;
-      updateFields(allFields);
-      updateCurrentStep(2);
-    }
-  }, [getApplication, updateCurrentStep, updateFields]);
 
   const onChangeConfig = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>, key: 'apiUrl' | 'appId') => {
@@ -175,7 +149,7 @@ const SwimlaneConnectionComponent: React.FunctionComponent<Props> = ({
               <EuiSpacer size="m" />
             </>
           )}
-          <EuiFieldText
+          <EuiFieldPassword
             fullWidth
             isInvalid={isApiTokenInvalid}
             readOnly={readOnly}
@@ -186,14 +160,6 @@ const SwimlaneConnectionComponent: React.FunctionComponent<Props> = ({
           />
         </>
       </EuiFormRow>
-      <EuiSpacer />
-      <EuiButton
-        disabled={!isValid}
-        onClick={connectSwimlane}
-        data-test-subj="swimlaneConfigureMapping"
-      >
-        {i18n.SW_RETRIEVE_CONFIGURATION_LABEL}
-      </EuiButton>
     </>
   );
 };

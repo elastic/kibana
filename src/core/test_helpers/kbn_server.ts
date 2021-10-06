@@ -7,9 +7,14 @@
  */
 
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
-import { createTestEsCluster, esTestConfig, kibanaServerTestUser, kibanaTestUser } from '@kbn/test';
+import {
+  createTestEsCluster,
+  CreateTestEsClusterOptions,
+  esTestConfig,
+  kibanaServerTestUser,
+  kibanaTestUser,
+} from '@kbn/test';
 import { defaultsDeep } from 'lodash';
-import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
@@ -27,7 +32,11 @@ const DEFAULTS_SETTINGS = {
     port: 0,
     xsrf: { disableProtection: true },
   },
-  logging: { silent: true },
+  logging: {
+    root: {
+      level: 'off',
+    },
+  },
   plugins: {},
   migrations: { skip: false },
 };
@@ -40,7 +49,6 @@ export function createRootWithSettings(
     configs: [],
     cliArgs: {
       dev: false,
-      silent: false,
       watch: false,
       basePath: false,
       runExamples: false,
@@ -93,12 +101,22 @@ export function createRoot(settings = {}, cliArgs: Partial<CliArgs> = {}) {
  */
 export function createRootWithCorePlugins(settings = {}, cliArgs: Partial<CliArgs> = {}) {
   const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
-    plugins: { scanDirs: [resolve(__dirname, '../../legacy/core_plugins')] },
     elasticsearch: {
       hosts: [esTestConfig.getUrl()],
       username: kibanaServerTestUser.username,
       password: kibanaServerTestUser.password,
     },
+    // createRootWithSettings sets default value to "true", so undefined should be threatened as "true".
+    ...(cliArgs.oss === false
+      ? {
+          // reporting loads headless browser, that prevents nodejs process from exiting and causes test flakiness
+          xpack: {
+            reporting: {
+              enabled: false,
+            },
+          },
+        }
+      : {}),
   };
 
   return createRootWithSettings(
@@ -153,10 +171,7 @@ export function createTestServers({
 }: {
   adjustTimeout: (timeout: number) => void;
   settings?: {
-    es?: {
-      license: 'basic' | 'gold' | 'trial';
-      [key: string]: any;
-    };
+    es?: Partial<CreateTestEsClusterOptions>;
     kbn?: {
       /**
        * An array of directories paths, passed in via absolute path strings
@@ -217,7 +232,7 @@ export function createTestServers({
       if (['gold', 'trial'].includes(license)) {
         // Override provided configs
         kbnSettings.elasticsearch = {
-          hosts: [esTestConfig.getUrl()],
+          hosts: es.getHostUrls(),
           username: kibanaServerTestUser.username,
           password: kibanaServerTestUser.password,
         };
@@ -226,7 +241,7 @@ export function createTestServers({
       return {
         stop: async () => await es.cleanup(),
         es,
-        hosts: [esTestConfig.getUrl()],
+        hosts: es.getHostUrls(),
         username: kibanaServerTestUser.username,
         password: kibanaServerTestUser.password,
       };
@@ -234,6 +249,7 @@ export function createTestServers({
     startKibana: async () => {
       const root = createRootWithCorePlugins(kbnSettings);
 
+      await root.preboot();
       const coreSetup = await root.setup();
       const coreStart = await root.start();
 

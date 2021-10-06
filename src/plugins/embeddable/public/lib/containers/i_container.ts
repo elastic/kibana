@@ -49,7 +49,7 @@ export interface IContainer<
   getInputForChild<EEI extends EmbeddableInput>(id: string): EEI;
 
   /**
-   * Changes the input for a given child. Note, this will override any inherited state taken from
+   * Changes the input for a given child. Note, this will override all inherited state taken from
    * the container itself.
    * @param id
    * @param changes
@@ -61,6 +61,13 @@ export interface IContainer<
    * @param id
    */
   getChild<E extends Embeddable<EmbeddableInput> = Embeddable<EmbeddableInput>>(id: string): E;
+
+  /**
+   * Embeddables which have deferEmbeddableLoad set to true need to manually call setChildLoaded
+   * on their parent container to communicate when they have finished loading.
+   * @param embeddable - the embeddable to set
+   */
+  setChildLoaded<E extends IEmbeddable = IEmbeddable>(embeddable: E): void;
 
   /**
    * Removes the embeddable with the given id.

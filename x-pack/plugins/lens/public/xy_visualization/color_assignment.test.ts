@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { FormatFactory, LensMultiTable } from '../types';
 import { getColorAssignments } from './color_assignment';
-import { LayerArgs } from './types';
+import type { FormatFactory, LensMultiTable } from '../../common';
+import type { LayerArgs } from '../../common/expressions';
+import { layerTypes } from '../../common';
 
 describe('color_assignment', () => {
   const layers: LayerArgs[] = [
@@ -18,6 +19,7 @@ describe('color_assignment', () => {
       seriesType: 'bar',
       palette: { type: 'palette', name: 'palette1' },
       layerId: '1',
+      layerType: layerTypes.DATA,
       splitAccessor: 'split1',
       accessors: ['y1', 'y2'],
     },
@@ -28,6 +30,7 @@ describe('color_assignment', () => {
       seriesType: 'bar',
       palette: { type: 'palette', name: 'palette2' },
       layerId: '2',
+      layerType: layerTypes.DATA,
       splitAccessor: 'split2',
       accessors: ['y3', 'y4'],
     },

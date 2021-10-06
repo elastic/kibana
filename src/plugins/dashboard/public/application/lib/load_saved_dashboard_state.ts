@@ -38,7 +38,7 @@ export const loadSavedDashboardState = async ({
 }: DashboardBuildContext & { savedDashboardId?: string }): Promise<
   LoadSavedDashboardStateReturn | undefined
 > => {
-  const { hideWriteControls } = dashboardCapabilities;
+  const { showWriteControls } = dashboardCapabilities;
   const { queryString } = query;
 
   // BWC - remove for 8.0
@@ -51,7 +51,7 @@ export const loadSavedDashboardState = async ({
     notifications.toasts.addWarning(getDashboard60Warning());
     return;
   }
-  await indexPatterns.ensureDefaultIndexPattern();
+  await indexPatterns.ensureDefaultDataView();
   let savedDashboard: DashboardSavedObject | undefined;
   try {
     savedDashboard = (await savedDashboards.get(savedDashboardId)) as DashboardSavedObject;
@@ -66,12 +66,12 @@ export const loadSavedDashboardState = async ({
   const savedDashboardState = savedObjectToDashboardState({
     savedDashboard,
     usageCollection,
-    hideWriteControls,
+    showWriteControls,
     savedObjectsTagging,
     version: initializerContext.env.packageInfo.version,
   });
 
-  const isViewMode = hideWriteControls || Boolean(savedDashboard.id);
+  const isViewMode = !showWriteControls || Boolean(savedDashboard.id);
   savedDashboardState.viewMode = isViewMode ? ViewMode.VIEW : ViewMode.EDIT;
   savedDashboardState.filters = cleanFiltersForSerialize(savedDashboardState.filters);
   savedDashboardState.query = migrateLegacyQuery(

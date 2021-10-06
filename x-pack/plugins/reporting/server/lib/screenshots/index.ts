@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import * as Rx from 'rxjs';
 import { LevelLogger } from '../';
+import { UrlOrUrlLocatorTuple } from '../../../common/types';
 import { ConditionalHeaders } from '../../export_types/common';
 import { LayoutInstance } from '../layouts';
 
-export { screenshotsObservableFactory } from './observable';
+export { getScreenshots$ } from './observable';
 
 export interface ScreenshotObservableOpts {
   logger: LevelLogger;
-  urls: string[];
+  urlsOrUrlLocatorTuples: UrlOrUrlLocatorTuple[];
   conditionalHeaders: ConditionalHeaders;
   layout: LayoutInstance;
   browserTimezone?: string;
 }
 
 export interface AttributesMap {
-  [key: string]: any;
+  [key: string]: string | null;
 }
 
 export interface ElementPosition {
@@ -44,9 +44,9 @@ export interface ElementsPositionAndAttribute {
 }
 
 export interface Screenshot {
-  base64EncodedData: string;
-  title: string;
-  description: string;
+  data: Buffer;
+  title: string | null;
+  description: string | null;
 }
 
 export interface ScreenshotResults {
@@ -55,11 +55,3 @@ export interface ScreenshotResults {
   error?: Error;
   elementsPositionAndAttributes?: ElementsPositionAndAttribute[]; // NOTE: for testing
 }
-
-export type ScreenshotsObservableFn = ({
-  logger,
-  urls,
-  conditionalHeaders,
-  layout,
-  browserTimezone,
-}: ScreenshotObservableOpts) => Rx.Observable<ScreenshotResults[]>;

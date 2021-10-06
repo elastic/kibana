@@ -91,13 +91,6 @@ export const ATTRIBUTE_VALUE_LABEL = i18n.translate(
   }
 );
 
-export const ATTRIBUTE_VALUE_ERROR = i18n.translate(
-  'xpack.enterpriseSearch.roleMapping.attributeValueError',
-  {
-    defaultMessage: 'Attribute value is required',
-  }
-);
-
 export const REMOVE_ROLE_MAPPING_TITLE = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.removeRoleMappingTitle',
   {
@@ -226,7 +219,7 @@ export const ROLE_MAPPINGS_HEADING_BUTTON = i18n.translate(
 
 export const ROLE_MAPPINGS_NO_RESULTS_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.noResults.message',
-  { defaultMessage: 'Create a new role mapping' }
+  { defaultMessage: 'No matching role mappings found' }
 );
 
 export const ROLES_DISABLED_TITLE = i18n.translate(
@@ -325,7 +318,7 @@ export const USERS_HEADING_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.usersHeadingDescription',
   {
     defaultMessage:
-      'User management provides granular access for individual or special permission needs. Users from federated sources such as SAML are managed by role mappings, and excluded from this list.',
+      'User management provides granular access for individual or special permission needs. Some users may be excluded from this list. These include users from federated sources such as SAML, which are managed by role mappings, and built-in user accounts such as the “elastic” or “enterprise_search” users.',
   }
 );
 
@@ -370,6 +363,13 @@ export const UPDATE_USER_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.updateUserDescription',
   {
     defaultMessage: 'Manage granular access and permissions',
+  }
+);
+
+export const DEACTIVATED_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.deactivatedLabel',
+  {
+    defaultMessage: 'Deactivated',
   }
 );
 
@@ -422,3 +422,29 @@ export const AUTH_PROVIDER_TOOLTIP = i18n.translate(
       'Provider-specific role mapping is still applied, but configuration is now deprecated.',
   }
 );
+
+export const DEACTIVATED_USER_CALLOUT_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.deactivatedUserCalloutLabel',
+  {
+    defaultMessage: 'User deactivated',
+  }
+);
+
+export const DEACTIVATED_USER_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.deactivatedUserCalloutDescription',
+  {
+    defaultMessage:
+      'This user is not currently active, and access has been temporarily revoked. Users can be re-activated via the User Management area of the Kibana console.',
+  }
+);
+
+export const SMTP_CALLOUT_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.smtpCalloutLabel',
+  {
+    defaultMessage: 'Personalized invitations will be automatically sent when an Enterprise Search',
+  }
+);
+
+export const SMTP_LINK_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.smtpLinkLabel', {
+  defaultMessage: 'SMTP configuration is provided',
+});

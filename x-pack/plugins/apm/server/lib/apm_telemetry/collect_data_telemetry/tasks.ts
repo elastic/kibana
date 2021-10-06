@@ -20,6 +20,7 @@ import {
   CONTAINER_ID,
   ERROR_GROUP_ID,
   HOST_NAME,
+  HOST_OS_PLATFORM,
   OBSERVER_HOSTNAME,
   PARENT_ID,
   POD_NAME,
@@ -291,6 +292,53 @@ export const tasks: TelemetryTask[] = [
         [region]: getBucketKeys(aggregations[region]),
       };
       return { cloud };
+    },
+  },
+  {
+    name: 'host',
+    executor: async ({ indices, search }) => {
+      function getBucketKeys({
+        buckets,
+      }: {
+        buckets: Array<{
+          doc_count: number;
+          key: string | number;
+        }>;
+      }) {
+        return buckets.map((bucket) => bucket.key as string);
+      }
+
+      const response = await search({
+        index: [
+          indices['apm_oss.errorIndices'],
+          indices['apm_oss.metricsIndices'],
+          indices['apm_oss.spanIndices'],
+          indices['apm_oss.transactionIndices'],
+        ],
+        body: {
+          size: 0,
+          timeout,
+          aggs: {
+            platform: {
+              terms: {
+                field: HOST_OS_PLATFORM,
+              },
+            },
+          },
+        },
+      });
+
+      const { aggregations } = response;
+
+      if (!aggregations) {
+        return { host: { os: { platform: [] } } };
+      }
+      const host = {
+        os: {
+          platform: getBucketKeys(aggregations.platform),
+        },
+      };
+      return { host };
     },
   },
   {
@@ -1046,10 +1094,9 @@ export const tasks: TelemetryTask[] = [
             geo: {
               country_iso_code: {
                 rum: {
-                  '1d':
-                    rumAgentCardinalityResponse.aggregations?.[
-                      CLIENT_GEO_COUNTRY_ISO_CODE
-                    ].value,
+                  '1d': rumAgentCardinalityResponse.aggregations?.[
+                    CLIENT_GEO_COUNTRY_ISO_CODE
+                  ].value,
                 },
               },
             },
@@ -1057,30 +1104,28 @@ export const tasks: TelemetryTask[] = [
           transaction: {
             name: {
               all_agents: {
-                '1d':
-                  allAgentsCardinalityResponse.aggregations?.[TRANSACTION_NAME]
-                    .value,
+                '1d': allAgentsCardinalityResponse.aggregations?.[
+                  TRANSACTION_NAME
+                ].value,
               },
               rum: {
-                '1d':
-                  rumAgentCardinalityResponse.aggregations?.[TRANSACTION_NAME]
-                    .value,
+                '1d': rumAgentCardinalityResponse.aggregations?.[
+                  TRANSACTION_NAME
+                ].value,
               },
             },
           },
           user_agent: {
             original: {
               all_agents: {
-                '1d':
-                  allAgentsCardinalityResponse.aggregations?.[
-                    USER_AGENT_ORIGINAL
-                  ].value,
+                '1d': allAgentsCardinalityResponse.aggregations?.[
+                  USER_AGENT_ORIGINAL
+                ].value,
               },
               rum: {
-                '1d':
-                  rumAgentCardinalityResponse.aggregations?.[
-                    USER_AGENT_ORIGINAL
-                  ].value,
+                '1d': rumAgentCardinalityResponse.aggregations?.[
+                  USER_AGENT_ORIGINAL
+                ].value,
               },
             },
           },

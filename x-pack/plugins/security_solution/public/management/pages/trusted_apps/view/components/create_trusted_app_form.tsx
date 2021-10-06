@@ -14,6 +14,8 @@ import {
   EuiSuperSelect,
   EuiSuperSelectOption,
   EuiTextArea,
+  EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiFormProps } from '@elastic/eui/src/components/form/form';
@@ -64,11 +66,9 @@ interface ValidationResult {
   isValid: boolean;
 
   /** Individual form field validations */
-  result: Partial<
-    {
-      [key in keyof NewTrustedApp]: FieldValidationState;
-    }
-  >;
+  result: Partial<{
+    [key in keyof NewTrustedApp]: FieldValidationState;
+  }>;
 }
 
 const addResultToValidation = (
@@ -161,8 +161,6 @@ const validateFormValues = (values: MaybeImmutable<NewTrustedApp>): ValidationRe
       } else if (
         !isPathValid({ os: values.os, field: entry.field, type: entry.type, value: entry.value })
       ) {
-        // show soft warnings and thus allow entry
-        isValid = true;
         addResultToValidation(
           validation,
           'entries',
@@ -224,11 +222,9 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
     );
 
     const [wasVisited, setWasVisited] = useState<
-      Partial<
-        {
-          [key in keyof NewTrustedApp]: boolean;
-        }
-      >
+      Partial<{
+        [key in keyof NewTrustedApp]: boolean;
+      }>
     >({});
 
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -360,14 +356,15 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
       [notifyOfChange, trustedApp]
     );
 
-    const handleConditionBuilderOnVisited: LogicalConditionBuilderProps['onVisited'] = useCallback(() => {
-      setWasVisited((prevState) => {
-        return {
-          ...prevState,
-          entries: true,
-        };
-      });
-    }, []);
+    const handleConditionBuilderOnVisited: LogicalConditionBuilderProps['onVisited'] =
+      useCallback(() => {
+        setWasVisited((prevState) => {
+          return {
+            ...prevState,
+            entries: true,
+          };
+        });
+      }, []);
 
     const handlePolicySelectChange: EffectedPolicySelectProps['onChange'] = useCallback(
       (selection) => {
@@ -464,6 +461,41 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
           />
         </EuiFormRow>
         <EuiFormRow
+          label={i18n.translate('xpack.securitySolution.trustedapps.create.description', {
+            defaultMessage: 'Description',
+          })}
+          fullWidth={fullWidth}
+          data-test-subj={getTestId('descriptionRow')}
+        >
+          <EuiTextArea
+            name="description"
+            value={trustedApp.description}
+            onChange={handleDomChangeEvents}
+            fullWidth
+            compressed={isTrustedAppsByPolicyEnabled}
+            maxLength={256}
+            data-test-subj={getTestId('descriptionField')}
+          />
+        </EuiFormRow>
+        <EuiHorizontalRule />
+        <EuiText size="xs">
+          <h3>
+            {i18n.translate('xpack.securitySolution.trustedApps.conditionsSectionTitle', {
+              defaultMessage: 'Conditions',
+            })}
+          </h3>
+        </EuiText>
+        <EuiSpacer size="xs" />
+        <EuiText size="s">
+          <p>
+            {i18n.translate('xpack.securitySolution.trustedApps.conditionsSectionDescription', {
+              defaultMessage:
+                'Select an operating system and add conditions. Availability of conditions may depend on your chosen OS.',
+            })}
+          </p>
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiFormRow
           label={i18n.translate('xpack.securitySolution.trustedapps.create.os', {
             defaultMessage: 'Select operating system',
           })}
@@ -498,24 +530,6 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             data-test-subj={getTestId('conditionsBuilder')}
           />
         </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.securitySolution.trustedapps.create.description', {
-            defaultMessage: 'Description',
-          })}
-          fullWidth={fullWidth}
-          data-test-subj={getTestId('descriptionRow')}
-        >
-          <EuiTextArea
-            name="description"
-            value={trustedApp.description}
-            onChange={handleDomChangeEvents}
-            fullWidth
-            compressed={isTrustedAppsByPolicyEnabled ? true : false}
-            maxLength={256}
-            data-test-subj={getTestId('descriptionField')}
-          />
-        </EuiFormRow>
-
         {isTrustedAppsByPolicyEnabled ? (
           <>
             <EuiHorizontalRule />

@@ -24,7 +24,7 @@ import { State } from '../common/store';
 import { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
-import { UserPrivilegesProvider } from '../detections/components/user_privileges';
+import { UserPrivilegesProvider } from '../common/components/user_privileges';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -41,7 +41,10 @@ const StartAppComponent: FC<StartAppComponent> = ({
   onAppLeave,
   store,
 }) => {
-  const { i18n } = useKibana().services;
+  const {
+    i18n,
+    application: { capabilities },
+  } = useKibana().services;
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
 
   return (
@@ -51,7 +54,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
           <ReduxStoreProvider store={store}>
             <EuiThemeProvider darkMode={darkMode}>
               <MlCapabilitiesProvider>
-                <UserPrivilegesProvider>
+                <UserPrivilegesProvider kibanaCapabilities={capabilities}>
                   <ManageUserInfo>
                     <PageRouter
                       history={history}

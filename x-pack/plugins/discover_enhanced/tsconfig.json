@@ -1,7 +1,6 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
@@ -13,7 +12,6 @@
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../../../src/plugins/discover/tsconfig.json" },
     { "path": "../../../src/plugins/share/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_legacy/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../../../src/plugins/url_forwarding/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },

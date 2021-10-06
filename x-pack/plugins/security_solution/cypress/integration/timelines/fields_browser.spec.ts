@@ -10,7 +10,6 @@ import {
   FIELDS_BROWSER_FIELDS_COUNT,
   FIELDS_BROWSER_HOST_CATEGORIES_COUNT,
   FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER,
-  FIELDS_BROWSER_HOST_GEO_COUNTRY_NAME_HEADER,
   FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER,
   FIELDS_BROWSER_MESSAGE_HEADER,
   FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
@@ -24,7 +23,6 @@ import { cleanKibana } from '../../tasks/common';
 import {
   addsHostGeoCityNameToTimeline,
   addsHostGeoContinentNameToTimeline,
-  addsHostGeoCountryNameToTimelineDraggingIt,
   clearFieldsBrowser,
   closeFieldsBrowser,
   filterFieldsBrowser,
@@ -154,18 +152,6 @@ describe('Fields Browser', () => {
       closeFieldsBrowser();
 
       cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER).should('exist');
-    });
-
-    it('adds a field to the timeline when the user drags and drops a field', () => {
-      const filterInput = 'host.geo.c';
-
-      filterFieldsBrowser(filterInput);
-
-      cy.get(FIELDS_BROWSER_HOST_GEO_COUNTRY_NAME_HEADER).should('not.exist');
-
-      addsHostGeoCountryNameToTimelineDraggingIt();
-
-      cy.get(FIELDS_BROWSER_HOST_GEO_COUNTRY_NAME_HEADER).should('exist');
     });
 
     it('resets all fields in the timeline when `Reset Fields` is clicked', () => {

@@ -91,6 +91,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   title,
   titleSize,
   yTickFormatter,
+  skip,
 }) => {
   const dispatch = useDispatch();
   const handleBrushEnd = useCallback(
@@ -123,9 +124,8 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     [chartHeight, startDate, legendPosition, endDate, handleBrushEnd, yTickFormatter, showLegend]
   );
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
-    defaultStackByOption
-  );
+  const [selectedStackByOption, setSelectedStackByOption] =
+    useState<MatrixHistogramOption>(defaultStackByOption);
   const setSelectedChartOptionCallback = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       setSelectedStackByOption(
@@ -146,11 +146,11 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     stackByField: selectedStackByOption.value,
     isPtrIncluded,
     docValueFields,
+    skip,
   };
 
-  const [loading, { data, inspect, totalCount, refetch }] = useMatrixHistogramCombined(
-    matrixHistogramRequest
-  );
+  const [loading, { data, inspect, totalCount, refetch }] =
+    useMatrixHistogramCombined(matrixHistogramRequest);
 
   const titleWithStackByField = useMemo(
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
@@ -167,10 +167,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
 
     return subtitle;
   }, [isInitialLoading, subtitle, totalCount]);
-  const hideHistogram = useMemo(() => (totalCount <= 0 && hideHistogramIfEmpty ? true : false), [
-    totalCount,
-    hideHistogramIfEmpty,
-  ]);
+  const hideHistogram = useMemo(
+    () => (totalCount <= 0 && hideHistogramIfEmpty ? true : false),
+    [totalCount, hideHistogramIfEmpty]
+  );
   const barChartData = useMemo(() => getCustomChartData(data, mapping), [data, mapping]);
 
   useEffect(() => {
@@ -216,6 +216,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             titleSize={titleSize}
             subtitle={subtitleWithCounts}
             inspectMultiple
+            isInspectDisabled={filterQuery === undefined}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>

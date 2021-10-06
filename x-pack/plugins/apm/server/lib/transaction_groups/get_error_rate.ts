@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import { Coordinate } from '../../../typings/timeseries';
-
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -15,21 +12,20 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../server/utils/queries';
+import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
+import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
+import { Coordinate } from '../../../typings/timeseries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import { getBucketSize } from '../helpers/get_bucket_size';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
+import { Setup } from '../helpers/setup_request';
 import {
-  calculateTransactionErrorPercentage,
+  calculateFailedTransactionRate,
   getOutcomeAggregation,
-  getTransactionErrorRateTimeSeries,
+  getFailedTransactionRateTimeSeries,
 } from '../helpers/transaction_error_rate';
 
 export async function getErrorRate({
@@ -43,8 +39,8 @@ export async function getErrorRate({
   start,
   end,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
@@ -101,7 +97,11 @@ export async function getErrorRate({
         timeseries: {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: getBucketSize({ start, end }).intervalString,
+            fixed_interval: getBucketSizeForAggregatedTransactions({
+              start,
+              end,
+              searchAggregatedTransactions,
+            }).intervalString,
             min_doc_count: 0,
             extended_bounds: { min: start, max: end },
           },
@@ -124,13 +124,11 @@ export async function getErrorRate({
     return { noHits, transactionErrorRate: [], average: null };
   }
 
-  const transactionErrorRate = getTransactionErrorRateTimeSeries(
+  const transactionErrorRate = getFailedTransactionRateTimeSeries(
     resp.aggregations.timeseries.buckets
   );
 
-  const average = calculateTransactionErrorPercentage(
-    resp.aggregations.outcomes
-  );
+  const average = calculateFailedTransactionRate(resp.aggregations.outcomes);
 
   return { noHits, transactionErrorRate, average };
 }
@@ -145,18 +143,21 @@ export async function getErrorRatePeriods({
   searchAggregatedTransactions,
   comparisonStart,
   comparisonEnd,
+  start,
+  end,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
   comparisonStart?: number;
   comparisonEnd?: number;
+  start: number;
+  end: number;
 }) {
-  const { start, end } = setup;
   const commonProps = {
     environment,
     kuery,
@@ -183,16 +184,14 @@ export async function getErrorRatePeriods({
     previousPeriodPromise,
   ]);
 
-  const firtCurrentPeriod = currentPeriod.transactionErrorRate.length
-    ? currentPeriod.transactionErrorRate
-    : undefined;
+  const firstCurrentPeriod = currentPeriod.transactionErrorRate;
 
   return {
     currentPeriod,
     previousPeriod: {
       ...previousPeriod,
       transactionErrorRate: offsetPreviousPeriodCoordinates({
-        currentPeriodTimeseries: firtCurrentPeriod,
+        currentPeriodTimeseries: firstCurrentPeriod,
         previousPeriodTimeseries: previousPeriod.transactionErrorRate,
       }),
     },

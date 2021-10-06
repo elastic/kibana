@@ -16,7 +16,6 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { noop } from 'lodash/fp';
-import { useHistory } from 'react-router-dom';
 import { Rule } from '../../../containers/detection_engine/rules';
 import * as i18n from './translations';
 import * as i18nActions from '../../../pages/detection_engine/rules/translations';
@@ -30,6 +29,8 @@ import {
 import { getRulesUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { getToolTipContent } from '../../../../common/utils/privileges';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
+import { useKibana } from '../../../../common/lib/kibana';
+import { APP_ID, SecurityPageName } from '../../../../../common/constants';
 
 const MyEuiButtonIcon = styled(EuiButtonIcon)`
   &.euiButtonIcon {
@@ -57,12 +58,15 @@ const RuleActionsOverflowComponent = ({
   canDuplicateRuleWithActions,
 }: RuleActionsOverflowComponentProps) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
-  const history = useHistory();
+  const { navigateToApp } = useKibana().services.application;
   const [, dispatchToaster] = useStateToaster();
 
   const onRuleDeletedCallback = useCallback(() => {
-    history.push(getRulesUrl());
-  }, [history]);
+    navigateToApp(APP_ID, {
+      deepLinkId: SecurityPageName.rules,
+      path: getRulesUrl(),
+    });
+  }, [navigateToApp]);
 
   const actions = useMemo(
     () =>
@@ -82,7 +86,7 @@ const RuleActionsOverflowComponent = ({
                   dispatchToaster
                 );
                 if (createdRules?.length) {
-                  editRuleAction(createdRules[0], history);
+                  editRuleAction(createdRules[0].id, navigateToApp);
                 }
               }}
             >
@@ -123,7 +127,7 @@ const RuleActionsOverflowComponent = ({
       canDuplicateRuleWithActions,
       closePopover,
       dispatchToaster,
-      history,
+      navigateToApp,
       onRuleDeletedCallback,
       rule,
       userHasPermissions,

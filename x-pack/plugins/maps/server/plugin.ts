@@ -83,18 +83,6 @@ export class MapsPlugin implements Plugin {
         },
       ]);
 
-      home.sampleData.replacePanelInSampleDatasetDashboard({
-        sampleDataId: 'ecommerce',
-        dashboardId: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
-        oldEmbeddableId: '9c6f83f0-bb4d-11e8-9c84-77068524bcab',
-        embeddableId: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
-        // @ts-ignore
-        embeddableType: 'map',
-        embeddableConfig: {
-          isLayerTOCOpen: false,
-        },
-      });
-
       home.sampleData.addSavedObjectsToSampleDataset('flights', getFlightsSavedObjects());
 
       home.sampleData.addAppLinksToSampleDataset('flights', [
@@ -170,14 +158,7 @@ export class MapsPlugin implements Plugin {
       lastLicenseId = license.uid;
     });
 
-    initRoutes(
-      core,
-      () => lastLicenseId,
-      emsSettings,
-      this.kibanaVersion,
-      this._logger,
-      currentConfig.enableDrawingFeature
-    );
+    initRoutes(core, () => lastLicenseId, emsSettings, this.kibanaVersion, this._logger);
 
     this._initHomeData(home, core.http.basePath.prepend, emsSettings);
 
@@ -192,7 +173,6 @@ export class MapsPlugin implements Plugin {
       catalogue: [APP_ID],
       privileges: {
         all: {
-          api: ['fileUpload:import'],
           app: [APP_ID, 'kibana'],
           catalogue: [APP_ID],
           savedObject: {
@@ -215,7 +195,7 @@ export class MapsPlugin implements Plugin {
 
     core.savedObjects.registerType(mapsTelemetrySavedObjects);
     core.savedObjects.registerType(mapSavedObjects);
-    registerMapsUsageCollector(usageCollection, currentConfig);
+    registerMapsUsageCollector(usageCollection);
 
     plugins.embeddable.registerEmbeddableFactory({
       id: MAP_SAVED_OBJECT_TYPE,

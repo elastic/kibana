@@ -9,10 +9,9 @@ import React, { Fragment, FunctionComponent, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
+import { Popover, ClosePopoverFn } from '../../popover';
 import { ShortcutStrings } from '../../../../i18n/shortcuts';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
-import { Popover, ClosePopoverFn } from '../../popover';
 import { CustomElementModal } from '../../custom_element_modal';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib/constants';
 import { PositionedElement } from '../../../../types';
@@ -248,7 +247,7 @@ export const EditMenu: FunctionComponent<Props> = ({
 
   const editControl = (togglePopover: React.MouseEventHandler<any>) => (
     <EuiButtonEmpty
-      size="xs"
+      size="s"
       aria-label={strings.getEditMenuLabel()}
       onClick={togglePopover}
       data-test-subj="canvasWorkpadEditMenuButton"

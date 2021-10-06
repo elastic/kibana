@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { transactionGroupsFetcher, Options } from './fetcher';
+import { Setup } from '../helpers/setup_request';
+import { topTransactionGroupsFetcher, TopTraceOptions } from './fetcher';
 
-export async function getTransactionGroupList(
-  options: Options,
-  setup: Setup & SetupTimeRange
+export async function getTopTransactionGroupList(
+  options: TopTraceOptions,
+  setup: Setup
 ) {
-  const bucketSize = setup.config['xpack.apm.ui.transactionGroupBucketSize'];
-  return await transactionGroupsFetcher(options, setup, bucketSize);
+  return await topTransactionGroupsFetcher(options, setup);
 }

@@ -6,21 +6,13 @@
  */
 
 import cytoscape from 'cytoscape';
-import React, { ComponentType } from 'react';
-import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
+import React from 'react';
 import { Cytoscape } from '../Cytoscape';
 import { Centerer } from './centerer';
 
 export default {
-  title: 'app/service_map/Cytoscape',
+  title: 'app/ServiceMap/Cytoscape',
   component: Cytoscape,
-  decorators: [
-    (Story: ComponentType) => (
-      <EuiThemeProvider>
-        <Story />
-      </EuiThemeProvider>
-    ),
-  ],
 };
 
 export function Example() {

@@ -20,6 +20,7 @@ import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { createThreatSignals } from '../threat_mapping/create_threat_signals';
 import { ThreatRuleParams } from '../../schemas/rule_schemas';
+import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
 export const threatMatchExecutor = async ({
   rule,
@@ -31,6 +32,7 @@ export const threatMatchExecutor = async ({
   searchAfterSize,
   logger,
   eventsTelemetry,
+  experimentalFeatures,
   buildRuleMessage,
   bulkCreate,
   wrapHits,
@@ -44,12 +46,18 @@ export const threatMatchExecutor = async ({
   searchAfterSize: number;
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
+  experimentalFeatures: ExperimentalFeatures;
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
 }) => {
   const ruleParams = rule.attributes.params;
-  const inputIndex = await getInputIndex(services, version, ruleParams.index);
+  const inputIndex = await getInputIndex({
+    experimentalFeatures,
+    services,
+    version,
+    index: ruleParams.index,
+  });
   return createThreatSignals({
     tuple,
     threatMapping: ruleParams.threatMapping,

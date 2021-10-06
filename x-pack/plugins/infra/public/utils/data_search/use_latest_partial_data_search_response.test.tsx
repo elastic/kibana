@@ -107,9 +107,8 @@ describe('useLatestPartialDataSearchResponse hook', () => {
       }),
     };
 
-    const requests$ = of<ParsedDataSearchRequestDescriptor<IKibanaSearchRequest<string>, string>>(
-      firstRequest
-    );
+    const requests$ =
+      of<ParsedDataSearchRequestDescriptor<IKibanaSearchRequest<string>, string>>(firstRequest);
 
     const { unmount } = renderHook(() => useLatestPartialDataSearchResponse(requests$));
 

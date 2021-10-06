@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110891
+/* eslint-disable @kbn/eslint/no_export_all */
+
 export * from './api';
 export * from './constants';
 export * from './types';
+
+// Note: do not import the expression folder here or the page bundle will be bloated with all
+// the package

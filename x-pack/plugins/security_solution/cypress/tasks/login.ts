@@ -10,6 +10,7 @@ import Url, { UrlObject } from 'url';
 
 import { ROLES } from '../../common/test';
 import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
+import { hostDetailsUrl } from '../urls/navigation';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -55,13 +56,15 @@ const LOGIN_API_ENDPOINT = '/internal/security/login';
  * @param route string route to visit
  */
 export const getUrlWithRoute = (role: ROLES, route: string) => {
+  const url = Cypress.config().baseUrl;
+  const kibana = new URL(url!);
   const theUrl = `${Url.format({
     auth: `${role}:changeme`,
     username: role,
     password: 'changeme',
-    protocol: Cypress.env('protocol'),
-    hostname: Cypress.env('hostname'),
-    port: Cypress.env('configport'),
+    protocol: kibana.protocol.replace(':', ''),
+    hostname: kibana.hostname,
+    port: kibana.port,
   } as UrlObject)}${route.startsWith('/') ? '' : '/'}${route}`;
   cy.log(`origin: ${theUrl}`);
   return theUrl;
@@ -79,11 +82,13 @@ interface User {
  * @param route string route to visit
  */
 export const constructUrlWithUser = (user: User, route: string) => {
-  const hostname = Cypress.env('hostname');
+  const url = Cypress.config().baseUrl;
+  const kibana = new URL(url!);
+  const hostname = kibana.hostname;
   const username = user.username;
   const password = user.password;
-  const protocol = Cypress.env('protocol');
-  const port = Cypress.env('configport');
+  const protocol = kibana.protocol.replace(':', '');
+  const port = kibana.port;
 
   const path = `${route.startsWith('/') ? '' : '/'}${route}`;
   const strUrl = `${protocol}://${username}:${password}@${hostname}:${port}${path}`;
@@ -97,7 +102,7 @@ export const getCurlScriptEnvVars = () => ({
   ELASTICSEARCH_URL: Cypress.env('ELASTICSEARCH_URL'),
   ELASTICSEARCH_USERNAME: Cypress.env('ELASTICSEARCH_USERNAME'),
   ELASTICSEARCH_PASSWORD: Cypress.env('ELASTICSEARCH_PASSWORD'),
-  KIBANA_URL: Cypress.env('KIBANA_URL'),
+  KIBANA_URL: Cypress.config().baseUrl,
 });
 
 export const postRoleAndUser = (role: ROLES) => {
@@ -310,6 +315,11 @@ export const loginAndWaitForTimeline = (timelineId: string, role?: ROLES) => {
   cy.visit(role ? getUrlWithRoute(role, route) : route);
   cy.get('[data-test-subj="headerGlobalNav"]');
   cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
+};
+
+export const loginAndWaitForHostDetailsPage = () => {
+  loginAndWaitForPage(hostDetailsUrl('suricata-iowa'));
+  cy.get('[data-test-subj="loading-spinner"]', { timeout: 12000 }).should('not.exist');
 };
 
 export const waitForPageWithoutDateRange = (url: string, role?: ROLES) => {

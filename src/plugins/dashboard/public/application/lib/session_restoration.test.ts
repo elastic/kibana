@@ -19,7 +19,7 @@ describe('createSessionRestorationDataProvider', () => {
     getAppState: () =>
       savedObjectToDashboardState({
         version,
-        hideWriteControls: false,
+        showWriteControls: true,
         usageCollection: undefined,
         savedObjectsTagging: undefined,
         savedDashboard: getSavedDashboardMock(),

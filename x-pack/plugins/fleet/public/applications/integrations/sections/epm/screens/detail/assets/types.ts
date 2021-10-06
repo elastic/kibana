@@ -17,4 +17,4 @@ export type AllowedAssetTypes = [
   KibanaAssetType.visualization
 ];
 
-export type AllowedAssetType = AllowedAssetTypes[number];
+export type AllowedAssetType = AllowedAssetTypes[number] | 'view';

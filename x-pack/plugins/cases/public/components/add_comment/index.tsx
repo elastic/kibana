@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useCallback, forwardRef, useImperativeHandle } from 'react';
+import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import React, { useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
 import styled from 'styled-components';
 
 import { CommentType } from '../../../common';
@@ -19,6 +19,7 @@ import * as i18n from './translations';
 import { schema, AddCommentFormSchema } from './schema';
 import { InsertTimeline } from '../insert_timeline';
 import { useOwnerContext } from '../owner_context/use_owner_context';
+
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
   top: 50%;
@@ -31,23 +32,36 @@ const initialCommentValue: AddCommentFormSchema = {
 
 export interface AddCommentRefObject {
   addQuote: (quote: string) => void;
+  setComment: (newComment: string) => void;
 }
 
 export interface AddCommentProps {
+  id: string;
   caseId: string;
   userCanCrud?: boolean;
   onCommentSaving?: () => void;
   onCommentPosted: (newCase: Case) => void;
   showLoading?: boolean;
+  statusActionButton: JSX.Element | null;
   subCaseId?: string;
 }
 
 export const AddComment = React.memo(
   forwardRef<AddCommentRefObject, AddCommentProps>(
     (
-      { caseId, userCanCrud, onCommentPosted, onCommentSaving, showLoading = true, subCaseId },
+      {
+        id,
+        caseId,
+        userCanCrud,
+        onCommentPosted,
+        onCommentSaving,
+        showLoading = true,
+        statusActionButton,
+        subCaseId,
+      },
       ref
     ) => {
+      const editorRef = useRef();
       const owner = useOwnerContext();
       const { isLoading, postComment } = usePostComment();
 
@@ -68,8 +82,17 @@ export const AddComment = React.memo(
         [comment, setFieldValue]
       );
 
+      const setComment = useCallback(
+        (newComment) => {
+          setFieldValue(fieldName, newComment);
+        },
+        [setFieldValue]
+      );
+
       useImperativeHandle(ref, () => ({
         addQuote,
+        setComment,
+        editor: editorRef.current,
       }));
 
       const onSubmit = useCallback(async () => {
@@ -97,21 +120,30 @@ export const AddComment = React.memo(
                 path={fieldName}
                 component={MarkdownEditorForm}
                 componentProps={{
+                  ref: editorRef,
+                  id,
                   idAria: 'caseComment',
                   isDisabled: isLoading,
                   dataTestSubj: 'add-comment',
                   placeholder: i18n.ADD_COMMENT_HELP_TEXT,
                   bottomRightContent: (
-                    <EuiButton
-                      data-test-subj="submit-comment"
-                      iconType="plusInCircle"
-                      isDisabled={isLoading}
-                      isLoading={isLoading}
-                      onClick={onSubmit}
-                      size="s"
-                    >
-                      {i18n.ADD_COMMENT}
-                    </EuiButton>
+                    <EuiFlexGroup gutterSize="s" alignItems="flexEnd" responsive={false} wrap>
+                      {statusActionButton && (
+                        <EuiFlexItem grow={false}>{statusActionButton}</EuiFlexItem>
+                      )}
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          data-test-subj="submit-comment"
+                          fill
+                          iconType="plusInCircle"
+                          isDisabled={isLoading}
+                          isLoading={isLoading}
+                          onClick={onSubmit}
+                        >
+                          {i18n.ADD_COMMENT}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   ),
                 }}
               />

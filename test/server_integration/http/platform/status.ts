@@ -18,10 +18,13 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
 
   const getStatus = async (pluginName: string): Promise<ServiceStatusSerialized> => {
-    const resp = await supertest.get('/api/status?v8format=true');
+    const resp = await supertest.get('/api/status');
 
     return resp.body.status.plugins[pluginName];
   };
+
+  // max debounce of the status observable + 1
+  const statusPropagation = () => new Promise((resolve) => setTimeout(resolve, 501));
 
   const setStatus = async <T extends keyof typeof ServiceStatusLevels>(level: T) =>
     supertest
@@ -53,6 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
         5_000,
         async () => (await getStatus('statusPluginA')).level === 'degraded'
       );
+      await statusPropagation();
       expect((await getStatus('statusPluginA')).level).to.eql('degraded');
       expect((await getStatus('statusPluginB')).level).to.eql('degraded');
 
@@ -62,6 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
         5_000,
         async () => (await getStatus('statusPluginA')).level === 'available'
       );
+      await statusPropagation();
       expect((await getStatus('statusPluginA')).level).to.eql('available');
       expect((await getStatus('statusPluginB')).level).to.eql('available');
     });

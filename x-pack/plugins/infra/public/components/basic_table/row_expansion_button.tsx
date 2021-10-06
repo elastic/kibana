@@ -20,12 +20,10 @@ export const RowExpansionButton = <Item extends any>({
   onCollapse: (item: Item) => void;
   onExpand: (item: Item) => void;
 }) => {
-  const handleClick = useCallback(() => (isExpanded ? onCollapse(item) : onExpand(item)), [
-    isExpanded,
-    item,
-    onCollapse,
-    onExpand,
-  ]);
+  const handleClick = useCallback(
+    () => (isExpanded ? onCollapse(item) : onExpand(item)),
+    [isExpanded, item, onCollapse, onExpand]
+  );
 
   return (
     <EuiButtonIcon

@@ -1,0 +1,14 @@
+{
+  "id": "locatorExplorer",
+  "kibanaVersion": "kibana",
+  "version": "0.0.1",
+  "server": false,
+  "ui": true,
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Example app that shows how to use custom URL locators",
+  "requiredPlugins": ["share", "locatorExamples", "developerExamples"],
+  "optionalPlugins": []
+}

@@ -196,6 +196,7 @@ exports[`Inspector Data View component should render empty state 1`] = `
         >
           <span
             className="euiTextColor euiTextColor--subdued"
+            style={Object {}}
           >
             <EuiSpacer
               size="m"
@@ -1169,7 +1170,6 @@ exports[`Inspector Data View component should render single table without select
                               >
                                 <EuiFlexGroup
                                   alignItems="center"
-                                  className=""
                                   gutterSize="s"
                                   key=".0"
                                   responsive={false}
@@ -1403,7 +1403,7 @@ exports[`Inspector Data View component should render single table without select
                                   >
                                     <button
                                       aria-label="Previous page"
-                                      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                      className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                                       data-test-subj="pagination-button-previous"
                                       disabled={true}
                                       onClick={[Function]}
@@ -1431,9 +1431,13 @@ exports[`Inspector Data View component should render single table without select
                               <ul
                                 className="euiPagination__list"
                               >
-                                <PaginationButton
+                                <PaginationButtonWrapper
+                                  activePage={0}
+                                  ariaControls="__table_generated-id"
                                   key="0"
+                                  pageCount={1}
                                   pageIndex={0}
+                                  safeClick={[Function]}
                                 >
                                   <li
                                     className="euiPagination__item"
@@ -1513,7 +1517,7 @@ exports[`Inspector Data View component should render single table without select
                                       </EuiI18n>
                                     </EuiPaginationButton>
                                   </li>
-                                </PaginationButton>
+                                </PaginationButtonWrapper>
                               </ul>
                               <EuiI18n
                                 default="Next page, {page}"
@@ -1538,7 +1542,7 @@ exports[`Inspector Data View component should render single table without select
                                   >
                                     <button
                                       aria-label="Next page"
-                                      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                      className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                                       data-test-subj="pagination-button-next"
                                       disabled={true}
                                       onClick={[Function]}
@@ -2732,7 +2736,6 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                               >
                                 <EuiFlexGroup
                                   alignItems="center"
-                                  className=""
                                   gutterSize="s"
                                   key=".0"
                                   responsive={false}
@@ -2966,7 +2969,7 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                   >
                                     <button
                                       aria-label="Previous page"
-                                      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                      className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                                       data-test-subj="pagination-button-previous"
                                       disabled={true}
                                       onClick={[Function]}
@@ -2994,9 +2997,13 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                               <ul
                                 className="euiPagination__list"
                               >
-                                <PaginationButton
+                                <PaginationButtonWrapper
+                                  activePage={0}
+                                  ariaControls="__table_generated-id"
                                   key="0"
+                                  pageCount={1}
                                   pageIndex={0}
+                                  safeClick={[Function]}
                                 >
                                   <li
                                     className="euiPagination__item"
@@ -3076,7 +3083,7 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                       </EuiI18n>
                                     </EuiPaginationButton>
                                   </li>
-                                </PaginationButton>
+                                </PaginationButtonWrapper>
                               </ul>
                               <EuiI18n
                                 default="Next page, {page}"
@@ -3101,7 +3108,7 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                   >
                                     <button
                                       aria-label="Next page"
-                                      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                      className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                                       data-test-subj="pagination-button-next"
                                       disabled={true}
                                       onClick={[Function]}

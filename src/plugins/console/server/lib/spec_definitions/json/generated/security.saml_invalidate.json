@@ -1,0 +1,11 @@
+{
+  "security.saml_invalidate": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_security/saml/invalidate"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-saml-invalidate.html"
+  }
+}

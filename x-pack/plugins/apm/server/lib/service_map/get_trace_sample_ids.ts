@@ -8,7 +8,6 @@
 import Boom from '@hapi/boom';
 import { sortBy, take, uniq } from 'lodash';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -17,8 +16,9 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
-import { environmentQuery, rangeQuery } from '../../../server/utils/queries';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { rangeQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
+import { Setup } from '../helpers/setup_request';
 
 const MAX_TRACES_TO_INSPECT = 1000;
 
@@ -26,28 +26,35 @@ export async function getTraceSampleIds({
   serviceName,
   environment,
   setup,
+  start,
+  end,
 }: {
   serviceName?: string;
-  environment?: string;
-  setup: Setup & SetupTimeRange;
+  environment: string;
+  setup: Setup;
+  start: number;
+  end: number;
 }) {
-  const { start, end, apmEventClient, config } = setup;
+  const { apmEventClient, config } = setup;
 
   const query = {
     bool: {
-      filter: [
-        {
-          exists: {
-            field: SPAN_DESTINATION_SERVICE_RESOURCE,
-          },
-        },
-        ...rangeQuery(start, end),
-      ] as ESFilter[],
+      filter: [...rangeQuery(start, end)],
     },
-  } as { bool: { filter: ESFilter[]; must_not?: ESFilter[] | ESFilter } };
+  };
+
+  let events: ProcessorEvent[];
 
   if (serviceName) {
     query.bool.filter.push({ term: { [SERVICE_NAME]: serviceName } });
+    events = [ProcessorEvent.span, ProcessorEvent.transaction];
+  } else {
+    events = [ProcessorEvent.span];
+    query.bool.filter.push({
+      exists: {
+        field: SPAN_DESTINATION_SERVICE_RESOURCE,
+      },
+    });
   }
 
   query.bool.filter.push(...environmentQuery(environment));
@@ -64,7 +71,7 @@ export async function getTraceSampleIds({
 
   const params = {
     apm: {
-      events: [ProcessorEvent.span],
+      events,
     },
     body: {
       size: 0,
@@ -77,6 +84,7 @@ export async function getTraceSampleIds({
                 [SPAN_DESTINATION_SERVICE_RESOURCE]: {
                   terms: {
                     field: SPAN_DESTINATION_SERVICE_RESOURCE,
+                    missing_bucket: true,
                   },
                 },
               },

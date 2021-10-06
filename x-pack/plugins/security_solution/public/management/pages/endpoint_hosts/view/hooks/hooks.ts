@@ -13,7 +13,8 @@ import {
   MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
 } from '../../../../common/constants';
-import { useKibana } from '../../../../../common/lib/kibana';
+import { useAppUrl } from '../../../../../common/lib/kibana';
+import { pagePathGetters } from '../../../../../../../fleet/public';
 
 export function useEndpointSelector<TSelected>(selector: (state: EndpointState) => TSelected) {
   return useSelector(function (state: State) {
@@ -29,15 +30,15 @@ export function useEndpointSelector<TSelected>(selector: (state: EndpointState) 
  * Returns an object that contains Fleet app and URL information
  */
 export const useIngestUrl = (subpath: string): { url: string; appId: string; appPath: string } => {
-  const { services } = useKibana();
+  const { getAppUrl } = useAppUrl();
   return useMemo(() => {
     const appPath = `#/${subpath}`;
     return {
-      url: `${services.application.getUrlForApp('fleet')}${appPath}`,
+      url: `${getAppUrl({ appId: 'fleet' })}${appPath}`,
       appId: 'fleet',
       appPath,
     };
-  }, [services.application, subpath]);
+  }, [getAppUrl, subpath]);
 };
 /**
  * Returns an object that contains Fleet app and URL information
@@ -45,13 +46,14 @@ export const useIngestUrl = (subpath: string): { url: string; appId: string; app
 export const useAgentDetailsIngestUrl = (
   agentId: string
 ): { url: string; appId: string; appPath: string } => {
-  const { services } = useKibana();
+  const { getAppUrl } = useAppUrl();
   return useMemo(() => {
-    const appPath = `#/fleet/agents/${agentId}/activity`;
+    const appPath = pagePathGetters.agent_details_logs({ agentId })[1];
+
     return {
-      url: `${services.application.getUrlForApp('fleet')}${appPath}`,
+      url: `${getAppUrl({ appId: 'fleet' })}${appPath}`,
       appId: 'fleet',
       appPath,
     };
-  }, [services.application, agentId]);
+  }, [getAppUrl, agentId]);
 };

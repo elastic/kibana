@@ -193,6 +193,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                 isAgentPolicyLoading || agentPolicyData?.item?.is_managed ? undefined : (
                   <AgentDetailsActionMenu
                     agent={agentData.item}
+                    agentPolicy={agentPolicyData?.item}
                     assignFlyoutOpenByDefault={openReassignFlyoutOpenByDefault}
                     onCancelReassign={
                       routeState && routeState.onDoneNavigateTo
@@ -253,7 +254,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
       <WithHeaderLayout
         leftColumn={headerLeftContent}
         rightColumn={headerRightContent}
-        tabs={(headerTabs as unknown) as EuiTabProps[]}
+        tabs={headerTabs as unknown as EuiTabProps[]}
       >
         {isLoading && isInitialRequest ? (
           <Loading />
@@ -294,7 +295,7 @@ const AgentDetailsPageContent: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
 }> = ({ agent, agentPolicy }) => {
-  useBreadcrumbs('agent_list', {
+  useBreadcrumbs('agent_details', {
     agentHost:
       typeof agent.local_metadata.host === 'object' &&
       typeof agent.local_metadata.host.hostname === 'string'
@@ -306,7 +307,7 @@ const AgentDetailsPageContent: React.FunctionComponent<{
       <Route
         path={FLEET_ROUTING_PATHS.agent_details_logs}
         render={() => {
-          return <AgentLogs agent={agent} />;
+          return <AgentLogs agent={agent} agentPolicy={agentPolicy} />;
         }}
       />
       <Route

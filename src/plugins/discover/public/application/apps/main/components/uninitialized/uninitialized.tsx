@@ -7,8 +7,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
 interface Props {
@@ -17,31 +16,29 @@ interface Props {
 
 export const DiscoverUninitialized = ({ onRefresh }: Props) => {
   return (
-    <I18nProvider>
-      <EuiEmptyPrompt
-        iconType="discoverApp"
-        title={
-          <h2>
-            <FormattedMessage id="discover.uninitializedTitle" defaultMessage="Start searching" />
-          </h2>
-        }
-        body={
-          <p>
-            <FormattedMessage
-              id="discover.uninitializedText"
-              defaultMessage="Write a query, add some filters, or simply hit Refresh to retrieve results for the current query."
-            />
-          </p>
-        }
-        actions={
-          <EuiButton color="primary" fill onClick={onRefresh}>
-            <FormattedMessage
-              id="discover.uninitializedRefreshButtonText"
-              defaultMessage="Refresh data"
-            />
-          </EuiButton>
-        }
-      />
-    </I18nProvider>
+    <EuiEmptyPrompt
+      iconType="discoverApp"
+      title={
+        <h2>
+          <FormattedMessage id="discover.uninitializedTitle" defaultMessage="Start searching" />
+        </h2>
+      }
+      body={
+        <p>
+          <FormattedMessage
+            id="discover.uninitializedText"
+            defaultMessage="Write a query, add some filters, or simply hit Refresh to retrieve results for the current query."
+          />
+        </p>
+      }
+      actions={
+        <EuiButton color="primary" fill onClick={onRefresh} data-test-subj="refreshDataButton">
+          <FormattedMessage
+            id="discover.uninitializedRefreshButtonText"
+            defaultMessage="Refresh data"
+          />
+        </EuiButton>
+      }
+    />
   );
 };

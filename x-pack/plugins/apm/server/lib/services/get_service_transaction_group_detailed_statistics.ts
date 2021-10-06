@@ -6,7 +6,6 @@
  */
 
 import { keyBy } from 'lodash';
-import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -15,24 +14,22 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../server/utils/queries';
+import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
+import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import { getBucketSize } from '../helpers/get_bucket_size';
+import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../helpers/latency_aggregation_type';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { calculateTransactionErrorPercentage } from '../helpers/transaction_error_rate';
+import { Setup } from '../helpers/setup_request';
+import { calculateFailedTransactionRate } from '../helpers/transaction_error_rate';
 
 export async function getServiceTransactionGroupDetailedStatistics({
   environment,
@@ -47,8 +44,8 @@ export async function getServiceTransactionGroupDetailedStatistics({
   start,
   end,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   transactionNames: string[];
   setup: Setup;
@@ -68,7 +65,12 @@ export async function getServiceTransactionGroupDetailedStatistics({
   }>
 > {
   const { apmEventClient } = setup;
-  const { intervalString } = getBucketSize({ start, end, numBuckets });
+  const { intervalString } = getBucketSizeForAggregatedTransactions({
+    start,
+    end,
+    numBuckets,
+    searchAggregatedTransactions,
+  });
 
   const field = getTransactionDurationFieldForAggregatedTransactions(
     searchAggregatedTransactions
@@ -162,7 +164,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
     }));
     const errorRate = bucket.timeseries.buckets.map((timeseriesBucket) => ({
       x: timeseriesBucket.key,
-      y: calculateTransactionErrorPercentage(timeseriesBucket[EVENT_OUTCOME]),
+      y: calculateFailedTransactionRate(timeseriesBucket[EVENT_OUTCOME]),
     }));
     const transactionGroupTotalDuration =
       bucket.transaction_group_total_duration.value || 0;
@@ -190,21 +192,23 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
   comparisonEnd,
   environment,
   kuery,
+  start,
+  end,
 }: {
   serviceName: string;
   transactionNames: string[];
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   numBuckets: number;
   searchAggregatedTransactions: boolean;
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
   comparisonStart?: number;
   comparisonEnd?: number;
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
+  start: number;
+  end: number;
 }) {
-  const { start, end } = setup;
-
   const commonProps = {
     setup,
     serviceName,
@@ -237,7 +241,7 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
     previousPeriodPromise,
   ]);
 
-  const firtCurrentPeriod = currentPeriod.length ? currentPeriod[0] : undefined;
+  const firstCurrentPeriod = currentPeriod?.[0];
 
   return {
     currentPeriod: keyBy(currentPeriod, 'transactionName'),
@@ -246,15 +250,15 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
         return {
           ...data,
           errorRate: offsetPreviousPeriodCoordinates({
-            currentPeriodTimeseries: firtCurrentPeriod?.errorRate,
+            currentPeriodTimeseries: firstCurrentPeriod?.errorRate,
             previousPeriodTimeseries: data.errorRate,
           }),
           throughput: offsetPreviousPeriodCoordinates({
-            currentPeriodTimeseries: firtCurrentPeriod?.throughput,
+            currentPeriodTimeseries: firstCurrentPeriod?.throughput,
             previousPeriodTimeseries: data.throughput,
           }),
           latency: offsetPreviousPeriodCoordinates({
-            currentPeriodTimeseries: firtCurrentPeriod?.latency,
+            currentPeriodTimeseries: firstCurrentPeriod?.latency,
             previousPeriodTimeseries: data.latency,
           }),
         };

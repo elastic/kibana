@@ -13,7 +13,7 @@ import { fireEvent } from '@testing-library/dom';
 import { MiddlewareActionSpyHelper } from '../../../../common/store/test_utils';
 import {
   ConditionEntryField,
-  GetTrustedListAppsResponse,
+  GetTrustedAppsListResponse,
   NewTrustedApp,
   OperatingSystem,
   PostTrustedAppCreateResponse,
@@ -46,8 +46,7 @@ const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as j
 describe('When on the Trusted Apps Page', () => {
   const expectedAboutInfo =
     'Add a trusted application to improve performance or alleviate conflicts with other ' +
-    'applications running on your hosts. Trusted applications are applied to hosts running the Endpoint Security ' +
-    'integration on their agents.';
+    'applications running on your hosts.';
 
   const generator = new EndpointDocGenerator('policy-list');
 
@@ -84,7 +83,7 @@ describe('When on the Trusted Apps Page', () => {
     page: number = 1,
     // eslint-disable-next-line @typescript-eslint/naming-convention
     per_page: number = 20
-  ): GetTrustedListAppsResponse => {
+  ): GetTrustedAppsListResponse => {
     return {
       data: [getFakeTrustedApp()],
       total: 50, // << Should be a value large enough to fulfill two pages
@@ -97,7 +96,7 @@ describe('When on the Trusted Apps Page', () => {
     const currentGetHandler = http.get.getMockImplementation();
 
     http.get.mockImplementation(async (...args) => {
-      const path = (args[0] as unknown) as string;
+      const path = args[0] as unknown as string;
       // @ts-ignore
       const httpOptions = args[1] as HttpFetchOptions;
 
@@ -144,7 +143,7 @@ describe('When on the Trusted Apps Page', () => {
     waitForAction = mockedContext.middlewareSpy.waitForAction;
     render = () => mockedContext.render(<TrustedAppsPage />);
     reactTestingLibrary.act(() => {
-      history.push('/trusted_apps');
+      history.push('/administration/trusted_apps');
     });
     window.scrollTo = jest.fn();
   });
@@ -170,12 +169,12 @@ describe('When on the Trusted Apps Page', () => {
     it('should display a Add Trusted App button', async () => {
       const { getByTestId } = await renderWithListData();
       const addButton = getByTestId('trustedAppsListAddButton');
-      expect(addButton.textContent).toBe('Add Trusted Application');
+      expect(addButton.textContent).toBe('Add trusted application');
     });
 
-    it('should display the searchbar', async () => {
+    it('should display the searchExceptions', async () => {
       const renderResult = await renderWithListData();
-      expect(await renderResult.findByTestId('searchBar')).not.toBeNull();
+      expect(await renderResult.findByTestId('searchExceptions')).not.toBeNull();
     });
 
     describe('and the Grid view is being displayed', () => {
@@ -184,8 +183,13 @@ describe('When on the Trusted Apps Page', () => {
 
         beforeEach(async () => {
           renderResult = await renderWithListData();
+
+          await act(async () => {
+            (await renderResult.findAllByTestId('trustedAppCard-header-actions-button'))[0].click();
+          });
+
           act(() => {
-            fireEvent.click(renderResult.getByTestId('trustedAppEditButton'));
+            fireEvent.click(renderResult.getByTestId('editTrustedAppAction'));
           });
         });
 
@@ -233,7 +237,7 @@ describe('When on the Trusted Apps Page', () => {
 
             expect(coreStart.http.put).toHaveBeenCalledTimes(1);
 
-            const lastCallToPut = (coreStart.http.put.mock.calls[0] as unknown) as [
+            const lastCallToPut = coreStart.http.put.mock.calls[0] as unknown as [
               string,
               HttpFetchOptions
             ];
@@ -305,7 +309,7 @@ describe('When on the Trusted Apps Page', () => {
           });
 
           reactTestingLibrary.act(() => {
-            history.push('/trusted_apps?show=edit&id=9999-edit-8888');
+            history.push('/administration/trusted_apps?show=edit&id=9999-edit-8888');
           });
         });
 
@@ -315,15 +319,17 @@ describe('When on the Trusted Apps Page', () => {
           expect(coreStart.http.get).toHaveBeenCalledWith(TRUSTED_APP_GET_URI);
 
           expect(
-            (renderResult.getByTestId(
-              'addTrustedAppFlyout-createForm-nameTextField'
-            ) as HTMLInputElement).value
+            (
+              renderResult.getByTestId(
+                'addTrustedAppFlyout-createForm-nameTextField'
+              ) as HTMLInputElement
+            ).value
           ).toEqual('one app for edit');
         });
 
         it('should redirect to list and show toast message if `id` is missing from URL', async () => {
           reactTestingLibrary.act(() => {
-            history.push('/trusted_apps?show=edit&id=');
+            history.push('/administration/trusted_apps?show=edit&id=');
           });
 
           await renderAndWaitForGetApi();
@@ -353,73 +359,6 @@ describe('When on the Trusted Apps Page', () => {
             'Unable to edit trusted application (test: api error response)'
           );
         });
-      });
-    });
-
-    describe('and the List view is being displayed', () => {
-      let renderResult: ReturnType<typeof render>;
-
-      const expandFirstRow = () => {
-        reactTestingLibrary.act(() => {
-          fireEvent.click(renderResult.getByTestId('trustedAppsListItemExpandButton'));
-        });
-      };
-
-      beforeEach(async () => {
-        reactTestingLibrary.act(() => {
-          history.push('/trusted_apps?view_type=list');
-        });
-
-        renderResult = await renderWithListData();
-      });
-
-      it('should display the list', () => {
-        expect(renderResult.getByTestId('trustedAppsList'));
-      });
-
-      it('should show a card when row is expanded', () => {
-        expandFirstRow();
-        expect(renderResult.getByTestId('trustedAppCard'));
-      });
-
-      it('should show Edit flyout when edit button on card is clicked', () => {
-        expandFirstRow();
-        reactTestingLibrary.act(() => {
-          fireEvent.click(renderResult.getByTestId('trustedAppEditButton'));
-        });
-        expect(renderResult.findByTestId('addTrustedAppFlyout'));
-      });
-
-      it('should reflect updated information on row and card when updated data is received', async () => {
-        expandFirstRow();
-        reactTestingLibrary.act(() => {
-          const updatedListContent = createListApiResponse();
-          updatedListContent.data[0]!.name = 'updated trusted app';
-          updatedListContent.data[0]!.description = 'updated trusted app description';
-
-          mockedContext.store.dispatch({
-            type: 'trustedAppsListResourceStateChanged',
-            payload: {
-              newState: {
-                type: 'LoadedResourceState',
-                data: {
-                  items: updatedListContent.data,
-                  pageIndex: updatedListContent.page,
-                  pageSize: updatedListContent.per_page,
-                  totalItemsCount: updatedListContent.total,
-                  timestamp: Date.now(),
-                },
-              },
-            },
-          });
-        });
-
-        // The additional prefix of `Name` is due to the hidden element in DOM that is only shown
-        // for mobile devices (inserted by the EuiBasicTable)
-        expect(renderResult.getByTestId('trustedAppNameTableCell').textContent).toEqual(
-          'Nameupdated trusted app'
-        );
-        expect(renderResult.getByText('updated trusted app description'));
       });
     });
   });
@@ -477,7 +416,7 @@ describe('When on the Trusted Apps Page', () => {
 
     it('should preserve other URL search params', async () => {
       reactTestingLibrary.act(() => {
-        history.push('/trusted_apps?page_index=2&page_size=20');
+        history.push('/administration/trusted_apps?page_index=2&page_size=20');
       });
       await renderAndClickAddButton();
       expect(history.location.search).toBe('?page_index=2&page_size=20&show=create');
@@ -491,8 +430,11 @@ describe('When on the Trusted Apps Page', () => {
     it('should have list of policies populated', async () => {
       useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
       const resetEnv = forceHTMLElementOffsetWidth();
-      const { getByTestId } = await renderAndClickAddButton();
-      expect(getByTestId('policy-abc123'));
+      const renderResult = await renderAndClickAddButton();
+      act(() => {
+        fireEvent.click(renderResult.getByTestId('perPolicy'));
+      });
+      expect(renderResult.getByTestId('policy-abc123'));
       resetEnv();
     });
 
@@ -638,9 +580,10 @@ describe('When on the Trusted Apps Page', () => {
           });
 
           it('should show success toast notification', () => {
-            expect(coreStart.notifications.toasts.addSuccess.mock.calls[0][0]).toEqual(
-              '"one app" has been added to the Trusted Applications list.'
-            );
+            expect(coreStart.notifications.toasts.addSuccess.mock.calls[0][0]).toEqual({
+              text: '"one app" has been added to the Trusted Applications list.',
+              title: 'Success!',
+            });
           });
 
           it('should trigger the List to reload', () => {
@@ -740,30 +683,29 @@ describe('When on the Trusted Apps Page', () => {
   });
 
   describe('and there are no trusted apps', () => {
-    const releaseExistsResponse: jest.MockedFunction<
-      () => Promise<GetTrustedListAppsResponse>
-    > = jest.fn(async () => {
-      return {
-        data: [],
-        total: 0,
-        page: 1,
-        per_page: 1,
-      };
-    });
-    const releaseListResponse: jest.MockedFunction<
-      () => Promise<GetTrustedListAppsResponse>
-    > = jest.fn(async () => {
-      return {
-        data: [],
-        total: 0,
-        page: 1,
-        per_page: 20,
-      };
-    });
+    const releaseExistsResponse: jest.MockedFunction<() => Promise<GetTrustedAppsListResponse>> =
+      jest.fn(async () => {
+        return {
+          data: [],
+          total: 0,
+          page: 1,
+          per_page: 1,
+        };
+      });
+    const releaseListResponse: jest.MockedFunction<() => Promise<GetTrustedAppsListResponse>> =
+      jest.fn(async () => {
+        return {
+          data: [],
+          total: 0,
+          page: 1,
+          per_page: 20,
+        };
+      });
 
     beforeEach(() => {
+      const priorMockImplementation = coreStart.http.get.getMockImplementation();
       // @ts-ignore
-      coreStart.http.get.mockImplementation(async (path, options) => {
+      coreStart.http.get.mockImplementation((path, options) => {
         if (path === TRUSTED_APPS_LIST_API) {
           const { page, per_page: perPage } = options.query as { page: number; per_page: number };
 
@@ -772,6 +714,23 @@ describe('When on the Trusted Apps Page', () => {
           } else {
             return releaseListResponse();
           }
+        }
+
+        if (path === PACKAGE_POLICY_API_ROUTES.LIST_PATTERN) {
+          const policy = generator.generatePolicyPackagePolicy();
+          policy.name = 'test policy A';
+          policy.id = 'abc123';
+
+          const response: GetPackagePoliciesResponse = {
+            items: [policy],
+            page: 1,
+            perPage: 1000,
+            total: 1,
+          };
+          return response;
+        }
+        if (priorMockImplementation) {
+          return priorMockImplementation(path);
         }
       });
     });
@@ -870,12 +829,12 @@ describe('When on the Trusted Apps Page', () => {
       expect(await renderResult.findByTestId('trustedAppEmptyState')).not.toBeNull();
     });
 
-    it('should not display the searchbar', async () => {
+    it('should not display the searchExceptions', async () => {
       const renderResult = render();
       await act(async () => {
         await waitForAction('trustedAppsExistStateChanged');
       });
-      expect(renderResult.queryByTestId('searchBar')).toBeNull();
+      expect(renderResult.queryByTestId('searchExceptions')).toBeNull();
     });
   });
 
@@ -884,7 +843,7 @@ describe('When on the Trusted Apps Page', () => {
     beforeEach(async () => {
       mockListApis(coreStart.http);
       reactTestingLibrary.act(() => {
-        history.push('/trusted_apps?filter=test');
+        history.push('/administration/trusted_apps?filter=test');
       });
       renderResult = render();
       await act(async () => {
@@ -907,12 +866,34 @@ describe('When on the Trusted Apps Page', () => {
   describe('and the back button is present', () => {
     let renderResult: ReturnType<AppContextTestRender['render']>;
     beforeEach(async () => {
+      // Ensure implementation is defined before render to avoid undefined responses from hidden api calls
+      const priorMockImplementation = coreStart.http.get.getMockImplementation();
+      // @ts-ignore
+      coreStart.http.get.mockImplementation((path, options) => {
+        if (path === PACKAGE_POLICY_API_ROUTES.LIST_PATTERN) {
+          const policy = generator.generatePolicyPackagePolicy();
+          policy.name = 'test policy A';
+          policy.id = 'abc123';
+
+          const response: GetPackagePoliciesResponse = {
+            items: [policy],
+            page: 1,
+            perPage: 1000,
+            total: 1,
+          };
+          return response;
+        }
+        if (priorMockImplementation) {
+          return priorMockImplementation(path);
+        }
+      });
+
       renderResult = render();
       await act(async () => {
         await waitForAction('trustedAppsListResourceStateChanged');
       });
       reactTestingLibrary.act(() => {
-        history.push('/trusted_apps', {
+        history.push('/administration/trusted_apps', {
           onBackButtonNavigateTo: [{ appId: 'appId' }],
           backButtonLabel: 'back to fleet',
           backButtonUrl: '/fleet',
@@ -928,7 +909,7 @@ describe('When on the Trusted Apps Page', () => {
 
     it('back button is not present', () => {
       reactTestingLibrary.act(() => {
-        history.push('/trusted_apps');
+        history.push('/administration/trusted_apps');
       });
       expect(renderResult.queryByTestId('backToOrigin')).toBeNull();
     });

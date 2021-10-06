@@ -204,9 +204,8 @@ export default function ({ getService }: FtrProviderContext) {
         it('should display the feature importance decision path in the data grid', async () => {
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
-          await ml.dataFrameAnalyticsResults.openFeatureImportanceDecisionPathPopover();
-          await ml.dataFrameAnalyticsResults.assertFeatureImportanceDecisionPathElementsExists();
-          await ml.dataFrameAnalyticsResults.assertFeatureImportanceDecisionPathChartElementsExists();
+          await ml.dataFrameAnalyticsResults.openFeatureImportancePopover();
+          await ml.dataFrameAnalyticsResults.assertFeatureImportancePopoverContent();
         });
       });
     }

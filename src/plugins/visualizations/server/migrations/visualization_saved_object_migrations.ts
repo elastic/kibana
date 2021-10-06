@@ -8,9 +8,9 @@
 
 import { cloneDeep, get, omit, has, flow, forOwn } from 'lodash';
 
-import { SavedObjectMigrationFn } from 'kibana/server';
+import type { SavedObjectMigrationFn } from 'kibana/server';
 
-import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
+import { DEFAULT_QUERY_LANGUAGE, INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../data/common';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
   commonHideTSVBLastValueIndicator,
@@ -18,6 +18,8 @@ import {
   commonMigrateVislibPie,
   commonAddEmptyValueColorRule,
   commonMigrateTagCloud,
+  commonAddDropLastBucketIntoTSVBModel,
+  commonRemoveMarkdownLessFromTSVB,
 } from './visualization_common_migrations';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
@@ -37,7 +39,7 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
     searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
     doc.references.push({
       name: searchSource.indexRefName,
-      type: 'index-pattern',
+      type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
       id: searchSource.index,
     });
     delete searchSource.index;
@@ -50,7 +52,7 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
       filterRow.meta.indexRefName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
       doc.references.push({
         name: filterRow.meta.indexRefName,
-        type: 'index-pattern',
+        type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
         id: filterRow.meta.index,
       });
       delete filterRow.meta.index;
@@ -648,7 +650,7 @@ const migrateControls: SavedObjectMigrationFn<any, any> = (doc) => {
         control.indexPatternRefName = `control_${i}_index_pattern`;
         doc.references.push({
           name: control.indexPatternRefName,
-          type: 'index-pattern',
+          type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
           id: control.indexPattern,
         });
         delete control.indexPattern;
@@ -945,6 +947,23 @@ const hideTSVBLastValueIndicator: SavedObjectMigrationFn<any, any> = (doc) => {
   return doc;
 };
 
+const addDropLastBucketIntoTSVBModel: SavedObjectMigrationFn<any, any> = (doc) => {
+  try {
+    const visState = JSON.parse(doc.attributes.visState);
+    const newVisState = commonAddDropLastBucketIntoTSVBModel(visState);
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        visState: JSON.stringify(newVisState),
+      },
+    };
+  } catch (e) {
+    // Let it go, the data is invalid and we'll leave it as is
+  }
+  return doc;
+};
+
 const removeDefaultIndexPatternAndTimeFieldFromTSVBModel: SavedObjectMigrationFn<any, any> = (
   doc
 ) => {
@@ -1038,6 +1057,41 @@ const migrateTagCloud: SavedObjectMigrationFn<any, any> = (doc) => {
   return doc;
 };
 
+export const replaceIndexPatternReference: SavedObjectMigrationFn<any, any> = (doc) => ({
+  ...doc,
+  references: Array.isArray(doc.references)
+    ? doc.references.map((reference) => {
+        if (reference.type === 'index_pattern') {
+          reference.type = INDEX_PATTERN_SAVED_OBJECT_TYPE;
+        }
+        return reference;
+      })
+    : doc.references,
+});
+
+export const removeMarkdownLessFromTSVB: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+
+    const newVisState = commonRemoveMarkdownLessFromTSVB(visState);
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        visState: JSON.stringify(newVisState),
+      },
+    };
+  }
+  return doc;
+};
+
 export const visualizationSavedObjectTypeMigrations = {
   /**
    * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
@@ -1084,5 +1138,12 @@ export const visualizationSavedObjectTypeMigrations = {
     hideTSVBLastValueIndicator,
     removeDefaultIndexPatternAndTimeFieldFromTSVBModel
   ),
-  '7.14.0': flow(addEmptyValueColorRule, migrateVislibPie, migrateTagCloud),
+  '7.14.0': flow(
+    addEmptyValueColorRule,
+    migrateVislibPie,
+    migrateTagCloud,
+    replaceIndexPatternReference,
+    addDropLastBucketIntoTSVBModel
+  ),
+  '8.0.0': flow(removeMarkdownLessFromTSVB),
 };

@@ -20,6 +20,7 @@ const mockAlertType = (id: string): AlertType => ({
   defaultActionGroupId: 'default',
   producer: 'alerts',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
 });
 
 describe('AlertNavigationRegistry', () => {

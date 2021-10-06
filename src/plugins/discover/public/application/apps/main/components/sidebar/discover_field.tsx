@@ -358,7 +358,36 @@ function DiscoverFieldComponent({
     </EuiPopoverTitle>
   );
 
-  const details = getDetails(field);
+  const renderPopover = () => {
+    const details = getDetails(field);
+    return (
+      <>
+        <DiscoverFieldDetails
+          indexPattern={indexPattern}
+          field={field}
+          details={details}
+          onAddFilter={onAddFilter}
+        />
+        {multiFields && (
+          <>
+            <EuiSpacer size="m" />
+            <MultiFields
+              multiFields={multiFields}
+              alwaysShowActionButton={alwaysShowActionButton}
+              toggleDisplay={toggleDisplay}
+            />
+          </>
+        )}
+        <DiscoverFieldVisualize
+          field={field}
+          indexPattern={indexPattern}
+          multiFields={rawMultiFields}
+          trackUiMetric={trackUiMetric}
+          details={details}
+        />
+      </>
+    );
+  };
 
   return (
     <EuiPopover
@@ -396,33 +425,7 @@ function DiscoverFieldComponent({
           })}
         </h5>
       </EuiTitle>
-      {infoIsOpen && (
-        <>
-          <DiscoverFieldDetails
-            indexPattern={indexPattern}
-            field={field}
-            details={details}
-            onAddFilter={onAddFilter}
-          />
-          {multiFields && (
-            <>
-              <EuiSpacer size="m" />
-              <MultiFields
-                multiFields={multiFields}
-                alwaysShowActionButton={alwaysShowActionButton}
-                toggleDisplay={toggleDisplay}
-              />
-            </>
-          )}
-          <DiscoverFieldVisualize
-            field={field}
-            indexPattern={indexPattern}
-            multiFields={rawMultiFields}
-            trackUiMetric={trackUiMetric}
-            details={details}
-          />
-        </>
-      )}
+      {infoIsOpen && renderPopover()}
     </EuiPopover>
   );
 }

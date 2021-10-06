@@ -8,7 +8,10 @@
 export const DEFAULT_INITIAL_APP_DATA = {
   readOnlyMode: false,
   ilmEnabled: true,
-  isFederatedAuth: false,
+  searchOAuth: {
+    clientId: 'someUID',
+    redirectUrl: 'http://localhost:3002/ws/search_callback',
+  },
   configuredLimits: {
     appSearch: {
       engine: {
@@ -52,9 +55,7 @@ export const DEFAULT_INITIAL_APP_DATA = {
       id: 'some-id-string',
       groups: ['Default', 'Cats'],
       isAdmin: true,
-      canCreatePersonalSources: true,
-      canCreateInvitations: true,
-      isCurated: false,
+      canCreatePrivateSources: true,
       viewedOnboardingPage: true,
     },
   },

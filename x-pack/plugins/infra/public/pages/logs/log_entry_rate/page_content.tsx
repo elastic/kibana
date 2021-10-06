@@ -20,6 +20,7 @@ import {
   useLogAnalysisSetupFlyoutStateContext,
 } from '../../../components/logging/log_analysis_setup/setup_flyout';
 import { SubscriptionSplashPage } from '../../../components/subscription_splash_content';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
@@ -155,12 +156,18 @@ const AnomaliesPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = ({
   children,
   ...rest
 }) => {
+  const { sourceStatus } = useLogSourceContext();
   return (
     <LogsPageTemplate
+      hasData={sourceStatus?.logIndexStatus !== 'missing'}
       data-test-subj="logsLogEntryRatePage"
-      pageHeader={{
-        pageTitle: anomaliesTitle,
-      }}
+      pageHeader={
+        rest.isEmptyState
+          ? undefined
+          : {
+              pageTitle: anomaliesTitle,
+            }
+      }
       {...rest}
     >
       {children}

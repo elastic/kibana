@@ -9,8 +9,8 @@ import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
+import type { Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
 
 interface Props {

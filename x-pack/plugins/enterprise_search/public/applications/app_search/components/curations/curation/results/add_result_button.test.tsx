@@ -5,34 +5,43 @@
  * 2.0.
  */
 
-import { setMockActions } from '../../../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import { EuiButton } from '@elastic/eui';
 
 import { AddResultButton } from './';
 
 describe('AddResultButton', () => {
+  const values = {
+    isAutomated: false,
+  };
+
   const actions = {
     openFlyout: jest.fn(),
   };
 
-  let wrapper: ShallowWrapper;
-
-  beforeAll(() => {
-    setMockActions(actions);
-    wrapper = shallow(<AddResultButton />);
-  });
-
   it('renders', () => {
-    expect(wrapper.find(EuiButton)).toHaveLength(1);
+    const wrapper = shallow(<AddResultButton />);
+
+    expect(wrapper.is(EuiButton)).toBe(true);
   });
 
   it('opens the add result flyout on click', () => {
+    setMockActions(actions);
+    const wrapper = shallow(<AddResultButton />);
+
     wrapper.find(EuiButton).simulate('click');
     expect(actions.openFlyout).toHaveBeenCalled();
+  });
+
+  it('is disbled when the curation is automated', () => {
+    setMockValues({ ...values, isAutomated: true });
+    const wrapper = shallow(<AddResultButton />);
+
+    expect(wrapper.find(EuiButton).prop('disabled')).toBe(true);
   });
 });

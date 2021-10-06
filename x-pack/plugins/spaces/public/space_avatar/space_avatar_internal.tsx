@@ -10,19 +10,11 @@ import { EuiAvatar, isValidHex } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
 
-import type { Space } from 'src/plugins/spaces_oss/common';
-
 import { MAX_SPACE_INITIALS } from '../../common';
 import { getSpaceColor, getSpaceImageUrl, getSpaceInitials } from './space_attributes';
+import type { SpaceAvatarProps } from './types';
 
-interface Props {
-  space: Partial<Space>;
-  size?: 's' | 'm' | 'l' | 'xl';
-  className?: string;
-  announceSpaceName?: boolean;
-}
-
-export const SpaceAvatarInternal: FC<Props> = (props: Props) => {
+export const SpaceAvatarInternal: FC<SpaceAvatarProps> = (props: SpaceAvatarProps) => {
   const { space, size, announceSpaceName, ...rest } = props;
 
   const spaceName = space.name ? space.name.trim() : '';

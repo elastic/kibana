@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { layerTypes } from '../../../../common';
+import { LensAppState } from '../../../state_management/types';
 import { removeLayer, appendLayer } from './layer_actions';
 
 function createTestArgs(initialLayerIds: string[]) {
@@ -46,10 +47,10 @@ function createTestArgs(initialLayerIds: string[]) {
       datasourceStates,
       title: 'foo',
       visualization: {
-        activeId: 'vis1',
+        activeId: 'testVis',
         state: initialLayerIds,
       },
-    },
+    } as unknown as LensAppState,
     activeVisualization,
     datasourceMap: {
       ds1: testDatasource('ds1'),
@@ -58,7 +59,7 @@ function createTestArgs(initialLayerIds: string[]) {
     trackUiEvent,
     stagedPreview: {
       visualization: {
-        activeId: 'vis1',
+        activeId: 'testVis',
         state: initialLayerIds,
       },
       datasourceStates,
@@ -117,6 +118,7 @@ describe('appendLayer', () => {
       generateId: () => 'foo',
       state,
       trackUiEvent,
+      layerType: layerTypes.DATA,
     });
 
     expect(newState.visualization.state).toEqual(['layer1', 'layer2', 'foo']);

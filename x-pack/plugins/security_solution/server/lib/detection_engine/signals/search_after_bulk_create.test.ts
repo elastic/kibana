@@ -31,11 +31,14 @@ import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { bulkCreateFactory } from './bulk_create_factory';
 import { wrapHitsFactory } from './wrap_hits_factory';
 import { mockBuildRuleMessage } from './__mocks__/build_rule_message.mock';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { BuildReasonMessage } from './reason_formatters';
 
 const buildRuleMessage = mockBuildRuleMessage;
 
 describe('searchAfterAndBulkCreate', () => {
   let mockService: AlertServicesMock;
+  let buildReasonMessage: BuildReasonMessage;
   let bulkCreate: BulkCreate;
   let wrapHits: WrapHits;
   let inputIndexPattern: string[] = [];
@@ -47,6 +50,7 @@ describe('searchAfterAndBulkCreate', () => {
   let tuple: RuleRangeTuple;
   beforeEach(() => {
     jest.clearAllMocks();
+    buildReasonMessage = jest.fn().mockResolvedValue('some alert reason message');
     listClient = listMock.getListClient();
     listClient.searchListItemByValues = jest.fn().mockResolvedValue([]);
     inputIndexPattern = ['auditbeat-*'];
@@ -69,6 +73,8 @@ describe('searchAfterAndBulkCreate', () => {
     wrapHits = wrapHitsFactory({
       ruleSO,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
+      mergeStrategy: 'missingFields',
+      ignoreFields: [],
     });
   });
 
@@ -189,6 +195,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -293,6 +300,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -371,6 +379,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -430,6 +439,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -509,6 +519,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -564,6 +575,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -636,6 +648,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -710,6 +723,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -738,9 +752,16 @@ describe('searchAfterAndBulkCreate', () => {
         repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3))
       )
     );
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockRejectedValue(
-      elasticsearchClientMock.createErrorTransportRequestPromise(new Error('bulk failed'))
-    ); // Added this recently
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockReturnValue(
+      elasticsearchClientMock.createErrorTransportRequestPromise(
+        new ResponseError(
+          elasticsearchClientMock.createApiResponse({
+            statusCode: 400,
+            body: { error: { type: 'bulk_error_type' } },
+          })
+        )
+      )
+    );
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       listClient,
       exceptionsList: [exceptionItem],
@@ -754,6 +775,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -801,6 +823,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -862,6 +885,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -970,28 +994,25 @@ describe('searchAfterAndBulkCreate', () => {
         sampleDocSearchResultsNoSortIdNoHits()
       )
     );
-    const {
-      success,
-      createdSignalsCount,
-      lastLookBackDate,
-      errors,
-    } = await searchAfterAndBulkCreate({
-      ruleSO,
-      tuple,
-      listClient,
-      exceptionsList: [],
-      services: mockService,
-      logger: mockLogger,
-      eventsTelemetry: undefined,
-      id: sampleRuleGuid,
-      inputIndexPattern,
-      signalsIndex: DEFAULT_SIGNALS_INDEX,
-      pageSize: 1,
-      filter: undefined,
-      buildRuleMessage,
-      bulkCreate,
-      wrapHits,
-    });
+    const { success, createdSignalsCount, lastLookBackDate, errors } =
+      await searchAfterAndBulkCreate({
+        ruleSO,
+        tuple,
+        listClient,
+        exceptionsList: [],
+        services: mockService,
+        logger: mockLogger,
+        eventsTelemetry: undefined,
+        id: sampleRuleGuid,
+        inputIndexPattern,
+        signalsIndex: DEFAULT_SIGNALS_INDEX,
+        pageSize: 1,
+        filter: undefined,
+        buildReasonMessage,
+        buildRuleMessage,
+        bulkCreate,
+        wrapHits,
+      });
     expect(success).toEqual(false);
     expect(errors).toEqual(['error on creation']);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(5);
@@ -1084,6 +1105,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,

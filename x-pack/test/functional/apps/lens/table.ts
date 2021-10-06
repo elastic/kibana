@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should open the palette panel to customize the palette look', async () => {
-      await PageObjects.lens.openTablePalettePanel();
+      await PageObjects.lens.openPalettePanel('lnsDatatable');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.lens.changePaletteTo('temperature');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -122,12 +122,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(styleObj['background-color']).to.be('rgb(235, 239, 245)');
     });
 
+    it('should keep the coloring consistent when changing mode', async () => {
+      // Change mode from percent to number
+      await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      // check that all remained the same
+      const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
+      expect(styleObj['background-color']).to.be('rgb(235, 239, 245)');
+    });
+
+    it('should keep the coloring consistent when moving to custom palette from default', async () => {
+      await PageObjects.lens.changePaletteTo('custom');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      // check that all remained the same
+      const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
+      expect(styleObj['background-color']).to.be('rgb(235, 239, 245)');
+    });
+
     it('tweak the color stops numeric value', async () => {
-      await testSubjects.setValue('lnsDatatable_dynamicColoring_stop_value_0', '30', {
+      // restore default palette and percent mode
+      await PageObjects.lens.changePaletteTo('temperature');
+      await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_percent');
+      // now tweak the value
+      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '30', {
         clearWithKeyboard: true,
       });
       // when clicking on another row will trigger a sorting + update
-      await testSubjects.click('lnsDatatable_dynamicColoring_stop_value_1');
+      await testSubjects.click('lnsPalettePanel_dynamicColoring_stop_value_1');
       await PageObjects.header.waitUntilLoadingHasFinished();
       // pick a cell without color as is below the range
       const styleObj = await PageObjects.lens.getDatatableCellStyle(3, 3);
@@ -137,13 +158,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow the user to reverse the palette', async () => {
-      await testSubjects.click('lnsDatatable_dynamicColoring_reverse');
+      await testSubjects.click('lnsPalettePanel_dynamicColoring_reverse');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const styleObj = await PageObjects.lens.getDatatableCellStyle(1, 1);
       expect(styleObj['background-color']).to.be('rgb(168, 191, 218)');
       // should also set text color when in cell mode
       expect(styleObj.color).to.be('rgb(0, 0, 0)');
-      await PageObjects.lens.closeTablePalettePanel();
+      await PageObjects.lens.closePalettePanel();
     });
 
     it('should allow to show a summary table for metric columns', async () => {

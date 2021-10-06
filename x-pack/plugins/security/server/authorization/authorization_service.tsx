@@ -94,6 +94,7 @@ export interface AuthorizationServiceSetup {
   actions: Actions;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
   checkPrivilegesDynamicallyWithRequest: CheckPrivilegesDynamicallyWithRequest;
+  checkSavedObjectsPrivilegesWithRequest: CheckSavedObjectsPrivilegesWithRequest;
   mode: AuthorizationMode;
 }
 

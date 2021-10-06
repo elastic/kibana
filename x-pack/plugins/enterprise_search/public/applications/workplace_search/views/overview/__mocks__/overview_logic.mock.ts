@@ -13,12 +13,11 @@ const { workplaceSearch: mockAppValues } = DEFAULT_INITIAL_APP_DATA;
 export const mockOverviewValues = {
   accountsCount: 0,
   activityFeed: [],
-  canCreateContentSources: false,
   hasOrgSources: false,
   hasUsers: false,
   isOldAccount: false,
   pendingInvitationsCount: 0,
-  personalSourcesCount: 0,
+  privateSourcesCount: 0,
   sourcesCount: 0,
   dataLoading: true,
 };
@@ -27,7 +26,7 @@ export const mockActions = {
   initializeOverview: jest.fn(() => ({})),
 };
 
-const mockValues = { ...mockOverviewValues, ...mockAppValues, isFederatedAuth: true };
+const mockValues = { ...mockOverviewValues, ...mockAppValues };
 
 setMockActions({ ...mockActions });
 setMockKeaValues({ ...mockValues });

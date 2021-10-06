@@ -25,6 +25,8 @@ export default function ({ getService, getPageObjects }) {
         }
       );
 
+      await clusterOverview.closeAlertsModal();
+
       // go to overview
       await clusterOverview.clickEsOverview();
       expect(await overview.isOnOverview()).to.be(true);

@@ -9,7 +9,7 @@ import { stringify } from 'query-string';
 import url from 'url';
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
-import request, { Cookie } from 'request';
+import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { adminTestUser } from '@kbn/test';
 import {
   getLogoutRequest,
@@ -97,13 +97,13 @@ export default function ({ getService }: FtrProviderContext) {
       const { body: user } = await supertest
         .get('/internal/security/me')
         .set('kbn-xsrf', 'xxx')
-        .set('Cookie', request.cookie(cookies[0])!.cookieString())
+        .set('Cookie', parseCookie(cookies[0])!.cookieString())
         .expect(200);
 
       expect(user.username).to.eql(adminTestUser.username);
       expect(user.authentication_provider).to.eql({ type: 'basic', name: 'basic' });
       expect(user.authentication_type).to.be('realm');
-      // Do not assert on the `authentication_realm`, as the value differes for on-prem vs cloud
+      // Do not assert on the `authentication_realm`, as the value differs for on-prem vs cloud
     });
 
     describe('initiating handshake', () => {
@@ -128,7 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = handshakeResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const handshakeCookie = request.cookie(cookies[0])!;
+        const handshakeCookie = parseCookie(cookies[0])!;
         expect(handshakeCookie.key).to.be('sid');
         expect(handshakeCookie.value).to.not.be.empty();
         expect(handshakeCookie.path).to.be('/');
@@ -149,7 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(302);
 
-        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
+        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
         await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
@@ -178,7 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(302);
 
-        handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
+        handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
         samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
       });
 
@@ -209,7 +209,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = samlAuthenticationResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        await checkSessionCookie(request.cookie(cookies[0])!);
+        await checkSessionCookie(parseCookie(cookies[0])!);
       });
 
       it('should succeed in case of IdP initiated login', async () => {
@@ -225,7 +225,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = samlAuthenticationResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        await checkSessionCookie(request.cookie(cookies[0])!);
+        await checkSessionCookie(parseCookie(cookies[0])!);
       });
 
       it('should fail if SAML response is not valid', async () => {
@@ -254,7 +254,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ SAMLResponse: await createSAMLResponse() })
           .expect(302);
 
-        sessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
+        sessionCookie = parseCookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
       });
 
       it('should extend cookie on every successful non-system API call', async () => {
@@ -265,7 +265,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(apiResponseOne.headers['set-cookie']).to.not.be(undefined);
-        const sessionCookieOne = request.cookie(apiResponseOne.headers['set-cookie'][0])!;
+        const sessionCookieOne = parseCookie(apiResponseOne.headers['set-cookie'][0])!;
 
         expect(sessionCookieOne.value).to.not.be.empty();
         expect(sessionCookieOne.value).to.not.equal(sessionCookie.value);
@@ -277,7 +277,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(apiResponseTwo.headers['set-cookie']).to.not.be(undefined);
-        const sessionCookieTwo = request.cookie(apiResponseTwo.headers['set-cookie'][0])!;
+        const sessionCookieTwo = parseCookie(apiResponseTwo.headers['set-cookie'][0])!;
 
         expect(sessionCookieTwo.value).to.not.be.empty();
         expect(sessionCookieTwo.value).to.not.equal(sessionCookieOne.value);
@@ -317,7 +317,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(302);
 
-        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
+        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
         const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
 
         idpSessionIndex = String(randomness.naturalNumber());
@@ -332,7 +332,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(302);
 
-        sessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
+        sessionCookie = parseCookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
       });
 
       it('should redirect to IdP with SAML request to complete logout', async () => {
@@ -344,7 +344,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = logoutResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const logoutCookie = request.cookie(cookies[0])!;
+        const logoutCookie = parseCookie(cookies[0])!;
         expect(logoutCookie.key).to.be('sid');
         expect(logoutCookie.value).to.be.empty();
         expect(logoutCookie.path).to.be('/');
@@ -395,7 +395,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = logoutResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const logoutCookie = request.cookie(cookies[0])!;
+        const logoutCookie = parseCookie(cookies[0])!;
         expect(logoutCookie.key).to.be('sid');
         expect(logoutCookie.value).to.be.empty();
         expect(logoutCookie.path).to.be('/');
@@ -455,7 +455,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(302);
 
-        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
+        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
         const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
 
         const samlAuthenticationResponse = await supertest
@@ -464,7 +464,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) })
           .expect(302);
 
-        sessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
+        sessionCookie = parseCookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
 
         // Access token expiration is set to 15s for API integration tests.
         // Let's wait for 20s to make sure token expires.
@@ -491,7 +491,7 @@ export default function ({ getService }: FtrProviderContext) {
         const firstResponseCookies = firstResponse.headers['set-cookie'];
         expect(firstResponseCookies).to.have.length(1);
 
-        const firstNewCookie = request.cookie(firstResponseCookies[0])!;
+        const firstNewCookie = parseCookie(firstResponseCookies[0])!;
         expectNewSessionCookie(firstNewCookie);
 
         // Request with old cookie should reuse the same refresh token if within 60 seconds.
@@ -505,7 +505,7 @@ export default function ({ getService }: FtrProviderContext) {
         const secondResponseCookies = secondResponse.headers['set-cookie'];
         expect(secondResponseCookies).to.have.length(1);
 
-        const secondNewCookie = request.cookie(secondResponseCookies[0])!;
+        const secondNewCookie = parseCookie(secondResponseCookies[0])!;
         expectNewSessionCookie(secondNewCookie);
 
         expect(firstNewCookie.value).not.to.eql(secondNewCookie.value);
@@ -549,7 +549,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(302);
 
-        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
+        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
         const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
 
         const samlAuthenticationResponse = await supertest
@@ -558,7 +558,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) })
           .expect(302);
 
-        sessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
+        sessionCookie = parseCookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
 
         // Let's delete tokens from `.security` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index
@@ -580,7 +580,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = handshakeResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const handshakeCookie = request.cookie(cookies[0])!;
+        const handshakeCookie = parseCookie(cookies[0])!;
         expect(handshakeCookie.key).to.be('sid');
         expect(handshakeCookie.value).to.be.empty();
         expect(handshakeCookie.path).to.be('/');
@@ -602,7 +602,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = handshakeResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const handshakeCookie = request.cookie(cookies[0])!;
+        const handshakeCookie = parseCookie(cookies[0])!;
         expect(handshakeCookie.key).to.be('sid');
         expect(handshakeCookie.value).to.not.be.empty();
         expect(handshakeCookie.path).to.be('/');
@@ -662,7 +662,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(302);
 
-        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
+        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
         const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
 
         const samlAuthenticationResponse = await supertest
@@ -676,9 +676,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(302);
 
-        existingSessionCookie = request.cookie(
-          samlAuthenticationResponse.headers['set-cookie'][0]
-        )!;
+        existingSessionCookie = parseCookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
       });
 
       for (const [description, setup] of testScenarios) {
@@ -693,7 +691,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(samlAuthenticationResponse.headers.location).to.be('/');
 
-          const newSessionCookie = request.cookie(
+          const newSessionCookie = parseCookie(
             samlAuthenticationResponse.headers['set-cookie'][0]
           )!;
           expect(newSessionCookie.value).to.not.be.empty();
@@ -724,7 +722,7 @@ export default function ({ getService }: FtrProviderContext) {
             '/security/overwritten_session?next=%2F'
           );
 
-          const newSessionCookie = request.cookie(
+          const newSessionCookie = parseCookie(
             samlAuthenticationResponse.headers['set-cookie'][0]
           )!;
           expect(newSessionCookie.value).to.not.be.empty();

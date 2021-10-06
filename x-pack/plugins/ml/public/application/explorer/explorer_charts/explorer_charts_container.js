@@ -65,8 +65,7 @@ function ExplorerChartContainer({
   severity,
   tooManyBuckets,
   wrapLabel,
-  mlUrlGenerator,
-  basePath,
+  mlLocator,
   timeBuckets,
   timefilter,
   onSelectEntity,
@@ -80,19 +79,19 @@ function ExplorerChartContainer({
     let isCancelled = false;
     const generateLink = async () => {
       if (!isCancelled && series.functionDescription !== ML_JOB_AGGREGATION.LAT_LONG) {
-        const singleMetricViewerLink = await getExploreSeriesLink(
-          mlUrlGenerator,
-          series,
-          timefilter
-        );
-        setExplorerSeriesLink(singleMetricViewerLink);
+        try {
+          const singleMetricViewerLink = await getExploreSeriesLink(mlLocator, series, timefilter);
+          setExplorerSeriesLink(singleMetricViewerLink);
+        } catch (error) {
+          setExplorerSeriesLink('');
+        }
       }
     };
     generateLink();
     return () => {
       isCancelled = true;
     };
-  }, [mlUrlGenerator, series]);
+  }, [mlLocator, series]);
 
   const addToRecentlyAccessed = useCallback(() => {
     if (recentlyAccessed) {
@@ -163,7 +162,7 @@ function ExplorerChartContainer({
                   iconSide="right"
                   iconType="visLine"
                   size="xs"
-                  href={`${basePath}/app/ml${explorerSeriesLink}`}
+                  href={explorerSeriesLink}
                   onClick={addToRecentlyAccessed}
                 >
                   <FormattedMessage id="xpack.ml.explorer.charts.viewLabel" defaultMessage="View" />
@@ -235,7 +234,7 @@ export const ExplorerChartsContainerUI = ({
   tooManyBuckets,
   kibana,
   errorMessages,
-  mlUrlGenerator,
+  mlLocator,
   timeBuckets,
   timefilter,
   onSelectEntity,
@@ -245,7 +244,6 @@ export const ExplorerChartsContainerUI = ({
   const {
     services: {
       chrome: { recentlyAccessed },
-      http: { basePath },
       embeddable: embeddablePlugin,
       maps: mapsPlugin,
     },
@@ -293,8 +291,7 @@ export const ExplorerChartsContainerUI = ({
                 severity={severity}
                 tooManyBuckets={tooManyBuckets}
                 wrapLabel={wrapLabel}
-                mlUrlGenerator={mlUrlGenerator}
-                basePath={basePath.get()}
+                mlLocator={mlLocator}
                 timeBuckets={timeBuckets}
                 timefilter={timefilter}
                 onSelectEntity={onSelectEntity}

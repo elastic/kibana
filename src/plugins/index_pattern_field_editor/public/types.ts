@@ -65,3 +65,17 @@ export interface EsRuntimeField {
 }
 
 export type CloseEditor = () => void;
+
+export type FieldPreviewContext =
+  | 'boolean_field'
+  | 'date_field'
+  | 'double_field'
+  | 'geo_point_field'
+  | 'ip_field'
+  | 'keyword_field'
+  | 'long_field';
+
+export interface FieldPreviewResponse {
+  values: unknown[];
+  error?: Record<string, any>;
+}

@@ -8,7 +8,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiPanel } from '@elastic/eui';
-import { ClockPlayIcon } from './clock_play_icon';
 
 export interface Props {
   isTimesliderOpen: boolean;
@@ -39,10 +38,11 @@ export function TimesliderToggleButton(props: Props) {
         size="s"
         onClick={onClick}
         data-test-subj="timesliderToggleButton"
-        iconType={ClockPlayIcon}
-        color={props.isTimesliderOpen ? 'primary' : 'text'}
+        iconType="timeslider"
         aria-label={label}
         title={label}
+        isSelected={props.isTimesliderOpen}
+        display={props.isTimesliderOpen ? 'fill' : 'empty'}
       />
     </EuiPanel>
   );

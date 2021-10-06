@@ -17,13 +17,8 @@ interface Props {
 }
 
 export const WaffleTimeControls = withTheme(({ theme }: Props) => {
-  const {
-    currentTime,
-    isAutoReloading,
-    startAutoReload,
-    stopAutoReload,
-    jumpToTime,
-  } = useWaffleTimeContext();
+  const { currentTime, isAutoReloading, startAutoReload, stopAutoReload, jumpToTime } =
+    useWaffleTimeContext();
 
   const currentMoment = moment(currentTime);
 
@@ -53,7 +48,7 @@ export const WaffleTimeControls = withTheme(({ theme }: Props) => {
   );
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="m">
+    <EuiFlexGroup gutterSize="m">
       <EuiFlexItem grow={false} data-test-subj="waffleDatePicker">
         <EuiDatePicker
           dateFormat="L LTS"

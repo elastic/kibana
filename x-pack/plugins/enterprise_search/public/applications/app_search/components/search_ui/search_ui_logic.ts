@@ -20,6 +20,7 @@ interface InitialFieldValues {
   validSortFields: string[];
   validFacetFields: string[];
   urlField?: string;
+  thumbnailField?: string;
   titleField?: string;
 }
 interface SearchUIActions {
@@ -30,6 +31,7 @@ interface SearchUIActions {
   onSortFieldsChange(sortFields: string[]): { sortFields: string[] };
   onTitleFieldChange(titleField: string): { titleField: string };
   onUrlFieldChange(urlField: string): { urlField: string };
+  onThumbnailFieldChange(thumbnailField: string): { thumbnailField: string };
 }
 
 interface SearchUIValues {
@@ -39,6 +41,7 @@ interface SearchUIValues {
   validFacetFields: string[];
   titleField: string;
   urlField: string;
+  thumbnailField: string;
   facetFields: string[];
   sortFields: string[];
   activeField: ActiveField;
@@ -54,6 +57,7 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
     onSortFieldsChange: (sortFields) => ({ sortFields }),
     onTitleFieldChange: (titleField) => ({ titleField }),
     onUrlFieldChange: (urlField) => ({ urlField }),
+    onThumbnailFieldChange: (thumbnailField) => ({ thumbnailField }),
   }),
   reducers: () => ({
     dataLoading: [
@@ -79,6 +83,12 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
         onFieldDataLoaded: (_, { urlField }) => urlField || '',
       },
     ],
+    thumbnailField: [
+      '',
+      {
+        onThumbnailFieldChange: (_, { thumbnailField }) => thumbnailField,
+      },
+    ],
     facetFields: [[], { onFacetFieldsChange: (_, { facetFields }) => facetFields }],
     sortFields: [[], { onSortFieldsChange: (_, { sortFields }) => sortFields }],
     activeField: [ActiveField.None, { onActiveFieldChange: (_, { activeField }) => activeField }],
@@ -93,7 +103,7 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
         return;
       }
 
-      const url = `/api/app_search/engines/${engineName}/search_ui/field_config`;
+      const url = `/internal/app_search/engines/${engineName}/search_ui/field_config`;
 
       try {
         const initialFieldValues = await http.get(url);

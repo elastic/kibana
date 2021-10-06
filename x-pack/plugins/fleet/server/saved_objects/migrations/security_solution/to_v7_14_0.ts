@@ -14,9 +14,8 @@ export const migrateEndpointPackagePolicyToV7140: SavedObjectMigrationFn<
   PackagePolicy,
   PackagePolicy
 > = (packagePolicyDoc) => {
-  const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> = cloneDeep(
-    packagePolicyDoc
-  );
+  const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> =
+    cloneDeep(packagePolicyDoc);
   if (packagePolicyDoc.attributes.package?.name === 'endpoint') {
     const input = updatedPackagePolicyDoc.attributes.inputs[0];
     if (input && input.config) {
@@ -31,7 +30,11 @@ export const migrateEndpointPackagePolicyToV7140: SavedObjectMigrationFn<
 
       // This value is based on license.
       // For the migration, we add 'true', our license watcher will correct it, if needed, when the app starts.
-      policy.windows.ransomware.supported = true;
+      if (policy?.windows?.ransomware?.mode) {
+        policy.windows.ransomware.supported = true;
+      } else {
+        policy.windows.ransomware = { mode: 'off', supported: true };
+      }
     }
   }
 

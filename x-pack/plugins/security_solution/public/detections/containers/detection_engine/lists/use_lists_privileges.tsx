@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useUserPrivileges } from '../../../components/user_privileges';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { Privilege } from '../alerts/types';
 
 export interface UseListsPrivilegesState {

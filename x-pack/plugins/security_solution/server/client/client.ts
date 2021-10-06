@@ -9,12 +9,15 @@ import { ConfigType } from '../config';
 
 export class AppClient {
   private readonly signalsIndex: string;
+  private readonly spaceId: string;
 
-  constructor(private spaceId: string, private config: ConfigType) {
+  constructor(_spaceId: string, private config: ConfigType) {
     const configuredSignalsIndex = this.config.signalsIndex;
 
-    this.signalsIndex = `${configuredSignalsIndex}-${this.spaceId}`;
+    this.signalsIndex = `${configuredSignalsIndex}-${_spaceId}`;
+    this.spaceId = _spaceId;
   }
 
   public getSignalsIndex = (): string => this.signalsIndex;
+  public getSpaceId = (): string => this.spaceId;
 }

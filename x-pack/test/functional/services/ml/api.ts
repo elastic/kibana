@@ -8,6 +8,8 @@
 import { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
+import fs from 'fs';
+import path from 'path';
 import { Calendar } from '../../../../plugins/ml/server/models/calendar/index';
 import { Annotation } from '../../../../plugins/ml/common/types/annotations';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
@@ -24,6 +26,8 @@ import {
 } from '../../../../plugins/ml/common/constants/index_patterns';
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
 import { PutTrainedModelConfig } from '../../../../plugins/ml/common/types/trained_models';
+
+type ModelType = 'regression' | 'classification';
 
 export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -451,8 +455,24 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
+    validateJobId(jobId: string) {
+      if (jobId.match(/[\*,]/) !== null) {
+        throw new Error(`No wildcards or list of ids supported in this context (got ${jobId})`);
+      }
+    },
+
     async getAnomalyDetectionJob(jobId: string) {
       return await esSupertest.get(`/_ml/anomaly_detectors/${jobId}`).expect(200);
+    },
+
+    async adJobExist(jobId: string) {
+      this.validateJobId(jobId);
+      try {
+        await this.getAnomalyDetectionJob(jobId);
+        return true;
+      } catch (err) {
+        return false;
+      }
     },
 
     async waitForAnomalyDetectionJobToExist(jobId: string, timeout: number = 5 * 1000) {
@@ -505,6 +525,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async deleteAnomalyDetectionJobES(jobId: string) {
       log.debug(`Deleting anomaly detection job with id '${jobId}' ...`);
+
+      if ((await this.adJobExist(jobId)) === false) {
+        log.debug('> no such AD job found, nothing to delete.');
+        return;
+      }
 
       const datafeedId = `datafeed-${jobId}`;
       if ((await this.datafeedExist(datafeedId)) === true) {
@@ -668,6 +693,16 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return response;
     },
 
+    async dfaJobExist(analyticsId: string) {
+      this.validateJobId(analyticsId);
+      try {
+        await this.getDataFrameAnalyticsJob(analyticsId);
+        return true;
+      } catch (err) {
+        return false;
+      }
+    },
+
     async waitForDataFrameAnalyticsJobToExist(analyticsId: string) {
       await retry.waitForWithTimeout(`'${analyticsId}' to exist`, 5 * 1000, async () => {
         if (await this.getDataFrameAnalyticsJob(analyticsId)) {
@@ -720,6 +755,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async deleteDataFrameAnalyticsJobES(analyticsId: string) {
       log.debug(`Deleting data frame analytics job with id '${analyticsId}' ...`);
+
+      if ((await this.dfaJobExist(analyticsId)) === false) {
+        log.debug('> no such DFA job found, nothing to delete.');
+        return;
+      }
 
       await esSupertest
         .delete(`/_ml/data_frame/analytics/${analyticsId}`)
@@ -841,17 +881,18 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return undefined;
     },
 
-    async indexAnnotation(annotationRequestBody: Partial<Annotation>) {
+    async indexAnnotation(annotationRequestBody: Partial<Annotation>, id?: string) {
       log.debug(`Indexing annotation '${JSON.stringify(annotationRequestBody)}'...`);
       // @ts-ignore due to outdated type for IndexDocumentParams.type
       const params = {
         index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
+        id,
         body: annotationRequestBody,
         refresh: 'wait_for',
       } as const;
       const { body } = await es.index(params);
       await this.waitForAnnotationToExist(body._id);
-      log.debug('> Annotation indexed.');
+      log.debug(`> Annotation ${body._id} indexed.`);
       return body;
     },
 
@@ -942,6 +983,94 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
       log.debug('> Trained model crated');
       return model;
+    },
+
+    async createdTestTrainedModels(
+      modelType: ModelType,
+      count: number = 10,
+      withIngestPipelines = false
+    ) {
+      const compressedDefinition = this.getCompressedModelDefinition(modelType);
+
+      const modelIds = new Array(count).fill(null).map((v, i) => `dfa_${modelType}_model_n_${i}`);
+
+      const models = modelIds.map((id) => {
+        return {
+          model_id: id,
+          body: {
+            compressed_definition: compressedDefinition,
+            inference_config: {
+              [modelType]: {},
+            },
+            input: {
+              field_names: ['common_field'],
+            },
+          } as PutTrainedModelConfig,
+        };
+      });
+
+      for (const model of models) {
+        await this.createTrainedModel(model.model_id, model.body);
+        if (withIngestPipelines) {
+          await this.createIngestPipeline(model.model_id);
+        }
+      }
+
+      return modelIds;
+    },
+
+    /**
+     * Retrieves compressed model definition from the test resources.
+     * @param modelType
+     */
+    getCompressedModelDefinition(modelType: ModelType) {
+      return fs.readFileSync(
+        path.resolve(
+          __dirname,
+          'resources',
+          'trained_model_definitions',
+          `minimum_valid_config_${modelType}.json.gz.b64`
+        ),
+        'utf-8'
+      );
+    },
+
+    async createModelAlias(modelId: string, modelAlias: string) {
+      log.debug(`Creating alias for model "${modelId}"`);
+      await esSupertest
+        .put(`/_ml/trained_models/${modelId}/model_aliases/${modelAlias}`)
+        .expect(200);
+      log.debug('> Model alias created');
+    },
+
+    /**
+     * Creates ingest pipelines for trained model
+     * @param modelId
+     */
+    async createIngestPipeline(modelId: string) {
+      log.debug(`Creating ingest pipeline for trained model with id "${modelId}"`);
+      const ingestPipeline = await esSupertest
+        .put(`/_ingest/pipeline/pipeline_${modelId}`)
+        .send({
+          processors: [
+            {
+              inference: {
+                model_id: modelId,
+              },
+            },
+          ],
+        })
+        .expect(200)
+        .then((res) => res.body);
+
+      log.debug('> Ingest pipeline crated');
+      return ingestPipeline;
+    },
+
+    async deleteIngestPipeline(modelId: string) {
+      log.debug(`Deleting ingest pipeline for trained model with id "${modelId}"`);
+      await esSupertest.delete(`/_ingest/pipeline/pipeline_${modelId}`).expect(200);
+      log.debug('> Ingest pipeline deleted');
     },
   };
 }

@@ -9,15 +9,14 @@ import { queryByLabelText } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { CoreStart } from 'kibana/public';
 import React from 'react';
-import { Router } from 'react-router-dom';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
 import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
-import { IUrlParams } from '../../../context/url_params_context/types';
+import type { ApmUrlParams } from '../../../context/url_params_context/types';
 import * as useFetcherHook from '../../../hooks/use_fetcher';
 import * as useServiceTransactionTypesHook from '../../../context/apm_service/use_service_transaction_types_fetcher';
-import * as useServiceAgentNameHook from '../../../context/apm_service/use_service_agent_name_fetcher';
+import * as useServiceAgentNameHook from '../../../context/apm_service/use_service_agent_fetcher';
 import {
   disableConsoleWarning,
   renderWithTheme,
@@ -26,8 +25,9 @@ import { fromQuery } from '../../shared/Links/url_helpers';
 import { TransactionOverview } from './';
 
 const KibanaReactContext = createKibanaReactContext({
+  uiSettings: { get: () => true },
   usageCollection: { reportUiCounter: () => {} },
-} as Partial<CoreStart>);
+} as unknown as Partial<CoreStart>);
 
 const history = createMemoryHistory();
 jest.spyOn(history, 'push');
@@ -37,7 +37,7 @@ function setup({
   urlParams,
   serviceTransactionTypes,
 }: {
-  urlParams: IUrlParams;
+  urlParams: ApmUrlParams;
   serviceTransactionTypes: string[];
 }) {
   history.replace({
@@ -52,9 +52,10 @@ function setup({
 
   // mock agent
   jest
-    .spyOn(useServiceAgentNameHook, 'useServiceAgentNameFetcher')
+    .spyOn(useServiceAgentNameHook, 'useServiceAgentFetcher')
     .mockReturnValue({
       agentName: 'nodejs',
+      runtimeName: 'node',
       error: undefined,
       status: useFetcherHook.FETCH_STATUS.SUCCESS,
     });
@@ -63,14 +64,12 @@ function setup({
 
   return renderWithTheme(
     <KibanaReactContext.Provider>
-      <MockApmPluginContextWrapper>
-        <Router history={history}>
-          <UrlParamsProvider>
-            <ApmServiceContextProvider>
-              <TransactionOverview serviceName="opbeans-python" />
-            </ApmServiceContextProvider>
-          </UrlParamsProvider>
-        </Router>
+      <MockApmPluginContextWrapper history={history}>
+        <UrlParamsProvider>
+          <ApmServiceContextProvider>
+            <TransactionOverview />
+          </ApmServiceContextProvider>
+        </UrlParamsProvider>
       </MockApmPluginContextWrapper>
     </KibanaReactContext.Provider>
   );
@@ -95,11 +94,14 @@ describe('TransactionOverview', () => {
     it('should redirect to first type', () => {
       setup({
         serviceTransactionTypes: ['firstType', 'secondType'],
-        urlParams: {},
+        urlParams: {
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+        },
       });
       expect(history.replace).toHaveBeenCalledWith(
         expect.objectContaining({
-          search: 'transactionType=firstType',
+          search: 'rangeFrom=now-15m&rangeTo=now&transactionType=firstType',
         })
       );
     });
@@ -113,6 +115,8 @@ describe('TransactionOverview', () => {
         serviceTransactionTypes: ['firstType'],
         urlParams: {
           transactionType: 'firstType',
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
         },
       });
 

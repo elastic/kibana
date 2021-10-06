@@ -16,7 +16,7 @@ import { FieldFormatter, LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../common/
 import {
   AbstractSourceDescriptor,
   Attribution,
-  DataMeta,
+  DataRequestMeta,
   Timeslice,
 } from '../../../common/descriptor_types';
 import { LICENSED_FEATURES } from '../../licensed_features';
@@ -47,19 +47,17 @@ export interface ISource {
   isFilterByMapBounds(): boolean;
   isGeoGridPrecisionAware(): boolean;
   isQueryAware(): boolean;
-  isRefreshTimerAware(): boolean;
   isTimeAware(): Promise<boolean>;
   getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
   getAttributionProvider(): (() => Promise<Attribution[]>) | null;
   isESSource(): boolean;
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
   supportsFitToBounds(): Promise<boolean>;
-  showJoinEditor(): boolean;
-  getJoinsDisabledReason(): string | null;
   cloneDescriptor(): AbstractSourceDescriptor;
   getFieldNames(): string[];
   getApplyGlobalQuery(): boolean;
   getApplyGlobalTime(): boolean;
+  getApplyForceRefresh(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
   getGeoGridPrecision(zoom: number): number;
@@ -69,7 +67,7 @@ export interface ISource {
   getMinZoom(): number;
   getMaxZoom(): number;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
-  getUpdateDueToTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean;
+  getUpdateDueToTimeslice(prevMeta: DataRequestMeta, timeslice?: Timeslice): boolean;
 }
 
 export class AbstractSource implements ISource {
@@ -115,10 +113,6 @@ export class AbstractSource implements ISource {
     return false;
   }
 
-  isRefreshTimerAware(): boolean {
-    return false;
-  }
-
   isGeoGridPrecisionAware(): boolean {
     return false;
   }
@@ -143,6 +137,10 @@ export class AbstractSource implements ISource {
     return false;
   }
 
+  getApplyForceRefresh(): boolean {
+    return false;
+  }
+
   getIndexPatternIds(): string[] {
     return [];
   }
@@ -153,14 +151,6 @@ export class AbstractSource implements ISource {
 
   getGeoGridPrecision(zoom: number): number {
     return 0;
-  }
-
-  showJoinEditor(): boolean {
-    return false;
-  }
-
-  getJoinsDisabledReason(): string | null {
-    return null;
   }
 
   isESSource(): boolean {
@@ -201,7 +191,7 @@ export class AbstractSource implements ISource {
     return [];
   }
 
-  getUpdateDueToTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean {
+  getUpdateDueToTimeslice(prevMeta: DataRequestMeta, timeslice?: Timeslice): boolean {
     return true;
   }
 }

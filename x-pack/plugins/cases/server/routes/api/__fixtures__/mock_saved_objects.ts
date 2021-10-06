@@ -8,17 +8,16 @@
 import { SavedObject } from 'kibana/server';
 import {
   AssociationType,
+  CaseAttributes,
   CaseStatuses,
   CaseType,
   CommentAttributes,
   CommentType,
   ConnectorTypes,
-  ESCaseAttributes,
-  ESCasesConfigureAttributes,
   SECURITY_SOLUTION_OWNER,
 } from '../../../../common';
 
-export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
+export const mockCases: Array<SavedObject<CaseAttributes>> = [
   {
     type: 'cases',
     id: 'mock-id-1',
@@ -29,7 +28,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
         id: 'none',
         name: 'none',
         type: ConnectorTypes.none,
-        fields: [],
+        fields: null,
       },
       created_at: '2019-11-25T21:54:48.952Z',
       created_by: {
@@ -68,7 +67,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
         id: 'none',
         name: 'none',
         type: ConnectorTypes.none,
-        fields: [],
+        fields: null,
       },
       created_at: '2019-11-25T22:32:00.900Z',
       created_by: {
@@ -107,11 +106,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
         id: '123',
         name: 'My connector',
         type: ConnectorTypes.jira,
-        fields: [
-          { key: 'issueType', value: 'Task' },
-          { key: 'priority', value: 'High' },
-          { key: 'parent', value: null },
-        ],
+        fields: { issueType: 'Task', priority: 'High', parent: null },
       },
       created_at: '2019-11-25T22:32:17.947Z',
       created_by: {
@@ -154,11 +149,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
         id: '123',
         name: 'My connector',
         type: ConnectorTypes.jira,
-        fields: [
-          { key: 'issueType', value: 'Task' },
-          { key: 'priority', value: 'High' },
-          { key: 'parent', value: null },
-        ],
+        fields: { issueType: 'Task', priority: 'High', parent: null },
       },
       created_at: '2019-11-25T22:32:17.947Z',
       created_by: {
@@ -188,38 +179,6 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
     version: 'WzUsMV0=',
   },
 ];
-
-export const mockCaseNoConnectorId: SavedObject<Partial<ESCaseAttributes>> = {
-  type: 'cases',
-  id: 'mock-no-connector_id',
-  attributes: {
-    closed_at: null,
-    closed_by: null,
-    created_at: '2019-11-25T21:54:48.952Z',
-    created_by: {
-      full_name: 'elastic',
-      email: 'testemail@elastic.co',
-      username: 'elastic',
-    },
-    description: 'This is a brand new case of a bad meanie defacing data',
-    external_service: null,
-    title: 'Super Bad Security Issue',
-    status: CaseStatuses.open,
-    tags: ['defacement'],
-    updated_at: '2019-11-25T21:54:48.952Z',
-    updated_by: {
-      full_name: 'elastic',
-      email: 'testemail@elastic.co',
-      username: 'elastic',
-    },
-    settings: {
-      syncAlerts: true,
-    },
-  },
-  references: [],
-  updated_at: '2019-11-25T21:54:48.952Z',
-  version: 'WzAsMV0=',
-};
 
 export const mockCasesErrorTriggerData = [
   {
@@ -443,38 +402,6 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
       },
     ],
     updated_at: '2019-11-25T22:32:30.608Z',
-    version: 'WzYsMV0=',
-  },
-];
-
-export const mockCaseConfigure: Array<SavedObject<ESCasesConfigureAttributes>> = [
-  {
-    type: 'cases-configure',
-    id: 'mock-configuration-1',
-    attributes: {
-      connector: {
-        id: '789',
-        name: 'My connector 3',
-        type: ConnectorTypes.jira,
-        fields: null,
-      },
-      closure_type: 'close-by-user',
-      created_at: '2020-04-09T09:43:51.778Z',
-      created_by: {
-        full_name: 'elastic',
-        email: 'testemail@elastic.co',
-        username: 'elastic',
-      },
-      updated_at: '2020-04-09T09:43:51.778Z',
-      updated_by: {
-        full_name: 'elastic',
-        email: 'testemail@elastic.co',
-        username: 'elastic',
-      },
-      owner: SECURITY_SOLUTION_OWNER,
-    },
-    references: [],
-    updated_at: '2020-04-09T09:43:51.778Z',
     version: 'WzYsMV0=',
   },
 ];

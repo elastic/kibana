@@ -12,9 +12,15 @@ import { i18n } from '@kbn/i18n';
 
 import { camelCase, isArray, isObject } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common/constants';
+import {
+  APP_ID,
+  CASES_FEATURE_ID,
+  DEFAULT_DATE_FORMAT,
+  DEFAULT_DATE_FORMAT_TZ,
+} from '../../../../common/constants';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { AuthenticatedUser } from '../../../../../security/common/model';
+import { NavigateToAppOptions } from '../../../../../../../src/core/public';
 import { StartServices } from '../../../types';
 import { useUiSetting, useKibana } from './kibana_react';
 
@@ -61,6 +67,7 @@ export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
       return [...acc, value];
     }
   }, []);
+
 export const convertToCamelCase = <T, U extends {}>(snakeCase: T): U =>
   Object.entries(snakeCase).reduce((acc, [key, value]) => {
     if (isArray(value)) {
@@ -72,6 +79,7 @@ export const convertToCamelCase = <T, U extends {}>(snakeCase: T): U =>
     }
     return acc;
   }, {} as U);
+
 export const useCurrentUser = (): AuthenticatedElasticUser | null => {
   const isMounted = useRef(false);
   const [user, setUser] = useState<AuthenticatedElasticUser | null>(null);
@@ -148,15 +156,70 @@ export const useGetUserCasesPermissions = () => {
   const uiCapabilities = useKibana().services.application.capabilities;
 
   useEffect(() => {
-    const capabilitiesCanUserCRUD: boolean =
-      typeof uiCapabilities.siem.crud_cases === 'boolean' ? uiCapabilities.siem.crud_cases : false;
-    const capabilitiesCanUserRead: boolean =
-      typeof uiCapabilities.siem.read_cases === 'boolean' ? uiCapabilities.siem.read_cases : false;
     setCasesPermissions({
-      crud: capabilitiesCanUserCRUD,
-      read: capabilitiesCanUserRead,
+      crud: !!uiCapabilities[CASES_FEATURE_ID].crud_cases,
+      read: !!uiCapabilities[CASES_FEATURE_ID].read_cases,
     });
   }, [uiCapabilities]);
 
   return casesPermissions;
+};
+
+/**
+ * Returns a full URL to the provided page path by using
+ * kibana's `getUrlForApp()`
+ */
+export const useAppUrl = () => {
+  const { getUrlForApp } = useKibana().services.application;
+
+  const getAppUrl = useCallback(
+    ({
+      appId = APP_ID,
+      ...options
+    }: {
+      appId?: string;
+      deepLinkId?: string;
+      path?: string;
+      absolute?: boolean;
+    }) => getUrlForApp(appId, options),
+    [getUrlForApp]
+  );
+  return { getAppUrl };
+};
+
+/**
+ * Navigate to any app using kibana's `navigateToApp()`
+ * or by url using `navigateToUrl()`
+ */
+export const useNavigateTo = () => {
+  const { navigateToApp, navigateToUrl } = useKibana().services.application;
+
+  const navigateTo = useCallback(
+    ({
+      url,
+      appId = APP_ID,
+      ...options
+    }: {
+      url?: string;
+      appId?: string;
+    } & NavigateToAppOptions) => {
+      if (url) {
+        navigateToUrl(url);
+      } else {
+        navigateToApp(appId, options);
+      }
+    },
+    [navigateToApp, navigateToUrl]
+  );
+  return { navigateTo };
+};
+
+/**
+ * Returns navigateTo and getAppUrl navigation hooks
+ *
+ */
+export const useNavigation = () => {
+  const { navigateTo } = useNavigateTo();
+  const { getAppUrl } = useAppUrl();
+  return { navigateTo, getAppUrl };
 };

@@ -15,6 +15,7 @@ export interface Field {
   name: string;
   type?: string;
   description?: string;
+  value?: string;
   format?: string;
   fields?: Fields;
   enabled?: boolean;

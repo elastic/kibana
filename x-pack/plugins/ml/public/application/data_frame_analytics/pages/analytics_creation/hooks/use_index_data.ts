@@ -217,9 +217,10 @@ export const useIndexData = (
     JSON.stringify([query, pagination, sortingColumns, combinedRuntimeMappings]),
   ]);
 
-  const dataLoader = useMemo(() => new DataLoader(indexPattern, toastNotifications), [
-    indexPattern,
-  ]);
+  const dataLoader = useMemo(
+    () => new DataLoader(indexPattern, toastNotifications),
+    [indexPattern]
+  );
 
   useEffect(() => {
     async function fetchColumnChartsData(fieldHistogramsQuery: Record<string, any>) {
@@ -255,6 +256,7 @@ export const useIndexData = (
 
   return {
     ...dataGrid,
+    indexPatternFields,
     renderCellValue,
   };
 };

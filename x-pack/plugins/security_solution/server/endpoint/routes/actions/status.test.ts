@@ -243,6 +243,11 @@ describe('Endpoint Action Status', () => {
         ],
         [aMockResponse(actionID, mockAgentID)]
       );
+      (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+        .fn()
+        .mockReturnValue({
+          findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+        });
       const response = await getPendingStatus({
         query: {
           agent_ids: [mockAgentID],
@@ -273,6 +278,11 @@ describe('Endpoint Action Status', () => {
         ],
         [aMockResponse(actionTwoID, agentThree)]
       );
+      (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+        .fn()
+        .mockReturnValue({
+          findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+        });
       const response = await getPendingStatus({
         query: {
           agent_ids: [agentOne, agentTwo, agentThree],

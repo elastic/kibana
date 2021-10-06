@@ -153,6 +153,36 @@ You can perform these operations in bulk by multi-selecting rules, and then clic
 image:images/bulk-mute-disable.png[The Manage rules button lets you mute/unmute, enable/disable, and delete in bulk,width=75%]
 
 [float]
+=== Rule status
+
+A rule can have one of the following statuses:
+
+`active`:: The conditions for the rule have been met, and the associated actions should be invoked.
+`ok`:: The conditions for the rule have not been met, and the associated actions are not invoked.
+`error`:: An error was encountered during rule execution.
+`pending`:: The rule has not yet executed.  The rule was either just created, or enabled after being disabled.
+`unknown`:: A problem occurred when calculating the status. Most likely, something went wrong with the alerting code.
+
+[float]
+[[importing-and-exporting-rules]]
+=== Import and export rules
+
+To import and export rules, use the <<managing-saved-objects, Saved Objects Management UI>>.
+
+[NOTE]
+==============================================
+Some rule types cannot be exported through this interface:
+
+**Security rules** can be imported and exported using the {security-guide}/rules-ui-management.html#import-export-rules-ui[Security UI].
+
+**Stack monitoring rules** are <<kibana-alerts, automatically created>> for you and therefore cannot be managed via the Saved Objects Management UI.
+==============================================
+
+Rules are disabled on export. You are prompted to re-enable rule on successful import.
+[role="screenshot"]
+image::images/rules-imported-banner.png[Rules import banner, width=50%]
+
+[float]
 [[rule-details]]
 === Drilldown to rule details
 

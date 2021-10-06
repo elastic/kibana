@@ -12,7 +12,7 @@ import { createQuery } from '../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
 // @ts-ignore
-import { parseCrossClusterPrefix } from '../ccs_utils';
+import { parseCrossClusterPrefix } from '../../../common/ccs_utils';
 import { getClustersState } from './get_clusters_state';
 import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
@@ -53,8 +53,8 @@ function fetchClusterStats(req: LegacyRequest, esIndexPattern: string, clusterUu
   const params = {
     index: esIndexPattern,
     size: config.get('monitoring.ui.max_bucket_size'),
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._index',
       'hits.hits._source.cluster_uuid',
       'hits.hits._source.elasticsearch.cluster.id',

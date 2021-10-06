@@ -12,18 +12,28 @@ import { configSchema, TaskManagerConfig, MAX_WORKERS_LIMIT } from './config';
 
 export const plugin = (initContext: PluginInitializerContext) => new TaskManagerPlugin(initContext);
 
-export {
+export type {
   TaskInstance,
   ConcreteTaskInstance,
+  EphemeralTask,
   TaskRunCreatorFunction,
-  TaskStatus,
   RunContext,
 } from './task';
 
-export { asInterval } from './lib/intervals';
-export { isUnrecoverableError, throwUnrecoverableError } from './task_running';
+export { TaskStatus } from './task';
 
+export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
+
+export { asInterval } from './lib/intervals';
 export {
+  isUnrecoverableError,
+  throwUnrecoverableError,
+  isEphemeralTaskRejectedDueToCapacityError,
+} from './task_running';
+export { RunNowResult } from './task_scheduling';
+export { getOldestIdleActionTask } from './queries/oldest_idle_action_task';
+
+export type {
   TaskManagerPlugin as TaskManager,
   TaskManagerSetupContract,
   TaskManagerStartContract,

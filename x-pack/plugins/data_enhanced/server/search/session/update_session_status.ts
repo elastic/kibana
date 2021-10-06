@@ -13,11 +13,17 @@ import {
 } from '../../../../../../src/plugins/data/common';
 import { getSearchStatus } from './get_search_status';
 import { getSessionStatus } from './get_session_status';
-import { CheckSearchSessionsDeps, SearchSessionsResponse, SearchStatus } from './types';
+import {
+  CheckSearchSessionsDeps,
+  SearchSessionsConfig,
+  SearchSessionsResponse,
+  SearchStatus,
+} from './types';
 import { isSearchSessionExpired } from './utils';
 
 export async function updateSessionStatus(
   { logger, client }: CheckSearchSessionsDeps,
+  config: SearchSessionsConfig,
   session: SavedObjectsFindResult<SearchSessionSavedObjectAttributes>
 ) {
   let sessionUpdated = false;
@@ -61,7 +67,7 @@ export async function updateSessionStatus(
   // And only then derive the session's status
   const sessionStatus = isExpired
     ? SearchSessionStatus.EXPIRED
-    : getSessionStatus(session.attributes);
+    : getSessionStatus(session.attributes, config);
   if (sessionStatus !== session.attributes.status) {
     const now = new Date().toISOString();
     session.attributes.status = sessionStatus;
@@ -79,13 +85,14 @@ export async function updateSessionStatus(
 
 export async function getAllSessionsStatusUpdates(
   deps: CheckSearchSessionsDeps,
+  config: SearchSessionsConfig,
   searchSessions: SearchSessionsResponse
 ) {
   const updatedSessions = new Array<SavedObjectsFindResult<SearchSessionSavedObjectAttributes>>();
 
   await Promise.all(
     searchSessions.saved_objects.map(async (session) => {
-      const updated = await updateSessionStatus(deps, session);
+      const updated = await updateSessionStatus(deps, config, session);
 
       if (updated) {
         updatedSessions.push(session);

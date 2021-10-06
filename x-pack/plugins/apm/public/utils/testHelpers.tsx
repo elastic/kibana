@@ -67,13 +67,13 @@ export function mockMoment() {
 // Useful for getting the rendered href from any kind of link component
 export async function getRenderedHref(Component: React.FC, location: Location) {
   const el = render(
-    <MockApmPluginContextWrapper>
-      <MemoryRouter initialEntries={[location]}>
+    <MemoryRouter initialEntries={[location]}>
+      <MockApmPluginContextWrapper>
         <UrlParamsProvider>
           <Component />
         </UrlParamsProvider>
-      </MemoryRouter>
-    </MockApmPluginContextWrapper>
+      </MockApmPluginContextWrapper>
+    </MemoryRouter>
   );
   const a = el.container.querySelector('a');
 
@@ -114,8 +114,6 @@ export function expectTextsInDocument(output: any, texts: string[]) {
 }
 
 interface MockSetup {
-  start: number;
-  end: number;
   apmEventClient: any;
   internalClient: any;
   config: APMConfig;
@@ -162,8 +160,6 @@ export async function inspectSearchParams(
   let error;
 
   const mockSetup = {
-    start: 1528113600000,
-    end: 1528977600000,
     apmEventClient: { search: spy } as any,
     internalClient: { search: spy } as any,
     config: new Proxy(

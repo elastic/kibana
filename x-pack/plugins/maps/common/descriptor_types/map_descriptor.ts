@@ -10,7 +10,6 @@
 import { ReactNode } from 'react';
 import { GeoJsonProperties } from 'geojson';
 import { Geometry } from 'geojson';
-import { Query } from '../../../../../src/plugins/data/common';
 import { DRAW_SHAPE, ES_SPATIAL_RELATIONS } from '../constants';
 
 export type MapExtent = {
@@ -18,10 +17,6 @@ export type MapExtent = {
   minLat: number;
   maxLon: number;
   maxLat: number;
-};
-
-export type MapQuery = Query & {
-  queryLastTriggeredAt?: string;
 };
 
 export type MapCenter = {

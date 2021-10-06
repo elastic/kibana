@@ -10,17 +10,20 @@ import {
   getFindResultWithSingleHit,
   FindHit,
 } from '../routes/__mocks__/request_responses';
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import { getExportAll } from './get_export_all';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
-describe('getExportAll', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('getExportAll - %s', (_, isRuleRegistryEnabled) => {
   test('it exports everything from the alerts client', async () => {
-    const alertsClient = alertsClientMock.create();
-    const result = getFindResultWithSingleHit();
-    const alert = getAlertMock(getQueryRuleParams());
+    const rulesClient = rulesClientMock.create();
+    const result = getFindResultWithSingleHit(isRuleRegistryEnabled);
+    const alert = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
     alert.params = {
       ...alert.params,
       filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],
@@ -30,9 +33,9 @@ describe('getExportAll', () => {
       timelineTitle: 'some-timeline-title',
     };
     result.data = [alert];
-    alertsClient.find.mockResolvedValue(result);
+    rulesClient.find.mockResolvedValue(result);
 
-    const exports = await getExportAll(alertsClient);
+    const exports = await getExportAll(rulesClient, isRuleRegistryEnabled);
     const rulesJson = JSON.parse(exports.rulesNdjson);
     const detailsJson = JSON.parse(exports.exportDetails);
     expect(rulesJson).toEqual({
@@ -84,7 +87,7 @@ describe('getExportAll', () => {
   });
 
   test('it will export empty rules', async () => {
-    const alertsClient = alertsClientMock.create();
+    const rulesClient = rulesClientMock.create();
     const findResult: FindHit = {
       page: 1,
       perPage: 1,
@@ -92,9 +95,9 @@ describe('getExportAll', () => {
       data: [],
     };
 
-    alertsClient.find.mockResolvedValue(findResult);
+    rulesClient.find.mockResolvedValue(findResult);
 
-    const exports = await getExportAll(alertsClient);
+    const exports = await getExportAll(rulesClient, isRuleRegistryEnabled);
     expect(exports).toEqual({
       rulesNdjson: '',
       exportDetails: '{"exported_count":0,"missing_rules":[],"missing_rules_count":0}\n',

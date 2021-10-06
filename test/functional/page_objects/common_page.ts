@@ -19,6 +19,7 @@ interface NavigateProps {
   shouldLoginIfPrompted: boolean;
   useActualUrl: boolean;
   insertTimestamp: boolean;
+  disableWelcomePrompt: boolean;
 }
 export class CommonPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -37,11 +38,17 @@ export class CommonPageObject extends FtrService {
    * Logins to Kibana as default user and navigates to provided app
    * @param appUrl Kibana URL
    */
-  private async loginIfPrompted(appUrl: string, insertTimestamp: boolean) {
+  private async loginIfPrompted(
+    appUrl: string,
+    insertTimestamp: boolean,
+    disableWelcomePrompt: boolean
+  ) {
     // Disable the welcome screen. This is relevant for environments
     // which don't allow to use the yml setting, e.g. cloud production.
     // It is done here so it applies to logins but also to a login re-use.
-    await this.browser.setLocalStorageItem('home:welcome:show', 'false');
+    if (disableWelcomePrompt) {
+      await this.browser.setLocalStorageItem('home:welcome:show', 'false');
+    }
 
     let currentUrl = await this.browser.getCurrentUrl();
     this.log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
@@ -60,10 +67,14 @@ export class CommonPageObject extends FtrService {
         await this.loginPage.login('test_user', 'changeme');
       }
 
-      await this.find.byCssSelector(
-        '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
-        6 * this.defaultFindTimeout
-      );
+      if (appUrl.includes('/status')) {
+        await this.testSubjects.find('statusPageRoot');
+      } else {
+        await this.find.byCssSelector(
+          '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
+          6 * this.defaultFindTimeout
+        );
+      }
       await this.browser.get(appUrl, insertTimestamp);
       currentUrl = await this.browser.getCurrentUrl();
       this.log.debug(`Finished login process currentUrl = ${currentUrl}`);
@@ -76,6 +87,7 @@ export class CommonPageObject extends FtrService {
       appConfig,
       ensureCurrentUrl,
       shouldLoginIfPrompted,
+      disableWelcomePrompt,
       useActualUrl,
       insertTimestamp,
     } = navigateProps;
@@ -95,7 +107,7 @@ export class CommonPageObject extends FtrService {
       await alert?.accept();
 
       const currentUrl = shouldLoginIfPrompted
-        ? await this.loginIfPrompted(appUrl, insertTimestamp)
+        ? await this.loginIfPrompted(appUrl, insertTimestamp, disableWelcomePrompt)
         : await this.browser.getCurrentUrl();
 
       if (ensureCurrentUrl && !currentUrl.includes(appUrl)) {
@@ -117,6 +129,7 @@ export class CommonPageObject extends FtrService {
       basePath = '',
       ensureCurrentUrl = true,
       shouldLoginIfPrompted = true,
+      disableWelcomePrompt = true,
       useActualUrl = false,
       insertTimestamp = true,
       shouldUseHashForSubUrl = true,
@@ -136,6 +149,7 @@ export class CommonPageObject extends FtrService {
       appConfig,
       ensureCurrentUrl,
       shouldLoginIfPrompted,
+      disableWelcomePrompt,
       useActualUrl,
       insertTimestamp,
     });
@@ -156,6 +170,7 @@ export class CommonPageObject extends FtrService {
       basePath = '',
       ensureCurrentUrl = true,
       shouldLoginIfPrompted = true,
+      disableWelcomePrompt = true,
       useActualUrl = true,
       insertTimestamp = true,
     } = {}
@@ -170,6 +185,7 @@ export class CommonPageObject extends FtrService {
       appConfig,
       ensureCurrentUrl,
       shouldLoginIfPrompted,
+      disableWelcomePrompt,
       useActualUrl,
       insertTimestamp,
     });
@@ -202,7 +218,14 @@ export class CommonPageObject extends FtrService {
 
   async navigateToApp(
     appName: string,
-    { basePath = '', shouldLoginIfPrompted = true, hash = '', insertTimestamp = true } = {}
+    {
+      basePath = '',
+      shouldLoginIfPrompted = true,
+      hash = '',
+      search = '',
+      disableWelcomePrompt = true,
+      insertTimestamp = true,
+    } = {}
   ) {
     let appUrl: string;
     if (this.config.has(['apps', appName])) {
@@ -211,11 +234,13 @@ export class CommonPageObject extends FtrService {
       appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
         pathname: `${basePath}${appConfig.pathname}`,
         hash: hash || appConfig.hash,
+        search,
       });
     } else {
       appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
         pathname: `${basePath}/app/${appName}`,
         hash,
+        search,
       });
     }
 
@@ -233,7 +258,7 @@ export class CommonPageObject extends FtrService {
         this.log.debug('returned from get, calling refresh');
         await this.browser.refresh();
         let currentUrl = shouldLoginIfPrompted
-          ? await this.loginIfPrompted(appUrl, insertTimestamp)
+          ? await this.loginIfPrompted(appUrl, insertTimestamp, disableWelcomePrompt)
           : await this.browser.getCurrentUrl();
 
         if (currentUrl.includes('app/kibana')) {
@@ -469,7 +494,10 @@ export class CommonPageObject extends FtrService {
     topOffset?: number
   ) {
     await this.testSubjects.click(clickTarget, undefined, topOffset);
-    const validate = isValidatorCssString ? this.find.byCssSelector : this.testSubjects.exists;
-    await validate(validator);
+    if (isValidatorCssString) {
+      await this.find.byCssSelector(validator);
+    } else {
+      await this.testSubjects.exists(validator);
+    }
   }
 }

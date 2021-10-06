@@ -28,7 +28,6 @@ import './index.scss';
 
 import {
   ChromeBadge,
-  ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeHelpExtensionMenuLink,
@@ -99,14 +98,18 @@ export type {
 } from './application';
 
 export { SimpleSavedObject } from './saved_objects';
+export type { ResolvedSimpleSavedObject } from './saved_objects';
 export type {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkResolveObject,
+  SavedObjectsBulkResolveResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponsePublic,
+  SavedObjectsResolveResponse,
   SavedObjectsUpdateOptions,
   SavedObject,
   SavedObjectAttribute,
@@ -186,6 +189,8 @@ export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './dep
 export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
 export { URL_MAX_LENGTH } from './core_app';
+
+export type { KibanaExecutionContext } from './execution_context';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -283,7 +288,6 @@ export interface CoreStart {
 export type {
   Capabilities,
   ChromeBadge,
-  ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeHelpExtensionMenuLink,

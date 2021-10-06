@@ -55,10 +55,8 @@ export const useNetworkOverview = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    overviewNetworkRequest,
-    setNetworkRequest,
-  ] = useState<NetworkOverviewRequestOptions | null>(null);
+  const [overviewNetworkRequest, setNetworkRequest] =
+    useState<NetworkOverviewRequestOptions | null>(null);
 
   const [overviewNetworkResponse, setNetworkOverviewResponse] = useState<NetworkOverviewArgs>({
     overviewNetwork: {},
@@ -74,7 +72,7 @@ export const useNetworkOverview = ({
 
   const overviewNetworkSearch = useCallback(
     (request: NetworkOverviewRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -118,7 +116,7 @@ export const useNetworkOverview = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, addError, addWarning]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {

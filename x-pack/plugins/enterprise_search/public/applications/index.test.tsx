@@ -64,7 +64,7 @@ describe('renderApp', () => {
 
     it('renders EnterpriseSearch', () => {
       mount(EnterpriseSearch);
-      expect(mockContainer.querySelector('.enterpriseSearchOverview')).not.toBeNull();
+      expect(mockContainer.querySelector('.kbnPageTemplate')).not.toBeNull();
     });
 
     it('renders AppSearch', () => {

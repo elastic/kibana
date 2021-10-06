@@ -7,6 +7,7 @@
 
 import { HttpSetup } from 'kibana/public';
 import { ActionTypeExecutorResult } from '../../../../../actions/common';
+import { getExecuteConnectorUrl } from '../../../../common/utils/connectors_api';
 import { ResilientIncidentTypes, ResilientSeverity } from './types';
 
 export const BASE_ACTION_API_PATH = '/api/actions';
@@ -19,7 +20,7 @@ export interface Props {
 
 export async function getIncidentTypes({ http, signal, connectorId }: Props) {
   return http.post<ActionTypeExecutorResult<ResilientIncidentTypes>>(
-    `${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`,
+    getExecuteConnectorUrl(connectorId),
     {
       body: JSON.stringify({
         params: { subAction: 'incidentTypes', subActionParams: {} },
@@ -31,7 +32,7 @@ export async function getIncidentTypes({ http, signal, connectorId }: Props) {
 
 export async function getSeverity({ http, signal, connectorId }: Props) {
   return http.post<ActionTypeExecutorResult<ResilientSeverity>>(
-    `${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`,
+    getExecuteConnectorUrl(connectorId),
     {
       body: JSON.stringify({
         params: { subAction: 'severity', subActionParams: {} },

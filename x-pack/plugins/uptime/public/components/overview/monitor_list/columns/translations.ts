@@ -8,11 +8,11 @@
 import { i18n } from '@kbn/i18n';
 
 export const ENABLE_STATUS_ALERT = i18n.translate('xpack.uptime.monitorList.enableDownAlert', {
-  defaultMessage: 'Enable rule',
+  defaultMessage: 'Enable status alerts',
 });
 
 export const DISABLE_STATUS_ALERT = i18n.translate('xpack.uptime.monitorList.disableDownAlert', {
-  defaultMessage: 'Disable rule',
+  defaultMessage: 'Disable status alerts',
 });
 
 export const EXPAND_TAGS_LABEL = i18n.translate('xpack.uptime.monitorList.tags.expand', {

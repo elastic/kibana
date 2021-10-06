@@ -202,7 +202,7 @@ export class CoreSystem {
       });
       const deprecations = this.deprecations.start({ http });
 
-      this.coreApp.start({ application, http, notifications, uiSettings });
+      this.coreApp.start({ application, docLinks, http, notifications, uiSettings });
 
       const core: InternalCoreStart = {
         application,

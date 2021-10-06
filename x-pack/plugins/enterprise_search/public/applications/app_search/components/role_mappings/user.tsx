@@ -17,14 +17,15 @@ import {
   UserSelector,
   UserAddedInfo,
   UserInvitationCallout,
+  DeactivatedUserCallout,
 } from '../../../shared/role_mapping';
 import { RoleTypes } from '../../types';
 
 import { EngineAssignmentSelector } from './engine_assignment_selector';
 import { RoleMappingsLogic } from './role_mappings_logic';
 
-const standardRoles = (['owner', 'admin'] as unknown) as RoleTypes[];
-const advancedRoles = (['dev', 'editor', 'analyst'] as unknown) as RoleTypes[];
+const standardRoles = ['owner', 'admin'] as unknown as RoleTypes[];
+const advancedRoles = ['dev', 'editor', 'analyst'] as unknown as RoleTypes[];
 
 export const User: React.FC = () => {
   const {
@@ -48,6 +49,8 @@ export const User: React.FC = () => {
     roleMappingErrors,
     userCreated,
     userFormIsNewUser,
+    smtpSettingsPresent,
+    formLoading,
   } = useValues(RoleMappingsLogic);
 
   const roleTypes = hasAdvancedRoles ? [...standardRoles, ...advancedRoles] : standardRoles;
@@ -55,6 +58,11 @@ export const User: React.FC = () => {
   const showEngineAssignmentSelector = hasEngines && hasAdvancedRoles;
   const flyoutDisabled =
     !userFormUserIsExisting && (!elasticsearchUser.email || !elasticsearchUser.username);
+  const userIsDeactivated = !!(
+    singleUserRoleMapping &&
+    !singleUserRoleMapping.invitation &&
+    !singleUserRoleMapping.elasticsearchUser.enabled
+  );
 
   const userAddedInfo = singleUserRoleMapping && (
     <UserAddedInfo
@@ -76,6 +84,7 @@ export const User: React.FC = () => {
     <EuiForm isInvalid={roleMappingErrors.length > 0} error={roleMappingErrors}>
       <UserSelector
         isNewUser={userFormIsNewUser}
+        smtpSettingsPresent={smtpSettingsPresent}
         elasticsearchUsers={elasticsearchUsers}
         handleRoleChange={handleRoleChange}
         elasticsearchUser={elasticsearchUser}
@@ -94,6 +103,7 @@ export const User: React.FC = () => {
   return (
     <UserFlyout
       disabled={flyoutDisabled}
+      formLoading={formLoading}
       isComplete={userCreated}
       isNew={userFormIsNewUser}
       closeUserFlyout={closeUsersAndRolesFlyout}
@@ -101,6 +111,7 @@ export const User: React.FC = () => {
     >
       {userCreated ? userAddedInfo : createUserForm}
       {userInvitationCallout}
+      {userIsDeactivated && <DeactivatedUserCallout isNew={userFormIsNewUser} />}
     </UserFlyout>
   );
 };

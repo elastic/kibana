@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel } from '@elastic/eui';
+import { EuiPopover, EuiContextMenuItem, EuiContextMenuPanel, EuiHeaderLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AlertFlyout } from './alert_flyout';
 import { useLinkProps } from '../../../hooks/use_link_props';
@@ -54,13 +54,18 @@ export const AlertDropdown = () => {
     setPopoverOpen(true);
   }, [setPopoverOpen]);
 
+  const openFlyout = useCallback(() => {
+    setFlyoutVisible(true);
+    closePopover();
+  }, [setFlyoutVisible, closePopover]);
+
   const menuItems = useMemo(() => {
     return [
       <EuiContextMenuItem
         disabled={!canCreateAlerts}
         icon="bell"
         key="createLink"
-        onClick={() => setFlyoutVisible(true)}
+        onClick={openFlyout}
         toolTipContent={!canCreateAlerts ? readOnlyUserTooltipContent : undefined}
         toolTipTitle={!canCreateAlerts ? readOnlyUserTooltipTitle : undefined}
       >
@@ -76,22 +81,24 @@ export const AlertDropdown = () => {
         />
       </EuiContextMenuItem>,
     ];
-  }, [manageAlertsLinkProps, canCreateAlerts]);
+  }, [manageAlertsLinkProps, canCreateAlerts, openFlyout]);
 
   return (
     <>
       <EuiPopover
         panelPaddingSize="none"
         button={
-          <EuiButtonEmpty
-            size="xs"
+          <EuiHeaderLink
             color="text"
             iconSide={'right'}
             iconType={'arrowDown'}
             onClick={openPopover}
           >
-            <FormattedMessage id="xpack.infra.alerting.logs.alertsButton" defaultMessage="Alerts" />
-          </EuiButtonEmpty>
+            <FormattedMessage
+              id="xpack.infra.alerting.logs.alertsButton"
+              defaultMessage="Alerts and rules"
+            />
+          </EuiHeaderLink>
         }
         isOpen={popoverOpen}
         closePopover={closePopover}

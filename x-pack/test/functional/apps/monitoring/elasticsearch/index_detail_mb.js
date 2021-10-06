@@ -32,6 +32,8 @@ export default function ({ getService, getPageObjects }) {
           }
         );
 
+        await overview.closeAlertsModal();
+
         // go to indices listing
         await overview.clickEsIndices();
         expect(await indicesList.isOnListing()).to.be(true);

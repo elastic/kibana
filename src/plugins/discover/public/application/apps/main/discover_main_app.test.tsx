@@ -22,22 +22,19 @@ setHeaderActionMenuMounter(jest.fn());
 describe('DiscoverMainApp', () => {
   test('renders', () => {
     const { history } = createSearchSessionMock();
-    const indexPatternList = ([indexPatternMock].map((ip) => {
+    const indexPatternList = [indexPatternMock].map((ip) => {
       return { ...ip, ...{ attributes: { title: ip.title } } };
-    }) as unknown) as Array<SavedObject<IndexPatternAttributes>>;
+    }) as unknown as Array<SavedObject<IndexPatternAttributes>>;
 
-    const component = mountWithIntl(
-      <DiscoverMainApp
-        indexPattern={indexPatternMock}
-        opts={{
-          indexPatternList,
-          services: discoverServiceMock,
-          savedSearch: savedSearchMock,
-          navigateTo: jest.fn(),
-          history,
-        }}
-      />
-    );
+    const props = {
+      indexPatternList,
+      services: discoverServiceMock,
+      savedSearch: savedSearchMock,
+      navigateTo: jest.fn(),
+      history,
+    };
+
+    const component = mountWithIntl(<DiscoverMainApp {...props} />);
 
     expect(findTestSubject(component, 'indexPattern-switch-link').text()).toBe(
       indexPatternMock.title

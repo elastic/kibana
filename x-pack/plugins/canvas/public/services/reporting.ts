@@ -6,37 +6,8 @@
  */
 
 import { ReportingStart } from '../../../reporting/public';
-import { CanvasServiceFactory } from './';
 
-export interface ReportingService {
-  start?: ReportingStart;
+type ReportingPanelPDFComponent = ReportingStart['components']['ReportingPanelPDFV2'];
+export interface CanvasReportingService {
+  getReportingPanelPDFComponent: () => ReportingPanelPDFComponent | null;
 }
-
-export const reportingServiceFactory: CanvasServiceFactory<ReportingService> = (
-  _coreSetup,
-  coreStart,
-  _setupPlugins,
-  startPlugins
-): ReportingService => {
-  const { reporting } = startPlugins;
-
-  const reportingEnabled = () => ({ start: reporting });
-  const reportingDisabled = () => ({ start: undefined });
-
-  if (!reporting) {
-    // Reporting is not enabled
-    return reportingDisabled();
-  }
-
-  if (reporting.usesUiCapabilities()) {
-    if (coreStart.application.capabilities.canvas?.generatePdf === true) {
-      // Canvas has declared Reporting as a subfeature with the `generatePdf` UI Capability
-      return reportingEnabled();
-    } else {
-      return reportingDisabled();
-    }
-  }
-
-  // Legacy/Deprecated: Reporting is enabled as an Elasticsearch feature
-  return reportingEnabled();
-};

@@ -12,6 +12,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Common migrations', function () {
     // Migrations
     loadTestFile(require.resolve('./cases/migrations'));
+    loadTestFile(require.resolve('./comments/migrations'));
     loadTestFile(require.resolve('./configure/migrations'));
     loadTestFile(require.resolve('./user_actions/migrations'));
   });

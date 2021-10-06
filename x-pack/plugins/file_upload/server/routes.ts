@@ -141,7 +141,6 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           accepts: ['application/json'],
           maxBytes: MAX_FILE_SIZE_BYTES,
         },
-        tags: ['access:fileUpload:import'],
       },
     },
     async (context, request, response) => {
@@ -185,15 +184,11 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       validate: {
         body: schema.object({ index: schema.string() }),
       },
-      options: {
-        tags: ['access:fileUpload:import'],
-      },
     },
     async (context, request, response) => {
       try {
-        const {
-          body: indexExists,
-        } = await context.core.elasticsearch.client.asCurrentUser.indices.exists(request.body);
+        const { body: indexExists } =
+          await context.core.elasticsearch.client.asCurrentUser.indices.exists(request.body);
         return response.ok({ body: { exists: indexExists } });
       } catch (e) {
         return response.customError(wrapError(e));

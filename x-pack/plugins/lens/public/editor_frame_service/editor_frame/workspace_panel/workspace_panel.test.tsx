@@ -15,7 +15,7 @@ import {
   createExpressionRendererMock,
   DatasourceMock,
   createMockFramePublicAPI,
-} from '../../mocks';
+} from '../../../mocks';
 import { mockDataPlugin, mountWithProvider } from '../../../mocks';
 jest.mock('../../../debounced_component', () => {
   return {
@@ -24,16 +24,19 @@ jest.mock('../../../debounced_component', () => {
 });
 
 import { WorkspacePanel } from './workspace_panel';
-import { mountWithIntl as mount } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
 import { fromExpression } from '@kbn/interpreter/common';
 import { coreMock } from 'src/core/public/mocks';
-import { esFilters, IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import { esFilters, IndexPattern } from '../../../../../../../src/plugins/data/public';
+import type { FieldSpec } from '../../../../../../../src/plugins/data/common';
 import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
 import { uiActionsPluginMock } from '../../../../../../../src/plugins/ui_actions/public/mocks';
 import { TriggerContract } from '../../../../../../../src/plugins/ui_actions/public/triggers';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public/embeddable';
+import { LensRootStore, setState } from '../../../state_management';
+import { getLensInspectorService } from '../../../lens_inspector_service';
+import { inspectorPluginMock } from '../../../../../../../src/plugins/inspector/public/mocks';
 
 const defaultPermissions: Record<string, Record<string, boolean | Record<string, boolean>>> = {
   navLinks: { management: true },
@@ -42,7 +45,7 @@ const defaultPermissions: Record<string, Record<string, boolean | Record<string,
 
 function createCoreStartWithPermissions(newCapabilities = defaultPermissions) {
   const core = coreMock.createStart();
-  ((core.application.capabilities as unknown) as Record<
+  (core.application.capabilities as unknown as Record<
     string,
     Record<string, boolean | Record<string, boolean>>
   >) = newCapabilities;
@@ -50,13 +53,8 @@ function createCoreStartWithPermissions(newCapabilities = defaultPermissions) {
 }
 
 const defaultProps = {
-  activeDatasourceId: 'mock',
-  datasourceStates: {},
   datasourceMap: {},
   framePublicAPI: createMockFramePublicAPI(),
-  activeVisualizationId: 'vis',
-  visualizationState: {},
-  dispatch: () => {},
   ExpressionRenderer: createExpressionRendererMock(),
   core: createCoreStartWithPermissions(),
   plugins: {
@@ -64,7 +62,7 @@ const defaultProps = {
     data: mockDataPlugin(),
   },
   getSuggestionForField: () => undefined,
-  isFullscreen: false,
+  lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
   toggleFullscreen: jest.fn(),
 };
 
@@ -81,12 +79,12 @@ describe('workspace_panel', () => {
 
   beforeEach(() => {
     // These are used in specific tests to assert function calls
-    trigger = ({ exec: jest.fn() } as unknown) as jest.Mocked<TriggerContract>;
+    trigger = { exec: jest.fn() } as unknown as jest.Mocked<TriggerContract>;
     uiActionsMock = uiActionsPluginMock.createStartContract();
     uiActionsMock.getTrigger.mockReturnValue(trigger);
     mockVisualization = createMockVisualization();
     mockVisualization2 = createMockVisualization();
-    mockDatasource = createMockDatasource('a');
+    mockDatasource = createMockDatasource('testDatasource');
     expressionRendererMock = createExpressionRendererMock();
   });
 
@@ -98,13 +96,15 @@ describe('workspace_panel', () => {
     const mounted = await mountWithProvider(
       <WorkspacePanel
         {...defaultProps}
-        activeVisualizationId={null}
         visualizationMap={{
-          vis: mockVisualization,
+          testVis: mockVisualization,
         }}
         ExpressionRenderer={expressionRendererMock}
       />,
-      defaultProps.plugins.data
+
+      {
+        preloadedState: { visualization: { activeId: null, state: {} }, datasourceStates: {} },
+      }
     );
     instance = mounted.instance;
     expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(2);
@@ -116,10 +116,11 @@ describe('workspace_panel', () => {
       <WorkspacePanel
         {...defaultProps}
         visualizationMap={{
-          vis: { ...mockVisualization, toExpression: () => null },
+          testVis: { ...mockVisualization, toExpression: () => null },
         }}
       />,
-      defaultProps.plugins.data
+
+      { preloadedState: { datasourceStates: {} } }
     );
     instance = mounted.instance;
 
@@ -132,10 +133,11 @@ describe('workspace_panel', () => {
       <WorkspacePanel
         {...defaultProps}
         visualizationMap={{
-          vis: { ...mockVisualization, toExpression: () => 'vis' },
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
       />,
-      defaultProps.plugins.data
+
+      { preloadedState: { datasourceStates: {} } }
     );
     instance = mounted.instance;
 
@@ -154,22 +156,15 @@ describe('workspace_panel', () => {
     const mounted = await mountWithProvider(
       <WorkspacePanel
         {...defaultProps}
-        datasourceStates={{
-          mock: {
-            state: {},
-            isLoading: false,
-          },
-        }}
         datasourceMap={{
-          mock: mockDatasource,
+          testDatasource: mockDatasource,
         }}
         framePublicAPI={framePublicAPI}
         visualizationMap={{
-          vis: { ...mockVisualization, toExpression: () => 'vis' },
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
         ExpressionRenderer={expressionRendererMock}
-      />,
-      defaultProps.plugins.data
+      />
     );
 
     instance = mounted.instance;
@@ -177,7 +172,7 @@ describe('workspace_panel', () => {
     expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
       "kibana
       | lens_merge_tables layerIds=\\"first\\" tables={datasource}
-      | vis"
+      | testVis"
     `);
   });
 
@@ -193,23 +188,16 @@ describe('workspace_panel', () => {
     const mounted = await mountWithProvider(
       <WorkspacePanel
         {...props}
-        datasourceStates={{
-          mock: {
-            state: {},
-            isLoading: false,
-          },
-        }}
         datasourceMap={{
-          mock: mockDatasource,
+          testDatasource: mockDatasource,
         }}
         framePublicAPI={framePublicAPI}
         visualizationMap={{
-          vis: { ...mockVisualization, toExpression: () => 'vis' },
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
         ExpressionRenderer={expressionRendererMock}
         plugins={{ ...props.plugins, uiActions: uiActionsMock }}
-      />,
-      defaultProps.plugins.data
+      />
     );
     instance = mounted.instance;
 
@@ -229,28 +217,19 @@ describe('workspace_panel', () => {
     };
     mockDatasource.toExpression.mockReturnValue('datasource');
     mockDatasource.getLayers.mockReturnValue(['first']);
-    const dispatch = jest.fn();
 
     const mounted = await mountWithProvider(
       <WorkspacePanel
         {...defaultProps}
-        datasourceStates={{
-          mock: {
-            state: {},
-            isLoading: false,
-          },
-        }}
         datasourceMap={{
-          mock: mockDatasource,
+          testDatasource: mockDatasource,
         }}
         framePublicAPI={framePublicAPI}
         visualizationMap={{
-          vis: { ...mockVisualization, toExpression: () => 'vis' },
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
-        dispatch={dispatch}
         ExpressionRenderer={expressionRendererMock}
-      />,
-      defaultProps.plugins.data
+      />
     );
 
     instance = mounted.instance;
@@ -261,8 +240,8 @@ describe('workspace_panel', () => {
     onData(undefined, { tables: { tables: tableData } });
 
     expect(mounted.lensStore.dispatch).toHaveBeenCalledWith({
-      type: 'app/onActiveDataChange',
-      payload: { activeData: tableData },
+      type: 'lens/onActiveDataChange',
+      payload: tableData,
     });
   });
 
@@ -282,27 +261,31 @@ describe('workspace_panel', () => {
     const mounted = await mountWithProvider(
       <WorkspacePanel
         {...defaultProps}
-        datasourceStates={{
-          mock: {
-            state: {},
-            isLoading: false,
-          },
-          mock2: {
-            state: {},
-            isLoading: false,
-          },
-        }}
         datasourceMap={{
-          mock: mockDatasource,
+          testDatasource: mockDatasource,
           mock2: mockDatasource2,
         }}
         framePublicAPI={framePublicAPI}
         visualizationMap={{
-          vis: { ...mockVisualization, toExpression: () => 'vis' },
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
         ExpressionRenderer={expressionRendererMock}
       />,
-      defaultProps.plugins.data
+
+      {
+        preloadedState: {
+          datasourceStates: {
+            testDatasource: {
+              state: {},
+              isLoading: false,
+            },
+            mock2: {
+              state: {},
+              isLoading: false,
+            },
+          },
+        },
+      }
     );
     instance = mounted.instance;
 
@@ -362,22 +345,15 @@ describe('workspace_panel', () => {
       const mounted = await mountWithProvider(
         <WorkspacePanel
           {...defaultProps}
-          datasourceStates={{
-            mock: {
-              state: {},
-              isLoading: false,
-            },
-          }}
           datasourceMap={{
-            mock: mockDatasource,
+            testDatasource: mockDatasource,
           }}
           framePublicAPI={framePublicAPI}
           visualizationMap={{
-            vis: { ...mockVisualization, toExpression: () => 'vis' },
+            testVis: { ...mockVisualization, toExpression: () => 'testVis' },
           }}
           ExpressionRenderer={expressionRendererMock}
-        />,
-        defaultProps.plugins.data
+        />
       );
       instance = mounted.instance;
     });
@@ -415,22 +391,15 @@ describe('workspace_panel', () => {
       const mounted = await mountWithProvider(
         <WorkspacePanel
           {...defaultProps}
-          datasourceStates={{
-            mock: {
-              state: {},
-              isLoading: false,
-            },
-          }}
           datasourceMap={{
-            mock: mockDatasource,
+            testDatasource: mockDatasource,
           }}
           framePublicAPI={framePublicAPI}
           visualizationMap={{
-            vis: { ...mockVisualization, toExpression: () => 'vis' },
+            testVis: { ...mockVisualization, toExpression: () => 'testVis' },
           }}
           ExpressionRenderer={expressionRendererMock}
-        />,
-        defaultProps.plugins.data
+        />
       );
       instance = mounted.instance;
     });
@@ -439,8 +408,8 @@ describe('workspace_panel', () => {
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(1);
 
-    const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
-    const field = ({ name: 'myfield' } as unknown) as IFieldType;
+    const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+    const field = { name: 'myfield' } as unknown as FieldSpec;
 
     await act(async () => {
       instance.setProps({
@@ -466,22 +435,26 @@ describe('workspace_panel', () => {
     const mounted = await mountWithProvider(
       <WorkspacePanel
         {...defaultProps}
-        datasourceStates={{
-          mock: {
-            // define a layer with an indexpattern not available
-            state: { layers: { indexPatternId: 'a' }, indexPatterns: {} },
-            isLoading: false,
-          },
-        }}
         datasourceMap={{
-          mock: mockDatasource,
+          testDatasource: mockDatasource,
         }}
         framePublicAPI={framePublicAPI}
         visualizationMap={{
-          vis: { ...mockVisualization, toExpression: () => 'vis' },
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
       />,
-      defaultProps.plugins.data
+
+      {
+        preloadedState: {
+          datasourceStates: {
+            testDatasource: {
+              // define a layer with an indexpattern not available
+              state: { layers: { indexPatternId: 'a' }, indexPatterns: {} },
+              isLoading: false,
+            },
+          },
+        },
+      }
     );
     instance = mounted.instance;
 
@@ -499,20 +472,12 @@ describe('workspace_panel', () => {
     const mounted = await mountWithProvider(
       <WorkspacePanel
         {...defaultProps}
-        datasourceStates={{
-          mock: {
-            // define a layer with an indexpattern not available
-            state: { layers: { indexPatternId: 'a' }, indexPatterns: {} },
-            isLoading: false,
-          },
-        }}
         datasourceMap={{
-          mock: mockDatasource,
+          testDatasource: mockDatasource,
         }}
         framePublicAPI={framePublicAPI}
-        activeVisualizationId="vis"
         visualizationMap={{
-          vis: { ...mockVisualization, toExpression: () => 'vis' },
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
         // Use cannot navigate to the management page
         core={createCoreStartWithPermissions({
@@ -520,7 +485,18 @@ describe('workspace_panel', () => {
           management: { kibana: { indexPatterns: true } },
         })}
       />,
-      defaultProps.plugins.data
+
+      {
+        preloadedState: {
+          datasourceStates: {
+            testDatasource: {
+              // define a layer with an indexpattern not available
+              state: { layers: { indexPatternId: 'a' }, indexPatterns: {} },
+              isLoading: false,
+            },
+          },
+        },
+      }
     );
     instance = mounted.instance;
 
@@ -539,19 +515,12 @@ describe('workspace_panel', () => {
     const mounted = await mountWithProvider(
       <WorkspacePanel
         {...defaultProps}
-        datasourceStates={{
-          mock: {
-            // define a layer with an indexpattern not available
-            state: { layers: { indexPatternId: 'a' }, indexPatterns: {} },
-            isLoading: false,
-          },
-        }}
         datasourceMap={{
-          mock: mockDatasource,
+          testDatasource: mockDatasource,
         }}
         framePublicAPI={framePublicAPI}
         visualizationMap={{
-          vis: { ...mockVisualization, toExpression: () => 'vis' },
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
         // user can go to management, but indexPatterns management is not accessible
         core={createCoreStartWithPermissions({
@@ -559,7 +528,18 @@ describe('workspace_panel', () => {
           management: { kibana: { indexPatterns: false } },
         })}
       />,
-      defaultProps.plugins.data
+
+      {
+        preloadedState: {
+          datasourceStates: {
+            testDatasource: {
+              // define a layer with an indexpattern not available
+              state: { layers: { indexPatternId: 'a' }, indexPatterns: {} },
+              isLoading: false,
+            },
+          },
+        },
+      }
     );
     instance = mounted.instance;
 
@@ -581,21 +561,14 @@ describe('workspace_panel', () => {
     const mounted = await mountWithProvider(
       <WorkspacePanel
         {...defaultProps}
-        datasourceStates={{
-          mock: {
-            state: {},
-            isLoading: false,
-          },
-        }}
         datasourceMap={{
-          mock: mockDatasource,
+          testDatasource: mockDatasource,
         }}
         framePublicAPI={framePublicAPI}
         visualizationMap={{
-          vis: { ...mockVisualization, toExpression: () => 'vis' },
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
-      />,
-      defaultProps.plugins.data
+      />
     );
     instance = mounted.instance;
 
@@ -609,7 +582,7 @@ describe('workspace_panel', () => {
     mockVisualization.getErrorMessages.mockReturnValue([
       { shortMessage: 'Some error happened', longMessage: 'Some long description happened' },
     ]);
-    mockVisualization.toExpression.mockReturnValue('vis');
+    mockVisualization.toExpression.mockReturnValue('testVis');
     const framePublicAPI = createMockFramePublicAPI();
     framePublicAPI.datasourceLayers = {
       first: mockDatasource.publicAPIMock,
@@ -618,21 +591,14 @@ describe('workspace_panel', () => {
     const mounted = await mountWithProvider(
       <WorkspacePanel
         {...defaultProps}
-        datasourceStates={{
-          mock: {
-            state: {},
-            isLoading: false,
-          },
-        }}
         datasourceMap={{
-          mock: mockDatasource,
+          testDatasource: mockDatasource,
         }}
         framePublicAPI={framePublicAPI}
         visualizationMap={{
-          vis: mockVisualization,
+          testVis: mockVisualization,
         }}
-      />,
-      defaultProps.plugins.data
+      />
     );
     instance = mounted.instance;
 
@@ -648,7 +614,7 @@ describe('workspace_panel', () => {
     mockVisualization.getErrorMessages.mockReturnValue([
       { shortMessage: 'Some error happened', longMessage: 'Some long description happened' },
     ]);
-    mockVisualization.toExpression.mockReturnValue('vis');
+    mockVisualization.toExpression.mockReturnValue('testVis');
     const framePublicAPI = createMockFramePublicAPI();
     framePublicAPI.datasourceLayers = {
       first: mockDatasource.publicAPIMock,
@@ -657,21 +623,14 @@ describe('workspace_panel', () => {
     const mounted = await mountWithProvider(
       <WorkspacePanel
         {...defaultProps}
-        datasourceStates={{
-          mock: {
-            state: {},
-            isLoading: false,
-          },
-        }}
         datasourceMap={{
-          mock: mockDatasource,
+          testDatasource: mockDatasource,
         }}
         framePublicAPI={framePublicAPI}
         visualizationMap={{
-          vis: mockVisualization,
+          testVis: mockVisualization,
         }}
-      />,
-      defaultProps.plugins.data
+      />
     );
     instance = mounted.instance;
 
@@ -693,21 +652,14 @@ describe('workspace_panel', () => {
     const mounted = await mountWithProvider(
       <WorkspacePanel
         {...defaultProps}
-        datasourceStates={{
-          mock: {
-            state: {},
-            isLoading: false,
-          },
-        }}
         datasourceMap={{
-          mock: mockDatasource,
+          testDatasource: mockDatasource,
         }}
         framePublicAPI={framePublicAPI}
         visualizationMap={{
-          vis: { ...mockVisualization, toExpression: () => 'vis' },
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
-      />,
-      defaultProps.plugins.data
+      />
     );
     instance = mounted.instance;
 
@@ -727,22 +679,15 @@ describe('workspace_panel', () => {
       const mounted = await mountWithProvider(
         <WorkspacePanel
           {...defaultProps}
-          datasourceStates={{
-            mock: {
-              state: {},
-              isLoading: false,
-            },
-          }}
           datasourceMap={{
-            mock: mockDatasource,
+            testDatasource: mockDatasource,
           }}
           framePublicAPI={framePublicAPI}
           visualizationMap={{
-            vis: { ...mockVisualization, toExpression: () => 'vis' },
+            testVis: { ...mockVisualization, toExpression: () => 'testVis' },
           }}
           ExpressionRenderer={expressionRendererMock}
-        />,
-        defaultProps.plugins.data
+        />
       );
       instance = mounted.instance;
     });
@@ -763,29 +708,23 @@ describe('workspace_panel', () => {
     framePublicAPI.datasourceLayers = {
       first: mockDatasource.publicAPIMock,
     };
-
+    let lensStore: LensRootStore;
     await act(async () => {
       const mounted = await mountWithProvider(
         <WorkspacePanel
           {...defaultProps}
-          datasourceStates={{
-            mock: {
-              state: {},
-              isLoading: false,
-            },
-          }}
           datasourceMap={{
-            mock: mockDatasource,
+            testDatasource: mockDatasource,
           }}
           framePublicAPI={framePublicAPI}
           visualizationMap={{
-            vis: { ...mockVisualization, toExpression: () => 'vis' },
+            testVis: { ...mockVisualization, toExpression: () => 'testVis' },
           }}
           ExpressionRenderer={expressionRendererMock}
-        />,
-        defaultProps.plugins.data
+        />
       );
       instance = mounted.instance;
+      lensStore = mounted.lensStore;
     });
 
     instance.update();
@@ -796,7 +735,14 @@ describe('workspace_panel', () => {
       return <span />;
     });
 
-    instance.setProps({ visualizationState: {} });
+    lensStore!.dispatch(
+      setState({
+        visualization: {
+          activeId: 'testVis',
+          state: {},
+        },
+      })
+    );
     instance.update();
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(2);
@@ -805,7 +751,6 @@ describe('workspace_panel', () => {
   });
 
   describe('suggestions from dropping in workspace panel', () => {
-    let mockDispatch: jest.Mock;
     let mockGetSuggestionForField: jest.Mock;
     let frame: jest.Mocked<FramePublicAPI>;
 
@@ -813,12 +758,11 @@ describe('workspace_panel', () => {
 
     beforeEach(() => {
       frame = createMockFramePublicAPI();
-      mockDispatch = jest.fn();
       mockGetSuggestionForField = jest.fn();
     });
 
-    function initComponent(draggingContext = draggedField) {
-      instance = mount(
+    async function initComponent(draggingContext = draggedField) {
+      const mounted = await mountWithProvider(
         <ChildDragDropProvider
           dragging={draggingContext}
           setDragging={() => {}}
@@ -832,60 +776,60 @@ describe('workspace_panel', () => {
         >
           <WorkspacePanel
             {...defaultProps}
-            datasourceStates={{
-              mock: {
-                state: {},
-                isLoading: false,
-              },
-            }}
             datasourceMap={{
-              mock: mockDatasource,
+              testDatasource: mockDatasource,
             }}
             framePublicAPI={frame}
             visualizationMap={{
-              vis: mockVisualization,
+              testVis: mockVisualization,
               vis2: mockVisualization2,
             }}
-            dispatch={mockDispatch}
             getSuggestionForField={mockGetSuggestionForField}
           />
         </ChildDragDropProvider>
       );
+      instance = mounted.instance;
+      return mounted;
     }
 
     it('should immediately transition if exactly one suggestion is returned', async () => {
       mockGetSuggestionForField.mockReturnValue({
-        visualizationId: 'vis',
+        visualizationId: 'testVis',
         datasourceState: {},
-        datasourceId: 'mock',
+        datasourceId: 'testDatasource',
         visualizationState: {},
       });
-      initComponent();
+      const { lensStore } = await initComponent();
 
       instance.find(DragDrop).prop('onDrop')!(draggedField, 'field_replace');
 
-      expect(mockDispatch).toHaveBeenCalledWith({
-        type: 'SWITCH_VISUALIZATION',
-        newVisualizationId: 'vis',
-        initialState: {},
-        datasourceState: {},
-        datasourceId: 'mock',
+      expect(lensStore.dispatch).toHaveBeenCalledWith({
+        type: 'lens/switchVisualization',
+        payload: {
+          suggestion: {
+            newVisualizationId: 'testVis',
+            visualizationState: {},
+            datasourceState: {},
+            datasourceId: 'testDatasource',
+          },
+          clearStagedPreview: true,
+        },
       });
     });
 
-    it('should allow to drop if there are suggestions', () => {
+    it('should allow to drop if there are suggestions', async () => {
       mockGetSuggestionForField.mockReturnValue({
-        visualizationId: 'vis',
+        visualizationId: 'testVis',
         datasourceState: {},
-        datasourceId: 'mock',
+        datasourceId: 'testDatasource',
         visualizationState: {},
       });
-      initComponent();
+      await initComponent();
       expect(instance.find(DragDrop).prop('dropTypes')).toBeTruthy();
     });
 
-    it('should refuse to drop if there are no suggestions', () => {
-      initComponent();
+    it('should refuse to drop if there are no suggestions', async () => {
+      await initComponent();
       expect(instance.find(DragDrop).prop('dropType')).toBeFalsy();
     });
   });

@@ -9,9 +9,9 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { VisualizationToolbarProps } from '../types';
+import type { VisualizationToolbarProps } from '../types';
 import { LegendSettingsPopover } from '../shared_components';
-import { HeatmapVisualizationState } from './types';
+import type { HeatmapVisualizationState } from './types';
 
 const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
   {
@@ -63,6 +63,21 @@ export const HeatmapToolbar = memo(
                 setState({
                   ...state,
                   legend: { ...state.legend, position: id as Position },
+                });
+              }}
+              maxLines={state?.legend.maxLines}
+              onMaxLinesChange={(val) => {
+                setState({
+                  ...state,
+                  legend: { ...state.legend, maxLines: val },
+                });
+              }}
+              shouldTruncate={state?.legend.shouldTruncate ?? true}
+              onTruncateLegendChange={() => {
+                const current = state.legend.shouldTruncate ?? true;
+                setState({
+                  ...state,
+                  legend: { ...state.legend, shouldTruncate: !current },
                 });
               }}
             />

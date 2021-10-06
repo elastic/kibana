@@ -5,15 +5,14 @@
  * 2.0.
  */
 import { useContext, useEffect } from 'react';
-import { useServices } from '../../../services';
+import { usePlatformService } from '../../../services';
 import { WorkpadRoutingContext } from '..';
 
 const fullscreenClass = 'canvas-isFullscreen';
 
 export const useFullscreenPresentationHelper = () => {
   const { isFullscreen } = useContext(WorkpadRoutingContext);
-  const services = useServices();
-  const { setFullscreen } = services.platform;
+  const { setFullscreen } = usePlatformService();
 
   useEffect(() => {
     const body = document.querySelector('body');

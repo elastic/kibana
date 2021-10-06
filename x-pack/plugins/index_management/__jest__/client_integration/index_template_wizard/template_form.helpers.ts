@@ -206,7 +206,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
 
     await act(async () => {
       if (settings) {
-        find('mockCodeEditor').simulate('change', {
+        find('settingsEditor').simulate('change', {
           jsonString: settings,
         }); // Using mocked EuiCodeEditor
       }
@@ -241,7 +241,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
 
     if (aliases) {
       await act(async () => {
-        find('mockCodeEditor').simulate('change', {
+        find('aliasesEditor').simulate('change', {
           jsonString: aliases,
         }); // Using mocked EuiCodeEditor
       });
@@ -337,4 +337,6 @@ export type TestSubjects =
   | 'templateFormContainer'
   | 'testingEditor'
   | 'versionField'
+  | 'aliasesEditor'
+  | 'settingsEditor'
   | 'versionField.input';

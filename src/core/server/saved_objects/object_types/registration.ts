@@ -17,6 +17,7 @@ const legacyUrlAliasType: SavedObjectsType = {
     properties: {
       sourceId: { type: 'keyword' },
       targetType: { type: 'keyword' },
+      resolveCounter: { type: 'long' },
       disabled: { type: 'boolean' },
       // other properties exist, but we aren't querying or aggregating on those, so we don't need to specify them (because we use `dynamic: false` above)
     },

@@ -18,6 +18,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useTrackPageview } from '../../../../../observability/public';
+import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { Prompt } from '../../../utils/navigation_warning_prompt';
@@ -27,10 +28,7 @@ import { NameConfigurationPanel } from './name_configuration_panel';
 import { LogSourceConfigurationFormErrors } from './source_configuration_form_errors';
 import { useLogSourceConfigurationFormState } from './source_configuration_form_state';
 import { LogsPageTemplate } from '../page_template';
-
-const settingsTitle = i18n.translate('xpack.infra.logs.settingsTitle', {
-  defaultMessage: 'Settings',
-});
+import { settingsTitle } from '../../../translations';
 
 export const LogsSettingsPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -42,6 +40,12 @@ export const LogsSettingsPage = () => {
     path: 'log_source_configuration',
     delay: 15000,
   });
+
+  useLogsBreadcrumbs([
+    {
+      text: settingsTitle,
+    },
+  ]);
 
   const {
     sourceConfiguration: source,
@@ -72,10 +76,10 @@ export const LogsSettingsPage = () => {
     sourceConfigurationFormElement.resetValue();
   }, [updateSource, sourceConfigurationFormElement, formState]);
 
-  const isWriteable = useMemo(() => shouldAllowEdit && source && source.origin !== 'internal', [
-    shouldAllowEdit,
-    source,
-  ]);
+  const isWriteable = useMemo(
+    () => shouldAllowEdit && source && source.origin !== 'internal',
+    [shouldAllowEdit, source]
+  );
 
   if ((isLoading || isUninitialized) && !resolvedSourceConfiguration) {
     return <SourceLoadingPage />;
@@ -96,7 +100,7 @@ export const LogsSettingsPage = () => {
         <Prompt
           prompt={sourceConfigurationFormElement.isDirty ? unsavedFormPromptMessage : undefined}
         />
-        <EuiPanel paddingSize="l">
+        <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
           <NameConfigurationPanel
             isLoading={isLoading}
             isReadOnly={!isWriteable}
@@ -104,7 +108,7 @@ export const LogsSettingsPage = () => {
           />
         </EuiPanel>
         <EuiSpacer />
-        <EuiPanel paddingSize="l">
+        <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
           <IndicesConfigurationPanel
             isLoading={isLoading}
             isReadOnly={!isWriteable}
@@ -114,7 +118,7 @@ export const LogsSettingsPage = () => {
           />
         </EuiPanel>
         <EuiSpacer />
-        <EuiPanel paddingSize="l">
+        <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
           <LogColumnsConfigurationPanel
             availableFields={availableFields}
             isLoading={isLoading}

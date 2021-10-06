@@ -35,7 +35,7 @@ export const getTimeseriesAggregation = (
   aggs: { outcomes: getOutcomeAggregation() },
 });
 
-export function calculateTransactionErrorPercentage(
+export function calculateFailedTransactionRate(
   outcomeResponse: AggregationResultOf<OutcomeAggregation, {}>
 ) {
   const outcomes = Object.fromEntries(
@@ -48,7 +48,7 @@ export function calculateTransactionErrorPercentage(
   return failedTransactions / (successfulTransactions + failedTransactions);
 }
 
-export function getTransactionErrorRateTimeSeries(
+export function getFailedTransactionRateTimeSeries(
   buckets: AggregationResultOf<
     {
       date_histogram: AggregationOptionsByType['date_histogram'];
@@ -60,7 +60,7 @@ export function getTransactionErrorRateTimeSeries(
   return buckets.map((dateBucket) => {
     return {
       x: dateBucket.key,
-      y: calculateTransactionErrorPercentage(dateBucket.outcomes),
+      y: calculateFailedTransactionRate(dateBucket.outcomes),
     };
   });
 }

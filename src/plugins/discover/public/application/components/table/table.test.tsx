@@ -7,9 +7,9 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { DocViewTable } from './table';
+import { DocViewerTable, DocViewerTableProps } from './table';
 import { indexPatterns, IndexPattern } from '../../../../../data/public';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
@@ -23,13 +23,13 @@ import { getServices } from '../../../kibana_services';
   uiSettings: {
     get: (key: string) => {
       if (key === 'discover:showMultiFields') {
-        return false;
+        return true;
       }
     },
   },
 }));
 
-const indexPattern = ({
+const indexPattern = {
   fields: {
     getAll: () => [
       {
@@ -67,13 +67,17 @@ const indexPattern = ({
   metaFields: ['_index', '_score'],
   flattenHit: undefined,
   formatHit: jest.fn((hit) => hit._source),
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
 indexPattern.fields.getByName = (name: string) => {
   return indexPattern.fields.getAll().find((field) => field.name === name);
 };
 
 indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
+
+const mountComponent = (props: DocViewerTableProps) => {
+  return mountWithIntl(<DocViewerTable {...props} />);
+};
 
 describe('DocViewTable at Discover', () => {
   // At Discover's main view, all buttons are rendered
@@ -114,7 +118,7 @@ describe('DocViewTable at Discover', () => {
     onAddColumn: jest.fn(),
     onRemoveColumn: jest.fn(),
   };
-  const component = mount(<DocViewTable {...props} />);
+  const component = mountComponent(props);
   [
     {
       _property: '_index',
@@ -163,12 +167,14 @@ describe('DocViewTable at Discover', () => {
       expect(rowComponent.length).toBe(1);
     });
 
-    ([
-      'addInclusiveFilterButton',
-      'collapseBtn',
-      'toggleColumnButton',
-      'underscoreWarning',
-    ] as const).forEach((element) => {
+    (
+      [
+        'addInclusiveFilterButton',
+        'collapseBtn',
+        'toggleColumnButton',
+        'underscoreWarning',
+      ] as const
+    ).forEach((element) => {
       const elementExist = check[element];
 
       if (typeof elementExist === 'boolean') {
@@ -210,7 +216,7 @@ describe('DocViewTable at Discover Context', () => {
     filter: jest.fn(),
   };
 
-  const component = mount(<DocViewTable {...props} />);
+  const component = mountComponent(props);
 
   it(`renders no toggleColumnButton`, () => {
     const foundLength = findTestSubject(component, 'toggleColumnButtons').length;
@@ -253,7 +259,7 @@ describe('DocViewTable at Discover Doc', () => {
     hit,
     indexPattern,
   };
-  const component = mount(<DocViewTable {...props} />);
+  const component = mountComponent(props);
   const foundLength = findTestSubject(component, 'addInclusiveFilterButton').length;
 
   it(`renders no action buttons`, () => {
@@ -262,7 +268,7 @@ describe('DocViewTable at Discover Doc', () => {
 });
 
 describe('DocViewTable at Discover Doc with Fields API', () => {
-  const indexPatterneCommerce = ({
+  const indexPatterneCommerce = {
     fields: {
       getAll: () => [
         {
@@ -325,6 +331,33 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
             },
           },
         },
+        {
+          name: 'city',
+          displayName: 'city',
+          type: 'keyword',
+          isMapped: true,
+          readFromDocValues: true,
+          searchable: true,
+          shortDotsEnable: false,
+          scripted: false,
+          filterable: false,
+        },
+        {
+          name: 'city.raw',
+          displayName: 'city.raw',
+          type: 'string',
+          isMapped: true,
+          spec: {
+            subType: {
+              multi: {
+                parent: 'city',
+              },
+            },
+          },
+          shortDotsEnable: false,
+          scripted: false,
+          filterable: false,
+        },
       ],
     },
     metaFields: ['_index', '_type', '_score', '_id'],
@@ -354,7 +387,7 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
       });
       return result;
     }),
-  } as unknown) as IndexPattern;
+  } as unknown as IndexPattern;
 
   indexPatterneCommerce.fields.getByName = (name: string) => {
     return indexPatterneCommerce.fields.getAll().find((field) => field.name === name);
@@ -371,6 +404,7 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
       customer_first_name: 'Betty',
       'customer_first_name.keyword': 'Betty',
       'customer_first_name.nickname': 'Betsy',
+      'city.raw': 'Los Angeles',
     },
   };
   const props = {
@@ -381,20 +415,10 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
     onAddColumn: jest.fn(),
     onRemoveColumn: jest.fn(),
   };
+
   it('renders multifield rows if showMultiFields flag is set', () => {
-    (getServices as jest.Mock).mockImplementationOnce(() => ({
-      uiSettings: {
-        get: (key: string) => {
-          return key === 'discover:showMultiFields';
-        },
-      },
-    }));
-    const component = mount(<DocViewTable {...props} />);
-    const categoryMultifieldRow = findTestSubject(
-      component,
-      'tableDocViewRow-multifieldsTitle-category'
-    );
-    expect(categoryMultifieldRow.length).toBe(1);
+    const component = mountComponent(props);
+
     const categoryKeywordRow = findTestSubject(component, 'tableDocViewRow-category.keyword');
     expect(categoryKeywordRow.length).toBe(1);
 
@@ -404,23 +428,57 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
     expect(findTestSubject(component, 'tableDocViewRow-customer_first_name.nickname').length).toBe(
       1
     );
+
+    expect(
+      findTestSubject(component, 'tableDocViewRow-category.keyword-multifieldBadge').length
+    ).toBe(1);
+
+    expect(
+      findTestSubject(component, 'tableDocViewRow-customer_first_name.keyword-multifieldBadge')
+        .length
+    ).toBe(1);
+
+    expect(
+      findTestSubject(component, 'tableDocViewRow-customer_first_name.nickname-multifieldBadge')
+        .length
+    ).toBe(1);
+
+    expect(findTestSubject(component, 'tableDocViewRow-city.raw').length).toBe(1);
   });
 
   it('does not render multifield rows if showMultiFields flag is not set', () => {
-    const component = mount(<DocViewTable {...props} />);
-    const categoryMultifieldRow = findTestSubject(
-      component,
-      'tableDocViewRow-multifieldsTitle-category'
-    );
-    expect(categoryMultifieldRow.length).toBe(0);
+    (getServices as jest.Mock).mockImplementationOnce(() => ({
+      uiSettings: {
+        get: (key: string) => {
+          return key === 'discover:showMultiFields' && false;
+        },
+      },
+    }));
+    const component = mountComponent(props);
+
     const categoryKeywordRow = findTestSubject(component, 'tableDocViewRow-category.keyword');
     expect(categoryKeywordRow.length).toBe(0);
 
     expect(findTestSubject(component, 'tableDocViewRow-customer_first_name.keyword').length).toBe(
       0
     );
+
     expect(findTestSubject(component, 'tableDocViewRow-customer_first_name.nickname').length).toBe(
       0
     );
+
+    expect(
+      findTestSubject(component, 'tableDocViewRow-customer_first_name.keyword-multifieldBadge')
+        .length
+    ).toBe(0);
+
+    expect(findTestSubject(component, 'tableDocViewRow-customer_first_name').length).toBe(1);
+    expect(
+      findTestSubject(component, 'tableDocViewRow-customer_first_name.nickname-multifieldBadge')
+        .length
+    ).toBe(0);
+
+    expect(findTestSubject(component, 'tableDocViewRow-city').length).toBe(0);
+    expect(findTestSubject(component, 'tableDocViewRow-city.raw').length).toBe(1);
   });
 });

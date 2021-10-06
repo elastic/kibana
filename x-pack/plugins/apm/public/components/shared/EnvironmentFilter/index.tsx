@@ -9,22 +9,23 @@ import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import React from 'react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../common/environment_filter_values';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../Links/url_helpers';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useUxUrlParams } from '../../../context/url_params_context/use_ux_url_params';
 
 function updateEnvironmentUrl(
   history: History,
   location: ReturnType<typeof useLocation>,
-  environment?: string
+  environment: string
 ) {
-  const nextEnvironmentQueryParam =
-    environment !== ENVIRONMENT_ALL.value ? environment : undefined;
+  const nextEnvironmentQueryParam = environment;
   history.push({
     ...location,
     search: fromQuery({
@@ -60,13 +61,56 @@ function getOptions(environments: string[]) {
   ];
 }
 
-export function EnvironmentFilter() {
+export function ApmEnvironmentFilter() {
+  const { path, query } = useApmParams('/*');
+
+  const serviceName = 'serviceName' in path ? path.serviceName : undefined;
+  const environment =
+    ('environment' in query && query.environment) || ENVIRONMENT_ALL.value;
+
+  const rangeFrom = 'rangeFrom' in query ? query.rangeFrom : undefined;
+  const rangeTo = 'rangeTo' in query ? query.rangeTo : undefined;
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo, optional: true });
+
+  return (
+    <EnvironmentFilter
+      start={start}
+      end={end}
+      serviceName={serviceName}
+      environment={environment}
+    />
+  );
+}
+
+export function UxEnvironmentFilter() {
+  const {
+    urlParams: { start, end, environment, serviceName },
+  } = useUxUrlParams();
+
+  return (
+    <EnvironmentFilter
+      start={start}
+      end={end}
+      environment={environment}
+      serviceName={serviceName}
+    />
+  );
+}
+
+export function EnvironmentFilter({
+  start,
+  end,
+  environment,
+  serviceName,
+}: {
+  start?: string;
+  end?: string;
+  environment?: string;
+  serviceName?: string;
+}) {
   const history = useHistory();
   const location = useLocation();
-  const { serviceName } = useParams<{ serviceName?: string }>();
-  const { urlParams } = useUrlParams();
-
-  const { environment, start, end } = urlParams;
   const { environments, status = 'loading' } = useEnvironmentsFetcher({
     serviceName,
     start,
@@ -82,11 +126,12 @@ export function EnvironmentFilter() {
 
   return (
     <EuiSelect
+      fullWidth
       prepend={i18n.translate('xpack.apm.filter.environment.label', {
         defaultMessage: 'Environment',
       })}
       options={options}
-      value={environment || ENVIRONMENT_ALL.value}
+      value={environment}
       onChange={(event) => {
         updateEnvironmentUrl(history, location, event.target.value);
       }}

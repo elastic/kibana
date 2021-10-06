@@ -17,6 +17,7 @@ import { getToastNotifications } from '../../../util/dependency_cache';
 import { ml } from '../../../services/ml_api_service';
 import { stringMatch } from '../../../util/string_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
+import { JOB_ACTION } from '../../../../../common/constants/job_actions';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { mlCalendarService } from '../../../services/calendar_service';
 import { isPopulatedObject } from '../../../../../common/util/object_utils';
@@ -73,6 +74,12 @@ export function isClosable(jobs) {
       j.datafeedState === DATAFEED_STATE.STOPPED &&
       j.jobState !== JOB_STATE.CLOSED &&
       j.jobState !== JOB_STATE.CLOSING
+  );
+}
+
+export function isResettable(jobs) {
+  return jobs.some(
+    (j) => j.jobState === JOB_STATE.CLOSED || j.blocked?.reason === JOB_ACTION.RESET
   );
 }
 
@@ -164,6 +171,13 @@ function showResults(resp, action) {
     });
     actionTextPT = i18n.translate('xpack.ml.jobsList.closedActionStatusText', {
       defaultMessage: 'closed',
+    });
+  } else if (action === JOB_ACTION.RESET) {
+    actionText = i18n.translate('xpack.ml.jobsList.resetActionStatusText', {
+      defaultMessage: 'reset',
+    });
+    actionTextPT = i18n.translate('xpack.ml.jobsList.resetActionStatusText', {
+      defaultMessage: 'reset',
     });
   }
 
@@ -277,6 +291,24 @@ export function closeJobs(jobs, finish = () => {}) {
         error,
         i18n.translate('xpack.ml.jobsList.closeJobErrorMessage', {
           defaultMessage: 'Jobs failed to close',
+        })
+      );
+      finish();
+    });
+}
+
+export function resetJobs(jobIds, finish = () => {}) {
+  mlJobService
+    .resetJobs(jobIds)
+    .then((resp) => {
+      showResults(resp, JOB_ACTION.RESET);
+      finish();
+    })
+    .catch((error) => {
+      getToastNotificationService().displayErrorToast(
+        error,
+        i18n.translate('xpack.ml.jobsList.resetJobErrorMessage', {
+          defaultMessage: 'Jobs failed to reset',
         })
       );
       finish();

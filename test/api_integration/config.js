@@ -13,6 +13,7 @@ export default async function ({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
+    rootTags: ['runOutsideOfCiGroups'],
     testFiles: [require.resolve('./apis')],
     services,
     servers: commonConfig.get('servers'),

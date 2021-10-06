@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { observabilityAppId } from '../../../../../common';
 
 import {
   getCaseDetailsUrl,
@@ -14,7 +15,7 @@ import {
   useFormatUrl,
 } from '../../../../pages/cases/links';
 import { useKibana } from '../../../../utils/kibana_react';
-import { CASES_APP_ID, CASES_OWNER } from '../constants';
+import { CASES_OWNER } from '../constants';
 
 export interface AllCasesNavProps {
   detailName: string;
@@ -30,9 +31,9 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
     cases: casesUi,
     application: { getUrlForApp, navigateToUrl },
   } = useKibana().services;
-  const { formatUrl } = useFormatUrl(CASES_APP_ID);
+  const { formatUrl } = useFormatUrl();
 
-  const casesUrl = getUrlForApp(CASES_APP_ID);
+  const casesUrl = `${getUrlForApp(observabilityAppId)}/cases`;
   return casesUi.getAllCases({
     caseDetailsNavigation: {
       href: ({ detailName, subCaseId }: AllCasesNavProps) => {

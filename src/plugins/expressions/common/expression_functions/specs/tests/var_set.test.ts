@@ -17,18 +17,19 @@ describe('expression_functions', () => {
     const fn = functionWrapper(variableSet);
     let input: Partial<ReturnType<ExecutionContext['getSearchContext']>>;
     let context: ExecutionContext;
-    let variables: Record<string, any>;
+    let variables: Record<string, unknown>;
 
     beforeEach(() => {
       input = { timeRange: { from: '0', to: '1' } };
       context = {
         getSearchContext: () => input,
         getSearchSessionId: () => undefined,
+        getExecutionContext: () => undefined,
         types: {},
         variables: { test: 1 },
-        abortSignal: {} as any,
-        inspectorAdapters: {} as any,
-      };
+        abortSignal: {},
+        inspectorAdapters: {},
+      } as unknown as typeof context;
 
       variables = context.variables;
     });
@@ -65,7 +66,7 @@ describe('expression_functions', () => {
 
       it('sets the variables', async () => {
         const vars = {};
-        const result = await executor
+        const { result } = await executor
           .run('var_set name=test1 name=test2 value=1', 2, { variables: vars })
           .pipe(first())
           .toPromise();

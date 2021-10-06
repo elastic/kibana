@@ -44,11 +44,11 @@ describe('Security Plugin', () => {
       protocol: 'https',
     });
 
-    mockSetupDependencies = ({
+    mockSetupDependencies = {
       licensing: { license$: of({}), featureUsage: { register: jest.fn() } },
       features: featuresPluginMock.createSetup(),
       taskManager: taskManagerMock.createSetup(),
-    } as unknown) as PluginSetupDependencies;
+    } as unknown as PluginSetupDependencies;
 
     mockCoreStart = coreMock.createStart();
 
@@ -101,6 +101,7 @@ describe('Security Plugin', () => {
             },
             "checkPrivilegesDynamicallyWithRequest": [Function],
             "checkPrivilegesWithRequest": [Function],
+            "checkSavedObjectsPrivilegesWithRequest": [Function],
             "mode": Object {
               "useRbacForRequest": [Function],
             },
@@ -118,9 +119,12 @@ describe('Security Plugin', () => {
               },
             },
             "getFeatures": [Function],
-            "getType": [Function],
+            "hasAtLeast": [Function],
             "isEnabled": [Function],
             "isLicenseAvailable": [Function],
+          },
+          "privilegeDeprecationsService": Object {
+            "getKibanaRolesByFeatureId": [Function],
           },
         }
       `);
@@ -171,6 +175,7 @@ describe('Security Plugin', () => {
             },
             "checkPrivilegesDynamicallyWithRequest": [Function],
             "checkPrivilegesWithRequest": [Function],
+            "checkSavedObjectsPrivilegesWithRequest": [Function],
             "mode": Object {
               "useRbacForRequest": [Function],
             },

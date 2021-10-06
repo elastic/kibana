@@ -8,21 +8,13 @@
 import { applyMiddleware, compose as reduxCompose } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 import { getWindow } from '../../lib/get_window';
-import { esPersistMiddleware } from './es_persist';
 import { inFlight } from './in_flight';
 import { workpadUpdate } from './workpad_update';
 import { elementStats } from './element_stats';
 import { resolvedArgs } from './resolved_args';
 
 const middlewares = [
-  applyMiddleware(
-    thunkMiddleware,
-    elementStats,
-    resolvedArgs,
-    esPersistMiddleware,
-    inFlight,
-    workpadUpdate
-  ),
+  applyMiddleware(thunkMiddleware, elementStats, resolvedArgs, inFlight, workpadUpdate),
 ];
 
 // compose with redux devtools, if extension is installed

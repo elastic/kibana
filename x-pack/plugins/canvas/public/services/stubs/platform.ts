@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { PlatformService } from '../platform';
+import { PluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
+
+import { CanvasPlatformService } from '../platform';
+
+type CanvasPlatformServiceFactory = PluginServiceFactory<CanvasPlatformService>;
 
 const noop = (..._args: any[]): any => {};
 
@@ -15,17 +19,21 @@ const uiSettings: Record<string, any> = {
 
 const getUISetting = (setting: string) => uiSettings[setting];
 
-export const platformService: PlatformService = {
+export const platformServiceFactory: CanvasPlatformServiceFactory = () => ({
   getBasePath: () => '/base/path',
   getBasePathInterface: noop,
   getDocLinkVersion: () => 'dockLinkVersion',
   getElasticWebsiteUrl: () => 'https://elastic.co',
+  getKibanaVersion: () => 'kibanaVersion',
   getHasWriteAccess: () => true,
   getUISetting,
+  hasHeaderBanner$: noop,
   setBreadcrumbs: noop,
   setRecentlyAccessed: noop,
   getSavedObjects: noop,
   getSavedObjectsClient: noop,
   getUISettings: noop,
   setFullscreen: noop,
-};
+  redirectLegacyUrl: noop,
+  getLegacyUrlConflict: undefined,
+});

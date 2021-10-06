@@ -21,13 +21,18 @@ export const createRenderer = (element: ReactElement | null): Renderer => {
   const dom: Dom = element && mount(<I18nProvider>{element}</I18nProvider>);
 
   return () =>
-    new Promise(async (resolve) => {
-      if (dom) {
-        await act(async () => {
-          dom.update();
-        });
+    new Promise(async (resolve, reject) => {
+      try {
+        if (dom) {
+          await act(async () => {
+            dom.update();
+          });
+        }
+
+        setImmediate(() => resolve(dom)); // flushes any pending promises
+      } catch (error) {
+        reject(error);
       }
-      setImmediate(() => resolve(dom)); // flushes any pending promises
     });
 };
 

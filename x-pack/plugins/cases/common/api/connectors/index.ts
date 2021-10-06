@@ -73,6 +73,8 @@ const ConnectorNoneTypeFieldsRt = rt.type({
   fields: rt.null,
 });
 
+export const noneConnectorId: string = 'none';
+
 export const ConnectorTypeFieldsRt = rt.union([
   ConnectorJiraTypeFieldsRt,
   ConnectorNoneTypeFieldsRt,
@@ -82,14 +84,22 @@ export const ConnectorTypeFieldsRt = rt.union([
   ConnectorSwimlaneTypeFieldsRt,
 ]);
 
-export const CaseConnectorRt = rt.intersection([
-  rt.type({
-    id: rt.string,
-    name: rt.string,
-  }),
+/**
+ * This type represents the connector's format when it is encoded within a user action.
+ */
+export const CaseUserActionConnectorRt = rt.intersection([
+  rt.type({ name: rt.string }),
   ConnectorTypeFieldsRt,
 ]);
 
+export const CaseConnectorRt = rt.intersection([
+  rt.type({
+    id: rt.string,
+  }),
+  CaseUserActionConnectorRt,
+]);
+
+export type CaseUserActionConnector = rt.TypeOf<typeof CaseUserActionConnectorRt>;
 export type CaseConnector = rt.TypeOf<typeof CaseConnectorRt>;
 export type ConnectorTypeFields = rt.TypeOf<typeof ConnectorTypeFieldsRt>;
 export type ConnectorJiraTypeFields = rt.TypeOf<typeof ConnectorJiraTypeFieldsRt>;
@@ -102,16 +112,3 @@ export type ConnectorServiceNowSIRTypeFields = rt.TypeOf<typeof ConnectorService
 
 // we need to change these types back and forth for storing in ES (arrays overwrite, objects merge)
 export type ConnectorFields = rt.TypeOf<typeof ConnectorFieldsRt>;
-
-export type ESConnectorFields = Array<{
-  key: string;
-  value: unknown;
-}>;
-
-export type ESCaseConnectorTypes = ConnectorTypes;
-export interface ESCaseConnector {
-  id: string;
-  name: string;
-  type: ESCaseConnectorTypes;
-  fields: ESConnectorFields | null;
-}

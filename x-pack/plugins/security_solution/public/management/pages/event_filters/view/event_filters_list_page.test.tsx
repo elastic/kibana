@@ -41,7 +41,7 @@ describe('When on the Event Filters List Page', () => {
     waitForAction = mockedContext.middlewareSpy.waitForAction;
 
     act(() => {
-      history.push('/event_filters');
+      history.push('/administration/event_filters');
     });
   });
 
@@ -115,7 +115,6 @@ describe('When on the Event Filters List Page', () => {
 
       expect(eventMeta).toEqual([
         'some name',
-        'Linux',
         'April 20th 2020 @ 11:25:31',
         'some user',
         'April 20th 2020 @ 11:25:31',
@@ -156,7 +155,7 @@ describe('When on the Event Filters List Page', () => {
   describe('And search is dispatched', () => {
     beforeEach(async () => {
       act(() => {
-        history.push('/event_filters?filter=test');
+        history.push('/administration/event_filters?filter=test');
       });
       renderResult = render();
       await act(async () => {
@@ -180,7 +179,7 @@ describe('When on the Event Filters List Page', () => {
     beforeEach(async () => {
       renderResult = render();
       act(() => {
-        history.push('/event_filters', {
+        history.push('/administration/event_filters', {
           onBackButtonNavigateTo: [{ appId: 'appId' }],
           backButtonLabel: 'back to fleet',
           backButtonUrl: '/fleet',
@@ -196,7 +195,7 @@ describe('When on the Event Filters List Page', () => {
 
     it('back button is not present', () => {
       act(() => {
-        history.push('/event_filters');
+        history.push('/administration/event_filters');
       });
       expect(renderResult.queryByTestId('backToOrigin')).toBeNull();
     });

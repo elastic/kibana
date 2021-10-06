@@ -12,7 +12,7 @@
   "license": "Elastic License v2",
   "name": "Possible Consent Grant Attack via Azure-Registered Application",
   "note": "## Triage and analysis\n\n- In a consent grant attack, an attacker tricks an end user into granting a malicious application consent to access their data, usually via a phishing attack. After the malicious application has been granted consent, it has account-level access to data without the need for an organizational account.\n- Normal remediation steps, like resetting passwords for breached accounts or requiring Multi-Factor Authentication (MFA) on accounts, are not effective against this type of attack, since these are third-party applications and are external to the organization.\n- Security analysts should review the list of trusted applications for any suspicious items.\n\n\n## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:(azure.activitylogs or azure.auditlogs or o365.audit) and ( azure.activitylogs.operation_name:\"Consent to application\" or azure.auditlogs.operation_name:\"Consent to application\" or o365.audit.Operation:\"Consent to application.\" ) and event.outcome:(Success or success)",
+  "query": "event.dataset:(azure.activitylogs or azure.auditlogs or o365.audit) and \n  (\n    azure.activitylogs.operation_name:\"Consent to application\" or\n    azure.auditlogs.operation_name:\"Consent to application\" or\n    o365.audit.Operation:\"Consent to application.\"\n  ) and\n  event.outcome:(Success or success)\n",
   "references": [
     "https://docs.microsoft.com/en-us/microsoft-365/security/office-365-security/detect-and-remediate-illicit-consent-grants?view=o365-worldwide"
   ],

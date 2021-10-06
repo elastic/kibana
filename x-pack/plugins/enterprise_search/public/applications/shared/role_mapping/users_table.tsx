@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { EuiBadge, EuiBasicTableColumn, EuiInMemoryTable, EuiTextColor } from '@elastic/eui';
+import type { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 
 import { ASRoleMapping } from '../../app_search/types';
 import { SingleUserRoleMapping } from '../../shared/types';
@@ -15,6 +16,7 @@ import { WSRoleMapping } from '../../workplace_search/types';
 
 import {
   INVITATION_PENDING_LABEL,
+  DEACTIVATED_LABEL,
   ALL_LABEL,
   FILTER_USERS_LABEL,
   NO_USERS_LABEL,
@@ -37,6 +39,7 @@ interface SharedUser extends SingleUserRoleMapping<ASRoleMapping | WSRoleMapping
   email: string | null;
   roleType: string;
   id: string;
+  enabled: boolean;
 }
 
 interface SharedRoleMapping extends ASRoleMapping, WSRoleMapping {
@@ -52,6 +55,9 @@ interface Props {
 
 const noItemsPlaceholder = <EuiTextColor color="subdued">&mdash;</EuiTextColor>;
 const invitationBadge = <EuiBadge color="hollow">{INVITATION_PENDING_LABEL}</EuiBadge>;
+const deactivatedBadge = <EuiBadge color="hollow">{DEACTIVATED_LABEL}</EuiBadge>;
+
+type Users = Array<Omit<SharedUser, 'elasticsearchUser | roleMapping'>>;
 
 export const UsersTable: React.FC<Props> = ({
   accessItemKey,
@@ -60,20 +66,31 @@ export const UsersTable: React.FC<Props> = ({
   handleDeleteMapping,
 }) => {
   // 'accessItems' is needed because App Search has `engines` and Workplace Search has `groups`.
-  const users = ((singleUserRoleMappings as SharedUser[]).map((user) => ({
+  const users = (singleUserRoleMappings as SharedUser[]).map((user) => ({
     username: user.elasticsearchUser.username,
     email: user.elasticsearchUser.email,
+    enabled: user.elasticsearchUser.enabled,
     roleType: user.roleMapping.roleType,
     id: user.roleMapping.id,
     accessItems: (user.roleMapping as SharedRoleMapping)[accessItemKey],
     invitation: user.invitation,
-  })) as unknown) as Array<Omit<SharedUser, 'elasticsearchUser | roleMapping'>>;
+  })) as unknown as Users;
+
+  const [items, setItems] = useState([] as Users);
+
+  useEffect(() => {
+    setItems(users);
+  }, [singleUserRoleMappings]);
 
   const columns: Array<EuiBasicTableColumn<SharedUser>> = [
     {
       field: 'username',
       name: USERNAME_LABEL,
-      render: (_, { username }: SharedUser) => username,
+      render: (_, { username, invitation, enabled }: SharedUser) => (
+        <div data-test-subj="UsernameCell">
+          {username} {!invitation && !enabled && deactivatedBadge}
+        </div>
+      ),
     },
     {
       field: 'email',
@@ -126,7 +143,22 @@ export const UsersTable: React.FC<Props> = ({
     pageSize: 10,
   };
 
+  const onQueryChange = ({ queryText }: EuiSearchBarOnChangeArgs) => {
+    const filteredItems = users.filter((user) => {
+      // JSON.stringify allows us to search all the object fields
+      // without converting all the nested arrays and objects to strings manually
+      // Some false-positives are possible, because the search is also performed on
+      // object keys, but the simplicity of JSON.stringify seems to worth the tradeoff.
+      const normalizedTableItemString = JSON.stringify(user).toLowerCase();
+      const normalizedQuery = queryText.toLowerCase();
+      return normalizedTableItemString.indexOf(normalizedQuery) !== -1;
+    });
+
+    setItems(filteredItems);
+  };
+
   const search = {
+    onChange: onQueryChange,
     box: {
       incremental: true,
       fullWidth: false,
@@ -139,7 +171,7 @@ export const UsersTable: React.FC<Props> = ({
     <EuiInMemoryTable
       data-test-subj="UsersTable"
       columns={columns}
-      items={users}
+      items={items}
       search={search}
       pagination={pagination}
       message={NO_USERS_LABEL}

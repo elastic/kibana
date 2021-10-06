@@ -7,22 +7,22 @@
  */
 
 jest.mock('execa');
-jest.mock('fs');
 
 import { getChanges } from './get_changes';
+import { REPO_ROOT, createAbsolutePathSerializer } from '@kbn/dev-utils';
 
 const execa: jest.Mock = jest.requireMock('execa');
+
+expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 it('parses git ls-files output', async () => {
   expect.assertions(4);
 
-  jest.requireMock('fs').existsSync.mockImplementation(() => true);
-
   execa.mockImplementation((cmd, args, options) => {
     expect(cmd).toBe('git');
-    expect(args).toEqual(['ls-files', '-dmt', '--', '/foo/bar/x']);
+    expect(args).toEqual(['ls-files', '-dmt', '--', 'foo/bar/x']);
     expect(options).toEqual({
-      cwd: '/foo/bar/x',
+      cwd: REPO_ROOT,
     });
 
     return {
@@ -37,12 +37,14 @@ it('parses git ls-files output', async () => {
     };
   });
 
-  await expect(getChanges('/foo/bar/x')).resolves.toMatchInlineSnapshot(`
+  const changes = await getChanges('foo/bar/x');
+
+  expect(changes).toMatchInlineSnapshot(`
     Map {
-      "/foo/bar/x/kbn-optimizer/package.json" => "modified",
-      "/foo/bar/x/kbn-optimizer/src/common/bundle.ts" => "modified",
-      "/foo/bar/x/kbn-optimizer/src/common/bundles.ts" => "deleted",
-      "/foo/bar/x/kbn-optimizer/src/get_bundle_definitions.test.ts" => "deleted",
+      <absolute path>/kbn-optimizer/package.json => "modified",
+      <absolute path>/kbn-optimizer/src/common/bundle.ts => "modified",
+      <absolute path>/kbn-optimizer/src/common/bundles.ts => "deleted",
+      <absolute path>/kbn-optimizer/src/get_bundle_definitions.test.ts => "deleted",
     }
   `);
 });

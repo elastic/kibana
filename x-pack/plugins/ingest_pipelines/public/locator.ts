@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { ManagementAppLocator } from 'src/plugins/management/common';
 import {
   LocatorPublic,
@@ -27,7 +27,7 @@ export enum INGEST_PIPELINES_PAGES {
   CLONE = 'pipeline_clone',
 }
 
-interface IngestPipelinesBaseParams extends SerializableState {
+interface IngestPipelinesBaseParams extends SerializableRecord {
   pipelineId: string;
 }
 export interface IngestPipelinesListParams extends Partial<IngestPipelinesBaseParams> {
@@ -52,7 +52,7 @@ export type IngestPipelinesParams =
   | IngestPipelinesCloneParams
   | IngestPipelinesCreateParams;
 
-export type IngestPipelinesLocator = LocatorPublic<void>;
+export type IngestPipelinesLocator = LocatorPublic<IngestPipelinesParams>;
 
 export const INGEST_PIPELINES_APP_LOCATOR = 'INGEST_PIPELINES_APP_LOCATOR';
 

@@ -12,12 +12,9 @@ import {
   TRANSACTION_SAMPLED,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../server/utils/queries';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { rangeQuery, kqlQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
+import { Setup } from '../helpers/setup_request';
 import { getTransaction } from '../transactions/get_transaction';
 
 export async function getErrorGroupSample({
@@ -26,14 +23,18 @@ export async function getErrorGroupSample({
   serviceName,
   groupId,
   setup,
+  start,
+  end,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   groupId: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
+  start: number;
+  end: number;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
 
   const params = {
     apm: {
@@ -67,7 +68,13 @@ export async function getErrorGroupSample({
 
   let transaction;
   if (transactionId && traceId) {
-    transaction = await getTransaction({ transactionId, traceId, setup });
+    transaction = await getTransaction({
+      transactionId,
+      traceId,
+      setup,
+      start,
+      end,
+    });
   }
 
   return {

@@ -22,7 +22,7 @@ export const EmptyStateError = ({ errors }: EmptyStateErrorProps) => {
   return (
     <EuiFlexGroup justifyContent="center">
       <EuiFlexItem grow={false}>
-        <EuiPanel>
+        <EuiPanel hasBorder>
           <EuiEmptyPrompt
             iconType="securityApp"
             iconColor="subdued"

@@ -29,9 +29,11 @@ const StatusFilterComponent: React.FC<Props> = ({
     .map((status) => ({
       value: status,
       inputDisplay: (
-        <EuiFlexGroup gutterSize="xs" alignItems={'center'}>
+        <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
           <EuiFlexItem grow={false}>
-            <Status type={status} />
+            <span>
+              <Status type={status} />
+            </span>
           </EuiFlexItem>
           {status !== StatusAll && <EuiFlexItem grow={false}>{` (${stats[status]})`}</EuiFlexItem>}
         </EuiFlexGroup>

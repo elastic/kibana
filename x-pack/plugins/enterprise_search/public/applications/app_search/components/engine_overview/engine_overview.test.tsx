@@ -20,18 +20,13 @@ describe('EngineOverview', () => {
   const values = {
     dataLoading: false,
     myRole: {},
-    isEngineEmpty: true,
+    hasNoDocuments: true,
     isMetaEngine: false,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues(values);
-  });
-
-  it('renders', () => {
-    const wrapper = shallow(<EngineOverview />);
-    expect(wrapper.find('[data-test-subj="EngineOverview"]')).toHaveLength(1);
   });
 
   describe('EmptyEngineOverview', () => {
@@ -45,7 +40,7 @@ describe('EngineOverview', () => {
 
   describe('EngineOverviewMetrics', () => {
     it('renders when the engine has documents', () => {
-      setMockValues({ ...values, isEngineEmpty: false });
+      setMockValues({ ...values, hasNoDocuments: false });
       const wrapper = shallow(<EngineOverview />);
       expect(wrapper.find(EngineOverviewMetrics)).toHaveLength(1);
     });

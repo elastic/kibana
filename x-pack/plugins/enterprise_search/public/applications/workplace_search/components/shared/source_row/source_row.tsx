@@ -34,6 +34,14 @@ import { SourceIcon } from '../source_icon';
 
 import './source_row.scss';
 
+import {
+  SOURCE_ROW_REAUTHENTICATE_STATUS_LINK_LABEL,
+  SOURCE_ROW_REMOTE_LABEL,
+  SOURCE_ROW_REMOTE_TOOLTIP,
+  SOURCE_ROW_SEARCHABLE_TOGGLE_LABEL,
+  SOURCE_ROW_DETAILS_LABEL,
+} from './constants';
+
 // i18n is not needed here because this is only used to check against the server error, which
 // is not translated by the Kibana team at this time.
 const CREDENTIALS_REFRESH_NEEDED_PREFIX = 'OAuth access token could not be refreshed';
@@ -61,6 +69,7 @@ export const SourceRow: React.FC<SourceRowProps> = ({
     isFederatedSource,
     errorReason,
     allowsReauth,
+    activities,
   },
   onSearchableToggle,
   isOrganization,
@@ -68,32 +77,29 @@ export const SourceRow: React.FC<SourceRowProps> = ({
 }) => {
   const isIndexing = status === statuses.INDEXING;
   const hasError = status === statuses.ERROR || status === statuses.DISCONNECTED;
-  const showFix =
-    isOrganization &&
+  const showReauthenticate =
     hasError &&
     allowsReauth &&
-    errorReason?.startsWith(CREDENTIALS_REFRESH_NEEDED_PREFIX);
+    errorReason?.startsWith(CREDENTIALS_REFRESH_NEEDED_PREFIX) &&
+    activities[0]?.status?.toLowerCase() === statuses.ERROR;
 
   const rowClass = classNames({ 'source-row--error': hasError });
 
-  const fixLink = (
+  const reauthenticateLink = (
     <EuiLinkTo
       to={getSourcesPath(
         `${ADD_SOURCE_PATH}/${serviceType}/reauthenticate?sourceId=${id}`,
         isOrganization
       )}
     >
-      Fix
+      {SOURCE_ROW_REAUTHENTICATE_STATUS_LINK_LABEL}
     </EuiLinkTo>
   );
 
   const remoteTooltip = (
     <>
-      <span>Remote</span>
-      <EuiToolTip
-        position="top"
-        content="Remote sources rely on the source's search service directly, and no content is indexed with Workplace Search. Speed and integrity of results are functions of the third-party service's health and performance."
-      >
+      <span>{SOURCE_ROW_REMOTE_LABEL}</span>
+      <EuiToolTip position="top" content={SOURCE_ROW_REMOTE_TOOLTIP}>
         <EuiIcon type="questionInCircle" />
       </EuiToolTip>
     </>
@@ -143,7 +149,7 @@ export const SourceRow: React.FC<SourceRowProps> = ({
             onChange={(e: EuiSwitchEvent) => onSearchableToggle(id, e.target.checked)}
             disabled={!supportedByLicense}
             compressed
-            label="Source Searchable Toggle"
+            label={SOURCE_ROW_SEARCHABLE_TOGGLE_LABEL}
             showLabel={false}
             data-test-subj="SourceSearchableToggle"
           />
@@ -151,7 +157,7 @@ export const SourceRow: React.FC<SourceRowProps> = ({
       )}
       <EuiTableRowCell align="right">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
-          {showFix && <EuiFlexItem grow={false}>{fixLink}</EuiFlexItem>}
+          {showReauthenticate && <EuiFlexItem grow={false}>{reauthenticateLink}</EuiFlexItem>}
           <EuiFlexItem grow={false}>
             {showDetails && (
               <EuiLinkTo
@@ -159,7 +165,7 @@ export const SourceRow: React.FC<SourceRowProps> = ({
                 data-test-subj="SourceDetailsLink"
                 to={getContentSourcePath(SOURCE_DETAILS_PATH, id, !!isOrganization)}
               >
-                Details
+                {SOURCE_ROW_DETAILS_LABEL}
               </EuiLinkTo>
             )}
           </EuiFlexItem>

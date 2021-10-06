@@ -17,9 +17,11 @@ import { includes, remove } from 'lodash';
 
 import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from 'kibana/public';
 
+import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+import { PluginServices } from '../../../../src/plugins/presentation_util/public';
+
 import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
 import { App } from './components/app';
-import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 import { registerLanguage } from './lib/monaco_language_def';
 import { SetupRegistries } from './plugin_api';
 import { initRegistries, populateRegistries, destroyRegistries } from './registries';
@@ -30,7 +32,12 @@ import { init as initStatsReporter } from './lib/ui_metric';
 
 import { CapabilitiesStrings } from '../i18n';
 
-import { startServices, services, ServicesProvider } from './services';
+import {
+  startLegacyServices,
+  services,
+  LegacyServicesProvider,
+  CanvasPluginServices,
+} from './services';
 import { initFunctions } from './functions';
 // @ts-expect-error untyped local
 import { appUnload } from './state/actions/app';
@@ -44,27 +51,38 @@ import './style/index.scss';
 
 const { ReadOnlyBadge: strings } = CapabilitiesStrings;
 
-export const renderApp = (
-  coreStart: CoreStart,
-  plugins: CanvasStartDeps,
-  { element }: AppMountParameters,
-  canvasStore: Store
-) => {
-  const { presentationUtil } = plugins;
+export const renderApp = ({
+  coreStart,
+  startPlugins,
+  params,
+  canvasStore,
+  pluginServices,
+}: {
+  coreStart: CoreStart;
+  startPlugins: CanvasStartDeps;
+  params: AppMountParameters;
+  canvasStore: Store;
+  pluginServices: PluginServices<CanvasPluginServices>;
+}) => {
+  const { presentationUtil } = startPlugins;
+  const { element } = params;
   element.classList.add('canvas');
   element.classList.add('canvasContainerWrapper');
+  const ServicesContextProvider = pluginServices.getContextProvider();
 
   ReactDOM.render(
-    <KibanaContextProvider services={{ ...plugins, ...coreStart }}>
-      <ServicesProvider providers={services}>
-        <presentationUtil.ContextProvider>
-          <I18nProvider>
-            <Provider store={canvasStore}>
-              <App />
-            </Provider>
-          </I18nProvider>
-        </presentationUtil.ContextProvider>
-      </ServicesProvider>
+    <KibanaContextProvider services={{ ...startPlugins, ...coreStart }}>
+      <ServicesContextProvider>
+        <LegacyServicesProvider providers={services}>
+          <presentationUtil.ContextProvider>
+            <I18nProvider>
+              <Provider store={canvasStore}>
+                <App history={params.history} />
+              </Provider>
+            </I18nProvider>
+          </presentationUtil.ContextProvider>
+        </LegacyServicesProvider>
+      </ServicesContextProvider>
     </KibanaContextProvider>,
     element
   );
@@ -82,26 +100,27 @@ export const initializeCanvas = async (
   registries: SetupRegistries,
   appUpdater: BehaviorSubject<AppUpdater>
 ) => {
-  await startServices(coreSetup, coreStart, setupPlugins, startPlugins, appUpdater);
+  await startLegacyServices(coreSetup, coreStart, setupPlugins, startPlugins, appUpdater);
+  const { expressions } = setupPlugins;
 
   // Adding these functions here instead of in plugin.ts.
   // Some of these functions have deep dependencies into Canvas, which was bulking up the size
   // of our bundle entry point. Moving them here pushes that load to when canvas is actually loaded.
   const canvasFunctions = initFunctions({
     timefilter: setupPlugins.data.query.timefilter.timefilter,
-    prependBasePath: coreSetup.http.basePath.prepend,
+    prependBasePath: coreStart.http.basePath.prepend,
     types: setupPlugins.expressions.getTypes(),
     paletteService: await setupPlugins.charts.palettes.getPalettes(),
   });
 
   for (const fn of canvasFunctions) {
-    services.expressions.getService().registerFunction(fn);
+    expressions.registerFunction(fn);
   }
 
   // Create Store
-  const canvasStore = await createStore(coreSetup, setupPlugins);
+  const canvasStore = await createStore(coreSetup);
 
-  registerLanguage(Object.values(services.expressions.getService().getFunctions()));
+  registerLanguage(Object.values(expressions.getFunctions()));
 
   // Init Registries
   initRegistries();
@@ -132,10 +151,7 @@ export const initializeCanvas = async (
       },
     ],
     content: (domNode) => {
-      ReactDOM.render(
-        <HelpMenu functionRegistry={services.expressions.getService().getFunctions()} />,
-        domNode
-      );
+      ReactDOM.render(<HelpMenu functionRegistry={expressions.getFunctions()} />, domNode);
       return () => ReactDOM.unmountComponentAtNode(domNode);
     },
   });
@@ -147,7 +163,7 @@ export const initializeCanvas = async (
   return canvasStore;
 };
 
-export const teardownCanvas = (coreStart: CoreStart, startPlugins: CanvasStartDeps) => {
+export const teardownCanvas = (coreStart: CoreStart) => {
   destroyRegistries();
 
   // Canvas pollutes the jQuery plot plugins collection with custom plugins that only work in Canvas.

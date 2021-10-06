@@ -12,6 +12,8 @@ export interface Influencer {
   influencer_field_values: string[];
 }
 
+export type MLAnomalyDoc = AnomalyRecordDoc;
+
 export interface AnomalyRecordDoc {
   [key: string]: any;
   job_id: string;

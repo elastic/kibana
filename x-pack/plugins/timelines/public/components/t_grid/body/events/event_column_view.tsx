@@ -11,12 +11,13 @@ import type { OnRowSelected } from '../../types';
 import { EventsTrData, EventsTdGroupActions } from '../../styles';
 import { DataDrivenColumns, getMappedNonEcsValue } from '../data_driven_columns';
 import { TimelineTabs } from '../../../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   RowCellRender,
+  SetEventsDeleted,
+  SetEventsLoading,
 } from '../../../../../common/types/timeline';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { Ecs } from '../../../../../common/ecs';
@@ -41,6 +42,8 @@ interface Props {
   timelineId: string;
   leadingControlColumns: ControlColumnProps[];
   trailingControlColumns: ControlColumnProps[];
+  setEventsLoading: SetEventsLoading;
+  setEventsDeleted: SetEventsDeleted;
 }
 
 export const EventColumnView = React.memo<Props>(
@@ -58,12 +61,14 @@ export const EventColumnView = React.memo<Props>(
     hasRowRenderers,
     onRuleChange,
     renderCellValue,
-    selectedEventIds,
+    selectedEventIds = {},
     showCheckboxes,
     tabType,
     timelineId,
     leadingControlColumns,
     trailingControlColumns,
+    setEventsLoading,
+    setEventsDeleted,
   }) => {
     // Each action button shall announce itself to screen readers via an `aria-label`
     // in the following format:
@@ -82,7 +87,6 @@ export const EventColumnView = React.memo<Props>(
           .join(' '),
       [columnHeaders, data]
     );
-
     const leadingActionCells = useMemo(
       () =>
         leadingControlColumns ? leadingControlColumns.map((column) => column.rowCellRender) : [],
@@ -122,6 +126,8 @@ export const EventColumnView = React.memo<Props>(
                   onRuleChange={onRuleChange}
                   tabType={tabType}
                   timelineId={timelineId}
+                  setEventsLoading={setEventsLoading}
+                  setEventsDeleted={setEventsDeleted}
                 />
               )}
             </EventsTdGroupActions>
@@ -145,6 +151,8 @@ export const EventColumnView = React.memo<Props>(
         showCheckboxes,
         tabType,
         timelineId,
+        setEventsLoading,
+        setEventsDeleted,
       ]
     );
     return (
@@ -173,6 +181,8 @@ export const EventColumnView = React.memo<Props>(
           isEventViewer={isEventViewer}
           onRuleChange={onRuleChange}
           selectedEventIds={selectedEventIds}
+          setEventsLoading={setEventsLoading}
+          setEventsDeleted={setEventsDeleted}
         />
       </EventsTrData>
     );

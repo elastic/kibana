@@ -59,6 +59,10 @@ export const epmRouteService = {
   getRemovePath: (pkgkey: string) => {
     return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgkey}', pkgkey).replace(/\/$/, ''); // trim trailing slash
   },
+
+  getUpdatePath: (pkgkey: string) => {
+    return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgkey}', pkgkey);
+  },
 };
 
 export const packagePolicyRouteService = {
@@ -80,6 +84,10 @@ export const packagePolicyRouteService = {
 
   getDeletePath: () => {
     return PACKAGE_POLICY_API_ROUTES.DELETE_PATTERN;
+  },
+
+  getUpgradePath: () => {
+    return PACKAGE_POLICY_API_ROUTES.UPGRADE_PATTERN;
   },
 };
 

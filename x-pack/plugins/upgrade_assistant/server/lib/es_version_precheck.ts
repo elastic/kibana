@@ -101,14 +101,16 @@ export const esVersionCheck = async (
   }
 };
 
-export const versionCheckHandlerWrapper = <P, Q, B>(handler: RequestHandler<P, Q, B>) => async (
-  ctx: RequestHandlerContext,
-  request: KibanaRequest<P, Q, B>,
-  response: KibanaResponseFactory
-) => {
-  const errorResponse = await esVersionCheck(ctx, response);
-  if (errorResponse) {
-    return errorResponse;
-  }
-  return handler(ctx, request, response);
-};
+export const versionCheckHandlerWrapper =
+  <P, Q, B>(handler: RequestHandler<P, Q, B>) =>
+  async (
+    ctx: RequestHandlerContext,
+    request: KibanaRequest<P, Q, B>,
+    response: KibanaResponseFactory
+  ) => {
+    const errorResponse = await esVersionCheck(ctx, response);
+    if (errorResponse) {
+      return errorResponse;
+    }
+    return handler(ctx, request, response);
+  };

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import moment from 'moment';
-// @ts-ignore no module definition
 import Puid from 'puid';
 import { JOB_STATUSES } from '../../../common/constants';
 import {
@@ -15,7 +15,7 @@ import {
   ReportDocumentHead,
   ReportSource,
 } from '../../../common/types';
-import { ReportTaskParams } from '../tasks';
+import type { ReportTaskParams } from '../tasks';
 
 export { ReportDocument };
 export { ReportApiJSON, ReportSource };
@@ -24,8 +24,7 @@ const puid = new Puid();
 export const MIGRATION_VERSION = '7.14.0';
 
 /*
- * The public fields are a flattened version what Elasticsearch returns when you
- * `GET` a document.
+ * Class for an ephemeral report document: possibly is not saved in Elasticsearch
  */
 export class Report implements Partial<ReportSource & ReportDocumentHead> {
   public _index?: string;
@@ -33,23 +32,25 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
   public _primary_term?: number; // set by ES
   public _seq_no?: number; // set by ES
 
-  public readonly kibana_name: ReportSource['kibana_name'];
-  public readonly kibana_id: ReportSource['kibana_id'];
   public readonly jobtype: ReportSource['jobtype'];
   public readonly created_at: ReportSource['created_at'];
   public readonly created_by: ReportSource['created_by'];
   public readonly payload: ReportSource['payload'];
 
   public readonly meta: ReportSource['meta'];
-  public readonly max_attempts: ReportSource['max_attempts'];
-  public readonly browser_type?: ReportSource['browser_type'];
+  public readonly browser_type: ReportSource['browser_type'];
 
   public readonly status: ReportSource['status'];
   public readonly attempts: ReportSource['attempts'];
-  public readonly output?: ReportSource['output'];
-  public readonly started_at?: ReportSource['started_at'];
-  public readonly completed_at?: ReportSource['completed_at'];
-  public readonly timeout?: ReportSource['timeout'];
+
+  // fields with undefined values exist in report jobs that have not been claimed
+  public readonly kibana_name: ReportSource['kibana_name'];
+  public readonly kibana_id: ReportSource['kibana_id'];
+  public readonly output: ReportSource['output'];
+  public readonly started_at: ReportSource['started_at'];
+  public readonly completed_at: ReportSource['completed_at'];
+  public readonly timeout: ReportSource['timeout'];
+  public readonly max_attempts: ReportSource['max_attempts'];
 
   public process_expiration?: ReportSource['process_expiration'];
   public migration_version: string;
@@ -66,20 +67,29 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
 
     this.migration_version = MIGRATION_VERSION;
 
-    this.payload = opts.payload!;
-    this.kibana_name = opts.kibana_name!;
-    this.kibana_id = opts.kibana_id!;
-    this.jobtype = opts.jobtype!;
-    this.max_attempts = opts.max_attempts!;
+    // see RequestHandler.enqueueJob for all the fields that are expected to exist when adding a report
+    if (opts.jobtype == null) {
+      throw new Error(`jobtype is expected!`);
+    }
+    if (opts.payload == null) {
+      throw new Error(`payload is expected!`);
+    }
+
+    this.payload = opts.payload;
+    this.kibana_id = opts.kibana_id;
+    this.kibana_name = opts.kibana_name;
+    this.jobtype = opts.jobtype;
+    this.max_attempts = opts.max_attempts;
     this.attempts = opts.attempts || 0;
+    this.timeout = opts.timeout;
+    this.browser_type = opts.browser_type;
 
     this.process_expiration = opts.process_expiration;
-    this.timeout = opts.timeout;
-
+    this.started_at = opts.started_at;
+    this.completed_at = opts.completed_at;
     this.created_at = opts.created_at || moment.utc().toISOString();
     this.created_by = opts.created_by || false;
     this.meta = opts.meta || { objectType: 'unknown' };
-    this.browser_type = opts.browser_type;
 
     this.status = opts.status || JOB_STATUSES.PENDING;
     this.output = opts.output || null;
@@ -113,9 +123,9 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
       created_by: this.created_by,
       payload: this.payload,
       meta: this.meta,
-      timeout: this.timeout!,
+      timeout: this.timeout,
       max_attempts: this.max_attempts,
-      browser_type: this.browser_type!,
+      browser_type: this.browser_type,
       status: this.status,
       attempts: this.attempts,
       started_at: this.started_at,
@@ -142,7 +152,6 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
       payload: this.payload,
       meta: this.meta,
       attempts: this.attempts,
-      max_attempts: this.max_attempts,
     };
   }
 
@@ -158,7 +167,6 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
       jobtype: this.jobtype,
       created_at: this.created_at,
       created_by: this.created_by,
-      payload: this.payload,
       meta: this.meta,
       timeout: this.timeout,
       max_attempts: this.max_attempts,
@@ -167,6 +175,9 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
       attempts: this.attempts,
       started_at: this.started_at,
       completed_at: this.completed_at,
+      migration_version: this.migration_version,
+      payload: omit(this.payload, 'headers'),
+      output: omit(this.output, 'content'),
     };
   }
 }

@@ -29,8 +29,7 @@ interface Manifest {
   server: boolean;
   kibanaVersion: string;
   version: string;
-  // TODO: make this required.
-  owner?: {
+  owner: {
     // Internally, this should be a team name.
     name: string;
     // All internally owned plugins should have a github team specified that can be pinged in issues, or used to look up
@@ -62,6 +61,12 @@ export function parseKibanaPlatformPlugin(manifestPath: string): KibanaPlatformP
 
   if (typeof manifest.version !== 'string') {
     throw new TypeError('expected new platform plugin manifest to have a string version');
+  }
+
+  if (!manifest.owner || typeof manifest.owner.name !== 'string') {
+    throw new TypeError(
+      `Expected plugin ${manifest.id} manifest to have an owner with name specified (${manifestPath})`
+    );
   }
 
   return {

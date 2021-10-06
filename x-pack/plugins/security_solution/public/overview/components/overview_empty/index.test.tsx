@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 import { OverviewEmpty } from '.';
-import { useIngestEnabledCheck } from '../../../common/hooks/endpoint/ingest_enabled';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 const endpointPackageVersion = '0.19.1';
 
@@ -20,8 +20,10 @@ jest.mock('../../../management/pages/endpoint_hosts/view/hooks', () => ({
   useEndpointSelector: jest.fn().mockReturnValue({ endpointPackageVersion }),
 }));
 
-jest.mock('../../../common/hooks/endpoint/ingest_enabled', () => ({
-  useIngestEnabledCheck: jest.fn().mockReturnValue({ allEnabled: true }),
+jest.mock('../../../common/components/user_privileges', () => ({
+  useUserPrivileges: jest
+    .fn()
+    .mockReturnValue({ endpointPrivileges: { loading: false, canAccessFleet: true } }),
 }));
 
 jest.mock('../../../common/hooks/endpoint/use_navigate_to_app_event_handler', () => ({
@@ -36,33 +38,20 @@ describe('OverviewEmpty', () => {
     });
 
     afterAll(() => {
-      (useIngestEnabledCheck as jest.Mock).mockReset();
+      (useUserPrivileges as jest.Mock).mockReset();
     });
 
-    test('render with correct actions ', () => {
-      expect(wrapper.find('[data-test-subj="empty-page"]').prop('actions')).toEqual({
-        beats: {
-          description:
-            'Lightweight Beats can send data from hundreds or thousands of machines and systems',
-          fill: false,
-          label: 'Add data with Beats',
-          url: '/app/home#/tutorial_directory/security',
+    it('render with correct actions ', () => {
+      expect(wrapper.find('[data-test-subj="empty-page"]').prop('noDataConfig')).toEqual({
+        actions: {
+          elasticAgent: {
+            description:
+              'Use Elastic Agent to collect security events and protect your endpoints from threats. Manage your agents in Fleet and add integrations with a single click.',
+            href: '/app/integrations/browse/security',
+          },
         },
-        elasticAgent: {
-          description:
-            'The Elastic Agent provides a simple, unified way to add monitoring to your hosts.',
-          fill: false,
-          label: 'Add data with Elastic Agent',
-          url: 'ingestUrl',
-        },
-        endpoint: {
-          description:
-            'Protect your hosts with threat prevention, detection, and deep security data visibility.',
-          fill: false,
-          label: 'Add Endpoint Security',
-          onClick: undefined,
-          url: `#/integrations/endpoint-${endpointPackageVersion}/add-integration`,
-        },
+        docsLink: 'https://www.elastic.co/guide/en/security/mocked-test-branch/index.html',
+        solution: 'Security',
       });
     });
   });
@@ -70,19 +59,21 @@ describe('OverviewEmpty', () => {
   describe('When isIngestEnabled = false', () => {
     let wrapper: ShallowWrapper;
     beforeAll(() => {
-      (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: false });
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        endpointPrivileges: { loading: false, canAccessFleet: false },
+      });
       wrapper = shallow(<OverviewEmpty />);
     });
 
-    test('render with correct actions ', () => {
-      expect(wrapper.find('[data-test-subj="empty-page"]').prop('actions')).toEqual({
-        beats: {
-          description:
-            'Lightweight Beats can send data from hundreds or thousands of machines and systems',
-          fill: false,
-          label: 'Add data with Beats',
-          url: '/app/home#/tutorial_directory/security',
+    it('render with correct actions ', () => {
+      expect(wrapper.find('[data-test-subj="empty-page"]').prop('noDataConfig')).toEqual({
+        actions: {
+          beats: {
+            href: '/app/home#/tutorial_directory/security',
+          },
         },
+        docsLink: 'https://www.elastic.co/guide/en/security/mocked-test-branch/index.html',
+        solution: 'Security',
       });
     });
   });

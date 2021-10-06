@@ -8,19 +8,19 @@
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
-import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
-import { getBucketSize } from '../../helpers/get_bucket_size';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { rangeQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
+import { Setup } from '../../helpers/setup_request';
 
 export async function getTransactionErrorCountChartPreview({
   setup,
   alertParams,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   alertParams: AlertParams;
 }) {
-  const { apmEventClient, start, end } = setup;
-  const { serviceName, environment } = alertParams;
+  const { apmEventClient } = setup;
+  const { serviceName, environment, interval, start, end } = alertParams;
 
   const query = {
     bool: {
@@ -32,13 +32,15 @@ export async function getTransactionErrorCountChartPreview({
     },
   };
 
-  const { intervalString } = getBucketSize({ start, end, numBuckets: 20 });
-
   const aggs = {
     timeseries: {
       date_histogram: {
         field: '@timestamp',
-        fixed_interval: intervalString,
+        fixed_interval: interval,
+        extended_bounds: {
+          min: start,
+          max: end,
+        },
       },
     },
   };

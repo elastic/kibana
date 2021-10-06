@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
@@ -51,8 +51,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(response.body).toMatchInline(`
           Object {
             "transactionTypes": Array [
-              "Worker",
               "request",
+              "Worker",
             ],
           }
         `);

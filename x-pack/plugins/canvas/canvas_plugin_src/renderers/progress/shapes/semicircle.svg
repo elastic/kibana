@@ -1,4 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60">
-  <path d="M 0 60 A 60 60 0 1 1 120 60" />
-  <text x="60" y="60" text-anchor='middle' dy="-1" />
-</svg>

@@ -18,18 +18,20 @@ export interface AlertingExampleDeps {
   features: FeaturesPluginSetup;
 }
 
-export const noopAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
+export const noopAlertType: AlertType<{}, {}, {}, {}, {}, 'default'> = {
   id: 'test.noop',
   name: 'Test: Noop',
   actionGroups: [{ id: 'default', name: 'Default' }],
   defaultActionGroupId: 'default',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   async executor() {},
   producer: 'alerts',
 };
 
 export const alwaysFiringAlertType: AlertType<
   { instances: Array<{ id: string; state: any }> },
+  never, // Only use if defining useSavedObjectReferences hook
   {
     globalStateValue: boolean;
     groupInSeriesIndex: number;
@@ -47,6 +49,7 @@ export const alwaysFiringAlertType: AlertType<
   defaultActionGroupId: 'default',
   producer: 'alerts',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   async executor(alertExecutorOptions) {
     const { services, state, params } = alertExecutorOptions;
 
@@ -64,7 +67,7 @@ export const alwaysFiringAlertType: AlertType<
   },
 };
 
-export const failingAlertType: AlertType<never, never, never, never, 'default' | 'other'> = {
+export const failingAlertType: AlertType<never, never, never, never, never, 'default' | 'other'> = {
   id: 'test.failing',
   name: 'Test: Failing',
   actionGroups: [
@@ -76,6 +79,7 @@ export const failingAlertType: AlertType<never, never, never, never, 'default' |
   producer: 'alerts',
   defaultActionGroupId: 'default',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   async executor() {
     throw new Error('Failed to execute alert type');
   },

@@ -7,6 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { pluck } from 'rxjs/operators';
 import { CoreSetup, Plugin, HttpResponsePayload } from '../../../../../src/core/server';
 import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 import { ExpressionsServerStart } from '../../../../../src/plugins/expressions/server';
@@ -32,13 +33,12 @@ export class TestPlugin implements Plugin<TestPluginSetup, TestPluginStart, {}, 
       },
       async (context, req, res) => {
         const [, { expressions }] = await core.getStartServices();
-        const output = await expressions.run<unknown, HttpResponsePayload>(
-          req.body.expression,
-          req.body.input,
-          {
+        const output = await expressions
+          .run<unknown, HttpResponsePayload>(req.body.expression, req.body.input, {
             kibanaRequest: req,
-          }
-        );
+          })
+          .pipe(pluck('result'))
+          .toPromise();
         return res.ok({ body: output });
       }
     );

@@ -12,7 +12,7 @@ import Util from 'util';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 
-const logFilePath = Path.join(__dirname, 'migration_test_corrupt_docs_kibana.log');
+const logFilePath = Path.join(__dirname, 'corrupt_outdated_docs.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
 
@@ -76,6 +76,7 @@ describe('migration v2 with corrupt saved object documents', () => {
     root = createRoot();
 
     esServer = await startES();
+    await root.preboot();
     const coreSetup = await root.setup();
 
     coreSetup.savedObjects.registerType({

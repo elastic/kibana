@@ -1,24 +1,23 @@
 # Share plugin
 
-Replaces the legacy `ui/share` module for registering share context menus.
+The `share` plugin contains various utilities for displaying sharing context menu,
+generating deep links to other apps, and creating short URLs.
 
-## Example registration
+
+## Sharing context menu
+
+You can register an item into sharing context menu (which is displayed in
+Dahsboard, Discover, and Visuzlize apps).
+
+### Example registration
 
 ```ts
-// For legacy plugins
-import { npSetup } from 'ui/new_platform';
-npSetup.plugins.share.register(/* same details here */);
+import { ShareContext, ShareMenuItem } from 'src/plugins/share/public';
 
-// For new plugins: first add 'share' to the list of `optionalPlugins` 
-// in your kibana.json file. Then access the plugin directly in `setup`:
-
-class MyPlugin {
-  setup(core, plugins) {
-    if (plugins.share) {
-      plugins.share.register(/* same details here. */);
-    }
-  }
-}
+plugins.share.register({
+  id: 'MY_MENU',
+  getShareMenuItems: (context: ShareContext): ShareMenuItem[] => {
+    // ...
+  },
+};
 ```
-
-Note that the old module supported providing a Angular DI function to receive Angular dependencies. This is no longer supported as we migrate away from Angular and will be removed in 8.0.

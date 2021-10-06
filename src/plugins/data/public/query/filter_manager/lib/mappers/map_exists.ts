@@ -7,7 +7,7 @@
  */
 
 import { get } from 'lodash';
-import { Filter, isExistsFilter, FILTERS } from '../../../../../common';
+import { Filter, isExistsFilter, FILTERS } from '@kbn/es-query';
 
 export const mapExists = (filter: Filter) => {
   if (isExistsFilter(filter)) {

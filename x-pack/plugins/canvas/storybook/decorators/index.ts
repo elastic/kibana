@@ -8,7 +8,7 @@
 import { addDecorator } from '@storybook/react';
 import { routerContextDecorator } from './router_decorator';
 import { kibanaContextDecorator } from './kibana_decorator';
-import { servicesContextDecorator } from './services_decorator';
+import { servicesContextDecorator, legacyContextDecorator } from './services_decorator';
 
 export { reduxDecorator } from './redux_decorator';
 export { servicesContextDecorator } from './services_decorator';
@@ -21,5 +21,6 @@ export const addDecorators = () => {
 
   addDecorator(kibanaContextDecorator);
   addDecorator(routerContextDecorator);
+  addDecorator(legacyContextDecorator());
   addDecorator(servicesContextDecorator());
 };

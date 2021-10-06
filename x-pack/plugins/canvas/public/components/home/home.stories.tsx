@@ -7,24 +7,17 @@
 
 import React from 'react';
 
-import {
-  reduxDecorator,
-  getAddonPanelParameters,
-  servicesContextDecorator,
-  getDisableStoryshotsParameter,
-} from '../../../storybook';
+import { reduxDecorator } from '../../../storybook';
+import { argTypes } from '../../services/storybook';
 
-import { Home } from './home.component';
+import { Home } from './home';
 
 export default {
-  title: 'Home/Home Page',
-  argTypes: {},
+  title: 'Home',
+  component: Home,
+  argTypes,
   decorators: [reduxDecorator()],
-  parameters: { ...getAddonPanelParameters(), ...getDisableStoryshotsParameter() },
+  parameters: {},
 };
 
-export const NoContent = () => <Home />;
-export const HasContent = () => <Home />;
-
-NoContent.decorators = [servicesContextDecorator()];
-HasContent.decorators = [servicesContextDecorator({ findWorkpads: 5, findTemplates: true })];
+export const HomePage = () => <Home />;

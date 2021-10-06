@@ -26,6 +26,7 @@ import { customElementType, workpadType, workpadTemplateType } from './saved_obj
 import { initializeTemplates } from './templates';
 import { essqlSearchStrategyProvider } from './lib/essql_strategy';
 import { getUISettings } from './ui_settings';
+import { CanvasRouteHandlerContext, createWorkpadRouteContext } from './workpad_route_context';
 
 interface PluginsSetup {
   expressions: ExpressionsServerSetup;
@@ -48,6 +49,8 @@ export class CanvasPlugin implements Plugin {
   }
 
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup) {
+    const expressionsFork = plugins.expressions.fork();
+
     coreSetup.uiSettings.register(getUISettings());
     coreSetup.savedObjects.registerType(customElementType);
     coreSetup.savedObjects.registerType(workpadType);
@@ -55,13 +58,18 @@ export class CanvasPlugin implements Plugin {
 
     plugins.features.registerKibanaFeature(getCanvasFeature(plugins));
 
-    const canvasRouter = coreSetup.http.createRouter();
+    const contextProvider = createWorkpadRouteContext({ expressions: expressionsFork });
+    coreSetup.http.registerRouteHandlerContext<CanvasRouteHandlerContext, 'canvas'>(
+      'canvas',
+      contextProvider
+    );
+
+    const canvasRouter = coreSetup.http.createRouter<CanvasRouteHandlerContext>();
 
     initRoutes({
       router: canvasRouter,
-      expressions: plugins.expressions,
+      expressions: expressionsFork,
       bfetch: plugins.bfetch,
-      elasticsearch: coreSetup.elasticsearch,
       logger: this.logger,
     });
 
@@ -74,10 +82,10 @@ export class CanvasPlugin implements Plugin {
     const globalConfig = this.initializerContext.config.legacy.get();
     registerCanvasUsageCollector(plugins.usageCollection, globalConfig.kibana.index);
 
-    setupInterpreter(plugins.expressions);
+    setupInterpreter(expressionsFork);
 
     coreSetup.getStartServices().then(([_, depsStart]) => {
-      const strategy = essqlSearchStrategyProvider(depsStart.data);
+      const strategy = essqlSearchStrategyProvider();
       plugins.data.search.registerSearchStrategy(ESSQL_SEARCH_STRATEGY, strategy);
     });
   }

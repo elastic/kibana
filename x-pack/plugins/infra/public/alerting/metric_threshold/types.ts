@@ -61,4 +61,6 @@ export interface AlertParams {
   sourceId: string;
   filterQueryText?: string;
   alertOnNoData?: boolean;
+  alertOnGroupDisappear?: boolean;
+  shouldDropPartialBuckets?: boolean;
 }

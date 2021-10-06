@@ -18,10 +18,33 @@ import {
   UserActionField,
 } from '../api';
 
+export interface CasesUiConfigType {
+  markdownPlugins: {
+    lens: boolean;
+  };
+}
+
 export const StatusAll = 'all' as const;
 export type StatusAllType = typeof StatusAll;
 
 export type CaseStatusWithAllStatus = CaseStatuses | StatusAllType;
+
+/**
+ * The type for the `refreshRef` prop (a `React.Ref`) defined by the `CaseViewComponentProps`.
+ *
+ * @example
+ * const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
+ * return <CaseComponent refreshRef={refreshRef} ...otherProps>
+ */
+export type CaseViewRefreshPropInterface = null | {
+  /**
+   * Refreshes the all of the user actions/comments in the view's timeline
+   * (note: this also triggers a silent `refreshCase()`)
+   */
+  refreshUserActionsAndComments: () => Promise<void>;
+  /** Refreshes the Case information only */
+  refreshCase: () => Promise<void>;
+};
 
 export type Comment = CommentRequest & {
   associationType: AssociationType;
@@ -43,7 +66,9 @@ export interface CaseUserActions {
   caseId: string;
   commentId: string | null;
   newValue: string | null;
+  newValConnectorId: string | null;
   oldValue: string | null;
+  oldValConnectorId: string | null;
 }
 
 export interface CaseExternalService {
@@ -87,6 +112,12 @@ export interface Case extends BasicCase {
   settings: CaseAttributes['settings'];
   tags: string[];
   type: CaseType;
+}
+
+export interface ResolvedCase {
+  case: Case;
+  outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
+  aliasTargetId?: string;
 }
 
 export interface QueryParams {

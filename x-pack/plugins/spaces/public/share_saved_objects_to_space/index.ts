@@ -5,6 +5,15 @@
  * 2.0.
  */
 
-export { ShareSavedObjectsToSpaceService } from './share_saved_objects_to_space_service';
-export { getShareToSpaceFlyoutComponent, getLegacyUrlConflict } from './components';
+export {
+  getShareToSpaceFlyoutComponent,
+  getLegacyUrlConflict,
+  getSavedObjectConflictMessage,
+} from './components';
 export { createRedirectLegacyUrl } from './utils';
+export type {
+  LegacyUrlConflictProps,
+  ShareToSpaceFlyoutProps,
+  ShareToSpaceSavedObjectTarget,
+  SavedObjectConflictMessageProps,
+} from './types';

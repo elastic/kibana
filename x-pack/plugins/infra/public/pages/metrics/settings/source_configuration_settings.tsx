@@ -25,18 +25,23 @@ import { IndicesConfigurationPanel } from './indices_configuration_panel';
 import { MLConfigurationPanel } from './ml_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';
 import { useSourceConfigurationFormState } from './source_configuration_form_state';
+import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
+import { settingsTitle } from '../../../translations';
+
 import { MetricsPageTemplate } from '../page_template';
 interface SourceConfigurationSettingsProps {
   shouldAllowEdit: boolean;
 }
 
-const settingsTitle = i18n.translate('xpack.infra.metrics.settingsTitle', {
-  defaultMessage: 'Settings',
-});
-
 export const SourceConfigurationSettings = ({
   shouldAllowEdit,
 }: SourceConfigurationSettingsProps) => {
+  useMetricsBreadcrumbs([
+    {
+      text: settingsTitle,
+    },
+  ]);
+
   const {
     createSourceConfiguration,
     source,
@@ -71,10 +76,10 @@ export const SourceConfigurationSettings = ({
     formStateChanges,
   ]);
 
-  const isWriteable = useMemo(() => shouldAllowEdit && source && source.origin !== 'internal', [
-    shouldAllowEdit,
-    source,
-  ]);
+  const isWriteable = useMemo(
+    () => shouldAllowEdit && source && source.origin !== 'internal',
+    [shouldAllowEdit, source]
+  );
 
   const { hasInfraMLCapabilities } = useInfraMLCapabilitiesContext();
 
@@ -102,7 +107,7 @@ export const SourceConfigurationSettings = ({
             : undefined
         }
       />
-      <EuiPanel paddingSize="l">
+      <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
         <NameConfigurationPanel
           isLoading={isLoading}
           nameFieldProps={indicesConfigurationProps.name}
@@ -110,7 +115,7 @@ export const SourceConfigurationSettings = ({
         />
       </EuiPanel>
       <EuiSpacer />
-      <EuiPanel paddingSize="l">
+      <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
         <IndicesConfigurationPanel
           isLoading={isLoading}
           metricAliasFieldProps={indicesConfigurationProps.metricAlias}
@@ -118,7 +123,7 @@ export const SourceConfigurationSettings = ({
         />
       </EuiPanel>
       <EuiSpacer />
-      <EuiPanel paddingSize="l">
+      <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
         <FieldsConfigurationPanel
           containerFieldProps={indicesConfigurationProps.containerField}
           hostFieldProps={indicesConfigurationProps.hostField}
@@ -131,7 +136,7 @@ export const SourceConfigurationSettings = ({
       <EuiSpacer />
       {hasInfraMLCapabilities && (
         <>
-          <EuiPanel paddingSize="l">
+          <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
             <MLConfigurationPanel
               isLoading={isLoading}
               readOnly={!isWriteable}

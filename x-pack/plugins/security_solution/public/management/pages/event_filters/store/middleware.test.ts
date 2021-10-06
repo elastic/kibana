@@ -81,7 +81,7 @@ describe('Event filters middleware', () => {
       store.dispatch({
         type: 'userChangedUrl',
         payload: {
-          pathname: '/event_filters',
+          pathname: '/administration/event_filters',
           search: searchParams,
           hash: '',
           key: 'ylsd7h',

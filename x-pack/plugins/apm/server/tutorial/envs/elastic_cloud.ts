@@ -23,7 +23,7 @@ import {
   createJavaAgentInstructions,
   createDotNetAgentInstructions,
   createPhpAgentInstructions,
-} from '../instructions/apm_agent_instructions';
+} from '../../../common/tutorial/instructions/apm_agent_instructions';
 import { CloudSetup } from '../../../../cloud/server';
 
 export function createElasticCloudInstructions(
@@ -46,7 +46,8 @@ export function createElasticCloudInstructions(
 function getApmServerInstructionSet(
   cloudSetup?: CloudSetup
 ): InstructionSetSchema {
-  const cloudId = cloudSetup?.cloudId;
+  const deploymentId = cloudSetup?.deploymentId;
+
   return {
     title: i18n.translate('xpack.apm.tutorial.apmServer.title', {
       defaultMessage: 'APM Server',
@@ -56,11 +57,11 @@ function getApmServerInstructionSet(
         id: INSTRUCTION_VARIANT.ESC,
         instructions: [
           {
-            title: 'Enable the APM Server in the ESS console',
+            title: 'Enable the APM Server in the Elastic Cloud user console',
             textPre: i18n.translate('xpack.apm.tutorial.elasticCloud.textPre', {
               defaultMessage:
-                'To enable the APM Server go to [the Elastic Cloud console](https://cloud.elastic.co/deployments?q={cloudId}) and enable APM in the deployment settings. Once enabled, refresh this page.',
-              values: { cloudId },
+                'To enable the APM Server go to [the Elastic Cloud console](https://cloud.elastic.co/deployments/{deploymentId}/edit) and enable APM and Fleet in the deployment edit page by clicking on add capacity, and then click on save. Once enabled, refresh this page.',
+              values: { deploymentId },
             }),
           },
         ],

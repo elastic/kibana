@@ -10,7 +10,8 @@ import PropTypes from 'prop-types';
 import { History } from 'history';
 // @ts-expect-error
 import createHashStateHistory from 'history-extra/dist/createHashStateHistory';
-import { useServices } from '../../services';
+import { ScopedHistory } from 'kibana/public';
+import { useNavLinkService } from '../../services';
 // @ts-expect-error
 import { shortcutManager } from '../../lib/shortcut_manager';
 import { CanvasRouter } from '../../routes';
@@ -29,15 +30,24 @@ class ShortcutManagerContextWrapper extends React.Component {
   }
 }
 
-export const App: FC = () => {
+export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
   const historyRef = useRef<History>(createHashStateHistory() as History);
-  const services = useServices();
+  const { updatePath } = useNavLinkService();
 
   useEffect(() => {
     return historyRef.current.listen(({ pathname }) => {
-      services.navLink.updatePath(pathname);
+      updatePath(pathname);
     });
   });
+
+  // We are using our own history due to needing pushState functionality not yet available on standard history
+  // This effect will listen for changes on the scoped history and push that to our history
+  // This is needed for SavedObject.resolve redirects
+  useEffect(() => {
+    return history.listen((location) => {
+      historyRef.current.replace(location.hash.substr(1));
+    });
+  }, [history]);
 
   return (
     <ShortcutManagerContextWrapper>

@@ -56,14 +56,14 @@ const mockConfig = {
 };
 
 describe('sources routes', () => {
-  describe('GET /api/workplace_search/account/sources', () => {
+  describe('GET /internal/workplace_search/account/sources', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/account/sources',
+        path: '/internal/workplace_search/account/sources',
       });
 
       registerAccountSourcesRoute({
@@ -79,14 +79,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/account/sources/status', () => {
+  describe('GET /internal/workplace_search/account/sources/status', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/account/sources/status',
+        path: '/internal/workplace_search/account/sources/status',
       });
 
       registerAccountSourcesStatusRoute({
@@ -102,14 +102,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/account/sources/{id}', () => {
+  describe('GET /internal/workplace_search/account/sources/{id}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/account/sources/{id}',
+        path: '/internal/workplace_search/account/sources/{id}',
       });
 
       registerAccountSourceRoute({
@@ -125,14 +125,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('DELETE /api/workplace_search/account/sources/{id}', () => {
+  describe('DELETE /internal/workplace_search/account/sources/{id}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/api/workplace_search/account/sources/{id}',
+        path: '/internal/workplace_search/account/sources/{id}',
       });
 
       registerAccountSourceRoute({
@@ -148,14 +148,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('POST /api/workplace_search/account/create_source', () => {
+  describe('POST /internal/workplace_search/account/create_source', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/workplace_search/account/create_source',
+        path: '/internal/workplace_search/account/create_source',
       });
 
       registerAccountCreateSourceRoute({
@@ -187,14 +187,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('POST /api/workplace_search/account/sources/{id}/documents', () => {
+  describe('POST /internal/workplace_search/account/sources/{id}/documents', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/workplace_search/account/sources/{id}/documents',
+        path: '/internal/workplace_search/account/sources/{id}/documents',
       });
 
       registerAccountSourceDocumentsRoute({
@@ -227,14 +227,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/account/sources/{id}/federated_summary', () => {
+  describe('GET /internal/workplace_search/account/sources/{id}/federated_summary', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/account/sources/{id}/federated_summary',
+        path: '/internal/workplace_search/account/sources/{id}/federated_summary',
       });
 
       registerAccountSourceFederatedSummaryRoute({
@@ -250,14 +250,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/account/sources/{id}/reauth_prepare', () => {
+  describe('GET /internal/workplace_search/account/sources/{id}/reauth_prepare', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/account/sources/{id}/reauth_prepare',
+        path: '/internal/workplace_search/account/sources/{id}/reauth_prepare',
       });
 
       registerAccountSourceReauthPrepareRoute({
@@ -273,14 +273,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('PATCH /api/workplace_search/account/sources/{id}/settings', () => {
+  describe('PATCH /internal/workplace_search/account/sources/{id}/settings', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'patch',
-        path: '/api/workplace_search/account/sources/{id}/settings',
+        path: '/internal/workplace_search/account/sources/{id}/settings',
       });
 
       registerAccountSourceSettingsRoute({
@@ -309,14 +309,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/account/pre_sources/{id}', () => {
+  describe('GET /internal/workplace_search/account/pre_sources/{id}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/account/pre_sources/{id}',
+        path: '/internal/workplace_search/account/pre_sources/{id}',
       });
 
       registerAccountPreSourceRoute({
@@ -332,14 +332,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/account/sources/{serviceType}/prepare', () => {
+  describe('GET /internal/workplace_search/account/sources/{serviceType}/prepare', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/account/sources/{serviceType}/prepare',
+        path: '/internal/workplace_search/account/sources/{serviceType}/prepare',
       });
 
       registerAccountPrepareSourcesRoute({
@@ -355,14 +355,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('PUT /api/workplace_search/account/sources/{id}/searchable', () => {
+  describe('PUT /internal/workplace_search/account/sources/{id}/searchable', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/workplace_search/account/sources/{id}/searchable',
+        path: '/internal/workplace_search/account/sources/{id}/searchable',
       });
 
       registerAccountSourceSearchableRoute({
@@ -389,14 +389,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/account/sources/{id}/display_settings/config', () => {
+  describe('GET /internal/workplace_search/account/sources/{id}/display_settings/config', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/account/sources/{id}/display_settings/config',
+        path: '/internal/workplace_search/account/sources/{id}/display_settings/config',
       });
 
       registerAccountSourceDisplaySettingsConfig({
@@ -412,14 +412,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('POST /api/workplace_search/account/sources/{id}/display_settings/config', () => {
+  describe('POST /internal/workplace_search/account/sources/{id}/display_settings/config', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/workplace_search/account/sources/{id}/display_settings/config',
+        path: '/internal/workplace_search/account/sources/{id}/display_settings/config',
       });
 
       registerAccountSourceDisplaySettingsConfig({
@@ -455,14 +455,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/account/sources/{id}/schemas', () => {
+  describe('GET /internal/workplace_search/account/sources/{id}/schemas', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/account/sources/{id}/schemas',
+        path: '/internal/workplace_search/account/sources/{id}/schemas',
       });
 
       registerAccountSourceSchemasRoute({
@@ -478,14 +478,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('POST /api/workplace_search/account/sources/{id}/schemas', () => {
+  describe('POST /internal/workplace_search/account/sources/{id}/schemas', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/workplace_search/account/sources/{id}/schemas',
+        path: '/internal/workplace_search/account/sources/{id}/schemas',
       });
 
       registerAccountSourceSchemasRoute({
@@ -508,14 +508,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/account/sources/{sourceId}/reindex_job/{jobId}', () => {
+  describe('GET /internal/workplace_search/account/sources/{sourceId}/reindex_job/{jobId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/account/sources/{sourceId}/reindex_job/{jobId}',
+        path: '/internal/workplace_search/account/sources/{sourceId}/reindex_job/{jobId}',
       });
 
       registerAccountSourceReindexJobRoute({
@@ -540,14 +540,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/account/sources/{sourceId}/download_diagnostics', () => {
+  describe('GET /internal/workplace_search/account/sources/{sourceId}/download_diagnostics', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/account/sources/{sourceId}/download_diagnostics',
+        path: '/internal/workplace_search/account/sources/{sourceId}/download_diagnostics',
       });
 
       registerAccountSourceDownloadDiagnosticsRoute({
@@ -559,18 +559,19 @@ describe('sources routes', () => {
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/sources/:sourceId/download_diagnostics',
+        hasJsonResponse: false,
       });
     });
   });
 
-  describe('GET /api/workplace_search/org/sources', () => {
+  describe('GET /internal/workplace_search/org/sources', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/org/sources',
+        path: '/internal/workplace_search/org/sources',
       });
 
       registerOrgSourcesRoute({
@@ -586,14 +587,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/org/sources/status', () => {
+  describe('GET /internal/workplace_search/org/sources/status', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/org/sources/status',
+        path: '/internal/workplace_search/org/sources/status',
       });
 
       registerOrgSourcesStatusRoute({
@@ -609,14 +610,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/org/sources/{id}', () => {
+  describe('GET /internal/workplace_search/org/sources/{id}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/org/sources/{id}',
+        path: '/internal/workplace_search/org/sources/{id}',
       });
 
       registerOrgSourceRoute({
@@ -632,14 +633,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('DELETE /api/workplace_search/org/sources/{id}', () => {
+  describe('DELETE /internal/workplace_search/org/sources/{id}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/api/workplace_search/org/sources/{id}',
+        path: '/internal/workplace_search/org/sources/{id}',
       });
 
       registerOrgSourceRoute({
@@ -655,14 +656,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('POST /api/workplace_search/org/create_source', () => {
+  describe('POST /internal/workplace_search/org/create_source', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/workplace_search/org/create_source',
+        path: '/internal/workplace_search/org/create_source',
       });
 
       registerOrgCreateSourceRoute({
@@ -694,14 +695,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('POST /api/workplace_search/org/sources/{id}/documents', () => {
+  describe('POST /internal/workplace_search/org/sources/{id}/documents', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/workplace_search/org/sources/{id}/documents',
+        path: '/internal/workplace_search/org/sources/{id}/documents',
       });
 
       registerOrgSourceDocumentsRoute({
@@ -734,14 +735,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/org/sources/{id}/federated_summary', () => {
+  describe('GET /internal/workplace_search/org/sources/{id}/federated_summary', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/org/sources/{id}/federated_summary',
+        path: '/internal/workplace_search/org/sources/{id}/federated_summary',
       });
 
       registerOrgSourceFederatedSummaryRoute({
@@ -757,14 +758,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/org/sources/{id}/reauth_prepare', () => {
+  describe('GET /internal/workplace_search/org/sources/{id}/reauth_prepare', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/org/sources/{id}/reauth_prepare',
+        path: '/internal/workplace_search/org/sources/{id}/reauth_prepare',
       });
 
       registerOrgSourceReauthPrepareRoute({
@@ -780,14 +781,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('PATCH /api/workplace_search/org/sources/{id}/settings', () => {
+  describe('PATCH /internal/workplace_search/org/sources/{id}/settings', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'patch',
-        path: '/api/workplace_search/org/sources/{id}/settings',
+        path: '/internal/workplace_search/org/sources/{id}/settings',
       });
 
       registerOrgSourceSettingsRoute({
@@ -816,14 +817,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/org/pre_sources/{id}', () => {
+  describe('GET /internal/workplace_search/org/pre_sources/{id}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/org/pre_sources/{id}',
+        path: '/internal/workplace_search/org/pre_sources/{id}',
       });
 
       registerOrgPreSourceRoute({
@@ -839,14 +840,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/org/sources/{serviceType}/prepare', () => {
+  describe('GET /internal/workplace_search/org/sources/{serviceType}/prepare', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/org/sources/{serviceType}/prepare',
+        path: '/internal/workplace_search/org/sources/{serviceType}/prepare',
       });
 
       registerOrgPrepareSourcesRoute({
@@ -862,14 +863,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('PUT /api/workplace_search/org/sources/{id}/searchable', () => {
+  describe('PUT /internal/workplace_search/org/sources/{id}/searchable', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/workplace_search/org/sources/{id}/searchable',
+        path: '/internal/workplace_search/org/sources/{id}/searchable',
       });
 
       registerOrgSourceSearchableRoute({
@@ -896,14 +897,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/org/sources/{id}/display_settings/config', () => {
+  describe('GET /internal/workplace_search/org/sources/{id}/display_settings/config', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/org/sources/{id}/display_settings/config',
+        path: '/internal/workplace_search/org/sources/{id}/display_settings/config',
       });
 
       registerOrgSourceDisplaySettingsConfig({
@@ -919,14 +920,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('POST /api/workplace_search/org/sources/{id}/display_settings/config', () => {
+  describe('POST /internal/workplace_search/org/sources/{id}/display_settings/config', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/workplace_search/org/sources/{id}/display_settings/config',
+        path: '/internal/workplace_search/org/sources/{id}/display_settings/config',
       });
 
       registerOrgSourceDisplaySettingsConfig({
@@ -962,14 +963,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/org/sources/{id}/schemas', () => {
+  describe('GET /internal/workplace_search/org/sources/{id}/schemas', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/org/sources/{id}/schemas',
+        path: '/internal/workplace_search/org/sources/{id}/schemas',
       });
 
       registerOrgSourceSchemasRoute({
@@ -985,14 +986,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('POST /api/workplace_search/org/sources/{id}/schemas', () => {
+  describe('POST /internal/workplace_search/org/sources/{id}/schemas', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/workplace_search/org/sources/{id}/schemas',
+        path: '/internal/workplace_search/org/sources/{id}/schemas',
       });
 
       registerOrgSourceSchemasRoute({
@@ -1015,14 +1016,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/org/sources/{sourceId}/reindex_job/{jobId}', () => {
+  describe('GET /internal/workplace_search/org/sources/{sourceId}/reindex_job/{jobId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/org/sources/{sourceId}/reindex_job/{jobId}',
+        path: '/internal/workplace_search/org/sources/{sourceId}/reindex_job/{jobId}',
       });
 
       registerOrgSourceReindexJobRoute({
@@ -1038,14 +1039,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/org/sources/{sourceId}/download_diagnostics', () => {
+  describe('GET /internal/workplace_search/org/sources/{sourceId}/download_diagnostics', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/org/sources/{sourceId}/download_diagnostics',
+        path: '/internal/workplace_search/org/sources/{sourceId}/download_diagnostics',
       });
 
       registerOrgSourceDownloadDiagnosticsRoute({
@@ -1057,18 +1058,19 @@ describe('sources routes', () => {
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/org/sources/:sourceId/download_diagnostics',
+        hasJsonResponse: false,
       });
     });
   });
 
-  describe('GET /api/workplace_search/org/settings/connectors', () => {
+  describe('GET /internal/workplace_search/org/settings/connectors', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/org/settings/connectors',
+        path: '/internal/workplace_search/org/settings/connectors',
       });
 
       registerOrgSourceOauthConfigurationsRoute({
@@ -1084,14 +1086,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('POST /api/workplace_search/org/settings/connectors', () => {
+  describe('POST /internal/workplace_search/org/settings/connectors', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/workplace_search/org/settings/connectors',
+        path: '/internal/workplace_search/org/settings/connectors',
       });
 
       registerOrgSourceOauthConfigurationsRoute({
@@ -1114,14 +1116,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('PUT /api/workplace_search/org/settings/connectors', () => {
+  describe('PUT /internal/workplace_search/org/settings/connectors', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/workplace_search/org/settings/connectors',
+        path: '/internal/workplace_search/org/settings/connectors',
       });
 
       registerOrgSourceOauthConfigurationsRoute({
@@ -1144,14 +1146,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/org/settings/connectors/{serviceType}', () => {
+  describe('GET /internal/workplace_search/org/settings/connectors/{serviceType}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/org/settings/connectors/{serviceType}',
+        path: '/internal/workplace_search/org/settings/connectors/{serviceType}',
       });
 
       registerOrgSourceOauthConfigurationRoute({
@@ -1167,14 +1169,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('POST /api/workplace_search/org/settings/connectors/{serviceType}', () => {
+  describe('POST /internal/workplace_search/org/settings/connectors/{serviceType}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/workplace_search/org/settings/connectors/{serviceType}',
+        path: '/internal/workplace_search/org/settings/connectors/{serviceType}',
       });
 
       registerOrgSourceOauthConfigurationRoute({
@@ -1197,14 +1199,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('PUT /api/workplace_search/org/settings/connectors/{serviceType}', () => {
+  describe('PUT /internal/workplace_search/org/settings/connectors/{serviceType}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/workplace_search/org/settings/connectors/{serviceType}',
+        path: '/internal/workplace_search/org/settings/connectors/{serviceType}',
       });
 
       registerOrgSourceOauthConfigurationRoute({
@@ -1227,14 +1229,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('DELETE /api/workplace_search/org/settings/connectors/{serviceType}', () => {
+  describe('DELETE /internal/workplace_search/org/settings/connectors/{serviceType}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/api/workplace_search/org/settings/connectors/{serviceType}',
+        path: '/internal/workplace_search/org/settings/connectors/{serviceType}',
       });
 
       registerOrgSourceOauthConfigurationRoute({
@@ -1250,7 +1252,7 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/sources/create', () => {
+  describe('GET /internal/workplace_search/sources/create', () => {
     const tokenPackage = 'some_encrypted_secrets';
 
     const mockRequest = {
@@ -1266,7 +1268,7 @@ describe('sources routes', () => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/sources/create',
+        path: '/internal/workplace_search/sources/create',
       });
 
       registerOauthConnectorParamsRoute({

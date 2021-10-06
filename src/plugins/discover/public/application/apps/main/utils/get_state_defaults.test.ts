@@ -27,9 +27,11 @@ describe('getStateDefaults', () => {
           "default_column",
         ],
         "filters": undefined,
+        "hideChart": undefined,
         "index": "index-pattern-with-timefield-id",
         "interval": "auto",
         "query": undefined,
+        "savedQuery": undefined,
         "sort": Array [
           Array [
             "timestamp",
@@ -54,9 +56,11 @@ describe('getStateDefaults', () => {
           "default_column",
         ],
         "filters": undefined,
+        "hideChart": undefined,
         "index": "the-index-pattern-id",
         "interval": "auto",
         "query": undefined,
+        "savedQuery": undefined,
         "sort": Array [],
       }
     `);

@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
 import { merge } from 'lodash';
 
+import { coerce } from 'semver';
 import { Plugin } from './plugin';
 import { EsContext } from './es';
 import { EventLogService } from './event_log_service';
@@ -65,8 +66,6 @@ export class EventLogger implements IEventLogger {
 
   // non-blocking, but spawns an async task to do the work
   logEvent(eventProperties: IEvent): void {
-    if (!this.eventLogService.isEnabled()) return;
-
     const event: IEvent = {};
     const fixedProperties = {
       ecs: {
@@ -74,6 +73,7 @@ export class EventLogger implements IEventLogger {
       },
       kibana: {
         server_uuid: this.eventLogService.kibanaUUID,
+        version: coerce(this.eventLogService.kibanaVersion)?.version,
       },
     };
 

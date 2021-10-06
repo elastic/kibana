@@ -174,6 +174,26 @@ describe('EPM template', () => {
     expect(template).toMatchSnapshot(path.basename(ymlPath));
   });
 
+  it('tests processing long field with index false', () => {
+    const longWithIndexFalseYml = `
+- name: longIndexFalse
+  type: long
+  index: false
+`;
+    const longWithIndexFalseMapping = {
+      properties: {
+        longIndexFalse: {
+          type: 'long',
+          index: false,
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(longWithIndexFalseYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(longWithIndexFalseMapping);
+  });
+
   it('tests processing text field with multi fields', () => {
     const textWithMultiFieldsLiteralYml = `
 - name: textWithMultiFields
@@ -604,6 +624,26 @@ describe('EPM template', () => {
       properties: {
         constantKeyword: {
           type: 'constant_keyword',
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(constantKeywordLiteralYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
+  });
+
+  it('tests constant_keyword field type with value', () => {
+    const constantKeywordLiteralYaml = `
+- name: constantKeyword
+  type: constant_keyword
+  value: always_the_same
+  `;
+    const constantKeywordMapping = {
+      properties: {
+        constantKeyword: {
+          type: 'constant_keyword',
+          value: 'always_the_same',
         },
       },
     };

@@ -1,36 +1,37 @@
 [role="xpack"]
 [[xpack-grokdebugger]]
-== Debugging grok expressions
+== Debug grok expressions
 
 You can build and debug grok patterns in the {kib} *Grok Debugger*
-before you use them in your data processing pipelines. Grok is a pattern 
+before you use them in your data processing pipelines. Grok is a pattern
 matching syntax that you can use to parse arbitrary text and
 structure it. Grok is good for parsing syslog, apache, and other
 webserver logs, mysql logs, and in general, any log format that is
-written for human consumption. 
+written for human consumption.
 
-Grok patterns are supported in the ingest node
-{ref}/grok-processor.html[grok processor] and the Logstash
-{logstash-ref}/plugins-filters-grok.html[grok filter]. See 
-{logstash-ref}/plugins-filters-grok.html#_grok_basics[grok basics]
-for more information on the syntax for a grok pattern. 
+Grok patterns are supported in {es} {ref}/runtime.html[runtime fields], the {es}
+{ref}/grok-processor.html[grok ingest processor], and the {ls}
+{logstash-ref}/plugins-filters-grok.html[grok filter]. For syntax, see
+{ref}/grok.html[Grokking grok].
 
-The Elastic Stack ships
-with more than 120 reusable grok patterns. See
-https://github.com/elastic/elasticsearch/tree/master/libs/grok/src/main/resources/patterns[Ingest node grok patterns] and https://github.com/logstash-plugins/logstash-patterns-core/tree/master/patterns[Logstash grok patterns]
-for the complete list of patterns.
+The {stack} ships with more than 120 reusable grok patterns. For a complete
+list of patterns, see
+https://github.com/elastic/elasticsearch/tree/master/libs/grok/src/main/resources/patterns[{es}
+grok patterns] and
+https://github.com/logstash-plugins/logstash-patterns-core/tree/master/patterns[{ls}
+grok patterns].
 
 Because
-ingest node and Logstash share the same grok implementation and pattern
+{es} and {ls} share the same grok implementation and pattern
 libraries, any grok pattern that you create in the *Grok Debugger* will work
-in ingest node and Logstash.
+in both {es} and {ls}.
 
 [float]
 [[grokdebugger-getting-started]]
-=== Getting started with the Grok Debugger
+=== Get started
 
 This example walks you through using the *Grok Debugger*. This tool
-is automatically enabled in {kib}. 
+is automatically enabled in {kib}.
 
 NOTE: If you're using {stack-security-features}, you must have the `manage_pipeline`
 permission to use the Grok Debugger.
@@ -66,12 +67,12 @@ image::dev-tools/grokdebugger/images/grok-debugger-overview.png["Grok Debugger"]
 
 [float]
 [[grokdebugger-custom-patterns]]
-=== Testing custom patterns
+=== Test custom patterns
 
 If the default grok pattern dictionary doesn't contain the patterns you need,
-you can define, test, and debug custom patterns using the Grok Debugger.
+you can define, test, and debug custom patterns using the *Grok Debugger*.
 
-Custom patterns that you enter in the Grok Debugger are not saved. Custom patterns
+Custom patterns that you enter in the *Grok Debugger* are not saved. Custom patterns
 are only available for the current debugging session and have no side effects.
 
 Follow this example to define a custom pattern.

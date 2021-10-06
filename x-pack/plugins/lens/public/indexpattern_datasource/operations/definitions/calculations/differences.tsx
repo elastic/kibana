@@ -14,6 +14,7 @@ import {
   getErrorsForDateReference,
   dateBasedOperationToExpression,
   hasDateField,
+  checkForDataLayerType,
 } from './utils';
 import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
@@ -99,13 +100,17 @@ export const derivativeOperation: OperationDefinition<
       })
     );
   },
-  getDisabledStatus(indexPattern, layer) {
-    return checkForDateHistogram(
-      layer,
-      i18n.translate('xpack.lens.indexPattern.derivative', {
-        defaultMessage: 'Differences',
-      })
-    )?.join(', ');
+  getDisabledStatus(indexPattern, layer, layerType) {
+    const opName = i18n.translate('xpack.lens.indexPattern.derivative', {
+      defaultMessage: 'Differences',
+    });
+    if (layerType) {
+      const dataLayerErrors = checkForDataLayerType(layerType, opName);
+      if (dataLayerErrors) {
+        return dataLayerErrors.join(', ');
+      }
+    }
+    return checkForDateHistogram(layer, opName)?.join(', ');
   },
   timeScalingMode: 'optional',
   filterable: true,
@@ -114,7 +119,7 @@ export const derivativeOperation: OperationDefinition<
     signature: i18n.translate('xpack.lens.indexPattern.differences.signature', {
       defaultMessage: 'metric: number',
     }),
-    description: i18n.translate('xpack.lens.indexPattern.differences.documentation', {
+    description: i18n.translate('xpack.lens.indexPattern.differences.documentation.markdown', {
       defaultMessage: `
 Calculates the difference to the last value of a metric over time. To use this function, you need to configure a date histogram dimension as well.
 Differences requires the data to be sequential. If your data is empty when using differences, try increasing the date histogram interval.

@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
 import { TelemetryPluginConfig } from '../plugin';
+import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
 
 interface TelemetryServiceConstructor {
   config: TelemetryPluginConfig;
@@ -93,14 +94,14 @@ export class TelemetryService {
 
   /** Retrieve the opt-in/out notification URL **/
   public getOptInStatusUrl = () => {
-    const telemetryOptInStatusUrl = this.config.optInStatusUrl;
-    return telemetryOptInStatusUrl;
+    const { sendUsageTo } = this.config;
+    return getTelemetryChannelEndpoint({ channelName: 'optInStatus', env: sendUsageTo });
   };
 
   /** Retrieve the URL to report telemetry **/
   public getTelemetryUrl = () => {
-    const telemetryUrl = this.config.url;
-    return telemetryUrl;
+    const { sendUsageTo } = this.config;
+    return getTelemetryChannelEndpoint({ channelName: 'main', env: sendUsageTo });
   };
 
   /**

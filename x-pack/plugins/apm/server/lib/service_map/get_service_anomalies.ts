@@ -11,17 +11,22 @@ import { estypes } from '@elastic/elasticsearch';
 import { ESSearchResponse } from '../../../../../../src/core/types/elasticsearch';
 import { MlPluginSetup } from '../../../../ml/server';
 import { PromiseReturnType } from '../../../../observability/typings/common';
-import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';
+import {
+  getSeverity,
+  ML_ERRORS,
+  ML_TRANSACTION_LATENCY_DETECTOR_INDEX,
+} from '../../../common/anomaly_detection';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getServiceHealthStatus } from '../../../common/service_health_status';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
-import { rangeQuery } from '../../../server/utils/queries';
+import { rangeQuery } from '../../../../observability/server';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getMlJobsWithAPMGroup } from '../anomaly_detection/get_ml_jobs_with_apm_group';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
+import { apmMlAnomalyQuery } from '../../../common/utils/apm_ml_anomaly_query';
 
 export const DEFAULT_ANOMALIES: ServiceAnomaliesResponse = {
   mlJobIds: [],
@@ -35,12 +40,16 @@ export type ServiceAnomaliesResponse = PromiseReturnType<
 export async function getServiceAnomalies({
   setup,
   environment,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
-  environment?: string;
+  setup: Setup;
+  environment: string;
+  start: number;
+  end: number;
 }) {
   return withApmSpan('get_service_anomalies', async () => {
-    const { ml, start, end } = setup;
+    const { ml } = setup;
 
     if (!ml) {
       throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
@@ -52,7 +61,7 @@ export async function getServiceAnomalies({
         query: {
           bool: {
             filter: [
-              { terms: { result_type: ['model_plot', 'record'] } },
+              ...apmMlAnomalyQuery(ML_TRANSACTION_LATENCY_DETECTOR_INDEX),
               ...rangeQuery(
                 Math.min(end - 30 * 60 * 1000, start),
                 end,
@@ -107,10 +116,8 @@ export async function getServiceAnomalies({
       getMLJobIds(ml.anomalyDetectors, environment),
     ]);
 
-    const typedAnomalyResponse: ESSearchResponse<
-      unknown,
-      typeof params
-    > = anomalyResponse as any;
+    const typedAnomalyResponse: ESSearchResponse<unknown, typeof params> =
+      anomalyResponse as any;
     const relevantBuckets = uniqBy(
       sortBy(
         // make sure we only return data for jobs that are available in this space
@@ -153,7 +160,7 @@ export async function getServiceAnomalies({
 
 export async function getMLJobs(
   anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>,
-  environment?: string
+  environment: string
 ) {
   const response = await getMlJobsWithAPMGroup(anomalyDetectors);
 
@@ -162,7 +169,7 @@ export async function getMLJobs(
   const mlJobs = response.jobs.filter(
     (job) => (job.custom_settings?.job_tags?.apm_ml_version ?? 0) >= 2
   );
-  if (environment && environment !== ENVIRONMENT_ALL.value) {
+  if (environment !== ENVIRONMENT_ALL.value) {
     const matchingMLJob = mlJobs.find(
       (job) => job.custom_settings?.job_tags?.environment === environment
     );
@@ -176,7 +183,7 @@ export async function getMLJobs(
 
 export async function getMLJobIds(
   anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>,
-  environment?: string
+  environment: string
 ) {
   const mlJobs = await getMLJobs(anomalyDetectors, environment);
   return mlJobs.map((job) => job.job_id);

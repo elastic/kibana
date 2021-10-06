@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Query } from 'src/plugins/data/common';
 import { FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
 import { Filter, TimeRange } from 'src/plugins/data/public';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
@@ -14,16 +15,15 @@ import { IField } from '../../fields/field';
 import {
   ESSearchSourceResponseMeta,
   MapExtent,
-  MapQuery,
   Timeslice,
   VectorSourceRequestMeta,
-  VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
 
 export interface SourceTooltipConfig {
   tooltipContent: string | null;
   areResultsTrimmed: boolean;
+  isDeprecated?: boolean;
 }
 
 export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
@@ -33,12 +33,12 @@ export interface GeoJsonWithMeta {
   meta?: GeoJsonFetchMeta;
 }
 
-export interface BoundsFilters {
+export interface BoundsRequestMeta {
   applyGlobalQuery: boolean;
   applyGlobalTime: boolean;
   filters: Filter[];
-  query?: MapQuery;
-  sourceQuery?: MapQuery;
+  query?: Query;
+  sourceQuery?: Query;
   timeFilters: TimeRange;
   timeslice?: Timeslice;
 }
@@ -46,7 +46,7 @@ export interface BoundsFilters {
 export interface IVectorSource extends ISource {
   getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
-    boundsFilters: BoundsFilters,
+    layerDataFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null>;
   getGeoJsonWithMeta(
@@ -59,7 +59,15 @@ export interface IVectorSource extends ISource {
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField | null;
   getLeftJoinFields(): Promise<IField[]>;
-  getSyncMeta(): VectorSourceSyncMeta | null;
+  showJoinEditor(): boolean;
+  getJoinsDisabledReason(): string | null;
+
+  /*
+   * Vector layer avoids unnecessarily re-fetching source data.
+   * Use getSyncMeta to expose fields that require source data re-fetch when changed.
+   */
+  getSyncMeta(): object | null;
+
   getFieldNames(): string[];
   createField({ fieldName }: { fieldName: string }): IField;
   hasTooltipProperties(): boolean;
@@ -68,7 +76,12 @@ export interface IVectorSource extends ISource {
   getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig;
   getTimesliceMaskFieldName(): Promise<string | null>;
   supportsFeatureEditing(): Promise<boolean>;
-  addFeature(geometry: Geometry | Position[]): Promise<void>;
+  getDefaultFields(): Promise<Record<string, Record<string, string>>>;
+  addFeature(
+    geometry: Geometry | Position[],
+    defaultFields: Record<string, Record<string, string>>
+  ): Promise<void>;
+  deleteFeature(featureId: string): Promise<void>;
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
@@ -97,7 +110,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   }
 
   async getBoundsForFilters(
-    boundsFilters: BoundsFilters,
+    boundsFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     return null;
@@ -109,6 +122,10 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
   async getLeftJoinFields(): Promise<IField[]> {
     return [];
+  }
+
+  getJoinsDisabledReason(): string | null {
+    return null;
   }
 
   async getGeoJsonWithMeta(
@@ -153,7 +170,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return { tooltipContent: null, areResultsTrimmed: false };
   }
 
-  getSyncMeta(): VectorSourceSyncMeta | null {
+  getSyncMeta(): object | null {
     return null;
   }
 
@@ -161,11 +178,22 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return null;
   }
 
-  async addFeature(geometry: Geometry | Position[]) {
+  async addFeature(
+    geometry: Geometry | Position[],
+    defaultFields: Record<string, Record<string, string>>
+  ) {
     throw new Error('Should implement VectorSource#addFeature');
+  }
+
+  async deleteFeature(featureId: string): Promise<void> {
+    throw new Error('Should implement VectorSource#deleteFeature');
   }
 
   async supportsFeatureEditing(): Promise<boolean> {
     return false;
+  }
+
+  async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
+    return {};
   }
 }

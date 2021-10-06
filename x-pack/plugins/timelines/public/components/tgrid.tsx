@@ -9,14 +9,14 @@ import React from 'react';
 
 import type { TGridProps } from '../types';
 import { TGridIntegrated, TGridIntegratedProps } from './t_grid/integrated';
-import { TGridStandalone } from './t_grid/standalone';
+import { TGridStandalone, TGridStandaloneProps } from './t_grid/standalone';
 
 export const TGrid = (props: TGridProps) => {
   const { type, ...componentsProps } = props;
   if (type === 'standalone') {
-    return <TGridStandalone {...componentsProps} />;
+    return <TGridStandalone {...(componentsProps as unknown as TGridStandaloneProps)} />;
   } else if (type === 'embedded') {
-    return <TGridIntegrated {...((componentsProps as unknown) as TGridIntegratedProps)} />;
+    return <TGridIntegrated {...(componentsProps as unknown as TGridIntegratedProps)} />;
   }
   return null;
 };

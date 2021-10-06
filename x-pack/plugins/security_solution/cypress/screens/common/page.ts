@@ -6,3 +6,5 @@
  */
 
 export const PAGE_TITLE = '[data-test-subj="header-page-title"]';
+
+export const NOT_FOUND = '[data-test-subj="notFoundPage"]';

@@ -30,6 +30,10 @@ export class HomePageObject extends FtrService {
     return !(await this.testSubjects.exists(`addSampleDataSet${id}`));
   }
 
+  async isWelcomeInterstitialDisplayed() {
+    return await this.testSubjects.isDisplayed('homeWelcomeInterstitial');
+  }
+
   async getVisibileSolutions() {
     const solutionPanels = await this.testSubjects.findAll('~homSolutionPanel', 2000);
     const panelAttributes = await Promise.all(
@@ -41,8 +45,11 @@ export class HomePageObject extends FtrService {
   async addSampleDataSet(id: string) {
     const isInstalled = await this.isSampleDataSetInstalled(id);
     if (!isInstalled) {
-      await this.testSubjects.click(`addSampleDataSet${id}`);
-      await this._waitForSampleDataLoadingAction(id);
+      await this.retry.waitFor('wait until sample data is installed', async () => {
+        await this.testSubjects.click(`addSampleDataSet${id}`);
+        await this._waitForSampleDataLoadingAction(id);
+        return await this.isSampleDataSetInstalled(id);
+      });
     }
   }
 
@@ -74,6 +81,7 @@ export class HomePageObject extends FtrService {
 
   async launchSampleDataSet(id: string) {
     await this.addSampleDataSet(id);
+    await this.common.closeToastIfExists();
     await this.testSubjects.click(`launchSampleDataSet${id}`);
   }
 
@@ -110,19 +118,26 @@ export class HomePageObject extends FtrService {
     await this.testSubjects.click('onCloudTutorial');
   }
 
-  // click on side nav toggle button to see all of side nav
-  async clickOnToggleNavButton() {
+  // click on global nav toggle button
+  async clickToggleGlobalNav() {
     await this.testSubjects.click('toggleNavButton');
+  }
+
+  async clickGoHome() {
+    await this.openCollapsibleNav();
+    await this.testSubjects.click('homeLink');
+  }
+
+  // open global nav if it's closed
+  async openCollapsibleNav() {
+    if (!(await this.testSubjects.exists('collapsibleNav'))) {
+      await this.clickToggleGlobalNav();
+    }
   }
 
   // collapse the observability side nav details
   async collapseObservabibilitySideNav() {
     await this.testSubjects.click('collapsibleNavGroup-observability');
-  }
-
-  // dock the side nav
-  async dockTheSideNav() {
-    await this.testSubjects.click('collapsible-nav-lock');
   }
 
   async loadSavedObjects() {

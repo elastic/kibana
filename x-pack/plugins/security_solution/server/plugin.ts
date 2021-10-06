@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { once } from 'lodash';
 import { Observable } from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import LRU from 'lru-cache';
+import { estypes } from '@elastic/elasticsearch';
 
 import {
   CoreSetup,
@@ -17,28 +16,29 @@ import {
   Plugin as IPlugin,
   PluginInitializerContext,
   SavedObjectsClient,
-  DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '../../../../src/plugins/data/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import {
+  UsageCollectionSetup,
+  UsageCounter,
+} from '../../../../src/plugins/usage_collection/server';
 import {
   PluginSetupContract as AlertingSetup,
   PluginStartContract as AlertPluginStartContract,
 } from '../../alerting/server';
+import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 
 import { PluginStartContract as CasesPluginStartContract } from '../../cases/server';
-import {
-  ECS_COMPONENT_TEMPLATE_NAME,
-  TECHNICAL_COMPONENT_TEMPLATE_NAME,
-} from '../../rule_registry/common/assets';
+import { ECS_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
 import { SecurityPluginSetup as SecuritySetup, SecurityPluginStart } from '../../security/server';
 import {
-  RuleDataClient,
+  IRuleDataClient,
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
+  Dataset,
 } from '../../rule_registry/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
@@ -48,28 +48,32 @@ import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { ILicense, LicensingPluginStart } from '../../licensing/server';
 import { FleetStartContract } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { compose } from './lib/compose/kibana';
-import { createQueryAlertType } from './lib/detection_engine/reference_rules/query';
-import { createEqlAlertType } from './lib/detection_engine/reference_rules/eql';
-import { createThresholdAlertType } from './lib/detection_engine/reference_rules/threshold';
+import {
+  createEqlAlertType,
+  createIndicatorMatchAlertType,
+  createMlAlertType,
+  createQueryAlertType,
+  createThresholdAlertType,
+} from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
-import { rulesNotificationAlertType } from './lib/detection_engine/notifications/rules_notification_alert_type';
-import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
 import { ManifestTask } from './endpoint/lib/artifacts';
-import { initSavedObjects, savedObjectTypes } from './saved_objects';
+import { CheckMetadataTransformsTask } from './endpoint/lib/metadata';
+import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
 import {
   APP_ID,
   SERVER_APP_ID,
-  SecurityPageName,
   SIGNALS_ID,
-  NOTIFICATIONS_ID,
-  REFERENCE_RULE_ALERT_TYPE_ID,
-  REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID,
+  LEGACY_NOTIFICATIONS_ID,
+  QUERY_RULE_TYPE_ID,
+  DEFAULT_SPACE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  EQL_RULE_TYPE_ID,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
@@ -84,6 +88,7 @@ import type { SecuritySolutionRequestHandlerContext } from './types';
 import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
+import { TelemetryReceiver } from './lib/telemetry/receiver';
 import {
   TelemetryPluginStart,
   TelemetryPluginSetup,
@@ -92,6 +97,18 @@ import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
+import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
+import { alertsFieldMap } from './lib/detection_engine/rule_types/field_maps/alerts';
+import { rulesFieldMap } from './lib/detection_engine/rule_types/field_maps/rules';
+import { RuleExecutionLogClient } from './lib/detection_engine/rule_execution_log/rule_execution_log_client';
+import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
+import { EndpointMetadataService } from './endpoint/services/metadata';
+import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
+import { ctiFieldMap } from './lib/detection_engine/rule_types/field_maps/cti';
+// eslint-disable-next-line no-restricted-imports
+import { legacyRulesNotificationAlertType } from './lib/detection_engine/notifications/legacy_rules_notification_alert_type';
+// eslint-disable-next-line no-restricted-imports
+import { legacyIsNotificationAlertExecutor } from './lib/detection_engine/notifications/legacy_types';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -126,23 +143,6 @@ export interface PluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
 
-const casesSubPlugin = `${APP_ID}:${SecurityPageName.case}`;
-
-/**
- * Don't include cases here so that the sub feature can govern whether Cases is enabled in the navigation
- */
-const securitySubPluginsNoCases = [
-  APP_ID,
-  `${APP_ID}:${SecurityPageName.overview}`,
-  `${APP_ID}:${SecurityPageName.detections}`,
-  `${APP_ID}:${SecurityPageName.hosts}`,
-  `${APP_ID}:${SecurityPageName.network}`,
-  `${APP_ID}:${SecurityPageName.timelines}`,
-  `${APP_ID}:${SecurityPageName.administration}`,
-];
-
-const allSecuritySubPlugins = [...securitySubPluginsNoCases, casesSubPlugin];
-
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
   private readonly config: ConfigType;
@@ -150,6 +150,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private appClientFactory: AppClientFactory;
   private setupPlugins?: SetupPlugins;
   private readonly endpointAppContextService = new EndpointAppContextService();
+  private readonly telemetryReceiver: TelemetryReceiver;
   private readonly telemetryEventsSender: TelemetryEventsSender;
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
@@ -157,7 +158,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private policyWatcher?: PolicyWatcher;
 
   private manifestTask: ManifestTask | undefined;
+  private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private artifactsCache: LRU<string, Buffer>;
+  private telemetryUsageCounter?: UsageCounter;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
@@ -167,6 +170,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // Cache up to three artifacts with a max retention of 5 mins each
     this.artifactsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
+    this.telemetryReceiver = new TelemetryReceiver(this.logger);
 
     this.logger.debug('plugin initialized');
   }
@@ -190,18 +194,25 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     initUsageCollectors({
       core,
-      endpointAppContext: endpointContext,
       kibanaIndex: globalConfig.kibana.index,
       signalsIndex: config.signalsIndex,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
     });
 
+    this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
+
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
     core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
       APP_ID,
       (context, request, response) => ({
         getAppClient: () => this.appClientFactory.create(request),
+        getSpaceId: () => plugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID,
+        getExecutionLogClient: () =>
+          new RuleExecutionLogClient({
+            ruleDataService: plugins.ruleRegistry.ruleDataService,
+            savedObjectsClient: context.core.savedObjects.client,
+          }),
       })
     );
 
@@ -213,76 +224,68 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // TODO: Once we are past experimental phase this check can be removed along with legacy registration of rules
     const isRuleRegistryEnabled = experimentalFeatures.ruleRegistryEnabled;
 
-    let ruleDataClient: RuleDataClient | null = null;
+    const { ruleDataService } = plugins.ruleRegistry;
+    let ruleDataClient: IRuleDataClient | null = null;
+
     if (isRuleRegistryEnabled) {
-      const { ruleDataService } = plugins.ruleRegistry;
-      const start = () => core.getStartServices().then(([coreStart]) => coreStart);
+      // NOTE: this is not used yet
+      // TODO: convert the aliases to FieldMaps. Requires enhancing FieldMap to support alias path.
+      // Split aliases by component template since we need to alias some fields in technical field mappings,
+      // some fields in security solution specific component template.
+      const aliases: Record<string, estypes.MappingProperty> = {};
+      Object.entries(aadFieldConversion).forEach(([key, value]) => {
+        aliases[key] = {
+          type: 'alias',
+          path: value,
+        };
+      });
 
-      const ready = once(async () => {
-        const componentTemplateName = ruleDataService.getFullAssetName(
-          'security-solution-mappings'
-        );
-
-        if (!ruleDataService.isWriteEnabled()) {
-          return;
-        }
-
-        await ruleDataService.createOrUpdateComponentTemplate({
-          name: componentTemplateName,
-          body: {
-            template: {
-              settings: {
-                number_of_shards: 1,
-              },
-              mappings: {}, // TODO: Add mappings here via `mappingFromFieldMap()`
-            },
+      ruleDataClient = ruleDataService.initializeIndex({
+        feature: SERVER_APP_ID,
+        registrationContext: 'security',
+        dataset: Dataset.alerts,
+        componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
+        componentTemplates: [
+          {
+            name: 'mappings',
+            mappings: mappingFromFieldMap(
+              { ...alertsFieldMap, ...rulesFieldMap, ...ctiFieldMap },
+              false
+            ),
           },
-        });
-
-        await ruleDataService.createOrUpdateIndexTemplate({
-          name: ruleDataService.getFullAssetName('security-solution-index-template'),
-          body: {
-            index_patterns: [ruleDataService.getFullAssetName('security-solution*')],
-            composed_of: [
-              ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
-              ruleDataService.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
-              componentTemplateName,
-            ],
-          },
-        });
+        ],
+        secondaryAlias: config.signalsIndex,
       });
 
-      ready().catch((err) => {
-        this.logger!.error(err);
-      });
+      // Register rule types via rule-registry
+      const createRuleOptions: CreateRuleOptions = {
+        experimentalFeatures,
+        lists: plugins.lists,
+        logger: this.logger,
+        mergeStrategy: this.config.alertMergeStrategy,
+        ignoreFields: this.config.alertIgnoreFields,
+        ml: plugins.ml,
+        ruleDataClient,
+        ruleDataService,
+        version: this.context.env.packageInfo.version,
+      };
 
-      ruleDataClient = new RuleDataClient({
-        alias: plugins.ruleRegistry.ruleDataService.getFullAssetName('security-solution'),
-        getClusterClient: async () => {
-          const coreStart = await start();
-          return coreStart.elasticsearch.client.asInternalUser;
-        },
-        ready,
-      });
-
-      // sec
-
-      // Register reference rule types via rule-registry
-      this.setupPlugins.alerting.registerType(createQueryAlertType(ruleDataClient, this.logger));
-      this.setupPlugins.alerting.registerType(createEqlAlertType(ruleDataClient, this.logger));
-      this.setupPlugins.alerting.registerType(
-        createThresholdAlertType(ruleDataClient, this.logger)
-      );
+      this.setupPlugins.alerting.registerType(createEqlAlertType(createRuleOptions));
+      this.setupPlugins.alerting.registerType(createIndicatorMatchAlertType(createRuleOptions));
+      this.setupPlugins.alerting.registerType(createMlAlertType(createRuleOptions));
+      this.setupPlugins.alerting.registerType(createQueryAlertType(createRuleOptions));
+      this.setupPlugins.alerting.registerType(createThresholdAlertType(createRuleOptions));
     }
 
-    // TO DO We need to get the endpoint routes inside of initRoutes
+    // TODO We need to get the endpoint routes inside of initRoutes
     initRoutes(
       router,
       config,
       plugins.encryptedSavedObjects?.canEncrypt === true,
       plugins.security,
       plugins.ml,
-      ruleDataClient
+      ruleDataService,
+      isRuleRegistryEnabled
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
@@ -291,121 +294,20 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerTrustedAppsRoutes(router, endpointContext);
     registerActionRoutes(router, endpointContext);
 
-    const referenceRuleTypes = [
-      REFERENCE_RULE_ALERT_TYPE_ID,
-      REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID,
+    const racRuleTypes = [
+      EQL_RULE_TYPE_ID,
+      QUERY_RULE_TYPE_ID,
+      INDICATOR_RULE_TYPE_ID,
+      ML_RULE_TYPE_ID,
     ];
     const ruleTypes = [
       SIGNALS_ID,
-      NOTIFICATIONS_ID,
-      ...(isRuleRegistryEnabled ? referenceRuleTypes : []),
+      LEGACY_NOTIFICATIONS_ID,
+      ...(isRuleRegistryEnabled ? racRuleTypes : []),
     ];
 
-    plugins.features.registerKibanaFeature({
-      id: SERVER_APP_ID,
-      name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionTitle', {
-        defaultMessage: 'Security',
-      }),
-      order: 1100,
-      category: DEFAULT_APP_CATEGORIES.security,
-      app: [...allSecuritySubPlugins, 'kibana'],
-      catalogue: ['securitySolution'],
-      management: {
-        insightsAndAlerting: ['triggersActions'],
-      },
-      alerting: ruleTypes,
-      cases: [APP_ID],
-      subFeatures: [
-        {
-          name: 'Cases',
-          privilegeGroups: [
-            {
-              groupType: 'mutually_exclusive',
-              privileges: [
-                {
-                  // if the user is granted access to the cases feature than the global nav will show the cases
-                  // sub plugin within the security solution navigation
-                  app: [casesSubPlugin],
-                  id: 'cases_all',
-                  includeIn: 'all',
-                  name: 'All',
-                  savedObject: {
-                    all: [],
-                    read: [],
-                  },
-                  // using variables with underscores here otherwise when we retrieve them from the kibana
-                  // capabilities in a hook I get type errors regarding boolean | ReadOnly<{[x: string]: boolean}>
-                  ui: ['crud_cases', 'read_cases'], // uiCapabilities.siem.crud_cases
-                  cases: {
-                    all: [APP_ID],
-                  },
-                },
-                {
-                  app: [casesSubPlugin],
-                  id: 'cases_read',
-                  includeIn: 'read',
-                  name: 'Read',
-                  savedObject: {
-                    all: [],
-                    read: [],
-                  },
-                  // using variables with underscores here otherwise when we retrieve them from the kibana
-                  // capabilities in a hook I get type errors regarding boolean | ReadOnly<{[x: string]: boolean}>
-                  ui: ['read_cases'], // uiCapabilities.siem.read_cases
-                  cases: {
-                    read: [APP_ID],
-                  },
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      privileges: {
-        all: {
-          app: [...securitySubPluginsNoCases, 'kibana'],
-          catalogue: ['securitySolution'],
-          api: ['securitySolution', 'lists-all', 'lists-read'],
-          savedObject: {
-            all: ['alert', 'exception-list', 'exception-list-agnostic', ...savedObjectTypes],
-            read: [],
-          },
-          alerting: {
-            rule: {
-              all: ruleTypes,
-            },
-            alert: {
-              all: ruleTypes,
-            },
-          },
-          management: {
-            insightsAndAlerting: ['triggersActions'],
-          },
-          ui: ['show', 'crud'],
-        },
-        read: {
-          app: [...securitySubPluginsNoCases, 'kibana'],
-          catalogue: ['securitySolution'],
-          api: ['securitySolution', 'lists-read'],
-          savedObject: {
-            all: [],
-            read: ['exception-list', 'exception-list-agnostic', ...savedObjectTypes],
-          },
-          alerting: {
-            rule: {
-              read: ruleTypes,
-            },
-            alert: {
-              read: ruleTypes,
-            },
-          },
-          management: {
-            insightsAndAlerting: ['triggersActions'],
-          },
-          ui: ['show'],
-        },
-      },
-    });
+    plugins.features.registerKibanaFeature(getKibanaPrivilegesFeaturePrivileges(ruleTypes));
+    plugins.features.registerKibanaFeature(getCasesKibanaFeature());
 
     // Continue to register legacy rules against alerting client exposed through rule-registry
     if (this.setupPlugins.alerting != null) {
@@ -415,8 +317,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         version: this.context.env.packageInfo.version,
         ml: plugins.ml,
         lists: plugins.lists,
+        mergeStrategy: this.config.alertMergeStrategy,
+        ignoreFields: this.config.alertIgnoreFields,
+        experimentalFeatures,
+        ruleDataService: plugins.ruleRegistry.ruleDataService,
       });
-      const ruleNotificationType = rulesNotificationAlertType({
+      const ruleNotificationType = legacyRulesNotificationAlertType({
         logger: this.logger,
       });
 
@@ -424,7 +330,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         this.setupPlugins.alerting.registerType(signalRuleType);
       }
 
-      if (isNotificationAlertExecutor(ruleNotificationType)) {
+      if (legacyIsNotificationAlertExecutor(ruleNotificationType)) {
         this.setupPlugins.alerting.registerType(ruleNotificationType);
       }
     }
@@ -441,8 +347,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
-    compose(core, plugins, endpointContext);
-
     core.getStartServices().then(([_, depsStart]) => {
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
         depsStart.data,
@@ -454,7 +358,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     });
 
-    this.telemetryEventsSender.setup(plugins.telemetry, plugins.taskManager);
+    this.telemetryEventsSender.setup(
+      this.telemetryReceiver,
+      plugins.telemetry,
+      plugins.taskManager,
+      this.telemetryUsageCounter
+    );
+
+    this.checkMetadataTransformsTask = new CheckMetadataTransformsTask({
+      endpointAppContext: endpointContext,
+      core,
+      taskManager: plugins.taskManager!,
+    });
 
     return {};
   }
@@ -496,7 +411,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               taskManager,
             });
           } else {
-            logger.debug('User artifacts task not available.');
+            logger.error(new Error('User artifacts task not available.'));
           }
         });
       });
@@ -512,11 +427,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.policyWatcher.start(licenseService);
     }
 
+    const exceptionListClient = this.lists!.getExceptionListClient(savedObjectsClient, 'kibana');
+
     this.endpointAppContextService.start({
       agentService: plugins.fleet?.agentService,
       packageService: plugins.fleet?.packageService,
       packagePolicyService: plugins.fleet?.packagePolicyService,
       agentPolicyService: plugins.fleet?.agentPolicyService,
+      endpointMetadataService: new EndpointMetadataService(
+        core.savedObjects,
+        plugins.fleet?.agentService!,
+        plugins.fleet?.agentPolicyService!,
+        logger
+      ),
       appClientFactory: this.appClientFactory,
       security: plugins.security,
       alerting: plugins.alerting,
@@ -525,12 +448,22 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       logger,
       manifestManager,
       registerIngestCallback,
-      savedObjectsStart: core.savedObjects,
       licenseService,
-      exceptionListsClient: this.lists!.getExceptionListClient(savedObjectsClient, 'kibana'),
+      exceptionListsClient: exceptionListClient,
     });
 
-    this.telemetryEventsSender.start(core, plugins.telemetry, plugins.taskManager);
+    this.telemetryReceiver.start(core, this.endpointAppContextService, exceptionListClient);
+
+    this.telemetryEventsSender.start(
+      plugins.telemetry,
+      plugins.taskManager,
+      this.telemetryReceiver
+    );
+
+    this.checkMetadataTransformsTask?.start({
+      taskManager: plugins.taskManager!,
+    });
+
     return {};
   }
 

@@ -32,7 +32,6 @@ jest.mock('../../../containers/details/index', () => ({
   useTimelineEventsDetails: jest.fn(),
 }));
 jest.mock('../body/events/index', () => ({
-  // eslint-disable-next-line react/display-name
   Events: () => <></>,
 }));
 
@@ -60,6 +59,7 @@ jest.mock('../../../../common/lib/kibana', () => {
         },
         timelines: {
           getLastUpdated: jest.fn(),
+          getFieldBrowser: jest.fn(),
           getUseDraggableKeyboardWrapper: () => mockUseDraggableKeyboardWrapper,
         },
       },

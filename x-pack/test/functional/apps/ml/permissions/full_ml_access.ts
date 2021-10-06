@@ -93,8 +93,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       const ecIndexPattern = 'ft_module_sample_ecommerce';
       const ecExpectedTotalCount = '287';
-      // @TODO: Re-enable in follow up
-      // const ecExpectedModuleId = 'sample_data_ecommerce';
 
       const uploadFilePath = path.join(
         __dirname,
@@ -365,11 +363,9 @@ export default function ({ getService }: FtrProviderContext) {
             }
             await ml.dataVisualizerIndexBased.assertViewInDiscoverCard(testUser.discoverAvailable);
 
-            // @TODO: Re-enable in follow up
-            // await ml.testExecution.logTestStep('should display job cards');
-            // await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardExists();
-            // await ml.dataVisualizerIndexBased.assertRecognizerCardExists(ecExpectedModuleId);
-            // await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardExists();
+            await ml.testExecution.logTestStep('should display job cards');
+            await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardExists();
+            await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardExists();
           });
 
           it('should display elements on File Data Visualizer page correctly', async () => {

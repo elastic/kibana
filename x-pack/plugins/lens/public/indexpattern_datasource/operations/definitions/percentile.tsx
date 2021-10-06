@@ -220,7 +220,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     signature: i18n.translate('xpack.lens.indexPattern.percentile.signature', {
       defaultMessage: 'field: string, [percentile]: number',
     }),
-    description: i18n.translate('xpack.lens.indexPattern.percentile.documentation', {
+    description: i18n.translate('xpack.lens.indexPattern.percentile.documentation.markdown', {
       defaultMessage: `
 Returns the specified percentile of the values of a field. This is the value n percent of the values occuring in documents are smaller.
 

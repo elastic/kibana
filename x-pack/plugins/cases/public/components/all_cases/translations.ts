@@ -90,10 +90,15 @@ export const REFRESH = i18n.translate('xpack.cases.caseTable.refreshTitle', {
   defaultMessage: 'Refresh',
 });
 
-export const SERVICENOW_LINK_ARIA = i18n.translate('xpack.cases.caseTable.serviceNowLinkAria', {
-  defaultMessage: 'click to view the incident on servicenow',
-});
-
+export const PUSH_LINK_ARIA = (thirdPartyName: string): string =>
+  i18n.translate('xpack.cases.caseTable.pushLinkAria', {
+    values: { thirdPartyName },
+    defaultMessage: 'click to view the incident on { thirdPartyName }.',
+  });
 export const STATUS = i18n.translate('xpack.cases.caseTable.status', {
   defaultMessage: 'Status',
+});
+
+export const CHANGE_STATUS = i18n.translate('xpack.cases.caseTable.changeStatus', {
+  defaultMessage: 'Change status',
 });

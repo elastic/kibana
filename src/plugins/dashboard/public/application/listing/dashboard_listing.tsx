@@ -7,11 +7,15 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiLink, EuiButton, EuiEmptyPrompt, EuiBasicTableColumn } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
-import { getDashboardBreadcrumb, dashboardListingTable } from '../../dashboard_strings';
+import {
+  getDashboardBreadcrumb,
+  dashboardListingTable,
+  noItemsStrings,
+} from '../../dashboard_strings';
 import { ApplicationStart, SavedObjectsFindOptionsReference } from '../../../../../core/public';
 import { syncQueryStateWithUrl } from '../../services/data';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
@@ -83,12 +87,7 @@ export const DashboardListing = ({
     };
   }, [title, savedObjectsClient, redirectTo, data.query, kbnUrlStateStorage]);
 
-  // clear dangling session because they are not required here
-  useEffect(() => {
-    data.search.session.clear();
-  }, [data.search.session]);
-
-  const hideWriteControls = dashboardCapabilities.hideWriteControls;
+  const { showWriteControls } = dashboardCapabilities;
   const listingLimit = savedObjects.settings.getListingLimit();
   const defaultFilter = title ? `"${title}"` : '';
 
@@ -119,8 +118,8 @@ export const DashboardListing = ({
   }, [dashboardSessionStorage, redirectTo, core.overlays]);
 
   const emptyPrompt = useMemo(
-    () => getNoItemsMessage(hideWriteControls, core.application, createItem),
-    [createItem, core.application, hideWriteControls]
+    () => getNoItemsMessage(showWriteControls, core.application, createItem),
+    [createItem, core.application, showWriteControls]
   );
 
   const fetchItems = useCallback(
@@ -164,18 +163,14 @@ export const DashboardListing = ({
       : [];
   }, [savedObjectsTagging]);
 
-  const {
-    getEntityName,
-    getTableCaption,
-    getTableListTitle,
-    getEntityNamePlural,
-  } = dashboardListingTable;
+  const { getEntityName, getTableCaption, getTableListTitle, getEntityNamePlural } =
+    dashboardListingTable;
   return (
     <TableListView
-      createItem={hideWriteControls ? undefined : createItem}
-      deleteItems={hideWriteControls ? undefined : deleteItems}
+      createItem={!showWriteControls ? undefined : createItem}
+      deleteItems={!showWriteControls ? undefined : deleteItems}
       initialPageSize={savedObjects.settings.getPerPage()}
-      editItem={hideWriteControls ? undefined : editItem}
+      editItem={!showWriteControls ? undefined : editItem}
       initialFilter={initialFilter ?? defaultFilter}
       toastNotifications={core.notifications.toasts}
       headingId="dashboardListingHeading"
@@ -236,26 +231,20 @@ const getTableColumns = (
       sortable: true,
     },
     ...(savedObjectsTagging ? [savedObjectsTagging.ui.getTableColumnDefinition()] : []),
-  ];
+  ] as unknown as Array<EuiBasicTableColumn<Record<string, unknown>>>;
 };
 
 const getNoItemsMessage = (
-  hideWriteControls: boolean,
+  showWriteControls: boolean,
   application: ApplicationStart,
   createItem: () => void
 ) => {
-  if (hideWriteControls) {
+  if (!showWriteControls) {
     return (
       <EuiEmptyPrompt
-        iconType="dashboardApp"
-        title={
-          <h1 id="dashboardListingHeading">
-            <FormattedMessage
-              id="dashboard.listing.noItemsMessage"
-              defaultMessage="Looks like you don't have any dashboards."
-            />
-          </h1>
-        }
+        iconType="glasses"
+        title={<h1 id="dashboardListingHeading">{noItemsStrings.getReadonlyTitle()}</h1>}
+        body={<p>{noItemsStrings.getReadonlyBody()}</p>}
       />
     );
   }
@@ -263,22 +252,10 @@ const getNoItemsMessage = (
   return (
     <EuiEmptyPrompt
       iconType="dashboardApp"
-      title={
-        <h1 id="dashboardListingHeading">
-          <FormattedMessage
-            id="dashboard.listing.createNewDashboard.title"
-            defaultMessage="Create your first dashboard"
-          />
-        </h1>
-      }
+      title={<h1 id="dashboardListingHeading">{noItemsStrings.getReadEditTitle()}</h1>}
       body={
-        <Fragment>
-          <p>
-            <FormattedMessage
-              id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
-              defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-            />
-          </p>
+        <>
+          <p>{noItemsStrings.getReadEditDashboardDescription()}</p>
           <p>
             <FormattedMessage
               id="dashboard.listing.createNewDashboard.newToKibanaDescription"
@@ -292,16 +269,13 @@ const getNoItemsMessage = (
                       })
                     }
                   >
-                    <FormattedMessage
-                      id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
-                      defaultMessage="Install some sample data"
-                    />
+                    {noItemsStrings.getSampleDataLinkText()}
                   </EuiLink>
                 ),
               }}
             />
           </p>
-        </Fragment>
+        </>
       }
       actions={
         <EuiButton
@@ -310,10 +284,7 @@ const getNoItemsMessage = (
           iconType="plusInCircle"
           data-test-subj="createDashboardPromptButton"
         >
-          <FormattedMessage
-            id="dashboard.listing.createNewDashboard.createButtonLabel"
-            defaultMessage="Create new dashboard"
-          />
+          {noItemsStrings.getCreateNewDashboardText()}
         </EuiButton>
       }
     />

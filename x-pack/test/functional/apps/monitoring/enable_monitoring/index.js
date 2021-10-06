@@ -55,6 +55,7 @@ export default function ({ getService, getPageObjects }) {
       await retry.tryForTime(20000, async () => {
         // Click the refresh button
         await testSubjects.click('querySubmitButton');
+        await clusterOverview.closeAlertsModal();
         expect(await clusterOverview.isOnClusterOverview()).to.be(true);
       });
     });

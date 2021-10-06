@@ -10,10 +10,13 @@ export { CasesClient } from './client';
 import { ConfigType, ConfigSchema } from './config';
 import { CasePlugin } from './plugin';
 
-export { CaseRequestContext } from './types';
 export const config: PluginConfigDescriptor<ConfigType> = {
   schema: ConfigSchema,
-  deprecations: ({ renameFromRoot }) => [
+  exposeToBrowser: {
+    markdownPlugins: true,
+  },
+  deprecations: ({ deprecate, renameFromRoot }) => [
+    deprecate('enabled', '8.0.0'),
     renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled'),
   ],
 };

@@ -30,6 +30,7 @@ describe('UserFlyout', () => {
     isNew: true,
     isComplete: false,
     disabled: false,
+    formLoading: false,
     closeUserFlyout,
     handleSaveUser,
   };

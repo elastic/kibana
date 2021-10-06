@@ -76,9 +76,6 @@ const strings = {
     }),
 };
 
-import './edit_var.scss';
-import './var_panel.scss';
-
 interface Props {
   selectedVar: CanvasVariable | null;
   variables: CanvasVariable[];

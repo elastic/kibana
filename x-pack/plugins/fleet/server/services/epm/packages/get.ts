@@ -114,9 +114,17 @@ export async function getPackageInfo(options: {
     Registry.fetchFindLatestPackage(pkgName),
   ]);
 
+  // If no package version is provided, use the installed version in the response
+  let responsePkgVersion = pkgVersion || savedObject?.attributes.install_version;
+
+  // If no installed version of the given package exists, default to the latest version of the package
+  if (!responsePkgVersion) {
+    responsePkgVersion = latestPackage.version;
+  }
+
   const getPackageRes = await getPackageFromSource({
     pkgName,
-    pkgVersion,
+    pkgVersion: responsePkgVersion,
     savedObjectsClient,
     installedPkg: savedObject?.attributes,
   });
@@ -129,6 +137,7 @@ export async function getPackageInfo(options: {
     assets: Registry.groupPathsByService(paths || []),
     removable: !isUnremovablePackage(pkgName),
     notice: Registry.getNoticePath(paths || []),
+    keepPoliciesUpToDate: savedObject?.attributes.keep_policies_up_to_date ?? false,
   };
   const updated = { ...packageInfo, ...additions };
 
@@ -209,7 +218,10 @@ export async function getPackageFromSource(options: {
         installedPkg.package_assets,
         savedObjectsClient
       );
-      logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from ES`);
+
+      if (res) {
+        logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from ES`);
+      }
     }
     // for packages not in cache or package storage and installed from registry, check registry
     if (!res && pkgInstallSource === 'registry') {

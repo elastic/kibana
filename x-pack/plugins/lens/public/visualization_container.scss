@@ -1,6 +1,7 @@
 .lnsVisualizationContainer {
   @include euiScrollBar;
   overflow: auto;
+  user-select: text;
 }
 
 .lnsExpressionRenderer {

@@ -166,7 +166,7 @@ class KeyedTimeslider extends Component<Props, State> {
 
   render() {
     return (
-      <div className="mapTimeslider">
+      <div className="mapTimeslider mapTimeslider--animation">
         <div className="mapTimeslider__row">
           <EuiButtonIcon
             onClick={this.props.closeTimeslider}
@@ -186,24 +186,18 @@ class KeyedTimeslider extends Component<Props, State> {
             <div className="mapTimeslider__controls">
               <EuiButtonIcon
                 onClick={this._onPrevious}
-                iconType="arrowLeft"
+                iconType="framePrevious"
                 color="text"
                 aria-label={i18n.translate('xpack.maps.timeslider.previousTimeWindowLabel', {
                   defaultMessage: 'Previous time window',
                 })}
               />
               <EuiButtonIcon
-                onClick={this._onNext}
-                iconType="arrowRight"
-                color="text"
-                aria-label={i18n.translate('xpack.maps.timeslider.nextTimeWindowLabel', {
-                  defaultMessage: 'Next time window',
-                })}
-              />
-              <EuiButtonIcon
+                className="mapTimeslider__playButton"
                 onClick={this.state.isPaused ? this._onPlay : this._onPause}
-                iconType={this.state.isPaused ? 'play' : 'pause'}
-                color="text"
+                iconType={this.state.isPaused ? 'playFilled' : 'pause'}
+                size="s"
+                display="fill"
                 aria-label={
                   this.state.isPaused
                     ? i18n.translate('xpack.maps.timeslider.playLabel', {
@@ -213,6 +207,14 @@ class KeyedTimeslider extends Component<Props, State> {
                         defaultMessage: 'Pause',
                       })
                 }
+              />
+              <EuiButtonIcon
+                onClick={this._onNext}
+                iconType="frameNext"
+                color="text"
+                aria-label={i18n.translate('xpack.maps.timeslider.nextTimeWindowLabel', {
+                  defaultMessage: 'Next time window',
+                })}
               />
             </div>
           </div>
@@ -228,6 +230,7 @@ class KeyedTimeslider extends Component<Props, State> {
             max={this.state.max}
             step={1}
             ticks={this.state.ticks}
+            isDraggable
           />
         </div>
       </div>

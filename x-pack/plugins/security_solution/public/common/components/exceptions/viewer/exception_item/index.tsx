@@ -84,7 +84,7 @@ const ExceptionItemComponent = ({
   }, [loadingItemIds, exceptionItem.id]);
 
   return (
-    <EuiPanel paddingSize="none" data-test-subj={dataTestSubj}>
+    <EuiPanel paddingSize="none" data-test-subj={dataTestSubj} hasBorder hasShadow={false}>
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           <EuiFlexGroup direction="row">

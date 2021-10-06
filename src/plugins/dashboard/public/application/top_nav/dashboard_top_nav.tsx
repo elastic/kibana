@@ -64,11 +64,7 @@ export interface DashboardTopNavState {
 
 type CompleteDashboardAppState = Required<
   DashboardAppState,
-  | 'getLatestDashboardState'
-  | 'dashboardContainer'
-  | 'savedDashboard'
-  | 'indexPatterns'
-  | 'applyFilters'
+  'getLatestDashboardState' | 'dashboardContainer' | 'savedDashboard' | 'applyFilters'
 >;
 
 export const isCompleteDashboardAppState = (
@@ -78,7 +74,6 @@ export const isCompleteDashboardAppState = (
     Boolean(state.getLatestDashboardState) &&
     Boolean(state.dashboardContainer) &&
     Boolean(state.savedDashboard) &&
-    Boolean(state.indexPatterns) &&
     Boolean(state.applyFilters)
   );
 };
@@ -204,10 +199,11 @@ export function DashboardTopNav({
         path,
         state: {
           originatingApp: DashboardConstants.DASHBOARDS_ID,
+          searchSessionId: data.search.session.getSessionId(),
         },
       });
     },
-    [trackUiMetric, stateTransferService]
+    [stateTransferService, data.search.session, trackUiMetric]
   );
 
   const clearAddPanel = useCallback(() => {
@@ -408,6 +404,7 @@ export function DashboardTopNav({
     (anchorElement: HTMLElement) => {
       if (!share) return;
       const currentState = dashboardAppState.getLatestDashboardState();
+      const timeRange = timefilter.getTime();
       ShowShareModal({
         share,
         kibanaVersion,
@@ -416,9 +413,10 @@ export function DashboardTopNav({
         currentDashboardState: currentState,
         savedDashboard: dashboardAppState.savedDashboard,
         isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
+        timeRange,
       });
     },
-    [dashboardAppState, dashboardCapabilities, share, kibanaVersion]
+    [dashboardAppState, dashboardCapabilities, share, kibanaVersion, timefilter]
   );
 
   const dashboardTopNavActions = useMemo(() => {
@@ -482,7 +480,7 @@ export function DashboardTopNav({
       dashboardAppState.getLatestDashboardState().viewMode,
       dashboardTopNavActions,
       {
-        hideWriteControls: dashboardCapabilities.hideWriteControls,
+        showWriteControls: dashboardCapabilities.showWriteControls,
         isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
         isSaveInProgress: state.isSaveInProgress,
         isNewDashboard: !savedDashboard.id,

@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { PluginInitializerContext } from 'src/core/public';
+
 export { CSV_QUOTE_VALUES_SETTING, CSV_SEPARATOR_SETTING } from '../common/constants';
 
 export { LocatorDefinition, LocatorPublic, KibanaLocation } from '../common/url_service';
@@ -30,6 +32,7 @@ export {
   UrlGeneratorsService,
 } from './url_generators';
 
+export { RedirectOptions } from '../common/url_service';
 export { useLocatorUrl } from '../common/url_service/locators/use_locator_url';
 
 import { SharePlugin } from './plugin';
@@ -38,4 +41,6 @@ export { KibanaURL } from './kibana_url';
 export { downloadMultipleAs, downloadFileAs } from './lib/download_as';
 export type { DownloadableContent } from './lib/download_as';
 
-export const plugin = () => new SharePlugin();
+export function plugin(ctx: PluginInitializerContext) {
+  return new SharePlugin(ctx);
+}

@@ -25,7 +25,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
     config: {
       apiUrl: 'http://swimlane.mynonexistent.com',
       appId: '123456asdf',
-      connectorType: 'all',
+      connectorType: 'all' as const,
       mappings: {
         alertIdConfig: {
           id: 'ednjls',
@@ -181,6 +181,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             name: 'A swimlane action',
             connector_type_id: '.swimlane',
             config: {
+              connectorType: 'all' as const,
               appId: mockSwimlane.config.appId,
               mappings: mockSwimlane.config.mappings,
             },
@@ -205,6 +206,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             name: 'A swimlane action',
             connector_type_id: '.swimlane',
             config: {
+              connectorType: 'all' as const,
               mappings: mockSwimlane.config.mappings,
               apiUrl: swimlaneSimulatorURL,
             },
@@ -261,6 +263,31 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message: `error validating action type config: error configuring connector action: target url "${mockSwimlane.config.apiUrl}" is not added to the Kibana config xpack.actions.allowedHosts`,
+            });
+          });
+      });
+
+      it('should respond with a 400 Bad Request if connectorType is not supported', async () => {
+        await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A swimlane action',
+            connector_type_id: '.swimlane',
+            config: {
+              ...mockSwimlane.config,
+              apiUrl: swimlaneSimulatorURL,
+              connectorType: 'not-supported',
+            },
+            secrets: mockSwimlane.secrets,
+          })
+          .expect(400)
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'error validating action type config: [connectorType]: types that failed validation:\n- [connectorType.0]: expected value to equal [all]\n- [connectorType.1]: expected value to equal [alerts]\n- [connectorType.2]: expected value to equal [cases]',
             });
           });
       });

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
+import { estypes } from '@elastic/elasticsearch';
 import { createQuery } from './create_query';
 import { mapToList } from './get_high_level_stats';
 import { incrementByKey } from './get_high_level_stats';
@@ -115,18 +115,18 @@ export interface LogstashProcessOptions {
  * @param {Object} plugins - plugin information keyed by cluster UUIDs to count the unique plugins
  */
 export function processStatsResults(
-  results: SearchResponse<LogstashStats>,
+  results: estypes.SearchResponse<LogstashStats>,
   { clusters, allEphemeralIds, versions, plugins }: LogstashProcessOptions
 ) {
   const currHits = results?.hits?.hits || [];
   currHits.forEach((hit) => {
-    const clusterUuid = hit._source.cluster_uuid;
+    const clusterUuid = hit._source!.cluster_uuid;
     if (clusters[clusterUuid] === undefined) {
       clusters[clusterUuid] = getLogstashBaseStats();
       versions[clusterUuid] = new Map();
       plugins[clusterUuid] = new Map();
     }
-    const logstashStats = hit._source.logstash_stats;
+    const logstashStats = hit._source?.logstash_stats;
     const clusterStats = clusters[clusterUuid].cluster_stats;
 
     if (clusterStats !== undefined && logstashStats !== undefined) {
@@ -138,7 +138,7 @@ export function processStatsResults(
       clusters[clusterUuid].versions = mapToList(a, 'version');
 
       // Internal Collection has no agent field, so default to 'internal_collection'
-      let thisCollectionType = hit._source.agent?.type;
+      let thisCollectionType = hit._source?.agent?.type;
       if (thisCollectionType === undefined) {
         thisCollectionType = 'internal_collection';
       }
@@ -175,7 +175,7 @@ export function processStatsResults(
  * @param {Object} plugins - plugin information keyed by cluster UUIDs to count the unique plugins
  */
 export function processLogstashStateResults(
-  results: SearchResponse<LogstashState>,
+  results: estypes.SearchResponse<LogstashState>,
   clusterUuid: string,
   { clusters, plugins }: LogstashProcessOptions
 ) {
@@ -184,7 +184,7 @@ export function processLogstashStateResults(
   const pipelineStats = clusters[clusterUuid].cluster_stats?.pipelines;
 
   currHits.forEach((hit) => {
-    const thisLogstashStatePipeline = hit._source.logstash_state?.pipeline;
+    const thisLogstashStatePipeline = hit._source?.logstash_state?.pipeline;
 
     if (pipelineStats !== undefined && thisLogstashStatePipeline !== undefined) {
       pipelineStats.count = (pipelineStats.count || 0) + 1;
@@ -261,17 +261,14 @@ export function processLogstashStateResults(
 }
 
 export async function fetchLogstashStats(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   clusterUuids: string[],
   { page = 0, ...options }: { page?: number } & LogstashProcessOptions
 ): Promise<void> {
-  const params = {
-    headers: {
-      'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
-    },
+  const params: estypes.SearchRequest = {
     index: INDEX_PATTERN_LOGSTASH,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._source.cluster_uuid',
       'hits.hits._source.type',
       'hits.hits._source.source_node',
@@ -295,7 +292,7 @@ export async function fetchLogstashStats(
             },
           },
         ],
-      }),
+      }) as estypes.QueryDslQueryContainer,
       from: page * HITS_SIZE,
       collapse: { field: 'logstash_stats.logstash.uuid' },
       sort: [{ ['logstash_stats.timestamp']: { order: 'desc', unmapped_type: 'long' } }],
@@ -303,7 +300,11 @@ export async function fetchLogstashStats(
     },
   };
 
-  const results = await callCluster<SearchResponse<LogstashStats>>('search', params);
+  const { body: results } = await callCluster.search<LogstashStats>(params, {
+    headers: {
+      'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
+    },
+  });
   const hitsLength = results?.hits?.hits.length || 0;
 
   if (hitsLength > 0) {
@@ -325,18 +326,15 @@ export async function fetchLogstashStats(
 }
 
 export async function fetchLogstashState(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   clusterUuid: string,
   ephemeralIds: string[],
   { page = 0, ...options }: { page?: number } & LogstashProcessOptions
 ): Promise<void> {
-  const params = {
-    headers: {
-      'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
-    },
+  const params: estypes.SearchRequest = {
     index: INDEX_PATTERN_LOGSTASH,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._source.logstash_state.pipeline.batch_size',
       'hits.hits._source.logstash_state.pipeline.workers',
       'hits.hits._source.logstash_state.pipeline.representation.graph.vertices.config_name',
@@ -355,7 +353,7 @@ export async function fetchLogstashState(
             },
           },
         ],
-      }),
+      }) as estypes.QueryDslQueryContainer,
       from: page * HITS_SIZE,
       collapse: { field: 'logstash_state.pipeline.ephemeral_id' },
       sort: [{ ['timestamp']: { order: 'desc', unmapped_type: 'long' } }],
@@ -363,7 +361,12 @@ export async function fetchLogstashState(
     },
   };
 
-  const results = await callCluster<SearchResponse<LogstashState>>('search', params);
+  const { body: results } = await callCluster.search<LogstashState>(params, {
+    headers: {
+      'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
+    },
+  });
+
   const hitsLength = results?.hits?.hits.length || 0;
   if (hitsLength > 0) {
     // further augment the clusters object with more stats
@@ -392,7 +395,7 @@ export interface LogstashStatsByClusterUuid {
  * @return {Object} - Logstash stats in an object keyed by the cluster UUIDs
  */
 export async function getLogstashStats(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   clusterUuids: string[]
 ): Promise<LogstashStatsByClusterUuid> {
   const options: LogstashProcessOptions = {

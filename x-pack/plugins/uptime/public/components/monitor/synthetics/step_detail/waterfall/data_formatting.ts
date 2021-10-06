@@ -435,6 +435,7 @@ const buildMimeTypePalette = (): MimeTypeColourPalette => {
       case MimeType.Font:
         acc[value] = SAFE_PALETTE[8];
         break;
+      case MimeType.XHR:
       case MimeType.Other:
         acc[value] = SAFE_PALETTE[9];
         break;

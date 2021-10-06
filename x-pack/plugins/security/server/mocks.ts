@@ -23,10 +23,14 @@ function createSetupMock() {
       actions: mockAuthz.actions,
       checkPrivilegesWithRequest: mockAuthz.checkPrivilegesWithRequest,
       checkPrivilegesDynamicallyWithRequest: mockAuthz.checkPrivilegesDynamicallyWithRequest,
+      checkSavedObjectsPrivilegesWithRequest: mockAuthz.checkSavedObjectsPrivilegesWithRequest,
       mode: mockAuthz.mode,
     },
     registerSpacesService: jest.fn(),
     license: licenseMock.create(),
+    privilegeDeprecationsService: {
+      getKibanaRolesByFeatureId: jest.fn(),
+    },
   };
 }
 
@@ -42,6 +46,7 @@ function createStartMock() {
       actions: mockAuthz.actions,
       checkPrivilegesWithRequest: mockAuthz.checkPrivilegesWithRequest,
       checkPrivilegesDynamicallyWithRequest: mockAuthz.checkPrivilegesDynamicallyWithRequest,
+      checkSavedObjectsPrivilegesWithRequest: mockAuthz.checkSavedObjectsPrivilegesWithRequest,
       mode: mockAuthz.mode,
     },
   };

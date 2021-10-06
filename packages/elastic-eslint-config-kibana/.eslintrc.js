@@ -1,3 +1,5 @@
+const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_files');
+
 module.exports = {
   extends: [
     './javascript.js',
@@ -79,8 +81,18 @@ module.exports = {
           from: 'react-intl',
           to: '@kbn/i18n/react',
           disallowedMessage: `import from @kbn/i18n/react instead`
-        }
+        },
+        {
+          from: 'styled-components',
+          to: false,
+          exclude: USES_STYLED_COMPONENTS,
+          disallowedMessage: `Prefer using @emotion/react instead. To use styled-components, ensure you plugin is enabled in @kbn/dev-utils/src/babel.ts.`
+        },
       ],
     ],
+
+    '@kbn/eslint/no_async_promise_body': 'error',
+    '@kbn/eslint/no_async_foreach': 'error',
+    '@kbn/eslint/no_trailing_import_slash': 'error',
   },
 };

@@ -20,6 +20,9 @@ Run all tests from the `x-pack` root directory
   - Run `node scripts/functional_tests_server`
   - Run `node ../scripts/functional_test_runner.js --config ./test/api_integration/config.ts --grep=Lens`
 
+## Developing tips
+
+Lens state is kept in the Redux Store. To enable redux logger, open Chrome Developer Tools and type in the console: `window.ELASTIC_LENS_LOGGER=true`.
 
 ## UI Terminology
 

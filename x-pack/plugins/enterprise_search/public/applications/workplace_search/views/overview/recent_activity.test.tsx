@@ -30,6 +30,11 @@ const activityFeed = [
     target: 'http://localhost:3002/ws/org/sources',
     timestamp: '2020-06-24 16:34:16',
   },
+  {
+    id: '(foo@example.com)',
+    message: 'joined the organization',
+    timestamp: '2021-07-02 16:38:27',
+  },
 ];
 
 describe('RecentActivity', () => {
@@ -46,13 +51,14 @@ describe('RecentActivity', () => {
   it('renders an activityFeed with links', () => {
     setMockValues({ activityFeed });
     const wrapper = shallow(<RecentActivity />);
-    const activity = wrapper.find(RecentActivityItem).dive();
+    const sourceActivityItem = wrapper.find(RecentActivityItem).first().dive();
+    const newUserActivityItem = wrapper.find(RecentActivityItem).last().dive();
 
-    expect(activity).toHaveLength(1);
-
-    const link = activity.find('[data-test-subj="viewSourceDetailsLink"]');
+    const link = sourceActivityItem.find('[data-test-subj="viewSourceDetailsLink"]');
     link.simulate('click');
     expect(mockTelemetryActions.sendWorkplaceSearchTelemetry).toHaveBeenCalled();
+
+    expect(newUserActivityItem.find('[data-test-subj="newUserTextWrapper"]')).toHaveLength(1);
   });
 
   it('renders activity item error state', () => {

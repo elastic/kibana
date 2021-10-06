@@ -7,9 +7,9 @@
 
 import apm from 'elastic-apm-node';
 import { i18n } from '@kbn/i18n';
+import { getDataPath } from '@kbn/utils';
 import del from 'del';
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
 import puppeteer from 'puppeteer';
 import * as Rx from 'rxjs';
@@ -17,7 +17,6 @@ import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
 import { getChromiumDisconnectedError } from '../';
 import { ReportingCore } from '../../..';
-import { BROWSER_TYPE } from '../../../../common/constants';
 import { durationToNumber } from '../../../../common/schema_utils';
 import { CaptureConfig } from '../../../../server/types';
 import { LevelLogger } from '../../../lib';
@@ -25,6 +24,18 @@ import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
 import { Metrics, getMetrics } from './metrics';
+
+// Puppeteer type definitions do not match the documentation.
+// See https://pptr.dev/#?product=Puppeteer&version=v8.0.0&show=api-puppeteerlaunchoptions
+interface ReportingLaunchOptions extends puppeteer.LaunchOptions {
+  userDataDir?: string;
+  ignoreHTTPSErrors?: boolean;
+  args?: string[];
+}
+
+declare module 'puppeteer' {
+  function launch(options: ReportingLaunchOptions): Promise<puppeteer.Browser>;
+}
 
 type BrowserConfig = CaptureConfig['browser']['chromium'];
 type ViewportConfig = CaptureConfig['viewport'];
@@ -48,7 +59,7 @@ export class HeadlessChromiumDriverFactory {
       logger.warning(`Enabling the Chromium sandbox provides an additional layer of protection.`);
     }
 
-    this.userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
+    this.userDataDir = fs.mkdtempSync(path.join(getDataPath(), 'chromium-'));
     this.getChromiumArgs = (viewport: ViewportConfig) =>
       args({
         userDataDir: this.userDataDir,
@@ -58,7 +69,7 @@ export class HeadlessChromiumDriverFactory {
       });
   }
 
-  type = BROWSER_TYPE;
+  type = 'chromium';
 
   /*
    * Return an observable to objects which will drive screenshot capture for a page
@@ -67,7 +78,8 @@ export class HeadlessChromiumDriverFactory {
     { viewport, browserTimezone }: { viewport: ViewportConfig; browserTimezone?: string },
     pLogger: LevelLogger
   ): Rx.Observable<{ driver: HeadlessChromiumDriver; exit$: Rx.Observable<never> }> {
-    return Rx.Observable.create(async (observer: InnerSubscriber<any, any>) => {
+    // FIXME: 'create' is deprecated
+    return Rx.Observable.create(async (observer: InnerSubscriber<unknown, unknown>) => {
       const logger = pLogger.clone(['browser-driver']);
       logger.info(`Creating browser page driver`);
 
@@ -85,11 +97,12 @@ export class HeadlessChromiumDriverFactory {
           userDataDir: this.userDataDir,
           executablePath: this.binaryPath,
           ignoreHTTPSErrors: true,
+          handleSIGHUP: false,
           args: chromiumArgs,
           env: {
             TZ: browserTimezone,
           },
-        } as puppeteer.LaunchOptions);
+        });
 
         page = await browser.newPage();
         devTools = await page.target().createCDPSession();

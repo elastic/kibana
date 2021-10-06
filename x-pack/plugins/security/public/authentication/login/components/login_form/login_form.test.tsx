@@ -183,7 +183,9 @@ describe('LoginForm', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find(EuiCallOut).props().title).toEqual(`Oops! Error. Try again.`);
+    expect(wrapper.find(EuiCallOut).props().title).toEqual(
+      `We couldn't log you in. Please try again.`
+    );
   });
 
   it('properly redirects after successful login', async () => {

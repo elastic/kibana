@@ -13,7 +13,7 @@ import JSON5 from 'json5';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import type { Root } from '../../../root';
 
-const logFilePath = Path.join(__dirname, 'cleanup_test.log');
+const logFilePath = Path.join(__dirname, 'cleanup.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
 const asyncReadFile = Util.promisify(Fs.readFile);
@@ -44,6 +44,7 @@ function createRoot() {
           {
             name: 'root',
             appenders: ['file'],
+            level: 'debug', // DEBUG logs are required to retrieve the PIT _id from the action response logs
           },
         ],
       },
@@ -98,7 +99,20 @@ describe('migration v2', () => {
     root = createRoot();
 
     esServer = await startES();
-    await root.setup();
+    await root.preboot();
+    const coreSetup = await root.setup();
+
+    coreSetup.savedObjects.registerType({
+      name: 'foo',
+      hidden: false,
+      mappings: {
+        properties: {},
+      },
+      namespaceType: 'agnostic',
+      migrations: {
+        '7.14.0': (doc) => doc,
+      },
+    });
 
     await expect(root.start()).rejects.toThrowErrorMatchingInlineSnapshot(`
       "Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: 1 corrupt saved object documents were found: index-pattern:test_index*
