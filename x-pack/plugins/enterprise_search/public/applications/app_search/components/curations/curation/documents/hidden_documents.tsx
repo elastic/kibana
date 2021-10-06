@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { DataPanel } from '../../../data_panel';
 
 import { SHOW_DOCUMENT_ACTION } from '../../constants';
+import { HIDDEN_DOCUMENTS_TITLE } from '../constants';
 import { CurationLogic } from '../curation_logic';
 import { AddResultButton, CurationResult, convertToResultFormat } from '../results';
 
@@ -29,14 +30,7 @@ export const HiddenDocuments: React.FC = () => {
     <DataPanel
       filled
       iconType="eyeClosed"
-      title={
-        <h2>
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.hiddenDocuments.title',
-            { defaultMessage: 'Hidden documents' }
-          )}
-        </h2>
-      }
+      title={<h2>{HIDDEN_DOCUMENTS_TITLE}</h2>}
       subtitle={i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.curations.hiddenDocuments.description',
         { defaultMessage: 'Hidden documents will not appear in organic results.' }
