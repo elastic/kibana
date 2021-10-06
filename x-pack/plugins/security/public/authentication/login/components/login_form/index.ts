@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export type { LoginFormProps } from './login_form';
 export { LoginForm, MessageType as LoginFormMessageType } from './login_form';
