@@ -30,7 +30,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
   };
 
-  describe('Discover Saved Searches', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/104578
+  describe.skip('Discover Saved Searches', () => {
     before('initialize tests', async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
