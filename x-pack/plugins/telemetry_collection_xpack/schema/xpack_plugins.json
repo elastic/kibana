@@ -163,6 +163,9 @@
             "__es-query": {
               "type": "long"
             },
+            "transform_health": {
+              "type": "long"
+            },
             "apm__error_rate": {
               "type": "long"
             },
@@ -243,6 +246,9 @@
               "type": "long"
             },
             "__es-query": {
+              "type": "long"
+            },
+            "transform_health": {
               "type": "long"
             },
             "apm__error_rate": {
