@@ -31,6 +31,9 @@ export function ContextAppRoute(props: ContextAppProps) {
   const { chrome } = services;
 
   const { indexPatternId, id } = useParams<ContextUrlParams>();
+  /**
+   * Context app state
+   */
 
   useEffect(() => {
     chrome.setBreadcrumbs([

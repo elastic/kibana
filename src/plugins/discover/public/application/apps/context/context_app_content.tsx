@@ -33,7 +33,6 @@ export interface ContextAppContentProps {
   predecessorCount: number;
   successorCount: number;
   rows: EsHitRecordList;
-  sort: [[string, SortDirection]];
   predecessors: EsHitRecordList;
   successors: EsHitRecordList;
   anchorStatus: LoadingStatus;
@@ -65,7 +64,6 @@ export function ContextAppContent({
   predecessorCount,
   successorCount,
   rows,
-  sort,
   predecessors,
   successors,
   anchorStatus,
@@ -134,7 +132,7 @@ export function ContextAppContent({
           onFilter={addFilter}
           onAddColumn={onAddColumn}
           onRemoveColumn={onRemoveColumn}
-          sort={sort}
+          sort={[[indexPattern.timeFieldName!, SortDirection.desc]]}
           useNewFieldsApi={useNewFieldsApi}
           dataTestSubj="contextDocTable"
         />
@@ -149,7 +147,7 @@ export function ContextAppContent({
             expandedDoc={expandedDoc}
             isLoading={isAnchorLoading}
             sampleSize={0}
-            sort={sort}
+            sort={[[indexPattern.timeFieldName!, SortDirection.desc]]}
             isSortEnabled={false}
             showTimeCol={showTimeCol}
             services={services}

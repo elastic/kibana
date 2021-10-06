@@ -86,7 +86,14 @@ export const TableRow = ({
   );
 
   const getContextAppHref = () => {
-    return getContextUrl(row._id, indexPattern.id!, columns, filterManager, addBasePath);
+    return getContextUrl(
+      row._id,
+      indexPattern.id!,
+      columns,
+      filterManager,
+      addBasePath,
+      indexPattern.timeFieldName!
+    );
   };
 
   const getSingleDocHref = () => {

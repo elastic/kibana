@@ -7,7 +7,6 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { fromPairs } from 'lodash';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../../common';
 import { DiscoverServices } from '../../../../build_services';
 import { fetchAnchorProvider } from '../services/anchor';
@@ -69,8 +68,6 @@ export function useContextAppFetch({
   }, []);
 
   const fetchAnchorRow = useCallback(async () => {
-    const { sort } = appState;
-    const [[, sortDir]] = sort;
     const errorTitle = i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
       defaultMessage: 'Unable to load the anchor document',
     });
@@ -93,8 +90,8 @@ export function useContextAppFetch({
     try {
       setState({ anchorStatus: { value: LoadingStatus.LOADING } });
       const anchor = await fetchAnchor(indexPattern, anchorId, [
-        fromPairs(sort),
-        { [tieBreakerField]: sortDir },
+        { [indexPattern.timeFieldName!]: SortDirection.desc },
+        { [tieBreakerField]: SortDirection.desc },
       ]);
       setState({ anchor, anchorStatus: { value: LoadingStatus.LOADED } });
       return anchor;
@@ -105,21 +102,11 @@ export function useContextAppFetch({
         text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
       });
     }
-  }, [
-    appState,
-    tieBreakerField,
-    setState,
-    toastNotifications,
-    fetchAnchor,
-    anchorId,
-    indexPattern,
-  ]);
+  }, [tieBreakerField, setState, toastNotifications, fetchAnchor, anchorId, indexPattern]);
 
   const fetchSurroundingRows = useCallback(
     async (type: SurrDocType, fetchedAnchor?: EsHitRecord) => {
       const filters = filterManager.getFilters();
-      const { sort } = appState;
-      const [[sortField, sortDir]] = sort;
 
       const count =
         type === SurrDocType.PREDECESSORS ? appState.predecessorCount : appState.successorCount;
@@ -135,9 +122,8 @@ export function useContextAppFetch({
           type,
           indexPattern,
           anchor as EsHitRecord,
-          sortField,
           tieBreakerField,
-          sortDir as SortDirection,
+          SortDirection.desc,
           count,
           filters
         );

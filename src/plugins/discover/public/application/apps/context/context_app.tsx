@@ -12,7 +12,7 @@ import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
-import { esFilters, SortDirection } from '../../../../../data/public';
+import { esFilters } from '../../../../../data/public';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 import { ContextErrorMessage } from './components/context_error_message';
 import { IndexPattern, IndexPatternField } from '../../../../../data/common';
@@ -46,6 +46,9 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
    */
   const { appState, setAppState } = useContextAppState({ indexPattern, services });
   const prevAppState = useRef<AppState>();
+  if (!indexPattern.timeFieldName && appState.timefield) {
+    indexPattern.timeFieldName = appState.timefield;
+  }
 
   /**
    * Context fetched state
@@ -163,7 +166,6 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
                 onAddColumn={onAddColumn}
                 onRemoveColumn={onRemoveColumn}
                 onSetColumns={onSetColumns}
-                sort={appState.sort as [[string, SortDirection]]}
                 predecessorCount={appState.predecessorCount}
                 successorCount={appState.successorCount}
                 setAppState={setAppState}

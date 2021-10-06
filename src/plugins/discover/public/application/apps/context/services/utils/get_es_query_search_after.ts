@@ -8,6 +8,7 @@
 
 import { SurrDocType } from '../context';
 import { EsHitRecord, EsHitRecordList } from '../../../../types';
+import { IndexPattern } from '../../../../../../../data_views/common';
 
 export type EsQuerySearchAfter = [string | number, string | number];
 
@@ -20,11 +21,12 @@ export type EsQuerySearchAfter = [string | number, string | number];
 export function getEsQuerySearchAfter(
   type: SurrDocType,
   documents: EsHitRecordList,
-  timeFieldName: string,
+  indexPattern: IndexPattern,
   anchor: EsHitRecord,
   nanoSeconds: string,
   useNewFieldsApi?: boolean
 ): EsQuerySearchAfter {
+  const timeFieldName = indexPattern.timeFieldName!;
   if (documents.length) {
     // already surrounding docs -> first or last record  is used
     const afterTimeRecIdx =

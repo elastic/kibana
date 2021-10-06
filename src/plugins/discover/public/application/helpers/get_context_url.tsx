@@ -20,7 +20,8 @@ export function getContextUrl(
   indexPatternId: string,
   columns: string[],
   filterManager: FilterManager,
-  addBasePath: DiscoverServices['addBasePath']
+  addBasePath: DiscoverServices['addBasePath'],
+  timefield: string
 ) {
   const globalFilters = filterManager.getGlobalFilters();
   const appFilters = filterManager.getAppFilters();
@@ -33,6 +34,7 @@ export function getContextUrl(
       _a: rison.encode({
         columns,
         filters: (appFilters || []).map(esFilters.disableFilter),
+        timefield,
       }),
     }),
     { encode: false, sort: false }

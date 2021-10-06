@@ -34,9 +34,8 @@ function fetchContextProvider(useNewFieldsApi?: boolean) {
    * Fetch successor or predecessor documents of a given anchor document
    *
    * @param {SurrDocType} type - `successors` or `predecessors`
-   * @param {string} indexPatternId
+   * @param {IndexPattern} indexPatternId
    * @param {EsHitRecord} anchor - anchor record
-   * @param {string} timeField - name of the timefield, that's sorted on
    * @param {string} tieBreakerField - name of the tie breaker, the 2nd sort field
    * @param {SortDirection} sortDir - direction of sorting
    * @param {number} size - number of records to retrieve
@@ -47,7 +46,6 @@ function fetchContextProvider(useNewFieldsApi?: boolean) {
     type: SurrDocType,
     indexPattern: IndexPattern,
     anchor: EsHitRecord,
-    timeField: string,
     tieBreakerField: string,
     sortDir: SortDirection,
     size: number,
@@ -57,6 +55,7 @@ function fetchContextProvider(useNewFieldsApi?: boolean) {
       return [];
     }
     const { data } = getServices();
+    const timeField = indexPattern.timeFieldName!;
     const searchSource = data.search.searchSource.createEmpty() as SearchSource;
     updateSearchSource(searchSource, indexPattern, filters, Boolean(useNewFieldsApi));
     const sortDirToApply = type === SurrDocType.SUCCESSORS ? sortDir : reverseSortDir(sortDir);
@@ -78,7 +77,7 @@ function fetchContextProvider(useNewFieldsApi?: boolean) {
       const searchAfter = getEsQuerySearchAfter(
         type,
         documents,
-        timeField,
+        indexPattern,
         anchor,
         nanos,
         useNewFieldsApi
