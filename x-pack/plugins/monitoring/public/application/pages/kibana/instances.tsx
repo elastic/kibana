@@ -19,6 +19,8 @@ import { KibanaInstances } from '../../../components/kibana/instances';
 import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { AlertsByName } from '../../../alerts/types';
+import { fetchAlerts } from '../../../lib/fetch_alerts';
 
 export const KibanaInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const { cluster_uuid: clusterUuid, ccs } = useContext(GlobalStateContext);
@@ -29,6 +31,7 @@ export const KibanaInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
     cluster_uuid: clusterUuid,
   }) as any;
   const [data, setData] = useState({} as any);
+  const [alerts, setAlerts] = useState<AlertsByName>({});
 
   const title = i18n.translate('xpack.monitoring.kibana.instances.routeTitle', {
     defaultMessage: 'Kibana - Instances',
@@ -49,19 +52,34 @@ export const KibanaInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/kibana/instances`;
-    const response = await services.http?.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify({
-        ccs,
-        timeRange: {
-          min: bounds.min.toISOString(),
-          max: bounds.max.toISOString(),
-        },
-      }),
-    });
+    try {
+      if (services.http?.fetch && clusterUuid) {
+        const response = await services.http?.fetch(url, {
+          method: 'POST',
+          body: JSON.stringify({
+            ccs,
+            timeRange: {
+              min: bounds.min.toISOString(),
+              max: bounds.max.toISOString(),
+            },
+          }),
+        });
 
-    setData(response);
-    updateTotalItemCount(response.stats.total);
+        setData(response);
+        updateTotalItemCount(response.stats.total);
+        const alertsResponse = await fetchAlerts({
+          fetch: services.http.fetch,
+          clusterUuid,
+          timeRange: {
+            min: bounds.min.valueOf(),
+            max: bounds.max.valueOf(),
+          },
+        });
+        setAlerts(alertsResponse);
+      }
+    } catch (err) {
+      // TODO: handle errors
+    }
   }, [
     ccs,
     clusterUuid,
@@ -84,7 +102,7 @@ export const KibanaInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
             <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}
               <KibanaInstances
-                alerts={{}}
+                alerts={alerts}
                 instances={data.kibanas}
                 setupMode={setupMode}
                 clusterStatus={data.clusterStatus}

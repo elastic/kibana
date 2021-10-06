@@ -20,6 +20,7 @@ import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 import { fetchClusters } from '../../../lib/fetch_clusters';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
+import { EnableAlertsModal } from '../../../alerts/enable_alerts_modal';
 
 const CODE_PATHS = [CODE_PATH_ALL];
 
@@ -116,6 +117,7 @@ export const ClusterOverview: React.FC<{}> = () => {
           </SetupModeContext.Provider>
         )}
       />
+      <EnableAlertsModal alerts={alerts} />
     </PageTemplate>
   );
 };

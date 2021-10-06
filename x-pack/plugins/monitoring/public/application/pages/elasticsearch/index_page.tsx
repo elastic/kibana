@@ -20,8 +20,10 @@ import { ItemTemplate } from './item_template';
 import { indicesByNodes } from '../../../components/elasticsearch/shard_allocation/transformers/indices_by_nodes';
 // @ts-ignore
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
+import { AlertsByName } from '../../../alerts/types';
+import { fetchAlerts } from '../../../lib/fetch_alerts';
 
-export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) => {
+export const ElasticsearchIndexPage: React.FC<ComponentProps> = () => {
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
   const { index }: { index: string } = useParams();
@@ -30,6 +32,7 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) =
   const [data, setData] = useState({} as any);
   const [indexLabel, setIndexLabel] = useState(labels.index as any);
   const [nodesByIndicesData, setNodesByIndicesData] = useState([]);
+  const [alerts, setAlerts] = useState<AlertsByName>({});
 
   const title = i18n.translate('xpack.monitoring.elasticsearch.index.overview.title', {
     defaultMessage: 'Elasticsearch - Indices - {indexName} - Overview',
@@ -48,23 +51,38 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) =
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/indices/${index}`;
-    const response = await services.http?.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify({
-        timeRange: {
-          min: bounds.min.toISOString(),
-          max: bounds.max.toISOString(),
-        },
-        is_advanced: false,
-      }),
-    });
-    setData(response);
-    const transformer = indicesByNodes();
-    setNodesByIndicesData(transformer(response.shards, response.nodes));
+    try {
+      if (services.http?.fetch && clusterUuid) {
+        const response = await services.http?.fetch(url, {
+          method: 'POST',
+          body: JSON.stringify({
+            timeRange: {
+              min: bounds.min.toISOString(),
+              max: bounds.max.toISOString(),
+            },
+            is_advanced: false,
+          }),
+        });
+        setData(response);
+        const transformer = indicesByNodes();
+        setNodesByIndicesData(transformer(response.shards, response.nodes));
 
-    const shards = response.shards;
-    if (shards.some((shard: any) => shard.state === 'UNASSIGNED')) {
-      setIndexLabel(labels.indexWithUnassigned);
+        const shards = response.shards;
+        if (shards.some((shard: any) => shard.state === 'UNASSIGNED')) {
+          setIndexLabel(labels.indexWithUnassigned);
+        }
+        const alertsResponse = await fetchAlerts({
+          fetch: services.http.fetch,
+          clusterUuid,
+          timeRange: {
+            min: bounds.min.valueOf(),
+            max: bounds.max.valueOf(),
+          },
+        });
+        setAlerts(alertsResponse);
+      }
+    } catch (err) {
+      // TODO: handle errors
     }
   }, [clusterUuid, services.data?.query.timefilter.timefilter, services.http, index]);
 
@@ -83,7 +101,7 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) =
             <IndexReact
               setupMode={setupMode}
               labels={indexLabel}
-              alerts={{}}
+              alerts={alerts}
               onBrush={onBrush}
               indexUuid={index}
               clusterUuid={clusterUuid}

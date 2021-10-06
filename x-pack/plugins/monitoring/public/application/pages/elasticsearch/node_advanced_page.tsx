@@ -14,8 +14,10 @@ import { GlobalStateContext } from '../../contexts/global_state_context';
 import { AdvancedNode } from '../../../components/elasticsearch/node/advanced';
 import { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';
+import { AlertsByName } from '../../../alerts/types';
+import { fetchAlerts } from '../../../lib/fetch_alerts';
 
-export const ElasticsearchNodeAdvancedPage: React.FC<ComponentProps> = ({ clusters }) => {
+export const ElasticsearchNodeAdvancedPage: React.FC<ComponentProps> = () => {
   const globalState = useContext(GlobalStateContext);
   const { zoomInfo, onBrush } = useCharts();
 
@@ -25,6 +27,7 @@ export const ElasticsearchNodeAdvancedPage: React.FC<ComponentProps> = ({ cluste
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
   const [data, setData] = useState({} as any);
+  const [alerts, setAlerts] = useState<AlertsByName>({});
 
   const title = i18n.translate('xpack.monitoring.elasticsearch.node.advanced.title', {
     defaultMessage: 'Elasticsearch - Nodes - {nodeName} - Advanced',
@@ -43,20 +46,33 @@ export const ElasticsearchNodeAdvancedPage: React.FC<ComponentProps> = ({ cluste
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes/${node}`;
-
-    const response = await services.http?.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify({
-        ccs,
-        timeRange: {
-          min: bounds.min.toISOString(),
-          max: bounds.max.toISOString(),
-        },
-        is_advanced: true,
-      }),
-    });
-
-    setData(response);
+    try {
+      if (services.http?.fetch && clusterUuid) {
+        const response = await services.http?.fetch(url, {
+          method: 'POST',
+          body: JSON.stringify({
+            ccs,
+            timeRange: {
+              min: bounds.min.toISOString(),
+              max: bounds.max.toISOString(),
+            },
+            is_advanced: true,
+          }),
+        });
+        setData(response);
+        const alertsResponse = await fetchAlerts({
+          fetch: services.http.fetch,
+          clusterUuid,
+          timeRange: {
+            min: bounds.min.valueOf(),
+            max: bounds.max.valueOf(),
+          },
+        });
+        setAlerts(alertsResponse);
+      }
+    } catch (err) {
+      // TODO: handle errors
+    }
   }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http, node]);
 
   return (
@@ -69,7 +85,7 @@ export const ElasticsearchNodeAdvancedPage: React.FC<ComponentProps> = ({ cluste
     >
       <AdvancedNode
         nodeSummary={data.nodeSummary}
-        alerts={{}}
+        alerts={alerts}
         metrics={data.metrics}
         onBrush={onBrush}
         zoomInfo={zoomInfo}

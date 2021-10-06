@@ -29,7 +29,6 @@ export interface PageTemplateProps {
   tabs?: TabMenuItem[];
   getPageData?: () => Promise<void>;
   product?: string;
-  loadAlerts?: boolean;
 }
 
 export const PageTemplate: React.FC<PageTemplateProps> = ({

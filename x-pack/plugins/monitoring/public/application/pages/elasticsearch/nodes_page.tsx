@@ -17,6 +17,8 @@ import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_r
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { AlertsByName } from '../../../alerts/types';
+import { fetchAlerts } from '../../../lib/fetch_alerts';
 
 export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -31,6 +33,7 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
     cluster_uuid: clusterUuid,
   }) as any;
   const [data, setData] = useState({} as any);
+  const [alerts, setAlerts] = useState<AlertsByName>({});
 
   const title = i18n.translate('xpack.monitoring.elasticsearch.nodes.routeTitle', {
     defaultMessage: 'Elasticsearch - Nodes',
@@ -51,20 +54,35 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes`;
-    const response = await services.http?.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify({
-        ccs,
-        timeRange: {
-          min: bounds.min.toISOString(),
-          max: bounds.max.toISOString(),
-        },
-        ...getPaginationRouteOptions(),
-      }),
-    });
+    try {
+      if (services.http?.fetch && clusterUuid) {
+        const response = await services.http?.fetch(url, {
+          method: 'POST',
+          body: JSON.stringify({
+            ccs,
+            timeRange: {
+              min: bounds.min.toISOString(),
+              max: bounds.max.toISOString(),
+            },
+            ...getPaginationRouteOptions(),
+          }),
+        });
 
-    setData(response);
-    updateTotalItemCount(response.totalNodeCount);
+        setData(response);
+        updateTotalItemCount(response.totalNodeCount);
+        const alertsResponse = await fetchAlerts({
+          fetch: services.http.fetch,
+          clusterUuid,
+          timeRange: {
+            min: bounds.min.valueOf(),
+            max: bounds.max.valueOf(),
+          },
+        });
+        setAlerts(alertsResponse);
+      }
+    } catch (err) {
+      // TODO: handle errors
+    }
   }, [
     ccs,
     clusterUuid,
@@ -92,7 +110,7 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
                 clusterUuid={globalState.cluster_uuid}
                 setupMode={setupMode}
                 nodes={data.nodes}
-                alerts={{}}
+                alerts={alerts}
                 showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
                 {...getPaginationTableProps()}
               />

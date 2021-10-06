@@ -19,14 +19,17 @@ import { useCharts } from '../../hooks/use_charts';
 import { nodesByIndices } from '../../../components/elasticsearch/shard_allocation/transformers/nodes_by_indices';
 // @ts-ignore
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
+import { AlertsByName } from '../../../alerts/types';
+import { fetchAlerts } from '../../../lib/fetch_alerts';
 
-export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) => {
+export const ElasticsearchNodePage: React.FC<ComponentProps> = () => {
   const globalState = useContext(GlobalStateContext);
   const { zoomInfo, onBrush } = useCharts();
   const [showSystemIndices, setShowSystemIndices] = useLocalStorage<boolean>(
     'showSystemIndices',
     false
   );
+  const [alerts, setAlerts] = useState<AlertsByName>({});
 
   const { node }: { node: string } = useParams();
   const { services } = useKibana<{ data: any }>();
@@ -53,23 +56,37 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes/${node}`;
+    try {
+      if (services.http?.fetch && clusterUuid) {
+        const response = await services.http?.fetch(url, {
+          method: 'POST',
+          body: JSON.stringify({
+            showSystemIndices,
+            ccs,
+            timeRange: {
+              min: bounds.min.toISOString(),
+              max: bounds.max.toISOString(),
+            },
+            is_advanced: false,
+          }),
+        });
 
-    const response = await services.http?.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify({
-        showSystemIndices,
-        ccs,
-        timeRange: {
-          min: bounds.min.toISOString(),
-          max: bounds.max.toISOString(),
-        },
-        is_advanced: false,
-      }),
-    });
-
-    setData(response);
-    const transformer = nodesByIndices();
-    setNodesByIndicesData(transformer(response.shards, response.nodes));
+        setData(response);
+        const transformer = nodesByIndices();
+        setNodesByIndicesData(transformer(response.shards, response.nodes));
+        const alertsResponse = await fetchAlerts({
+          fetch: services.http.fetch,
+          clusterUuid,
+          timeRange: {
+            min: bounds.min.valueOf(),
+            max: bounds.max.valueOf(),
+          },
+        });
+        setAlerts(alertsResponse);
+      }
+    } catch (err) {
+      // TODO: handle errors
+    }
   }, [
     ccs,
     clusterUuid,
@@ -92,11 +109,11 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
       pageType="nodes"
     >
       <SetupModeRenderer
-        render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
+        render={({ flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}
             <NodeReact
-              alerts={{}}
+              alerts={alerts}
               labels={labels.node}
               nodeId={node}
               clusterUuid={clusterUuid}
