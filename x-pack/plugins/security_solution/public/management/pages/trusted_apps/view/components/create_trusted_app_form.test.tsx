@@ -351,17 +351,13 @@ describe('When using the Trusted App Form', () => {
     });
     it("allows the user to set the trusted app entry to 'Global' in the edit option", () => {
       render();
-      const globalButton = renderResult.getByTestId(
-        `${dataTestSubjForForm}-effectedPolicies-global`
-      );
-
       const globalButtonInput = renderResult.getByTestId('globalPolicy') as HTMLButtonElement;
 
       reactTestingLibrary.act(() => {
         fireEvent.click(globalButtonInput);
       });
 
-      expect(globalButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
+      expect(formProps.onChange.mock.calls[0][0].item.effectScope.type).toBe('global');
     });
     it('hides the policy assignment section if the TA is set to global', () => {
       (formProps.trustedApp as NewTrustedApp).effectScope = {
