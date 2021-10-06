@@ -21,7 +21,6 @@ import { fetchClusters } from '../../../lib/fetch_clusters';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { EnableAlertsModal } from '../../../alerts/enable_alerts_modal';
-import { useRequestErrorHandler } from '../../hooks/use_request_error_handler';
 
 const CODE_PATHS = [CODE_PATH_ALL];
 
@@ -57,45 +56,32 @@ export const ClusterOverview: React.FC<{}> = () => {
     ];
   }
 
-  const handleRequestError = useRequestErrorHandler();
-
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
-    try {
-      if (services.http?.fetch && clusterUuid) {
-        const response = await fetchClusters({
-          fetch: services.http.fetch,
-          timeRange: {
-            min: bounds.min.toISOString(),
-            max: bounds.max.toISOString(),
-          },
-          ccs,
-          clusterUuid,
-          codePaths: CODE_PATHS,
-        });
-        setClusters(response);
-        const alertsResponse = await fetchAlerts({
-          fetch: services.http.fetch,
-          clusterUuid,
-          timeRange: {
-            min: bounds.min.valueOf(),
-            max: bounds.max.valueOf(),
-          },
-        });
-        setAlerts(alertsResponse);
-      }
-    } catch (err) {
-      handleRequestError(err);
-    } finally {
+    if (services.http?.fetch && clusterUuid) {
+      const response = await fetchClusters({
+        fetch: services.http.fetch,
+        timeRange: {
+          min: bounds.min.toISOString(),
+          max: bounds.max.toISOString(),
+        },
+        ccs,
+        clusterUuid,
+        codePaths: CODE_PATHS,
+      });
+      setClusters(response);
+      const alertsResponse = await fetchAlerts({
+        fetch: services.http.fetch,
+        clusterUuid,
+        timeRange: {
+          min: bounds.min.valueOf(),
+          max: bounds.max.valueOf(),
+        },
+      });
+      setAlerts(alertsResponse);
       setLoaded(true);
     }
-  }, [
-    handleRequestError,
-    ccs,
-    clusterUuid,
-    services.data?.query.timefilter.timefilter,
-    services.http?.fetch,
-  ]);
+  }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http]);
 
   useEffect(() => {
     if (clusters && clusters.length) {

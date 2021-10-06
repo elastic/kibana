@@ -21,7 +21,6 @@ import { nodesByIndices } from '../../../components/elasticsearch/shard_allocati
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { useRequestErrorHandler } from '../../hooks/use_request_error_handler';
 
 export const ElasticsearchNodePage: React.FC<ComponentProps> = () => {
   const globalState = useContext(GlobalStateContext);
@@ -54,40 +53,35 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = () => {
     },
   });
 
-  const handleRequestError = useRequestErrorHandler();
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes/${node}`;
-    try {
-      if (services.http?.fetch && clusterUuid) {
-        const response = await services.http?.fetch(url, {
-          method: 'POST',
-          body: JSON.stringify({
-            showSystemIndices,
-            ccs,
-            timeRange: {
-              min: bounds.min.toISOString(),
-              max: bounds.max.toISOString(),
-            },
-            is_advanced: false,
-          }),
-        });
-
-        setData(response);
-        const transformer = nodesByIndices();
-        setNodesByIndicesData(transformer(response.shards, response.nodes));
-        const alertsResponse = await fetchAlerts({
-          fetch: services.http.fetch,
-          clusterUuid,
+    if (services.http?.fetch && clusterUuid) {
+      const response = await services.http?.fetch(url, {
+        method: 'POST',
+        body: JSON.stringify({
+          showSystemIndices,
+          ccs,
           timeRange: {
-            min: bounds.min.valueOf(),
-            max: bounds.max.valueOf(),
+            min: bounds.min.toISOString(),
+            max: bounds.max.toISOString(),
           },
-        });
-        setAlerts(alertsResponse);
-      }
-    } catch (err) {
-      handleRequestError(err);
+          is_advanced: false,
+        }),
+      });
+
+      setData(response);
+      const transformer = nodesByIndices();
+      setNodesByIndicesData(transformer(response.shards, response.nodes));
+      const alertsResponse = await fetchAlerts({
+        fetch: services.http.fetch,
+        clusterUuid,
+        timeRange: {
+          min: bounds.min.valueOf(),
+          max: bounds.max.valueOf(),
+        },
+      });
+      setAlerts(alertsResponse);
     }
   }, [
     services.data?.query.timefilter.timefilter,
@@ -96,7 +90,6 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = () => {
     node,
     showSystemIndices,
     ccs,
-    handleRequestError,
   ]);
 
   const toggleShowSystemIndices = useCallback(() => {

@@ -49,16 +49,16 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
   const { currentTimerange } = useContext(MonitoringTimeContainer.Context);
   const [loaded, setLoaded] = useState(false);
   const history = useHistory();
-  const handleRequestErrors = useRequestErrorHandler();
+  const handleRequestError = useRequestErrorHandler();
   useEffect(() => {
     getPageData?.()
       .catch((err) => {
-        handleRequestErrors(err);
+        handleRequestError(err);
       })
       .finally(() => {
         setLoaded(true);
       });
-  }, [getPageData, currentTimerange, handleRequestErrors]);
+  }, [getPageData, currentTimerange, handleRequestError]);
 
   const onRefresh = () => {
     const requests = [getPageData?.()];
@@ -67,7 +67,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
     }
 
     Promise.allSettled(requests).catch((err) => {
-      handleRequestErrors(err);
+      handleRequestError(err);
     });
   };
 

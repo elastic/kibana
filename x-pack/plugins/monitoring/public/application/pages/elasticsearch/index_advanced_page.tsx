@@ -18,7 +18,6 @@ import { ItemTemplate } from './item_template';
 import { AdvancedIndex } from '../../../components/elasticsearch/index/advanced';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { useRequestErrorHandler } from '../../hooks/use_request_error_handler';
 
 export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = () => {
   const globalState = useContext(GlobalStateContext);
@@ -36,44 +35,32 @@ export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = () => {
     },
   });
 
-  const handleRequestError = useRequestErrorHandler();
-
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/indices/${index}`;
-    try {
-      if (services.http?.fetch && clusterUuid) {
-        const response = await services.http?.fetch(url, {
-          method: 'POST',
-          body: JSON.stringify({
-            timeRange: {
-              min: bounds.min.toISOString(),
-              max: bounds.max.toISOString(),
-            },
-            is_advanced: true,
-          }),
-        });
-        setData(response);
-        const alertsResponse = await fetchAlerts({
-          fetch: services.http.fetch,
-          clusterUuid,
+    if (services.http?.fetch && clusterUuid) {
+      const response = await services.http?.fetch(url, {
+        method: 'POST',
+        body: JSON.stringify({
           timeRange: {
-            min: bounds.min.valueOf(),
-            max: bounds.max.valueOf(),
+            min: bounds.min.toISOString(),
+            max: bounds.max.toISOString(),
           },
-        });
-        setAlerts(alertsResponse);
-      }
-    } catch (err) {
-      handleRequestError(err);
+          is_advanced: true,
+        }),
+      });
+      setData(response);
+      const alertsResponse = await fetchAlerts({
+        fetch: services.http.fetch,
+        clusterUuid,
+        timeRange: {
+          min: bounds.min.valueOf(),
+          max: bounds.max.valueOf(),
+        },
+      });
+      setAlerts(alertsResponse);
     }
-  }, [
-    handleRequestError,
-    clusterUuid,
-    services.data?.query.timefilter.timefilter,
-    services.http,
-    index,
-  ]);
+  }, [clusterUuid, services.data?.query.timefilter.timefilter, services.http, index]);
 
   return (
     <ItemTemplate title={title} getPageData={getPageData} id={index} pageType="indices">

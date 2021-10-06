@@ -19,7 +19,6 @@ import { useTable } from '../../hooks/use_table';
 import { PageTemplate, TabMenuItem } from '../page_template';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 import { fetchClusters } from '../../../lib/fetch_clusters';
-import { useRequestErrorHandler } from '../../hooks/use_request_error_handler';
 
 const pageTitle = i18n.translate('xpack.monitoring.cluster.listing.pageTitle', {
   defaultMessage: 'Cluster listing',
@@ -68,31 +67,21 @@ export const ClusterListing: React.FC<ComponentProps> = () => {
     },
   ];
 
-  const handleRequestError = useRequestErrorHandler();
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
-    try {
-      if (services.http?.fetch) {
-        const response = await fetchClusters({
-          fetch: services.http.fetch,
-          timeRange: {
-            min: bounds.min.toISOString(),
-            max: bounds.max.toISOString(),
-          },
-          ccs: globalState.ccs,
-          codePaths: ['all'],
-        });
-        setClusters(response);
-      }
-    } catch (err) {
-      handleRequestError(err);
+    if (services.http?.fetch) {
+      const response = await fetchClusters({
+        fetch: services.http.fetch,
+        timeRange: {
+          min: bounds.min.toISOString(),
+          max: bounds.max.toISOString(),
+        },
+        ccs: globalState.ccs,
+        codePaths: ['all'],
+      });
+      setClusters(response);
     }
-  }, [
-    globalState.ccs,
-    handleRequestError,
-    services.data?.query.timefilter.timefilter,
-    services.http,
-  ]);
+  }, [globalState.ccs, services.data?.query.timefilter.timefilter, services.http]);
 
   if (globalState.save && clusters.length === 1) {
     globalState.cluster_uuid = clusters[0].cluster_uuid;

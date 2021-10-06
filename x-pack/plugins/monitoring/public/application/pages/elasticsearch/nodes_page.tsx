@@ -19,7 +19,6 @@ import { useTable } from '../../hooks/use_table';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { useRequestErrorHandler } from '../../hooks/use_request_error_handler';
 
 export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -52,38 +51,33 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
     }
   }, [cluster, generateBreadcrumbs]);
 
-  const handleRequestError = useRequestErrorHandler();
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes`;
-    try {
-      if (services.http?.fetch && clusterUuid) {
-        const response = await services.http?.fetch(url, {
-          method: 'POST',
-          body: JSON.stringify({
-            ccs,
-            timeRange: {
-              min: bounds.min.toISOString(),
-              max: bounds.max.toISOString(),
-            },
-            ...getPaginationRouteOptions(),
-          }),
-        });
-
-        setData(response);
-        updateTotalItemCount(response.totalNodeCount);
-        const alertsResponse = await fetchAlerts({
-          fetch: services.http.fetch,
-          clusterUuid,
+    if (services.http?.fetch && clusterUuid) {
+      const response = await services.http?.fetch(url, {
+        method: 'POST',
+        body: JSON.stringify({
+          ccs,
           timeRange: {
-            min: bounds.min.valueOf(),
-            max: bounds.max.valueOf(),
+            min: bounds.min.toISOString(),
+            max: bounds.max.toISOString(),
           },
-        });
-        setAlerts(alertsResponse);
-      }
-    } catch (err) {
-      handleRequestError(err);
+          ...getPaginationRouteOptions(),
+        }),
+      });
+
+      setData(response);
+      updateTotalItemCount(response.totalNodeCount);
+      const alertsResponse = await fetchAlerts({
+        fetch: services.http.fetch,
+        clusterUuid,
+        timeRange: {
+          min: bounds.min.valueOf(),
+          max: bounds.max.valueOf(),
+        },
+      });
+      setAlerts(alertsResponse);
     }
   }, [
     services.data?.query.timefilter.timefilter,
@@ -92,7 +86,6 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
     ccs,
     getPaginationRouteOptions,
     updateTotalItemCount,
-    handleRequestError,
   ]);
 
   return (
