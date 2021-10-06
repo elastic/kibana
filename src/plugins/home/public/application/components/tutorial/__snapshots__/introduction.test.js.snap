@@ -7,17 +7,20 @@ exports[`props exportedFieldsUrl 1`] = `
       <Content
         text="this is a great tutorial about..."
       />
-      <EuiLink
-        href="exported_fields_url"
-        rel="noopener"
-        target="_blank"
-      >
-        <FormattedMessage
-          defaultMessage="View exported fields"
-          id="home.tutorial.introduction.viewButtonLabel"
-          values={Object {}}
-        />
-      </EuiLink>
+      <React.Fragment>
+        <br />
+        <EuiLink
+          href="exported_fields_url"
+          rel="noopener"
+          target="_blank"
+        >
+          <FormattedMessage
+            defaultMessage="View exported fields"
+            id="home.tutorial.introduction.viewButtonLabel"
+            values={Object {}}
+          />
+        </EuiLink>
+      </React.Fragment>
     </React.Fragment>
   }
   pageTitle={

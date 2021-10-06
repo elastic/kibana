@@ -3,9 +3,16 @@
 exports[`render 1`] = `
 <_EuiSplitPanelOuter>
   <_EuiSplitPanelInner
+    color="subdued"
     paddingSize="none"
   >
-    <EuiTabs>
+    <EuiTabs
+      style={
+        Object {
+          "padding": "0 24px",
+        }
+      }
+    >
       <EuiTab
         isSelected={true}
         key="0"
@@ -82,6 +89,7 @@ exports[`render 1`] = `
           },
         ]
       }
+      titleSize="xs"
     />
   </_EuiSplitPanelInner>
 </_EuiSplitPanelOuter>
@@ -90,9 +98,16 @@ exports[`render 1`] = `
 exports[`statusCheckState checking status 1`] = `
 <_EuiSplitPanelOuter>
   <_EuiSplitPanelInner
+    color="subdued"
     paddingSize="none"
   >
-    <EuiTabs>
+    <EuiTabs
+      style={
+        Object {
+          "padding": "0 24px",
+        }
+      }
+    >
       <EuiTab
         isSelected={true}
         key="0"
@@ -188,6 +203,7 @@ exports[`statusCheckState checking status 1`] = `
           },
         ]
       }
+      titleSize="xs"
     />
   </_EuiSplitPanelInner>
 </_EuiSplitPanelOuter>
@@ -196,9 +212,16 @@ exports[`statusCheckState checking status 1`] = `
 exports[`statusCheckState failed status check - error 1`] = `
 <_EuiSplitPanelOuter>
   <_EuiSplitPanelInner
+    color="subdued"
     paddingSize="none"
   >
-    <EuiTabs>
+    <EuiTabs
+      style={
+        Object {
+          "padding": "0 24px",
+        }
+      }
+    >
       <EuiTab
         isSelected={true}
         key="0"
@@ -303,6 +326,7 @@ exports[`statusCheckState failed status check - error 1`] = `
           },
         ]
       }
+      titleSize="xs"
     />
   </_EuiSplitPanelInner>
 </_EuiSplitPanelOuter>
@@ -311,9 +335,16 @@ exports[`statusCheckState failed status check - error 1`] = `
 exports[`statusCheckState failed status check - no data 1`] = `
 <_EuiSplitPanelOuter>
   <_EuiSplitPanelInner
+    color="subdued"
     paddingSize="none"
   >
-    <EuiTabs>
+    <EuiTabs
+      style={
+        Object {
+          "padding": "0 24px",
+        }
+      }
+    >
       <EuiTab
         isSelected={true}
         key="0"
@@ -418,6 +449,7 @@ exports[`statusCheckState failed status check - no data 1`] = `
           },
         ]
       }
+      titleSize="xs"
     />
   </_EuiSplitPanelInner>
 </_EuiSplitPanelOuter>
@@ -426,9 +458,16 @@ exports[`statusCheckState failed status check - no data 1`] = `
 exports[`statusCheckState initial state - no check has been attempted 1`] = `
 <_EuiSplitPanelOuter>
   <_EuiSplitPanelInner
+    color="subdued"
     paddingSize="none"
   >
-    <EuiTabs>
+    <EuiTabs
+      style={
+        Object {
+          "padding": "0 24px",
+        }
+      }
+    >
       <EuiTab
         isSelected={true}
         key="0"
@@ -524,6 +563,7 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
           },
         ]
       }
+      titleSize="xs"
     />
   </_EuiSplitPanelInner>
 </_EuiSplitPanelOuter>
@@ -532,9 +572,16 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
 exports[`statusCheckState successful status check 1`] = `
 <_EuiSplitPanelOuter>
   <_EuiSplitPanelInner
+    color="subdued"
     paddingSize="none"
   >
-    <EuiTabs>
+    <EuiTabs
+      style={
+        Object {
+          "padding": "0 24px",
+        }
+      }
+    >
       <EuiTab
         isSelected={true}
         key="0"
@@ -639,6 +686,7 @@ exports[`statusCheckState successful status check 1`] = `
           },
         ]
       }
+      titleSize="xs"
     />
   </_EuiSplitPanelInner>
 </_EuiSplitPanelOuter>
