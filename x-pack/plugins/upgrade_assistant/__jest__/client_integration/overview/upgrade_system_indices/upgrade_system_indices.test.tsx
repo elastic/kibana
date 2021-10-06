@@ -10,7 +10,7 @@ import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../../helpers';
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
-describe('Overview - Upgrade system indices - Step', () => {
+describe('Overview - Upgrade system indices', () => {
   let testBed: OverviewTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
@@ -40,11 +40,17 @@ describe('Overview - Upgrade system indices - Step', () => {
       expect(exists('systemIndicesStatusErrorCallout')).toBe(true);
     });
 
-    test(`Let's the user attempt to reload backup status`, () => {
-      const { exists, component } = testBed;
+    test('Lets the user attempt to reload backup status', async () => {
+      const { exists, component, actions } = testBed;
       component.update();
 
-      expect(exists('systemIndicesStatusRetryButton')).toBe(true);
+      httpRequestsMockHelpers.setLoadSystemIndicesUpgradeStatus({
+        upgrade_status: 'NO_UPGRADE_NEEDED',
+      });
+
+      await actions.clickRetrySystemIndicesButton();
+
+      expect(exists('noUpgradeNeededSection')).toBe(true);
     });
   });
 

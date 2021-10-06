@@ -36,37 +36,37 @@ export interface SystemIndicesFlyoutProps {
 
 const i18nTexts = {
   closeButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.overview.system_indices.flyoutCloseButtonLabel',
+    'xpack.upgradeAssistant.overview.systemIndices.flyoutCloseButtonLabel',
     {
       defaultMessage: 'Close',
     }
   ),
-  flyoutTitle: i18n.translate('xpack.upgradeAssistant.overview.system_indices.flyoutTitle', {
+  flyoutTitle: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.flyoutTitle', {
     defaultMessage: 'Upgrade system indices',
   }),
   flyoutDescription: i18n.translate(
-    'xpack.upgradeAssistant.overview.system_indices.flyoutDescription',
+    'xpack.upgradeAssistant.overview.systemIndices.flyoutDescription',
     {
       defaultMessage:
         'The following features contain system indices that need to be migrated before upgrading:',
     }
   ),
   upgradeCompleteLabel: i18n.translate(
-    'xpack.upgradeAssistant.overview.system_indices.upgradeCompleteLabel',
+    'xpack.upgradeAssistant.overview.systemIndices.upgradeCompleteLabel',
     {
       defaultMessage: 'Upgrade complete',
     }
   ),
   needsUpgradingLabel: i18n.translate(
-    'xpack.upgradeAssistant.overview.system_indices.needsUpgradingLabel',
+    'xpack.upgradeAssistant.overview.systemIndices.needsUpgradingLabel',
     {
       defaultMessage: 'Requires upgrading',
     }
   ),
-  upgradingLabel: i18n.translate('xpack.upgradeAssistant.overview.system_indices.upgradingLabel', {
+  upgradingLabel: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.upgradingLabel', {
     defaultMessage: 'Upgrading…',
   }),
-  errorLabel: i18n.translate('xpack.upgradeAssistant.overview.system_indices.errorLabel', {
+  errorLabel: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.errorLabel', {
     defaultMessage: 'Error upgrading indices',
   }),
 };

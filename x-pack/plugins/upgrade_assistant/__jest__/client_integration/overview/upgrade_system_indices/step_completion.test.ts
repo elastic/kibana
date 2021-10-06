@@ -11,7 +11,7 @@ import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 import { setupEnvironment, advanceTime } from '../../helpers';
 import { SYSTEM_INDICES_UPGRADE_POLL_INTERVAL_MS } from '../../../../common/constants';
 
-describe('Overview - Upgrade system indices - Step status', () => {
+describe('Overview - Upgrade system indices - Step completion', () => {
   let testBed: OverviewTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
@@ -35,7 +35,7 @@ describe('Overview - Upgrade system indices - Step status', () => {
     expect(exists(`upgradeSystemIndicesStep-complete`)).toBe(true);
   });
 
-  test(`It's incomplete when there are deprecation logs since last checkpoint`, async () => {
+  test(`It's incomplete when an upgrade is needed`, async () => {
     httpRequestsMockHelpers.setLoadSystemIndicesUpgradeStatus({
       upgrade_status: 'UPGRADE_NEEDED',
     });

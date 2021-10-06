@@ -91,9 +91,7 @@ const UpgradeSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
     useSystemIndicesUpgrade();
 
   useEffect(() => {
-    if (upgradeStatus.data?.upgrade_status === 'NO_UPGRADE_NEEDED') {
-      setIsComplete(true);
-    }
+    setIsComplete(upgradeStatus.data?.upgrade_status === 'NO_UPGRADE_NEEDED');
     // Depending upon setIsComplete would create an infinite loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [upgradeStatus.data?.upgrade_status]);

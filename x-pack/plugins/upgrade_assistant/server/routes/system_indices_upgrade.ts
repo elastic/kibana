@@ -17,6 +17,7 @@ export function registerSystemIndicesUpgradeRoutes({
   router,
   lib: { handleEsError },
 }: RouteDependencies) {
+  // GET status of the system indices upgrade
   router.get(
     { path: `${API_BASE_PATH}/system_indices_upgrade`, validate: false },
     versionCheckHandlerWrapper(
@@ -42,6 +43,7 @@ export function registerSystemIndicesUpgradeRoutes({
     )
   );
 
+  // POST starts the system indices upgrade
   router.post(
     { path: `${API_BASE_PATH}/system_indices_upgrade`, validate: false },
     versionCheckHandlerWrapper(

@@ -30,13 +30,13 @@ describe('Overview - Upgrade system indices - Flyout', () => {
   });
 
   test('shows correct features in flyout table', async () => {
-    const { exists, actions } = testBed;
+    const { actions, table } = testBed;
 
     await actions.clickViewSystemIndicesState();
 
-    expect(exists(`flyoutDetails.featureNoUpgradeNeeded`)).toBe(true);
-    expect(exists(`flyoutDetails.featureUpgradeNeeded`)).toBe(true);
-    expect(exists(`flyoutDetails.featureInProgress`)).toBe(true);
-    expect(exists(`flyoutDetails.featureError`)).toBe(true);
+    const { tableCellsValues } = table.getMetaData('flyoutDetails');
+
+    expect(tableCellsValues.length).toBe(systemIndicesUpgradeStatus.features.length);
+    expect(tableCellsValues).toMatchSnapshot();
   });
 });

@@ -23,34 +23,34 @@ export const systemIndicesUpgradeStatus: SystemIndicesUpgradeStatus = {
     },
     {
       feature_name: 'machine_learning',
-      minimum_index_version: '7.1.1',
+      minimum_index_version: '7.1.2',
       upgrade_status: 'IN_PROGRESS',
       indices: [
         {
-          index: '.security-7',
-          version: '7.1.1',
+          index: '.ml-config',
+          version: '7.1.2',
         },
       ],
     },
     {
       feature_name: 'kibana',
-      minimum_index_version: '7.1.1',
+      minimum_index_version: '7.1.3',
       upgrade_status: 'UPGRADE_NEEDED',
       indices: [
         {
-          index: '.security-7',
-          version: '7.1.1',
+          index: '.kibana',
+          version: '7.1.3',
         },
       ],
     },
     {
       feature_name: 'logstash',
-      minimum_index_version: '7.1.1',
+      minimum_index_version: '7.1.4',
       upgrade_status: 'NO_UPGRADE_NEEDED',
       indices: [
         {
-          index: '.security-7',
-          version: '7.1.1',
+          index: '.logstash-config',
+          version: '7.1.4',
         },
       ],
     },
