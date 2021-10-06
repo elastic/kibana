@@ -12,6 +12,8 @@ import { useValues, useActions } from 'kea';
 
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { RESTORE_DEFAULTS_BUTTON_LABEL } from '../../../constants';
 import { AppSearchPageTemplate } from '../../layout';
 import { MANAGE_CURATION_TITLE, RESTORE_CONFIRMATION } from '../constants';
@@ -25,9 +27,28 @@ import { SuggestedDocumentsCallout } from './suggested_documents_callout';
 
 export const ManualCuration: React.FC = () => {
   const { curationId } = useParams() as { curationId: string };
-  const { resetCuration } = useActions(CurationLogic({ curationId }));
-  const { dataLoading, queries } = useValues(CurationLogic({ curationId }));
+  const { onSelectPageTab, resetCuration } = useActions(CurationLogic({ curationId }));
+  const { dataLoading, queries, selectedPageTab } = useValues(CurationLogic({ curationId }));
   const { isFlyoutOpen } = useValues(AddResultLogic);
+
+  const pageTabs = [
+    {
+      label: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.title',
+        { defaultMessage: 'Promoted documents' }
+      ),
+      isSelected: selectedPageTab === 'promoted',
+      onClick: () => onSelectPageTab('promoted'),
+    },
+    {
+      label: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.engine.curations.hiddenDocuments.title',
+        { defaultMessage: 'Hidden documents' }
+      ),
+      isSelected: selectedPageTab === 'hidden',
+      onClick: () => onSelectPageTab('hidden'),
+    },
+  ];
 
   return (
     <AppSearchPageTemplate
@@ -44,6 +65,7 @@ export const ManualCuration: React.FC = () => {
             {RESTORE_DEFAULTS_BUTTON_LABEL}
           </EuiButton>,
         ],
+        tabs: pageTabs,
       }}
       isLoading={dataLoading}
     >
@@ -57,12 +79,10 @@ export const ManualCuration: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xl" />
-
-      <PromotedDocuments />
+      {selectedPageTab === 'promoted' && <PromotedDocuments />}
+      {selectedPageTab === 'hidden' && <HiddenDocuments />}
       <EuiSpacer />
       <OrganicDocuments />
-      <EuiSpacer />
-      <HiddenDocuments />
 
       {isFlyoutOpen && <AddResultFlyout />}
     </AppSearchPageTemplate>
