@@ -8,7 +8,7 @@ import React, { useContext, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { useKibana, useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';
 // @ts-ignore

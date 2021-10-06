@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { PageTemplate } from '../page_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 // @ts-ignore
 import { CcrShardReact } from '../../../components/elasticsearch/ccr_shard';
 import { ComponentProps } from '../../route_init';

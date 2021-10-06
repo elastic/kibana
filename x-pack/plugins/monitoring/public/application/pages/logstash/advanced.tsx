@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
 // @ts-ignore
 import { Listing } from '../../../components/logstash/listing';
