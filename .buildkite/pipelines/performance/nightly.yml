@@ -1,6 +1,6 @@
 steps:
-  - command: .buildkite/scripts/lifecycle/pre_build.sh
-    label: ":male-mechanic::skin-tone-2:Pre-Build"
+  - label: ":male-mechanic::skin-tone-2:Pre-Build"
+    command: .buildkite/scripts/lifecycle/pre_build.sh
 
   - wait
 
@@ -24,5 +24,5 @@ steps:
   - wait: ~
     continue_on_failure: true
 
-  - command: ":male_superhero::skin-tone-2: .buildkite/scripts/lifecycle/post_build.sh"
-    label: Post-Build
+  - label: ":male_superhero::skin-tone-2:Post-Build"
+    command: .buildkite/scripts/lifecycle/post_build.sh
