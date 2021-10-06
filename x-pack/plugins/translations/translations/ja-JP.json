@@ -2287,8 +2287,6 @@
     "data.searchSessions.sessionService.sessionObjectFetchError": "検索セッション情報を取得できませんでした",
     "data.triggers.applyFilterDescription": "Kibanaフィルターが適用されるとき。単一の値または範囲フィルターにすることができます。",
     "data.triggers.applyFilterTitle": "フィルターを適用",
-    "dataViews.indexPatternLoad.help": "インデックスパターンを読み込みます",
-    "dataViews.functions.indexPatternLoad.id.help": "読み込むインデックスパターンID",
     "dataViews.ensureDefaultIndexPattern.bannerLabel": "Kibanaでデータの可視化と閲覧を行うには、Elasticsearchからデータを取得するためのインデックスパターンの作成が必要です。",
     "dataViews.fetchFieldErrorTitle": "インデックスパターンのフィールド取得中にエラーが発生 {title}（ID：{id}）",
     "dataViews.indexPatternLoad.error.kibanaRequest": "サーバーでこの検索を実行するには、KibanaRequest が必要です。式実行パラメーターに要求オブジェクトを渡してください。",

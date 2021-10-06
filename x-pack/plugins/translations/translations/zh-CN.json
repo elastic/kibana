@@ -2309,8 +2309,6 @@
     "data.searchSessions.sessionService.sessionObjectFetchError": "无法提取搜索会话信息",
     "data.triggers.applyFilterDescription": "应用 kibana 筛选时。可能是单个值或范围筛选。",
     "data.triggers.applyFilterTitle": "应用筛选",
-    "dataViews.indexPatternLoad.help": "加载索引模式",
-    "dataViews.functions.indexPatternLoad.id.help": "要加载的索引模式 id",
     "dataViews.ensureDefaultIndexPattern.bannerLabel": "要在 Kibana 中可视化和浏览数据，必须创建索引模式，以从 Elasticsearch 中检索数据。",
     "dataViews.fetchFieldErrorTitle": "提取索引模式 {title} (ID: {id}) 的字段时出错",
     "dataViews.indexPatternLoad.error.kibanaRequest": "在服务器上执行此搜索时需要 Kibana 请求。请向表达式执行模式参数提供请求对象。",
