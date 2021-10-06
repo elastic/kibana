@@ -8,7 +8,8 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
-import { errors as EsErrors, estypes } from '@elastic/elasticsearch';
+import { errors as EsErrors } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { checkForUnknownDocs } from './check_for_unknown_docs';
 
