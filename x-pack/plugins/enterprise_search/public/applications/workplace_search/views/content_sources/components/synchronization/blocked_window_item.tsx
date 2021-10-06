@@ -22,6 +22,7 @@ import {
   EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ALL_DAYS_LABEL, DAYS_OF_WEEK_LABELS } from '../../../../../shared/constants';
 import { BLOCK_LABEL, BETWEEN_LABEL, ON_LABEL, REMOVE_BUTTON } from '../../../../constants';
@@ -36,6 +37,7 @@ import {
   INCREMENTAL_SYNC_DESCRIPTION,
   DELETION_SYNC_DESCRIPTION,
   PERMISSIONS_SYNC_DESCRIPTION,
+  UTC_TITLE,
 } from '../../constants';
 
 interface Props {
@@ -147,10 +149,16 @@ export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow }) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiIconTip
-            title="All times are in UTC"
+            title={UTC_TITLE}
             type="iInCircle"
             content={
-              <EuiText size="s">Current UTC time: {moment().utc().format('h:mm A')}</EuiText>
+              <EuiText size="s">
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.workplaceSearch.sources.utcLabel"
+                  defaultMessage="Current UTC time: {utcTime}"
+                  values={{ utcTime: moment().utc().format('h:mm A') }}
+                />
+              </EuiText>
             }
           />
         </EuiFlexItem>
