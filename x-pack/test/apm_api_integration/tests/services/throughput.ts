@@ -16,6 +16,7 @@ import { PromiseReturnType } from '../../../../plugins/observability/typings/com
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
+import { roundNumber } from '../../utils';
 
 type ThroughputReturn = APIReturnType<'GET /api/apm/services/{serviceName}/throughput'>;
 
@@ -316,6 +317,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const currentPeriodAvg = mean(throughputResponse.currentPeriod.map((d) => d.y));
           const previousPeriodAvg = mean(throughputResponse.previousPeriod.map((d) => d.y));
           expect(currentPeriodAvg).to.equal(previousPeriodAvg);
+          expectSnapshot(roundNumber(currentPeriodAvg)).toMatchInline(`"98.90"`);
+          expectSnapshot(roundNumber(previousPeriodAvg)).toMatchInline(`"98.90"`);
         });
       });
     }
