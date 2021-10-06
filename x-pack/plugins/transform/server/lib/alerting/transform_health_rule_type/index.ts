@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import './app/index.scss';
-import { TransformUiPlugin } from './plugin';
-
-/** @public */
-export const plugin = () => {
-  return new TransformUiPlugin();
-};
-
-export { getTransformHealthRuleType } from './alerting';
+export {
+  getTransformHealthRuleType,
+  registerTransformHealthRuleType,
+} from './register_transform_health_rule_type';
