@@ -12,10 +12,10 @@ import PropTypes from 'prop-types';
 import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { KibanaPageTemplate } from '@kbn/react-page-template';
 import { Synopsis } from './synopsis';
 import { SampleDataSetCards } from './sample_data_set_cards';
 import { getServices } from '../kibana_services';
-import { KibanaPageTemplate } from '../../../../kibana_react/public';
 import { getTutorials } from '../load_tutorials';
 
 const ALL_TAB_ID = 'all';

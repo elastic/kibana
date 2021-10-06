@@ -3785,6 +3785,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/react-page-template@link:bazel-bin/packages/kbn-react-page-template":
+  version "0.0.0"
+  uid ""
+
 "@kbn/rule-data-utils@link:bazel-bin/packages/kbn-rule-data-utils":
   version "0.0.0"
   uid ""
