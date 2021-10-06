@@ -17,12 +17,18 @@ import { INDICATOR_REFERENCE } from '../../../../common/cti/constants';
 import { IP_FIELD_TYPE } from '../../../network/components/ip';
 import { PORT_NAMES } from '../../../network/components/port/helpers';
 
-const COLUMNS_WITH_LINKS = [
+export const COLUMNS_WITH_LINKS = [
   {
     columnId: HOST_NAME_FIELD_NAME,
     label: i18n.VIEW_HOST_SUMMARY,
   },
   {
+    columnId: 'source.ip',
+    fieldType: IP_FIELD_TYPE,
+    label: i18n.EXPAND_IP_DETAILS,
+  },
+  {
+    columnId: 'destination.ip',
     fieldType: IP_FIELD_TYPE,
     label: i18n.EXPAND_IP_DETAILS,
   },
@@ -52,9 +58,8 @@ const COLUMNS_WITH_LINKS = [
   },
 ];
 
-export const getLink = (cId?: string, fieldType?: string) => {
-  return (
-    cId &&
-    COLUMNS_WITH_LINKS.find((c) => c.columnId === cId || (fieldType && c.fieldType === fieldType))
+export const getLink = (cId?: string, fieldType?: string, linkField?: string) =>
+  cId &&
+  COLUMNS_WITH_LINKS.find(
+    (c) => c.columnId === cId || (fieldType && c.fieldType === fieldType) || linkField != null
   );
-};

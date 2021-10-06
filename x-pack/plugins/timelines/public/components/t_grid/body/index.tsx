@@ -146,9 +146,8 @@ const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
 `;
 
 const FIELDS_WITHOUT_CELL_ACTIONS = ['@timestamp', 'signal.rule.risk_score', 'signal.reason'];
-const hasCellActions = (columnId?: string) => {
-  return columnId && FIELDS_WITHOUT_CELL_ACTIONS.indexOf(columnId) < 0;
-};
+const hasCellActions = (columnId?: string) =>
+  columnId && FIELDS_WITHOUT_CELL_ACTIONS.indexOf(columnId) < 0;
 const transformControlColumns = ({
   actionColumnsWidth,
   columnHeaders,

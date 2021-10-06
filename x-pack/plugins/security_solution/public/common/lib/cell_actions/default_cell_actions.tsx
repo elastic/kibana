@@ -43,6 +43,8 @@ const useKibanaServices = () => {
   return { timelines, filterManager };
 };
 
+export const EmptyComponent = () => <></>;
+
 const cellActionLink = [
   ({
     browserFields,
@@ -59,7 +61,7 @@ const cellActionLink = [
     timelineId: string;
     pageSize: number;
   }) =>
-    getLink(header?.id, header?.type)
+    getLink(header?.id, header?.type, header?.linkField)
       ? ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
           const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
           const ecs = pageRowIndex < ecsData.length ? ecsData[pageRowIndex] : null;
@@ -75,7 +77,7 @@ const cellActionLink = [
             fieldName: columnId,
           });
 
-          const link = getLink(columnId, header?.type);
+          const link = getLink(columnId, header?.type, header?.linkField);
           const value = parseValue(head(values));
 
           return link && eventId && values && !isEmpty(value) ? (
@@ -98,7 +100,7 @@ const cellActionLink = [
             <></>
           );
         }
-      : () => <></>,
+      : EmptyComponent,
 ];
 
 export const cellActions: TGridCellAction[] = [

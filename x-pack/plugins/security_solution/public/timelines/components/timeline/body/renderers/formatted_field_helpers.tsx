@@ -83,7 +83,13 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
 
   if (isString(value) && ruleName.length > 0 && ruleId != null) {
     const link = Component ? (
-      <Component onClick={goToRuleDetails} iconType="link" aria-label={title} title={title}>
+      <Component
+        onClick={goToRuleDetails}
+        iconType="link"
+        aria-label={title}
+        title={title}
+        data-test-subj={`view-${fieldName}`}
+      >
         {title ?? value}
       </Component>
     ) : (
