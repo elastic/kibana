@@ -29,9 +29,11 @@ export const handleNestedFilter = (filter: Filter, indexPattern?: IndexPatternBa
 
   return {
     meta: filter.meta,
-    nested: {
-      path: field.subType.nested.path,
-      query: query.query || query,
+    query: {
+      nested: {
+        path: field.subType.nested.path,
+        query: query.query || query,
+      },
     },
   };
 };
