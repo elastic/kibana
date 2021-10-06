@@ -34,7 +34,8 @@ export const ResetCommand: ICommand = {
   async run(projects) {
     log.warning(dedent`
       In most cases, 'yarn kbn clean' is all that should be needed to recover a consistent state when
-      problems arise. If you need to use this command, please let us know, as it should not be necessary.
+      problems arise. However for the rare cases where something get corrupt on node_modules you might need this command.
+      If you think you need to use this command very often (which is not normal), please let us know.
     `);
 
     const toDelete = [];

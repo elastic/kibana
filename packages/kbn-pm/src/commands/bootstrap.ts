@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { resolve, sep } from 'path';
+import { sep } from 'path';
 import { CiStatsReporter } from '@kbn/dev-utils/ci_stats_reporter';
 
 import { log } from '../utils/log';
@@ -16,12 +16,7 @@ import { getNonBazelProjectsOnly, topologicallyBatchProjects } from '../utils/pr
 import { ICommand } from './';
 import { readYarnLock } from '../utils/yarn_lock';
 import { validateDependencies } from '../utils/validate_dependencies';
-import {
-  ensureYarnIntegrityFileExists,
-  installBazelTools,
-  runBazel,
-  yarnIntegrityFileExists,
-} from '../utils/bazel';
+import { installBazelTools, runBazel } from '../utils/bazel';
 
 export const BootstrapCommand: ICommand = {
   description: 'Install dependencies and crosslink projects',
@@ -40,16 +35,8 @@ export const BootstrapCommand: ICommand = {
     const reporter = CiStatsReporter.fromEnv(log);
     const timings = [];
 
-    // Force install is set in case a flag is passed or
-    // if the `.yarn-integrity` file is not found which
-    // will be indicated by the return of yarnIntegrityFileExists.
-    const forceInstall =
-      (!!options && options['force-install'] === true) ||
-      !(await yarnIntegrityFileExists(resolve(kibanaProjectPath, 'node_modules')));
-
-    // Ensure we have a `node_modules/.yarn-integrity` file as we depend on it
-    // for bazel to know it has to re-install the node_modules after a reset or a clean
-    await ensureYarnIntegrityFileExists(resolve(kibanaProjectPath, 'node_modules'));
+    // Force install is set in case a flag `--force-install` is passed into kbn bootstrap
+    const forceInstall = !!options && options['force-install'] === true;
 
     // Install bazel machinery tools if needed
     await installBazelTools(rootPath);
