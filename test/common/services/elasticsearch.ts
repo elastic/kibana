@@ -21,13 +21,15 @@ export function ElasticsearchProvider({ getService }: FtrProviderContext): Kiban
   const config = getService('config');
 
   if (process.env.TEST_CLOUD) {
+    // @ts-expect-error TODO make sure Client is assignable to KibanaClient
     return new Client({
       nodes: [formatUrl(config.get('servers.elasticsearch'))],
       requestTimeout: config.get('timeouts.esRequestTimeout'),
     });
   } else {
+    // @ts-expect-error TODO make sure Client is assignable to KibanaClient
     return new Client({
-      ssl: {
+      tls: {
         ca: fs.readFileSync(CA_CERT_PATH, 'utf-8'),
       },
       nodes: [formatUrl(config.get('servers.elasticsearch'))],

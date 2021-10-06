@@ -37,7 +37,7 @@ export const types =
     await pipe(
       TE.tryCatch(
         async () => {
-          const { body } = await new Client({ node }).search({
+          const body = await new Client({ node }).search({
             index,
             size: 0,
             body: query,
