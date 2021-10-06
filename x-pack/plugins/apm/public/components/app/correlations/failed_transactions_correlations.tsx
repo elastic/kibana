@@ -19,7 +19,6 @@ import {
   EuiBetaBadge,
   EuiBadge,
   EuiToolTip,
-  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
@@ -225,7 +224,6 @@ export function FailedTransactionsCorrelations({
             )}
           </>
         ),
-        align: RIGHT_ALIGNMENT,
         render: (_, { normalizedScore }) => {
           return (
             <>
@@ -267,6 +265,7 @@ export function FailedTransactionsCorrelations({
             {fieldName}
             <CorrelationsContextPopover
               fieldName={fieldName}
+              fieldValue={fieldValue}
               stats={fieldStats?.get(fieldName)}
               onAddFilter={onAddFilter}
             />

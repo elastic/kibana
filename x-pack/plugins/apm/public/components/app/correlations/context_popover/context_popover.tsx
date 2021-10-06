@@ -29,10 +29,12 @@ import { useTheme } from '../../../../hooks/use_theme';
 
 export function CorrelationsContextPopover({
   fieldName,
+  fieldValue,
   stats,
   onAddFilter,
 }: {
   fieldName: string;
+  fieldValue: string | number;
   stats?: FieldStats;
   onAddFilter: (
     field: IndexPatternField | string,
@@ -103,7 +105,11 @@ export function CorrelationsContextPopover({
       </EuiTitle>
       {infoIsOpen ? (
         <>
-          <TopValues stats={stats} onAddFilter={onAddFilter} />
+          <TopValues
+            stats={stats}
+            onAddFilter={onAddFilter}
+            fieldValue={fieldValue}
+          />
           {stats.topValuesSampleSize !== undefined && (
             <Fragment>
               <EuiSpacer size="s" />
