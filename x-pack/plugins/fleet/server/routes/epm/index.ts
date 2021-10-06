@@ -19,6 +19,7 @@ import {
   DeletePackageRequestSchema,
   BulkUpgradePackagesFromRegistryRequestSchema,
   GetStatsRequestSchema,
+  UpdatePackageRequestSchema,
 } from '../../types';
 
 import {
@@ -32,6 +33,7 @@ import {
   deletePackageHandler,
   bulkInstallPackagesFromRegistryHandler,
   getStatsHandler,
+  updatePackageHandler,
 } from './handlers';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
@@ -89,6 +91,15 @@ export const registerRoutes = (router: IRouter<FleetRequestHandlerContext>) => {
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getInfoHandler
+  );
+
+  router.put(
+    {
+      path: EPM_API_ROUTES.INFO_PATTERN,
+      validate: UpdatePackageRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    updatePackageHandler
   );
 
   router.post(

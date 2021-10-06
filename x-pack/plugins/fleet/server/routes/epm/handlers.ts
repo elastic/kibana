@@ -22,6 +22,7 @@ import type {
   BulkInstallPackagesResponse,
   IBulkInstallPackageHTTPError,
   GetStatsResponse,
+  UpdatePackageResponse,
 } from '../../../common';
 import type {
   GetCategoriesRequestSchema,
@@ -34,6 +35,7 @@ import type {
   BulkUpgradePackagesFromRegistryRequestSchema,
   GetStatsRequestSchema,
   FleetRequestHandler,
+  UpdatePackageRequestSchema,
 } from '../../types';
 import {
   bulkInstallPackages,
@@ -54,6 +56,7 @@ import { licenseService } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
+import { updatePackage } from '../../services/epm/packages/update';
 
 export const getCategoriesHandler: FleetRequestHandler<
   undefined,
@@ -196,6 +199,28 @@ export const getInfoHandler: FleetRequestHandler<TypeOf<typeof GetInfoRequestSch
       return defaultIngestErrorHandler({ error, response });
     }
   };
+
+export const updatePackageHandler: FleetRequestHandler<
+  TypeOf<typeof UpdatePackageRequestSchema.params>,
+  unknown,
+  TypeOf<typeof UpdatePackageRequestSchema.body>
+> = async (context, request, response) => {
+  try {
+    const { pkgkey } = request.params;
+    const savedObjectsClient = context.fleet.epm.internalSoClient;
+
+    const { pkgName } = splitPkgKey(pkgkey);
+
+    const res = await updatePackage({ savedObjectsClient, pkgName, ...request.body });
+    const body: UpdatePackageResponse = {
+      response: res,
+    };
+
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
 
 export const getStatsHandler: FleetRequestHandler<TypeOf<typeof GetStatsRequestSchema.params>> =
   async (context, request, response) => {
