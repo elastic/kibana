@@ -980,7 +980,7 @@ export function overridePackageInputs(
         ({ name }) => name === input.policy_template
       );
 
-      // Ignore any policy template removes in the new package version
+      // Ignore any policy templates removed in the new package version
       if (!policyTemplate) {
         return false;
       }
@@ -1000,7 +1000,7 @@ export function overridePackageInputs(
 
     // If there's no corresponding input on the original package policy, just
     // take the override value from the new package as-is. This case typically
-    // occurs when inputs or package policies are added/removed between versions.
+    // occurs when inputs or package policy templates are added/removed between versions.
     if (originalInput === undefined) {
       inputs.push(override as NewPackagePolicyInput);
       continue;
@@ -1092,7 +1092,14 @@ function deepMergeVars(original: any, override: any): any {
 
   for (const { name, ...overrideVal } of overrideVars) {
     const originalVar = original.vars[name];
+
     result.vars[name] = { ...originalVar, ...overrideVal };
+
+    // Ensure that any value from the original object is persisted on the newly merged resulting object,
+    // even if we merge other data about the given variable
+    if (originalVar?.value) {
+      result.vars[name].value = originalVar.value;
+    }
   }
 
   return result;
