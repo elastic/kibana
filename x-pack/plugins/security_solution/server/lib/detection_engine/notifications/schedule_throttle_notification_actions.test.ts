@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 import { alertsMock } from '../../../../../alerting/server/mocks';
 import { scheduleThrottledNotificationActions } from './schedule_throttle_notification_actions';
 import {
@@ -19,8 +19,10 @@ jest.mock('./schedule_notification_actions', () => ({
 
 describe('schedule_throttle_notification_actions', () => {
   let notificationRuleParams: NotificationRuleTypeParams;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
     (scheduleNotificationActions as jest.Mock).mockReset();
     notificationRuleParams = {
       author: ['123'],
@@ -82,6 +84,38 @@ describe('schedule_throttle_notification_actions', () => {
       ),
       alertInstance: alertsMock.createAlertInstanceFactory(),
       notificationRuleParams,
+      logger,
+      signals: [],
+    });
+
+    expect(scheduleNotificationActions as jest.Mock).toHaveBeenCalled();
+  });
+
+  it('should call "scheduleNotificationActions" if the signals length is 1 or greater', async () => {
+    await scheduleThrottledNotificationActions({
+      throttle: '1d',
+      startedAt: new Date('2021-08-24T19:19:22.094Z'),
+      id: '123',
+      kibanaSiemAppUrl: 'http://www.example.com',
+      outputIndex: 'output-123',
+      ruleId: 'rule-123',
+      esClient: elasticsearchServiceMock.createElasticsearchClient(
+        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+          hits: {
+            hits: [],
+            total: 0,
+          },
+        })
+      ),
+      alertInstance: alertsMock.createAlertInstanceFactory(),
+      notificationRuleParams,
+      logger,
+      signals: [
+        {
+          _id: '123',
+          index: '123',
+        },
+      ],
     });
 
     expect(scheduleNotificationActions as jest.Mock).toHaveBeenCalled();
@@ -105,6 +139,8 @@ describe('schedule_throttle_notification_actions', () => {
       ),
       alertInstance: alertsMock.createAlertInstanceFactory(),
       notificationRuleParams,
+      logger,
+      signals: [],
     });
 
     expect(scheduleNotificationActions as jest.Mock).not.toHaveBeenCalled();
@@ -132,6 +168,8 @@ describe('schedule_throttle_notification_actions', () => {
       ),
       alertInstance: alertsMock.createAlertInstanceFactory(),
       notificationRuleParams,
+      logger,
+      signals: [],
     });
 
     expect(scheduleNotificationActions as jest.Mock).not.toHaveBeenCalled();
@@ -161,6 +199,8 @@ describe('schedule_throttle_notification_actions', () => {
       ),
       alertInstance: alertsMock.createAlertInstanceFactory(),
       notificationRuleParams,
+      logger,
+      signals: [],
     });
 
     expect((scheduleNotificationActions as jest.Mock).mock.calls[0][0].resultsLink).toMatch(
@@ -172,6 +212,73 @@ describe('schedule_throttle_notification_actions', () => {
         signals: [{ test: 123 }],
         ruleParams: notificationRuleParams,
       })
+    );
+  });
+
+  it('should log debug information when passing through in expected format and no error messages', async () => {
+    await scheduleThrottledNotificationActions({
+      throttle: '1d',
+      startedAt: new Date('2021-08-24T19:19:22.094Z'),
+      id: '123',
+      kibanaSiemAppUrl: 'http://www.example.com',
+      outputIndex: 'output-123',
+      ruleId: 'rule-123',
+      esClient: elasticsearchServiceMock.createElasticsearchClient(
+        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+          hits: {
+            hits: [
+              {
+                _source: {},
+              },
+            ],
+            total: 1,
+          },
+        })
+      ),
+      alertInstance: alertsMock.createAlertInstanceFactory(),
+      notificationRuleParams,
+      logger,
+      signals: [],
+    });
+    // We only test the first part since it has date math using math
+    expect(logger.debug.mock.calls[0][0]).toMatch(
+      /The notification throttle resultsLink created is/
+    );
+    expect(logger.debug.mock.calls[1][0]).toEqual(
+      'The notification throttle query result size before deconflicting duplicates is: 1. The notification throttle passed in signals size before deconflicting duplicates is: 0. The deconflicted size and size of the signals sent into throttle notification is: 1.'
+    );
+    // error should not have been called in this case.
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('should log error information if "throttle" is an invalid string', async () => {
+    await scheduleThrottledNotificationActions({
+      throttle: 'invalid',
+      startedAt: new Date('2021-08-24T19:19:22.094Z'),
+      id: '123',
+      kibanaSiemAppUrl: 'http://www.example.com',
+      outputIndex: 'output-123',
+      ruleId: 'rule-123',
+      esClient: elasticsearchServiceMock.createElasticsearchClient(
+        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+          hits: {
+            hits: [
+              {
+                _source: {},
+              },
+            ],
+            total: 1,
+          },
+        })
+      ),
+      alertInstance: alertsMock.createAlertInstanceFactory(),
+      notificationRuleParams,
+      logger,
+      signals: [],
+    });
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'The notification throttle "from" and/or "to" range values could be constructed as valid. Tried to construct the values of "from": now-invalid "to": 2021-08-24T19:19:22.094Z. This will cause a reset of the notification throttle. Expect either missing alert notifications or alert notifications happening earlier than expected.'
     );
   });
 });
