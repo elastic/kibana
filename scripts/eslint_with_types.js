@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { TodoSavedObjectAttributes } from './todo_saved_object_attributes';
-export type { BookSavedObjectAttributes } from './book_saved_object_attributes';
-export { BOOK_SAVED_OBJECT } from './book_saved_object_attributes';
+require('../src/setup_node_env');
+require('../src/dev/eslint').runEslintWithTypes();
