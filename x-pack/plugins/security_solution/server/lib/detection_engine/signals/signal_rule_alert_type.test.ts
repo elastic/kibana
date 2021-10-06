@@ -30,7 +30,7 @@ import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mo
 import { queryExecutor } from './executors/query';
 import { mlExecutor } from './executors/ml';
 import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.mock';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
 import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
@@ -496,7 +496,7 @@ describe('signal_rule_alert_type', () => {
     it('and log failure with the default message', async () => {
       (queryExecutor as jest.Mock).mockReturnValue(
         elasticsearchClientMock.createErrorTransportRequestPromise(
-          new ResponseError(
+          new errors.ResponseError(
             elasticsearchClientMock.createApiResponse({
               statusCode: 400,
               body: { error: { type: 'some_error_type' } },

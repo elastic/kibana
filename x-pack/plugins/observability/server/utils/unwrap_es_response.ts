@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch';
 import type { UnwrapPromise } from '@kbn/utility-types';
 import { inspect } from 'util';
 

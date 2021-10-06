@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClientError } from '@elastic/elasticsearch/lib/errors';
+import { ElasticsearchClientError } from '@elastic/elasticsearch';
 import { boomify } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { ErrorTypes } from '../../types';

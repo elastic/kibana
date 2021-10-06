@@ -12,7 +12,7 @@ import {
 } from '@kbn/server-route-repository';
 import { CoreSetup, CoreStart, Logger, RouteRegistrar } from 'kibana/server';
 import Boom from '@hapi/boom';
-import { RequestAbortedError } from '@elastic/elasticsearch/lib/errors';
+import { RequestAbortedError } from '@elastic/elasticsearch';
 import { RuleDataPluginService } from '../../../rule_registry/server';
 import { ObservabilityRequestHandlerContext } from '../types';
 import { AbstractObservabilityServerRouteRepository } from './types';

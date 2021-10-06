@@ -16,7 +16,7 @@ import { esSearchStrategyProvider } from './es_search_strategy';
 import { SearchStrategyDependencies } from '../../types';
 
 import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
-import { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { KbnServerError } from '../../../../../kibana_utils/server';
 
 describe('ES search strategy', () => {
@@ -132,7 +132,7 @@ describe('ES search strategy', () => {
 
   it('throws normalized error if ResponseError is thrown', async (done) => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
-    const errResponse = new ResponseError({
+    const errResponse = new errors.ResponseError({
       body: indexNotFoundException,
       statusCode: 404,
       headers: {},
@@ -156,7 +156,7 @@ describe('ES search strategy', () => {
 
   it('throws normalized error if ElasticsearchClientError is thrown', async (done) => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
-    const errResponse = new ElasticsearchClientError('This is a general ESClient error');
+    const errResponse = new errors.ElasticsearchClientError('This is a general ESClient error');
 
     try {
       await esSearchStrategyProvider(mockConfig$, mockLogger)

@@ -8,7 +8,7 @@
 import uuid from 'uuid';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
@@ -84,7 +84,7 @@ export async function getEnrollmentAPIKey(
     // @ts-expect-error esDocToEnrollmentApiKey doesn't accept optional _source
     return esDocToEnrollmentApiKey(res.body);
   } catch (e) {
-    if (e instanceof ResponseError && e.statusCode === 404) {
+    if (e instanceof errors.ResponseError && e.statusCode === 404) {
       throw Boom.notFound(`Enrollment api key ${id} not found`);
     }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { Either, isLeft } from 'fp-ts/lib/Either';
 
 import { ElasticsearchClient } from 'kibana/server';
@@ -140,13 +140,13 @@ export class RuleDataClient implements IRuleDataClient {
                 .then(() => {
                   return clusterClient.bulk(requestWithDefaultParameters).then((retryResponse) => {
                     if (retryResponse.body.errors) {
-                      throw new ResponseError(retryResponse);
+                      throw new errors.ResponseError(retryResponse);
                     }
                     return retryResponse;
                   });
                 });
             }
-            const error = new ResponseError(response);
+            const error = new errors.ResponseError(response);
             throw error;
           }
           return response;

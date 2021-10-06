@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { KibanaRequest, RouteRegistrar } from 'src/core/server';
-import { RequestAbortedError } from '@elastic/elasticsearch/lib/errors';
+import { RequestAbortedError } from '@elastic/elasticsearch';
 import agent from 'elastic-apm-node';
 import { ServerRouteRepository } from '@kbn/server-route-repository';
 import { merge } from 'lodash';

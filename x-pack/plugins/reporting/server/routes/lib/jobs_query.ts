@@ -11,7 +11,7 @@ import {
   SearchHit,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { ElasticsearchClient } from 'src/core/server';
@@ -71,7 +71,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
 
       return await callback(client);
     } catch (error) {
-      if (error instanceof ResponseError && [401, 403, 404].includes(error.statusCode)) {
+      if (error instanceof errors.ResponseError && [401, 403, 404].includes(error.statusCode)) {
         return;
       }
 

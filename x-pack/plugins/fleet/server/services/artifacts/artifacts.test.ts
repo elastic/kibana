@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 
 import type { ApiResponse } from '@elastic/transport';
 
@@ -64,7 +64,7 @@ describe('When using the artifacts services', () => {
     it('should throw an ArtifactElasticsearchError if one is encountered', async () => {
       esClientMock.get.mockImplementation(() => {
         return elasticsearchServiceMock.createErrorTransportRequestPromise(
-          new ResponseError(generateEsRequestErrorApiResponseMock())
+          new errors.ResponseError(generateEsRequestErrorApiResponseMock())
         );
       });
 
@@ -103,7 +103,7 @@ describe('When using the artifacts services', () => {
     });
 
     it('should ignore 409 errors from elasticsearch', async () => {
-      const error = new ResponseError({ statusCode: 409 } as ApiResponse);
+      const error = new errors.ResponseError({ statusCode: 409 } as ApiResponse);
       // Unclear why `mockRejectedValue()` has the params value type set to `never`
       // @ts-expect-error
       esClientMock.create.mockRejectedValue(error);

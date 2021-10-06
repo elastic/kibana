@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { Client } from '@elastic/elasticsearch';
 import { FtrService } from '../../functional/ftr_provider_context';
 import {
@@ -180,7 +180,7 @@ export class EndpointTestResources extends FtrService {
         return searchResponse.body.hits.total === size;
       } catch (error) {
         // We ignore 404's (index might not exist)
-        if (error instanceof ResponseError && error.statusCode === 404) {
+        if (error instanceof errors.ResponseError && error.statusCode === 404) {
           return false;
         }
 

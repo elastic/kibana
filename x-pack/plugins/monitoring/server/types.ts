@@ -14,7 +14,7 @@ import type {
   ElasticsearchClient,
 } from 'kibana/server';
 import type Boom from '@hapi/boom';
-import { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { LicenseFeature, ILicense } from '../../licensing/server';
 import type {
@@ -180,7 +180,7 @@ export interface ClusterSettingsReasonResponse {
   };
 }
 
-export type ErrorTypes = Error | Boom.Boom | ResponseError | ElasticsearchClientError;
+export type ErrorTypes = Error | Boom.Boom | errors.ResponseError | errors.ElasticsearchClientError;
 
 export type Pipeline = {
   id: string;

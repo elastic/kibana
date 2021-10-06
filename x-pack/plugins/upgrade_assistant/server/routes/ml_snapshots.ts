@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { API_BASE_PATH } from '../../common/constants';
@@ -56,7 +56,7 @@ const verifySnapshotUpgrade = async (
   snapshot: { snapshotId: string; jobId: string }
 ): Promise<{
   isSuccessful: boolean;
-  error?: ResponseError;
+  error?: errors.ResponseError;
 }> => {
   const { snapshotId, jobId } = snapshot;
 

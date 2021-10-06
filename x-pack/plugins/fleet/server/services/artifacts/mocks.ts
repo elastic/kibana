@@ -7,7 +7,7 @@
 import { URL } from 'url';
 
 import type { ApiResponse } from '@elastic/elasticsearch';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 
 import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 import type { SearchHit, ESSearchResponse } from '../../../../../../src/core/types/elasticsearch';
@@ -182,7 +182,7 @@ export const setEsClientMethodResponseToError = (
 ) => {
   esClientMock[method].mockImplementation(() => {
     return elasticsearchServiceMock.createErrorTransportRequestPromise(
-      new ResponseError(generateEsRequestErrorApiResponseMock(options))
+      new errors.ResponseError(generateEsRequestErrorApiResponseMock(options))
     );
   });
 };

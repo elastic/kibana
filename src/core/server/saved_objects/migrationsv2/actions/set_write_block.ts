@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClientError } from '@elastic/elasticsearch/lib/errors';
+import type { ElasticsearchClientError } from '@elastic/elasticsearch';
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { errors as EsErrors } from '@elastic/elasticsearch';
