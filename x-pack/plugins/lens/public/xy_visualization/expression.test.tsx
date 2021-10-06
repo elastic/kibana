@@ -767,8 +767,8 @@ describe('xy_expression', () => {
         );
         expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
           fit: true,
-          min: undefined,
-          max: undefined,
+          min: NaN,
+          max: NaN,
         });
       });
 
@@ -796,6 +796,8 @@ describe('xy_expression', () => {
         );
         expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
           fit: false,
+          min: NaN,
+          max: NaN,
         });
       });
 
@@ -825,8 +827,8 @@ describe('xy_expression', () => {
         );
         expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
           fit: false,
-          min: undefined,
-          max: undefined,
+          min: NaN,
+          max: NaN,
         });
       });
     });
@@ -870,7 +872,11 @@ describe('xy_expression', () => {
           }}
         />
       );
-      expect(component.find(Settings).prop('xDomain')).toEqual({ minInterval: 101 });
+      expect(component.find(Settings).prop('xDomain')).toEqual({
+        minInterval: 101,
+        min: NaN,
+        max: NaN,
+      });
     });
 
     test('disabled legend extra by default', () => {

@@ -1511,7 +1511,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     }
     gridLine={
       Object {
-        "visible": false,
+        "visible": false,"fit": false,
       }
     }
     groupId="left"
