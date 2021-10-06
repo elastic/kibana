@@ -161,7 +161,7 @@ describe('Events Details Helpers', () => {
         isObjectArray: false,
       },
       {
-        category: 'signal',
+        category: 'kibana',
         field: 'kibana.alert.workflow_status',
         values: ['open'],
         originalValue: ['open'],

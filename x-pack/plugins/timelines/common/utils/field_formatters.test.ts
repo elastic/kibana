@@ -136,7 +136,7 @@ describe('Events Details Helpers', () => {
     const _source: EventSource = {
       '@timestamp': '2021-02-24T00:41:06.527Z',
       'kibana.alert.workflow_status': 'open',
-      'signal.rule.name': 'Rawr',
+      'kibana.alert.rule.name': 'Rawr',
       'threat.indicator': [
         {
           provider: 'yourself',

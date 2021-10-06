@@ -161,7 +161,7 @@ describe('updateAlertsStatus', () => {
                     }
                     if (ctx._source.signal != null && ctx._source.signal.status != null) {
                       ctx._source.signal.status = 'closed'
-                    }"
+                    }",
               },
             },
             "conflicts": "abort",
