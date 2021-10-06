@@ -69,6 +69,16 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setDeleteLogsCacheResponse = (response?: string, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+    server.respondWith('DELETE', `${API_BASE_PATH}/deprecation_logging/cache`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
   const setUpdateDeprecationLoggingResponse = (
     response?: DeprecationLoggingStatus,
     error?: ResponseError
@@ -169,6 +179,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setDeleteMlSnapshotResponse,
     setUpgradeMlSnapshotStatusResponse,
     setLoadDeprecationLogsCountResponse,
+    setDeleteLogsCacheResponse,
     setStartReindexingResponse,
     setReindexStatusResponse,
     setLoadMlUpgradeModeResponse,

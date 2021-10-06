@@ -248,6 +248,7 @@ describe('Overview - Fix deprecation logs step', () => {
   describe('Step 3 - Resolve log issues', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(true));
+      httpRequestsMockHelpers.setDeleteLogsCacheResponse('ok');
     });
 
     test('With deprecation warnings', async () => {
@@ -335,6 +336,47 @@ describe('Overview - Fix deprecation logs step', () => {
       await actions.clickResetButton();
 
       expect(exists('noWarningsCallout')).toBe(true);
+    });
+
+    test('Shows a toast if deleting cache fails', async () => {
+      const error = {
+        statusCode: 500,
+        error: 'Internal server error',
+        message: 'Internal server error',
+      };
+
+      httpRequestsMockHelpers.setDeleteLogsCacheResponse(undefined, error);
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 10 });
+
+      const addDanger = jest.fn();
+      await act(async () => {
+        testBed = await setupOverviewPage({
+          services: {
+            core: {
+              notifications: {
+                toasts: {
+                  addDanger,
+                },
+              },
+            },
+          },
+        });
+      });
+
+      const { exists, actions, component } = testBed;
+
+      component.update();
+
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 0 });
+
+      await actions.clickResetButton();
+
+      // The toast should always be shown if the delete logs cache fails.
+      expect(addDanger).toHaveBeenCalled();
+      // Even though a stub for the API call getting the count was set to return 0,
+      // given that the delete logs cache API call will fail the callout remains in
+      // warning state.
+      expect(exists('hasWarningsCallout')).toBe(true);
     });
 
     describe('Poll for logs count', () => {

@@ -96,13 +96,11 @@ export class ApiService {
     });
   }
 
-  public async deleteDeprecationLogsCache() {
-    const result = await this.sendRequest({
-      path: `${API_BASE_PATH}/deprecation_logging/deprecation_cache`,
+  public deleteDeprecationLogsCache() {
+    return this.sendRequest({
+      path: `${API_BASE_PATH}/deprecation_logging/cache`,
       method: 'delete',
     });
-
-    return result;
   }
 
   public async updateIndexSettings(indexName: string, settings: string[]) {

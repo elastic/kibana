@@ -46,6 +46,9 @@ const i18nTexts = {
       defaultMessage: 'Reset counter',
     }
   ),
+  errorToastTitle: i18n.translate('xpack.upgradeAssistant.overview.verifyChanges.errorToastTitle', {
+    defaultMessage: 'Could not clear deprecation logs cache',
+  }),
 };
 
 interface Props {
@@ -60,7 +63,10 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
   setHasNoDeprecationLogs,
 }) => {
   const {
-    services: { api },
+    services: {
+      api,
+      core: { notifications },
+    },
   } = useAppContext();
   const { data, error, isLoading, resendRequest, isInitialRequest } =
     api.getDeprecationLogsCount(checkpoint);
@@ -72,9 +78,18 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
   const calloutTestId = hasLogs ? 'hasWarningsCallout' : 'noWarningsCallout';
 
   const onResetClick = async () => {
+    const { error: deleteLogsCacheError } = await api.deleteDeprecationLogsCache();
+
+    if (deleteLogsCacheError) {
+      notifications.toasts.addDanger({
+        title: i18nTexts.errorToastTitle,
+        text: deleteLogsCacheError.message.toString(),
+      });
+      return;
+    }
+
     const now = moment().toISOString();
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_RESET_LOGS_COUNTER_CLICK);
-    api.deleteDeprecationLogsCache();
     setCheckpoint(now);
   };
 

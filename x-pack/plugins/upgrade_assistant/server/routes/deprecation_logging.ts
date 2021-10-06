@@ -127,7 +127,7 @@ export function registerDeprecationLoggingRoutes({
 
   router.delete(
     {
-      path: `${API_BASE_PATH}/deprecation_logging/deprecation_cache`,
+      path: `${API_BASE_PATH}/deprecation_logging/cache`,
       validate: false,
     },
     versionCheckHandlerWrapper(
