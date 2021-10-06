@@ -33,6 +33,8 @@ import { traceRouteRepository } from './traces';
 import { transactionRouteRepository } from './transactions';
 import { APMRouteHandlerResources } from './typings';
 import { historicalDataRouteRepository } from './historical_data';
+import { eventMetadataRouteRepository } from './event_metadata';
+import { suggestionsRouteRepository } from './suggestions';
 
 const getTypedGlobalApmServerRouteRepository = () => {
   const repository = createApmServerRouteRepository()
@@ -45,6 +47,7 @@ const getTypedGlobalApmServerRouteRepository = () => {
     .merge(serviceMapRouteRepository)
     .merge(serviceNodeRouteRepository)
     .merge(serviceRouteRepository)
+    .merge(suggestionsRouteRepository)
     .merge(traceRouteRepository)
     .merge(transactionRouteRepository)
     .merge(alertsChartPreviewRouteRepository)
@@ -56,7 +59,8 @@ const getTypedGlobalApmServerRouteRepository = () => {
     .merge(apmFleetRouteRepository)
     .merge(backendsRouteRepository)
     .merge(fallbackToTransactionsRouteRepository)
-    .merge(historicalDataRouteRepository);
+    .merge(historicalDataRouteRepository)
+    .merge(eventMetadataRouteRepository);
 
   return repository;
 };

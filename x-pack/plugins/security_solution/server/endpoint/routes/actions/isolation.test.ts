@@ -42,7 +42,7 @@ import {
   HostMetadata,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { createV2SearchResponse } from '../metadata/support/test_support';
+import { legacyMetadataSearchResponse } from '../metadata/support/test_support';
 import { ElasticsearchAssetType } from '../../../../../fleet/common';
 import { CasesClientMock } from '../../../../../cases/server/client/mocks';
 
@@ -151,6 +151,7 @@ describe('Host Isolation', () => {
               type: ElasticsearchAssetType.transform,
             },
           ],
+          keep_policies_up_to_date: false,
         })
       );
       licenseEmitter = new Subject();
@@ -188,7 +189,7 @@ describe('Host Isolation', () => {
         ctx.core.elasticsearch.client.asCurrentUser.search = jest
           .fn()
           .mockImplementation(() =>
-            Promise.resolve({ body: createV2SearchResponse(searchResponse) })
+            Promise.resolve({ body: legacyMetadataSearchResponse(searchResponse) })
           );
         const withLicense = license ? license : Platinum;
         licenseEmitter.next(withLicense);

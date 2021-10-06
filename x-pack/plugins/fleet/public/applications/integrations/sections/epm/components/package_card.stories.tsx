@@ -29,8 +29,9 @@ const args: Args = {
   release: 'ga',
   id: 'id',
   version: '1.0.0',
-  download: '/',
-  path: 'path',
+  url: '/',
+  icons: [],
+  integration: '',
 };
 
 const argTypes = {
@@ -44,6 +45,8 @@ const argTypes = {
 
 export const NotInstalled = ({ width, ...props }: Args) => (
   <div style={{ width }}>
+    {/*
+ // @ts-ignore */}
     <PackageCard {...props} status="not_installed" />
   </div>
 );
@@ -51,6 +54,7 @@ export const NotInstalled = ({ width, ...props }: Args) => (
 export const Installed = ({ width, ...props }: Args) => {
   const savedObject: SavedObject<Installation> = {
     id: props.id,
+    // @ts-expect-error
     type: props.type || '',
     attributes: {
       name: props.name,
@@ -62,12 +66,15 @@ export const Installed = ({ width, ...props }: Args) => {
       install_status: 'installed',
       install_source: 'registry',
       install_started_at: '2020-01-01T00:00:00.000Z',
+      keep_policies_up_to_date: false,
     },
     references: [],
   };
 
   return (
     <div style={{ width }}>
+      {/*
+ // @ts-ignore */}
       <PackageCard {...props} status="installed" savedObject={savedObject} />
     </div>
   );

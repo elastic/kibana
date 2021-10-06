@@ -57,14 +57,13 @@ export function AddLayerButton({
         })}
         content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
           defaultMessage:
-            'Use multiple layers to combine visualization types or visualize different index patterns.',
+            'Use multiple layers to combine visualization types or visualize different data views.',
         })}
         position="bottom"
       >
         <EuiButton
           className="lnsConfigPanel__addLayerBtn"
           fullWidth
-          size="s"
           data-test-subj="lnsLayerAddButton"
           aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
             defaultMessage: 'Add layer',
@@ -89,7 +88,6 @@ export function AddLayerButton({
         <EuiButton
           className="lnsConfigPanel__addLayerBtn"
           fullWidth
-          size="s"
           data-test-subj="lnsLayerAddButton"
           aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
             defaultMessage: 'Add layer',

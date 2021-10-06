@@ -24,6 +24,7 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
+import type { DiscoverStart } from '../../../../src/plugins/discover/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type {
   HomePublicPluginSetup,
@@ -42,6 +43,8 @@ import { createObservabilityRuleTypeRegistry } from './rules/create_observabilit
 import { createCallObservabilityApi } from './services/call_observability_api';
 import { createNavigationRegistry, NavigationEntry } from './services/navigation_registry';
 import { updateGlobalNavigation } from './update_global_navigation';
+import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
+import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
@@ -58,6 +61,7 @@ export interface ObservabilityPublicPluginsStart {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
   lens: LensPublicStart;
+  discover: DiscoverStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -231,7 +235,9 @@ export class Plugin
     };
   }
 
-  public start({ application }: CoreStart) {
+  public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
+    const { application } = coreStart;
+
     const config = this.initializerContext.config.get();
 
     updateGlobalNavigation({
@@ -252,6 +258,8 @@ export class Plugin
       navigation: {
         PageTemplate,
       },
+      createExploratoryViewUrl,
+      ExploratoryViewEmbeddable: getExploratoryViewEmbeddable(coreStart, pluginsStart),
     };
   }
 }

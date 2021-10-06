@@ -78,7 +78,7 @@ export const areaVisTypeDefinition = {
             truncate: 100,
           },
           title: {
-            text: defaultCountLabel,
+            text: '',
           },
           style: {},
         },

@@ -14,7 +14,7 @@ import { HostMetadata, MaybeImmutable } from '../../../../../../common/endpoint/
 import { useEndpointSelector } from './hooks';
 import { agentPolicies, uiQueryParams } from '../../store/selectors';
 import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
-import { ContextMenuItemNavByRouterProps } from '../../../../components/context_menu_with_router_support/context_menu_item_nav_by_rotuer';
+import { ContextMenuItemNavByRouterProps } from '../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { isIsolationSupported } from '../../../../../../common/endpoint/service/host_isolation/utils';
