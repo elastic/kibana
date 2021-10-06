@@ -6,105 +6,57 @@
  */
 
 import React, { useMemo } from 'react';
-import { omit } from 'lodash/fp';
-import { createStructuredSelector } from 'reselect';
-
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiLink } from '@elastic/eui';
-import * as i18nCommon from '../../../common/translations';
-import { EmptyPage, EmptyPageActionsProps } from '../../../common/components/empty_page';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../common/lib/kibana';
 import { ADD_DATA_PATH } from '../../../../common/constants';
-import {
-  useEndpointSelector,
-  useIngestUrl,
-} from '../../../management/pages/endpoint_hosts/view/hooks';
-import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { CreateStructuredSelector } from '../../../common/store';
-import { endpointPackageVersion as useEndpointPackageVersion } from '../../../management/pages/endpoint_hosts/store/selectors';
+import { pagePathGetters } from '../../../../../fleet/public';
+import { SOLUTION_NAME } from '../../../../public/common/translations';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
+
+import {
+  KibanaPageTemplate,
+  NoDataPageActionsProps,
+} from '../../../../../../../src/plugins/kibana_react/public';
 
 const OverviewEmptyComponent: React.FC = () => {
   const { http, docLinks } = useKibana().services;
   const basePath = http.basePath.get();
-  const selector = (createStructuredSelector as CreateStructuredSelector)({
-    endpointPackageVersion: useEndpointPackageVersion,
-  });
-  const { endpointPackageVersion } = useEndpointSelector(selector);
-  const { url: ingestUrl } = useIngestUrl('');
-
-  const endpointIntegrationUrlPath = endpointPackageVersion
-    ? `/endpoint-${endpointPackageVersion}/add-integration`
-    : '';
-  const endpointIntegrationUrl = `/integrations${endpointIntegrationUrlPath}`;
-  const handleEndpointClick = useNavigateToAppEventHandler('fleet', {
-    path: endpointIntegrationUrl,
-  });
   const canAccessFleet = useUserPrivileges().endpointPrivileges.canAccessFleet;
+  const integrationsPathComponents = pagePathGetters.integrations_all({ category: 'security' });
 
-  const emptyPageActions: EmptyPageActionsProps = useMemo(
+  const agentAction: NoDataPageActionsProps = useMemo(
     () => ({
       elasticAgent: {
-        label: i18nCommon.EMPTY_ACTION_ELASTIC_AGENT,
-        url: ingestUrl,
-        description: i18nCommon.EMPTY_ACTION_ELASTIC_AGENT_DESCRIPTION,
-        fill: false,
-      },
-      beats: {
-        label: i18nCommon.EMPTY_ACTION_BEATS,
-        url: `${basePath}${ADD_DATA_PATH}`,
-        description: i18nCommon.EMPTY_ACTION_BEATS_DESCRIPTION,
-        fill: false,
-      },
-      endpoint: {
-        label: i18nCommon.EMPTY_ACTION_ENDPOINT,
-        url: endpointIntegrationUrl,
-        description: i18nCommon.EMPTY_ACTION_ENDPOINT_DESCRIPTION,
-        onClick: handleEndpointClick,
-        fill: false,
+        href: `${basePath}${integrationsPathComponents[0]}${integrationsPathComponents[1]}`,
+        description: i18n.translate(
+          'xpack.securitySolution.pages.emptyPage.beatsCard.description',
+          {
+            defaultMessage:
+              'Use Elastic Agent to collect security events and protect your endpoints from threats. Manage your agents in Fleet and add integrations with a single click.',
+          }
+        ),
       },
     }),
-    [basePath, ingestUrl, endpointIntegrationUrl, handleEndpointClick]
+    [basePath, integrationsPathComponents]
   );
 
-  const emptyPageIngestDisabledActions = useMemo(
-    () => omit(['elasticAgent', 'endpoint'], emptyPageActions),
-    [emptyPageActions]
+  const beatsAction: NoDataPageActionsProps = useMemo(
+    () => ({
+      beats: {
+        href: `${basePath}${ADD_DATA_PATH}`,
+      },
+    }),
+    [basePath]
   );
 
-  return canAccessFleet === true ? (
-    <EmptyPage
-      actions={emptyPageActions}
+  return (
+    <KibanaPageTemplate
       data-test-subj="empty-page"
-      message={
-        <>
-          <FormattedMessage
-            id="xpack.securitySolution.emptyMessage"
-            defaultMessage="Elastic Security integrates the free and open Elastic SIEM with Endpoint Security to prevent, detect, and respond to threats. To begin, you’ll need to add security solution related data to the Elastic Stack. For additional information, you can view our "
-          />
-          <EuiLink href={docLinks.links.siem.gettingStarted} target="_blank">
-            {i18nCommon.EMPTY_ACTION_SECONDARY}
-          </EuiLink>
-        </>
-      }
-      title={i18nCommon.EMPTY_TITLE}
-    />
-  ) : (
-    <EmptyPage
-      actions={emptyPageIngestDisabledActions}
-      data-test-subj="empty-page"
-      message={
-        <>
-          <FormattedMessage
-            id="xpack.securitySolution.emptyMessage"
-            defaultMessage="Elastic Security integrates the free and open Elastic SIEM with Endpoint Security to prevent, detect, and respond to threats. To begin, you’ll need to add security solution related data to the Elastic Stack. For additional information, you can view our "
-          />
-          <EuiLink href={docLinks.links.siem.gettingStarted} target="_blank">
-            {i18nCommon.EMPTY_ACTION_SECONDARY}
-          </EuiLink>
-        </>
-      }
-      title={i18nCommon.EMPTY_TITLE}
+      noDataConfig={{
+        solution: SOLUTION_NAME,
+        actions: canAccessFleet ? agentAction : beatsAction,
+        docsLink: docLinks.links.siem.gettingStarted,
+      }}
     />
   );
 };
