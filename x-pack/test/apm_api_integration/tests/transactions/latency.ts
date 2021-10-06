@@ -113,7 +113,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(response.status).to.be(200);
           const latencyChartReturn = response.body as LatencyChartReturnType;
           expect(latencyChartReturn.currentPeriod.overallAvgDuration).not.to.be(null);
-          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(31);
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(61);
         });
       });
 
@@ -138,7 +138,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(response.status).to.be(200);
           const latencyChartReturn = response.body as LatencyChartReturnType;
           expect(latencyChartReturn.currentPeriod.overallAvgDuration).not.to.be(null);
-          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(31);
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(61);
         });
       });
 
@@ -165,10 +165,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expect(latencyChartReturn.currentPeriod.overallAvgDuration).not.to.be(null);
           expectSnapshot(latencyChartReturn.currentPeriod.overallAvgDuration).toMatchInline(
-            `53906.6603773585`
+            `53147.5747663551`
           );
 
-          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(31);
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(61);
         });
       });
 
