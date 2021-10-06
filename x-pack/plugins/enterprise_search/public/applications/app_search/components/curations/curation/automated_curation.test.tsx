@@ -14,9 +14,9 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiTab } from '@elastic/eui';
 
-import { getPageHeaderActions, getPageTitle } from '../../../../test_helpers';
+import { getPageHeaderActions, getPageHeaderTabs, getPageTitle } from '../../../../test_helpers';
 
 jest.mock('./curation_logic', () => ({ CurationLogic: jest.fn() }));
 
@@ -58,6 +58,20 @@ describe('AutomatedCuration', () => {
     expect(wrapper.is(AppSearchPageTemplate));
     expect(wrapper.find(PromotedDocuments)).toHaveLength(1);
     expect(wrapper.find(OrganicDocuments)).toHaveLength(1);
+  });
+
+  it('includes a static tab group', () => {
+    const wrapper = shallow(<AutomatedCuration />);
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+
+    expect(tabs).toHaveLength(2);
+
+    expect(tabs.at(0).prop('onClick')).toBeUndefined();
+    expect(tabs.at(0).prop('isSelected')).toBe(true);
+
+    expect(tabs.at(1).prop('onClick')).toBeUndefined();
+    expect(tabs.at(1).prop('isSelected')).toBe(false);
+    expect(tabs.at(1).prop('disabled')).toBe(true);
   });
 
   it('initializes CurationLogic with a curationId prop from URL param', () => {
