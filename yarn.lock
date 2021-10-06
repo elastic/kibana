@@ -2228,6 +2228,37 @@
     enabled "2.0.x"
     kuler "^2.0.0"
 
+"@dnd-kit/accessibility@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@dnd-kit/accessibility/-/accessibility-3.0.0.tgz#b56e3750414fd907b7d6972b3116aa8f96d07fde"
+  integrity sha512-QwaQ1IJHQHMMuAGOOYHQSx7h7vMZPfO97aDts8t5N/MY7n2QTDSnW+kF7uRQ1tVBkr6vJ+BqHWG5dlgGvwVjow==
+  dependencies:
+    tslib "^2.0.0"
+
+"@dnd-kit/core@^3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@dnd-kit/core/-/core-3.1.1.tgz#c5ad6665931f5a51e74226220e58ac7514f3faf0"
+  integrity sha512-18YY5+1lTqJbGSg6JBSa/fjAOTUYAysFrQ5Ti8oppEPHFacQbC+owM51y2z2KN0LkDHBfGZKw2sFT7++ttwfpA==
+  dependencies:
+    "@dnd-kit/accessibility" "^3.0.0"
+    "@dnd-kit/utilities" "^2.0.0"
+    tslib "^2.0.0"
+
+"@dnd-kit/sortable@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@dnd-kit/sortable/-/sortable-4.0.0.tgz#81dd2b014a16527cf89602dc40060d9ee4dad352"
+  integrity sha512-teYVFy6mQG/u6F6CaGxAkzPfiNJvguFzWfJ/zonYQRxfANHX6QJ6GziMG9KON/Ae9Q2ODJP8vib+guWJrDXeGg==
+  dependencies:
+    "@dnd-kit/utilities" "^2.0.0"
+    tslib "^2.0.0"
+
+"@dnd-kit/utilities@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@dnd-kit/utilities/-/utilities-2.0.0.tgz#a8462dff65c6f606ecbe95273c7e263b14a1ab97"
+  integrity sha512-bjs49yMNzMM+BYRsBUhTqhTk6HEvhuY3leFt6Em6NaYGgygaMbtGbbXof/UXBv7rqyyi0OkmBBnrCCcxqS2t/g==
+  dependencies:
+    tslib "^2.0.0"
+
 "@dsherret/to-absolute-glob@^2.0.2":
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/@dsherret/to-absolute-glob/-/to-absolute-glob-2.0.2.tgz#1f6475dc8bd974cea07a2daf3864b317b1dd332c"
@@ -2403,15 +2434,6 @@
     "@octokit/rest" "^16.23.2"
     async-retry "^1.2.3"
     strip-ansi "^5.2.0"
-
-"@elastic/good@^9.0.1-kibana3":
-  version "9.0.1-kibana3"
-  resolved "https://registry.yarnpkg.com/@elastic/good/-/good-9.0.1-kibana3.tgz#a70c2b30cbb4f44d1cf4a464562e0680322eac9b"
-  integrity sha512-UtPKr0TmlkL1abJfO7eEVUTqXWzLKjMkz+65FvxU/Ub9kMAr4No8wHLRfDHFzBkWoDIbDWygwld011WzUnea1Q==
-  dependencies:
-    "@hapi/hoek" "9.x.x"
-    "@hapi/oppsy" "3.x.x"
-    "@hapi/validate" "1.x.x"
 
 "@elastic/makelogs@^6.0.0":
   version "6.0.0"
@@ -2897,14 +2919,6 @@
   resolved "https://registry.yarnpkg.com/@hapi/file/-/file-2.0.0.tgz#2ecda37d1ae9d3078a67c13b7da86e8c3237dfb9"
   integrity sha512-WSrlgpvEqgPWkI18kkGELEZfXr0bYLtr16iIN4Krh9sRnzBZN6nnWxHFxtsnP684wueEySBbXPDg/WfA9xJdBQ==
 
-"@hapi/good-squeeze@6.0.0":
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/@hapi/good-squeeze/-/good-squeeze-6.0.0.tgz#bb72d6869cd7398b615a6b7270f630dc4f76aebf"
-  integrity sha512-UgHAF9Lm8fJPzgf2HymtowOwNc1+IL+p08YTVR+XA4d8nmyE1t9x3RLA4riqldnOKHkVqGakJ1jGqUG7jk77Cg==
-  dependencies:
-    "@hapi/hoek" "9.x.x"
-    fast-safe-stringify "2.x.x"
-
 "@hapi/h2o2@^9.1.0":
   version "9.1.0"
   resolved "https://registry.yarnpkg.com/@hapi/h2o2/-/h2o2-9.1.0.tgz#b223f4978b6f2b0d7d9db10a84a567606c4c3551"
@@ -2991,13 +3005,6 @@
   dependencies:
     "@hapi/hoek" "^9.0.4"
     "@hapi/vise" "^4.0.0"
-
-"@hapi/oppsy@3.x.x":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@hapi/oppsy/-/oppsy-3.0.0.tgz#1ae397e200e86d0aa41055f103238ed8652947ca"
-  integrity sha512-0kfUEAqIi21GzFVK2snMO07znMEBiXb+/pOx1dmgOO9TuvFstcfmHU5i56aDfiFP2DM5WzQCU2UWc2gK1lMDhQ==
-  dependencies:
-    "@hapi/hoek" "9.x.x"
 
 "@hapi/pez@^5.0.1":
   version "5.0.3"
@@ -3747,10 +3754,6 @@
   uid ""
 
 "@kbn/io-ts-utils@link:bazel-bin/packages/kbn-io-ts-utils":
-  version "0.0.0"
-  uid ""
-
-"@kbn/legacy-logging@link:bazel-bin/packages/kbn-legacy-logging":
   version "0.0.0"
   uid ""
 
@@ -14493,7 +14496,7 @@ fast-redact@^3.0.0:
   resolved "https://registry.yarnpkg.com/fast-redact/-/fast-redact-3.0.0.tgz#ac2f9e36c9f4976f5db9fb18c6ffbaf308cf316d"
   integrity sha512-a/S/Hp6aoIjx7EmugtzLqXmcNsyFszqbt6qQ99BdG61QjBZF6shNis0BYR6TsZOQ1twYc0FN2Xdhwwbv6+KD0w==
 
-fast-safe-stringify@2.x.x, fast-safe-stringify@^2.0.4, fast-safe-stringify@^2.0.7:
+fast-safe-stringify@^2.0.4, fast-safe-stringify@^2.0.7:
   version "2.0.8"
   resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.0.8.tgz#dc2af48c46cf712b683e849b2bbd446b32de936f"
   integrity sha512-lXatBjf3WPjmWD6DpIZxkeSsCOwqI0maYMpgDlx8g4U2qi4lbjA9oH/HD2a87G+KfsUmo5WbJFmqBZlPxtptag==

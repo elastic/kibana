@@ -151,6 +151,7 @@ describe('Host Isolation', () => {
               type: ElasticsearchAssetType.transform,
             },
           ],
+          keep_policies_up_to_date: false,
         })
       );
       licenseEmitter = new Subject();
