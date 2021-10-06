@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { RiskyHostsPanelView } from './risky_hosts_panel_view';
 import { LinkPanelListItem } from '../link_panel';
 import { useRiskyHostsDashboardButtonHref } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href';
@@ -27,7 +27,10 @@ const RiskyHostsEnabledModuleComponent: React.FC<{
   hostRiskScore: HostRisk;
   to: string;
 }> = ({ hostRiskScore, to, from }) => {
-  const listItems = getListItemsFromHits(hostRiskScore?.result || []);
+  const listItems = useMemo(
+    () => getListItemsFromHits(hostRiskScore?.result || []),
+    [hostRiskScore]
+  );
   const { buttonHref } = useRiskyHostsDashboardButtonHref(to, from);
   const { listItemsWithLinks } = useRiskyHostsDashboardLinks(to, from, listItems);
 
