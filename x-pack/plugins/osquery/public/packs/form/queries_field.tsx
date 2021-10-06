@@ -81,27 +81,19 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
               draft[showEditQueryFlyout].query = updatedQuery.query;
 
               if (updatedQuery.platform?.length) {
-                draft[showEditQueryFlyout].platform = {
-                  type: 'text',
-                  value: updatedQuery.platform,
-                };
+                draft[showEditQueryFlyout].platform = updatedQuery.platform;
               } else {
                 delete draft[showEditQueryFlyout].platform;
               }
 
               if (updatedQuery.version?.length) {
-                draft[showEditQueryFlyout].version = {
-                  type: 'text',
-                  value: updatedQuery.version,
-                };
+                draft[showEditQueryFlyout].version = updatedQuery.version;
               } else {
                 delete draft[showEditQueryFlyout].version;
               }
 
               if (updatedQuery.ecs_mapping) {
-                draft[showEditQueryFlyout].ecs_mapping = {
-                  value: updatedQuery.ecs_mapping,
-                };
+                draft[showEditQueryFlyout].ecs_mapping = updatedQuery.ecs_mapping;
               } else {
                 delete draft[showEditQueryFlyout].ecs_mapping;
               }

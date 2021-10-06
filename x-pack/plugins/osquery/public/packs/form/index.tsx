@@ -6,7 +6,6 @@
  */
 
 import { reduce } from 'lodash';
-import { merge } from 'lodash/fp';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -135,16 +134,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       // @ts-expect-error update types
       queries: convertSOQueriesToPack(payload.queries),
     }),
-    defaultValue: merge(
-      {
-        name: '',
-        description: '',
-        enabled: true,
-        queries: [],
-        policy_ids: [],
-      },
-      defaultValue ?? {}
-    ),
+    defaultValue,
   });
 
   const { setFieldValue, submit, isSubmitting } = form;

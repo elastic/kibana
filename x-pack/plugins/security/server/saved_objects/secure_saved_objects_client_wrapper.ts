@@ -915,8 +915,6 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
     const missingPrivileges = this.getMissingPrivileges(privileges);
 
-    console.log(missingPrivileges);
-
     const typeMap = privileges.kibana.reduce<Map<string, LegacyEnsureAuthorizedTypeResult>>(
       (acc, { resource, privilege, authorized }) => {
         if (!authorized) {
