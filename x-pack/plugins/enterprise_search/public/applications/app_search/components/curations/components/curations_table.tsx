@@ -23,7 +23,7 @@ import { DataPanel } from '../../data_panel';
 import { generateEnginePath } from '../../engine';
 
 import { CurationsLogic } from '../curations_logic';
-import { Curation, CurationSuggestion } from '../types';
+import { Curation } from '../types';
 import { convertToDate } from '../utils';
 
 import { AutomatedIcon } from './automated_icon';
@@ -140,11 +140,7 @@ export const CurationsTable: React.FC = () => {
     >
       <EuiBasicTable
         columns={columns}
-        items={curations.map((curation, index) => {
-          curation.suggestion = curation.suggestion || ({} as CurationSuggestion);
-          curation.suggestion.status = index % 2 ? 'pending' : 'automated';
-          return curation;
-        })}
+        items={curations}
         responsive
         hasActions
         loading={dataLoading}

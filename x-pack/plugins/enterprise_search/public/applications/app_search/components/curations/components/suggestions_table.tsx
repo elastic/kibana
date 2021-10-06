@@ -95,23 +95,7 @@ const columns: Array<EuiBasicTableColumn<CurationSuggestion>> = [
 
 export const SuggestionsTable: React.FC = () => {
   const { loadSuggestions, onPaginate } = useActions(SuggestionsLogic);
-  const { meta, dataLoading } = useValues(SuggestionsLogic);
-
-  const suggestions: CurationSuggestion[] = [
-    {
-      query: 'mountains',
-      updated_at: '2021-07-08T14:35:50Z',
-      promoted: ['1', '2'],
-      status: 'pending',
-    },
-    {
-      query: 'rivers',
-      updated_at: '2021-07-08T14:35:50Z',
-      promoted: ['1', '2'],
-      status: 'pending',
-      override_curation_id: '1-2-3',
-    },
-  ];
+  const { meta, suggestions, dataLoading } = useValues(SuggestionsLogic);
 
   useEffect(() => {
     loadSuggestions();
