@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { ElasticsearchClient, RequestHandler, Logger } from 'src/core/server';
+import { RequestHandler, Logger } from 'src/core/server';
 import uuid from 'uuid';
 import { TypeOf } from '@kbn/config-schema';
 import { CommentType } from '../../../../../cases/common';
