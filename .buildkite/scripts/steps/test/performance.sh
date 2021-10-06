@@ -9,6 +9,6 @@ tput setab 2; tput setaf 0; echo "Performance test will be run at ${TARGET_BRANC
 
 cat << EOF | buildkite-agent pipeline upload
 steps:
-  - command: "git checkout $TARGET_BRANCH && git fetch && cd x-pack && yarn install && yarn test:jest"
+  - command: "git checkout $TARGET_BRANCH && git fetch && yarn kbn bootstrap && cd x-pack && yarn install && yarn test:jest"
     parallelism: "$ITERATION_COUNT"
 EOF
