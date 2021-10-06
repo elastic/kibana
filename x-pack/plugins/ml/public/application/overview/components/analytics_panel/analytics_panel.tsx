@@ -31,8 +31,13 @@ import { SourceSelection } from '../../../data_frame_analytics/pages/analytics_m
 interface Props {
   jobCreationDisabled: boolean;
   setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
+  refreshCount: number;
 }
-export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount }) => {
+export const AnalyticsPanel: FC<Props> = ({
+  jobCreationDisabled,
+  setLazyJobCount,
+  refreshCount,
+}) => {
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [analyticsStats, setAnalyticsStats] = useState<AnalyticStatsBarStats | undefined>(
     undefined
@@ -64,7 +69,7 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount
 
   useEffect(() => {
     getAnalytics(true);
-  }, []);
+  }, [refreshCount]);
 
   const onRefresh = () => {
     getAnalytics(true);

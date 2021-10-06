@@ -68,9 +68,11 @@ export function jobSavedObjectsInitializationFactory(
   }
 
   async function _needsInitializing(savedObjectsClient: SavedObjectsClientContract) {
-    if (await _jobSavedObjectsExist(savedObjectsClient)) {
+    if (false && (await _jobSavedObjectsExist(savedObjectsClient))) {
       // at least one ml saved object exists
       // this has been initialized before
+      // this check is currently disabled to allow the initialization to run
+      // on every kibana restart
       return false;
     }
 
