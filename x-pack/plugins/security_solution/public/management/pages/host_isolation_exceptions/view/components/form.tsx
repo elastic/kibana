@@ -111,6 +111,7 @@ export const HostIsolationExceptionsForm: React.FC<{
           aria-label={NAME_PLACEHOLDER}
           required={hasBeenInputNameVisited}
           maxLength={256}
+          data-test-subj="hostIsolationExceptions-form-name-input"
           onBlur={() => !hasBeenInputNameVisited && setHasBeenInputNameVisited(true)}
         />
       </EuiFormRow>
@@ -135,6 +136,7 @@ export const HostIsolationExceptionsForm: React.FC<{
           aria-label={IP_PLACEHOLDER}
           required={hasBeenInputIpVisited}
           maxLength={256}
+          data-test-subj="hostIsolationExceptions-form-ip-input"
           onBlur={() => !hasBeenInputIpVisited && setHasBeenInputIpVisited(true)}
         />
       </EuiFormRow>
@@ -151,6 +153,7 @@ export const HostIsolationExceptionsForm: React.FC<{
           defaultValue={exception.description ?? ''}
           onChange={handleOnDescriptionChange}
           fullWidth
+          data-test-subj="hostIsolationExceptions-form-description-input"
           aria-label={DESCRIPTION_PLACEHOLDER}
           maxLength={256}
         />
