@@ -33,6 +33,7 @@ import { visName, VisTypeXyExpressionFunctionDefinition } from './expression_fun
 import { XyVisType } from '../common';
 import { getEsaggsFn } from './to_ast_esaggs';
 import { TimeRangeBounds } from '../../../data/common';
+import { getSeriesParams } from './utils/get_series_params';
 
 const prepareLabel = (data: Labels) => {
   const label = buildExpressionFunction('label', {
@@ -145,6 +146,17 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
 
   const responseAggs = vis.data.aggs?.getResponseAggs().filter(({ enabled }) => enabled) ?? [];
 
+  const schemaName = vis.type.schemas?.metrics[0].name;
+  const firstValueAxesId = vis.params.valueAxes[0].id;
+  const updatedSeries = getSeriesParams(
+    vis.data.aggs,
+    vis.params.seriesParams,
+    schemaName,
+    firstValueAxesId
+  );
+
+  const finalSeriesParams = updatedSeries ?? vis.params.seriesParams;
+
   if (dimensions.x) {
     const xAgg = responseAggs[dimensions.x.accessor] as any;
     if (xAgg.type.name === BUCKET_TYPES.DATE_HISTOGRAM) {
@@ -202,7 +214,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     orderBucketsBySum: vis.params.orderBucketsBySum,
     categoryAxes: vis.params.categoryAxes.map(prepareCategoryAxis),
     valueAxes: vis.params.valueAxes.map(prepareValueAxis),
-    seriesParams: vis.params.seriesParams.map(prepareSeriesParam),
+    seriesParams: finalSeriesParams.map(prepareSeriesParam),
     labels: prepareLabel(vis.params.labels),
     thresholdLine: prepareThresholdLine(vis.params.thresholdLine),
     gridCategoryLines: vis.params.grid.categoryLines,
