@@ -20,7 +20,7 @@ export const PolicyTrustedAppsEmptyUnexisting = memo<CommonProps>(({ policyId, p
   return (
     <EuiPageTemplate template="centeredContent">
       <EuiEmptyPrompt
-        iconType="faceHappy"
+        iconType="plusInCircle"
         data-test-subj="policy-trusted-apps-empty-unexisting"
         title={
           <h2>
