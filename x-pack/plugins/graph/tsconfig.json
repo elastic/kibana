@@ -25,7 +25,6 @@
     { "path": "../../../src/plugins/home/tsconfig.json"},
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../../src/plugins/presentation_util/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" }
   ]
 }
