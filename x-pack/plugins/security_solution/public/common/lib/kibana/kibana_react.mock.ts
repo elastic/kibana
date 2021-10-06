@@ -91,8 +91,9 @@ export const createUseUiSetting$Mock = () => {
   ];
 };
 
-export const createStartServicesMock = (): StartServices => {
-  const core = coreMock.createStart();
+export const createStartServicesMock = (
+  core: ReturnType<typeof coreMock.createStart> = coreMock.createStart()
+): StartServices => {
   core.uiSettings.get.mockImplementation(createUseUiSettingMock());
   const { storage } = createSecuritySolutionStorageMock();
   const data = dataPluginMock.createStartContract();

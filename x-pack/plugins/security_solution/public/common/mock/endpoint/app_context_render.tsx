@@ -98,10 +98,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const depsStart = depsStartMock();
   const middlewareSpy = createSpyMiddleware();
   const { storage } = createSecuritySolutionStorageMock();
-  const startServices: StartServices = {
-    ...createStartServicesMock(),
-    ...coreStart,
-  };
+  const startServices: StartServices = createStartServicesMock(coreStart);
 
   const storeReducer = {
     ...SUB_PLUGINS_REDUCER,
