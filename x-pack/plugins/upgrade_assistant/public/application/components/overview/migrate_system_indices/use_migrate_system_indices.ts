@@ -12,30 +12,30 @@ import { SystemIndicesFlyout, SystemIndicesFlyoutProps } from './flyout';
 import { useAppContext } from '../../../app_context';
 import type { ResponseError } from '../../../lib/api';
 import { GlobalFlyout } from '../../../../shared_imports';
-import { SYSTEM_INDICES_UPGRADE_POLL_INTERVAL_MS } from '../../../../../common/constants';
+import { SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS } from '../../../../../common/constants';
 
-const FLYOUT_ID = 'upgradeSystemIndicesFlyout';
+const FLYOUT_ID = 'migrateSystemIndicesFlyout';
 const { useGlobalFlyout } = GlobalFlyout;
 
-export const useSystemIndicesUpgrade = () => {
+export const useMigrateSystemIndices = () => {
   const {
     services: { api },
   } = useAppContext();
 
   const [showFlyout, setShowFlyout] = useState(false);
 
-  const [startUpgradeStatus, setStartUpgradeStatus] = useState<{
+  const [startMigrationStatus, setStartMigrationStatus] = useState<{
     statusType: string;
     error?: ResponseError;
   }>({ statusType: 'idle' });
 
   const { data, error, isLoading, resendRequest, isInitialRequest } =
-    api.useLoadSystemIndicesUpgradeStatus();
+    api.useLoadSystemIndicesMigrationStatus();
   const isInProgress = data?.upgrade_status === 'IN_PROGRESS';
 
   // We only want to poll for the status while the upgrading process
   // is in progress.
-  useInterval(resendRequest, isInProgress ? SYSTEM_INDICES_UPGRADE_POLL_INTERVAL_MS : null);
+  useInterval(resendRequest, isInProgress ? SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS : null);
 
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
     useGlobalFlyout();
@@ -61,24 +61,24 @@ export const useSystemIndicesUpgrade = () => {
     }
   }, [addContentToGlobalFlyout, data, showFlyout, closeFlyout]);
 
-  const beginSystemIndicesUpgrade = useCallback(async () => {
-    const { error: startUpgradeError } = await api.upgradeSystemIndices();
+  const beginSystemIndicesMigration = useCallback(async () => {
+    const { error: startMigrationError } = await api.migrateSystemIndices();
 
-    setStartUpgradeStatus({
-      statusType: startUpgradeError ? 'error' : 'started',
-      error: startUpgradeError ?? undefined,
+    setStartMigrationStatus({
+      statusType: startMigrationError ? 'error' : 'started',
+      error: startMigrationError ?? undefined,
     });
 
-    if (!startUpgradeError) {
+    if (!startMigrationError) {
       resendRequest();
     }
   }, [api, resendRequest]);
 
   return {
     setShowFlyout,
-    startUpgradeStatus,
-    beginSystemIndicesUpgrade,
-    upgradeStatus: {
+    startMigrationStatus,
+    beginSystemIndicesMigration,
+    migrationStatus: {
       data,
       error,
       isLoading,

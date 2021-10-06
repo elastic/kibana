@@ -10,7 +10,7 @@ import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../../helpers';
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
-describe('Overview - Upgrade system indices', () => {
+describe('Overview - Migrate system indices', () => {
   let testBed: OverviewTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
@@ -25,7 +25,7 @@ describe('Overview - Upgrade system indices', () => {
 
   describe('Error state', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadSystemIndicesUpgradeStatus(undefined, {
+      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus(undefined, {
         statusCode: 400,
         message: 'error',
       });
@@ -40,22 +40,22 @@ describe('Overview - Upgrade system indices', () => {
       expect(exists('systemIndicesStatusErrorCallout')).toBe(true);
     });
 
-    test('Lets the user attempt to reload backup status', async () => {
+    test('Lets the user attempt to reload migration status', async () => {
       const { exists, component, actions } = testBed;
       component.update();
 
-      httpRequestsMockHelpers.setLoadSystemIndicesUpgradeStatus({
+      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
         upgrade_status: 'NO_UPGRADE_NEEDED',
       });
 
       await actions.clickRetrySystemIndicesButton();
 
-      expect(exists('noUpgradeNeededSection')).toBe(true);
+      expect(exists('noMigrationNeededSection')).toBe(true);
     });
   });
 
-  test('No upgrade needed', async () => {
-    httpRequestsMockHelpers.setLoadSystemIndicesUpgradeStatus({
+  test('No migration needed', async () => {
+    httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
       upgrade_status: 'NO_UPGRADE_NEEDED',
     });
 
@@ -65,13 +65,13 @@ describe('Overview - Upgrade system indices', () => {
 
     component.update();
 
-    expect(exists('noUpgradeNeededSection')).toBe(true);
-    expect(exists('startSystemIndicesUpgradeButton')).toBe(false);
+    expect(exists('noMigrationNeededSection')).toBe(true);
+    expect(exists('startSystemIndicesMigrationButton')).toBe(false);
     expect(exists('viewSystemIndicesStateButton')).toBe(false);
   });
 
-  test('Upgrade in progress', async () => {
-    httpRequestsMockHelpers.setLoadSystemIndicesUpgradeStatus({
+  test('Migration in progress', async () => {
+    httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
       upgrade_status: 'IN_PROGRESS',
     });
 
@@ -81,16 +81,16 @@ describe('Overview - Upgrade system indices', () => {
 
     component.update();
 
-    // Start upgrade is disabled
-    expect(exists('startSystemIndicesUpgradeButton')).toBe(true);
-    expect(find('startSystemIndicesUpgradeButton').props().disabled).toBe(true);
+    // Start migration is disabled
+    expect(exists('startSystemIndicesMigrationButton')).toBe(true);
+    expect(find('startSystemIndicesMigrationButton').props().disabled).toBe(true);
     // But we keep view system indices CTA
     expect(exists('viewSystemIndicesStateButton')).toBe(true);
   });
 
-  describe('Upgrade needed', () => {
+  describe('Migration needed', () => {
     test('Initial state', async () => {
-      httpRequestsMockHelpers.setLoadSystemIndicesUpgradeStatus({
+      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
         upgrade_status: 'UPGRADE_NEEDED',
       });
 
@@ -100,18 +100,18 @@ describe('Overview - Upgrade system indices', () => {
 
       component.update();
 
-      // Start upgrade should be enabled
-      expect(exists('startSystemIndicesUpgradeButton')).toBe(true);
-      expect(find('startSystemIndicesUpgradeButton').props().disabled).toBe(false);
+      // Start migration should be enabled
+      expect(exists('startSystemIndicesMigrationButton')).toBe(true);
+      expect(find('startSystemIndicesMigrationButton').props().disabled).toBe(false);
       // Same for view system indices status
       expect(exists('viewSystemIndicesStateButton')).toBe(true);
     });
 
-    test('Handles errors when upgrading', async () => {
-      httpRequestsMockHelpers.setLoadSystemIndicesUpgradeStatus({
+    test('Handles errors when migrating', async () => {
+      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
         upgrade_status: 'UPGRADE_NEEDED',
       });
-      httpRequestsMockHelpers.setUpgradeSystemIndicesResponse(undefined, {
+      httpRequestsMockHelpers.setSystemIndicesMigrationResponse(undefined, {
         statusCode: 400,
         message: 'error',
       });
@@ -121,16 +121,16 @@ describe('Overview - Upgrade system indices', () => {
       const { exists, component, find } = testBed;
 
       await act(async () => {
-        find('startSystemIndicesUpgradeButton').simulate('click');
+        find('startSystemIndicesMigrationButton').simulate('click');
       });
 
       component.update();
 
       // Error is displayed
-      expect(exists('startSystemIndicesUpgradeCalloutError')).toBe(true);
+      expect(exists('startSystemIndicesMigrationCalloutError')).toBe(true);
       // CTA is enabled
-      expect(exists('startSystemIndicesUpgradeButton')).toBe(true);
-      expect(find('startSystemIndicesUpgradeButton').props().disabled).toBe(false);
+      expect(exists('startSystemIndicesMigrationButton')).toBe(true);
+      expect(find('startSystemIndicesMigrationButton').props().disabled).toBe(false);
     });
   });
 });

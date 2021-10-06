@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SystemIndicesUpgradeStatus } from '../../../../common/types';
+import { SystemIndicesMigrationStatus } from '../../../../common/types';
 
-export const systemIndicesUpgradeStatus: SystemIndicesUpgradeStatus = {
+export const systemIndicesMigrationStatus: SystemIndicesMigrationStatus = {
   upgrade_status: 'UPGRADE_NEEDED',
   features: [
     {

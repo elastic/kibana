@@ -148,11 +148,11 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
-  const setLoadSystemIndicesUpgradeStatus = (response?: object, error?: ResponseError) => {
+  const setLoadSystemIndicesMigrationStatus = (response?: object, error?: ResponseError) => {
     const status = error ? error.statusCode || 400 : 200;
     const body = error ? error : response;
 
-    server.respondWith('GET', `${API_BASE_PATH}/system_indices_upgrade`, [
+    server.respondWith('GET', `${API_BASE_PATH}/system_indices_migration`, [
       status,
       { 'Content-Type': 'application/json' },
       JSON.stringify(body),
@@ -170,11 +170,11 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
-  const setUpgradeSystemIndicesResponse = (response?: object, error?: ResponseError) => {
+  const setSystemIndicesMigrationResponse = (response?: object, error?: ResponseError) => {
     const status = error ? error.statusCode || 400 : 200;
     const body = error ? error : response;
 
-    server.respondWith('POST', `${API_BASE_PATH}/system_indices_upgrade`, [
+    server.respondWith('POST', `${API_BASE_PATH}/system_indices_migration`, [
       status,
       { 'Content-Type': 'application/json' },
       JSON.stringify(body),
@@ -191,8 +191,8 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setDeleteMlSnapshotResponse,
     setUpgradeMlSnapshotStatusResponse,
     setLoadDeprecationLogsCountResponse,
-    setLoadSystemIndicesUpgradeStatus,
-    setUpgradeSystemIndicesResponse,
+    setLoadSystemIndicesMigrationStatus,
+    setSystemIndicesMigrationResponse,
     setStartReindexingResponse,
     setReindexStatusResponse,
     setLoadMlUpgradeModeResponse,

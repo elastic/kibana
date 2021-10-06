@@ -14,7 +14,7 @@ jest.mock('../lib/es_version_precheck', () => ({
   versionCheckHandlerWrapper: (a: any) => a,
 }));
 
-import { registerSystemIndicesUpgradeRoutes } from './system_indices_upgrade';
+import { registerSystemIndicesMigrationRoutes } from './system_indices_migration';
 
 const mockedResponse = {
   features: [
@@ -37,7 +37,7 @@ const mockedResponse = {
  * Since these route callbacks are so thin, these serve simply as integration tests
  * to ensure they're wired up to the lib functions correctly.
  */
-describe('Upgrade system indices API', () => {
+describe('Migrate system indices API', () => {
   let mockRouter: MockRouter;
   let routeDependencies: any;
 
@@ -47,15 +47,15 @@ describe('Upgrade system indices API', () => {
       router: mockRouter,
       lib: { handleEsError },
     };
-    registerSystemIndicesUpgradeRoutes(routeDependencies);
+    registerSystemIndicesMigrationRoutes(routeDependencies);
   });
 
   afterEach(() => {
     jest.resetAllMocks();
   });
 
-  describe('GET /api/upgrade_assistant/system_indices_upgrade', () => {
-    it('returns system indices upgrade status', async () => {
+  describe('GET /api/upgrade_assistant/system_indices_migration', () => {
+    it('returns system indices migration status', async () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
           .request as jest.Mock
@@ -65,7 +65,7 @@ describe('Upgrade system indices API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
-        pathPattern: '/api/upgrade_assistant/system_indices_upgrade',
+        pathPattern: '/api/upgrade_assistant/system_indices_migration',
       })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
       expect(resp.status).toEqual(200);
@@ -86,14 +86,14 @@ describe('Upgrade system indices API', () => {
       await expect(
         routeDependencies.router.getHandler({
           method: 'get',
-          pathPattern: '/api/upgrade_assistant/system_indices_upgrade',
+          pathPattern: '/api/upgrade_assistant/system_indices_migration',
         })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory)
       ).rejects.toThrow('scary error!');
     });
   });
 
-  describe('POST /api/upgrade_assistant/system_indices_upgrade', () => {
-    it('returns system indices upgrade status', async () => {
+  describe('POST /api/upgrade_assistant/system_indices_migration', () => {
+    it('returns system indices migration status', async () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
           .request as jest.Mock
@@ -103,7 +103,7 @@ describe('Upgrade system indices API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'post',
-        pathPattern: '/api/upgrade_assistant/system_indices_upgrade',
+        pathPattern: '/api/upgrade_assistant/system_indices_migration',
       })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
       expect(resp.status).toEqual(200);
@@ -124,7 +124,7 @@ describe('Upgrade system indices API', () => {
       await expect(
         routeDependencies.router.getHandler({
           method: 'post',
-          pathPattern: '/api/upgrade_assistant/system_indices_upgrade',
+          pathPattern: '/api/upgrade_assistant/system_indices_migration',
         })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory)
       ).rejects.toThrow('scary error!');
     });

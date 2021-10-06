@@ -9,17 +9,17 @@ import { API_BASE_PATH } from '../../common/constants';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { RouteDependencies } from '../types';
 import {
-  getESSystemIndicesUpgradeStatus,
-  startESSystemIndicesUpgrade,
-} from '../lib/es_system_indices_upgrade';
+  getESSystemIndicesMigrationStatus,
+  startESSystemIndicesMigration,
+} from '../lib/es_system_indices_migration';
 
-export function registerSystemIndicesUpgradeRoutes({
+export function registerSystemIndicesMigrationRoutes({
   router,
   lib: { handleEsError },
 }: RouteDependencies) {
-  // GET status of the system indices upgrade
+  // GET status of the system indices migration
   router.get(
-    { path: `${API_BASE_PATH}/system_indices_upgrade`, validate: false },
+    { path: `${API_BASE_PATH}/system_indices_migration`, validate: false },
     versionCheckHandlerWrapper(
       async (
         {
@@ -31,7 +31,7 @@ export function registerSystemIndicesUpgradeRoutes({
         response
       ) => {
         try {
-          const status = await getESSystemIndicesUpgradeStatus(client.asCurrentUser);
+          const status = await getESSystemIndicesMigrationStatus(client.asCurrentUser);
 
           return response.ok({
             body: status,
@@ -43,9 +43,9 @@ export function registerSystemIndicesUpgradeRoutes({
     )
   );
 
-  // POST starts the system indices upgrade
+  // POST starts the system indices migration
   router.post(
-    { path: `${API_BASE_PATH}/system_indices_upgrade`, validate: false },
+    { path: `${API_BASE_PATH}/system_indices_migration`, validate: false },
     versionCheckHandlerWrapper(
       async (
         {
@@ -57,7 +57,7 @@ export function registerSystemIndicesUpgradeRoutes({
         response
       ) => {
         try {
-          const status = await startESSystemIndicesUpgrade(client.asCurrentUser);
+          const status = await startESSystemIndicesMigration(client.asCurrentUser);
 
           return response.ok({
             body: status,

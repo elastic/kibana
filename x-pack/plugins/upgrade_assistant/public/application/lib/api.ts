@@ -10,7 +10,7 @@ import { HttpSetup } from 'src/core/public';
 import {
   ESUpgradeStatus,
   CloudBackupStatus,
-  SystemIndicesUpgradeStatus,
+  SystemIndicesMigrationStatus,
 } from '../../../common/types';
 import {
   API_BASE_PATH,
@@ -62,16 +62,16 @@ export class ApiService {
     });
   }
 
-  public useLoadSystemIndicesUpgradeStatus() {
-    return this.useRequest<SystemIndicesUpgradeStatus>({
-      path: `${API_BASE_PATH}/system_indices_upgrade`,
+  public useLoadSystemIndicesMigrationStatus() {
+    return this.useRequest<SystemIndicesMigrationStatus>({
+      path: `${API_BASE_PATH}/system_indices_migration`,
       method: 'get',
     });
   }
 
-  public async upgradeSystemIndices() {
+  public async migrateSystemIndices() {
     const result = await this.sendRequest({
-      path: `${API_BASE_PATH}/system_indices_upgrade`,
+      path: `${API_BASE_PATH}/system_indices_migration`,
       method: 'post',
     });
 

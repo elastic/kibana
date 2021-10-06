@@ -25,14 +25,14 @@ import {
 } from '@elastic/eui';
 
 import {
-  SystemIndicesUpgradeStatus,
-  SystemIndicesUpgradeFeature,
+  SystemIndicesMigrationStatus,
+  SystemIndicesMigrationFeature,
   UPGRADE_STATUS,
 } from '../../../../../common/types';
 
 export interface SystemIndicesFlyoutProps {
   closeFlyout: () => void;
-  data: SystemIndicesUpgradeStatus;
+  data: SystemIndicesMigrationStatus;
 }
 
 const i18nTexts = {
@@ -52,19 +52,19 @@ const i18nTexts = {
         'Migrate the indices that store information for the following features before you upgrade to 8.0.',
     }
   ),
-  upgradeCompleteLabel: i18n.translate(
-    'xpack.upgradeAssistant.overview.systemIndices.upgradeCompleteLabel',
+  migrationCompleteLabel: i18n.translate(
+    'xpack.upgradeAssistant.overview.systemIndices.migrationCompleteLabel',
     {
       defaultMessage: 'Migration complete',
     }
   ),
-  needsUpgradingLabel: i18n.translate(
-    'xpack.upgradeAssistant.overview.systemIndices.needsUpgradingLabel',
+  needsMigrationLabel: i18n.translate(
+    'xpack.upgradeAssistant.overview.systemIndices.needsMigrationLabel',
     {
       defaultMessage: 'Migration required',
     }
   ),
-  upgradingLabel: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.upgradingLabel', {
+  migratingLabel: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.migratingLabel', {
     defaultMessage: 'Migration in progress',
   }),
   errorLabel: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.errorLabel', {
@@ -93,7 +93,7 @@ const renderMigrationStatus = (status: UPGRADE_STATUS) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText color="green" size="s" data-test-subj="featureNoUpgradeNeeded">
-            <p>{i18nTexts.upgradeCompleteLabel}</p>
+            <p>{i18nTexts.migrationCompleteLabel}</p>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -103,7 +103,7 @@ const renderMigrationStatus = (status: UPGRADE_STATUS) => {
   if (status === 'UPGRADE_NEEDED') {
     return (
       <EuiText size="s" data-test-subj="featureUpgradeNeeded">
-        <p>{i18nTexts.needsUpgradingLabel}</p>
+        <p>{i18nTexts.needsMigrationLabel}</p>
       </EuiText>
     );
   }
@@ -116,7 +116,7 @@ const renderMigrationStatus = (status: UPGRADE_STATUS) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" size="s" data-test-subj="featureInProgress">
-            <p>{i18nTexts.upgradingLabel}</p>
+            <p>{i18nTexts.migratingLabel}</p>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -170,7 +170,7 @@ export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutPr
           <p>{i18nTexts.flyoutDescription}</p>
         </EuiText>
         <EuiSpacer size="l" />
-        <EuiInMemoryTable<SystemIndicesUpgradeFeature>
+        <EuiInMemoryTable<SystemIndicesMigrationFeature>
           data-test-subj="featuresTable"
           itemId="feature_name"
           items={data.features}

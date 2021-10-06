@@ -9,14 +9,14 @@ import { act } from 'react-dom/test-utils';
 
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 import { setupEnvironment } from '../../helpers';
-import { systemIndicesUpgradeStatus } from './mocks';
+import { systemIndicesMigrationStatus } from './mocks';
 
-describe('Overview - Upgrade system indices - Flyout', () => {
+describe('Overview - Migrate system indices - Flyout', () => {
   let testBed: OverviewTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadSystemIndicesUpgradeStatus(systemIndicesUpgradeStatus);
+    httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus(systemIndicesMigrationStatus);
 
     await act(async () => {
       testBed = await setupOverviewPage();
@@ -36,7 +36,7 @@ describe('Overview - Upgrade system indices - Flyout', () => {
 
     const { tableCellsValues } = table.getMetaData('flyoutDetails');
 
-    expect(tableCellsValues.length).toBe(systemIndicesUpgradeStatus.features.length);
+    expect(tableCellsValues.length).toBe(systemIndicesMigrationStatus.features.length);
     expect(tableCellsValues).toMatchSnapshot();
   });
 });

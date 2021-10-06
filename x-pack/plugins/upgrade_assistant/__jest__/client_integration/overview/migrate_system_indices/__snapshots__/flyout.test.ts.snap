@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Overview - Upgrade system indices - Flyout shows correct features in flyout table 1`] = `
+exports[`Overview - Migrate system indices - Flyout shows correct features in flyout table 1`] = `
 Array [
   Array [
     "Security",

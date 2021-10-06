@@ -24,7 +24,7 @@ import {
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import type { OverviewStepProps } from '../../types';
-import { useSystemIndicesUpgrade } from './use_system_indices_upgrade';
+import { useMigrateSystemIndices } from './use_migrate_system_indices';
 
 interface Props {
   setIsComplete: OverviewStepProps['setIsComplete'];
@@ -35,12 +35,12 @@ interface StepProps extends OverviewStepProps {
 }
 
 const i18nTexts = {
-  title: i18n.translate('xpack.upgradeAssistant.overview.system_indices.title', {
+  title: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.title', {
     defaultMessage: 'Migrate system indices',
   }),
   bodyDescription: (docLink: string) => (
     <FormattedMessage
-      id="xpack.upgradeAssistant.overview.system_indices.body"
+      id="xpack.upgradeAssistant.overview.systemIndices.body"
       defaultMessage="Migrate the indices that store system information before you upgrade to 8.0. {learnMoreLink}."
       values={{
         learnMoreLink: (
@@ -52,51 +52,51 @@ const i18nTexts = {
     />
   ),
   startButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.overview.system_indices.startButtonLabel',
+    'xpack.upgradeAssistant.overview.systemIndices.startButtonLabel',
     {
       defaultMessage: 'Migrate indices',
     }
   ),
   inProgressButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.overview.system_indices.inProgressButtonLabel',
+    'xpack.upgradeAssistant.overview.systemIndices.inProgressButtonLabel',
     {
       defaultMessage: 'Migration in progress',
     }
   ),
-  noUpgradeNeeded: i18n.translate(
-    'xpack.upgradeAssistant.overview.system_indices.noUpgradeNeeded',
+  noMigrationNeeded: i18n.translate(
+    'xpack.upgradeAssistant.overview.systemIndices.noMigrationNeeded',
     {
       defaultMessage: 'Migration complete',
     }
   ),
   viewSystemIndicesStatus: i18n.translate(
-    'xpack.upgradeAssistant.system_indices.overview.system_indices.viewSystemIndicesStatus',
+    'xpack.upgradeAssistant.systemIndices.overview.systemIndices.viewSystemIndicesStatus',
     {
       defaultMessage: 'View system indices',
     }
   ),
   retryButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.overview.system_indices.retryButtonLabel',
+    'xpack.upgradeAssistant.overview.systemIndices.retryButtonLabel',
     {
       defaultMessage: 'Retry migration',
     }
   ),
-  loadingError: i18n.translate('xpack.upgradeAssistant.overview.system_indices.loadingError', {
+  loadingError: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.loadingError', {
     defaultMessage: 'Could not retrieve the system indices status',
   }),
 };
 
-const UpgradeSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) => {
-  const { beginSystemIndicesUpgrade, startUpgradeStatus, upgradeStatus, setShowFlyout } =
-    useSystemIndicesUpgrade();
+const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) => {
+  const { beginSystemIndicesMigration, startMigrationStatus, migrationStatus, setShowFlyout } =
+    useMigrateSystemIndices();
 
   useEffect(() => {
-    setIsComplete(upgradeStatus.data?.upgrade_status === 'NO_UPGRADE_NEEDED');
+    setIsComplete(migrationStatus.data?.upgrade_status === 'NO_UPGRADE_NEEDED');
     // Depending upon setIsComplete would create an infinite loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [upgradeStatus.data?.upgrade_status]);
+  }, [migrationStatus.data?.upgrade_status]);
 
-  if (upgradeStatus.error) {
+  if (migrationStatus.error) {
     return (
       <EuiCallOut
         title={i18nTexts.loadingError}
@@ -105,12 +105,12 @@ const UpgradeSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
         data-test-subj="systemIndicesStatusErrorCallout"
       >
         <p>
-          {upgradeStatus.error.statusCode} - {upgradeStatus.error.message}
+          {migrationStatus.error.statusCode} - {migrationStatus.error.message}
         </p>
         <EuiButton
           color="danger"
-          isLoading={upgradeStatus.isLoading}
-          onClick={upgradeStatus.resendRequest}
+          isLoading={migrationStatus.isLoading}
+          onClick={migrationStatus.resendRequest}
           data-test-subj="systemIndicesStatusRetryButton"
         >
           {i18nTexts.retryButtonLabel}
@@ -119,34 +119,36 @@ const UpgradeSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
     );
   }
 
-  if (upgradeStatus.data?.upgrade_status === 'NO_UPGRADE_NEEDED') {
+  if (migrationStatus.data?.upgrade_status === 'NO_UPGRADE_NEEDED') {
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="noUpgradeNeededSection">
+      <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="noMigrationNeededSection">
         <EuiFlexItem grow={false}>
           <EuiIcon type="check" color="success" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText color="green">
-            <p>{i18nTexts.noUpgradeNeeded}</p>
+            <p>{i18nTexts.noMigrationNeeded}</p>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
 
-  const isButtonDisabled = upgradeStatus.isInitialRequest && upgradeStatus.isLoading;
-  const isUpgrading = upgradeStatus.data?.upgrade_status === 'IN_PROGRESS';
+  const isButtonDisabled = migrationStatus.isInitialRequest && migrationStatus.isLoading;
+  const isMigrating = migrationStatus.data?.upgrade_status === 'IN_PROGRESS';
 
   return (
     <>
-      {startUpgradeStatus.statusType === 'error' && (
+      {startMigrationStatus.statusType === 'error' && (
         <>
           <EuiCallOut
             size="s"
             color="danger"
             iconType="alert"
-            title={`${startUpgradeStatus.error!.statusCode} - ${startUpgradeStatus.error!.message}`}
-            data-test-subj="startSystemIndicesUpgradeCalloutError"
+            title={`${startMigrationStatus.error!.statusCode} - ${
+              startMigrationStatus.error!.message
+            }`}
+            data-test-subj="startSystemIndicesMigrationCalloutError"
           />
           <EuiSpacer size="m" />
         </>
@@ -155,12 +157,12 @@ const UpgradeSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButton
-            isLoading={isUpgrading}
+            isLoading={isMigrating}
             isDisabled={isButtonDisabled}
-            onClick={beginSystemIndicesUpgrade}
-            data-test-subj="startSystemIndicesUpgradeButton"
+            onClick={beginSystemIndicesMigration}
+            data-test-subj="startSystemIndicesMigrationButton"
           >
-            {isUpgrading ? i18nTexts.inProgressButtonLabel : i18nTexts.startButtonLabel}
+            {isMigrating ? i18nTexts.inProgressButtonLabel : i18nTexts.startButtonLabel}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -177,7 +179,7 @@ const UpgradeSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
   );
 };
 
-export const getUpgradeSystemIndicesStep = ({
+export const getMigrateSystemIndicesStep = ({
   docLinks,
   isComplete,
   setIsComplete,
@@ -187,7 +189,7 @@ export const getUpgradeSystemIndicesStep = ({
   return {
     title: i18nTexts.title,
     status,
-    'data-test-subj': `upgradeSystemIndicesStep-${status}`,
+    'data-test-subj': `migrateSystemIndicesStep-${status}`,
     children: (
       <>
         <EuiText>
@@ -196,7 +198,7 @@ export const getUpgradeSystemIndicesStep = ({
 
         <EuiSpacer size="m" />
 
-        <UpgradeSystemIndicesStep setIsComplete={setIsComplete} />
+        <MigrateSystemIndicesStep setIsComplete={setIsComplete} />
       </>
     ),
   };

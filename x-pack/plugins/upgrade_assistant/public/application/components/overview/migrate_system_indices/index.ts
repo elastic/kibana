@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getUpgradeSystemIndicesStep } from './upgrade_system_indices';
+export { getMigrateSystemIndicesStep } from './migrate_system_indices';

@@ -9,9 +9,9 @@ import { act } from 'react-dom/test-utils';
 
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 import { setupEnvironment, advanceTime } from '../../helpers';
-import { SYSTEM_INDICES_UPGRADE_POLL_INTERVAL_MS } from '../../../../common/constants';
+import { SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS } from '../../../../common/constants';
 
-describe('Overview - Upgrade system indices - Step completion', () => {
+describe('Overview - Migrate system indices - Step completion', () => {
   let testBed: OverviewTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
@@ -20,7 +20,7 @@ describe('Overview - Upgrade system indices - Step completion', () => {
   });
 
   test(`It's complete when no upgrade is needed`, async () => {
-    httpRequestsMockHelpers.setLoadSystemIndicesUpgradeStatus({
+    httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
       upgrade_status: 'NO_UPGRADE_NEEDED',
     });
 
@@ -32,11 +32,11 @@ describe('Overview - Upgrade system indices - Step completion', () => {
 
     component.update();
 
-    expect(exists(`upgradeSystemIndicesStep-complete`)).toBe(true);
+    expect(exists(`migrateSystemIndicesStep-complete`)).toBe(true);
   });
 
-  test(`It's incomplete when an upgrade is needed`, async () => {
-    httpRequestsMockHelpers.setLoadSystemIndicesUpgradeStatus({
+  test(`It's incomplete when migration is needed`, async () => {
+    httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
       upgrade_status: 'UPGRADE_NEEDED',
     });
 
@@ -48,7 +48,7 @@ describe('Overview - Upgrade system indices - Step completion', () => {
 
     component.update();
 
-    expect(exists(`upgradeSystemIndicesStep-incomplete`)).toBe(true);
+    expect(exists(`migrateSystemIndicesStep-incomplete`)).toBe(true);
   });
 
   describe('Poll for new status', () => {
@@ -56,7 +56,7 @@ describe('Overview - Upgrade system indices - Step completion', () => {
       jest.useFakeTimers();
 
       // First request should make the step be incomplete
-      httpRequestsMockHelpers.setLoadSystemIndicesUpgradeStatus({
+      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
         upgrade_status: 'IN_PROGRESS',
       });
 
@@ -70,17 +70,17 @@ describe('Overview - Upgrade system indices - Step completion', () => {
     test('renders step as complete when a upgraded needed status is followed by a no upgrade needed', async () => {
       const { exists } = testBed;
 
-      expect(exists(`upgradeSystemIndicesStep-incomplete`)).toBe(true);
+      expect(exists('migrateSystemIndicesStep-incomplete')).toBe(true);
 
-      httpRequestsMockHelpers.setLoadSystemIndicesUpgradeStatus({
+      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
         upgrade_status: 'NO_UPGRADE_NEEDED',
       });
 
       // Resolve the polling timeout.
-      await advanceTime(SYSTEM_INDICES_UPGRADE_POLL_INTERVAL_MS);
+      await advanceTime(SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS);
       testBed.component.update();
 
-      expect(exists(`upgradeSystemIndicesStep-complete`)).toBe(true);
+      expect(exists('migrateSystemIndicesStep-complete')).toBe(true);
     });
   });
 });
