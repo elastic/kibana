@@ -60,13 +60,18 @@ describe('AutomatedCuration', () => {
     expect(wrapper.find(OrganicDocuments)).toHaveLength(1);
   });
 
-  it('includes a single static tab', () => {
+  it('includes a static tab group', () => {
     const wrapper = shallow(<AutomatedCuration />);
     const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
 
-    expect(tabs).toHaveLength(1);
+    expect(tabs).toHaveLength(2);
+
     expect(tabs.at(0).prop('onClick')).toBeUndefined();
     expect(tabs.at(0).prop('isSelected')).toBe(true);
+
+    expect(tabs.at(1).prop('onClick')).toBeUndefined();
+    expect(tabs.at(1).prop('isSelected')).toBe(false);
+    expect(tabs.at(1).prop('disabled')).toBe(true);
   });
 
   it('initializes CurationLogic with a curationId prop from URL param', () => {

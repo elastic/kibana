@@ -22,7 +22,7 @@ import {
 
 import { getCurationsBreadcrumbs } from '../utils';
 
-import { PROMOTED_DOCUMENTS_TITLE } from './constants';
+import { HIDDEN_DOCUMENTS_TITLE, PROMOTED_DOCUMENTS_TITLE } from './constants';
 import { CurationLogic } from './curation_logic';
 import { PromotedDocuments, OrganicDocuments } from './documents';
 
@@ -32,13 +32,16 @@ export const AutomatedCuration: React.FC = () => {
   const { convertToManual } = useActions(logic);
   const { activeQuery, dataLoading, queries } = useValues(logic);
 
-  // This single static tab is meant to visually mirror the dynamic set of tags
-  // in the ManualCuration component. This page however does not include
-  // hidden documents, so we only need one tab.
+  // This tab group is meant to visually mirror the dynamic group of tags in the ManualCuration component
   const pageTabs = [
     {
       label: PROMOTED_DOCUMENTS_TITLE,
       isSelected: true,
+    },
+    {
+      label: HIDDEN_DOCUMENTS_TITLE,
+      isSelected: false,
+      disabled: true,
     },
   ];
 
