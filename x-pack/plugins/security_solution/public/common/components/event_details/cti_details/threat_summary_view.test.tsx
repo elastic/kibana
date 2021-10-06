@@ -9,7 +9,7 @@ import React from 'react';
 
 import { ThreatSummaryView } from './threat_summary_view';
 import { TestProviders } from '../../../mock';
-import { useMountAppended } from '../../../utils/use_mount_appended';
+import { render } from '@testing-library/react';
 import { buildEventEnrichmentMock } from '../../../../../common/search_strategy/security_solution/cti/index.mock';
 import { mockAlertDetailsData } from '../__mocks__';
 import { TimelineEventsDetailsItem } from '../../../../../../timelines/common';
@@ -28,7 +28,6 @@ jest.mock('../table/action_cell');
 jest.mock('../table/field_name_cell');
 
 describe('ThreatSummaryView', () => {
-  const mount = useMountAppended();
   const eventId = '5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31';
   const timelineId = 'detections-page';
   const data = mockAlertDetailsData as TimelineEventsDetailsItem[];
@@ -39,7 +38,7 @@ describe('ThreatSummaryView', () => {
       buildEventEnrichmentMock({ 'matched.id': ['test.id'], 'matched.field': ['test.field'] }),
       buildEventEnrichmentMock({ 'matched.id': ['other.id'], 'matched.field': ['other.field'] }),
     ];
-    const wrapper = mount(
+    const { getByText, getAllByTestId } = render(
       <TestProviders>
         <ThreatSummaryView
           data={data}
@@ -52,11 +51,8 @@ describe('ThreatSummaryView', () => {
       </TestProviders>
     );
 
-    const panel = wrapper.find(
-      'ThreatSummaryPanelHeader[title="Enriched with Threat Intelligence"]'
-    );
-    expect(panel.exists()).toBeTruthy();
+    expect(getByText('Enriched with Threat Intelligence')).toBeInTheDocument();
 
-    expect(wrapper.find('EnrichedDataRow')).toHaveLength(enrichments.length);
+    expect(getAllByTestId('EnrichedDataRow')).toHaveLength(enrichments.length);
   });
 });

@@ -13,7 +13,7 @@ import { RISKY_HOSTS_DOC_LINK } from '../../../../overview/components/overview_r
 import { HostRisk } from '../../../../overview/containers/overview_risky_host_links/use_hosts_risk_score';
 import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
 
-const HostRiskDataComponent: React.FC<{
+const HostRiskSummaryComponent: React.FC<{
   hostRisk: HostRisk;
 }> = ({ hostRisk }) => (
   <>
@@ -58,4 +58,4 @@ const HostRiskDataComponent: React.FC<{
   </>
 );
 
-export const HostRiskData = React.memo(HostRiskDataComponent);
+export const HostRiskSummary = React.memo(HostRiskSummaryComponent);

@@ -7,12 +7,12 @@
 
 import React from 'react';
 
-import { HostRiskData } from './host_risk_data';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../mock';
 import { NO_HOST_RISK_DATA_DESCRIPTION } from './translations';
+import { HostRiskSummary } from './host_risk_summary';
 
-describe('HostRiskData', () => {
+describe('HostRiskSummary', () => {
   it('renders host risk data', () => {
     const riskKeyword = 'test risk';
     const hostRisk = {
@@ -31,7 +31,7 @@ describe('HostRiskData', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <HostRiskData hostRisk={hostRisk} />
+        <HostRiskSummary hostRisk={hostRisk} />
       </TestProviders>
     );
 
@@ -47,7 +47,7 @@ describe('HostRiskData', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <HostRiskData hostRisk={hostRisk} />
+        <HostRiskSummary hostRisk={hostRisk} />
       </TestProviders>
     );
 
@@ -71,7 +71,7 @@ describe('HostRiskData', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <HostRiskData hostRisk={hostRisk} />
+        <HostRiskSummary hostRisk={hostRisk} />
       </TestProviders>
     );
 
@@ -87,7 +87,7 @@ describe('HostRiskData', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <HostRiskData hostRisk={hostRisk} />
+        <HostRiskSummary hostRisk={hostRisk} />
       </TestProviders>
     );
 
