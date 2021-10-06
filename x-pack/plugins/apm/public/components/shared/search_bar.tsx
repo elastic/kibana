@@ -45,12 +45,9 @@ function ApmDatePicker() {
     refreshInterval: refreshIntervalFromUrl = '0',
   } = query;
 
-  const refreshPaused = refreshPausedFromUrl
-    ? toBoolean(refreshPausedFromUrl)
-    : undefined;
-  const refreshInterval = refreshIntervalFromUrl
-    ? toNumber(refreshIntervalFromUrl)
-    : undefined;
+  const refreshPaused = toBoolean(refreshPausedFromUrl);
+
+  const refreshInterval = toNumber(refreshIntervalFromUrl);
 
   const { incrementTimeRangeId } = useTimeRangeId();
 

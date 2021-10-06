@@ -95,9 +95,7 @@ export function DatePicker({ rangeFrom, rangeTo, refreshPaused, refreshInterval 
       refreshInterval={refreshInterval}
       onRefreshChange={onRefreshChange}
       commonlyUsedRanges={commonlyUsedRanges}
-      onRefresh={() => {
-        onRefreshTimeRange();
-      }}
+      onRefresh={onRefreshTimeRange}
     />
   );
 }
