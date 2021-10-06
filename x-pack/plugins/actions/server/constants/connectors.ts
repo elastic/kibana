@@ -10,3 +10,6 @@ export const ENABLE_NEW_SN_ITSM_CONNECTOR = true;
 
 // TODO: Remove when Elastic for Security Operations is published.
 export const ENABLE_NEW_SN_SIR_CONNECTOR = true;
+
+// TODO: Remove when ready
+export const ENABLE_ITOM = true;

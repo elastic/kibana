@@ -134,6 +134,13 @@ export const INCIDENT = i18n.translate(
   }
 );
 
+export const SECURITY_INCIDENT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenowSIR.title',
+  {
+    defaultMessage: 'Security Incident',
+  }
+);
+
 export const SHORT_DESCRIPTION_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.titleFieldLabel',
   {
@@ -317,5 +324,64 @@ export const OFF = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.updateIncidentOff',
   {
     defaultMessage: 'Off',
+  }
+);
+
+export const EVENT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenowITOM.event',
+  {
+    defaultMessage: 'Event',
+  }
+);
+
+/**
+ * ITOM
+ */
+export const SOURCE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.sourceTextAreaFieldLabel',
+  {
+    defaultMessage: 'Source',
+  }
+);
+
+export const EVENT_CLASS = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.eventClassTextAreaFieldLabel',
+  {
+    defaultMessage: 'Source instance',
+  }
+);
+
+export const RESOURCE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.resourceTextAreaFieldLabel',
+  {
+    defaultMessage: 'Resource',
+  }
+);
+
+export const NODE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.nodeTextAreaFieldLabel',
+  {
+    defaultMessage: 'Node',
+  }
+);
+
+export const METRIC_NAME = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.metricNameTextAreaFieldLabel',
+  {
+    defaultMessage: 'Metric name',
+  }
+);
+
+export const TYPE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.typeTextAreaFieldLabel',
+  {
+    defaultMessage: 'Type',
+  }
+);
+
+export const MESSAGE_KEY = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.messageKeyTextAreaFieldLabel',
+  {
+    defaultMessage: 'Message key',
   }
 );

@@ -18,6 +18,7 @@ import {
   ServiceNowSecrets,
   ServiceNowITSMActionParams,
   ServiceNowSIRActionParams,
+  ServiceNowITOMActionParams,
 } from './types';
 import { isValidUrl } from '../../../lib/value_validators';
 
@@ -90,6 +91,20 @@ export const SERVICENOW_SIR_TITLE = i18n.translate(
   }
 );
 
+export const SERVICENOW_ITOM_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.actionTypeTitle',
+  {
+    defaultMessage: 'ServiceNow ITOM',
+  }
+);
+
+export const SERVICENOW_ITOM_DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.selectMessageText',
+  {
+    defaultMessage: 'Create an event in ServiceNow ITOM.',
+  }
+);
+
 export function getServiceNowITSMActionType(): ActionTypeModel<
   ServiceNowConfig,
   ServiceNowSecrets,
@@ -159,5 +174,24 @@ export function getServiceNowSIRActionType(): ActionTypeModel<
       return validationResult;
     },
     actionParamsFields: lazy(() => import('./servicenow_sir_params')),
+  };
+}
+
+export function getServiceNowITOMActionType(): ActionTypeModel<
+  ServiceNowConfig,
+  ServiceNowSecrets,
+  ServiceNowITOMActionParams
+> {
+  return {
+    id: '.servicenow-itom',
+    iconClass: lazy(() => import('./logo')),
+    selectMessage: SERVICENOW_ITOM_DESC,
+    actionTypeTitle: SERVICENOW_ITOM_TITLE,
+    validateConnector,
+    actionConnectorFields: lazy(() => import('./servicenow_connectors_no_app')),
+    validateParams: async (
+      actionParams: ServiceNowITOMActionParams
+    ): Promise<GenericValidationResult<unknown>> => ({ errors: {} }),
+    actionParamsFields: lazy(() => import('./servicenow_itom_params')),
   };
 }

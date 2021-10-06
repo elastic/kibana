@@ -24,6 +24,7 @@ import {
 import { getActionType as getJiraActionType } from './jira';
 import { getActionType as getResilientActionType } from './resilient';
 import { getActionType as getTeamsActionType } from './teams';
+import { ENABLE_ITOM } from '../constants/connectors';
 export { ActionParamsType as EmailActionParams, ActionTypeId as EmailActionTypeId } from './email';
 export {
   ActionParamsType as IndexActionParams,
@@ -77,8 +78,11 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getWebhookActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getServiceNowITSMActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getServiceNowSIRActionType({ logger, configurationUtilities }));
-  actionTypeRegistry.register(getServiceNowITOMActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getJiraActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getResilientActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getTeamsActionType({ logger, configurationUtilities }));
+
+  if (ENABLE_ITOM) {
+    actionTypeRegistry.register(getServiceNowITOMActionType({ logger, configurationUtilities }));
+  }
 }

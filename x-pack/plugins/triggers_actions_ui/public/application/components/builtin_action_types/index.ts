@@ -14,10 +14,15 @@ import { getSwimlaneActionType } from './swimlane';
 import { getWebhookActionType } from './webhook';
 import { TypeRegistry } from '../../type_registry';
 import { ActionTypeModel } from '../../../types';
-import { getServiceNowITSMActionType, getServiceNowSIRActionType } from './servicenow';
+import {
+  getServiceNowITSMActionType,
+  getServiceNowSIRActionType,
+  getServiceNowITOMActionType,
+} from './servicenow';
 import { getJiraActionType } from './jira';
 import { getResilientActionType } from './resilient';
 import { getTeamsActionType } from './teams';
+import { ENABLE_ITOM } from '../../../../../actions/server/constants/connectors';
 
 export function registerBuiltInActionTypes({
   actionTypeRegistry,
@@ -36,4 +41,8 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getJiraActionType());
   actionTypeRegistry.register(getResilientActionType());
   actionTypeRegistry.register(getTeamsActionType());
+
+  if (ENABLE_ITOM) {
+    actionTypeRegistry.register(getServiceNowITOMActionType());
+  }
 }

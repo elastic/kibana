@@ -169,7 +169,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
   return (
     <>
       <EuiTitle size="s">
-        <h3>{i18n.INCIDENT}</h3>
+        <h3>{i18n.SECURITY_INCIDENT}</h3>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFormRow
