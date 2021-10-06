@@ -83,18 +83,13 @@ export function MetricChart({
       ? formatFactory(column.meta?.params).convert(row[accessor])
       : Number(Number(row[accessor]).toFixed(3)).toString();
 
-  // trigger a re-render on value change only for the preview
-  const props: { key?: string | number } = {};
-  if (mode !== 'full') {
-    props.key = value;
-  }
   return (
     <VisualizationContainer
       reportTitle={title}
       reportDescription={description}
       className="lnsMetricExpression__container"
     >
-      <AutoScale {...props}>
+      <AutoScale key={value}>
         <div data-test-subj="lns_metric_value" style={{ fontSize: '60pt', fontWeight: 600 }}>
           {value}
         </div>
