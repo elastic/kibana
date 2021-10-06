@@ -362,25 +362,25 @@ describe('GET /api/status', () => {
         await setupServer({
           coreOverall: createServiceStatus(ServiceStatusLevels.available),
         });
-        await supertest(httpSetup.server.listener).get('/api/status?v7format=true').expect(200);
+        await supertest(httpSetup.server.listener).get('/api/status').expect(200);
       });
       it('respond with a 200 when core.overall.status is degraded', async () => {
         await setupServer({
           coreOverall: createServiceStatus(ServiceStatusLevels.degraded),
         });
-        await supertest(httpSetup.server.listener).get('/api/status?v7format=true').expect(200);
+        await supertest(httpSetup.server.listener).get('/api/status').expect(200);
       });
       it('respond with a 503 when core.overall.status is unavailable', async () => {
         await setupServer({
           coreOverall: createServiceStatus(ServiceStatusLevels.unavailable),
         });
-        await supertest(httpSetup.server.listener).get('/api/status?v7format=true').expect(503);
+        await supertest(httpSetup.server.listener).get('/api/status').expect(503);
       });
       it('respond with a 503 when core.overall.status is critical', async () => {
         await setupServer({
           coreOverall: createServiceStatus(ServiceStatusLevels.critical),
         });
-        await supertest(httpSetup.server.listener).get('/api/status?v7format=true').expect(503);
+        await supertest(httpSetup.server.listener).get('/api/status').expect(503);
       });
     });
   });
