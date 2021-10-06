@@ -13,6 +13,7 @@ import {
   policyIndexPattern,
   metadataCurrentIndexPattern,
   telemetryIndexPattern,
+  METADATA_UNITED_INDEX,
 } from '../../../plugins/security_solution/common/endpoint/constants';
 
 export function deleteDataStream(getService: (serviceName: 'es') => Client, index: string) {
@@ -67,6 +68,12 @@ export async function deleteAllDocsFromMetadataCurrentIndex(
   getService: (serviceName: 'es') => Client
 ) {
   await deleteAllDocsFromIndex(getService, metadataCurrentIndexPattern);
+}
+
+export async function deleteAllDocsFromMetadataUnitedIndex(
+  getService: (serviceName: 'es') => Client
+) {
+  await deleteAllDocsFromIndex(getService, METADATA_UNITED_INDEX);
 }
 
 export async function deleteEventsStream(getService: (serviceName: 'es') => Client) {
