@@ -25,16 +25,17 @@ export interface CiStatsMetric {
   value: number;
   limit?: number;
   limitConfigPath?: string;
+  meta?: CiStatsMetadata;
 }
 
-export interface CiStatsTimingMetadata {
+export interface CiStatsMetadata {
   [key: string]: string | string[] | number | boolean | undefined;
 }
 export interface CiStatsTiming {
   group: string;
   id: string;
   ms: number;
-  meta?: CiStatsTimingMetadata;
+  meta?: CiStatsMetadata;
 }
 
 export interface ReqOptions {
@@ -51,6 +52,10 @@ export interface TimingsOptions {
   upstreamBranch?: string;
   /** value of data/uuid, automatically loaded if not specified */
   kibanaUuid?: string | null;
+}
+
+export interface MetricsOptions {
+  defaultMeta?: CiStatsMetadata;
 }
 export class CiStatsReporter {
   static fromEnv(log: ToolingLog) {
@@ -101,7 +106,7 @@ export class CiStatsReporter {
     const memUsage = process.memoryUsage();
     const isElasticCommitter = email && email.endsWith('@elastic.co') ? true : false;
 
-    const defaultMetadata = {
+    const defaultMeta = {
       kibanaUuid,
       isElasticCommitter,
       committerHash: email
@@ -125,7 +130,7 @@ export class CiStatsReporter {
       totalMem: Os.totalmem(),
     };
 
-    this.log.debug('CIStatsReporter committerHash: %s', defaultMetadata.committerHash);
+    this.log.debug('CIStatsReporter committerHash: %s', defaultMeta.committerHash);
 
     return await this.req({
       auth: !!buildId,
@@ -133,8 +138,8 @@ export class CiStatsReporter {
       body: {
         buildId,
         upstreamBranch,
+        defaultMeta,
         timings,
-        defaultMetadata,
       },
       bodyDesc: timings.length === 1 ? `${timings.length} timing` : `${timings.length} timings`,
     });
@@ -144,7 +149,7 @@ export class CiStatsReporter {
    * Report metrics data to the ci-stats service. If running outside of CI this method
    * does nothing as metrics can only be reported when associated with a specific CI build.
    */
-  async metrics(metrics: CiStatsMetric[]) {
+  async metrics(metrics: CiStatsMetric[], options?: MetricsOptions) {
     if (!this.hasBuildConfig()) {
       return;
     }
@@ -160,6 +165,7 @@ export class CiStatsReporter {
       path: '/v1/metrics',
       body: {
         buildId,
+        defaultMeta: options?.defaultMeta,
         metrics,
       },
       bodyDesc: `metrics: ${metrics
