@@ -15,7 +15,6 @@ import { PRODUCT_RESPONSE_HEADER } from '../supported_server_response_check';
 
 // use jest.requireActual() to prevent weird errors when people mock @elastic/elasticsearch
 const { Client: UnmockedClient } = jest.requireActual('@elastic/elasticsearch');
-
 const createInternalClientMock = (res?: Promise<unknown>): DeeplyMockedKeys<KibanaClient> => {
   // we mimic 'reflection' on a concrete instance of the client to generate the mocked functions.
   const client = new UnmockedClient({
@@ -77,9 +76,9 @@ const createInternalClientMock = (res?: Promise<unknown>): DeeplyMockedKeys<Kiba
   // `on`, `off`, and `once` are properties without a setter.
   // We can't `client.on = jest.fn()` because the following error will be thrown:
   // TypeError: Cannot set property on of #<Client> which has only a getter
-  mockGetter(client, 'on');
-  mockGetter(client, 'off');
-  mockGetter(client, 'once');
+  mockGetter(client.diagnostic, 'on');
+  mockGetter(client.diagnostic, 'off');
+  mockGetter(client.diagnostic, 'once');
   client.transport = {
     request: jest.fn(),
   };

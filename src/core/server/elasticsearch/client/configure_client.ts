@@ -8,12 +8,15 @@
 
 import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
-import { ApiError, Client, RequestEvent, errors, Transport } from '@elastic/elasticsearch';
+import { Client, errors } from '@elastic/elasticsearch';
+import { Transport, events } from '@elastic/transport';
 import type {
-  RequestBody,
   TransportRequestParams,
   TransportRequestOptions,
+  TransportResult,
+  DiagnosticResult,
 } from '@elastic/transport';
+import type { RequestBody } from '@elastic/transport/lib/types';
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 
@@ -36,13 +39,16 @@ export const configureClient = (
   const clientOptions = parseClientOptions(config, scoped);
   class KibanaTransport extends Transport {
     request(params: TransportRequestParams, options?: TransportRequestOptions) {
-      const opts = options || {};
+      const opts: TransportRequestOptions = options || {};
       const opaqueId = getExecutionContext();
       if (opaqueId && !opts.opaqueId) {
         // rewrites headers['x-opaque-id'] if it presents
         opts.opaqueId = opaqueId;
       }
-      return super.request(params, opts);
+      // Enforce the client to return TransportResult.
+      // It's required for bwc with responses in 7.x version.
+      opts.meta = true;
+      return super.request(params, opts) as Promise<TransportResult<any, any>>;
     }
   }
 
@@ -76,9 +82,10 @@ function ensureString(body: RequestBody): string {
  * Returns a debug message from an Elasticsearch error in the following format:
  * [error type] error reason
  */
-export function getErrorMessage(error: ApiError): string {
+export function getErrorMessage(error: errors.ElasticsearchClientError): string {
   if (error instanceof errors.ResponseError) {
-    return `[${error.meta.body?.error?.type}]: ${error.meta.body?.error?.reason ?? error.message}`;
+    const errorBody = error.meta.body as { error?: { type: string; reason?: string } };
+    return `[${errorBody?.error?.type}]: ${errorBody?.error?.reason ?? error.message}`;
   }
   return `[${error.name}]: ${error.message}`;
 }
@@ -92,7 +99,7 @@ export function getErrorMessage(error: ApiError): string {
  *
  * so it could be copy-pasted into the Dev console
  */
-function getResponseMessage(event: RequestEvent): string {
+function getResponseMessage(event: DiagnosticResult): string {
   const errorMeta = getRequestDebugMeta(event);
   const body = errorMeta.body ? `\n${errorMeta.body}` : '';
   return `${errorMeta.statusCode}\n${errorMeta.method} ${errorMeta.url}${body}`;
@@ -102,7 +109,7 @@ function getResponseMessage(event: RequestEvent): string {
  * Returns stringified debug information from an Elasticsearch request event
  * useful for logging in case of an unexpected failure.
  */
-export function getRequestDebugMeta(event: RequestEvent): {
+export function getRequestDebugMeta(event: DiagnosticResult): {
   url: string;
   body: string;
   statusCode: number | null;
@@ -115,12 +122,12 @@ export function getRequestDebugMeta(event: RequestEvent): {
     url: `${params.path}${querystring ? `?${querystring}` : ''}`,
     body: params.body ? `${ensureString(params.body)}` : '',
     method: params.method,
-    statusCode: event.statusCode,
+    statusCode: event.statusCode!,
   };
 }
 
 const addLogging = (client: Client, logger: Logger) => {
-  client.on('response', (error, event) => {
+  client.diagnostic.on(events.RESPONSE, (error, event) => {
     if (event) {
       const opaqueId = event.meta.request.options.opaqueId;
       const meta = opaqueId

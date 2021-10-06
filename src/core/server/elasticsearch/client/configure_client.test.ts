@@ -9,13 +9,14 @@
 import { Buffer } from 'buffer';
 import { Readable } from 'stream';
 
-import { RequestEvent, errors } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
 import type {
   TransportRequestOptions,
   TransportRequestParams,
-  RequestBody,
+  DiagnosticResult,
 } from '@elastic/transport';
+import type { RequestBody } from '@elastic/transport/lib/types';
 
 import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
@@ -36,7 +37,7 @@ const createFakeClient = () => {
   const client = new actualEs.Client({
     nodes: ['http://localhost'], // Enforcing `nodes` because it's mandatory
   });
-  jest.spyOn(client, 'on');
+  jest.spyOn(client.diagnostic, 'on');
   return client;
 };
 
@@ -54,7 +55,7 @@ const createApiResponse = <T>({
   warnings?: string[];
   params?: TransportRequestParams;
   requestOptions?: TransportRequestOptions;
-}): RequestEvent<T> => {
+}): DiagnosticResult<T> => {
   return {
     body,
     statusCode,
@@ -124,8 +125,8 @@ describe('configureClient', () => {
   it('listens to client on `response` events', () => {
     const client = configureClient(config, { logger, type: 'test', scoped: false });
 
-    expect(client.on).toHaveBeenCalledTimes(1);
-    expect(client.on).toHaveBeenCalledWith('response', expect.any(Function));
+    expect(client.diagnostic.on).toHaveBeenCalledTimes(1);
+    expect(client.diagnostic.on).toHaveBeenCalledWith('response', expect.any(Function));
   });
 
   describe('Product check', () => {
@@ -176,7 +177,7 @@ describe('configureClient', () => {
           },
         });
 
-        client.emit('response', null, response);
+        client.diagnostic.emit('response', null, response);
         expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
                   Array [
                     Array [
@@ -201,7 +202,7 @@ describe('configureClient', () => {
           })
         );
 
-        client.emit('response', null, response);
+        client.diagnostic.emit('response', null, response);
         expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
                   Array [
                     Array [
@@ -228,7 +229,7 @@ describe('configureClient', () => {
           )
         );
 
-        client.emit('response', null, response);
+        client.diagnostic.emit('response', null, response);
         expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -255,7 +256,7 @@ describe('configureClient', () => {
           )
         );
 
-        client.emit('response', null, response);
+        client.diagnostic.emit('response', null, response);
         expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -273,7 +274,7 @@ describe('configureClient', () => {
 
         const response = createResponseWithBody();
 
-        client.emit('response', null, response);
+        client.diagnostic.emit('response', null, response);
         expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -298,7 +299,7 @@ describe('configureClient', () => {
           },
         });
 
-        client.emit('response', null, response);
+        client.diagnostic.emit('response', null, response);
 
         expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
                   Array [
@@ -333,7 +334,7 @@ describe('configureClient', () => {
             },
           },
         });
-        client.emit('response', new errors.ResponseError(response), response);
+        client.diagnostic.emit('response', new errors.ResponseError(response), response);
 
         expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
           Array [
@@ -351,7 +352,7 @@ describe('configureClient', () => {
         const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createApiResponse({ body: {} });
-        client.emit('response', new errors.TimeoutError('message', response), response);
+        client.diagnostic.emit('response', new errors.TimeoutError('message', response), response);
 
         expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
                   Array [
@@ -381,7 +382,7 @@ describe('configureClient', () => {
             },
           },
         });
-        client.emit('response', new errors.ResponseError(response), response);
+        client.diagnostic.emit('response', new errors.ResponseError(response), response);
 
         expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
           Array [
@@ -397,7 +398,7 @@ describe('configureClient', () => {
       it('logs default error info when the error response body is empty', () => {
         const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
-        let response: RequestEvent<any, any> = createApiResponse({
+        let response: DiagnosticResult<any, any> = createApiResponse({
           statusCode: 400,
           headers: {},
           params: {
@@ -408,7 +409,7 @@ describe('configureClient', () => {
             error: {},
           },
         });
-        client.emit('response', new errors.ResponseError(response), response);
+        client.diagnostic.emit('response', new errors.ResponseError(response), response);
 
         expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
           Array [
@@ -431,7 +432,7 @@ describe('configureClient', () => {
           },
           body: undefined,
         });
-        client.emit('response', new errors.ResponseError(response), response);
+        client.diagnostic.emit('response', new errors.ResponseError(response), response);
 
         expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
           Array [
@@ -461,7 +462,7 @@ describe('configureClient', () => {
             error: {},
           },
         });
-        client.emit('response', null, response);
+        client.diagnostic.emit('response', null, response);
 
         expect(loggingSystemMock.collect(logger).debug[0][1]).toMatchInlineSnapshot(`
           Object {
@@ -487,7 +488,7 @@ describe('configureClient', () => {
           },
           body: {} as any,
         });
-        client.emit('response', new errors.ResponseError(response), response);
+        client.diagnostic.emit('response', new errors.ResponseError(response), response);
 
         expect(loggingSystemMock.collect(logger).debug[0][1]).toMatchInlineSnapshot(`
           Object {
