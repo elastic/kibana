@@ -27,7 +27,7 @@ import {
 import { findNewUuid } from '../../components/renderers/lib/find_new_uuid';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { GlobalStateContext } from '../../application/global_state_context';
+import { GlobalStateContext } from '../../application/contexts/global_state_context';
 import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 class WrappedSetupModeRenderer extends React.Component {
