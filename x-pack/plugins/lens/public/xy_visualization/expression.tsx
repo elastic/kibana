@@ -117,6 +117,8 @@ export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
   return intervalDuration.as('milliseconds');
 }
 
+const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
+
 export const getXyChartRenderer = (dependencies: {
   formatFactory: FormatFactory;
   chartsThemeService: ChartsPluginStart['theme'];
@@ -395,6 +397,41 @@ export function XYChart({
         min = extent.lowerBound;
         max = extent.upperBound;
       }
+    } else {
+      const axisHasThreshold = thresholdLayers.some(({ yConfig }) =>
+        yConfig?.some(({ axisMode }) => axisMode === axis.groupId)
+      );
+      if (!fit && axisHasThreshold) {
+        // Remove this once the chart will support automatic annotation fit for other type of charts
+        for (const series of axis.series) {
+          const table = data.tables[series.layer];
+          for (const row of table.rows) {
+            for (const column of table.columns) {
+              if (column.id === series.accessor) {
+                const value = row[column.id];
+                if (typeof value === 'number') {
+                  // keep the 0 in view
+                  max = Math.max(value, max || 0, 0);
+                  min = Math.min(value, min || 0, 0);
+                }
+              }
+            }
+          }
+        }
+        for (const { layerId, yConfig } of thresholdLayers) {
+          const table = data.tables[layerId];
+          for (const { axisMode, forAccessor } of yConfig || []) {
+            if (axis.groupId === axisMode) {
+              for (const row of table.rows) {
+                const value = row[forAccessor];
+                // keep the 0 in view
+                max = Math.max(value, max || 0, 0);
+                min = Math.min(value, min || 0, 0);
+              }
+            }
+          }
+        }
+      }
     }
 
     return {
@@ -651,9 +688,6 @@ export function XYChart({
             : {};
 
           const table = data.tables[layerId];
-
-          const isPrimitive = (value: unknown): boolean =>
-            value != null && typeof value !== 'object';
 
           // what if row values are not primitive? That is the case of, for instance, Ranges
           // remaps them to their serialized version with the formatHint metadata
