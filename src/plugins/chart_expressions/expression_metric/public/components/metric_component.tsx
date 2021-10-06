@@ -6,18 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { last, isNaN } from 'lodash';
 import React, { Component } from 'react';
-import { isColorDark } from '@elastic/eui';
 import { MetricVisValue } from './metric_value';
 import { MetricInput, VisParams, MetricOptions } from '../../common/types';
-import type { FieldFormatsContentType, IFieldFormat } from '../../../../field_formats/common';
+import type { IFieldFormat } from '../../../../field_formats/common';
 import { Datatable } from '../../../../expressions/public';
-import { getHeatmapColors } from '../../../../charts/public';
-import { getFormatService } from '../format_service';
+import { CustomPaletteState } from '../../../../charts/public';
+import { getFormatService } from '../services/format_service';
 import { ExpressionValueVisDimension } from '../../../../visualizations/public';
+import { formatValue, getMinMaxForColumns, MinMax, shouldApplyColor } from '../utils';
+import { getPaletteService } from '../services';
 
 import './metric.scss';
+import { getColumnByAccessor } from '../utils/accessor';
+import { needsLightText } from '../utils/palette';
 
 export interface MetricVisComponentProps {
   visParams: Pick<VisParams, 'metric' | 'dimensions'>;
@@ -27,124 +29,55 @@ export interface MetricVisComponentProps {
 }
 
 class MetricVisComponent extends Component<MetricVisComponentProps> {
-  private getLabels() {
-    const { percentageMode: isPercentageMode, colorsRange } = this.props.visParams.metric;
-    const lastRange = last(colorsRange);
-    if (!colorsRange || !lastRange) {
-      return [];
-    }
-
-    const max = lastRange.to;
-    return colorsRange.map((range: any) => {
-      const from = isPercentageMode ? Math.round((100 * range.from) / max) : range.from;
-      const to = isPercentageMode ? Math.round((100 * range.to) / max) : range.to;
-      return `${from} - ${to}`;
-    });
-  }
-
-  private getColors() {
-    const { invertColors, colorSchema, colorsRange } = this.props.visParams.metric;
-    return this.getLabels().reduce<Record<string, string>>((colors, label, index) => {
-      const divider = Math.max(colorsRange.length - 1, 1);
-      const val = invertColors ? 1 - index / divider : index / divider;
-      colors[label] = getHeatmapColors(val, colorSchema);
-      return colors;
-    }, {});
-  }
-
-  private getBucket(val: number) {
-    const { colorsRange = [] } = this.props.visParams.metric;
-    const bucket = colorsRange.findIndex((range) => range.from <= val && range.to > val);
-
-    if (bucket === -1) {
-      if (colorsRange?.[0] && val < colorsRange?.[0].from) {
-        return 0;
-      }
-      return colorsRange.length - 1;
-    }
-
-    return bucket;
-  }
-
-  private getColor(val: number, labels: string[], colors: { [label: string]: string }) {
-    const bucket = this.getBucket(val);
-    return colors[labels[bucket]];
-  }
-
-  private needsLightText(bgColor: string) {
-    const colors = /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/.exec(bgColor);
-    if (!colors) {
-      return false;
-    }
-
-    const [red, green, blue] = colors.slice(1).map((c) => parseInt(c, 10));
-    return isColorDark(red, green, blue);
-  }
-
-  private getFormattedValue = (
-    fieldFormatter: IFieldFormat,
-    value: any,
-    format: FieldFormatsContentType = 'text'
-  ) => {
-    if (isNaN(value)) {
-      return '-';
-    }
-
-    return fieldFormatter.convert(value, format);
-  };
-
-  private getColumn(
-    accessor: ExpressionValueVisDimension['accessor'],
-    columns: Datatable['columns'] = []
-  ) {
-    if (typeof accessor === 'number') {
-      return columns[accessor];
-    }
-    return columns.filter(({ id }) => accessor.id === id)[0];
+  private getColor(value: number, paletteParams: CustomPaletteState | undefined, minMax: MinMax) {
+    return getPaletteService().get('custom')?.getColorForValue?.(value, paletteParams, minMax);
   }
 
   private processTableGroups(table: Datatable) {
     const { metric: metricConfig, dimensions } = this.props.visParams;
-    const { percentageMode: isPercentageMode, colorsRange, style } = metricConfig;
-    const min = colorsRange?.[0]?.from;
-    const max = last(colorsRange)?.to;
-    const colors = this.getColors();
-    const labels = this.getLabels();
+    const { percentageMode: isPercentageMode, style, palette } = metricConfig;
+    const { stops = [] } = palette ?? {};
+    const min = stops[0];
+    const max = stops[stops.length - 1];
 
     let bucketColumnId: string;
     let bucketFormatter: IFieldFormat;
 
     if (dimensions.bucket) {
-      bucketColumnId = this.getColumn(dimensions.bucket.accessor, table.columns).id;
+      bucketColumnId = getColumnByAccessor(dimensions.bucket.accessor, table.columns).id;
       bucketFormatter = getFormatService().deserialize(dimensions.bucket.format);
     }
 
     return dimensions.metrics.reduce(
       (acc: MetricOptions[], metric: ExpressionValueVisDimension) => {
-        const column = this.getColumn(metric.accessor, table?.columns);
+        const column = getColumnByAccessor(metric.accessor, table?.columns);
         const formatter = getFormatService().deserialize(metric.format);
+        const minMax = getMinMaxForColumns(table);
+
         const metrics = table.rows.map((row, rowIndex) => {
           let title = column.name;
           let value: number = row[column.id];
-          const color = this.getColor(value, labels, colors);
+          const columnMinMax = minMax[column.id];
+          const color = this.getColor(value, palette, columnMinMax);
 
-          if (isPercentageMode && colorsRange?.length && max !== undefined && min !== undefined) {
+          if (isPercentageMode && stops.length) {
             value = (value - min) / (max - min);
           }
-          const formattedValue = this.getFormattedValue(formatter, value, 'html');
+
+          const formattedValue = formatValue(value, formatter, 'html');
           if (bucketColumnId) {
-            const bucketValue = this.getFormattedValue(bucketFormatter, row[bucketColumnId]);
+            const bucketValue = formatValue(row[bucketColumnId], bucketFormatter);
             title = `${bucketValue} - ${title}`;
           }
 
-          const shouldColor = colorsRange.length > 1;
+          const shouldBrush = stops.length > 1 && shouldApplyColor(color ?? '');
 
           return {
             label: title,
             value: formattedValue,
-            color: shouldColor && style.labelColor ? color : undefined,
-            bgColor: shouldColor && style.bgColor ? color : undefined,
-            lightText: shouldColor && style.bgColor && this.needsLightText(color),
+            color: shouldBrush && style.labelColor ? color : undefined,
+            bgColor: shouldBrush && style.bgColor ? color : undefined,
+            lightText: shouldBrush && style.bgColor && needsLightText(color),
             rowIndex,
           };
         });

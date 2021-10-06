@@ -22,7 +22,6 @@ export interface MetricArguments {
   colorMode: ColorMode;
   showLabels: boolean;
   bgFill: string;
-  subText: string;
   palette: PaletteOutput<CustomPaletteState>;
   font: Style;
   metric: ExpressionValueVisDimension[];

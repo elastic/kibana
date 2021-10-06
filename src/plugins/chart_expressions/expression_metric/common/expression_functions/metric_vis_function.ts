@@ -29,7 +29,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'Shows metric in percentage mode. Requires colorRange to be set.',
       }),
     },
-    /* ---- Should support or remove? ---- */
     colorMode: {
       types: ['string'],
       default: `"${ColorMode.None}"`,
@@ -38,24 +37,12 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'Which part of metric to color',
       }),
     },
-    /* --------------------------- */
-    /* ---- Should remove? ---- */
-    subText: {
-      types: ['string'],
-      aliases: ['label', 'text', 'description'],
-      default: '""',
-      help: i18n.translate('expressionMetricVis.function.subText.help', {
-        defaultMessage: 'Custom text to show under the metric',
-      }),
-    },
-    /* --------------------------- */
     palette: {
       types: ['palette'],
       help: i18n.translate('expressionMetricVis.function.palette.help', {
         defaultMessage: '!!!! TODO add description',
       }),
     },
-
     showLabels: {
       types: ['boolean'],
       default: true,
@@ -79,7 +66,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       }),
       default: '{font size=60}',
     },
-
     metric: {
       types: ['vis_dimension'],
       help: i18n.translate('expressionMetricVis.function.metric.help', {
@@ -141,8 +127,8 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
               bgFill: args.bgFill,
               bgColor: args.colorMode === ColorMode.Background,
               labelColor: args.colorMode === ColorMode.Labels,
-              subText: args.subText,
               fontSize,
+              subText: '',
             },
           },
           dimensions: {

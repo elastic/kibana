@@ -64,9 +64,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
 
   const metricVis = buildExpressionFunction('metricVis', {
     percentageMode,
-    colorSchema,
     colorMode: metricColorMode,
-    invertColors,
     showLabels: labels?.show ?? false,
   });
 
@@ -83,7 +81,6 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
       range: percentageMode ? 'percent' : 'number',
       rangeMin: colorsRange[0].from,
       rangeMax: last(colorsRange)?.to,
-      reverse: invertColors,
     });
 
     metricVis.addArgument('palette', buildExpression([palette]));
