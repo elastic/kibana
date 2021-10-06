@@ -69,9 +69,6 @@ export const PromotedDocuments: React.FC = () => {
         hasDocuments && (
           <EuiFlexGroup gutterSize="s" responsive={false} wrap>
             <EuiFlexItem>
-              <AddResultButton />
-            </EuiFlexItem>
-            <EuiFlexItem>
               <EuiButtonEmpty
                 onClick={clearPromotedIds}
                 iconType="menuDown"
@@ -83,6 +80,9 @@ export const PromotedDocuments: React.FC = () => {
                   { defaultMessage: 'Demote all' }
                 )}
               </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <AddResultButton />
             </EuiFlexItem>
           </EuiFlexGroup>
         )
