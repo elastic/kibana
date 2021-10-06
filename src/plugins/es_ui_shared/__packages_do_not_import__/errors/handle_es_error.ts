@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ApiError } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import { IKibanaResponse, KibanaResponseFactory } from 'kibana/server';
 import { getEsCause } from './es_error_parser';
 
 interface EsErrorHandlerParams {
-  error: ApiError;
+  error: errors.ElasticsearchClientError;
   response: KibanaResponseFactory;
   handleCustomError?: () => IKibanaResponse<any>;
 }
