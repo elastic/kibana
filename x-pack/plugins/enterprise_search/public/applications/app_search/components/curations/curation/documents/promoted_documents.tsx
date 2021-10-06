@@ -56,7 +56,7 @@ export const PromotedDocuments: React.FC = () => {
             <EuiFlexItem>
               <EuiButtonEmpty
                 onClick={clearPromotedIds}
-                iconType="menuDown"
+                color="danger"
                 size="s"
                 disabled={isAutomated}
               >
