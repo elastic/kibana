@@ -16,7 +16,7 @@ import type {
 
 import moment from 'moment';
 import { merge } from 'lodash';
-import type { PluginStart as DataViewsPluginStart } from '../../../../../../src/plugins/data_views/server';
+import type { DataViewsService } from '../../../../../../src/plugins/data_views/common';
 import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
 import type { MlInfoResponse } from '../../../common/types/ml_server_info';
@@ -114,7 +114,7 @@ export class DataRecognizer {
   private _mlClient: MlClient;
   private _savedObjectsClient: SavedObjectsClientContract;
   private _jobSavedObjectService: JobSavedObjectService;
-  private _dataViews: DataViewsPluginStart;
+  private _dataViewsService: DataViewsService;
   private _request: KibanaRequest;
 
   private _authorizationHeader: object;
@@ -135,14 +135,14 @@ export class DataRecognizer {
     mlClusterClient: IScopedClusterClient,
     mlClient: MlClient,
     savedObjectsClient: SavedObjectsClientContract,
-    dataViews: DataViewsPluginStart,
+    dataViewsService: DataViewsService,
     jobSavedObjectService: JobSavedObjectService,
     request: KibanaRequest
   ) {
     this._client = mlClusterClient;
     this._mlClient = mlClient;
     this._savedObjectsClient = savedObjectsClient;
-    this._dataViews = dataViews;
+    this._dataViewsService = dataViewsService;
     this._jobSavedObjectService = jobSavedObjectService;
     this._request = request;
     this._authorizationHeader = getAuthorizationHeader(request);
@@ -625,12 +625,7 @@ export class DataRecognizer {
   // returns a id based on an index pattern name
   private async _getIndexPatternId(name: string): Promise<string | undefined> {
     try {
-      const dataViewService = await this._dataViews.dataViewsServiceFactory(
-        this._savedObjectsClient,
-        this._client.asInternalUser
-      );
-
-      const dataViews = await dataViewService.find(name);
+      const dataViews = await this._dataViewsService.find(name);
       return dataViews.find((d) => d.title === name)?.id;
     } catch (error) {
       mlLog.warn(`Error loading index patterns, ${error}`);
@@ -1393,20 +1388,15 @@ export function dataRecognizerFactory(
   client: IScopedClusterClient,
   mlClient: MlClient,
   savedObjectsClient: SavedObjectsClientContract,
-  getDataViews: () => DataViewsPluginStart | null,
+  dataViewsService: DataViewsService,
   jobSavedObjectService: JobSavedObjectService,
   request: KibanaRequest
 ) {
-  const dataViews = getDataViews();
-  if (dataViews === null) {
-    throw Error('Data views plugin not initialized');
-  }
-
   return new DataRecognizer(
     client,
     mlClient,
     savedObjectsClient,
-    dataViews,
+    dataViewsService,
     jobSavedObjectService,
     request
   );

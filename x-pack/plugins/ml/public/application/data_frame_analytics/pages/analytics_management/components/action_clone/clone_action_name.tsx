@@ -9,7 +9,6 @@ import { EuiToolTip } from '@elastic/eui';
 import React, { FC } from 'react';
 import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { IIndexPattern } from 'src/plugins/data/common';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { DataFrameAnalyticsConfig, isOutlierAnalysis } from '../../../../common';
 import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
@@ -401,12 +400,10 @@ export const useNavigateToWizardWithClonedJob = () => {
   const {
     services: {
       notifications: { toasts },
-      savedObjects,
+      data: { dataViews },
     },
   } = useMlKibana();
   const navigateToPath = useNavigateToPath();
-
-  const savedObjectsClient = savedObjects.client;
 
   return async (item: Pick<DataFrameAnalyticsListRow, 'config' | 'stats'>) => {
     const sourceIndex = Array.isArray(item.config.source.index)
@@ -415,17 +412,7 @@ export const useNavigateToWizardWithClonedJob = () => {
     let sourceIndexId;
 
     try {
-      const response = await savedObjectsClient.find<IIndexPattern>({
-        type: 'index-pattern',
-        perPage: 10,
-        search: `"${sourceIndex}"`,
-        searchFields: ['title'],
-        fields: ['title'],
-      });
-
-      const ip = response.savedObjects.find(
-        (obj) => obj.attributes.title.toLowerCase() === sourceIndex.toLowerCase()
-      );
+      const ip = (await dataViews.find(sourceIndex)).find(({ title }) => title === sourceIndex);
       if (ip !== undefined) {
         sourceIndexId = ip.id;
       } else {

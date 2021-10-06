@@ -19,7 +19,7 @@ import cloudwatchJobCaps from './__mocks__/results/cloudwatch_rollup_job_caps.js
 describe('job_service - job_caps', () => {
   let mlClusterClientNonRollupMock: any;
   let mlClusterClientRollupMock: any;
-  let savedObjectsClientMock: any;
+  let dataViews: any;
 
   beforeEach(() => {
     const asNonRollupMock = {
@@ -41,7 +41,7 @@ describe('job_service - job_caps', () => {
       asInternalUser: callAsRollupMock,
     };
 
-    savedObjectsClientMock = {
+    dataViews = {
       async find() {
         return Promise.resolve(kibanaSavedObjects);
       },
@@ -53,7 +53,7 @@ describe('job_service - job_caps', () => {
       const indexPattern = 'farequote-*';
       const isRollup = false;
       const { newJobCaps } = newJobCapsProvider(mlClusterClientNonRollupMock);
-      const response = await newJobCaps(indexPattern, isRollup, savedObjectsClientMock);
+      const response = await newJobCaps(indexPattern, isRollup, dataViews);
       expect(response).toEqual(farequoteJobCaps);
     });
 
@@ -61,7 +61,7 @@ describe('job_service - job_caps', () => {
       const indexPattern = 'farequote-*';
       const isRollup = true;
       const { newJobCaps } = newJobCapsProvider(mlClusterClientNonRollupMock);
-      const response = await newJobCaps(indexPattern, isRollup, savedObjectsClientMock);
+      const response = await newJobCaps(indexPattern, isRollup, dataViews);
       expect(response).toEqual(farequoteJobCapsEmpty);
     });
   });
@@ -71,7 +71,7 @@ describe('job_service - job_caps', () => {
       const indexPattern = 'cloud_roll_index';
       const isRollup = true;
       const { newJobCaps } = newJobCapsProvider(mlClusterClientRollupMock);
-      const response = await newJobCaps(indexPattern, isRollup, savedObjectsClientMock);
+      const response = await newJobCaps(indexPattern, isRollup, dataViews);
       expect(response).toEqual(cloudwatchJobCaps);
     });
 
@@ -79,7 +79,7 @@ describe('job_service - job_caps', () => {
       const indexPattern = 'cloud_roll_index';
       const isRollup = false;
       const { newJobCaps } = newJobCapsProvider(mlClusterClientRollupMock);
-      const response = await newJobCaps(indexPattern, isRollup, savedObjectsClientMock);
+      const response = await newJobCaps(indexPattern, isRollup, dataViews);
       expect(response).not.toEqual(cloudwatchJobCaps);
     });
   });

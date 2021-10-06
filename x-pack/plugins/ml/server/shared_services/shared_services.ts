@@ -16,7 +16,7 @@ import { KibanaRequest } from '../../.././../../src/core/server';
 import { MlLicense } from '../../common/license';
 
 import type { CloudSetup } from '../../../cloud/server';
-import { PluginStart as DataViewsPluginStart } from '../../../../../src/plugins/data_views/server';
+import type { PluginStart as DataViewsPluginStart } from '../../../../../src/plugins/data_views/server';
 import type { SecurityPluginSetup } from '../../../security/server';
 import { licenseChecks } from './license_checks';
 import { MlSystemProvider, getMlSystemProvider } from './providers/system';
@@ -46,6 +46,7 @@ import {
 } from '../lib/alerts/jobs_health_service';
 import type { FieldFormatsStart } from '../../../../../src/plugins/field_formats/server';
 import type { FieldFormatsRegistryProvider } from '../../common/types/kibana';
+import { getDataViewsServiceFactory, GetDataViewsService } from '../lib/data_views_utils';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
@@ -77,6 +78,7 @@ interface OkParams {
   mlClient: MlClient;
   jobSavedObjectService: JobSavedObjectService;
   getFieldsFormatRegistry: FieldFormatsRegistryProvider;
+  getDataViewsService: GetDataViewsService;
 }
 
 type OkCallback = (okParams: OkParams) => any;
@@ -91,7 +93,7 @@ export function createSharedServices(
   getInternalSavedObjectsClient: () => SavedObjectsClientContract | null,
   getUiSettings: () => UiSettingsServiceStart | null,
   getFieldsFormat: () => FieldFormatsStart | null,
-  getDataViews: () => DataViewsPluginStart | null,
+  getDataViews: () => DataViewsPluginStart,
   isMlReady: () => Promise<void>
 ): {
   sharedServicesProviders: SharedServices;
@@ -116,7 +118,8 @@ export function createSharedServices(
       getSpaces !== undefined,
       isMlReady,
       getUiSettings,
-      getFieldsFormat
+      getFieldsFormat,
+      getDataViews
     );
 
     const {
@@ -125,6 +128,7 @@ export function createSharedServices(
       mlClient,
       jobSavedObjectService,
       getFieldsFormatRegistry,
+      getDataViewsService,
     } = getRequestItems(request);
     const asyncGuards: Array<Promise<void>> = [];
 
@@ -143,7 +147,13 @@ export function createSharedServices(
       },
       async ok(callback: OkCallback) {
         await Promise.all(asyncGuards);
-        return callback({ scopedClient, mlClient, jobSavedObjectService, getFieldsFormatRegistry });
+        return callback({
+          scopedClient,
+          mlClient,
+          jobSavedObjectService,
+          getFieldsFormatRegistry,
+          getDataViewsService,
+        });
       },
     };
     return guards;
@@ -179,7 +189,8 @@ function getRequestItemsProvider(
   spaceEnabled: boolean,
   isMlReady: () => Promise<void>,
   getUiSettings: () => UiSettingsServiceStart | null,
-  getFieldsFormat: () => FieldFormatsStart | null
+  getFieldsFormat: () => FieldFormatsStart | null,
+  getDataViews: () => DataViewsPluginStart
 ) {
   return (request: KibanaRequest) => {
     const getHasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities);
@@ -237,12 +248,20 @@ function getRequestItemsProvider(
       };
       mlClient = getMlClient(scopedClient, jobSavedObjectService);
     }
+
+    const getDataViewsService = getDataViewsServiceFactory(
+      getDataViews,
+      savedObjectsClient,
+      scopedClient
+    );
+
     return {
       hasMlCapabilities,
       scopedClient,
       mlClient,
       jobSavedObjectService,
       getFieldsFormatRegistry,
+      getDataViewsService,
     };
   };
 }

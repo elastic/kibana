@@ -12,7 +12,7 @@ import type {
   KibanaRequest,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import type { PluginStart as DataViewsPluginStart } from '../../../../../src/plugins/data_views/server';
+import type { DataViewsService } from '../../../../../src/plugins/data_views/common';
 import type { DatafeedOverride, JobOverride } from '../../common/types/modules';
 import { wrapError } from '../client/error_wrapper';
 import { dataRecognizerFactory } from '../models/data_recognizer';
@@ -30,7 +30,7 @@ function recognize(
   client: IScopedClusterClient,
   mlClient: MlClient,
   savedObjectsClient: SavedObjectsClientContract,
-  getDataViews: () => DataViewsPluginStart | null,
+  dataViewsService: DataViewsService,
   jobSavedObjectService: JobSavedObjectService,
   request: KibanaRequest,
   indexPatternTitle: string
@@ -39,7 +39,7 @@ function recognize(
     client,
     mlClient,
     savedObjectsClient,
-    getDataViews,
+    dataViewsService,
     jobSavedObjectService,
     request
   );
@@ -50,7 +50,7 @@ function getModule(
   client: IScopedClusterClient,
   mlClient: MlClient,
   savedObjectsClient: SavedObjectsClientContract,
-  getDataViews: () => DataViewsPluginStart | null,
+  dataViewsService: DataViewsService,
   jobSavedObjectService: JobSavedObjectService,
   request: KibanaRequest,
   moduleId?: string
@@ -59,7 +59,7 @@ function getModule(
     client,
     mlClient,
     savedObjectsClient,
-    getDataViews,
+    dataViewsService,
     jobSavedObjectService,
     request
   );
@@ -74,7 +74,7 @@ function setup(
   client: IScopedClusterClient,
   mlClient: MlClient,
   savedObjectsClient: SavedObjectsClientContract,
-  getDataViews: () => DataViewsPluginStart | null,
+  dataViewsService: DataViewsService,
   jobSavedObjectService: JobSavedObjectService,
   request: KibanaRequest,
   moduleId: string,
@@ -95,7 +95,7 @@ function setup(
     client,
     mlClient,
     savedObjectsClient,
-    getDataViews,
+    dataViewsService,
     jobSavedObjectService,
     request
   );
@@ -120,7 +120,7 @@ function dataRecognizerJobsExist(
   client: IScopedClusterClient,
   mlClient: MlClient,
   savedObjectsClient: SavedObjectsClientContract,
-  getDataViews: () => DataViewsPluginStart | null,
+  dataViewsService: DataViewsService,
   jobSavedObjectService: JobSavedObjectService,
   request: KibanaRequest,
   moduleId: string
@@ -129,7 +129,7 @@ function dataRecognizerJobsExist(
     client,
     mlClient,
     savedObjectsClient,
-    getDataViews,
+    dataViewsService,
     jobSavedObjectService,
     request
   );
@@ -139,10 +139,7 @@ function dataRecognizerJobsExist(
 /**
  * Recognizer routes.
  */
-export function dataRecognizer(
-  { router, routeGuard }: RouteInitialization,
-  getDataViews: () => DataViewsPluginStart | null
-) {
+export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup Modules
    *
@@ -182,14 +179,23 @@ export function dataRecognizer(
       },
     },
     routeGuard.fullLicenseAPIGuard(
-      async ({ client, mlClient, request, response, context, jobSavedObjectService }) => {
+      async ({
+        client,
+        mlClient,
+        request,
+        response,
+        context,
+        jobSavedObjectService,
+        getDataViewsService,
+      }) => {
         try {
           const { indexPatternTitle } = request.params;
+          const dataViewService = await getDataViewsService();
           const results = await recognize(
             client,
             mlClient,
             context.core.savedObjects.client,
-            getDataViews,
+            dataViewService,
             jobSavedObjectService,
             request,
             indexPatternTitle
@@ -322,7 +328,15 @@ export function dataRecognizer(
       },
     },
     routeGuard.fullLicenseAPIGuard(
-      async ({ client, mlClient, request, response, context, jobSavedObjectService }) => {
+      async ({
+        client,
+        mlClient,
+        request,
+        response,
+        context,
+        jobSavedObjectService,
+        getDataViewsService,
+      }) => {
         try {
           let { moduleId } = request.params;
           if (moduleId === '') {
@@ -330,11 +344,12 @@ export function dataRecognizer(
             // the moduleId will be an empty string.
             moduleId = undefined;
           }
+          const dataViewService = await getDataViewsService();
           const results = await getModule(
             client,
             mlClient,
             context.core.savedObjects.client,
-            getDataViews,
+            dataViewService,
             jobSavedObjectService,
             request,
             moduleId
@@ -500,7 +515,15 @@ export function dataRecognizer(
       },
     },
     routeGuard.fullLicenseAPIGuard(
-      async ({ client, mlClient, request, response, context, jobSavedObjectService }) => {
+      async ({
+        client,
+        mlClient,
+        request,
+        response,
+        context,
+        jobSavedObjectService,
+        getDataViewsService,
+      }) => {
         try {
           const { moduleId } = request.params;
 
@@ -519,11 +542,13 @@ export function dataRecognizer(
             applyToAllSpaces,
           } = request.body as TypeOf<typeof setupModuleBodySchema>;
 
+          const dataViewService = await getDataViewsService();
+
           const result = await setup(
             client,
             mlClient,
             context.core.savedObjects.client,
-            getDataViews,
+            dataViewService,
             jobSavedObjectService,
             request,
             moduleId,
@@ -612,14 +637,23 @@ export function dataRecognizer(
       },
     },
     routeGuard.fullLicenseAPIGuard(
-      async ({ client, mlClient, request, response, context, jobSavedObjectService }) => {
+      async ({
+        client,
+        mlClient,
+        request,
+        response,
+        context,
+        jobSavedObjectService,
+        getDataViewsService,
+      }) => {
         try {
           const { moduleId } = request.params;
+          const dataViewService = await getDataViewsService();
           const result = await dataRecognizerJobsExist(
             client,
             mlClient,
             context.core.savedObjects.client,
-            getDataViews,
+            dataViewService,
             jobSavedObjectService,
             request,
             moduleId

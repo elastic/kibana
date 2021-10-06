@@ -158,7 +158,8 @@ export class MlServerPlugin
         getInternalSavedObjectsClient,
         plugins.spaces,
         plugins.security?.authz,
-        () => this.isMlReady
+        () => this.isMlReady,
+        () => this.dataViews
       ),
       mlLicense: this.mlLicense,
     };
@@ -175,11 +176,18 @@ export class MlServerPlugin
       ? () => coreSetup.getStartServices().then(([, { spaces }]) => spaces!)
       : undefined;
 
+    const getDataViews = () => {
+      if (this.dataViews === null) {
+        throw Error('Data views plugin not initialized');
+      }
+      return this.dataViews;
+    };
+
     annotationRoutes(routeInit, plugins.security);
     calendars(routeInit);
     dataFeedRoutes(routeInit);
     dataFrameAnalyticsRoutes(routeInit);
-    dataRecognizer(routeInit, () => this.dataViews);
+    dataRecognizer(routeInit);
     dataVisualizerRoutes(routeInit);
     fieldsService(routeInit);
     filtersRoutes(routeInit);
@@ -213,7 +221,7 @@ export class MlServerPlugin
       () => getInternalSavedObjectsClient(),
       () => this.uiSettings,
       () => this.fieldsFormat,
-      () => this.dataViews,
+      getDataViews,
       () => this.isMlReady
     );
 
