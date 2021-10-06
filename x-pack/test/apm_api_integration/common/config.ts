@@ -95,8 +95,6 @@ export function createTestConfig(config: Config) {
                 '7.14.0'
               );
 
-              console.log(inspect(esEvents.slice(0, 10), { depth: null }));
-
               const batches = chunk(esEvents, 1000);
               const limiter = pLimit(1);
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getGoAgentDefaults, service, timerange } from '@elastic/apm-generator';
+import { service, timerange } from '@elastic/apm-generator';
 import expect from '@kbn/expect';
-import { first, last, mean } from 'lodash';
+import { first, last, mean, uniq } from 'lodash';
 import moment from 'moment';
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
@@ -32,22 +32,35 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
       before(async () => {
-        const instance = service('synth-go', 'production', 'go').instance('instance-a');
+        const serviceGoProdInstance = service('synth-go', 'production', 'go').instance(
+          'instance-a'
+        );
+        // const serviceGoDevInstance = service('synth-go', 'development', 'go').instance(
+        //   'instance-b'
+        // );
+        // const serviceJavaInstance = service('synth-java', 'production', 'java').instance(
+        //   'instance-c'
+        // );
 
-        const timestamps = timerange(start, end).interval('1s').rate(5);
+        const timestamps = timerange(start, end).interval('1s').rate(10);
 
         await generator.generate(
           timestamps.flatMap((timestamp) => [
-            ...instance
+            ...serviceGoProdInstance
               .transaction('GET /api/product/list')
               .duration(1000)
               .timestamp(timestamp)
               .serialize(),
-            ...instance
-              .transaction('GET /api/product/:id')
-              .duration(500)
-              .timestamp(timestamp)
-              .serialize(),
+            // ...serviceGoDevInstance
+            //   .transaction('GET /api/product/list')
+            //   .duration(500)
+            //   .timestamp(timestamp)
+            //   .serialize(),
+            // ...serviceJavaInstance
+            //   .transaction('GET /api/product/list')
+            //   .duration(500)
+            //   .timestamp(timestamp)
+            //   .serialize(),
           ])
         );
       });
@@ -68,14 +81,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               end: new Date(end).toISOString(),
               transactionType: 'request',
               environment: 'production',
-              kuery: '',
+              kuery: 'processor.event:transaction',
             },
           },
         });
 
         const throughputValues = response.body.currentPeriod.map(({ y }) => y);
 
-        expect(throughputValues.every((y) => y === 10)).to.be(true);
+        expect(uniq(throughputValues)).to.eql([10]);
         expect(response.body.throughputUnit).to.eql('second');
       });
     }
