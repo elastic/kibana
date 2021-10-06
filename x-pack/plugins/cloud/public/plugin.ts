@@ -248,10 +248,14 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       );
     }
 
+    // Get performance information from the browser (non standard property
+    // @ts-expect-error
+    const memoryInfo = window.performance.memory || {};
     // Record an event that Kibana was opened so we can easily search for sessions that use Kibana
     fullStory.event('Loaded Kibana', {
       // `str` suffix is required, see docs: https://help.fullstory.com/hc/en-us/articles/360020623234
       kibana_version_str: this.initializerContext.env.packageInfo.version,
+      ...memoryInfo,
     });
   }
 }
