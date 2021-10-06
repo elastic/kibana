@@ -18,7 +18,7 @@ pageLoadAssetSize:
   devTools: 38781
   discover: 99999
   discoverEnhanced: 42730
-  embeddable: 242753
+  embeddable: 99999
   embeddableEnhanced: 41145
   enterpriseSearch: 35741
   features: 21723
@@ -119,3 +119,4 @@ pageLoadAssetSize:
   share: 100298
   snapshotRestore: 63225
   customIntegrations: 28810
+  dataViews: 42000
