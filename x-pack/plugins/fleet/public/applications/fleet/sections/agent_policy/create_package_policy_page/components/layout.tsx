@@ -7,6 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import styled from 'styled-components';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,6 +23,14 @@ import { WithHeaderLayout } from '../../../../layouts';
 import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../types';
 import { PackageIcon } from '../../../../components';
 import type { EditPackagePolicyFrom } from '../types';
+
+const AgentPolicyName = styled(EuiDescriptionListDescription)`
+  margin-left: auto;
+  max-width: 250px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+`;
 
 export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
   from: EditPackagePolicyFrom;
@@ -209,9 +218,9 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
               defaultMessage="Agent policy"
             />
           </EuiDescriptionListTitle>
-          <EuiDescriptionListDescription className="eui-textBreakWord">
+          <AgentPolicyName className="eui-textBreakWord" title={agentPolicy?.name || '-'}>
             {agentPolicy?.name || '-'}
-          </EuiDescriptionListDescription>
+          </AgentPolicyName>
         </EuiDescriptionList>
       ) : undefined;
 

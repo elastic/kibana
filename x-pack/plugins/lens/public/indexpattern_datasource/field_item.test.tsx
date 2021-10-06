@@ -215,7 +215,7 @@ describe('IndexPattern Field Item', () => {
         query: { query: 'geo.src : "US"', language: 'kuery' },
         filters: [
           {
-            match: { phrase: { 'geo.dest': 'US' } },
+            query: { match: { phrase: { 'geo.dest': 'US' } } },
           },
         ],
       });
