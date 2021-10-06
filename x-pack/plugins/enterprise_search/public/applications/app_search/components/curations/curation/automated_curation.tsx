@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiSpacer, EuiButton, EuiBadge } from '@elastic/eui';
+import { EuiSpacer, EuiButton, EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
 
 import { AppSearchPageTemplate } from '../../layout';
 import { AutomatedIcon } from '../components/automated_icon';
@@ -51,7 +51,7 @@ export const AutomatedCuration: React.FC = () => {
       pageHeader={{
         pageTitle: (
           <>
-            {activeQuery}{' '}
+            {dataLoading ? <EuiLoadingSpinner size="l" /> : activeQuery}{' '}
             <EuiBadge iconType={AutomatedIcon} color="accent">
               {AUTOMATED_LABEL}
             </EuiBadge>

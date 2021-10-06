@@ -14,7 +14,7 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiBadge, EuiTab } from '@elastic/eui';
+import { EuiBadge, EuiLoadingSpinner, EuiTab } from '@elastic/eui';
 
 import { getPageHeaderActions, getPageHeaderTabs, getPageTitle } from '../../../../test_helpers';
 
@@ -87,6 +87,15 @@ describe('AutomatedCuration', () => {
 
     expect(pageTitle.text()).toContain('query A');
     expect(pageTitle.find(EuiBadge)).toHaveLength(1);
+  });
+
+  it('displays a spinner in the title when loading', () => {
+    setMockValues({ ...values, dataLoading: true });
+
+    const wrapper = shallow(<AutomatedCuration />);
+    const pageTitle = shallow(<div>{getPageTitle(wrapper)}</div>);
+
+    expect(pageTitle.find(EuiLoadingSpinner)).toHaveLength(1);
   });
 
   describe('convert to manual button', () => {
