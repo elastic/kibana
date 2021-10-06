@@ -84,7 +84,6 @@ import {
 } from './legacy_visualizations';
 import type { SecurityPluginStart } from '../../security/public';
 import type { SpacesPluginStart } from '../../spaces/public';
-import { GeoJsonFileSource } from './classes/sources/geojson_file_source';
 
 export interface MapsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
@@ -197,11 +196,6 @@ export class MapsPlugin
     plugins.expressions.registerFunction(createTileMapFn);
     plugins.expressions.registerRenderer(tileMapRenderer);
     plugins.visualizations.createBaseVisualization(tileMapVisType);
-
-    registerSource({
-      ConstructorFunction: GeoJsonFileSource,
-      type: 'test',
-    });
 
     return {
       registerLayerWizard,
