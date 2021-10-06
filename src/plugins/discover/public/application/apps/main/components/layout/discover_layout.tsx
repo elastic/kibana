@@ -54,7 +54,6 @@ export function DiscoverLayout({
   indexPatternList,
   inspectorAdapters,
   navigateTo,
-  onAddIndexPattern,
   onChangeIndexPattern,
   onUpdateQuery,
   savedSearchRefetch$,
@@ -132,7 +131,7 @@ export function DiscoverLayout({
         field,
         values,
         operation,
-        String(indexPattern.id)
+        indexPattern
       );
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
@@ -197,7 +196,6 @@ export function DiscoverLayout({
               useNewFieldsApi={useNewFieldsApi}
               onEditRuntimeField={onEditRuntimeField}
               setIndexPatternTimefield={setIndexPatternTimefield}
-              onAddIndexPattern={onAddIndexPattern}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>

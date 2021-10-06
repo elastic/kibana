@@ -30,7 +30,6 @@ const createError = (statusKey: string, reason: FailureReason, error?: Error) =>
 
 export interface ContextAppFetchProps {
   anchorId: string;
-  indexPatternId: string;
   indexPattern: IndexPattern;
   appState: AppState;
   useNewFieldsApi: boolean;
@@ -39,13 +38,12 @@ export interface ContextAppFetchProps {
 
 export function useContextAppFetch({
   anchorId,
-  indexPatternId,
   indexPattern,
   appState,
   useNewFieldsApi,
   services,
 }: ContextAppFetchProps) {
-  const { uiSettings: config, data, indexPatterns, toastNotifications, filterManager } = services;
+  const { uiSettings: config, data, toastNotifications, filterManager } = services;
 
   const searchSource = useMemo(() => {
     return data.search.searchSource.createEmpty();
@@ -55,11 +53,11 @@ export function useContextAppFetch({
     [config, indexPattern]
   );
   const fetchAnchor = useMemo(() => {
-    return fetchAnchorProvider(indexPatterns, searchSource, useNewFieldsApi);
-  }, [indexPatterns, searchSource, useNewFieldsApi]);
+    return fetchAnchorProvider(searchSource, useNewFieldsApi);
+  }, [searchSource, useNewFieldsApi]);
   const { fetchSurroundingDocs } = useMemo(
-    () => fetchContextProvider(indexPatterns, useNewFieldsApi),
-    [indexPatterns, useNewFieldsApi]
+    () => fetchContextProvider(useNewFieldsApi),
+    [useNewFieldsApi]
   );
 
   const [fetchedState, setFetchedState] = useState<ContextFetchState>(
@@ -94,7 +92,7 @@ export function useContextAppFetch({
 
     try {
       setState({ anchorStatus: { value: LoadingStatus.LOADING } });
-      const anchor = await fetchAnchor(indexPatternId, anchorId, [
+      const anchor = await fetchAnchor(indexPattern, anchorId, [
         fromPairs(sort),
         { [tieBreakerField]: sortDir },
       ]);
@@ -113,8 +111,8 @@ export function useContextAppFetch({
     setState,
     toastNotifications,
     fetchAnchor,
-    indexPatternId,
     anchorId,
+    indexPattern,
   ]);
 
   const fetchSurroundingRows = useCallback(
@@ -135,7 +133,7 @@ export function useContextAppFetch({
         setState({ [statusKey]: { value: LoadingStatus.LOADING } });
         const rows = await fetchSurroundingDocs(
           type,
-          indexPatternId,
+          indexPattern,
           anchor as EsHitRecord,
           sortField,
           tieBreakerField,
@@ -159,7 +157,7 @@ export function useContextAppFetch({
       tieBreakerField,
       setState,
       fetchSurroundingDocs,
-      indexPatternId,
+      indexPattern,
       toastNotifications,
     ]
   );

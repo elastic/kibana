@@ -19,7 +19,7 @@ import {
   FILTERS,
 } from '@kbn/es-query';
 
-import { IFieldType, IIndexPattern } from '../../../../common';
+import { IFieldType, IIndexPattern, IndexPattern } from '../../../../common';
 import { FilterManager } from '../filter_manager';
 
 function getExistingFilter(
@@ -69,7 +69,7 @@ export function generateFilters(
   field: IFieldType | string,
   values: any,
   operation: string,
-  index: string
+  index: string | IndexPattern
 ): Filter[] {
   values = Array.isArray(values) ? _.uniq(values) : [values];
   const fieldObj = (
@@ -95,7 +95,8 @@ export function generateFilters(
     } else if (fieldObj.type?.includes('range') && value && typeof value === 'object') {
       // When dealing with range fields, the filter type depends on the data passed in. If it's an
       // object we assume that it's a min/max value
-      const tmpIndexPattern = { id: index } as IIndexPattern;
+      const tmpIndexPattern =
+        typeof index === 'string' ? ({ id: index } as IIndexPattern) : (index as IIndexPattern);
 
       filter = buildFilter(
         tmpIndexPattern,
@@ -108,7 +109,8 @@ export function generateFilters(
         FilterStateStore.APP_STATE
       );
     } else {
-      const tmpIndexPattern = { id: index } as IIndexPattern;
+      const tmpIndexPattern =
+        typeof index === 'string' ? ({ id: index } as IIndexPattern) : (index as IIndexPattern);
       // exists filter special case:  fieldname = '_exists' and value = fieldname
       const filterType = fieldName === '_exists_' ? FILTERS.EXISTS : FILTERS.PHRASE;
       const actualFieldObj = fieldName === '_exists_' ? ({ name: value } as IFieldType) : fieldObj;

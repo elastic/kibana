@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { DiscoverServices } from '../../../build_services';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { Doc } from './components/doc';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
-import { useIndexPattern } from '../../helpers/use_index_pattern';
+import { useDataViews } from '../../services/use_data_views';
+import { DataView } from '../../../../../data_views/common';
 
 export interface SingleDocRouteProps {
   /**
@@ -31,9 +32,10 @@ function useQuery() {
 
 export function SingleDocRoute(props: SingleDocRouteProps) {
   const { services } = props;
-  const { chrome, timefilter, indexPatterns } = services;
+  const { chrome, timefilter } = services;
 
   const { indexPatternId, index } = useParams<DocUrlParams>();
+  const [dataView, setDataView] = useState<DataView | undefined>();
 
   const query = useQuery();
   const docId = query.get('id') || '';
@@ -52,20 +54,23 @@ export function SingleDocRoute(props: SingleDocRouteProps) {
     timefilter.disableTimeRangeSelector();
   });
 
-  const indexPattern = useIndexPattern(services.indexPatterns, indexPatternId);
+  const { get } = useDataViews(services);
 
-  if (!indexPattern) {
+  useEffect(() => {
+    const load = async () => {
+      const nextDataView = await get(indexPatternId);
+      setDataView(nextDataView);
+    };
+    load();
+  }, [get, indexPatternId, setDataView]);
+
+  if (!dataView) {
     return <LoadingIndicator />;
   }
 
   return (
     <div className="app-container">
-      <Doc
-        id={docId}
-        index={index}
-        indexPatternId={indexPatternId}
-        indexPatternService={indexPatterns}
-      />
+      <Doc id={docId} index={index} dataView={dataView} />
     </div>
   );
 }

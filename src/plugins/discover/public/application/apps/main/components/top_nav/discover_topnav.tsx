@@ -93,7 +93,6 @@ export const DiscoverTopNav = ({
   const setMenuMountPoint = useMemo(() => {
     return getHeaderActionMenuMounter();
   }, []);
-
   return (
     <TopNavMenu
       appName="discover"

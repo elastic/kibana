@@ -34,7 +34,7 @@ import { AppState } from '../../services/discover_state';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { DataDocuments$ } from '../../services/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
-import { DiscoverDataViewEntry } from '../../discover_main_route';
+import { DiscoverDataViewEntry } from '../../../../services/use_data_views';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -106,7 +106,6 @@ export interface DiscoverSidebarResponsiveProps {
   onEditRuntimeField: () => void;
 
   setIndexPatternTimefield: (value: string) => void;
-  onAddIndexPattern: (value: string) => void;
 }
 
 /**
@@ -247,7 +246,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                   onChangeIndexPattern={onChangeIndexPattern}
                   selectedIndexPattern={selectedIndexPattern}
                   indexPatternList={props.indexPatternList}
-                  onAddIndexPattern={props.onAddIndexPattern}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

@@ -12,7 +12,7 @@ import { DiscoverServices } from '../../../build_services';
 import { ContextApp } from './context_app';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
-import { useIndexPattern } from '../../helpers/use_index_pattern';
+import { useDataViews } from '../../services/use_data_views';
 
 export interface ContextAppProps {
   /**
@@ -43,11 +43,11 @@ export function ContextAppRoute(props: ContextAppProps) {
     ]);
   }, [chrome]);
 
-  const indexPattern = useIndexPattern(services.indexPatterns, indexPatternId);
+  const { dataView: indexPattern } = useDataViews(services, indexPatternId);
 
   if (!indexPattern) {
     return <LoadingIndicator />;
   }
 
-  return <ContextApp indexPatternId={indexPatternId} anchorId={id} indexPattern={indexPattern} />;
+  return <ContextApp anchorId={id} indexPattern={indexPattern} />;
 }

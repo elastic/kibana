@@ -31,11 +31,10 @@ const ContextAppContentMemoized = memo(ContextAppContent);
 
 export interface ContextAppProps {
   indexPattern: IndexPattern;
-  indexPatternId: string;
   anchorId: string;
 }
 
-export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAppProps) => {
+export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
   const services = getServices();
   const { uiSettings: config, capabilities, indexPatterns, navigation, filterManager } = services;
 
@@ -54,7 +53,6 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
   const { fetchedState, fetchContextRows, fetchAllRows, fetchSurroundingRows } = useContextAppFetch(
     {
       anchorId,
-      indexPatternId,
       indexPattern,
       appState,
       useNewFieldsApi,
@@ -79,7 +77,6 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
     prevAppState.current = cloneDeep(appState);
   }, [
     appState,
-    indexPatternId,
     anchorId,
     fetchContextRows,
     fetchAllRows,
@@ -112,7 +109,7 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
         field,
         values,
         operation,
-        indexPatternId
+        indexPattern
       );
       filterManager.addFilters(newFilters);
       if (indexPatterns) {
@@ -120,7 +117,7 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
         await popularizeField(indexPattern, fieldName, indexPatterns, capabilities);
       }
     },
-    [filterManager, indexPatternId, indexPatterns, indexPattern, capabilities]
+    [filterManager, indexPattern, indexPatterns, capabilities]
   );
 
   const TopNavMenu = navigation.ui.TopNavMenu;

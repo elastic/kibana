@@ -14,7 +14,7 @@ import { useDiscoverState } from './services/use_discover_state';
 import { useUrl } from './services/use_url';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
-import { DiscoverDataViewEntry } from './discover_main_route';
+import { DiscoverDataViewEntry } from '../../services/use_data_views';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -35,8 +35,6 @@ export interface DiscoverMainProps {
    * Current instance of SavedSearch
    */
   savedSearch: SavedSearch;
-  setIndexPatternTimefield: (field: string) => void;
-  onAddIndexPattern: (value: string) => void;
 }
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
@@ -58,6 +56,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     indexPattern,
     inspectorAdapters,
     onChangeIndexPattern,
+    onChangeTimefield,
     onUpdateQuery,
     refetch$,
     resetSavedSearch,
@@ -115,8 +114,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
       services={services}
       state={state}
       stateContainer={stateContainer}
-      setIndexPatternTimefield={props.setIndexPatternTimefield}
-      onAddIndexPattern={props.onAddIndexPattern}
+      setIndexPatternTimefield={onChangeTimefield}
     />
   );
 }

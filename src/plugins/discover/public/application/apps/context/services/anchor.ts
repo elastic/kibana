@@ -9,25 +9,15 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import {
-  ISearchSource,
-  IndexPatternsContract,
-  EsQuerySortValue,
-  IndexPattern,
-} from '../../../../../../data/public';
+import { ISearchSource, EsQuerySortValue, IndexPattern } from '../../../../../../data/public';
 import { EsHitRecord } from '../../../types';
 
-export function fetchAnchorProvider(
-  indexPatterns: IndexPatternsContract,
-  searchSource: ISearchSource,
-  useNewFieldsApi: boolean = false
-) {
+export function fetchAnchorProvider(searchSource: ISearchSource, useNewFieldsApi: boolean = false) {
   return async function fetchAnchor(
-    indexPatternId: string,
+    indexPattern: IndexPattern,
     anchorId: string,
     sort: EsQuerySortValue[]
   ): Promise<EsHitRecord> {
-    const indexPattern = await indexPatterns.get(indexPatternId);
     updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, indexPattern);
 
     const response = await searchSource.fetch();

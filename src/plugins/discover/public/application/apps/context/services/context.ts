@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Filter, IndexPattern, IndexPatternsContract, SearchSource } from 'src/plugins/data/public';
+import { Filter, IndexPattern, SearchSource } from 'src/plugins/data/public';
 import { reverseSortDir, SortDirection } from './utils/sorting';
 import { convertIsoToMillis, extractNanos } from './utils/date_conversion';
 import { fetchHitsInInterval } from './utils/fetch_hits_in_interval';
@@ -25,7 +25,7 @@ const DAY_MILLIS = 24 * 60 * 60 * 1000;
 // look from 1 day up to 10000 days into the past and future
 const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map((days) => days * DAY_MILLIS);
 
-function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFieldsApi?: boolean) {
+function fetchContextProvider(useNewFieldsApi?: boolean) {
   return {
     fetchSurroundingDocs,
   };
@@ -45,7 +45,7 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
    */
   async function fetchSurroundingDocs(
     type: SurrDocType,
-    indexPatternId: string,
+    indexPattern: IndexPattern,
     anchor: EsHitRecord,
     timeField: string,
     tieBreakerField: string,
@@ -56,7 +56,6 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
     if (typeof anchor !== 'object' || anchor === null || !size) {
       return [];
     }
-    const indexPattern = await indexPatterns.get(indexPatternId);
     const { data } = getServices();
     const searchSource = data.search.searchSource.createEmpty() as SearchSource;
     updateSearchSource(searchSource, indexPattern, filters, Boolean(useNewFieldsApi));

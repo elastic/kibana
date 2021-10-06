@@ -12,7 +12,6 @@ import { getState } from './discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../../build_services';
 import { SavedSearch } from '../../../../saved_searches';
-import { loadIndexPattern } from '../utils/resolve_index_pattern';
 import { useSavedSearch as useSavedSearchData } from './use_saved_search';
 import {
   MODIFY_COLUMNS_ON_SWITCH,
@@ -24,7 +23,7 @@ import { useSearchSession } from './use_search_session';
 import { FetchStatus } from '../../../types';
 import { getSwitchIndexPatternAppState } from '../utils/get_switch_index_pattern_app_state';
 import { SortPairArr } from '../components/doc_table/lib/get_sort';
-import { DiscoverDataViewEntry } from '../discover_main_route';
+import { DiscoverDataViewEntry, useDataViews } from '../../../services/use_data_views';
 
 export function useDiscoverState({
   services,
@@ -45,6 +44,7 @@ export function useDiscoverState({
   const { timefilter } = data.query.timefilter;
 
   const indexPattern = savedSearch.searchSource.getField('index')!;
+  const { get } = useDataViews(services);
 
   const searchSource = useMemo(() => {
     savedSearch.searchSource.setField('index', indexPattern);
@@ -116,21 +116,17 @@ export function useDiscoverState({
       const chartIntervalChanged = nextState.interval !== interval;
       const docTableSortChanged = !isEqual(nextState.sort, sort);
       const indexPatternChanged = !isEqual(nextState.index, index);
+      const timeFieldChanged = !isEqual(nextState.timefield, index);
       // NOTE: this is also called when navigating from discover app to context app
-      if (nextState.index && indexPatternChanged) {
+      if (nextState.index && (indexPatternChanged || (nextState.timefield && timeFieldChanged))) {
         /**
          *  Without resetting the fetch state, e.g. a time column would be displayed when switching
          *  from a index pattern without to a index pattern with time filter for a brief moment
          *  That's because appState is updated before savedSearchData$
          *  The following line of code catches this, but should be improved
          */
-        const nextIndexPattern = await loadIndexPattern(
-          nextState.index,
-          indexPatterns,
-          indexPatternList,
-          config
-        );
-        savedSearch.searchSource.setField('index', nextIndexPattern.loaded);
+        const nextIndexPattern = await get(nextState.index, nextState.timefield);
+        savedSearch.searchSource.setField('index', nextIndexPattern);
 
         reset();
       }
@@ -152,6 +148,8 @@ export function useDiscoverState({
     reset,
     savedSearch.searchSource,
     indexPatternList,
+    services,
+    get,
   ]);
 
   /**
@@ -178,8 +176,7 @@ export function useDiscoverState({
    */
   const onChangeIndexPattern = useCallback(
     async (id: string) => {
-      const ip = indexPatternList.find((viewEntry) => viewEntry.id === id);
-      const nextIndexPattern = ip?.dataView ? ip.dataView : await indexPatterns.get(id);
+      const nextIndexPattern = await get(id);
       if (nextIndexPattern && indexPattern) {
         const nextAppState = getSwitchIndexPatternAppState(
           indexPattern,
@@ -192,15 +189,7 @@ export function useDiscoverState({
         stateContainer.setAppState(nextAppState);
       }
     },
-    [
-      config,
-      indexPattern,
-      indexPatterns,
-      state.columns,
-      state.sort,
-      stateContainer,
-      indexPatternList,
-    ]
+    [get, indexPattern, state.columns, state.sort, config, stateContainer]
   );
   /**
    * Function triggered when the user changes the query in the search bar
@@ -213,6 +202,13 @@ export function useDiscoverState({
       }
     },
     [refetch$, searchSessionManager]
+  );
+
+  const onChangeTimefield = useCallback(
+    (name: string) => {
+      stateContainer.setAppState({ timefield: name });
+    },
+    [stateContainer]
   );
 
   useEffect(() => {
@@ -248,6 +244,7 @@ export function useDiscoverState({
     refetch$,
     resetSavedSearch,
     onChangeIndexPattern,
+    onChangeTimefield,
     onUpdateQuery,
     searchSource,
     setState,

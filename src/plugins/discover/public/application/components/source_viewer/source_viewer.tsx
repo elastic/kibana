@@ -17,6 +17,7 @@ import { getServices } from '../../../kibana_services';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 import { ElasticRequestState } from '../../apps/doc/types';
 import { useEsDocSearch } from '../../services/use_es_doc_search';
+import { useDataViews } from '../../services/use_data_views';
 
 interface SourceViewerProps {
   id: string;
@@ -33,15 +34,15 @@ export const SourceViewer = ({
   width,
   hasLineNumbers,
 }: SourceViewerProps) => {
+  const services = getServices();
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
   const [jsonValue, setJsonValue] = useState<string>('');
-  const indexPatternService = getServices().data.indexPatterns;
-  const useNewFieldsApi = !getServices().uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
-  const [reqState, hit, , requestData] = useEsDocSearch({
+  const useNewFieldsApi = !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+  const { dataView } = useDataViews(services, indexPatternId);
+  const [reqState, hit, requestData] = useEsDocSearch({
     id,
     index,
-    indexPatternId,
-    indexPatternService,
+    dataView,
     requestSource: useNewFieldsApi,
   });
 

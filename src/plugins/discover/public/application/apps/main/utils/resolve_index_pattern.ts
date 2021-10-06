@@ -7,10 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { IndexPattern, IndexPatternsContract, SearchSource } from 'src/plugins/data/common';
-import type { IUiSettingsClient, SavedObject, ToastsStart } from 'kibana/public';
+import type { IndexPattern, SearchSource } from 'src/plugins/data/common';
+import type { SavedObject, ToastsStart } from 'kibana/public';
 import { DataViewListItem } from 'src/plugins/data/common';
-import { DiscoverDataViewEntry } from '../discover_main_route';
+import { DiscoverServices } from '../../../../build_services';
+import { DiscoverDataViewEntry } from '../../../services/use_data_views';
 export type IndexPatternSavedObject = SavedObject & { title: string };
 
 interface IndexPatternData {
@@ -73,19 +74,42 @@ export function getIndexPatternId(
  */
 export async function loadIndexPattern(
   id: string,
-  indexPatterns: IndexPatternsContract,
   indexPatternList: DiscoverDataViewEntry[],
-  config: IUiSettingsClient
+  services: DiscoverServices
 ): Promise<IndexPatternData> {
-  const actualId = getIndexPatternId(id, indexPatternList, config.get('defaultIndex'));
-  const loaded =
-    indexPatternList.find((entry) => entry.id === actualId)?.dataView ||
-    (await indexPatterns.get(actualId));
-  return {
+  const {
+    uiSettings,
+    data: { indexPatterns },
+  } = services;
+  const actualId = getIndexPatternId(id, indexPatternList, uiSettings.get('defaultIndex'));
+  const loaded = await indexPatterns.get(actualId);
+
+  const result = {
     loaded,
     stateVal: id,
     stateValFound: !!id && actualId === id,
   };
+  /**
+  if (toastNotifications && !result.stateValFound) {
+    toastNotifications.addWarning({
+      title: i18n.translate('discover.valueIsNotConfiguredIndexPatternIDWarningTitle', {
+        defaultMessage: '{stateVal} is not a configured index pattern ID',
+        values: {
+          stateVal: `"${result.stateVal}"`,
+        },
+      }),
+      text: i18n.translate('discover.showingDefaultIndexPatternWarningDescription', {
+        defaultMessage:
+          'Showing the default index pattern: "{loadedIndexPatternTitle}" ({loadedIndexPatternId})',
+        values: {
+          loadedIndexPatternTitle: result.loaded.title,
+          loadedIndexPatternId: result.loaded.id,
+        },
+      }),
+    });
+  }**/
+
+  return result;
 }
 
 /**

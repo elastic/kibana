@@ -65,6 +65,12 @@ export function FilterItem(props: FilterItemProps) {
     const index = props.filter.meta.index;
     let isSubscribed = true;
     if (index) {
+      if (props.indexPatterns) {
+        if (isSubscribed) {
+          setIndexPatternExists(true);
+        }
+        return;
+      }
       getIndexPatterns()
         .get(index)
         .then((indexPattern) => {
@@ -84,7 +90,7 @@ export function FilterItem(props: FilterItemProps) {
     return () => {
       isSubscribed = false;
     };
-  }, [props.filter.meta.index]);
+  }, [props.filter.meta.index, props.indexPatterns]);
 
   function handleBadgeClick(e: MouseEvent<HTMLInputElement>) {
     if (e.shiftKey) {

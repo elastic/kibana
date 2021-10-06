@@ -76,7 +76,6 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
    */
   documents?: ElasticSearchHit[];
   setIndexPatternTimefield: (field: string) => void;
-  onAddIndexPattern: (id: string) => void;
 }
 
 export function DiscoverSidebarComponent({
@@ -101,7 +100,6 @@ export function DiscoverSidebarComponent({
   closeFlyout,
   editField,
   setIndexPatternTimefield,
-  onAddIndexPattern,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
 
@@ -291,7 +289,6 @@ export function DiscoverSidebarComponent({
               selectedIndexPattern={selectedIndexPattern}
               indexPatternList={indexPatternList}
               onChangeIndexPattern={onChangeIndexPattern}
-              onAddIndexPattern={onChangeIndexPattern}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -330,7 +327,6 @@ export function DiscoverSidebarComponent({
                 selectedIndexPattern={selectedIndexPattern}
                 indexPatternList={indexPatternList}
                 onChangeIndexPattern={onChangeIndexPattern}
-                onAddIndexPattern={onAddIndexPattern}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

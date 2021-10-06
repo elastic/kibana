@@ -73,6 +73,10 @@ export interface AppState {
    * id of the used saved query
    */
   savedQuery?: string;
+  /**
+   * time field of a temporary data view
+   */
+  timefield?: string;
 }
 
 interface GetStateParams {
@@ -88,7 +92,6 @@ interface GetStateParams {
    * Browser history
    */
   history: History;
-
   /**
    * Core's notifications.toasts service
    * In case it is passed in,

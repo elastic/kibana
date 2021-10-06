@@ -13,7 +13,7 @@ import { DataRefetch$, SavedSearchData } from '../../services/use_saved_search';
 import { DiscoverServices } from '../../../../../build_services';
 import { SavedSearch } from '../../../../../saved_searches';
 import { RequestAdapter } from '../../../../../../../inspector';
-import { DiscoverDataViewEntry } from '../../discover_main_route';
+import { DiscoverDataViewEntry } from '../../../../services/use_data_views';
 
 export interface DiscoverLayoutProps {
   indexPattern: IndexPattern;
@@ -21,7 +21,6 @@ export interface DiscoverLayoutProps {
   inspectorAdapters: { requests: RequestAdapter };
   navigateTo: (url: string) => void;
   onChangeIndexPattern: (id: string) => void;
-  onAddIndexPattern: (id: string) => void;
   onUpdateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   resetSavedSearch: () => void;
   savedSearch: SavedSearch;

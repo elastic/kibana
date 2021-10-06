@@ -10,7 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { IndexPattern } from 'src/plugins/data/public';
 import { IndexPatternRef } from './types';
 import { ChangeIndexPattern } from './change_indexpattern';
-import { DiscoverDataViewEntry } from '../../discover_main_route';
+import { DiscoverDataViewEntry } from '../../../../services/use_data_views';
 
 export interface DiscoverIndexPatternProps {
   /**
@@ -21,8 +21,6 @@ export interface DiscoverIndexPatternProps {
    * Callback function when changing an index pattern
    */
   onChangeIndexPattern: (id: string) => void;
-
-  onAddIndexPattern: (id: string) => void;
   /**
    * currently selected index pattern
    */
@@ -35,7 +33,6 @@ export interface DiscoverIndexPatternProps {
 export function DiscoverIndexPattern({
   indexPatternList,
   onChangeIndexPattern,
-  onAddIndexPattern,
   selectedIndexPattern,
 }: DiscoverIndexPatternProps) {
   const options: IndexPatternRef[] = (indexPatternList || []).map((entity) => ({
@@ -65,11 +62,10 @@ export function DiscoverIndexPattern({
       onChangeIndexPattern={(id) => {
         const indexPattern = options.find((pattern) => pattern.id === id);
         if (indexPattern) {
-          onChangeIndexPattern(id);
           setSelected(indexPattern);
         }
+        onChangeIndexPattern(id);
       }}
-      onAddIndexPattern={onAddIndexPattern}
     />
   );
 }

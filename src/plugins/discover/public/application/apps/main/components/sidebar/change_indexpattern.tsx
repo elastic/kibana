@@ -32,14 +32,12 @@ export function ChangeIndexPattern({
   indexPatternId,
   indexPatternRefs,
   onChangeIndexPattern,
-  onAddIndexPattern,
   selectableProps,
   trigger,
 }: {
   indexPatternId?: string;
   indexPatternRefs: IndexPatternRef[];
   onChangeIndexPattern: (newId: string) => void;
-  onAddIndexPattern: (newId: string) => void;
   selectableProps?: EuiSelectableProps<{ value: string }>;
   trigger: ChangeIndexPatternTriggerProps;
 }) {
@@ -113,7 +111,11 @@ export function ChangeIndexPattern({
                 </p>
               </EuiText>
               <p>
-                <EuiButton onClick={() => onAddIndexPattern(searchTerm)}>
+                <EuiButton
+                  onClick={() => {
+                    onChangeIndexPattern(searchTerm);
+                  }}
+                >
                   <FormattedMessage
                     id="discover.fieldChooser.indexPattern.viewData"
                     defaultMessage="View data of indices named {indices}"

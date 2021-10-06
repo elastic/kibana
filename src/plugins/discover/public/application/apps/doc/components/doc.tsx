@@ -9,11 +9,11 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent, EuiPage } from '@elastic/eui';
-import { IndexPatternsContract } from 'src/plugins/data/public';
 import { getServices } from '../../../../kibana_services';
 import { DocViewer } from '../../../components/doc_viewer/doc_viewer';
 import { ElasticRequestState } from '../types';
 import { useEsDocSearch } from '../../../services/use_es_doc_search';
+import { DataView } from '../../../../../../data_views/common';
 
 export interface DocProps {
   /**
@@ -28,11 +28,7 @@ export interface DocProps {
    * IndexPattern ID used to get IndexPattern entity
    * that's used for adding additional fields (stored_fields, script_fields, docvalue_fields)
    */
-  indexPatternId: string;
-  /**
-   * IndexPatternService to get a given index pattern by ID
-   */
-  indexPatternService: IndexPatternsContract;
+  dataView?: DataView;
   /**
    * If set, will always request source, regardless of the global `fieldsFromSource` setting
    */
@@ -40,7 +36,7 @@ export interface DocProps {
 }
 
 export function Doc(props: DocProps) {
-  const [reqState, hit, indexPattern] = useEsDocSearch(props);
+  const [reqState, hit] = useEsDocSearch(props);
   const indexExistsLink = getServices().docLinks.links.apis.indexExists;
   return (
     <EuiPage>
@@ -54,7 +50,7 @@ export function Doc(props: DocProps) {
               <FormattedMessage
                 id="discover.doc.failedToLocateIndexPattern"
                 defaultMessage="No index pattern matches ID {indexPatternId}."
-                values={{ indexPatternId: props.indexPatternId }}
+                values={{ indexPatternId: props.dataView?.id }}
               />
             }
           />
@@ -111,9 +107,9 @@ export function Doc(props: DocProps) {
           </EuiCallOut>
         )}
 
-        {reqState === ElasticRequestState.Found && hit !== null && indexPattern && (
+        {reqState === ElasticRequestState.Found && hit !== null && props.dataView && (
           <div data-test-subj="doc-hit">
-            <DocViewer hit={hit} indexPattern={indexPattern} />
+            <DocViewer hit={hit} indexPattern={props.dataView} />
           </div>
         )}
       </EuiPageContent>
