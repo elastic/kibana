@@ -69,13 +69,13 @@ const createObjectPropOfManagedValues = (key: string, value: Record<string, any>
 const addManagedProp = (
   ast: t.ObjectExpression,
   key: string,
-  value: string | Record<string, any> | boolean
+  value: string | Record<string, any> | boolean | number
 ) => {
-  ast.properties.push(
-    typeof value === 'string' || typeof value === 'boolean'
-      ? createManagedProp(key, value)
-      : createObjectPropOfManagedValues(key, value)
-  );
+  if (['number', 'string', 'boolean'].includes(typeof value)) {
+    ast.properties.push(createManagedProp(key, value));
+  } else {
+    ast.properties.push(createObjectPropOfManagedValues(key, value as Record<string, any>));
+  }
 };
 
 /**
@@ -89,7 +89,7 @@ const addManagedProp = (
 const replaceManagedProp = (
   ast: t.ObjectExpression,
   existing: BasicObjectProp,
-  value: string | Record<string, any> | boolean
+  value: string | Record<string, any> | boolean | number
 ) => {
   remove(ast.properties, existing);
   addManagedProp(ast, existing.key.value, value);
