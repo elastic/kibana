@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Export import saved objects between versions', () => {
     describe('From 7.12.1', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
@@ -78,14 +78,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
         await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       });
     });
 
     describe('from 7.13.3', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
@@ -124,7 +124,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
         await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       });
     });

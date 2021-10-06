@@ -15,7 +15,7 @@ export default function ({ loadTestFile, getService }) {
 
   describe('canvas app visual regression', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.load('x-pack/test/functional/es_archives/canvas/default');
 
       await browser.setWindowSize(SCREEN_WIDTH, 1000);

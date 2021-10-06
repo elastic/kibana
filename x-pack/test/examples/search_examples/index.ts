@@ -15,7 +15,7 @@ export default function ({ getService, loadTestFile }: PluginFunctionalProviderC
     this.tags('ciGroup13');
     before(async () => {
       await esArchiver.emptyKibanaIndex();
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic'); // need at least one index pattern
     });
 

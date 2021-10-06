@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Export import saved objects between versions', function () {
     before(async function () {
-      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.load('x-pack/test/functional/es_archives/getting_started/shakespeare');
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.unload('x-pack/test/functional/es_archives/getting_started/shakespeare');
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });

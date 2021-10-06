@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('value suggestions', function describeIndexTests() {
     before(async function () {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.load('x-pack/test/functional/es_archives/dashboard/drilldowns');
     });
 

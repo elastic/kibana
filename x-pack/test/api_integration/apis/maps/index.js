@@ -10,12 +10,12 @@ export default function ({ loadTestFile, getService }) {
 
   describe('Maps endpoints', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.load('x-pack/test/functional/es_archives/maps/data');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.unload('x-pack/test/functional/es_archives/maps/data');
     });
 

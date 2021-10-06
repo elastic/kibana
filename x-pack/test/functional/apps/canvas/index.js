@@ -13,7 +13,7 @@ export default function canvasApp({ loadTestFile, getService }) {
     before(async () => {
       // init data
       await security.testUser.setRoles(['test_logstash_reader', 'global_canvas_all']);
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     after(async () => {

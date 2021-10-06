@@ -14,7 +14,7 @@ export default function ({ getService, loadTestFile }: PluginFunctionalProviderC
 
   describe('embedded Lens examples', function () {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.load('x-pack/test/functional/es_archives/lens/basic'); // need at least one index pattern
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
