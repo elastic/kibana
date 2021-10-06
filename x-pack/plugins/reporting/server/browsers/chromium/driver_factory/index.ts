@@ -222,9 +222,9 @@ export class HeadlessChromiumDriverFactory {
 
     const uncaughtExceptionPageError$ = Rx.fromEvent<Error>(page, 'pageerror').pipe(
       map((err) => {
-        logger.error(
+        logger.warning(
           i18n.translate('xpack.reporting.browsers.chromium.pageErrorDetected', {
-            defaultMessage: `Reporting encountered an error on the page: {err}`,
+            defaultMessage: `Reporting encountered an uncaught error on the page that will be ignored: {err}`,
             values: { err: err.toString() },
           })
         );
