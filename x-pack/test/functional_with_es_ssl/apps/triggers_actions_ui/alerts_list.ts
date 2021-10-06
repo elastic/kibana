@@ -140,7 +140,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should search for tags', async () => {
       const createdAlert = await createAlert({ tags: ['tag', 'tagtag', 'taggity tag'] });
       await refreshAlertsList();
-      await pageObjects.triggersActionsUI.searchAlerts(`${createdAlert.name} foo`);
+      await pageObjects.triggersActionsUI.searchAlerts(`${createdAlert.name} tag`);
 
       const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResults.length).to.equal(1);
