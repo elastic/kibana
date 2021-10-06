@@ -109,7 +109,6 @@ export class ResourceInstaller {
    * Installs index-level resources shared between all namespaces of this index:
    *   - custom ILM policy if it was provided
    *   - component templates
-   *   - attempts to update mappings of existing concrete indices
    */
   public async installIndexLevelResources(indexInfo: IndexInfo): Promise<void> {
     await this.installWithTimeout(`resources for index ${indexInfo.baseName}`, async () => {
@@ -149,9 +148,8 @@ export class ResourceInstaller {
 
     // Find all concrete indices for all namespaces of the index.
     const concreteIndices = await this.fetchConcreteIndices(aliases, backingIndices);
-    const concreteWriteIndices = concreteIndices.filter((item) => item.isWriteIndex);
-    // Update mappings of the found write indices.
-    await Promise.all(concreteWriteIndices.map((item) => this.updateAliasWriteIndexMapping(item)));
+    // Update mappings of the found indices.
+    await Promise.all(concreteIndices.map((item) => this.updateAliasWriteIndexMapping(item)));
   }
 
   private async updateAliasWriteIndexMapping({ index, alias }: ConcreteIndexInfo) {
