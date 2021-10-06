@@ -34,24 +34,24 @@ describe('sendRequest function', () => {
     expect(errorResponse).toEqual(getErrorResponse());
   });
 
-  it('calls responseInterceptors with successful responses', async () => {
+  it('calls responseHandlers with successful responses', async () => {
     const { sendSuccessRequest, getSuccessResponse } = helpers;
-    const successInterceptorSpy = sinon.spy();
-    const successInterceptors = [successInterceptorSpy];
+    const successHandlerSpy = sinon.spy();
+    const successHandlers = [successHandlerSpy];
 
-    await sendSuccessRequest(successInterceptors);
-    sinon.assert.calledOnce(successInterceptorSpy);
-    sinon.assert.calledWith(successInterceptorSpy, getSuccessResponse());
+    await sendSuccessRequest(successHandlers);
+    sinon.assert.calledOnce(successHandlerSpy);
+    sinon.assert.calledWith(successHandlerSpy, getSuccessResponse());
   });
 
-  it('calls responseInterceptors with errors', async () => {
+  it('calls responseHandlers with errors', async () => {
     const { sendErrorRequest, getErrorResponse } = helpers;
-    const errorInterceptorSpy = sinon.spy();
-    const errorInterceptors = [errorInterceptorSpy];
+    const errorHandlerSpy = sinon.spy();
+    const errorHandlers = [errorHandlerSpy];
 
     // For some reason sinon isn't throwing an error on rejection, as an awaited Promise normally would.
-    await sendErrorRequest(errorInterceptors);
-    sinon.assert.calledOnce(errorInterceptorSpy);
-    sinon.assert.calledWith(errorInterceptorSpy, getErrorResponse());
+    await sendErrorRequest(errorHandlers);
+    sinon.assert.calledOnce(errorHandlerSpy);
+    sinon.assert.calledWith(errorHandlerSpy, getErrorResponse());
   });
 });

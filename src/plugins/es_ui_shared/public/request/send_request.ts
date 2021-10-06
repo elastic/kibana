@@ -8,7 +8,7 @@
 
 import { HttpSetup, HttpFetchQuery } from '../../../../../src/core/public';
 
-export type ResponseInterceptor = ({ data, error }: { data: any; error: any }) => void;
+export type ResponseHandler = ({ data, error }: { data: any; error: any }) => void;
 
 export interface SendRequestConfig {
   path: string;
@@ -20,7 +20,11 @@ export interface SendRequestConfig {
    * HttpFetchOptions#asSystemRequest.
    */
   asSystemRequest?: boolean;
-  responseInterceptors?: ResponseInterceptor[];
+  /**
+   * Optional handlers for triggering side effects based on a request's
+   * successful response or errror. These don't mutate responses or errors.
+   */
+  responseHandlers?: ResponseHandler[];
 }
 
 export interface SendRequestResponse<D = any, E = any> {
@@ -30,16 +34,13 @@ export interface SendRequestResponse<D = any, E = any> {
 
 // Pass the response sequentially through each interceptor, allowing for
 // side effects to be run.
-const updateResponseInterceptors = (
-  response: any,
-  responseInterceptors: ResponseInterceptor[] = []
-) => {
-  responseInterceptors.forEach((interceptor) => interceptor(response));
+const updateResponseHandlers = (response: any, responseHandlers: ResponseHandler[] = []) => {
+  responseHandlers.forEach((interceptor) => interceptor(response));
 };
 
 export const sendRequest = async <D = any, E = any>(
   httpClient: HttpSetup,
-  { path, method, body, query, asSystemRequest, responseInterceptors }: SendRequestConfig
+  { path, method, body, query, asSystemRequest, responseHandlers }: SendRequestConfig
 ): Promise<SendRequestResponse<D, E>> => {
   try {
     const stringifiedBody = typeof body === 'string' ? body : JSON.stringify(body);
@@ -54,7 +55,7 @@ export const sendRequest = async <D = any, E = any>(
       error: null,
     };
 
-    updateResponseInterceptors(response, responseInterceptors);
+    updateResponseHandlers(response, responseHandlers);
     return response;
   } catch (e) {
     const response = {
@@ -62,7 +63,7 @@ export const sendRequest = async <D = any, E = any>(
       error: e.response?.data ?? e.body,
     };
 
-    updateResponseInterceptors(response, responseInterceptors);
+    updateResponseHandlers(response, responseHandlers);
     return response;
   }
 };

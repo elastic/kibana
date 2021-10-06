@@ -10,6 +10,6 @@ export {
   SendRequestConfig,
   SendRequestResponse,
   sendRequest,
-  ResponseInterceptor,
+  ResponseHandler,
 } from './send_request';
 export { UseRequestConfig, UseRequestResponse, useRequest } from './use_request';
