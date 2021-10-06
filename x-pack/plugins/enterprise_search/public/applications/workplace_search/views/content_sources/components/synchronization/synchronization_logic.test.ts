@@ -83,6 +83,15 @@ describe('SynchronizationLogic', () => {
 
       expect(SynchronizationLogic.values.contentExtractionChecked).toEqual(false);
     });
+
+    it('resetSyncSettings', () => {
+      SynchronizationLogic.actions.setContentExtractionChecked(false);
+      SynchronizationLogic.actions.setThumbnailsChecked(false);
+      SynchronizationLogic.actions.resetSyncSettings();
+
+      expect(SynchronizationLogic.values.thumbnailsChecked).toEqual(true);
+      expect(SynchronizationLogic.values.contentExtractionChecked).toEqual(true);
+    });
   });
 
   describe('listeners', () => {

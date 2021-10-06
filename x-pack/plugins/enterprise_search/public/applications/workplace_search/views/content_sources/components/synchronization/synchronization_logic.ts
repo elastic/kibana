@@ -89,12 +89,14 @@ export const SynchronizationLogic = kea<
       props.contentSource.indexing.features.thumbnails.enabled,
       {
         setThumbnailsChecked: (_, thumbnailsChecked) => thumbnailsChecked,
+        resetSyncSettings: () => props.contentSource.indexing.features.thumbnails.enabled,
       },
     ],
     contentExtractionChecked: [
       props.contentSource.indexing.features.contentExtraction.enabled,
       {
         setContentExtractionChecked: (_, contentExtractionChecked) => contentExtractionChecked,
+        resetSyncSettings: () => props.contentSource.indexing.features.contentExtraction.enabled,
       },
     ],
     cachedSchedule: [stripScheduleSeconds(props.contentSource.indexing.schedule)],
@@ -163,12 +165,6 @@ export const SynchronizationLogic = kea<
       } catch (e) {
         flashAPIErrors(e);
       }
-    },
-    resetSyncSettings: () => {
-      actions.setThumbnailsChecked(props.contentSource.indexing.features.thumbnails.enabled);
-      actions.setContentExtractionChecked(
-        props.contentSource.indexing.features.contentExtraction.enabled
-      );
     },
     updateSyncSettings: async () => {
       const { id: sourceId } = props.contentSource;
