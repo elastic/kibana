@@ -10,30 +10,7 @@ import { upperFirst } from 'lodash';
 
 import { Position } from '@elastic/charts';
 
-import { VisParams, ValueAxis, SeriesParam, ChartMode, InterpolationMode } from '../../../../types';
-import { ChartType } from '../../../../../common';
-
-export const makeSerie = (
-  id: string,
-  label: string,
-  defaultValueAxis: ValueAxis['id'],
-  lastSerie?: SeriesParam
-): SeriesParam => {
-  const data = { id, label };
-  const defaultSerie = {
-    show: true,
-    mode: ChartMode.Normal,
-    type: ChartType.Line,
-    drawLinesBetweenPoints: true,
-    showCircles: true,
-    circlesRadius: 3,
-    interpolate: InterpolationMode.Linear,
-    lineWidth: 2,
-    valueAxis: defaultValueAxis,
-    data,
-  };
-  return lastSerie ? { ...lastSerie, data } : defaultSerie;
-};
+import { VisParams, ValueAxis } from '../../../../types';
 
 export const isAxisHorizontal = (position: Position) =>
   [Position.Top, Position.Bottom].includes(position as any);
