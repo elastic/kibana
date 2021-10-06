@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFieldSearch,
-  EuiFilterGroup,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFieldSearch, EuiFilterGroup, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { Fragment, useState } from 'react';
 import { rgba } from 'polished';
 import styled from 'styled-components';
@@ -77,7 +71,14 @@ export function FilterValuesList({
       <ListWrapper>
         {loading && (
           <div className="eui-textCenter">
-            <EuiLoadingSpinner />
+            <EuiProgress
+              size="xs"
+              color="primary"
+              position="absolute"
+              style={{
+                top: 'initial',
+              }}
+            />
           </div>
         )}
         {displayValues.length === 0 && !loading && (
