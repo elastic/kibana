@@ -35,8 +35,6 @@ import { useHostIsolationExceptionsSelector } from '../hooks';
 import { HostIsolationExceptionsForm } from './form';
 
 export const HostIsolationExceptionsFormFlyout: React.FC<{
-  type?: 'create' | 'edit';
-  id?: string;
   onCancel(): void;
 }> = memo(({ onCancel }) => {
   const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
