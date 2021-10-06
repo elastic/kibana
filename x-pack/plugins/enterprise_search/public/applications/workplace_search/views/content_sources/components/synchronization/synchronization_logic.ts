@@ -6,7 +6,7 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import moment from 'moment';
 
 export type TabId = 'source_sync_frequency' | 'blocked_time_windows';
@@ -47,6 +47,8 @@ interface SynchronizationValues {
   thumbnailsChecked: boolean;
   contentExtractionChecked: boolean;
   blockedWindows: BlockedWindow[];
+  cachedSchedule: IndexingSchedule;
+  schedule: IndexingSchedule;
 }
 
 export const emptyBlockedWindow: BlockedWindow = {
@@ -95,6 +97,8 @@ export const SynchronizationLogic = kea<
         setContentExtractionChecked: (_, contentExtractionChecked) => contentExtractionChecked,
       },
     ],
+    cachedSchedule: [stripScheduleSeconds(props.contentSource.indexing.schedule)],
+    schedule: [stripScheduleSeconds(props.contentSource.indexing.schedule)],
   }),
   selectors: ({ selectors }) => ({
     hasUnsavedObjectsAndAssetsChanges: [
@@ -118,6 +122,10 @@ export const SynchronizationLogic = kea<
           contentExtractionChecked !== contentExtractionEnabled
         );
       },
+    ],
+    hasUnsavedFrequencyChanges: [
+      () => [selectors.cachedSchedule, selectors.schedule],
+      (cachedSchedule, schedule) => isEqual(cachedSchedule, schedule),
     ],
   }),
   listeners: ({ actions, values, props }) => ({
