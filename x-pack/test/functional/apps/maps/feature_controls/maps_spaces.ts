@@ -13,7 +13,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'maps', 'security']);
   const appsMenu = getService('appsMenu');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/38414
   describe('spaces feature controls', () => {
     before(async () => {
       PageObjects.maps.setBasePath('/s/custom_space');
@@ -46,20 +45,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`allows a map to be created`, async () => {
-        await PageObjects.common.navigateToActualUrl('maps', '', {
-          basePath: `/s/custom_space`,
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
+        await PageObjects.maps.openNewMap();
         await PageObjects.maps.saveMap('my test map');
+        await PageObjects.maps.searchAndExpectItemsCount('my test map', 1);
       });
 
       it(`allows a map to be deleted`, async () => {
-        await PageObjects.common.navigateToActualUrl('maps', '', {
-          basePath: `/s/custom_space`,
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
+        await PageObjects.maps.gotoMapListingPage();
         await PageObjects.maps.deleteSavedMaps('my test map');
       });
     });
