@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { DataView } from '../../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../../src/plugins/data_views/common';
 
 export type IndexPatternContextValue = DataView | null;
 export const IndexPatternContext = React.createContext<IndexPatternContextValue>(null);

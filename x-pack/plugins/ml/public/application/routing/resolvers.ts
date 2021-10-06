@@ -11,7 +11,7 @@ import { checkGetJobsCapabilitiesResolver } from '../capabilities/check_capabili
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
 import { loadMlServerInfo } from '../services/ml_server_info';
 
-import { IndexPatternsContract } from '../../../../../../src/plugins/data/public';
+import type { DataViewsContract } from '../../../../../../src/plugins/data_views/public';
 
 export interface Resolvers {
   [name: string]: () => Promise<any>;
@@ -21,7 +21,7 @@ export interface ResolverResults {
 }
 
 interface BasicResolverDependencies {
-  indexPatterns: IndexPatternsContract;
+  indexPatterns: DataViewsContract;
   redirectToMlAccessDeniedPage: () => Promise<void>;
 }
 
