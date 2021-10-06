@@ -72,7 +72,7 @@ describe('Policy trusted apps layout', () => {
 
     mockedContext.history.push(getPolicyDetailsArtifactsListPath('1234'));
 
-    await waitForAction('policyArtifactsDeosAnyTrustedApp', {
+    await waitForAction('policyArtifactsDeosAnyTrustedAppExists', {
       validate: (action) => isLoadedResourceState(action.payload),
     });
 
@@ -86,7 +86,7 @@ describe('Policy trusted apps layout', () => {
     await waitForAction('assignedTrustedAppsListStateChanged');
 
     mockedContext.store.dispatch({
-      type: 'policyArtifactsDeosAnyTrustedApp',
+      type: 'policyArtifactsDeosAnyTrustedAppExists',
       payload: createLoadedResourceState(true),
     });
 
