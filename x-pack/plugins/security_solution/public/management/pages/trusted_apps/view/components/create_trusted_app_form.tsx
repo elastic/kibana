@@ -423,7 +423,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
     }, [notifyOfChange, trustedApp]);
 
     // Anytime the TrustedApp has an effective scope of `policies`, then ensure that
-    // those polices are selected in the UI while at teh same time preserving prior
+    // those polices are selected in the UI while at the same time preserving prior
     // selections (UX requirement)
     useEffect(() => {
       setSelectedPolicies((currentSelection) => {

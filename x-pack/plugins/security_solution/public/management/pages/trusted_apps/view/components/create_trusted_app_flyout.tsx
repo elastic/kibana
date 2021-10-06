@@ -211,12 +211,17 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
             />
             <EuiLink external href={`${docLinks.links.siem.guide}`}>
               <FormattedMessage
-                id="xpack.securitySolution.trustedapps.docsLink"
-                defaultMessage="Trusted applications documentation."
+                id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.expiredLicenseMessage"
+                defaultMessage="Your Kibana license has been downgraded. Future policy configurations will now be globally assigned to all policies. For more information, see our "
               />
-            </EuiLink>
-          </EuiCallOut>
-        )}
+              <EuiLink external href={`${docLinks.links.securitySolution.trustedApps}`}>
+                <FormattedMessage
+                  id="xpack.securitySolution.trustedapps.docsLink"
+                  defaultMessage="Trusted applications documentation."
+                />
+              </EuiLink>
+            </EuiCallOut>
+          )}
         <EuiFlyoutBody>
           <EuiText size="xs">
             <h3>
