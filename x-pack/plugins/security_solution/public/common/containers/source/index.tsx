@@ -97,7 +97,6 @@ export const getDocValueFields = memoizeOne(
               ...accumulator,
               {
                 field: field.name,
-                format: field.format ? field.format : undefined,
               },
             ];
           }
