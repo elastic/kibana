@@ -357,7 +357,7 @@
     "reactcss": "1.2.3",
     "recompose": "^0.26.0",
     "reduce-reducers": "^1.0.4",
-    "redux": "^4.0.5",
+    "redux": "^4.1.0",
     "redux-actions": "^2.6.5",
     "redux-devtools-extension": "^2.13.8",
     "redux-logger": "^3.0.6",
