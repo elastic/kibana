@@ -73,3 +73,6 @@ export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="attach-alert-to-cas
 
 export const ALERT_COUNT_TABLE_FIRST_ROW_COUNT =
   '[data-test-subj="alertsCountTable"] tr:nth-child(1) td:nth-child(2) .euiTableCellContent__text';
+
+export const ALERTS_TREND_SIGNAL_RULE_NAME_PANEL =
+  '[data-test-subj="render-content-signal.rule.name"]';
