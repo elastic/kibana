@@ -6,7 +6,7 @@
  */
 
 import { RequestAdapter } from '../../../../../src/plugins/inspector/common/adapters/request';
-import { MapAdapter } from '../inspector/adapters/map_adapter';
+import { MapAdapter } from '../inspector/map_adapter';
 import { getShowMapsInspectorAdapter } from '../kibana_services';
 
 const REGISTER_CANCEL_CALLBACK = 'REGISTER_CANCEL_CALLBACK';
