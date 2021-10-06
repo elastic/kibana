@@ -81,6 +81,6 @@ export const LICENSE_OVERRIDES = {
 
   // TODO can be removed once we upgrade the use of walk dependency past or equal to v2.3.14
   'walk@2.3.9': ['MIT'],
-  '@elastic/eui@38.2.0': ['SSPL-1.0 OR Elastic License 2.0'],
+  '@elastic/eui@39.0.0': ['SSPL-1.0 OR Elastic License 2.0'],
   'language-subtag-registry@0.3.21': ['CC-BY-4.0'], // retired ODC‑By license https://github.com/mattcg/language-subtag-registry
 };
