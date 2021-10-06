@@ -22,6 +22,21 @@ export interface Engine {
   };
 }
 
+interface CurationSuggestionDetails {
+  count: number;
+  pending: number;
+  applied: number;
+  automated: number;
+  rejected: number;
+  disabled: number;
+  last_updated: string;
+}
+
+interface SearchRelevanceSuggestionDetails {
+  count: number;
+  curation: CurationSuggestionDetails;
+}
+
 export interface EngineDetails extends Engine {
   created_at: string;
   document_count: number;
@@ -38,6 +53,7 @@ export interface EngineDetails extends Engine {
   isMeta: boolean;
   engine_count?: number;
   includedEngines?: EngineDetails[];
+  search_relevance_suggestions?: SearchRelevanceSuggestionDetails;
 }
 
 interface ResultField {
