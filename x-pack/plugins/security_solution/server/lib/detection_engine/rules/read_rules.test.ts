@@ -47,7 +47,7 @@ describe.each([
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         ruleId: undefined,
       });
-      expect(rule).toEqual(resolveAlertMock(isRuleRegistryEnabled, getQueryRuleParams()));
+      expect(rule).toEqual(getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()));
     });
     test('should return null if saved object found by alerts client given id is not alert type', async () => {
       const rulesClient = rulesClientMock.create();
