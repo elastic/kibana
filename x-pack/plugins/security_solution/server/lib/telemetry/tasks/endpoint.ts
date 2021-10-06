@@ -5,35 +5,23 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { Logger } from 'src/core/server';
-import {
-  ConcreteTaskInstance,
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '../../../../../task_manager/server';
-import {
-  batchTelemetryRecords,
-  getPreviousEpMetaTaskTimestamp,
-  isPackagePolicyList,
-} from '../helpers';
 import { TelemetryEventsSender } from '../sender';
-import { PolicyData } from '../../../../common/endpoint/types';
-import { FLEET_ENDPOINT_PACKAGE } from '../../../../../fleet/common';
 import {
   EndpointMetricsAggregation,
   EndpointPolicyResponseAggregation,
   EndpointPolicyResponseDocument,
 } from '../types';
-import { TELEMETRY_CHANNEL_ENDPOINT_META } from '../constants';
 import { TelemetryReceiver } from '../receiver';
-
-export const TelemetryEndpointTaskConstants = {
-  TIMEOUT: '5m',
-  TYPE: 'security:endpoint-meta-telemetry',
-  INTERVAL: '24h',
-  VERSION: '1.0.0',
-};
+import { TaskExecutionPeriod } from '../task';
+import {
+  batchTelemetryRecords,
+  getPreviousEpMetaTaskTimestamp,
+  isPackagePolicyList,
+} from '../helpers';
+import { PolicyData } from '../../../../common/endpoint/types';
+import { FLEET_ENDPOINT_PACKAGE } from '../../../../../fleet/common';
+import { TELEMETRY_CHANNEL_ENDPOINT_META } from '../constants';
 
 // Endpoint agent uses this Policy ID while it's installing.
 const DefaultEndpointPolicyIdToIgnore = '00000000-0000-0000-0000-000000000000';
@@ -45,115 +33,29 @@ const EmptyFleetAgentResponse = {
   perPage: 0,
 };
 
-/** Telemetry Endpoint Task
- *
- * The Endpoint Telemetry task is a daily batch job that collects and transmits non-sensitive
- * endpoint performance and policy logs to Elastic Security Data Engineering. It is used to
- * identify bugs or common UX issues with the Elastic Security Endpoint agent.
- */
-export class TelemetryEndpointTask {
-  private readonly logger: Logger;
-  private readonly sender: TelemetryEventsSender;
-  private readonly receiver: TelemetryReceiver;
-
-  constructor(
+export const TelemetryDiagTaskConfig = {
+  type: 'security:endpoint-meta-telemetry',
+  title: 'Security Solution Telemetry Endpoint Metrics and Info task',
+  interval: '24h',
+  timeout: '5m',
+  version: '1.0.0',
+  getLastExecutionTime: getPreviousEpMetaTaskTimestamp,
+  runTask: async (
+    taskId: string,
     logger: Logger,
-    taskManager: TaskManagerSetupContract,
+    receiver: TelemetryReceiver,
     sender: TelemetryEventsSender,
-    receiver: TelemetryReceiver
-  ) {
-    this.logger = logger;
-    this.sender = sender;
-    this.receiver = receiver;
-
-    taskManager.registerTaskDefinitions({
-      [TelemetryEndpointTaskConstants.TYPE]: {
-        title: 'Security Solution Telemetry Endpoint Metrics and Info task',
-        timeout: TelemetryEndpointTaskConstants.TIMEOUT,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-          const { state } = taskInstance;
-
-          return {
-            run: async () => {
-              const taskExecutionTime = moment().utc().toISOString();
-              const lastExecutionTimestamp = getPreviousEpMetaTaskTimestamp(
-                taskExecutionTime,
-                taskInstance.state?.lastExecutionTimestamp
-              );
-
-              const hits = await this.runTask(
-                taskInstance.id,
-                lastExecutionTimestamp,
-                taskExecutionTime
-              );
-
-              return {
-                state: {
-                  lastExecutionTimestamp: taskExecutionTime,
-                  runs: (state.runs || 0) + 1,
-                  hits,
-                },
-              };
-            },
-            cancel: async () => {},
-          };
-        },
-      },
-    });
-  }
-
-  public start = async (taskManager: TaskManagerStartContract) => {
-    try {
-      await taskManager.ensureScheduled({
-        id: this.getTaskId(),
-        taskType: TelemetryEndpointTaskConstants.TYPE,
-        scope: ['securitySolution'],
-        schedule: {
-          interval: TelemetryEndpointTaskConstants.INTERVAL,
-        },
-        state: { runs: 0 },
-        params: { version: TelemetryEndpointTaskConstants.VERSION },
-      });
-    } catch (e) {
-      this.logger.error(`Error scheduling task, received ${e.message}`);
-    }
-  };
-
-  private getTaskId = (): string => {
-    return `${TelemetryEndpointTaskConstants.TYPE}:${TelemetryEndpointTaskConstants.VERSION}`;
-  };
-
-  private async fetchEndpointData(executeFrom: string, executeTo: string) {
-    const [fleetAgentsResponse, epMetricsResponse, policyResponse] = await Promise.allSettled([
-      this.receiver.fetchFleetAgents(),
-      this.receiver.fetchEndpointMetrics(executeFrom, executeTo),
-      this.receiver.fetchEndpointPolicyResponses(executeFrom, executeTo),
-    ]);
-
-    return {
-      fleetAgentsResponse:
-        fleetAgentsResponse.status === 'fulfilled'
-          ? fleetAgentsResponse.value
-          : EmptyFleetAgentResponse,
-      endpointMetrics:
-        epMetricsResponse.status === 'fulfilled' ? epMetricsResponse.value : undefined,
-      epPolicyResponse: policyResponse.status === 'fulfilled' ? policyResponse.value : undefined,
-    };
-  }
-
-  public runTask = async (taskId: string, executeFrom: string, executeTo: string) => {
-    if (taskId !== this.getTaskId()) {
-      this.logger.debug(`Outdated task running: ${taskId}`);
-      return 0;
+    taskExecutionPeriod: TaskExecutionPeriod
+  ) => {
+    if (!taskExecutionPeriod.last) {
+      throw new Error('last execution timestamp is required');
     }
 
-    const isOptedIn = await this.sender.isTelemetryOptedIn();
-    if (!isOptedIn) {
-      this.logger.debug(`Telemetry is not opted-in.`);
-      return 0;
-    }
-
-    const endpointData = await this.fetchEndpointData(executeFrom, executeTo);
+    const endpointData = await fetchEndpointData(
+      receiver,
+      taskExecutionPeriod.last,
+      taskExecutionPeriod.current
+    );
 
     /** STAGE 1 - Fetch Endpoint Agent Metrics
      *
@@ -163,7 +65,7 @@ export class TelemetryEndpointTask {
      * a metric document(s) exists for an EP agent we map to fleet agent and policy
      */
     if (endpointData.endpointMetrics === undefined) {
-      this.logger.debug(`no endpoint metrics to report`);
+      logger.debug(`no endpoint metrics to report`);
       return 0;
     }
 
@@ -172,7 +74,7 @@ export class TelemetryEndpointTask {
     };
 
     if (endpointMetricsResponse.aggregations === undefined) {
-      this.logger.debug(`no endpoint metrics to report`);
+      logger.debug(`no endpoint metrics to report`);
       return 0;
     }
 
@@ -196,7 +98,7 @@ export class TelemetryEndpointTask {
     const agentsResponse = endpointData.fleetAgentsResponse;
 
     if (agentsResponse === undefined) {
-      this.logger.debug('no fleet agent information available');
+      logger.debug('no fleet agent information available');
       return 0;
     }
 
@@ -215,7 +117,7 @@ export class TelemetryEndpointTask {
     const endpointPolicyCache = new Map<string, PolicyData>();
     for (const policyInfo of fleetAgents.values()) {
       if (policyInfo !== null && policyInfo !== undefined && !endpointPolicyCache.has(policyInfo)) {
-        const agentPolicy = await this.receiver.fetchPolicyConfigs(policyInfo);
+        const agentPolicy = await receiver.fetchPolicyConfigs(policyInfo);
         const packagePolicies = agentPolicy?.package_policies;
 
         if (packagePolicies !== undefined && isPackagePolicyList(packagePolicies)) {
@@ -291,7 +193,7 @@ export class TelemetryEndpointTask {
         const { cpu, memory, uptime } = endpoint.endpoint_metrics.Endpoint.metrics;
 
         return {
-          '@timestamp': executeTo,
+          '@timestamp': taskExecutionPeriod.current,
           endpoint_id: endpointAgentId,
           endpoint_version: endpoint.endpoint_version,
           endpoint_package_version: policyConfig?.package?.version || null,
@@ -328,12 +230,33 @@ export class TelemetryEndpointTask {
        * Send the documents in a batches of 100
        */
       batchTelemetryRecords(telemetryPayloads, 100).forEach((telemetryBatch) =>
-        this.sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_META, telemetryBatch)
+        sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_META, telemetryBatch)
       );
       return telemetryPayloads.length;
     } catch (err) {
-      this.logger.warn('could not complete endpoint alert telemetry task');
+      logger.warn('could not complete endpoint alert telemetry task');
       return 0;
     }
+  },
+};
+
+async function fetchEndpointData(
+  receiver: TelemetryReceiver,
+  executeFrom: string,
+  executeTo: string
+) {
+  const [fleetAgentsResponse, epMetricsResponse, policyResponse] = await Promise.allSettled([
+    receiver.fetchFleetAgents(),
+    receiver.fetchEndpointMetrics(executeFrom, executeTo),
+    receiver.fetchEndpointPolicyResponses(executeFrom, executeTo),
+  ]);
+
+  return {
+    fleetAgentsResponse:
+      fleetAgentsResponse.status === 'fulfilled'
+        ? fleetAgentsResponse.value
+        : EmptyFleetAgentResponse,
+    endpointMetrics: epMetricsResponse.status === 'fulfilled' ? epMetricsResponse.value : undefined,
+    epPolicyResponse: policyResponse.status === 'fulfilled' ? policyResponse.value : undefined,
   };
 }
