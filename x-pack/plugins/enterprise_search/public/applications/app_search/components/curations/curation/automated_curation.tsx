@@ -74,7 +74,6 @@ export const AutomatedCuration: React.FC = () => {
       isLoading={dataLoading}
     >
       <PromotedDocuments />
-      <EuiSpacer />
       <OrganicDocuments />
     </AppSearchPageTemplate>
   );

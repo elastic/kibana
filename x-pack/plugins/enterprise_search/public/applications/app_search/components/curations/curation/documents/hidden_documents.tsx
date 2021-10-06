@@ -30,13 +30,8 @@ export const HiddenDocuments: React.FC = () => {
 
   return (
     <DataPanel
-      filled
       iconType={CountBadge}
       title={<h2>{HIDDEN_DOCUMENTS_TITLE}</h2>}
-      subtitle={i18n.translate(
-        'xpack.enterpriseSearch.appSearch.engine.curations.hiddenDocuments.description',
-        { defaultMessage: 'Hidden documents will not appear in organic results.' }
-      )}
       action={
         hasDocuments && (
           <EuiFlexGroup gutterSize="s" responsive={false} wrap>

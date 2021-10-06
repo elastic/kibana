@@ -18,11 +18,7 @@ import { LeafIcon } from '../../../../../shared/icons';
 import { DataPanel } from '../../../data_panel';
 import { Result } from '../../../result/types';
 
-import {
-  RESULT_ACTIONS_DIRECTIONS,
-  PROMOTE_DOCUMENT_ACTION,
-  HIDE_DOCUMENT_ACTION,
-} from '../../constants';
+import { PROMOTE_DOCUMENT_ACTION, HIDE_DOCUMENT_ACTION } from '../../constants';
 import { CurationLogic } from '../curation_logic';
 import { CurationResult } from '../results';
 
@@ -36,7 +32,6 @@ export const OrganicDocuments: React.FC = () => {
 
   return (
     <DataPanel
-      filled
       iconType={LeafIcon}
       title={
         <h2>
@@ -49,7 +44,6 @@ export const OrganicDocuments: React.FC = () => {
           )}
         </h2>
       }
-      subtitle={!isAutomated && RESULT_ACTIONS_DIRECTIONS}
     >
       {hasDocuments ? (
         documents.map((document: Result) => (

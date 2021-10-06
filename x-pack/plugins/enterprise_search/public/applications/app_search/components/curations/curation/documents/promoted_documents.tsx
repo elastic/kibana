@@ -22,7 +22,6 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { DataPanel } from '../../../data_panel';
 
@@ -48,22 +47,8 @@ export const PromotedDocuments: React.FC = () => {
 
   return (
     <DataPanel
-      filled
       iconType={CountBadge}
       title={<h2>{PROMOTED_DOCUMENTS_TITLE}</h2>}
-      subtitle={
-        isAutomated ? (
-          <FormattedMessage
-            id="xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.automatedDescription"
-            defaultMessage="This curation is being managed by App Search"
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.manualDescription"
-            defaultMessage="Promoted results appear before organic results. Documents can be re-ordered."
-          />
-        )
-      }
       action={
         !isAutomated &&
         hasDocuments && (

@@ -70,7 +70,6 @@ export const ManualCuration: React.FC = () => {
           <ManageQueriesModal />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
       {selectedPageTab === 'promoted' && (
         <>
           <SuggestedDocumentsCallout />
@@ -79,7 +78,6 @@ export const ManualCuration: React.FC = () => {
       )}
       {selectedPageTab === 'promoted' && <PromotedDocuments />}
       {selectedPageTab === 'hidden' && <HiddenDocuments />}
-      <EuiSpacer />
       <OrganicDocuments />
 
       {isFlyoutOpen && <AddResultFlyout />}
