@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { Logger } from 'src/core/server';
 
 import { DeprecationsDetails, DeprecationsServiceSetup } from '../../../../../src/core/server';
 import type { PrivilegeDeprecationsService } from '../../../security/common/model';
@@ -14,6 +15,7 @@ import { CASES_FEATURE_ID, SERVER_APP_ID } from '../../common/constants';
 interface Deps {
   deprecationsService: DeprecationsServiceSetup;
   getKibanaRolesByFeatureId?: PrivilegeDeprecationsService['getKibanaRolesByFeatureId'];
+  logger: Logger;
 }
 
 export const updateSecuritySolutionPrivileges = (
@@ -76,11 +78,13 @@ export const updateSecuritySolutionPrivileges = (
 export const registerPrivilegeDeprecations = ({
   deprecationsService,
   getKibanaRolesByFeatureId,
+  logger,
 }: Deps) => {
   deprecationsService.registerDeprecations({
     getDeprecations: async (context) => {
+      let deprecatedRoles: DeprecationsDetails[] = [];
       if (!getKibanaRolesByFeatureId) {
-        return [];
+        return deprecatedRoles;
       }
       const responseRoles = await getKibanaRolesByFeatureId({
         context,
@@ -91,57 +95,94 @@ export const registerPrivilegeDeprecations = ({
         return responseRoles.errors;
       }
 
-      const roles = responseRoles.roles ?? [];
-      return roles.map<DeprecationsDetails>((role) => {
-        const { metadata, elasticsearch, kibana } = role;
+      try {
+        const roles = responseRoles.roles ?? [];
+        deprecatedRoles = roles.map<DeprecationsDetails>((role) => {
+          const { metadata, elasticsearch, kibana } = role;
 
-        const updatedKibana = kibana.map((privilege) => {
-          const { siem, ...otherFeatures } = privilege.feature;
-          const privilegeContainsSiem = Array.isArray(siem) && siem.length > 0;
+          const updatedKibana = kibana.map((privilege) => {
+            const { siem, ...otherFeatures } = privilege.feature;
+            const privilegeContainsSiem = Array.isArray(siem) && siem.length > 0;
 
-          if (privilegeContainsSiem) {
-            return {
-              ...privilege,
-              feature: {
-                ...otherFeatures,
-                ...updateSecuritySolutionPrivileges(siem),
+            if (privilegeContainsSiem) {
+              return {
+                ...privilege,
+                feature: {
+                  ...otherFeatures,
+                  ...updateSecuritySolutionPrivileges(siem),
+                },
+              };
+            }
+            return privilege;
+          });
+
+          const updatedRole = {
+            metadata,
+            elasticsearch,
+            kibana: updatedKibana,
+          };
+
+          return {
+            title: i18n.translate(
+              'xpack.securitySolution.deprecation.casesSubfeaturePrivileges.title',
+              {
+                defaultMessage: 'Deprecate cases sub-feature privileges in Security',
+              }
+            ),
+            message: i18n.translate(
+              'xpack.securitySolution.deprecation.ccasesSubfeaturePrivileges.message',
+              {
+                defaultMessage:
+                  'The "securitySolutions" feature privilege has been populated with siem feature or cases sub feature if existing.',
+              }
+            ),
+            level: 'warning',
+            correctiveActions: {
+              api: {
+                method: 'PUT',
+                path: `/api/security/role/${encodeURIComponent(role.name)}`,
+                body: updatedRole,
               },
-            };
-          }
-          return privilege;
-        });
-
-        const updatedRole = {
-          metadata,
-          elasticsearch,
-          kibana: updatedKibana,
-        };
-
-        return {
-          title: i18n.translate(
-            'xpack.securitySolution.deprecation.casesSubfeaturePrivileges.title',
-            {
-              defaultMessage: 'Deprecate cases sub-feature privileges in Security',
-            }
-          ),
-          message: i18n.translate(
-            'xpack.securitySolution.deprecation.ccasesSubfeaturePrivileges.message',
-            {
-              defaultMessage:
-                'The "securitySolutions" feature privilege has been populated with siem feature or cases sub feature if existing.',
-            }
-          ),
-          level: 'warning',
-          correctiveActions: {
-            api: {
-              method: 'PUT',
-              path: `/api/security/role/${encodeURIComponent(role.name)}`,
-              body: updatedRole,
+              manualSteps: [],
             },
-            manualSteps: [],
+          };
+        });
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : 'n/a';
+        const message = i18n.translate(
+          'xpack.securitySolutions.privilegeDeprecations.error.convertingRoles.message',
+          {
+            defaultMessage: `Failed to create cases roles from siem roles, unexpected error: {message}`,
+            values: {
+              message: errMsg,
+            },
+          }
+        );
+        logger.error(
+          `Failed to create cases roles from siem roles, unexpected error: ${errMsg ?? ''}`
+        );
+        return [
+          {
+            title: i18n.translate('xpack.securitySolutions.privilegeDeprecations.error.title', {
+              defaultMessage: `Error in security solution to deprecate cases sub feature`,
+            }),
+            level: 'fetch_error',
+            message,
+            correctiveActions: {
+              manualSteps: [
+                i18n.translate(
+                  'xpack.securitySolutions.privilegeDeprecations.manualSteps.message',
+                  {
+                    defaultMessage:
+                      'A user will have to set cases privileges manually in your associated role',
+                  }
+                ),
+              ],
+            },
           },
-        };
-      });
+        ];
+      }
+      return deprecatedRoles;
     },
   });
 };

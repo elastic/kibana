@@ -375,6 +375,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       deprecationsService: core.deprecations,
       getKibanaRolesByFeatureId:
         plugins.security?.privilegeDeprecationsService.getKibanaRolesByFeatureId,
+      logger: this.logger.get('deprecations'),
     });
 
     return {};
