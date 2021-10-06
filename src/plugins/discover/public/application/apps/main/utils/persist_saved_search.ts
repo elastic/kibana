@@ -54,7 +54,9 @@ export async function persistSavedSearch(
 
   try {
     const id = await saveSavedSearch(savedSearch, saveOptions, services.core.savedObjects.client);
-    onSuccess(id!);
+    if (id) {
+      onSuccess(id);
+    }
     return { id };
   } catch (saveError) {
     onError(saveError, savedSearch);
