@@ -18,9 +18,8 @@ import { Optimizer, Options } from './optimizer';
 
 jest.mock('@kbn/optimizer');
 const realOptimizer = jest.requireActual('@kbn/optimizer');
-const { runOptimizer, OptimizerConfig, logOptimizerState, logOptimizerProgress } = jest.requireMock(
-  '@kbn/optimizer'
-);
+const { runOptimizer, OptimizerConfig, logOptimizerState, logOptimizerProgress } =
+  jest.requireMock('@kbn/optimizer');
 
 logOptimizerState.mockImplementation(realOptimizer.logOptimizerState);
 logOptimizerProgress.mockImplementation(realOptimizer.logOptimizerProgress);
