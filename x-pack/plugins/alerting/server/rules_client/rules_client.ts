@@ -1111,6 +1111,7 @@ export class RulesClient {
         updatedAt: new Date().toISOString(),
         executionStatus: {
           status: 'pending',
+          lastDuration: 0,
           lastExecutionDate: new Date().toISOString(),
           error: null,
         },

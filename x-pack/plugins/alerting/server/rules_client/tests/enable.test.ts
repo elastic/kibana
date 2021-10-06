@@ -260,6 +260,7 @@ describe('enable()', () => {
         ],
         executionStatus: {
           status: 'pending',
+          lastDuration: 0,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           error: null,
         },
@@ -369,6 +370,7 @@ describe('enable()', () => {
         ],
         executionStatus: {
           status: 'pending',
+          lastDuration: 0,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           error: null,
         },
