@@ -7,7 +7,8 @@
 #
 
 load("@npm//@bazel/typescript/internal:ts_config.bzl", "TsConfigInfo")
-load("@build_bazel_rules_nodejs//:providers.bzl", "run_node", "LinkablePackageInfo")
+load("@build_bazel_rules_nodejs//:providers.bzl", "run_node", "LinkablePackageInfo", "declaration_info")
+load("@build_bazel_rules_nodejs//internal/linker:link_node_modules.bzl", "module_mappings_aspect")
 
 
 #### TODO
@@ -35,14 +36,30 @@ def _join(*elements):
 def _dts_inputs(pkg_path, files):
   return [f for f in files if f.path.endswith(_join(pkg_path, "target_types", "index.d.ts")) and not f.path.endswith(".map")]
 
+def _deps_inputs(ctx):
+  """Returns all transitively referenced files on deps """
+  deps_files_depsets = []
+  for dep in ctx.attr.deps:
+    # Collect whatever is in the "data"
+    deps_files_depsets.append(dep.data_runfiles.files)
+
+    # Only collect DefaultInfo files (not transitive)
+    deps_files_depsets.append(dep.files)
+
+  deps_files = depset(transitive = deps_files_depsets).to_list()
+  return deps_files
+
 def _pkg_npm_types_impl(ctx):
   # input declarations
-  inputs = ctx.files.data[:]
+  deps_inputs = _deps_inputs(ctx)
   tsconfig_inputs = _tsconfig_inputs(ctx)
+  inputs = ctx.files.srcs[:]
   inputs.extend(tsconfig_inputs)
-  inputs.extend([ctx.file._generated_package_json_template])
+  inputs.extend(deps_inputs)
+  inputs.append(ctx.file._generated_package_json_template)
 
   # output dir declaration
+  package_path = ctx.label.package
   package_dir = ctx.actions.declare_directory(ctx.label.name)
   outputs = [package_dir]
 
@@ -53,20 +70,19 @@ def _pkg_npm_types_impl(ctx):
 
   # layout api extractor arguments
   extractor_args = ctx.actions.args()
-  package_path = ctx.label.package
 
-  # general args layout
-  ## [0] = base output dir
-  ## [1] = generated package json template input file path
-  ## [2] = stringified template args
-  ## [3] = tsconfig input file path
-  ## [4] = provided types to summarise entry point
+  ## general args layout
+  ### [0] = base output dir
+  ### [1] = generated package json template input file path
+  ### [2] = stringified template args
+  ### [3] = tsconfig input file path
+  ### [4] = provided types to summarise entry point
   extractor_args.add(package_dir.path)
   extractor_args.add(ctx.file._generated_package_json_template.path)
   extractor_args.add_joined(template_args, join_with = ",", omit_if_empty = False)
   extractor_args.add(_join(package_path, "tsconfig.json"))
   extractor_args.add_joined([s.path for s in _dts_inputs(package_path, ctx.files.data)], join_with = ",", omit_if_empty = False)
-  extractor_args.add_joined([s.path for s in inputs], join_with = ",", omit_if_empty = False)
+  extractor_args.add_joined([s.path for s in deps_inputs], join_with = ",", omit_if_empty = False)
 
   run_node(
     ctx,
@@ -86,8 +102,12 @@ def _pkg_npm_types_impl(ctx):
       files = package_dir_depset,
       runfiles = ctx.runfiles([package_dir]),
     ),
+    declaration_info(
+      declarations = depset([package_dir])
+    ),
     LinkablePackageInfo(
       package_name = ctx.attr.package_name,
+      package_path = "",
       path = package_dir.path,
       files = package_dir_depset,
     )
@@ -96,10 +116,16 @@ def _pkg_npm_types_impl(ctx):
 pkg_npm_types = rule(
   implementation = _pkg_npm_types_impl,
   attrs = {
-    "data": attr.label_list(
+    "deps": attr.label_list(
+      doc = """Other targets which are the base types to summarise from""",
       allow_files = True,
+      aspects = [module_mappings_aspect],
     ),
     "package_name": attr.string(),
+    "srcs": attr.label_list(
+      doc = """Files inside this directory which are inputs for the types to summarise.""",
+      allow_files = True,
+    ),
     "tsconfig": attr.label(mandatory = True, allow_single_file = [".json"]),
     "_packager": attr.label(
       doc = "Target that executes the npm types package assembler binary",
