@@ -15,9 +15,12 @@ import { fromSavedSearchAttributes } from './saved_searches_utils';
 import { injectSearchSourceReferences, parseSearchSourceJSON } from '../../../data/public';
 import { SavedObjectNotFound } from '../../../kibana_utils/public';
 
+import type { SpacesApi } from '../../../../../x-pack/plugins/spaces/public';
+
 interface GetSavedSearchDependencies {
   search: DataPublicPluginStart['search'];
   savedObjectsClient: SavedObjectsStart['client'];
+  spaces?: SpacesApi;
 }
 
 const getEmptySavedSearch = ({
@@ -30,7 +33,7 @@ const getEmptySavedSearch = ({
 
 const findSavedSearch = async (
   savedSearchId: string,
-  { search, savedObjectsClient }: GetSavedSearchDependencies
+  { search, savedObjectsClient, spaces }: GetSavedSearchDependencies
 ) => {
   const so = await savedObjectsClient.resolve<SavedSearchAttributes>(
     SAVED_SEARCH_TYPE,
@@ -59,6 +62,14 @@ const findSavedSearch = async (
     {
       outcome: so.outcome,
       aliasTargetId: so.alias_target_id,
+      errorJSON:
+        so.outcome === 'conflict' && spaces
+          ? JSON.stringify({
+              targetType: SAVED_SEARCH_TYPE,
+              sourceId: savedSearchId,
+              targetSpace: (await spaces!.getActiveSpace()).id,
+            })
+          : undefined,
     }
   );
 };

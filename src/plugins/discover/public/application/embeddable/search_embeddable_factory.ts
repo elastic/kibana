@@ -72,9 +72,10 @@ export class SearchEmbeddableFactory
       const savedSearch = await getSavedSearch(savedObjectId, {
         search: services.data.search,
         savedObjectsClient: services.core.savedObjects.client,
+        spaces: services.spaces,
       });
 
-      await throwErrorOnSavedSearchUrlConflict(savedSearch, services.spaces);
+      await throwErrorOnSavedSearchUrlConflict(savedSearch);
 
       const indexPattern = savedSearch.searchSource.getField('index');
       const { executeTriggerActions } = await this.getStartServices();

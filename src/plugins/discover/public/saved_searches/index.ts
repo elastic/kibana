@@ -12,7 +12,6 @@ export { getSavedSearch } from './get_saved_searches';
 export {
   getSavedSearchUrl,
   getSavedSearchFullPathUrl,
-  savedSearchHasUrlConflict,
   getSavedSearchUrlConflictMessage,
   throwErrorOnSavedSearchUrlConflict,
 } from './saved_searches_utils';

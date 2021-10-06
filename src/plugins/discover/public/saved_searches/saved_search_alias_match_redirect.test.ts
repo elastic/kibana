@@ -31,7 +31,7 @@ describe('useSavedSearchAliasMatchRedirect', () => {
   test('should redirect in case of aliasMatch', () => {
     const savedSearch = {
       id: 'id',
-      sharingSavedObject: {
+      sharingSavedObjectProps: {
         outcome: 'aliasMatch',
         aliasTargetId: 'aliasTargetId',
       },
@@ -48,7 +48,7 @@ describe('useSavedSearchAliasMatchRedirect', () => {
   test('should not redirect if outcome !== aliasMatch', () => {
     const savedSearch = {
       id: 'id',
-      sharingSavedObject: {
+      sharingSavedObjectProps: {
         outcome: 'exactMatch',
       },
     } as SavedSearch;
@@ -61,7 +61,7 @@ describe('useSavedSearchAliasMatchRedirect', () => {
   test('should not redirect if aliasTargetId is not defined', () => {
     const savedSearch = {
       id: 'id',
-      sharingSavedObject: {
+      sharingSavedObjectProps: {
         outcome: 'aliasMatch',
       },
     } as SavedSearch;

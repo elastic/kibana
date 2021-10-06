@@ -33,7 +33,7 @@ describe('SavedSearchURLConflictCallout', () => {
   test("should render URLConflictCallout in case of id's conflicts", () => {
     const savedSearch = {
       id: 'id',
-      sharingSavedObject: {
+      sharingSavedObjectProps: {
         outcome: 'conflict',
         aliasTargetId: 'aliasTargetId',
       },
@@ -49,7 +49,7 @@ describe('SavedSearchURLConflictCallout', () => {
   test('should not render URLConflictCallout in case of no conflicts', () => {
     const savedSearch = {
       id: 'id',
-      sharingSavedObject: {},
+      sharingSavedObjectProps: {},
     } as SavedSearch;
 
     const component = mountWithIntl(

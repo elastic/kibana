@@ -126,8 +126,9 @@ describe('getSavedSearch', () => {
           "setParent": [MockFunction],
           "setPreferredSearchStrategyId": [MockFunction],
         },
-        "sharingSavedObject": Object {
+        "sharingSavedObjectProps": Object {
           "aliasTargetId": undefined,
+          "errorJSON": undefined,
           "outcome": "exactMatch",
         },
         "sort": Array [

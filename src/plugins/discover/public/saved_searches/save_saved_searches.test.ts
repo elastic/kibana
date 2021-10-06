@@ -32,7 +32,7 @@ describe('saveSavedSearch', () => {
           references: [],
         }),
       },
-      sharingSavedObject: {
+      sharingSavedObjectProps: {
         outcome: 'aliasMatch',
       },
     } as SavedSearch;

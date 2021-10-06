@@ -10,7 +10,6 @@ export { UseRequestConfig, useRequest } from '../../../../src/plugins/es_ui_shar
 export {
   getSavedSearch,
   getSavedSearchUrlConflictMessage,
-  savedSearchHasUrlConflict,
 } from '../../../../src/plugins/discover/public';
 
 export {

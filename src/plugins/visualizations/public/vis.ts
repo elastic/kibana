@@ -32,7 +32,7 @@ import {
 import { BaseVisType } from './vis_types';
 import { VisParams } from '../common/types';
 
-import { getSavedSearch } from '../../discover/public';
+import { getSavedSearch, throwErrorOnSavedSearchUrlConflict } from '../../discover/public';
 
 export interface SerializedVisData {
   expression?: string;
@@ -65,6 +65,8 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
       search: getSearch(),
       savedObjectsClient: getSavedObjects().client,
     });
+
+    await throwErrorOnSavedSearchUrlConflict(savedSearch);
 
     if (savedSearch?.searchSource) {
       inputSearchSource.setParent(savedSearch.searchSource);

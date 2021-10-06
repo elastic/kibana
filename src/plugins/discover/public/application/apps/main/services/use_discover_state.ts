@@ -151,6 +151,7 @@ export function useDiscoverState({
       const newSavedSearch = await getSavedSearch(id, {
         search: services.data.search,
         savedObjectsClient: services.core.savedObjects.client,
+        spaces: services.spaces,
       });
 
       const newIndexPattern = newSavedSearch.searchSource.getField('index') || indexPattern;

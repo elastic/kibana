@@ -71,7 +71,7 @@ describe('saved_searches_utils', () => {
             "requestStartHandlers": Array [],
             "searchStrategyId": undefined,
           },
-          "sharingSavedObject": Object {},
+          "sharingSavedObjectProps": Object {},
           "sort": Array [],
           "title": "saved search",
         }
@@ -86,8 +86,9 @@ describe('saved_searches_utils', () => {
       try {
         await throwErrorOnSavedSearchUrlConflict({
           id: 'id',
-          sharingSavedObject: {
+          sharingSavedObjectProps: {
             outcome: 'conflict',
+            errorJSON: '{}',
           },
         } as SavedSearch);
       } catch (e) {
@@ -95,7 +96,7 @@ describe('saved_searches_utils', () => {
       }
 
       expect(error).toBe(
-        'This search has the same URL as a legacy alias. Disable the alias to resolve this error : {"sourceId":"id","targetType":"search","targetSpace":"default"}'
+        'This search has the same URL as a legacy alias. Disable the alias to resolve this error : {}'
       );
     });
   });

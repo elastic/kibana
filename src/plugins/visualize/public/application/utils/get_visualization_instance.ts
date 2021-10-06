@@ -16,7 +16,11 @@ import {
 import { SearchSourceFields } from 'src/plugins/data/public';
 import { cloneDeep } from 'lodash';
 import { ExpressionValueError } from 'src/plugins/expressions/public';
-import { getSavedSearch, SavedSearch } from '../../../../discover/public';
+import {
+  getSavedSearch,
+  SavedSearch,
+  throwErrorOnSavedSearchUrlConflict,
+} from '../../../../discover/public';
 import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '../../../../kibana_utils/common';
 import { VisualizeServices } from '../types';
 
@@ -55,6 +59,8 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
       search: data.search,
       savedObjectsClient: savedObjects.client,
     });
+
+    await throwErrorOnSavedSearchUrlConflict(savedSearch);
   }
 
   return { savedSearch, embeddableHandler };

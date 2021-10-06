@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
-import { getSavedSearchUrl, savedSearchHasUrlConflict } from './saved_searches_utils';
+import { getSavedSearchUrl } from './saved_searches_utils';
 
 import type { SavedSearch } from './types';
 import type { SpacesApi } from '../../../../../x-pack/plugins/spaces/public';
@@ -24,8 +24,8 @@ export const SavedSearchURLConflictCallout = ({
   spaces,
   history,
 }: SavedSearchURLConflictCalloutProps) => {
-  if (spaces && savedSearch?.id && savedSearchHasUrlConflict(savedSearch)) {
-    const otherObjectId = savedSearch.sharingSavedObject?.aliasTargetId;
+  if (spaces && savedSearch?.id && savedSearch?.sharingSavedObjectProps?.outcome === 'conflict') {
+    const otherObjectId = savedSearch.sharingSavedObjectProps?.aliasTargetId;
 
     if (otherObjectId) {
       return spaces.ui.components.getLegacyUrlConflict({

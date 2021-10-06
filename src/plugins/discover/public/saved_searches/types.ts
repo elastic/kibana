@@ -36,8 +36,9 @@ export interface SavedSearch {
     columns?: Record<string, DiscoverGridSettingsColumn>;
   };
   hideChart?: boolean;
-  sharingSavedObject?: {
+  sharingSavedObjectProps?: {
     outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
     aliasTargetId?: string;
+    errorJSON?: string;
   };
 }

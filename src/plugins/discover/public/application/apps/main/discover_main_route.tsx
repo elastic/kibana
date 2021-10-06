@@ -98,6 +98,7 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
         const currentSavedSearch = await getSavedSearch(savedSearchId, {
           search: services.data.search,
           savedObjectsClient: core.savedObjects.client,
+          spaces: services.spaces,
         });
 
         const loadedIndexPattern = await loadDefaultOrCurrentIndexPattern(

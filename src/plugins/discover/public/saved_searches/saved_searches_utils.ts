@@ -6,38 +6,23 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import { SAVED_SEARCH_TYPE } from './constants';
 import type { SavedSearchAttributes, SavedSearch } from './types';
-import type { SpacesApi } from '../../../../../x-pack/plugins/spaces/public';
 
 export const getSavedSearchUrl = (id?: string) => (id ? `#/view/${encodeURIComponent(id)}` : '#/');
 
 export const getSavedSearchFullPathUrl = (id?: string) => `/app/discover${getSavedSearchUrl(id)}`;
 
-export const savedSearchHasUrlConflict = (savedSearch: SavedSearch) =>
-  savedSearch?.sharingSavedObject?.outcome === 'conflict';
-
-export const getSavedSearchUrlConflictMessage = async (
-  savedSearch: SavedSearch,
-  spaces?: SpacesApi
-) =>
+export const getSavedSearchUrlConflictMessage = async (savedSearch: SavedSearch) =>
   i18n.translate('discover.savedSearchEmbeddable.legacyURLConflict.errorMessage', {
     defaultMessage: `This search has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
     values: {
-      json: JSON.stringify({
-        sourceId: savedSearch.id,
-        targetType: SAVED_SEARCH_TYPE,
-        targetSpace: ((await spaces?.getActiveSpace()) ?? {}).id || 'default',
-      }),
+      json: savedSearch.sharingSavedObjectProps?.errorJSON,
     },
   });
 
-export const throwErrorOnSavedSearchUrlConflict = async (
-  savedSearch: SavedSearch,
-  spaces?: SpacesApi
-) => {
-  if (savedSearchHasUrlConflict(savedSearch)) {
-    throw new Error(await getSavedSearchUrlConflictMessage(savedSearch, spaces));
+export const throwErrorOnSavedSearchUrlConflict = async (savedSearch: SavedSearch) => {
+  if (savedSearch.sharingSavedObjectProps?.errorJSON) {
+    throw new Error(await getSavedSearchUrlConflictMessage(savedSearch));
   }
 };
 
@@ -45,11 +30,11 @@ export const fromSavedSearchAttributes = (
   id: string,
   attributes: SavedSearchAttributes,
   searchSource: SavedSearch['searchSource'],
-  sharingSavedObject: SavedSearch['sharingSavedObject']
+  sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps']
 ): SavedSearch => ({
   id,
   searchSource,
-  sharingSavedObject,
+  sharingSavedObjectProps,
   title: attributes.title,
   sort: attributes.sort,
   columns: attributes.columns,

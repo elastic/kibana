@@ -28,7 +28,7 @@ export const useSavedSearchAliasMatchRedirect = ({
   useEffect(() => {
     async function aliasMatchRedirect() {
       if (savedSearch) {
-        const { aliasTargetId, outcome } = savedSearch.sharingSavedObject ?? {};
+        const { aliasTargetId, outcome } = savedSearch.sharingSavedObjectProps ?? {};
 
         if (spaces && aliasTargetId && outcome === 'aliasMatch') {
           await spaces.ui.redirectLegacyUrl(

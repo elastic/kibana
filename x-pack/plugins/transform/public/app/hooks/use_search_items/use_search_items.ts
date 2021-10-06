@@ -11,11 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { isIndexPattern } from '../../../../common/types/index_pattern';
 
-import {
-  getSavedSearch,
-  getSavedSearchUrlConflictMessage,
-  savedSearchHasUrlConflict,
-} from '../../../shared_imports';
+import { getSavedSearch, getSavedSearchUrlConflictMessage } from '../../../shared_imports';
 
 import { useAppDependencies } from '../../app_dependencies';
 
@@ -54,10 +50,11 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
       fetchedSavedSearch = await getSavedSearch(id, {
         search: appDeps.data.search,
         savedObjectsClient: appDeps.savedObjects.client,
+        spaces: appDeps.spaces,
       });
 
-      if (savedSearchHasUrlConflict(fetchedSavedSearch)) {
-        setError(await getSavedSearchUrlConflictMessage(fetchedSavedSearch, appDeps.spaces));
+      if (fetchedSavedSearch?.sharingSavedObjectProps?.errorJSON) {
+        setError(await getSavedSearchUrlConflictMessage(fetchedSavedSearch));
         return;
       }
     } catch (e) {
