@@ -834,5 +834,5 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
 export interface SharingSavedObjectProps {
   outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
   aliasTargetId?: string;
-  errorJSON?: string;
+  sourceId?: string;
 }

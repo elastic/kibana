@@ -6,14 +6,32 @@
  */
 
 import { EuiButtonEmpty, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import type { SpacesManager } from '../../spaces_manager';
 import type { EmbeddableLegacyUrlConflictProps } from '../types';
 
-export const EmbeddableLegacyUrlConflictInternal = ({ json }: EmbeddableLegacyUrlConflictProps) => {
+export interface InternalProps {
+  spacesManager: SpacesManager;
+}
+
+export const EmbeddableLegacyUrlConflictInternal = (
+  props: InternalProps & EmbeddableLegacyUrlConflictProps
+) => {
+  const { spacesManager, targetType, sourceId } = props;
+  const [aliasJsonString, setAliasJsonString] = useState('');
+
+  useEffect(() => {
+    async function setup() {
+      const activeSpace = await spacesManager.getActiveSpace();
+      setAliasJsonString(JSON.stringify({ targetSpace: activeSpace.id, targetType, sourceId }));
+    }
+    setup();
+  }, [spacesManager, targetType, sourceId]);
+
   const [expandError, setExpandError] = useState(false);
   return (
     <>
@@ -38,8 +56,8 @@ export const EmbeddableLegacyUrlConflictInternal = ({ json }: EmbeddableLegacyUr
       {expandError ? (
         <EuiCallOut
           title={i18n.translate('xpack.spaces.legacyURLConflict.expandErrorText', {
-            defaultMessage: `This object has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
-            values: { json },
+            defaultMessage: `This object has the same URL as a legacy alias. Disable the alias to resolve this error: {aliasJsonString}`,
+            values: { aliasJsonString },
           })}
           color="danger"
           iconType="alert"

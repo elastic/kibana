@@ -287,7 +287,8 @@ export class Embeddable
         }),
         longMessage: (
           <this.deps.spaces.ui.components.getEmbeddableLegacyUrlConflict
-            json={sharingSavedObjectProps.errorJSON!}
+            targetType={DOC_TYPE}
+            sourceId={sharingSavedObjectProps.sourceId!}
           />
         ),
       };

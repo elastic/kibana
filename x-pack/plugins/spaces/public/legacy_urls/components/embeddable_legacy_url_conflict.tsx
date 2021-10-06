@@ -8,14 +8,15 @@
 import React from 'react';
 
 import type { EmbeddableLegacyUrlConflictProps } from '../types';
+import type { InternalProps } from './embeddable_legacy_url_conflict_internal';
 
-export const getEmbeddableLegacyUrlConflict = async (): Promise<
-  React.FC<EmbeddableLegacyUrlConflictProps>
-> => {
+export const getEmbeddableLegacyUrlConflict = async (
+  internalProps: InternalProps
+): Promise<React.FC<EmbeddableLegacyUrlConflictProps>> => {
   const { EmbeddableLegacyUrlConflictInternal } = await import(
     './embeddable_legacy_url_conflict_internal'
   );
   return (props: EmbeddableLegacyUrlConflictProps) => {
-    return <EmbeddableLegacyUrlConflictInternal {...props} />;
+    return <EmbeddableLegacyUrlConflictInternal {...{ ...internalProps, ...props }} />;
   };
 };

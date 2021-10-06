@@ -35,7 +35,11 @@ export interface LegacyUrlConflictProps {
  */
 export interface EmbeddableLegacyUrlConflictProps {
   /**
-   * JSON details for the alias that will be rendered in the component.
+   * The target type of the legacy URL alias.
    */
-  json: string;
+  targetType: string;
+  /**
+   * The source ID of the legacy URL alias.
+   */
+  sourceId: string;
 }
