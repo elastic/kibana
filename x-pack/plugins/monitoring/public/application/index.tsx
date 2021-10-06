@@ -26,7 +26,7 @@ import {
   CODE_PATH_BEATS,
   CODE_PATH_KIBANA,
   CODE_PATH_LOGSTASH,
-  CODE_PATH_APM
+  CODE_PATH_APM,
 } from '../../common/constants';
 import { BeatsInstancePage } from './pages/beats/instance';
 import { ApmOverviewPage, ApmInstancesPage, ApmInstancePage } from './pages/apm';
@@ -196,7 +196,7 @@ const MonitoringApp: React.FC<{
                     codePaths={[CODE_PATH_LOGSTASH]}
                     fetchAllClusters={false}
                   />
-                  
+
                   {/* APM Views */}
                   <RouteInit
                     path="/apm/instances/:instance"
@@ -205,8 +205,8 @@ const MonitoringApp: React.FC<{
                     fetchAllClusters={false}
                   />
 
-                {/* Logstash Routes */}
-                <RouteInit
+                  {/* Logstash Routes */}
+                  <RouteInit
                     path="/logstash/nodes"
                     component={LogStashNodesPage}
                     codePaths={[CODE_PATH_LOGSTASH]}
@@ -260,7 +260,7 @@ const MonitoringApp: React.FC<{
                     codePaths={[CODE_PATH_LOGSTASH]}
                     fetchAllClusters={false}
                   />
-                 <RouteInit
+                  <RouteInit
                     path="/apm"
                     component={ApmOverviewPage}
                     codePaths={[CODE_PATH_APM]}
