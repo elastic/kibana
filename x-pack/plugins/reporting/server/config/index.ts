@@ -59,10 +59,9 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
           // https://github.com/elastic/kibana/issues/79905
           message: i18n.translate('xpack.reporting.deprecations.reportingRoles.description', {
             defaultMessage:
-              `Using roles defined by "{fromPath}.roles.allow" to grant users the ` +
-              `privilege to create a report prevents users from using API Keys to ` +
-              `create reports, and prevents admins from using Kibana application ` +
-              `privileges to grant users access to create reports.`,
+              `Using roles defined by "{fromPath}.roles.allow" to grant reporting ` +
+              `privileges prevents users from using API Keys to create reports, and ` +
+              `prevents admins from using Kibana application privileges to grant reporting privileges.`,
             values: { fromPath },
           }),
           correctiveActions: {
