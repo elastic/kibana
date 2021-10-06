@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '../elasticsearch_client';
+import type { ElasticsearchClient } from '../elasticsearch_client';
 
 // TODO: Being fooled by alias, so can return true if concrete index doesn't exist
 export const getIndexExists = async (

@@ -17,6 +17,7 @@ import {
   InitializeSavedObjectResponse,
   SavedObjectResult,
   JobsSpacesResponse,
+  SyncCheckResponse,
 } from '../../../../common/types/saved_objects';
 
 export const savedObjectsApiProvider = (httpService: HttpService) => ({
@@ -59,6 +60,14 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
       path: `${basePath()}/saved_objects/initialize`,
       method: 'GET',
       query: { simulate },
+    });
+  },
+  syncCheck(jobType?: JobType) {
+    const body = JSON.stringify({ jobType });
+    return httpService.http<SyncCheckResponse>({
+      path: `${basePath()}/saved_objects/sync_check`,
+      method: 'POST',
+      body,
     });
   },
   canDeleteJob(jobType: JobType, jobIds: string[]) {
