@@ -13,6 +13,8 @@ import { EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { LeafIcon } from '../../../../../shared/icons';
+
 import { DataPanel } from '../../../data_panel';
 import { Result } from '../../../result/types';
 
@@ -35,7 +37,7 @@ export const OrganicDocuments: React.FC = () => {
   return (
     <DataPanel
       filled
-      iconType="search"
+      iconType={LeafIcon}
       title={
         <h2>
           {i18n.translate(
