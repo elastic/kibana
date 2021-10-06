@@ -31,7 +31,6 @@ import {
   getDefaultSearchParams,
   getShardTimeout,
   getTotalLoaded,
-  shimAbortSignal,
   shimHitsTotal,
 } from '../es_search';
 
@@ -68,10 +67,14 @@ export const enhancedEsSearchStrategyProvider = (
             )),
             ...request.params,
           };
-      const promise = id
-        ? client.asyncSearch.get({ ...params, id })
-        : client.asyncSearch.submit(params);
-      const { body, headers } = await shimAbortSignal(promise, options.abortSignal);
+      const { body, headers } = id
+        ? await client.asyncSearch.get(
+            { ...params, id },
+            { abortController: { signal: options.abortSignal } }
+          )
+        : await client.asyncSearch.submit(params, {
+            abortController: { signal: options.abortSignal },
+          });
 
       const response = shimHitsTotal(body.response, options);
 
@@ -115,14 +118,18 @@ export const enhancedEsSearchStrategyProvider = (
     };
 
     try {
-      const promise = client.transport.request({
-        method,
-        path,
-        body,
-        querystring,
-      });
+      const esResponse = await client.transport.request(
+        {
+          method,
+          path,
+          body,
+          querystring,
+        },
+        {
+          abortController: { signal: options?.abortSignal },
+        }
+      );
 
-      const esResponse = await shimAbortSignal(promise, options?.abortSignal);
       const response = esResponse.body as estypes.SearchResponse<any>;
       return {
         rawResponse: shimHitsTotal(response, options),

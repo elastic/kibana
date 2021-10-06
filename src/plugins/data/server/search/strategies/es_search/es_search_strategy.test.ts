@@ -5,12 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
-  elasticsearchClientMock,
-  MockedTransportRequestPromise,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../core/server/elasticsearch/client/mocks';
+import type { TransportResult } from '@elastic/transport';
+import { elasticsearchServiceMock } from '../../../../../../core/server/mocks';
 import { pluginInitializerContextConfigMock } from '../../../../../../core/server/mocks';
 import { esSearchStrategyProvider } from './es_search_strategy';
 import { SearchStrategyDependencies } from '../../types';
@@ -27,9 +23,9 @@ describe('ES search strategy', () => {
       skipped: 2,
       successful: 7,
     },
-  };
-  let mockedApiCaller: MockedTransportRequestPromise<any>;
-  let mockApiCaller: jest.Mock<() => MockedTransportRequestPromise<any>>;
+  } as const;
+  let mockedApiCaller: Promise<TransportResult<any>>;
+  let mockApiCaller: jest.Mock<() => TransportResult<any>>;
   const mockLogger: any = {
     debug: () => {},
   };
@@ -37,9 +33,9 @@ describe('ES search strategy', () => {
   function getMockedDeps(err?: Record<string, any>) {
     mockApiCaller = jest.fn().mockImplementation(() => {
       if (err) {
-        mockedApiCaller = elasticsearchClientMock.createErrorTransportRequestPromise(err);
+        mockedApiCaller = elasticsearchServiceMock.createErrorTransportRequestPromise(err);
       } else {
-        mockedApiCaller = elasticsearchClientMock.createSuccessTransportRequestPromise(
+        mockedApiCaller = elasticsearchServiceMock.createSuccessTransportRequestPromise(
           successBody,
           { statusCode: 200 }
         );
@@ -108,7 +104,6 @@ describe('ES search strategy', () => {
         expect(data.isPartial).toBe(false);
         expect(data).toHaveProperty('loaded');
         expect(data).toHaveProperty('rawResponse');
-        expect(mockedApiCaller.abort).not.toBeCalled();
         done();
       }));
 
@@ -127,7 +122,6 @@ describe('ES search strategy', () => {
       ...params,
       track_total_hits: true,
     });
-    expect(mockedApiCaller.abort).toBeCalled();
   });
 
   it('throws normalized error if ResponseError is thrown', async (done) => {

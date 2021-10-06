@@ -12,7 +12,6 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ConfigSchema } from '../../config';
 import { IFieldType } from '../../common';
 import { findIndexPatternById, getFieldByName } from '../data_views';
-import { shimAbortSignal } from '../search';
 
 export async function termsAggSuggestions(
   config: ConfigSchema,
@@ -38,8 +37,12 @@ export async function termsAggSuggestions(
 
   const body = await getBody(autocompleteSearchOptions, field ?? fieldName, query, filters);
 
-  const promise = esClient.search({ index, body });
-  const result = await shimAbortSignal(promise, abortSignal);
+  const result = await esClient.search(
+    { index, body },
+    {
+      abortController: { signal: abortSignal },
+    }
+  );
 
   const buckets =
     get(result.body, 'aggregations.suggestions.buckets') ||

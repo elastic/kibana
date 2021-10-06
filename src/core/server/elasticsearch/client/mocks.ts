@@ -142,14 +142,12 @@ const createSuccessTransportRequestPromise = <T>(
   headers: Record<string, string | string[]> = { [PRODUCT_RESPONSE_HEADER]: 'Elasticsearch' }
 ): Promise<TransportResult<T>> => {
   const response = createApiResponse({ body, statusCode, headers });
-  const promise = Promise.resolve(response) as Promise<TransportResult<T>>;
 
-  return promise;
+  return Promise.resolve(response) as Promise<TransportResult<T>>;
 };
 
-const createErrorTransportRequestPromise = (err: any): Promise<never> => {
-  const promise = Promise.reject(err);
-  return promise;
+const createErrorTransportRequestPromise = (err: any): Promise<TransportResult<never>> => {
+  return Promise.reject(err);
 };
 
 function createApiResponse<TResponse = Record<string, any>>(
