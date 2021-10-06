@@ -12,8 +12,6 @@ import { useValues, useActions } from 'kea';
 
 import { EuiSpacer, EuiButton, EuiBadge } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-
 import { AppSearchPageTemplate } from '../../layout';
 import { AutomatedIcon } from '../components/automated_icon';
 import {
@@ -21,8 +19,10 @@ import {
   COVERT_TO_MANUAL_BUTTON_LABEL,
   CONVERT_TO_MANUAL_CONFIRMATION,
 } from '../constants';
+
 import { getCurationsBreadcrumbs } from '../utils';
 
+import { PROMOTED_DOCUMENTS_TITLE } from './constants';
 import { CurationLogic } from './curation_logic';
 import { PromotedDocuments, OrganicDocuments } from './documents';
 
@@ -37,10 +37,7 @@ export const AutomatedCuration: React.FC = () => {
   // hidden documents, so we only need one tab.
   const pageTabs = [
     {
-      label: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.title',
-        { defaultMessage: 'Promoted documents' }
-      ),
+      label: PROMOTED_DOCUMENTS_TITLE,
       isSelected: true,
     },
   ];

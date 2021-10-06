@@ -12,13 +12,12 @@ import { useValues, useActions } from 'kea';
 
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-
 import { RESTORE_DEFAULTS_BUTTON_LABEL } from '../../../constants';
 import { AppSearchPageTemplate } from '../../layout';
 import { MANAGE_CURATION_TITLE, RESTORE_CONFIRMATION } from '../constants';
 import { getCurationsBreadcrumbs } from '../utils';
 
+import { PROMOTED_DOCUMENTS_TITLE, HIDDEN_DOCUMENTS_TITLE } from './constants';
 import { CurationLogic } from './curation_logic';
 import { PromotedDocuments, OrganicDocuments, HiddenDocuments } from './documents';
 import { ActiveQuerySelect, ManageQueriesModal } from './queries';
@@ -33,18 +32,12 @@ export const ManualCuration: React.FC = () => {
 
   const pageTabs = [
     {
-      label: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.title',
-        { defaultMessage: 'Promoted documents' }
-      ),
+      label: PROMOTED_DOCUMENTS_TITLE,
       isSelected: selectedPageTab === 'promoted',
       onClick: () => onSelectPageTab('promoted'),
     },
     {
-      label: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.engine.curations.hiddenDocuments.title',
-        { defaultMessage: 'Hidden documents' }
-      ),
+      label: HIDDEN_DOCUMENTS_TITLE,
       isSelected: selectedPageTab === 'hidden',
       onClick: () => onSelectPageTab('hidden'),
     },
