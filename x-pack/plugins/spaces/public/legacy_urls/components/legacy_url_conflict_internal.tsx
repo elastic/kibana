@@ -11,11 +11,14 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { first } from 'rxjs/operators';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { ApplicationStart, StartServicesAccessor } from 'src/core/public';
 
@@ -69,32 +72,55 @@ export const LegacyUrlConflictInternal = (props: InternalProps & LegacyUrlConfli
       title={
         <FormattedMessage
           id="xpack.spaces.shareToSpace.legacyUrlConflictTitle"
-          defaultMessage="2 objects are associated with this URL"
+          defaultMessage="2 saved objects use this URL"
         />
       }
     >
       <FormattedMessage
         id="xpack.spaces.shareToSpace.legacyUrlConflictBody"
-        defaultMessage="You're currently looking at {objectNoun} [id={currentObjectId}]. A legacy URL for this page shows a different {objectNoun} [id={otherObjectId}]."
-        values={{ objectNoun, currentObjectId, otherObjectId }}
+        defaultMessage="Check that this is the {objectNoun} that you are looking for. Otherwise, go to the other one. {documentationLink}"
+        values={{
+          objectNoun,
+          documentationLink: (
+            <EuiLink
+              external
+              href="https://www.elastic.co/guide/en/kibana/master/legacy-url-aliases.html"
+              target="_blank"
+            >
+              {i18n.translate('xpack.spaces.legacyURLConflict.documentationLinkText', {
+                defaultMessage: 'Learn more',
+              })}
+            </EuiLink>
+          ),
+        }}
       />
 
       <EuiSpacer size="m" />
 
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButton
-            color="warning"
-            size="s"
-            onClick={clickLinkButton}
-            data-test-subj="legacy-url-conflict-go-to-other-button"
+          <EuiToolTip
+            position="bottom"
+            delay="long"
+            content={i18n.translate('xpack.spaces.legacyURLConflict.toolTipText', {
+              defaultMessage:
+                'This {objectNoun} has [id={currentObjectId}]. The other {objectNoun} has [id={otherObjectId}].',
+              values: { objectNoun, currentObjectId, otherObjectId },
+            })}
           >
-            <FormattedMessage
-              id="xpack.spaces.shareToSpace.legacyUrlConflictLinkButton"
-              defaultMessage="Go to other {objectNoun}"
-              values={{ objectNoun }}
-            />
-          </EuiButton>
+            <EuiButton
+              color="warning"
+              size="s"
+              onClick={clickLinkButton}
+              data-test-subj="legacy-url-conflict-go-to-other-button"
+            >
+              <FormattedMessage
+                id="xpack.spaces.shareToSpace.legacyUrlConflictLinkButton"
+                defaultMessage="Go to other {objectNoun}"
+                values={{ objectNoun }}
+              />
+            </EuiButton>
+          </EuiToolTip>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>

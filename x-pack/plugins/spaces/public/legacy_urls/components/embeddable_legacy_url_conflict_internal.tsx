@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiCodeBlock,
+  EuiLink,
+  EuiSpacer,
+  EuiTextAlign,
+} from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -27,7 +34,9 @@ export const EmbeddableLegacyUrlConflictInternal = (
   useEffect(() => {
     async function setup() {
       const activeSpace = await spacesManager.getActiveSpace();
-      setAliasJsonString(JSON.stringify({ targetSpace: activeSpace.id, targetType, sourceId }));
+      setAliasJsonString(
+        JSON.stringify({ targetSpace: activeSpace.id, targetType, sourceId }, null, 2)
+      );
     }
     setup();
   }, [spacesManager, targetType, sourceId]);
@@ -37,35 +46,43 @@ export const EmbeddableLegacyUrlConflictInternal = (
     <>
       <FormattedMessage
         id="xpack.spaces.legacyURLConflict.longMessage"
-        defaultMessage="Disable the {documentationLink} associated with this object."
-        values={{
-          documentationLink: (
-            <EuiLink
-              external
-              href="https://www.elastic.co/guide/en/kibana/master/legacy-url-aliases.html"
-              target="_blank"
-            >
-              {i18n.translate('xpack.spaces.legacyURLConflict.documentationLinkText', {
-                defaultMessage: 'legacy URL alias',
-              })}
-            </EuiLink>
-          ),
-        }}
+        defaultMessage="We found 2 saved objects for this panel. Disable the legacy URL alias to fix this error."
       />
       <EuiSpacer />
       {expandError ? (
-        <EuiCallOut
-          title={i18n.translate('xpack.spaces.legacyURLConflict.expandErrorText', {
-            defaultMessage: `This object has the same URL as a legacy alias. Disable the alias to resolve this error: {aliasJsonString}`,
-            values: { aliasJsonString },
-          })}
-          color="danger"
-          iconType="alert"
-        />
+        <EuiTextAlign textAlign="left">
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.spaces.legacyURLConflict.expandErrorText"
+                defaultMessage="Copy this JSON and use it with the {documentationLink}"
+                values={{
+                  documentationLink: (
+                    <EuiLink
+                      external
+                      href="https://www.elastic.co/guide/en/kibana/master/spaces-api-disable-legacy-url-aliases.html"
+                      target="_blank"
+                    >
+                      {i18n.translate('xpack.spaces.legacyURLConflict.documentationLinkText', {
+                        defaultMessage: '_disable_legacy_url_aliases API',
+                      })}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            }
+            color="danger"
+            iconType="alert"
+          >
+            <EuiCodeBlock fontSize="s" language="json" isCopyable={true} paddingSize="none">
+              {aliasJsonString}
+            </EuiCodeBlock>
+          </EuiCallOut>
+        </EuiTextAlign>
       ) : (
         <EuiButtonEmpty onClick={() => setExpandError(true)}>
           {i18n.translate('xpack.spaces.legacyURLConflict.expandError', {
-            defaultMessage: `Show more`,
+            defaultMessage: `View details`,
           })}
         </EuiButtonEmpty>
       )}
