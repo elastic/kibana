@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { mount } from 'enzyme';
 import { createElement } from 'react';
 import { act } from 'react-dom/test-utils';
