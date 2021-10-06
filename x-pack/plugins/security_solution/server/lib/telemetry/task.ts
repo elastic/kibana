@@ -27,12 +27,14 @@ export interface SecurityTelemetryTaskConfig {
 
 export type SecurityTelemetryTaskRunner = (
   taskId: string,
+  logger: Logger,
   receiver: TelemetryReceiver,
-  taskExecutionPeriod?: TaskExecutionPeriod
+  sender: TelemetryEventsSender,
+  taskExecutionPeriod: TaskExecutionPeriod
 ) => Promise<number>;
 
 export interface TaskExecutionPeriod {
-  last: string;
+  last?: string;
   current: string;
 }
 
@@ -69,15 +71,10 @@ export class SecurityTelemetryTask {
           return {
             run: async () => {
               const taskExecutionTime = moment().utc().toISOString();
-              const executionPeriod = this.config.getLastExecutionTime
-                ? {
-                    last: this.config.getLastExecutionTime(
-                      taskExecutionTime,
-                      taskInstance.state?.lastExecutionTimestamp
-                    ),
-                    current: taskExecutionTime,
-                  }
-                : undefined;
+              const executionPeriod = {
+                last: this.getLastExecutionTime(taskExecutionTime, taskInstance),
+                current: taskExecutionTime,
+              };
 
               const hits = await this.runTask(taskInstance.id, executionPeriod);
 
@@ -95,6 +92,18 @@ export class SecurityTelemetryTask {
       },
     });
   }
+
+  private getLastExecutionTime = (
+    taskExecutionTime: string,
+    taskInstance: ConcreteTaskInstance
+  ): string | undefined => {
+    return this.config.getLastExecutionTime
+      ? this.config.getLastExecutionTime(
+          taskExecutionTime,
+          taskInstance.state?.lastExecutionTimestamp
+        )
+      : undefined;
+  };
 
   private getTaskId = (): string => {
     return `${this.config.type}:${this.config.version}`;
@@ -117,7 +126,7 @@ export class SecurityTelemetryTask {
     }
   };
 
-  private runTask = async (taskId: string, executionPeriod?: TaskExecutionPeriod) => {
+  private runTask = async (taskId: string, executionPeriod: TaskExecutionPeriod) => {
     this.logger.debug(`Running task ${taskId}`);
     if (taskId !== this.getTaskId()) {
       this.logger.debug(`Outdated task running: ${taskId}`);
@@ -130,6 +139,6 @@ export class SecurityTelemetryTask {
       return 0;
     }
 
-    return this.config.runTask(taskId, this.receiver, executionPeriod);
+    return this.config.runTask(taskId, this.logger, this.receiver, this.sender, executionPeriod);
   };
 }
