@@ -129,7 +129,7 @@ export function savedObjectsRoutes(
    * @apiGroup JobSavedObjects
    *
    * @api {get} /api/ml/saved_objects/sync_needed Check whether job saved objects need synchronizing
-   * @apiName syncCheckSchema
+   * @apiName SyncCheck
    * @apiDescription Check whether job saved objects need synchronizing.
    *
    */
