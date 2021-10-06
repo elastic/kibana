@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { EuiEmptyPrompt, EuiButton, EuiPageTemplate, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { usePolicyDetailsNavigateCallback } from '../../policy_hooks';
@@ -19,6 +19,13 @@ interface CommonProps {
 export const PolicyTrustedAppsEmptyUnassigned = memo<CommonProps>(({ policyId, policyName }) => {
   const navigateCallback = usePolicyDetailsNavigateCallback();
   const { onClickHandler, toRouteUrl } = useGetLinkTo(policyId, policyName);
+  const onClickPrimaryButtonHandler = useCallback(
+    () =>
+      navigateCallback({
+        show: 'list',
+      }),
+    [navigateCallback]
+  );
   return (
     <EuiPageTemplate template="centeredContent">
       <EuiEmptyPrompt
@@ -40,15 +47,7 @@ export const PolicyTrustedAppsEmptyUnassigned = memo<CommonProps>(({ policyId, p
           />
         }
         actions={[
-          <EuiButton
-            color="primary"
-            fill
-            onClick={() =>
-              navigateCallback({
-                show: 'list',
-              })
-            }
-          >
+          <EuiButton color="primary" fill onClick={onClickPrimaryButtonHandler}>
             <FormattedMessage
               id="xpack.securitySolution.endpoint.policy.trustedApps.empty.unassigned.primaryAction"
               defaultMessage="Assign trusted applications"

@@ -40,8 +40,8 @@ export interface PolicyArtifactsAssignableListPageDataFilter {
   payload: { filter: string };
 }
 
-export interface PolicyArtifactsDeosAnyTrustedApp {
-  type: 'policyArtifactsDeosAnyTrustedApp';
+export interface PolicyArtifactsDeosAnyTrustedAppExists {
+  type: 'policyArtifactsDeosAnyTrustedAppExists';
   payload: AsyncResourceState<boolean>;
 }
 
@@ -67,7 +67,7 @@ export type PolicyTrustedAppsAction =
   | PolicyArtifactsUpdateTrustedAppsChanged
   | PolicyArtifactsAssignableListExistDataChanged
   | PolicyArtifactsAssignableListPageDataFilter
-  | PolicyArtifactsDeosAnyTrustedApp
+  | PolicyArtifactsDeosAnyTrustedAppExists
   | AssignedTrustedAppsListStateChanged
   | PolicyDetailsListOfAllPoliciesStateChanged
   | PolicyDetailsTrustedAppsForceListDataRefresh;

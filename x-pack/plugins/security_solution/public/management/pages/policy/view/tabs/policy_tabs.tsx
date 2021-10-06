@@ -60,8 +60,11 @@ export const PolicyTabs = React.memo(() => {
   const currentSelectedTab = useMemo(() => {
     let initialTab = tabs[0];
 
-    if (isInSettingsTab) initialTab = tabs[0];
-    else if (isInTrustedAppsTab) initialTab = tabs[1];
+    if (isInSettingsTab) {
+      initialTab = tabs[0];
+    } else if (isInTrustedAppsTab) {
+      initialTab = tabs[1];
+    }
 
     return initialTab;
   }, [isInSettingsTab, isInTrustedAppsTab, tabs]);

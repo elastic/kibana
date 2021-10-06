@@ -42,7 +42,7 @@ export const PolicyTrustedAppsList = memo(() => {
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
   const hasTrustedApps = usePolicyDetailsSelector(doesPolicyHaveTrustedApps);
   const isLoading = usePolicyDetailsSelector(isPolicyTrustedAppListLoading);
-  const isDoesTrustedAppExistsLoading = usePolicyDetailsSelector(doesTrustedAppExistsLoading);
+  const isTrustedAppExistsCheckLoading = usePolicyDetailsSelector(doesTrustedAppExistsLoading);
   const trustedAppItems = usePolicyDetailsSelector(getPolicyTrustedAppList);
   const pagination = usePolicyDetailsSelector(getPolicyTrustedAppsListPagination);
   const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
@@ -158,7 +158,7 @@ export const PolicyTrustedAppsList = memo(() => {
     setCardExpanded({});
   }, [trustedAppItems]);
 
-  if (hasTrustedApps.loading || isDoesTrustedAppExistsLoading) {
+  if (hasTrustedApps.loading || isTrustedAppExistsCheckLoading) {
     return (
       <EuiPageTemplate template="centeredContent">
         <EuiLoadingSpinner className="essentialAnimation" size="xl" />

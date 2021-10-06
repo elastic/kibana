@@ -26,6 +26,7 @@ import {
   getCurrentArtifactsLocation,
   isOnPolicyTrustedAppsView,
   getCurrentUrlLocationPaginationParams,
+  getDoesAnyTrustedAppExistsIsLoading,
 } from '../selectors';
 import {
   ImmutableArray,
@@ -136,11 +137,11 @@ const checkIfAnyTrustedApp = async (
   trustedAppsService: TrustedAppsService
 ) => {
   const state = store.getState();
-  if (isLoadingResourceState(state.artifacts.doesAnyTrustedApp)) {
+  if (getDoesAnyTrustedAppExistsIsLoading(state)) {
     return;
   }
   store.dispatch({
-    type: 'policyArtifactsDeosAnyTrustedApp',
+    type: 'policyArtifactsDeosAnyTrustedAppExists',
     // Ignore will be fixed with when AsyncResourceState is refactored (#830)
     // @ts-ignore
     payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
@@ -152,15 +153,13 @@ const checkIfAnyTrustedApp = async (
     });
 
     store.dispatch({
-      type: 'policyArtifactsDeosAnyTrustedApp',
+      type: 'policyArtifactsDeosAnyTrustedAppExists',
       payload: createLoadedResourceState(!isEmpty(trustedApps.data)),
     });
   } catch (err) {
     store.dispatch({
-      type: 'policyArtifactsDeosAnyTrustedApp',
-      // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-      // @ts-ignore
-      payload: createFailedResourceState(err.body ?? err),
+      type: 'policyArtifactsDeosAnyTrustedAppExists',
+      payload: createFailedResourceState<boolean>(err.body ?? err),
     });
   }
 };
@@ -319,8 +318,9 @@ const fetchPolicyTrustedAppsIfNeeded = async (
           artifacts: fetchResponse,
         }),
       });
-      if (!fetchResponse.total)
+      if (!fetchResponse.total) {
         await checkIfAnyTrustedApp({ getState, dispatch }, trustedAppsService);
+      }
     } catch (error) {
       dispatch({
         type: 'assignedTrustedAppsListStateChanged',

@@ -112,8 +112,8 @@ export const getUpdateArtifacts = (
  */
 export const getDoesTrustedAppExists = (state: Immutable<PolicyDetailsState>): boolean => {
   return (
-    isLoadedResourceState(state.artifacts.doesAnyTrustedApp) &&
-    state.artifacts.doesAnyTrustedApp.data
+    isLoadedResourceState(state.artifacts.doesAnyTrustedAppExists) &&
+    state.artifacts.doesAnyTrustedAppExists.data
   );
 };
 
@@ -121,7 +121,7 @@ export const getDoesTrustedAppExists = (state: Immutable<PolicyDetailsState>): b
  * Returns does any TA exists loading
  */
 export const doesTrustedAppExistsLoading = (state: Immutable<PolicyDetailsState>): boolean => {
-  return isLoadingResourceState(state.artifacts.doesAnyTrustedApp);
+  return isLoadingResourceState(state.artifacts.doesAnyTrustedAppExists);
 };
 
 /** Returns a boolean of whether the user is on the policy details page or not */
@@ -201,3 +201,14 @@ export const getTrustedAppsAllPoliciesById: PolicyDetailsSelector<
     return mapById;
   }, {}) as Immutable<Record<string, Immutable<PolicyData>>>;
 });
+
+export const getDoesAnyTrustedAppExists: PolicyDetailsSelector<
+  PolicyDetailsState['artifacts']['doesAnyTrustedAppExists']
+> = (state) => state.artifacts.doesAnyTrustedAppExists;
+
+export const getDoesAnyTrustedAppExistsIsLoading: PolicyDetailsSelector<boolean> = createSelector(
+  getDoesAnyTrustedAppExists,
+  (doesAnyTrustedAppExists) => {
+    return isLoadingResourceState(doesAnyTrustedAppExists);
+  }
+);
