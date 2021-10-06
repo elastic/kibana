@@ -94,11 +94,14 @@ describe('TransactionOverview', () => {
     it('should redirect to first type', () => {
       setup({
         serviceTransactionTypes: ['firstType', 'secondType'],
-        urlParams: {},
+        urlParams: {
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+        },
       });
       expect(history.replace).toHaveBeenCalledWith(
         expect.objectContaining({
-          search: 'transactionType=firstType',
+          search: 'rangeFrom=now-15m&rangeTo=now&transactionType=firstType',
         })
       );
     });
@@ -112,6 +115,8 @@ describe('TransactionOverview', () => {
         serviceTransactionTypes: ['firstType'],
         urlParams: {
           transactionType: 'firstType',
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
         },
       });
 

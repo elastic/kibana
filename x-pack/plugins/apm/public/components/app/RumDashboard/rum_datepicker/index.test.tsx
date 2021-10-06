@@ -9,63 +9,62 @@ import { EuiSuperDatePicker } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import { createMemoryHistory, MemoryHistory } from 'history';
-import React from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { ReactNode } from 'react';
 import qs from 'query-string';
-import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import { DatePicker } from './';
+import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
+import { UrlParamsContext } from '../../../../context/url_params_context/url_params_context';
+import { RumDatePicker } from './';
+import { useLocation } from 'react-router-dom';
 
 let history: MemoryHistory;
-
-const mockRefreshTimeRange = jest.fn();
 let mockHistoryPush: jest.SpyInstance;
 let mockHistoryReplace: jest.SpyInstance;
 
-function DatePickerWrapper() {
+const mockRefreshTimeRange = jest.fn();
+
+function MockUrlParamsProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
 
-  const { rangeFrom, rangeTo, refreshInterval, refreshPaused } = qs.parse(
-    location.search,
-    {
-      parseNumbers: true,
-      parseBooleans: true,
-    }
-  ) as {
-    rangeFrom?: string;
-    rangeTo?: string;
-    refreshInterval?: number;
-    refreshPaused?: boolean;
-  };
+  const urlParams = qs.parse(location.search, {
+    parseBooleans: true,
+    parseNumbers: true,
+  });
 
   return (
-    <DatePicker
-      rangeFrom={rangeFrom}
-      rangeTo={rangeTo}
-      refreshInterval={refreshInterval}
-      refreshPaused={refreshPaused}
-      onTimeRangeRefresh={mockRefreshTimeRange}
+    <UrlParamsContext.Provider
+      value={{
+        rangeId: 0,
+        refreshTimeRange: mockRefreshTimeRange,
+        urlParams,
+        uxUiFilters: {},
+      }}
+      children={children}
     />
   );
 }
 
-function mountDatePicker(initialParams: {
-  rangeFrom?: string;
-  rangeTo?: string;
-  refreshInterval?: number;
-  refreshPaused?: boolean;
-}) {
+function mountDatePicker(
+  params: {
+    rangeFrom?: string;
+    rangeTo?: string;
+    refreshPaused?: boolean;
+    refreshInterval?: number;
+  } = {}
+) {
   const setTimeSpy = jest.fn();
   const getTimeSpy = jest.fn().mockReturnValue({});
 
   history = createMemoryHistory({
-    initialEntries: [`/?${qs.stringify(initialParams)}`],
+    initialEntries: [`/?${qs.stringify(params)}`],
   });
 
+  jest.spyOn(console, 'error').mockImplementation(() => null);
   mockHistoryPush = jest.spyOn(history, 'push');
   mockHistoryReplace = jest.spyOn(history, 'replace');
 
   const wrapper = mount(
     <MockApmPluginContextWrapper
+      history={history}
       value={
         {
           plugins: {
@@ -79,20 +78,17 @@ function mountDatePicker(initialParams: {
           },
         } as any
       }
-      history={history}
     >
-      <DatePickerWrapper />
+      <MockUrlParamsProvider>
+        <RumDatePicker />
+      </MockUrlParamsProvider>
     </MockApmPluginContextWrapper>
   );
 
   return { wrapper, setTimeSpy, getTimeSpy };
 }
 
-describe('DatePicker', () => {
-  beforeAll(() => {
-    jest.spyOn(console, 'error').mockImplementation(() => null);
-  });
-
+describe('RumDatePicker', () => {
   afterAll(() => {
     jest.restoreAllMocks();
   });
@@ -101,13 +97,40 @@ describe('DatePicker', () => {
     jest.resetAllMocks();
   });
 
-  it('updates the URL when the date range changes', () => {
-    const { wrapper } = mountDatePicker({
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
-    });
+  it('sets default query params in the URL', () => {
+    mountDatePicker();
+    expect(mockHistoryReplace).toHaveBeenCalledTimes(1);
+    expect(mockHistoryReplace).toHaveBeenCalledWith(
+      expect.objectContaining({
+        search: 'rangeFrom=now-15m&rangeTo=now',
+      })
+    );
+  });
 
+  it('adds missing `rangeFrom` to url', () => {
+    mountDatePicker({ rangeTo: 'now', refreshInterval: 5000 });
+    expect(mockHistoryReplace).toHaveBeenCalledTimes(1);
+    expect(mockHistoryReplace).toHaveBeenCalledWith(
+      expect.objectContaining({
+        search: 'rangeFrom=now-15m&rangeTo=now&refreshInterval=5000',
+      })
+    );
+  });
+
+  it('does not set default query params in the URL when values already defined', () => {
+    mountDatePicker({
+      rangeFrom: 'now-1d',
+      rangeTo: 'now',
+      refreshPaused: false,
+      refreshInterval: 5000,
+    });
     expect(mockHistoryReplace).toHaveBeenCalledTimes(0);
+  });
+
+  it('updates the URL when the date range changes', () => {
+    const { wrapper } = mountDatePicker();
+
+    expect(mockHistoryReplace).toHaveBeenCalledTimes(1);
 
     wrapper.find(EuiSuperDatePicker).props().onTimeChange({
       start: 'now-90m',
@@ -126,13 +149,11 @@ describe('DatePicker', () => {
   it('enables auto-refresh when refreshPaused is false', async () => {
     jest.useFakeTimers();
     const { wrapper } = mountDatePicker({
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
       refreshPaused: false,
       refreshInterval: 1000,
     });
     expect(mockRefreshTimeRange).not.toHaveBeenCalled();
-    jest.advanceTimersByTime(1000);
+    jest.advanceTimersByTime(2500);
     await waitFor(() => {});
     expect(mockRefreshTimeRange).toHaveBeenCalled();
     wrapper.unmount();
@@ -140,12 +161,7 @@ describe('DatePicker', () => {
 
   it('disables auto-refresh when refreshPaused is true', async () => {
     jest.useFakeTimers();
-    mountDatePicker({
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
-      refreshPaused: true,
-      refreshInterval: 1000,
-    });
+    mountDatePicker({ refreshPaused: true, refreshInterval: 1000 });
     expect(mockRefreshTimeRange).not.toHaveBeenCalled();
     jest.advanceTimersByTime(1000);
     await waitFor(() => {});
@@ -166,6 +182,25 @@ describe('DatePicker', () => {
 
     it('does not update the url', () => {
       expect(mockHistoryReplace).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('if `rangeFrom` is missing from the urlParams', () => {
+    beforeEach(() => {
+      mountDatePicker({ rangeTo: 'now-5m' });
+    });
+
+    it('updates the url with the default `rangeFrom` ', async () => {
+      expect(mockHistoryReplace).toHaveBeenCalledTimes(1);
+      expect(mockHistoryReplace.mock.calls[0][0].search).toContain(
+        'rangeFrom=now-15m'
+      );
+    });
+
+    it('preserves `rangeTo`', () => {
+      expect(mockHistoryReplace.mock.calls[0][0].search).toContain(
+        'rangeTo=now-5m'
+      );
     });
   });
 });

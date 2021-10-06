@@ -32,7 +32,14 @@ import { useBreakpoints } from '../../../hooks/use_breakpoints';
 export function BackendDetailOverview() {
   const {
     path: { backendName },
-    query: { rangeFrom, rangeTo, environment, kuery },
+    query: {
+      rangeFrom,
+      rangeTo,
+      refreshInterval,
+      refreshPaused,
+      environment,
+      kuery,
+    },
   } = useApmParams('/backends/{backendName}/overview');
 
   const apmRouter = useApmRouter();
@@ -41,7 +48,14 @@ export function BackendDetailOverview() {
     {
       title: DependenciesInventoryTitle,
       href: apmRouter.link('/backends', {
-        query: { rangeFrom, rangeTo, environment, kuery },
+        query: {
+          rangeFrom,
+          rangeTo,
+          refreshInterval,
+          refreshPaused,
+          environment,
+          kuery,
+        },
       }),
     },
     {
@@ -51,6 +65,8 @@ export function BackendDetailOverview() {
         query: {
           rangeFrom,
           rangeTo,
+          refreshInterval,
+          refreshPaused,
           environment,
           kuery,
         },

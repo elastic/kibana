@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRef } from 'react';
+import { useMemo } from 'react';
 import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
 import { getDateRange } from '../context/url_params_context/helpers';
 
@@ -41,29 +41,16 @@ export function useTimeRange({
   rangeTo?: string;
   optional?: boolean;
 }): TimeRange | PartialTimeRange {
-  const rangeRef = useRef({ rangeFrom, rangeTo });
+  const { incrementTimeRangeId, timeRangeId } = useTimeRangeId();
 
-  const { timeRangeId, incrementTimeRangeId } = useTimeRangeId();
-
-  const timeRangeIdRef = useRef(timeRangeId);
-
-  const stateRef = useRef(getDateRange({ state: {}, rangeFrom, rangeTo }));
-
-  const updateParsedTime = () => {
-    stateRef.current = getDateRange({ state: {}, rangeFrom, rangeTo });
-  };
-
-  if (
-    timeRangeIdRef.current !== timeRangeId ||
-    rangeRef.current.rangeFrom !== rangeFrom ||
-    rangeRef.current.rangeTo !== rangeTo
-  ) {
-    updateParsedTime();
-  }
-
-  rangeRef.current = { rangeFrom, rangeTo };
-
-  const { start, end, exactStart, exactEnd } = stateRef.current;
+  const { start, end, exactStart, exactEnd } = useMemo(() => {
+    return getDateRange({
+      state: {},
+      rangeFrom,
+      rangeTo,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rangeFrom, rangeTo, timeRangeId]);
 
   if ((!start || !end || !exactStart || !exactEnd) && !optional) {
     throw new Error('start and/or end were unexpectedly not set');
