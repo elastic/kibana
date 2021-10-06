@@ -1,5 +1,13 @@
 steps:
-  - label: ":male-mechanic::skin-tone-2:Pre-Build"
+  - block: ":gear: Performance Tests Configuration"
+    prompt: "Fill out the details for performance test"
+    fields:
+      - text: ":arrows_counterclockwise: Iterations"
+        key: "performance-test-iteration-count"
+        hint: "How many times you want to run tests? "
+        required: true
+
+  - label: ":male-mechanic::skin-tone-2: Pre-Build"
     command: .buildkite/scripts/lifecycle/pre_build.sh
 
   - wait
@@ -7,27 +15,13 @@ steps:
   - label: ":zap: Performance Tests"
     command: echo "Welcome to Performance Tests!"
 
-  # TODO: Create script to fetch remote branches and serve those to user via dropdown
-  - block: ":gear:Performance Tests Configuration"
-    prompt: "Fill out the details for performance test"
-    fields:
-      - text: ":arrows_counterclockwise: Iterations"
-        key: "performance-test-iteration-count"
-        hint: "How many times you want to run tests? "
-        required: true
-      - text: ":git: Branch"
-        key: "performance-test-target-branch"
-        hint: "Which branch you want to run tests? "
-        required: true
-        default: "main"
-
   - wait: ~
     continue_on_failure: true
 
-  - label: ":male_superhero::skin-tone-2:Post-Build"
+  - label: ":male_superhero::skin-tone-2: Post-Build"
     command: .buildkite/scripts/lifecycle/post_build.sh
 
   - wait
 
-  - label: ":muscle:Performance Tests"
+  - label: ":muscle: Performance Tests"
     command: .buildkite/scripts/steps/test/performance.sh
