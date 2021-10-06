@@ -18,7 +18,7 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
     before(async () => {
       log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 800);
-      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
@@ -28,7 +28,7 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
