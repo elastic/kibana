@@ -7,7 +7,7 @@
 
 // Maximum number of examples to obtain for text type fields.
 import { CoreSetup } from 'kibana/public';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { NON_AGGREGATABLE_FIELD_TYPES, OMIT_FIELDS } from '../../../../common/constants';

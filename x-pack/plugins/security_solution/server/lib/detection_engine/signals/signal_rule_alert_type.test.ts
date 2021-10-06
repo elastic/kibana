@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { getAlertMock } from '../routes/__mocks__/request_responses';
 import { signalRulesAlertType } from './signal_rule_alert_type';

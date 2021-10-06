@@ -7,7 +7,7 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IFieldType } from '../../common';
 import { findIndexPatternById, getFieldByName } from '../data_views';
 import { shimAbortSignal } from '../search';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RUNTIME_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 
 type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];

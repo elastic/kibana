@@ -6,7 +6,7 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { ChartData, ChartRequestAgg, HistogramField, NumericColumnStatsMap } from '../../types';
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/common';

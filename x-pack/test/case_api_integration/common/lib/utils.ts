@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash';
 import expect from '@kbn/expect';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/transport';
 import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 

@@ -8,7 +8,7 @@
 
 import { tabifyDocs } from './tabify_docs';
 import { IndexPattern } from '../..';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 describe('tabifyDocs', () => {
   const fieldFormats = {

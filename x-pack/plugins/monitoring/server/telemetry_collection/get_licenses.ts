@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESLicense } from '../../../telemetry_collection_xpack/server';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 

@@ -11,7 +11,7 @@
 import { Subject } from 'rxjs';
 import { omit, defaults } from 'lodash';
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   SavedObject,

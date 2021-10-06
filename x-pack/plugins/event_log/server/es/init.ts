@@ -9,7 +9,7 @@ import {
   IndicesAlias,
   IndicesIndexStatePrefixedSettings,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { asyncForEach } from '@kbn/std';
 import { getIlmPolicy, getIndexTemplate } from './documents';
 import { EsContext } from './context';

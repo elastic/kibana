@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/transport';
 
 import { JobSavedObjectService } from '../../saved_objects';

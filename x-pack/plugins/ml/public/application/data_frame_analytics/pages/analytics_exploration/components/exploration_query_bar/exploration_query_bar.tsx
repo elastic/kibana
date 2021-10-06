@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { debounce } from 'lodash';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Dictionary } from '../../../../../../../common/types/common';
 import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common';
 import { Query, QueryStringInput } from '../../../../../../../../../../src/plugins/data/public';

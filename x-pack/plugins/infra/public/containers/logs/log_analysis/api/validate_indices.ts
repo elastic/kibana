@@ -6,7 +6,7 @@
  */
 
 import type { HttpHandler } from 'src/core/public';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   LOG_ANALYSIS_VALIDATE_INDICES_PATH,

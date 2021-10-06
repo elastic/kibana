@@ -7,7 +7,7 @@
  */
 
 import type { ElasticsearchClient } from 'src/core/server';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TIMEOUT } from './constants';
 
 /**

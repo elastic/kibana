@@ -9,7 +9,7 @@
 import type { Observable } from 'rxjs';
 import type { IScopedClusterClient, Logger, SharedGlobalConfig } from 'kibana/server';
 import { catchError, first, tap } from 'rxjs/operators';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { from } from 'rxjs';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {

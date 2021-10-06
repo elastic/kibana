@@ -7,7 +7,7 @@
 
 import { KbnClient } from '@kbn/test';
 import type { TransportResult } from '@elastic/transport';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import type SuperTest from 'supertest';
 import type {

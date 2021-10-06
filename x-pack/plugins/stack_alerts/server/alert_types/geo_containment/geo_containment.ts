@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import { Logger } from 'src/core/server';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
 import { AlertServices } from '../../../../alerting/server';
 import {

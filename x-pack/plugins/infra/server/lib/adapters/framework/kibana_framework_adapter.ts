@@ -11,7 +11,7 @@ import {
   MlGetBuckets,
 } from '@elastic/elasticsearch/api/requestParams';
 import { TransportRequestParams } from '@elastic/transport';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 import {
   InfraRouteConfig,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { flatten, merge, sortBy, sum, pickBy } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { TelemetryTask } from '.';

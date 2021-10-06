@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/transport';
 import { IScopedClusterClient } from 'src/core/server';
 import { JsonObject, JsonValue } from '@kbn/utility-types';

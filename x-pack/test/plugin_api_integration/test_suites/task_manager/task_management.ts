@@ -7,7 +7,7 @@
 
 import { random, times } from 'lodash';
 import expect from '@kbn/expect';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import TaskManagerMapping from '../../../../plugins/task_manager/server/saved_objects/mappings.json';
 import {

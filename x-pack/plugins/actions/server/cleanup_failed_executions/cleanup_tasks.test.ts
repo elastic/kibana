@@ -10,7 +10,7 @@ import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../src/
 import { spacesMock } from '../../../spaces/server/mocks';
 import { CleanupTasksOpts, cleanupTasks } from './cleanup_tasks';
 import { TaskInstance } from '../../../task_manager/server';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TransportResult } from '@elastic/transport';
 
 describe('cleanupTasks', () => {

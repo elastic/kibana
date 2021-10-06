@@ -12,7 +12,7 @@ import { ConfigSchema } from '../../config';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import type { TransportResult } from '@elastic/transport';
 import { termsAggSuggestions } from './terms_agg';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { duration } from 'moment';
 
 let savedObjectsClientMock: jest.Mocked<SavedObjectsClientContract>;

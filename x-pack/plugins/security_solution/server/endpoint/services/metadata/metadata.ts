@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { HostMetadata } from '../../../../common/endpoint/types';
 import { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { getESQueryHostMetadataByIDs } from '../../routes/metadata/query_builders';

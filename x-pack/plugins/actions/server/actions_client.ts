@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
 
 import { i18n } from '@kbn/i18n';

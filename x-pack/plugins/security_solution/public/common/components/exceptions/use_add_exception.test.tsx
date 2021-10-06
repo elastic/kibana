@@ -6,7 +6,7 @@
  */
 
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaServices } from '../../../common/lib/kibana';
 

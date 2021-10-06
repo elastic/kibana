@@ -7,7 +7,7 @@
 
 import { scaleLog } from 'd3-scale';
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from 'src/core/server';
 

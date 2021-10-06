@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiDataGridColumn } from '@elastic/eui';
 
 import {
