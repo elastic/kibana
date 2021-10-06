@@ -53,6 +53,20 @@ export interface PolicyDetailsListOfAllPoliciesStateChanged
 export type PolicyDetailsTrustedAppsForceListDataRefresh =
   Action<'policyDetailsTrustedAppsForceListDataRefresh'>;
 
+export interface PolicyDetailsRemoveArtifactIds
+  extends Action<'policyDetailsTrustedAppsRemoveIds'> {
+  payload: {
+    artifactIds: string[];
+  };
+}
+
+export type PolicyDetailsArtifactsResetRemove = Action<'policyDetailsArtifactsResetRemove'>;
+
+export interface PolicyDetailsTrustedAppsRemoveListStateChanged
+  extends Action<'policyDetailsTrustedAppsRemoveListStateChanged'> {
+  payload: PolicyArtifactsState['removeList'];
+}
+
 /**
  * All of the possible actions for Trusted Apps under the Policy Details store
  */
@@ -64,4 +78,7 @@ export type PolicyTrustedAppsAction =
   | PolicyArtifactsAssignableListPageDataFilter
   | AssignedTrustedAppsListStateChanged
   | PolicyDetailsListOfAllPoliciesStateChanged
-  | PolicyDetailsTrustedAppsForceListDataRefresh;
+  | PolicyDetailsTrustedAppsForceListDataRefresh
+  | PolicyDetailsTrustedAppsRemoveListStateChanged
+  | PolicyDetailsArtifactsResetRemove
+  | PolicyDetailsRemoveArtifactIds;

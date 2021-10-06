@@ -94,6 +94,8 @@ export interface PolicyArtifactsState {
   assignedList: AsyncResourceState<PolicyAssignedTrustedApps>;
   /** A list of all available polices */
   policies: AsyncResourceState<GetPolicyListResponse>;
+  /** list of artifacts to remove. Holds the ids that were removed and the API response */
+  removeList: AsyncResourceState<{ artifactIds: string[]; response: true }>;
 }
 
 export enum OS {

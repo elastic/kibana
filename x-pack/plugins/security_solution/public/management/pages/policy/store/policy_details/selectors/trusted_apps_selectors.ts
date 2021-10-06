@@ -30,6 +30,7 @@ import {
   LoadedResourceState,
 } from '../../../../../state';
 import { getCurrentArtifactsLocation } from './policy_common_selectors';
+import { ServerApiError } from '../../../../../../common/types';
 
 export const doesPolicyHaveTrustedApps = (
   state: PolicyDetailsState
@@ -181,3 +182,19 @@ export const getTrustedAppsAllPoliciesById: PolicyDetailsSelector<
     return mapById;
   }, {}) as Immutable<Record<string, Immutable<PolicyData>>>;
 });
+
+export const getCurrentTrustedAppsRemoveListState: PolicyDetailsSelector<
+  PolicyArtifactsState['removeList']
+> = (state) => state.artifacts.removeList;
+
+export const getTrustedAppsIsRemoving: PolicyDetailsSelector<boolean> = createSelector(
+  getCurrentTrustedAppsRemoveListState,
+  (removeListState) => isLoadingResourceState(removeListState)
+);
+
+export const getTrustedAppsRemovalError: PolicyDetailsSelector<ServerApiError | undefined> =
+  createSelector(getCurrentTrustedAppsRemoveListState, (removeListState) => {
+    if (isFailedResourceState(removeListState)) {
+      return removeListState.error;
+    }
+  });

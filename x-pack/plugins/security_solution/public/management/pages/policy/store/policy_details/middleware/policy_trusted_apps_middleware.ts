@@ -8,39 +8,41 @@
 import pMap from 'p-map';
 import { find, isEmpty } from 'lodash/fp';
 import {
-  PolicyDetailsState,
-  MiddlewareRunner,
   GetPolicyListResponse,
+  MiddlewareRunner,
   MiddlewareRunnerContext,
   PolicyAssignedTrustedApps,
+  PolicyDetailsState,
   PolicyDetailsStore,
 } from '../../../types';
 import {
-  policyIdFromParams,
-  getAssignableArtifactsList,
   doesPolicyTrustedAppsListNeedUpdate,
-  getCurrentPolicyAssignedTrustedAppsState,
-  getLatestLoadedPolicyAssignedTrustedAppsState,
-  getTrustedAppsPolicyListState,
-  isPolicyTrustedAppListLoading,
+  getAssignableArtifactsList,
   getCurrentArtifactsLocation,
-  isOnPolicyTrustedAppsView,
+  getCurrentPolicyAssignedTrustedAppsState,
+  getCurrentTrustedAppsRemoveListState,
   getCurrentUrlLocationPaginationParams,
+  getLatestLoadedPolicyAssignedTrustedAppsState,
+  getTrustedAppsIsRemoving,
+  getTrustedAppsPolicyListState,
+  isOnPolicyTrustedAppsView,
+  isPolicyTrustedAppListLoading,
+  policyIdFromParams,
 } from '../selectors';
 import {
+  Immutable,
   ImmutableArray,
   ImmutableObject,
   PostTrustedAppCreateRequest,
   TrustedApp,
-  Immutable,
 } from '../../../../../../../common/endpoint/types';
 import { ImmutableMiddlewareAPI } from '../../../../../../common/store';
 import { TrustedAppsService } from '../../../../trusted_apps/service';
 import {
+  createFailedResourceState,
   createLoadedResourceState,
   createLoadingResourceState,
   createUninitialisedResourceState,
-  createFailedResourceState,
   isLoadingResourceState,
   isUninitialisedResourceState,
 } from '../../../../../state';
@@ -92,6 +94,11 @@ export const policyTrustedAppsMiddlewareRunner: MiddlewareRunner = async (
       if (getCurrentArtifactsLocation(state).show === 'list') {
         await searchTrustedApps(store, trustedAppsService, action.payload.filter);
       }
+
+      break;
+
+    case 'policyDetailsTrustedAppsRemoveIds':
+      removeTrustedAppsFromPolicy(context, store, action.payload.artifactIds);
 
       break;
   }
@@ -332,6 +339,34 @@ const fetchAllPoliciesIfNeeded = async (
     dispatch({
       type: 'policyDetailsListOfAllPoliciesStateChanged',
       payload: createFailedResourceState<GetPolicyListResponse>(error.body || error),
+    });
+  }
+};
+
+const removeTrustedAppsFromPolicy = async (
+  { trustedAppsService }: MiddlewareRunnerContext,
+  { getState, dispatch }: PolicyDetailsStore,
+  trustedAppIds: string[]
+): Promise<void> => {
+  const state = getState();
+
+  if (getTrustedAppsIsRemoving(state)) {
+    return;
+  }
+
+  dispatch({
+    type: 'policyDetailsTrustedAppsRemoveListStateChanged',
+    payload: createLoadingResourceState(getCurrentTrustedAppsRemoveListState(state)),
+  });
+
+  try {
+    await new Promise((r) => setTimeout(r, 5000));
+
+    throw new Error('what just happen?');
+  } catch (error) {
+    dispatch({
+      type: 'policyDetailsTrustedAppsRemoveListStateChanged',
+      payload: createFailedResourceState(error),
     });
   }
 };
