@@ -10,8 +10,9 @@ import { useParams } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 
+import { DELETE_BUTTON_LABEL } from '../../../../shared/constants';
 import { RESTORE_DEFAULTS_BUTTON_LABEL } from '../../../constants';
 import { AppSearchPageTemplate } from '../../layout';
 import { MANAGE_CURATION_TITLE, RESTORE_CONFIRMATION } from '../constants';
@@ -49,28 +50,27 @@ export const ManualCuration: React.FC = () => {
       pageHeader={{
         pageTitle: MANAGE_CURATION_TITLE,
         rightSideItems: [
-          <EuiButton
-            color="danger"
-            onClick={() => {
-              if (window.confirm(RESTORE_CONFIRMATION)) resetCuration();
-            }}
-          >
-            {RESTORE_DEFAULTS_BUTTON_LABEL}
-          </EuiButton>,
+          <EuiFlexGroup gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color="danger"
+                onClick={() => {
+                  if (window.confirm(RESTORE_CONFIRMATION)) resetCuration();
+                }}
+              >
+                {RESTORE_DEFAULTS_BUTTON_LABEL}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ManageQueriesModal />
+            </EuiFlexItem>
+          </EuiFlexGroup>,
         ],
         tabs: pageTabs,
       }}
       isLoading={dataLoading}
     >
-      <SuggestedDocumentsCallout />
-      <EuiFlexGroup alignItems="flexEnd" gutterSize="xl" responsive={false}>
-        <EuiFlexItem>
-          <ActiveQuerySelect />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ManageQueriesModal />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <ActiveQuerySelect />
       {selectedPageTab === 'promoted' && <SuggestedDocumentsCallout />}
       {selectedPageTab === 'promoted' && <PromotedDocuments />}
       {selectedPageTab === 'hidden' && <HiddenDocuments />}

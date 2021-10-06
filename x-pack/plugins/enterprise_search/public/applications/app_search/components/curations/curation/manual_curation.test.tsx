@@ -14,7 +14,7 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiTab } from '@elastic/eui';
+import { EuiButton, EuiTab } from '@elastic/eui';
 
 import { getPageTitle, getPageHeaderActions, getPageHeaderTabs } from '../../../../test_helpers';
 
@@ -23,6 +23,7 @@ import { CurationLogic } from './curation_logic';
 
 import { PromotedDocuments, HiddenDocuments } from './documents';
 import { ManualCuration } from './manual_curation';
+import { ActiveQuerySelect, ManageQueriesModal } from './queries';
 import { AddResultFlyout } from './results';
 import { SuggestedDocumentsCallout } from './suggested_documents_callout';
 
@@ -108,13 +109,20 @@ describe('ManualCuration', () => {
     expect(CurationLogic).toHaveBeenCalledWith({ curationId: 'hello-world' });
   });
 
+  it('contains a button to manage queries and an active query selector', () => {
+    const wrapper = shallow(<ManualCuration />);
+
+    expect(getPageHeaderActions(wrapper).find(ManageQueriesModal)).toHaveLength(1);
+    expect(wrapper.find(ActiveQuerySelect)).toHaveLength(1);
+  });
+
   describe('restore defaults button', () => {
     let restoreDefaultsButton: ShallowWrapper;
     let confirmSpy: jest.SpyInstance;
 
     beforeAll(() => {
       const wrapper = shallow(<ManualCuration />);
-      restoreDefaultsButton = getPageHeaderActions(wrapper).childAt(0);
+      restoreDefaultsButton = getPageHeaderActions(wrapper).find(EuiButton);
 
       confirmSpy = jest.spyOn(window, 'confirm');
     });
