@@ -275,6 +275,12 @@ export const securitySolutionsDeepLinks: AppDeepLink[] = [
           },
         ],
       },
+      // getCasesDeepLink({ extend: {
+      //   [SecurityPageName.case]: {
+      //     navLinkStatus: AppNavLinkStatus.visible,
+      //     order: 9006,
+      //   }
+      // }}),
       {
         id: SecurityPageName.case,
         title: CASE,

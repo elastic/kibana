@@ -10,6 +10,7 @@ import { CasesUiStart, SetupPlugins, StartPlugins } from './types';
 import { KibanaServices } from './common/lib/kibana';
 import { getCaseConnectorUi } from './components/connectors';
 import {
+  getCasesLazy,
   getAllCasesLazy,
   getCaseViewLazy,
   getConfigureCasesLazy,
@@ -39,6 +40,12 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
     const config = this.initializerContext.config.get<CasesUiConfigType>();
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion, config });
     return {
+      /**
+       * Get the all cases table
+       * @param props AllCasesProps
+       * @return {ReactElement<AllCasesProps>}
+       */
+      getCases: getCasesLazy,
       /**
        * Get the all cases table
        * @param props AllCasesProps
