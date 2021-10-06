@@ -230,7 +230,7 @@ export class TaskRunner<
     // - execution is not cancelled
     // OR
     // - alerting config disables skip behavior AND rule type disables skip behavior
-    return !this.cancelled$.getValue();
+    return !this.cancelled$.getValue() || !this.context.cancelAlertsOnRuleTimeout;
   }
 
   async executeAlertInstance(
@@ -459,7 +459,7 @@ export class TaskRunner<
       if (muteAll) {
         this.logger.debug(`no scheduling of actions for alert ${alertLabel}: alert is muted.`);
       }
-      if (this.cancelled$.getValue()) {
+      if (!this.shouldLogAndScheduleActionsForAlerts()) {
         this.logger.debug(
           `no scheduling of actions for alert ${alertLabel}: alert execution has been cancelled.`
         );

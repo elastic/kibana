@@ -107,7 +107,8 @@ describe('Task Runner', () => {
     ruleTypeRegistry,
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: false,
-    maxEphemeralActionsPerAlert: new Promise((resolve) => resolve(10)),
+    maxEphemeralActionsPerAlert: 10,
+    cancelAlertsOnRuleTimeout: true,
   };
 
   function testAgainstEphemeralSupport(
@@ -4557,7 +4558,7 @@ describe('Task Runner', () => {
     );
   });
 
-  test('actionsPlugin.execute is skipped if rule execution is cancelled', async () => {
+  test('actionsPlugin.execute is skipped if rule execution is cancelled and cancelAlertsOnRuleTimeout is true', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     alertType.executor.mockImplementation(

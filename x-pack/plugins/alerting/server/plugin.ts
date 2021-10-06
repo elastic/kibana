@@ -389,21 +389,24 @@ export class AlertingPlugin {
       return alertingAuthorizationClientFactory!.create(request);
     };
 
-    taskRunnerFactory.initialize({
-      logger,
-      getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch),
-      getRulesClientWithRequest,
-      spaceIdToNamespace,
-      actionsPlugin: plugins.actions,
-      encryptedSavedObjectsClient,
-      basePathService: core.http.basePath,
-      eventLogger: this.eventLogger!,
-      internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
-      executionContext: core.executionContext,
-      ruleTypeRegistry: this.ruleTypeRegistry!,
-      kibanaBaseUrl: this.kibanaBaseUrl,
-      supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
-      maxEphemeralActionsPerAlert: this.config.then((config) => config.maxEphemeralActionsPerAlert),
+    this.config.then((config) => {
+      taskRunnerFactory.initialize({
+        logger,
+        getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch),
+        getRulesClientWithRequest,
+        spaceIdToNamespace,
+        actionsPlugin: plugins.actions,
+        encryptedSavedObjectsClient,
+        basePathService: core.http.basePath,
+        eventLogger: this.eventLogger!,
+        internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
+        executionContext: core.executionContext,
+        ruleTypeRegistry: this.ruleTypeRegistry!,
+        kibanaBaseUrl: this.kibanaBaseUrl,
+        supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
+        maxEphemeralActionsPerAlert: config.maxEphemeralActionsPerAlert,
+        cancelAlertsOnRuleTimeout: config.cancelAlertsOnRuleTimeout,
+      });
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {

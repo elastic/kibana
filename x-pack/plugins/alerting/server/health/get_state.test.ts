@@ -73,6 +73,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
         },
         maxEphemeralActionsPerAlert: 100,
         defaultRuleTaskTimeout: '20m',
+        cancelAlertsOnRuleTimeout: true,
       }),
       pollInterval
     ).subscribe();
@@ -108,6 +109,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
         },
         maxEphemeralActionsPerAlert: 100,
         defaultRuleTaskTimeout: '20m',
+        cancelAlertsOnRuleTimeout: true,
       }),
       pollInterval,
       retryDelay
@@ -154,6 +156,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
         },
         maxEphemeralActionsPerAlert: 100,
         defaultRuleTaskTimeout: '20m',
+        cancelAlertsOnRuleTimeout: true,
       })
     ).toPromise();
 
@@ -186,6 +189,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
         },
         maxEphemeralActionsPerAlert: 100,
         defaultRuleTaskTimeout: '20m',
+        cancelAlertsOnRuleTimeout: true,
       })
     ).toPromise();
 
@@ -218,6 +222,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
         },
         maxEphemeralActionsPerAlert: 100,
         defaultRuleTaskTimeout: '20m',
+        cancelAlertsOnRuleTimeout: true,
       })
     ).toPromise();
 
@@ -247,6 +252,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
         },
         maxEphemeralActionsPerAlert: 100,
         defaultRuleTaskTimeout: '20m',
+        cancelAlertsOnRuleTimeout: true,
       }),
       retryDelay
     ).subscribe((status) => {
@@ -279,6 +285,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
         },
         maxEphemeralActionsPerAlert: 100,
         defaultRuleTaskTimeout: '20m',
+        cancelAlertsOnRuleTimeout: true,
       }),
       retryDelay
     ).subscribe((status) => {
@@ -317,6 +324,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
         },
         maxEphemeralActionsPerAlert: 100,
         defaultRuleTaskTimeout: '20m',
+        cancelAlertsOnRuleTimeout: true,
       })
     ).toPromise();
 

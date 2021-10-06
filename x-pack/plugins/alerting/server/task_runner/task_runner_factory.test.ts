@@ -83,7 +83,8 @@ describe('Task Runner Factory', () => {
     ruleTypeRegistry: ruleTypeRegistryMock.create(),
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: true,
-    maxEphemeralActionsPerAlert: new Promise((resolve) => resolve(10)),
+    maxEphemeralActionsPerAlert: 10,
+    cancelAlertsOnRuleTimeout: true,
     executionContext,
   };
 
