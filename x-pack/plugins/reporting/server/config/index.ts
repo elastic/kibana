@@ -50,15 +50,20 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
 
       if (reporting?.roles?.enabled !== false) {
         addDeprecation({
+          level: 'warning',
           title: i18n.translate('xpack.reporting.deprecations.reportingRoles.title', {
-            defaultMessage: 'Setting "{fromPath}.roles" is deprecated',
+            defaultMessage: 'The "{fromPath}.roles.enabled" default is changing',
             values: { fromPath },
           }),
+          // TODO: once scheduled reports is released, restate this to say that we have no access to scheduled reporting.
+          // https://github.com/elastic/kibana/issues/79905
           message: i18n.translate('xpack.reporting.deprecations.reportingRoles.description', {
             defaultMessage:
-              `Granting reporting privilege through a "reporting_user" role will not be supported` +
-              ` starting in 8.0. Please set "xpack.reporting.roles.enabled" to "false" and grant reporting privileges to users` +
-              ` using Kibana application privileges **Management > Security > Roles**.`,
+              `Using roles defined by "{fromPath}.roles.allow" to grant users the ` +
+              `privilege to create a report prevents users from using API Keys to ` +
+              `create reports, and prevents admins from using Kibana application ` +
+              `privileges to grant users access to create reports.`,
+            values: { fromPath },
           }),
           correctiveActions: {
             manualSteps: [
@@ -67,8 +72,8 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
               }),
               i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepTwo', {
                 defaultMessage:
-                  `Grant reporting privileges to users using Kibana application privileges` +
-                  ` under **Management > Security > Roles**.`,
+                  `Create new roles that grant privileges to create reports using ` +
+                  `Kibana application privileges under **Management > Security > Roles**.`,
               }),
             ],
           },
