@@ -21,7 +21,6 @@ describe('when rendering the PolicyTrustedAppsList', () => {
   let appTestContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
-  let apiResponseProviders: ReturnType<typeof policyDetailsPageAllApiHttpMocks>;
   let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
 
   const getCardByIndexPosition = (cardIndex: number = 0) => {
@@ -61,7 +60,7 @@ describe('when rendering the PolicyTrustedAppsList', () => {
   beforeEach(() => {
     appTestContext = createAppRootMockRenderer();
 
-    apiResponseProviders = policyDetailsPageAllApiHttpMocks(appTestContext.coreStart.http);
+    policyDetailsPageAllApiHttpMocks(appTestContext.coreStart.http);
     appTestContext.setExperimentalFlag({ trustedAppsByPolicyEnabled: true });
     waitForAction = appTestContext.middlewareSpy.waitForAction;
 
@@ -168,6 +167,7 @@ describe('when rendering the PolicyTrustedAppsList', () => {
       },
     });
     await render();
+    await retrieveAllPolicies;
     act(() => {
       fireEvent.click(
         within(getCardByIndexPosition(2)).getByTestId(
@@ -191,7 +191,37 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     ).toEqual('Endpoint Policy 1');
   });
 
-  it.todo('should handle pagination changes');
+  it.todo('should navigate to policy details when clicking policy on assignment context menu');
 
-  it.toto('should reset `pageIndex` when a new pageSize is selected');
+  it('should handle pagination changes', async () => {
+    await render();
+
+    expect(appTestContext.history.location.search).not.toBeTruthy();
+
+    act(() => {
+      fireEvent.click(renderResult.getByTestId('pagination-button-next'));
+    });
+
+    expect(appTestContext.history.location.search).toMatch('?page_index=1');
+  });
+
+  it('should reset `pageIndex` when a new pageSize is selected', async () => {
+    await render();
+    // page ahead
+    act(() => {
+      fireEvent.click(renderResult.getByTestId('pagination-button-next'));
+    });
+    await waitFor(() => !!window.location.search);
+
+    // now change the page size
+    await act(async () => {
+      fireEvent.click(renderResult.getByTestId('tablePaginationPopoverButton'));
+      await waitFor(() => renderResult.getByTestId('tablePagination-50-rows'));
+    });
+    act(() => {
+      fireEvent.click(renderResult.getByTestId('tablePagination-50-rows'));
+    });
+
+    expect(appTestContext.history.location.search).toMatch('?page_size=50');
+  });
 });
