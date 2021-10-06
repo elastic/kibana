@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { APP_ID } from '../../../../../plugins/maps/common/constants';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
@@ -45,13 +46,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`allows a map to be created`, async () => {
-        await PageObjects.maps.openNewMap();
+        await PageObjects.common.navigateToActualUrl(APP_ID, '/map', {
+          basePath: `/s/custom_space`,
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await PageObjects.maps.waitForLayersToLoad();
         await PageObjects.maps.saveMap('my test map');
-        await PageObjects.maps.searchAndExpectItemsCount('my test map', 1);
       });
 
       it(`allows a map to be deleted`, async () => {
-        await PageObjects.maps.gotoMapListingPage();
+        await PageObjects.common.navigateToActualUrl(APP_ID, '/', {
+          basePath: `/s/custom_space`,
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
         await PageObjects.maps.deleteSavedMaps('my test map');
       });
     });
@@ -70,7 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`returns a 404`, async () => {
-        await PageObjects.common.navigateToActualUrl('maps', '', {
+        await PageObjects.common.navigateToActualUrl(APP_ID, '/', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
