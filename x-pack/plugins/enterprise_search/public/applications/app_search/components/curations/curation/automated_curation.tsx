@@ -12,6 +12,8 @@ import { useValues, useActions } from 'kea';
 
 import { EuiSpacer, EuiButton, EuiBadge } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { AppSearchPageTemplate } from '../../layout';
 import { AutomatedIcon } from '../components/automated_icon';
 import {
@@ -29,6 +31,19 @@ export const AutomatedCuration: React.FC = () => {
   const logic = CurationLogic({ curationId });
   const { convertToManual } = useActions(logic);
   const { activeQuery, dataLoading, queries } = useValues(logic);
+
+  // This single static tab is meant to visually mirror the dynamic set of tags
+  // in the ManualCuration component. This page however does not include
+  // hidden documents, so we only need one tab.
+  const pageTabs = [
+    {
+      label: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.title',
+        { defaultMessage: 'Promoted documents' }
+      ),
+      isSelected: true,
+    },
+  ];
 
   return (
     <AppSearchPageTemplate
@@ -54,6 +69,7 @@ export const AutomatedCuration: React.FC = () => {
             {COVERT_TO_MANUAL_BUTTON_LABEL}
           </EuiButton>,
         ],
+        tabs: pageTabs,
       }}
       isLoading={dataLoading}
     >
