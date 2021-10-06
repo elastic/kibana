@@ -6,8 +6,7 @@
  */
 
 import { EuiButtonEmpty } from '@elastic/eui';
-import { fireEvent } from '@testing-library/dom';
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import AddToTimelineButton, { ADD_TO_TIMELINE_KEYBOARD_SHORTCUT } from './add_to_timeline';
@@ -188,7 +187,7 @@ describe('add to timeline', () => {
       });
     });
 
-    test('it dispatches a multiple `addProviderToTimeline` actions when an array of `dataProvider` are provided', () => {
+    test('it dispatches multiple `addProviderToTimeline` actions when an array of `dataProvider` are provided', () => {
       const providers = [providerA, providerB];
 
       render(
