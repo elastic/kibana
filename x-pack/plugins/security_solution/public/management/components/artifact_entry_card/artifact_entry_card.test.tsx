@@ -25,7 +25,7 @@ describe.each([
   ) => ReturnType<AppContextTestRender['render']>;
 
   beforeEach(() => {
-    item = generateItem();
+    item = generateItem() as AnyArtifact;
     appTestContext = createAppRootMockRenderer();
     render = (props = {}) => {
       renderResult = appTestContext.render(
@@ -71,17 +71,25 @@ describe.each([
     );
   });
 
-  it('should display description if one exists', async () => {
+  it('should display description if one exists if needed', async () => {
     render();
-
-    expect(renderResult.getByTestId('testCard-description').textContent).toEqual(item.description);
+    if (isTrustedApp(item)) {
+      expect(renderResult.getByTestId('testCard-description').textContent).toEqual(
+        item.description
+      );
+    } else {
+      expect(renderResult.queryByTestId('testCard-description')).toBeNull();
+    }
   });
 
-  it('should display default empty value if description does not exist', async () => {
+  it('should display default empty value if description does not exist if needed', async () => {
     item.description = undefined;
     render();
-
-    expect(renderResult.getByTestId('testCard-description').textContent).toEqual('—');
+    if (isTrustedApp(item)) {
+      expect(renderResult.getByTestId('testCard-description').textContent).toEqual('—');
+    } else {
+      expect(renderResult.queryByTestId('testCard-description')).toBeNull();
+    }
   });
 
   it('should display OS and criteria conditions', () => {
