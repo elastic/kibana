@@ -6,3 +6,4 @@
  */
 
 export { ElasticsearchOverview } from './overview';
+export { ElasticsearchOverviewReact } from './overview_react';
