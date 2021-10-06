@@ -109,7 +109,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                   checked={false}
                   className="euiCheckbox__input"
                   disabled={false}
-                  id="_selection_column-checkbox_generated-id"
+                  id="_selection_column-checkbox_generated-id_mobile"
                   onChange={[Function]}
                   type="checkbox"
                 />
@@ -118,7 +118,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 />
                 <label
                   className="euiCheckbox__label"
-                  htmlFor="_selection_column-checkbox_generated-id"
+                  htmlFor="_selection_column-checkbox_generated-id_mobile"
                 >
                   Select all rows
                 </label>
@@ -195,7 +195,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                       className="euiCheckbox__input"
                       data-test-subj="checkboxSelectAll"
                       disabled={false}
-                      id="_selection_column-checkbox_generated-id"
+                      id="_selection_column-checkbox_generated-id_desktop"
                       onChange={[Function]}
                       type="checkbox"
                     />

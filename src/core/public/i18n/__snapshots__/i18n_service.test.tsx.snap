@@ -7,6 +7,7 @@ exports[`#start() returns \`Context\` component 1`] = `
       Object {
         "mapping": Object {
           "euiAccordion.isLoading": "Loading",
+          "euiBasicTable.noItemsMessage": "No items found",
           "euiBasicTable.selectAllRows": "Select all rows",
           "euiBasicTable.selectThisRow": "Select this row",
           "euiBasicTable.tableAutoCaptionWithPagination": [Function],

@@ -884,7 +884,12 @@ exports[`Inspector Data View component should render single table without select
               },
             ]
           }
-          noItemsMessage="No items found"
+          noItemsMessage={
+            <EuiI18n
+              default="No items found"
+              token="euiBasicTable.noItemsMessage"
+            />
+          }
           onChange={[Function]}
           pagination={
             Object {
@@ -2449,7 +2454,12 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
               },
             ]
           }
-          noItemsMessage="No items found"
+          noItemsMessage={
+            <EuiI18n
+              default="No items found"
+              token="euiBasicTable.noItemsMessage"
+            />
+          }
           onChange={[Function]}
           pagination={
             Object {

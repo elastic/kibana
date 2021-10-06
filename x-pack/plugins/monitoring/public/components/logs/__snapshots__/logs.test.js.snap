@@ -268,7 +268,12 @@ exports[`Logs should render normally 1`] = `
         },
       ]
     }
-    noItemsMessage="No items found"
+    noItemsMessage={
+      <EuiI18n
+        default="No items found"
+        token="euiBasicTable.noItemsMessage"
+      />
+    }
     responsive={true}
     tableLayout="fixed"
   />
