@@ -23,38 +23,73 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { CustomIntegration } from '../../../common';
+import { FC } from 'react';
+import { CustomIntegration, Shipper, SHIPPER_DISPLAY } from '../../../common';
 import { usePlatformService } from '../../services';
 
 export interface Props {
   replacements: Array<Pick<CustomIntegration, 'id' | 'uiInternalPath' | 'title'>>;
+  shipper: Shipper;
 }
 
 // TODO - clintandrewhall: should use doc-links service
 const URL_COMPARISON = 'https://ela.st/beats-agent-comparison';
 
 const idGenerator = htmlIdGenerator('replacementCard');
-const alsoAvailable = i18n.translate('customIntegrations.components.replacementAccordionLabel', {
-  defaultMessage: 'Also available in Beats',
-});
 
-const link = (
-  <EuiLink
-    href={URL_COMPARISON}
-    data-test-subj="customIntegrationsBeatsAgentComparisonLink"
-    external
-  >
+const getAlsoAvailable = (shipper: Shipper) =>
+  i18n.translate('customIntegrations.components.replacementAccordionLabel', {
+    defaultMessage: 'Also available in {shipper}',
+    values: {
+      shipper: SHIPPER_DISPLAY[shipper],
+    },
+  });
+
+const messages: { [key in Shipper]: FC } = {
+  beats: () => {
+    const link = (
+      <EuiLink
+        href={URL_COMPARISON}
+        data-test-subj="customIntegrationsBeatsAgentComparisonLink"
+        external
+      >
+        <FormattedMessage
+          id="customIntegrations.components.replacementAccordion.comparisonPageLinkLabel"
+          defaultMessage="comparison page"
+        />
+      </EuiLink>
+    );
+
+    return (
+      <FormattedMessage
+        id="customIntegrations.components.replacementAccordion.beatsDescription"
+        defaultMessage="Elastic Agent Integrations are recommended, but you can also use {beats}. For more
+      details, check out our {link}."
+        values={{
+          beats: SHIPPER_DISPLAY.beats,
+          link,
+        }}
+      />
+    );
+  },
+  sample_data: () => (
     <FormattedMessage
-      id="customIntegrations.components.replacementAccordion.comparisonPageLinkLabel"
-      defaultMessage="comparison page"
+      id="customIntegrations.components.replacementAccordion.sampleDataDescription"
+      defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
     />
-  </EuiLink>
-);
+  ),
+  tutorial: () => (
+    <FormattedMessage
+      id="customIntegrations.components.replacementAccordion.sampleDataDescription"
+      defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+    />
+  ),
+};
 
 /**
  * A pure component, an accordion panel which can display information about replacements for a given EPR module.
  */
-export const ReplacementCard = ({ replacements }: Props) => {
+export const ReplacementCard = ({ replacements, shipper }: Props) => {
   const { euiTheme } = useEuiTheme();
   const { getAbsolutePath } = usePlatformService();
 
@@ -77,9 +112,14 @@ export const ReplacementCard = ({ replacements }: Props) => {
     </EuiFlexItem>
   ));
 
+  const Message = messages[shipper];
+
   return (
     <div
       css={css`
+        & + & {
+          margin-top: ${euiTheme.size.s};
+        }
         & .euiAccordion__button {
           color: ${euiTheme.colors.link};
         }
@@ -88,19 +128,12 @@ export const ReplacementCard = ({ replacements }: Props) => {
         }
       `}
     >
-      <EuiAccordion id={idGenerator()} buttonContent={alsoAvailable} paddingSize="none">
+      <EuiAccordion id={idGenerator()} buttonContent={getAlsoAvailable(shipper)} paddingSize="none">
         <EuiPanel color="subdued" hasShadow={false} paddingSize="m">
           <EuiFlexGroup direction="column" gutterSize="m">
             <EuiFlexItem>
               <EuiText size="s">
-                <FormattedMessage
-                  id="customIntegrations.components.replacementAccordion.recommendationDescription"
-                  defaultMessage="Elastic Agent Integrations are recommended, but you can also use Beats. For more
-      details, check out our {link}."
-                  values={{
-                    link,
-                  }}
-                />
+                <Message />
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>

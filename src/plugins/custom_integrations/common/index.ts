@@ -14,8 +14,40 @@ export interface IntegrationCategoryCount {
   id: IntegrationCategory;
 }
 
-export const INTEGRATION_CATEGORY_DISPLAY = {
-  // Known EPR
+export const category = [
+  'aws',
+  'azure',
+  'cloud',
+  'config_management',
+  'containers',
+  'crm',
+  'custom',
+  'datastore',
+  'elastic_stack',
+  'google_cloud',
+  'kubernetes',
+  'languages',
+  'language_client',
+  'message_queue',
+  'monitoring',
+  'network',
+  'notification',
+  'os_system',
+  'productivity',
+  'security',
+  'sample_data',
+  'support',
+  'ticketing',
+  'version_control',
+  'web',
+  'upload_file',
+  'updates_available',
+] as const;
+
+export type IntegrationCategory = typeof category[number];
+
+// TODO: consider i18n
+export const INTEGRATION_CATEGORY_DISPLAY: { [K in IntegrationCategory]: string } = {
   aws: 'AWS',
   azure: 'Azure',
   cloud: 'Cloud',
@@ -49,8 +81,16 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   updates_available: 'Updates available',
 };
 
-export type IntegrationCategory = keyof typeof INTEGRATION_CATEGORY_DISPLAY;
+export const shipper = ['beats', 'tutorial', 'sample_data'] as const;
 
+export type Shipper = typeof shipper[number];
+
+// TODO: consider i18n
+export const SHIPPER_DISPLAY: { [K in Shipper]: string } = {
+  beats: 'Beats',
+  tutorial: 'Tutorials',
+  sample_data: 'Sample data',
+};
 export interface CustomIntegrationIcon {
   src: string;
   type: 'eui' | 'svg';
@@ -65,7 +105,7 @@ export interface CustomIntegration {
   isBeta: boolean;
   icons: CustomIntegrationIcon[];
   categories: IntegrationCategory[];
-  shipper: string;
+  shipper: Shipper;
   eprOverlap?: string; // name of the equivalent Elastic Agent integration in EPR. e.g. a beat module can correspond to an EPR-package, or an APM-tutorial. When completed, Integrations-UX can preferentially show the EPR-package, rather than the custom-integration
 }
 

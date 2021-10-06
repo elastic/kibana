@@ -8,21 +8,23 @@
 
 import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
+import type { Shipper } from '../../../common';
 import { useFindService } from '../../services';
 
 import { ReplacementCard as Component } from './replacement_card.component';
 
 export interface Props {
   eprPackageName: string;
+  shipper: Shipper;
 }
 
 /**
  * A data-connected component which can query about Beats-based replacement options for a given EPR module.
  */
-export const ReplacementCard = ({ eprPackageName }: Props) => {
+export const ReplacementCard = ({ eprPackageName, shipper }: Props) => {
   const { findReplacementIntegrations } = useFindService();
   const integrations = useAsync(async () => {
-    return await findReplacementIntegrations({ shipper: 'beats', eprPackageName });
+    return await findReplacementIntegrations({ eprPackageName, shipper });
   }, [eprPackageName]);
 
   const { loading, value: replacements } = integrations;
@@ -31,5 +33,5 @@ export const ReplacementCard = ({ eprPackageName }: Props) => {
     return null;
   }
 
-  return <Component {...{ replacements }} />;
+  return <Component {...{ replacements, shipper }} />;
 };
