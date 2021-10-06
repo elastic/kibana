@@ -14,6 +14,7 @@ export interface CurationSuggestion {
   promoted: string[];
   status: 'pending' | 'applied' | 'automated' | 'rejected' | 'disabled';
   curation_id?: string;
+  override_curation_id?: string;
 }
 
 export interface Curation {
