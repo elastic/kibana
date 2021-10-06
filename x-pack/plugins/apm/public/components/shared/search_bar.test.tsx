@@ -75,6 +75,8 @@ describe('when transactionType is selected and multiple transaction types are gi
       serviceTransactionTypes: ['firstType', 'secondType'],
       urlParams: {
         transactionType: 'secondType',
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
       },
     });
 
@@ -95,6 +97,8 @@ describe('when transactionType is selected and multiple transaction types are gi
       serviceTransactionTypes: ['firstType', 'secondType'],
       urlParams: {
         transactionType: 'secondType',
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
       },
     });
 
