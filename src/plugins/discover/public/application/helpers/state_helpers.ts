@@ -24,13 +24,16 @@ export function handleSourceColumnState<TState extends { columns?: string[] }>(
   }
   const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
   const defaultColumns = uiSettings.get(DEFAULT_COLUMNS_SETTING);
+
   if (useNewFieldsApi) {
-    // if fields API is used, filter out the source column
-    let cleanedColumns = state.columns.filter((column) => column !== '_source');
+    // if fields API is used, filter out the source/Document column
+    let cleanedColumns = state.columns.filter(
+      (column) => column !== '_source' && column !== 'Document'
+    );
     if (cleanedColumns.length === 0 && !isEqual(defaultColumns, ['_source'])) {
       cleanedColumns = defaultColumns;
       // defaultColumns could still contain _source
-      cleanedColumns = cleanedColumns.filter((column) => column !== '_source');
+      cleanedColumns = cleanedColumns.filter((column) => column !== '_source' && column !== 'Document');
     }
     return {
       ...state,
