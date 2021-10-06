@@ -56,10 +56,11 @@ export class TelemetryEventsSender {
     this.telemetryUsageCounter = telemetryUsageCounter;
 
     if (taskManager) {
-      this.telemetryTasks = listTelemetryTaskConfigs().map(
-        (config) =>
-          new SecurityTelemetryTask(config, this.logger, taskManager, this, telemetryReceiver)
-      );
+      this.telemetryTasks = listTelemetryTaskConfigs().map((config) => {
+        const task = new SecurityTelemetryTask(config, this.logger, this, telemetryReceiver);
+        task.register(taskManager);
+        return task;
+      });
     }
   }
 

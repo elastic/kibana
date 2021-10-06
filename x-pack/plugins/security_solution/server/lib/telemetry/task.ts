@@ -52,7 +52,6 @@ export class SecurityTelemetryTask {
   constructor(
     config: SecurityTelemetryTaskConfig,
     logger: Logger,
-    taskManager: TaskManagerSetupContract,
     sender: TelemetryEventsSender,
     receiver: TelemetryReceiver
   ) {
@@ -60,7 +59,25 @@ export class SecurityTelemetryTask {
     this.logger = logger;
     this.sender = sender;
     this.receiver = receiver;
+  }
 
+  private getLastExecutionTime = (
+    taskExecutionTime: string,
+    taskInstance: ConcreteTaskInstance
+  ): string | undefined => {
+    return this.config.getLastExecutionTime
+      ? this.config.getLastExecutionTime(
+          taskExecutionTime,
+          taskInstance.state?.lastExecutionTimestamp
+        )
+      : undefined;
+  };
+
+  private getTaskId = (): string => {
+    return `${this.config.type}:${this.config.version}`;
+  };
+
+  public register = (taskManager: TaskManagerSetupContract) => {
     taskManager.registerTaskDefinitions({
       [this.config.type]: {
         title: this.config.title,
@@ -91,22 +108,6 @@ export class SecurityTelemetryTask {
         },
       },
     });
-  }
-
-  private getLastExecutionTime = (
-    taskExecutionTime: string,
-    taskInstance: ConcreteTaskInstance
-  ): string | undefined => {
-    return this.config.getLastExecutionTime
-      ? this.config.getLastExecutionTime(
-          taskExecutionTime,
-          taskInstance.state?.lastExecutionTimestamp
-        )
-      : undefined;
-  };
-
-  private getTaskId = (): string => {
-    return `${this.config.type}:${this.config.version}`;
   };
 
   public start = async (taskManager: TaskManagerStartContract) => {
