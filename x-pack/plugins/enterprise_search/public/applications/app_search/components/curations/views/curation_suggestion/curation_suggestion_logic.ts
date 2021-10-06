@@ -10,7 +10,11 @@ import { HttpSetup } from 'kibana/public';
 
 import { i18n } from '@kbn/i18n';
 
-import { flashAPIErrors, setQueuedErrorMessage } from '../../../../../shared/flash_messages';
+import {
+  flashAPIErrors,
+  setQueuedErrorMessage,
+  setQueuedSuccessMessage,
+} from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { ENGINE_CURATIONS_PATH, ENGINE_CURATION_PATH } from '../../../../routes';
@@ -145,7 +149,12 @@ export const CurationSuggestionLogic = kea<
           'applied'
         );
 
-        // Show flash success here?
+        setQueuedSuccessMessage(
+          i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.successfullyAppliedMessage',
+            { defaultMessage: 'Suggestion was succefully applied.' }
+          )
+        );
         KibanaLogic.values.navigateToUrl(
           generateEnginePath(ENGINE_CURATION_PATH, {
             curationId: updatedSuggestion.curation_id,
@@ -168,7 +177,16 @@ export const CurationSuggestionLogic = kea<
           'automated'
         );
 
-        // Show flash success here?
+        setQueuedSuccessMessage(
+          i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.successfullyAppliedMessage',
+            {
+              defaultMessage:
+                'Suggestion was succefully applied and all future suggestions for the query "{query}" will be automatically applied.',
+              values: { query: suggestion!.query },
+            }
+          )
+        );
         KibanaLogic.values.navigateToUrl(
           generateEnginePath(ENGINE_CURATION_PATH, {
             curationId: updatedSuggestion.curation_id,
@@ -186,7 +204,15 @@ export const CurationSuggestionLogic = kea<
       try {
         await updateSuggestion(http, engineName, suggestion!.query, 'rejected');
 
-        // Show flash success here?
+        setQueuedSuccessMessage(
+          i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.successfullyAppliedMessage',
+            {
+              defaultMessage: 'Suggestion was succefully rejected.',
+              values: { query: suggestion!.query },
+            }
+          )
+        );
         KibanaLogic.values.navigateToUrl(generateEnginePath(ENGINE_CURATIONS_PATH));
       } catch (e) {
         flashAPIErrors(e);
@@ -200,7 +226,16 @@ export const CurationSuggestionLogic = kea<
       try {
         await updateSuggestion(http, engineName, suggestion!.query, 'disabled');
 
-        // Show flash success here?
+        setQueuedSuccessMessage(
+          i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.successfullyAppliedMessage',
+            {
+              defaultMessage:
+                'Suggestion was succefully rejected and you will no longer receive suggestions for the query "{query}".',
+              values: { query: suggestion!.query },
+            }
+          )
+        );
         KibanaLogic.values.navigateToUrl(generateEnginePath(ENGINE_CURATIONS_PATH));
       } catch (e) {
         flashAPIErrors(e);
