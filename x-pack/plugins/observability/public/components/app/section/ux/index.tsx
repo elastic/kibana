@@ -13,9 +13,10 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import CoreVitals from '../../../shared/core_web_vitals';
+import { BucketSize } from '../../../../pages/overview';
 
 interface Props {
-  bucketSize: string;
+  bucketSize: BucketSize;
 }
 
 export function UXSection({ bucketSize }: Props) {
@@ -31,7 +32,7 @@ export function UXSection({ bucketSize }: Props) {
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
           serviceName,
-          bucketSize,
+          ...bucketSize,
         });
       }
     },

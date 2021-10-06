@@ -31,9 +31,10 @@ import { Series } from '../../../../typings';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
+import { BucketSize } from '../../../../pages/overview';
 
 interface Props {
-  bucketSize?: string;
+  bucketSize: BucketSize;
 }
 
 export function UptimeSection({ bucketSize }: Props) {
@@ -49,7 +50,7 @@ export function UptimeSection({ bucketSize }: Props) {
         return getDataHandler('synthetics')?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
-          bucketSize,
+          ...bucketSize,
         });
       }
     },
