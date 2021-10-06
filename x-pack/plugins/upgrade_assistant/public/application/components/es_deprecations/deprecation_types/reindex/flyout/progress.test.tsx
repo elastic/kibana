@@ -8,7 +8,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { IndexGroup, ReindexStatus, ReindexStep } from '../../../../../../../common/types';
+import { ReindexStatus, ReindexStep } from '../../../../../../../common/types';
 import type { ReindexState } from '../use_reindex_state';
 import { ReindexProgress } from './progress';
 
@@ -33,7 +33,7 @@ describe('ReindexProgress', () => {
   steps={
     Array [
       Object {
-        "status": "incomplete",
+        "status": "inProgress",
         "title": <FormattedMessage
           defaultMessage="Setting old index to read-only"
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.readonlyStepTitle"
@@ -109,79 +109,5 @@ describe('ReindexProgress', () => {
     const reindexStep = wrapper.props().steps[2];
     expect(reindexStep.children.type.name).toEqual('ReindexProgressBar');
     expect(reindexStep.children.props.reindexState.reindexTaskPercComplete).toEqual(0.25);
-  });
-
-  it('adds steps for index groups', () => {
-    const wrapper = shallow(
-      <ReindexProgress
-        reindexState={
-          {
-            lastCompletedStep: ReindexStep.created,
-            status: ReindexStatus.inProgress,
-            indexGroup: IndexGroup.ml,
-            reindexTaskPercComplete: null,
-            errorMessage: null,
-          } as ReindexState
-        }
-        cancelReindex={jest.fn()}
-      />
-    );
-
-    expect(wrapper).toMatchInlineSnapshot(`
-<StepProgress
-  steps={
-    Array [
-      Object {
-        "status": "inProgress",
-        "title": <FormattedMessage
-          defaultMessage="Pausing Machine Learning jobs"
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.pauseMlStepTitle"
-          values={Object {}}
-        />,
-      },
-      Object {
-        "status": "incomplete",
-        "title": <FormattedMessage
-          defaultMessage="Setting old index to read-only"
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.readonlyStepTitle"
-          values={Object {}}
-        />,
-      },
-      Object {
-        "status": "incomplete",
-        "title": <FormattedMessage
-          defaultMessage="Creating new index"
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.createIndexStepTitle"
-          values={Object {}}
-        />,
-      },
-      Object {
-        "status": "incomplete",
-        "title": <FormattedMessage
-          defaultMessage="Reindexing documents"
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.reindexingDocumentsStepTitle"
-          values={Object {}}
-        />,
-      },
-      Object {
-        "status": "incomplete",
-        "title": <FormattedMessage
-          defaultMessage="Swapping original index with alias"
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasSwapStepTitle"
-          values={Object {}}
-        />,
-      },
-      Object {
-        "status": "incomplete",
-        "title": <FormattedMessage
-          defaultMessage="Resuming Machine Learning jobs"
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.resumeMlStepTitle"
-          values={Object {}}
-        />,
-      },
-    ]
-  }
-/>
-`);
   });
 });

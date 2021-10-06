@@ -17,7 +17,6 @@ import { errors as esErrors } from '@elastic/elasticsearch';
 const mockReindexService = {
   hasRequiredPrivileges: jest.fn(),
   detectReindexWarnings: jest.fn(),
-  getIndexGroup: jest.fn(),
   createReindexOperation: jest.fn(),
   findAllInProgressOperations: jest.fn(),
   findReindexOperation: jest.fn(),
@@ -35,7 +34,7 @@ jest.mock('../../lib/reindexing', () => {
   };
 });
 
-import { IndexGroup, ReindexSavedObject, ReindexStatus } from '../../../common/types';
+import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
 import { credentialStoreFactory } from '../../lib/reindexing/credential_store';
 import { registerReindexIndicesRoutes } from './reindex_indices';
 
@@ -69,7 +68,6 @@ describe('reindex API', () => {
 
     mockReindexService.hasRequiredPrivileges.mockResolvedValue(true);
     mockReindexService.detectReindexWarnings.mockReset();
-    mockReindexService.getIndexGroup.mockReset();
     mockReindexService.createReindexOperation.mockReset();
     mockReindexService.findAllInProgressOperations.mockReset();
     mockReindexService.findReindexOperation.mockReset();
@@ -163,25 +161,6 @@ describe('reindex API', () => {
       const data = resp.payload;
       expect(data.reindexOp).toBeNull();
       expect(data.warnings).toBeNull();
-    });
-
-    it('returns the indexGroup for ML indices', async () => {
-      mockReindexService.findReindexOperation.mockResolvedValueOnce(null);
-      mockReindexService.detectReindexWarnings.mockResolvedValueOnce([]);
-      mockReindexService.getIndexGroup.mockReturnValue(IndexGroup.ml);
-
-      const resp = await routeDependencies.router.getHandler({
-        method: 'get',
-        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
-      })(
-        routeHandlerContextMock,
-        createRequestMock({ params: { indexName: 'anIndex' } }),
-        kibanaResponseFactory
-      );
-
-      expect(resp.status).toEqual(200);
-      const data = resp.payload;
-      expect(data.indexGroup).toEqual(IndexGroup.ml);
     });
   });
 
