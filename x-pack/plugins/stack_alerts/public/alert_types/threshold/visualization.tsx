@@ -277,7 +277,12 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
               showOverlappingTicks={true}
               tickFormat={dateFormatter}
             />
-            <Axis domain={{ max: maxY }} id="left" title={aggLabel} position={Position.Left} />
+            <Axis
+              domain={{ max: maxY, min: NaN }}
+              id="left"
+              title={aggLabel}
+              position={Position.Left}
+            />
             {alertVisualizationDataKeys.map((key: string) => {
               return (
                 <LineSeries
