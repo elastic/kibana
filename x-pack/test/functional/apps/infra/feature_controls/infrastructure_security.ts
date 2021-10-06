@@ -168,12 +168,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-<<<<<<< HEAD
-          await testSubjects.existOrFail('infrastructureViewSetupInstructionsButton');
-          await testSubjects.missingOrFail('configureSourceButton');
-=======
           await testSubjects.existOrFail('~noDataPage');
->>>>>>> 74da7d30de2 ([Observability] New "No Data" screens (#107709))
         });
 
         it(`shows read-only badge`, async () => {
