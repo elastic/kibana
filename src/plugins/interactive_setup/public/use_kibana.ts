@@ -8,8 +8,8 @@
 
 import constate from 'constate';
 
-import type { HttpSetup } from 'src/core/public';
+import type { CoreStart } from 'src/core/public';
 
-export const [HttpProvider, useHttp] = constate(({ http }: { http: HttpSetup }) => {
-  return http;
+export const [KibanaProvider, useKibana] = constate(({ services }: { services: CoreStart }) => {
+  return services;
 });

@@ -28,7 +28,7 @@ describe('VerificationCodeForm', () => {
     const onSuccess = jest.fn();
 
     const { findByRole, findByLabelText } = render(
-      <Providers http={coreStart.http}>
+      <Providers services={coreStart}>
         <VerificationCodeForm onSuccess={onSuccess} />
       </Providers>
     );
@@ -65,14 +65,14 @@ describe('VerificationCodeForm', () => {
     const onSuccess = jest.fn();
 
     const { findAllByText, findByRole, findByLabelText } = render(
-      <Providers http={coreStart.http}>
+      <Providers services={coreStart}>
         <VerificationCodeForm onSuccess={onSuccess} />
       </Providers>
     );
 
     fireEvent.click(await findByRole('button', { name: 'Verify', hidden: true }));
 
-    await findAllByText(/Enter a verification code/i);
+    await findAllByText(/Enter the verification code from the Kibana server/i);
 
     fireEvent.input(await findByLabelText('Digit 1'), {
       target: { value: '1' },
