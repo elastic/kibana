@@ -6,10 +6,11 @@
  */
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { showAlertsToast } from '../../alerts/lib/alerts_toast';
-import { ajaxErrorHandlersProvider } from '../../lib/ajax_error_handler';
+import { useRequestErrorHandler } from './use_request_error_handler';
 
 export const useAlertsModal = () => {
   const { services } = useKibana();
+  const handleRequestError = useRequestErrorHandler();
 
   function shouldShowAlertsModal(alerts: {}) {
     const modalHasBeenShown =
@@ -32,8 +33,7 @@ export const useAlertsModal = () => {
       window.localStorage.setItem('ALERTS_MODAL_DECISION_MADE', 'true');
       showAlertsToast(response);
     } catch (err) {
-      const ajaxErrorHandlers = ajaxErrorHandlersProvider();
-      return ajaxErrorHandlers(err);
+      await handleRequestError(err);
     }
   }
 
