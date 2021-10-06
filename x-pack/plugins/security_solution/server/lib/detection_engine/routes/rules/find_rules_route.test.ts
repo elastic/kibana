@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { requestContextMock, requestMock, serverMock } from '../__mocks__';
@@ -23,9 +24,11 @@ describe.each([
 ])('find_rules - %s', (_, isRuleRegistryEnabled) => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(async () => {
     server = serverMock.create();
+    logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
@@ -35,7 +38,7 @@ describe.each([
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
     clients.ruleExecutionLogClient.findBulk.mockResolvedValue(getFindBulkResultStatus());
 
-    findRulesRoute(server.router, isRuleRegistryEnabled);
+    findRulesRoute(server.router, logger, isRuleRegistryEnabled);
   });
 
   describe('status codes with actionClient and alertClient', () => {

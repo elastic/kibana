@@ -30,10 +30,14 @@ const legacyRuleActionsSavedObjectMappings: SavedObjectsType['mappings'] = {
     },
     actions: {
       properties: {
+        actionRef: {
+          type: 'keyword',
+        },
         group: {
           type: 'keyword',
         },
         id: {
+          // "actions.id" is no longer used since the saved object references and "actionRef" was introduced. It is still here for legacy reasons such as migrations.
           type: 'keyword',
         },
         action_type_id: {

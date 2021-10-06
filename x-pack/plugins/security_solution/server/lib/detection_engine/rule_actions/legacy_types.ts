@@ -6,7 +6,30 @@
  */
 
 import { SavedObjectAttributes } from 'kibana/server';
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { AlertActionParams } from '../../../../../alerting/common';
+
+/**
+ * This was the pre-7.16 version of LegacyRuleAlertAction and how it was stored on disk pre-7.16.
+ * Post 7.16 this is how it is serialized from the saved object from disk since we are using saved object references.
+ * @deprecated Remove this once the legacy notification/side car is gone
+ */
+export interface LegacyRuleAlertAction {
+  group: string;
+  id: string;
+  params: AlertActionParams;
+  action_type_id: string;
+}
+
+/**
+ * This is how it is stored on disk in its "raw format" for 7.16+
+ * @deprecated Remove this once the legacy notification/side car is gone
+ */
+export interface LegacyRuleAlertSavedObjectAction {
+  group: string;
+  params: AlertActionParams;
+  action_type_id: string;
+  actionRef: string;
+}
 
 /**
  * We keep this around to migrate and update data for the old deprecated rule actions saved object mapping but we
@@ -16,8 +39,7 @@ import { RuleAlertAction } from '../../../../common/detection_engine/types';
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface LegacyIRuleActionsAttributes extends Record<string, any> {
-  ruleAlertId: string;
-  actions: RuleAlertAction[];
+  actions: LegacyRuleAlertSavedObjectAction[];
   ruleThrottle: string;
   alertThrottle: string | null;
 }
@@ -37,7 +59,7 @@ export interface LegacyIRuleActionsAttributesSavedObjectAttributes
  */
 export interface LegacyRuleActions {
   id: string;
-  actions: RuleAlertAction[];
+  actions: LegacyRuleAlertAction[];
   ruleThrottle: string;
   alertThrottle: string | null;
 }
