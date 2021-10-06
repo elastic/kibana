@@ -6,17 +6,19 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
+import { HttpSetup } from 'kibana/public';
 
 import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { EngineLogic } from '../../../engine';
 import { Result } from '../../../result/types';
-import { CurationSuggestion } from '../../types';
+import { Curation, CurationSuggestion } from '../../types';
 
 interface CurationSuggestionValues {
   dataLoading: boolean;
   suggestion: CurationSuggestion | null;
   suggestedPromotedDocuments: Result[];
+  curation: Curation | null;
 }
 
 interface CurationSuggestionActions {
@@ -24,12 +26,15 @@ interface CurationSuggestionActions {
   onSuggestionLoaded({
     suggestion,
     suggestedPromotedDocuments,
+    curation,
   }: {
     suggestion: CurationSuggestion;
     suggestedPromotedDocuments: Result[];
+    curation: Curation;
   }): {
     suggestion: CurationSuggestion;
     suggestedPromotedDocuments: Result[];
+    curation: Curation;
   };
 }
 
@@ -43,9 +48,10 @@ export const CurationSuggestionLogic = kea<
   path: ['enterprise_search', 'app_search', 'curations', 'suggestion_logic'],
   actions: () => ({
     loadSuggestion: true,
-    onSuggestionLoaded: ({ suggestion, suggestedPromotedDocuments }) => ({
+    onSuggestionLoaded: ({ suggestion, suggestedPromotedDocuments, curation }) => ({
       suggestion,
       suggestedPromotedDocuments,
+      curation,
     }),
   }),
   reducers: () => ({
@@ -68,6 +74,12 @@ export const CurationSuggestionLogic = kea<
         onSuggestionLoaded: (_, { suggestedPromotedDocuments }) => suggestedPromotedDocuments,
       },
     ],
+    curation: [
+      null,
+      {
+        onSuggestionLoaded: (_, { curation }) => curation,
+      },
+    ],
   }),
   listeners: ({ actions, props }) => ({
     loadSuggestion: async () => {
@@ -75,44 +87,20 @@ export const CurationSuggestionLogic = kea<
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.post(
-          `/internal/app_search/engines/${engineName}/search_relevance_suggestions/${props.query}`,
-          {
-            body: JSON.stringify({
-              page: {
-                current: 1,
-                size: 1,
-              },
-              filters: {
-                status: ['pending'],
-                type: 'curation',
-              },
-            }),
-          }
-        );
+        const suggestion = await getSuggestions(http, engineName, props.query);
+        const promotedIds: string[] = suggestion.promoted;
+        const documentDetailsResopnse = getDocumentDetails(http, engineName, promotedIds);
 
-        const suggestion = response.results[0];
+        let promises = [documentDetailsResopnse];
+        if (suggestion.curation_id) {
+          promises = [...promises, getCuration(http, engineName, suggestion.curation_id)];
+        }
 
-        const searchResponse = await http.post(
-          `/internal/app_search/engines/${engineName}/search`,
-          {
-            query: { query: '' },
-            body: JSON.stringify({
-              page: {
-                size: 100,
-              },
-              filters: {
-                id: suggestion.promoted,
-              },
-            }),
-          }
-        );
+        const [documentDetails, curation] = await Promise.all(promises);
 
         // Filter out docs that were not found and maintain promoted order
-        const promotedIds: string[] = suggestion.promoted;
-        const documentDetails = searchResponse.results;
         const suggestedPromotedDocuments = promotedIds.reduce((acc: Result[], id: string) => {
-          const found = documentDetails.find(
+          const found = documentDetails.results.find(
             (documentDetail: Result) => documentDetail.id.raw === id
           );
           if (!found) return acc;
@@ -120,8 +108,9 @@ export const CurationSuggestionLogic = kea<
         }, []);
 
         actions.onSuggestionLoaded({
-          suggestion: suggestion as CurationSuggestion,
+          suggestion,
           suggestedPromotedDocuments,
+          curation: curation || null,
         });
       } catch (e) {
         flashAPIErrors(e);
@@ -129,3 +118,48 @@ export const CurationSuggestionLogic = kea<
     },
   }),
 });
+
+const getSuggestions = async (
+  http: HttpSetup,
+  engineName: string,
+  query: string
+): Promise<CurationSuggestion> => {
+  const response = await http.post(
+    `/internal/app_search/engines/${engineName}/search_relevance_suggestions/${query}`,
+    {
+      body: JSON.stringify({
+        page: {
+          current: 1,
+          size: 1,
+        },
+        filters: {
+          status: ['pending'],
+          type: 'curation',
+        },
+      }),
+    }
+  );
+
+  const suggestion = response.results[0] as CurationSuggestion;
+  return suggestion;
+};
+
+const getDocumentDetails = async (http: HttpSetup, engineName: string, documentIds: string[]) => {
+  return http.post(`/internal/app_search/engines/${engineName}/search`, {
+    query: { query: '' },
+    body: JSON.stringify({
+      page: {
+        size: 100,
+      },
+      filters: {
+        id: documentIds,
+      },
+    }),
+  });
+};
+
+const getCuration = async (http: HttpSetup, engineName: string, curationId: string) => {
+  return http.get(`/internal/app_search/engines/${engineName}/curations/${curationId}`, {
+    query: { skip_record_analytics: 'true' },
+  });
+};

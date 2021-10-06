@@ -73,7 +73,7 @@ export const CurationResultPanel: React.FC<Props> = ({ variant, results }) => {
       >
         {results.length > 0 ? (
           results.map((result) => (
-            <EuiFlexItem grow={false} key={result.id.raw}>
+            <EuiFlexItem key={result.id.raw} style={{ width: '100%' }}>
               <Result
                 result={result}
                 isMetaEngine={isMetaEngine}
