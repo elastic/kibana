@@ -36,6 +36,8 @@ interface Props {
   pagination: Pagination;
 }
 
+type MLJob = MLJobs[0];
+
 export const ElasticsearchMLJobs = ({
   clusterStatus,
   jobs,
@@ -144,13 +146,15 @@ const columns = [
     }),
     field: 'node.name',
     sortable: true,
-    render: (name: string, node: { id: string }) => {
-      if (node) {
-        return (
-          <EuiLink href={getSafeForExternalLink(`#/elasticsearch/nodes/${node.id}`)}>
-            {name}
-          </EuiLink>
-        );
+    render: (name: string, job: MLJob) => {
+      if (job.node) {
+        if ('id' in job.node) {
+          return (
+            <EuiLink href={getSafeForExternalLink(`#/elasticsearch/nodes/${job.node.id}`)}>
+              {name}
+            </EuiLink>
+          );
+        } else return <span>{name}</span>;
       }
 
       return (
