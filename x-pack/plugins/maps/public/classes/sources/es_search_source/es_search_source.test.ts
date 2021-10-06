@@ -31,7 +31,7 @@ describe('ESSearchSource', () => {
       const esSearchSource = new ESSearchSource(mockDescriptor);
       expect(esSearchSource.getMinZoom()).toBe(0);
       expect(esSearchSource.getMaxZoom()).toBe(24);
-      expect(esSearchSource.getLayerName()).toBe('source_layer');
+      expect(esSearchSource.getLayerName()).toBe('hits');
     });
 
     describe('getUrlTemplateWithMeta', () => {
