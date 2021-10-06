@@ -768,8 +768,8 @@ export const BETWEEN_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSea
   defaultMessage: 'between',
 });
 
-export const EVERY_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.everyLabel', {
-  defaultMessage: 'every',
+export const ON_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.onLabel', {
+  defaultMessage: 'on',
 });
 
 export const AND = i18n.translate('xpack.enterpriseSearch.workplaceSearch.and', {

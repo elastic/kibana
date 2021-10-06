@@ -104,7 +104,7 @@ export const Frequency: React.FC<FrequencyProps> = ({ tabId }) => {
         action={actions}
       />
       {docsLinks}
-      <EuiSpacer size="s" />
+      <EuiSpacer />
       <EuiTabbedContent tabs={tabs} selectedTab={tabs[tabId]} onTabClick={onSelectedTabChanged} />
     </SourceLayout>
   );
