@@ -100,7 +100,12 @@ export const SynchronizationLogic = kea<
       },
     ],
     cachedSchedule: [stripScheduleSeconds(props.contentSource.indexing.schedule)],
-    schedule: [stripScheduleSeconds(props.contentSource.indexing.schedule)],
+    schedule: [
+      stripScheduleSeconds(props.contentSource.indexing.schedule),
+      {
+        resetSyncSettings: () => stripScheduleSeconds(props.contentSource.indexing.schedule),
+      },
+    ],
   }),
   selectors: ({ selectors }) => ({
     hasUnsavedObjectsAndAssetsChanges: [
@@ -127,7 +132,7 @@ export const SynchronizationLogic = kea<
     ],
     hasUnsavedFrequencyChanges: [
       () => [selectors.cachedSchedule, selectors.schedule],
-      (cachedSchedule, schedule) => isEqual(cachedSchedule, schedule),
+      (cachedSchedule, schedule) => !isEqual(cachedSchedule, schedule),
     ],
   }),
   listeners: ({ actions, values, props }) => ({

@@ -44,7 +44,10 @@ interface FrequencyProps {
 
 export const Frequency: React.FC<FrequencyProps> = ({ tabId }) => {
   const { contentSource } = useValues(SourceLogic);
-  const { handleSelectedTabChanged } = useActions(SynchronizationLogic({ contentSource }));
+  const { hasUnsavedFrequencyChanges } = useValues(SynchronizationLogic({ contentSource }));
+  const { handleSelectedTabChanged, resetSyncSettings } = useActions(
+    SynchronizationLogic({ contentSource })
+  );
 
   const tabs = [
     {
@@ -66,10 +69,14 @@ export const Frequency: React.FC<FrequencyProps> = ({ tabId }) => {
   const actions = (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <EuiButtonEmpty>{RESET_BUTTON}</EuiButtonEmpty>{' '}
+        <EuiButtonEmpty onClick={resetSyncSettings} disabled={!hasUnsavedFrequencyChanges}>
+          {RESET_BUTTON}
+        </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiButton fill>{SAVE_BUTTON_LABEL}</EuiButton>{' '}
+        <EuiButton fill onClick={() => 'TODO'} disabled={!hasUnsavedFrequencyChanges}>
+          {SAVE_BUTTON_LABEL}
+        </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
