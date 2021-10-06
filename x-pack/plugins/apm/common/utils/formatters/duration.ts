@@ -182,13 +182,12 @@ export function asTransactionRate(value: Maybe<number>) {
   });
 }
 
-export function asExactTransactionRate(value: number, unit: ThroughputUnit) {
+export function asExactTransactionRate(value: number) {
   return i18n.translate('xpack.apm.exactTransactionRateLabel', {
-    defaultMessage: `{value} { unit, select, minute {tpm} other {tps} }`,
-    values: { value: asDecimalOrInteger(value), unit },
+    defaultMessage: `{value} tpm`,
+    values: { value: asDecimalOrInteger(value) },
   });
 }
-
 /**
  * Converts value and returns it formatted - 00 unit
  */

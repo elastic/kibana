@@ -514,8 +514,6 @@ const serviceThroughputRoute = createApmServerRoute({
         searchAggregatedTransactions,
       });
 
-    const throughputUnit = getThroughputUnit(bucketSize);
-
     const commonProps = {
       environment,
       kuery,
@@ -524,8 +522,8 @@ const serviceThroughputRoute = createApmServerRoute({
       setup,
       transactionType,
       transactionName,
-      throughputUnit,
       intervalString,
+      bucketSize,
     };
 
     const [currentPeriod, previousPeriod] = await Promise.all([
@@ -549,7 +547,6 @@ const serviceThroughputRoute = createApmServerRoute({
         currentPeriodTimeseries: currentPeriod,
         previousPeriodTimeseries: previousPeriod,
       }),
-      throughputUnit,
     };
   },
 });

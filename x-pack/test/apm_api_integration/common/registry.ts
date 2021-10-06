@@ -21,7 +21,8 @@ type ArchiveName =
   | 'ml_8.0.0'
   | 'observability_overview'
   | 'rum_8.0.0'
-  | 'rum_test_data';
+  | 'rum_test_data'
+  | 'apm_synthetic_8.0.0';
 
 interface RunCondition {
   config: APMFtrConfigName;
