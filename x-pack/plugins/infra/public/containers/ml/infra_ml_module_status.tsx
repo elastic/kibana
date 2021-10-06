@@ -224,9 +224,17 @@ const getJobStatus =
             jobSummary.datafeedState === 'stopped'
           ) {
             return 'stopped';
-          } else if (jobSummary.jobState === 'opening') {
+          } else if (
+            jobSummary.jobState === 'opening' &&
+            jobSummary.awaitingNodeAssignment === false
+          ) {
             return 'initializing';
-          } else if (jobSummary.jobState === 'opened' && jobSummary.datafeedState === 'started') {
+          } else if (
+            (jobSummary.jobState === 'opened' && jobSummary.datafeedState === 'started') ||
+            (jobSummary.jobState === 'opening' &&
+              jobSummary.datafeedState === 'starting' &&
+              jobSummary.awaitingNodeAssignment === true)
+          ) {
             return 'started';
           }
 

@@ -49,6 +49,7 @@ export function getStateDefaults({
     hideChart: undefined,
     viewMode: undefined,
     hideAggregatedPreview: undefined,
+    savedQuery: undefined,
   } as AppState;
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;
