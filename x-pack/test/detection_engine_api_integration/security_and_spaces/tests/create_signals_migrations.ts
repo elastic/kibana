@@ -22,7 +22,7 @@ import {
   waitForIndexToPopulate,
 } from '../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
-import { RACAlert } from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/types';
+import { Signal } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 
 interface CreateResponse {
   index: string;
@@ -38,7 +38,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('Creating signals migrations', () => {
+  // Skipping as migrations work only on legacy indices
+  describe.skip('Creating signals migrations', () => {
     let createdMigrations: CreateResponse[];
     let legacySignalsIndexName: string;
     let outdatedSignalsIndexName: string;
@@ -97,7 +98,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const [{ migration_index: newIndex }] = createResponses;
       await waitForIndexToPopulate(es, newIndex);
-      const { body: migrationResults } = await es.search<RACAlert>({ index: newIndex });
+      const { body: migrationResults } = await es.search<{ signal: Signal }>({ index: newIndex });
 
       expect(migrationResults.hits.hits).length(1);
       const migratedSignal = migrationResults.hits.hits[0]._source?.signal;

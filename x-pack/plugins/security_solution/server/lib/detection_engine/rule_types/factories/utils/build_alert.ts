@@ -16,6 +16,7 @@ import {
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { createHash } from 'crypto';
 
@@ -28,7 +29,6 @@ import {
   isWrappedSignalHit,
 } from '../../../signals/utils';
 import { RACAlert } from '../../types';
-import { flattenWithPrefix } from './flatten_with_prefix';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,

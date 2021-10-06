@@ -6,6 +6,8 @@
  */
 
 import { EVENT_KIND, TIMESTAMP } from '@kbn/rule-data-utils';
+import { flattenWithPrefix } from '@kbn/securitysolution-rules';
+
 import { SavedObject } from 'src/core/types';
 import { BaseHit } from '../../../../../../common/detection_engine/types';
 import type { ConfigType } from '../../../../../config';
@@ -22,7 +24,6 @@ import {
 import { RACAlert } from '../../types';
 import { additionalAlertFields, buildAlert } from './build_alert';
 import { filterSource } from './filter_source';
-import { flattenWithPrefix } from './flatten_with_prefix';
 
 const isSourceDoc = (
   hit: SignalSourceHit

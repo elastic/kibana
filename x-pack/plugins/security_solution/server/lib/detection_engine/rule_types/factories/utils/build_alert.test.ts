@@ -21,9 +21,9 @@ import {
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { sampleDocNoSortIdWithTimestamp } from '../../../signals/__mocks__/es_results';
-import { flattenWithPrefix } from './flatten_with_prefix';
 import { buildAlert, buildParent, buildAncestors, additionalAlertFields } from './build_alert';
 import { Ancestor, SignalSourceHit } from '../../../signals/types';
 import {

@@ -20,6 +20,7 @@ import {
   EVENT_ACTION,
   EVENT_KIND,
 } from '@kbn/rule-data-utils';
+import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { orderBy, get } from 'lodash';
 
@@ -54,7 +55,6 @@ import {
   ALERT_ORIGINAL_TIME,
 } from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/field_maps/field_names';
 import { Ancestor } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
-import { flattenWithPrefix } from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/factories/utils/flatten_with_prefix';
 
 /**
  * Specific _id to use for some of the tests. If the archiver changes and you see errors
