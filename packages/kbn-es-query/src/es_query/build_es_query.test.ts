@@ -41,8 +41,10 @@ describe('build query', () => {
         { query: 'bar:baz', language: 'lucene' },
       ] as Query[];
       const filters = {
-        match: {
-          a: 'b',
+        query: {
+          match: {
+            a: 'b',
+          },
         },
         meta: {
           alias: '',
@@ -80,8 +82,10 @@ describe('build query', () => {
     it('should accept queries and filters as either single objects or arrays', () => {
       const queries = { query: 'extension:jpg', language: 'lucene' } as Query;
       const filters = {
-        match: {
-          a: 'b',
+        query: {
+          match: {
+            a: 'b',
+          },
         },
         meta: {
           alias: '',
@@ -118,12 +122,14 @@ describe('build query', () => {
     it('should remove match_all clauses', () => {
       const filters = [
         {
-          match_all: {},
+          query: { match_all: {} },
           meta: { type: 'match_all' },
         } as MatchAllFilter,
         {
-          match: {
-            a: 'b',
+          query: {
+            match: {
+              a: 'b',
+            },
           },
           meta: {
             alias: '',
@@ -163,7 +169,7 @@ describe('build query', () => {
         { query: '@timestamp:"2019-03-23T13:18:00"', language: 'kuery' },
         { query: '@timestamp:"2019-03-23T13:18:00"', language: 'lucene' },
       ] as Query[];
-      const filters = [{ match_all: {}, meta: { type: 'match_all' } } as MatchAllFilter];
+      const filters = [{ query: { match_all: {} }, meta: { type: 'match_all' } } as MatchAllFilter];
       const config = {
         allowLeadingWildcards: true,
         queryStringOptions: {},

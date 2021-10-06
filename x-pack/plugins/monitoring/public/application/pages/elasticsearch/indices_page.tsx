@@ -25,6 +25,7 @@ export const ElasticsearchIndicesPage: React.FC<ComponentProps> = ({ clusters })
   const { services } = useKibana<{ data: any }>();
   const { getPaginationTableProps } = useTable('elasticsearch.indices');
   const clusterUuid = globalState.cluster_uuid;
+  const ccs = globalState.ccs;
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
   });
@@ -60,6 +61,7 @@ export const ElasticsearchIndicesPage: React.FC<ComponentProps> = ({ clusters })
             show_system_indices: showSystemIndices,
           },
           body: JSON.stringify({
+            ccs,
             timeRange: {
               min: bounds.min.toISOString(),
               max: bounds.max.toISOString(),
@@ -81,11 +83,12 @@ export const ElasticsearchIndicesPage: React.FC<ComponentProps> = ({ clusters })
       }
     }
   }, [
-    handleRequestError,
-    showSystemIndices,
-    clusterUuid,
     services.data?.query.timefilter.timefilter,
     services.http,
+    clusterUuid,
+    showSystemIndices,
+    ccs,
+    handleRequestError,
   ]);
 
   return (
@@ -96,7 +99,7 @@ export const ElasticsearchIndicesPage: React.FC<ComponentProps> = ({ clusters })
       data-test-subj="elasticsearchOverviewPage"
       cluster={cluster}
     >
-      <div data-test-subj="elasticsearchNodesListingPage">
+      <div data-test-subj="elasticsearchIndicesListingPage">
         <SetupModeRenderer
           render={({ flyoutComponent, bottomBarComponent }: SetupModeProps) => (
             <SetupModeContext.Provider value={{ setupModeSupported: true }}>
