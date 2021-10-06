@@ -219,7 +219,6 @@ export async function getSavedVisualization(
   const id = (opts.id as string) || '';
   const savedObject = {
     id,
-    copyOnSave: false,
     migrationVersion: opts.migrationVersion,
     displayName: SAVED_VIS_TYPE,
     getEsType: () => SAVED_VIS_TYPE,
@@ -306,7 +305,12 @@ export async function getSavedVisualization(
 
 export async function saveVisualization(
   savedObject: VisSavedObject,
-  { confirmOverwrite = false, isTitleDuplicateConfirmed = false, onTitleDuplicate }: SaveVisOptions,
+  {
+    confirmOverwrite = false,
+    isTitleDuplicateConfirmed = false,
+    onTitleDuplicate,
+    copyOnSave = false,
+  }: SaveVisOptions,
   services: {
     savedObjectsClient: SavedObjectsClientContract;
     overlays: OverlayStart;
@@ -321,7 +325,7 @@ export async function saveVisualization(
   // The goal is to move towards a better rename flow, but since our users have been conditioned
   // to expect a 'save as' flow during a rename, we are keeping the logic the same until a better
   // UI/UX can be worked out.
-  if (savedObject.copyOnSave) {
+  if (copyOnSave) {
     delete savedObject.id;
   }
 
@@ -366,13 +370,14 @@ export async function saveVisualization(
 
   try {
     await checkForDuplicateTitle(
-      savedObject as any,
+      {
+        ...savedObject,
+        copyOnSave,
+      } as any,
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
       services as any
     );
-    savedObject.isSaving = true;
-
     const createOpt = {
       id: savedObject.id,
       migrationVersion: savedObject.migrationVersion,
@@ -386,11 +391,9 @@ export async function saveVisualization(
         });
 
     savedObject.id = resp.id;
-    savedObject.isSaving = false;
     savedObject.lastSavedTitle = savedObject.title;
     return savedObject.id;
   } catch (err: any) {
-    savedObject.isSaving = false;
     savedObject.id = originalId;
     if (isErrorNonFatal(err)) {
       return '';

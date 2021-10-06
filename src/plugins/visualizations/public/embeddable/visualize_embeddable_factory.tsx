@@ -226,9 +226,9 @@ export class VisualizeEmbeddableFactory
         confirmOverwrite: false,
         returnToOrigin: true,
         isTitleDuplicateConfirmed: true,
+        copyOnSave: false,
       };
       savedVis.title = title;
-      savedVis.copyOnSave = false;
       savedVis.description = '';
       savedVis.searchSourceFields = visObj?.data.searchSource?.getSerializedFields();
       const serializedVis = (visObj as unknown as Vis).serialize();

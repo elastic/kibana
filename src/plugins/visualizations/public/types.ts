@@ -45,14 +45,12 @@ export interface ISavedVis {
 
 export interface VisSavedObject extends ISavedVis {
   lastSavedTitle: string;
-  copyOnSave?: boolean;
   getEsType: () => string;
   getDisplayName?: () => string;
   displayName: string;
   migrationVersion?: SavedObjectsMigrationVersion;
   searchSource?: any;
   version?: string;
-  isSaving?: boolean;
   tags?: string[];
 }
 
@@ -60,6 +58,7 @@ export interface SaveVisOptions {
   confirmOverwrite?: boolean;
   isTitleDuplicateConfirmed?: boolean;
   onTitleDuplicate?: () => void;
+  copyOnSave?: boolean;
 }
 
 export interface GetVisOptions {

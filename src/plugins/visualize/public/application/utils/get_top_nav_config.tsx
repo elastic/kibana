@@ -124,8 +124,10 @@ export const getTopNavConfig = (
   /**
    * Called when the user clicks "Save" button.
    */
-  async function doSave(saveOptions: SavedObjectSaveOpts & { dashboardId?: string }) {
-    const newlyCreated = !Boolean(savedVis.id) || savedVis.copyOnSave;
+  async function doSave(
+    saveOptions: SavedObjectSaveOpts & { dashboardId?: string; copyOnSave?: boolean }
+  ) {
+    const newlyCreated = !Boolean(savedVis.id) || saveOptions.copyOnSave;
     // vis.title was not bound and it's needed to reflect title into visState
     stateContainer.transitions.setVis({
       title: savedVis.title,
@@ -173,7 +175,7 @@ export const getTopNavConfig = (
               state: {
                 type: VISUALIZE_EMBEDDABLE_TYPE,
                 input: { savedObjectId: id },
-                embeddableId: savedVis.copyOnSave ? undefined : embeddableId,
+                embeddableId: saveOptions.copyOnSave ? undefined : embeddableId,
                 searchSessionId: data.search.session.getSessionId(),
               },
               path,
@@ -401,7 +403,6 @@ export const getTopNavConfig = (
                 const currentTitle = savedVis.title;
                 savedVis.title = newTitle;
                 embeddableHandler.updateInput({ title: newTitle });
-                savedVis.copyOnSave = newCopyOnSave;
                 savedVis.description = newDescription;
 
                 if (savedObjectsTagging) {
@@ -414,6 +415,7 @@ export const getTopNavConfig = (
                   onTitleDuplicate,
                   returnToOrigin,
                   dashboardId: !!dashboardId ? dashboardId : undefined,
+                  copyOnSave: newCopyOnSave,
                 };
 
                 // If we're adding to a dashboard and not saving to library,
