@@ -18,6 +18,7 @@ import { ItemTemplate } from './item_template';
 import { AdvancedIndex } from '../../../components/elasticsearch/index/advanced';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
+import { useRequestErrorHandler } from '../../hooks/use_request_error_handler';
 
 export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = () => {
   const globalState = useContext(GlobalStateContext);
@@ -34,6 +35,8 @@ export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = () => {
       indexName: index,
     },
   });
+
+  const handleRequestError = useRequestErrorHandler();
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
@@ -62,9 +65,15 @@ export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = () => {
         setAlerts(alertsResponse);
       }
     } catch (err) {
-      // TODO: handle errors
+      handleRequestError(err);
     }
-  }, [clusterUuid, services.data?.query.timefilter.timefilter, services.http, index]);
+  }, [
+    handleRequestError,
+    clusterUuid,
+    services.data?.query.timefilter.timefilter,
+    services.http,
+    index,
+  ]);
 
   return (
     <ItemTemplate title={title} getPageData={getPageData} id={index} pageType="indices">

@@ -21,6 +21,7 @@ import { fetchClusters } from '../../../lib/fetch_clusters';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { EnableAlertsModal } from '../../../alerts/enable_alerts_modal';
+import { useRequestErrorHandler } from '../../hooks/use_request_error_handler';
 
 const CODE_PATHS = [CODE_PATH_ALL];
 
@@ -56,6 +57,8 @@ export const ClusterOverview: React.FC<{}> = () => {
     ];
   }
 
+  const handleRequestError = useRequestErrorHandler();
+
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     try {
@@ -82,11 +85,17 @@ export const ClusterOverview: React.FC<{}> = () => {
         setAlerts(alertsResponse);
       }
     } catch (err) {
-      // TODO: handle errors
+      handleRequestError(err);
     } finally {
       setLoaded(true);
     }
-  }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http?.fetch]);
+  }, [
+    handleRequestError,
+    ccs,
+    clusterUuid,
+    services.data?.query.timefilter.timefilter,
+    services.http?.fetch,
+  ]);
 
   useEffect(() => {
     if (clusters && clusters.length) {

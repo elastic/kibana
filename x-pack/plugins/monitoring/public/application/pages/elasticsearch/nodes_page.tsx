@@ -19,6 +19,7 @@ import { useTable } from '../../hooks/use_table';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
+import { useRequestErrorHandler } from '../../hooks/use_request_error_handler';
 
 export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -51,6 +52,7 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
     }
   }, [cluster, generateBreadcrumbs]);
 
+  const handleRequestError = useRequestErrorHandler();
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes`;
@@ -81,15 +83,16 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
         setAlerts(alertsResponse);
       }
     } catch (err) {
-      // TODO: handle errors
+      handleRequestError(err);
     }
   }, [
-    ccs,
-    clusterUuid,
     services.data?.query.timefilter.timefilter,
     services.http,
+    clusterUuid,
+    ccs,
     getPaginationRouteOptions,
     updateTotalItemCount,
+    handleRequestError,
   ]);
 
   return (

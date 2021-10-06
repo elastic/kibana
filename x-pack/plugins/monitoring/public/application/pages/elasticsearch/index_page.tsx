@@ -22,6 +22,7 @@ import { indicesByNodes } from '../../../components/elasticsearch/shard_allocati
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
+import { useRequestErrorHandler } from '../../hooks/use_request_error_handler';
 
 export const ElasticsearchIndexPage: React.FC<ComponentProps> = () => {
   const globalState = useContext(GlobalStateContext);
@@ -48,6 +49,7 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = () => {
     },
   });
 
+  const handleRequestError = useRequestErrorHandler();
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/indices/${index}`;
@@ -82,9 +84,15 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = () => {
         setAlerts(alertsResponse);
       }
     } catch (err) {
-      // TODO: handle errors
+      handleRequestError(err);
     }
-  }, [clusterUuid, services.data?.query.timefilter.timefilter, services.http, index]);
+  }, [
+    handleRequestError,
+    clusterUuid,
+    services.data?.query.timefilter.timefilter,
+    services.http,
+    index,
+  ]);
 
   return (
     <ItemTemplate

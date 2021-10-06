@@ -16,6 +16,7 @@ import { getSetupModeState, isSetupModeFeatureEnabled } from '../setup_mode/setu
 import { SetupModeFeature } from '../../../common/enums';
 import { AlertsDropdown } from '../../alerts/alerts_dropdown';
 import { ActionMenu } from '../../components/action_menu';
+import { useRequestErrorHandler } from '../hooks/use_request_error_handler';
 
 export interface TabMenuItem {
   id: string;
@@ -44,20 +45,20 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
   const { currentTimerange } = useContext(MonitoringTimeContainer.Context);
   const [loaded, setLoaded] = useState(false);
   const history = useHistory();
-
+  const handleRequestErrors = useRequestErrorHandler();
   useEffect(() => {
     getPageData?.()
       .catch((err) => {
-        // TODO: handle errors
+        handleRequestErrors(err);
       })
       .finally(() => {
         setLoaded(true);
       });
-  }, [getPageData, currentTimerange]);
+  }, [getPageData, currentTimerange, handleRequestErrors]);
 
   const onRefresh = () => {
     getPageData?.().catch((err) => {
-      // TODO: handle errors
+      handleRequestErrors(err);
     });
   };
 

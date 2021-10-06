@@ -19,6 +19,7 @@ import { useTable } from '../../hooks/use_table';
 import { PageTemplate, TabMenuItem } from '../page_template';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 import { fetchClusters } from '../../../lib/fetch_clusters';
+import { useRequestErrorHandler } from '../../hooks/use_request_error_handler';
 
 const pageTitle = i18n.translate('xpack.monitoring.cluster.listing.pageTitle', {
   defaultMessage: 'Cluster listing',
@@ -67,6 +68,7 @@ export const ClusterListing: React.FC<ComponentProps> = () => {
     },
   ];
 
+  const handleRequestError = useRequestErrorHandler();
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     try {
@@ -83,9 +85,14 @@ export const ClusterListing: React.FC<ComponentProps> = () => {
         setClusters(response);
       }
     } catch (err) {
-      // TODO: handle errors
+      handleRequestError(err);
     }
-  }, [globalState, services.data?.query.timefilter.timefilter, services.http]);
+  }, [
+    globalState.ccs,
+    handleRequestError,
+    services.data?.query.timefilter.timefilter,
+    services.http,
+  ]);
 
   if (globalState.save && clusters.length === 1) {
     globalState.cluster_uuid = clusters[0].cluster_uuid;

@@ -16,6 +16,7 @@ import { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
+import { useRequestErrorHandler } from '../../hooks/use_request_error_handler';
 
 export const ElasticsearchNodeAdvancedPage: React.FC<ComponentProps> = () => {
   const globalState = useContext(GlobalStateContext);
@@ -43,6 +44,7 @@ export const ElasticsearchNodeAdvancedPage: React.FC<ComponentProps> = () => {
     },
   });
 
+  const handleRequestError = useRequestErrorHandler();
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes/${node}`;
@@ -71,9 +73,16 @@ export const ElasticsearchNodeAdvancedPage: React.FC<ComponentProps> = () => {
         setAlerts(alertsResponse);
       }
     } catch (err) {
-      // TODO: handle errors
+      handleRequestError(err);
     }
-  }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http, node]);
+  }, [
+    handleRequestError,
+    ccs,
+    clusterUuid,
+    services.data?.query.timefilter.timefilter,
+    services.http,
+    node,
+  ]);
 
   return (
     <ItemTemplate
