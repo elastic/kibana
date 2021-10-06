@@ -69,21 +69,17 @@ export const ClusterListing: React.FC<ComponentProps> = () => {
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
-    try {
-      if (services.http?.fetch) {
-        const response = await fetchClusters({
-          fetch: services.http.fetch,
-          timeRange: {
-            min: bounds.min.toISOString(),
-            max: bounds.max.toISOString(),
-          },
-          ccs: globalState.ccs,
-          codePaths: ['all'],
-        });
-        setClusters(response);
-      }
-    } catch (err) {
-      // TODO: handle errors
+    if (services.http?.fetch) {
+      const response = await fetchClusters({
+        fetch: services.http.fetch,
+        timeRange: {
+          min: bounds.min.toISOString(),
+          max: bounds.max.toISOString(),
+        },
+        ccs: globalState.ccs,
+        codePaths: ['all'],
+      });
+      setClusters(response);
     }
   }, [globalState, services.data?.query.timefilter.timefilter, services.http]);
 
