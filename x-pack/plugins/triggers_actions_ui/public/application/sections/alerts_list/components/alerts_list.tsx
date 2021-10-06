@@ -409,6 +409,7 @@ export const AlertsList: React.FunctionComponent = () => {
           <EuiPopover
             button={
               <EuiBadge
+                data-test-subj="ruleTagsBadge"
                 color="hollow"
                 iconType="tag"
                 iconSide="left"
@@ -424,10 +425,16 @@ export const AlertsList: React.FunctionComponent = () => {
             isOpen={tagPopoverOpenIndex === item.index}
             closePopover={() => setTagPopoverOpenIndex(-1)}
           >
-            <EuiPopoverTitle>Tags</EuiPopoverTitle>
+            <EuiPopoverTitle data-test-subj="ruleTagsPopoverTitle">Tags</EuiPopoverTitle>
             <div style={{ width: '300px' }} />
-            {tags.map((tag: string) => (
-              <EuiBadge color="hollow" iconType="tag" iconSide="left">
+            {tags.map((tag: string, index: number) => (
+              <EuiBadge
+                data-test-subj="ruleTagsPopoverTag"
+                key={index}
+                color="hollow"
+                iconType="tag"
+                iconSide="left"
+              >
                 {tag}
               </EuiBadge>
             ))}
@@ -476,7 +483,7 @@ export const AlertsList: React.FunctionComponent = () => {
       ),
       sortable: true,
       truncateText: false,
-      'data-test-subj': 'alertsTableCell-interval',
+      'data-test-subj': 'alertsTableCell-duration',
       render: (value: number, item: AlertTableItem) => {
         const ruleTypeTimeout: string | undefined = alertTypesState.data.get(
           item.alertTypeId
