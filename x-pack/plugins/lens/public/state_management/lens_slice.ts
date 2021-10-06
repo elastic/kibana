@@ -7,6 +7,7 @@
 
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
 import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
+import { mapValues } from 'lodash';
 import { History } from 'history';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
@@ -139,6 +140,15 @@ export const removeLayers = createAction<{
   visualizationId: VisualizationState['activeId'];
   layerIds: string[];
 }>('lens/removeLayers');
+export const removeOrClearLayer = createAction<{
+  visualizationId: string;
+  layerId: string;
+  layerIds: string[];
+}>('lens/removeOrClearLayer');
+  }
+  // fallback to generic count check
+  return layerCount === 1 ? 'clear' : 'remove';
+}
 
 export const lensActions = {
   setState,
@@ -158,6 +168,7 @@ export const lensActions = {
   initEmpty,
   editVisualizationAction,
   removeLayers,
+  removeOrClearLayer,
 };
 
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {
@@ -191,6 +202,45 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       }
     ) => {
       return action.payload.updater(current(state) as LensAppState);
+    },
+    [removeOrClearLayer.type]: (
+      state,
+      {
+        payload: { visualizationId, layerId, layerIds },
+      }: {
+        payload: {
+          visualizationId: string;
+          layerId: string;
+          layerIds: string[];
+        };
+      }
+    ) => {
+      const activeVisualization = visualizationMap[visualizationId];
+      const isOnlyLayer =
+        getRemoveOperation(
+          activeVisualization,
+          state.visualization.state,
+          layerId,
+          layerIds.length
+        ) === 'clear';
+
+      state.datasourceStates = mapValues(
+        state.datasourceStates,
+        (datasourceState, datasourceId) => {
+          const datasource = datasourceMap[datasourceId!];
+          return {
+            ...datasourceState,
+            state: isOnlyLayer
+              ? datasource.clearLayer(datasourceState.state, layerId)
+              : datasource.removeLayer(datasourceState.state, layerId),
+          };
+        }
+      );
+      state.stagedPreview = undefined;
+      state.visualization.state =
+        isOnlyLayer || !activeVisualization.removeLayer
+          ? activeVisualization.clearLayer(state.visualization.state, layerId)
+          : activeVisualization.removeLayer(state.visualization.state, layerId);
     },
     [updateDatasourceState.type]: (
       state,

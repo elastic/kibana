@@ -7,7 +7,6 @@
 
 import React, { useMemo, memo } from 'react';
 import { EuiForm } from '@elastic/eui';
-import { mapValues } from 'lodash';
 import { Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
@@ -17,6 +16,7 @@ import { ConfigPanelWrapperProps } from './types';
 import { useFocusUpdate } from './use_focus_update';
 import {
   useLensDispatch,
+  removeOrClearLayer,
   updateState,
   updateDatasourceState,
   updateVisualizationState,
@@ -27,6 +27,7 @@ import {
   LensAppState,
 } from '../../../state_management';
 import { AddLayerButton, getLayerType } from './add_layer';
+import { getRemoveOperation } from '../../../utils';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const visualization = useLensSelector(selectVisualization);
@@ -39,18 +40,6 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
   ) : null;
 });
 
-function getRemoveOperation(
-  activeVisualization: Visualization,
-  visualizationState: VisualizationState['state'],
-  layerId: string,
-  layerCount: number
-) {
-  if (activeVisualization.getRemoveOperation) {
-    return activeVisualization.getRemoveOperation(visualizationState, layerId);
-  }
-  // fallback to generic count check
-  return layerCount === 1 ? 'clear' : 'remove';
-}
 export function LayerPanels(
   props: ConfigPanelWrapperProps & {
     activeVisualization: Visualization;
@@ -204,44 +193,12 @@ export function LayerPanels(
             }}
             onRemoveLayer={() => {
               dispatchLens(
-                updateState({
-                  subType: 'REMOVE_OR_CLEAR_LAYER',
-                  updater: (state) => {
-                    const isOnlyLayer =
-                      getRemoveOperation(
-                        activeVisualization,
-                        state.visualization.state,
-                        layerId,
-                        layerIds.length
-                      ) === 'clear';
-
-                    return {
-                      ...state,
-                      datasourceStates: mapValues(
-                        state.datasourceStates,
-                        (datasourceState, datasourceId) => {
-                          const datasource = datasourceMap[datasourceId!];
-                          return {
-                            ...datasourceState,
-                            state: isOnlyLayer
-                              ? datasource.clearLayer(datasourceState.state, layerId)
-                              : datasource.removeLayer(datasourceState.state, layerId),
-                          };
-                        }
-                      ),
-                      visualization: {
-                        ...state.visualization,
-                        state:
-                          isOnlyLayer || !activeVisualization.removeLayer
-                            ? activeVisualization.clearLayer(state.visualization.state, layerId)
-                            : activeVisualization.removeLayer(state.visualization.state, layerId),
-                      },
-                      stagedPreview: undefined,
-                    };
-                  },
+                removeOrClearLayer({
+                  visualizationId: activeVisualization.id,
+                  layerId,
+                  layerIds,
                 })
               );
-
               removeLayerRef(layerId);
             }}
             toggleFullscreen={toggleFullscreen}

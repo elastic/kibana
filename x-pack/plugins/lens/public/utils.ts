@@ -94,3 +94,16 @@ export async function getIndexPatternsObjects(
   // return also the rejected ids in case we want to show something later on
   return { indexPatterns: fullfilled.map((response) => response.value), rejectedIds };
 }
+
+export function getRemoveOperation(
+  activeVisualization: Visualization,
+  visualizationState: VisualizationState['state'],
+  layerId: string,
+  layerCount: number
+) {
+  if (activeVisualization.getRemoveOperation) {
+    return activeVisualization.getRemoveOperation(visualizationState, layerId);
+  }
+  // fallback to generic count check
+  return layerCount === 1 ? 'clear' : 'remove';
+}
