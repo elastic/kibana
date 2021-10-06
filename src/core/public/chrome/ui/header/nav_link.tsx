@@ -99,7 +99,7 @@ export function createOverviewLink({
   onClick = () => {},
   navigateToUrl,
 }: Omit<Props, 'appId' | 'basePath'>) {
-  const { href, url, id } = link;
+  const { href, url } = link;
 
   return {
     href,
