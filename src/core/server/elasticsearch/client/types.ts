@@ -132,3 +132,10 @@ export interface DeleteDocumentResponse {
     type: string;
   };
 }
+
+/**
+ * @public
+ */
+export interface ElasticsearchErrorDetails {
+  error?: { type: string; reason?: string };
+}

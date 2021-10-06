@@ -52,6 +52,7 @@ export const updateAliases =
       .updateAliases(
         {
           body: {
+            // @ts-expect-error @elastic/elasticsearch IndicesUpdateAliasesRequest cannot be used
             actions: aliasActions,
           },
         },

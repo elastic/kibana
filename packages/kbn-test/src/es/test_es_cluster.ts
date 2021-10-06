@@ -281,11 +281,10 @@ export function createTestEsCluster<
      * Returns an ES Client to the configured cluster
      */
     getClient(): KibanaClient {
+      // @ts-expect-error TODO make sure Client is assignable to KibanaClient
       return new Client({
         node: this.getHostUrls()[0],
-        // TODO investigate the mismatch:
-        //  Property 'dataFrameTransformDeprecated' is missing in type 'Client' but required in type 'KibanaClient'.
-      }) as unknown as KibanaClient;
+      });
     }
 
     getUrl() {

@@ -8,7 +8,8 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import { errors as esErrors, estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import type { SavedObjectsRawDoc } from '../../serialization';
 import {

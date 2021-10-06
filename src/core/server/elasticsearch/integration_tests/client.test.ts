@@ -57,7 +57,7 @@ describe('elasticsearch clients', () => {
     const resp =
       await kibanaServer.coreStart.elasticsearch.client.asInternalUser.indices.getSettings(
         { index: '.kibana' },
-        { headers: { 'x-elastic-product-origin': null } }
+        { headers: { 'x-elastic-product-origin': undefined } }
       );
 
     expect(resp.headers).toHaveProperty('warning');

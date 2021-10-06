@@ -289,7 +289,7 @@ export class Router<Context extends RequestHandlerContext = RequestHandlerContex
 
 const convertEsUnauthorized = (e: EsNotAuthorizedError): ErrorHttpResponseOptions => {
   const getAuthenticateHeaderValue = () => {
-    const header = Object.entries(e.headers).find(
+    const header = Object.entries(e.headers || {}).find(
       ([key]) => key.toLowerCase() === 'www-authenticate'
     );
     return header ? (header[1] as string) : 'Basic realm="Authorization Required"';

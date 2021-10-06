@@ -19,6 +19,7 @@ import type {
 import type { RequestBody } from '@elastic/transport/lib/types';
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
+import type { ElasticsearchErrorDetails } from './types';
 
 const noop = () => undefined;
 
@@ -84,7 +85,7 @@ function ensureString(body: RequestBody): string {
  */
 export function getErrorMessage(error: errors.ElasticsearchClientError): string {
   if (error instanceof errors.ResponseError) {
-    const errorBody = error.meta.body as { error?: { type: string; reason?: string } };
+    const errorBody = error.meta.body as ElasticsearchErrorDetails;
     return `[${errorBody?.error?.type}]: ${errorBody?.error?.reason ?? error.message}`;
   }
   return `[${error.name}]: ${error.message}`;

@@ -52,6 +52,7 @@ export interface ICustomClusterClient extends IClusterClient {
 
 /** @internal **/
 export class ClusterClient implements ICustomClusterClient {
+  // @ts-expect-error TODO make sure Client is assignable to KibanaClient
   public readonly asInternalUser: Client;
   private readonly rootScopedClient: Client;
   private readonly allowListHeaders: string[];
@@ -81,6 +82,7 @@ export class ClusterClient implements ICustomClusterClient {
     const scopedClient = this.rootScopedClient.child({
       headers: scopedHeaders,
     });
+    // @ts-expect-error TODO make sure Client is assignable to KibanaClient
     return new ScopedClusterClient(this.asInternalUser, scopedClient);
   }
 

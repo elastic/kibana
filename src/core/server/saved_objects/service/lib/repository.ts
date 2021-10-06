@@ -1882,6 +1882,7 @@ export class SavedObjectsRepository {
     const { body, statusCode, headers } = await this.client.openPointInTime(esOptions, {
       ignore: [404],
     });
+
     if (statusCode === 404) {
       if (!isSupportedEsServer(headers)) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();

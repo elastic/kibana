@@ -35,6 +35,7 @@ export type {
   ShardsResponse,
   GetResponse,
   DeleteDocumentResponse,
+  ElasticsearchErrorDetails,
 } from './client';
 export { getRequestDebugMeta, getErrorMessage } from './client';
 export {

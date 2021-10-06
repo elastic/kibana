@@ -323,6 +323,7 @@ export async function claimAlias(
 
   await client.indices.updateAliases({
     body: {
+      // @ts-expect-error @elastic/elasticsearch IndicesUpdateAliasesRequest cannot be used
       actions: aliasActions.concat(removeActions).concat({ add: { index, alias } }),
     },
   });
