@@ -63,7 +63,7 @@ export const kibanaFilterFunction: ExpressionFunctionKibanaFilter = {
         alias: '',
         disabled: args.disabled || false,
       },
-      ...JSON.parse(args.query),
+      query: JSON.parse(args.query),
     };
   },
 };

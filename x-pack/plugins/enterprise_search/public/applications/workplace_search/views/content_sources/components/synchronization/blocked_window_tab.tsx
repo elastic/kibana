@@ -13,13 +13,15 @@ import { EuiButton, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 
 import { ADD_LABEL } from '../../../../constants';
 import { BLOCKED_EMPTY_STATE_TITLE, BLOCKED_EMPTY_STATE_DESCRIPTION } from '../../constants';
+import { SourceLogic } from '../../source_logic';
 
 import { BlockedWindowItem } from './blocked_window_item';
 import { SynchronizationLogic } from './synchronization_logic';
 
 export const BlockedWindows: React.FC = () => {
-  const { blockedWindows } = useValues(SynchronizationLogic);
-  const { addBlockedWindow } = useActions(SynchronizationLogic);
+  const { contentSource } = useValues(SourceLogic);
+  const { blockedWindows } = useValues(SynchronizationLogic({ contentSource }));
+  const { addBlockedWindow } = useActions(SynchronizationLogic({ contentSource }));
 
   const hasBlockedWindows = blockedWindows.length > 0;
 

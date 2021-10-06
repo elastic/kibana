@@ -330,6 +330,48 @@ function sampleArgs() {
   return { data, args };
 }
 
+function sampleArgsWithThreshold(thresholdValue: number = 150) {
+  const { data, args } = sampleArgs();
+
+  return {
+    data: {
+      ...data,
+      tables: {
+        ...data.tables,
+        threshold: {
+          type: 'datatable',
+          columns: [
+            {
+              id: 'threshold-a',
+              meta: { params: { id: 'number' }, type: 'number' },
+              name: 'Static value',
+            },
+          ],
+          rows: [{ 'threshold-a': thresholdValue }],
+        },
+      },
+    } as LensMultiTable,
+    args: {
+      ...args,
+      layers: [
+        ...args.layers,
+        {
+          layerType: layerTypes.THRESHOLD,
+          accessors: ['threshold-a'],
+          layerId: 'threshold',
+          seriesType: 'line',
+          xScaleType: 'linear',
+          yScaleType: 'linear',
+          palette: mockPaletteOutput,
+          isHistogram: false,
+          hide: true,
+          yConfig: [{ axisMode: 'left', forAccessor: 'threshold-a', type: 'lens_xy_yConfig' }],
+        },
+      ],
+    } as XYArgs,
+  };
+}
+
 describe('xy_expression', () => {
   describe('configs', () => {
     test('legendConfig produces the correct arguments', () => {
@@ -827,6 +869,53 @@ describe('xy_expression', () => {
           fit: false,
           min: undefined,
           max: undefined,
+        });
+      });
+
+      test('it does include threshold values when in full extent mode', () => {
+        const { data, args } = sampleArgsWithThreshold();
+
+        const component = shallow(<XYChart {...defaultProps} data={data} args={args} />);
+        expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
+          fit: false,
+          min: 0,
+          max: 150,
+        });
+      });
+
+      test('it should ignore threshold values when set to custom extents', () => {
+        const { data, args } = sampleArgsWithThreshold();
+
+        const component = shallow(
+          <XYChart
+            {...defaultProps}
+            data={data}
+            args={{
+              ...args,
+              yLeftExtent: {
+                type: 'lens_xy_axisExtentConfig',
+                mode: 'custom',
+                lowerBound: 123,
+                upperBound: 456,
+              },
+            }}
+          />
+        );
+        expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
+          fit: false,
+          min: 123,
+          max: 456,
+        });
+      });
+
+      test('it should work for negative values in thresholds', () => {
+        const { data, args } = sampleArgsWithThreshold(-150);
+
+        const component = shallow(<XYChart {...defaultProps} data={data} args={args} />);
+        expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
+          fit: false,
+          min: -150,
+          max: 5,
         });
       });
     });
