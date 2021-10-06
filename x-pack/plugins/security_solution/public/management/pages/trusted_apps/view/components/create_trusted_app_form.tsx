@@ -191,6 +191,7 @@ export type CreateTrustedAppFormProps = Pick<
   /** The trusted app values that will be passed to the form */
   trustedApp: MaybeImmutable<NewTrustedApp>;
   isEditMode: boolean;
+  isDirty: boolean;
   onChange: (state: TrustedAppFormState) => void;
   /** Setting passed on to the EffectedPolicySelect component */
   policies: Pick<EffectedPolicySelectProps, 'options' | 'isLoading'>;
@@ -201,6 +202,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
   ({
     fullWidth,
     isEditMode,
+    isDirty,
     onChange,
     trustedApp: _trustedApp,
     policies = { options: [] },
@@ -219,8 +221,8 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
     const isGlobal = isGlobalEffectScope(trustedApp.effectScope);
 
     const hideAssignmentSection = useMemo(() => {
-      return !isPlatinumPlus && (!isEditMode || isGlobal);
-    }, [isEditMode, isGlobal, isPlatinumPlus]);
+      return !isPlatinumPlus && (!isEditMode || (isGlobal && !isDirty));
+    }, [isEditMode, isGlobal, isDirty, isPlatinumPlus]);
 
     const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
       () => OPERATING_SYSTEMS.map((os) => ({ value: os, inputDisplay: OS_TITLES[os] })),

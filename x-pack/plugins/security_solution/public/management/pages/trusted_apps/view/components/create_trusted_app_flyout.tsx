@@ -20,7 +20,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useState, useMemo } from 'react';
 import { EuiFlyoutProps } from '@elastic/eui/src/components/flyout/flyout';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
@@ -132,10 +132,15 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
           type: 'trustedAppCreationDialogFormStateUpdated',
           payload: { entry: newFormState.item, isValid: newFormState.isValid },
         });
+        if (formValues !== newFormState.item) {
+          setIsFormDirty(true);
+        }
       },
-      [dispatch]
+
+      [dispatch, formValues]
     );
 
+    const [isFormDirty, setIsFormDirty] = useState(false);
     const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
       'trustedAppsByPolicyEnabled'
     );
@@ -195,21 +200,19 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
-        {isTrustedAppsByPolicyEnabled && !isPlatinumPlus && isEditMode && !isGlobal && (
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.securitySolution.trustedapps.createTrustedAppFlyout.expiredLicenseTitle',
-              { defaultMessage: 'Expired License' }
-            )}
-            color="warning"
-            iconType="help"
-            data-test-subj={getTestId('expired-license-callout')}
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.expiredLicenseMessage"
-              defaultMessage="Your Kibana license has been downgraded. Future policy configurations will now be globally assigned to all policies. For more information, see our "
-            />
-            <EuiLink external href={`${docLinks.links.siem.guide}`}>
+        {isTrustedAppsByPolicyEnabled &&
+          !isPlatinumPlus &&
+          isEditMode &&
+          (!isGlobal || isFormDirty) && (
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.securitySolution.trustedapps.createTrustedAppFlyout.expiredLicenseTitle',
+                { defaultMessage: 'Expired License' }
+              )}
+              color="warning"
+              iconType="help"
+              data-test-subj={getTestId('expired-license-callout')}
+            >
               <FormattedMessage
                 id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.expiredLicenseMessage"
                 defaultMessage="Your Kibana license has been downgraded. Future policy configurations will now be globally assigned to all policies. For more information, see our "
@@ -244,6 +247,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
             onChange={handleFormOnChange}
             isInvalid={!!creationErrors}
             isEditMode={isEditMode}
+            isDirty={isFormDirty}
             error={creationErrorsMessage}
             policies={policies}
             trustedApp={formValues}
