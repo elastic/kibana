@@ -19,11 +19,13 @@ interface Options {
  */
 export async function interpretAst(
   ast: ExpressionAstExpression,
-  variables: Record<string, any>
+  variables: Record<string, any>,
+  input: ExpressionValue = null
 ): Promise<ExpressionValue> {
   const context = { variables };
   const { execute } = pluginServices.getServices().expressions;
-  return await execute(ast, null, context).getData().pipe(pluck('result')).toPromise();
+
+  return await execute(ast, input, context).getData().pipe(pluck('result')).toPromise();
 }
 
 /**
@@ -43,9 +45,9 @@ export async function runInterpreter(
   options: Options = {}
 ): Promise<ExpressionValue> {
   const context = { variables };
-
   try {
     const { execute } = pluginServices.getServices().expressions;
+
     const renderable = await execute(ast, input, context)
       .getData()
       .pipe(pluck('result'))

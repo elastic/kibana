@@ -111,7 +111,8 @@ export const fetchContext = createThunk(
         ...element.ast,
         chain: astChain,
       },
-      variables
+      variables,
+      prevContextValue
     ).then((value) => {
       dispatch(
         args.setValue({
