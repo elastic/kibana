@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+
+import { useActions, useValues } from 'kea';
 
 import {
   EuiButtonEmpty,
@@ -19,6 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { useDecodedParams } from '../../../../utils/encode_path_params';
+import { EngineLogic } from '../../../engine';
 import { AppSearchPageTemplate } from '../../../layout';
 import { Result } from '../../../result';
 import { Result as ResultType } from '../../../result/types';
@@ -27,26 +30,37 @@ import { getCurationsBreadcrumbs } from '../../utils';
 import { CurationActionBar } from './curation_action_bar';
 import { CurationResultPanel } from './curation_result_panel';
 
+import { CurationSuggestionLogic } from './curation_suggestion_logic';
 import { DATA } from './temp_data';
 
 export const CurationSuggestion: React.FC = () => {
   const { query } = useDecodedParams();
+  const curationSuggestionLogic = CurationSuggestionLogic({ query });
+  const { loadSuggestion } = useActions(curationSuggestionLogic);
+  const { engine, isMetaEngine } = useValues(EngineLogic);
+  const { suggestion, suggestedPromotedDocuments, dataLoading } =
+    useValues(curationSuggestionLogic);
   const [showOrganicResults, setShowOrganicResults] = useState(false);
   const currentOrganicResults = [...DATA].splice(5, 4);
   const proposedOrganicResults = [...DATA].splice(2, 4);
 
-  const queryTitle = query === '""' ? query : `${query}`;
+  const suggestionQuery = suggestion?.query || '';
+
+  useEffect(() => {
+    loadSuggestion();
+  }, []);
 
   return (
     <AppSearchPageTemplate
+      isLoading={dataLoading}
       pageChrome={getCurationsBreadcrumbs([
         i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.breadcrumbLabel',
-          { defaultMessage: 'Suggested: {query}', values: { query } }
+          { defaultMessage: 'Suggested: {query}', values: { query: suggestionQuery } }
         ),
       ])}
       pageHeader={{
-        pageTitle: queryTitle,
+        pageTitle: suggestionQuery,
       }}
     >
       <CurationActionBar
@@ -57,17 +71,27 @@ export const CurationSuggestion: React.FC = () => {
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="xxs">
-            <h2>Current</h2>
+            <h2>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.currentTitle',
+                { defaultMessage: 'Current' }
+              )}
+            </h2>
           </EuiTitle>
           <EuiSpacer size="s" />
           <CurationResultPanel variant="current" results={[...DATA].splice(0, 3)} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="xxs">
-            <h2>Suggested</h2>
+            <h2>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.suggestionTitle',
+                { defaultMessage: 'Suggested' }
+              )}
+            </h2>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <CurationResultPanel variant="suggested" results={[...DATA].splice(3, 2)} />
+          <CurationResultPanel variant="suggested" results={suggestedPromotedDocuments} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
@@ -81,7 +105,15 @@ export const CurationSuggestion: React.FC = () => {
           onClick={() => setShowOrganicResults(!showOrganicResults)}
           data-test-subj="showOrganicResults"
         >
-          {showOrganicResults ? 'Collapse' : 'Expand'} organic search results
+          {showOrganicResults
+            ? i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.collapseButtonLabel',
+                { defaultMessage: 'Collapse organic search results' }
+              )
+            : i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.expandButtonLabel',
+                { defaultMessage: 'Expand organic search results' }
+              )}
         </EuiButtonEmpty>
         {showOrganicResults && (
           <>
@@ -90,10 +122,18 @@ export const CurationSuggestion: React.FC = () => {
               <EuiFlexGroup gutterSize="m">
                 <EuiFlexItem>
                   {currentOrganicResults.length > 0 && (
-                    <EuiFlexGroup direction="column" gutterSize="s">
+                    <EuiFlexGroup
+                      direction="column"
+                      gutterSize="s"
+                      data-test-subj="currentOrganicResults"
+                    >
                       {currentOrganicResults.map((result: ResultType) => (
                         <EuiFlexItem grow={false} key={result.id.raw}>
-                          <Result result={result} isMetaEngine={false} />
+                          <Result
+                            result={result}
+                            isMetaEngine={isMetaEngine}
+                            schemaForTypeHighlights={engine.schema}
+                          />
                         </EuiFlexItem>
                       ))}
                     </EuiFlexGroup>
@@ -101,10 +141,18 @@ export const CurationSuggestion: React.FC = () => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   {proposedOrganicResults.length > 0 && (
-                    <EuiFlexGroup direction="column" gutterSize="s">
+                    <EuiFlexGroup
+                      direction="column"
+                      gutterSize="s"
+                      data-test-subj="proposedOrganicResults"
+                    >
                       {proposedOrganicResults.map((result: ResultType) => (
                         <EuiFlexItem grow={false} key={result.id.raw}>
-                          <Result result={result} isMetaEngine={false} />
+                          <Result
+                            result={result}
+                            isMetaEngine={isMetaEngine}
+                            schemaForTypeHighlights={engine.schema}
+                          />
                         </EuiFlexItem>
                       ))}
                     </EuiFlexGroup>

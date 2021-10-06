@@ -457,6 +457,7 @@ export async function createInstallation(options: {
       install_status: 'installing',
       install_started_at: new Date().toISOString(),
       install_source: installSource,
+      keep_policies_up_to_date: false,
     },
     { id: pkgName, overwrite: true }
   );
