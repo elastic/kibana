@@ -26,3 +26,8 @@ steps:
 
   - label: ":male_superhero::skin-tone-2:Post-Build"
     command: .buildkite/scripts/lifecycle/post_build.sh
+
+  - wait
+
+  - label: ":muscle:Performance Tests"
+    command: .buildkite/scripts/steps/test/performance.sh
