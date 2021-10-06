@@ -149,56 +149,6 @@ reporting_user:
 --------------------------------------------------------------------------------
 
 [float]
-==== Grant access with a custom index
-
-If you are using a custom index, the `xpack.reporting.index` setting must begin with `.reporting-*`. The default {kib} system user has `all` privileges against the `.reporting-*` pattern of indices.
-
-If you use a different pattern for the `xpack.reporting.index` setting, you must create a custom `kibana_system` user with appropriate access to the index.
-
-NOTE: In the next major version of Kibana, granting access with a custom index is unsupported.
-
-. Create the reporting role. 
-
-.. Open the main menu, then click *Stack Management*.
-
-.. Click *Roles > Create role*.
-
-. Specify the role settings.
-
-.. Enter the *Role name*. For example, `custom-reporting-user`.
-
-.. From the *Indices* dropdown, select the custom index. 
-
-.. From the *Privileges* dropdown, select *all*.
-
-.. Click *Add Kibana privilege*.
-
-.. Select one or more *Spaces* that you want to grant reporting privileges to.
-
-.. Click *Customize*, then click *Analytics*.
-
-.. Next to each application you want to grant reporting privileges to, click *All*.
-
-.. Click *Add {kib} privilege*, then click *Create role*.
-
-. Assign the reporting role to a user.
-
-.. Open the main menu, then click *Stack Management*.
-
-.. Click *Users*, then click the user you want to assign the reporting role to. 
-
-.. From the *Roles* dropdown, select *kibana_system* and *custom-reporting-user*.
-
-.. Click *Update user*.
-
-. Configure {kib} to use the new account.
-+
-[source,js]
---------------------------------------------------------------------------------
-elasticsearch.username: 'custom_kibana_system'
---------------------------------------------------------------------------------
-
-[float]
 [[securing-reporting]]
 === Secure the reporting endpoints
 

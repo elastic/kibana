@@ -2,9 +2,6 @@
 
 set -euo pipefail
 
-# Required, at least for kbn_sample_panel_action
-export BUILD_TS_REFS_DISABLE=false
-
 source .buildkite/scripts/steps/functional/common.sh
 
 # Required, at least for plugin_functional tests
