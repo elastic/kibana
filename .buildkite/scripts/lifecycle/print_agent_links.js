@@ -27,8 +27,6 @@ const { BuildkiteClient } = require('kibana-buildkite-library');
     console.log('\u001b]1339;' + `url='${METRICS_URL}'\u0007`);
     console.log('Agent Logs:');
     console.log('\u001b]1339;' + `url='${LOGS_URL}'\u0007`);
-
-    process.exit(0);
   } catch (ex) {
     // Probably don't need to fail the build for this failure, just log it
     console.error('Buildkite API Error', ex.message);
