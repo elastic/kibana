@@ -14,8 +14,6 @@ import { toMountPoint, useKibana } from '../../../../../../src/plugins/kibana_re
 import { MonitoringStartPluginDependencies } from '../../types';
 
 export async function formatMonitoringError(err: IHttpFetchError) {
-  // TODO: We should stop using Boom for errors and instead write a custom handler to return richer error objects
-  // then we can do better messages, such as highlighting the Cluster UUID instead of requiring it be part of the message
   if (err.response?.status && err.response?.status !== -1) {
     const body = await err.response?.json();
     return (
