@@ -968,8 +968,6 @@ export function overridePackageInputs(
 ): DryRunPackagePolicy {
   if (!inputsOverride) return basePackagePolicy;
 
-  // console.log(JSON.stringify({ basePackagePolicy, packageInfo, inputsOverride }, null, 2));
-
   const availablePolicyTemplates = packageInfo.policy_templates ?? [];
 
   const inputs = [
