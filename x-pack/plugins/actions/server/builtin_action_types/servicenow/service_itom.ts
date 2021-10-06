@@ -12,8 +12,7 @@ import {
   SNProductsConfigValue,
   ServiceFactory,
   ExternalServiceITOM,
-  ExecutorParamsITOM,
-  ExternalService,
+  ExecutorSubActionAddEventParams,
 } from './types';
 
 import { Logger } from '../../../../../../src/core/server';
@@ -25,7 +24,7 @@ import { createServiceError } from './utils';
 
 const getAddEventURL = (url: string) => `${url}/api/global/em/jsonv2`;
 
-export const createExternalServiceITOM: ServiceFactory = (
+export const createExternalServiceITOM: ServiceFactory<ExternalServiceITOM> = (
   credentials: ExternalServiceCredentials,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities,
@@ -36,21 +35,21 @@ export const createExternalServiceITOM: ServiceFactory = (
     logger,
     configurationUtilities,
     serviceConfig
-  ) as ExternalService;
+  );
 
   const { username, password } = credentials.secrets as ServiceNowSecretConfigurationType;
   const axiosInstance = axios.create({
     auth: { username, password },
   });
 
-  const addEvent = async (params: ExecutorParamsITOM) => {
+  const addEvent = async (params: ExecutorSubActionAddEventParams) => {
     try {
       const res = await request({
         axios: axiosInstance,
         url: getAddEventURL(snService.getUrl()),
         logger,
         method: 'post',
-        data: params,
+        data: { records: [params] },
         configurationUtilities,
       });
 
