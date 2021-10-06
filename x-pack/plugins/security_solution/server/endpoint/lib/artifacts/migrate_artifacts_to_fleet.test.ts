@@ -21,7 +21,7 @@ import { createEndpointArtifactClientMock } from '../../services/artifacts/mocks
 import { InternalArtifactCompleteSchema } from '../../schemas';
 import { generateArtifactEsGetSingleHitMock } from '../../../../../fleet/server/services/artifacts/mocks';
 import { NewArtifact } from '../../../../../fleet/server/services';
-import { CreateRequest } from '@elastic/elasticsearch/api/types';
+import { CreateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 describe('When migrating artifacts to fleet', () => {
   let soClient: jest.Mocked<SavedObjectsClient>;

@@ -7,7 +7,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { AxiosResponse } from 'axios';
-import { DeleteByQueryResponse } from '@elastic/elasticsearch/api/types';
+import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { KbnClient } from '@kbn/test';
 import { HostMetadata } from '../types';

@@ -6,7 +6,11 @@
  */
 
 import { ApiResponse } from '@elastic/elasticsearch';
-import { DeleteResponse, SearchHit, SearchResponse } from '@elastic/elasticsearch/api/types';
+import {
+  DeleteResponse,
+  SearchHit,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { i18n } from '@kbn/i18n';
 import { UnwrapPromise } from '@kbn/utility-types';

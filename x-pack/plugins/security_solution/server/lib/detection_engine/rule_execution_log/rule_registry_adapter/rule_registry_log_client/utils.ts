@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchSort } from '@elastic/elasticsearch/api/types';
+import { SearchSort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EVENT_ACTION, TIMESTAMP } from '@kbn/rule-data-utils';
 import { RuleExecutionStatus } from '../../../../../../common/detection_engine/schemas/common/schemas';
 import { ExecutionMetric } from '../../types';

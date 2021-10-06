@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexResponse, UpdateResponse } from '@elastic/elasticsearch/api/types';
+import { IndexResponse, UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'src/core/server';
 import { LevelLogger, statuses } from '../';
 import { ReportingCore } from '../../';

@@ -6,7 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { DeleteByQueryResponse } from '@elastic/elasticsearch/api/types';
+import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { HostMetadata } from '../types';
 import {
   EndpointActionGenerator,

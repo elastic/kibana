@@ -6,7 +6,7 @@
  */
 
 import { ApiResponse } from '@elastic/elasticsearch';
-import { BulkResponse } from '@elastic/elasticsearch/api/types';
+import { BulkResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/logging';
 import { ESSearchRequest } from 'src/core/types/elasticsearch';
 import {

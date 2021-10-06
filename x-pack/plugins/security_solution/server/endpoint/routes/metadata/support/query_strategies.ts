@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchResponse } from '@elastic/elasticsearch/api/types';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { HostMetadata } from '../../../../../common/endpoint/types';
 import { HostListQueryResult, HostQueryResult } from '../../../types';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ApiResponse } from '@elastic/elasticsearch';
-import { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/api/types';
+import { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   CheckMetadataTransformsTask,
   TYPE,

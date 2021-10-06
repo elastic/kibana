@@ -11,7 +11,7 @@ import {
   ElasticsearchClient,
   SavedObjectsClientContract,
 } from 'src/core/server';
-import { SearchRequest } from '@elastic/elasticsearch/api/types';
+import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getTrustedAppsList } from '../../endpoint/routes/trusted_apps/service';
 import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
 import { ExceptionListClient } from '../../../../lists/server';

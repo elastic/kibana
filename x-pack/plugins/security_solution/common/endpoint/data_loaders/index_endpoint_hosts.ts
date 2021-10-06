@@ -10,7 +10,7 @@ import { cloneDeep, merge } from 'lodash';
 import { AxiosResponse } from 'axios';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { KbnClient } from '@kbn/test';
-import { DeleteByQueryResponse } from '@elastic/elasticsearch/api/types';
+import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Agent, CreatePackagePolicyResponse, GetPackagesResponse } from '../../../../fleet/common';
 import { EndpointDocGenerator } from '../generate_data';
 import { HostMetadata, HostPolicyResponse } from '../types';

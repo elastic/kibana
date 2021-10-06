@@ -23,7 +23,10 @@ import {
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 
-import { InlineScript, QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import {
+  InlineScript,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertTypeParams, AlertingAuthorizationFilterType } from '../../../alerting/server';
 import {
   ReadOperations,

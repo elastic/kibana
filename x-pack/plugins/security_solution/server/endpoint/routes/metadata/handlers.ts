@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { ApiResponse } from '@elastic/elasticsearch';
-import { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/api/types';
+import { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { TypeOf } from '@kbn/config-schema';
 import {

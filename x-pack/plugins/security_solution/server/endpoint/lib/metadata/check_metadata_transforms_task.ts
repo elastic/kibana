@@ -8,7 +8,7 @@ import { ApiResponse } from '@elastic/elasticsearch';
 import {
   TransformGetTransformStatsResponse,
   TransformGetTransformStatsTransformStats,
-} from '@elastic/elasticsearch/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CoreSetup, ElasticsearchClient, Logger } from 'src/core/server';
 import {
   ConcreteTaskInstance,
