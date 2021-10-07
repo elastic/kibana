@@ -6,9 +6,16 @@
  * Side Public License, v 1.
  */
 
-/**
- * Removes markup added by kibana fields html formatter
- */
-export function trimAngularSpan(text: string): string {
-  return text.replace(/^<span ng-non-bindable>/, '').replace(/<\/span>$/, '');
+import { Interval } from './interval';
+
+export class Timerange {
+  constructor(private from: number, private to: number) {}
+
+  interval(interval: string) {
+    return new Interval(this.from, this.to, interval);
+  }
+}
+
+export function timerange(from: number, to: number) {
+  return new Timerange(from, to);
 }
