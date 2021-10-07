@@ -91,6 +91,7 @@ export function runBuildApiDocsCli() {
           ...collectApiStatsForPlugin(pluginApi, missingApiItems, referencedDeprecations),
           owner: plugin.manifest.owner,
           description: plugin.manifest.description,
+          isPlugin: plugin.isPlugin,
         };
         return acc;
       }, {} as { [key: string]: PluginMetaInfo });
@@ -256,6 +257,7 @@ function getTsProject(repoPath: string) {
   });
   project.addSourceFilesAtPaths(`${repoPath}/x-pack/plugins/**/*{.d.ts,.ts}`);
   project.addSourceFilesAtPaths(`${repoPath}/src/plugins/**/*{.d.ts,.ts}`);
+  project.addSourceFilesAtPaths(`${repoPath}/packages/**/*{.d.ts,.ts}`);
   project.resolveSourceFileDependencies();
   return project;
 }
