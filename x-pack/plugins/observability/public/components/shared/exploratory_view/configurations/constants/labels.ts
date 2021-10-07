@@ -170,7 +170,7 @@ export const METRIC_LABEL = i18n.translate('xpack.observability.expView.fieldLab
   defaultMessage: 'Metric',
 });
 export const LABELS_FIELD = i18n.translate('xpack.observability.expView.fieldLabels.labels', {
-  defaultMessage: 'Labels:',
+  defaultMessage: 'Labels',
 });
 export const LABELS_BREAKDOWN = i18n.translate(
   'xpack.observability.expView.fieldLabels.chooseField',

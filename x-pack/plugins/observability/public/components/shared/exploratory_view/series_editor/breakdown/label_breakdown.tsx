@@ -54,6 +54,7 @@ export function LabelsBreakdown({ series, seriesId }: Props) {
           });
         }}
         singleSelection={{ asPlainText: true }}
+        isInvalid={series.breakdown === LABEL_FIELDS_BREAKDOWN}
       />
     </EuiFlexItem>
   );
