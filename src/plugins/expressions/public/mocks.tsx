@@ -30,8 +30,6 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   return {
     execute: jest.fn(),
-    ExpressionLoader: jest.fn(),
-    ExpressionRenderHandler: jest.fn(),
     getFunction: jest.fn(),
     getFunctions: jest.fn(),
     getRenderer: jest.fn(),
@@ -40,7 +38,6 @@ const createStartContract = (): Start => {
     getTypes: jest.fn(),
     loader: jest.fn(),
     ReactExpressionRenderer: jest.fn((props) => <></>),
-    render: jest.fn(),
     run: jest.fn(),
   };
 };
