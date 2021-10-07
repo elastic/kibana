@@ -565,7 +565,7 @@ describe('migrations v2 model', () => {
       });
       // The createIndex action called by LEGACY_CREATE_REINDEX_TARGET never
       // returns a left, it will always succeed or timeout. Since timeout
-      // failures are always retried we don't explicity test this logic
+      // failures are always retried we don't explicitly test this logic
     });
 
     describe('LEGACY_REINDEX', () => {

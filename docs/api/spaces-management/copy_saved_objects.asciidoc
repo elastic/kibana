@@ -58,7 +58,7 @@ You can request to overwrite any objects that already exist in the target space 
 NOTE: This cannot be used with the `overwrite` option.
 
 `overwrite`::
-  (Optional, boolean) When set to `true`, all conflicts are automatically overidden. When a saved object with a matching `type` and `id`
+  (Optional, boolean) When set to `true`, all conflicts are automatically overridden. When a saved object with a matching `type` and `id`
   exists in the target space, that version is replaced with the version from the source space. The default value is `false`.
 +
 NOTE: This cannot be used with the `createNewCopies` option.

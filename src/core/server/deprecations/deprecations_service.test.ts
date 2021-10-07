@@ -78,7 +78,7 @@ describe('DeprecationsService', () => {
               correctiveActions: {
                 manualSteps: [
                   'Using Kibana user management, change all users using the kibana_user role to the kibana_admin role.',
-                  'Using Kibana role-mapping management, change all role-mappings which assing the kibana_user role to the kibana_admin role.',
+                  'Using Kibana role-mapping management, change all role-mappings which assign the kibana_user role to the kibana_admin role.',
                 ],
               },
             },
@@ -103,7 +103,7 @@ describe('DeprecationsService', () => {
             "correctiveActions": Object {
               "manualSteps": Array [
                 "Using Kibana user management, change all users using the kibana_user role to the kibana_admin role.",
-                "Using Kibana role-mapping management, change all role-mappings which assing the kibana_user role to the kibana_admin role.",
+                "Using Kibana role-mapping management, change all role-mappings which assign the kibana_user role to the kibana_admin role.",
               ],
             },
             "deprecationType": "config",

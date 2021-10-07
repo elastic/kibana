@@ -4,7 +4,7 @@
 
 ## SavedObjectsImporter.resolveImportErrors() method
 
-Resolve and return saved object import errors. See the [options](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.md) for more detailed informations.
+Resolve and return saved object import errors. See the [options](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.md) for more detailed information.
 
 <b>Signature:</b>
 

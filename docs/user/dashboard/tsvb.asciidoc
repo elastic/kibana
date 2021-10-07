@@ -208,7 +208,7 @@ For example `dashboards#/view/f193ca90-c9f4-11eb-b038-dd3270053a27`.
 
 . Click *Save and return*.
 
-. In the toolbar, cick *Save as*, then make sure *Store time with dashboard* is deselected. 
+. In the toolbar, click *Save as*, then make sure *Store time with dashboard* is deselected. 
 ====
 
 [discrete]

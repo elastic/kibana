@@ -101,7 +101,7 @@ Optional properties are:
     prevent that specific `var` from being edited by the user.
 
 | `xpack.fleet.outputs`
-  | List of ouputs that are configured when the {fleet} app starts.
+  | List of outputs that are configured when the {fleet} app starts.
 Required properties are:
 
   `id`:: Unique ID for this output. The ID should be a string.

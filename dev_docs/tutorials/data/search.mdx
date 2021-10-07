@@ -477,7 +477,7 @@ If you don't call `clear`, you will see a warning in the console while developin
 
 The last step of the integration is restoring an existing search session. The `searchSessionId` parameter and the rest of the restore state are passed into the application via the URL. Non-URL support is planned for future releases.
 
-If you detect the presense of a `searchSessionId` parameter in the URL, call the `restore` method **instead** of calling `start`. The previous example would now become:
+If you detect the presence of a `searchSessionId` parameter in the URL, call the `restore` method **instead** of calling `start`. The previous example would now become:
 
 ```ts
 function onSearchSessionConfigChange(searchSessionIdFromUrl?: string) {

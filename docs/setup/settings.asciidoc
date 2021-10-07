@@ -428,14 +428,14 @@ in a manner that is inconsistent with `/proc/self/cgroup`.
 
 |[[savedObjects-maxImportExportSize]] `savedObjects.maxImportExportSize:`
  | The maximum count of saved objects that can be imported or exported.
-This setting exists to prevent the {kib} server from runnning out of memory when handling
+This setting exists to prevent the {kib} server from running out of memory when handling
 large numbers of saved objects. It is recommended to only raise this setting if you are
 confident your server can hold this many objects in memory.
 *Default: `10000`*
 
 |[[savedObjects-maxImportPayloadBytes]] `savedObjects.maxImportPayloadBytes:`
  | The maximum byte size of a saved objects import that the {kib} server will accept.
-This setting exists to prevent the {kib} server from runnning out of memory when handling
+This setting exists to prevent the {kib} server from running out of memory when handling
 a large import payload. Note that this setting overrides the more general
 <<server-maxPayload, `server.maxPayload`>> for saved object imports only.
 *Default: `26214400`*

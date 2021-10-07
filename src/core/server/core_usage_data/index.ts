@@ -19,7 +19,7 @@ export type {
 export { CoreUsageDataService } from './core_usage_data_service';
 export { CoreUsageStatsClient, REPOSITORY_RESOLVE_OUTCOME_STATS } from './core_usage_stats_client';
 
-// Because of #79265 we need to explicity import, then export these types for
+// Because of #79265 we need to explicitly import, then export these types for
 // scripts/telemetry_check.js to work as expected
 import {
   CoreUsageStats,
