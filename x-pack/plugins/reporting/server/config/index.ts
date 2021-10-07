@@ -18,12 +18,8 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
   schema: ConfigSchema,
   deprecations: ({ unused }) => [
     unused('capture.browser.chromium.maxScreenshotDimension'),
-    unused('capture.concurrency'),
-    unused('capture.settleTime'),
-    unused('capture.timeout'),
     unused('poll.jobCompletionNotifier.intervalErrorMultiplier'),
     unused('poll.jobsRefresh.intervalErrorMultiplier'),
-    unused('kibanaApp'),
     (settings, fromPath, addDeprecation) => {
       const reporting = get(settings, fromPath);
       if (reporting?.index) {
