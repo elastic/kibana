@@ -18,13 +18,11 @@ describe('test agent autenticate services', () => {
       body: {
         hits: {
           hits: [
+            // @ts-expect-error not full interface
             {
-              // @ts-expect-error
               _id: 'agent1',
               _source: {
-                // @ts-expect-error
                 active: true,
-                // @ts-expect-error
                 access_api_key_id: 'pedTuHIBTEDt93wW0Fhr',
               },
             },
@@ -47,13 +45,11 @@ describe('test agent autenticate services', () => {
       body: {
         hits: {
           hits: [
+            // @ts-expect-error not full interface
             {
-              // @ts-expect-error
               _id: 'agent1',
               _source: {
-                // @ts-expect-error
                 active: true,
-                // @ts-expect-error
                 access_api_key_id: 'pedTuHIBTEDt93wW0Fhr',
               },
             },
@@ -137,10 +133,11 @@ describe('test agent autenticate services', () => {
     const mockEsClient = elasticsearchServiceMock.createInternalClient();
 
     mockEsClient.search.mockResolvedValue({
+      // @ts-expect-error not full interface
       body: {
         hits: {
-          // @ts-expect-error
           hits: [],
+          total: 0,
         },
       },
     });

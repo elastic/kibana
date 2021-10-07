@@ -43,6 +43,7 @@ describe('When using the artifacts services', () => {
 
   describe('and calling `getArtifact()`', () => {
     it('should get artifact using id', async () => {
+      // @ts-expect-error not full interface
       esClientMock.get.mockImplementation(() => {
         return elasticsearchServiceMock.createSuccessTransportRequestPromise(
           generateArtifactEsGetSingleHitMock()
@@ -105,7 +106,6 @@ describe('When using the artifacts services', () => {
     it('should ignore 409 errors from elasticsearch', async () => {
       const error = new errors.ResponseError({ statusCode: 409 } as TransportResult);
       // Unclear why `mockRejectedValue()` has the params value type set to `never`
-      // @ts-expect-error
       esClientMock.create.mockRejectedValue(error);
       await expect(() => createArtifact(esClientMock, newArtifact)).not.toThrow();
     });
@@ -140,6 +140,7 @@ describe('When using the artifacts services', () => {
 
   describe('and calling `listArtifacts()`', () => {
     beforeEach(() => {
+      // @ts-expect-error not full interface
       esClientMock.search.mockImplementation(() => {
         return elasticsearchServiceMock.createSuccessTransportRequestPromise(
           generateArtifactEsSearchResultHitsMock()

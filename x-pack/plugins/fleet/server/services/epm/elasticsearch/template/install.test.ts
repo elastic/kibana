@@ -49,7 +49,8 @@ describe('EPM install', () => {
       packageName: pkg.name,
     });
 
-    const sentTemplate = esClient.indices.putIndexTemplate.mock.calls[0][0]!.body as Record<
+    // @ts-expect-error
+    const sentTemplate = esClient.indices.putIndexTemplate.mock.calls[0][0].body as Record<
       string,
       any
     >;
@@ -90,6 +91,7 @@ describe('EPM install', () => {
       packageName: pkg.name,
     });
 
+    // @ts-expect-error
     const sentTemplate = esClient.indices.putIndexTemplate.mock.calls[0][0]!.body as Record<
       string,
       any
@@ -130,6 +132,7 @@ describe('EPM install', () => {
       packageVersion: pkg.version,
       packageName: pkg.name,
     });
+    // @ts-expect-error
     const sentTemplate = esClient.indices.putIndexTemplate.mock.calls[0][0]!.body as Record<
       string,
       any
@@ -181,12 +184,14 @@ describe('EPM install', () => {
       packageName: pkg.name,
     });
 
+    // @ts-expect-error
     const removeAliases = esClient.indices.putIndexTemplate.mock.calls[0][0]!.body as Record<
       string,
       any
     >;
     expect(removeAliases.template.aliases).not.toBeDefined();
 
+    // @ts-expect-error
     const sentTemplate = esClient.indices.putIndexTemplate.mock.calls[1][0]!.body as Record<
       string,
       any
