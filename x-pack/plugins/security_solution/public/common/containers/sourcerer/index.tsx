@@ -225,7 +225,7 @@ export const getScopeFromPath = (
   pathname: string
 ): SourcererScopeName.default | SourcererScopeName.detections =>
   matchPath(pathname, {
-    path: [ALERTS_PATH, RULES_PATH, `${RULES_PATH}/:anything`, `${UEBA_PATH}/:id`],
+    path: [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${UEBA_PATH}/:id`],
     strict: false,
   }) == null
     ? SourcererScopeName.default

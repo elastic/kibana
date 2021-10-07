@@ -240,12 +240,12 @@ describe('getScopeFromPath', () => {
   it('should return default scope', async () => {
     expect(getScopeFromPath('/')).toBe(SourcererScopeName.default);
     expect(getScopeFromPath('/exceptions')).toBe(SourcererScopeName.default);
+    expect(getScopeFromPath('/rules')).toBe(SourcererScopeName.default);
+    expect(getScopeFromPath('/rules/create')).toBe(SourcererScopeName.default);
   });
 
   it('should return detections scope', async () => {
     expect(getScopeFromPath('/alerts')).toBe(SourcererScopeName.detections);
-    expect(getScopeFromPath('/rules')).toBe(SourcererScopeName.detections);
-    expect(getScopeFromPath('/rules/create')).toBe(SourcererScopeName.detections);
     expect(getScopeFromPath('/rules/id/foo')).toBe(SourcererScopeName.detections);
     expect(getScopeFromPath('/rules/id/foo/edit')).toBe(SourcererScopeName.detections);
   });

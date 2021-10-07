@@ -32,11 +32,13 @@ import {
 } from '../../tasks/privileges';
 
 import { CASES_URL } from '../../urls/navigation';
+import { openSourcerer } from '../../tasks/sourcerer';
 const usersToCreate = [secAllUser, secReadCasesAllUser];
 const rolesToCreate = [secAll, secReadCasesAll];
 // needed to generate index pattern
 const visitSecuritySolution = () => {
   loginAndWaitForHostDetailsPage();
+  openSourcerer();
   logout();
 };
 
@@ -51,7 +53,6 @@ describe('Cases privileges', () => {
   before(() => {
     cleanKibana();
     createUsersAndRoles(usersToCreate, rolesToCreate);
-    visitSecuritySolution();
   });
 
   after(() => {
@@ -61,6 +62,7 @@ describe('Cases privileges', () => {
 
   beforeEach(() => {
     deleteCases();
+    visitSecuritySolution();
   });
 
   for (const user of [secAllUser, secReadCasesAllUser]) {
