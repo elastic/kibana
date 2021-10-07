@@ -7,6 +7,7 @@
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { PersistenceServices } from '../../../../../../rule_registry/server';
 import { queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
@@ -62,7 +63,7 @@ export const createQueryAlertType = (createOptions: CreateRuleOptions) => {
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    producer: 'security-solution',
+    producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
         runOpts: {

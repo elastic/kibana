@@ -10,7 +10,12 @@ import {
   ALERT_REASON,
   ALERT_RULE_NAMESPACE,
   ALERT_RULE_UPDATED_AT,
+  ALERT_STATUS,
+  ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  SPACE_IDS,
+  TAGS,
+  VERSION,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
@@ -117,6 +122,8 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(signal._source).eql({
         '@timestamp': signal._source['@timestamp'],
+        [ALERT_UUID]: signal._source[ALERT_UUID],
+        [VERSION]: signal._source[VERSION],
         actual: [1],
         bucket_span: 900,
         by_field_name: 'process.name',
@@ -151,6 +158,9 @@ export default ({ getService }: FtrProviderContext) => {
           },
         ],
         [ALERT_WORKFLOW_STATUS]: 'open',
+        [ALERT_STATUS]: 'active',
+        [SPACE_IDS]: ['default'],
+        [TAGS]: [`__internal_rule_id:${createdRule.rule_id}`, '__internal_immutable:false'],
         ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
           uuid: createdRule.id,
           category: 'Machine Learning Rule',
@@ -186,6 +196,10 @@ export default ({ getService }: FtrProviderContext) => {
           type: 'machine_learning',
           anomaly_threshold: 30,
           machine_learning_job_id: ['linux_anomalous_network_activity_ecs'],
+          category: 'Machine Learning Rule',
+          consumer: 'siem',
+          producer: 'siem',
+          rule_type_id: 'siem.mlRule',
         }),
         [ALERT_DEPTH]: 1,
         [ALERT_REASON]: `event with process store, by root on mothra created critical alert Test ML rule.`,

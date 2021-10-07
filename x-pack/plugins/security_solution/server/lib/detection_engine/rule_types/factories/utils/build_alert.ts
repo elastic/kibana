@@ -14,6 +14,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
+  TAGS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
