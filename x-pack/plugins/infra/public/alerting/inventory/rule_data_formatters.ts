@@ -9,32 +9,44 @@ import { ALERT_REASON, ALERT_RULE_PARAMS, TIMESTAMP } from '@kbn/rule-data-utils
 import { encode } from 'rison-node';
 import { stringify } from 'query-string';
 import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
+import { InventoryMetricThresholdParams } from '../../../common/alerting/metrics';
 
 export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
   const reason = fields[ALERT_REASON] ?? '-';
-  const ruleParams =
-    typeof fields[ALERT_RULE_PARAMS] === 'string' ? JSON.parse(fields[ALERT_RULE_PARAMS]!) : {};
+  const ruleParams = parseRuleParams(fields[ALERT_RULE_PARAMS]);
 
-  const linkToParams: Record<string, any> = {
-    nodeType: ruleParams.nodeType,
-    timestamp: Date.parse(fields[TIMESTAMP]),
-    customMetric: '',
-  };
+  let link = '/app/metrics/link-to/inventory?';
 
-  // We always pick the first criteria metric for the URL
-  const criteria = ruleParams.criteria[0];
-  if (criteria.customMetric.id !== 'alert-custom-metric') {
-    const customMetric = encode(criteria.customMetric);
-    linkToParams.customMetric = customMetric;
-    linkToParams.metric = customMetric;
-  } else {
-    linkToParams.metric = encode({ type: criteria.metric });
+  if (ruleParams) {
+    const linkToParams: Record<string, any> = {
+      nodeType: ruleParams.nodeType,
+      timestamp: Date.parse(fields[TIMESTAMP]),
+      customMetric: '',
+    };
+
+    // We always pick the first criteria metric for the URL
+    const criteria = ruleParams.criteria[0];
+    if (criteria.customMetric && criteria.customMetric.id !== 'alert-custom-metric') {
+      const customMetric = encode(criteria.customMetric);
+      linkToParams.customMetric = customMetric;
+      linkToParams.metric = customMetric;
+    } else {
+      linkToParams.metric = encode({ type: criteria.metric });
+    }
+
+    link += stringify(linkToParams);
   }
-
-  const link = '/app/metrics/link-to/inventory?' + stringify(linkToParams);
 
   return {
     reason,
     link,
   };
 };
+
+function parseRuleParams(params?: string): InventoryMetricThresholdParams | undefined {
+  try {
+    return typeof params === 'string' ? JSON.parse(params) : undefined;
+  } catch (_) {
+    return;
+  }
+}
