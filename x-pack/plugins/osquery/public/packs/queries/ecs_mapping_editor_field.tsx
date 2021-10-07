@@ -319,7 +319,7 @@ export interface ECSMappingEditorFieldRef {
 }
 
 export interface ECSMappingEditorFieldProps {
-  field: FieldHook<string>;
+  field: FieldHook<Record<string, unknown>>;
   query: string;
   fieldRef: MutableRefObject<ECSMappingEditorFieldRef>;
   euiFieldProps: EuiComboBoxProps<{}>;
