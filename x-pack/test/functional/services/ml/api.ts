@@ -985,7 +985,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return model;
     },
 
-    async createdTestTrainedModels(
+    async createTestTrainedModels(
       modelType: ModelType,
       count: number = 10,
       withIngestPipelines = false

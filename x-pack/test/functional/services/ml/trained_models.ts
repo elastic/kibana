@@ -21,12 +21,12 @@ export function TrainedModelsProvider(
   const retry = getService('retry');
 
   return {
-    async createdTestTrainedModels(
+    async createTestTrainedModels(
       modelType: ModelType,
       count: number = 10,
       withIngestPipelines = false
     ) {
-      await mlApi.createdTestTrainedModels(modelType, count, withIngestPipelines);
+      await mlApi.createTestTrainedModels(modelType, count, withIngestPipelines);
     },
 
     async assertStats(expectedTotalCount: number) {

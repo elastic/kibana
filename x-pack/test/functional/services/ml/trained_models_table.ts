@@ -119,16 +119,10 @@ export function TrainedModelsTableProvider({ getService }: FtrProviderContext) {
       );
     }
 
-    public async assertModelsDisplayedInTable(modelId: string, shouldBeDisplayed: boolean) {
-      if (shouldBeDisplayed) {
-        await this.filterWithSearchString(modelId, 1);
-      } else {
-        if (await testSubjects.exists('mlNoDataFrameModelsFound', { timeout: 1000 })) {
-          // no jobs at all, no other assertion needed
-          return;
-        }
-        await this.filterWithSearchString(modelId, 0);
-      }
+    public async assertModelDisplayedInTable(modelId: string, shouldBeDisplayed: boolean) {
+      await retry.tryForTime(5 * 1000, async () => {
+        await this.filterWithSearchString(modelId, shouldBeDisplayed === true ? 1 : 0);
+      });
     }
 
     public async assertModelsRowFields(modelId: string, expectedRow: TrainedModelRowData) {
@@ -210,14 +204,9 @@ export function TrainedModelsTableProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    public async assertRowNotExists(modelId: string) {
-      await retry.tryForTime(30 * 1000, async () => {
-        await this.filterWithSearchString(modelId, 0);
-      });
-    }
-
     public async clickDeleteAction(modelId: string) {
-      await testSubjects.click(`mlModelsTableRowDeleteAction`);
+      await testSubjects.click(this.rowSelector(modelId, 'mlModelsTableRowDeleteAction'));
+      await this.assertDeleteModalExists();
     }
   })();
 }

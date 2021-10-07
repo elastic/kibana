@@ -12,8 +12,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('trained models', function () {
     before(async () => {
-      await ml.trainedModels.createdTestTrainedModels('classification', 15, true);
-      await ml.trainedModels.createdTestTrainedModels('regression', 15);
+      await ml.trainedModels.createTestTrainedModels('classification', 15, true);
+      await ml.trainedModels.createTestTrainedModels('regression', 15);
       await ml.securityUI.loginAsMlPowerUser();
       await ml.navigation.navigateToTrainedModels();
     });
@@ -125,11 +125,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('should show the delete modal');
       await ml.trainedModelsTable.clickDeleteAction(modelWithoutPipelineData.modelId);
-      await ml.trainedModelsTable.assertDeleteModalExists();
 
       await ml.testExecution.logTestStep('should delete the model');
       await ml.trainedModelsTable.confirmDeleteModel();
-      await ml.trainedModelsTable.assertRowNotExists(modelWithoutPipelineData.modelId);
+      await ml.trainedModelsTable.assertModelDisplayedInTable(
+        modelWithoutPipelineData.modelId,
+        false
+      );
     });
   });
 }
