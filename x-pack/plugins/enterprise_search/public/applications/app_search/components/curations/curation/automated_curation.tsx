@@ -10,14 +10,7 @@ import { useParams } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
 
-import {
-  EuiSpacer,
-  EuiButton,
-  EuiBadge,
-  EuiLoadingSpinner,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiButton, EuiBadge, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { AppSearchPageTemplate } from '../../layout';
 import { AutomatedIcon } from '../components/automated_icon';

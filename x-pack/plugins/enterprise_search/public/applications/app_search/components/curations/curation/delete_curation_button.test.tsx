@@ -6,7 +6,7 @@
  */
 
 import '../../../../__mocks__/shallow_useeffect.mock';
-import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
+import { setMockActions } from '../../../../__mocks__/kea_logic';
 import { mockUseParams } from '../../../../__mocks__/react_router';
 import '../../../__mocks__/engine_logic.mock';
 
@@ -14,19 +14,11 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiButton, EuiTab } from '@elastic/eui';
-
-import { getPageTitle, getPageHeaderActions, getPageHeaderTabs } from '../../../../test_helpers';
+import { EuiButton } from '@elastic/eui';
 
 jest.mock('./curation_logic', () => ({ CurationLogic: jest.fn() }));
-import { CurationLogic } from './curation_logic';
 
 import { DeleteCurationButton } from './delete_curation_button';
-import { PromotedDocuments, HiddenDocuments } from './documents';
-import { ManualCuration } from './manual_curation';
-import { ActiveQuerySelect, ManageQueriesModal } from './queries';
-import { AddResultFlyout } from './results';
-import { SuggestedDocumentsCallout } from './suggested_documents_callout';
 
 describe('DeleteCurationButton', () => {
   const actions = {
