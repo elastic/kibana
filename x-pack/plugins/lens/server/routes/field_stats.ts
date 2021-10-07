@@ -56,7 +56,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
         const field = indexPattern.fields.find((f) => f.name === fieldName);
 
         if (!field) {
-          throw new Error(`Field {fieldName} not found in data view ${indexPattern.title}`);
+          throw new Error(`Field {fieldName} not found in index pattern ${indexPattern.title}`);
         }
 
         const filter = timeFieldName

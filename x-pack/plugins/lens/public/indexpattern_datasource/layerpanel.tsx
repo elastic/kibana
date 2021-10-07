@@ -23,8 +23,8 @@ export function LayerPanel({ state, layerId, onChangeIndexPattern }: IndexPatter
 
   const indexPattern = state.indexPatterns[layer.indexPatternId];
 
-  const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {
-    defaultMessage: 'Data view not found',
+  const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingIndexPattern', {
+    defaultMessage: 'Index pattern not found',
   });
 
   return (
