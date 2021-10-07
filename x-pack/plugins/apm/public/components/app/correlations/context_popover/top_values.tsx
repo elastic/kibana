@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiProgress,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IndexPatternField } from '../../../../../../../../src/plugins/data/common';
@@ -46,7 +47,7 @@ export function TopValues({ stats, onAddFilter, fieldValue }: Props) {
         topValues.map((value) => {
           const isHighlighted =
             fieldValue !== undefined && value.key === fieldValue;
-          const barColor = isHighlighted ? 'accent' : undefined;
+          const barColor = isHighlighted ? 'accent' : 'primary';
           const valueText =
             progressBarMax !== undefined
               ? asPercent(value.doc_count, progressBarMax)
@@ -65,7 +66,11 @@ export function TopValues({ stats, onAddFilter, fieldValue }: Props) {
                     max={progressBarMax}
                     color={barColor}
                     size="s"
-                    label={value.key}
+                    label={
+                      <EuiToolTip content={value.key}>
+                        <span>{value.key}</span>
+                      </EuiToolTip>
+                    }
                     className="eui-textTruncate"
                     aria-label={value.key.toString()}
                     valueText={valueText}
