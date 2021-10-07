@@ -739,3 +739,7 @@ export const NEXT_SYNC_RUNNING_MESSAGE = i18n.translate(
     defaultMessage: 'as soon as the currently running job finishes',
   }
 );
+
+export const UTC_TITLE = i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.utcTitle', {
+  defaultMessage: 'All times are in UTC',
+});

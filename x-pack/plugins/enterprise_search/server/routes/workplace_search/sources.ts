@@ -77,6 +77,20 @@ const sourceSettingsSchema = schema.object({
             ),
           })
         ),
+        schedule: schema.maybe(
+          schema.object({
+            blocked_windows: schema.maybe(
+              schema.arrayOf(
+                schema.object({
+                  job_type: schema.string(),
+                  day: schema.string(),
+                  start: schema.string(),
+                  end: schema.string(),
+                })
+              )
+            ),
+          })
+        ),
       })
     ),
   }),
