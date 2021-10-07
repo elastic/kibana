@@ -46,9 +46,9 @@ describe('buildDefaultSettings', () => {
           "lifecycle": Object {
             "name": "logs",
           },
-          mapping: {
-            total_fields: {
-              limit: '10000',
+          "mapping": Object {
+            "total_fields": Object {
+              "limit": "10000",
             },
           },
           "query": Object {
