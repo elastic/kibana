@@ -22,11 +22,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('spaces', () => {
     const basePath = `/s/${space}`;
 
-    const time = (range: { from: string; to: string }) => (space: string) => async () =>
-      await kibanaServer.uiSettings.replace({ 'timepicker:timeDefaults': JSON.stringify(range) }, { space });
-    const september2015 = time({ from: '2015-09-19T06:31:44.000Z', to: '2015-09-23T18:31:44.000Z' })(space);
+    const time = (range: { from: string; to: string }) => async () =>
+      await kibanaServer.uiSettings.replace(
+        { 'timepicker:timeDefaults': JSON.stringify(range) },
+        { space }
+      );
+    const september2015 = time({
+      from: '2015-09-19T06:31:44.000Z',
+      to: '2015-09-23T18:31:44.000Z',
+    });
 
-    before(async () => await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional'));
+    before(
+      async () =>
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional')
+    );
 
     describe('space with no features disabled', async () => {
       before(async () => {
@@ -61,7 +70,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows save button', async () => {
         await PageObjects.common.navigateToApp('discover', { basePath });
-        await testSubjects.existOrFail('discoverSaveButton', { timeout: config.get('timeouts.waitFor') });
+        await testSubjects.existOrFail('discoverSaveButton', {
+          timeout: config.get('timeouts.waitFor'),
+        });
       });
 
       it('shows "visualize" field button', async () => {
@@ -137,7 +148,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const noIdxPtrns = 'custom_space_no_index_patterns';
       before(async () => {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-        await spacesService.create({ id: noIdxPtrns, name: noIdxPtrns, disabledFeatures: ['indexPatterns'] });
+        await spacesService.create({
+          id: noIdxPtrns,
+          name: noIdxPtrns,
+          disabledFeatures: ['indexPatterns'],
+        });
       });
 
       after(async () => await spacesService.delete(noIdxPtrns));
