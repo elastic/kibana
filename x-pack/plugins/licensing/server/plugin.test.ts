@@ -102,9 +102,6 @@ describe('licensing plugin', () => {
         await license$.pipe(take(1)).toPromise();
 
         expect(esClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
-        expect(esClient.asInternalUser.xpack.info).toHaveBeenCalledWith({
-          accept_enterprise: true,
-        });
       });
 
       it('observable receives updated licenses', async () => {
