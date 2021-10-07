@@ -2,12 +2,13 @@
 # Import shared settings first so we can override below
 import %workspace%/.bazelrc.common
 
-## Disabled for now
 # Remote cache settings for local env
-# build --remote_cache=https://storage.googleapis.com/kibana-bazel-cache
-# build --incompatible_remote_results_ignore_disk=true
-# build --remote_accept_cached=true
-# build --remote_upload_local_results=false
+build --remote_cache=grpcs://cloud.buildbuddy.io
+build --incompatible_remote_results_ignore_disk=true
+build --noremote_upload_local_results
+build --remote_timeout=30
+build --remote_header=x-buildbuddy-api-key=3EYk49W2NefOx2n3yMze
+build --remote_accept_cached=true
 
 # BuildBuddy
 ## Metadata settings

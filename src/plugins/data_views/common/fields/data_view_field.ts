@@ -13,7 +13,13 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { RuntimeField } from '../types';
 import type { IFieldType } from './types';
 import { FieldSpec, DataView } from '..';
-import { shortenDottedString } from './utils';
+import {
+  shortenDottedString,
+  isDataViewFieldSubtypeMulti,
+  isDataViewFieldSubtypeNested,
+  getDataViewFieldSubtypeMulti,
+  getDataViewFieldSubtypeNested,
+} from './utils';
 
 /** @public */
 export class DataViewField implements IFieldType {
@@ -157,6 +163,22 @@ export class DataViewField implements IFieldType {
   public get visualizable() {
     const notVisualizableFieldTypes: string[] = [KBN_FIELD_TYPES.UNKNOWN, KBN_FIELD_TYPES.CONFLICT];
     return this.aggregatable && !notVisualizableFieldTypes.includes(this.spec.type);
+  }
+
+  public isSubtypeNested() {
+    return isDataViewFieldSubtypeNested(this);
+  }
+
+  public isSubtypeMulti() {
+    return isDataViewFieldSubtypeMulti(this);
+  }
+
+  public getSubtypeNested() {
+    return getDataViewFieldSubtypeNested(this);
+  }
+
+  public getSubtypeMulti() {
+    return getDataViewFieldSubtypeMulti(this);
   }
 
   public deleteCount() {

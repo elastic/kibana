@@ -83,7 +83,7 @@ export interface AppNavOptions {
 
   /**
    * A EUI iconType that will be used for the app's icon. This icon
-   * takes precendence over the `icon` property.
+   * takes precedence over the `icon` property.
    */
   euiIconType?: string;
 

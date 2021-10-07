@@ -49,7 +49,7 @@ let store: Store<State, Action> | null = null;
  * Factory for Security App's redux store.
  */
 export const createStore = (
-  state: PreloadedState<State>,
+  state: State,
   pluginsReducer: SubPluginsInitReducer,
   kibana: Observable<CoreStart>,
   storage: Storage,
@@ -74,7 +74,7 @@ export const createStore = (
 
   store = createReduxStore(
     createReducer(pluginsReducer),
-    state,
+    state as PreloadedState<State>,
     composeEnhancers(
       applyMiddleware(epicMiddleware, telemetryMiddleware, ...(additionalMiddleware ?? []))
     )
