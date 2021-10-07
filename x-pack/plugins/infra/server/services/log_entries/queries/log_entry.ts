@@ -21,6 +21,7 @@ export const createGetLogEntryQuery = (
   runtimeMappings?: estypes.MappingRuntimeFields
 ): estypes.AsyncSearchSubmitRequest => ({
   index: logEntryIndex,
+  // @ts-expect-error AsyncSearchSubmitRequest expects terminate_after in body
   terminate_after: 1,
   track_scores: false,
   track_total_hits: false,
@@ -32,7 +33,6 @@ export const createGetLogEntryQuery = (
       },
     },
     fields: ['*'],
-    // @ts-expect-error @elastic/elasticsearch doesn't declare "runtime_mappings" property
     runtime_mappings: runtimeMappings,
     sort: [{ [timestampField]: 'desc' }, { [tiebreakerField]: 'desc' }],
     _source: false,

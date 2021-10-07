@@ -124,7 +124,7 @@ export enum InfraWaffleMapRuleOperator {
 }
 
 export interface InfraWaffleMapOptions {
-  fields?: MetricsSourceConfigurationProperties['fields'] | null;
+  fields?: Omit<MetricsSourceConfigurationProperties['fields'], 'message'> | null;
   formatter: InfraFormatterType;
   formatTemplate: string;
   metric: SnapshotMetricInput;

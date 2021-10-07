@@ -38,6 +38,7 @@ export const createGetLogEntriesQuery = (
 
   return {
     index: logEntriesIndex,
+    // @ts-expect-error AsyncSearchSubmitRequest expects allow_no_indices in body
     allow_no_indices: true,
     track_scores: false,
     track_total_hits: false,
@@ -53,7 +54,6 @@ export const createGetLogEntriesQuery = (
         },
       },
       fields,
-      // @ts-expect-error @elastic/elasticsearch doesn't declare "runtime_mappings" property
       runtime_mappings: runtimeMappings,
       _source: false,
       ...createSortClause(sortDirection, timestampField, tiebreakerField),
@@ -87,7 +87,7 @@ const createHighlightClause = (highlightQuery: JsonObject | undefined, fields: s
   highlightQuery
     ? {
         highlight: {
-          boundary_scanner: 'word',
+          boundary_scanner: 'word' as const,
           fields: fields.reduce(
             (highlightFieldConfigs, fieldName) => ({
               ...highlightFieldConfigs,
