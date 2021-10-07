@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { get } from 'lodash';
-import { formatMetric } from '../../../lib/format_number';
-import {BytesPercentageUsage, ClusterItemContainer, DisabledIfNoDataAndInSetupModeLink} from './helpers';
+import { formatMetric, formatNumber } from '../../../lib/format_number';
+import { BytesPercentageUsage, ClusterItemContainer, DisabledIfNoDataAndInSetupModeLink } from './helpers';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -23,6 +23,7 @@ import {
   EuiHorizontalRule,
   EuiFlexGroup,
 } from '@elastic/eui';
+import { ENTERPRISE_SEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
@@ -66,7 +67,7 @@ export function EnterpriseSearchPanel(props) {
                       defaultMessage: 'Enterprise Search Overview',
                     }
                   )}
-                  data-test-subj="enterpriseSearchOverview"
+                  data-test-subj="entSearchOverview"
                 >
                   <FormattedMessage
                     id="xpack.monitoring.cluster.overview.entSearchPanel.overviewLinkLabel"
@@ -77,6 +78,48 @@ export function EnterpriseSearchPanel(props) {
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
+
+              <EuiDescriptionListTitle className="eui-textBreakWord">
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.entSearchPanel.versionLabel"
+                  defaultMessage="Version"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription data-test-subj="entSearchVersion">
+                {props.stats.versions[0] ||
+                  i18n.translate(
+                    'xpack.monitoring.cluster.overview.entSearchPanel.versionNotAvailableDescription',
+                    {
+                      defaultMessage: 'N/A',
+                    }
+                  )}
+              </EuiDescriptionListDescription>
+
+            </EuiDescriptionList>
+          </EuiPanel>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiPanel paddingSize="m">
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s">
+                  <h3>
+                    <EuiLink href={getSafeForExternalLink('#/enterprisesearch/nodes')} data-test-subj="entSearchNodes">
+                      <FormattedMessage
+                        id="xpack.monitoring.cluster.overview.entSearchPanel.nodesTotalLinkLabel"
+                        defaultMessage="Nodes: {nodesTotal}"
+                        values={{
+                          nodesTotal: formatNumber(props.stats.totalInstances, 'int_commas'),
+                        }}
+                      />
+                    </EuiLink>
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiHorizontalRule margin="m" />
+            <EuiDescriptionList type="column">
               <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.entSearchPanel.memoryUsageLabel"
@@ -85,13 +128,25 @@ export function EnterpriseSearchPanel(props) {
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="entSearchMemoryUsage">
                 <BytesPercentageUsage
-                  usedBytes={props.health.jvm.memory_usage['heap_used.bytes']}
-                  maxBytes={props.health.jvm.memory_usage['heap_max.bytes']}
+                  usedBytes={props.stats.memUsed}
+                  maxBytes={props.stats.memCommitted}
                 />
               </EuiDescriptionListDescription>
+
+              <EuiDescriptionListTitle className="eui-textBreakWord">
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.entSearchPanel.uptimeLabel"
+                  defaultMessage="Uptime"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription data-test-subj="entSearchUptime">
+                {formatNumber(props.stats.uptime, 'time_since')}
+              </EuiDescriptionListDescription>
+
             </EuiDescriptionList>
           </EuiPanel>
         </EuiFlexItem>
+
       </EuiFlexGrid>
     </ClusterItemContainer>
   );

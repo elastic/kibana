@@ -10,6 +10,17 @@ import { checkParam } from '../error_missing_required';
 import { createEnterpriseSearchQuery } from './create_enterprise_search_query';
 import { EnterpriseSearchMetric } from '../metrics';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
+import { ElasticsearchResponse } from 'x-pack/plugins/monitoring/common/types/es';
+import { entSearchAggResponseHandler, entSearchUuidsAgg } from './_enterprise_search_stats';
+
+function handleResponse(clusterUuid: string, response: ElasticsearchResponse) {
+  const stats = entSearchAggResponseHandler(response);
+
+  return {
+    clusterUuid,
+    stats,
+  };
+}
 
 export function getEnterpriseSearchForClusters(
   req: LegacyRequest,
@@ -23,11 +34,11 @@ export function getEnterpriseSearchForClusters(
 
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
+  const config = req.server.config();
+  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
 
   return Promise.all(
     clusters.map(async (cluster) => {
-
-      // TODO: Need to check how to insert cluster_uuid into the metric at top-level
       const clusterUuid = cluster.elasticsearch?.cluster?.id ?? cluster.cluster_uuid;
       const params = {
         index: entSearchIndexPattern,
@@ -37,18 +48,17 @@ export function getEnterpriseSearchForClusters(
           query: createEnterpriseSearchQuery({
             start,
             end,
-            uuid: clusterUuid,
             clusterUuid: STANDALONE_CLUSTER_CLUSTER_UUID,
+            uuid: clusterUuid,
             metric: EnterpriseSearchMetric.getMetricFields(),
           }),
-          sort: { '@timestamp': 'desc' },
+          aggs: entSearchUuidsAgg(maxBucketSize!),
         },
       };
 
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
       const response = await callWithRequest(req, 'search', params);
-
-      return response;
+      return handleResponse(clusterUuid, response);
     })
   );
 }

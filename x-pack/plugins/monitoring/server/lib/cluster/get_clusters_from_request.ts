@@ -75,7 +75,12 @@ export async function getClustersFromRequest(
   }
 
   if (!clusterUuid && !isStandaloneCluster) {
-    const indexPatternsToCheckForNonClusters = [lsIndexPattern, beatsIndexPattern, apmIndexPattern];
+    const indexPatternsToCheckForNonClusters = [
+      lsIndexPattern, 
+      beatsIndexPattern, 
+      apmIndexPattern,
+      enterpriseSearchIndexPattern
+    ];
 
     if (await hasStandaloneClusters(req, indexPatternsToCheckForNonClusters)) {
       clusters.push(getStandaloneClusterDefinition());
@@ -237,20 +242,18 @@ export async function getClustersFromRequest(
     }
   });
 
-  // add apm data
+  // add Enterprise Search data
   const enterpriseSearchByCluster = isInCodePath(codePaths, [CODE_PATH_ENTERPRISE_SEARCH])
     ? await getEnterpriseSearchForClusters(req, enterpriseSearchIndexPattern, clusters)
     : [];
   enterpriseSearchByCluster.forEach((entSearch) => {
-    const health = entSearch?.hits?.hits[0]?._source?.enterprisesearch?.health;
     const clusterIndex = clusters.findIndex(
       (cluster) =>
-        get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid) ===
-        health?.cluster_uuid
+        get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid) === entSearch.clusterUuid
     );
     if (clusterIndex >= 0) {
       Reflect.set(clusters[clusterIndex], 'enterpriseSearch', {
-        health,
+        ...entSearch
       });
     }
   });

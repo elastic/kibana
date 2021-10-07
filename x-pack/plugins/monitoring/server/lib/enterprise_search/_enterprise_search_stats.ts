@@ -7,11 +7,6 @@
 
 import type { ElasticsearchResponse } from '../../../common/types/es';
 
-const getMemPath = (cgroup?: string) =>
-  cgroup
-    ? 'beats_stats.metrics.beat.cgroup.memory.mem.usage.bytes'
-    : 'beats_stats.metrics.beat.memstats.rss';
-
 export const getDiffCalculation = (max: number | null, min: number | null) => {
   // no need to test max >= 0, but min <= 0 which is normal for a derivative after restart
   // because we are aggregating/collapsing on ephemeral_ids
@@ -22,91 +17,97 @@ export const getDiffCalculation = (max: number | null, min: number | null) => {
   return null;
 };
 
-export const apmAggFilterPath = [
+export const entSearchAggFilterPath = [
   'aggregations.total',
-  'aggregations.min_events_total.value',
-  'aggregations.max_events_total.value',
-  'aggregations.min_mem_total.value',
-  'aggregations.max_mem_total.value',
+  'aggregations.heap_used_total.value',
+  'aggregations.heap_max_total.value',
+  'aggregations.heap_committed_total.value',
   'aggregations.versions.buckets',
 ];
-export const entSearchUuidsAgg = (maxBucketSize?: string, cgroup?: string) => ({
+
+export const entSearchUuidsAgg = (maxBucketSize?: string) => ({
   total: {
     cardinality: {
-      field: 'beats_stats.beat.uuid',
+      field: 'agent.id',
       precision_threshold: 10000,
     },
   },
   versions: {
     terms: {
-      field: 'beats_stats.beat.version',
+      field: 'enterprisesearch.health.version.number',
     },
   },
   ephemeral_ids: {
     terms: {
-      field: 'beats_stats.metrics.beat.info.ephemeral_id',
+      field: 'agent.ephemeral_id',
       size: maxBucketSize,
     },
     aggs: {
-      min_events: {
-        min: {
-          field: 'beats_stats.metrics.libbeat.pipeline.events.total',
-        },
-      },
-      max_events: {
+      uptime_max: {
         max: {
-          field: 'beats_stats.metrics.libbeat.pipeline.events.total',
-        },
+          field: 'enterprisesearch.health.process.uptime.sec'
+        }
       },
-      min_mem: {
-        min: {
-          field: getMemPath(cgroup),
-        },
-      },
-      max_mem: {
+      heap_used: {
         max: {
-          field: getMemPath(cgroup),
+          field: 'enterprisesearch.health.jvm.memory_usage.heap_used.bytes'
+        },
+      },
+      heap_max: {
+        max: {
+          field: 'enterprisesearch.health.jvm.memory_usage.heap_max.bytes'
+        },
+      },
+      heap_committed: {
+        max: {
+          field: 'enterprisesearch.health.jvm.memory_usage.heap_committed.bytes'
         },
       },
     },
   },
-  min_events_total: {
+  uptime: {
+    max_bucket: {
+      buckets_path: 'ephemeral_ids>uptime_max',
+    }
+  },
+  heap_used_total: {
     sum_bucket: {
-      buckets_path: 'ephemeral_ids>min_events',
+      buckets_path: 'ephemeral_ids>heap_used',
     },
   },
-  max_events_total: {
+  heap_max_total: {
     sum_bucket: {
-      buckets_path: 'ephemeral_ids>max_events',
+      buckets_path: 'ephemeral_ids>heap_max',
     },
   },
-  min_mem_total: {
+  heap_committed_total: {
     sum_bucket: {
-      buckets_path: 'ephemeral_ids>min_mem',
-    },
-  },
-  max_mem_total: {
-    sum_bucket: {
-      buckets_path: 'ephemeral_ids>max_mem',
+      buckets_path: 'ephemeral_ids>heap_committed',
     },
   },
 });
 
-export const entSearchResponseHandler = (response: ElasticsearchResponse) => {
-  const apmTotal = response.aggregations?.total.value ?? 0;
+export const entSearchAggResponseHandler = (response: ElasticsearchResponse) => {
+  const aggs = response.aggregations;
+  console.log("Aggs: ", aggs);
 
-  const eventsTotalMax = response.aggregations?.max_events_total.value ?? 0;
-  const eventsTotalMin = response.aggregations?.min_events_total.value ?? 0;
-  const memMax = response.aggregations?.max_mem_total.value ?? 0;
-  const memMin = response.aggregations?.min_mem_total.value ?? 0;
-  const versions = (response.aggregations?.versions.buckets ?? []).map(
+  const totalInstances = aggs?.total.value ?? 0;
+  const uptime = aggs?.uptime.value;
+
+  const memUsed = aggs?.heap_used_total.value ?? 0;
+  const memMax = aggs?.heap_max_total.value ?? 0;
+  const memCommitted = aggs?.heap_committed_total.value ?? 0;
+
+  const versions = (aggs?.versions.buckets ?? []).map(
     ({ key }: { key: string }) => key
   );
 
   return {
-    apmTotal,
-    totalEvents: getDiffCalculation(eventsTotalMax, eventsTotalMin),
-    memRss: getDiffCalculation(memMax, memMin),
+    totalInstances,
+    uptime,
+    memUsed,
+    memMax,
+    memCommitted,
     versions,
   };
 };
