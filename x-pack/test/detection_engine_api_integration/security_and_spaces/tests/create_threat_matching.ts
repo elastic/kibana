@@ -7,7 +7,19 @@
 
 import { get, isEqual } from 'lodash';
 import expect from '@kbn/expect';
-import { ALERT_REASON, ALERT_RULE_UUID, ALERT_STATUS } from '@kbn/rule-data-utils';
+import {
+  ALERT_REASON,
+  ALERT_RULE_UUID,
+  ALERT_STATUS,
+  ALERT_RULE_NAMESPACE,
+  ALERT_RULE_UPDATED_AT,
+  ALERT_UUID,
+  ALERT_WORKFLOW_STATUS,
+  SPACE_IDS,
+  VERSION,
+  TAGS,
+} from '@kbn/rule-data-utils';
+import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { DETECTION_ENGINE_RULES_STATUS_URL } from '../../../../plugins/security_solution/common/constants';
@@ -29,7 +41,9 @@ import { ENRICHMENT_TYPES } from '../../../../plugins/security_solution/common/c
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
-  ALERT_ORIGINAL_EVENT,
+  ALERT_ORIGINAL_EVENT_ACTION,
+  ALERT_ORIGINAL_EVENT_CATEGORY,
+  ALERT_ORIGINAL_EVENT_MODULE,
   ALERT_ORIGINAL_TIME,
 } from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/field_maps/field_names';
 import { Ancestor } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
@@ -147,10 +161,10 @@ export default ({ getService }: FtrProviderContext) => {
           threat_filters: [],
         };
 
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 10, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, [id]);
+        const createdRule = await createRule(supertest, rule);
+        await waitForRuleSuccessOrStatus(supertest, createdRule.id);
+        await waitForSignalsToBePresent(supertest, 10, [createdRule.id]);
+        const signalsOpen = await getSignalsByIds(supertest, [createdRule.id]);
         expect(signalsOpen.hits.hits.length).equal(10);
         const fullSource = signalsOpen.hits.hits.find(
           (signal) =>
@@ -202,12 +216,10 @@ export default ({ getService }: FtrProviderContext) => {
           ecs: {
             version: '1.0.0-beta2',
           },
-          event: {
-            action: 'error',
-            category: 'user-login',
-            module: 'auditd',
-            kind: 'signal',
-          },
+          'event.action': 'error',
+          'event.category': 'user-login',
+          'event.module': 'auditd',
+          'event.kind': 'signal',
           host: {
             architecture: 'x86_64',
             containerized: false,
@@ -252,19 +264,73 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
           [ALERT_DEPTH]: 1,
-          [ALERT_ORIGINAL_EVENT]: {
-            action: 'error',
-            category: 'user-login',
-            module: 'auditd',
-          },
+          [ALERT_ORIGINAL_EVENT_ACTION]: 'error',
+          [ALERT_ORIGINAL_EVENT_CATEGORY]: 'user-login',
+          [ALERT_ORIGINAL_EVENT_MODULE]: 'auditd',
           [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
           [ALERT_REASON]:
             'user-login event by root on zeek-sensor-amsterdam created high alert Query with a rule id.',
           [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
-          [ALERT_STATUS]: 'open',
+          [ALERT_STATUS]: 'active',
+          [ALERT_UUID]: fullSignal[ALERT_UUID],
+          [ALERT_WORKFLOW_STATUS]: 'open',
+          [SPACE_IDS]: ['default'],
+          [VERSION]: fullSignal[VERSION],
+          [TAGS]: [`__internal_rule_id:${createdRule.rule_id}`, '__internal_immutable:false'],
           threat: {
             enrichments: get(fullSignal, 'threat.enrichments'),
           },
+          ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
+            actions: [],
+            author: [],
+            category: 'Indicator Match Rule',
+            consumer: 'siem',
+            created_at: createdRule.created_at,
+            created_by: 'elastic',
+            description: 'Detecting root and admin users',
+            enabled: true,
+            exceptions_list: [],
+            false_positives: [],
+            from: '1900-01-01T00:00:00.000Z',
+            immutable: false,
+            index: ['auditbeat-*'],
+            interval: '5m',
+            language: 'kuery',
+            max_signals: 100,
+            name: 'Query with a rule id',
+            producer: 'siem',
+            query: '*:*',
+            references: [],
+            risk_score: 55,
+            risk_score_mapping: [],
+            rule_id: createdRule.rule_id,
+            rule_type_id: 'siem.indicatorRule',
+            severity: 'high',
+            severity_mapping: [],
+            tags: [],
+            threat: [],
+            threat_filters: [],
+            threat_index: ['auditbeat-*'],
+            threat_mapping: [
+              {
+                entries: [
+                  {
+                    field: 'host.name',
+                    type: 'mapping',
+                    value: 'host.name',
+                  },
+                ],
+              },
+            ],
+            threat_query: 'source.ip: "188.166.120.93"',
+            throttle: null,
+            to: 'now',
+            type: 'threat_match',
+            updated_at: fullSignal[ALERT_RULE_UPDATED_AT],
+            updated_by: 'elastic',
+            uuid: createdRule.id,
+            version: 1,
+          }),
         });
       });
 
