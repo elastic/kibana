@@ -7,18 +7,24 @@
  */
 
 import { applyDeprecations } from './apply_deprecations';
-import { ConfigDeprecation, ConfigDeprecationWithContext } from './types';
+import { ConfigDeprecation, ConfigDeprecationContext, ConfigDeprecationWithContext } from './types';
 import { configDeprecationFactory as deprecations } from './deprecation_factory';
 
-const wrapHandler = (
-  handler: ConfigDeprecation,
-  path: string = ''
-): ConfigDeprecationWithContext => ({
-  deprecation: handler,
-  path,
-});
-
 describe('applyDeprecations', () => {
+  const context: ConfigDeprecationContext = {
+    version: '7.16.2',
+    branch: '7.16',
+  };
+
+  const wrapHandler = (
+    handler: ConfigDeprecation,
+    path: string = ''
+  ): ConfigDeprecationWithContext => ({
+    deprecation: handler,
+    path,
+    context,
+  });
+
   it('calls all deprecations handlers once', () => {
     const handlerA = jest.fn();
     const handlerB = jest.fn();
@@ -30,6 +36,26 @@ describe('applyDeprecations', () => {
     expect(handlerA).toHaveBeenCalledTimes(1);
     expect(handlerB).toHaveBeenCalledTimes(1);
     expect(handlerC).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls deprecations handlers with the correct parameters', () => {
+    const config = { foo: 'bar' };
+    const addDeprecation = jest.fn();
+    const createAddDeprecation = jest.fn().mockReturnValue(addDeprecation);
+
+    const handlerA = jest.fn();
+    const handlerB = jest.fn();
+    applyDeprecations(
+      config,
+      [wrapHandler(handlerA, 'pathA'), wrapHandler(handlerB, 'pathB')],
+      createAddDeprecation
+    );
+
+    expect(handlerA).toHaveBeenCalledTimes(1);
+    expect(handlerA).toHaveBeenCalledWith(config, 'pathA', addDeprecation, context);
+
+    expect(handlerB).toHaveBeenCalledTimes(1);
+    expect(handlerB).toHaveBeenCalledWith(config, 'pathB', addDeprecation, context);
   });
 
   it('passes path to addDeprecation factory', () => {
@@ -51,7 +77,7 @@ describe('applyDeprecations', () => {
     expect(createAddDeprecation).toHaveBeenNthCalledWith(2, 'pathB');
   });
 
-  it('calls handlers with correct arguments', () => {
+  it('calls handlers with correct config argument', () => {
     const addDeprecation = jest.fn();
     const createAddDeprecation = jest.fn().mockReturnValue(addDeprecation);
     const initialConfig = { foo: 'bar', deprecated: 'deprecated' };

@@ -16,8 +16,6 @@ import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_ap
 import { LicenseContext } from '../../../context/license/license_context';
 import * as useFetcherModule from '../../../hooks/use_fetcher';
 import { ServiceMap } from '.';
-import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
-import { Router } from 'react-router-dom';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 const history = createMemoryHistory();
@@ -49,15 +47,15 @@ const expiredLicense = new License({
 });
 
 function createWrapper(license: License | null) {
+  history.replace('/service-map?rangeFrom=now-15m&rangeTo=now');
+
   return ({ children }: { children?: ReactNode }) => {
     return (
       <EuiThemeProvider>
         <KibanaReactContext.Provider>
           <LicenseContext.Provider value={license || undefined}>
-            <MockApmPluginContextWrapper>
-              <Router history={history}>
-                <UrlParamsProvider>{children}</UrlParamsProvider>
-              </Router>
+            <MockApmPluginContextWrapper history={history}>
+              {children}
             </MockApmPluginContextWrapper>
           </LicenseContext.Provider>
         </KibanaReactContext.Provider>
