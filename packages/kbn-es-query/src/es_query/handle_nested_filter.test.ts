@@ -25,11 +25,13 @@ describe('handleNestedFilter', function () {
       meta: {
         index: 'logstash-*',
       },
-      nested: {
-        path: 'nestedField',
-        query: {
-          match_phrase: {
-            'nestedField.child': 'foo',
+      query: {
+        nested: {
+          path: 'nestedField',
+          query: {
+            match_phrase: {
+              'nestedField.child': 'foo',
+            },
           },
         },
       },
