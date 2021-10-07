@@ -561,14 +561,6 @@
         "deprecated": true,
         "references": [
           {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts"
-          },
-          {
             "plugin": "discover",
             "path": "src/plugins/discover/public/saved_searches/saved_searches.ts"
           },
@@ -583,6 +575,14 @@
           {
             "plugin": "discover",
             "path": "src/plugins/discover/public/plugin.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts"
           },
           {
             "plugin": "visualizations",
@@ -1072,20 +1072,20 @@
             "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/apps/main/components/top_nav/on_save_search.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/apps/main/components/top_nav/on_save_search.tsx"
-          },
-          {
             "plugin": "presentationUtil",
             "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
           },
           {
             "plugin": "presentationUtil",
             "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/apps/main/components/top_nav/on_save_search.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/apps/main/components/top_nav/on_save_search.tsx"
           },
           {
             "plugin": "dashboard",
@@ -2103,14 +2103,6 @@
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
           },
           {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/types.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/types.ts"
-          },
-          {
             "plugin": "discover",
             "path": "src/plugins/discover/public/saved_searches/_saved_search.ts"
           },
@@ -2125,6 +2117,14 @@
           {
             "plugin": "discover",
             "path": "src/plugins/discover/public/application/apps/main/discover_main_route.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/types.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/types.ts"
           },
           {
             "plugin": "visualizations",
@@ -2494,9 +2494,9 @@
             "signature": [
               "((id?: string | undefined) => Promise<",
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataDataViewsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IndexPattern",
                 "text": "IndexPattern"
               },
@@ -2929,9 +2929,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataDataViewsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IndexPattern",
                 "text": "IndexPattern"
               },

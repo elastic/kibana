@@ -458,7 +458,7 @@ the infrastructure monitoring use-case within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ingest_pipelines/README.md[ingestPipelines]
-|The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest nodes. Please refer to the Elasticsearch documentation for more details.
+|The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest pipelines.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/lens/readme.md[lens]

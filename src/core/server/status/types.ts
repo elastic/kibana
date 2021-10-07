@@ -232,6 +232,11 @@ export interface StatusServiceSetup {
 /** @internal */
 export interface InternalStatusServiceSetup
   extends Pick<StatusServiceSetup, 'core$' | 'overall$' | 'isStatusPageAnonymous'> {
+  /**
+   * Overall status of core's service.
+   */
+  coreOverall$: Observable<ServiceStatus>;
+
   // Namespaced under `plugins` key to improve clarity that these are APIs for plugins specifically.
   plugins: {
     set(plugin: PluginName, status$: Observable<ServiceStatus>): void;
