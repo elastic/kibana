@@ -12,10 +12,9 @@ import { MetricInput, VisParams, MetricOptions } from '../../common/types';
 import type { IFieldFormat } from '../../../../field_formats/common';
 import { Datatable } from '../../../../expressions/public';
 import { CustomPaletteState } from '../../../../charts/public';
-import { getFormatService } from '../services/format_service';
+import { getFormatService, getPaletteService } from '../../../expression_metric/public/services';
 import { ExpressionValueVisDimension } from '../../../../visualizations/public';
 import { formatValue, getMinMaxForColumns, MinMax, shouldApplyColor } from '../utils';
-import { getPaletteService } from '../services';
 
 import './metric.scss';
 import { getColumnByAccessor } from '../utils/accessor';
@@ -53,7 +52,6 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
         const column = getColumnByAccessor(metric.accessor, table?.columns);
         const formatter = getFormatService().deserialize(metric.format);
         const minMax = getMinMaxForColumns(table);
-
         const metrics = table.rows.map((row, rowIndex) => {
           let title = column.name;
           let value: number = row[column.id];

@@ -9,11 +9,20 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { DatatableColumn, Range } from '../../../../expressions';
+import { DatatableColumn } from '../../../../expressions';
 import { Render } from '../../../../presentation_util/public/__stories__';
-import { ColorMode, ColorSchemas } from '../../../../charts/common';
+import { ColorMode, CustomPaletteState } from '../../../../charts/common';
 import { metricVisRenderer } from '../expression_renderers';
 import { MetricVisRenderConfig, visType } from '../../common/types';
+
+const palette: CustomPaletteState = {
+  colors: ['rgb(219 231 38)', 'rgb(112 38 231)', 'rgb(38 124 231)'],
+  stops: [0, 50, 150],
+  gradient: false,
+  rangeMin: 0,
+  rangeMax: 150,
+  range: 'number',
+};
 
 const config: MetricVisRenderConfig = {
   visType,
@@ -35,15 +44,12 @@ const config: MetricVisRenderConfig = {
   },
   visConfig: {
     metric: {
-      percentageMode: false,
-      colorSchema: ColorSchemas.GreenToRed,
       metricColorMode: ColorMode.None,
-      colorsRange: [],
       labels: { show: true },
-      invertColors: false,
+      percentageMode: false,
       style: {
         bgColor: false,
-        bgFill: '#000',
+        bgFill: '',
         fontSize: 60,
         labelColor: false,
         subText: '',
@@ -101,11 +107,6 @@ const dataWithBuckets = [
   { 'col-0-1': 56, 'col-0-2': 52, 'col-0-3': 'Wednesday' },
 ];
 
-const colorsRange: Range[] = [
-  { type: 'range', from: 0, to: 50 },
-  { type: 'range', from: 51, to: 150 },
-];
-
 const containerSize = {
   width: '700px',
   height: '700px',
@@ -158,7 +159,7 @@ storiesOf('renderers/visMetric', module)
             ...config.visConfig,
             metric: {
               ...config.visConfig.metric,
-              colorsRange,
+              palette,
               metricColorMode: ColorMode.Background,
               style: {
                 ...config.visConfig.metric.style,
@@ -181,7 +182,7 @@ storiesOf('renderers/visMetric', module)
             ...config.visConfig,
             metric: {
               ...config.visConfig.metric,
-              colorsRange,
+              palette,
               metricColorMode: ColorMode.Labels,
               style: {
                 ...config.visConfig.metric.style,
@@ -204,13 +205,12 @@ storiesOf('renderers/visMetric', module)
             ...config.visConfig,
             metric: {
               ...config.visConfig.metric,
-              colorsRange,
+              palette,
               metricColorMode: ColorMode.Labels,
               style: {
                 ...config.visConfig.metric.style,
                 labelColor: true,
               },
-              invertColors: true,
             },
           },
         }}

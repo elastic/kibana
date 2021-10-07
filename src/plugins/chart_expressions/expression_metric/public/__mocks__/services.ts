@@ -6,16 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { FieldFormatsContentType, IFieldFormat } from '../../../../field_formats/common';
-
-export const formatValue = (
-  value: number | string,
-  fieldFormatter: IFieldFormat,
-  format: FieldFormatsContentType = 'text'
-) => {
-  if (typeof value === 'number' && isNaN(value)) {
-    return '-';
-  }
-
-  return fieldFormatter.convert(value, format);
-};
+export { getFormatService } from './format_service';
+export { getPaletteService } from './palette_service';
