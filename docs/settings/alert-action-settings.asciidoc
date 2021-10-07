@@ -31,11 +31,6 @@ Be sure to back up the encryption key value somewhere safe, as your alerting rul
 [[action-settings]]
 ==== Action settings
 
-`xpack.actions.enabled`::
-deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
-Feature toggle that enables Actions in {kib}.
-If `false`, all features dependent on Actions are disabled, including the *Observability* and *Security* apps.  Default: `true`.
-
 `xpack.actions.allowedHosts` {ess-icon}::
 A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `[*]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.
 +
@@ -179,3 +174,10 @@ For example, `20m`, `24h`, `7d`, `1w`. Default: `60s`.
 
 `xpack.alerting.maxEphemeralActionsPerAlert`::
 Sets the number of actions that will be executed ephemerally. To use this, enable ephemeral tasks in task manager first with <<task-manager-settings,`xpack.task_manager.ephemeral_tasks.enabled`>>
+
+`xpack.alerting.defaultRuleTaskTimeout`::
+Specifies the default timeout for the all rule types tasks. The time is formatted as:
++
+`<count>[ms,s,m,h,d,w,M,Y]` 
++
+For example, `20m`, `24h`, `7d`, `1w`. Default: `60s`.

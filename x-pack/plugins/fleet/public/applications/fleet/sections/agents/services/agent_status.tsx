@@ -7,19 +7,20 @@
 
 import { euiPaletteColorBlindBehindText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import * as euiVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import type { SimplifiedAgentStatus } from '../../../types';
 
 const visColors = euiPaletteColorBlindBehindText();
 const colorToHexMap = {
-  // TODO - replace with variable once https://github.com/elastic/eui/issues/2731 is closed
-  default: '#d3dae6',
+  // using variables as mentioned here https://elastic.github.io/eui/#/guidelines/getting-started
+  default: euiVars.default.euiColorLightShade,
   primary: visColors[1],
   secondary: visColors[0],
   accent: visColors[2],
   warning: visColors[5],
   danger: visColors[9],
-  inactive: '#98A2B3',
+  inactive: euiVars.default.euiColorDarkShade,
 };
 
 export const AGENT_STATUSES: SimplifiedAgentStatus[] = [
