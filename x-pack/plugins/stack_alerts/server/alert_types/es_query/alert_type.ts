@@ -148,8 +148,6 @@ export function getAlertType(logger: Logger): AlertType<
     isExportable: true,
     executor,
     producer: STACK_ALERTS_FEATURE_ID,
-    minimumScheduleInterval: '5m',
-    defaultScheduleInterval: '10m',
   };
 
   async function executor(
