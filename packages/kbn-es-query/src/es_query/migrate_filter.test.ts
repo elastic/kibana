@@ -12,6 +12,16 @@ import { PhraseFilter, MatchAllFilter } from '../filters';
 
 describe('migrateFilter', function () {
   const oldMatchPhraseFilter = {
+    match: {
+      fieldFoo: {
+        query: 'foobar',
+        type: 'phrase',
+      },
+    },
+    meta: {},
+  } as unknown as DeprecatedMatchPhraseFilter;
+
+  const oldMatchPhraseFilter2 = {
     query: {
       match: {
         fieldFoo: {
@@ -36,8 +46,10 @@ describe('migrateFilter', function () {
 
   it('should migrate match filters of type phrase', function () {
     const migratedFilter = migrateFilter(oldMatchPhraseFilter, undefined);
-
     expect(migratedFilter).toEqual(newMatchPhraseFilter);
+
+    const migratedFilter2 = migrateFilter(oldMatchPhraseFilter2, undefined);
+    expect(migratedFilter2).toEqual(newMatchPhraseFilter);
   });
 
   it('should not modify the original filter', function () {
@@ -50,7 +62,7 @@ describe('migrateFilter', function () {
 
   it('should return the original filter if no migration is necessary', function () {
     const originalFilter = {
-      match_all: {},
+      query: { match_all: {} },
     } as MatchAllFilter;
     const migratedFilter = migrateFilter(originalFilter, undefined);
 
