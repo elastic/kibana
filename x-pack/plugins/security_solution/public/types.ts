@@ -9,6 +9,7 @@ import { CoreStart } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import { SpacesPluginStart } from '../../../plugins/spaces/public';
 import { LensPublicStart } from '../../../plugins/lens/public';
 import { NewsfeedPublicPluginStart } from '../../../../src/plugins/newsfeed/public';
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
@@ -67,6 +68,7 @@ export interface StartPlugins {
   timelines: TimelinesUIStart;
   uiActions: UiActionsStart;
   ml?: MlPluginStart;
+  spaces: SpacesPluginStart;
 }
 
 export type StartServices = CoreStart &
