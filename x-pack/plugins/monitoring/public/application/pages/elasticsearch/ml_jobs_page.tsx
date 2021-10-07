@@ -16,6 +16,7 @@ import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
 import type { MLJobs } from '../../../types';
+import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 
 interface SetupModeProps {
   setupMode: any;
@@ -80,6 +81,7 @@ export const ElasticsearchMLJobsPage: React.FC<ComponentProps> = ({ clusters }) 
     >
       <div data-test-subj="elasticsearchMLJobsListingPage">
         <SetupModeRenderer
+          productName={ELASTICSEARCH_SYSTEM_ID}
           render={({ flyoutComponent, bottomBarComponent }: SetupModeProps) => (
             <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}

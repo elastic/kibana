@@ -18,6 +18,7 @@ import { useTable } from '../../hooks/use_table';
 import { useLocalStorage } from '../../hooks/use_local_storage';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
+import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 
 export const ElasticsearchIndicesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -94,6 +95,7 @@ export const ElasticsearchIndicesPage: React.FC<ComponentProps> = ({ clusters })
     >
       <div data-test-subj="elasticsearchIndicesListingPage">
         <SetupModeRenderer
+          productName={ELASTICSEARCH_SYSTEM_ID}
           render={({ flyoutComponent, bottomBarComponent }: SetupModeProps) => (
             <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}

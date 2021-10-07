@@ -21,6 +21,7 @@ import { nodesByIndices } from '../../../components/elasticsearch/shard_allocati
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
+import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 
 export const ElasticsearchNodePage: React.FC<ComponentProps> = () => {
   const globalState = useContext(GlobalStateContext);
@@ -105,7 +106,8 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = () => {
       pageType="nodes"
     >
       <SetupModeRenderer
-        render={({ flyoutComponent, bottomBarComponent }: SetupModeProps) => (
+        productName={ELASTICSEARCH_SYSTEM_ID}
+        render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}
             <NodeReact

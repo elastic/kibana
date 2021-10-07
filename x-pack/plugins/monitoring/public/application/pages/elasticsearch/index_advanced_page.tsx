@@ -18,6 +18,7 @@ import { ItemTemplate } from './item_template';
 import { AdvancedIndex } from '../../../components/elasticsearch/index/advanced';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
+import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 
 export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = () => {
   const globalState = useContext(GlobalStateContext);
@@ -65,6 +66,7 @@ export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = () => {
   return (
     <ItemTemplate title={title} getPageData={getPageData} id={index} pageType="indices">
       <SetupModeRenderer
+        productName={ELASTICSEARCH_SYSTEM_ID}
         render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}

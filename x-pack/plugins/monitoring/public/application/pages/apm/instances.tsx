@@ -18,6 +18,7 @@ import { ApmServerInstances } from '../../../components/apm/instances';
 import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { APM_SYSTEM_ID } from '../../../../common/constants';
 
 interface SetupModeProps {
   setupMode: any;
@@ -90,7 +91,7 @@ export const ApmInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
       data-test-subj="apmInstancesPage"
     >
       <SetupModeRenderer
-        productName="apm"
+        productName={APM_SYSTEM_ID}
         render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}
