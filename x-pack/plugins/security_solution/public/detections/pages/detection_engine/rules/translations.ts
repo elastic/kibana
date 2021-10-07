@@ -13,6 +13,11 @@ export const BACK_TO_DETECTIONS = i18n.translate(
     defaultMessage: 'Back to detections',
   }
 );
+export const POPOVER_TOOLTIP_ARIA_LABEL = (columnName: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.rules.popoverTooltip.ariaLabel', {
+    defaultMessage: 'Tooltip for column: {columnName}',
+    values: { columnName },
+  });
 
 export const IMPORT_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.importRuleTitle',
@@ -389,14 +394,6 @@ export const COLUMN_GAP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.gap',
   {
     defaultMessage: 'Last Gap (if any)',
-  }
-);
-
-export const COLUMN_GAP_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltip',
-  {
-    defaultMessage:
-      'Duration of most recent gap in Rule execution. Adjust Rule look-back or see documentation for mitigating gaps ',
   }
 );
 

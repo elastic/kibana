@@ -230,6 +230,7 @@ export class DocLinksService {
           ruleChangeLog: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/prebuilt-rules-changelog.html`,
           detectionsReq: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/detections-permissions-section.html`,
           networkMap: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/conf-map-ui.html`,
+          troubleshootGaps: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/alerts-ui-monitor.html#troubleshoot-gaps`,
         },
         query: {
           eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -630,6 +631,7 @@ export interface DocLinksStart {
       readonly ruleChangeLog: string;
       readonly detectionsReq: string;
       readonly networkMap: string;
+      readonly troubleshootGaps: string;
     };
     readonly query: {
       readonly eql: string;
