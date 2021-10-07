@@ -16,7 +16,7 @@ import { run, createFailError } from '@kbn/dev-utils';
 import { lastValueFrom } from '@kbn/std';
 
 import { PROJECTS } from './projects';
-import { buildAllTsRefs } from './build_ts_refs';
+import { buildTsRefs } from './build_ts_refs';
 import { updateRootRefsConfig } from './root_refs_config';
 
 export async function runTypeCheckCli() {
@@ -35,7 +35,7 @@ export async function runTypeCheckCli() {
         return !p.disableTypeCheck && (!projectFilter || p.tsConfigPath === projectFilter);
       });
 
-      const { failed } = await buildAllTsRefs({
+      const { failed } = await buildTsRefs({
         log,
         procRunner,
         verbose: !!flags.verbose,

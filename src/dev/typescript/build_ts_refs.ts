@@ -13,7 +13,7 @@ import { ToolingLog, REPO_ROOT, ProcRunner } from '@kbn/dev-utils';
 import { ROOT_REFS_CONFIG_PATH } from './root_refs_config';
 import { Project } from './project';
 
-export async function buildAllTsRefs({
+export async function buildTsRefs({
   log,
   procRunner,
   verbose,

@@ -12,7 +12,7 @@ import { run, REPO_ROOT, createFlagError } from '@kbn/dev-utils';
 import del from 'del';
 
 import { RefOutputCache } from './ref_output_cache';
-import { buildAllTsRefs } from './build_ts_refs';
+import { buildTsRefs } from './build_ts_refs';
 import { updateRootRefsConfig, ROOT_REFS_CONFIG_PATH } from './root_refs_config';
 import { Project } from './project';
 import { PROJECT_CACHE } from './projects';
@@ -97,7 +97,7 @@ export async function runBuildRefsCli() {
       }
 
       try {
-        await buildAllTsRefs({
+        await buildTsRefs({
           log,
           procRunner,
           verbose: !!flags.verbose,
