@@ -6,7 +6,7 @@
  */
 
 import DateMath from '@elastic/datemath';
-import { QUERY } from '../../../common/constants';
+import { QUERY } from '../constants';
 
 export const parseRelativeDate = (dateStr: string, options = {}) => {
   // We need this this parsing because if user selects This week or this date
