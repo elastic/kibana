@@ -213,6 +213,11 @@ describe('Config Deprecations', () => {
 
   it('renames security.showInsecureClusterWarning to xpack.security.showInsecureClusterWarning', () => {
     const config = {
+      xpack: {
+        security: {
+          session: { idleTimeout: 123, lifespan: 345 },
+        },
+      },
       security: {
         showInsecureClusterWarning: false,
       },
