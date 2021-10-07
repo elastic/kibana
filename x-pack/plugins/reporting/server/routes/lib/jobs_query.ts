@@ -10,6 +10,7 @@ import {
   DeleteResponse,
   SearchHit,
   SearchResponse,
+  SearchRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { errors } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
@@ -21,8 +22,6 @@ import { ReportApiJSON, ReportSource } from '../../../common/types';
 import { statuses } from '../../lib/statuses';
 import { Report } from '../../lib/store';
 import { ReportingUser } from '../../types';
-
-type SearchRequest = Required<Parameters<ElasticsearchClient['search']>>[0];
 
 const defaultSize = 10;
 const getUsername = (user: ReportingUser) => (user ? user.username : false);
@@ -71,7 +70,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
 
       return await callback(client);
     } catch (error) {
-      if (error instanceof errors.ResponseError && [401, 403, 404].includes(error.statusCode)) {
+      if (error instanceof errors.ResponseError && [401, 403, 404].includes(error.statusCode!)) {
         return;
       }
 
