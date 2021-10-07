@@ -439,6 +439,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
           "indexName": "my-index",
         }
       }
+      hostRisk={null}
       isAlert={false}
       isDraggable={false}
       loading={true}
@@ -959,6 +960,7 @@ Array [
                         "indexName": "my-index",
                       }
                     }
+                    hostRisk={null}
                     isAlert={false}
                     isDraggable={false}
                     loading={true}
@@ -1996,6 +1998,7 @@ Array [
                       "indexName": "my-index",
                     }
                   }
+                  hostRisk={null}
                   isAlert={false}
                   isDraggable={false}
                   loading={true}

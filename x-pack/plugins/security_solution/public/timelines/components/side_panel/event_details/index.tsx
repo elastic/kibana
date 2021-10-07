@@ -35,6 +35,7 @@ import { TimelineNonEcsData } from '../../../../../common';
 import { Ecs } from '../../../../../common/ecs';
 import { EventDetailsFooter } from './footer';
 import { EntityType } from '../../../../../../timelines/common';
+import { useHostsRiskScore } from '../../../../overview/containers/overview_risky_host_links/use_hosts_risk_score';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -128,6 +129,10 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     [detailsData]
   );
 
+  const hostRisk = useHostsRiskScore({
+    hostName,
+  });
+
   const backToAlertDetailsLink = useMemo(() => {
     return (
       <>
@@ -196,6 +201,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
             loading={loading}
             timelineId={timelineId}
             timelineTabType="flyout"
+            hostRisk={hostRisk}
           />
         )}
       </StyledEuiFlyoutBody>
@@ -228,6 +234,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         loading={loading}
         timelineId={timelineId}
         timelineTabType={tabType}
+        hostRisk={hostRisk}
       />
     </>
   );
