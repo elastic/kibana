@@ -75,7 +75,7 @@ export class EnterpriseSearchMetric extends Metric {
   static getMetricFields() {
     return {
       uuidField: 'enterprisesearch.health.cluster_uuid',
-      timestampField: 'timestamp',
+      timestampField: '@timestamp',
     };
   }
 }
