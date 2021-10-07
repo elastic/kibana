@@ -23,6 +23,7 @@
     "cases",
     "data",
     "features",
+    "inspector",
     "ruleRegistry",
     "timelines",
     "triggersActionsUi"

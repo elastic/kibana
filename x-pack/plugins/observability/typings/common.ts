@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Request } from '../../../../src/plugins/inspector';
+
 export type ObservabilityApp =
   | 'infra_metrics'
   | 'infra_logs'
@@ -22,3 +24,5 @@ export type PromiseReturnType<Func> = Func extends (...args: any[]) => Promise<i
   : Func;
 
 export { Coordinates } from '../public/typings/fetch_overview_data/';
+
+export type InspectResponse = Request[];
