@@ -31,7 +31,7 @@ export function searchProvider(
   async function anomalySearch<T>(
     searchParams: estypes.SearchRequest,
     jobIds: string[]
-  ): Promise<TransportResult<estypes.SearchResponse<T>>> {
+  ): Promise<TransportResult<estypes.SearchResponse<T>, unknown>> {
     await jobIdsCheck('anomaly-detector', jobIds);
     const { asInternalUser } = client;
     const resp = await asInternalUser.search<T>({

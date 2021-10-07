@@ -89,6 +89,7 @@ const cardinalityCheckProvider = (client: IScopedClusterClient) => {
       new Set<string>()
     );
 
+    // @ts-expect-error influencers is optional
     const normalizedInfluencers: estypes.Field[] = Array.isArray(influencers)
       ? influencers
       : [influencers];

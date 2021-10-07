@@ -38,7 +38,7 @@ export async function validateInfluencers(job: CombinedJob) {
   // detector using 'count' and no influencers and there shouldn't
   // be a warning about that.
   if (
-    influencers.length === 0 &&
+    influencers?.length === 0 &&
     job.analysis_config.detectors.length === 1 &&
     detectorFieldNames.length === 0
   ) {
@@ -46,6 +46,7 @@ export async function validateInfluencers(job: CombinedJob) {
   }
 
   if (
+    // @ts-expect-error influencers is optional
     influencers.length <= INFLUENCER_LOW_THRESHOLD &&
     detectorFieldNames.length >= DETECTOR_FIELD_NAMES_THRESHOLD
   ) {
@@ -59,8 +60,10 @@ export async function validateInfluencers(job: CombinedJob) {
     }
 
     messages.push({ id, influencerSuggestion });
+    // @ts-expect-error influencers is optional
   } else if (influencers.length <= INFLUENCER_LOW_THRESHOLD) {
     messages.push({ id: 'influencer_low' });
+    // @ts-expect-error influencers is optional
   } else if (influencers.length >= INFLUENCER_HIGH_THRESHOLD) {
     messages.push({ id: 'influencer_high' });
   }

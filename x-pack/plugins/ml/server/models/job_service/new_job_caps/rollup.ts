@@ -28,7 +28,7 @@ export async function rollupServiceProvider(
   let jobIndexPatterns: string[] = [indexPattern];
 
   async function getRollupJobs(): Promise<
-    estypes.RollupGetRollupCapabilitiesRollupCapabilitySummary[] | null
+    estypes.RollupGetRollupCapsRollupCapabilitySummary[] | null
   > {
     if (rollupIndexPatternObject !== null) {
       const parsedTypeMetaData = JSON.parse(rollupIndexPatternObject.attributes.typeMeta!);
