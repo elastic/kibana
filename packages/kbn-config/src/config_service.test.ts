@@ -323,18 +323,58 @@ test('treats config as enabled if config path is not present in schema', async (
   expect(unusedPaths).toEqual([]);
 });
 
-test('does not read "enabled" if its schema is not present', async () => {
+test('throws if reading "enabled" when it is not present in the schema', async () => {
   const initialConfig = {
     foo: {
-      enabled: false, // should be ignored as it is not in schema
+      enabled: false,
     },
   };
 
   const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
 
-  const isEnabled = await configService.isEnabledAtPath('foo');
-  expect(isEnabled).toBe(true);
+  configService.setSchema(
+    'foo',
+    schema.object({
+      bar: schema.maybe(schema.string()),
+    })
+  );
+
+  expect(
+    async () => await configService.isEnabledAtPath('foo')
+  ).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"[config validation of [foo].enabled]: definition for this key is missing"`
+  );
+});
+
+test('throws if reading "enabled" when no schema exists', async () => {
+  const initialConfig = {
+    foo: {
+      enabled: false,
+    },
+  };
+
+  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
+  const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+
+  expect(
+    async () => await configService.isEnabledAtPath('foo')
+  ).rejects.toThrowErrorMatchingInlineSnapshot(`"No validation schema has been defined for [foo]"`);
+});
+
+test('throws if reading any config value when no schema exists', async () => {
+  const initialConfig = {
+    foo: {
+      whatever: 'hi',
+    },
+  };
+
+  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
+  const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+
+  expect(
+    async () => await configService.isEnabledAtPath('foo')
+  ).rejects.toThrowErrorMatchingInlineSnapshot(`"No validation schema has been defined for [foo]"`);
 });
 
 test('allows plugins to specify "enabled" flag via validation schema', async () => {

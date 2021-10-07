@@ -168,22 +168,29 @@ export class ConfigService {
 
   public async isEnabledAtPath(path: ConfigPath) {
     const namespace = pathToString(path);
+    const hasSchema = this.schemas.has(namespace);
 
-    const validatedConfig = this.schemas.has(namespace)
+    const config = await this.config$.pipe(first()).toPromise();
+    if (!hasSchema && config.has(path)) {
+      // Throw if there is no schema, but a config exists at the path.
+      throw new Error(`No validation schema has been defined for [${namespace}]`);
+    }
+
+    const validatedConfig = hasSchema
       ? await this.atPath<{ enabled?: boolean }>(path).pipe(first()).toPromise()
       : undefined;
 
     const isDisabled = validatedConfig?.enabled === false;
-
     if (isDisabled) {
-      // If the plugin is _not_ enabled, we mark the entire plugin path as
-      // handled, as it's expected that it won't be used.
+      // If the plugin is explicitly disabled, we mark the entire plugin
+      // path as handled, as it's expected that it won't be used.
       this.markAsHandled(path);
       return false;
     }
 
-    // If validatedConfig.enabled is undefined or explicitly set to true,
-    // we consider the plugin is enabled.
+    // If the schema exists and the config is explicitly set to true,
+    // _or_ if the `enabled` config is undefined, then we treat the
+    // plugin as enabled.
     return true;
   }
 
