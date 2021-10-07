@@ -84,10 +84,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
         });
         return summary;
       }),
-
-      // TODO: broken during Node 16 upgrade
-      // @ts-expect-error
-      distinctUntilChanged(isDeepStrictEqual),
+      distinctUntilChanged<ServiceStatus<unknown>>(isDeepStrictEqual),
       shareReplay(1)
     );
 
@@ -171,10 +168,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
         elasticsearch: elasticsearchStatus,
         savedObjects: savedObjectsStatus,
       })),
-
-      // TODO: broken during Node 16 upgrade
-      // @ts-expect-error
-      distinctUntilChanged(isDeepStrictEqual),
+      distinctUntilChanged<CoreStatus>(isDeepStrictEqual),
       shareReplay(1)
     );
   }

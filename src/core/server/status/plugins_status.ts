@@ -103,8 +103,6 @@ export class PluginsStatusService {
       return of({});
     }
 
-    // TODO: broken during Node 16 upgrade
-    // @ts-expect-error
     return this.update$.pipe(
       switchMap(() => {
         const pluginStatuses = plugins
@@ -130,7 +128,7 @@ export class PluginsStatusService {
 
         return combineLatest(pluginStatuses).pipe(
           map((statuses) => Object.fromEntries(statuses)),
-          distinctUntilChanged(isDeepStrictEqual)
+          distinctUntilChanged<Record<PluginName, ServiceStatus>>(isDeepStrictEqual)
         );
       })
     );
