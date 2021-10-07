@@ -33,6 +33,8 @@ data-type="inline"
 />
 ++++
 
+{nbsp} +
+
 [[kibana-home-page]]
 *{kib} is for administrators, analysts, and business users.*
 As an admin, your role is to manage the Elastic Stack, from creating your
