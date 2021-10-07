@@ -127,7 +127,7 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
 
     api.sendReindexTelemetryData({ start: true });
 
-    const { data, error } = await api.startReindexTask(indexName);
+    const { data: reindexOp, error } = await api.startReindexTask(indexName);
 
     if (error) {
       setReindexState({
@@ -139,7 +139,7 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
       return;
     }
 
-    setReindexState(getReindexState(reindexState, data));
+    setReindexState(getReindexState(reindexState, { reindexOp }));
     updateStatus();
   }, [api, indexName, reindexState, updateStatus]);
 

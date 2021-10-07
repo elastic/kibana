@@ -30,17 +30,6 @@ exports[`ChecklistFlyout renders 1`] = `
       </p>
     </EuiCallOut>
     <EuiSpacer />
-    <EuiTitle
-      size="xs"
-    >
-      <h3>
-        <FormattedMessage
-          defaultMessage="Reindexing process"
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklistTitle"
-          values={Object {}}
-        />
-      </h3>
-    </EuiTitle>
     <ReindexProgress
       cancelReindex={[MockFunction]}
       reindexState={
