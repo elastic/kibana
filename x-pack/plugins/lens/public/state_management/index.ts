@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { configureStore, getDefaultMiddleware, DeepPartial } from '@reduxjs/toolkit';
+import { configureStore, getDefaultMiddleware, PreloadedState } from '@reduxjs/toolkit';
 import logger from 'redux-logger';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
 import { lensSlice } from './lens_slice';
@@ -40,7 +40,7 @@ export const {
 
 export const makeConfigureStore = (
   storeDeps: LensStoreDeps,
-  preloadedState: DeepPartial<LensState>
+  preloadedState: PreloadedState<LensState>
 ) => {
   const middleware = [
     ...getDefaultMiddleware({
