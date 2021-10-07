@@ -29,7 +29,7 @@ describe('Cluster upgrade', () => {
     });
 
     test('renders overview', () => {
-      const { exists, find } = testBed;
+      const { exists } = testBed;
       expect(exists('overview')).toBe(true);
       expect(exists('isUpgradingMessage')).toBe(false);
       expect(exists('isUpgradeCompleteMessage')).toBe(false);
@@ -38,8 +38,9 @@ describe('Cluster upgrade', () => {
 
   describe('when cluster is in the process of a rolling upgrade', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(null, {
+      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(undefined, {
         statusCode: 426,
+        message: '',
         attributes: {
           allNodesUpgraded: false,
         },
@@ -61,8 +62,9 @@ describe('Cluster upgrade', () => {
 
   describe('when cluster has been upgraded', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(null, {
+      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(undefined, {
         statusCode: 426,
+        message: '',
         attributes: {
           allNodesUpgraded: true,
         },

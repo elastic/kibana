@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt, EuiPageContent } from '@elastic/eui';

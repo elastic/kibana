@@ -10,7 +10,6 @@ import { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { ResponseError } from '../../../../../common/types';
-import { AppContextDependencies } from '../../../../types';
 import { useAppContext } from '../../../app_context';
 import { DeprecationLoggingPreviewProps } from '../../types';
 
