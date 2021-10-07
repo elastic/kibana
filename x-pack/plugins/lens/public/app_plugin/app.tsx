@@ -37,7 +37,7 @@ import {
   getLastKnownDocWithoutPinnedFilters,
   runSaveLensVisualization,
 } from './save_modal_container';
-import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
+import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
@@ -101,7 +101,7 @@ export function App({
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(undefined);
 
-  const lensInspector = getLensInspectorService(inspector);
+  const lensInspector = inspector;
 
   useEffect(() => {
     if (currentDoc) {
