@@ -4,15 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiDragDropContext, EuiDraggable, EuiEmptyPrompt, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiDragDropContext,
+  EuiDraggable,
+  EuiEmptyPrompt,
+  EuiButtonEmpty,
+  EuiBadge,
+  EuiTextColor,
+} from '@elastic/eui';
 
+import { mountWithIntl } from '../../../../../test_helpers';
 import { DataPanel } from '../../../data_panel';
 import { CurationResult } from '../results';
 
@@ -47,6 +54,14 @@ describe('PromotedDocuments', () => {
     return draggableWrapper.renderProp('children')({}, {}, {});
   };
 
+  it('displays the number of documents in a badge', () => {
+    const wrapper = shallow(<PromotedDocuments />);
+    const Icon = wrapper.prop('iconType');
+    const iconWrapper = shallow(<Icon />);
+
+    expect(iconWrapper.find(EuiBadge).prop('children')).toEqual(4);
+  });
+
   it('renders a list of draggable promoted documents', () => {
     const wrapper = shallow(<PromotedDocuments />);
 
@@ -57,12 +72,29 @@ describe('PromotedDocuments', () => {
     });
   });
 
-  it('renders an empty state & hides the panel actions when empty', () => {
-    setMockValues({ ...values, curation: { promoted: [] } });
-    const wrapper = shallow(<PromotedDocuments />);
+  describe('empty state', () => {
+    it('renders', () => {
+      setMockValues({ ...values, curation: { promoted: [] } });
+      const wrapper = shallow(<PromotedDocuments />);
 
-    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
-    expect(wrapper.find(DataPanel).prop('action')).toBe(false);
+      expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+    });
+
+    it('hide information about starring documents if the curation is automated', () => {
+      setMockValues({ ...values, curation: { promoted: [] }, isAutomated: true });
+      const wrapper = shallow(<PromotedDocuments />);
+      const emptyPromptBody = mountWithIntl(<>{wrapper.find(EuiEmptyPrompt).prop('body')}</>);
+
+      expect(emptyPromptBody.text()).not.toContain('Star documents');
+    });
+  });
+
+  it('shows a message when the curation is automated', () => {
+    setMockValues({ ...values, isAutomated: true });
+    const wrapper = shallow(<PromotedDocuments />);
+    const panelAction = shallow(wrapper.find(DataPanel).prop('action') as React.ReactElement);
+
+    expect(panelAction.find(EuiTextColor)).toHaveLength(1);
   });
 
   it('renders a loading state', () => {
@@ -81,6 +113,14 @@ describe('PromotedDocuments', () => {
       expect(actions.removePromotedId).toHaveBeenCalledWith('mock-document-4');
     });
 
+    it('hides demote button for results when the curation is automated', () => {
+      setMockValues({ ...values, isAutomated: true });
+      const wrapper = shallow(<PromotedDocuments />);
+      const result = getDraggableChildren(wrapper.find(EuiDraggable).last());
+
+      expect(result.prop('actions')).toEqual([]);
+    });
+
     it('renders a demote all button that demotes all hidden results', () => {
       const wrapper = shallow(<PromotedDocuments />);
       const panelActions = shallow(wrapper.find(DataPanel).prop('action') as React.ReactElement);
@@ -89,7 +129,14 @@ describe('PromotedDocuments', () => {
       expect(actions.clearPromotedIds).toHaveBeenCalled();
     });
 
-    describe('draggging', () => {
+    it('hides the demote all button when there are on promoted results', () => {
+      setMockValues({ ...values, curation: { promoted: [] } });
+      const wrapper = shallow(<PromotedDocuments />);
+
+      expect(wrapper.find(DataPanel).prop('action')).toEqual(false);
+    });
+
+    describe('dragging', () => {
       it('calls setPromotedIds with the reordered list when users are done dragging', () => {
         const wrapper = shallow(<PromotedDocuments />);
         wrapper.find(EuiDragDropContext).simulate('dragEnd', {

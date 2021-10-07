@@ -62,7 +62,7 @@ describe('disableUnknownTypeMappingFields', () => {
       properties: {
         new_field: { type: 'binary' },
         field_1: { type: 'keyword' }, // was type text in source mappings
-        // old_field was present in source but ommited in active mappings
+        // old_field was present in source but omitted in active mappings
       },
     });
   });

@@ -62,6 +62,7 @@
 /packages/kbn-interpreter/ @elastic/kibana-app-services
 /src/plugins/bfetch/ @elastic/kibana-app-services
 /src/plugins/data/ @elastic/kibana-app-services
+/src/plugins/data-views/ @elastic/kibana-app-services
 /src/plugins/embeddable/ @elastic/kibana-app-services
 /src/plugins/expressions/ @elastic/kibana-app-services
 /src/plugins/field_formats/ @elastic/kibana-app-services
@@ -242,7 +243,6 @@
 /packages/kbn-std/ @elastic/kibana-core
 /packages/kbn-config/ @elastic/kibana-core
 /packages/kbn-logging/ @elastic/kibana-core
-/packages/kbn-legacy-logging/ @elastic/kibana-core
 /packages/kbn-crypto/ @elastic/kibana-core
 /packages/kbn-http-tools/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
@@ -287,9 +287,7 @@
 
 # Security
 /src/core/server/csp/ @elastic/kibana-security @elastic/kibana-core
-/src/plugins/security_oss/ @elastic/kibana-security
 /src/plugins/interactive_setup/ @elastic/kibana-security
-/test/security_functional/ @elastic/kibana-security
 /x-pack/plugins/spaces/ @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/ @elastic/kibana-security
 /x-pack/plugins/security/ @elastic/kibana-security
@@ -447,4 +445,5 @@
 /docs/setup/configuring-reporting.asciidoc @elastic/kibana-reporting-services @elastic/kibana-app-services
 #CC# /x-pack/plugins/reporting/ @elastic/kibana-reporting-services
 
-
+# EUI design
+/src/plugins/kibana_react/public/page_template/ @elastic/eui-design @elastic/kibana-app-services
