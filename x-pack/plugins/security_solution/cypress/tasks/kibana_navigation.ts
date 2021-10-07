@@ -22,5 +22,5 @@ export const openKibanaNavigation = () => {
 export const changeSpace = (space: string) => {
   cy.get(`${SPACES_BUTTON}`).click();
   cy.get(getGoToSpaceMenuItem(space)).click();
-  cy.get(`[data-test-subj="space-avatar-${space}"]`, { timeout: 120000 });
+  cy.get(`[data-test-subj="space-avatar-${space}"]`).should('exist');
 };
