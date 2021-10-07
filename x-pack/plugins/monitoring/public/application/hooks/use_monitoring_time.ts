@@ -62,6 +62,7 @@ export const useMonitoringTime = () => {
     });
 
     return () => sub.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {

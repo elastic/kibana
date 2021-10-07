@@ -41,7 +41,7 @@ export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ pageTitle,
       }
       handleTimeChange(selectedTime.start, selectedTime.end);
     },
-    [handleTimeChange, state]
+    [handleTimeChange]
   );
 
   const onRefreshChange = useCallback(
