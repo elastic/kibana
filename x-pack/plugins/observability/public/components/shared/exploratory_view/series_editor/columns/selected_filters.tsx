@@ -36,7 +36,7 @@ export function SelectedFilters({ seriesId, series, seriesConfig }: Props) {
 
   return (
     <>
-      <EuiFlexGroup wrap gutterSize="xs" alignItems="center">
+      <EuiFlexGroup wrap gutterSize="xs">
         {filters.map(({ field, values, notValues }) => (
           <Fragment key={field}>
             {(values ?? []).length > 0 && (
@@ -45,7 +45,7 @@ export function SelectedFilters({ seriesId, series, seriesConfig }: Props) {
                   seriesId={seriesId}
                   series={series}
                   field={field}
-                  label={labels[field]}
+                  label={labels[field] ?? field}
                   value={values ?? []}
                   removeFilter={() => {
                     values?.forEach((val) => {
@@ -63,7 +63,7 @@ export function SelectedFilters({ seriesId, series, seriesConfig }: Props) {
                   series={series}
                   seriesId={seriesId}
                   field={field}
-                  label={labels[field]}
+                  label={labels[field] ?? field}
                   value={notValues ?? []}
                   negate={true}
                   removeFilter={() => {

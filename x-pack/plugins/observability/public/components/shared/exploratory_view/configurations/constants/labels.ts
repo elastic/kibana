@@ -169,6 +169,15 @@ export const TAGS_LABEL = i18n.translate('xpack.observability.expView.fieldLabel
 export const METRIC_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.metric', {
   defaultMessage: 'Metric',
 });
+export const LABELS_FIELD = i18n.translate('xpack.observability.expView.fieldLabels.labels', {
+  defaultMessage: 'Labels',
+});
+export const LABELS_BREAKDOWN = i18n.translate(
+  'xpack.observability.expView.fieldLabels.chooseField',
+  {
+    defaultMessage: 'Labels field',
+  }
+);
 export const KPI_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.kpi', {
   defaultMessage: 'KPI',
 });
