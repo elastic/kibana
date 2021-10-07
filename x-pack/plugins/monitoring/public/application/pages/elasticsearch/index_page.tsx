@@ -74,6 +74,11 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = () => {
       const alertsResponse = await fetchAlerts({
         fetch: services.http.fetch,
         alertTypeIds: [RULE_LARGE_SHARD_SIZE],
+        filters: [
+          {
+            shardIndex: index,
+          },
+        ],
         clusterUuid,
         timeRange: {
           min: bounds.min.valueOf(),

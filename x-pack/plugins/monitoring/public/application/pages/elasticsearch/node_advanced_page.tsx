@@ -78,6 +78,11 @@ export const ElasticsearchNodeAdvancedPage: React.FC<ComponentProps> = () => {
           RULE_DISK_USAGE,
           RULE_MEMORY_USAGE,
         ],
+        filters: [
+          {
+            nodeUuid: node,
+          },
+        ],
         timeRange: {
           min: bounds.min.valueOf(),
           max: bounds.max.valueOf(),

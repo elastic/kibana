@@ -76,6 +76,11 @@ export const ElasticsearchCcrShardPage: React.FC<ComponentProps> = () => {
         fetch: services.http.fetch,
         alertTypeIds: [RULE_CCR_READ_EXCEPTIONS],
         clusterUuid,
+        filters: [
+          {
+            shardId,
+          },
+        ],
         timeRange: {
           min: bounds.min.valueOf(),
           max: bounds.max.valueOf(),
