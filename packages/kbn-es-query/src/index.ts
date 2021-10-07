@@ -9,3 +9,9 @@
 export * from './es_query';
 export * from './filters';
 export * from './kuery';
+export {
+  isDataViewFieldSubtypeMulti,
+  isDataViewFieldSubtypeNested,
+  getDataViewFieldSubtypeMulti,
+  getDataViewFieldSubtypeNested,
+} from './utils';

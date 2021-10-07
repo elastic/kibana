@@ -53,12 +53,9 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestio
     );
     const search = `${prefix}${suffix}`.trim().toLowerCase();
     const matchingFields = allFields.filter((field) => {
+      const subTypeNested = indexPatternsUtils.getFieldSubtypeNested(field);
       return (
-        (!nestedPath ||
-          (nestedPath &&
-            field.subType &&
-            field.subType.nested &&
-            field.subType.nested.path.includes(nestedPath))) &&
+        (!nestedPath || (nestedPath && subTypeNested?.nested.path.includes(nestedPath))) &&
         field.name.toLowerCase().includes(search)
       );
     });

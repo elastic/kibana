@@ -32,7 +32,7 @@ export const FieldNameCell = React.memo(
     // TODO: Remove. This is what was used to show the plaintext fieldName vs the tooltip one
     // const showPlainTextName =
     //   (data.isObjectArray && data.type !== 'geo_point') || fieldFromBrowserField == null;
-    const isMultiField = !!fieldMapping?.spec?.subType?.multi;
+    const isMultiField = fieldMapping?.isSubtypeMulti();
     return (
       <>
         <EuiFlexItem grow={false} className="eventFieldsTable__fieldIcon">

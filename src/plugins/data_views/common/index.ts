@@ -14,7 +14,16 @@ export {
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
 } from './constants';
 export type { IFieldType, IIndexPatternFieldList } from './fields';
-export { isFilterable, isNestedField, fieldList, DataViewField, IndexPatternField } from './fields';
+export {
+  isFilterable,
+  fieldList,
+  DataViewField,
+  IndexPatternField,
+  isNestedField,
+  isMultiField,
+  getFieldSubtypeMulti,
+  getFieldSubtypeNested,
+} from './fields';
 export type {
   FieldFormatMap,
   RuntimeType,
