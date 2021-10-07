@@ -7,6 +7,7 @@
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { THRESHOLD_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { PersistenceServices } from '../../../../../../rule_registry/server';
 import { thresholdRuleParams, ThresholdRuleParams } from '../../schemas/rule_schemas';
@@ -63,7 +64,7 @@ export const createThresholdAlertType = (createOptions: CreateRuleOptions) => {
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    producer: 'security-solution',
+    producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
         runOpts: { buildRuleMessage, bulkCreate, exceptionItems, rule, tuple, wrapHits },
