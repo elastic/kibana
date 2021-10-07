@@ -157,8 +157,7 @@ describe('ServerMetricsCollector', () => {
     expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(500);
   });
 
-  // TODO: broken during Node 16 upgrade
-  it.skip('collect connection count', async () => {
+  it('collect connection count', async () => {
     const waitSubject = new Subject();
     const hitSubject = new BehaviorSubject(0);
 
