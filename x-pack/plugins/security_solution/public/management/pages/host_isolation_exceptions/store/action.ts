@@ -20,7 +20,7 @@ export type HostIsolationExceptionsFormStateChanged =
   };
 
 export type HostIsolationExceptionsFormEntryChanged =
-  Action<'hostIslationExceptionsFormEntryChanged'> & {
+  Action<'hostIsolationExceptionsFormEntryChanged'> & {
     payload: HostIsolationExceptionsPageState['form']['entry'];
   };
 
@@ -38,10 +38,19 @@ export type HostIsolationExceptionsDeleteStatusChanged =
   Action<'hostIsolationExceptionsDeleteStatusChanged'> & {
     payload: HostIsolationExceptionsPageState['deletion']['status'];
   };
+
+export type HostIsolationExceptionsMarkToEdit = Action<'hostIsolationExceptionsMarkToEdit'> & {
+  payload: {
+    id: string;
+  };
+};
+
 export type HostIsolationExceptionsPageAction =
   | HostIsolationExceptionsPageDataChanged
   | HostIsolationExceptionsCreateEntry
   | HostIsolationExceptionsFormStateChanged
   | HostIsolationExceptionsDeleteItem
   | HostIsolationExceptionsSubmitDelete
-  | HostIsolationExceptionsDeleteStatusChanged;
+  | HostIsolationExceptionsDeleteStatusChanged
+  | HostIsolationExceptionsFormEntryChanged
+  | HostIsolationExceptionsMarkToEdit;

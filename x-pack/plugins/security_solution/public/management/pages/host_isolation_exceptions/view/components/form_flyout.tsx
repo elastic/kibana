@@ -18,7 +18,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
@@ -54,10 +57,14 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
     isFailedResourceState(state.form.status)
   );
 
+  const exceptionToEdit = useHostIsolationExceptionsSelector((state) => state.form.entry);
+
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
 
   const [formHasError, setFormHasError] = useState(true);
-  const [exception, setException] = useState<CreateExceptionListItemSchema | undefined>(undefined);
+  const [exception, setException] = useState<
+    CreateExceptionListItemSchema | UpdateExceptionListItemSchema | undefined
+  >(undefined);
 
   const onCancel = useCallback(
     () =>
@@ -69,20 +76,30 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
   );
 
   useEffect(() => {
-    // prevent flyout to show edit without an id
-    if (location.show === 'edit' && !location.id) {
-      onCancel();
+    if (location.show === 'edit') {
+      // prevent flyout to show edit without an id
+      if (!location.id) {
+        onCancel();
+        return;
+      }
+      // load the exception to edit
+      if (!exceptionToEdit) {
+        dispatch({
+          type: 'hostIsolationExceptionsMarkToEdit',
+          payload: { id: location.id! },
+        });
+      } else {
+        setException(exceptionToEdit);
+      }
     }
     // initialize an empty exception to create
+  }, [dispatch, exceptionToEdit, location.id, location.show, onCancel]);
+
+  useEffect(() => {
     if (location.show === 'create' && exception === undefined) {
       setException(createEmptyHostIsolationException());
     }
-    // load the exception to edit
-    // dispatch({
-    //   type: 'hostIsolationExceptionsMarkToEdit',
-    //   payload: location.id!,
-    // });
-  }, [dispatch, exception, location, onCancel]);
+  }, [exception, location.show]);
 
   useEffect(() => {
     if (creationSuccessful) {

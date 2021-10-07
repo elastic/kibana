@@ -56,6 +56,15 @@ export const hostIsolationExceptionsPageReducer: StateReducer = (
         },
       };
     }
+    case 'hostIsolationExceptionsFormEntryChanged': {
+      return {
+        ...state,
+        form: {
+          ...state.form,
+          entry: action.payload,
+        },
+      };
+    }
     case 'hostIsolationExceptionsPageDataChanged': {
       return {
         ...state,

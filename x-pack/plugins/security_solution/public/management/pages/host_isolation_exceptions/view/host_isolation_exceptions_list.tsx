@@ -72,7 +72,7 @@ export const HostIsolationExceptionsList = () => {
         onClick: () => {
           navigateCallback({
             show: 'edit',
-            id: element.item_id,
+            id: element.id,
           });
         },
         'data-test-subj': 'editHostIsolationException',

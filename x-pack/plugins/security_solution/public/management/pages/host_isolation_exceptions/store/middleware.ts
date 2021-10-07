@@ -9,6 +9,7 @@ import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { CoreStart, HttpSetup, HttpStart } from 'kibana/public';
 import { matchPath } from 'react-router-dom';
@@ -26,6 +27,7 @@ import {
   deleteHostIsolationExceptionItems,
   getHostIsolationExceptionItems,
   createHostIsolationExceptionItem,
+  getOneHostIsolationExceptionItem,
 } from '../service';
 import { HostIsolationExceptionsPageState } from '../types';
 import { getCurrentListPageDataState, getCurrentLocation, getItemToDelete } from './selector';
@@ -52,6 +54,10 @@ export const createHostIsolationExceptionsPageMiddleware = (
 
     if (action.type === 'hostIsolationExceptionsSubmitDelete') {
       deleteHostIsolationExceptionsItem(store, coreStart.http);
+    }
+
+    if (action.type === 'hostIsolationExceptionsMarkToEdit') {
+      loadHostIsolationExceptionsItem(store, coreStart.http, action.payload.id);
     }
   };
 };
@@ -171,6 +177,29 @@ async function deleteHostIsolationExceptionsItem(
   } catch (error) {
     dispatch({
       type: 'hostIsolationExceptionsDeleteStatusChanged',
+      payload: createFailedResourceState<ExceptionListItemSchema>(error.body ?? error),
+    });
+  }
+}
+
+async function loadHostIsolationExceptionsItem(
+  store: ImmutableMiddlewareAPI<HostIsolationExceptionsPageState, AppAction>,
+  http: HttpSetup,
+  id: string
+) {
+  const { dispatch } = store;
+  try {
+    const exception: UpdateExceptionListItemSchema = await getOneHostIsolationExceptionItem(
+      http,
+      id
+    );
+    dispatch({
+      type: 'hostIsolationExceptionsFormEntryChanged',
+      payload: exception,
+    });
+  } catch (error) {
+    dispatch({
+      type: 'hostIsolationExceptionsFormStateChanged',
       payload: createFailedResourceState<ExceptionListItemSchema>(error.body ?? error),
     });
   }
