@@ -8,10 +8,9 @@
 import { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { combineLatest, forkJoin, of, Subscription } from 'rxjs';
 import { mergeMap, switchMap } from 'rxjs/operators';
-import {
-  FieldStatsSearchStrategyParams,
-  OverallStatsSearchStrategyParams,
-} from '../../../../common/search_strategy/types';
+import { i18n } from '@kbn/i18n';
+import { ToastsStart } from 'kibana/public';
+import { OverallStatsSearchStrategyParams } from '../../../../common/search_strategy/types';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import {
   checkAggregatableFieldsExistRequest,
@@ -25,12 +24,42 @@ import {
 } from '../../../../../../../src/plugins/data/common';
 import { OverallStats } from '../types/overall_stats';
 import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
+import { extractErrorProperties } from '../utils/error_utils';
+
+function displayError(toastNotifications: ToastsStart, indexPattern: string, err: any) {
+  if (err.statusCode === 500) {
+    toastNotifications.addError(err, {
+      title: i18n.translate('xpack.dataVisualizer.index.dataLoader.internalServerErrorMessage', {
+        defaultMessage:
+          'Error loading data in index {index}. {message}. ' +
+          'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
+        values: {
+          index: indexPattern,
+          message: err.error ?? err.message,
+        },
+      }),
+    });
+  } else {
+    toastNotifications.addError(err, {
+      title: i18n.translate('xpack.dataVisualizer.index.errorLoadingDataMessage', {
+        defaultMessage: 'Error loading data in index {index}. {message}.',
+        values: {
+          index: indexPattern,
+          message: err.error ?? err.message,
+        },
+      }),
+    });
+  }
+}
 
 export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
   searchStrategyParams: TParams | undefined
 ): OverallStats {
   const {
-    services: { data },
+    services: {
+      data,
+      notifications: { toasts },
+    },
   } = useDataVisualizerKibana();
 
   const [stats, setOverallStats] = useState<OverallStats>(getDefaultPageState().overallStats);
@@ -43,7 +72,6 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     abortCtrl.current.abort();
     abortCtrl.current = new AbortController();
     if (!searchStrategyParams) return;
-    console.log('searchStrategyParams', searchStrategyParams);
 
     const {
       aggregatableFields,
@@ -57,18 +85,53 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       samplerShardSize,
     } = searchStrategyParams;
 
-    const nonAggregatableOverallStats$ = combineLatest(
-      nonAggregatableFields.map((fieldName: string) =>
-        data.search
-          .search<IKibanaSearchRequest, IKibanaSearchResponse>(
+    const nonAggregatableOverallStats$ =
+      nonAggregatableFields.length > 0
+        ? combineLatest(
+            nonAggregatableFields.map((fieldName: string) =>
+              data.search
+                .search<IKibanaSearchRequest, IKibanaSearchResponse>(
+                  {
+                    params: checkNonAggregatableFieldExistsRequest(
+                      index,
+                      searchQuery,
+                      fieldName,
+                      timeFieldName,
+                      earliest,
+                      latest,
+                      runtimeFieldMap
+                    ),
+                  },
+                  {
+                    abortSignal: abortCtrl.current.signal,
+                    sessionId: searchStrategyParams?.sessionId,
+                  }
+                )
+                .pipe(
+                  switchMap((resp) => {
+                    return of({
+                      ...resp,
+                      rawResponse: { ...resp.rawResponse, fieldName },
+                    } as IKibanaSearchResponse);
+                  })
+                )
+            )
+          )
+        : of(undefined);
+
+    const aggregatableOverallStats$ =
+      aggregatableFields.length > 0
+        ? data.search.search(
             {
-              params: checkNonAggregatableFieldExistsRequest(
+              params: checkAggregatableFieldsExistRequest(
                 index,
                 searchQuery,
-                fieldName,
+                aggregatableFields,
+                samplerShardSize,
                 timeFieldName,
                 earliest,
                 latest,
+                undefined,
                 runtimeFieldMap
               ),
             },
@@ -77,41 +140,15 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
               sessionId: searchStrategyParams?.sessionId,
             }
           )
-          .pipe(
-            switchMap((resp) => {
-              return of({
-                ...resp,
-                rawResponse: { ...resp.rawResponse, fieldName },
-              } as IKibanaSearchResponse);
-            })
-          )
-      )
-    );
+        : of(undefined);
+
     const sub = forkJoin({
       nonAggregatableOverallStatsResp: nonAggregatableOverallStats$,
-      aggregatableOverallStatsResp: data.search.search(
-        {
-          params: checkAggregatableFieldsExistRequest(
-            index,
-            searchQuery,
-            aggregatableFields,
-            samplerShardSize,
-            timeFieldName,
-            earliest,
-            latest,
-            undefined,
-            runtimeFieldMap
-          ),
-        },
-        {
-          abortSignal: abortCtrl.current.signal,
-          sessionId: searchStrategyParams?.sessionId,
-        }
-      ),
+      aggregatableOverallStatsResp: aggregatableOverallStats$,
     }).pipe(
       mergeMap(({ nonAggregatableOverallStatsResp, aggregatableOverallStatsResp }) => {
         const aggregatableOverallStats = processAggregatableFieldsExistResponse(
-          aggregatableOverallStatsResp.rawResponse,
+          aggregatableOverallStatsResp?.rawResponse,
           aggregatableFields,
           samplerShardSize
         );
@@ -128,14 +165,15 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
 
     searchSubscription$.current = sub.subscribe({
       next: (overallStats) => {
-        setOverallStats(overallStats);
+        if (overallStats) {
+          setOverallStats(overallStats);
+        }
       },
       error: (error) => {
-        // @todo: handle error
-        // import { extractErrorProperties } from '../utils/error_utils';
+        displayError(toasts, searchStrategyParams.index, extractErrorProperties(error));
       },
     });
-  }, [data.search, searchStrategyParams]);
+  }, [data.search, searchStrategyParams, toasts]);
 
   const cancelFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();

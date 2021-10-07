@@ -17,7 +17,7 @@ import { getDatafeedAggregations } from '../../../../../common/utils/datafeed_ut
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import { IKibanaSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import { AggregatableField, NonAggregatableField } from '../../types/overall_stats';
-import { AggCardinality, FieldData, Aggs } from '../../../../../common/search_strategy/types';
+import { AggCardinality, Aggs } from '../../../../../common/search_strategy/types';
 
 export const checkAggregatableFieldsExistRequest = (
   indexPatternTitle: string,
@@ -87,19 +87,23 @@ export const checkAggregatableFieldsExistRequest = (
 };
 
 export const processAggregatableFieldsExistResponse = (
-  body: estypes.SearchResponse,
+  body: estypes.SearchResponse | undefined,
   aggregatableFields: string[],
   samplerShardSize: number,
   datafeedConfig?: estypes.MlDatafeed
 ) => {
-  const aggregations = body.aggregations;
-  // @ts-expect-error incorrect search response type
-  const totalCount = body.hits.total;
   const stats = {
-    totalCount,
-    aggregatableExistsFields: [] as FieldData[],
-    aggregatableNotExistsFields: [] as FieldData[],
+    totalCount: 0,
+    aggregatableExistsFields: [] as AggregatableField[],
+    aggregatableNotExistsFields: [] as AggregatableField[],
   };
+
+  if (!body || aggregatableFields.length === 0) return stats;
+
+  const aggregations = body.aggregations;
+  const totalCount = (body.hits.total as estypes.SearchTotalHits).value ?? body.hits.total;
+  stats.totalCount = totalCount as number;
+
   const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
   const sampleCount =
     samplerShardSize > 0 ? get(aggregations, ['sample', 'doc_count'], 0) : totalCount;
@@ -144,6 +148,7 @@ export const processAggregatableFieldsExistResponse = (
         stats.aggregatableNotExistsFields.push({
           fieldName: field,
           existsInDocs: false,
+          stats: {},
         });
       }
     }
@@ -177,7 +182,9 @@ export const checkNonAggregatableFieldExistsRequest = (
     },
     ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
   };
-  filterCriteria.push({ exists: { field } });
+  if (Array.isArray(filterCriteria)) {
+    filterCriteria.push({ exists: { field } });
+  }
 
   return {
     index,
@@ -187,7 +194,7 @@ export const checkNonAggregatableFieldExistsRequest = (
 };
 
 export const processNonAggregatableFieldsExistResponse = (
-  results: IKibanaSearchResponse[],
+  results: IKibanaSearchResponse[] | undefined,
   nonAggregatableFields: string[]
 ) => {
   const stats = {
@@ -195,6 +202,7 @@ export const processNonAggregatableFieldsExistResponse = (
     nonAggregatableNotExistsFields: [] as NonAggregatableField[],
   };
 
+  if (!results || nonAggregatableFields.length === 0) return stats;
   nonAggregatableFields.forEach((fieldName) => {
     const existsInDocs = results.find((r) => r.rawResponse.fieldName === fieldName) !== undefined;
     const fieldData: NonAggregatableField = {
