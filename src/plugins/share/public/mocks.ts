@@ -44,6 +44,7 @@ const createSetupContract = (): Setup => {
     },
     url,
     navigate: jest.fn(),
+    setAnonymousAccessServiceProvider: jest.fn(),
   };
   return setupContract;
 };

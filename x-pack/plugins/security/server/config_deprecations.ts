@@ -10,6 +10,7 @@ import type { ConfigDeprecationProvider } from 'src/core/server';
 
 export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   rename,
+  renameFromRoot,
   unused,
 }) => [
   rename('sessionTimeout', 'session.idleTimeout'),
@@ -20,6 +21,11 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   rename('audit.appender.policy.kind', 'audit.appender.policy.type'),
   rename('audit.appender.strategy.kind', 'audit.appender.strategy.type'),
   rename('audit.appender.path', 'audit.appender.fileName'),
+
+  renameFromRoot(
+    'security.showInsecureClusterWarning',
+    'xpack.security.showInsecureClusterWarning'
+  ),
 
   unused('authorization.legacyFallback.enabled'),
   unused('authc.saml.maxRedirectURLSize'),

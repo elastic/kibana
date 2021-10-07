@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export interface ConfigType {
-  loginAssistanceMessage: string;
-  showInsecureClusterWarning: boolean;
-}
+export { createClusterDataCheck } from './check_cluster_data';
