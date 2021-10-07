@@ -14,4 +14,4 @@ checks-reporter-with-killswitch "Run Performance Tests" \
   node scripts/functional_tests \
     --debug --bail \
     --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-    --config x-pack/test/performance/config.ts;
+    --config test/performance/config.ts;

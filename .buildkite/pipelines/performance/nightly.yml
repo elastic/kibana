@@ -14,11 +14,18 @@ steps:
 
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
+    agents:
+      queue: c2-16
 
   - wait
 
-  - label: ":zap: Performance Tests"
-    command: echo "Welcome to Performance Tests!"
+  - label: ":muscle: Performance Tests"
+    command: .buildkite/scripts/steps/functional/performance.sh
+    agents:
+      queue: ci-group-6
+    depends_on: build
+    concurrency: 50
+    concurrency_group: 'performance-test-group'
 
   - wait: ~
     continue_on_failure: true
@@ -26,7 +33,3 @@ steps:
   - label: ":male_superhero::skin-tone-2: Post-Build"
     command: .buildkite/scripts/lifecycle/post_build.sh
 
-  - wait
-
-  - label: ":muscle: Performance Tests"
-    command: .buildkite/scripts/steps/test/performance.sh
