@@ -54,7 +54,9 @@ function createApiResponseMock<TResponse, TContext>(
     Partial<Omit<TransportResult<TResponse, TContext>, 'body'>>
 ): TransportResult<TResponse, TContext> {
   return {
+    // @ts-expect-error null is not supported
     statusCode: null,
+    // @ts-expect-error null is not supported
     headers: null,
     warnings: null,
     meta: {} as any,
