@@ -283,6 +283,8 @@ export class DocLinksService {
         },
         transforms: {
           guide: `${ELASTICSEARCH_DOCS}transforms.html`,
+          // TODO add valid docs URL
+          alertingRules: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-configuring-alerts.html`,
         },
         visualize: {
           guide: `${KIBANA_DOCS}dashboard.html`,
@@ -308,6 +310,8 @@ export class DocLinksService {
           apmRules: `${KIBANA_DOCS}apm-alerts.html`,
           emailAction: `${KIBANA_DOCS}email-action-type.html`,
           emailActionConfig: `${KIBANA_DOCS}email-action-type.html`,
+          emailExchangeClientSecretConfig: `${KIBANA_DOCS}email-action-type.html#exchange-client-secret`,
+          emailExchangeClientIdConfig: `${KIBANA_DOCS}email-action-type.html#exchange-client-tenant-id`,
           generalSettings: `${KIBANA_DOCS}alert-action-settings-kb.html#general-alert-action-settings`,
           indexAction: `${KIBANA_DOCS}index-action-type.html`,
           esQuery: `${KIBANA_DOCS}rule-type-es-query.html`,

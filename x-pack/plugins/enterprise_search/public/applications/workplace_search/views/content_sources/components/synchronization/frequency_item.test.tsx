@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import moment from 'moment';
 
-import { EuiFieldNumber, EuiSuperSelect } from '@elastic/eui';
+import { EuiFieldNumber } from '@elastic/eui';
 
 import { FrequencyItem } from './frequency_item';
 
@@ -31,37 +31,26 @@ describe('FrequencyItem', () => {
   it('renders', () => {
     const wrapper = shallow(<FrequencyItem {...props} />);
 
-    expect(wrapper.find(EuiSuperSelect)).toHaveLength(1);
-    expect(wrapper.find(EuiFieldNumber)).toHaveLength(1);
+    expect(wrapper.find(EuiFieldNumber)).toHaveLength(3);
   });
 
   describe('ISO8601 formatting', () => {
     it('handles minutes display', () => {
       const wrapper = shallow(<FrequencyItem {...props} duration="P1DT2H3M4S" />);
 
-      expect(wrapper.find(EuiFieldNumber).prop('value')).toEqual(1563);
-      expect(wrapper.find(EuiSuperSelect).prop('valueOfSelected')).toEqual('minutes');
+      expect(wrapper.find('[data-test-subj="durationMinutes"]').prop('value')).toEqual(3);
     });
 
     it('handles hours display', () => {
       const wrapper = shallow(<FrequencyItem {...props} duration="P1DT2H" />);
 
-      expect(wrapper.find(EuiFieldNumber).prop('value')).toEqual(26);
-      expect(wrapper.find(EuiSuperSelect).prop('valueOfSelected')).toEqual('hours');
+      expect(wrapper.find('[data-test-subj="durationHours"]').prop('value')).toEqual(2);
     });
 
     it('handles days display', () => {
       const wrapper = shallow(<FrequencyItem {...props} duration="P3D" />);
 
-      expect(wrapper.find(EuiFieldNumber).prop('value')).toEqual(3);
-      expect(wrapper.find(EuiSuperSelect).prop('valueOfSelected')).toEqual('days');
-    });
-
-    it('handles seconds display (defaults to 1 minute)', () => {
-      const wrapper = shallow(<FrequencyItem {...props} duration="P44S" />);
-
-      expect(wrapper.find(EuiFieldNumber).prop('value')).toEqual(1);
-      expect(wrapper.find(EuiSuperSelect).prop('valueOfSelected')).toEqual('minutes');
+      expect(wrapper.find('[data-test-subj="durationDays"]').prop('value')).toEqual(3);
     });
 
     it('handles "nextStart" that is in past', () => {
