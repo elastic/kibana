@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { ManagementAppLocator } from './locator';
+export { ManagementAppLocator, MANAGEMENT_APP_LOCATOR } from './locator';
