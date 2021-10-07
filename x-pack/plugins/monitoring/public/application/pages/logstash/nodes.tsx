@@ -16,7 +16,9 @@ import { LogstashTemplate } from './logstash_template';
 import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
-import { LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
+import { LOGSTASH_SYSTEM_ID, RULE_LOGSTASH_VERSION_MISMATCH } from '../../../../common/constants';
+import { AlertsByName } from '../../../alerts/types';
+import { fetchAlerts } from '../../../lib/fetch_alerts';
 
 interface SetupModeProps {
   setupMode: any;
@@ -33,6 +35,7 @@ export const LogStashNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
     cluster_uuid: clusterUuid,
   });
   const [data, setData] = useState({} as any);
+  const [alerts, setAlerts] = useState<AlertsByName>({});
   const { getPaginationTableProps } = useTable('logstash.nodes');
 
   const title = i18n.translate('xpack.monitoring.logstash.nodes.routeTitle', {
@@ -46,18 +49,30 @@ export const LogStashNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/logstash/nodes`;
-    const response = await services.http?.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify({
-        ccs,
-        timeRange: {
-          min: bounds.min.toISOString(),
-          max: bounds.max.toISOString(),
-        },
-      }),
-    });
+    if (services.http?.fetch && clusterUuid) {
+      const response = await services.http?.fetch(url, {
+        method: 'POST',
+        body: JSON.stringify({
+          ccs,
+          timeRange: {
+            min: bounds.min.toISOString(),
+            max: bounds.max.toISOString(),
+          },
+        }),
+      });
 
-    setData(response);
+      setData(response);
+      const alertsResponse = await fetchAlerts({
+        fetch: services.http.fetch,
+        alertTypeIds: [RULE_LOGSTASH_VERSION_MISMATCH],
+        clusterUuid,
+        timeRange: {
+          min: bounds.min.valueOf(),
+          max: bounds.max.valueOf(),
+        },
+      });
+      setAlerts(alertsResponse);
+    }
   }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http]);
 
   return (
@@ -78,6 +93,7 @@ export const LogStashNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
                 metrics={data.metrics}
                 data={data.nodes}
                 setupMode={setupMode}
+                alerts={alerts}
                 {...getPaginationTableProps()}
               />
               {bottomBarComponent}
