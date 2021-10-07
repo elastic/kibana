@@ -13,12 +13,11 @@ import { formatMsg } from '../../../../../../src/plugins/kibana_legacy/public';
 import { toMountPoint, useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { MonitoringStartPluginDependencies } from '../../types';
 
-export async function formatMonitoringError(err: IHttpFetchError) {
+export function formatMonitoringError(err: IHttpFetchError) {
   if (err.response?.status && err.response?.status !== -1) {
-    const body = await err.response?.json();
     return (
       <EuiText>
-        <p>{body.message}</p>
+        <p>{err.body?.message}</p>
         <EuiText size="xs">
           <FormattedMessage
             id="xpack.monitoring.ajaxErrorHandler.httpErrorMessage"

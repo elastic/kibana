@@ -6,8 +6,9 @@
  */
 
 import { EuiTab, EuiTabs } from '@elastic/eui';
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
+import { IHttpFetchError } from 'kibana/public';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
 import { MonitoringTimeContainer } from '../hooks/use_monitoring_time';
@@ -49,27 +50,46 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
   const { currentTimerange } = useContext(MonitoringTimeContainer.Context);
   const [loaded, setLoaded] = useState(false);
   const history = useHistory();
+  const [hasError, setHasError] = useState(false);
   const handleRequestError = useRequestErrorHandler();
+
+  const getPageDataResponseHandler = useCallback(
+    (result: any) => {
+      setHasError(false);
+      return result;
+    },
+    [setHasError]
+  );
+
   useEffect(() => {
     getPageData?.()
-      .catch(handleRequestError)
+      .then(getPageDataResponseHandler)
+      .catch((err: IHttpFetchError) => {
+        handleRequestError(err);
+        setHasError(true);
+      })
       .finally(() => {
         setLoaded(true);
       });
-  }, [getPageData, currentTimerange, handleRequestError]);
+  }, [getPageData, currentTimerange, getPageDataResponseHandler, handleRequestError]);
 
   const onRefresh = () => {
-    const requests = [getPageData?.()];
-    if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
-      requests.push(updateSetupModeData());
-    }
+    getPageData?.().then(getPageDataResponseHandler).catch(handleRequestError);
 
-    Promise.allSettled(requests).catch(handleRequestError);
+    if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
+      updateSetupModeData();
+    }
   };
 
   const createHref = (route: string) => history.createHref({ pathname: route });
 
   const isTabSelected = (route: string) => history.location.pathname === route;
+
+  const renderContent = () => {
+    if (hasError) return null;
+    if (getPageData && !loaded) return <PageLoading />;
+    return children;
+  };
 
   return (
     <div className="app-container">
@@ -95,7 +115,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
           })}
         </EuiTabs>
       )}
-      <div>{!getPageData ? children : loaded ? children : <PageLoading />}</div>
+      <div>{renderContent()}</div>
     </div>
   );
 };
