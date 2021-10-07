@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGroup, EuiPanel, EuiAccordion, EuiSpacer } from '@elastic/eui';
