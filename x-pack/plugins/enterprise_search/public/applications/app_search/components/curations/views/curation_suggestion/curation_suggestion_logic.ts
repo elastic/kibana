@@ -209,7 +209,6 @@ export const CurationSuggestionLogic = kea<
             'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.successfullyRejectedMessage',
             {
               defaultMessage: 'Suggestion was succefully rejected.',
-              values: { query: suggestion!.query },
             }
           )
         );
