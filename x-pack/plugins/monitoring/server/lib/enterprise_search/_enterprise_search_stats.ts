@@ -50,22 +50,22 @@ export const entSearchUuidsAgg = (maxBucketSize?: string) => ({
     aggs: {
       uptime_max: {
         max: {
-          field: 'enterprisesearch.health.process.uptime.sec'
-        }
+          field: 'enterprisesearch.health.process.uptime.sec',
+        },
       },
       heap_used: {
         max: {
-          field: 'enterprisesearch.health.jvm.memory_usage.heap_used.bytes'
+          field: 'enterprisesearch.health.jvm.memory_usage.heap_used.bytes',
         },
       },
-      heap_max: {
+      heap_total: {
         max: {
-          field: 'enterprisesearch.health.jvm.memory_usage.heap_max.bytes'
+          field: 'enterprisesearch.health.jvm.memory_usage.heap_max.bytes',
         },
       },
       heap_committed: {
         max: {
-          field: 'enterprisesearch.health.jvm.memory_usage.heap_committed.bytes'
+          field: 'enterprisesearch.health.jvm.memory_usage.heap_committed.bytes',
         },
       },
     },
@@ -75,19 +75,19 @@ export const entSearchUuidsAgg = (maxBucketSize?: string) => ({
   uptime: {
     max_bucket: {
       buckets_path: 'ephemeral_ids>uptime_max',
-    }
+    },
   },
-  heap_used_total: {
+  cluster_heap_used: {
     sum_bucket: {
       buckets_path: 'ephemeral_ids>heap_used',
     },
   },
-  heap_max_total: {
+  cluster_heap_total: {
     sum_bucket: {
-      buckets_path: 'ephemeral_ids>heap_max',
+      buckets_path: 'ephemeral_ids>heap_total',
     },
   },
-  heap_committed_total: {
+  cluster_heap_committed: {
     sum_bucket: {
       buckets_path: 'ephemeral_ids>heap_committed',
     },
@@ -100,20 +100,18 @@ export const entSearchAggResponseHandler = (response: ElasticsearchResponse) => 
   const totalInstances = aggs?.total.value ?? 0;
   const uptime = aggs?.uptime.value;
 
-  const memUsed = aggs?.heap_used_total.value ?? 0;
-  const memMax = aggs?.heap_max_total.value ?? 0;
-  const memCommitted = aggs?.heap_committed_total.value ?? 0;
+  const memUsed = aggs?.cluster_heap_used.value ?? 0;
+  const memCommitted = aggs?.cluster_heap_committed.value ?? 0;
+  const memTotal = aggs?.cluster_heap_total.value ?? 0;
 
-  const versions = (aggs?.versions.buckets ?? []).map(
-    ({ key }: { key: string }) => key
-  );
+  const versions = (aggs?.versions.buckets ?? []).map(({ key }: { key: string }) => key);
 
   return {
     totalInstances,
     uptime,
     memUsed,
-    memMax,
     memCommitted,
+    memTotal,
     versions,
   };
 };

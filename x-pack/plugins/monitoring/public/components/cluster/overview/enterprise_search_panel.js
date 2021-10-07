@@ -119,7 +119,7 @@ export function EnterpriseSearchPanel(props) {
               <EuiDescriptionListDescription data-test-subj="entSearchMemoryUsage">
                 <BytesPercentageUsage
                   usedBytes={props.stats.memUsed}
-                  maxBytes={props.stats.memCommitted}
+                  maxBytes={props.stats.memTotal}
                 />
               </EuiDescriptionListDescription>
 
