@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiEmptyPrompt, EuiButtonEmpty } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButtonEmpty, EuiBadge } from '@elastic/eui';
 
 import { DataPanel } from '../../../data_panel';
 import { CurationResult } from '../results';
@@ -46,6 +46,14 @@ describe('HiddenDocuments', () => {
     const wrapper = shallow(<HiddenDocuments />);
 
     expect(wrapper.find(CurationResult)).toHaveLength(5);
+  });
+
+  it('displays the number of documents in a badge', () => {
+    const wrapper = shallow(<HiddenDocuments />);
+    const Icon = wrapper.prop('iconType');
+    const iconWrapper = shallow(<Icon />);
+
+    expect(iconWrapper.find(EuiBadge).prop('children')).toEqual(5);
   });
 
   it('renders an empty state & hides the panel actions when empty', () => {
