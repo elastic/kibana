@@ -197,7 +197,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // Run signals on top of that 1 signal which should create a single signal (on top of) a signal
         const ruleForSignals: QueryCreateSchema = {
-          ...getRuleForSignalTesting([`.internal.alerts-security.alerts-default-*`]),
+          ...getRuleForSignalTesting([`.alerts-security.alerts-default*`]),
           rule_id: 'signal-on-signal',
         };
 
