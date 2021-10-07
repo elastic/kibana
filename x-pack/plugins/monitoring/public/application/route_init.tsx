@@ -9,6 +9,7 @@ import { Route, Redirect, useLocation } from 'react-router-dom';
 import { useClusters } from './hooks/use_clusters';
 import { GlobalStateContext } from './global_state_context';
 import { getClusterFromClusters } from '../lib/get_cluster_from_clusters';
+import { isInSetupMode } from './setup_mode';
 
 export interface ComponentProps {
   clusters: [];
@@ -35,12 +36,12 @@ export const RouteInit: React.FC<RouteInitProps> = ({
   const { clusters, loaded } = useClusters(clusterUuid, undefined, codePaths);
 
   // TODO: we will need this when setup mode is migrated
-  // const inSetupMode = isInSetupMode();
+  const inSetupMode = isInSetupMode();
 
   const cluster = getClusterFromClusters(clusters, globalState, unsetGlobalState);
 
   // TODO: check for setupMode too when the setup mode is migrated
-  if (loaded && !cluster) {
+  if (loaded && !cluster && !inSetupMode) {
     return <Redirect to="/no-data" />;
   }
 
