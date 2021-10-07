@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { ISource } from './source';
+import type { ISource } from './source';
 import { Adapters } from '../../../../../../src/plugins/inspector/common/adapters';
 
 export type SourceRegistryEntry = {
