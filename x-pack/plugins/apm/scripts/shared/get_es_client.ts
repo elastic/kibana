@@ -6,7 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { ApiKeyAuth, BasicAuth } from '@elastic/elasticsearch/lib/pool';
+import { ApiKeyAuth, BasicAuth } from '@elastic/transport/lib/types';
 import {
   ESSearchResponse,
   ESSearchRequest,
@@ -20,10 +20,11 @@ export function getEsClient({
 }: {
   node: string;
   auth?: BasicAuth | ApiKeyAuth;
-}) {
+  // TODO ask owners to fix
+}): any {
   const client = new Client({
     node,
-    ssl: {
+    tls: {
       rejectUnauthorized: false,
     },
     requestTimeout: 120000,
@@ -36,14 +37,11 @@ export function getEsClient({
     TDocument = unknown,
     TSearchRequest extends ESSearchRequest = ESSearchRequest
   >(request: TSearchRequest) {
-    const response = await originalSearch<TDocument>(request);
+    const response = await originalSearch(request);
 
     return {
       ...response,
-      body: response.body as unknown as ESSearchResponse<
-        TDocument,
-        TSearchRequest
-      >,
+      body: response as unknown as ESSearchResponse<TDocument, TSearchRequest>,
     };
   }
 

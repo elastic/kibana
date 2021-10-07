@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { TransportRequestPromise } from '@elastic/transport';
 import { KibanaRequest } from 'src/core/server';
 
-export function cancelEsRequestOnAbort<T extends TransportRequestPromise<any>>(
+export function cancelEsRequestOnAbort<T extends any>(
   promise: T,
   request: KibanaRequest
 ) {
   const subscription = request.events.aborted$.subscribe(() => {
+    // @ts-expect-error fix abort
     promise.abort();
   });
 
   // using .catch() here means unsubscribe will be called
   // after it has thrown an error, so we use .then(onSuccess, onFailure)
   // syntax
+  // @ts-expect-error fix abort
   promise.then(
     () => subscription.unsubscribe(),
     () => subscription.unsubscribe()

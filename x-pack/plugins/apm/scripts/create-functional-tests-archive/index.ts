@@ -144,6 +144,7 @@ async function run() {
   // profile
   const indicesWithDocs =
     response.body.aggregations?.index.buckets.map(
+      // @ts-expect-error bucket has any type
       (bucket) => bucket.key as string
     ) ?? [];
 

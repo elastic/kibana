@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { TransportRequestPromise } from '@elastic/transport';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { unwrapEsResponse } from '../../../../../../observability/server';
 import { APMRouteHandlerResources } from '../../../../routes/typings';
@@ -39,7 +38,7 @@ export function createInternalESClient({
       params,
     }: {
       requestType: string;
-      cb: () => TransportRequestPromise<T>;
+      cb: () => Promise<T>;
       params: Record<string, any>;
     }
   ) {
