@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export interface ConfigType {
-  loginAssistanceMessage: string;
-  showInsecureClusterWarning: boolean;
-}
+export { AnonymousAccessService } from './anonymous_access_service';
