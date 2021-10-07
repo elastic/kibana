@@ -31,7 +31,7 @@ import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { bulkCreateFactory } from './bulk_create_factory';
 import { wrapHitsFactory } from './wrap_hits_factory';
 import { mockBuildRuleMessage } from './__mocks__/build_rule_message.mock';
-import { errors } from '@elastic/elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import { BuildReasonMessage } from './reason_formatters';
 
 const buildRuleMessage = mockBuildRuleMessage;
@@ -754,7 +754,7 @@ describe('searchAfterAndBulkCreate', () => {
     );
     mockService.scopedClusterClient.asCurrentUser.bulk.mockReturnValue(
       elasticsearchClientMock.createErrorTransportRequestPromise(
-        new errors.ResponseError(
+        new esErrors.ResponseError(
           elasticsearchClientMock.createApiResponse({
             statusCode: 400,
             body: { error: { type: 'bulk_error_type' } },

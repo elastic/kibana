@@ -19,9 +19,11 @@ export async function getSearchStatus(
   // TODO: Handle strategies other than the default one
   try {
     // @ts-expect-error start_time_in_millis: EpochMillis is string | number
-    const apiResponse: TransportResult<AsyncSearchStatusResponse> = await client.asyncSearch.status({
-      id: asyncId,
-    });
+    const apiResponse: TransportResult<AsyncSearchStatusResponse> = await client.asyncSearch.status(
+      {
+        id: asyncId,
+      }
+    );
     const response = apiResponse.body;
     if ((response.is_partial && !response.is_running) || response.completion_status >= 400) {
       return {
