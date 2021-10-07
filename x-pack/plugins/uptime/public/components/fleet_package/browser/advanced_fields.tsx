@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { ComboBox } from '../combo_box';
 
-import { useBrowserAdvancedFieldsContext } from '../contexts';
+import { useBrowserAdvancedFieldsContext, useBrowserSimpleFieldsContext } from '../contexts';
 
 import { ConfigKeys, ScreenshotOption } from '../types';
 
@@ -26,6 +26,7 @@ import { OptionalLabel } from '../optional_label';
 
 export const BrowserAdvancedFields = () => {
   const { fields, setFields } = useBrowserAdvancedFieldsContext();
+  const { fields: simpleFields } = useBrowserSimpleFieldsContext();
 
   const handleInputChange = useCallback(
     ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
@@ -41,73 +42,75 @@ export const BrowserAdvancedFields = () => {
       data-test-subj="syntheticsBrowserAdvancedFieldsAccordion"
     >
       <EuiSpacer size="m" />
-      <EuiDescribedFormGroup
-        title={
-          <h4>
-            <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.filtering.title"
-              defaultMessage="Synthetics agent filtering"
-            />
-          </h4>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.filtering.description"
-            defaultMessage="Filter tests using match or tags options."
-          />
-        }
-      >
-        <EuiSpacer size="s" />
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersMatch.label"
-              defaultMessage="Filter match"
-            />
+      {simpleFields[ConfigKeys.SOURCE_ZIP_URL] && (
+        <EuiDescribedFormGroup
+          title={
+            <h4>
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.filtering.title"
+                defaultMessage="Selective tests"
+              />
+            </h4>
           }
-          labelAppend={<OptionalLabel />}
-          helpText={
+          description={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersMatch.helpText"
-              defaultMessage="Run only journeys with a name or tags that matches the provided glob."
+              id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.filtering.description"
+              defaultMessage="Use this option to apply these monitor settings to a subset of the tests in your suite. Only the configured subset will be run by this monitor."
             />
           }
         >
-          <EuiFieldText
-            value={fields[ConfigKeys.JOURNEY_FILTERS_MATCH]}
-            onChange={(event) =>
-              handleInputChange({
-                value: event.target.value,
-                configKey: ConfigKeys.JOURNEY_FILTERS_MATCH,
-              })
+          <EuiSpacer size="s" />
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersMatch.label"
+                defaultMessage="Filter match"
+              />
             }
-            data-test-subj="syntheticsBrowserJourneyFiltersMatch"
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersTags.label"
-              defaultMessage="Filter tags"
-            />
-          }
-          labelAppend={<OptionalLabel />}
-          helpText={
-            <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersTags.helpText"
-              defaultMessage="Run only journeys with the given tag(s), or globs."
-            />
-          }
-        >
-          <ComboBox
-            selectedOptions={fields[ConfigKeys.JOURNEY_FILTERS_TAGS]}
-            onChange={(value) =>
-              handleInputChange({ value, configKey: ConfigKeys.JOURNEY_FILTERS_TAGS })
+            labelAppend={<OptionalLabel />}
+            helpText={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersMatch.helpText"
+                defaultMessage="Run only journeys with a name that matches the provided glob with this monitor."
+              />
             }
-            data-test-subj="syntheticsBrowserJourneyFiltersTags"
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+          >
+            <EuiFieldText
+              value={fields[ConfigKeys.JOURNEY_FILTERS_MATCH]}
+              onChange={(event) =>
+                handleInputChange({
+                  value: event.target.value,
+                  configKey: ConfigKeys.JOURNEY_FILTERS_MATCH,
+                })
+              }
+              data-test-subj="syntheticsBrowserJourneyFiltersMatch"
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersTags.label"
+                defaultMessage="Filter tags"
+              />
+            }
+            labelAppend={<OptionalLabel />}
+            helpText={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersTags.helpText"
+                defaultMessage="Run only journeys with the given tags with this monitor."
+              />
+            }
+          >
+            <ComboBox
+              selectedOptions={fields[ConfigKeys.JOURNEY_FILTERS_TAGS]}
+              onChange={(value) =>
+                handleInputChange({ value, configKey: ConfigKeys.JOURNEY_FILTERS_TAGS })
+              }
+              data-test-subj="syntheticsBrowserJourneyFiltersTags"
+            />
+          </EuiFormRow>
+        </EuiDescribedFormGroup>
+      )}
       <EuiDescribedFormGroup
         title={
           <h4>
