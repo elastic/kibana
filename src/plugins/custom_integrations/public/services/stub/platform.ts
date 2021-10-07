@@ -22,5 +22,5 @@ export type CustomIntegrationsPlatformServiceFactory =
  */
 export const platformServiceFactory: CustomIntegrationsPlatformServiceFactory = () => ({
   getBasePath: () => '/basePath',
-  getAbsolutePath: (path: string): string => `/basePath${path}`,
+  getAbsolutePath: (path: string): string => `https://example.com/basePath${path}`,
 });
