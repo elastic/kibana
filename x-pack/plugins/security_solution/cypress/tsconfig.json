@@ -8,6 +8,7 @@
     "target/**/*"
   ],
   "compilerOptions": {
+    "target": "ES2019",
     "outDir": "target/types",
     "types": [
       "cypress",
