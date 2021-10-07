@@ -9,6 +9,7 @@ import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { HttpStart } from 'kibana/public';
@@ -82,6 +83,19 @@ export async function createHostIsolationExceptionItem({
 export async function deleteHostIsolationExceptionItems(http: HttpStart, id: string) {
   await ensureHostIsolationExceptionsListExists(http);
   return http.delete<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+    query: {
+      id,
+      namespace_type: 'agnostic',
+    },
+  });
+}
+
+export async function getOneHostIsolationExceptionItem(
+  http: HttpStart,
+  id: string
+): Promise<UpdateExceptionListItemSchema> {
+  await ensureHostIsolationExceptionsListExists(http);
+  return http.get<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
     query: {
       id,
       namespace_type: 'agnostic',

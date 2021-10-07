@@ -30,6 +30,7 @@ import {
   isLoadingResourceState,
 } from '../../../../state/async_resource_state';
 import { HostIsolationExceptionsPageAction } from '../../store/action';
+import { getCurrentLocation } from '../../store/selector';
 import { createEmptyHostIsolationException } from '../../utils';
 import {
   useHostIsolationExceptionsNavigateCallback,
@@ -40,6 +41,8 @@ import { HostIsolationExceptionsForm } from './form';
 export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
   const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
   const toasts = useToasts();
+
+  const location = useHostIsolationExceptionsSelector(getCurrentLocation);
 
   const creationInProgress = useHostIsolationExceptionsSelector((state) =>
     isLoadingResourceState(state.form.status)
@@ -66,8 +69,20 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
   );
 
   useEffect(() => {
-    setException(createEmptyHostIsolationException());
-  }, []);
+    // prevent flyout to show edit without an id
+    if (location.show === 'edit' && !location.id) {
+      onCancel();
+    }
+    // initialize an empty exception to create
+    if (location.show === 'create' && exception === undefined) {
+      setException(createEmptyHostIsolationException());
+    }
+    // load the exception to edit
+    // dispatch({
+    //   type: 'hostIsolationExceptionsMarkToEdit',
+    //   payload: location.id!,
+    // });
+  }, [dispatch, exception, location, onCancel]);
 
   useEffect(() => {
     if (creationSuccessful) {
