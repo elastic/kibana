@@ -13,7 +13,7 @@ import { Writer } from './writer';
 import { Message, MessageTypes } from './message';
 
 export class ToolingLog {
-  private identWidth = 0;
+  private indentWidth = 0;
   private writers: Writer[];
   private readonly written$: Rx.Subject<Message>;
 
@@ -22,9 +22,24 @@ export class ToolingLog {
     this.written$ = new Rx.Subject();
   }
 
-  public indent(delta = 0) {
-    this.identWidth = Math.max(this.identWidth + delta, 0);
-    return this.identWidth;
+  public getIndent() {
+    return this.indentWidth;
+  }
+
+  public indent<T>(delta = 0, block?: () => Promise<T>) {
+    const originalWidth = this.indentWidth;
+    this.indentWidth = Math.max(this.indentWidth + delta, 0);
+    if (!block) {
+      return;
+    }
+
+    return (async () => {
+      try {
+        return await block();
+      } finally {
+        this.indentWidth = originalWidth;
+      }
+    })();
   }
 
   public verbose(...args: any[]) {
@@ -70,7 +85,7 @@ export class ToolingLog {
   private sendToWriters(type: MessageTypes, args: any[]) {
     const msg = {
       type,
-      indent: this.identWidth,
+      indent: this.indentWidth,
       args,
     };
 

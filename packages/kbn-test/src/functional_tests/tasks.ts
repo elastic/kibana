@@ -78,12 +78,9 @@ export async function runTests(options: RunTestsParams) {
     log.write('--- asserting that all tests belong to a ciGroup');
     for (const configPath of options.configs) {
       log.info('loading', configPath);
-      log.indent(4);
-      try {
+      await log.indent(4, async () => {
         await assertNoneExcluded({ configPath, options: { ...options, log } });
-      } finally {
-        log.indent(-4);
-      }
+      });
       continue;
     }
 
@@ -94,14 +91,11 @@ export async function runTests(options: RunTestsParams) {
   const configPathsWithTests: string[] = [];
   for (const configPath of options.configs) {
     log.info('testing', configPath);
-    log.indent(4);
-    try {
+    await log.indent(4, async () => {
       if (await hasTests({ configPath, options: { ...options, log } })) {
         configPathsWithTests.push(configPath);
       }
-    } finally {
-      log.indent(-4);
-    }
+    });
   }
 
   for (const configPath of configPathsWithTests) {
