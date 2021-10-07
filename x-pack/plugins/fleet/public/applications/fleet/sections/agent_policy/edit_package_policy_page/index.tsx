@@ -584,10 +584,17 @@ export const EditPackagePolicyForm = memo<{
                         fill
                         data-test-subj="saveIntegration"
                       >
-                        <FormattedMessage
-                          id="xpack.fleet.editPackagePolicy.saveButton"
-                          defaultMessage="Save integration"
-                        />
+                        {isUpgrade ? (
+                          <FormattedMessage
+                            id="xpack.fleet.editPackagePolicy.upgradeButton"
+                            defaultMessage="Upgrade integration"
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.fleet.editPackagePolicy.saveButton"
+                            defaultMessage="Save integration"
+                          />
+                        )}
                       </EuiButton>
                     </EuiFlexItem>
                   </EuiFlexGroup>
