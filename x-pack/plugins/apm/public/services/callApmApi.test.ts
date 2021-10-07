@@ -36,7 +36,7 @@ describe('callApmApi', () => {
     expect(callApi).toHaveBeenCalledWith(
       {},
       expect.objectContaining({
-        pathname: '/api/apm/foo/to/bar',
+        pathname: '/internal/apm/foo/to/bar',
       })
     );
   });
@@ -55,7 +55,7 @@ describe('callApmApi', () => {
     expect(callApi).toHaveBeenCalledWith(
       {},
       expect.objectContaining({
-        pathname: '/api/apm',
+        pathname: '/internal/apm',
         query: {
           foo: 'bar',
           bar: 'foo',
@@ -78,7 +78,7 @@ describe('callApmApi', () => {
     expect(callApi).toHaveBeenCalledWith(
       {},
       expect.objectContaining({
-        pathname: '/api/apm',
+        pathname: '/internal/apm',
         method: 'post',
         body: {
           foo: 'bar',
