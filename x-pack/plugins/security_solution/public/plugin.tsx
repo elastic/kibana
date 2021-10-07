@@ -122,10 +122,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      */
     const startServices: Promise<StartServices> = (async () => {
       const [coreStart, startPlugins] = await core.getStartServices();
+      const { spaces } = startPlugins;
 
       const services: StartServices = {
         ...coreStart,
         ...startPlugins,
+        spaces,
         storage: this.storage,
         security: plugins.security,
       };
