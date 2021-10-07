@@ -142,7 +142,7 @@ describe('CustomIntegrationsPlugin', () => {
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:
-            'https://www.elastic.co/guide/en/elasticsearch/client/rust-api/branch/index.html',
+            'https://www.elastic.co/guide/en/elasticsearch/client/rust-api/current/index.html',
           isBeta: false,
           icons: [{ type: 'svg' }],
           categories: ['elastic_stack', 'custom', 'language_client'],
