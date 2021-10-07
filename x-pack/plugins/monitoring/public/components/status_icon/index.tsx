@@ -30,6 +30,13 @@ export const StatusIcon: React.FunctionComponent<StatusIconProps> = ({ type, lab
   const icon = typeToIconMap[type];
 
   return (
-    <EuiIcon aria-label={label} size="l" data-test-subj="statusIcon" type="dot" color={icon} />
+    <EuiIcon
+      // @ts-ignore
+      alt={label}
+      size="l"
+      data-test-subj="statusIcon"
+      type="dot"
+      color={icon}
+    />
   );
 };
