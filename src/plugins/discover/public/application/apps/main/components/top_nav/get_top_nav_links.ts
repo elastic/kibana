@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import type { IndexPattern, ISearchSource } from 'src/plugins/data/common';
+import { ENABLE_LABS_UI } from '../../../../../../common';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../utils/get_sharing_data';
 import { unhashUrl } from '../../../../../../../kibana_utils/public';
@@ -29,6 +30,7 @@ export const getTopNavLinks = ({
   onOpenInspector,
   searchSource,
   onOpenSavedSearch,
+  onOpenLabs,
 }: {
   indexPattern: IndexPattern;
   navigateTo: (url: string) => void;
@@ -38,6 +40,7 @@ export const getTopNavLinks = ({
   onOpenInspector: () => void;
   searchSource: ISearchSource;
   onOpenSavedSearch: (id: string) => void;
+  onOpenLabs: () => void;
 }) => {
   const options = {
     id: 'options',
@@ -75,6 +78,8 @@ export const getTopNavLinks = ({
       defaultMessage: 'Save Search',
     }),
     testId: 'discoverSaveButton',
+    iconType: 'save',
+    emphasize: true,
     run: () => onSaveSearch({ savedSearch, services, indexPattern, navigateTo, state }),
   };
 
@@ -150,12 +155,25 @@ export const getTopNavLinks = ({
     },
   };
 
+  const labs = {
+    id: 'labs',
+    label: i18n.translate('discover.localMenu.labs', {
+      defaultMessage: 'Labs',
+    }),
+    description: i18n.translate('discover.localMenu.openLabs', {
+      defaultMessage: 'Open Labs for trying out new features',
+    }),
+    testId: 'openLabsButton',
+    run: onOpenLabs,
+  };
+
   return [
     newSearch,
-    ...(services.capabilities.discover.save ? [saveSearch] : []),
     openSearch,
     shareSearch,
     inspectSearch,
+    ...(services.uiSettings.get(ENABLE_LABS_UI) ? [labs] : []),
     ...(services.capabilities.advancedSettings.save ? [options] : []),
+    ...(services.capabilities.discover.save ? [saveSearch] : []),
   ];
 };

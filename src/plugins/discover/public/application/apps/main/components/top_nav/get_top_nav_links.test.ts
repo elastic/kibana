@@ -13,21 +13,30 @@ import { savedSearchMock } from '../../../../../__mocks__/saved_search';
 import { DiscoverServices } from '../../../../../build_services';
 import { GetStateReturn } from '../../services/discover_state';
 
-const services = {
-  capabilities: {
-    discover: {
-      save: true,
-    },
-    advancedSettings: {
-      save: true,
-    },
-  },
-} as unknown as DiscoverServices;
+const uiSettingsMock = jest.fn<unknown, [string, unknown]>((key) => {
+  if (key === 'labs:discover:enable_ui') {
+    return true;
+  }
+});
 
-const state = {} as unknown as GetStateReturn;
+const getProps = () => {
+  const services = {
+    capabilities: {
+      discover: {
+        save: true,
+      },
+      advancedSettings: {
+        save: true,
+      },
+    },
+    uiSettings: {
+      get: uiSettingsMock,
+    },
+  } as unknown as DiscoverServices;
 
-test('getTopNavLinks result', () => {
-  const topNavLinks = getTopNavLinks({
+  const state = {} as unknown as GetStateReturn;
+
+  return {
     indexPattern: indexPatternMock,
     navigateTo: jest.fn(),
     onOpenInspector: jest.fn(),
@@ -36,51 +45,53 @@ test('getTopNavLinks result', () => {
     state,
     searchSource: {} as ISearchSource,
     onOpenSavedSearch: () => {},
+    onOpenLabs: () => {},
+  };
+};
+const ids = (items: Array<{ id: string }>) => items.map(({ id }) => id);
+
+describe('getTopNavLinks', () => {
+  test('generated config of TopNavMenu config is correct when discover save permissions are assigned', () => {
+    const props = getProps();
+    props.services.capabilities.discover.save = true;
+    expect(ids(getTopNavLinks(props))).toEqual([
+      'new',
+      'open',
+      'share',
+      'inspect',
+      'labs',
+      'options',
+      'save',
+    ]);
   });
-  expect(topNavLinks).toMatchInlineSnapshot(`
-    Array [
-      Object {
-        "description": "New Search",
-        "id": "new",
-        "label": "New",
-        "run": [Function],
-        "testId": "discoverNewButton",
-      },
-      Object {
-        "description": "Save Search",
-        "id": "save",
-        "label": "Save",
-        "run": [Function],
-        "testId": "discoverSaveButton",
-      },
-      Object {
-        "description": "Open Saved Search",
-        "id": "open",
-        "label": "Open",
-        "run": [Function],
-        "testId": "discoverOpenButton",
-      },
-      Object {
-        "description": "Share Search",
-        "id": "share",
-        "label": "Share",
-        "run": [Function],
-        "testId": "shareTopNavButton",
-      },
-      Object {
-        "description": "Open Inspector for search",
-        "id": "inspect",
-        "label": "Inspect",
-        "run": [Function],
-        "testId": "openInspectorButton",
-      },
-      Object {
-        "description": "Options",
-        "id": "options",
-        "label": "Options",
-        "run": [Function],
-        "testId": "discoverOptionsButton",
-      },
-    ]
-  `);
+
+  test('generated config of TopNavMenu config is correct when no discover save permissions are assigned', () => {
+    const props = getProps();
+    props.services.capabilities.discover.save = false;
+    expect(ids(getTopNavLinks(props))).toEqual([
+      'new',
+      'open',
+      'share',
+      'inspect',
+      'labs',
+      'options',
+    ]);
+  });
+
+  test('should not show labs button if ui disabled', () => {
+    const props = getProps();
+    uiSettingsMock.mockImplementation((id) => {
+      if (id === 'labs:discover:enable_ui') {
+        return false;
+      }
+    });
+    expect(ids(getTopNavLinks(props))).toEqual([
+      'new',
+      'open',
+      'share',
+      'inspect',
+      'options',
+      'save',
+    ]);
+  });
 });

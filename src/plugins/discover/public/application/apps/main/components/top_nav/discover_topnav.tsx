@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { DiscoverLayoutProps } from '../layout/types';
 import { getTopNavLinks } from './get_top_nav_links';
@@ -14,7 +13,6 @@ import { Query, TimeRange } from '../../../../../../../data/common/query';
 import { getHeaderActionMenuMounter } from '../../../../../kibana_services';
 import { GetStateReturn } from '../../services/discover_state';
 import { LazyLabsFlyout, withSuspense } from '../../../../../../../presentation_util/public';
-import { ENABLE_LABS_UI } from '../../../../../../common';
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
 
@@ -46,7 +44,7 @@ export const DiscoverTopNav = ({
   const history = useHistory();
   const showDatePicker = useMemo(() => indexPattern.isTimeBased(), [indexPattern]);
   const [isLabsShown, setIsLabsShown] = useState(false);
-  const { uiSettings, navigation } = services;
+  const { navigation } = services;
   const { TopNavMenu } = navigation.ui;
 
   const onOpenSavedSearch = useCallback(
@@ -60,49 +58,35 @@ export const DiscoverTopNav = ({
     [history, resetSavedSearch, savedSearch.id]
   );
 
-  const topNavMenu = useMemo(() => {
-    const links = getTopNavLinks({
+  const onOpenLabs = useCallback(() => {
+    setIsLabsShown(true);
+  }, []);
+
+  const topNavMenu = useMemo(
+    () =>
+      getTopNavLinks({
+        indexPattern,
+        navigateTo,
+        savedSearch,
+        services,
+        state: stateContainer,
+        onOpenInspector,
+        searchSource,
+        onOpenSavedSearch,
+        onOpenLabs,
+      }),
+    [
       indexPattern,
       navigateTo,
       savedSearch,
       services,
-      state: stateContainer,
+      stateContainer,
       onOpenInspector,
       searchSource,
       onOpenSavedSearch,
-    });
-
-    if (uiSettings.get(ENABLE_LABS_UI)) {
-      return [
-        {
-          id: 'labs',
-          label: i18n.translate('discover.localMenu.labs', {
-            defaultMessage: 'Labs',
-          }),
-          description: i18n.translate('discover.localMenu.openLabs', {
-            defaultMessage: 'Open Labs for trying out new features',
-          }),
-          testId: 'openLabsButton',
-          run: () => {
-            setIsLabsShown(true);
-          },
-        },
-        ...links,
-      ];
-    }
-
-    return links;
-  }, [
-    indexPattern,
-    navigateTo,
-    savedSearch,
-    services,
-    stateContainer,
-    onOpenInspector,
-    searchSource,
-    onOpenSavedSearch,
-    uiSettings,
-  ]);
+      onOpenLabs,
+    ]
+  );
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
     const { appStateContainer, setAppState } = stateContainer;
