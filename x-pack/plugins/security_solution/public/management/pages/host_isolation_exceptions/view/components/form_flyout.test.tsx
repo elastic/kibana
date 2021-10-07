@@ -13,6 +13,7 @@ import {
 import userEvent from '@testing-library/user-event';
 import { HostIsolationExceptionsFormFlyout } from './form_flyout';
 import { act } from 'react-dom/test-utils';
+import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../../common/constants';
 
 jest.mock('../../service.ts');
 
@@ -21,15 +22,13 @@ describe('When on the host isolation exceptions flyout form', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
-  const onCancel = jest.fn();
 
   // const createHostIsolationExceptionItemMock = createHostIsolationExceptionItem as jest.mock;
 
   beforeEach(() => {
-    onCancel.mockReset();
     mockedContext = createAppRootMockRenderer();
     render = () => {
-      return mockedContext.render(<HostIsolationExceptionsFormFlyout onCancel={onCancel} />);
+      return mockedContext.render(<HostIsolationExceptionsFormFlyout />);
     };
     waitForAction = mockedContext.middlewareSpy.waitForAction;
   });
@@ -82,7 +81,8 @@ describe('When on the host isolation exceptions flyout form', () => {
         const confirmButton = renderResult.getByTestId('add-exception-confirm-button');
         expect(confirmButton).toHaveAttribute('disabled');
       });
-      it('should show a toast and call onCancel when the operation is finished', () => {
+      it('should show a toast and close the flyout when the operation is finished', () => {
+        mockedContext.history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=create`);
         act(() => {
           mockedContext.store.dispatch({
             type: 'hostIsolationExceptionsFormStateChanged',
@@ -92,8 +92,8 @@ describe('When on the host isolation exceptions flyout form', () => {
             },
           });
         });
-        expect(onCancel).toHaveBeenCalled();
         expect(mockedContext.coreStart.notifications.toasts.addSuccess).toHaveBeenCalled();
+        expect(mockedContext.history.location.search).toBe('');
       });
       it('should show an error toast operation fails and enable the submit button', () => {
         act(() => {

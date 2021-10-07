@@ -104,15 +104,6 @@ export const HostIsolationExceptionsList = () => {
     [navigateCallback]
   );
 
-  const handleCancelButtonClick = useCallback(
-    () =>
-      navigateCallback({
-        show: undefined,
-        id: undefined,
-      }),
-    [navigateCallback]
-  );
-
   return (
     <AdministrationListPage
       title={
@@ -136,7 +127,7 @@ export const HostIsolationExceptionsList = () => {
         </EuiButton>
       }
     >
-      {showFlyout && <HostIsolationExceptionsFormFlyout onCancel={handleCancelButtonClick} />}
+      {showFlyout && <HostIsolationExceptionsFormFlyout />}
 
       <SearchExceptions
         defaultValue={location.filter}

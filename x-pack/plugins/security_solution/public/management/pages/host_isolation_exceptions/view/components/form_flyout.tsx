@@ -31,12 +31,13 @@ import {
 } from '../../../../state/async_resource_state';
 import { HostIsolationExceptionsPageAction } from '../../store/action';
 import { createEmptyHostIsolationException } from '../../utils';
-import { useHostIsolationExceptionsSelector } from '../hooks';
+import {
+  useHostIsolationExceptionsNavigateCallback,
+  useHostIsolationExceptionsSelector,
+} from '../hooks';
 import { HostIsolationExceptionsForm } from './form';
 
-export const HostIsolationExceptionsFormFlyout: React.FC<{
-  onCancel(): void;
-}> = memo(({ onCancel }) => {
+export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
   const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
   const toasts = useToasts();
 
@@ -50,8 +51,19 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{
     isFailedResourceState(state.form.status)
   );
 
+  const navigateCallback = useHostIsolationExceptionsNavigateCallback();
+
   const [formHasError, setFormHasError] = useState(true);
   const [exception, setException] = useState<CreateExceptionListItemSchema | undefined>(undefined);
+
+  const onCancel = useCallback(
+    () =>
+      navigateCallback({
+        show: undefined,
+        id: undefined,
+      }),
+    [navigateCallback]
+  );
 
   useEffect(() => {
     setException(createEmptyHostIsolationException());
@@ -94,7 +106,7 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{
   const handleOnCancel = useCallback(() => {
     if (creationInProgress) return;
     onCancel();
-  }, [creationInProgress, onCancel]);
+  }, [creationInProgress]);
 
   const handleOnSubmit = useCallback(() => {
     dispatch({
