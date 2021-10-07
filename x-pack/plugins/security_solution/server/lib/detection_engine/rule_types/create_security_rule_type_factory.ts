@@ -66,7 +66,6 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
         const ruleStatusClient = new RuleExecutionLogClient({
           savedObjectsClient,
           ruleDataService,
-          isRuleRegistryEnabled: true,
         });
         const ruleSO = await savedObjectsClient.get('alert', alertId);
 

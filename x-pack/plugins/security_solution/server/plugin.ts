@@ -215,7 +215,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         getSpaceId: () => plugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID,
         getExecutionLogClient: () =>
           new RuleExecutionLogClient({
-            isRuleRegistryEnabled,
             ruleDataService: plugins.ruleRegistry.ruleDataService,
             savedObjectsClient: context.core.savedObjects.client,
           }),
