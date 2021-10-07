@@ -8,11 +8,11 @@ module.exports = {
      */
     {
       files: ['**/*.js'],
-      parser: require.resolve('babel-eslint'),
+      parser: require.resolve('@babel/eslint-parser'),
 
       plugins: [
         'mocha',
-        'babel',
+        '@babel',
         'import',
         'no-unsanitized',
         'prefer-object-spread',
@@ -35,8 +35,11 @@ module.exports = {
 
       parserOptions: {
         sourceType: 'module',
-        ecmaVersion: 6,
-        ecmaFeatures: { experimentalObjectRestSpread: true },
+        ecmaVersion: 2018,
+        requireConfigFile: false,
+        babelOptions: {
+          presets: ['@kbn/babel-preset/node_preset']
+        },
       },
 
       rules: {
