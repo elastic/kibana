@@ -22477,7 +22477,6 @@
     "xpack.securitySolution.indexPatterns.pickIndexPatternsCombo": "インデックスパターンを選択",
     "xpack.securitySolution.indexPatterns.resetButton": "リセット",
     "xpack.securitySolution.indexPatterns.save": "保存",
-    "xpack.securitySolution.indexPatterns.selectionLabel": "このページでデータソースを選択",
     "xpack.securitySolution.insert.timeline.insertTimelineButton": "タイムラインリンクの挿入",
     "xpack.securitySolution.inspect.modal.closeTitle": "閉じる",
     "xpack.securitySolution.inspect.modal.indexPatternDescription": "Elasticsearchインデックスに接続したインデックスパターンです。これらのインデックスは Kibana > 高度な設定で構成できます。",
