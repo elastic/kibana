@@ -10,7 +10,7 @@ import { CoreStart } from 'kibana/public';
 import ReactDOM from 'react-dom';
 import React, { Suspense, useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiProgress } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { Required } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -79,10 +79,8 @@ export const EmbeddableWrapper = ({
     },
     [dataVisualizerListState, onOutputChange]
   );
-  const { configs, searchQueryLanguage, searchString, extendedColumns } = useDataVisualizerGridData(
-    input,
-    dataVisualizerListState
-  );
+  const { configs, searchQueryLanguage, searchString, extendedColumns, progress } =
+    useDataVisualizerGridData(input, dataVisualizerListState);
   const getItemIdToExpandedRowMap = useCallback(
     function (itemIds: string[], items: FieldVisConfig[]): ItemIdToExpandedRowMap {
       return itemIds.reduce((m: ItemIdToExpandedRowMap, fieldName: string) => {
@@ -104,15 +102,18 @@ export const EmbeddableWrapper = ({
   );
 
   return (
-    <DataVisualizerTable<FieldVisConfig>
-      items={configs}
-      pageState={dataVisualizerListState}
-      updatePageState={onTableChange}
-      getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
-      extendedColumns={extendedColumns}
-      showPreviewByDefault={input?.showPreviewByDefault}
-      onChange={onOutputChange}
-    />
+    <div>
+      <EuiProgress value={progress.loaded} max={progress.total} size={'xs'} />
+      <DataVisualizerTable<FieldVisConfig>
+        items={configs}
+        pageState={dataVisualizerListState}
+        updatePageState={onTableChange}
+        getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
+        extendedColumns={extendedColumns}
+        showPreviewByDefault={input?.showPreviewByDefault}
+        onChange={onOutputChange}
+      />
+    </div>
   );
 };
 

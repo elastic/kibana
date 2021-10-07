@@ -482,6 +482,7 @@ export const useDataVisualizerGridData = (
   }, [input.indexPattern, services, searchQueryLanguage, searchString]);
 
   return {
+    progress: strategyResponse.progress,
     configs,
     searchQueryLanguage,
     searchString,
