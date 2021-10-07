@@ -34,6 +34,8 @@ describe('AutomatedCuration', () => {
     queries: ['query A', 'query B'],
     isFlyoutOpen: false,
     curation: {
+      promoted: [],
+      hidden: [],
       suggestion: {
         status: 'applied',
       },

@@ -38,16 +38,18 @@ export const AutomatedCuration: React.FC = () => {
   const { curationId } = useParams<{ curationId: string }>();
   const logic = CurationLogic({ curationId });
   const { convertToManual } = useActions(logic);
-  const { activeQuery, dataLoading, queries } = useValues(logic);
+  const { activeQuery, dataLoading, queries, curation } = useValues(logic);
 
   // This tab group is meant to visually mirror the dynamic group of tags in the ManualCuration component
   const pageTabs = [
     {
       label: PROMOTED_DOCUMENTS_TITLE,
+      append: <EuiBadge>{curation.promoted.length}</EuiBadge>,
       isSelected: true,
     },
     {
       label: HIDDEN_DOCUMENTS_TITLE,
+      append: <EuiBadge isDisabled>0</EuiBadge>,
       isSelected: false,
       disabled: true,
     },

@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { AppSearchPageTemplate } from '../../layout';
 import { MANAGE_CURATION_TITLE } from '../constants';
@@ -27,17 +27,21 @@ import { SuggestedDocumentsCallout } from './suggested_documents_callout';
 export const ManualCuration: React.FC = () => {
   const { curationId } = useParams() as { curationId: string };
   const { onSelectPageTab } = useActions(CurationLogic({ curationId }));
-  const { dataLoading, queries, selectedPageTab } = useValues(CurationLogic({ curationId }));
+  const { dataLoading, queries, selectedPageTab, curation } = useValues(
+    CurationLogic({ curationId })
+  );
   const { isFlyoutOpen } = useValues(AddResultLogic);
 
   const pageTabs = [
     {
       label: PROMOTED_DOCUMENTS_TITLE,
+      append: <EuiBadge>{curation.promoted.length}</EuiBadge>,
       isSelected: selectedPageTab === 'promoted',
       onClick: () => onSelectPageTab('promoted'),
     },
     {
       label: HIDDEN_DOCUMENTS_TITLE,
+      append: <EuiBadge>{curation.hidden.length}</EuiBadge>,
       isSelected: selectedPageTab === 'hidden',
       onClick: () => onSelectPageTab('hidden'),
     },

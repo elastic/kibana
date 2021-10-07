@@ -14,7 +14,7 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiButton, EuiTab } from '@elastic/eui';
+import { EuiTab } from '@elastic/eui';
 
 import { getPageTitle, getPageHeaderActions, getPageHeaderTabs } from '../../../../test_helpers';
 
@@ -34,6 +34,10 @@ describe('ManualCuration', () => {
     queries: ['query A', 'query B'],
     isFlyoutOpen: false,
     selectedPageTab: 'promoted',
+    curation: {
+      promoted: [],
+      hidden: [],
+    },
   };
   const actions = {
     deleteCuration: jest.fn(),
