@@ -24,18 +24,19 @@ export const handleNestedFilter = (filter: Filter, indexPattern?: IndexPatternBa
   );
 
   const subTypeNested = field && getDataViewFieldSubtypeNested(field);
-
   if (!subTypeNested) {
     return filter;
-  } else {
-    const query = cleanFilter(filter);
+  }
 
-    return {
-      meta: filter.meta,
+  const query = cleanFilter(filter);
+
+  return {
+    meta: filter.meta,
+    query: {
       nested: {
         path: subTypeNested.nested.path,
         query: query.query || query,
       },
-    };
-  }
+    },
+  };
 };
