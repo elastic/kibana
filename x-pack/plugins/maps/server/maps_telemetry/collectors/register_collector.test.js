@@ -9,14 +9,12 @@ import { registerMapsUsageCollector } from './register';
 
 describe('buildCollectorObj#fetch', () => {
   let makeUsageCollectorStub;
-  let savedObjectsClient;
   let registerStub;
   let usageCollection;
   let config;
 
   beforeEach(() => {
     makeUsageCollectorStub = jest.fn();
-    savedObjectsClient = jest.fn();
     registerStub = jest.fn();
     config = jest.fn();
     usageCollection = {
@@ -26,7 +24,7 @@ describe('buildCollectorObj#fetch', () => {
   });
 
   test('makes and registers maps usage collector', async () => {
-    registerMapsUsageCollector(usageCollection, savedObjectsClient, config);
+    registerMapsUsageCollector(usageCollection, config);
 
     expect(registerStub).toHaveBeenCalledTimes(1);
     expect(makeUsageCollectorStub).toHaveBeenCalledTimes(1);

@@ -40,6 +40,25 @@ describe('getESUpgradeStatus', () => {
     asApiResponse(deprecationsResponse)
   );
 
+  esClient.asCurrentUser.transport.request.mockResolvedValue(
+    asApiResponse({
+      features: [
+        {
+          feature_name: 'machine_learning',
+          minimum_index_version: '7.1.1',
+          upgrade_status: 'UPGRADE_NEEDED',
+          indices: [
+            {
+              index: '.ml-config',
+              version: '7.1.1',
+            },
+          ],
+        },
+      ],
+      upgrade_status: 'UPGRADE_NEEDED',
+    })
+  );
+
   // @ts-expect-error not full interface of response
   esClient.asCurrentUser.indices.resolveIndex.mockResolvedValue(asApiResponse(resolvedIndices));
 
@@ -85,5 +104,31 @@ describe('getESUpgradeStatus', () => {
       'totalCriticalDeprecations',
       0
     );
+  });
+
+  it('filters out system indices returned by upgrade system indices API', async () => {
+    esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
+      asApiResponse({
+        cluster_settings: [],
+        node_settings: [],
+        ml_settings: [],
+        index_settings: {
+          '.ml-config': [
+            {
+              level: 'critical',
+              message: 'Index created before 7.0',
+              url: 'https://',
+              details: '...',
+              resolve_during_rolling_upgrade: false,
+            },
+          ],
+        },
+      })
+    );
+
+    const upgradeStatus = await getESUpgradeStatus(esClient);
+
+    expect(upgradeStatus.deprecations).toHaveLength(0);
+    expect(upgradeStatus.totalCriticalDeprecations).toBe(0);
   });
 });

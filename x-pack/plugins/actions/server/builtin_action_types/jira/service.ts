@@ -6,6 +6,7 @@
  */
 
 import axios from 'axios';
+import { isEmpty } from 'lodash';
 
 import { Logger } from '../../../../../../src/core/server';
 import {
@@ -76,7 +77,7 @@ export const createExternalService = (
 
   const createFields = (key: string, incident: Incident): Fields => {
     let fields: Fields = {
-      summary: incident.summary,
+      summary: trimAndRemoveNewlines(incident.summary),
       project: { key },
     };
 
@@ -102,6 +103,13 @@ export const createExternalService = (
 
     return fields;
   };
+
+  const trimAndRemoveNewlines = (str: string) =>
+    str
+      .split(/[\n\r]/gm)
+      .map((item) => item.trim())
+      .filter((item) => !isEmpty(item))
+      .join(', ');
 
   const createErrorMessage = (errorResponse: ResponseError | string | null | undefined): string => {
     if (errorResponse == null) {
