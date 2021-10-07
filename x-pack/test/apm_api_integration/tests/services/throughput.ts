@@ -33,6 +33,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const start = new Date('2021-01-01T00:00:00.000Z').getTime();
       const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
+      const GO_PROD_RATE = 10;
+      const GO_DEV_RATE = 5;
+      const JAVA_PROD_RATE = 20;
+
       before(async () => {
         const serviceGoProdInstance = service('synth-go', 'production', 'go').instance(
           'instance-a'
@@ -47,7 +51,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await traceData.index([
           ...timerange(start, end)
             .interval('1s')
-            .rate(10)
+            .rate(GO_PROD_RATE)
             .flatMap((timestamp) =>
               serviceGoProdInstance
                 .transaction('GET /api/product/list')
@@ -57,7 +61,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ),
           ...timerange(start, end)
             .interval('1s')
-            .rate(5)
+            .rate(GO_DEV_RATE)
             .flatMap((timestamp) =>
               serviceGoDevInstance
                 .transaction('GET /api/product/:id')
@@ -67,7 +71,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ),
           ...timerange(start, end)
             .interval('1s')
-            .rate(20)
+            .rate(JAVA_PROD_RATE)
             .flatMap((timestamp) =>
               serviceJavaInstance
                 .transaction('POST /api/product/buy')
@@ -120,7 +124,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('returns the expected throughput', () => {
           const throughputValues = uniq(body.currentPeriod.map((coord) => coord.y));
-          expect(throughputValues).to.eql([10]);
+          expect(throughputValues).to.eql([GO_PROD_RATE]);
         });
       });
 
@@ -135,7 +139,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('returns data for all environments', () => {
           const throughputValues = body.currentPeriod.map(({ y }) => y);
-          expect(uniq(throughputValues)).to.eql([15]);
+          expect(uniq(throughputValues)).to.eql([GO_PROD_RATE + GO_DEV_RATE]);
           expect(body.throughputUnit).to.eql('second');
         });
       });
@@ -152,7 +156,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('returns data that matches the kuery', () => {
           const throughputValues = body.currentPeriod.map(({ y }) => y);
-          expect(uniq(throughputValues)).to.eql([5]);
+          expect(uniq(throughputValues)).to.eql([GO_DEV_RATE]);
           expect(body.throughputUnit).to.eql('second');
         });
       });
