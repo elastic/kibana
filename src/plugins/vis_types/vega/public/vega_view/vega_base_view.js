@@ -212,7 +212,7 @@ export class VegaBaseView {
         uri = uri.url;
       } else if (!this._enableExternalUrls) {
         this.handleExternalUrlError(getExternalUrlsAreNotEnabledError());
-      } else if (this._externalUrl.validateUrl(uri)) {
+      } else if (!this._externalUrl.validateUrl(uri)) {
         this.handleExternalUrlError(getExternalUrlServiceError(uri));
       }
       const result = await originalSanitize(uri, options);
