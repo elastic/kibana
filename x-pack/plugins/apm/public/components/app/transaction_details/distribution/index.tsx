@@ -222,18 +222,14 @@ export function TransactionDistribution({
         status={status}
       />
 
-      {hasData && (
-        <>
-          <EuiSpacer size="s" />
+      <EuiSpacer size="s" />
 
-          <WaterfallWithSummary
-            urlParams={urlParams}
-            waterfall={waterfall}
-            isLoading={waterfallStatus === FETCH_STATUS.LOADING}
-            traceSamples={traceSamples}
-          />
-        </>
-      )}
+      <WaterfallWithSummary
+        urlParams={urlParams}
+        waterfall={waterfall}
+        isLoading={waterfallStatus === FETCH_STATUS.LOADING}
+        traceSamples={traceSamples}
+      />
     </div>
   );
 }
