@@ -9407,7 +9407,6 @@
     "xpack.enterpriseSearch.appSearch.engine.curations.empty.buttonLabel": "阅读策展指南",
     "xpack.enterpriseSearch.appSearch.engine.curations.empty.description": "使用策展提升和隐藏文档。帮助人们发现最想让他们发现的内容。",
     "xpack.enterpriseSearch.appSearch.engine.curations.empty.noCurationsTitle": "创建您的首个策展",
-    "xpack.enterpriseSearch.appSearch.engine.curations.hiddenDocuments.description": "隐藏的文档将不显示在有机结果中。",
     "xpack.enterpriseSearch.appSearch.engine.curations.hiddenDocuments.emptyDescription": "通过单击上面有机结果上的眼睛图标，可隐藏文档，或手动搜索和隐藏结果。",
     "xpack.enterpriseSearch.appSearch.engine.curations.hiddenDocuments.emptyTitle": "您尚未隐藏任何文档",
     "xpack.enterpriseSearch.appSearch.engine.curations.hiddenDocuments.removeAllButtonLabel": "全部还原",
