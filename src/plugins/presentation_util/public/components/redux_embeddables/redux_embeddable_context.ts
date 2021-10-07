@@ -14,12 +14,22 @@ import {
 } from './types';
 import { ContainerInput, EmbeddableInput } from '../../../../embeddable/public';
 
+/**
+ * When creating the context, a generic EmbeddableInput as placeholder is used. This will later be cast to
+ * the generic type passed in by the useReduxEmbeddableContext or useReduxContainerContext hooks
+ **/
 export const ReduxEmbeddableContext = createContext<
   | ReduxEmbeddableContextServices<EmbeddableInput>
   | ReduxContainerContextServices<EmbeddableInput>
   | null
->(null); // generic EmbeddableInput as placeholder
+>(null);
 
+/**
+ * A typed use context hook for embeddables that are not containers. it @returns an
+ * ReduxEmbeddableContextServices object typed to the generic inputTypes and ReducerTypes you pass in.
+ * Note that the reducer type is optional, but will be required to correctly infer the keys and payload
+ * types of your reducers. use `typeof MyReducers` here to retain them.
+ */
 export const useReduxEmbeddableContext = <
   InputType extends EmbeddableInput = EmbeddableInput,
   ReducerType extends GenericEmbeddableReducers<InputType> = GenericEmbeddableReducers<InputType>
@@ -38,6 +48,13 @@ export const useReduxEmbeddableContext = <
   return context!;
 };
 
+/**
+ * A typed use context hook for embeddable containers. it @returns an
+ * ReduxContainerContextServices object typed to the generic inputTypes and ReducerTypes you pass in.
+ * Note that the reducer type is optional, but will be required to correctly infer the keys and payload
+ * types of your reducers. use `typeof MyReducers` here to retain them. It also includes a containerActions
+ * key which contains most of the commonly used container operations
+ */
 export const useReduxContainerContext = <
   InputType extends ContainerInput = ContainerInput,
   ReducerType extends GenericEmbeddableReducers<InputType> = GenericEmbeddableReducers<InputType>
