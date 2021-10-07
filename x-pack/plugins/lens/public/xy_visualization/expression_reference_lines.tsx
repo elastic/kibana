@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import './expression_thresholds.scss';
+import './expression_reference_lines.scss';
 import React from 'react';
 import { groupBy } from 'lodash';
 import { EuiIcon } from '@elastic/eui';

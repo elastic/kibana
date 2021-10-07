@@ -7,9 +7,9 @@
 
 import { XYLayerConfig } from '../../common/expressions';
 import { FramePublicAPI } from '../types';
-import { computeStaticValueForGroup, getStaticValue } from './threshold_helpers';
+import { computeStaticValueForGroup, getStaticValue } from './reference_line_helpers';
 
-describe('threshold helpers', () => {
+describe('reference_line helpers', () => {
   describe('getStaticValue', () => {
     function getActiveData(json: Array<{ id: string; rows: Array<Record<string, number>> }>) {
       return json.reduce((memo, { id, rows }) => {
