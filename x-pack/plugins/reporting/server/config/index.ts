@@ -21,7 +21,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
     unused('capture.concurrency'),
     unused('capture.settleTime'),
     unused('capture.timeout'),
-    unused('capture.viewport'),
+    unused('capture.viewport'), // deprecated as unused since 7.16
     unused('poll.jobCompletionNotifier.intervalErrorMultiplier'),
     unused('poll.jobsRefresh.intervalErrorMultiplier'),
     unused('kibanaApp'),
