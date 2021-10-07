@@ -109,7 +109,6 @@ export const EditControlGroup = () => {
                   containerActions.removeEmbeddable(panelId)
                 );
             });
-            Object.keys(panels).forEach((panelId) => containerActions.removeEmbeddable(panelId));
           }}
           aria-label={'delete-all'}
           iconType="trash"

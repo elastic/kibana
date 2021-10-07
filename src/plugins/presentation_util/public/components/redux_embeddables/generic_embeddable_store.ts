@@ -33,4 +33,8 @@ managedEmbeddablesStore.injectReducer = <StateShape>({
   );
 };
 
+/**
+ * A managed Redux store which can be used with multiple embeddables at once. When a new embeddable is created at runtime,
+ * all passed in reducers will be made into a slice, then combined into the store using combineReducers.
+ */
 export const getManagedEmbeddablesStore = () => managedEmbeddablesStore;

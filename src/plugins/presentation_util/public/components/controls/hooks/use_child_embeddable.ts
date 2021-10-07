@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import { useEffect, useState } from 'react';
-import { IContainer } from '../../../../../embeddable/public';
 import { InputControlEmbeddable } from '../../../services/controls';
 
 export const useChildEmbeddable = ({

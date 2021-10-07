@@ -146,7 +146,7 @@ export const ControlGroupStrings = {
       getSubtitle: () =>
         i18n.translate('presentationUtil.inputControls.controlGroup.management.discard.sub', {
           defaultMessage:
-            'Discard changes to this control? Controls are not recoverable once removed.',
+            'Discard changes to this control? Changes are not recoverable once discardsd.',
         }),
       getConfirm: () =>
         i18n.translate('presentationUtil.inputControls.controlGroup.management.discard.confirm', {
@@ -164,7 +164,7 @@ export const ControlGroupStrings = {
         }),
       getSubtitle: () =>
         i18n.translate('presentationUtil.inputControls.controlGroup.management.deleteNew.sub', {
-          defaultMessage: 'Discard new control? Controls are not recoverable once removed.',
+          defaultMessage: 'Discard new control? Controls are not recoverable once discarded.',
         }),
       getConfirm: () =>
         i18n.translate('presentationUtil.inputControls.controlGroup.management.deleteNew.confirm', {

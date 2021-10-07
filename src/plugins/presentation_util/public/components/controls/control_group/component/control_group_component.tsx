@@ -9,7 +9,7 @@
 import '../control_group.scss';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import classNames from 'classnames';
 import {
   arrayMove,
@@ -37,6 +37,7 @@ import { EditControlGroup } from '../editor/edit_control_group';
 import { forwardAllContext } from '../editor/forward_all_context';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
 import { useReduxContainerContext } from '../../../redux_embeddables/redux_embeddable_context';
+import { controlGroupReducers } from '../state/control_group_reducers';
 
 export const ControlGroup = () => {
   // Presentation Services Context
@@ -44,36 +45,35 @@ export const ControlGroup = () => {
   const { openFlyout } = overlays.useService();
 
   // Redux embeddable container Context
-  const reduxContainerContext = useReduxContainerContext<ControlGroupInput>();
-  const { useEmbeddableSelector } = reduxContainerContext;
+  const reduxContainerContext = useReduxContainerContext<
+    ControlGroupInput,
+    typeof controlGroupReducers
+  >();
+  const {
+    useEmbeddableSelector,
+    useEmbeddableDispatch,
+    actions: { setControlOrders },
+  } = reduxContainerContext;
+  const dispatch = useEmbeddableDispatch();
 
   // current state
   const { panels } = useEmbeddableSelector((state) => state);
-  const [controlIds, setControlIds] = useState<string[]>([]);
 
-  useEffect(() => {
-    setControlIds((currentIds) => {
-      // sync control Ids with panels from state.
-      const newIds: string[] = [];
-      const allIds = [...currentIds, ...Object.keys(panels)];
-      allIds.forEach((id) => {
-        const currentIndex = currentIds.indexOf(id);
-        if (!panels[id] && currentIndex !== -1) {
-          currentIds.splice(currentIndex, 1);
-        }
-        if (currentIndex === -1 && Boolean(panels[id])) {
-          newIds.push(id);
-        }
-      });
-      return [...currentIds, ...newIds];
-    });
-  }, [panels]);
+  const idsInOrder = useMemo(
+    () =>
+      Object.values(panels)
+        .sort((a, b) => (a.order > b.order ? 1 : -1))
+        .reduce((acc, panel) => {
+          acc.push(panel.explicitInput.id);
+          return acc;
+        }, [] as string[]),
+    [panels]
+  );
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
-
   const draggingIndex = useMemo(
-    () => (draggingId ? controlIds.indexOf(draggingId) : -1),
-    [controlIds, draggingId]
+    () => (draggingId ? idsInOrder.indexOf(draggingId) : -1),
+    [idsInOrder, draggingId]
   );
 
   const sensors = useSensors(
@@ -83,10 +83,10 @@ export const ControlGroup = () => {
 
   const onDragEnd = ({ over }: DragEndEvent) => {
     if (over) {
-      const overIndex = controlIds.indexOf(over.id);
+      const overIndex = idsInOrder.indexOf(over.id);
       if (draggingIndex !== overIndex) {
         const newIndex = overIndex;
-        setControlIds((currentControlIds) => arrayMove(currentControlIds, draggingIndex, newIndex));
+        dispatch(setControlOrders({ ids: arrayMove([...idsInOrder], draggingIndex, newIndex) }));
       }
     }
     setDraggingId(null);
@@ -105,14 +105,14 @@ export const ControlGroup = () => {
             strategy: LayoutMeasuringStrategy.Always,
           }}
         >
-          <SortableContext items={controlIds} strategy={rectSortingStrategy}>
+          <SortableContext items={idsInOrder} strategy={rectSortingStrategy}>
             <EuiFlexGroup
               className={classNames('controlGroup', { 'controlGroup-isDragging': draggingId })}
               alignItems="center"
               gutterSize={'m'}
               wrap={true}
             >
-              {controlIds.map(
+              {idsInOrder.map(
                 (controlId, index) =>
                   panels[controlId] && (
                     <SortableControl

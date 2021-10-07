@@ -43,6 +43,11 @@ const embeddableIsContainer = (
   embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>
 ): embeddable is IContainer => embeddable.isContainer;
 
+/**
+ * Place this wrapper around the react component when rendering an embeddable to automatically set up
+ * redux for use with the embeddable via the supplied reducers. Any child components can then use ReduxEmbeddableContext
+ * or ReduxContainerContext to interface with the state of the embeddable.
+ */
 export const ReduxEmbeddableWrapper = <InputType extends EmbeddableInput = EmbeddableInput>(
   props: PropsWithChildren<ReduxEmbeddableWrapperProps<InputType>>
 ) => {
@@ -115,6 +120,10 @@ interface ReduxEmbeddableSyncProps<InputType extends EmbeddableInput = Embeddabl
   embeddable: IEmbeddable<InputType, EmbeddableOutput>;
 }
 
+/**
+ * This component uses the context from the embeddable wrapper to set up a generic two-way binding between the embeddable input and
+ * the redux store. a custom diffInput function can be provided, this function should always prioritize input A over input B.
+ */
 const ReduxEmbeddableSync = <InputType extends EmbeddableInput = EmbeddableInput>({
   embeddable,
   diffInput,

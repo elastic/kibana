@@ -39,8 +39,12 @@ export class ControlGroupContainer extends Container<InputControlInput, ControlG
     partial: Partial<TEmbeddableInput> = {}
   ): ControlPanelState<TEmbeddableInput> {
     const panelState = super.createNewPanelState(factory, partial);
+    const highestOrder = Object.values(this.getInput().panels).reduce((highestSoFar, panel) => {
+      if (panel.order > highestSoFar) highestSoFar = panel.order;
+      return highestSoFar;
+    }, 0);
     return {
-      order: 1,
+      order: highestOrder + 1,
       width: this.getInput().defaultControlWidth ?? DEFAULT_CONTROL_WIDTH,
       ...panelState,
     } as ControlPanelState<TEmbeddableInput>;

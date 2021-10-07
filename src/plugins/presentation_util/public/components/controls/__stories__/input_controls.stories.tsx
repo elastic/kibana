@@ -13,6 +13,11 @@ import { decorators } from './decorators';
 import { pluginServices, registry } from '../../../services/storybook';
 import { populateStorybookControlFactories } from './storybook_control_factories';
 import { ControlGroupContainerFactory } from '../control_group/embeddable/control_group_container_factory';
+import { ControlsPanels } from '../control_group/types';
+import {
+  OptionsListEmbeddableInput,
+  OPTIONS_LIST_CONTROL,
+} from '../control_types/options_list/options_list_embeddable';
 
 export default {
   title: 'Controls',
@@ -20,7 +25,7 @@ export default {
   decorators,
 };
 
-const EmptyControlGroupStoryComponent = () => {
+const EmptyControlGroupStoryComponent = ({ panels }: { panels?: ControlsPanels }) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
   pluginServices.setRegistry(registry.start({}));
@@ -36,16 +41,57 @@ const EmptyControlGroupStoryComponent = () => {
           useTimerange: false,
         },
         controlStyle: 'oneLine',
+        panels: panels ?? {},
         id: uuid.v4(),
-        panels: {},
       });
       if (controlGroupContainerEmbeddable && embeddableRoot.current) {
         controlGroupContainerEmbeddable.render(embeddableRoot.current);
       }
     })();
-  }, [embeddableRoot]);
+  }, [embeddableRoot, panels]);
 
   return <div ref={embeddableRoot} />;
 };
 
 export const EmptyControlGroupStory = () => <EmptyControlGroupStoryComponent />;
+export const ConfiguredControlGroupStory = () => (
+  <EmptyControlGroupStoryComponent
+    panels={{
+      optionsList1: {
+        type: OPTIONS_LIST_CONTROL,
+        order: 1,
+        width: 'auto',
+        explicitInput: {
+          title: 'Origin City',
+          id: 'optionsList1',
+          indexPattern: 'demo data flights',
+          field: 'OriginCityName',
+          defaultSelections: ['Toronto'],
+        } as OptionsListEmbeddableInput,
+      },
+      optionsList2: {
+        type: OPTIONS_LIST_CONTROL,
+        order: 2,
+        width: 'auto',
+        explicitInput: {
+          title: 'Destination City',
+          id: 'optionsList2',
+          indexPattern: 'demo data flights',
+          field: 'DestCityName',
+          defaultSelections: ['London'],
+        } as OptionsListEmbeddableInput,
+      },
+      optionsList3: {
+        type: OPTIONS_LIST_CONTROL,
+        order: 3,
+        width: 'auto',
+        explicitInput: {
+          title: 'Carrier',
+          id: 'optionsList3',
+          indexPattern: 'demo data flights',
+          field: 'Carrier',
+        } as OptionsListEmbeddableInput,
+      },
+    }}
+  />
+);
