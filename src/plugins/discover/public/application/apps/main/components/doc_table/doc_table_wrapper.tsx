@@ -205,6 +205,7 @@ export const DocTableWrapper = forwardRef(
             row={current}
             useNewFieldsApi={useNewFieldsApi}
             hideTimeColumn={hideTimeColumn}
+            isShortDots={isShortDots}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
             filterManager={filterManager}
@@ -223,6 +224,7 @@ export const DocTableWrapper = forwardRef(
         onRemoveColumn,
         filterManager,
         addBasePath,
+        isShortDots,
         fieldsToShow,
       ]
     );

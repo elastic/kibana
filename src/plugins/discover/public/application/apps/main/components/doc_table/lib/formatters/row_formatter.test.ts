@@ -8,43 +8,11 @@
 
 import ReactDOM from 'react-dom/server';
 import { formatRow, formatTopLevelObject } from './row_formatter';
-import { IndexPattern } from '../../../../../../../../data/common';
-import { fieldFormatsMock } from '../../../../../../../../field_formats/common/mocks';
-import { setServices } from '../../../../../../kibana_services';
-import { DiscoverServices } from '../../../../../../build_services';
-import { stubbedSavedObjectIndexPattern } from '../../../../../../../../data/common/stubs';
+import { setServices } from '../../../../../../../kibana_services';
+import { DiscoverServices } from '../../../../../../../build_services';
+import { indexPattern, hit } from './mocks';
 
 describe('Row formatter', () => {
-  const hit = {
-    _id: 'a',
-    _type: 'doc',
-    _score: 1,
-    _source: {
-      foo: 'bar',
-      number: 42,
-      hello: '<h1>World</h1>',
-      also: 'with "quotes" or \'single quotes\'',
-    },
-  };
-
-  const createIndexPattern = () => {
-    const id = 'my-index';
-    const {
-      type,
-      version,
-      attributes: { timeFieldName, fields, title },
-    } = stubbedSavedObjectIndexPattern(id);
-
-    return new IndexPattern({
-      spec: { id, type, version, timeFieldName, fields: JSON.parse(fields), title },
-      fieldFormats: fieldFormatsMock,
-      shortDotsEnable: false,
-      metaFields: [],
-    });
-  };
-
-  const indexPattern = createIndexPattern();
-
   const fieldsToShow = indexPattern.fields.getAll().map((fld) => fld.name);
 
   // Realistic response with alphabetical insertion order

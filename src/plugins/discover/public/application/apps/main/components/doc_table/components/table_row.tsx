@@ -17,7 +17,8 @@ import { ElasticSearchHit, DocViewFilterFn } from '../../../../../doc_views/doc_
 import { getContextUrl } from '../../../../../helpers/get_context_url';
 import { getSingleDocUrl } from '../../../../../helpers/get_single_doc_url';
 import { TableRowDetails } from './table_row_details';
-import { formatRow, formatTopLevelObject } from '../lib/row_formatter';
+import { formatRow, formatTopLevelObject } from '../lib/formatters/row_formatter';
+import { formatSource } from '../lib/formatters/source_formatter';
 
 export type DocTableRow = ElasticSearchHit & {
   isAnchor?: boolean;
@@ -32,6 +33,7 @@ export interface TableRowProps {
   onRemoveColumn?: (column: string) => void;
   useNewFieldsApi: boolean;
   hideTimeColumn: boolean;
+  isShortDots: boolean;
   filterManager: FilterManager;
   addBasePath: (path: string) => string;
   fieldsToShow: string[];
@@ -45,6 +47,7 @@ export const TableRow = ({
   useNewFieldsApi,
   fieldsToShow,
   hideTimeColumn,
+  isShortDots,
   onAddColumn,
   onRemoveColumn,
   filterManager,
@@ -63,18 +66,23 @@ export const TableRow = ({
   // toggle display of the rows details, a full list of the fields from each row
   const toggleRow = () => setOpen((prevOpen) => !prevOpen);
 
-  /**
-   * Fill an element with the value of a field
-   */
-  const displayField = (fieldName: string) => {
+  const formatField = (fieldName: string) => {
+    if (fieldName === '_source') {
+      return formatSource({
+        hit: row,
+        indexPattern,
+        isShortDots,
+      });
+    }
+
     const formattedField = indexPattern.formatField(row, fieldName);
 
     // field formatters take care of escaping
     // eslint-disable-next-line react/no-danger
-    const fieldElement = <span dangerouslySetInnerHTML={{ __html: formattedField }} />;
-
-    return <div className="truncate-by-height">{fieldElement}</div>;
+    const element = <span dangerouslySetInnerHTML={{ __html: formattedField }} />;
+    return <div className="truncate-by-height">{element}</div>;
   };
+
   const inlineFilter = useCallback(
     (column: string, type: '+' | '-') => {
       const field = indexPattern.fields.getByName(column);
@@ -116,7 +124,7 @@ export const TableRow = ({
       <TableCell
         key={indexPattern.timeFieldName}
         timefield={true}
-        formatted={displayField(indexPattern.timeFieldName)}
+        formatted={formatField(indexPattern.timeFieldName)}
         filterable={Boolean(mapping(indexPattern.timeFieldName)?.filterable && filter)}
         column={indexPattern.timeFieldName}
         inlineFilter={inlineFilter}
@@ -166,7 +174,7 @@ export const TableRow = ({
             key={column}
             timefield={false}
             sourcefield={column === '_source'}
-            formatted={displayField(column)}
+            formatted={formatField(column)}
             filterable={isFilterable}
             column={column}
             inlineFilter={inlineFilter}

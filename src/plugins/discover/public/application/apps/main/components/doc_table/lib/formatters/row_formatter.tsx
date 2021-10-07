@@ -8,8 +8,8 @@
 
 import React, { Fragment } from 'react';
 import type { IndexPattern } from 'src/plugins/data/common';
-import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../../../../common';
-import { getServices } from '../../../../../../kibana_services';
+import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../../../../../common';
+import { getServices } from '../../../../../../../kibana_services';
 
 import './row_formatter.scss';
 
