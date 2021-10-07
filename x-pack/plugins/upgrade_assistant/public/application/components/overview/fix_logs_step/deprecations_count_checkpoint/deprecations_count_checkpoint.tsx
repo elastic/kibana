@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 import moment from 'moment-timezone';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n/react';
 
@@ -60,6 +60,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
   setCheckpoint,
   setHasNoDeprecationLogs,
 }) => {
+  const [isDeletingCache, setIsDeletingCache] = useState(false);
   const {
     services: {
       api,
@@ -76,7 +77,9 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
   const calloutTestId = hasLogs ? 'hasWarningsCallout' : 'noWarningsCallout';
 
   const onResetClick = async () => {
+    setIsDeletingCache(true);
     const { error: deleteLogsCacheError } = await api.deleteDeprecationLogsCache();
+    setIsDeletingCache(false);
 
     if (deleteLogsCacheError) {
       notifications.toasts.addDanger({
@@ -130,7 +133,12 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
       data-test-subj={calloutTestId}
     >
       <p>{i18nTexts.calloutBody}</p>
-      <EuiButton color={calloutTint} onClick={onResetClick} data-test-subj="resetLastStoredDate">
+      <EuiButton
+        color={calloutTint}
+        onClick={onResetClick}
+        isLoading={isDeletingCache}
+        data-test-subj="resetLastStoredDate"
+      >
         {i18nTexts.resetCounterButton}
       </EuiButton>
     </EuiCallOut>
