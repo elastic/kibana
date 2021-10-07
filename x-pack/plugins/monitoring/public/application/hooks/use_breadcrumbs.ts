@@ -186,6 +186,30 @@ function getApmBreadcrumbs(mainInstance: any) {
   return breadcrumbs;
 }
 
+// generate Enterprise Search breadcrumbs
+function getEnterpriseSearchBreadcrumbs(mainInstance: any) {
+  const entSearchLabel = i18n.translate('xpack.monitoring.breadcrumbs.entSearchLabel', {
+    defaultMessage: 'Enterprise Search',
+  });
+  const breadcrumbs = [];
+  if (mainInstance.node) {
+    breadcrumbs.push(createCrumb('#/enterprise_search', entSearchLabel));
+    breadcrumbs.push(
+      createCrumb(
+        '#/enterprise_search/nodes',
+        i18n.translate('xpack.monitoring.breadcrumbs.entSearch.nodesLabel', {
+          defaultMessage: 'Nodes',
+        })
+      )
+    );
+    breadcrumbs.push(createCrumb(null, mainInstance.instance));
+  } else {
+    // don't link to Overview when we're possibly on Overview or its sibling tabs
+    breadcrumbs.push(createCrumb(null, entSearchLabel));
+  }
+  return breadcrumbs;
+}
+
 function buildBreadcrumbs(clusterName: string, mainInstance?: any | null) {
   const homeCrumb = i18n.translate('xpack.monitoring.breadcrumbs.clustersLabel', {
     defaultMessage: 'Clusters',
@@ -211,6 +235,9 @@ function buildBreadcrumbs(clusterName: string, mainInstance?: any | null) {
   }
   if (mainInstance?.inApm) {
     breadcrumbs = breadcrumbs.concat(getApmBreadcrumbs(mainInstance));
+  }
+  if (mainInstance?.inEnterpriseSearch) {
+    breadcrumbs = breadcrumbs.concat(getEnterpriseSearchBreadcrumbs(mainInstance));
   }
 
   return breadcrumbs;
