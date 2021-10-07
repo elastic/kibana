@@ -102,7 +102,7 @@ export interface MapsPluginStartDependencies {
   dashboard: DashboardStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
-  security: SecurityPluginStart;
+  security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
 }
 
