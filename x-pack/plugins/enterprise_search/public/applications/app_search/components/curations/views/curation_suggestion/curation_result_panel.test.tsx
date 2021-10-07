@@ -48,6 +48,7 @@ describe('CurationResultPanel', () => {
     expect(wrapper.find(Result).length).toBe(2);
     expect(wrapper.find(Result).at(0).props()).toEqual({
       result: results[0],
+      resultPosition: 1,
       isMetaEngine: true,
       schemaForTypeHighlights: values.engine.schema,
     });
