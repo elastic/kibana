@@ -15,6 +15,7 @@ export const dataViewSavedObjectType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'single',
   management: {
+    displayName: 'Data view',
     icon: 'indexPatternApp',
     defaultSearchField: 'title',
     importableAndExportable: true,

@@ -418,7 +418,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
             }
           }
 
-          // Delete the index pattern if there's an index pattern that matches the name of dest index
+          // Delete the data view if there's a data view that matches the name of dest index
           if (destinationIndex && deleteDestIndexPattern) {
             try {
               const indexPatternId = await getIndexPatternId(context, destinationIndex);
@@ -701,7 +701,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
   /**
    * @apiGroup DataFrameAnalytics
    *
-   * @api {get} api/data_frame/analytics/fields/:indexPattern Get index pattern fields for analytics
+   * @api {get} api/data_frame/analytics/fields/:indexPattern Get fields for a pattern of indices used for analytics
    * @apiName AnalyticsNewJobCaps
    * @apiDescription Retrieve the index fields for analytics
    */

@@ -162,7 +162,7 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
 
   return (
     <ExpressionWithPopover
-      defaultValue={'Select an index pattern and geo shape field'}
+      defaultValue={'Select a data view and geo shape field'}
       value={boundaryIndexPattern.title}
       popoverContent={indexPopover}
       expressionDescription={i18n.translate('xpack.stackAlerts.geoContainment.indexLabel', {

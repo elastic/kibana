@@ -85,6 +85,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   return (
     <>
       <EuiPageHeader
+        data-test-subj="indexManagementHeaderContent"
         pageTitle={
           <span data-test-subj="appTitle">
             <FormattedMessage id="xpack.idxMgmt.home.appTitle" defaultMessage="Index Management" />

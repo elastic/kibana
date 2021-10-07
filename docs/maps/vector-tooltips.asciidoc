@@ -18,7 +18,7 @@ image::maps/images/multifeature_tooltip.png[]
 ==== Format tooltips
 
 You can format the attributes in a tooltip by adding <<managing-fields, field formatters>> to your
-index pattern. You can use field formatters to round numbers, provide units,
+data view. You can use field formatters to round numbers, provide units,
 and even display images in your tooltip.
 
 [float]

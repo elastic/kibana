@@ -142,9 +142,9 @@ export function actionsMenuContent(
 
         if (!jobIndicesAvailable) {
           getToastNotifications().addDanger(
-            i18n.translate('xpack.ml.jobsList.managementActions.noSourceIndexPatternForClone', {
+            i18n.translate('xpack.ml.jobsList.managementActions.noSourceDataViewForClone', {
               defaultMessage:
-                'Unable to clone the anomaly detection job {jobId}. No index pattern exists for index {indexPatternTitle}.',
+                'Unable to clone the anomaly detection job {jobId}. No data view exists for index {indexPatternTitle}.',
               values: { jobId: item.id, indexPatternTitle },
             })
           );
