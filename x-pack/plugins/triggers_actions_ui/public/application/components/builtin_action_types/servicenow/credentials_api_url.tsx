@@ -7,14 +7,7 @@
 
 import React, { memo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiFormRow,
-  EuiLink,
-  EuiFieldText,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFormRow, EuiLink, EuiFieldText, EuiSpacer } from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';

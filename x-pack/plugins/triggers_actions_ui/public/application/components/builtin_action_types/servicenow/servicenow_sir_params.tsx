@@ -13,7 +13,9 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
-  EuiSwitch,
+  EuiCheckbox,
+  EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionParamsProps } from '../../../../types';
@@ -302,17 +304,25 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
         label={i18n.COMMENTS_LABEL}
       />
-      <EuiSpacer size="m" />
       {!isOldConnector && (
-        <EuiFormRow id="update-incident-form-row" fullWidth label={i18n.UPDATE_INCIDENT_LABEL}>
-          <EuiSwitch
-            label={updateIncident ? i18n.ON : i18n.OFF}
-            name="update-incident-switch"
-            checked={updateIncident}
-            onChange={onUpdateIncidentSwitchChange}
-            aria-describedby="update-incident-form-row"
-          />
-        </EuiFormRow>
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiCheckbox
+                id="update-incident-checkbox"
+                label={i18n.UPDATE_INCIDENT_LABEL}
+                checked={updateIncident}
+                onChange={onUpdateIncidentSwitchChange}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip position="top" content="provide some description about what it does">
+                <EuiIcon type="questionInCircle" />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       )}
     </>
   );

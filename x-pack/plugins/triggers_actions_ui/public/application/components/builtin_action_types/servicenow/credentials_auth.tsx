@@ -6,14 +6,7 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import {
-  EuiFormRow,
-  EuiFieldText,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiFieldPassword,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFormRow, EuiFieldText, EuiFieldPassword } from '@elastic/eui';
 import type { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
 import type { ServiceNowActionConnector } from './types';

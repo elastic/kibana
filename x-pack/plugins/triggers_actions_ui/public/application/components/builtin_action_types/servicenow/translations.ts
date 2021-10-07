@@ -302,7 +302,7 @@ export const UNKNOWN = i18n.translate(
 export const UPDATE_INCIDENT_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.updateIncidentCheckboxLabel',
   {
-    defaultMessage: 'Update incident',
+    defaultMessage: 'Update incident when alert instance is updated',
   }
 );
 
