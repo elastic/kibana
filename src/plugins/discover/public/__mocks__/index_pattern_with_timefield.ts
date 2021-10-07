@@ -72,6 +72,8 @@ const indexPattern = {
   getFieldByName: (name: string) => fields.getByName(name),
   timeFieldName: 'timestamp',
   getFormatterForField: () => ({ convert: () => 'formatted' }),
+  isTimeNanosBased: () => false,
+  popularizeField: () => {},
 } as unknown as IndexPattern;
 
 indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
