@@ -21,7 +21,7 @@ type ThroughputReturn = APIReturnType<'GET /api/apm/services/{serviceName}/throu
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
-  const generator = getService('generator');
+  const traceData = getService('traceData');
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
@@ -44,7 +44,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           'instance-c'
         );
 
-        await generator.generate([
+        await traceData.index([
           ...timerange(start, end)
             .interval('1s')
             .rate(10)
@@ -78,9 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(async () => {
-        await generator.clean();
-      });
+      after(() => traceData.clean());
 
       async function callApi(overrides?: {
         start?: string;
@@ -122,7 +120,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('returns the expected throughput', () => {
           const throughputValues = uniq(body.currentPeriod.map((coord) => coord.y));
-          expect(throughputValues).to.eql([15]);
+          expect(throughputValues).to.eql([10]);
         });
       });
 
@@ -137,7 +135,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('returns data for all environments', () => {
           const throughputValues = body.currentPeriod.map(({ y }) => y);
-          expect(uniq(throughputValues)).to.eql([10]);
+          expect(uniq(throughputValues)).to.eql([15]);
           expect(body.throughputUnit).to.eql('second');
         });
       });
