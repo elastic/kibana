@@ -8,13 +8,11 @@
 import React, { FunctionComponent, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { DocLinksStart } from 'src/core/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiText,
   EuiButton,
   EuiSpacer,
-  EuiLink,
   EuiIcon,
   EuiButtonEmpty,
   EuiCallOut,
@@ -31,7 +29,6 @@ interface Props {
 }
 
 interface StepProps extends OverviewStepProps {
-  docLinks: DocLinksStart;
   nextMajor: number;
 }
 
@@ -39,18 +36,11 @@ const i18nTexts = {
   title: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.title', {
     defaultMessage: 'Migrate system indices',
   }),
-  bodyDescription: (docLink: string, nextMajor: number) => (
+  bodyDescription: (nextMajor: number) => (
     <FormattedMessage
       id="xpack.upgradeAssistant.overview.systemIndices.body"
-      defaultMessage="Migrate the indices that store system information before you upgrade to {nextMajor}.0. {learnMoreLink}."
-      values={{
-        nextMajor,
-        learnMoreLink: (
-          <EuiLink href={docLink} target="_blank">
-            Learn more
-          </EuiLink>
-        ),
-      }}
+      defaultMessage="Migrate the indices that store system information before you upgrade to {nextMajor}.0."
+      values={{ nextMajor }}
     />
   ),
   startButtonLabel: i18n.translate(
@@ -74,7 +64,7 @@ const i18nTexts = {
   viewSystemIndicesStatus: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.viewSystemIndicesStatus',
     {
-      defaultMessage: 'View system indices',
+      defaultMessage: 'View migration information',
     }
   ),
   retryButtonLabel: i18n.translate(
@@ -182,7 +172,6 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
 };
 
 export const getMigrateSystemIndicesStep = ({
-  docLinks,
   nextMajor,
   isComplete,
   setIsComplete,
@@ -196,12 +185,7 @@ export const getMigrateSystemIndicesStep = ({
     children: (
       <>
         <EuiText>
-          <p>
-            {i18nTexts.bodyDescription(
-              docLinks.links.upgradeAssistant.systemFeaturesUpgrade,
-              nextMajor
-            )}
-          </p>
+          <p>{i18nTexts.bodyDescription(nextMajor)}</p>
         </EuiText>
 
         <EuiSpacer size="m" />

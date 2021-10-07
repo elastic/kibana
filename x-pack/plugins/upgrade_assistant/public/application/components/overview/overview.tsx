@@ -115,7 +115,6 @@ export const Overview: FunctionComponent = () => {
               setIsComplete: setCompletedStep.bind(null, 'backup'),
             }),
             getMigrateSystemIndicesStep({
-              docLinks,
               nextMajor,
               isComplete: isStepComplete('migrate_system_indices'),
               setIsComplete: setCompletedStep.bind(null, 'migrate_system_indices'),
