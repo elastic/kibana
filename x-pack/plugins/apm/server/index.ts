@@ -74,6 +74,8 @@ export type APMXPackConfig = TypeOf<typeof configSchema>;
 export type APMConfig = ReturnType<typeof mergeConfigs>;
 
 // plugin config and ui indices settings
+// All options should be documented in the APM configuration settings
+// and be included on cloud allow list unless there are specific reasons not to
 export function mergeConfigs(
   apmOssConfig: APMOSSConfig,
   apmConfig: APMXPackConfig
