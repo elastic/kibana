@@ -458,7 +458,7 @@ async function queryUnitedIndex(
     endpointPolicyIds
   );
 
-  let unitedMetadataQueryResponse: TransportResult<SearchResponse<UnitedAgentMetadata>>;
+  let unitedMetadataQueryResponse: TransportResult<SearchResponse<UnitedAgentMetadata>, unknown>;
   try {
     unitedMetadataQueryResponse =
       await context.core.elasticsearch.client.asCurrentUser.search<UnitedAgentMetadata>(

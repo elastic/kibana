@@ -57,6 +57,7 @@ export const ensureMigrationCleanupPolicy = async ({
   if (!policyExists) {
     await esClient.ilm.putLifecycle({
       policy,
+      // @ts-expect-error IlmAction is not valid
       body: migrationCleanupPolicy,
     });
   }
@@ -86,10 +87,8 @@ export const applyMigrationCleanupPolicy = async ({
   await esClient.indices.putSettings({
     index,
     body: {
-      settings: {
-        lifecycle: {
-          name: getMigrationCleanupPolicyName(alias),
-        },
+      lifecycle: {
+        name: getMigrationCleanupPolicyName(alias),
       },
     },
   });

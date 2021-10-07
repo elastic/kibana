@@ -8,8 +8,8 @@
 /* eslint-disable no-console */
 import yargs from 'yargs';
 import fs from 'fs';
-import { Client, ClientOptions } from '@elastic/elasticsearch';
-import { errors } from '@elastic/elasticsearch';
+import { Client, errors } from '@elastic/elasticsearch';
+import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import { ToolingLog, CA_CERT_PATH } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
@@ -196,7 +196,7 @@ async function main() {
       url,
       certificateAuthorities: [ca],
     });
-    clientOptions = { node, ssl: { ca: [ca] } };
+    clientOptions = { node, tls: { ca: [ca] } };
   } else {
     kbnClient = new KbnClient({
       log: new ToolingLog({

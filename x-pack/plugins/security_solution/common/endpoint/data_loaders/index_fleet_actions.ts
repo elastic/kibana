@@ -171,47 +171,43 @@ export const deleteIndexedFleetActions = async (
   };
 
   if (indexedData.actions.length) {
-    response.actions = (
-      await esClient
-        .deleteByQuery({
-          index: `${indexedData.actionsIndex}-*`,
-          wait_for_completion: true,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  { terms: { action_id: indexedData.actions.map((action) => action.action_id) } },
-                ],
-              },
+    response.actions = await esClient
+      .deleteByQuery({
+        index: `${indexedData.actionsIndex}-*`,
+        wait_for_completion: true,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                { terms: { action_id: indexedData.actions.map((action) => action.action_id) } },
+              ],
             },
           },
-        })
-        .catch(wrapErrorAndRejectPromise)
-    ).body;
+        },
+      })
+      .catch(wrapErrorAndRejectPromise);
   }
 
   if (indexedData.actionResponses) {
-    response.responses = (
-      await esClient
-        .deleteByQuery({
-          index: `${indexedData.responsesIndex}-*`,
-          wait_for_completion: true,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    terms: {
-                      action_id: indexedData.actionResponses.map((action) => action.action_id),
-                    },
+    response.responses = await esClient
+      .deleteByQuery({
+        index: `${indexedData.responsesIndex}-*`,
+        wait_for_completion: true,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    action_id: indexedData.actionResponses.map((action) => action.action_id),
                   },
-                ],
-              },
+                },
+              ],
             },
           },
-        })
-        .catch(wrapErrorAndRejectPromise)
-    ).body;
+        },
+      })
+      .catch(wrapErrorAndRejectPromise);
   }
 
   return response;
