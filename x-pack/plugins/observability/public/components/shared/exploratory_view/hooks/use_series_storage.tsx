@@ -71,9 +71,16 @@ export function UrlStorageContextProvider({
 
   const setSeries = useCallback((seriesIndex: number, newValue: SeriesUrl) => {
     setAllSeries((prevAllSeries) => {
+      const seriesWithCurrentBreakdown = prevAllSeries.findIndex((series) => series.breakdown);
       const newStateRest = prevAllSeries.map((series, index) => {
         if (index === seriesIndex) {
-          return newValue;
+          return {
+            ...newValue,
+            breakdown:
+              seriesWithCurrentBreakdown === seriesIndex || seriesWithCurrentBreakdown === -1
+                ? newValue.breakdown
+                : undefined,
+          };
         }
         return series;
       });
