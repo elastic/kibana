@@ -55,7 +55,7 @@ export const BrowserAdvancedFields = () => {
           description={
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.filtering.description"
-              defaultMessage="Use this option to apply these monitor settings to a subset of the tests in your suite. Only the configured subset will be run by this monitor."
+              defaultMessage="Use these options to apply the selected monitor settings to a subset of the tests in your suite. Only the configured subset will be run by this monitor."
             />
           }
         >
