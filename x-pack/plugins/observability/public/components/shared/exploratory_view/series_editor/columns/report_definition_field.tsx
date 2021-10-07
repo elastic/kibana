@@ -38,8 +38,8 @@ export function ReportDefinitionField({ series, field, seriesConfig, onChange }:
         filtersN.push(qFilter.query);
       }
       const existFilter = qFilter as ExistsFilter;
-      if (existFilter.exists) {
-        filtersN.push({ exists: existFilter.exists });
+      if (existFilter.query.exists) {
+        filtersN.push({ exists: existFilter.query.exists });
       }
     });
 
