@@ -16,7 +16,7 @@ import { nextTick } from '@kbn/test/jest';
 
 import { DEFAULT_META } from '../../../../shared/constants';
 
-import { SuggestionsLogic } from './suggestions_logic';
+import { SuggestionsAPIResponse, SuggestionsLogic } from './suggestions_logic';
 
 const DEFAULT_VALUES = {
   dataLoading: true,
@@ -30,7 +30,7 @@ const DEFAULT_VALUES = {
   },
 };
 
-const MOCK_RESPONSE = {
+const MOCK_RESPONSE: SuggestionsAPIResponse = {
   meta: {
     page: {
       current: 1,
@@ -44,6 +44,7 @@ const MOCK_RESPONSE = {
       query: 'foo',
       updated_at: '2021-07-08T14:35:50Z',
       promoted: ['1', '2'],
+      status: 'applied',
     },
   ],
 };
