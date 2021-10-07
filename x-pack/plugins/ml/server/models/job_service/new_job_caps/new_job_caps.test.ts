@@ -10,7 +10,7 @@ import { newJobCapsProvider } from './index';
 import farequoteFieldCaps from './__mocks__/responses/farequote_field_caps.json';
 import cloudwatchFieldCaps from './__mocks__/responses/cloudwatch_field_caps.json';
 import rollupCaps from './__mocks__/responses/rollup_caps.json';
-import kibanaSavedObjects from './__mocks__/responses/kibana_saved_objects.json';
+import dataView from './__mocks__/responses/data_view_rollup_cloudwatch.json';
 
 import farequoteJobCaps from './__mocks__/results/farequote_job_caps.json';
 import farequoteJobCapsEmpty from './__mocks__/results/farequote_job_caps_empty.json';
@@ -43,7 +43,7 @@ describe('job_service - job_caps', () => {
 
     dataViews = {
       async find() {
-        return Promise.resolve([kibanaSavedObjects]);
+        return Promise.resolve(dataView);
       },
     };
   });
