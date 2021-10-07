@@ -50,7 +50,7 @@ export const setup = (
   };
 
   const wrap: HtmlContextTypeConvert = (value, options) => {
-    return `${recurse(value, options)}`;
+    return recurse(value, options);
   };
 
   return wrap;
