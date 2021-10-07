@@ -395,7 +395,7 @@ export class AlertsClient {
         esQuery == null ? { query: ``, language: 'kuery' } : esQuery,
         [
           authzFilter as unknown as Filter,
-          { term: { [SPACE_IDS]: alertSpaceId } } as unknown as Filter,
+          { query: { term: { [SPACE_IDS]: alertSpaceId } } } as unknown as Filter,
         ],
         config
       );
