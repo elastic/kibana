@@ -153,7 +153,11 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_WORKFLOW_STATUS]: 'open',
         ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
           uuid: createdRule.id,
+          category: 'Machine Learning Rule',
+          consumer: 'siem',
+          producer: 'security-solution',
           rule_id: createdRule.rule_id,
+          rule_type_id: 'siem.mlRule',
           created_at: createdRule.created_at,
           updated_at: signal._source?.[ALERT_RULE_UPDATED_AT],
           actions: [],
@@ -186,6 +190,11 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_DEPTH]: 1,
         [ALERT_REASON]: `event with process store, by root on mothra created critical alert Test ML rule.`,
         [ALERT_ORIGINAL_TIME]: '2020-11-16T22:58:08.000Z',
+        'kibana.alert.status': 'active',
+        'kibana.alert.uuid': signal._source['kibana.alert.uuid'],
+        'kibana.space_ids': ['default'],
+        'kibana.version': '8.0.0',
+        tags: [`__internal_rule_id:${createdRule.rule_id}`, '__internal_immutable:false'],
         all_field_values: [
           'store',
           'linux_anomalous_network_activity_ecs',
