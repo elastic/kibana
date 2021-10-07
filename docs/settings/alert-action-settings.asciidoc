@@ -50,7 +50,7 @@ are defined.  The first provides a custom host setting for mail server
 data from both a file and inline, and requires TLS for the
 connection.  The second provides a custom host setting for https server
 `webhook.example.com` which turns off server certificate authentication,
-that will allow Kibana connect to the server if it's using a self-signed
+that will allow Kibana to connect to the server if it's using a self-signed
 certificate.  The individual properties that can be used in the settings are
 documented below.
 +
