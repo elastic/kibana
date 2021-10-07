@@ -19,9 +19,9 @@ import {
   getAddToCaseActionLazy,
   getAddToExistingCaseButtonLazy,
   getAddToNewCaseButtonLazy,
-  getAddToCasePopoverLazy,
 } from './methods';
 import { CasesUiConfigType, ENABLE_CASE_CONNECTOR } from '../common';
+import { reduxStore } from './store';
 
 /**
  * @public
@@ -41,6 +41,7 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
 
   public start(core: CoreStart, plugins: StartPlugins): CasesUiStart {
     const config = this.initializerContext.config.get<CasesUiConfigType>();
+    const store = reduxStore;
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion, config });
     return {
       /**
@@ -79,10 +80,21 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
        * @return UseAllCasesSelectorModalReturnedValues
        */
       getAllCasesSelectorModal: getAllCasesSelectorModalLazy,
-      getAddToCaseAction: getAddToCaseActionLazy,
-      getAddToExistingCaseButton: getAddToExistingCaseButtonLazy,
-      getAddToNewCaseButton: getAddToNewCaseButtonLazy,
-      getAddToCasePopover: getAddToCasePopoverLazy,
+      getAddToCaseAction: (props) => {
+        return getAddToCaseActionLazy(props, {
+          store,
+        });
+      },
+      getAddToExistingCaseButton: (props) => {
+        return getAddToExistingCaseButtonLazy(props, {
+          store,
+        });
+      },
+      getAddToNewCaseButton: (props) => {
+        return getAddToNewCaseButtonLazy(props, {
+          store,
+        });
+      },
     };
   }
 

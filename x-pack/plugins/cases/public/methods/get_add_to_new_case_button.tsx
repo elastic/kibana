@@ -7,11 +7,18 @@
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
+import { Provider } from 'react-redux';
 import { AddToCaseActionProps } from '../components/add_to_case';
+import { AppStore } from '../store';
 
 const AddToNewCaseButtonLazy = lazy(() => import('../components/add_to_case/button'));
-export const getAddToNewCaseButtonLazy = (props: AddToCaseActionProps) => (
+export const getAddToNewCaseButtonLazy = (
+  props: AddToCaseActionProps,
+  { store }: { store: AppStore }
+) => (
   <Suspense fallback={<EuiLoadingSpinner />}>
-    <AddToNewCaseButtonLazy {...props} />
+    <Provider store={store}>
+      <AddToNewCaseButtonLazy {...props} type={'new'} />
+    </Provider>
   </Suspense>
 );

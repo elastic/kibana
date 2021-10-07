@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useMemo, useCallback, useEffect } from 'react';
 import { CaseStatuses, StatusAll, TimelineItem } from '../../../common';
 import { useAddToCase, normalizedEventFields } from './use_add_to_case';
+import { useAppDispatch } from '../utils';
 import { CreateCaseFlyout } from './flyout';
 import { AllCasesSelectorModal } from '../all_cases/selector_modal';
+import { setOpenAddToExistingCase, setOpenAddToNewCase } from '../../store/reducer';
 import * as i18n from './translations';
 
 export interface AddToCaseActionProps {
@@ -24,6 +26,8 @@ export interface AddToCaseActionProps {
   onClose?: Function;
   disableAlerts?: boolean;
   type?: 'new' | 'existing';
+  // expose the id of the selected event via a callback
+  setActiveCaseFlowId?: Function;
 }
 
 const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
@@ -34,6 +38,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   appId,
   onClose,
   disableAlerts,
+  setActiveCaseFlowId,
 }) => {
   const eventId = event?.ecs._id ?? '';
   const eventIndex = event?.ecs._index ?? '';
@@ -45,9 +50,9 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     createCaseUrl,
     isAllCaseModalOpen,
     isCreateCaseFlyoutOpen,
-    dispatch,
+    activeCaseFlowId,
   } = useAddToCase({ event, useInsertTimeline, casePermissions, appId, onClose });
-
+  const dispatch = useAppDispatch();
   const getAllCasesSelectorModalProps = useMemo(() => {
     const { ruleId, ruleName } = normalizedEventFields(event);
     return {
@@ -72,7 +77,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
       updateCase: onCaseSuccess,
       userCanCrud: casePermissions?.crud ?? false,
       owner: [appId],
-      onClose: () => dispatch({ type: 'setOpenAddToExistingCase', payload: { id: null } }),
+      onClose: () => dispatch(setOpenAddToExistingCase(null)),
     };
   }, [
     casePermissions?.crud,
@@ -89,9 +94,13 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   ]);
 
   const closeCaseFlyoutOpen = useCallback(() => {
-    dispatch({ type: 'setOpenAddToNewCase', payload: { id: null } });
+    dispatch(setOpenAddToNewCase(null));
   }, [dispatch]);
-  console.log(isCreateCaseFlyoutOpen, isAllCaseModalOpen);
+  useEffect(() => {
+    if (setActiveCaseFlowId) {
+      setActiveCaseFlowId(activeCaseFlowId);
+    }
+  }, [activeCaseFlowId, setActiveCaseFlowId]);
   return (
     <>
       {isCreateCaseFlyoutOpen && (

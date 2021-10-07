@@ -69,7 +69,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   }, []);
   const ruleId = get(0, ecsRowData?.signal?.rule?.id);
   const ruleName = get(0, ecsRowData?.signal?.rule?.name);
-  const { timelines: timelinesUi, cases } = useKibana().services;
+  const { cases } = useKibana().services;
 
   const { addToCaseActionProps, addToCaseActionItems } = useAddToCaseActions({
     ecsData: ecsRowData,

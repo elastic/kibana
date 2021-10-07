@@ -5,19 +5,18 @@
  * 2.0.
  */
 import { get, isEmpty } from 'lodash/fp';
-import { useState, useCallback, useMemo, SyntheticEvent, useReducer, Dispatch } from 'react';
+import { useState, useCallback, useMemo, SyntheticEvent } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { Case, SubCase } from '../../../common';
 import { TimelineItem } from '../../../common/';
 import { createUpdateSuccessToaster } from './helpers';
+import { useAppDispatch, useAppSelector } from '../utils';
+import { setOpenAddToExistingCase, setOpenAddToNewCase } from '../../store/reducer';
+import { activeCaseFlowId as activeCaseFlowIdSelector } from '../../store/selectors';
 import { AddToCaseActionProps } from '.';
-import type { CasesUiStart, StartServices } from '../../types';
-
-type Action =
-  | { type: 'setOpenAddToExistingCase'; payload: { id: string | null } }
-  | { type: 'setOpenAddToNewCase'; payload: { id: string | null } };
+import type { StartServices } from '../../types';
 
 interface UseAddToCase {
   addNewCaseClick: () => void;
@@ -41,42 +40,13 @@ interface UseAddToCase {
   closePopover: () => void;
   isPopoverOpen: boolean;
   isCreateCaseFlyoutOpen: boolean;
-  dispatch: Dispatch<Action>;
-  state: AddToCaseState;
+  activeCaseFlowId: string | null;
 }
 
 const appendSearch = (search?: string) =>
   isEmpty(search) ? '' : `${search?.startsWith('?') ? search : `?${search}`}`;
 
 const getCreateCaseUrl = (search?: string | null) => `/create${appendSearch(search ?? undefined)}`;
-
-interface AddToCaseState {
-  addToExistingCaseOpenID: string | null;
-  createNewCaseOpenID: string | null;
-}
-
-const initialState: AddToCaseState = {
-  createNewCaseOpenID: null,
-  addToExistingCaseOpenID: null,
-};
-
-const popoverReducer = (state: AddToCaseState, action: Action): AddToCaseState => {
-  const { id } = action.payload;
-  switch (action.type) {
-    case 'setOpenAddToExistingCase':
-      return {
-        createNewCaseOpenID: null,
-        addToExistingCaseOpenID: id,
-      };
-    case 'setOpenAddToNewCase':
-      return {
-        addToExistingCaseOpenID: null,
-        createNewCaseOpenID: id,
-      };
-    default:
-      return state;
-  }
-};
 
 const getCaseDetailsUrl = ({
   id,
@@ -120,13 +90,8 @@ export const useAddToCase = ({
     application: { navigateToApp, getUrlForApp, navigateToUrl },
     notifications: { toasts },
   } = useKibana<StartServices>().services;
-  // const [state, dispatch] = useReducer(popoverReducer, initialState);
-  // console.log(state);
-  // const isAllCaseModalOpen = state.addToExistingCaseOpenID === eventId;
-  // const isCreateCaseFlyoutOpen = state.createNewCaseOpenID === eventId;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [isAllCaseModalOpen, setIsAllCaseModalOpen] = useState(false);
-  const [isAddToExistingCaseOpen, setIsAddToExistingCaseOpen] = useState(false);
+  const dispatch = useAppDispatch();
   const openPopover = useCallback(() => setIsPopoverOpen(true), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const isAlert = useMemo(() => {
@@ -166,8 +131,7 @@ export const useAddToCase = ({
       postComment?: (arg: PostCommentArg) => Promise<void>,
       updateCase?: (newCase: Case) => void
     ) => {
-      // dispatch({ type: 'setOpenAddToNewCase', payload: { id: null } });
-      setIsAllCaseModalOpen(false);
+      dispatch(setOpenAddToNewCase(null));
       const { ruleId, ruleName } = normalizedEventFields(event);
       if (postComment) {
         await postComment({
@@ -186,15 +150,14 @@ export const useAddToCase = ({
         });
       }
     },
-    [eventId, eventIndex, appId, event]
+    [eventId, eventIndex, appId, event, dispatch]
   );
   const onCaseSuccess = useCallback(
     async (theCase: Case) => {
-      // dispatch({ type: 'setOpenAddToExistingCase', payload: { id: null } });
-      setIsAddToExistingCaseOpen(false);
+      dispatch(setOpenAddToExistingCase(null));
       createUpdateSuccessToaster(toasts, theCase, onViewCaseClick);
     },
-    [onViewCaseClick, toasts]
+    [onViewCaseClick, toasts, dispatch]
   );
 
   const goToCreateCase = useCallback(
@@ -208,23 +171,23 @@ export const useAddToCase = ({
     [navigateToApp, urlSearch, appId]
   );
 
-  const onCaseClicked = useCallback((theCase?: Case | SubCase) => {
-    /**
-     * No cases listed on the table.
-     * The user pressed the add new case table's button.
-     * We gonna open the create case modal.
-     */
-    if (theCase == null) {
-      // dispatch({ type: 'setOpenAddToNewCase', payload: { id: eventId } });
-      setIsAllCaseModalOpen(true);
-    }
-    // dispatch({ type: 'setOpenAddToExistingCase', payload: { id: null } });
-    setIsAddToExistingCaseOpen(false);
-  }, []);
+  const onCaseClicked = useCallback(
+    (theCase?: Case | SubCase) => {
+      /**
+       * No cases listed on the table.
+       * The user pressed the add new case table's button.
+       * We gonna open the create case modal.
+       */
+      if (theCase == null) {
+        dispatch(setOpenAddToNewCase(eventId));
+      }
+      dispatch(setOpenAddToExistingCase(null));
+    },
+    [dispatch, eventId]
+  );
   const addNewCaseClick = useCallback(() => {
     closePopover();
-    //dispatch({ type: 'setOpenAddToNewCase', payload: { id: eventId } });
-    setIsAllCaseModalOpen(true);
+    dispatch(setOpenAddToNewCase(eventId));
     if (onClose) {
       onClose();
     }
@@ -232,11 +195,19 @@ export const useAddToCase = ({
 
   const addExistingCaseClick = useCallback(() => {
     closePopover();
-    dispatch({ type: 'setOpenAddToExistingCase', payload: { id: eventId } });
+    dispatch(setOpenAddToExistingCase(eventId));
     if (onClose) {
       onClose();
     }
   }, [onClose, closePopover, dispatch, eventId]);
+  const isAllCaseModalOpen = useAppSelector(
+    (state) => state.addToCase.addToExistingCaseOpenID === eventId
+  );
+  const isCreateCaseFlyoutOpen = useAppSelector(
+    (state) => state.addToCase.createNewCaseOpenID === eventId
+  );
+  const activeCaseFlowId = useAppSelector(activeCaseFlowIdSelector);
+
   return {
     addNewCaseClick,
     addExistingCaseClick,
@@ -253,8 +224,7 @@ export const useAddToCase = ({
     closePopover,
     isPopoverOpen,
     isCreateCaseFlyoutOpen,
-    dispatch,
-    state,
+    activeCaseFlowId,
   };
 };
 

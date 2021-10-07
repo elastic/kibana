@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import { IconType } from '@elastic/eui';
 import { ConnectorTypes } from '../../common';
 import { FieldConfig, ValidationConfig } from '../common/shared_imports';
 import { StartPlugins } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
 import { CaseActionConnector } from './types';
+import type { RootState, AppDispatch } from '../store';
 
 export const getConnectorById = (
   id: string,
@@ -68,3 +70,6 @@ export const getConnectorIcon = (
 
   return emptyResponse;
 };
+
+export const useAppDispatch = () => useDispatch<AppDispatch>();
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

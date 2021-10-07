@@ -48,6 +48,7 @@ import {
   useGetUserAlertsPermissions,
 } from '../../hooks/use_alert_permission';
 import type { TimelinesUIStart, TGridType, SortDirection } from '../../../../timelines/public';
+import type { CasesUiStart } from '../../../../cases/public';
 import { useStatusBulkActionItems } from '../../../../timelines/public';
 import type { TopAlert } from './';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
@@ -165,9 +166,9 @@ function ObservabilityActions({
   const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
   const [openActionsPopoverId, setActionsPopover] = useState(null);
   const {
-    timelines,
+    cases,
     application: { capabilities },
-  } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
+  } = useKibana<CoreStart & { cases: CasesUiStart }>().services;
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
@@ -231,13 +232,13 @@ function ObservabilityActions({
     return [
       ...(casePermissions?.crud
         ? [
-            timelines.getAddToExistingCaseButton({
+            cases.getAddToExistingCaseButton({
               event,
               casePermissions,
               appId: observabilityFeatureId,
               onClose: afterCaseSelection,
             }),
-            timelines.getAddToNewCaseButton({
+            cases.getAddToNewCaseButton({
               event,
               casePermissions,
               appId: observabilityFeatureId,
@@ -247,7 +248,7 @@ function ObservabilityActions({
         : []),
       ...(alertPermissions.crud ? statusActionItems : []),
     ];
-  }, [afterCaseSelection, casePermissions, timelines, event, statusActionItems, alertPermissions]);
+  }, [afterCaseSelection, casePermissions, cases, event, statusActionItems, alertPermissions]);
 
   const viewDetailsTextLabel = i18n.translate(
     'xpack.observability.alertsTable.viewDetailsTextLabel',

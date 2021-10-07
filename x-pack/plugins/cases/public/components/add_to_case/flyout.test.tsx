@@ -9,7 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { CreateCaseFlyout } from './flyout';
-import { TestProviders } from '../../../../../mock';
+import { TestProviders } from '../../common/mock';
 
 const onCloseFlyout = jest.fn();
 const onSuccess = jest.fn();

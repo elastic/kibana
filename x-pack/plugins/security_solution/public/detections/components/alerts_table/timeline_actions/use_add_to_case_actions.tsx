@@ -27,7 +27,7 @@ export const useAddToCaseActions = ({
   nonEcsData,
   timelineId,
 }: UseAddToCaseActions) => {
-  const { timelines: timelinesUi, cases } = useKibana().services;
+  const { cases } = useKibana().services;
   const casePermissions = useGetUserCasesPermissions();
   const insertTimelineHook = useInsertTimeline;
 

@@ -7,7 +7,6 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-
 import { useAddToCase } from './use_add_to_case';
 import { AddToCaseActionProps } from '.';
 import * as i18n from './translations';

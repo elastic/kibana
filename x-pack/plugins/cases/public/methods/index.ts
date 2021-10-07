@@ -14,4 +14,3 @@ export * from './get_all_cases_selector_modal';
 export * from './get_add_to_case_action';
 export * from './get_add_to_existing_case_button';
 export * from './get_add_to_new_case_button';
-export * from './get_add_to_case_popover';

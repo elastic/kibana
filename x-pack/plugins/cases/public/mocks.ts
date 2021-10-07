@@ -17,7 +17,6 @@ const createStartContract = (): jest.Mocked<CasesUiStart> => ({
   getAddToCaseAction: jest.fn(),
   getAddToExistingCaseButton: jest.fn(),
   getAddToNewCaseButton: jest.fn(),
-  getAddToCasePopover: jest.fn(),
 });
 
 export const casesPluginMock = {

@@ -8,7 +8,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Direction, EntityType } from '../../../../common/search_strategy';
 import { TGridCellAction, TimelineTabs } from '../../../../common/types/timeline';
@@ -23,7 +23,7 @@ import type {
   BulkActionsProp,
   AlertStatus,
 } from '../../../../common/types/timeline';
-import { TimelinesStartPlugins } from '../../../types';
+import { TimelinesStartServices } from '../../../types';
 import {
   esQuery,
   Filter,
@@ -34,7 +34,6 @@ import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { combineQueries, getCombinedFilterQuery } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
-import type { State } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
 import { StatefulBody } from '../body';
 import { LastUpdatedAt } from '../..';
@@ -148,7 +147,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
 }) => {
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
-  const { uiSettings, cases } = useKibana<TimelinesStartPlugins>().services;
+  const { uiSettings, cases } = useKibana<TimelinesStartServices>().services;
   const [isQueryLoading, setIsQueryLoading] = useState(false);
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(indexNames);
 
@@ -255,7 +254,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   );
   const hasAlerts = totalCountMinusDeleted > 0;
 
-  const activeCaseFlowId = useSelector((state: State) => tGridSelectors.activeCaseFlowId(state));
+  const [activeCaseFlowId, setActiveCaseFlowId] = useState<string | null>(null);
   const selectedEvent = useMemo(() => {
     const matchedEvent = events.find((event) => event.ecs._id === activeCaseFlowId);
     if (matchedEvent) {
@@ -272,6 +271,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
       appId,
       onClose: afterCaseSelection,
       disableAlerts: true,
+      setActiveCaseFlowId,
     };
   }, [appId, casePermissions, afterCaseSelection, selectedEvent]);
 
