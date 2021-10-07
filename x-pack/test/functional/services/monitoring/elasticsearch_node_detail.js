@@ -21,7 +21,7 @@ export function MonitoringElasticsearchNodeDetailProvider({ getService }) {
 
   return new (class ElasticsearchNodeDetail {
     async clickAdvanced() {
-      return testSubjects.click('esNodeDetailAdvancedLink');
+      return testSubjects.click('esItemDetailAdvancedLink');
     }
 
     async getSummary() {
