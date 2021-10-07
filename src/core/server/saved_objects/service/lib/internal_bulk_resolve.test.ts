@@ -243,7 +243,7 @@ describe('internalBulkResolve', () => {
   });
 
   it('does not call bulk update in the Default space', async () => {
-    // Aliases cannot exist in the Default space, so we skip the alias check part of the alogrithm in that case (e.g., bulk update)
+    // Aliases cannot exist in the Default space, so we skip the alias check part of the algorithm in that case (e.g., bulk update)
     for (const namespace of [undefined, 'default']) {
       const params = setup([{ type: OBJ_TYPE, id: '1' }], { namespace });
       mockMgetResults(

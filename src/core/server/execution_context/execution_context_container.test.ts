@@ -115,7 +115,7 @@ describe('KibanaExecutionContext', () => {
       expect(value).toEqual(context);
     });
 
-    it('returns a context object with registed parent object', () => {
+    it('returns a context object with registered parent object', () => {
       const parentContext: KibanaExecutionContext = {
         type: 'parent-type',
         name: 'parent-name',
