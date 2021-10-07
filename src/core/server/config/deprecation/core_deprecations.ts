@@ -201,8 +201,7 @@ const opsLoggingEventDeprecation: ConfigDeprecation = (
         defaultMessage:
           '"logging.events.ops" has been deprecated and will be removed ' +
           'in 8.0. To access ops data moving forward, please enable debug logs for the ' +
-          '"metrics.ops" context in your logging configuration. For more details, see ' +
-          `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx`,
+          '"metrics.ops" context in your logging configuration.',
       }),
       correctiveActions: {
         manualSteps: [
@@ -232,8 +231,7 @@ const requestLoggingEventDeprecation: ConfigDeprecation = (
         defaultMessage:
           '"logging.events.request" has been deprecated and will be removed ' +
           'in 8.0. To access request data moving forward, please enable debug logs for the ' +
-          '"http.server.response" context in your logging configuration. For more details, see ' +
-          `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx`,
+          '"http.server.response" context in your logging configuration.',
       }),
       correctiveActions: {
         manualSteps: [
@@ -263,8 +261,7 @@ const responseLoggingEventDeprecation: ConfigDeprecation = (
         defaultMessage:
           '"logging.events.response" has been deprecated and will be removed ' +
           'in 8.0. To access response data moving forward, please enable debug logs for the ' +
-          '"http.server.response" context in your logging configuration. For more details, see ' +
-          `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx`,
+          '"http.server.response" context in your logging configuration.',
       }),
       correctiveActions: {
         manualSteps: [
@@ -294,8 +291,7 @@ const timezoneLoggingDeprecation: ConfigDeprecation = (
         defaultMessage:
           '"logging.timezone" has been deprecated and will be removed ' +
           'in 8.0. To set the timezone moving forward, please add a timezone date modifier to the log pattern ' +
-          'in your logging configuration. For more details, see ' +
-          `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx`,
+          'in your logging configuration.',
       }),
       correctiveActions: {
         manualSteps: [
@@ -325,8 +321,7 @@ const destLoggingDeprecation: ConfigDeprecation = (
         defaultMessage:
           '"logging.dest" has been deprecated and will be removed ' +
           'in 8.0. To set the destination moving forward, you can use the "console" appender ' +
-          'in your logging configuration or define a custom one. For more details, see ' +
-          `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx`,
+          'in your logging configuration or define a custom one.',
       }),
       correctiveActions: {
         manualSteps: [
@@ -448,9 +443,7 @@ const jsonLoggingDeprecation: ConfigDeprecation = (
           '"logging.json" has been deprecated and will be removed ' +
           'in 8.0. To specify log message format moving forward, ' +
           'you can configure the "appender.layout" property for every custom appender in your logging configuration. ' +
-          'There is currently no default layout for custom appenders and each one must be declared explicitly. ' +
-          'For more details, see ' +
-          `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx`,
+          'There is currently no default layout for custom appenders and each one must be declared explicitly.',
       }),
       correctiveActions: {
         manualSteps: [
@@ -480,8 +473,7 @@ const logRotateDeprecation: ConfigDeprecation = (
         defaultMessage:
           '"logging.rotate" and sub-options have been deprecated and will be removed in 8.0. ' +
           'Moving forward, you can enable log rotation using the "rolling-file" appender for a logger ' +
-          'in your logging configuration. For more details, see ' +
-          `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#rolling-file-appender`,
+          'in your logging configuration.',
       }),
       correctiveActions: {
         manualSteps: [
