@@ -136,12 +136,14 @@ export function reportFailuresToFile(log: ToolingLog, failures: TestFailure[]) {
         <p><strong>${escape(failure.name)}</strong></p>
         <p>
           <small>
-            <strong>Failures in CI</strong>: <span class="badge rounded-pill bg-danger">${
+            <strong>Failures in tracked branches</strong>: <span class="badge rounded-pill bg-danger">${
               failure.failureCount || 0
             }</span>
             ${
               failure.githubIssue
-                ? `<br /><a href="${failure.githubIssue}">${failure.githubIssue}</a>`
+                ? `<br /><a href="${escape(failure.githubIssue)}">${escape(
+                    failure.githubIssue
+                  )}</a>`
                 : ''
             }
           </small>
@@ -151,7 +153,7 @@ export function reportFailuresToFile(log: ToolingLog, failures: TestFailure[]) {
             ? `<p>
               <small>
                 <strong>Buildkite Job</strong><br />
-                <a href="${jobUrl}">${jobUrl}</a>
+                <a href="${escape(jobUrl)}">${escape(jobUrl)}</a>
               </small>
             </p>`
             : ''
