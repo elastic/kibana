@@ -40,6 +40,7 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   deprecations: securityConfigDeprecationProvider,
   exposeToBrowser: {
     loginAssistanceMessage: true,
+    showInsecureClusterWarning: true,
   },
 };
 export const plugin: PluginInitializer<
