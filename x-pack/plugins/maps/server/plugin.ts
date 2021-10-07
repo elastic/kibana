@@ -196,7 +196,9 @@ export class MapsPlugin implements Plugin {
 
     core.savedObjects.registerType(mapsTelemetrySavedObjects);
     core.savedObjects.registerType(mapSavedObjects);
-    registerMapsUsageCollector(usageCollection, currentConfig);
+    if (usageCollection) {
+      registerMapsUsageCollector(usageCollection, currentConfig);
+    }
 
     plugins.embeddable.registerEmbeddableFactory({
       id: MAP_SAVED_OBJECT_TYPE,
