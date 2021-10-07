@@ -6,15 +6,17 @@
  */
 
 import React, { useEffect } from 'react';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { Route, Router } from 'react-router-dom';
 import { render } from '@testing-library/react';
 import { UrlStorageContextProvider, useSeriesStorage } from './use_series_storage';
 import { getHistoryFromUrl } from '../rtl_helpers';
+import type { AppDataType } from '../types';
 
 const mockSingleSeries = [
   {
     name: 'performance-distribution',
-    dataType: 'ux',
+    dataType: 'ux' as AppDataType,
     breakdown: 'user_agent.name',
     time: { from: 'now-15m', to: 'now' },
   },
@@ -23,13 +25,13 @@ const mockSingleSeries = [
 const mockMultipleSeries = [
   {
     name: 'performance-distribution',
-    dataType: 'ux',
+    dataType: 'ux' as AppDataType,
     breakdown: 'user_agent.name',
     time: { from: 'now-15m', to: 'now' },
   },
   {
     name: 'kpi-over-time',
-    dataType: 'synthetics',
+    dataType: 'synthetics' as AppDataType,
     breakdown: 'user_agent.name',
     time: { from: 'now-15m', to: 'now' },
   },
@@ -92,7 +94,7 @@ describe('userSeriesStorage', function () {
     );
   });
 
-  it('should return expected result when there are multiple series series', function () {
+  it('should return expected result when there are multiple series', function () {
     const setData = setupTestComponent(mockMultipleSeries);
 
     expect(setData).toHaveBeenCalledTimes(2);
@@ -132,5 +134,42 @@ describe('userSeriesStorage', function () {
         firstSeries: undefined,
       })
     );
+  });
+
+  it('ensures that only one series has a breakdown', () => {
+    function wrapper({ children }: { children: React.ReactElement }) {
+      return (
+        <UrlStorageContextProvider
+          storage={{
+            get: jest
+              .fn()
+              .mockImplementation((key: string) => (key === 'sr' ? mockMultipleSeries : null)),
+            set: jest.fn(),
+          }}
+        >
+          {children}
+        </UrlStorageContextProvider>
+      );
+    }
+    const { result } = renderHook(() => useSeriesStorage(), { wrapper });
+
+    act(() => {
+      result.current.setSeries(1, mockMultipleSeries[1]);
+    });
+
+    expect(result.current.allSeries).toEqual([
+      {
+        name: 'performance-distribution',
+        dataType: 'ux',
+        breakdown: 'user_agent.name',
+        time: { from: 'now-15m', to: 'now' },
+      },
+      {
+        name: 'kpi-over-time',
+        dataType: 'synthetics',
+        breakdown: undefined,
+        time: { from: 'now-15m', to: 'now' },
+      },
+    ]);
   });
 });
