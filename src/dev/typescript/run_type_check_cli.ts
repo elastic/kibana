@@ -16,7 +16,7 @@ import { run, createFailError } from '@kbn/dev-utils';
 import { lastValueFrom } from '@kbn/std';
 
 import { PROJECTS } from './projects';
-import { buildAllTsRefs } from './build_ts_refs';
+import { buildTsRefs } from './build_ts_refs';
 import { updateRootRefsConfig } from './root_refs_config';
 
 export async function runTypeCheckCli() {
@@ -26,11 +26,6 @@ export async function runTypeCheckCli() {
       // a reference to every composite project in the repo
       await updateRootRefsConfig(log);
 
-      const { failed } = await buildAllTsRefs({ log, procRunner, verbose: !!flags.verbose });
-      if (failed) {
-        throw createFailError('Unable to build TS project refs');
-      }
-
       const projectFilter =
         flags.project && typeof flags.project === 'string'
           ? Path.resolve(flags.project)
@@ -39,6 +34,16 @@ export async function runTypeCheckCli() {
       const projects = PROJECTS.filter((p) => {
         return !p.disableTypeCheck && (!projectFilter || p.tsConfigPath === projectFilter);
       });
+
+      const { failed } = await buildTsRefs({
+        log,
+        procRunner,
+        verbose: !!flags.verbose,
+        project: projects.length === 1 ? projects[0] : undefined,
+      });
+      if (failed) {
+        throw createFailError('Unable to build TS project refs');
+      }
 
       if (!projects.length) {
         if (projectFilter) {
