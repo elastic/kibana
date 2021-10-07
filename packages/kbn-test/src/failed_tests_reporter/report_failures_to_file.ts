@@ -76,6 +76,12 @@ export function reportFailuresToFile(log: ToolingLog, failures: TestFailure[]) {
       .flat()
       .join('\n');
 
+    // Buildkite steps that use `parallelism` need a numerical suffix added to identify them
+    // We should also increment the number by one, since it's 0-based
+    const jobNumberSuffix = process.env.BUILDKITE_PARALLEL_JOB
+      ? ` #${parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10) + 1}`
+      : '';
+
     const failureJSON = JSON.stringify(
       {
         ...failure,
@@ -84,9 +90,7 @@ export function reportFailuresToFile(log: ToolingLog, failures: TestFailure[]) {
         jobId: process.env.BUILDKITE_JOB_ID || '',
         url: process.env.BUILDKITE_BUILD_URL || '',
         jobName: process.env.BUILDKITE_LABEL
-          ? `${process.env.BUILDKITE_LABEL}${
-              process.env.BUILDKITE_PARALLEL_JOB ? ` #${process.env.BUILDKITE_PARALLEL_JOB}` : ''
-            }`
+          ? `${process.env.BUILDKITE_LABEL}${jobNumberSuffix}`
           : '',
       },
       null,

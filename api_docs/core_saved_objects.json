@@ -4885,7 +4885,13 @@
             "label": "#log",
             "description": [],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
             "deprecated": false
@@ -5313,7 +5319,13 @@
                     "label": "logger",
                     "description": [],
                     "signature": [
-                      "Logger"
+                      {
+                        "pluginId": "@kbn/logging",
+                        "scope": "server",
+                        "docId": "kibKbnLoggingPluginApi",
+                        "section": "def-server.Logger",
+                        "text": "Logger"
+                      }
                     ],
                     "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
                     "deprecated": false
@@ -13454,9 +13466,21 @@
             "description": [],
             "signature": [
               "<Meta extends ",
-              "LogMeta",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.LogMeta",
+                "text": "LogMeta"
+              },
               " = ",
-              "LogMeta",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.LogMeta",
+                "text": "LogMeta"
+              },
               ">(msg: string, meta: Meta) => void"
             ],
             "path": "src/core/server/saved_objects/migrations/core/migration_logger.ts",

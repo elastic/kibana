@@ -13,8 +13,10 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const returnTrue = () => true;
 
-const defaultOnFailure = (methodName: string) => (lastError: Error) => {
-  throw new Error(`${methodName} timeout: ${lastError.stack || lastError.message}`);
+const defaultOnFailure = (methodName: string) => (lastError: Error | undefined) => {
+  throw new Error(
+    `${methodName} timeout${lastError ? `: ${lastError.stack || lastError.message}` : ''}`
+  );
 };
 
 /**
