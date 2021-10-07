@@ -47,8 +47,8 @@ import {
 } from '../common';
 
 import {
-  ILLEGAL_CHARACTERS_KEY,
-  CONTAINS_SPACES_KEY,
+  // ILLEGAL_CHARACTERS_KEY,
+  // CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
   validateDataView,
@@ -59,8 +59,8 @@ export type { IndexPatternsService } from './data_views';
 
 // Index patterns namespace:
 export const indexPatterns = {
-  ILLEGAL_CHARACTERS_KEY,
-  CONTAINS_SPACES_KEY,
+  // ILLEGAL_CHARACTERS_KEY,
+  // CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
   isFilterable,
