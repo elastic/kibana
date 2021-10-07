@@ -7,8 +7,11 @@
 
 import { config } from './index';
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import { configDeprecationsMock } from '../../../../../src/core/server/mocks';
 
 const CONFIG_PATH = 'xpack.reporting';
+
+const deprecationContext = configDeprecationsMock.createContext();
 
 const applyReportingDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = config.deprecations!(configDeprecationFactory);
@@ -20,6 +23,7 @@ const applyReportingDeprecations = (settings: Record<string, any> = {}) => {
     deprecations.map((deprecation) => ({
       deprecation,
       path: CONFIG_PATH,
+      context: deprecationContext,
     })),
     () =>
       ({ message }) =>
