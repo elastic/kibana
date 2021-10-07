@@ -14,9 +14,9 @@ import {
   EuiContextMenuItem,
   EuiToolTip,
 } from '@elastic/eui';
-import { AddToCaseActionProps } from './add_to_case_action';
-import { useAddToCase } from '../../../../hooks/use_add_to_case';
-import { ActionIconItem } from '../../action_icon_item';
+import { useAddToCase } from './use_add_to_case';
+import { ActionIconItem } from './action_icon_button';
+import { AddToCaseActionProps } from '.';
 import * as i18n from './translations';
 
 const AddToCaseActionButtonComponent: React.FC<AddToCaseActionProps> = ({

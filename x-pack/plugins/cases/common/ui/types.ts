@@ -251,3 +251,16 @@ export interface Ecs {
   _index?: string;
   signal?: SignalEcs;
 }
+
+type Maybe<T> = T | null;
+export interface TimelineItem {
+  _id: string;
+  _index?: Maybe<string>;
+  data: TimelineNonEcsData[];
+  ecs: Ecs;
+}
+
+export interface TimelineNonEcsData {
+  field: string;
+  value?: Maybe<string[]>;
+}

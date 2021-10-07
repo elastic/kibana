@@ -9,10 +9,10 @@ import 'jest-styled-components';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { CoreStart } from 'kibana/public';
 import { coreMock } from 'src/core/public/mocks';
-import type { IToasts } from '../../../../../../../../src/core/public';
+import type { IToasts } from '../../../../../../src/core/public';
 
 import { createUpdateSuccessToaster } from './helpers';
-import { Case } from '../../../../../../cases/common';
+import { Case } from '../../../common';
 
 let mockCoreStart: MockedKeys<CoreStart>;
 let toasts: IToasts;

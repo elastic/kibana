@@ -9,10 +9,9 @@ import React, { memo, useMemo } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 
-import * as i18n from '../translations';
-import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { Case } from '../../../../../../../cases/common';
-import type { TimelinesStartServices } from '../../../../../types';
+import * as i18n from './translations';
+import { Case } from '../../../common';
+import { CreateCase } from '../create';
 
 export interface CreateCaseModalProps {
   afterCaseCreated?: (theCase: Case) => Promise<void>;
@@ -73,7 +72,6 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
   appId,
   disableAlerts,
 }) => {
-  const { cases } = useKibana<TimelinesStartServices>().services;
   const createCaseProps = useMemo(() => {
     return {
       afterCaseCreated,
@@ -98,7 +96,9 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
           </EuiTitle>
         </EuiFlyoutHeader>
         <StyledEuiFlyoutBody>
-          <FormWrapper>{cases.getCreateCase(createCaseProps)}</FormWrapper>
+          <FormWrapper>
+            <CreateCase {...createCaseProps} />
+          </FormWrapper>
         </StyledEuiFlyoutBody>
       </StyledFlyout>
     </>

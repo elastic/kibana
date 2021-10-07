@@ -27,7 +27,7 @@ export const useAddToCaseActions = ({
   nonEcsData,
   timelineId,
 }: UseAddToCaseActions) => {
-  const { timelines: timelinesUi } = useKibana().services;
+  const { timelines: timelinesUi, cases } = useKibana().services;
   const casePermissions = useGetUserCasesPermissions();
   const insertTimelineHook = useInsertTimeline;
 
@@ -56,11 +56,11 @@ export const useAddToCaseActions = ({
       hasWritePermissions &&
       addToCaseActionProps
         ? [
-            timelinesUi.getAddToExistingCaseButton(addToCaseActionProps),
-            timelinesUi.getAddToNewCaseButton(addToCaseActionProps),
+            cases.getAddToExistingCaseButton(addToCaseActionProps),
+            cases.getAddToNewCaseButton({ ...addToCaseActionProps, type: 'new' }),
           ]
         : [],
-    [addToCaseActionProps, hasWritePermissions, timelineId, timelinesUi]
+    [addToCaseActionProps, hasWritePermissions, timelineId, cases]
   );
 
   return {

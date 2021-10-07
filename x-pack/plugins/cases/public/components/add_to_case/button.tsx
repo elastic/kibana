@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 
-import { useAddToCase } from '../../../../hooks/use_add_to_case';
-import { AddToCaseActionProps } from './add_to_case_action';
+import { useAddToCase } from './use_add_to_case';
+import { AddToCaseActionProps } from '.';
 import * as i18n from './translations';
 
 const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
@@ -19,27 +19,34 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   casePermissions,
   appId,
   onClose,
+  type,
 }) => {
-  const { addNewCaseClick, isDisabled, userCanCrud } = useAddToCase({
+  const { addNewCaseClick, addExistingCaseClick, isDisabled, userCanCrud } = useAddToCase({
     event,
     useInsertTimeline,
     casePermissions,
     appId,
     onClose,
   });
-
+  const onClick = useCallback(() => {
+    if (type === 'new') {
+      addNewCaseClick();
+    } else {
+      addExistingCaseClick();
+    }
+  }, [addNewCaseClick, addExistingCaseClick, type]);
   return (
     <>
       {userCanCrud && (
         <EuiContextMenuItem
           aria-label={ariaLabel}
           data-test-subj="attach-alert-to-case-button"
-          onClick={addNewCaseClick}
+          onClick={onClick}
           // needs forced size="s" since it is lazy loaded and the EuiContextMenuPanel can not initialize the size
           size="s"
           disabled={isDisabled}
         >
-          {i18n.ACTION_ADD_NEW_CASE}
+          {type === 'new' ? i18n.ACTION_ADD_NEW_CASE : i18n.ACTION_ADD_EXISTING_CASE}
         </EuiContextMenuItem>
       )}
     </>

@@ -16,6 +16,10 @@ import {
   getCreateCaseLazy,
   getRecentCasesLazy,
   getAllCasesSelectorModalLazy,
+  getAddToCaseActionLazy,
+  getAddToExistingCaseButtonLazy,
+  getAddToNewCaseButtonLazy,
+  getAddToCasePopoverLazy,
 } from './methods';
 import { CasesUiConfigType, ENABLE_CASE_CONNECTOR } from '../common';
 
@@ -75,6 +79,10 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
        * @return UseAllCasesSelectorModalReturnedValues
        */
       getAllCasesSelectorModal: getAllCasesSelectorModalLazy,
+      getAddToCaseAction: getAddToCaseActionLazy,
+      getAddToExistingCaseButton: getAddToExistingCaseButtonLazy,
+      getAddToNewCaseButton: getAddToNewCaseButtonLazy,
+      getAddToCasePopover: getAddToCasePopoverLazy,
     };
   }
 

@@ -24,6 +24,7 @@ import { ConfigureCasesProps } from './components/configure_cases';
 import { CreateCaseProps } from './components/create';
 import { RecentCasesProps } from './components/recent_cases';
 import { AllCasesSelectorModalProps } from './components/all_cases/selector_modal';
+import { AddToCaseActionProps } from './components/add_to_case';
 
 export interface SetupPlugins {
   security: SecurityPluginSetup;
@@ -92,4 +93,8 @@ export interface CasesUiStart {
    * @returns A react component for showing recent cases
    */
   getRecentCases: (props: RecentCasesProps) => ReactElement<RecentCasesProps>;
+  getAddToCaseAction: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
+  getAddToExistingCaseButton: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
+  getAddToNewCaseButton: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
+  getAddToCasePopover: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
 }

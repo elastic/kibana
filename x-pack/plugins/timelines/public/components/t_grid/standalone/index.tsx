@@ -11,7 +11,6 @@ import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Direction, EntityType } from '../../../../common/search_strategy';
-import type { CoreStart } from '../../../../../../../src/core/public';
 import { TGridCellAction, TimelineTabs } from '../../../../common/types/timeline';
 
 import type {
@@ -24,6 +23,7 @@ import type {
   BulkActionsProp,
   AlertStatus,
 } from '../../../../common/types/timeline';
+import { TimelinesStartPlugins } from '../../../types';
 import {
   esQuery,
   Filter,
@@ -46,7 +46,6 @@ import {
 } from '../styles';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
-import { AddToCaseAction } from '../../actions/timeline/cases/add_to_case_action';
 import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
@@ -149,7 +148,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
 }) => {
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
-  const { uiSettings } = useKibana<CoreStart>().services;
+  const { uiSettings, cases } = useKibana<TimelinesStartPlugins>().services;
   const [isQueryLoading, setIsQueryLoading] = useState(false);
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(indexNames);
 
@@ -272,6 +271,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
       casePermissions: casePermissions ?? null,
       appId,
       onClose: afterCaseSelection,
+      disableAlerts: true,
     };
   }, [appId, casePermissions, afterCaseSelection, selectedEvent]);
 
@@ -405,7 +405,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
             </EventsContainerLoading>
           </TimelineContext.Provider>
         ) : null}
-        <AddToCaseAction {...addToCaseActionProps} disableAlerts />
+        {cases.getAddToCaseAction(addToCaseActionProps)}
       </AlertsTableWrapper>
     </InspectButtonContainer>
   );

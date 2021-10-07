@@ -7,9 +7,26 @@
 
 import React, { MouseEvent } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import styled from 'styled-components';
 
-import { EventsTdContent } from '../t_grid/styles';
-import { DEFAULT_ICON_BUTTON_WIDTH } from '../t_grid/helpers';
+const DEFAULT_ICON_BUTTON_WIDTH = 24;
+const EventsTdContent = styled.div.attrs(({ className }) => ({
+  className: `siemEventsTable__tdContent ${className != null ? className : ''}`,
+}))<{ textAlign?: string; width?: number }>`
+  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+  line-height: ${({ theme }) => theme.eui.euiLineHeight};
+  min-width: 0;
+  padding: ${({ theme }) => theme.eui.paddingSizes.xs};
+  text-align: ${({ textAlign }) => textAlign};
+  width: ${({ width }) =>
+    width != null
+      ? `${width}px`
+      : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
+
+  button.euiButtonIcon {
+    margin-left: ${({ theme }) => `-${theme.eui.paddingSizes.xs}`};
+  }
+`;
 
 interface ActionIconItemProps {
   ariaLabel?: string;
