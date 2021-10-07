@@ -10,10 +10,10 @@ import {
   EuiTabbedContentTab,
   EuiSpacer,
   EuiLoadingContent,
-  EuiLoadingSpinner,
   EuiNotificationBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -38,6 +38,9 @@ import {
 import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
 import { Reason } from './reason';
 
+import { InvestigationGuideView } from './investigation_guide_view';
+import { HostRisk } from '../../../overview/containers/overview_risky_host_links/use_hosts_risk_score';
+
 type EventViewTab = EuiTabbedContentTab;
 
 export type EventViewId =
@@ -60,7 +63,13 @@ interface Props {
   isDraggable?: boolean;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
+  hostRisk: HostRisk | null;
 }
+
+export const Indent = styled.div`
+  padding: 0 8px;
+  word-break: break-word;
+`;
 
 const StyledEuiTabbedContent = styled(EuiTabbedContent)`
   display: flex;
@@ -99,6 +108,7 @@ const EventDetailsComponent: React.FC<Props> = ({
   isDraggable,
   timelineId,
   timelineTabType,
+  hostRisk,
 }) => {
   const [selectedTabId, setSelectedTabId] = useState<EventViewId>(EventsViewType.summaryView);
   const handleTabClick = useCallback(
@@ -151,8 +161,11 @@ const EventDetailsComponent: React.FC<Props> = ({
                     title: i18n.DUCOMENT_SUMMARY,
                   }}
                 />
-                {enrichmentCount > 0 && (
+
+                {(enrichmentCount > 0 || hostRisk) && (
                   <ThreatSummaryView
+                    isDraggable={isDraggable}
+                    hostRisk={hostRisk}
                     browserFields={browserFields}
                     data={data}
                     eventId={id}
@@ -160,11 +173,14 @@ const EventDetailsComponent: React.FC<Props> = ({
                     enrichments={allEnrichments}
                   />
                 )}
+
                 {isEnrichmentsLoading && (
                   <>
                     <EuiLoadingContent lines={2} />
                   </>
                 )}
+
+                <InvestigationGuideView data={data} />
               </>
             ),
           }
@@ -179,6 +195,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       enrichmentCount,
       allEnrichments,
       isEnrichmentsLoading,
+      hostRisk,
     ]
   );
 

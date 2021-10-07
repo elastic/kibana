@@ -5,26 +5,30 @@
  * 2.0.
  */
 
-import { HostsRiskyHostsRequestOptions } from '../../../../../../common/search_strategy/security_solution/hosts/risky_hosts';
-import { createQueryFilterClauses } from '../../../../../utils/build_query';
+import { HostsRiskScoreRequestOptions } from '../../../../../../common';
 
-export const buildRiskyHostsQuery = ({
-  filterQuery,
-  timerange: { from, to },
+export const buildHostsRiskScoreQuery = ({
+  timerange,
+  hostName,
   defaultIndex,
-}: HostsRiskyHostsRequestOptions) => {
-  const filter = [
-    ...createQueryFilterClauses(filterQuery),
-    {
+}: HostsRiskScoreRequestOptions) => {
+  const filter = [];
+
+  if (timerange) {
+    filter.push({
       range: {
         '@timestamp': {
-          gte: from,
-          lte: to,
+          gte: timerange.from,
+          lte: timerange.to,
           format: 'strict_date_optional_time',
         },
       },
-    },
-  ];
+    });
+  }
+
+  if (hostName) {
+    filter.push({ term: { 'host.name': hostName } });
+  }
 
   const dslQuery = {
     index: defaultIndex,

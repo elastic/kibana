@@ -6,156 +6,128 @@
  */
 
 import styled from 'styled-components';
-import { get } from 'lodash/fp';
-import React, { Fragment } from 'react';
-import { EuiBasicTableColumn, EuiText, EuiTitle } from '@elastic/eui';
-
+import React, { useCallback, useState } from 'react';
+import {
+  EuiTitle,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiPopover,
+  EuiButtonIcon,
+  EuiPopoverTitle,
+  EuiText,
+} from '@elastic/eui';
 import * as i18n from './translations';
-import { Indent, StyledEuiInMemoryTable } from '../summary_view';
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
-import { getEnrichmentIdentifiers } from './helpers';
-import { EnrichmentIcon } from './enrichment_icon';
-import { FieldsData } from '../types';
-import { ActionCell } from '../table/action_cell';
-import { BrowserField, BrowserFields, TimelineEventsDetailsItem } from '../../../../../common';
-import { FieldValueCell } from '../table/field_value_cell';
 
-export interface ThreatSummaryItem {
-  title: {
-    title: string | undefined;
-    type: string | undefined;
-  };
-  description: {
-    browserField: BrowserField;
-    data: FieldsData | undefined;
-    eventId: string;
-    index: number;
-    provider: string | undefined;
-    timelineId: string;
-    value: string | undefined;
-  };
+import { FieldsData } from '../types';
+
+import { BrowserField, BrowserFields, TimelineEventsDetailsItem } from '../../../../../common';
+import { HostRisk } from '../../../../overview/containers/overview_risky_host_links/use_hosts_risk_score';
+import { HostRiskSummary } from './host_risk_summary';
+import { EnrichmentSummary } from './enrichment_summary';
+
+export interface ThreatSummaryDescription {
+  browserField: BrowserField;
+  data: FieldsData | undefined;
+  eventId: string;
+  index: number;
+  provider: string | undefined;
+  timelineId: string;
+  value: string | undefined;
+  isDraggable?: boolean;
 }
 
-const RightMargin = styled.span`
-  margin-right: ${({ theme }) => theme.eui.paddingSizes.xs};
-  min-width: 30px;
+const UppercaseEuiTitle = styled(EuiTitle)`
+  text-transform: uppercase;
 `;
 
-const EnrichmentTitle: React.FC<ThreatSummaryItem['title']> = ({ title, type }) => (
-  <>
-    <RightMargin>
-      <EuiTitle size="xxxs">
-        <h5>{title}</h5>
-      </EuiTitle>
-    </RightMargin>
-    <EnrichmentIcon type={type} />
-  </>
+const ThreatSummaryPanelTitle: React.FC = ({ children }) => (
+  <UppercaseEuiTitle size="xxxs">
+    <h5>{children}</h5>
+  </UppercaseEuiTitle>
 );
 
-const EnrichmentDescription: React.FC<ThreatSummaryItem['description']> = ({
-  browserField,
-  data,
-  eventId,
-  index,
-  provider,
-  timelineId,
+const StyledEnrichmentFieldTitle = styled(EuiTitle)`
+  width: 220px;
+`;
+
+const EnrichmentFieldTitle: React.FC<{
+  title: string | undefined;
+}> = ({ title }) => (
+  <StyledEnrichmentFieldTitle size="xxxs">
+    <h6>{title}</h6>
+  </StyledEnrichmentFieldTitle>
+);
+
+const StyledEuiFlexGroup = styled(EuiFlexGroup)`
+  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+  margin-top: ${({ theme }) => theme.eui.euiSizeS};
+`;
+
+export const EnrichedDataRow: React.FC<{ field: string | undefined; value: React.ReactNode }> = ({
+  field,
   value,
-}) => {
-  if (!data || !value) return null;
-  const key = `alert-details-value-formatted-field-value-${timelineId}-${eventId}-${data.field}-${value}-${index}-${provider}`;
+}) => (
+  <StyledEuiFlexGroup
+    direction="row"
+    gutterSize="none"
+    responsive
+    alignItems="center"
+    data-test-subj="EnrichedDataRow"
+  >
+    <EuiFlexItem style={{ flexShrink: 0 }} grow={false}>
+      <EnrichmentFieldTitle title={field} />
+    </EuiFlexItem>
+    <EuiFlexItem>{value}</EuiFlexItem>
+  </StyledEuiFlexGroup>
+);
+
+export const ThreatSummaryPanelHeader: React.FC<{
+  title: string;
+  toolTipContent: React.ReactNode;
+}> = ({ title, toolTipContent }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const onClick = useCallback(() => {
+    setIsPopoverOpen(!isPopoverOpen);
+  }, [isPopoverOpen, setIsPopoverOpen]);
+
+  const closePopover = useCallback(() => {
+    setIsPopoverOpen(false);
+  }, [setIsPopoverOpen]);
+
   return (
-    <Fragment key={key}>
-      <RightMargin>
-        <FieldValueCell
-          contextId={timelineId}
-          data={data}
-          eventId={key}
-          fieldFromBrowserField={browserField}
-          values={[value]}
-        />
-      </RightMargin>
-      {provider && (
-        <>
-          <RightMargin>
-            <EuiText size="xs">
-              <em>{i18n.PROVIDER_PREPOSITION}</em>
-            </EuiText>
-          </RightMargin>
-          <RightMargin>
-            <EuiText grow={false} size="xs">
-              {provider}
-            </EuiText>
-          </RightMargin>
-        </>
-      )}
-      {value && (
-        <ActionCell
-          data={data}
-          contextId={timelineId}
-          eventId={key}
-          fieldFromBrowserField={browserField}
-          timelineId={timelineId}
-          values={[value]}
-        />
-      )}
-    </Fragment>
+    <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
+      <EuiFlexItem>
+        <ThreatSummaryPanelTitle>{title}</ThreatSummaryPanelTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          anchorPosition="leftCenter"
+          button={
+            <EuiButtonIcon
+              color="text"
+              size="xs"
+              iconSize="m"
+              iconType="iInCircle"
+              aria-label={i18n.INFORMATION_ARIA_LABEL}
+              onClick={onClick}
+            />
+          }
+        >
+          <EuiPopoverTitle>{title}</EuiPopoverTitle>
+          <EuiText size="s" style={{ width: '270px' }}>
+            {toolTipContent}
+          </EuiText>
+        </EuiPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
-
-const buildThreatSummaryItems = (
-  browserFields: BrowserFields,
-  data: TimelineEventsDetailsItem[],
-  enrichments: CtiEnrichment[],
-  timelineId: string,
-  eventId: string
-) => {
-  return enrichments.map((enrichment, index) => {
-    const { field, type, value, provider } = getEnrichmentIdentifiers(enrichment);
-    const eventData = data.find((item) => item.field === field);
-    const category = eventData?.category ?? '';
-    const browserField = get([category, 'fields', field ?? ''], browserFields);
-
-    const fieldsData = {
-      field,
-      format: browserField?.format ?? '',
-      type: browserField?.type ?? '',
-      isObjectArray: eventData?.isObjectArray,
-    };
-
-    return {
-      title: {
-        title: field,
-        type,
-      },
-      description: {
-        eventId,
-        index,
-        provider,
-        timelineId,
-        value,
-        data: fieldsData,
-        browserField,
-      },
-    };
-  });
-};
-
-const columns: Array<EuiBasicTableColumn<ThreatSummaryItem>> = [
-  {
-    field: 'title',
-    truncateText: false,
-    render: EnrichmentTitle,
-    width: '220px',
-    name: '',
-  },
-  {
-    className: 'flyoutOverviewDescription',
-    field: 'description',
-    truncateText: false,
-    render: EnrichmentDescription,
-    name: '',
-  },
-];
 
 const ThreatSummaryViewComponent: React.FC<{
   browserFields: BrowserFields;
@@ -163,15 +135,40 @@ const ThreatSummaryViewComponent: React.FC<{
   enrichments: CtiEnrichment[];
   eventId: string;
   timelineId: string;
-}> = ({ browserFields, data, enrichments, eventId, timelineId }) => (
-  <Indent>
-    <StyledEuiInMemoryTable
-      columns={columns}
-      compressed
-      data-test-subj="threat-summary-view"
-      items={buildThreatSummaryItems(browserFields, data, enrichments, timelineId, eventId)}
-    />
-  </Indent>
-);
+  hostRisk: HostRisk | null;
+  isDraggable?: boolean;
+}> = ({ browserFields, data, enrichments, eventId, timelineId, hostRisk, isDraggable }) => {
+  if (!hostRisk && enrichments.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiHorizontalRule />
+
+      <EuiTitle size="xxxs">
+        <h5>{i18n.ENRICHED_DATA}</h5>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup direction="column" gutterSize="m" style={{ flexGrow: 0 }}>
+        {hostRisk && (
+          <EuiFlexItem grow={false}>
+            <HostRiskSummary hostRisk={hostRisk} />
+          </EuiFlexItem>
+        )}
+
+        <EnrichmentSummary
+          browserFields={browserFields}
+          data={data}
+          enrichments={enrichments}
+          timelineId={timelineId}
+          eventId={eventId}
+          isDraggable={isDraggable}
+        />
+      </EuiFlexGroup>
+    </>
+  );
+};
 
 export const ThreatSummaryView = React.memo(ThreatSummaryViewComponent);
