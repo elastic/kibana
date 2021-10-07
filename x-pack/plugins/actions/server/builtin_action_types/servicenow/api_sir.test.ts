@@ -97,11 +97,19 @@ describe('api_sir', () => {
 
   describe('formatObservables', () => {
     test('it formats array observables correctly', async () => {
-      expect(formatObservables(['a', 'b', 'c'], ObservableTypes.ip4)).toEqual([
-        { type: 'ipv4-addr', value: 'a' },
-        { type: 'ipv4-addr', value: 'b' },
-        { type: 'ipv4-addr', value: 'c' },
-      ]);
+      const expectedTypes: Array<[ObservableTypes, string]> = [
+        [ObservableTypes.ip4, 'ipv4-addr'],
+        [ObservableTypes.sha256, 'SHA256'],
+        [ObservableTypes.url, 'URL'],
+      ];
+
+      for (const type of expectedTypes) {
+        expect(formatObservables(['a', 'b', 'c'], type[0])).toEqual([
+          { type: type[1], value: 'a' },
+          { type: type[1], value: 'b' },
+          { type: type[1], value: 'c' },
+        ]);
+      }
     });
 
     test('it removes duplicates from array observables correctly', async () => {
@@ -151,20 +159,19 @@ describe('api_sir', () => {
     });
 
     test('it prepares the params correctly when the connector is legacy and the observables are undefined', async () => {
+      const {
+        dest_ip: destIp,
+        source_ip: sourceIp,
+        malware_hash: malwareHash,
+        malware_url: malwareURL,
+        ...incidentWithoutObservables
+      } = sirParams.incident;
+
       expect(
         prepareParams(true, {
           ...sirParams,
-          incident: {
-            ...sirParams.incident,
-            // @ts-expect-error
-            dest_ip: undefined,
-            // @ts-expect-error
-            source_ip: undefined,
-            // @ts-expect-error
-            malware_hash: undefined,
-            // @ts-expect-error
-            malware_url: undefined,
-          },
+          // @ts-expect-error
+          incident: incidentWithoutObservables,
         })
       ).toEqual({
         ...sirParams,

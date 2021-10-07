@@ -97,7 +97,7 @@ describe('api', () => {
           description: 'Incident description',
           short_description: 'Incident title',
           correlation_display: 'Alerting',
-          correlation_id: 'alertID',
+          correlation_id: 'ruleId',
           opened_by: 'elastic',
         },
       });
@@ -126,7 +126,7 @@ describe('api', () => {
           description: 'Incident description',
           short_description: 'Incident title',
           correlation_display: 'Alerting',
-          correlation_id: 'alertID',
+          correlation_id: 'ruleId',
         },
         incidentId: 'incident-1',
       });
@@ -142,7 +142,7 @@ describe('api', () => {
           description: 'Incident description',
           short_description: 'Incident title',
           correlation_display: 'Alerting',
-          correlation_id: 'alertID',
+          correlation_id: 'ruleId',
         },
         incidentId: 'incident-1',
       });
@@ -170,7 +170,7 @@ describe('api', () => {
           description: 'Incident description',
           short_description: 'Incident title',
           correlation_display: 'Alerting',
-          correlation_id: 'alertID',
+          correlation_id: 'ruleId',
         },
         incidentId: 'incident-1',
       });
@@ -186,7 +186,7 @@ describe('api', () => {
           description: 'Incident description',
           short_description: 'Incident title',
           correlation_display: 'Alerting',
-          correlation_id: 'alertID',
+          correlation_id: 'ruleId',
         },
         incidentId: 'incident-1',
       });
@@ -263,7 +263,7 @@ describe('api', () => {
           description: 'Incident description',
           short_description: 'Incident title',
           correlation_display: 'Alerting',
-          correlation_id: 'alertID',
+          correlation_id: 'ruleId',
         },
       });
       expect(externalService.createIncident).not.toHaveBeenCalled();
@@ -290,7 +290,7 @@ describe('api', () => {
           description: 'Incident description',
           short_description: 'Incident title',
           correlation_display: 'Alerting',
-          correlation_id: 'alertID',
+          correlation_id: 'ruleId',
         },
         incidentId: 'incident-3',
       });
@@ -306,7 +306,7 @@ describe('api', () => {
           description: 'Incident description',
           short_description: 'Incident title',
           correlation_display: 'Alerting',
-          correlation_id: 'alertID',
+          correlation_id: 'ruleId',
         },
         incidentId: 'incident-2',
       });
@@ -333,7 +333,7 @@ describe('api', () => {
           description: 'Incident description',
           short_description: 'Incident title',
           correlation_display: 'Alerting',
-          correlation_id: 'alertID',
+          correlation_id: 'ruleId',
         },
         incidentId: 'incident-3',
       });
@@ -349,7 +349,7 @@ describe('api', () => {
           description: 'Incident description',
           short_description: 'Incident title',
           correlation_display: 'Alerting',
-          correlation_id: 'alertID',
+          correlation_id: 'ruleId',
         },
         incidentId: 'incident-2',
       });

@@ -57,7 +57,7 @@ export default function serviceNowTest({ getService }: FtrProviderContext) {
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A servicenow action',
+            name: `A connector with type ${connectorType}`,
             connector_type_id: connectorType,
             config: {
               apiUrl: serviceNowSimulatorURL,
@@ -69,7 +69,7 @@ export default function serviceNowTest({ getService }: FtrProviderContext) {
         expect(createdAction).to.eql({
           id: createdAction.id,
           is_preconfigured: false,
-          name: 'A servicenow action',
+          name: `A connector with type ${connectorType}`,
           connector_type_id: connectorType,
           is_missing_secrets: false,
           config: {
@@ -85,7 +85,7 @@ export default function serviceNowTest({ getService }: FtrProviderContext) {
         expect(fetchedAction).to.eql({
           id: fetchedAction.id,
           is_preconfigured: false,
-          name: 'A servicenow action',
+          name: `A connector with type ${connectorType}`,
           connector_type_id: connectorType,
           is_missing_secrets: false,
           config: {
@@ -100,7 +100,7 @@ export default function serviceNowTest({ getService }: FtrProviderContext) {
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A servicenow action',
+            name: `A connector with type ${connectorType}`,
             connector_type_id: connectorType,
             config: {
               apiUrl: serviceNowSimulatorURL,
@@ -121,7 +121,7 @@ export default function serviceNowTest({ getService }: FtrProviderContext) {
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A servicenow action',
+            name: `A connector with type ${connectorType}`,
             connector_type_id: connectorType,
             config: {},
           })
@@ -141,7 +141,7 @@ export default function serviceNowTest({ getService }: FtrProviderContext) {
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A servicenow action',
+            name: `A connector with type ${connectorType}`,
             connector_type_id: connectorType,
             config: {
               apiUrl: 'http://servicenow.mynonexistent.com',
@@ -164,7 +164,7 @@ export default function serviceNowTest({ getService }: FtrProviderContext) {
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A servicenow action',
+            name: `A connector with type ${connectorType}`,
             connector_type_id: connectorType,
             config: {
               apiUrl: serviceNowSimulatorURL,
@@ -569,7 +569,7 @@ export default function serviceNowTest({ getService }: FtrProviderContext) {
               malware_url: ['https://example.com'],
               category: 'software',
               subcategory: 'os',
-              correlation_id: 'alertID',
+              correlation_id: 'ruleId',
               correlation_display: 'Alerting',
               priority: '1',
             },

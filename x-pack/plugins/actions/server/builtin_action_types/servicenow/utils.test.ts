@@ -36,7 +36,7 @@ describe('utils', () => {
       const error = new Error('An error occurred');
       // @ts-expect-error
       expect(createServiceError(error, 'Unable to do action').message).toBe(
-        '[Action][ServiceNow]: Unable to do action. Error: An error occurred Reason: unknown'
+        '[Action][ServiceNow]: Unable to do action. Error: An error occurred Reason: unknown: errorResponse was null'
       );
     });
 
@@ -58,7 +58,7 @@ describe('utils', () => {
       } as AxiosError;
 
       expect(createServiceError(axiosError, 'Unable to do action').message).toBe(
-        '[Action][ServiceNow]: Unable to do action. Error: An error occurred Reason: unknown'
+        '[Action][ServiceNow]: Unable to do action. Error: An error occurred Reason: unknown: no error in error response'
       );
     });
   });

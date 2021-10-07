@@ -20,11 +20,13 @@ export const prepareIncident = (useOldApi: boolean, incident: PartialIncident): 
 
 const createErrorMessage = (errorResponse?: ServiceNowError): string => {
   if (errorResponse == null) {
-    return 'unknown';
+    return 'unknown: errorResponse was null';
   }
 
   const { error } = errorResponse;
-  return error != null ? `${error?.message}: ${error?.detail}` : 'unknown';
+  return error != null
+    ? `${error?.message}: ${error?.detail}`
+    : 'unknown: no error in error response';
 };
 
 export const createServiceError = (error: ResponseError, message: string) =>
