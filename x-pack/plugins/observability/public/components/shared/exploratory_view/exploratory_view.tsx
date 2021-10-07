@@ -96,11 +96,7 @@ export function ExploratoryView({
     <Wrapper>
       {lens ? (
         <>
-          <ExploratoryViewHeader
-            lensAttributes={lensAttributes}
-            seriesId={0}
-            lastUpdated={lastUpdated}
-          />
+          <ExploratoryViewHeader lensAttributes={lensAttributes} lastUpdated={lastUpdated} />
           <LensWrapper ref={wrapperRef} height={height}>
             <EuiResizableContainer
               style={{ height: '100%' }}

@@ -45,7 +45,7 @@ export function convertAllShortSeries(allShortSeries: AllShortSeries) {
 }
 
 export const allSeriesKey = 'sr';
-const reportTypeKey = 'reportType';
+export const reportTypeKey = 'reportType';
 
 export function UrlStorageContextProvider({
   children,
