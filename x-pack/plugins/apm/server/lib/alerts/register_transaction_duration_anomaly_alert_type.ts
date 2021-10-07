@@ -212,8 +212,9 @@ export function registerTransactionDurationAnomalyAlertType({
           (await mlAnomalySearch(anomalySearchParams, [])) as any;
 
         const anomalies =
-          // @ts-expect-error
+          // @ts-ignore 4.3.5 upgrade
           response
+            // @ts-ignore 4.3.5 upgrade
             .aggregations!.anomaly_groups.buckets.map((bucket) => {
               const latest = bucket.latest_score.top[0].metrics;
 

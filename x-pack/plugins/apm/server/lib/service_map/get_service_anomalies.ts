@@ -24,7 +24,6 @@ import {
 } from '../../../common/transaction_types';
 import { rangeQuery } from '../../../../observability/server';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { getMlJobsWithAPMGroup } from '../anomaly_detection/get_ml_jobs_with_apm_group';
 import { Setup } from '../helpers/setup_request';
 import { apmMlAnomalyQuery } from '../../../common/utils/apm_ml_anomaly_query';
@@ -81,20 +80,22 @@ export async function getServiceAnomalies({
           services: {
             composite: {
               size: 5000,
-              sources: asMutableArray([
+              sources: [
                 { serviceName: { terms: { field: 'partition_field_value' } } },
                 { jobId: { terms: { field: 'job_id' } } },
-              ] as const),
+              ] as Array<
+                Record<string, estypes.AggregationsCompositeAggregationSource>
+              >,
             },
             aggs: {
               metrics: {
                 top_metrics: {
-                  metrics: asMutableArray([
+                  metrics: [
                     { field: 'actual' },
                     { field: 'by_field_value' },
                     { field: 'result_type' },
                     { field: 'record_score' },
-                  ] as const),
+                  ],
                   sort: {
                     record_score: 'desc' as const,
                   },
@@ -120,9 +121,9 @@ export async function getServiceAnomalies({
     const relevantBuckets = uniqBy(
       sortBy(
         // make sure we only return data for jobs that are available in this space
-        serviceBuckets.filter((bucket) =>
+        typedAnomalyResponse.aggregations?.services.buckets.filter((bucket) =>
           jobIds.includes(bucket.key.jobId as string)
-        ),
+        ) ?? [],
         // sort by job ID in case there are multiple jobs for one service to
         // ensure consistent results
         (bucket) => bucket.key.jobId

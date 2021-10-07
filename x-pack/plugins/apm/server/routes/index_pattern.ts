@@ -22,6 +22,7 @@ const staticIndexPatternRoute = createApmServerRoute({
       config,
     } = resources;
 
+    // @ts-ignore 4.3.5 upgrade
     const [setup, savedObjectsClient] = await Promise.all([
       setupRequest(resources),
       core
