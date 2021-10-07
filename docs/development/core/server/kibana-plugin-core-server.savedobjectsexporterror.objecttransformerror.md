@@ -4,7 +4,7 @@
 
 ## SavedObjectsExportError.objectTransformError() method
 
-Error returned when a [export tranform](./kibana-plugin-core-server.savedobjectsexporttransform.md) threw an error
+Error returned when a [export transform](./kibana-plugin-core-server.savedobjectsexporttransform.md) threw an error
 
 <b>Signature:</b>
 

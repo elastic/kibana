@@ -25,11 +25,13 @@ describe('handleNestedFilter', function () {
       meta: {
         index: 'logstash-*',
       },
-      nested: {
-        path: 'nestedField',
-        query: {
-          match_phrase: {
-            'nestedField.child': 'foo',
+      query: {
+        nested: {
+          path: 'nestedField',
+          query: {
+            match_phrase: {
+              'nestedField.child': 'foo',
+            },
           },
         },
       },
@@ -65,10 +67,8 @@ describe('handleNestedFilter', function () {
     // for example, we don't support query_string queries
     const filter = buildQueryFilter(
       {
-        query: {
-          query_string: {
-            query: 'response:200',
-          },
+        query_string: {
+          query: 'response:200',
         },
       },
       'logstash-*',
