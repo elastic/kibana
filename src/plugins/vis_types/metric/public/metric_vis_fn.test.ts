@@ -10,13 +10,15 @@ import { createMetricVisFn } from './metric_vis_fn';
 import { functionWrapper } from '../../../expressions/common/expression_functions/specs/tests/utils';
 import { Datatable } from '../../../expressions/common/expression_types/specs';
 
+type Arguments = Parameters<ReturnType<typeof createMetricVisFn>['fn']>[1];
+
 describe('interpreter/functions#metric', () => {
   const fn = functionWrapper(createMetricVisFn());
   const context = {
     type: 'datatable',
     rows: [{ 'col-0-1': 0 }],
     columns: [{ id: 'col-0-1', name: 'Count' }],
-  };
+  } as unknown as Datatable;
   const args = {
     percentageMode: false,
     useRanges: false,
@@ -50,7 +52,7 @@ describe('interpreter/functions#metric', () => {
         aggType: 'count',
       },
     ],
-  };
+  } as unknown as Arguments;
 
   it('returns an object with the correct structure', () => {
     const actual = fn(context, args, undefined);

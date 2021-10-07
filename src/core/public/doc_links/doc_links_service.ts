@@ -283,6 +283,8 @@ export class DocLinksService {
         },
         transforms: {
           guide: `${ELASTICSEARCH_DOCS}transforms.html`,
+          // TODO add valid docs URL
+          alertingRules: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-configuring-alerts.html`,
         },
         visualize: {
           guide: `${KIBANA_DOCS}dashboard.html`,
@@ -308,6 +310,8 @@ export class DocLinksService {
           apmRules: `${KIBANA_DOCS}apm-alerts.html`,
           emailAction: `${KIBANA_DOCS}email-action-type.html`,
           emailActionConfig: `${KIBANA_DOCS}email-action-type.html`,
+          emailExchangeClientSecretConfig: `${KIBANA_DOCS}email-action-type.html#exchange-client-secret`,
+          emailExchangeClientIdConfig: `${KIBANA_DOCS}email-action-type.html#exchange-client-tenant-id`,
           generalSettings: `${KIBANA_DOCS}alert-action-settings-kb.html#general-alert-action-settings`,
           indexAction: `${KIBANA_DOCS}index-action-type.html`,
           esQuery: `${KIBANA_DOCS}rule-type-es-query.html`,
@@ -469,6 +473,19 @@ export class DocLinksService {
         },
         ecs: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
+        },
+        clients: {
+          /** Changes to these URLs must also be synched in src/plugins/custom_integrations/server/language_clients/index.ts */
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/index.html`,
+          goOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/go-api/${DOC_LINK_VERSION}/overview.html`,
+          javaIndex: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/java-api-client/${DOC_LINK_VERSION}/index.html`,
+          jsIntro: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/javascript-api/${DOC_LINK_VERSION}/introduction.html`,
+          netGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/index.html`,
+          perlGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/perl-api/${DOC_LINK_VERSION}/index.html`,
+          phpGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/php-api/${DOC_LINK_VERSION}/index.html`,
+          pythonGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/index.html`,
+          rubyOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/ruby-api/${DOC_LINK_VERSION}/ruby_client.html`,
+          rustGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/rust-api/${DOC_LINK_VERSION}/index.html`,
         },
       },
     });
@@ -705,6 +722,18 @@ export interface DocLinksStart {
     }>;
     readonly ecs: {
       readonly guide: string;
+    };
+    readonly clients: {
+      readonly guide: string;
+      readonly goOverview: string;
+      readonly javaIndex: string;
+      readonly jsIntro: string;
+      readonly netGuide: string;
+      readonly perlGuide: string;
+      readonly phpGuide: string;
+      readonly pythonGuide: string;
+      readonly rubyOverview: string;
+      readonly rustGuide: string;
     };
   };
 }

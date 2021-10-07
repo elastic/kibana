@@ -6,7 +6,6 @@
  */
 
 import { Logger } from 'src/core/server';
-import { schema } from '@kbn/config-schema';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import {
   DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
@@ -15,12 +14,19 @@ import {
 } from '../../../../common/constants';
 
 // eslint-disable-next-line no-restricted-imports
-import { LegacyNotificationAlertTypeDefinition } from './legacy_types';
+import {
+  LegacyNotificationAlertTypeDefinition,
+  legacyRulesNotificationParams,
+} from './legacy_types';
 import { AlertAttributes } from '../signals/types';
 import { siemRuleActionGroups } from '../signals/siem_rule_action_groups';
 import { scheduleNotificationActions } from './schedule_notification_actions';
 import { getNotificationResultsLink } from './utils';
 import { getSignals } from './get_signals';
+// eslint-disable-next-line no-restricted-imports
+import { legacyExtractReferences } from './legacy_saved_object_references/legacy_extract_references';
+// eslint-disable-next-line no-restricted-imports
+import { legacyInjectReferences } from './legacy_saved_object_references/legacy_inject_references';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -36,9 +42,12 @@ export const legacyRulesNotificationAlertType = ({
   defaultActionGroupId: 'default',
   producer: SERVER_APP_ID,
   validate: {
-    params: schema.object({
-      ruleAlertId: schema.string(),
-    }),
+    params: legacyRulesNotificationParams,
+  },
+  useSavedObjectReferences: {
+    extractReferences: (params) => legacyExtractReferences({ logger, params }),
+    injectReferences: (params, savedObjectReferences) =>
+      legacyInjectReferences({ logger, params, savedObjectReferences }),
   },
   minimumLicenseRequired: 'basic',
   isExportable: false,

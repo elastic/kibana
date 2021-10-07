@@ -31,6 +31,7 @@ describe('getStateDefaults', () => {
         "index": "index-pattern-with-timefield-id",
         "interval": "auto",
         "query": undefined,
+        "savedQuery": undefined,
         "sort": Array [
           Array [
             "timestamp",
@@ -59,6 +60,7 @@ describe('getStateDefaults', () => {
         "index": "the-index-pattern-id",
         "interval": "auto",
         "query": undefined,
+        "savedQuery": undefined,
         "sort": Array [],
       }
     `);

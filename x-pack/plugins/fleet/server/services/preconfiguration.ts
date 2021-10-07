@@ -35,6 +35,7 @@ import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import type { InputsOverride } from './package_policy';
 import { overridePackageInputs } from './package_policy';
 import { appContextService } from './app_context';
+import { upgradeManagedPackagePolicies } from './managed_package_policies';
 import { outputService } from './output';
 
 interface PreconfigurationResult {
@@ -311,6 +312,17 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         await agentPolicyService.update(soClient, esClient, policy!.id, { is_managed: true });
       }
     }
+  }
+
+  try {
+    const fulfilledPolicyPackagePolicyIds = fulfilledPolicies.flatMap<string>(
+      ({ policy }) => policy?.package_policies as string[]
+    );
+
+    await upgradeManagedPackagePolicies(soClient, esClient, fulfilledPolicyPackagePolicyIds);
+    // Swallow errors that occur when upgrading
+  } catch (error) {
+    appContextService.getLogger().error(error);
   }
 
   return {

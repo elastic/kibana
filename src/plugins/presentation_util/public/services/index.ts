@@ -33,5 +33,6 @@ export const getStubPluginServices = (): PresentationUtilPluginStart => {
   return {
     ContextProvider: pluginServices.getContextProvider(),
     labsService: pluginServices.getServices().labs,
+    controlsService: pluginServices.getServices().controls,
   };
 };
