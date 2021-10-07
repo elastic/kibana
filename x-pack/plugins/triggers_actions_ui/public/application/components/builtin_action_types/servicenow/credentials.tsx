@@ -37,8 +37,6 @@ const CredentialsComponent: React.FC<Props> = ({
           <EuiTitle size="xxs">
             <h4>{i18n.SN_INSTANCE_LABEL}</h4>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem>
           <CredentialsApiUrl
             action={action}
             errors={errors}
@@ -56,7 +54,6 @@ const CredentialsComponent: React.FC<Props> = ({
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
       <EuiFlexItem>
         <CredentialsAuth
           action={action}

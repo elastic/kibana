@@ -7,7 +7,14 @@
 
 import React, { memo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFormRow, EuiLink, EuiFieldText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiLink,
+  EuiFieldText,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiSpacer,
+} from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
@@ -41,8 +48,8 @@ const CredentialsApiUrlComponent: React.FC<Props> = ({
   );
 
   return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem>
+    <>
+      <EuiFormRow fullWidth>
         <p>
           <FormattedMessage
             id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.apiUrlHelpLabel"
@@ -56,34 +63,33 @@ const CredentialsApiUrlComponent: React.FC<Props> = ({
             }}
           />
         </p>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFormRow
-          id="apiUrl"
+      </EuiFormRow>
+      <EuiSpacer size="l" />
+      <EuiFormRow
+        id="apiUrl"
+        fullWidth
+        error={errors.apiUrl}
+        isInvalid={isApiUrlInvalid}
+        label={i18n.API_URL_LABEL}
+        helpText={i18n.API_URL_HELPTEXT}
+      >
+        <EuiFieldText
           fullWidth
-          error={errors.apiUrl}
           isInvalid={isApiUrlInvalid}
-          label={i18n.API_URL_LABEL}
-          helpText={i18n.API_URL_HELPTEXT}
-        >
-          <EuiFieldText
-            fullWidth
-            isInvalid={isApiUrlInvalid}
-            name="apiUrl"
-            readOnly={readOnly}
-            value={apiUrl || ''} // Needed to prevent uncontrolled input error when value is undefined
-            data-test-subj="credentialsApiUrlFromInput"
-            onChange={onChangeApiUrlEvent}
-            onBlur={() => {
-              if (!apiUrl) {
-                onChangeApiUrlEvent();
-              }
-            }}
-            disabled={isLoading}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          name="apiUrl"
+          readOnly={readOnly}
+          value={apiUrl || ''} // Needed to prevent uncontrolled input error when value is undefined
+          data-test-subj="credentialsApiUrlFromInput"
+          onChange={onChangeApiUrlEvent}
+          onBlur={() => {
+            if (!apiUrl) {
+              onChangeApiUrlEvent();
+            }
+          }}
+          disabled={isLoading}
+        />
+      </EuiFormRow>
+    </>
   );
 };
 

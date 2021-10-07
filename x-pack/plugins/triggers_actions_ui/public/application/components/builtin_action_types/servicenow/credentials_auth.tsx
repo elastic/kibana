@@ -54,74 +54,60 @@ const CredentialsAuthComponent: React.FC<Props> = ({
 
   return (
     <>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow fullWidth>
-            {getEncryptedFieldNotifyLabel(
-              !action.id,
-              2,
-              action.isMissingSecrets ?? false,
-              i18n.REENTER_VALUES_LABEL
-            )}
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow
-            id="connector-servicenow-username"
-            fullWidth
-            error={errors.username}
-            isInvalid={isUsernameInvalid}
-            label={i18n.USERNAME_LABEL}
-          >
-            <EuiFieldText
-              fullWidth
-              isInvalid={isUsernameInvalid}
-              readOnly={readOnly}
-              name="connector-servicenow-username"
-              value={username || ''} // Needed to prevent uncontrolled input error when value is undefined
-              data-test-subj="connector-servicenow-username-form-input"
-              onChange={onChangeUsernameEvent}
-              onBlur={() => {
-                if (!username) {
-                  onChangeUsernameEvent();
-                }
-              }}
-              disabled={isLoading}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow
-            id="connector-servicenow-password"
-            fullWidth
-            error={errors.password}
-            isInvalid={isPasswordInvalid}
-            label={i18n.PASSWORD_LABEL}
-          >
-            <EuiFieldPassword
-              fullWidth
-              readOnly={readOnly}
-              isInvalid={isPasswordInvalid}
-              name="connector-servicenow-password"
-              value={password || ''} // Needed to prevent uncontrolled input error when value is undefined
-              data-test-subj="connector-servicenow-password-form-input"
-              onChange={onChangePasswordEvent}
-              onBlur={() => {
-                if (!password) {
-                  onChangePasswordEvent();
-                }
-              }}
-              disabled={isLoading}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiFormRow fullWidth>
+        {getEncryptedFieldNotifyLabel(
+          !action.id,
+          2,
+          action.isMissingSecrets ?? false,
+          i18n.REENTER_VALUES_LABEL
+        )}
+      </EuiFormRow>
+      <EuiFormRow
+        id="connector-servicenow-username"
+        fullWidth
+        error={errors.username}
+        isInvalid={isUsernameInvalid}
+        label={i18n.USERNAME_LABEL}
+      >
+        <EuiFieldText
+          fullWidth
+          isInvalid={isUsernameInvalid}
+          readOnly={readOnly}
+          name="connector-servicenow-username"
+          value={username || ''} // Needed to prevent uncontrolled input error when value is undefined
+          data-test-subj="connector-servicenow-username-form-input"
+          onChange={onChangeUsernameEvent}
+          onBlur={() => {
+            if (!username) {
+              onChangeUsernameEvent();
+            }
+          }}
+          disabled={isLoading}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        id="connector-servicenow-password"
+        fullWidth
+        error={errors.password}
+        isInvalid={isPasswordInvalid}
+        label={i18n.PASSWORD_LABEL}
+      >
+        <EuiFieldPassword
+          fullWidth
+          readOnly={readOnly}
+          isInvalid={isPasswordInvalid}
+          name="connector-servicenow-password"
+          value={password || ''} // Needed to prevent uncontrolled input error when value is undefined
+          data-test-subj="connector-servicenow-password-form-input"
+          onChange={onChangePasswordEvent}
+          onBlur={() => {
+            if (!password) {
+              onChangePasswordEvent();
+            }
+          }}
+          disabled={isLoading}
+        />
+      </EuiFormRow>
     </>
   );
 };
