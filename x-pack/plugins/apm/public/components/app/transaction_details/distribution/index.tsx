@@ -53,7 +53,7 @@ interface TransactionDistributionProps {
   markerCurrentTransaction?: number;
   onChartSelection: BrushEndListener;
   onClearSelection: () => void;
-  onHasData: OnHasData;
+  onHasData?: OnHasData;
   selection?: Selection;
 }
 
@@ -83,7 +83,9 @@ export function TransactionDistribution({
   const onTransactionDistributionHasData: OnHasData = useCallback(
     (hasData) => {
       setShowSelection(hasData);
-      onHasData(hasData);
+      if (onHasData) {
+        onHasData(hasData);
+      }
     },
     [onHasData]
   );
@@ -229,7 +231,9 @@ export function TransactionDistribution({
         markerCurrentTransaction={markerCurrentTransaction}
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
         markerValue={percentileThresholdValue ?? 0}
-        overallHistogram={transactionDistribution}
+        // If there's an error pass on an empty array for the data
+        // so the chart finishes the loading state.
+        overallHistogram={!isErrorMessage(error) ? transactionDistribution : []}
         onChartSelection={onTrackedChartSelection}
         onHasData={onTransactionDistributionHasData}
         selection={selection}

@@ -320,7 +320,9 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
         markerValue={percentileThresholdValue ?? 0}
         {...selectedHistogram}
-        overallHistogram={overallHistogram}
+        // If there's an error pass on an empty array for the data
+        // so the chart finishes the loading state.
+        overallHistogram={!isErrorMessage(error) ? overallHistogram : []}
       />
 
       <EuiSpacer size="s" />
