@@ -73,7 +73,7 @@ export class HeadlessChromiumDriverFactory {
    * Return an observable to objects which will drive screenshot capture for a page
    */
   createPage(
-    opts: { browserTimezone?: string },
+    { browserTimezone }: { browserTimezone?: string },
     pLogger: LevelLogger
   ): Rx.Observable<{ driver: HeadlessChromiumDriver; exit$: Rx.Observable<never> }> {
     // FIXME: 'create' is deprecated
@@ -98,7 +98,7 @@ export class HeadlessChromiumDriverFactory {
           handleSIGHUP: false,
           args: chromiumArgs,
           env: {
-            TZ: opts.browserTimezone,
+            TZ: browserTimezone,
           },
         });
 
@@ -112,7 +112,7 @@ export class HeadlessChromiumDriverFactory {
         const versionInfo = await devTools.send('Browser.getVersion');
         logger.debug(`Browser version: ${JSON.stringify(versionInfo)}`);
 
-        await page.emulateTimezone(opts.browserTimezone);
+        await page.emulateTimezone(browserTimezone);
 
         // Set the default timeout for all navigation methods to the openUrl timeout (30 seconds)
         // All waitFor methods have their own timeout config passed in to them
