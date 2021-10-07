@@ -10,24 +10,21 @@ import { format as formatUrl } from 'url';
 import fs from 'fs';
 import { Client } from '@elastic/elasticsearch';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
 /*
  registers Kibana-specific @elastic/elasticsearch client instance.
  */
-export function ElasticsearchProvider({ getService }: FtrProviderContext): KibanaClient {
+export function ElasticsearchProvider({ getService }: FtrProviderContext): Client {
   const config = getService('config');
 
   if (process.env.TEST_CLOUD) {
-    // @ts-expect-error TODO make sure Client is assignable to KibanaClient
     return new Client({
       nodes: [formatUrl(config.get('servers.elasticsearch'))],
       requestTimeout: config.get('timeouts.esRequestTimeout'),
     });
   } else {
-    // @ts-expect-error TODO make sure Client is assignable to KibanaClient
     return new Client({
       tls: {
         ca: fs.readFileSync(CA_CERT_PATH, 'utf-8'),

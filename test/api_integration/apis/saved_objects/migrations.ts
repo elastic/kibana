@@ -14,7 +14,8 @@ import uuidv5 from 'uuid/v5';
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import expect from '@kbn/expect';
-import { ElasticsearchClient, SavedObjectsType } from 'src/core/server';
+import { SavedObjectsType } from 'src/core/server';
+import { Client as ElasticsearchClient } from '@elastic/elasticsearch';
 
 import {
   DocumentMigrator,
@@ -136,7 +137,7 @@ export default ({ getService }: FtrProviderContext) => {
       const migrationATemplate = await esClient.indices.existsTemplate({
         name: 'migration_a_template',
       });
-      expect(migrationATemplate.body).to.be.ok();
+      expect(migrationATemplate).to.be.ok();
 
       const result = await migrateIndex({
         esClient,
@@ -150,12 +151,12 @@ export default ({ getService }: FtrProviderContext) => {
         name: 'migration_a_template',
       });
 
-      expect(migrationATemplateAfter.body).not.to.be.ok();
+      expect(migrationATemplateAfter).not.to.be.ok();
       const migrationTestATemplateAfter = await esClient.indices.existsTemplate({
         name: 'migration_test_a_template',
       });
 
-      expect(migrationTestATemplateAfter.body).to.be.ok();
+      expect(migrationTestATemplateAfter).to.be.ok();
       expect(_.omit(result, 'elapsedMs')).to.eql({
         destIndex: '.migration-a_2',
         sourceIndex: '.migration-a_1',
@@ -451,7 +452,7 @@ export default ({ getService }: FtrProviderContext) => {
         { status: 'skipped', destIndex: undefined },
       ]);
 
-      const { body } = await esClient.cat.indices({ index: '.migration-c*', format: 'json' });
+      const body = await esClient.cat.indices({ index: '.migration-c*', format: 'json' });
       // It only created the original and the dest
       expect(_.map(body, 'index').sort()).to.eql(['.migration-c_1', '.migration-c_2']);
 
@@ -747,7 +748,7 @@ async function migrateIndex({
 }
 
 async function fetchDocs(esClient: ElasticsearchClient, index: string) {
-  const { body } = await esClient.search<any>({ index });
+  const body = await esClient.search<any>({ index });
 
   return body.hits.hits
     .map((h) => ({
