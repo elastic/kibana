@@ -81,7 +81,6 @@ async function createHostIsolationException(
       type: 'hostIsolationExceptionsFormStateChanged',
       payload: createLoadedResourceState(response),
     });
-    loadHostIsolationExceptionsList(store, http);
   } catch (error) {
     dispatch({
       type: 'hostIsolationExceptionsFormStateChanged',

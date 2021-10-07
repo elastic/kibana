@@ -80,12 +80,6 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{
 
   useEffect(() => {
     if (creationFailure) {
-      dispatch({
-        type: 'hostIsolationExceptionsFormStateChanged',
-        payload: {
-          type: 'UninitialisedResourceState',
-        },
-      });
       toasts.addDanger(
         i18n.translate(
           'xpack.securitySolution.hostIsolationExceptions.form.creationFailureToastTitle',
@@ -129,7 +123,7 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{
 
   return exception ? (
     <EuiFlyout
-      size="l"
+      size="m"
       onClose={handleOnCancel}
       data-test-subj="hostIsolationExceptionsCreateEditFlyout"
     >
