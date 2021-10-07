@@ -18,7 +18,6 @@ import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 export interface SharingSavedObjectProps {
   outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
   aliasTargetId?: string;
-  targetType?: string;
   sourceId?: string;
 }
 

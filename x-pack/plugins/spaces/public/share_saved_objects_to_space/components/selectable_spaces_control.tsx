@@ -26,7 +26,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
-import { DocumentationLinksService } from '../../lib';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { useSpaces } from '../../spaces_context';
 import type { SpacesDataEntry } from '../../types';
@@ -135,9 +134,7 @@ export const SelectableSpacesControl = (props: Props) => {
       return null;
     }
 
-    const kibanaPrivilegesUrl = new DocumentationLinksService(
-      docLinks!
-    ).getKibanaPrivilegesDocUrl();
+    const docLink = docLinks?.links.security.kibanaPrivileges;
     return (
       <EuiFlexItem grow={false}>
         <EuiText size="s" color="subdued">

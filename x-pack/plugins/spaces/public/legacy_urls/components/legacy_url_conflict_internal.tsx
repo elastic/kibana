@@ -15,15 +15,15 @@ import {
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 import { first } from 'rxjs/operators';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { ApplicationStart, StartServicesAccessor } from 'src/core/public';
+import type { StartServicesAccessor } from 'src/core/public';
 
 import { DEFAULT_OBJECT_NOUN } from '../../constants';
-import { DocumentationLinksService } from '../../lib';
 import type { PluginsStart } from '../../plugin';
 import type { LegacyUrlConflictProps } from '../types';
 
@@ -40,22 +40,15 @@ export const LegacyUrlConflictInternal = (props: InternalProps & LegacyUrlConfli
     otherObjectPath,
   } = props;
 
-  const [applicationStart, setApplicationStart] = useState<ApplicationStart>();
   const [isDismissed, setIsDismissed] = useState(false);
-  const [appId, setAppId] = useState<string>();
-  const [docLink, setDocLink] = useState<string>();
 
-  useEffect(() => {
-    async function setup() {
-      const [{ application, docLinks }] = await getStartServices();
-      const appIdValue = await application.currentAppId$.pipe(first()).toPromise(); // retrieve the most recent value from the BehaviorSubject
-      const docLinksService = new DocumentationLinksService(docLinks);
-      setApplicationStart(application);
-      setDocLink(docLinksService.getKibanaLegacyUrlAliasesDocUrl());
-      setAppId(appIdValue);
-    }
-    setup();
+  const { value: asyncParams } = useAsync(async () => {
+    const [{ application: applicationStart, docLinks }] = await getStartServices();
+    const appId = await applicationStart.currentAppId$.pipe(first()).toPromise(); // retrieve the most recent value from the BehaviorSubject
+    const docLink = docLinks.links.spaces.kibanaLegacyUrlAliases;
+    return { applicationStart, appId, docLink };
   }, [getStartServices]);
+  const { docLink, applicationStart, appId } = asyncParams ?? {};
 
   if (!applicationStart || !appId || !docLink || isDismissed) {
     return null;

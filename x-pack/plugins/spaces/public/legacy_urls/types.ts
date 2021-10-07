@@ -25,7 +25,8 @@ export interface LegacyUrlConflictProps {
    */
   otherObjectId: string;
   /**
-   * The path to use for the new URL, optionally including `search` and/or `hash` URL components.
+   *  The path within your application to use for the new URL, optionally including `search` and/or `hash` URL components. Do not include
+   *  `/app/my-app` or the current base path.
    */
   otherObjectPath: string;
 }

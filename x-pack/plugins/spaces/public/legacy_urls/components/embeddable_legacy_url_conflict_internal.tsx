@@ -13,13 +13,13 @@ import {
   EuiSpacer,
   EuiTextAlign,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { StartServicesAccessor } from 'src/core/public';
 
-import { DocumentationLinksService } from '../../lib';
 import type { PluginsStart } from '../../plugin';
 import type { SpacesManager } from '../../spaces_manager';
 import type { EmbeddableLegacyUrlConflictProps } from '../types';
@@ -33,23 +33,17 @@ export const EmbeddableLegacyUrlConflictInternal = (
   props: InternalProps & EmbeddableLegacyUrlConflictProps
 ) => {
   const { spacesManager, getStartServices, targetType, sourceId } = props;
-  const [aliasJsonString, setAliasJsonString] = useState<string>();
-  const [docLink, setDocLink] = useState<string>();
-
-  useEffect(() => {
-    async function setup() {
-      const activeSpace = await spacesManager.getActiveSpace();
-      const [{ docLinks }] = await getStartServices();
-      const docLinksService = new DocumentationLinksService(docLinks);
-      setAliasJsonString(
-        JSON.stringify({ targetSpace: activeSpace.id, targetType, sourceId }, null, 2)
-      );
-      setDocLink(docLinksService.getKibanaDisableLegacyUrlAliasesApiDocUrl());
-    }
-    setup();
-  }, [spacesManager, getStartServices, targetType, sourceId]);
 
   const [expandError, setExpandError] = useState(false);
+
+  const { value: asyncParams } = useAsync(async () => {
+    const [{ docLinks }] = await getStartServices();
+    const { id: targetSpace } = await spacesManager.getActiveSpace();
+    const docLink = docLinks.links.spaces.kibanaDisableLegacyUrlAliasesApi;
+    const aliasJsonString = JSON.stringify({ targetSpace, targetType, sourceId }, null, 2);
+    return { docLink, aliasJsonString };
+  }, [getStartServices, spacesManager]);
+  const { docLink, aliasJsonString } = asyncParams ?? {};
 
   if (!aliasJsonString || !docLink) {
     return null;
@@ -72,12 +66,7 @@ export const EmbeddableLegacyUrlConflictInternal = (
                 values={{
                   documentationLink: (
                     <EuiLink external href={docLink} target="_blank">
-                      {i18n.translate(
-                        'xpack.spaces.embeddableLegacyUrlConflict.documentationLinkText',
-                        {
-                          defaultMessage: '_disable_legacy_url_aliases API',
-                        }
-                      )}
+                      {'_disable_legacy_url_aliases API'}
                     </EuiLink>
                   ),
                 }}
