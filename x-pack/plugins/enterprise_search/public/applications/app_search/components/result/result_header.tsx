@@ -43,7 +43,7 @@ export const ResultHeader: React.FC<Props> = ({
         responsive={false}
         wrap
       >
-        {resultPosition && (
+        {typeof resultPosition !== 'undefined' && (
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow">
               <FormattedMessage
