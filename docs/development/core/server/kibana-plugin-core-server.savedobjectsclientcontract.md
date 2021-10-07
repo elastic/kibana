@@ -24,7 +24,7 @@ if (SavedObjectsErrorHelpers.isNotAuthorizedError(error)) { // 401 handling shou
 
 \#\#\# 404s from missing index
 
-From the perspective of application code and APIs the SavedObjectsClient is a black box that persists objects. One of the internal details that users have no control over is that we use an elasticsearch index for persistance and that index might be missing.
+From the perspective of application code and APIs the SavedObjectsClient is a black box that persists objects. One of the internal details that users have no control over is that we use an elasticsearch index for persistence and that index might be missing.
 
 At the time of writing we are in the process of transitioning away from the operating assumption that the SavedObjects index is always available. Part of this transition is handling errors resulting from an index missing. These used to trigger a 500 error in most cases, and in others cause 404s with different error messages.
 

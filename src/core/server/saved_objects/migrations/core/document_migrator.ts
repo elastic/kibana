@@ -443,7 +443,7 @@ function buildDocumentTransform({
     }
 
     // In order to keep tests a bit more stable, we won't
-    // tack on an empy migrationVersion to docs that have
+    // tack on an empty migrationVersion to docs that have
     // no migrations defined.
     if (_.isEmpty(transformedDoc.migrationVersion)) {
       delete transformedDoc.migrationVersion;
@@ -740,7 +740,7 @@ function nextUnmigratedProp(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMi
 }
 
 /**
- * Applies any relevent migrations to the document for the specified property.
+ * Applies any relevant migrations to the document for the specified property.
  */
 function migrateProp(
   doc: SavedObjectUnsanitizedDoc,
