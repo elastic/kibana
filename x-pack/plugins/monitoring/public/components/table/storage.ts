@@ -8,9 +8,22 @@
 import { set } from '@elastic/safer-lodash-set';
 import { get } from 'lodash';
 import { STORAGE_KEY } from '../../../common/constants';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
-export const tableStorageGetter = (keyPrefix) => {
-  return (storage) => {
+interface TableValues {
+  filterText: any;
+  pageIndex: any;
+  sortKey: any;
+  sortOrder: any;
+}
+
+interface EuiTableValues {
+  sort: any;
+  page: any;
+}
+
+export const tableStorageGetter = (keyPrefix: string) => {
+  return (storage: Storage): TableValues => {
     const localStorageData = storage.get(STORAGE_KEY) || {};
     const filterText = get(localStorageData, [keyPrefix, 'filterText']);
     const pageIndex = get(localStorageData, [keyPrefix, 'pageIndex']);
@@ -21,8 +34,8 @@ export const tableStorageGetter = (keyPrefix) => {
   };
 };
 
-export const tableStorageSetter = (keyPrefix) => {
-  return (storage, { filterText, pageIndex, sortKey, sortOrder }) => {
+export const tableStorageSetter = (keyPrefix: string) => {
+  return (storage: Storage, { filterText, pageIndex, sortKey, sortOrder }: TableValues) => {
     const localStorageData = storage.get(STORAGE_KEY) || {};
 
     set(localStorageData, [keyPrefix, 'filterText'], filterText || undefined); // don`t store empty data
@@ -36,8 +49,8 @@ export const tableStorageSetter = (keyPrefix) => {
   };
 };
 
-export const euiTableStorageGetter = (keyPrefix) => {
-  return (storage) => {
+export const euiTableStorageGetter = (keyPrefix: string) => {
+  return (storage: Storage): EuiTableValues => {
     const localStorageData = storage.get(STORAGE_KEY) || {};
     const sort = get(localStorageData, [keyPrefix, 'sort']);
     const page = get(localStorageData, [keyPrefix, 'page']);
@@ -46,8 +59,8 @@ export const euiTableStorageGetter = (keyPrefix) => {
   };
 };
 
-export const euiTableStorageSetter = (keyPrefix) => {
-  return (storage, { sort, page }) => {
+export const euiTableStorageSetter = (keyPrefix: string) => {
+  return (storage: Storage, { sort, page }: EuiTableValues) => {
     const localStorageData = storage.get(STORAGE_KEY) || {};
 
     set(localStorageData, [keyPrefix, 'sort'], sort || undefined); // don`t store empty data

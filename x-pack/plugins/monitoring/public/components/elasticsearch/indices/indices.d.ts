@@ -7,11 +7,14 @@
 
 import { FunctionComponent } from 'react';
 
-export const Overview: FunctionComponent<OverviewProps>;
-
-export interface OverviewProps {
-  cluster: unknown;
-  setupMode: unknown;
-  showLicenseExpiration: boolean;
+export const ElasticsearchIndices: FunctionComponent<ElasticsearchIndicesProps>;
+export interface ElasticsearchIndicesProps {
+  clusterStatus: unknown;
+  indices: unknown;
+  sorting: unknown;
+  pagination: unknown;
+  onTableChange: unknown;
+  toggleShowSystemIndices: unknown;
+  showSystemIndices: unknown;
   alerts: unknown;
 }

@@ -48,17 +48,21 @@ function PageLoadingUI() {
   );
 }
 
-function PageLoadingTracking({ pageViewTitle }) {
+const PageLoadingTracking: React.FunctionComponent<{ pageViewTitle: string }> = ({
+  pageViewTitle,
+}) => {
   const path = pageViewTitle.toLowerCase().replace(/-/g, '').replace(/\s+/g, '_');
   useTrackPageview({ app: 'stack_monitoring', path });
   useTrackPageview({ app: 'stack_monitoring', path, delay: 15000 });
   return <PageLoadingUI />;
-}
+};
 
-export function PageLoading({ pageViewTitle }) {
+export const PageLoading: React.FunctionComponent<{ pageViewTitle?: string }> = ({
+  pageViewTitle,
+}) => {
   if (pageViewTitle) {
     return <PageLoadingTracking pageViewTitle={pageViewTitle} />;
   }
 
   return <PageLoadingUI />;
-}
+};
