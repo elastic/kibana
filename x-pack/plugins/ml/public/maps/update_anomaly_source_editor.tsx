@@ -9,7 +9,7 @@ import React, { Fragment, Component } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { TypicalActualSelector } from './typical_actual_selector';
+import { LayerSelector } from './layer_selector';
 
 interface Props {
   onChange: (...args: Array<{ propName: string; value: unknown }>) => void;
@@ -32,7 +32,7 @@ export class UpdateAnomalySourceEditor extends Component<Props, State> {
             </h6>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <TypicalActualSelector
+          <LayerSelector
             onChange={(typicalActual: 'typical' | 'actual') => {
               this.props.onChange({
                 propName: 'typicalActual',

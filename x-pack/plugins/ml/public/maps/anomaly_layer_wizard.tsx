@@ -8,7 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import uuid from 'uuid';
-import { LAYER_TYPE, LAYER_WIZARD_CATEGORY, STYLE_TYPE } from '../../../maps/common';
+import {
+  COLOR_MAP_TYPE,
+  FIELD_ORIGIN,
+  LAYER_TYPE,
+  LAYER_WIZARD_CATEGORY,
+  STYLE_TYPE,
+} from '../../../maps/common';
 import { AnomalySource, AnomalySourceDescriptor } from './anomaly_source';
 import { CreateAnomalySourceEditor } from './create_anomaly_source_editor';
 import {
@@ -51,9 +57,17 @@ export const anomalyLayerWizard: LayerWizard = {
           type: 'VECTOR',
           properties: {
             fillColor: {
-              type: STYLE_TYPE.STATIC,
+              type: STYLE_TYPE.DYNAMIC,
               options: {
-                color: 'rgb(255,0,0)',
+                color: 'Blue to Red',
+                colorCategory: 'palette_0',
+                fieldMetaOptions: { isEnabled: true, sigma: 3 },
+                type: COLOR_MAP_TYPE.ORDINAL,
+                field: {
+                  name: 'record_score',
+                  origin: FIELD_ORIGIN.SOURCE,
+                },
+                useCustomColorRamp: false,
               },
             },
           } as unknown as VectorStylePropertiesDescriptor,

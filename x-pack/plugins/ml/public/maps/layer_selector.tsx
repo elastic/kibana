@@ -18,7 +18,7 @@ interface Props {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface State {}
 
-export class TypicalActualSelector extends Component<Props, State> {
+export class LayerSelector extends Component<Props, State> {
   private _isMounted: boolean = false;
 
   state: State = {};

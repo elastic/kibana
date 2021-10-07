@@ -64,7 +64,6 @@ export class AnomalyJobSelector extends Component<Props, State> {
       return null;
     }
 
-    const options = this.state.jobId ? [{ value: this.state.jobId, label: this.state.jobId }] : [];
     return (
       <EuiFormRow
         label={i18n.translate('xpack.ml.maps.jobIdLabel', {
@@ -76,7 +75,9 @@ export class AnomalyJobSelector extends Component<Props, State> {
           singleSelection={true}
           onChange={this.onJobIdSelect}
           options={this.state.jobIdList}
-          selectedOptions={options}
+          selectedOptions={
+            this.state.jobId ? [{ value: this.state.jobId, label: this.state.jobId }] : []
+          }
         />
       </EuiFormRow>
     );

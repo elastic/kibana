@@ -10,7 +10,7 @@ import React, { Component } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { AnomalySourceDescriptor } from './anomaly_source';
 import { AnomalyJobSelector } from './anomaly_job_selector';
-import { TypicalActualSelector } from './typical_actual_selector';
+import { LayerSelector } from './layer_selector';
 
 interface Props {
   onSourceConfigChange: (sourceConfig: Partial<AnomalySourceDescriptor> | null) => void;
@@ -68,7 +68,7 @@ export class CreateAnomalySourceEditor extends Component<Props, State> {
 
   render() {
     const selector = this.state.jobId ? (
-      <TypicalActualSelector
+      <LayerSelector
         onChange={this.onTypicalActualChange}
         typicalActual={this.state.typicalActual || 'typical'}
       />
