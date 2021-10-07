@@ -7,8 +7,8 @@
  */
 
 import { IndexPatternField } from 'src/plugins/data/public';
-import { getDataViewFieldSubtypeMulti } from '@kbn/es-query';
 import { FieldFilterState, isFieldFiltered } from './field_filter';
+import { getFieldSubtypeMulti } from '../../../../../../../../data/common';
 
 interface GroupedFields {
   selected: IndexPatternField[];
@@ -55,7 +55,7 @@ export function groupFields(
     if (!isFieldFiltered(field, fieldFilterState, fieldCounts)) {
       continue;
     }
-    const subTypeMulti = getDataViewFieldSubtypeMulti(field?.spec);
+    const subTypeMulti = getFieldSubtypeMulti(field?.spec);
     const isSubfield = useNewFieldsApi && subTypeMulti;
     if (columns.includes(field.name)) {
       result.selected.push(field);
