@@ -27,5 +27,5 @@ export interface EssqlSearchStrategyResponse {
   }>;
   rows: any[];
 
-  rawResponse: TransportResult<estypes.SqlQueryResponse>;
+  rawResponse: TransportResult<estypes.SqlQueryResponse, unknown>;
 }
