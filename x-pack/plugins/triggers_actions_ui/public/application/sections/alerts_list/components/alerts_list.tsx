@@ -401,7 +401,7 @@ export const AlertsList: React.FunctionComponent = () => {
         return (
           <>
             {link}
-            {alert.muteAll && (
+            {alert.enabled && alert.muteAll && (
               <EuiBadge data-test-subj="mutedActionsBadge" color="hollow">
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.mutedBadge"
