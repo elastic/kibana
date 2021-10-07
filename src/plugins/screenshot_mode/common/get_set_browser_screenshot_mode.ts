@@ -85,7 +85,7 @@ export const setScreenshotLayout = (value: Layout) => {
 /** @deprecated */
 export const getScreenshotLayout = (): undefined | Layout => {
   return (
-    ((window as unknown) as Record<string, Layout>)[KBN_SCREENSHOT_MODE_LAYOUT_KEY] ||
+    (window as unknown as Record<string, Layout>)[KBN_SCREENSHOT_MODE_LAYOUT_KEY] ||
     (window.localStorage.getItem(KBN_SCREENSHOT_MODE_LAYOUT_KEY) as Layout)
   );
 };
