@@ -35,13 +35,13 @@ export function formatMonitoringError(err: IHttpFetchError) {
 export const useRequestErrorHandler = () => {
   const { services } = useKibana<MonitoringStartPluginDependencies>();
   return useCallback(
-    async (err: IHttpFetchError) => {
+    (err: IHttpFetchError) => {
       if (err.response?.status === 403) {
         // redirect to error message view
         history.replaceState(null, '', '#/access-denied');
       } else if (err.response?.status === 404 && !includes(window.location.hash, 'no-data')) {
         // pass through if this is a 404 and we're already on the no-data page
-        const formattedError = await formatMonitoringError(err);
+        const formattedError = formatMonitoringError(err);
         services.notifications?.toasts.addDanger({
           title: toMountPoint(
             <FormattedMessage
