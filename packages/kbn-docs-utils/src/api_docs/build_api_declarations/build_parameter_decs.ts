@@ -36,9 +36,9 @@ export function buildApiDecsForParameters(
     // defined node, with children.
     // If we don't want the docs to be too deeply nested we could avoid this special handling.
     if (param.getTypeNode() && param.getTypeNode()!.getKind() === SyntaxKind.TypeLiteral) {
-      acc.push(buildApiDeclaration(param.getTypeNode()!, opts));
+      acc.push(buildApiDeclaration(param.getTypeNode()!, { ...opts, captureReferences: false }));
     } else {
-      const apiDec = buildBasicApiDeclaration(param, opts);
+      const apiDec = buildBasicApiDeclaration(param, { ...opts, captureReferences: false });
       acc.push({
         ...apiDec,
         isRequired: param.getType().isNullable() === false,

@@ -1,0 +1,1171 @@
+digraph test{
+ root=data
+subgraph clusterVisEditors {
+      label="Vis Editors"
+      style=filled
+      advancedSettings [label="advancedSettings\nI: 0.92\nCe: 22 | Ca: 2" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+charts [label="charts\nI: 0.24\nCe: 5 | Ca: 16" fillcolor="#EC7063", style=filled fixedsize=true width=1 height=1]
+kibanaLegacy [label="kibanaLegacy\nI: 0\nCe: 0 | Ca: 5" fillcolor="#A3E4D7", style=filled fixedsize=true width=1 height=1]
+management [label="management\nI: 0.48\nCe: 20 | Ca: 22" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+urlForwarding [label="urlForwarding\nI: 0\nCe: 0 | Ca: 7" fillcolor="#A3E4D7", style=filled fixedsize=true width=1 height=1]
+visDefaultEditor [label="visDefaultEditor\nI: 0.78\nCe: 35 | Ca: 10" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+visualizations [label="visualizations\nI: 0.63\nCe: 32 | Ca: 19" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+visualize [label="visualize\nI: 0.94\nCe: 34 | Ca: 2" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+expressionMetricVis [label="expressionMetricVis\nI: NaN\nCe: 33 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+expressionTagcloud [label="expressionTagcloud\nI: NaN\nCe: 33 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+visTypeMetric [label="visTypeMetric\nI: NaN\nCe: 36 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+visTypePie [label="visTypePie\nI: 0.97\nCe: 36 | Ca: 1" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+visTypeTable [label="visTypeTable\nI: NaN\nCe: 36 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+visTypeTagcloud [label="visTypeTagcloud\nI: NaN\nCe: 36 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+visTypeTimelion [label="visTypeTimelion\nI: NaN\nCe: 36 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+visTypeTimeseries [label="visTypeTimeseries\nI: 0.95\nCe: 35 | Ca: 2" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+visTypeVega [label="visTypeVega\nI: NaN\nCe: 37 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+visTypeVislib [label="visTypeVislib\nI: NaN\nCe: 38 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+visTypeXy [label="visTypeXy\nI: 0.97\nCe: 36 | Ca: 1" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+lens [label="lens\nI: 0.86\nCe: 38 | Ca: 6" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterAppServices {
+      label="App Services"
+      style=filled
+      bfetch [label="bfetch\nI: 0.25\nCe: 1 | Ca: 3" fillcolor="#F6DDCC", style=filled fixedsize=true width=1 height=1]
+data [label="data\nI: 0.14\nCe: 10 | Ca: 59" fillcolor="#E74C3C", style=filled fixedsize=true width=10 height=10]
+dataViews [label="dataViews\nI: 0.64\nCe: 7 | Ca: 4" fillcolor="#EC7063", style=filled fixedsize=true width=2.0630018529956766 height=2.0630018529956766]
+embeddable [label="embeddable\nI: 0.32\nCe: 12 | Ca: 25" fillcolor="#E74C3C", style=filled fixedsize=true width=1.4484249536751082 height=1.4484249536751082]
+expressions [label="expressions\nI: 0.13\nCe: 4 | Ca: 27" fillcolor="#F5B7B1", style=filled fixedsize=true width=6.460778258184065 height=6.460778258184065]
+fieldFormats [label="fieldFormats\nI: 0\nCe: 0 | Ca: 17" fillcolor="#A3E4D7", style=filled fixedsize=true width=1 height=1]
+indexPatternEditor [label="indexPatternEditor\nI: 0.92\nCe: 12 | Ca: 1" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+indexPatternFieldEditor [label="indexPatternFieldEditor\nI: 0.75\nCe: 12 | Ca: 4" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+indexPatternManagement [label="indexPatternManagement\nI: NaN\nCe: 24 | Ca: undefined" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+inspector [label="inspector\nI: 0.17\nCe: 3 | Ca: 15" fillcolor="#F5B7B1", style=filled fixedsize=true width=1 height=1]
+kibanaReact [label="kibanaReact\nI: 0\nCe: 0 | Ca: 76" fillcolor="#A3E4D7", style=filled fixedsize=true width=1 height=1]
+kibanaUtils [label="kibanaUtils\nI: 0\nCe: 0 | Ca: 53" fillcolor="#A3E4D7", style=filled fixedsize=true width=1.8993205682520073 height=1.8993205682520073]
+navigation [label="navigation\nI: 0.52\nCe: 11 | Ca: 10" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+screenshotMode [label="screenshotMode\nI: 0\nCe: 0 | Ca: 5" fillcolor="#A3E4D7", style=filled fixedsize=true width=1 height=1]
+share [label="share\nI: 0.04\nCe: 1 | Ca: 26" fillcolor="#F6DDCC", style=filled fixedsize=true width=1 height=1]
+uiActions [label="uiActions\nI: 0.12\nCe: 2 | Ca: 15" fillcolor="#F5CBA7", style=filled fixedsize=true width=1 height=1]
+dashboardEnhanced [label="dashboardEnhanced\nI: NaN\nCe: 36 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+dataEnhanced [label="dataEnhanced\nI: 0.85\nCe: 28 | Ca: 5" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+embeddableEnhanced [label="embeddableEnhanced\nI: 0.94\nCe: 15 | Ca: 1" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+runtimeFields [label="runtimeFields\nI: 0.92\nCe: 12 | Ca: 1" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+urlDrilldown [label="urlDrilldown\nI: NaN\nCe: 15 | Ca: undefined" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterStackManagement {
+      label="Stack Management"
+      style=filled
+      console [label="console\nI: NaN\nCe: 22 | Ca: undefined" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+devTools [label="devTools\nI: 0.2\nCe: 1 | Ca: 4" fillcolor="#F6DDCC", style=filled fixedsize=true width=1 height=1]
+esUiShared [label="esUiShared\nI: 0.26\nCe: 11 | Ca: 31" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+crossClusterReplication [label="crossClusterReplication\nI: NaN\nCe: 66 | Ca: undefined" fillcolor="#641E16", style=filled fixedsize=true width=1 height=1]
+grokdebugger [label="grokdebugger\nI: NaN\nCe: 23 | Ca: undefined" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+indexLifecycleManagement [label="indexLifecycleManagement\nI: NaN\nCe: 64 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+indexManagement [label="indexManagement\nI: 0.93\nCe: 63 | Ca: 5" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+ingestPipelines [label="ingestPipelines\nI: NaN\nCe: 28 | Ca: undefined" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+licenseApiGuard [label="licenseApiGuard\nI: 0\nCe: 0 | Ca: 2" fillcolor="#A3E4D7", style=filled fixedsize=true width=1 height=1]
+licenseManagement [label="licenseManagement\nI: 0.93\nCe: 26 | Ca: 2" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+painlessLab [label="painlessLab\nI: NaN\nCe: 22 | Ca: undefined" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+remoteClusters [label="remoteClusters\nI: 0.98\nCe: 64 | Ca: 1" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+rollup [label="rollup\nI: NaN\nCe: 64 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+searchprofiler [label="searchprofiler\nI: NaN\nCe: 23 | Ca: undefined" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+snapshotRestore [label="snapshotRestore\nI: NaN\nCe: 29 | Ca: undefined" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+upgradeAssistant [label="upgradeAssistant\nI: NaN\nCe: 62 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+watcher [label="watcher\nI: NaN\nCe: 26 | Ca: undefined" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterFleet {
+      label="Fleet"
+      style=filled
+      customIntegrations [label="customIntegrations\nI: 0.78\nCe: 14 | Ca: 4" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+fleet [label="fleet\nI: 0.87\nCe: 62 | Ca: 9" fillcolor="#78281F", style=filled fixedsize=true width=3.7770228536133414 height=3.7770228536133414]
+}
+subgraph clusterKibanaPresentation {
+      label="Kibana Presentation"
+      style=filled
+      dashboard [label="dashboard\nI: 0.85\nCe: 33 | Ca: 6" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+expressionError [label="expressionError\nI: 0.93\nCe: 14 | Ca: 1" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+expressionImage [label="expressionImage\nI: 0.93\nCe: 14 | Ca: 1" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+expressionMetric [label="expressionMetric\nI: 0.93\nCe: 14 | Ca: 1" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+expressionRepeatImage [label="expressionRepeatImage\nI: 0.93\nCe: 14 | Ca: 1" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+expressionRevealImage [label="expressionRevealImage\nI: 0.93\nCe: 14 | Ca: 1" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+expressionShape [label="expressionShape\nI: 0.93\nCe: 14 | Ca: 1" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+inputControlVis [label="inputControlVis\nI: NaN\nCe: 36 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+presentationUtil [label="presentationUtil\nI: 0.46\nCe: 13 | Ca: 15" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+visTypeMarkdown [label="visTypeMarkdown\nI: NaN\nCe: 36 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+canvas [label="canvas\nI: NaN\nCe: 49 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterDataDiscovery {
+      label="Data Discovery"
+      style=filled
+      discover [label="discover\nI: 0.73\nCe: 30 | Ca: 11" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+discoverEnhanced [label="discoverEnhanced\nI: NaN\nCe: 31 | Ca: undefined" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+graph1 [label="graph\nI: NaN\nCe: 28 | Ca: undefined" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterKibanaCore {
+      label="Kibana Core"
+      style=filled
+      home [label="home\nI: 0.23\nCe: 19 | Ca: 65" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+kibanaOverview [label="kibanaOverview\nI: NaN\nCe: 22 | Ca: undefined" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+newsfeed [label="newsfeed\nI: 0.25\nCe: 1 | Ca: 3" fillcolor="#F6DDCC", style=filled fixedsize=true width=1 height=1]
+savedObjects [label="savedObjects\nI: 0.41\nCe: 11 | Ca: 16" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+savedObjectsManagement [label="savedObjectsManagement\nI: NaN\nCe: 27 | Ca: undefined" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+savedObjectsTaggingOss [label="savedObjectsTaggingOss\nI: 0.71\nCe: 12 | Ca: 5" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+usageCollection [label="usageCollection\nI: 0.02\nCe: 1 | Ca: 61" fillcolor="#F6DDCC", style=filled fixedsize=true width=1 height=1]
+banners [label="banners\nI: NaN\nCe: 2 | Ca: undefined" fillcolor="#F5CBA7", style=filled fixedsize=true width=1 height=1]
+cloud [label="cloud\nI: 0.74\nCe: 28 | Ca: 10" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+features [label="features\nI: 0.05\nCe: 2 | Ca: 35" fillcolor="#F5CBA7", style=filled fixedsize=true width=1 height=1]
+globalSearch [label="globalSearch\nI: 0.33\nCe: 2 | Ca: 4" fillcolor="#F5CBA7", style=filled fixedsize=true width=1 height=1]
+globalSearchBar [label="globalSearchBar\nI: NaN\nCe: 31 | Ca: undefined" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+globalSearchProviders [label="globalSearchProviders\nI: NaN\nCe: 3 | Ca: undefined" fillcolor="#F5B7B1", style=filled fixedsize=true width=1 height=1]
+licensing [label="licensing\nI: 0.03\nCe: 1 | Ca: 32" fillcolor="#F6DDCC", style=filled fixedsize=true width=1 height=1]
+savedObjectsTagging [label="savedObjectsTagging\nI: 0.91\nCe: 29 | Ca: 3" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+core [label="core\nI: NaN\nCe: 0 | Ca: undefined" fillcolor="#A3E4D7", style=filled fixedsize=true width=7.11550339715874 height=7.11550339715874]
+}
+subgraph clusterPlatformSecurity {
+      label="Platform Security"
+      style=filled
+      interactiveSetup [label="interactiveSetup\nI: NaN\nCe: 0 | Ca: undefined" fillcolor="#A3E4D7", style=filled fixedsize=true width=1 height=1]
+encryptedSavedObjects [label="encryptedSavedObjects\nI: 0.85\nCe: 28 | Ca: 5" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+security [label="security\nI: 0.53\nCe: 27 | Ca: 24" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+spaces [label="spaces\nI: 0.5\nCe: 25 | Ca: 25" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterKibanaTelemtry {
+      label="Kibana Telemtry"
+      style=filled
+      kibanaUsageCollection [label="kibanaUsageCollection\nI: NaN\nCe: 2 | Ca: undefined" fillcolor="#F5CBA7", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterGIS {
+      label="GIS"
+      style=filled
+      mapsEms [label="mapsEms\nI: 0\nCe: 0 | Ca: 3" fillcolor="#A3E4D7", style=filled fixedsize=true width=1 height=1]
+maps [label="maps\nI: 0.83\nCe: 39 | Ca: 8" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterKibanaTelemetry {
+      label="Kibana Telemetry"
+      style=filled
+      telemetry [label="telemetry\nI: 0.56\nCe: 5 | Ca: 4" fillcolor="#EC7063", style=filled fixedsize=true width=1 height=1]
+telemetryCollectionManager [label="telemetryCollectionManager\nI: 0.5\nCe: 2 | Ca: 2" fillcolor="#F5CBA7", style=filled fixedsize=true width=1 height=1]
+telemetryManagementSection [label="telemetryManagementSection\nI: 0.96\nCe: 23 | Ca: 1" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+telemetryCollectionXpack [label="telemetryCollectionXpack\nI: NaN\nCe: 3 | Ca: undefined" fillcolor="#F5B7B1", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterKibanaAlerting {
+      label="Kibana Alerting"
+      style=filled
+      actions [label="actions\nI: 0.83\nCe: 30 | Ca: 6" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+alerting [label="alerting\nI: 0.69\nCe: 31 | Ca: 14" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+eventLog [label="eventLog\nI: 0.9\nCe: 26 | Ca: 3" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+stackAlerts [label="stackAlerts\nI: NaN\nCe: 35 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+taskManager [label="taskManager\nI: 0.2\nCe: 2 | Ca: 8" fillcolor="#F5CBA7", style=filled fixedsize=true width=1 height=1]
+triggersActionsUi [label="triggersActionsUi\nI: 0.74\nCe: 34 | Ca: 12" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterAPMUI {
+      label="APM UI"
+      style=filled
+      apm [label="apm\nI: NaN\nCe: 62 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterSecuritySolutionThreatHunting {
+      label="Security Solution Threat Hunting"
+      style=filled
+      cases [label="cases\nI: 0.94\nCe: 45 | Ca: 3" fillcolor="#78281F", style=filled fixedsize=true width=1.4700432365657814 height=1.4700432365657814]
+}
+subgraph clusterMachineLearningUI {
+      label="Machine Learning UI"
+      style=filled
+      dataVisualizer [label="dataVisualizer\nI: 0.98\nCe: 42 | Ca: 1" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+fileUpload [label="fileUpload\nI: 0.93\nCe: 28 | Ca: 2" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+ml [label="ml\nI: 0.85\nCe: 51 | Ca: 9" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+transform [label="transform\nI: NaN\nCe: 52 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterEnterpriseSearch {
+      label="Enterprise Search"
+      style=filled
+      enterpriseSearch [label="enterpriseSearch\nI: NaN\nCe: 62 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterLogsandMetricsUI {
+      label="Logs and Metrics UI"
+      style=filled
+      infra [label="infra\nI: 0.93\nCe: 62 | Ca: 5" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterSecuritydetectionsresponse {
+      label="Security detections response"
+      style=filled
+      lists [label="lists\nI: 0.93\nCe: 28 | Ca: 2" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterLogstash {
+      label="Logstash"
+      style=filled
+      logstash [label="logstash\nI: NaN\nCe: 63 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterSecuritysolution {
+      label="Security solution"
+      style=filled
+      metricsEntities [label="metricsEntities\nI: NaN\nCe: 29 | Ca: undefined" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+securitySolution [label="securitySolution\nI: NaN\nCe: 64 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=4.237183446571958 height=4.237183446571958]
+timelines [label="timelines\nI: 0.96\nCe: 47 | Ca: 2" fillcolor="#78281F", style=filled fixedsize=true width=2.992588017294626 height=2.992588017294626]
+}
+subgraph clusterStackMonitoring {
+      label="Stack Monitoring"
+      style=filled
+      monitoring [label="monitoring\nI: 0.98\nCe: 62 | Ca: 1" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterObservabilityUI {
+      label="Observability UI"
+      style=filled
+      observability [label="observability\nI: 0.88\nCe: 49 | Ca: 7" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterSecurityassetmanagement {
+      label="Security asset management"
+      style=filled
+      osquery [label="osquery\nI: 0.98\nCe: 62 | Ca: 1" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterKibanaReportingServices {
+      label="Kibana Reporting Services"
+      style=filled
+      reporting [label="reporting\nI: 0.97\nCe: 33 | Ca: 1" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterRAC {
+      label="RAC"
+      style=filled
+      ruleRegistry [label="ruleRegistry\nI: 0.88\nCe: 35 | Ca: 5" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterKibanaLocalization {
+      label="Kibana Localization"
+      style=filled
+      translations [label="translations\nI: NaN\nCe: 0 | Ca: undefined" fillcolor="#A3E4D7", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterKibanaAppServices {
+      label="Kibana App Services"
+      style=filled
+      uiActionsEnhanced [label="uiActionsEnhanced\nI: 0.82\nCe: 14 | Ca: 3" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterUptime {
+      label="Uptime"
+      style=filled
+      uptime [label="uptime\nI: NaN\nCe: 62 | Ca: undefined" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+advancedSettings -> kibanaReact
+advancedSettings -> kibanaUtils
+advancedSettings -> home
+advancedSettings -> esUiShared
+advancedSettings -> home
+advancedSettings -> usageCollection
+advancedSettings -> management
+bfetch -> kibanaUtils
+charts -> expressions
+console -> esUiShared
+console -> kibanaReact
+console -> kibanaUtils
+console -> home
+console -> usageCollection
+console -> home
+console -> devTools
+console -> share
+customIntegrations -> presentationUtil
+dashboard -> home
+dashboard -> kibanaReact
+dashboard -> kibanaUtils
+dashboard -> presentationUtil
+dashboard -> home
+dashboard -> spaces
+dashboard -> savedObjectsTaggingOss
+dashboard -> screenshotMode
+dashboard -> usageCollection
+dashboard -> data
+dashboard -> embeddable
+dashboard -> inspector
+dashboard -> navigation
+dashboard -> savedObjects
+dashboard -> share
+dashboard -> uiActions
+dashboard -> urlForwarding
+dashboard -> presentationUtil
+dashboard -> visualizations
+data -> kibanaUtils
+data -> kibanaReact
+data -> inspector
+data -> usageCollection
+data -> bfetch
+data -> expressions
+data -> uiActions
+data -> share
+data -> inspector
+data -> fieldFormats
+data -> dataViews
+dataViews -> kibanaUtils
+dataViews -> kibanaReact
+dataViews -> usageCollection
+dataViews -> fieldFormats
+dataViews -> expressions
+devTools -> urlForwarding
+discover -> kibanaUtils
+discover -> home
+discover -> kibanaReact
+discover -> dataViews
+discover -> home
+discover -> share
+discover -> usageCollection
+discover -> spaces
+discover -> charts
+discover -> data
+discover -> embeddable
+discover -> inspector
+discover -> fieldFormats
+discover -> kibanaLegacy
+discover -> urlForwarding
+discover -> navigation
+discover -> uiActions
+discover -> savedObjects
+discover -> indexPatternFieldEditor
+embeddable -> savedObjects
+embeddable -> kibanaReact
+embeddable -> kibanaUtils
+embeddable -> inspector
+embeddable -> uiActions
+esUiShared -> data
+expressionError -> kibanaReact
+expressionError -> expressions
+expressionError -> presentationUtil
+expressionImage -> expressions
+expressionImage -> presentationUtil
+expressionMetric -> expressions
+expressionMetric -> presentationUtil
+expressionRepeatImage -> expressions
+expressionRepeatImage -> presentationUtil
+expressionRevealImage -> expressions
+expressionRevealImage -> presentationUtil
+expressionShape -> expressions
+expressionShape -> presentationUtil
+expressions -> kibanaUtils
+expressions -> inspector
+home -> kibanaReact
+home -> usageCollection
+home -> telemetry
+home -> customIntegrations
+home -> data
+home -> share
+home -> urlForwarding
+indexPatternEditor -> kibanaReact
+indexPatternEditor -> esUiShared
+indexPatternEditor -> data
+indexPatternFieldEditor -> kibanaReact
+indexPatternFieldEditor -> esUiShared
+indexPatternFieldEditor -> usageCollection
+indexPatternFieldEditor -> fieldFormats
+indexPatternFieldEditor -> usageCollection
+indexPatternFieldEditor -> data
+indexPatternManagement -> kibanaReact
+indexPatternManagement -> kibanaUtils
+indexPatternManagement -> management
+indexPatternManagement -> data
+indexPatternManagement -> urlForwarding
+indexPatternManagement -> indexPatternFieldEditor
+indexPatternManagement -> indexPatternEditor
+inputControlVis -> kibanaReact
+inputControlVis -> data
+inputControlVis -> expressions
+inputControlVis -> visDefaultEditor
+inputControlVis -> visualizations
+inspector -> kibanaReact
+inspector -> share
+kibanaOverview -> kibanaReact
+kibanaOverview -> newsfeed
+kibanaOverview -> newsfeed
+kibanaOverview -> usageCollection
+kibanaOverview -> navigation
+kibanaOverview -> data
+kibanaOverview -> home
+kibanaOverview -> share
+kibanaUsageCollection -> usageCollection
+management -> kibanaReact
+management -> kibanaUtils
+management -> home
+management -> home
+management -> share
+navigation -> kibanaReact
+navigation -> data
+newsfeed -> screenshotMode
+presentationUtil -> savedObjects
+presentationUtil -> data
+presentationUtil -> dataViews
+presentationUtil -> embeddable
+presentationUtil -> kibanaReact
+savedObjects -> kibanaUtils
+savedObjects -> kibanaReact
+savedObjects -> data
+savedObjectsManagement -> kibanaReact
+savedObjectsManagement -> home
+savedObjectsManagement -> home
+savedObjectsManagement -> savedObjectsTaggingOss
+savedObjectsManagement -> spaces
+savedObjectsManagement -> management
+savedObjectsManagement -> data
+savedObjectsTaggingOss -> savedObjects
+share -> kibanaUtils
+telemetry -> kibanaUtils
+telemetry -> kibanaReact
+telemetry -> telemetryCollectionManager
+telemetry -> usageCollection
+telemetry -> screenshotMode
+telemetryCollectionManager -> usageCollection
+telemetryManagementSection -> usageCollection
+telemetryManagementSection -> usageCollection
+telemetryManagementSection -> advancedSettings
+telemetryManagementSection -> telemetry
+uiActions -> kibanaUtils
+uiActions -> kibanaReact
+usageCollection -> kibanaUtils
+visDefaultEditor -> kibanaUtils
+visDefaultEditor -> kibanaReact
+visDefaultEditor -> data
+visDefaultEditor -> fieldFormats
+visDefaultEditor -> discover
+visDefaultEditor -> esUiShared
+visDefaultEditor -> visualize
+visTypeMarkdown -> expressions
+visTypeMarkdown -> kibanaReact
+visTypeMarkdown -> visDefaultEditor
+visTypeMarkdown -> visualizations
+visTypeMarkdown -> expressions
+visTypeMarkdown -> visualizations
+visualizations -> kibanaUtils
+visualizations -> discover
+visualizations -> usageCollection
+visualizations -> spaces
+visualizations -> savedObjectsTaggingOss
+visualizations -> data
+visualizations -> expressions
+visualizations -> uiActions
+visualizations -> embeddable
+visualizations -> inspector
+visualizations -> savedObjects
+visualize -> kibanaUtils
+visualize -> kibanaReact
+visualize -> home
+visualize -> discover
+visualize -> home
+visualize -> share
+visualize -> savedObjectsTaggingOss
+visualize -> usageCollection
+visualize -> spaces
+visualize -> data
+visualize -> urlForwarding
+visualize -> navigation
+visualize -> savedObjects
+visualize -> visualizations
+visualize -> embeddable
+visualize -> dashboard
+visualize -> presentationUtil
+expressionMetricVis -> kibanaUtils
+expressionMetricVis -> expressions
+expressionMetricVis -> fieldFormats
+expressionMetricVis -> charts
+expressionMetricVis -> visualizations
+expressionMetricVis -> presentationUtil
+expressionTagcloud -> kibanaUtils
+expressionTagcloud -> expressions
+expressionTagcloud -> visualizations
+expressionTagcloud -> charts
+expressionTagcloud -> presentationUtil
+expressionTagcloud -> fieldFormats
+visTypeMetric -> visDefaultEditor
+visTypeMetric -> data
+visTypeMetric -> visualizations
+visTypeMetric -> charts
+visTypeMetric -> expressions
+visTypePie -> visDefaultEditor
+visTypePie -> charts
+visTypePie -> data
+visTypePie -> expressions
+visTypePie -> visualizations
+visTypePie -> usageCollection
+visTypeTable -> kibanaUtils
+visTypeTable -> kibanaReact
+visTypeTable -> share
+visTypeTable -> visDefaultEditor
+visTypeTable -> usageCollection
+visTypeTable -> expressions
+visTypeTable -> visualizations
+visTypeTable -> data
+visTypeTagcloud -> kibanaReact
+visTypeTagcloud -> visDefaultEditor
+visTypeTagcloud -> data
+visTypeTagcloud -> expressions
+visTypeTagcloud -> visualizations
+visTypeTagcloud -> charts
+visTypeTimelion -> kibanaUtils
+visTypeTimelion -> kibanaReact
+visTypeTimelion -> visDefaultEditor
+visTypeTimelion -> visualizations
+visTypeTimelion -> data
+visTypeTimelion -> expressions
+visTypeTimelion -> charts
+visTypeTimeseries -> kibanaUtils
+visTypeTimeseries -> kibanaReact
+visTypeTimeseries -> fieldFormats
+visTypeTimeseries -> usageCollection
+visTypeTimeseries -> charts
+visTypeTimeseries -> data
+visTypeTimeseries -> expressions
+visTypeTimeseries -> visualizations
+visTypeTimeseries -> visualize
+visTypeVega -> kibanaUtils
+visTypeVega -> kibanaReact
+visTypeVega -> visDefaultEditor
+visTypeVega -> esUiShared
+visTypeVega -> home
+visTypeVega -> usageCollection
+visTypeVega -> data
+visTypeVega -> visualizations
+visTypeVega -> mapsEms
+visTypeVega -> expressions
+visTypeVega -> inspector
+visTypeVislib -> kibanaUtils
+visTypeVislib -> visDefaultEditor
+visTypeVislib -> visTypeXy
+visTypeVislib -> visTypePie
+visTypeVislib -> fieldFormats
+visTypeVislib -> charts
+visTypeVislib -> data
+visTypeVislib -> expressions
+visTypeVislib -> visualizations
+visTypeXy -> kibanaUtils
+visTypeXy -> visDefaultEditor
+visTypeXy -> charts
+visTypeXy -> data
+visTypeXy -> expressions
+visTypeXy -> visualizations
+visTypeXy -> usageCollection
+actions -> usageCollection
+actions -> spaces
+actions -> security
+actions -> licensing
+actions -> taskManager
+actions -> encryptedSavedObjects
+actions -> eventLog
+actions -> features
+alerting -> usageCollection
+alerting -> spaces
+alerting -> security
+alerting -> actions
+alerting -> encryptedSavedObjects
+alerting -> eventLog
+alerting -> features
+alerting -> kibanaUtils
+alerting -> licensing
+alerting -> taskManager
+apm -> fleet
+apm -> home
+apm -> kibanaReact
+apm -> kibanaUtils
+apm -> maps
+apm -> ml
+apm -> observability
+apm -> actions
+apm -> alerting
+apm -> cloud
+apm -> home
+apm -> maps
+apm -> ml
+apm -> security
+apm -> spaces
+apm -> taskManager
+apm -> usageCollection
+apm -> fleet
+apm -> data
+apm -> embeddable
+apm -> features
+apm -> infra
+apm -> inspector
+apm -> licensing
+apm -> observability
+apm -> ruleRegistry
+apm -> triggersActionsUi
+banners -> kibanaReact
+banners -> licensing
+canvas -> discover
+canvas -> home
+canvas -> kibanaLegacy
+canvas -> kibanaReact
+canvas -> kibanaUtils
+canvas -> lens
+canvas -> maps
+canvas -> savedObjects
+canvas -> visualizations
+canvas -> fieldFormats
+canvas -> home
+canvas -> reporting
+canvas -> spaces
+canvas -> usageCollection
+canvas -> bfetch
+canvas -> charts
+canvas -> data
+canvas -> embeddable
+canvas -> expressionError
+canvas -> expressionImage
+canvas -> expressionMetric
+canvas -> expressionRepeatImage
+canvas -> expressionRevealImage
+canvas -> expressionShape
+canvas -> expressions
+canvas -> features
+canvas -> inspector
+canvas -> presentationUtil
+canvas -> uiActions
+canvas -> share
+cases -> savedObjects
+cases -> security
+cases -> spaces
+cases -> actions
+cases -> esUiShared
+cases -> lens
+cases -> features
+cases -> kibanaReact
+cases -> kibanaUtils
+cases -> triggersActionsUi
+cloud -> usageCollection
+cloud -> home
+cloud -> security
+crossClusterReplication -> kibanaReact
+crossClusterReplication -> esUiShared
+crossClusterReplication -> data
+crossClusterReplication -> usageCollection
+crossClusterReplication -> home
+crossClusterReplication -> licensing
+crossClusterReplication -> licenseApiGuard
+crossClusterReplication -> management
+crossClusterReplication -> remoteClusters
+crossClusterReplication -> indexManagement
+crossClusterReplication -> features
+dashboardEnhanced -> embeddable
+dashboardEnhanced -> embeddableEnhanced
+dashboardEnhanced -> kibanaReact
+dashboardEnhanced -> kibanaUtils
+dashboardEnhanced -> dashboard
+dashboardEnhanced -> data
+dashboardEnhanced -> embeddable
+dashboardEnhanced -> share
+dashboardEnhanced -> uiActionsEnhanced
+dataEnhanced -> kibanaUtils
+dataEnhanced -> kibanaReact
+dataEnhanced -> kibanaUtils
+dataEnhanced -> usageCollection
+dataEnhanced -> security
+dataEnhanced -> bfetch
+dataEnhanced -> data
+dataEnhanced -> features
+dataEnhanced -> management
+dataEnhanced -> share
+dataEnhanced -> taskManager
+dataEnhanced -> screenshotMode
+dataVisualizer -> home
+dataVisualizer -> kibanaReact
+dataVisualizer -> maps
+dataVisualizer -> esUiShared
+dataVisualizer -> fieldFormats
+dataVisualizer -> security
+dataVisualizer -> maps
+dataVisualizer -> home
+dataVisualizer -> lens
+dataVisualizer -> indexPatternFieldEditor
+dataVisualizer -> customIntegrations
+dataVisualizer -> data
+dataVisualizer -> usageCollection
+dataVisualizer -> embeddable
+dataVisualizer -> share
+dataVisualizer -> discover
+dataVisualizer -> fileUpload
+discoverEnhanced -> kibanaUtils
+discoverEnhanced -> data
+discoverEnhanced -> share
+discoverEnhanced -> usageCollection
+discoverEnhanced -> uiActions
+discoverEnhanced -> embeddable
+discoverEnhanced -> discover
+embeddableEnhanced -> embeddable
+embeddableEnhanced -> kibanaReact
+embeddableEnhanced -> uiActions
+embeddableEnhanced -> uiActionsEnhanced
+encryptedSavedObjects -> security
+enterpriseSearch -> home
+enterpriseSearch -> kibanaReact
+enterpriseSearch -> usageCollection
+enterpriseSearch -> home
+enterpriseSearch -> cloud
+enterpriseSearch -> customIntegrations
+enterpriseSearch -> features
+enterpriseSearch -> spaces
+enterpriseSearch -> security
+enterpriseSearch -> licensing
+enterpriseSearch -> data
+enterpriseSearch -> charts
+enterpriseSearch -> infra
+eventLog -> spaces
+features -> licensing
+fileUpload -> kibanaReact
+fileUpload -> security
+fileUpload -> data
+fileUpload -> usageCollection
+fleet -> kibanaReact
+fleet -> esUiShared
+fleet -> home
+fleet -> infra
+fleet -> kibanaUtils
+fleet -> usageCollection
+fleet -> security
+fleet -> features
+fleet -> cloud
+fleet -> usageCollection
+fleet -> home
+fleet -> globalSearch
+fleet -> licensing
+fleet -> data
+fleet -> encryptedSavedObjects
+fleet -> navigation
+fleet -> customIntegrations
+fleet -> share
+globalSearch -> licensing
+globalSearchBar -> usageCollection
+globalSearchBar -> savedObjectsTagging
+globalSearchBar -> globalSearch
+globalSearchProviders -> globalSearch
+graph1 -> kibanaUtils
+graph1 -> kibanaReact
+graph1 -> home
+graph1 -> home
+graph1 -> features
+graph1 -> spaces
+graph1 -> licensing
+graph1 -> data
+graph1 -> navigation
+graph1 -> savedObjects
+graph1 -> kibanaLegacy
+grokdebugger -> kibanaReact
+grokdebugger -> esUiShared
+grokdebugger -> licensing
+grokdebugger -> home
+grokdebugger -> devTools
+indexLifecycleManagement -> indexManagement
+indexLifecycleManagement -> kibanaReact
+indexLifecycleManagement -> esUiShared
+indexLifecycleManagement -> home
+indexLifecycleManagement -> cloud
+indexLifecycleManagement -> usageCollection
+indexLifecycleManagement -> indexManagement
+indexLifecycleManagement -> home
+indexLifecycleManagement -> licensing
+indexLifecycleManagement -> management
+indexLifecycleManagement -> features
+indexLifecycleManagement -> share
+indexManagement -> kibanaReact
+indexManagement -> esUiShared
+indexManagement -> runtimeFields
+indexManagement -> security
+indexManagement -> usageCollection
+indexManagement -> fleet
+indexManagement -> home
+indexManagement -> management
+indexManagement -> features
+indexManagement -> share
+infra -> observability
+infra -> licenseManagement
+infra -> kibanaUtils
+infra -> kibanaReact
+infra -> home
+infra -> ml
+infra -> embeddable
+infra -> ml
+infra -> home
+infra -> embeddable
+infra -> osquery
+infra -> features
+infra -> usageCollection
+infra -> spaces
+infra -> embeddable
+infra -> data
+infra -> dataEnhanced
+infra -> visTypeTimeseries
+infra -> alerting
+infra -> triggersActionsUi
+infra -> observability
+infra -> ruleRegistry
+ingestPipelines -> esUiShared
+ingestPipelines -> kibanaReact
+ingestPipelines -> security
+ingestPipelines -> usageCollection
+ingestPipelines -> management
+ingestPipelines -> features
+ingestPipelines -> share
+lens -> savedObjects
+lens -> kibanaUtils
+lens -> kibanaReact
+lens -> embeddable
+lens -> fieldFormats
+lens -> usageCollection
+lens -> taskManager
+lens -> globalSearch
+lens -> savedObjectsTagging
+lens -> spaces
+lens -> data
+lens -> charts
+lens -> expressions
+lens -> fieldFormats
+lens -> inspector
+lens -> navigation
+lens -> urlForwarding
+lens -> visualizations
+lens -> dashboard
+lens -> uiActions
+lens -> embeddable
+lens -> share
+lens -> presentationUtil
+lens -> indexPatternFieldEditor
+licenseManagement -> telemetryManagementSection
+licenseManagement -> esUiShared
+licenseManagement -> kibanaReact
+licenseManagement -> telemetry
+licenseManagement -> home
+licenseManagement -> licensing
+licenseManagement -> management
+licenseManagement -> features
+licensing -> kibanaReact
+lists -> spaces
+lists -> security
+logstash -> home
+logstash -> home
+logstash -> monitoring
+logstash -> security
+logstash -> licensing
+logstash -> management
+logstash -> features
+maps -> kibanaReact
+maps -> kibanaUtils
+maps -> usageCollection
+maps -> home
+maps -> mapsEms
+maps -> home
+maps -> savedObjectsTagging
+maps -> charts
+maps -> security
+maps -> spaces
+maps -> usageCollection
+maps -> licensing
+maps -> features
+maps -> inspector
+maps -> data
+maps -> fileUpload
+maps -> uiActions
+maps -> navigation
+maps -> expressions
+maps -> visualizations
+maps -> dashboard
+maps -> embeddable
+maps -> mapsEms
+maps -> savedObjects
+maps -> share
+maps -> presentationUtil
+metricsEntities -> data
+metricsEntities -> dataEnhanced
+ml -> esUiShared
+ml -> kibanaUtils
+ml -> kibanaReact
+ml -> dashboard
+ml -> savedObjects
+ml -> home
+ml -> maps
+ml -> usageCollection
+ml -> fieldFormats
+ml -> alerting
+ml -> home
+ml -> security
+ml -> spaces
+ml -> management
+ml -> licenseManagement
+ml -> maps
+ml -> usageCollection
+ml -> data
+ml -> dataViews
+ml -> cloud
+ml -> features
+ml -> dataVisualizer
+ml -> licensing
+ml -> share
+ml -> embeddable
+ml -> uiActions
+ml -> kibanaLegacy
+ml -> discover
+ml -> triggersActionsUi
+ml -> fieldFormats
+monitoring -> kibanaUtils
+monitoring -> home
+monitoring -> alerting
+monitoring -> kibanaReact
+monitoring -> kibanaLegacy
+monitoring -> infra
+monitoring -> usageCollection
+monitoring -> home
+monitoring -> cloud
+monitoring -> triggersActionsUi
+monitoring -> alerting
+monitoring -> actions
+monitoring -> encryptedSavedObjects
+monitoring -> licensing
+monitoring -> features
+monitoring -> data
+monitoring -> navigation
+monitoring -> observability
+observability -> data
+observability -> kibanaReact
+observability -> kibanaUtils
+observability -> embeddable
+observability -> home
+observability -> lens
+observability -> licensing
+observability -> spaces
+observability -> usageCollection
+observability -> alerting
+observability -> cases
+observability -> data
+observability -> features
+observability -> inspector
+observability -> ruleRegistry
+observability -> timelines
+observability -> triggersActionsUi
+osquery -> esUiShared
+osquery -> fleet
+osquery -> kibanaUtils
+osquery -> kibanaReact
+osquery -> fleet
+osquery -> home
+osquery -> usageCollection
+osquery -> lens
+osquery -> actions
+osquery -> data
+osquery -> dataEnhanced
+osquery -> discover
+osquery -> features
+osquery -> navigation
+osquery -> triggersActionsUi
+osquery -> security
+painlessLab -> kibanaReact
+painlessLab -> devTools
+painlessLab -> licensing
+painlessLab -> home
+remoteClusters -> kibanaReact
+remoteClusters -> esUiShared
+remoteClusters -> usageCollection
+remoteClusters -> cloud
+remoteClusters -> licensing
+remoteClusters -> management
+remoteClusters -> indexManagement
+remoteClusters -> features
+reporting -> kibanaReact
+reporting -> discover
+reporting -> security
+reporting -> spaces
+reporting -> usageCollection
+reporting -> data
+reporting -> esUiShared
+reporting -> home
+reporting -> management
+reporting -> licensing
+reporting -> uiActions
+reporting -> taskManager
+reporting -> embeddable
+reporting -> screenshotMode
+reporting -> share
+reporting -> features
+rollup -> kibanaUtils
+rollup -> kibanaReact
+rollup -> home
+rollup -> esUiShared
+rollup -> data
+rollup -> home
+rollup -> indexManagement
+rollup -> usageCollection
+rollup -> visTypeTimeseries
+rollup -> management
+rollup -> licensing
+rollup -> features
+ruleRegistry -> security
+ruleRegistry -> alerting
+ruleRegistry -> data
+ruleRegistry -> triggersActionsUi
+runtimeFields -> kibanaReact
+runtimeFields -> esUiShared
+savedObjectsTagging -> kibanaReact
+savedObjectsTagging -> usageCollection
+savedObjectsTagging -> security
+savedObjectsTagging -> features
+savedObjectsTagging -> management
+savedObjectsTagging -> savedObjectsTaggingOss
+searchprofiler -> esUiShared
+searchprofiler -> devTools
+searchprofiler -> home
+searchprofiler -> licensing
+security -> home
+security -> kibanaReact
+security -> spaces
+security -> esUiShared
+security -> home
+security -> management
+security -> usageCollection
+security -> spaces
+security -> share
+security -> data
+security -> features
+security -> licensing
+security -> taskManager
+securitySolution -> esUiShared
+securitySolution -> fleet
+securitySolution -> kibanaUtils
+securitySolution -> kibanaReact
+securitySolution -> usageCollection
+securitySolution -> lists
+securitySolution -> ml
+securitySolution -> encryptedSavedObjects
+securitySolution -> fleet
+securitySolution -> ml
+securitySolution -> dashboard
+securitySolution -> newsfeed
+securitySolution -> security
+securitySolution -> spaces
+securitySolution -> usageCollection
+securitySolution -> lens
+securitySolution -> lists
+securitySolution -> home
+securitySolution -> telemetry
+securitySolution -> actions
+securitySolution -> alerting
+securitySolution -> cases
+securitySolution -> data
+securitySolution -> dataEnhanced
+securitySolution -> embeddable
+securitySolution -> eventLog
+securitySolution -> features
+securitySolution -> inspector
+securitySolution -> licensing
+securitySolution -> maps
+securitySolution -> ruleRegistry
+securitySolution -> taskManager
+securitySolution -> timelines
+securitySolution -> triggersActionsUi
+securitySolution -> uiActions
+snapshotRestore -> esUiShared
+snapshotRestore -> kibanaReact
+snapshotRestore -> home
+snapshotRestore -> usageCollection
+snapshotRestore -> security
+snapshotRestore -> cloud
+snapshotRestore -> home
+snapshotRestore -> licensing
+snapshotRestore -> management
+snapshotRestore -> features
+snapshotRestore -> share
+spaces -> esUiShared
+spaces -> kibanaReact
+spaces -> home
+spaces -> advancedSettings
+spaces -> home
+spaces -> management
+spaces -> usageCollection
+spaces -> features
+spaces -> licensing
+stackAlerts -> esUiShared
+stackAlerts -> alerting
+stackAlerts -> features
+stackAlerts -> triggersActionsUi
+stackAlerts -> kibanaReact
+stackAlerts -> savedObjects
+stackAlerts -> data
+taskManager -> usageCollection
+telemetryCollectionXpack -> telemetryCollectionManager
+timelines -> alerting
+timelines -> cases
+timelines -> data
+timelines -> dataEnhanced
+timelines -> kibanaReact
+timelines -> kibanaUtils
+transform -> esUiShared
+transform -> discover
+transform -> kibanaUtils
+transform -> kibanaReact
+transform -> ml
+transform -> security
+transform -> usageCollection
+transform -> spaces
+transform -> alerting
+transform -> data
+transform -> home
+transform -> licensing
+transform -> management
+transform -> features
+transform -> savedObjects
+transform -> share
+transform -> triggersActionsUi
+transform -> fieldFormats
+triggersActionsUi -> home
+triggersActionsUi -> alerting
+triggersActionsUi -> esUiShared
+triggersActionsUi -> kibanaReact
+triggersActionsUi -> kibanaUtils
+triggersActionsUi -> alerting
+triggersActionsUi -> cloud
+triggersActionsUi -> features
+triggersActionsUi -> home
+triggersActionsUi -> spaces
+triggersActionsUi -> management
+triggersActionsUi -> charts
+triggersActionsUi -> data
+triggersActionsUi -> kibanaReact
+triggersActionsUi -> kibanaUtils
+triggersActionsUi -> savedObjects
+uiActionsEnhanced -> kibanaUtils
+uiActionsEnhanced -> kibanaReact
+uiActionsEnhanced -> data
+uiActionsEnhanced -> embeddable
+uiActionsEnhanced -> uiActions
+uiActionsEnhanced -> licensing
+upgradeAssistant -> esUiShared
+upgradeAssistant -> kibanaReact
+upgradeAssistant -> usageCollection
+upgradeAssistant -> cloud
+upgradeAssistant -> management
+upgradeAssistant -> discover
+upgradeAssistant -> data
+upgradeAssistant -> licensing
+upgradeAssistant -> features
+upgradeAssistant -> infra
+uptime -> observability
+uptime -> kibanaReact
+uptime -> kibanaUtils
+uptime -> home
+uptime -> data
+uptime -> ml
+uptime -> fleet
+uptime -> data
+uptime -> home
+uptime -> ml
+uptime -> fleet
+uptime -> alerting
+uptime -> embeddable
+uptime -> inspector
+uptime -> features
+uptime -> licensing
+uptime -> triggersActionsUi
+uptime -> usageCollection
+uptime -> ruleRegistry
+uptime -> observability
+watcher -> esUiShared
+watcher -> kibanaReact
+watcher -> fieldFormats
+watcher -> home
+watcher -> licensing
+watcher -> licenseApiGuard
+watcher -> management
+watcher -> charts
+watcher -> data
+watcher -> features
+urlDrilldown -> kibanaUtils
+urlDrilldown -> kibanaReact
+urlDrilldown -> embeddable
+urlDrilldown -> uiActions
+urlDrilldown -> uiActionsEnhanced
+
+}

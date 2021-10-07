@@ -28,6 +28,7 @@ import { getPluginApiMap } from './get_plugin_api_map';
 import { writeDeprecationDocByApi } from './mdx/write_deprecations_doc_by_api';
 import { writeDeprecationDocByPlugin } from './mdx/write_deprecations_doc_by_plugin';
 import { writePluginDirectoryDoc } from './mdx/write_plugin_directory_doc';
+import { writeDependencyGraph } from './write_dependency_graph';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
@@ -60,6 +61,7 @@ export function runBuildApiDocsCli() {
       const plugins = findPlugins();
 
       const outputFolder = Path.resolve(REPO_ROOT, 'api_docs');
+
       if (!Fs.existsSync(outputFolder)) {
         Fs.mkdirSync(outputFolder);
 
@@ -74,8 +76,10 @@ export function runBuildApiDocsCli() {
           }
         });
       }
+
       const collectReferences = flags.references as boolean;
 
+      log.info('collectReferences is ' + collectReferences);
       const { pluginApiMap, missingApiItems, unReferencedDeprecations, referencedDeprecations } =
         getPluginApiMap(project, plugins, log, {
           collectReferences,
@@ -98,6 +102,19 @@ export function runBuildApiDocsCli() {
 
       writePluginDirectoryDoc(outputFolder, pluginApiMap, allPluginStats, log);
 
+      log.info('Writing dependency graph');
+
+      const filteredPluginApi =
+        pluginFilter && typeof pluginFilter === 'object'
+          ? pluginApiMap[pluginFilter[0]]
+          : undefined;
+
+      log.info('filteredPluginApi is ' + filteredPluginApi);
+      log.info('typeof pluginFilter is ' + typeof pluginFilter);
+
+      writeDependencyGraph(outputFolder, plugins, allPluginStats, log, filteredPluginApi);
+
+      log.info('Writing api docs, pluginFilter is ' + pluginFilter);
       plugins.forEach((plugin) => {
         // Note that the filtering is done here, and not above because the entire public plugin API has to
         // be parsed in order to correctly determine reference links, and ensure that `removeBrokenLinks`
@@ -149,7 +166,11 @@ export function runBuildApiDocsCli() {
             d.label
           )}`;
 
-        if (collectReferences && pluginFilter === plugin.manifest.id) {
+        if (
+          collectReferences &&
+          typeof pluginFilter === 'object' &&
+          pluginFilter[0] === plugin.manifest.id
+        ) {
           if (referencedDeprecations[id] && pluginStats.deprecatedAPIsReferencedCount > 0) {
             log.info(`${referencedDeprecations[id].length} deprecated APIs used`);
             // eslint-disable-next-line no-console
@@ -168,6 +189,11 @@ export function runBuildApiDocsCli() {
           } else {
             log.info(`No unused APIs for plugin ${plugin.manifest.id}`);
           }
+        } else if (pluginFilter) {
+          log.info(
+            `Plugin filter "${pluginFilter}" does not match plugin id "${plugin.manifest.id}" or collectReferences is ` +
+              collectReferences
+          );
         }
 
         if (stats) {
@@ -307,7 +333,7 @@ function collectStatsForApi(doc: ApiDeclaration, stats: ApiStats, pluginApi: Plu
       collectStatsForApi(child, stats, pluginApi);
     });
   }
-  if (!doc.references || doc.references.length === 0) {
+  if (doc.references && doc.references.length === 0) {
     stats.noReferences.push(doc);
   }
 }
