@@ -5,48 +5,77 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
-
+import React, { FC, useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { JobType } from '../../../../common/types/saved_objects';
-import { useMlApiContext, useMlKibana } from '../../contexts/kibana';
+import { useMlApiContext } from '../../contexts/kibana';
+import { JobSpacesSyncFlyout } from '../../components/job_spaces_sync';
+import { checkPermission } from '../../capabilities/check_capabilities';
 
 interface Props {
   jobType?: JobType;
+  onCloseFlyout?: () => void;
+  forceRefresh?: boolean;
 }
 
-export const SavedObjectsWarning: FC<Props> = ({ jobType }) => {
+export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRefresh }) => {
   const {
-    savedObjects: { initSavedObjects },
+    savedObjects: { syncCheck },
   } = useMlApiContext();
-  const {
-    services: {
-      http: { basePath },
-    },
-  } = useMlKibana();
 
+  const mounted = useRef(false);
   const [showWarning, setShowWarning] = useState(false);
+  const [showSyncFlyout, setShowSyncFlyout] = useState(false);
+  const canCreateJob = useMemo(() => checkPermission('canCreateJob'), []);
 
-  useEffect(() => {
-    let unmounted = false;
-    initSavedObjects(true)
-      .then(({ jobs }) => {
-        if (unmounted === true) {
-          return;
-        }
+  const checkStatus = useCallback(async () => {
+    try {
+      if (mounted.current === false) {
+        return;
+      }
 
-        const missingJobs =
-          jobs.length > 0 && (jobType === undefined || jobs.some(({ type }) => type === jobType));
-        setShowWarning(missingJobs);
-      })
-      .catch(() => {
-        console.log('Saved object synchronization check could not be performed.'); // eslint-disable-line no-console
-      });
-    return () => {
-      unmounted = true;
-    };
-  }, []);
+      const { result } = await syncCheck(jobType);
+
+      if (mounted.current === true) {
+        setShowWarning(showSyncFlyout || result);
+      }
+    } catch (error) {
+      console.log('Saved object synchronization check could not be performed.'); // eslint-disable-line no-console
+    }
+  }, [showSyncFlyout, setShowWarning]);
+
+  useEffect(
+    function initialStatusCheck() {
+      mounted.current = true;
+      if (forceRefresh === undefined || forceRefresh === true) {
+        checkStatus();
+      }
+      return () => {
+        mounted.current = false;
+      };
+    },
+    [forceRefresh, mounted]
+  );
+
+  const onClose = useCallback(() => {
+    if (forceRefresh === undefined) {
+      checkStatus();
+    }
+    setShowSyncFlyout(false);
+    if (typeof onCloseFlyout === 'function') {
+      onCloseFlyout();
+    }
+  }, [checkStatus, onCloseFlyout, setShowSyncFlyout]);
+
+  useEffect(
+    function hideSyncFlyoutOnWarningClose() {
+      if (showWarning === false && mounted.current === true) {
+        setShowSyncFlyout(false);
+      }
+    },
+    [showWarning, setShowSyncFlyout]
+  );
 
   return showWarning === false ? null : (
     <>
@@ -61,22 +90,34 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType }) => {
         iconType="alert"
         data-test-subj="mlJobSyncRequiredWarning"
       >
-        <div>
+        <>
           <FormattedMessage
             id="xpack.ml.jobsList.missingSavedObjectWarning.description"
-            defaultMessage="Some jobs are missing their saved object and require synchronization in {link}."
-            values={{
-              link: (
-                <EuiLink href={`${basePath.get()}/app/management/insightsAndAlerting/jobsListLink`}>
-                  <FormattedMessage
-                    id="xpack.ml.jobsList.missingSavedObjectWarning.linkToManagement.link"
-                    defaultMessage="Stack Management"
-                  />
-                </EuiLink>
-              ),
-            }}
+            defaultMessage="Some jobs are missing or have incomplete saved objects. "
           />
-        </div>
+          {canCreateJob ? (
+            <FormattedMessage
+              id="xpack.ml.jobsList.missingSavedObjectWarning.link"
+              defaultMessage=" {link}"
+              values={{
+                link: (
+                  <EuiLink onClick={setShowSyncFlyout.bind(null, true)}>
+                    <FormattedMessage
+                      id="xpack.ml.jobsList.missingSavedObjectWarning.linkToManagement.link"
+                      defaultMessage="Synchronize your jobs."
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.ml.jobsList.missingSavedObjectWarning.noPermission"
+              defaultMessage="An Administrator can synchronize the jobs in Stack Management."
+            />
+          )}
+          {showSyncFlyout && <JobSpacesSyncFlyout onClose={onClose} />}
+        </>
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>

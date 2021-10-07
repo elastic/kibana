@@ -7,7 +7,7 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.12/ecs-os.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-os.html
  *
  * @internal
  */
