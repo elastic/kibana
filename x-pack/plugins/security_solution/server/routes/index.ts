@@ -58,7 +58,7 @@ import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import { previewRulesRoute } from '../lib/detection_engine/routes/rules/preview_rules_route';
-import { CreateRuleOptions } from '../lib/detection_engine/rule_types/types';
+import { PreviewRuleOptions } from '../lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
 
@@ -70,8 +70,8 @@ export const initRoutes = (
   ml: SetupPlugins['ml'],
   ruleDataService: RuleDataPluginService,
   logger: Logger,
-  isRuleRegistryEnabled: boolean
-  previewRuleOptions: CreateRuleOptions
+  isRuleRegistryEnabled: boolean,
+  previewRuleOptions: PreviewRuleOptions
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......

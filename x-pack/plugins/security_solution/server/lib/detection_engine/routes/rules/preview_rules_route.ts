@@ -8,7 +8,10 @@ import moment from 'moment';
 import uuid from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { DETECTION_ENGINE_RULES_PREVIEW } from '../../../../../common/constants';
+import {
+  DEFAULT_PREVIEW_INDEX,
+  DETECTION_ENGINE_RULES_PREVIEW,
+} from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildMlAuthz } from '../../../machine_learning/authz';
@@ -86,6 +89,8 @@ export const previewRulesRoute = async (
 
         const { previewRuleExecutionLogClient, warningsAndErrorsStore } = createWarningsAndErrors();
 
+        const spaceId = siemClient.getSpaceId();
+
         const runExecutors = async <
           TParams extends RuleParams,
           TState extends AlertTypeState,
@@ -161,7 +166,7 @@ export const previewRulesRoute = async (
                 savedObjectsClient: context.core.savedObjects.client,
                 scopedClusterClient: context.core.elasticsearch.client,
               },
-              spaceId: siemClient.getSpaceId(),
+              spaceId,
               updatedBy: rule.updatedBy,
               createdBy: rule.createdBy,
               params,
@@ -178,6 +183,7 @@ export const previewRulesRoute = async (
         await runExecutors(
           signalRulesAlertType({
             ...previewRuleOptions,
+            indexNameOverride: `${DEFAULT_PREVIEW_INDEX}-${spaceId}`,
             ruleExecutionLogClientOverride: previewRuleExecutionLogClient,
           }).executor,
           previewRuleParams
@@ -193,11 +199,7 @@ export const previewRulesRoute = async (
           return response.ok({
             body: {
               previewId,
-              warnings: warningsAndErrorsStore.filter(
-                (item) =>
-                  item.newStatus === RuleExecutionStatus.warning ||
-                  item.newStatus === RuleExecutionStatus['partial failure']
-              ),
+              warnings: warningsAndErrorsStore,
             },
           });
         }

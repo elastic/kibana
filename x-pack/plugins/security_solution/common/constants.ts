@@ -262,7 +262,7 @@ export const TIMELINE_FAVORITE_URL = '/api/timeline/_favorite';
 export const TIMELINE_DRAFT_URL = `${TIMELINE_URL}/_draft`;
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export`;
 export const TIMELINE_IMPORT_URL = `${TIMELINE_URL}/_import`;
-export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged`;
+export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackazzged`;
 
 export const NOTE_URL = '/api/note';
 export const PINNED_EVENT_URL = '/api/pinned_event';
