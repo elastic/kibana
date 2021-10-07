@@ -284,6 +284,7 @@ Noteworthy fields: `transaction.name`, `transaction.type`, `span.type`, `span.su
 #### Query
 
 ```json
+GET apm-*-metric-*,metrics-apm*/_search
 {
   "size": 0,
   "query": {
@@ -346,6 +347,7 @@ A pre-aggregated document with 73 span requests from opbeans-ruby to elasticsear
 The latency between a service and an (external) endpoint
 
 ```json
+GET apm-*-metric-*,metrics-apm*/_search?
 {
   "size": 0,
   "query": {
@@ -406,27 +408,17 @@ Most Elasticsearch queries will need to have one or more filters. There are a co
 - stability: Running an aggregation on unrelated documents could cause the entire query to fail
 - performance: limiting the number of documents will make the query faster
 
-```js
+```json
+GET apm-*-metric-*,metrics-apm*/_search
 {
   "query": {
     "bool": {
       "filter": [
-        // service name
         { "term": { "service.name": "opbeans-go" }},
-
-        // service environment
-        { "term": { "service.environment": "testing" }}
-
-        // transaction type
-        { "term": { "transaction.type": "request" }}
-
-        // event type (possible values : transaction, span, metric, error)
+        { "term": { "service.environment": "testing" }},
+        { "term": { "transaction.type": "request" }},
         { "terms": { "processor.event": ["metric"] }},
-
-        // metric set is a subtype of `processor.event: metric`
         { "terms": { "metricset.name": ["transaction"] }},
-
-        // time range
         {
           "range": {
             "@timestamp": {
@@ -438,5 +430,10 @@ Most Elasticsearch queries will need to have one or more filters. There are a co
         }
       ]
     }
-  },
+  }
+}
 ```
+
+Possible values for `processor.event` are: `transaction`, `span`, `metric`, `error`.
+
+`metricset` is a subtype of `processor.event: metric`.
