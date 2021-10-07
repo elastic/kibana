@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export interface ConfigType {
-  loginAssistanceMessage: string;
-  showInsecureClusterWarning: boolean;
-}
+export { defineSecurityCheckupGetStateRoutes } from './get_state';

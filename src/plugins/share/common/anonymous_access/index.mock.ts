@@ -6,5 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { LocatorDefinition, LocatorPublic, useLocatorUrl, formatSearchParams } from './url_service';
-export type { AnonymousAccessServiceContract, AnonymousAccessState } from './anonymous_access';
+import type { AnonymousAccessServiceContract } from './types';
+
+export const anonymousAccessMock = {
+  create: (): jest.Mocked<AnonymousAccessServiceContract> => ({
+    getState: jest.fn(),
+    getCapabilities: jest.fn(),
+  }),
+};
