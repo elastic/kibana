@@ -74,10 +74,8 @@ export type SearchHit = SearchResponse<object>['hits']['hits'][0];
 export interface TermAggregationBucket {
   key: string;
   doc_count: number;
-  top_threshold_hits?: {
-    hits: {
-      hits: SearchHit[];
-    };
+  max_timestamp: {
+    value_as_string: string;
   };
   cardinality_count?: {
     value: number;
