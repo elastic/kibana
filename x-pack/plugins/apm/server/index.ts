@@ -46,16 +46,12 @@ const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
   }),
-  transactionIndices: schema.string({
-    defaultValue: 'traces-apm*,apm-*-transaction-*',
-  }),
-  spanIndices: schema.string({ defaultValue: 'traces-apm*,apm-*-span-*' }),
-  errorIndices: schema.string({ defaultValue: 'logs-apm*,apm-*-error-*' }),
-  metricsIndices: schema.string({
-    defaultValue: 'metrics-apm*,apm-*-metric-*',
-  }),
-  sourcemapIndices: schema.string({ defaultValue: 'apm-*-sourcemap-*' }),
-  onboardingIndices: schema.string({ defaultValue: 'apm-*-onboarding-*' }),
+  transactionIndices: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
+  spanIndices: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
+  errorIndices: schema.string({ defaultValue: 'logs-apm*,apm-*' }),
+  metricsIndices: schema.string({ defaultValue: 'metrics-apm*,apm-*' }),
+  sourcemapIndices: schema.string({ defaultValue: 'apm-*' }),
+  onboardingIndices: schema.string({ defaultValue: 'apm-*' }),
   indexPattern: schema.string({ defaultValue: 'apm-*' }),
   fleetMode: schema.boolean({ defaultValue: true }),
 });
