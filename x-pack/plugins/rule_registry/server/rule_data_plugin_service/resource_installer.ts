@@ -88,6 +88,7 @@ export class ResourceInstaller {
       await Promise.all([
         this.createOrUpdateLifecyclePolicy({
           policy: getResourceName(DEFAULT_ILM_POLICY_ID),
+          // @ts-expect-error @elastic/elasticsearch IlmAction is not valid
           body: defaultLifecyclePolicy,
         }),
 

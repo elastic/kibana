@@ -140,12 +140,14 @@ export class RuleDataClient implements IRuleDataClient {
                 .then(() => {
                   return clusterClient.bulk(requestWithDefaultParameters).then((retryResponse) => {
                     if (retryResponse.body.errors) {
+                      // @ts-expect-error @elatic/elasticsearch TransportResult is not assignable to DiagnosticResult
                       throw new errors.ResponseError(retryResponse);
                     }
                     return retryResponse;
                   });
                 });
             }
+            // @ts-expect-error @elatic/elasticsearch TransportResult is not assignable to DiagnosticResult
             const error = new errors.ResponseError(response);
             throw error;
           }
