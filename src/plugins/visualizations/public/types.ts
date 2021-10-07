@@ -13,6 +13,7 @@ import {
   TimefilterContract,
   AggConfigSerialized,
 } from '../../../plugins/data/public';
+import type { ISearchSource } from '../../data/common';
 import { ExpressionAstExpression } from '../../expressions/public';
 
 import type { SerializedVis, Vis } from './vis';
@@ -49,7 +50,7 @@ export interface VisSavedObject extends ISavedVis {
   getDisplayName?: () => string;
   displayName: string;
   migrationVersion?: SavedObjectsMigrationVersion;
-  searchSource?: any;
+  searchSource?: ISearchSource;
   version?: string;
   tags?: string[];
 }

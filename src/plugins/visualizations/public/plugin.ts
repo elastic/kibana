@@ -96,7 +96,7 @@ export interface VisualizationsStart extends TypesStart {
     searchTerm: string,
     listingLimit: number,
     references?: SavedObjectsFindOptionsReference[]
-  ) => Promise<{ hits: any[]; total: number }>;
+  ) => Promise<{ hits: Array<Record<string, unknown>>; total: number }>;
   __LEGACY: { createVisEmbeddableFromObject: ReturnType<typeof createVisEmbeddableFromObject> };
 }
 

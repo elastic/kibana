@@ -55,7 +55,7 @@ describe('getVisualizationInstance', () => {
     mockServices.visualizations.convertToSerializedVis.mockImplementation(() => serializedVisMock);
     // @ts-expect-error
     mockServices.visualizations.getSavedVisualization.mockImplementation(
-      (opts: any) => savedVisMock
+      (opts: unknown) => savedVisMock
     );
     // @ts-expect-error
     mockServices.visualizations.createVis.mockImplementation(() => visMock);
@@ -152,7 +152,7 @@ describe('getVisualizationInstanceInput', () => {
     mockServices.visualizations.createVis.mockImplementation(() => visMock);
     // @ts-expect-error
     mockServices.visualizations.getSavedVisualization.mockImplementation(
-      (opts: any) => savedVisMock
+      (opts: unknown) => savedVisMock
     );
     // @ts-expect-error
     mockServices.createVisEmbeddableFromObject.mockImplementation(() => ({
