@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }) {
       await queryBar.setQuery('php* OR *jpg OR *css*');
       await testSubjects.click('querySubmitButton');
       await retry.tryForTime(30000, async function () {
-        expect(await PageObjects.discover.getHitCount()).to.be('13,301');
+        expect(await PageObjects.discover.getHitCount()).to.be('13,300');
       });
     });
   });

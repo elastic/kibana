@@ -62,7 +62,6 @@ const fieldsWithData = [
   'xss',
   'xss.raw',
   'runtime_number',
-
   'relatedContent.article:modified_time',
   'relatedContent.article:published_time',
   'relatedContent.article:section',
