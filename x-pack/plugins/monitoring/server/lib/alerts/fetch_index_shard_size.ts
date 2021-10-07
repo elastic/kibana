@@ -90,8 +90,6 @@ export async function fetchIndexShardSize(
                         '_index',
                         'index_stats.shards.primaries',
                         'index_stats.primaries.store.size_in_bytes',
-                        'source_node.name',
-                        'source_node.uuid',
                       ],
                     },
                     size: 1,
