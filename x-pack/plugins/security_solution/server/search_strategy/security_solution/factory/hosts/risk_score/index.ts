@@ -6,23 +6,23 @@
  */
 
 import { SecuritySolutionFactory } from '../../types';
-import { HostsQueries } from '../../../../../../common';
+import {
+  HostsRiskScoreRequestOptions,
+  HostsQueries,
+  HostsRiskScoreStrategyResponse,
+} from '../../../../../../common';
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { buildRiskyHostsQuery } from './query.risky_hosts.dsl';
-import {
-  HostsRiskyHostsRequestOptions,
-  HostsRiskyHostsStrategyResponse,
-} from '../../../../../../common/search_strategy/security_solution/hosts/risky_hosts';
+import { buildHostsRiskScoreQuery } from './query.hosts_risk.dsl';
 
-export const riskyHosts: SecuritySolutionFactory<HostsQueries.riskyHosts> = {
-  buildDsl: (options: HostsRiskyHostsRequestOptions) => buildRiskyHostsQuery(options),
+export const riskScore: SecuritySolutionFactory<HostsQueries.hostsRiskScore> = {
+  buildDsl: (options: HostsRiskScoreRequestOptions) => buildHostsRiskScoreQuery(options),
   parse: async (
-    options: HostsRiskyHostsRequestOptions,
+    options: HostsRiskScoreRequestOptions,
     response: IEsSearchResponse<unknown>
-  ): Promise<HostsRiskyHostsStrategyResponse> => {
+  ): Promise<HostsRiskScoreStrategyResponse> => {
     const inspect = {
-      dsl: [inspectStringifyObject(buildRiskyHostsQuery(options))],
+      dsl: [inspectStringifyObject(buildHostsRiskScoreQuery(options))],
     };
 
     return {

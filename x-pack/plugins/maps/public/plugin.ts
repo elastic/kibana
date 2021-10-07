@@ -47,12 +47,12 @@ import { getAppTitle } from '../common/i18n_getters';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 import {
   createLayerDescriptors,
-  registerLayerWizard,
-  registerSource,
   MapsSetupApi,
   MapsStartApi,
   suggestEMSTermJoinConfig,
 } from './api';
+import { registerLayerWizard } from './classes/layers/layer_wizard_registry';
+import { registerSource } from './classes/sources/source_registry';
 import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import type { MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/public';
 import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
@@ -102,7 +102,7 @@ export interface MapsPluginStartDependencies {
   dashboard: DashboardStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
-  security: SecurityPluginStart;
+  security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
 }
 

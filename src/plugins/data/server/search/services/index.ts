@@ -6,9 +6,4 @@
  * Side Public License, v 1.
  */
 
-/**
- * Removes markup added by kibana fields html formatter
- */
-export function trimAngularSpan(text: string): string {
-  return text.replace(/^<span ng-non-bindable>/, '').replace(/<\/span>$/, '');
-}
+export { CachedUiSettingsClient } from './cached_ui_settings_client';
