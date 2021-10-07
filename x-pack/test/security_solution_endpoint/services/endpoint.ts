@@ -177,7 +177,7 @@ export class EndpointTestResources extends FtrService {
           rest_total_hits_as_int: true,
         });
 
-        return searchResponse.body.hits.total === size;
+        return searchResponse.hits.total === size;
       } catch (error) {
         // We ignore 404's (index might not exist)
         if (error instanceof errors.ResponseError && error.statusCode === 404) {

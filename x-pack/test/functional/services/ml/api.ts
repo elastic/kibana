@@ -39,7 +39,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
   return {
     async hasJobResults(jobId: string): Promise<boolean> {
-      const { body } = await es.search({
+      const body = await es.search({
         index: '.ml-anomalies-*',
         body: {
           size: 1,
@@ -79,7 +79,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async hasDetectorResults(jobId: string, detectorIndex: number): Promise<boolean> {
-      const { body } = await es.search({
+      const body = await es.search({
         index: '.ml-anomalies-*',
         body: {
           size: 1,
@@ -128,12 +128,12 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async createIndices(indices: string) {
       log.debug(`Creating indices: '${indices}'...`);
-      if ((await es.indices.exists({ index: indices, allow_no_indices: false })).body === true) {
+      if ((await es.indices.exists({ index: indices, allow_no_indices: false })) === true) {
         log.debug(`Indices '${indices}' already exist. Nothing to create.`);
         return;
       }
 
-      const { body } = await es.indices.create({ index: indices });
+      const body = await es.indices.create({ index: indices });
       expect(body)
         .to.have.property('acknowledged')
         .eql(true, 'Response for create request indices should be acknowledged.');
@@ -144,12 +144,12 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async deleteIndices(indices: string) {
       log.debug(`Deleting indices: '${indices}'...`);
-      if ((await es.indices.exists({ index: indices, allow_no_indices: false })).body === false) {
+      if ((await es.indices.exists({ index: indices, allow_no_indices: false })) === false) {
         log.debug(`Indices '${indices}' don't exist. Nothing to delete.`);
         return;
       }
 
-      const { body } = await es.indices.delete({
+      const body = await es.indices.delete({
         index: indices,
       });
       expect(body)
@@ -315,7 +315,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async assertIndicesExist(indices: string) {
       await retry.tryForTime(30 * 1000, async () => {
-        if ((await es.indices.exists({ index: indices, allow_no_indices: false })).body === true) {
+        if ((await es.indices.exists({ index: indices, allow_no_indices: false })) === true) {
           return true;
         } else {
           throw new Error(`indices '${indices}' should exist`);
@@ -325,7 +325,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async assertIndicesNotToExist(indices: string) {
       await retry.tryForTime(30 * 1000, async () => {
-        if ((await es.indices.exists({ index: indices, allow_no_indices: false })).body === false) {
+        if ((await es.indices.exists({ index: indices, allow_no_indices: false })) === false) {
           return true;
         } else {
           throw new Error(`indices '${indices}' should not exist`);
@@ -335,7 +335,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async assertIndicesNotEmpty(indices: string) {
       await retry.tryForTime(30 * 1000, async () => {
-        const { body } = await es.search({
+        const body = await es.search({
           index: indices,
           body: {
             size: 1,
@@ -842,7 +842,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async getAnnotations(jobId: string) {
       log.debug(`Fetching annotations for job '${jobId}'...`);
 
-      const { body } = await es.search<Annotation>({
+      const body = await es.search<Annotation>({
         index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
         body: {
           query: {
@@ -861,7 +861,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async getAnnotationById(annotationId: string): Promise<Annotation | undefined> {
       log.debug(`Fetching annotation '${annotationId}'...`);
 
-      const { body } = await es.search({
+      const body = await es.search({
         index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
         body: {
           size: 1,
@@ -890,7 +890,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         body: annotationRequestBody,
         refresh: 'wait_for',
       } as const;
-      const { body } = await es.index(params);
+      const body = await es.index(params);
       await this.waitForAnnotationToExist(body._id);
       log.debug(`> Annotation ${body._id} indexed.`);
       return body;

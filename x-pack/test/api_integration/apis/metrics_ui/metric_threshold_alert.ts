@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { convertToKibanaClient } from '@kbn/test';
 import { InfraSource } from '../../../../plugins/infra/common/source_configuration/source_configuration';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
@@ -25,6 +26,7 @@ const { gauge, rate } = DATES['alert-test-data'];
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
+  const kbnClient = convertToKibanaClient(esClient);
 
   const baseParams: EvaluatedAlertParams = {
     groupBy: void 0,
@@ -100,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: gauge.max };
-          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
+          const results = await evaluateAlert(kbnClient, params, configuration, [], timeFrame);
           expect(results).to.eql([
             {
               '*': {
@@ -123,7 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('should alert on the last value when the end date is the same as the last event', async () => {
           const params = { ...baseParams };
           const timeFrame = { end: gauge.max };
-          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
+          const results = await evaluateAlert(kbnClient, params, configuration, [], timeFrame);
           expect(results).to.eql([
             {
               '*': {
@@ -160,7 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: gauge.max };
-          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
+          const results = await evaluateAlert(kbnClient, params, configuration, [], timeFrame);
           expect(results).to.eql([
             {
               dev: {
@@ -200,7 +202,7 @@ export default function ({ getService }: FtrProviderContext) {
             groupBy: ['env'],
           };
           const timeFrame = { end: gauge.max };
-          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
+          const results = await evaluateAlert(kbnClient, params, configuration, [], timeFrame);
           expect(results).to.eql([
             {
               dev: {
@@ -242,7 +244,7 @@ export default function ({ getService }: FtrProviderContext) {
           };
           const timeFrame = { end: gauge.midpoint };
           const results = await evaluateAlert(
-            esClient,
+            kbnClient,
             params,
             configuration,
             ['dev', 'prod'],
@@ -301,7 +303,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: rate.max };
-          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
+          const results = await evaluateAlert(kbnClient, params, configuration, [], timeFrame);
           expect(results).to.eql([
             {
               '*': {
@@ -341,7 +343,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: rate.max };
-          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
+          const results = await evaluateAlert(kbnClient, params, configuration, [], timeFrame);
           expect(results).to.eql([
             {
               dev: {

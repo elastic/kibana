@@ -40,10 +40,13 @@ export default function (providerContext: FtrProviderContext) {
 
       const templateName = body.response[0].id;
 
-      const { body: indexTemplateResponse } = await es.transport.request({
-        method: 'GET',
-        path: `/_index_template/${templateName}`,
-      });
+      const { body: indexTemplateResponse } = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_index_template/${templateName}`,
+        },
+        { meta: true }
+      );
 
       // the index template composed_of has the correct component templates in the correct order
       const indexTemplate = indexTemplateResponse.index_templates[0].index_template;

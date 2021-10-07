@@ -130,7 +130,7 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
 
-      expect(res.body.hits.hits.length).equal(beforeRes.body.hits.hits.length + 1);
+      expect(res.hits.hits.length).equal(beforeRes.hits.hits.length + 1);
     });
   });
 }

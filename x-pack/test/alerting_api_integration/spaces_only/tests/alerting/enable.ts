@@ -6,8 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { TransportResult } from '@elastic/transport';
 import { Spaces } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -31,11 +29,11 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
     after(() => objectRemover.removeAll());
 
     async function getScheduledTask(id: string): Promise<TaskManagerDoc> {
-      const scheduledTask: TransportResult<estypes.GetResponse<TaskManagerDoc>> = await es.get({
+      const scheduledTask = await es.get<TaskManagerDoc>({
         id: `task:${id}`,
         index: '.kibana_task_manager',
       });
-      return scheduledTask.body._source!;
+      return scheduledTask._source!;
     }
 
     it('should handle enable alert request appropriately', async () => {

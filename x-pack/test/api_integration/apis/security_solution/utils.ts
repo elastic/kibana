@@ -7,33 +7,36 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/transport';
-import { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { JsonObject, JsonArray } from '@kbn/utility-types';
 
 export async function getSavedObjectFromES<T>(
-  es: KibanaClient,
+  es: Client,
   savedObjectType: string,
   query?: object
 ): Promise<TransportResult<estypes.SearchResponse<T>, unknown>> {
-  return await es.search<T>({
-    index: '.kibana',
-    body: {
-      query: {
-        bool: {
-          filter: [
-            { ...query },
-            {
-              term: {
-                type: {
-                  value: savedObjectType,
+  return await es.search<T>(
+    {
+      index: '.kibana',
+      body: {
+        query: {
+          bool: {
+            filter: [
+              { ...query },
+              {
+                term: {
+                  type: {
+                    value: savedObjectType,
+                  },
                 },
               },
-            },
-          ],
+            ],
+          },
         },
       },
     },
-  });
+    { meta: true }
+  );
 }
 
 export const getFilterValue = (hostName: string, from: string, to: string): JsonObject => ({

@@ -33,10 +33,13 @@ export default function (providerContext: FtrProviderContext) {
         expect(apiResponse).have.property('name');
         expect(apiResponse).have.property('value');
 
-        const { body: tokensResponse } = await esClient.transport.request({
-          method: 'GET',
-          path: `_security/service/elastic/fleet-server/credential`,
-        });
+        const { body: tokensResponse } = await esClient.transport.request<any>(
+          {
+            method: 'GET',
+            path: `_security/service/elastic/fleet-server/credential`,
+          },
+          { meta: true }
+        );
 
         expect(tokensResponse.tokens).have.property(apiResponse.name);
       });

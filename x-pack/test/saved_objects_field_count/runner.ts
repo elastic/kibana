@@ -37,9 +37,7 @@ export async function testRunner({ getService }: FtrProviderContext) {
 
   log.debug('Saved Objects field count metrics starting');
 
-  const {
-    body: { fields },
-  } = await es.fieldCaps({
+  const { fields } = await es.fieldCaps({
     index: '.kibana',
     fields: '*',
   });

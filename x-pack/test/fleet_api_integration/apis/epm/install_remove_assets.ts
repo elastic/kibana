@@ -74,6 +74,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             ignore: [404],
+            meta: true,
           }
         );
         expect(resLogsTemplate.statusCode).equal(404);
@@ -85,6 +86,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             ignore: [404],
+            meta: true,
           }
         );
         expect(resMetricsTemplate.statusCode).equal(404);
@@ -97,6 +99,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             ignore: [404],
+            meta: true,
           }
         );
         expect(resMappings.statusCode).equal(404);
@@ -108,6 +111,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             ignore: [404],
+            meta: true,
           }
         );
         expect(resSettings.statusCode).equal(404);
@@ -119,6 +123,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             ignore: [404],
+            meta: true,
           }
         );
         expect(resUserSettings.statusCode).equal(404);
@@ -131,6 +136,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             ignore: [404],
+            meta: true,
           }
         );
         expect(res.statusCode).equal(404);
@@ -141,6 +147,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             ignore: [404],
+            meta: true,
           }
         );
         expect(resPipeline1.statusCode).equal(404);
@@ -151,6 +158,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             ignore: [404],
+            meta: true,
           }
         );
         expect(resPipeline2.statusCode).equal(404);
@@ -163,6 +171,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             ignore: [404],
+            meta: true,
           }
         );
         expect(res.statusCode).equal(404);
@@ -176,6 +185,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             ignore: [404],
+            meta: true,
           }
         );
         expect(res.statusCode).equal(404);

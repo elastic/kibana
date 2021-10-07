@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
+import { convertToKibanaClient } from '@kbn/test';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -20,6 +21,7 @@ const COMMON_HEADERS = {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const kibanaClient = convertToKibanaClient(es);
 
   async function assertExpectedSavedObjects(num: number) {
     // Make sure that new/deleted docs are available to search
@@ -27,9 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
       index: '.kibana',
     });
 
-    const {
-      body: { count },
-    } = await es.count({
+    const { count } = await es.count({
       index: '.kibana',
       q: 'type:lens-ui-telemetry',
     });
@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
         refresh: 'wait_for',
       });
 
-      const result = await getDailyEvents('.kibana', () => Promise.resolve(es));
+      const result = await getDailyEvents('.kibana', () => Promise.resolve(kibanaClient));
 
       expect(result).to.eql({
         byDate: {},
@@ -150,7 +150,7 @@ export default ({ getService }: FtrProviderContext) => {
         ],
       });
 
-      const result = await getDailyEvents('.kibana', () => Promise.resolve(es));
+      const result = await getDailyEvents('.kibana', () => Promise.resolve(kibanaClient));
 
       expect(result).to.eql({
         byDate: {
@@ -177,7 +177,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
 
-      const results = await getVisualizationCounts(() => Promise.resolve(es), '.kibana');
+      const results = await getVisualizationCounts(() => Promise.resolve(kibanaClient), '.kibana');
 
       expect(results).to.have.keys([
         'saved_overall',

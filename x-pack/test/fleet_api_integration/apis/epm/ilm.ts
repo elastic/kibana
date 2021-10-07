@@ -28,11 +28,14 @@ export default function ({ getService }: FtrProviderContext) {
         },
       };
 
-      const data = await es.transport.request({
-        method: 'PUT',
-        path: '/_ilm/policy/' + policyName,
-        body: policy,
-      });
+      const data = await es.transport.request<any>(
+        {
+          method: 'PUT',
+          path: '/_ilm/policy/' + policyName,
+          body: policy,
+        },
+        { meta: true }
+      );
 
       expect(data.body.acknowledged).to.eql(true);
       expect(data.statusCode).to.eql(200);

@@ -70,7 +70,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   registry.when('Annotations with a trial license', { config: 'trial', archives: [] }, () => {
     describe('when creating an annotation', () => {
       afterEach(async () => {
-        const indexExists = (await es.indices.exists({ index: DEFAULT_INDEX_NAME })).body;
+        const indexExists = await es.indices.exists({ index: DEFAULT_INDEX_NAME });
         if (indexExists) {
           await es.indices.delete({
             index: DEFAULT_INDEX_NAME,
@@ -259,11 +259,9 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
           index: transactionIndexName,
         });
 
-        const annotationIndexExists = (
-          await es.indices.exists({
-            index: DEFAULT_INDEX_NAME,
-          })
-        ).body;
+        const annotationIndexExists = await es.indices.exists({
+          index: DEFAULT_INDEX_NAME,
+        });
 
         if (annotationIndexExists) {
           await es.indices.delete({

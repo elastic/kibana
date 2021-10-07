@@ -263,7 +263,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(basic ? 403 : 204);
 
-        const { body: role } = await es.security.getRole({ name: 'role_to_update_with_dls_fls' });
+        const role = await es.security.getRole({ name: 'role_to_update_with_dls_fls' });
 
         expect(role.role_to_update_with_dls_fls.cluster).to.eql(basic ? ['monitor'] : ['manage']);
         expect(role.role_to_update_with_dls_fls.run_as).to.eql(

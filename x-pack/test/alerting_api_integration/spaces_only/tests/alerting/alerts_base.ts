@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { TransportResult } from '@elastic/elasticsearch';
 import { Response as SupertestResponse } from 'supertest';
 import { RecoveredActionGroup } from '../../../../../plugins/alerting/common';
 import { Space } from '../../../common/types';
@@ -380,9 +379,9 @@ instanceStateValue: true
       const scheduledActionTask: estypes.SearchHit<
         TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>
       > = await retry.try(async () => {
-        const searchResult: TransportResult<
-          estypes.SearchResponse<TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>>
-        > = await es.search({
+        const searchResult = await es.search<
+          TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>
+        >({
           index: '.kibana_task_manager',
           body: {
             query: {
@@ -415,8 +414,8 @@ instanceStateValue: true
             },
           },
         });
-        expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.eql(1);
-        return searchResult.body.hits.hits[0];
+        expect((searchResult.hits.total as estypes.SearchTotalHits).value).to.eql(1);
+        return searchResult.hits.hits[0];
       });
       expect(scheduledActionTask._source!.task.runAt).to.eql(retryDate.toISOString());
     });

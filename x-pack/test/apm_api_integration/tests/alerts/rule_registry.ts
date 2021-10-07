@@ -370,12 +370,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         });
 
-        expect(afterViolatingDataResponse.body.hits.hits.length).to.be(1);
+        expect(afterViolatingDataResponse.hits.hits.length).to.be(1);
 
-        const alertEvent = afterViolatingDataResponse.body.hits.hits[0].fields as Record<
-          string,
-          any
-        >;
+        const alertEvent = afterViolatingDataResponse.hits.hits[0].fields as Record<string, any>;
 
         const exclude = ['@timestamp', ALERT_START, ALERT_UUID, ALERT_RULE_UUID, VERSION];
 
@@ -482,9 +479,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         });
 
-        expect(afterRecoveryResponse.body.hits.hits.length).to.be(1);
+        expect(afterRecoveryResponse.hits.hits.length).to.be(1);
 
-        const recoveredAlertEvent = afterRecoveryResponse.body.hits.hits[0].fields as Record<
+        const recoveredAlertEvent = afterRecoveryResponse.hits.hits[0].fields as Record<
           string,
           any
         >;

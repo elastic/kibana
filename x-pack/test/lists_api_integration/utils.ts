@@ -6,7 +6,7 @@
  */
 
 import type SuperTest from 'supertest';
-import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 
 import type {
   Type,
@@ -164,15 +164,17 @@ export const binaryToString = (res: any, callback: any): void => {
  * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  */
-export const deleteAllExceptions = async (es: KibanaClient): Promise<void> => {
+export const deleteAllExceptions = async (es: Client): Promise<void> => {
   return countDownES(async () => {
-    return es.deleteByQuery({
-      index: '.kibana',
-      q: 'type:exception-list or type:exception-list-agnostic',
-      wait_for_completion: true,
-      refresh: true,
-      body: {},
-    });
+    return es.deleteByQuery(
+      {
+        index: '.kibana',
+        q: 'type:exception-list or type:exception-list-agnostic',
+        wait_for_completion: true,
+        refresh: true,
+      },
+      { meta: true }
+    );
   }, 'deleteAllExceptions');
 };
 

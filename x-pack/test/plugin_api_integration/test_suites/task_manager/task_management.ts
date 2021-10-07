@@ -64,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       const exists = await es.indices.exists({ index: testHistoryIndex });
-      if (exists.body) {
+      if (exists) {
         await es.deleteByQuery({
           index: testHistoryIndex,
           refresh: true,
@@ -151,7 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         })
         .then((result) =>
-          (result.body as unknown as SearchResults).hits.hits.filter((task) =>
+          (result as unknown as SearchResults).hits.hits.filter((task) =>
             taskId ? task._source?.taskId === taskId : true
           )
         );

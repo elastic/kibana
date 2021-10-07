@@ -100,15 +100,14 @@ export default function ({ getService }: FtrProviderContext) {
       // customize the lifecycle policy
       await es.ilm.putLifecycle({
         policy: ILM_POLICY_NAME,
+        // @ts-expect-error @elastic/elasticsearch IlmAction is not valid
         body: customLifecycle,
       });
 
       await reportingAPI.migrateReportingIndices();
 
       const {
-        body: {
-          [ILM_POLICY_NAME]: { policy },
-        },
+        [ILM_POLICY_NAME]: { policy },
       } = await es.ilm.getLifecycle({ policy: ILM_POLICY_NAME });
 
       expect(policy).to.eql(customLifecycle.policy);

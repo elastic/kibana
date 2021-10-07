@@ -39,18 +39,16 @@ export const registerEsHelpers = (getService: FtrProviderContext['getService']) 
   const es = getService('es');
 
   const createRepository = (repoName: string) => {
-    return es.snapshot
-      .createRepository({
-        repository: repoName,
-        body: {
-          type: 'fs',
-          settings: {
-            location: '/tmp/',
-          },
+    return es.snapshot.createRepository({
+      repository: repoName,
+      body: {
+        type: 'fs',
+        settings: {
+          location: '/tmp/',
         },
-        verify: false,
-      })
-      .then(({ body }) => body);
+      },
+      verify: false,
+    });
   };
 
   const createPolicy = (policy: SlmPolicy, cachePolicy?: boolean) => {
@@ -58,27 +56,22 @@ export const registerEsHelpers = (getService: FtrProviderContext['getService']) 
       policiesCreated.push(policy.name);
     }
 
-    return es.slm
-      .putLifecycle({
-        policy_id: policy.name,
-        // TODO: bring {@link SlmPolicy} in line with {@link PutSnapshotLifecycleRequest['body']}
-        // @ts-expect-error
-        body: policy,
-      })
-      .then(({ body }) => body);
+    return es.slm.putLifecycle({
+      policy_id: policy.name,
+      // TODO: bring {@link SlmPolicy} in line with {@link PutSnapshotLifecycleRequest['body']}
+      // @ts-expect-error
+      body: policy,
+    });
   };
 
   const getPolicy = (policyName: string) => {
-    return es.slm
-      .getLifecycle({
-        policy_id: policyName,
-        human: true,
-      })
-      .then(({ body }) => body);
+    return es.slm.getLifecycle({
+      policy_id: policyName,
+      human: true,
+    });
   };
 
-  const deletePolicy = (policyName: string) =>
-    es.slm.deleteLifecycle({ policy_id: policyName }).then(({ body }) => body);
+  const deletePolicy = (policyName: string) => es.slm.deleteLifecycle({ policy_id: policyName });
 
   const cleanupPolicies = () =>
     Promise.all(policiesCreated.map(deletePolicy))

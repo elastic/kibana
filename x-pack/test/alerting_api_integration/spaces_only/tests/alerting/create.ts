@@ -6,8 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { TransportResult } from '@elastic/transport';
 import { SavedObject } from 'kibana/server';
 import { Spaces } from '../../scenarios';
 import {
@@ -32,11 +30,11 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
     after(() => objectRemover.removeAll());
 
     async function getScheduledTask(id: string): Promise<TaskManagerDoc> {
-      const scheduledTask: TransportResult<estypes.GetResponse<TaskManagerDoc>> = await es.get({
+      const scheduledTask = await es.get<TaskManagerDoc>({
         id: `task:${id}`,
         index: '.kibana_task_manager',
       });
-      return scheduledTask.body._source!;
+      return scheduledTask._source!;
     }
 
     it('should handle create alert request appropriately', async () => {
@@ -192,10 +190,13 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         execution_status: response.body.execution_status,
       });
 
-      const esResponse = await es.get<SavedObject<RawAlert>>({
-        index: '.kibana',
-        id: `alert:${response.body.id}`,
-      });
+      const esResponse = await es.get<SavedObject<RawAlert>>(
+        {
+          index: '.kibana',
+          id: `alert:${response.body.id}`,
+        },
+        { meta: true }
+      );
       expect(esResponse.statusCode).to.eql(200);
       const rawActions = (esResponse.body._source as any)?.alert.actions ?? [];
       expect(rawActions).to.eql([
