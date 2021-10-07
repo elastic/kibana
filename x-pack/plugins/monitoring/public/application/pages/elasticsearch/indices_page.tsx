@@ -18,7 +18,7 @@ import { useTable } from '../../hooks/use_table';
 import { useLocalStorage } from '../../hooks/use_local_storage';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
+import { ELASTICSEARCH_SYSTEM_ID, RULE_LARGE_SHARD_SIZE } from '../../../../common/constants';
 
 export const ElasticsearchIndicesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -70,6 +70,7 @@ export const ElasticsearchIndicesPage: React.FC<ComponentProps> = ({ clusters })
       const alertsResponse = await fetchAlerts({
         fetch: services.http.fetch,
         clusterUuid,
+        alertTypeIds: [RULE_LARGE_SHARD_SIZE],
         timeRange: {
           min: bounds.min.valueOf(),
           max: bounds.max.valueOf(),

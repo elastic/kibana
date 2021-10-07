@@ -21,7 +21,7 @@ import { SetupModeContext } from '../../../components/setup_mode/setup_mode_cont
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
+import { KIBANA_SYSTEM_ID, RULE_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
 
 export const KibanaInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const { cluster_uuid: clusterUuid, ccs } = useContext(GlobalStateContext);
@@ -69,6 +69,7 @@ export const KibanaInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
       updateTotalItemCount(response.stats.total);
       const alertsResponse = await fetchAlerts({
         fetch: services.http.fetch,
+        alertTypeIds: [RULE_KIBANA_VERSION_MISMATCH],
         clusterUuid,
         timeRange: {
           min: bounds.min.valueOf(),

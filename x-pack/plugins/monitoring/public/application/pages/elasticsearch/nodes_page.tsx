@@ -19,7 +19,15 @@ import { useTable } from '../../hooks/use_table';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
+import {
+  ELASTICSEARCH_SYSTEM_ID,
+  RULE_CPU_USAGE,
+  RULE_DISK_USAGE,
+  RULE_THREAD_POOL_SEARCH_REJECTIONS,
+  RULE_THREAD_POOL_WRITE_REJECTIONS,
+  RULE_MEMORY_USAGE,
+  RULE_MISSING_MONITORING_DATA,
+} from '../../../../common/constants';
 
 export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -73,6 +81,14 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
       const alertsResponse = await fetchAlerts({
         fetch: services.http.fetch,
         clusterUuid,
+        alertTypeIds: [
+          RULE_CPU_USAGE,
+          RULE_DISK_USAGE,
+          RULE_THREAD_POOL_SEARCH_REJECTIONS,
+          RULE_THREAD_POOL_WRITE_REJECTIONS,
+          RULE_MEMORY_USAGE,
+          RULE_MISSING_MONITORING_DATA,
+        ],
         timeRange: {
           min: bounds.min.valueOf(),
           max: bounds.max.valueOf(),

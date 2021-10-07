@@ -18,7 +18,7 @@ import { ItemTemplate } from './item_template';
 import { AdvancedIndex } from '../../../components/elasticsearch/index/advanced';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
+import { ELASTICSEARCH_SYSTEM_ID, RULE_LARGE_SHARD_SIZE } from '../../../../common/constants';
 
 export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = () => {
   const globalState = useContext(GlobalStateContext);
@@ -53,6 +53,7 @@ export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = () => {
       setData(response);
       const alertsResponse = await fetchAlerts({
         fetch: services.http.fetch,
+        alertTypeIds: [RULE_LARGE_SHARD_SIZE],
         clusterUuid,
         timeRange: {
           min: bounds.min.valueOf(),

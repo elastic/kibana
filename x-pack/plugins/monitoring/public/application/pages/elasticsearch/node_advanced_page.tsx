@@ -16,6 +16,14 @@ import { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
+import {
+  RULE_CPU_USAGE,
+  RULE_THREAD_POOL_SEARCH_REJECTIONS,
+  RULE_THREAD_POOL_WRITE_REJECTIONS,
+  RULE_MISSING_MONITORING_DATA,
+  RULE_DISK_USAGE,
+  RULE_MEMORY_USAGE,
+} from '../../../../common/constants';
 
 export const ElasticsearchNodeAdvancedPage: React.FC<ComponentProps> = () => {
   const globalState = useContext(GlobalStateContext);
@@ -62,6 +70,14 @@ export const ElasticsearchNodeAdvancedPage: React.FC<ComponentProps> = () => {
       const alertsResponse = await fetchAlerts({
         fetch: services.http.fetch,
         clusterUuid,
+        alertTypeIds: [
+          RULE_CPU_USAGE,
+          RULE_THREAD_POOL_SEARCH_REJECTIONS,
+          RULE_THREAD_POOL_WRITE_REJECTIONS,
+          RULE_MISSING_MONITORING_DATA,
+          RULE_DISK_USAGE,
+          RULE_MEMORY_USAGE,
+        ],
         timeRange: {
           min: bounds.min.valueOf(),
           max: bounds.max.valueOf(),

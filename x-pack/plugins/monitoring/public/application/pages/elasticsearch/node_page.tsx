@@ -21,7 +21,15 @@ import { nodesByIndices } from '../../../components/elasticsearch/shard_allocati
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
+import {
+  ELASTICSEARCH_SYSTEM_ID,
+  RULE_CPU_USAGE,
+  RULE_THREAD_POOL_SEARCH_REJECTIONS,
+  RULE_THREAD_POOL_WRITE_REJECTIONS,
+  RULE_MISSING_MONITORING_DATA,
+  RULE_DISK_USAGE,
+  RULE_MEMORY_USAGE,
+} from '../../../../common/constants';
 
 export const ElasticsearchNodePage: React.FC<ComponentProps> = () => {
   const globalState = useContext(GlobalStateContext);
@@ -76,6 +84,14 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = () => {
       setNodesByIndicesData(transformer(response.shards, response.nodes));
       const alertsResponse = await fetchAlerts({
         fetch: services.http.fetch,
+        alertTypeIds: [
+          RULE_CPU_USAGE,
+          RULE_THREAD_POOL_SEARCH_REJECTIONS,
+          RULE_THREAD_POOL_WRITE_REJECTIONS,
+          RULE_MISSING_MONITORING_DATA,
+          RULE_DISK_USAGE,
+          RULE_MEMORY_USAGE,
+        ],
         clusterUuid,
         timeRange: {
           min: bounds.min.valueOf(),
