@@ -96,8 +96,12 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./services/throughput'));
     });
 
-    describe('throughput', function () {
-      loadTestFile(require.resolve('./throughput'));
+    describe('transactions and metrics throughput', function () {
+      loadTestFile(require.resolve('./throughput/transactions_metrics_apis'));
+    });
+
+    describe('dependencies throughput', function () {
+      loadTestFile(require.resolve('./throughput/dependencies_apis'));
     });
 
     describe('services/top_services', function () {
