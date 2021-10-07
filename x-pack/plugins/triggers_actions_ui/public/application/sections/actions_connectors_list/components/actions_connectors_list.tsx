@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ClassNames } from '@emotion/react';
 import React, { useState, useEffect } from 'react';
 import {
   EuiInMemoryTable,
@@ -51,6 +52,14 @@ import {
   ENABLE_NEW_SN_SIR_CONNECTOR,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../actions/server/constants/connectors';
+
+/**
+ * Add some spacing to the left of the warning icon for deprecated connectors
+ */
+const euiIconTipStyle = {
+  marginLeft: '8px',
+  marginBottom: '0 !important',
+};
 
 const ActionsConnectorsList: React.FunctionComponent = () => {
   const {
@@ -205,21 +214,26 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
               />
             ) : null}
             {showLegacyTooltip && (
-              <EuiIconTip
-                aria-label="Warning"
-                size="m"
-                type="alert"
-                color="warning"
-                title={i18n.translate(
-                  'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.legacyConnectorTitle',
-                  { defaultMessage: 'Deprecated connector' }
+              <ClassNames>
+                {({ css }) => (
+                  <EuiIconTip
+                    anchorClassName={css(euiIconTipStyle)}
+                    aria-label="Warning"
+                    size="m"
+                    type="alert"
+                    color="warning"
+                    title={i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.legacyConnectorTitle',
+                      { defaultMessage: 'Deprecated connector' }
+                    )}
+                    content={i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.isLegacyDescription',
+                      { defaultMessage: 'Please update your connector' }
+                    )}
+                    position="right"
+                  />
                 )}
-                content={i18n.translate(
-                  'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.isLegacyDescription',
-                  { defaultMessage: 'Please update your connector' }
-                )}
-                position="right"
-              />
+              </ClassNames>
             )}
           </>
         );

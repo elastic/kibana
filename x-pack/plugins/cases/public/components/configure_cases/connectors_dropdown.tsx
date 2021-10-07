@@ -57,6 +57,11 @@ const addNewConnector = {
   'data-test-subj': 'dropdown-connector-add-connector',
 };
 
+const StyledEuiIconTip = styled(EuiIconTip)`
+  margin-left: 8px;
+  margin-bottom: 0 !important;
+`;
+
 const ConnectorsDropdownComponent: React.FC<Props> = ({
   connectors,
   disabled,
@@ -91,7 +96,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                 </EuiFlexItem>
                 {isLegacyConnector(connector) && (
                   <EuiFlexItem grow={false}>
-                    <EuiIconTip
+                    <StyledEuiIconTip
                       aria-label={i18n.DEPRECATED_TOOLTIP_TITLE}
                       size={ICON_SIZE}
                       type="alert"
