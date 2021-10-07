@@ -20,6 +20,7 @@ import {
   EuiDraggable,
   euiDragDropReorder,
   EuiBadge,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -50,26 +51,38 @@ export const PromotedDocuments: React.FC = () => {
       iconType={CountBadge}
       title={<h2>{PROMOTED_DOCUMENTS_TITLE}</h2>}
       action={
-        !isAutomated &&
-        hasDocuments && (
-          <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-            <EuiFlexItem>
-              <EuiButtonEmpty
-                onClick={clearPromotedIds}
-                color="danger"
-                size="s"
-                disabled={isAutomated}
-              >
+        isAutomated ? (
+          <EuiText color="subdued" size="s">
+            <p>
+              <em>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.removeAllButtonLabel',
-                  { defaultMessage: 'Demote all' }
+                  'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.managedByAppSearchDescription',
+                  { defaultMessage: 'This curation is being automated by App Search' }
                 )}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <AddResultButton />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              </em>
+            </p>
+          </EuiText>
+        ) : (
+          hasDocuments && (
+            <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+              <EuiFlexItem>
+                <EuiButtonEmpty
+                  onClick={clearPromotedIds}
+                  color="danger"
+                  size="s"
+                  disabled={isAutomated}
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.removeAllButtonLabel',
+                    { defaultMessage: 'Demote all' }
+                  )}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <AddResultButton />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )
         )
       }
       isLoading={promotedDocumentsLoading}
