@@ -11,7 +11,6 @@ import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
 
 import { apiService } from './application/lib/api';
 import { breadcrumbService } from './application/lib/breadcrumbs';
-import { uiMetricService } from './application/lib/ui_metric';
 import { SetupDependencies, StartDependencies, AppDependencies } from './types';
 import { Config } from '../common/config';
 
@@ -19,10 +18,7 @@ export class UpgradeAssistantUIPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
 {
   constructor(private ctx: PluginInitializerContext) {}
-  setup(
-    coreSetup: CoreSetup<StartDependencies>,
-    { management, cloud, share, usageCollection }: SetupDependencies
-  ) {
+  setup(coreSetup: CoreSetup<StartDependencies>, { management, cloud, share }: SetupDependencies) {
     const { readonly } = this.ctx.config.get<Config>();
 
     const appRegistrar = management.sections.section.stack;
@@ -37,10 +33,6 @@ export class UpgradeAssistantUIPlugin
     const pluginName = i18n.translate('xpack.upgradeAssistant.appTitle', {
       defaultMessage: 'Upgrade Assistant',
     });
-
-    if (usageCollection) {
-      uiMetricService.setup(usageCollection);
-    }
 
     appRegistrar.registerApp({
       id: 'upgrade_assistant',

@@ -8,7 +8,6 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
 
 import {
-  IndexGroup,
   ReindexOperation,
   ReindexStatus,
   ReindexStep,
@@ -28,19 +27,17 @@ export interface ReindexState {
   errorMessage: string | null;
   reindexWarnings?: ReindexWarning[];
   hasRequiredPrivileges?: boolean;
-  indexGroup?: IndexGroup;
 }
 
 interface StatusResponse {
   warnings?: ReindexWarning[];
   reindexOp?: ReindexOperation;
   hasRequiredPrivileges?: boolean;
-  indexGroup?: IndexGroup;
 }
 
 const getReindexState = (
   reindexState: ReindexState,
-  { reindexOp, warnings, hasRequiredPrivileges, indexGroup }: StatusResponse
+  { reindexOp, warnings, hasRequiredPrivileges }: StatusResponse
 ) => {
   const newReindexState = {
     ...reindexState,
@@ -53,10 +50,6 @@ const getReindexState = (
 
   if (hasRequiredPrivileges !== undefined) {
     newReindexState.hasRequiredPrivileges = hasRequiredPrivileges;
-  }
-
-  if (indexGroup) {
-    newReindexState.indexGroup = indexGroup;
   }
 
   if (reindexOp) {
@@ -132,6 +125,8 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
       cancelLoadingState: undefined,
     });
 
+    api.sendReindexTelemetryData({ start: true });
+
     const { data, error } = await api.startReindexTask(indexName);
 
     if (error) {
@@ -149,6 +144,8 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
   }, [api, indexName, reindexState, updateStatus]);
 
   const cancelReindex = useCallback(async () => {
+    api.sendReindexTelemetryData({ stop: true });
+
     const { error } = await api.cancelReindexTask(indexName);
 
     setReindexState({

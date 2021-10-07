@@ -350,9 +350,11 @@ function createNewLayerWithMetricAggregation(
 }
 
 export function getDatasourceSuggestionsFromCurrentState(
-  state: IndexPatternPrivateState
+  state: IndexPatternPrivateState,
+  filterLayers: (layerId: string) => boolean = () => true
 ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
-  const layers = Object.entries(state.layers || {});
+  const layers = Object.entries(state.layers || {}).filter(([layerId]) => filterLayers(layerId));
+
   if (layers.length > 1) {
     // Return suggestions that reduce the data to each layer individually
     return layers
@@ -394,7 +396,7 @@ export function getDatasourceSuggestionsFromCurrentState(
   }
 
   return flatten(
-    Object.entries(state.layers || {})
+    layers
       .filter(([_id, layer]) => layer.columnOrder.length && layer.indexPatternId)
       .map(([layerId, layer]) => {
         const indexPattern = state.indexPatterns[layer.indexPatternId];

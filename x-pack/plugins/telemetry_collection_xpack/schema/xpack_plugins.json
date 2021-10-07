@@ -163,6 +163,9 @@
             "__es-query": {
               "type": "long"
             },
+            "transform_health": {
+              "type": "long"
+            },
             "apm__error_rate": {
               "type": "long"
             },
@@ -226,10 +229,10 @@
             "__geo-containment": {
               "type": "long"
             },
-            "xpack_ml_anomaly_detection_alert": {
+            "xpack__ml__anomaly_detection_alert": {
               "type": "long"
             },
-            "xpack_ml_anomaly_detection_jobs_health": {
+            "xpack__ml__anomaly_detection_jobs_health": {
               "type": "long"
             }
           }
@@ -245,6 +248,9 @@
             "__es-query": {
               "type": "long"
             },
+            "transform_health": {
+              "type": "long"
+            },
             "apm__error_rate": {
               "type": "long"
             },
@@ -308,10 +314,10 @@
             "__geo-containment": {
               "type": "long"
             },
-            "xpack_ml_anomaly_detection_alert": {
+            "xpack__ml__anomaly_detection_alert": {
               "type": "long"
             },
-            "xpack_ml_anomaly_detection_jobs_health": {
+            "xpack__ml__anomaly_detection_jobs_health": {
               "type": "long"
             }
           }
@@ -7322,6 +7328,44 @@
                   }
                 }
               }
+            }
+          }
+        },
+        "ui_open": {
+          "properties": {
+            "elasticsearch": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times a user viewed the list of Elasticsearch deprecations."
+              }
+            },
+            "overview": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times a user viewed the Overview page."
+              }
+            },
+            "kibana": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times a user viewed the list of Kibana deprecations"
+              }
+            }
+          }
+        },
+        "ui_reindex": {
+          "properties": {
+            "close": {
+              "type": "long"
+            },
+            "open": {
+              "type": "long"
+            },
+            "start": {
+              "type": "long"
+            },
+            "stop": {
+              "type": "long"
             }
           }
         }
