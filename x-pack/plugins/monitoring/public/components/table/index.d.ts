@@ -7,3 +7,4 @@
 
 export const euiTableStorageGetter: (string) => any;
 export const euiTableStorageSetter: (string) => any;
+export const EuiMonitoringTable: FunctionComponent<Props>;

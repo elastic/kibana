@@ -12,7 +12,6 @@ import {
   Action,
   Store,
   Dispatch,
-  PreloadedState,
   StateFromReducersMapObject,
   CombinedState,
 } from 'redux';
@@ -39,7 +38,7 @@ import { TimelineState } from '../timelines/store/timeline/types';
 export { SecurityPageName } from '../../common/constants';
 
 export interface SecuritySubPluginStore<K extends SecuritySubPluginKeyStore, T> {
-  initialState: Record<K, T | undefined>;
+  initialState: Record<K, T>;
   reducer: Record<K, Reducer<T, AnyAction>>;
   middleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>;
 }
@@ -70,14 +69,12 @@ export interface SecuritySubPluginWithStore<K extends SecuritySubPluginKeyStore,
 
 export interface SecuritySubPlugins extends SecuritySubPlugin {
   store: {
-    initialState: PreloadedState<
-      CombinedState<
-        StateFromReducersMapObject<
-          /** SubPluginsInitReducer, being an interface, will not work in `StateFromReducersMapObject`.
-           * Picking its keys does the trick.
-           **/
-          Pick<SubPluginsInitReducer, keyof SubPluginsInitReducer>
-        >
+    initialState: CombinedState<
+      StateFromReducersMapObject<
+        /** SubPluginsInitReducer, being an interface, will not work in `StateFromReducersMapObject`.
+         * Picking its keys does the trick.
+         **/
+        Pick<SubPluginsInitReducer, keyof SubPluginsInitReducer>
       >
     >;
     reducer: SubPluginsInitReducer;

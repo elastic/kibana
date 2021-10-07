@@ -49,6 +49,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./runtime'));
       loadTestFile(require.resolve('./throttle'));
       loadTestFile(require.resolve('./ignore_fields'));
+      loadTestFile(require.resolve('./migrations'));
     });
 
     // That split here enable us on using a different ciGroup to run the tests

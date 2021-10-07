@@ -21,7 +21,6 @@ import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
 import { RenderingService } from './rendering';
-import { LegacyService } from './legacy';
 import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
@@ -69,7 +68,6 @@ export class Server {
   private readonly elasticsearch: ElasticsearchService;
   private readonly http: HttpService;
   private readonly rendering: RenderingService;
-  private readonly legacy: LegacyService;
   private readonly log: Logger;
   private readonly plugins: PluginsService;
   private readonly savedObjects: SavedObjectsService;
@@ -108,7 +106,6 @@ export class Server {
     this.http = new HttpService(core);
     this.rendering = new RenderingService(core);
     this.plugins = new PluginsService(core);
-    this.legacy = new LegacyService(core);
     this.elasticsearch = new ElasticsearchService(core);
     this.savedObjects = new SavedObjectsService(core);
     this.uiSettings = new UiSettingsService(core);
@@ -286,10 +283,6 @@ export class Server {
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.#pluginsInitialized = pluginsSetup.initialized;
 
-    await this.legacy.setup({
-      http: httpSetup,
-    });
-
     this.registerCoreContext(coreSetup);
     this.coreApp.setup(coreSetup, uiPlugins);
 
@@ -348,7 +341,6 @@ export class Server {
   public async stop() {
     this.log.debug('stopping server');
 
-    await this.legacy.stop();
     await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
     await this.plugins.stop();
     await this.savedObjects.stop();

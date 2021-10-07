@@ -26,8 +26,6 @@ kibana_vars=(
     console.enabled
     console.proxyConfig
     console.proxyFilter
-    cpu.cgroup.path.override
-    cpuacct.cgroup.path.override
     csp.rules
     csp.strict
     csp.warnLegacyBrowsers
@@ -82,24 +80,13 @@ kibana_vars=(
     logging.appenders
     logging.appenders.console
     logging.appenders.file
-    logging.dest
-    logging.json
     logging.loggers
     logging.loggers.appenders
     logging.loggers.level
     logging.loggers.name
-    logging.quiet
     logging.root
     logging.root.appenders
     logging.root.level
-    logging.rotate.enabled
-    logging.rotate.everyBytes
-    logging.rotate.keepFiles
-    logging.rotate.pollingInterval
-    logging.rotate.usePolling
-    logging.silent
-    logging.useUTC
-    logging.verbose
     map.includeElasticMapsService
     map.proxyElasticMapsServiceInMaps
     map.regionmap
@@ -186,7 +173,6 @@ kibana_vars=(
     server.uuid
     server.xsrf.allowlist
     server.xsrf.disableProtection
-    server.xsrf.whitelist
     status.allowAnonymous
     status.v6ApiFormat
     telemetry.allowChangingOptInStatus
@@ -205,7 +191,6 @@ kibana_vars=(
     vis_type_vega.enableExternalUrls
     xpack.actions.allowedHosts
     xpack.actions.customHostSettings
-    xpack.actions.enabled
     xpack.actions.enabledActionTypes
     xpack.actions.maxResponseContentLength
     xpack.actions.preconfigured
@@ -222,6 +207,7 @@ kibana_vars=(
     xpack.alerting.healthCheck.interval
     xpack.alerting.invalidateApiKeysTask.interval
     xpack.alerting.invalidateApiKeysTask.removalDelay
+    xpack.alerting.defaultRuleTaskTimeout
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
@@ -262,7 +248,6 @@ kibana_vars=(
     xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled
     xpack.encryptedSavedObjects.encryptionKey
     xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys
-    xpack.event_log.enabled
     xpack.event_log.indexEntries
     xpack.event_log.logEntries
     xpack.fleet.agentPolicies
@@ -329,7 +314,6 @@ kibana_vars=(
     xpack.reporting.csv.useByteOrderMarkEncoding
     xpack.reporting.enabled
     xpack.reporting.encryptionKey
-    xpack.reporting.index
     xpack.reporting.kibanaApp
     xpack.reporting.kibanaServer.hostname
     xpack.reporting.kibanaServer.port
@@ -382,6 +366,7 @@ kibana_vars=(
     xpack.security.session.idleTimeout
     xpack.security.session.lifespan
     xpack.security.sessionTimeout
+    xpack.security.showInsecureClusterWarning
     xpack.securitySolution.alertMergeStrategy
     xpack.securitySolution.alertIgnoreFields
     xpack.securitySolution.endpointResultListDefaultFirstPageIndex
@@ -395,7 +380,6 @@ kibana_vars=(
     xpack.securitySolution.prebuiltRulesFromSavedObjects
     xpack.spaces.enabled
     xpack.spaces.maxSpaces
-    xpack.task_manager.enabled
     xpack.task_manager.index
     xpack.task_manager.max_attempts
     xpack.task_manager.max_poll_inactivity_cycles
@@ -437,7 +421,7 @@ umask 0002
 # paths. Therefore, Kibana provides a mechanism to override
 # reading the cgroup path from /proc/self/cgroup and instead uses the
 # cgroup path defined the configuration properties
-# cpu.cgroup.path.override and cpuacct.cgroup.path.override.
+# ops.cGroupOverrides.cpuPath and ops.cGroupOverrides.cpuAcctPath.
 # Therefore, we set this value here so that cgroup statistics are
 # available for the container this process will run in.
 

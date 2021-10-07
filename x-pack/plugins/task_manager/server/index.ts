@@ -41,6 +41,9 @@ export type {
 
 export const config: PluginConfigDescriptor<TaskManagerConfig> = {
   schema: configSchema,
+  exposeToUsage: {
+    max_workers: true,
+  },
   deprecations: () => [
     (settings, fromPath, addDeprecation) => {
       const taskManager = get(settings, fromPath);
@@ -64,17 +67,6 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
               `Maximum allowed value of "${fromPath}.max_workers" is ${MAX_WORKERS_LIMIT}.` +
                 `Replace "${fromPath}.max_workers: ${taskManager?.max_workers}" with (${MAX_WORKERS_LIMIT}).`,
             ],
-          },
-        });
-      }
-    },
-    (settings, fromPath, addDeprecation) => {
-      const taskManager = get(settings, fromPath);
-      if (taskManager?.enabled === false || taskManager?.enabled === true) {
-        addDeprecation({
-          message: `"xpack.task_manager.enabled" is deprecated. The ability to disable this plugin will be removed in 8.0.0.`,
-          correctiveActions: {
-            manualSteps: [`Remove "xpack.task_manager.enabled" from your kibana configs.`],
           },
         });
       }

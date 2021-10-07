@@ -72,12 +72,13 @@ export const CurationResultPanel: React.FC<Props> = ({ variant, results }) => {
         className={`curationResultPanel curationResultPanel--${variant}`}
       >
         {results.length > 0 ? (
-          results.map((result) => (
-            <EuiFlexItem grow={false} key={result.id.raw}>
+          results.map((result, index) => (
+            <EuiFlexItem key={result.id.raw} style={{ width: '100%' }}>
               <Result
                 result={result}
                 isMetaEngine={isMetaEngine}
                 schemaForTypeHighlights={engine.schema}
+                resultPosition={index + 1}
               />
             </EuiFlexItem>
           ))
