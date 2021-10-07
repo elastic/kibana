@@ -124,7 +124,6 @@ export function ShowShareModal({
     useHash: false,
     panels: rawDashboardState.panels,
     timeRange,
-    viewMode: ViewMode.PRINT, // For share locators we always load the dashboard in view mode
     refreshInterval: undefined, // We don't share refresh interval externally
     options: rawDashboardState.options,
   };
