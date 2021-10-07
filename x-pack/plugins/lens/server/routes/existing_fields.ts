@@ -6,7 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import { errors, estypes } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext, ElasticsearchClient } from 'src/core/server';
 import { CoreSetup, Logger } from 'src/core/server';
