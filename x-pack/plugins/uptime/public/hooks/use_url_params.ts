@@ -28,7 +28,7 @@ const getParsedParams = (search: string) => {
 export const useGetUrlParams: GetUrlParams = () => {
   const { search } = useLocation();
 
-  return useMemo(() => getSupportedUrlParams(getParsedParams(search)), [search]);
+  return getSupportedUrlParams(getParsedParams(search));
 };
 
 const getMapFromFilters = (value: any): Map<string, any> | undefined => {
