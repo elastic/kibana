@@ -25,18 +25,18 @@ export const IndexPatternPrompt: FC<Props> = ({ destIndex }) => {
     <>
       <EuiText size="xs" color="warning">
         <FormattedMessage
-          id="xpack.ml.dataframe.analytics.indexPatternPromptMessage"
-          defaultMessage="No index pattern exists for index {destIndex}. {linkToIndexPatternManagement} for {destIndex}."
+          id="xpack.ml.dataframe.analytics.dataViewPromptMessage"
+          defaultMessage="No data view exists for index {destIndex}. {linkToDataViewManagement} for {destIndex}."
           values={{
             destIndex,
-            linkToIndexPatternManagement: (
+            linkToDataViewManagement: (
               <EuiLink
                 href={`${basePath.get()}/app/management/kibana/indexPatterns/create`}
                 target="_blank"
               >
                 <FormattedMessage
-                  id="xpack.ml.dataframe.analytics.indexPatternPromptLinkText"
-                  defaultMessage="Create an index pattern"
+                  id="xpack.ml.dataframe.analytics.dataViewPromptLinkText"
+                  defaultMessage="Create a data view"
                 />
               </EuiLink>
             ),

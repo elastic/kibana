@@ -56,3 +56,22 @@ export function getEsSpatialRelationLabel(spatialRelation: ES_SPATIAL_RELATIONS)
       return spatialRelation;
   }
 }
+
+export function getDataViewLabel() {
+  return i18n.translate('xpack.maps.dataView.label', {
+    defaultMessage: 'Data view',
+  });
+}
+
+export function getDataViewSelectPlaceholder() {
+  return i18n.translate('xpack.maps.dataView.selectPlacholder', {
+    defaultMessage: 'Select data view',
+  });
+}
+
+export function getDataViewNotFoundMessage(id: string) {
+  return i18n.translate('xpack.maps.dataView.notFoundMessage', {
+    defaultMessage: `Unable to find data view '{id}'`,
+    values: { id },
+  });
+}

@@ -56,7 +56,7 @@ describe('createSearchItems', () => {
     } as unknown as SavedSearchSavedObject;
   });
 
-  test('should match index pattern', () => {
+  test('should match data view', () => {
     const resp = createSearchItems(kibanaConfig, indexPattern, null);
     expect(resp).toStrictEqual({
       combinedQuery: { bool: { must: [{ match_all: {} }] } },

@@ -34,17 +34,17 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
   const clickHandler = useCallback(
     async (item: TransformListRow) => {
       try {
-        const indexPatternTitle = Array.isArray(item.config.source.index)
+        const dataViewTitle = Array.isArray(item.config.source.index)
           ? item.config.source.index.join(',')
           : item.config.source.index;
-        const currentIndexPatternId = getIndexPatternIdByTitle(indexPatternTitle);
+        const currentIndexPatternId = getIndexPatternIdByTitle(dataViewTitle);
 
         if (currentIndexPatternId === undefined) {
           toastNotifications.addWarning(
-            i18n.translate('xpack.transform.edit.noIndexPatternErrorPromptText', {
+            i18n.translate('xpack.transform.edit.noDataViewErrorPromptText', {
               defaultMessage:
-                'Unable to get index pattern the transform {transformId}. No index pattern exists for {indexPattern}.',
-              values: { indexPattern: indexPatternTitle, transformId: item.id },
+                'Unable to get the data view for the transform {transformId}. No data view exists for {dataViewTitle}.',
+              values: { dataViewTitle, transformId: item.id },
             })
           );
         }
@@ -54,7 +54,7 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
       } catch (e) {
         toastNotifications.addError(e, {
           title: i18n.translate('xpack.transform.edit.errorPromptText', {
-            defaultMessage: 'An error occurred checking if source index pattern exists',
+            defaultMessage: 'An error occurred checking if source data view exists',
           }),
         });
       }

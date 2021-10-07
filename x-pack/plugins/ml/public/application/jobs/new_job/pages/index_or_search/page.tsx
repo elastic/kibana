@@ -44,8 +44,8 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
             <EuiTitle size="m">
               <h1>
                 <FormattedMessage
-                  id="xpack.ml.newJob.wizard.selectIndexPatternOrSavedSearch"
-                  defaultMessage="Select index pattern or saved search"
+                  id="xpack.ml.newJob.wizard.selectDataViewOrSavedSearch"
+                  defaultMessage="Select data view or saved search"
                 />
               </h1>
             </EuiTitle>
@@ -57,7 +57,7 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
             onChoose={onObjectSelection}
             showFilter
             noItemsMessage={i18n.translate('xpack.ml.newJob.wizard.searchSelection.notFoundLabel', {
-              defaultMessage: 'No matching indices or saved searches found.',
+              defaultMessage: 'No matching data views or saved searches found.',
             })}
             savedObjectMetaData={[
               {
@@ -74,9 +74,9 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
                 type: 'index-pattern',
                 getIconForSavedObject: () => 'indexPatternApp',
                 name: i18n.translate(
-                  'xpack.ml.newJob.wizard.searchSelection.savedObjectType.indexPattern',
+                  'xpack.ml.newJob.wizard.searchSelection.savedObjectType.dataView',
                   {
-                    defaultMessage: 'Index pattern',
+                    defaultMessage: 'Data view',
                   }
                 ),
               },

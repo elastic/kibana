@@ -63,16 +63,16 @@ function getStats({
         kibanaRequest.route.path
       }`,
     },
-    indexPattern: {
-      label: i18n.translate('xpack.apm.inspector.stats.indexPatternLabel', {
-        defaultMessage: 'Index pattern',
+    dataView: {
+      label: i18n.translate('xpack.apm.inspector.stats.dataViewLabel', {
+        defaultMessage: 'Data view',
       }),
       value: esRequestParams.index,
       description: i18n.translate(
-        'xpack.apm.inspector.stats.indexPatternDescription',
+        'xpack.apm.inspector.stats.dataViewDescription',
         {
           defaultMessage:
-            'The index pattern that connected to the Elasticsearch indices.',
+            'The data view that connected to the Elasticsearch indices.',
         }
       ),
     },

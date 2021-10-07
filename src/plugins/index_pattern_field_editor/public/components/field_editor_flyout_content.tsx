@@ -240,7 +240,7 @@ const FieldEditorFlyoutContentComponent = ({
                 <p>
                   <FormattedMessage
                     id="indexPatternFieldEditor.editor.flyoutEditFieldSubtitle"
-                    defaultMessage="Index pattern: {patternName}"
+                    defaultMessage="Data view: {patternName}"
                     values={{
                       patternName: <i>{indexPattern.title}</i>,
                     }}
