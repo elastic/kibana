@@ -135,8 +135,8 @@ function createDisplayItems(
     items.splice(1, 0, {
       title: (
         <FormattedMessage
-          id="xpack.dataVisualizer.file.importSummary.indexPatternTitle"
-          defaultMessage="Index pattern"
+          id="xpack.dataVisualizer.file.importSummary.dataViewTitle"
+          defaultMessage="Data view"
         />
       ),
       description: indexPattern,
