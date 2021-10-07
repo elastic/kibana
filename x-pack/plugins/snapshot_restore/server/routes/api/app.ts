@@ -53,6 +53,7 @@ export function registerAppRoutes({
           body: { has_all_requested: hasAllPrivileges, cluster },
         } = await clusterClient.asCurrentUser.security.hasPrivileges({
           body: {
+            // @ts-expect-error @elastic/elasticsearch doesn't declare all possible values in SecurityClusterPrivilege
             cluster: [...APP_REQUIRED_CLUSTER_PRIVILEGES, ...APP_SLM_CLUSTER_PRIVILEGES],
           },
         });
