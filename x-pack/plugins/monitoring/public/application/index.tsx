@@ -39,6 +39,7 @@ import { ElasticsearchIndicesPage } from './pages/elasticsearch/indices_page';
 import { ElasticsearchIndexPage } from './pages/elasticsearch/index_page';
 import { ElasticsearchIndexAdvancedPage } from './pages/elasticsearch/index_advanced_page';
 import { ElasticsearchNodePage } from './pages/elasticsearch/node_page';
+import { ElasticsearchMLJobsPage } from './pages/elasticsearch/ml_jobs_page';
 import { ElasticsearchNodeAdvancedPage } from './pages/elasticsearch/node_advanced_page';
 import { ElasticsearchCcrPage } from './pages/elasticsearch/ccr_page';
 import { ElasticsearchCcrShardPage } from './pages/elasticsearch/ccr_shard_page';
@@ -108,6 +109,13 @@ const MonitoringApp: React.FC<{
                   />
 
                   {/* ElasticSearch Views */}
+                  <RouteInit
+                    path="/elasticsearch/ml_jobs"
+                    component={ElasticsearchMLJobsPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
                   <RouteInit
                     path="/elasticsearch/ccr/:index/shard/:shardId"
                     component={ElasticsearchCcrShardPage}
@@ -223,32 +231,10 @@ const MonitoringApp: React.FC<{
                     fetchAllClusters={false}
                   />
 
-                  {/* APM Views */}
-                  <RouteInit
-                    path="/apm/instances/:instance"
-                    component={ApmInstancePage}
-                    codePaths={[CODE_PATH_APM]}
-                    fetchAllClusters={false}
-                  />
-
-                  {/* Logstash Routes */}
-                  <RouteInit
-                    path="/logstash/nodes"
-                    component={LogStashNodesPage}
-                    codePaths={[CODE_PATH_LOGSTASH]}
-                    fetchAllClusters={false}
-                  />
-
                   <RouteInit
                     path="/logstash/node/:uuid/advanced"
                     component={LogStashNodeAdvancedPage}
                     codePaths={[CODE_PATH_LOGSTASH]}
-                    fetchAllClusters={false}
-                  />
-                  <RouteInit
-                    path="/apm/instances"
-                    component={ApmInstancesPage}
-                    codePaths={[CODE_PATH_APM]}
                     fetchAllClusters={false}
                   />
 
@@ -286,6 +272,22 @@ const MonitoringApp: React.FC<{
                     codePaths={[CODE_PATH_LOGSTASH]}
                     fetchAllClusters={false}
                   />
+
+                  {/* APM Views */}
+                  <RouteInit
+                    path="/apm/instances/:instance"
+                    component={ApmInstancePage}
+                    codePaths={[CODE_PATH_APM]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/apm/instances"
+                    component={ApmInstancesPage}
+                    codePaths={[CODE_PATH_APM]}
+                    fetchAllClusters={false}
+                  />
+
                   <RouteInit
                     path="/apm"
                     component={ApmOverviewPage}
