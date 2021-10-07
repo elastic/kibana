@@ -30,12 +30,10 @@ export {
   ReactExpressionRendererType,
 } from './react_expression_renderer';
 export { ExpressionRenderHandler, ExpressionRendererEvent } from './render';
-export {
+export type {
   AnyExpressionFunctionDefinition,
   AnyExpressionTypeDefinition,
   ArgumentType,
-  buildExpression,
-  buildExpressionFunction,
   Datatable,
   DatatableColumn,
   DatatableColumnType,
@@ -79,17 +77,12 @@ export {
   FontStyle,
   FontValue,
   FontWeight,
-  format,
-  formatExpression,
   FunctionsRegistry,
   IInterpreterRenderHandlers,
   InterpreterErrorType,
   IRegistry,
-  isExpressionAstBuilder,
   KnownTypeToString,
   Overflow,
-  parse,
-  parseExpression,
   PointSeries,
   PointSeriesColumn,
   PointSeriesColumnName,
@@ -110,5 +103,15 @@ export {
   ExpressionsServiceStart,
   TablesAdapter,
   ExpressionsInspectorAdapter,
+} from '../common';
+
+export {
+  buildExpression,
+  buildExpressionFunction,
+  format,
+  formatExpression,
+  isExpressionAstBuilder,
+  parse,
+  parseExpression,
   createDefaultInspectorAdapters,
 } from '../common';
