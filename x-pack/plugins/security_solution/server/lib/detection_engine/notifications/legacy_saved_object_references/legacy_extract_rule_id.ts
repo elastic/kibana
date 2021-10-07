@@ -6,6 +6,9 @@
  */
 
 import { Logger, SavedObjectReference } from 'src/core/server';
+
+// eslint-disable-next-line no-restricted-imports
+import { legacyGetRuleReference } from '../../rule_actions/legacy_utils';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRulesNotificationParams } from '../legacy_types';
 
@@ -30,17 +33,11 @@ export const legacyExtractRuleId = ({
     logger.error(
       [
         'Security Solution notification (Legacy) system "ruleAlertId" is null or undefined when it never should be. ',
-        'This indicates potentially that saved object migrations did not run correctly. Returning empty reference',
-      ].join()
+        'This indicates potentially that saved object migrations did not run correctly. Returning empty reference.',
+      ].join('')
     );
     return [];
   } else {
-    return [
-      {
-        id: ruleAlertId,
-        name: 'alert_0',
-        type: 'alert',
-      },
-    ];
+    return [legacyGetRuleReference(ruleAlertId)];
   }
 };
