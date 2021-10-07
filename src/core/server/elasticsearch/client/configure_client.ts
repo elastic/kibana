@@ -48,7 +48,9 @@ export const configureClient = (
       }
       // Enforce the client to return TransportResult.
       // It's required for bwc with responses in 7.x version.
-      opts.meta = true;
+      if (opts.meta === undefined) {
+        opts.meta = true;
+      }
       return super.request(params, opts) as Promise<TransportResult<any, any>>;
     }
   }
@@ -162,7 +164,7 @@ const addLogging = (client: Client, logger: Logger) => {
 function skipProductCheck(client: Client) {
   const tSymbol = Object.getOwnPropertySymbols(client.transport || client).filter(
     (symbol) => symbol.description === 'product check'
-  )[0];
+  )[1];
   // @ts-expect-error `tSymbol` is missing in the index signature of Transport
   (client.transport || client)[tSymbol] = 2;
 }

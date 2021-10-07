@@ -23,10 +23,10 @@ export type ElasticsearchClient = Omit<
   'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close'
 > & {
   transport: {
-    request(
+    request<TResponse = unknown>(
       params: TransportRequestParams,
       options?: TransportRequestOptions
-    ): Promise<TransportResult>;
+    ): Promise<TransportResult<TResponse>>;
   };
 };
 
