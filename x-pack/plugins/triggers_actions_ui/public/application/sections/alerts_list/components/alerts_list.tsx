@@ -364,9 +364,9 @@ export const AlertsList: React.FunctionComponent = () => {
         const checkEnabledResult = checkAlertTypeEnabled(ruleType);
         const link = (
           <>
-            <EuiFlexGroup gutterSize="xs">
+            <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup direction="column" gutterSize="xs">
+                <EuiFlexGroup gutterSize="xs">
                   <EuiFlexItem grow={false}>
                     <EuiLink
                       title={name}
@@ -378,22 +378,22 @@ export const AlertsList: React.FunctionComponent = () => {
                     </EuiLink>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiText color="subdued" size="xs">
-                      {alert.alertType}
-                    </EuiText>
+                    {!checkEnabledResult.isEnabled && (
+                      <EuiIconTip
+                        anchorClassName="ruleDisabledQuestionIcon"
+                        data-test-subj="ruleDisabledByLicenseTooltip"
+                        type="questionInCircle"
+                        content={checkEnabledResult.message}
+                        position="right"
+                      />
+                    )}
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <div />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {!checkEnabledResult.isEnabled && (
-                  <EuiIconTip
-                    data-test-subj="ruleDisabledByLicenseTooltip"
-                    type="questionInCircle"
-                    content={checkEnabledResult.message}
-                    position="right"
-                  />
-                )}
+                <EuiText color="subdued" size="xs">
+                  {alert.alertType}
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </>
