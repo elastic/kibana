@@ -54,12 +54,7 @@ export function getIndexPatternNames() {
 }
 
 export function getIndexPatternIdFromName(name: string) {
-  for (let j = 0; j < indexPatternCache.length; j++) {
-    if (indexPatternCache[j].title === name) {
-      return indexPatternCache[j].id;
-    }
-  }
-  return null;
+  return indexPatternCache.find((i) => i.title === name)?.id ?? null;
 }
 export interface IndexPatternAndSavedSearch {
   savedSearch: SavedSearchSavedObject | null;
