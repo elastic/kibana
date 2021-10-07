@@ -48,14 +48,23 @@ export const ReportingCsvShareProvider = ({
       return [];
     }
 
+    const getSearchSource = sharingData.getSearchSource as (
+      absoluteTime?: boolean
+    ) => SearchSourceFields;
+
     const jobParams = {
       title: sharingData.title as string,
       objectType,
-      searchSource: sharingData.searchSource as SearchSourceFields,
       columns: sharingData.columns as string[] | undefined,
     };
 
-    const getJobParams = () => jobParams;
+    const getJobParams = (forShareUrl?: boolean) => {
+      const absoluteTime = !forShareUrl;
+      return {
+        ...jobParams,
+        searchSource: getSearchSource(absoluteTime),
+      };
+    };
 
     const shareActions = [];
 
