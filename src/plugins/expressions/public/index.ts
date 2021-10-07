@@ -101,8 +101,6 @@ export type {
   ExpressionsService,
   ExpressionsServiceSetup,
   ExpressionsServiceStart,
-  TablesAdapter,
-  ExpressionsInspectorAdapter,
 } from '../common';
 
 export {
@@ -114,4 +112,6 @@ export {
   parse,
   parseExpression,
   createDefaultInspectorAdapters,
+  TablesAdapter,
+  ExpressionsInspectorAdapter,
 } from '../common';
