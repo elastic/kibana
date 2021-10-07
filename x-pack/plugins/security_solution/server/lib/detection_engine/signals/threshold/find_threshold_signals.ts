@@ -6,6 +6,7 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 
 import {
   ThresholdNormalized,
@@ -50,22 +51,9 @@ export const findThresholdSignals = async ({
 }> => {
   // Leaf aggregations used below
   const leafAggs = {
-    top_threshold_hits: {
-      top_hits: {
-        sort: [
-          {
-            [timestampOverride ?? '@timestamp']: {
-              order: 'desc' as const,
-            },
-          },
-        ],
-        fields: [
-          {
-            field: '*',
-            include_unmapped: true,
-          },
-        ],
-        size: 1,
+    max_timestamp: {
+      max: {
+        field: timestampOverride != null ? timestampOverride : TIMESTAMP,
       },
     },
     ...(threshold.cardinality?.length

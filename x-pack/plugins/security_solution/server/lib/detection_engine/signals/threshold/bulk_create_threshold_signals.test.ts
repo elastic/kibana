@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
 import { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { sampleDocNoSortId, sampleDocSearchResultsNoSortId } from '../__mocks__/es_results';
+import { sampleDocSearchResultsNoSortId } from '../__mocks__/es_results';
 import { sampleThresholdSignalHistory } from '../__mocks__/threshold_signal_history.mock';
 import { calculateThresholdSignalUuid } from '../utils';
 import { transformThresholdResultsToEcs } from './bulk_create_threshold_signals';
@@ -40,10 +40,8 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
                     {
                       key: 'garden-gnomes',
                       doc_count: 12,
-                      top_threshold_hits: {
-                        hits: {
-                          hits: [sampleDocNoSortId('abcd')],
-                        },
+                      max_timestamp: {
+                        value_as_string: '2020-04-20T21:27:45+0000',
                       },
                       cardinality_count: {
                         value: 7,
@@ -208,10 +206,8 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
               {
                 key: '',
                 doc_count: 15,
-                top_threshold_hits: {
-                  hits: {
-                    hits: [sampleDocNoSortId('abcd')],
-                  },
+                max_timestamp: {
+                  value_as_string: '2020-04-20T21:27:45+0000',
                 },
                 cardinality_count: {
                   value: 7,

@@ -16,6 +16,7 @@ import {
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { Subscription } from 'rxjs';
+import { mapKeys, snakeCase } from 'lodash';
 import type {
   AuthenticatedUser,
   SecurityPluginSetup,
@@ -248,10 +249,17 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       );
     }
 
+    // Get performance information from the browser (non standard property
+    const memoryInfo = mapKeys(
+      // @ts-expect-error
+      window.performance.memory || {},
+      (_, key) => `${snakeCase(key)}_int`
+    );
     // Record an event that Kibana was opened so we can easily search for sessions that use Kibana
     fullStory.event('Loaded Kibana', {
       // `str` suffix is required, see docs: https://help.fullstory.com/hc/en-us/articles/360020623234
       kibana_version_str: this.initializerContext.env.packageInfo.version,
+      ...memoryInfo,
     });
   }
 }

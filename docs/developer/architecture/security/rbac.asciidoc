@@ -104,6 +104,6 @@ Authorization: Basic foo_read_only_user password
 }
 ----------------------------------
 
-{es} checks if the user is granted a specific action. If the user is assigned a role that grants a privilege, {es} uses the <<development-rbac-privileges, {kib} privileges>> definition to associate this with the actions, which makes authorizing users more intuitive and flexible programatically.
+{es} checks if the user is granted a specific action. If the user is assigned a role that grants a privilege, {es} uses the <<development-rbac-privileges, {kib} privileges>> definition to associate this with the actions, which makes authorizing users more intuitive and flexible programmatically.
 
 Once we have authorized the user to perform a specific action, we can execute the request using `callWithInternalUser`.

@@ -87,11 +87,11 @@ export const usePolicyTrustedAppsNotification = () => {
       ),
     });
   } else if (updateFailed) {
-    toasts.addSuccess(
+    toasts.addDanger(
       i18n.translate(
         'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.toastError.text',
         {
-          defaultMessage: 'An error occurred updating artifacts',
+          defaultMessage: `An error occurred updating artifacts`,
         }
       )
     );

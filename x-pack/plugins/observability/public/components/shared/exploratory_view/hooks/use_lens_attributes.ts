@@ -22,6 +22,7 @@ import { IndexPatternState, useAppIndexPatternContext } from './use_app_index_pa
 import { ALL_VALUES_SELECTED } from '../../field_value_suggestions/field_value_combobox';
 import { useTheme } from '../../../../hooks/use_theme';
 import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
+import { LABEL_FIELDS_BREAKDOWN } from '../configurations/constants';
 
 export const getFiltersFromDefs = (reportDefinitions: SeriesUrl['reportDefinitions']) => {
   return Object.entries(reportDefinitions ?? {})
@@ -69,7 +70,7 @@ export function getLayerConfigs(
         seriesConfig,
         time: series.time,
         name: series.name,
-        breakdown: series.breakdown,
+        breakdown: series.breakdown === LABEL_FIELDS_BREAKDOWN ? undefined : series.breakdown,
         seriesType: series.seriesType,
         operationType: series.operationType,
         reportDefinitions: series.reportDefinitions ?? {},

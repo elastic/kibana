@@ -18,6 +18,7 @@ import { Listing } from '../../../components/beats/listing';
 import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { BEATS_SYSTEM_ID } from '../../../../common/constants';
 
 export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -78,7 +79,7 @@ export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
     >
       <div data-test-subj="monitoringBeatsInstancesApp">
         <SetupModeRenderer
-          productName="beats"
+          productName={BEATS_SYSTEM_ID}
           render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
             <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}

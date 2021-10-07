@@ -216,8 +216,10 @@ describe('get_filter', () => {
         };
 
         const exists: Partial<Filter> = {
-          exists: {
-            field: 'host.hostname',
+          query: {
+            exists: {
+              field: 'host.hostname',
+            },
           },
         } as Partial<Filter>;
 

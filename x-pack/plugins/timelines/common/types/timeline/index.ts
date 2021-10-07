@@ -468,7 +468,7 @@ export enum TimelineTabs {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type EmptyObject = Record<any, never>;
+type EmptyObject = Partial<Record<any, never>>;
 
 export type TimelineExpandedEventType =
   | {
@@ -512,9 +512,9 @@ export type TimelineExpandedDetailType =
   | TimelineExpandedHostType
   | TimelineExpandedNetworkType;
 
-export type TimelineExpandedDetail = {
-  [tab in TimelineTabs]?: TimelineExpandedDetailType;
-};
+export type TimelineExpandedDetail = Partial<
+  Record<TimelineTabs | string, TimelineExpandedDetailType>
+>;
 
 export type ToggleDetailPanel = TimelineExpandedDetailType & {
   tabType?: TimelineTabs;
