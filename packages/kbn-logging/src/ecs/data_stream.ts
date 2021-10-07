@@ -7,7 +7,7 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.12/ecs-data_stream.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-data_stream.html
  *
  * @internal
  */

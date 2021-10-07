@@ -314,6 +314,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.security,
       plugins.ml,
       ruleDataService,
+      this.logger,
       isRuleRegistryEnabled,
       previewRuleOptions
     );

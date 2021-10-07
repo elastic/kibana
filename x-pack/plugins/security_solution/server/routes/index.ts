@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Logger } from 'src/core/server';
 import { RuleDataPluginService } from '../../../rule_registry/server';
 import { SecuritySolutionPluginRouter } from '../types';
 
@@ -68,21 +69,22 @@ export const initRoutes = (
   security: SetupPlugins['security'],
   ml: SetupPlugins['ml'],
   ruleDataService: RuleDataPluginService,
-  isRuleRegistryEnabled: boolean,
+  logger: Logger,
+  isRuleRegistryEnabled: boolean
   previewRuleOptions: CreateRuleOptions
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
   createRulesRoute(router, ml, isRuleRegistryEnabled);
-  readRulesRoute(router, isRuleRegistryEnabled);
+  readRulesRoute(router, logger, isRuleRegistryEnabled);
   updateRulesRoute(router, ml, isRuleRegistryEnabled);
   patchRulesRoute(router, ml, isRuleRegistryEnabled);
   deleteRulesRoute(router, isRuleRegistryEnabled);
-  findRulesRoute(router, isRuleRegistryEnabled);
+  findRulesRoute(router, logger, isRuleRegistryEnabled);
   previewRulesRoute(router, ml, previewRuleOptions);
 
   // Once we no longer have the legacy notifications system/"side car actions" this should be removed.
-  legacyCreateLegacyNotificationRoute(router);
+  legacyCreateLegacyNotificationRoute(router, logger);
 
   // TODO: pass isRuleRegistryEnabled to all relevant routes
 
