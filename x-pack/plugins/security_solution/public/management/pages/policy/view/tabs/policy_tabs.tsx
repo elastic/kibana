@@ -57,15 +57,17 @@ export const PolicyTabs = React.memo(() => {
     []
   );
 
-  const getInitialSelectedTab = () => {
+  const currentSelectedTab = useMemo(() => {
     let initialTab = tabs[0];
 
-    if (isInSettingsTab) initialTab = tabs[0];
-    else if (isInTrustedAppsTab) initialTab = tabs[1];
-    else initialTab = tabs[0];
+    if (isInSettingsTab) {
+      initialTab = tabs[0];
+    } else if (isInTrustedAppsTab) {
+      initialTab = tabs[1];
+    }
 
     return initialTab;
-  };
+  }, [isInSettingsTab, isInTrustedAppsTab, tabs]);
 
   const onTabClickHandler = useCallback(
     (selectedTab: EuiTabbedContentTab) => {
@@ -81,8 +83,7 @@ export const PolicyTabs = React.memo(() => {
   return (
     <EuiTabbedContent
       tabs={tabs}
-      initialSelectedTab={getInitialSelectedTab()}
-      autoFocus="selected"
+      selectedTab={currentSelectedTab}
       size="l"
       onTabClick={onTabClickHandler}
     />
