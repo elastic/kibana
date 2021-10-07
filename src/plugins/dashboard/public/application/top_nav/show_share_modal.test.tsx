@@ -6,14 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Capabilities } from 'src/core/public';
-import { DashboardCapabilities } from '..';
-import { DashboardAppLocatorParams } from '../..';
-import { getExpectedVersionProperties } from '../../../../../core/server/saved_objects/service/lib/internal_utils';
-import { esFilters } from '../../services/data';
-import { SharePluginStart } from '../../services/share';
 import { DashboardState } from '../../types';
-import { DashboardSessionStorage } from '../lib';
+import { DashboardAppLocatorParams } from '../..';
+import { Capabilities } from '../../services/core';
+import { SharePluginStart } from '../../services/share';
 import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
 import { getSavedDashboardMock, makeDefaultServices } from '../test_helpers';
 import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';
@@ -134,7 +130,7 @@ describe('ShowShareModal', () => {
       ],
       query: { query: 'bye', language: 'kuery' },
       savedQuery: 'amazingSavedQuery',
-    };
+    } as unknown as DashboardState;
     const { share, showModalProps } = getPropsAndShare(unsavedDashboardState);
     const toggleShareMenuSpy = jest.spyOn(share, 'toggleShareContextMenu');
     ShowShareModal(showModalProps);

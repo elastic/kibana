@@ -18,10 +18,9 @@ import { TimeRange } from '../../services/data';
 import { ViewMode } from '../../services/embeddable';
 import { setStateToKbnUrl, unhashUrl } from '../../services/kibana_utils';
 import { SharePluginStart } from '../../services/share';
-import { DashboardAppCapabilities, DashboardAppServices, DashboardState } from '../../types';
+import { DashboardAppCapabilities, DashboardState } from '../../types';
 import { dashboardUrlParams } from '../dashboard_router';
 import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
-import { useKibana } from '../../services/kibana_react';
 import { convertPanelMapToSavedPanels } from '../lib/convert_dashboard_panels';
 import { DashboardSessionStorage } from '../lib';
 
