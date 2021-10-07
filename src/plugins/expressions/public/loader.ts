@@ -196,8 +196,4 @@ export type IExpressionLoader = (
   element: HTMLElement,
   expression: string | ExpressionAstExpression,
   params: IExpressionLoaderParams
-) => ExpressionLoader;
-
-export const loader: IExpressionLoader = (element, expression, params) => {
-  return new ExpressionLoader(element, expression, params);
-};
+) => Promise<ExpressionLoader>;

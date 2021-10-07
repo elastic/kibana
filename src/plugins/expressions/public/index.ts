@@ -25,11 +25,10 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { ExpressionExecutor, IExpressionLoaderParams, ExpressionRenderError } from './types';
 export {
   ExpressionRendererComponent,
-  ReactExpressionRenderer,
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from './react_expression_renderer';
-export { ExpressionRenderHandler, ExpressionRendererEvent } from './render';
+export { ExpressionRendererEvent } from './render';
 export type {
   AnyExpressionFunctionDefinition,
   AnyExpressionTypeDefinition,

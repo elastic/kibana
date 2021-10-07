@@ -302,7 +302,7 @@ export class VisualizeEmbeddable
     super.render(this.domNode);
 
     const expressions = getExpressions();
-    this.handler = new expressions.ExpressionLoader(this.domNode, undefined, {
+    this.handler = await expressions.loader(this.domNode, undefined, {
       onRenderError: (element: HTMLElement, error: ExpressionRenderError) => {
         this.onContainerError(error);
       },

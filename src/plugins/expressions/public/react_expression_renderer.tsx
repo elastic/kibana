@@ -58,7 +58,7 @@ const defaultState: State = {
   error: null,
 };
 
-export const ReactExpressionRenderer = ({
+const ReactExpressionRenderer = ({
   className,
   dataAttrs,
   padding,
@@ -238,3 +238,7 @@ export const ReactExpressionRenderer = ({
     </div>
   );
 };
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { ReactExpressionRenderer as default };

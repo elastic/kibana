@@ -15,9 +15,8 @@ import {
   setNotifications,
   setExpressionsService,
 } from './services';
-import { ReactExpressionRenderer } from './react_expression_renderer';
-import { ExpressionLoader, IExpressionLoader, loader } from './loader';
-import { render, ExpressionRenderHandler } from './render';
+import { ReactExpressionRenderer } from './react_expression_renderer_wrapper';
+import { IExpressionLoader } from './loader';
 
 /**
  * Expressions public setup contract, extends {@link ExpressionsServiceSetup}
@@ -28,11 +27,8 @@ export type ExpressionsSetup = ExpressionsServiceSetup;
  * Expressions public start contrect, extends {@link ExpressionServiceStart}
  */
 export interface ExpressionsStart extends ExpressionsServiceStart {
-  ExpressionLoader: typeof ExpressionLoader;
-  ExpressionRenderHandler: typeof ExpressionRenderHandler;
   loader: IExpressionLoader;
   ReactExpressionRenderer: typeof ReactExpressionRenderer;
-  render: typeof render;
 }
 
 export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, ExpressionsStart> {
@@ -66,13 +62,16 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
     setNotifications(core.notifications);
 
     const { expressions } = this;
+
+    const loader: IExpressionLoader = async (element, expression, params) => {
+      const { ExpressionLoader } = await import('./loader');
+      return new ExpressionLoader(element, expression, params);
+    };
+
     const start = {
       ...expressions.start(),
-      ExpressionLoader,
-      ExpressionRenderHandler,
       loader,
       ReactExpressionRenderer,
-      render,
     };
 
     return Object.freeze(start);
