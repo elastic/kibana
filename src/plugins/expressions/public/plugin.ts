@@ -8,6 +8,7 @@
 
 import { pick } from 'lodash';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { SerializableRecord } from '@kbn/utility-types';
 import type { ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 import {
   ExpressionsService,
@@ -17,6 +18,7 @@ import {
 } from './services';
 import { ReactExpressionRenderer } from './react_expression_renderer_wrapper';
 import type { IExpressionLoader } from './loader';
+import type { IExpressionRenderer } from './render';
 
 /**
  * Expressions public setup contract, extends {@link ExpressionsServiceSetup}
@@ -28,6 +30,7 @@ export type ExpressionsSetup = ExpressionsServiceSetup;
  */
 export interface ExpressionsStart extends ExpressionsServiceStart {
   loader: IExpressionLoader;
+  render: IExpressionRenderer;
   ReactExpressionRenderer: typeof ReactExpressionRenderer;
 }
 
@@ -68,9 +71,17 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
       return new ExpressionLoader(element, expression, params);
     };
 
+    const render: IExpressionRenderer = async (element, data, options) => {
+      const { ExpressionRenderHandler } = await import('./render');
+      const handler = new ExpressionRenderHandler(element, options);
+      handler.render(data as SerializableRecord);
+      return handler;
+    };
+
     const start = {
       ...expressions.start(),
       loader,
+      render,
       ReactExpressionRenderer,
     };
 

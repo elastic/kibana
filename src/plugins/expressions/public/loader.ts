@@ -197,3 +197,7 @@ export type IExpressionLoader = (
   expression: string | ExpressionAstExpression,
   params: IExpressionLoaderParams
 ) => Promise<ExpressionLoader>;
+
+export const loader: IExpressionLoader = async (element, expression, params) => {
+  return new ExpressionLoader(element, expression, params);
+};

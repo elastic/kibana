@@ -198,8 +198,10 @@ export class Execution<
       ast,
     });
 
-    const inspectorAdapters =
-      (execution.params.inspectorAdapters as InspectorAdapters) || createDefaultInspectorAdapters();
+    const inspectorAdapters = {
+      ...createDefaultInspectorAdapters(),
+      ...((execution.params.inspectorAdapters as InspectorAdapters) || {}),
+    };
 
     this.context = {
       getSearchContext: () => this.execution.params.searchContext || {},
@@ -212,7 +214,7 @@ export class Execution<
       abortSignal: this.abortController.signal,
       inspectorAdapters,
       logDatatable: (name: string, datatable: Datatable) => {
-        inspectorAdapters.tables[name] = datatable;
+        inspectorAdapters.tables.logDatatable(name, datatable);
       },
       isSyncColorsEnabled: () => execution.params.syncColors!,
       ...execution.params.extraContext,

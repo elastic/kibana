@@ -22,13 +22,17 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 // Static exports.
-export { ExpressionExecutor, IExpressionLoaderParams, ExpressionRenderError } from './types';
-export {
+export type {
+  ExpressionExecutor,
+  IExpressionLoaderParams,
+  ExpressionRenderError,
+  ExpressionRendererEvent,
+} from './types';
+export type {
   ExpressionRendererComponent,
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from './react_expression_renderer';
-export { ExpressionRendererEvent } from './render';
 export type {
   AnyExpressionFunctionDefinition,
   AnyExpressionTypeDefinition,
@@ -100,6 +104,7 @@ export type {
   ExpressionsService,
   ExpressionsServiceSetup,
   ExpressionsServiceStart,
+  TablesAdapter,
 } from '../common';
 
 export {
@@ -111,6 +116,4 @@ export {
   parse,
   parseExpression,
   createDefaultInspectorAdapters,
-  TablesAdapter,
-  ExpressionsInspectorAdapter,
 } from '../common';
