@@ -54,7 +54,7 @@ export const useMonitoringTime = () => {
   );
 
   useEffect(() => {
-    const sub = Legacy.shims.timefilter.getTimeUpdate$().subscribe(function () {
+    const sub = Legacy.shims.timefilter.getTimeUpdate$().subscribe(function onTimeUpdate() {
       const updatedTime = Legacy.shims.timefilter.getTime();
       setTimeRange({ ...currentTimerange, ...updatedTime });
       state.time = { ...updatedTime };
