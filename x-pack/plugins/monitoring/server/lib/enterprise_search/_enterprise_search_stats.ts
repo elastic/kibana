@@ -26,17 +26,22 @@ export const entSearchAggFilterPath = [
 ];
 
 export const entSearchUuidsAgg = (maxBucketSize?: string) => ({
+  // Count all unique agents
   total: {
     cardinality: {
       field: 'agent.id',
       precision_threshold: 10000,
     },
   },
+
+  // Collect all runnng versions
   versions: {
     terms: {
       field: 'enterprisesearch.health.version.number',
     },
   },
+
+  // Get per-instance values using ephemeral IDs to aggreagte metrics
   ephemeral_ids: {
     terms: {
       field: 'agent.ephemeral_id',
@@ -65,6 +70,8 @@ export const entSearchUuidsAgg = (maxBucketSize?: string) => ({
       },
     },
   },
+
+  // Aggregate per-instance metrics into global values
   uptime: {
     max_bucket: {
       buckets_path: 'ephemeral_ids>uptime_max',
@@ -89,7 +96,6 @@ export const entSearchUuidsAgg = (maxBucketSize?: string) => ({
 
 export const entSearchAggResponseHandler = (response: ElasticsearchResponse) => {
   const aggs = response.aggregations;
-  console.log("Aggs: ", aggs);
 
   const totalInstances = aggs?.total.value ?? 0;
   const uptime = aggs?.uptime.value;
