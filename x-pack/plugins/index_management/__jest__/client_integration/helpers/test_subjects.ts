@@ -25,6 +25,7 @@ export type TestSubjects =
   | 'ilmPolicyLink'
   | 'includeStatsSwitch'
   | 'includeManagedSwitch'
+  | 'indexContextMenu'
   | 'indexManagementHeaderContent'
   | 'indexTable'
   | 'indexTableIncludeHiddenIndicesToggle'
