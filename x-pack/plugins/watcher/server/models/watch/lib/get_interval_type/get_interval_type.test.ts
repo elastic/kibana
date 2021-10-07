@@ -9,21 +9,27 @@ import { getIntervalType } from './get_interval_type';
 
 describe('get interval type', () => {
   test('should detect fixed intervals', () => {
-    ['1ms', '1s', '1m', '1h', '1d'].forEach((interval) => {
+    ['1ms', '1s', '1m', '1h', '1d', '21s', '7d'].forEach((interval) => {
+      const intervalDetected = getIntervalType(interval);
       try {
-        expect(getIntervalType(interval)).toBe('fixed');
+        expect(intervalDetected).toBe('fixed_interval');
       } catch (e) {
-        throw new Error(`Expected [${interval}] to be a fixed interval`);
+        throw new Error(
+          `Expected [${interval}] to be a fixed interval but got [${intervalDetected}]`
+        );
       }
     });
   });
 
   test('should detect calendar intervals', () => {
     ['1w', '1M', '1q', '1y'].forEach((interval) => {
+      const intervalDetected = getIntervalType(interval);
       try {
-        expect(getIntervalType(interval)).toBe('calendar');
+        expect(intervalDetected).toBe('calendar_interval');
       } catch (e) {
-        throw new Error(`Expected [${interval}] to be a calendar interval`);
+        throw new Error(
+          `Expected [${interval}] to be a calendar interval but got [${intervalDetected}]`
+        );
       }
     });
   });

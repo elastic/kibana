@@ -122,7 +122,7 @@ export function buildVisualizeQuery(watch, visualizeOptions, kibanaVersion) {
   } else {
     // From 8.x we use the more precise "fixed_interval" or "calendar_interval"
     const intervalType = getIntervalType(visualizeOptions.interval);
-    dateAgg.date_histogram[`${intervalType}_interval`] = visualizeOptions.interval;
+    dateAgg.date_histogram[intervalType] = visualizeOptions.interval;
   }
 
   // override the query range

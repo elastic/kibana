@@ -10,12 +10,12 @@
  * of the less precise "interval". This helper parse the interval and return its type.
  * @param interval Interval value (e.g. "1d", "1w"...)
  */
-export const getIntervalType = (interval: string): 'fixed' | 'calendar' => {
+export const getIntervalType = (interval: string): 'fixed_interval' | 'calendar_interval' => {
   // We will consider all interval as fixed except if they are
   // weekly (w), monthly (M), quarterly (q) or yearly (y)
   const intervalMetric = interval.charAt(interval.length - 1);
   if (['w', 'M', 'q', 'y'].includes(intervalMetric)) {
-    return 'calendar';
+    return 'calendar_interval';
   }
-  return 'fixed';
+  return 'fixed_interval';
 };
