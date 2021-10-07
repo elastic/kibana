@@ -67,8 +67,9 @@ async function createHostIsolationException(
   dispatch({
     type: 'hostIsolationExceptionsFormStateChanged',
     payload: {
+      // @ts-ignore will be fixed with when AsyncResourceState is refactored (#830)
       type: 'LoadingResourceState',
-      // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
+      // @ts-ignore will be fixed with when AsyncResourceState is refactored (#830)
       previousState: entry,
     },
   });
@@ -110,8 +111,9 @@ async function loadHostIsolationExceptionsList(
     dispatch({
       type: 'hostIsolationExceptionsPageDataChanged',
       payload: {
+        // @ts-ignore will be fixed with when AsyncResourceState is refactored (#830)
         type: 'LoadingResourceState',
-        // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
+        // @ts-ignore will be fixed with when AsyncResourceState is refactored (#830)
         previousState: getCurrentListPageDataState(store.getState()),
       },
     });
@@ -152,8 +154,9 @@ async function deleteHostIsolationExceptionsItem(
     dispatch({
       type: 'hostIsolationExceptionsDeleteStatusChanged',
       payload: {
+        // @ts-ignore will be fixed with when AsyncResourceState is refactored (#830)
         type: 'LoadingResourceState',
-        // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
+        // @ts-ignore will be fixed with when AsyncResourceState is refactored (#830)
         previousState: store.getState().deletion.status,
       },
     });
