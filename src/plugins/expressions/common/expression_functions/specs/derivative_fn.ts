@@ -6,23 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from '../types';
 import { Datatable } from '../../expression_types';
-
-export interface DerivativeArgs {
-  by?: string[];
-  inputColumnId: string;
-  outputColumnId: string;
-  outputColumnName?: string;
-}
-
-export type ExpressionFunctionDerivative = ExpressionFunctionDefinition<
-  'derivative',
-  Datatable,
-  DerivativeArgs,
-  Promise<Datatable>
->;
+import { buildResultColumns, getBucketIdentifier } from '../series_calculation_helpers';
+import { DerivativeArgs } from './derivative';
 
 /**
  * Calculates the derivative of a specified column in the data table.
@@ -52,50 +38,40 @@ export type ExpressionFunctionDerivative = ExpressionFunctionDefinition<
  *   before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.
  *   Missing values (`null` and `undefined`) will be treated as empty strings.
  */
-export const derivative: ExpressionFunctionDerivative = {
-  name: 'derivative',
-  type: 'datatable',
+export const derivativeFn = (
+  input: Datatable,
+  { by, inputColumnId, outputColumnId, outputColumnName }: DerivativeArgs
+) => {
+  const resultColumns = buildResultColumns(input, outputColumnId, inputColumnId, outputColumnName);
 
-  inputTypes: ['datatable'],
+  if (!resultColumns) {
+    return input;
+  }
 
-  help: i18n.translate('expressions.functions.derivative.help', {
-    defaultMessage: 'Calculates the derivative of a column in a data table',
-  }),
+  const previousValues: Partial<Record<string, number>> = {};
+  return {
+    ...input,
+    columns: resultColumns,
+    rows: input.rows.map((row) => {
+      const newRow = { ...row };
 
-  args: {
-    by: {
-      help: i18n.translate('expressions.functions.derivative.args.byHelpText', {
-        defaultMessage: 'Column to split the derivative calculation by',
-      }),
-      multi: true,
-      types: ['string'],
-      required: false,
-    },
-    inputColumnId: {
-      help: i18n.translate('expressions.functions.derivative.args.inputColumnIdHelpText', {
-        defaultMessage: 'Column to calculate the derivative of',
-      }),
-      types: ['string'],
-      required: true,
-    },
-    outputColumnId: {
-      help: i18n.translate('expressions.functions.derivative.args.outputColumnIdHelpText', {
-        defaultMessage: 'Column to store the resulting derivative in',
-      }),
-      types: ['string'],
-      required: true,
-    },
-    outputColumnName: {
-      help: i18n.translate('expressions.functions.derivative.args.outputColumnNameHelpText', {
-        defaultMessage: 'Name of the column to store the resulting derivative in',
-      }),
-      types: ['string'],
-      required: false,
-    },
-  },
+      const bucketIdentifier = getBucketIdentifier(row, by);
+      const previousValue = previousValues[bucketIdentifier];
+      const currentValue = newRow[inputColumnId];
 
-  async fn(input, args) {
-    const { derivativeFn } = await import('./derivative_fn');
-    return derivativeFn(input, args);
-  },
+      if (currentValue != null && previousValue != null) {
+        newRow[outputColumnId] = Number(currentValue) - previousValue;
+      } else {
+        newRow[outputColumnId] = undefined;
+      }
+
+      if (currentValue != null) {
+        previousValues[bucketIdentifier] = Number(currentValue);
+      } else {
+        previousValues[bucketIdentifier] = undefined;
+      }
+
+      return newRow;
+    }),
+  };
 };

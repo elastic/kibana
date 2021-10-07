@@ -16,7 +16,7 @@ import {
   setExpressionsService,
 } from './services';
 import { ReactExpressionRenderer } from './react_expression_renderer_wrapper';
-import { IExpressionLoader } from './loader';
+import type { IExpressionLoader } from './loader';
 
 /**
  * Expressions public setup contract, extends {@link ExpressionsServiceSetup}

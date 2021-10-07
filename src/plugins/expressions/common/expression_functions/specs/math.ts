@@ -25,7 +25,7 @@ export const math: ExpressionFunctionDefinition<
   'math',
   MathInput,
   MathArguments,
-  boolean | number | null
+  Promise<boolean | number | null>
 > = {
   name: 'math',
   type: undefined,
