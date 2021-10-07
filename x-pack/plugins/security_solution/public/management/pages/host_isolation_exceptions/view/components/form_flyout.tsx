@@ -106,7 +106,7 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
   const handleOnCancel = useCallback(() => {
     if (creationInProgress) return;
     onCancel();
-  }, [creationInProgress]);
+  }, [creationInProgress, onCancel]);
 
   const handleOnSubmit = useCallback(() => {
     dispatch({
