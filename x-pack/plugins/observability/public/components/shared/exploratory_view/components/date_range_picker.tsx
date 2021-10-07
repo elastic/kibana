@@ -91,6 +91,7 @@ export function DateRangePicker({ seriesId, series }: { seriesId: number; series
           })}
           dateFormat={dateFormat.replace('ss.SSS', 'ss')}
           showTimeSelect
+          popoverPlacement="left"
         />
       }
       endDateControl={
@@ -105,6 +106,7 @@ export function DateRangePicker({ seriesId, series }: { seriesId: number; series
           })}
           dateFormat={dateFormat.replace('ss.SSS', 'ss')}
           showTimeSelect
+          popoverPlacement="left"
         />
       }
     />

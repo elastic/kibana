@@ -11,16 +11,30 @@ import { EuiToolTip, EuiLink } from '@elastic/eui';
 import { useTimelineClick } from '../../../../utils/timeline/use_timeline_click';
 import { TimelineProps } from './types';
 import * as i18n from './translations';
+import { useAppToasts } from '../../../../hooks/use_app_toasts';
 
 export const TimelineMarkDownRendererComponent: React.FC<TimelineProps> = ({
   id,
   title,
   graphEventId,
 }) => {
+  const { addError } = useAppToasts();
+
   const handleTimelineClick = useTimelineClick();
+
+  const onError = useCallback(
+    (error: Error, timelineId: string) => {
+      addError(error, {
+        title: i18n.TIMELINE_ERROR_TITLE,
+        toastMessage: i18n.FAILED_TO_RETRIEVE_TIMELINE(timelineId),
+      });
+    },
+    [addError]
+  );
+
   const onClickTimeline = useCallback(
-    () => handleTimelineClick(id ?? '', graphEventId),
-    [id, graphEventId, handleTimelineClick]
+    () => handleTimelineClick(id ?? '', onError, graphEventId),
+    [id, graphEventId, handleTimelineClick, onError]
   );
   return (
     <EuiToolTip content={i18n.TIMELINE_ID(id ?? '')}>

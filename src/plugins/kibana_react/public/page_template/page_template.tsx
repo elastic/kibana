@@ -133,6 +133,7 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   if (noDataConfig) {
     return (
       <EuiPageTemplate
+        data-test-subj={rest['data-test-subj']}
         template={template}
         className={classes}
         pageSideBar={pageSideBar}

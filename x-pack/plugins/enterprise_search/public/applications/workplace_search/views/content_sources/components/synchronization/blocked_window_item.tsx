@@ -7,20 +7,25 @@
 
 import React from 'react';
 
+import moment from 'moment';
+
 import {
   EuiButton,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiDatePicker,
+  EuiDatePickerRange,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
+  EuiSelect,
+  EuiSelectOption,
   EuiSpacer,
   EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-import { DAYS_OF_WEEK_LABELS } from '../../../../../shared/constants';
-import { BLOCK_LABEL, BETWEEN_LABEL, EVERY_LABEL, AND, REMOVE_BUTTON } from '../../../../constants';
+import { ALL_DAYS_LABEL, DAYS_OF_WEEK_LABELS } from '../../../../../shared/constants';
+import { BLOCK_LABEL, BETWEEN_LABEL, ON_LABEL, REMOVE_BUTTON } from '../../../../constants';
 import { BlockedWindow, DAYS_OF_WEEK_VALUES } from '../../../../types';
 
 import {
@@ -32,6 +37,7 @@ import {
   INCREMENTAL_SYNC_DESCRIPTION,
   DELETION_SYNC_DESCRIPTION,
   PERMISSIONS_SYNC_DESCRIPTION,
+  UTC_TITLE,
 } from '../../constants';
 
 interface Props {
@@ -81,13 +87,11 @@ const syncOptions = [
   },
 ];
 
-const dayPickerOptions = DAYS_OF_WEEK_VALUES.reduce((options, day) => {
-  options.push({
-    label: DAYS_OF_WEEK_LABELS[day.toUpperCase() as keyof typeof DAYS_OF_WEEK_LABELS],
-    value: day,
-  });
-  return options;
-}, [] as Array<EuiComboBoxOptionOption<string>>);
+const daySelectOptions = DAYS_OF_WEEK_VALUES.map((day) => ({
+  text: DAYS_OF_WEEK_LABELS[day.toUpperCase() as keyof typeof DAYS_OF_WEEK_LABELS],
+  value: day,
+})) as EuiSelectOption[];
+daySelectOptions.push({ text: ALL_DAYS_LABEL, value: 'all' });
 
 export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow }) => {
   const handleSyncTypeChange = () => '#TODO';
@@ -103,7 +107,7 @@ export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow }) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ width: 175 }} className="blockedItemSyncSelect">
           <EuiSuperSelect
-            valueOfSelected={'permissions'}
+            valueOfSelected={blockedWindow.jobType}
             options={syncOptions}
             onChange={handleSyncTypeChange}
             itemClassName="blockedWindowSelectItem"
@@ -111,38 +115,51 @@ export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow }) => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
+          <EuiText>{ON_LABEL}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem style={{ minWidth: 130 }}>
+          <EuiSelect value={blockedWindow.day} options={daySelectOptions} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiText>{BETWEEN_LABEL}</EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ width: 128 }}>
-          <EuiDatePicker
-            showTimeSelect
-            showTimeSelectOnly
-            selected={blockedWindow.start}
-            onChange={handleStartDateChange}
-            dateFormat="hh:mm A"
-            timeFormat="hh:mm A"
+        <EuiFlexItem grow={false}>
+          <EuiDatePickerRange
+            startDateControl={
+              <EuiDatePicker
+                showTimeSelect
+                showTimeSelectOnly
+                selected={moment(blockedWindow.start, 'HH:mm:ssZ')}
+                onChange={handleStartDateChange}
+                dateFormat="h:mm A"
+                timeFormat="h:mm A"
+              />
+            }
+            endDateControl={
+              <EuiDatePicker
+                showTimeSelect
+                showTimeSelectOnly
+                selected={moment(blockedWindow.end, 'HH:mm:ssZ')}
+                onChange={handleEndDateChange}
+                dateFormat="h:mm A"
+                timeFormat="h:mm A"
+              />
+            }
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText>{AND}</EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ width: 128 }}>
-          <EuiDatePicker
-            showTimeSelect
-            showTimeSelectOnly
-            selected={blockedWindow.end}
-            onChange={handleEndDateChange}
-            dateFormat="hh:mm A"
-            timeFormat="hh:mm A"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText>{EVERY_LABEL}</EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiComboBox
-            selectedOptions={[dayPickerOptions[0], dayPickerOptions[1]]}
-            options={dayPickerOptions}
+          <EuiIconTip
+            title={UTC_TITLE}
+            type="iInCircle"
+            content={
+              <EuiText size="s">
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.workplaceSearch.sources.utcLabel"
+                  defaultMessage="Current UTC time: {utcTime}"
+                  values={{ utcTime: moment().utc().format('h:mm A') }}
+                />
+              </EuiText>
+            }
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
