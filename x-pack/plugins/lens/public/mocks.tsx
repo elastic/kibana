@@ -16,7 +16,7 @@ import moment from 'moment';
 import { Provider } from 'react-redux';
 import { act } from 'react-dom/test-utils';
 import { ReactExpressionRendererProps } from 'src/plugins/expressions/public';
-import { DeepPartial } from '@reduxjs/toolkit';
+import { PreloadedState } from '@reduxjs/toolkit';
 import { LensPublicStart } from '.';
 import { visualizationTypes } from './xy_visualization/types';
 import { navigationPluginMock } from '../../../../src/plugins/navigation/public/mocks';
@@ -479,7 +479,7 @@ export function makeLensStore({
       resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
       ...preloadedState,
     },
-  } as DeepPartial<LensState>);
+  } as PreloadedState<LensState>);
 
   const origDispatch = store.dispatch;
   store.dispatch = jest.fn(dispatch || origDispatch);
