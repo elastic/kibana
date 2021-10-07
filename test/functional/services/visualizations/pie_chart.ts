@@ -7,6 +7,7 @@
  */
 
 import expect from '@kbn/expect';
+import { isNil } from 'lodash';
 import { FtrService } from '../../ftr_provider_context';
 
 const pieChartSelector = 'visTypePieChart';
@@ -100,8 +101,8 @@ export class PieChartService extends FtrService {
     return await pieSlice.getAttribute('style');
   }
 
-  async getAllPieSliceStyles(name: string) {
-    this.log.debug(`VisualizePage.getAllPieSliceStyles(${name})`);
+  async getAllPieSliceColor(name: string) {
+    this.log.debug(`VisualizePage.getAllPieSliceColor(${name})`);
     if (await this.visChart.isNewLibraryChart(pieChartSelector)) {
       const slices =
         (await this.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ??
@@ -112,9 +113,22 @@ export class PieChartService extends FtrService {
       return selectedSlice.map((slice) => slice.color);
     }
     const pieSlices = await this.getAllPieSlices(name);
-    return await Promise.all(
+    const slicesStyles = await Promise.all(
       pieSlices.map(async (pieSlice) => await pieSlice.getAttribute('style'))
     );
+    return slicesStyles
+      .map(
+        (styles) =>
+          styles.split(';').reduce<Record<string, string>>((styleAsObj, style) => {
+            const stylePair = style.split(':');
+            if (stylePair.length !== 2) {
+              return styleAsObj;
+            }
+            styleAsObj[stylePair[0].trim()] = stylePair[1].trim();
+            return styleAsObj;
+          }, {}).fill // in vislib the color is available on the `fill` style prop
+      )
+      .filter((d) => !isNil(d));
   }
 
   async getPieChartData() {
