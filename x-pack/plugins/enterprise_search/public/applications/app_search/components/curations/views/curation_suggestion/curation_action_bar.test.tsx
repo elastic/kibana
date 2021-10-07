@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { setMockActions } from '../../../../../__mocks__/kea_logic';
+
 import React from 'react';
 
 import { shallow } from 'enzyme';
@@ -12,18 +14,22 @@ import { shallow } from 'enzyme';
 import { CurationActionBar } from './curation_action_bar';
 
 describe('CurationActionBar', () => {
-  const handleAcceptClick = jest.fn();
-  const handleRejectClick = jest.fn();
+  const actions = {
+    acceptSuggestion: jest.fn(),
+    rejectSuggestion: jest.fn(),
+  };
+
+  beforeAll(() => {
+    setMockActions(actions);
+  });
 
   it('renders', () => {
-    const wrapper = shallow(
-      <CurationActionBar onAcceptClick={handleAcceptClick} onRejectClick={handleRejectClick} />
-    );
+    const wrapper = shallow(<CurationActionBar />);
 
     wrapper.find('[data-test-subj="rejectButton"]').simulate('click');
-    expect(handleRejectClick).toHaveBeenCalled();
+    expect(actions.rejectSuggestion).toHaveBeenCalled();
 
     wrapper.find('[data-test-subj="acceptButton"]').simulate('click');
-    expect(handleAcceptClick).toHaveBeenCalled();
+    expect(actions.acceptSuggestion).toHaveBeenCalled();
   });
 });
