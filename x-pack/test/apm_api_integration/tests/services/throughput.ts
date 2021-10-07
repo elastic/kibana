@@ -92,7 +92,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         kuery?: string;
       }) {
         const response = await apmApiClient.readUser({
-          endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+          endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
           params: {
             path: {
               serviceName: 'synth-go',
