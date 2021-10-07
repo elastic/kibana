@@ -56,6 +56,8 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
     }
 
     async waitForTableToFinishLoading() {
+      // wait up to 1 second for loading to actually start
+      await find.existsByDisplayedByCssSelector('.euiBasicTable-loading', 1000);
       await retry.try(async () => {
         await find.waitForDeletedByCssSelector('.euiBasicTable-loading', 5000);
       });

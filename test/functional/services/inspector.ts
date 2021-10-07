@@ -49,7 +49,7 @@ export class InspectorService extends FtrService {
     this.log.debug('Inspector.open');
     let isOpen = await this.testSubjects.exists('inspectorPanel', { timeout: 10 });
     if (!isOpen) {
-      await this.testSubjects.click('openInspectorButton');
+      await this.testSubjects.click(openButton);
     }
 
     isOpen = await this.testSubjects.exists('inspectorPanel');
