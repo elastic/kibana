@@ -16,6 +16,8 @@ import { EngineLogic, generateEnginePath } from '../../engine';
 import { Curation } from '../types';
 import { addDocument, removeDocument } from '../utils';
 
+type CurationPageTabs = 'promoted' | 'hidden';
+
 interface CurationValues {
   dataLoading: boolean;
   curation: Curation;
@@ -27,9 +29,12 @@ interface CurationValues {
   promotedDocumentsLoading: boolean;
   hiddenIds: string[];
   hiddenDocumentsLoading: boolean;
+  isAutomated: boolean;
+  selectedPageTab: CurationPageTabs;
 }
 
 interface CurationActions {
+  convertToManual(): void;
   loadCuration(): void;
   onCurationLoad(curation: Curation): { curation: Curation };
   updateCuration(): void;
@@ -44,6 +49,7 @@ interface CurationActions {
   removeHiddenId(id: string): { id: string };
   clearHiddenIds(): void;
   resetCuration(): void;
+  onSelectPageTab(pageTab: CurationPageTabs): { pageTab: CurationPageTabs };
 }
 
 interface CurationProps {
@@ -53,6 +59,7 @@ interface CurationProps {
 export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, CurationProps>>({
   path: ['enterprise_search', 'app_search', 'curation_logic'],
   actions: () => ({
+    convertToManual: true,
     loadCuration: true,
     onCurationLoad: (curation) => ({ curation }),
     updateCuration: true,
@@ -67,6 +74,7 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
     removeHiddenId: (id) => ({ id }),
     clearHiddenIds: true,
     resetCuration: true,
+    onSelectPageTab: (pageTab) => ({ pageTab }),
   }),
   reducers: () => ({
     dataLoading: [
@@ -161,8 +169,41 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
         onCurationError: () => false,
       },
     ],
+    selectedPageTab: [
+      'promoted',
+      {
+        onSelectPageTab: (_, { pageTab }) => pageTab,
+      },
+    ],
+  }),
+  selectors: ({ selectors }) => ({
+    isAutomated: [
+      () => [selectors.curation],
+      (curation: CurationValues['curation']) => {
+        return curation.suggestion?.status === 'automated';
+      },
+    ],
   }),
   listeners: ({ actions, values, props }) => ({
+    convertToManual: async () => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+
+      try {
+        await http.put(`/internal/app_search/engines/${engineName}/search_relevance_suggestions`, {
+          body: JSON.stringify([
+            {
+              query: values.activeQuery,
+              type: 'curation',
+              status: 'applied',
+            },
+          ]),
+        });
+        actions.loadCuration();
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
     loadCuration: async () => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
