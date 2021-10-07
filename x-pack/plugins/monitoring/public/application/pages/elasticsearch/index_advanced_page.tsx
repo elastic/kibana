@@ -17,6 +17,7 @@ import { useCharts } from '../../hooks/use_charts';
 import { ItemTemplate } from './item_template';
 // @ts-ignore
 import { AdvancedIndex } from '../../../components/elasticsearch/index/advanced';
+import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 
 interface SetupModeProps {
   setupMode: any;
@@ -95,6 +96,7 @@ export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = ({ clust
   return (
     <ItemTemplate title={title} getPageData={getPageData} id={index} pageType="indices">
       <SetupModeRenderer
+        productName={ELASTICSEARCH_SYSTEM_ID}
         render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}
