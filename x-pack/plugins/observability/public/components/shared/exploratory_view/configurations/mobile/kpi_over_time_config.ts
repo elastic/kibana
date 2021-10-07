@@ -8,6 +8,7 @@
 import { ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
+  LABEL_FIELDS_FILTER,
   OPERATION_COLUMN,
   RECORDS_FIELD,
   REPORT_METRIC_FIELD,
@@ -45,7 +46,7 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): SeriesConfig 
       },
     ],
     hasOperationType: true,
-    filterFields: Object.keys(MobileFields),
+    filterFields: [...Object.keys(MobileFields), LABEL_FIELDS_FILTER],
     breakdownFields: Object.keys(MobileFields),
     baseFilters: [
       ...buildPhrasesFilter('agent.name', ['iOS/swift', 'open-telemetry/swift'], indexPattern),
