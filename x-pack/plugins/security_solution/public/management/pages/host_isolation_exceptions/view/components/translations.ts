@@ -71,7 +71,7 @@ export const DELETE_HOST_ISOLATION_EXCEPTION_LABEL = i18n.translate(
 );
 
 export const EDIT_HOST_ISOLATION_EXCEPTION_LABEL = i18n.translate(
-  'xpack.securitySolution.hostIsolationExceptions.list.action.delete',
+  'xpack.securitySolution.hostIsolationExceptions.list.action.edit',
   {
     defaultMessage: 'Edit Exception',
   }
