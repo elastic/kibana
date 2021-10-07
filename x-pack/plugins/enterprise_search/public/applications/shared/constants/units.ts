@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ALL_DAYS_LABEL = i18n.translate('xpack.enterpriseSearch.units.allDaysLabel', {
+  defaultMessage: 'All days',
+});
+
 export const MINUTES_UNIT_LABEL = i18n.translate('xpack.enterpriseSearch.units.minutesLabel', {
   defaultMessage: 'Minutes',
 });

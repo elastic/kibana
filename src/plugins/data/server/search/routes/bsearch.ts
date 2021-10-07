@@ -25,13 +25,13 @@ export function registerBsearchRoute(
     { request: IKibanaSearchRequest; options?: ISearchOptionsSerializable },
     IKibanaSearchResponse
   >('/internal/bsearch', (request) => {
+    const search = getScoped(request);
     return {
       /**
        * @param requestOptions
        * @throws `KibanaServerError`
        */
       onBatchItem: async ({ request: requestData, options }) => {
-        const search = getScoped(request);
         const { executionContext, ...restOptions } = options || {};
 
         return executionContextService.withContext(executionContext, () =>
