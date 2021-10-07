@@ -103,7 +103,11 @@ export const useVisualizeAppState = (
         instance.vis
           .setState({
             ...visState,
-            data: { aggs, searchSource: { ...visSearchSource, query, filter } },
+            data: {
+              aggs,
+              searchSource: { ...visSearchSource, query, filter },
+              savedSearchId: instance.vis.data.savedSearchId,
+            },
           })
           .then(() => {
             // setting up the stateContainer after setState is successful will prevent loading the editor with failures
