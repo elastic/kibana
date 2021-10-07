@@ -171,6 +171,22 @@ describe('Config Deprecations', () => {
     `);
   });
 
+  it('renames security.showInsecureClusterWarning to xpack.security.showInsecureClusterWarning', () => {
+    const config = {
+      security: {
+        showInsecureClusterWarning: false,
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated.security.showInsecureClusterWarning).not.toBeDefined();
+    expect(migrated.xpack.security.showInsecureClusterWarning).toEqual(false);
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Setting \\"security.showInsecureClusterWarning\\" has been replaced by \\"xpack.security.showInsecureClusterWarning\\"",
+      ]
+    `);
+  });
+
   it('warns when using the legacy audit logger', () => {
     const config = {
       xpack: {
