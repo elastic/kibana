@@ -50,15 +50,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'Shows labels under the metric values.',
       }),
     },
-    bgFill: {
-      types: ['string'],
-      default: '"#000"',
-      aliases: ['backgroundFill', 'bgColor', 'backgroundColor'],
-      help: i18n.translate('expressionMetricVis.function.bgFill.help', {
-        defaultMessage:
-          'Color as html hex code (#123456), html color (red, blue) or rgba value (rgba(255,255,255,1)).',
-      }),
-    },
     font: {
       types: ['style'],
       help: i18n.translate('expressionMetricVis.function.font.help', {
@@ -124,11 +115,11 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
               show: args.showLabels,
             },
             style: {
-              bgFill: args.bgFill,
               bgColor: args.colorMode === ColorMode.Background,
               labelColor: args.colorMode === ColorMode.Labels,
               fontSize,
               subText: '',
+              bgFill: '',
             },
           },
           dimensions: {

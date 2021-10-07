@@ -81,6 +81,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
             rowIndex,
           };
         });
+
         return [...acc, ...metrics];
       },
       []

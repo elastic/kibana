@@ -69,9 +69,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
   });
 
   if (style) {
-    metricVis.addArgument('bgFill', style.bgFill);
     metricVis.addArgument('font', buildExpression(`font size=${style.fontSize}`));
-    metricVis.addArgument('subText', style.subText);
   }
 
   if (colorsRange && colorsRange.length) {
