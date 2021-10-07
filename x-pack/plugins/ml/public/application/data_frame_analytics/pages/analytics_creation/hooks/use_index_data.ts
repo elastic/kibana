@@ -59,6 +59,7 @@ function getIndexPatternColumns(indexPattern: DataView, fieldsFilter: string[]) 
     .filter((field) => fieldsFilter.includes(field.name))
     .map((field) => {
       const schema =
+        // @ts-expect-error field is not DataViewField
         getDataGridSchemaFromESFieldType(field.type) || getDataGridSchemaFromKibanaFieldType(field);
 
       return {

@@ -43,7 +43,7 @@ describe('job_service - job_caps', () => {
 
     dataViews = {
       async find() {
-        return Promise.resolve(kibanaSavedObjects);
+        return Promise.resolve([kibanaSavedObjects]);
       },
     };
   });

@@ -65,8 +65,8 @@ async function loadRollupIndexPattern(
   indexPattern: string,
   dataViewsService: DataViewsService
 ): Promise<DataView | null> {
-  const resp2 = await dataViewsService.find('*');
-  const obj = resp2.find(
+  const resp = await dataViewsService.find('*');
+  const obj = resp.find(
     (dv) => dv.type === 'rollup' && dv.title === indexPattern && dv.typeMeta !== undefined
   );
 
