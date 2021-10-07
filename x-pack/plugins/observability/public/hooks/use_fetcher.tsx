@@ -12,6 +12,7 @@ export enum FETCH_STATUS {
   SUCCESS = 'success',
   FAILURE = 'failure',
   PENDING = 'pending',
+  NOT_INITIATED = 'not_initiated',
 }
 
 export interface FetcherResult<Data> {
