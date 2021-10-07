@@ -364,36 +364,51 @@ export const AlertsList: React.FunctionComponent = () => {
         const checkEnabledResult = checkAlertTypeEnabled(ruleType);
         const link = (
           <>
-            <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <EuiLink
-                  title={name}
-                  onClick={() => {
-                    history.push(routeToRuleDetails.replace(`:ruleId`, alert.id));
-                  }}
-                >
-                  {name}
-                </EuiLink>
+                <EuiFlexGroup direction="column" gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <EuiLink
+                      title={name}
+                      onClick={() => {
+                        history.push(routeToRuleDetails.replace(`:ruleId`, alert.id));
+                      }}
+                    >
+                      {name}
+                    </EuiLink>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText color="subdued" size="xs">
+                      {alert.alertType}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <div />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText color="subdued" size="xs">
-                  {alert.alertType}
-                </EuiText>
+                {!checkEnabledResult.isEnabled && (
+                  <EuiIconTip
+                    data-test-subj="ruleDisabledByLicenseTooltip"
+                    type="questionInCircle"
+                    content={checkEnabledResult.message}
+                    position="right"
+                  />
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </>
         );
-        return checkEnabledResult.isEnabled ? (
-          link
-        ) : (
+        return (
           <>
             {link}
-            <EuiIconTip
-              data-test-subj="ruleDisabledByLicenseTooltip"
-              type="questionInCircle"
-              content={checkEnabledResult.message}
-              position="right"
-            />
+            {alert.muteAll && (
+              <EuiBadge data-test-subj="mutedActionsBadge" color="hollow">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.mutedBadge"
+                  defaultMessage="Muted"
+                />
+              </EuiBadge>
+            )}
           </>
         );
       },
@@ -511,7 +526,7 @@ export const AlertsList: React.FunctionComponent = () => {
                 type="alert"
                 color="warning"
                 content={i18n.translate(
-                  'xpack.triggersActionsUI.checkAlertTypeEnabled.ruleTypeExcessDurationMessage',
+                  'xpack.triggersActionsUI.sections.alertsList.ruleTypeExcessDurationMessage',
                   {
                     defaultMessage:
                       'This exceeds the expected maximum execution time for this rule.',

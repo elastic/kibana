@@ -25328,6 +25328,7 @@
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editAriaLabel": "編集",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editButtonTooltip": "編集",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.enabledTitle": "有効",
+    "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.mutedBadge": "ミュート",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.nameTitle": "名前",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.scheduleTitle": "次の間隔で実行",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.statusTitle": "ステータス",

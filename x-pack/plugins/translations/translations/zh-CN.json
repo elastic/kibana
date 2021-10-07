@@ -25753,6 +25753,7 @@
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editAriaLabel": "编辑",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editButtonTooltip": "编辑",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.enabledTitle": "已启用",
+    "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.mutedBadge": "已静音",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.nameTitle": "名称",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.scheduleTitle": "运行间隔",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.statusTitle": "状态",
