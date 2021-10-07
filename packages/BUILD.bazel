@@ -4,6 +4,7 @@ filegroup(
   name = "build",
   srcs = [
       "//packages/elastic-datemath:build",
+      "//packages/elastic-datemath:build_types",
       "//packages/elastic-eslint-config-kibana:build",
       "//packages/elastic-safer-lodash-set:build",
       "//packages/kbn-ace:build",
@@ -65,8 +66,5 @@ filegroup(
       "//packages/kbn-ui-shared-deps-src:build",
       "//packages/kbn-utility-types:build",
       "//packages/kbn-utils:build",
-
-      "//packages/elastic-datemath:build_types",
-      "//packages/kbn-analytics:build_types",
   ],
 )

@@ -12,29 +12,9 @@ load("@build_bazel_rules_nodejs//internal/linker:link_node_modules.bzl", "module
 
 
 #### TODO
-###### improve provided types entry point to summarise logic
-###### refact api_extractor file into packager folder with better js code architecture
-###### link pkg npm types into node modules for migrated modules
+###### refact main build bazel file for packages
 ###### study around completely split types and code trees for all packages (also test if we can symlink pkg npm into /npm_module instead of base folder)
 ###### source maps for api extractor
-
-def _tsconfig_inputs(ctx):
-  """Returns all transitively referenced tsconfig files from "tsconfig" """
-  inputs = []
-  if TsConfigInfo in ctx.attr.tsconfig:
-    inputs.extend(ctx.attr.tsconfig[TsConfigInfo].deps)
-  else:
-    inputs.append(ctx.file.tsconfig)
-  return inputs
-
-def _join(*elements):
-  segments = [f for f in elements if f]
-  if len(segments):
-    return "/".join(segments)
-  return "."
-
-def _dts_inputs(pkg_path, files):
-  return [f for f in files if f.path.endswith(_join(pkg_path, "target_types", "index.d.ts")) and not f.path.endswith(".map")]
 
 def _deps_inputs(ctx):
   """Returns all transitively referenced files on deps """
@@ -48,6 +28,31 @@ def _deps_inputs(ctx):
 
   deps_files = depset(transitive = deps_files_depsets).to_list()
   return deps_files
+
+def _calculate_entrypoint_path(ctx):
+  return _join(ctx.bin_dir.path, ctx.label.package, _get_types_outdir_name(ctx), ctx.attr.entrypoint_name)
+
+def _get_types_outdir_name(ctx):
+  base_out_folder = _join(ctx.bin_dir.path, ctx.label.package)
+  type_dep_path = ctx.files.deps[0].path
+  type_dep_path_without_base_out = type_dep_path.replace(base_out_folder + "/", "", 1)
+  types_outdir_name = type_dep_path_without_base_out.split("/")[0]
+  return types_outdir_name
+
+def _join(*elements):
+  segments = [f for f in elements if f]
+  if len(segments):
+    return "/".join(segments)
+  return "."
+
+def _tsconfig_inputs(ctx):
+  """Returns all transitively referenced tsconfig files from "tsconfig" """
+  all_inputs = []
+  if TsConfigInfo in ctx.attr.tsconfig:
+    all_inputs.extend(ctx.attr.tsconfig[TsConfigInfo].deps)
+  else:
+    all_inputs.append(ctx.file.tsconfig)
+  return all_inputs
 
 def _pkg_npm_types_impl(ctx):
   # input declarations
@@ -76,13 +81,13 @@ def _pkg_npm_types_impl(ctx):
   ### [1] = generated package json template input file path
   ### [2] = stringified template args
   ### [3] = tsconfig input file path
-  ### [4] = provided types to summarise entry point
+  ### [4] = entry point from provided types to summarise
   extractor_args.add(package_dir.path)
   extractor_args.add(ctx.file._generated_package_json_template.path)
   extractor_args.add_joined(template_args, join_with = ",", omit_if_empty = False)
-  extractor_args.add(_join(package_path, "tsconfig.json"))
-  extractor_args.add_joined([s.path for s in _dts_inputs(package_path, ctx.files.data)], join_with = ",", omit_if_empty = False)
-  extractor_args.add_joined([s.path for s in deps_inputs], join_with = ",", omit_if_empty = False)
+  extractor_args.add(tsconfig_inputs[0])
+  extractor_args.add(_calculate_entrypoint_path(ctx))
+  # extractor_args.add_joined([s.path for s in ctx.files.deps], join_with = ",", omit_if_empty = False)
 
   run_node(
     ctx,
@@ -120,6 +125,10 @@ pkg_npm_types = rule(
       doc = """Other targets which are the base types to summarise from""",
       allow_files = True,
       aspects = [module_mappings_aspect],
+    ),
+    "entrypoint_name": attr.string(
+      doc = """Entrypoint name of the types files group to summarise""",
+      default = "index.d.ts",
     ),
     "package_name": attr.string(),
     "srcs": attr.label_list(

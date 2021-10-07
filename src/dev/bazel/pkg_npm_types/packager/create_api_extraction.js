@@ -14,17 +14,18 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-console.log(process.argv);
-console.log(process.cwd());
-
 const { format, parseTsconfig } = require('@bazel/typescript');
 const { Extractor, ExtractorConfig } = require('@microsoft/api-extractor');
 const fs = require('fs');
-const Mustache = require('mustache');
 const path = require('path');
-const DEBUG = false;
 
-function runMain(tsConfig, entryPoint, dtsBundleOut, apiReviewFolder, acceptApiUpdates = false) {
+function createApiExtraction(
+  tsConfig,
+  entryPoint,
+  dtsBundleOut,
+  apiReviewFolder,
+  acceptApiUpdates = false
+) {
   const [parsedConfig, errors] = parseTsconfig(tsConfig);
   if (errors && errors.length) {
     console.error(format('', errors));
@@ -83,59 +84,4 @@ function runMain(tsConfig, entryPoint, dtsBundleOut, apiReviewFolder, acceptApiU
   return succeeded ? 0 : 1;
 }
 
-exports.runMain = runMain;
-
-function generatePkgNpmTypesPackageJsonOutput(
-  outputBasePath,
-  packageJsonTemplatePath,
-  rawPackageJsonTemplateArgs
-) {
-  const packageJsonTemplateArgsInTuples = rawPackageJsonTemplateArgs.reduce(
-    (a, v) => {
-      const lastTupleIdx = a.length - 1;
-      const lastTupleSize = a[lastTupleIdx].length;
-
-      if (lastTupleSize < 2) {
-        a[lastTupleIdx].push(v);
-
-        return a;
-      }
-
-      return a.push([v]);
-    },
-    [[]]
-  );
-  const packageJsonTemplateArgs = Object.fromEntries(new Map(packageJsonTemplateArgsInTuples));
-  console.log(packageJsonTemplateArgs);
-  const template = fs.readFileSync(packageJsonTemplatePath);
-  const renderedTemplate = Mustache.render(template.toString(), packageJsonTemplateArgs);
-  console.log(renderedTemplate);
-  fs.writeFileSync(path.resolve(outputBasePath, 'package.json'), renderedTemplate);
-}
-
-// Entry point
-if (require.main === module) {
-  if (DEBUG) {
-    console.error(`
-api-extractor: running with
-  cwd: ${process.cwd()}
-  argv:
-    ${process.argv.join('\n    ')}
-  `);
-  }
-  const [
-    outputBasePath,
-    packageJsonTemplatePath,
-    stringifiedPackageJsonTemplateArgs,
-    tsConfig,
-    entryPoint,
-  ] = process.argv.slice(2);
-  const dtsBundleOutput = path.resolve(outputBasePath, 'index.d.ts');
-
-  generatePkgNpmTypesPackageJsonOutput(
-    outputBasePath,
-    packageJsonTemplatePath,
-    stringifiedPackageJsonTemplateArgs.split(',')
-  );
-  process.exitCode = runMain(tsConfig, entryPoint, dtsBundleOutput);
-}
+module.exports.createApiExtraction = createApiExtraction;

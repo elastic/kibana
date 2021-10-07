@@ -2,10 +2,16 @@ package(default_visibility = ["//visibility:public"])
 
 load("@build_bazel_rules_nodejs//internal/node:node.bzl", "nodejs_binary")
 
+filegroup(
+  name = "packager_all_files",
+  srcs = glob([
+    "packager/*",
+  ]),
+)
+
 exports_files(
   [
     "package_json.mustache",
-    "api_extractor.js"
   ],
   visibility = ["//visibility:public"]
 )
@@ -15,7 +21,8 @@ nodejs_binary(
   data = [
     "@npm//@bazel/typescript",
     "@npm//@microsoft/api-extractor",
-    "@npm//mustache"
+    "@npm//mustache",
+    ":packager_all_files"
   ],
-  entry_point = ":api_extractor.js",
+  entry_point = ":packager/index.js",
 )

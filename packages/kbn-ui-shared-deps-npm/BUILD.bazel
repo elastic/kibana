@@ -71,7 +71,7 @@ WEBPACK_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/elastic-datemath",
+  "//packages/elastic-datemath:npm_module_types",
   "//packages/kbn-utils",
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
