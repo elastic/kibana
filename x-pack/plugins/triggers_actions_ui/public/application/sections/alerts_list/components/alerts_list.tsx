@@ -485,8 +485,7 @@ export const AlertsList: React.FunctionComponent = () => {
           content={i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.durationTitle',
             {
-              defaultMessage:
-                'Duration is the length of time from when a rule begins execution to completion.',
+              defaultMessage: 'The length of time it took for the rule to run.',
             }
           )}
         >
@@ -528,8 +527,7 @@ export const AlertsList: React.FunctionComponent = () => {
                 content={i18n.translate(
                   'xpack.triggersActionsUI.sections.alertsList.ruleTypeExcessDurationMessage',
                   {
-                    defaultMessage:
-                      'This exceeds the expected maximum execution time for this rule.',
+                    defaultMessage: `Duration exceeds the rule's expected run time.`,
                   }
                 )}
                 position="right"
