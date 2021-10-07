@@ -8,6 +8,8 @@ tput setab 2; tput setaf 0; echo "Performance test will be run at ${BUILDKITE_BR
 
 cat << EOF | buildkite-agent pipeline upload
 steps:
-  - command: "yarn kbn bootstrap && node scripts/functional_tests --config x-pack/test/performance/config.ts"
+  - command: .buildkite/scripts/steps/test/performance_sub.sh
     parallelism: "$ITERATION_COUNT"
 EOF
+
+
