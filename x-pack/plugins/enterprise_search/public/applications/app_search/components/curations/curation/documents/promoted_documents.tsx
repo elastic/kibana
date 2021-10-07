@@ -26,6 +26,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { DataPanel } from '../../../data_panel';
 
 import { DEMOTE_DOCUMENT_ACTION } from '../../constants';
+import { PROMOTED_DOCUMENTS_TITLE } from '../constants';
 import { CurationLogic } from '../curation_logic';
 import { AddResultButton, CurationResult, convertToResultFormat } from '../results';
 
@@ -46,14 +47,7 @@ export const PromotedDocuments: React.FC = () => {
     <DataPanel
       filled
       iconType="starFilled"
-      title={
-        <h2>
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.title',
-            { defaultMessage: 'Promoted documents' }
-          )}
-        </h2>
-      }
+      title={<h2>{PROMOTED_DOCUMENTS_TITLE}</h2>}
       subtitle={
         isAutomated ? (
           <FormattedMessage

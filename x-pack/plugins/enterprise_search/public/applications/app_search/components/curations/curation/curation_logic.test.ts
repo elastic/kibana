@@ -56,6 +56,7 @@ describe('CurationLogic', () => {
     hiddenIds: [],
     hiddenDocumentsLoading: false,
     isAutomated: false,
+    selectedPageTab: 'promoted',
   };
 
   beforeEach(() => {
@@ -261,6 +262,21 @@ describe('CurationLogic', () => {
           promotedDocumentsLoading: true,
           hiddenIds: [],
           hiddenDocumentsLoading: true,
+        });
+      });
+    });
+
+    describe('onSelectPageTab', () => {
+      it('should set the selected page tab', () => {
+        mount({
+          selectedPageTab: 'promoted',
+        });
+
+        CurationLogic.actions.onSelectPageTab('hidden');
+
+        expect(CurationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          selectedPageTab: 'hidden',
         });
       });
     });
