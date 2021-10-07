@@ -21,7 +21,7 @@ Managed by the operations team to contain ci settings. Can be ignored by folks o
 
 ## [.github](https://github.com/elastic/kibana/tree/master/.github)
 
-Contains GitHub configuration settings. This file contains issue templates, and the [CODEOWNERS](https://github.com/elastic/kibana/blob/master/.github/CODEOWNERS) file. It's important for teams to keep the CODEOWNERS file up-to-date so the right team is pinged for a code owner review on PRs that edit certain files.
+Contains GitHub configuration settings. This file contains issue templates, and the [CODEOWNERS](https://github.com/elastic/kibana/blob/master/.github/CODEOWNERS) file. It's important for teams to keep the CODEOWNERS file up-to-date so the right team is pinged for a code owner review on PRs that edit certain files. Note that the `CODEOWNERS` file only exists on the main/master branch, and is not backported to other branches in the repo.
 
 ## [api_docs](https://github.com/elastic/kibana/tree/master/api_docs)
 
@@ -32,6 +32,12 @@ Note that currently you may see _a lot_ of changes because that command is not r
 ## [config](https://github.com/elastic/kibana/tree/master/config)
 
 This contains the base configuration file, `kibana.yml`. If you want to tweak any settings, create a `kibana.dev.yml` in here which will get picked up during development, and not checked into GitHub.
+
+## [docs](https://github.com/elastic/kibana/tree/master/docs)
+
+Every folder in here _except_ the [development one](https://github.com/elastic/kibana/tree/master/docs/development) contains manually generated asciidocs that end up hosted in our [Elastic guide](https://www.elastic.co/guide/).
+
+The `development` folder contains markdown that is auto-generated with our legacy API docs tool. We are aiming to remove it shortly after 8.0FF.
 
 ## [dev_docs](https://github.com/elastic/kibana/tree/master/dev_docs)
 
@@ -47,7 +53,7 @@ We used to write RFCs in `md` format and keep them in the repository, but we hav
 
 ## [licenses](https://github.com/elastic/kibana/tree/master/licenses)
 
-Contains our two license header texts - one that automatically gets put on any file inside x-pack (all code that requires more than a basic license level), and one for all the rest. Can be ignored for the most part, this rarely changes.
+Contains our two license header texts, one for the Elastic license and one for the Elastic+SSPL license. All code files inside x-pack should have the Elastic license text at the top, all code files outside x-pack should contain the other. If you have your environment set up to auto-fix on save, eslint should take care of adding it for you. If you don't have it, ci will fail. Can be ignored for the most part, this rarely changes.
 
 ## [packages](https://github.com/elastic/kibana/tree/master/packages)
 
@@ -114,7 +120,7 @@ Maintained by the Operations team.
 
 ### [x-pack/examples](https://github.com/elastic/kibana/tree/master/x-pack/examples)
 
-Contains all example plugins that rely on gold+ features. This folder was created back when code outside `x-pack` was covered under an Apache 2.0 license. Since then our OSS code changed to an Elastic or SSPL license. After that license change, I see no reason for this separation of `examples` and `x-pack/examples` to persist, so consider this folder tech-debt.
+Contains all example plugins that rely on gold+ features.
 
 ### [x-pack/plugins](https://github.com/elastic/kibana/tree/master/x-pack/plugins)
 
