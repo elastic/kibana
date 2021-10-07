@@ -21,7 +21,7 @@ import { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { APP_ID } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
@@ -53,10 +53,9 @@ export interface CaseProps extends Props {
 }
 
 const TimelineDetailsPanel = () => {
-  const { browserFields, docValueFields, runtimeMappings } = useSourcererScope(
+  const { browserFields, docValueFields, runtimeMappings } = useSourcererDataView(
     SourcererScopeName.detections
   );
-
   return (
     <DetailsPanel
       browserFields={browserFields}

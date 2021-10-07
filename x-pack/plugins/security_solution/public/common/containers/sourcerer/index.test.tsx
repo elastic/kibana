@@ -97,17 +97,9 @@ describe('Sourcerer Hooks', () => {
         ...mockGlobalState.sourcerer.sourcererScopes,
         [SourcererScopeName.default]: {
           ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
-          indexPattern: {
-            fields: [],
-            title: '',
-          },
         },
         [SourcererScopeName.timeline]: {
           ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
-          indexPattern: {
-            fields: [],
-            title: '',
-          },
         },
       },
     },
@@ -165,6 +157,7 @@ describe('Sourcerer Hooks', () => {
           ...state.sourcerer,
           signalIndexName: null,
           defaultDataView: {
+            ...state.sourcerer.defaultDataView,
             id: DEFAULT_DATA_VIEW_ID,
             title: DEFAULT_INDEX_PATTERN.join(','),
             patternList: DEFAULT_INDEX_PATTERN,

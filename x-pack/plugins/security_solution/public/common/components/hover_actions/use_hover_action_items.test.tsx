@@ -13,7 +13,7 @@ import { DataProvider } from '../../../../common/types/timeline';
 jest.mock('../../lib/kibana');
 jest.mock('../../hooks/use_selector');
 jest.mock('../../containers/sourcerer', () => ({
-  useSourcererScope: jest.fn().mockReturnValue({ browserFields: {} }),
+  useDataViewByScope: jest.fn().mockReturnValue({ browserFields: {} }),
 }));
 
 describe('useHoverActionItems', () => {

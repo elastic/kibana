@@ -216,9 +216,12 @@ export const useInitSourcerer = (
   ]);
 };
 
-export const useSourcererScope = (scope: SourcererScopeName = SourcererScopeName.default) => {
-  const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
-  return useDeepEqualSelector((state) => sourcererScopeSelector(state, scope));
+export const useSourcererDataView = (scope: SourcererScopeName = SourcererScopeName.default) => {
+  const dataViewBySourcererScope = useMemo(
+    () => sourcererSelectors.getSelectedDataViewSelector(),
+    []
+  );
+  return useDeepEqualSelector((state) => dataViewBySourcererScope(state, scope));
 };
 
 export const getScopeFromPath = (

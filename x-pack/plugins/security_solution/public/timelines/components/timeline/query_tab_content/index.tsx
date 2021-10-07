@@ -51,7 +51,7 @@ import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 import { sourcererActions } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useTimelineEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { TimelineDatePickerLock } from '../date_picker_lock';
@@ -192,8 +192,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     indexPattern,
     runtimeMappings,
     selectedPatterns,
-  } = useSourcererScope(SourcererScopeName.timeline);
-
+  } = useSourcererDataView(SourcererScopeName.timeline);
   const { uiSettings } = useKibana().services;
 
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);

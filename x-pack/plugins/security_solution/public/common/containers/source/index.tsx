@@ -28,7 +28,7 @@ import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { useAppToasts } from '../../hooks/use_app_toasts';
-import { SelectedDataView } from '../../store/sourcerer/selectors';
+import { useSourcererDataView } from '../sourcerer';
 
 export { BrowserField, BrowserFields, DocValueFields };
 
@@ -223,10 +223,7 @@ export const useIndexFields = (
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const dispatch = useDispatch();
-  const getSelectedDataView = useMemo(() => sourcererSelectors.getSelectedDataViewSelector(), []);
-  const { dataViewId, patternList, selectedPatterns } = useDeepEqualSelector<SelectedDataView>(
-    (state) => getSelectedDataView(state, sourcererScopeName)
-  );
+  const { dataViewId, patternList, selectedPatterns } = useSourcererDataView(sourcererScopeName);
   const { addError, addWarning } = useAppToasts();
 
   const setLoading = useCallback(
@@ -279,8 +276,8 @@ export const useIndexFields = (
                     sourcererActions.setSource({
                       scope: {
                         id: SourcererScopeName.detections,
-                        indicesExist: response.indicesExist.includes(signalIndexName),
                         loading: false,
+                        indicesExist: response.indicesExist.includes(signalIndexName),
                       },
 
                       dataView: {
@@ -297,6 +294,7 @@ export const useIndexFields = (
                     sourcererActions.setSource({
                       scope: {
                         id: sourcererScopeName,
+                        loading: false,
                         indicesExist:
                           // TODO: Steph/sourcerer needs test
                           sourcererScopeName === SourcererScopeName.detections
@@ -304,7 +302,6 @@ export const useIndexFields = (
                             : sourcererScopeName === SourcererScopeName.default
                             ? response.indicesExist.filter((i) => i !== signalIndexName).length > 0
                             : response.indicesExist.length > 0,
-                        loading: false,
                       },
                       dataView: {
                         browserFields: getBrowserFields(patternString, response.indexFields),

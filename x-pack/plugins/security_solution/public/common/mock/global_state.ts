@@ -35,8 +35,6 @@ import { TimelineType, TimelineStatus, TimelineTabs } from '../../../common/type
 import { mockManagementState } from '../../management/store/reducer';
 import { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
-import { mockBrowserFields, mockDocValueFields } from '../containers/source/mock';
-import { mockIndexPattern } from './index_pattern';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from '../store/sourcerer/helpers';
 
@@ -44,6 +42,7 @@ export const mockSourcererState = {
   ...initialSourcererState,
   signalIndexName: `${DEFAULT_SIGNALS_INDEX}-spacename`,
   defaultDataView: {
+    ...initialSourcererState.defaultDataView,
     id: DEFAULT_DATA_VIEW_ID,
     title: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`].join(','),
     patternList: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`],
@@ -329,9 +328,6 @@ export const mockGlobalState: State = {
           SourcererScopeName.default,
           mockSourcererState.signalIndexName
         ),
-        browserFields: mockBrowserFields,
-        indexPattern: mockIndexPattern,
-        docValueFields: mockDocValueFields,
       },
       [SourcererScopeName.detections]: {
         ...mockSourcererState.sourcererScopes[SourcererScopeName.detections],
@@ -341,9 +337,6 @@ export const mockGlobalState: State = {
           SourcererScopeName.detections,
           mockSourcererState.signalIndexName
         ),
-        browserFields: mockBrowserFields,
-        indexPattern: mockIndexPattern,
-        docValueFields: mockDocValueFields,
       },
       [SourcererScopeName.timeline]: {
         ...mockSourcererState.sourcererScopes[SourcererScopeName.timeline],
@@ -353,9 +346,6 @@ export const mockGlobalState: State = {
           SourcererScopeName.timeline,
           mockSourcererState.signalIndexName
         ),
-        browserFields: mockBrowserFields,
-        indexPattern: mockIndexPattern,
-        docValueFields: mockDocValueFields,
       },
     },
   },

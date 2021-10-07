@@ -24,7 +24,7 @@ import { inputsSelectors } from '../../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { OverviewEmpty } from '../../../../overview/components/overview_empty';
 import { esQuery } from '../../../../../../../../src/plugins/data/public';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useNetworkDetails } from '../../../../network/containers/details';
 import { networkModel } from '../../../../network/store';
 import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
@@ -98,7 +98,7 @@ export const ExpandableNetworkDetails = ({
     services: { uiSettings },
   } = useKibana();
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: esQuery.getEsQueryConfig(uiSettings),
     indexPattern,

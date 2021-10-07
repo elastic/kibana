@@ -12,12 +12,12 @@ import { TestProviders, mockIndexNames, mockIndexPattern } from '../../../../com
 import { TimelineId } from '../../../../../common/types/timeline';
 import { useTimelineKpis } from '../../../containers/kpis';
 import { FlyoutHeader } from '.';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useDataViewByScope } from '../../../../common/containers/sourcerer';
 import { mockBrowserFields, mockDocValueFields } from '../../../../common/containers/source/mock';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 
-const mockUseSourcererScope: jest.Mock = useSourcererScope as jest.Mock;
+const mockUseSourcererScope: jest.Mock = useDataViewByScope as jest.Mock;
 jest.mock('../../../../common/containers/sourcerer');
 
 const mockUseTimelineKpis: jest.Mock = useTimelineKpis as jest.Mock;

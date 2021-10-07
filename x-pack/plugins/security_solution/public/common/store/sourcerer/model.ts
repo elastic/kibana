@@ -48,9 +48,9 @@ export interface SourcererDataView {
    * title of Kibana Index Pattern
    * title also serves as "all pattern list", including inactive
    */
-  title: string;
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
+  title: string;
   // Remove once issue resolved: https://github.com/elastic/kibana/issues/111762
   runtimeMappings: MappingRuntimeFields;
   // the index pattern value passed to the search to make the query
@@ -67,8 +67,8 @@ export interface SourcererModel {
 }
 
 export const initSourcererScope = {
-  indicesExist: true,
   loading: false,
+  indicesExist: false,
   selectedDataViewId: '',
   selectedPatterns: [],
 };

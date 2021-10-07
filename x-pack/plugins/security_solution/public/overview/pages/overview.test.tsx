@@ -21,7 +21,7 @@ import {
   initialUserPrivilegesState,
   useUserPrivileges,
 } from '../../common/components/user_privileges';
-import { useSourcererScope } from '../../common/containers/sourcerer';
+import { useDataViewByScope } from '../../common/containers/sourcerer';
 import { useFetchIndex } from '../../common/containers/source';
 import { useIsThreatIntelModuleEnabled } from '../containers/overview_cti_links/use_is_threat_intel_module_enabled';
 import { useCtiEventCounts } from '../containers/overview_cti_links/use_cti_event_counts';
@@ -107,7 +107,7 @@ const endpointNoticeMessage = (hasMessageValue: boolean) => {
     clearAllMessages: () => undefined,
   };
 };
-const mockUseSourcererScope = useSourcererScope as jest.Mock;
+const mockUseSourcererScope = useDataViewByScope as jest.Mock;
 const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 const mockUseFetchIndex = useFetchIndex as jest.Mock;
 const mockUseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;

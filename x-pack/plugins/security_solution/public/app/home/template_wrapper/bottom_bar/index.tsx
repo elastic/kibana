@@ -12,7 +12,7 @@ import { useLocation } from 'react-router-dom';
 import { KibanaPageTemplateProps } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AppLeaveHandler } from '../../../../../../../../src/core/public';
 import { useShowTimeline } from '../../../../common/utils/timeline/use_show_timeline';
-import { useSourcererScope, getScopeFromPath } from '../../../../common/containers/sourcerer';
+import { getScopeFromPath, useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { AutoSaveWarningMsg } from '../../../../timelines/components/timeline/auto_save_warning';
 import { Flyout } from '../../../../timelines/components/flyout';
@@ -25,7 +25,7 @@ export const SecuritySolutionBottomBar = React.memo(
 
     const [showTimeline] = useShowTimeline();
 
-    const { indicesExist } = useSourcererScope(getScopeFromPath(pathname));
+    const { indicesExist } = useSourcererDataView(getScopeFromPath(pathname));
 
     return indicesExist && showTimeline ? (
       <>

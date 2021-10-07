@@ -60,6 +60,7 @@ describe('source/index.tsx', () => {
         kibanaDataViews: [
           ...sourcererState.kibanaDataViews,
           {
+            ...sourcererState.defaultDataView,
             id: 'something-random',
             title: 'something,random',
             patternList: ['something', 'random'],
@@ -69,24 +70,12 @@ describe('source/index.tsx', () => {
           ...sourcererState.sourcererScopes,
           [SourcererScopeName.default]: {
             ...sourcererState.sourcererScopes[SourcererScopeName.default],
-            indexPattern: {
-              fields: [],
-              title: '',
-            },
           },
           [SourcererScopeName.detections]: {
             ...sourcererState.sourcererScopes[SourcererScopeName.detections],
-            indexPattern: {
-              fields: [],
-              title: '',
-            },
           },
           [SourcererScopeName.timeline]: {
             ...sourcererState.sourcererScopes[SourcererScopeName.timeline],
-            indexPattern: {
-              fields: [],
-              title: '',
-            },
           },
         },
       },

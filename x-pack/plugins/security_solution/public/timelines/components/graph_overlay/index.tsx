@@ -30,7 +30,6 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { isFullScreen } from '../timeline/body/column_headers';
-import { sourcererSelectors } from '../../../common/store';
 import { updateTimelineGraphEventId } from '../../../timelines/store/timeline/actions';
 import { Resolver } from '../../../resolver/view';
 import {
@@ -40,7 +39,7 @@ import {
 } from '../../../common/components/super_date_picker/selectors';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { SelectedDataView } from '../../../common/store/sourcerer/selectors';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 
 const OverlayContainer = styled.div`
   display: flex;
@@ -182,10 +181,7 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
     globalFullScreen,
   ]);
 
-  const getSelectedDataView = useMemo(() => sourcererSelectors.getSelectedDataViewSelector(), []);
-  const { selectedPatterns } = useDeepEqualSelector<SelectedDataView>((state) =>
-    getSelectedDataView(state, SourcererScopeName.timeline)
-  );
+  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
 
   if (fullScreen && !isInTimeline) {
     return (

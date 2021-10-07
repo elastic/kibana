@@ -20,7 +20,7 @@ import {
 import { RuleDetailsPage } from './index';
 import { createStore, State } from '../../../../../common/store';
 import { useUserData } from '../../../../components/user_info';
-import { useSourcererScope } from '../../../../../common/containers/sourcerer';
+import { useDataViewByScope } from '../../../../../common/containers/sourcerer';
 import { useParams } from 'react-router-dom';
 import { mockHistory, Router } from '../../../../../common/mock/router';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
@@ -97,7 +97,7 @@ describe('RuleDetailsPageComponent', () => {
   beforeAll(() => {
     (useUserData as jest.Mock).mockReturnValue([{}]);
     (useParams as jest.Mock).mockReturnValue({});
-    (useSourcererScope as jest.Mock).mockReturnValue({
+    (useDataViewByScope as jest.Mock).mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });

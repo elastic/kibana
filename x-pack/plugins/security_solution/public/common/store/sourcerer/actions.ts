@@ -8,7 +8,7 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { TimelineEventsType } from '../../../../common/types/timeline';
 
-import { SourcererDataView, ManageScope, ManageScopeInit, SourcererScopeName } from './model';
+import { SourcererDataView, ManageScope, SourcererScopeName } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourcerer');
 
@@ -22,8 +22,8 @@ export const setSource = actionCreator<{
   };
   scope: {
     id: ManageScope['id'];
-    indicesExist: ManageScope['indicesExist'];
     loading: ManageScope['loading'];
+    indicesExist: ManageScope['indicesExist'];
   };
 }>('SET_SOURCE');
 

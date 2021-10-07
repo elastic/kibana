@@ -55,12 +55,14 @@ describe('Pick Events/Timeline Sourcerer', () => {
         sourcerer: {
           ...mockGlobalState.sourcerer,
           defaultDataView: {
+            ...mockGlobalState.sourcerer.defaultDataView,
             id: '1234',
             title: 'filebeat-*,auditbeat-*,auditbeat-*,auditbeat-*,auditbeat-*',
             patternList: ['filebeat-*', 'auditbeat-*'],
           },
           kibanaDataViews: [
             {
+              ...mockGlobalState.sourcerer.defaultDataView,
               id: '1234',
               title: 'filebeat-*,auditbeat-*,auditbeat-*,auditbeat-*,auditbeat-*',
               patternList: ['filebeat-*', 'auditbeat-*'],

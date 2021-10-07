@@ -7,7 +7,7 @@
 
 import { isObject, get, isString, isNumber } from 'lodash';
 import { useMemo } from 'react';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { Ecs } from '../../../../../cases/common';
@@ -102,7 +102,7 @@ export interface Alert {
   [key: string]: unknown;
 }
 export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, Ecs>] => {
-  const { selectedPatterns } = useSourcererScope(SourcererScopeName.detections);
+  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
   const alertsQuery = useMemo(() => buildAlertsQuery(alertIds), [alertIds]);
 
   const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<SignalHit, unknown>({

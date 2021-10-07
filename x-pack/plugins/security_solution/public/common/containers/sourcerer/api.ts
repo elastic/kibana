@@ -16,7 +16,7 @@ export interface GetSourcererDataView {
   };
 }
 
-interface SourcererDataView {
+interface SecurityDataView {
   defaultDataView: SourcererDataView;
   kibanaDataViews: SourcererDataView[];
 }
@@ -24,7 +24,7 @@ interface SourcererDataView {
 export const postSourcererDataView = async ({
   body,
   signal,
-}: GetSourcererDataView): Promise<SourcererDataView> =>
+}: GetSourcererDataView): Promise<SecurityDataView> =>
   KibanaServices.get().http.fetch(SOURCERER_API_URL, {
     method: 'POST',
     body: JSON.stringify(body),

@@ -18,7 +18,7 @@ import {
   displaySuccessToast,
   useStateToaster,
 } from '../../../common/components/toasters';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
@@ -100,7 +100,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     indexPattern: indexPatterns,
     loading: indexPatternsLoading,
     selectedPatterns,
-  } = useSourcererScope(SourcererScopeName.detections);
+  } = useSourcererDataView(SourcererScopeName.detections);
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
   const { addWarning } = useAppToasts();

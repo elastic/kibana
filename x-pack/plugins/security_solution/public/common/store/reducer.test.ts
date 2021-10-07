@@ -7,7 +7,7 @@
 
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import { createInitialState } from './reducer';
-import { DEFAULT_INDEX_PATTERN, DEFAULT_DATA_VIEW_ID } from '../../../common/constants';
+import { mockSourcererState } from '../mock';
 
 jest.mock('../lib/kibana', () => ({
   KibanaServices: {
@@ -18,19 +18,9 @@ jest.mock('../lib/kibana', () => ({
 describe('createInitialState', () => {
   describe('sourcerer -> default -> indicesExist', () => {
     const defaultState = {
-      defaultDataView: {
-        id: DEFAULT_DATA_VIEW_ID,
-        title: DEFAULT_INDEX_PATTERN.join(','),
-        patternList: DEFAULT_INDEX_PATTERN,
-      },
+      defaultDataView: mockSourcererState.defaultDataView,
       enableExperimental: parseExperimentalConfigValue([]),
-      kibanaDataViews: [
-        {
-          id: DEFAULT_DATA_VIEW_ID,
-          title: DEFAULT_INDEX_PATTERN.join(','),
-          patternList: DEFAULT_INDEX_PATTERN,
-        },
-      ],
+      kibanaDataViews: [mockSourcererState.defaultDataView],
       signalIndexName: 'siem-signals-default',
     };
     test('indicesExist should be TRUE if configIndexPatterns is NOT empty', () => {
@@ -44,7 +34,12 @@ describe('createInitialState', () => {
         {},
         {
           ...defaultState,
-          defaultDataView: { id: '', title: '', patternList: [] },
+          defaultDataView: {
+            ...defaultState.defaultDataView,
+            id: '',
+            title: '',
+            patternList: [],
+          },
         }
       );
 

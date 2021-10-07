@@ -18,6 +18,7 @@ import {
 const signalIndexName = mockGlobalState.sourcerer.signalIndexName;
 
 const dataView = {
+  ...mockGlobalState.sourcerer.defaultDataView,
   id: DEFAULT_DATA_VIEW_ID,
   title: `auditbeat-*,packetbeat-*,${signalIndexName}`,
   patternList: ['packetbeat-*', 'auditbeat-*', `${signalIndexName}`],

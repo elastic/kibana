@@ -8,12 +8,12 @@
 import { cloneDeep } from 'lodash/fp';
 import { mockGlobalState } from '../../mock';
 import { SourcererScopeName } from './model';
-import { getSourcererScopeSelector } from './selectors';
+import { getSelectedDataViewSelector } from './selectors';
 
 describe('Sourcerer selectors', () => {
-  describe('getSourcererScopeSelector', () => {
+  describe('getSelectedDataViewSelector', () => {
     it('Should exclude elastic cloud alias when selected patterns include "logs-*" as an alias', () => {
-      const mapStateToProps = getSourcererScopeSelector();
+      const mapStateToProps = getSelectedDataViewSelector();
       expect(mapStateToProps(mockGlobalState, SourcererScopeName.default).selectedPatterns).toEqual(
         [
           ...mockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns,
@@ -23,7 +23,7 @@ describe('Sourcerer selectors', () => {
     });
 
     it('Should NOT exclude elastic cloud alias when selected patterns does NOT include "logs-*" as an alias', () => {
-      const mapStateToProps = getSourcererScopeSelector();
+      const mapStateToProps = getSelectedDataViewSelector();
       const myMockGlobalState = cloneDeep(mockGlobalState);
       myMockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns = [
         'apm-*-transaction*',
@@ -48,7 +48,7 @@ describe('Sourcerer selectors', () => {
     });
 
     it('Should NOT exclude elastic cloud alias when selected patterns include "logs-endpoint.event-*" as an alias', () => {
-      const mapStateToProps = getSourcererScopeSelector();
+      const mapStateToProps = getSelectedDataViewSelector();
       const myMockGlobalState = cloneDeep(mockGlobalState);
       myMockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns = [
         'apm-*-transaction*',

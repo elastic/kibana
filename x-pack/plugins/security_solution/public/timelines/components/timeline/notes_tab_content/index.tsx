@@ -21,7 +21,7 @@ import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineActions } from '../../../store/timeline';
 import {
@@ -142,8 +142,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
     noteIds,
     status: timelineStatus,
   } = useDeepEqualSelector((state) => getTimelineNotes(state, timelineId));
-
-  const { browserFields, docValueFields, runtimeMappings } = useSourcererScope(
+  const { browserFields, docValueFields, runtimeMappings } = useSourcererDataView(
     SourcererScopeName.timeline
   );
 

@@ -26,10 +26,9 @@ import { NOTE_CONTENT_CLASS_NAME } from '../../timeline/body/helpers';
 import * as i18n from './translations';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { sourcererSelectors } from '../../../../common/store';
 import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
-import { SelectedDataView } from '../../../../common/store/sourcerer/selectors';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
@@ -47,10 +46,7 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   timelineId,
 }) => {
   const dispatch = useDispatch();
-  const getSelectedDataView = useMemo(() => sourcererSelectors.getSelectedDataViewSelector(), []);
-  const { selectedPatterns } = useDeepEqualSelector<SelectedDataView>((state) =>
-    getSelectedDataView(state, SourcererScopeName.timeline)
-  );
+  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
 
   const handleClick = useCallback(() => {
     dispatch(
