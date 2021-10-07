@@ -54,7 +54,6 @@ describe('ExpressionChart', () => {
         metricAlias: 'metricbeat-*',
         inventoryDefaultView: 'host',
         metricsExplorerDefaultView: 'host',
-        // @ts-expect-error: For some reason it doesn't respect "omit messsage" declaration x-pack/plugins/infra/common/metrics_sources/index.ts
         fields: {
           timestamp: '@timestamp',
           container: 'container.id',

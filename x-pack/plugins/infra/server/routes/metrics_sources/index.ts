@@ -88,13 +88,11 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           ? sources.updateSourceConfiguration(
               requestContext.core.savedObjects.client,
               sourceId,
-              // @ts-expect-error for some reason TypeScript doesn't recognise that the fields.* are partial - i.e. all optional both in the expected type and in the input type
               patchedSourceConfigurationProperties
             )
           : sources.createSourceConfiguration(
               requestContext.core.savedObjects.client,
               sourceId,
-              // @ts-expect-error for some reason TypeScript doesn't recognise that the fields.* are partial - i.e. all optional both in the expected type and in the input type
               patchedSourceConfigurationProperties
             ));
 
