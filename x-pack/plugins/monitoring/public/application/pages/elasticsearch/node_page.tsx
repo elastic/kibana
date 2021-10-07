@@ -12,19 +12,14 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { GlobalStateContext } from '../../global_state_context';
 import { NodeReact } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useLocalStorage } from '../../hooks/use_local_storage';
 import { useCharts } from '../../hooks/use_charts';
 import { nodesByIndices } from '../../../components/elasticsearch/shard_allocation/transformers/nodes_by_indices';
 // @ts-ignore
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
-
-interface SetupModeProps {
-  setupMode: any;
-  flyoutComponent: any;
-  bottomBarComponent: any;
-}
+import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 
 export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -98,6 +93,7 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
       pageType="nodes"
     >
       <SetupModeRenderer
+        productName={ELASTICSEARCH_SYSTEM_ID}
         render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}
