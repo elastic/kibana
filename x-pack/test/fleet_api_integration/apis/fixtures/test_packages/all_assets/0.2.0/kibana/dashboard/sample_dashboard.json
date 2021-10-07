@@ -15,7 +15,8 @@
     { "id": "sample_visualization", "name": "panel_0", "type": "visualization" },
     { "id": "sample_search2", "name": "panel_1", "type": "search" },
     { "id": "sample_search2", "name": "panel_2", "type": "search" },
-    { "id": "sample_visualization", "name": "panel_3", "type": "visualization" }
+    { "id": "sample_visualization", "name": "panel_3", "type": "visualization" },
+    { "id": "sample_tag", "type": "tag", "name": "tag-ref-sample_tag" }
   ],
   "id": "sample_dashboard",
   "type": "dashboard"
