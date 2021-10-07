@@ -220,6 +220,11 @@ export default function (providerContext: FtrProviderContext) {
         index: {
           lifecycle: { name: 'reference2' },
           codec: 'best_compression',
+          mapping: {
+            total_fields: {
+              limit: '10000',
+            },
+          },
           query: {
             default_field: ['logs_test_name', 'new_field_name'],
           },

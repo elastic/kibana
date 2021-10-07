@@ -121,6 +121,11 @@ export default function (providerContext: FtrProviderContext) {
               lifecycle: {
                 name: 'overridden by user',
               },
+              mapping: {
+                total_fields: {
+                  limit: '10000',
+                },
+              },
               number_of_shards: '3',
             },
           },
