@@ -16,6 +16,8 @@ import type {
   ColumnHeaderOptions,
   DataProvider,
   SortColumnTimeline,
+  TimelineExpandedDetail,
+  TimelineExpandedDetailType,
 } from '../../../common/types/timeline';
 import { getTGridManageDefaults, tGridDefaults } from './defaults';
 
@@ -412,22 +414,20 @@ export const setSelectedTimelineEvents = ({
   };
 };
 
-export const updateTimelineDetailsPanel = (action: ToggleDetailPanel) => {
-  const { tabType } = action;
+export const updateTimelineDetailsPanel = (action: ToggleDetailPanel): TimelineExpandedDetail => {
+  const { tabType, timelineId, ...expandedDetails } = action;
 
   const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail']);
   const expandedTabType = tabType ?? TimelineTabs.query;
-
-  return action.panelView && panelViewOptions.has(action.panelView)
-    ? {
-        [expandedTabType]: {
-          params: action.params ? { ...action.params } : {},
-          panelView: action.panelView,
-        },
-      }
-    : {
-        [expandedTabType]: {},
-      };
+  const newExpandDetails = {
+    params: expandedDetails.params ? { ...expandedDetails.params } : {},
+    panelView: expandedDetails.panelView,
+  } as TimelineExpandedDetailType;
+  return {
+    [expandedTabType]: panelViewOptions.has(expandedDetails.panelView ?? '')
+      ? newExpandDetails
+      : {},
+  };
 };
 
 export const addProviderToTimelineHelper = (
