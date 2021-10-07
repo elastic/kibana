@@ -17,6 +17,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const policyTestResources = getService('policyTestResources');
 
   // FLAKY
+  // https://github.com/elastic/kibana/issues/114308
+  // https://github.com/elastic/kibana/issues/114309
   describe.skip('When on the Trusted Apps list', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     before(async () => {
