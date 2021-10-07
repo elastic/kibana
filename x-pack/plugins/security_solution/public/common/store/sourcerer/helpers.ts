@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { KibanaDataView, SourcererModel, SourcererScopeById, SourcererScopeName } from './model';
+import { SourcererDataView, SourcererModel, SourcererScopeById, SourcererScopeName } from './model';
 import { TimelineEventsType } from '../../../../common';
 import { DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
 import { SelectedDataViewPayload } from './actions';
@@ -22,7 +22,7 @@ export const isSignalIndex = (index: string, signalIndex: string | null): boolea
   index === signalIndex;
 
 export const getScopePatternListSelection = (
-  theDataView: KibanaDataView | undefined,
+  theDataView: SourcererDataView | undefined,
   sourcererScope: SourcererScopeName,
   signalIndexName: SourcererModel['signalIndexName']
 ): string[] => {

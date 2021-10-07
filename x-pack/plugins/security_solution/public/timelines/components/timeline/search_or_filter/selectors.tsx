@@ -8,14 +8,14 @@
 import { State } from '../../../../common/store';
 import { sourcererSelectors } from '../../../../common/store/selectors';
 import {
-  KibanaDataView,
+  SourcererDataView,
   ManageScope,
   SourcererScopeName,
 } from '../../../../common/store/sourcerer/model';
 
 export interface SourcererScopeSelector {
-  defaultDataView: KibanaDataView;
-  kibanaDataViews: KibanaDataView[];
+  defaultDataView: SourcererDataView;
+  kibanaDataViews: SourcererDataView[];
   signalIndexName: string | null;
   sourcererScope: ManageScope;
 }

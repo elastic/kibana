@@ -62,7 +62,7 @@ import {
 } from '../common/experimental_features';
 import type { TimelineState } from '../../timelines/public';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
-import { KibanaDataView } from './common/store/sourcerer/model';
+import { SourcererDataView } from './common/store/sourcerer/model';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
@@ -351,8 +351,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
 
       const configPatternList = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
-      let defaultDataView: KibanaDataView;
-      let kibanaDataViews: KibanaDataView[];
+      let defaultDataView: SourcererDataView;
+      let kibanaDataViews: SourcererDataView[];
       try {
         // check for/generate default Security Solution Kibana index pattern
         const sourcererDataViews = await coreStart.http.fetch(SOURCERER_API_URL, {

@@ -63,13 +63,21 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       ...validateSelectedPatterns(state, payload),
     },
   }))
-  .case(setSource, (state, { id, payload }) => ({
+  .case(setSource, (state, { scope, dataView }) => ({
     ...state,
+    ...(dataView.id === state.defaultDataView.id
+      ? {
+          defaultDataView: { ...state.defaultDataView, ...dataView },
+        }
+      : {}),
+    kibanaDataViews: state.kibanaDataViews.map((dv) =>
+      dv.id === dataView.id ? { ...dv, ...dataView } : dv
+    ),
     sourcererScopes: {
       ...state.sourcererScopes,
-      [id]: {
-        ...state.sourcererScopes[id],
-        ...payload,
+      [scope.id]: {
+        ...state.sourcererScopes[scope.id],
+        ...scope,
       },
     },
   }))

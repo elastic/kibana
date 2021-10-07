@@ -21,7 +21,7 @@ import { SecuritySubPlugins } from '../../app/types';
 import { ManagementPluginReducer } from '../../management';
 import { State } from './types';
 import { AppAction } from './actions';
-import { KibanaDataView, SourcererScopeName } from './sourcerer/model';
+import { SourcererDataView, SourcererScopeName } from './sourcerer/model';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from './sourcerer/helpers';
 
@@ -41,8 +41,8 @@ export const createInitialState = (
     signalIndexName,
     enableExperimental,
   }: {
-    defaultDataView: KibanaDataView;
-    kibanaDataViews: KibanaDataView[];
+    defaultDataView: SourcererDataView;
+    kibanaDataViews: SourcererDataView[];
     signalIndexName: string | null;
     enableExperimental: ExperimentalFeatures;
   }

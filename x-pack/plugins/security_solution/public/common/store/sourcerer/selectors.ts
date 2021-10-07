@@ -8,17 +8,20 @@
 import memoizeOne from 'memoize-one';
 import { createSelector } from 'reselect';
 import { State } from '../types';
-import { KibanaDataView, ManageScope, SourcererScopeById, SourcererScopeName } from './model';
+import { SourcererDataView, ManageScope, SourcererScopeById, SourcererScopeName } from './model';
 import { getScopePatternListSelection } from './helpers';
 
-export const sourcererKibanaDataViewsSelector = ({ sourcerer }: State): KibanaDataView[] =>
+export const sourcererKibanaDataViewsSelector = ({ sourcerer }: State): SourcererDataView[] =>
   sourcerer.kibanaDataViews;
 
 export const sourcererSignalIndexNameSelector = ({ sourcerer }: State): string | null =>
   sourcerer.signalIndexName;
 
-export const sourcererDefaultDataViewSelector = ({ sourcerer }: State): KibanaDataView =>
+export const sourcererDefaultDataViewSelector = ({ sourcerer }: State): SourcererDataView =>
   sourcerer.defaultDataView;
+
+export const sourcererDataViewSelector = ({ sourcerer }: State, id: string): SourcererDataView =>
+  sourcerer.kibanaDataViews.find((dataView) => dataView.id === id) ?? sourcerer.defaultDataView;
 
 export const sourcererScopeIdSelector = (
   { sourcerer }: State,
@@ -33,13 +36,16 @@ export const sourcererScopesSelector = ({ sourcerer }: State): SourcererScopeByI
 export const scopesSelector = () => createSelector(sourcererScopesSelector, (scopes) => scopes);
 
 export const kibanaDataViewsSelector = () =>
-  createSelector(sourcererKibanaDataViewsSelector, (patterns) => patterns);
+  createSelector(sourcererKibanaDataViewsSelector, (dataViews) => dataViews);
 
 export const signalIndexNameSelector = () =>
   createSelector(sourcererSignalIndexNameSelector, (signalIndexName) => signalIndexName);
 
 export const defaultDataViewSelector = () =>
-  createSelector(sourcererDefaultDataViewSelector, (patterns) => patterns);
+  createSelector(sourcererDefaultDataViewSelector, (dataViews) => dataViews);
+
+export const sourcererDataView = () =>
+  createSelector(sourcererDataViewSelector, (dataView) => dataView);
 
 export interface SelectedDataView {
   dataViewId: string;

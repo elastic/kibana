@@ -277,15 +277,17 @@ export const useIndexFields = (
                   // TODO: Steph/sourcerer https://github.com/elastic/security-team/issues/1730 to be done before 7.16 feature freeze
                   dispatch(
                     sourcererActions.setSource({
-                      id: SourcererScopeName.detections,
-                      payload: {
-                        browserFields: getBrowserFields(patternString, response.indexFields),
-                        docValueFields: getDocValueFields(patternString, response.indexFields),
-                        errorMessage: null,
+                      scope: {
                         id: SourcererScopeName.detections,
-                        indexPattern: getIndexFields(patternString, response.indexFields),
                         indicesExist: response.indicesExist.includes(signalIndexName),
                         loading: false,
+                      },
+
+                      dataView: {
+                        browserFields: getBrowserFields(patternString, response.indexFields),
+                        docValueFields: getDocValueFields(patternString, response.indexFields),
+                        id: selectedDataViewId,
+                        indexPattern: getIndexFields(patternString, response.indexFields),
                         runtimeMappings: response.runtimeMappings,
                       },
                     })
@@ -293,15 +295,8 @@ export const useIndexFields = (
                 } else {
                   dispatch(
                     sourcererActions.setSource({
-                      id: sourcererScopeName,
-                      payload: {
-                        // TODO: Steph/sourcerer all the below formatting should be happening serverside
-                        // https://github.com/elastic/security-team/issues/1730
-                        browserFields: getBrowserFields(patternString, response.indexFields),
-                        docValueFields: getDocValueFields(patternString, response.indexFields),
-                        errorMessage: null,
+                      scope: {
                         id: sourcererScopeName,
-                        indexPattern: getIndexFields(patternString, response.indexFields),
                         indicesExist:
                           // TODO: Steph/sourcerer needs test
                           sourcererScopeName === SourcererScopeName.detections
@@ -310,6 +305,12 @@ export const useIndexFields = (
                             ? response.indicesExist.filter((i) => i !== signalIndexName).length > 0
                             : response.indicesExist.length > 0,
                         loading: false,
+                      },
+                      dataView: {
+                        browserFields: getBrowserFields(patternString, response.indexFields),
+                        docValueFields: getDocValueFields(patternString, response.indexFields),
+                        id: selectedDataViewId,
+                        indexPattern: getIndexFields(patternString, response.indexFields),
                         runtimeMappings: response.runtimeMappings,
                       },
                     })

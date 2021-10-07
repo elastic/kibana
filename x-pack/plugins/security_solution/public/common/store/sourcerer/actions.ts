@@ -8,21 +8,31 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { TimelineEventsType } from '../../../../common/types/timeline';
 
-import { KibanaDataView, ManageScopeInit, SourcererScopeName } from './model';
+import { SourcererDataView, ManageScope, ManageScopeInit, SourcererScopeName } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourcerer');
 
 export const setSource = actionCreator<{
-  id: SourcererScopeName;
-  payload: ManageScopeInit;
+  dataView: {
+    browserFields: SourcererDataView['browserFields'];
+    docValueFields: SourcererDataView['docValueFields'];
+    id: SourcererDataView['id'];
+    indexPattern: SourcererDataView['indexPattern'];
+    runtimeMappings: SourcererDataView['runtimeMappings'];
+  };
+  scope: {
+    id: ManageScope['id'];
+    indicesExist: ManageScope['indicesExist'];
+    loading: ManageScope['loading'];
+  };
 }>('SET_SOURCE');
 
 export const setSignalIndexName =
   actionCreator<{ signalIndexName: string }>('SET_SIGNAL_INDEX_NAME');
 
 export const setSourcererDataViews = actionCreator<{
-  defaultDataView: KibanaDataView;
-  kibanaDataViews: KibanaDataView[];
+  defaultDataView: SourcererDataView;
+  kibanaDataViews: SourcererDataView[];
 }>('SET_SOURCERER_DATA_VIEWS');
 
 export const setSourcererScopeLoading = actionCreator<{

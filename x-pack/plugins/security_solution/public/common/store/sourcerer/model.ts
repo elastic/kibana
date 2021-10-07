@@ -24,17 +24,9 @@ export enum SourcererScopeName {
 }
 
 export interface ManageScope {
-  browserFields: BrowserFields;
-  docValueFields: DocValueFields[];
-  errorMessage: string | null;
   id: SourcererScopeName;
-  // the index pattern value passed to the search to make the query
-  // includes fields and a title with active index names
-  indexPattern: IIndexPattern;
   indicesExist: boolean | undefined | null;
   loading: boolean;
-  // Remove once issue resolved: https://github.com/elastic/kibana/issues/111762
-  runtimeMappings: MappingRuntimeFields;
   selectedDataViewId: string;
   selectedPatterns: string[];
 }
@@ -47,7 +39,7 @@ export type SourcererScopeById = {
   [id in SourcererScopeName]: ManageScope;
 };
 
-export interface KibanaDataView {
+export interface SourcererDataView {
   /** Uniquely identifies a Kibana Index Pattern */
   id: string;
   /**  list of active patterns that return data  */
@@ -57,33 +49,39 @@ export interface KibanaDataView {
    * title also serves as "all pattern list", including inactive
    */
   title: string;
+  browserFields: BrowserFields;
+  docValueFields: DocValueFields[];
+  // Remove once issue resolved: https://github.com/elastic/kibana/issues/111762
+  runtimeMappings: MappingRuntimeFields;
+  // the index pattern value passed to the search to make the query
+  // includes fields and a title with active index names
+  indexPattern: IIndexPattern;
 }
 
 // ManageSourcerer
 export interface SourcererModel {
-  defaultDataView: KibanaDataView;
-  kibanaDataViews: KibanaDataView[];
+  defaultDataView: SourcererDataView;
+  kibanaDataViews: SourcererDataView[];
   signalIndexName: string | null;
   sourcererScopes: SourcererScopeById;
 }
 
 export const initSourcererScope = {
-  browserFields: EMPTY_BROWSER_FIELDS,
-  docValueFields: EMPTY_DOCVALUE_FIELD,
-  errorMessage: null,
-  indexPattern: EMPTY_INDEX_PATTERN,
   indicesExist: true,
   loading: false,
-  runtimeMappings: {},
   selectedDataViewId: '',
   selectedPatterns: [],
 };
 
 export const initialSourcererState: SourcererModel = {
   defaultDataView: {
+    browserFields: EMPTY_BROWSER_FIELDS,
+    docValueFields: EMPTY_DOCVALUE_FIELD,
     id: '',
-    title: '',
+    indexPattern: EMPTY_INDEX_PATTERN,
     patternList: [],
+    runtimeMappings: {},
+    title: '',
   },
   kibanaDataViews: [],
   signalIndexName: null,
