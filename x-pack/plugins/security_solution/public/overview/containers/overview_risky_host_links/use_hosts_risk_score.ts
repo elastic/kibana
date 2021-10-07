@@ -12,12 +12,11 @@ import { useDispatch } from 'react-redux';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../common/lib/kibana';
 import { inputsActions } from '../../../common/store/actions';
-import { LinkPanelListItem } from '../../components/link_panel';
-import { RISKY_HOSTS_INDEX_PREFIX } from '../../../../common/constants';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import { HostsRiskScore } from '../../../../common';
 import { useHostsRiskScoreComplete } from './use_hosts_risk_score_complete';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { getHostRiskIndex } from '../../../helpers';
 
 export const QUERY_ID = 'host_risk_score';
 const noop = () => {};
@@ -106,7 +105,7 @@ export const useHostsRiskScore = ({
             ? { to: timerange.to, from: timerange.from, interval: '' }
             : undefined,
           hostName,
-          defaultIndex: [`${RISKY_HOSTS_INDEX_PREFIX}${space.id}`],
+          defaultIndex: [getHostRiskIndex(space.id)],
         });
       });
     }
