@@ -150,12 +150,15 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
 
   private fetchLicense = async (core: CoreSetup): Promise<ILicense> => {
     try {
-      const response = await core.http.get({
+      const response = await core.http.get<ILicense>({
         path: this.infoEndpoint,
         asSystemRequest: true,
       });
       return new License({
+        // ILicense is missing 'license' and 'features'
+        // @ts-expect-error TS2339
         license: response.license,
+        // @ts-expect-error TS2339
         features: response.features,
         signature: response.signature,
       });

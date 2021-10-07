@@ -41,7 +41,8 @@ export const App = ({ http, token }: { http: HttpSetup; token?: string }) => {
       .post('/api/preboot/connect_to_es', { body: JSON.stringify(elasticsearchConfig) })
       .then(
         (response) => setConnectResponse(JSON.stringify(response)),
-        (err: IHttpFetchError) => setConnectResponse(err?.body?.message || 'ERROR')
+        (err: IHttpFetchError<{ message?: string }>) =>
+          setConnectResponse(err?.body?.message || 'ERROR')
       );
   };
 
