@@ -126,17 +126,6 @@ export interface FieldEdiorProps {
   };
 }
 
-const scriptedFieldCodeEditorOptions: CodeEditorProps['options'] = {
-  fontSize: 12,
-  minimap: {
-    enabled: false,
-  },
-  scrollBeyondLastLine: false,
-  wordWrap: 'on',
-  wrappingIndent: 'indent',
-  automaticLayout: true,
-};
-
 export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState> {
   static contextType = contextType;
 
@@ -612,7 +601,6 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             height="300px"
             value={spec.script ?? ''}
             onChange={this.onScriptChange}
-            options={scriptedFieldCodeEditorOptions}
             data-test-subj="editorFieldScript"
             aria-label={i18n.translate('indexPatternManagement.scriptLabelAriaLabel', {
               defaultMessage: 'Script editor',

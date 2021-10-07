@@ -331,6 +331,7 @@ class FilterEditorUI extends Component<Props, State> {
         <CodeEditor
           languageId={XJsonLang.ID}
           width="100%"
+          height={'250px'}
           value={this.state.queryDsl}
           onChange={this.onQueryDslChange}
           data-test-subj="customEditorInput"
