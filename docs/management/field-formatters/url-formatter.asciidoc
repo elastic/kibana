@@ -1,7 +1,7 @@
 You can specify the following types to the `Url` field formatter:
 
 * *Link* &mdash; Converts the contents of the field into an URL. You can specify the width and height of the image, while keeping the aspect ratio. 
-When the image is smaller than the specified paramters, the image is unable to upscale.
+When the image is smaller than the specified parameters, the image is unable to upscale.
 * *Image* &mdash; Specifies the image directory.
 * *Audio* &mdash; Specify the audio directory.
 

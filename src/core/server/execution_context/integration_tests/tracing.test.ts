@@ -132,7 +132,7 @@ describe('trace', () => {
       expect(header).toEqual(expect.any(String));
     });
 
-    it('can be overriden during Elasticsearch client call', async () => {
+    it('can be overridden during Elasticsearch client call', async () => {
       const { http } = await root.setup();
       const { createRouter } = http;
 
