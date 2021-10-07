@@ -6,17 +6,18 @@
  * Side Public License, v 1.
  */
 
+import type { ISearchSource } from '../../../data/common';
+import type { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
+import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
+import { coreMock } from '../../../../core/public/mocks';
+import { dataPluginMock } from '../../../data/public/mocks';
+import { SavedObjectsClientContract } from '../../../../core/public';
 import {
   findListItems,
   getSavedVisualization,
   saveVisualization,
   SAVED_VIS_TYPE,
 } from './saved_visualize_utils';
-import type { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
-import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
-import { coreMock } from '../../../../core/public/mocks';
-import { dataPluginMock } from '../../../data/public/mocks';
-import { SavedObjectsClientContract } from '../../../../core/public';
 import { VisTypeAlias, TypesStart } from '../vis_types';
 import type { VisSavedObject } from '../types';
 
@@ -208,9 +209,11 @@ describe('saved_visualize_utils', () => {
     });
 
     it('should serialize searchSource', async () => {
-      vis.searchSource = { serialize: jest.fn(() => ({ searchSourceJSON: '{}', references: [] })) };
+      vis.searchSource = {
+        serialize: jest.fn(() => ({ searchSourceJSON: '{}', references: [] })),
+      } as unknown as ISearchSource;
       await saveVisualization(vis, {}, { savedObjectsClient, overlays });
-      expect(vis.searchSource.serialize).toHaveBeenCalled();
+      expect(vis.searchSource?.serialize).toHaveBeenCalled();
     });
 
     it('should call updateTagsReferences if we provide savedObjectsTagging service', async () => {
