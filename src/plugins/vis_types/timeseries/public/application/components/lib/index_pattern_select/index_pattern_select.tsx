@@ -33,28 +33,22 @@ export interface IndexPatternSelectProps {
     | null;
 }
 
-const queryAllIndicesHelpText = (
-  <FormattedMessage
-    id="visTypeTimeseries.indexPatternSelect.queryAllIndicesText"
-    defaultMessage="To query all indices, use {asterisk}."
-    values={{
-      asterisk: <strong>*</strong>,
-    }}
-  />
+const defaultIndexPatternHelpText = i18n.translate(
+  'visTypeTimeseries.indexPatternSelect.defaultIndexPatternText',
+  {
+    defaultMessage: 'Default index pattern is used.',
+  }
 );
 
-const getIndexPatternHelpText = (useKibanaIndices: boolean) => (
-  <FormattedMessage
-    id="visTypeTimeseries.indexPatternSelect.defaultDataViewText"
-    defaultMessage="Using the default data view. {queryAllIndicesHelpText}"
-    values={{
-      queryAllIndicesHelpText: useKibanaIndices ? '' : queryAllIndicesHelpText,
-    }}
-  />
+const queryAllIndexesHelpText = i18n.translate(
+  'visTypeTimeseries.indexPatternSelect.queryAllIndexesText',
+  {
+    defaultMessage: 'To query all indexes use *',
+  }
 );
 
 const indexPatternLabel = i18n.translate('visTypeTimeseries.indexPatternSelect.label', {
-  defaultMessage: 'Data view',
+  defaultMessage: 'Index pattern',
 });
 
 export const IndexPatternSelect = ({
@@ -109,14 +103,17 @@ export const IndexPatternSelect = ({
     <EuiFormRow
       id={htmlId('indexPattern')}
       label={indexPatternLabel}
-      helpText={fetchedIndex.defaultIndex && getIndexPatternHelpText(useKibanaIndices)}
+      helpText={
+        fetchedIndex.defaultIndex &&
+        defaultIndexPatternHelpText + (!useKibanaIndices ? queryAllIndexesHelpText : '')
+      }
       labelAppend={
         fetchedIndex.indexPatternString && !fetchedIndex.indexPattern ? (
           <EuiLink onClick={navigateToCreateIndexPatternPage}>
             <EuiText size="xs">
               <FormattedMessage
-                id="visTypeTimeseries.indexPatternSelect.createDataViewText"
-                defaultMessage="Create data view"
+                id="visTypeTimeseries.indexPatternSelect.createIndexPatternText"
+                defaultMessage="Create index pattern"
               />
             </EuiText>
           </EuiLink>
