@@ -43,10 +43,13 @@ describe('alert_errors', () => {
       });
     });
 
-    it('should validate the minimumInterval', () => {
+    it('should validate the minimumScheduleInterval', () => {
       const alert = mockAlert();
       alert.schedule.interval = '2m';
-      const result = validateBaseProperties(alert, mockServerAlertType({ minimumInterval: '5m' }));
+      const result = validateBaseProperties(
+        alert,
+        mockserverRuleType({ minimumScheduleInterval: '5m' })
+      );
       expect(result.errors).toStrictEqual({
         name: [],
         interval: ['Interval is below minimum (5m) for this rule type'],
@@ -102,7 +105,7 @@ describe('alert_errors', () => {
             },
           }),
         }),
-        mockServerAlertType()
+        mockserverRuleType()
       );
       expect(result).toStrictEqual({
         alertParamsErrors: { field: ['This is wrong'] },
@@ -214,7 +217,7 @@ describe('alert_errors', () => {
   });
 });
 
-function mockServerAlertType(
+function mockserverRuleType(
   overloads: Partial<AlertType<string, string>> = {}
 ): AlertType<string, string> {
   return {

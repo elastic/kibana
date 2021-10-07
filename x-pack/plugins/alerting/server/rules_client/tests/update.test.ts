@@ -140,7 +140,7 @@ describe('update()', () => {
       recoveryActionGroup: RecoveredActionGroup,
       async executor() {},
       producer: 'alerts',
-      minimumInterval: '5s',
+      minimumScheduleInterval: '5s',
     });
   });
 

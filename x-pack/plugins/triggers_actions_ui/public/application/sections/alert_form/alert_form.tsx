@@ -48,7 +48,7 @@ import {
   Alert,
   IErrorObject,
   AlertAction,
-  AlertTypeIndex,
+  RuleTypeIndex,
   AlertType,
   RuleTypeRegistryContract,
   ActionTypeRegistryContract,
@@ -94,8 +94,8 @@ interface AlertFormProps<MetaData = Record<string, any>> {
   metadata?: MetaData;
 }
 
-const defaultInterval = getDurationNumberInItsUnit(DEFAULT_ALERT_INTERVAL);
-const defaultIntervalUnit = getDurationUnitValue(DEFAULT_ALERT_INTERVAL);
+const defaultScheduleInterval = getDurationNumberInItsUnit(DEFAULT_ALERT_INTERVAL);
+const defaultScheduleIntervalUnit = getDurationUnitValue(DEFAULT_ALERT_INTERVAL);
 
 export const AlertForm = ({
   alert,
@@ -123,10 +123,14 @@ export const AlertForm = ({
   const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(null);
 
   const [alertInterval, setAlertInterval] = useState<number | undefined>(
-    alert.schedule.interval ? getDurationNumberInItsUnit(alert.schedule.interval) : defaultInterval
+    alert.schedule.interval
+      ? getDurationNumberInItsUnit(alert.schedule.interval)
+      : defaultScheduleInterval
   );
   const [alertIntervalUnit, setAlertIntervalUnit] = useState<string>(
-    alert.schedule.interval ? getDurationUnitValue(alert.schedule.interval) : defaultIntervalUnit
+    alert.schedule.interval
+      ? getDurationUnitValue(alert.schedule.interval)
+      : defaultScheduleIntervalUnit
   );
   const [alertThrottle, setAlertThrottle] = useState<number | null>(
     alert.throttle ? getDurationNumberInItsUnit(alert.throttle) : null
@@ -135,7 +139,7 @@ export const AlertForm = ({
     alert.throttle ? getDurationUnitValue(alert.throttle) : 'h'
   );
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
-  const [alertTypeIndex, setalertTypeIndex] = useState<AlertTypeIndex | null>(null);
+  const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex | null>(null);
 
   const [availableAlertTypes, setAvailableAlertTypes] = useState<
     Array<{ alertTypeModel: AlertTypeModel; alertType: AlertType }>
@@ -154,14 +158,14 @@ export const AlertForm = ({
     (async () => {
       try {
         const alertTypesResult = await loadAlertTypes({ http });
-        const index: AlertTypeIndex = new Map();
+        const index: RuleTypeIndex = new Map();
         for (const alertTypeItem of alertTypesResult) {
           index.set(alertTypeItem.id, alertTypeItem);
         }
         if (alert.alertTypeId && index.has(alert.alertTypeId)) {
           setDefaultActionGroupId(index.get(alert.alertTypeId)!.defaultActionGroupId);
         }
-        setalertTypeIndex(index);
+        setRuleTypeIndex(index);
 
         const availableAlertTypesResult = getAvailableAlertTypes(alertTypesResult);
         setAvailableAlertTypes(availableAlertTypesResult);
@@ -198,20 +202,20 @@ export const AlertForm = ({
 
   useEffect(() => {
     setAlertTypeModel(alert.alertTypeId ? ruleTypeRegistry.get(alert.alertTypeId) : null);
-    if (alert.alertTypeId && alertTypeIndex && alertTypeIndex.has(alert.alertTypeId)) {
-      setDefaultActionGroupId(alertTypeIndex.get(alert.alertTypeId)!.defaultActionGroupId);
+    if (alert.alertTypeId && ruleTypeIndex && ruleTypeIndex.has(alert.alertTypeId)) {
+      setDefaultActionGroupId(ruleTypeIndex.get(alert.alertTypeId)!.defaultActionGroupId);
     }
-  }, [alert, alert.alertTypeId, alertTypeIndex, ruleTypeRegistry]);
+  }, [alert, alert.alertTypeId, ruleTypeIndex, ruleTypeRegistry]);
 
   useEffect(() => {
     if (alert.schedule.interval) {
       const interval = getDurationNumberInItsUnit(alert.schedule.interval);
       const intervalUnit = getDurationUnitValue(alert.schedule.interval);
 
-      if (interval !== defaultInterval) {
+      if (interval !== defaultScheduleInterval) {
         setAlertInterval(interval);
       }
-      if (intervalUnit !== defaultIntervalUnit) {
+      if (intervalUnit !== defaultScheduleIntervalUnit) {
         setAlertIntervalUnit(intervalUnit);
       }
     }
@@ -297,9 +301,7 @@ export const AlertForm = ({
           ? !item.alertTypeModel.requiresAppContext
           : item.alertType!.producer === alert.consumer
       );
-  const selectedAlertType = alert?.alertTypeId
-    ? alertTypeIndex?.get(alert?.alertTypeId)
-    : undefined;
+  const selectedAlertType = alert?.alertTypeId ? ruleTypeIndex?.get(alert?.alertTypeId) : undefined;
   const recoveryActionGroup = selectedAlertType?.recoveryActionGroup?.id;
   const getDefaultActionParams = useCallback(
     (actionTypeId: string, actionGroupId: string): Record<string, AlertActionParam> | undefined =>
@@ -423,8 +425,8 @@ export const AlertForm = ({
                     setActions([]);
                     setAlertTypeModel(item.alertTypeItem);
                     setAlertProperty('params', {});
-                    if (alertTypeIndex && alertTypeIndex.has(item.id)) {
-                      setDefaultActionGroupId(alertTypeIndex.get(item.id)!.defaultActionGroupId);
+                    if (ruleTypeIndex && ruleTypeIndex.has(item.id)) {
+                      setDefaultActionGroupId(ruleTypeIndex.get(item.id)!.defaultActionGroupId);
                     }
                   }}
                 />
@@ -442,8 +444,8 @@ export const AlertForm = ({
         <EuiFlexItem>
           <EuiTitle size="s" data-test-subj="selectedAlertTypeTitle">
             <h5 id="selectedAlertTypeTitle">
-              {alert.alertTypeId && alertTypeIndex && alertTypeIndex.has(alert.alertTypeId)
-                ? alertTypeIndex.get(alert.alertTypeId)!.name
+              {alert.alertTypeId && ruleTypeIndex && ruleTypeIndex.has(alert.alertTypeId)
+                ? ruleTypeIndex.get(alert.alertTypeId)!.name
                 : ''}
             </h5>
           </EuiTitle>
@@ -794,7 +796,7 @@ export const AlertForm = ({
           ) : null}
           {alertTypeNodes}
         </>
-      ) : alertTypeIndex ? (
+      ) : ruleTypeIndex ? (
         <NoAuthorizedAlertTypes operation={operation} />
       ) : (
         <SectionLoading>

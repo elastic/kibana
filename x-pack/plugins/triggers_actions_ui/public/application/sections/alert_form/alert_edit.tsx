@@ -63,8 +63,8 @@ export const AlertEdit = ({
   const [isConfirmAlertCloseModalOpen, setIsConfirmAlertCloseModalOpen] = useState<boolean>(false);
   const [alertActionsErrors, setAlertActionsErrors] = useState<IErrorObject[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [serverAlertType, setServerAlertType] = useState<AlertType<string, string> | undefined>(
-    props.alertType
+  const [serverRuleType, setServerRuleType] = useState<AlertType<string, string> | undefined>(
+    props.ruleType
   );
 
   const {
@@ -87,22 +87,22 @@ export const AlertEdit = ({
   }, [alert, actionTypeRegistry]);
 
   useEffect(() => {
-    if (!props.alertType && !serverAlertType) {
+    if (!props.ruleType && !serverRuleType) {
       (async () => {
-        const serverAlertTypes = await loadAlertTypes({ http });
-        for (const _serverAlertType of serverAlertTypes) {
-          if (alertType.id === _serverAlertType.id) {
-            setServerAlertType(_serverAlertType);
+        const serverRuleTypes = await loadAlertTypes({ http });
+        for (const _serverRuleType of serverRuleTypes) {
+          if (alertType.id === _serverRuleType.id) {
+            setServerRuleType(_serverRuleType);
           }
         }
       })();
     }
-  }, [props.alertType, alertType.id, serverAlertType, http]);
+  }, [props.ruleType, alertType.id, serverRuleType, http]);
 
   const { alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
     alert as Alert,
     alertType,
-    serverAlertType
+    serverRuleType
   );
 
   const checkForChangesAndCloseFlyout = () => {

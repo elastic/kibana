@@ -138,7 +138,7 @@ describe('register()', () => {
     );
   });
 
-  test('throws if defaultInterval isnt valid', () => {
+  test('throws if defaultScheduleInterval isnt valid', () => {
     const alertType: AlertType<never, never, never, never, never, 'default'> = {
       id: '123',
       name: 'Test',
@@ -154,7 +154,7 @@ describe('register()', () => {
       isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
-      defaultInterval: 'foobar',
+      defaultScheduleInterval: 'foobar',
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
@@ -165,7 +165,7 @@ describe('register()', () => {
     );
   });
 
-  test('throws if minimumInterval isnt valid', () => {
+  test('throws if minimumScheduleInterval isnt valid', () => {
     const alertType: AlertType<never, never, never, never, never, 'default'> = {
       id: '123',
       name: 'Test',
@@ -180,7 +180,7 @@ describe('register()', () => {
       isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
-      minimumInterval: 'foobar',
+      minimumScheduleInterval: 'foobar',
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
@@ -518,12 +518,12 @@ describe('list()', () => {
             "state": Array [],
           },
           "defaultActionGroupId": "testActionGroup",
-          "defaultInterval": undefined,
+          "defaultScheduleInterval": undefined,
           "enabledInLicense": false,
           "id": "test",
           "isExportable": true,
-          "minimumInterval": undefined,
           "minimumLicenseRequired": "basic",
+          "minimumScheduleInterval": undefined,
           "name": "Test",
           "producer": "alerts",
           "recoveryActionGroup": Object {

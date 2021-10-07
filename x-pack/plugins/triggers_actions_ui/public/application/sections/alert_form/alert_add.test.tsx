@@ -70,7 +70,7 @@ describe('alert_add', () => {
   async function setup(
     initialValues?: Partial<Alert>,
     onClose: AlertAddProps['onClose'] = jest.fn(),
-    defaultInterval?: string
+    defaultScheduleInterval?: string
   ) {
     const mocks = coreMock.createSetup();
     const { loadAlertTypes } = jest.requireMock('../../lib/alert_api');
@@ -85,7 +85,7 @@ describe('alert_add', () => {
           },
         ],
         defaultActionGroupId: 'testActionGroup',
-        defaultInterval,
+        defaultScheduleInterval,
         minimumLicenseRequired: 'basic',
         recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
         producer: ALERTS_FEATURE_ID,

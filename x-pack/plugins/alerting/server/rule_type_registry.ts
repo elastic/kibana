@@ -48,6 +48,8 @@ export interface RegistryRuleType
     | 'producer'
     | 'minimumLicenseRequired'
     | 'isExportable'
+    | 'minimumScheduleInterval'
+    | 'defaultScheduleInterval'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -188,9 +190,9 @@ export class RuleTypeRegistry {
     }
     alertType.actionVariables = normalizedActionVariables(alertType.actionVariables);
 
-    // validate defaultInterval here
-    if (alertType.defaultInterval) {
-      const invalidDefaultTimeout = validateDurationSchema(alertType.defaultInterval);
+    // validate defaultScheduleInterval here
+    if (alertType.defaultScheduleInterval) {
+      const invalidDefaultTimeout = validateDurationSchema(alertType.defaultScheduleInterval);
       if (invalidDefaultTimeout) {
         throw new Error(
           i18n.translate(
@@ -207,9 +209,9 @@ export class RuleTypeRegistry {
       }
     }
 
-    // validate minimumInterval here
-    if (alertType.minimumInterval) {
-      const invalidMinimumTimeout = validateDurationSchema(alertType.minimumInterval);
+    // validate minimumScheduleInterval here
+    if (alertType.minimumScheduleInterval) {
+      const invalidMinimumTimeout = validateDurationSchema(alertType.minimumScheduleInterval);
       if (invalidMinimumTimeout) {
         throw new Error(
           i18n.translate(
@@ -325,8 +327,8 @@ export class RuleTypeRegistry {
             producer,
             minimumLicenseRequired,
             isExportable,
-            minimumInterval,
-            defaultInterval,
+            minimumScheduleInterval,
+            defaultScheduleInterval,
           },
         ]: [string, UntypedNormalizedAlertType]) => ({
           id,
@@ -338,8 +340,8 @@ export class RuleTypeRegistry {
           producer,
           minimumLicenseRequired,
           isExportable,
-          minimumInterval,
-          defaultInterval,
+          minimumScheduleInterval,
+          defaultScheduleInterval,
           enabledInLicense: !!this.licenseState.getLicenseCheckForAlertType(
             id,
             name,

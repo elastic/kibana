@@ -38,7 +38,7 @@ import {
   Alert,
   AlertTableItem,
   AlertType,
-  AlertTypeIndex,
+  RuleTypeIndex,
   Pagination,
 } from '../../../../types';
 import { AlertAdd, AlertEdit } from '../../alert_form';
@@ -81,7 +81,7 @@ const ENTER_KEY = 13;
 interface AlertTypeState {
   isLoading: boolean;
   isInitialized: boolean;
-  data: AlertTypeIndex;
+  data: RuleTypeIndex;
 }
 interface AlertState {
   isLoading: boolean;
@@ -168,7 +168,7 @@ export const AlertsList: React.FunctionComponent = () => {
       try {
         setAlertTypesState({ ...alertTypesState, isLoading: true });
         const alertTypes = await loadAlertTypes({ http });
-        const index: AlertTypeIndex = new Map();
+        const index: RuleTypeIndex = new Map();
         for (const alertType of alertTypes) {
           index.set(alertType.id, alertType);
         }
@@ -902,7 +902,7 @@ export const AlertsList: React.FunctionComponent = () => {
           }}
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
-          alertTypeIndex={alertTypesState.data}
+          ruleTypeIndex={alertTypesState.data}
           onSave={loadAlertsData}
         />
       )}
@@ -914,7 +914,7 @@ export const AlertsList: React.FunctionComponent = () => {
           }}
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
-          alertType={
+          ruleType={
             alertTypesState.data.get(currentRuleToEdit.alertTypeId) as AlertType<string, string>
           }
           onSave={loadAlertsData}
@@ -955,17 +955,17 @@ function filterAlertsById(alerts: Alert[], ids: string[]): Alert[] {
 
 function convertAlertsToTableItems(
   alerts: Alert[],
-  alertTypeIndex: AlertTypeIndex,
+  ruleTypeIndex: RuleTypeIndex,
   canExecuteActions: boolean
 ) {
   return alerts.map((alert) => ({
     ...alert,
     actionsCount: alert.actions.length,
     tagsText: alert.tags.join(', '),
-    alertType: alertTypeIndex.get(alert.alertTypeId)?.name ?? alert.alertTypeId,
+    alertType: ruleTypeIndex.get(alert.alertTypeId)?.name ?? alert.alertTypeId,
     isEditable:
-      hasAllPrivilege(alert, alertTypeIndex.get(alert.alertTypeId)) &&
+      hasAllPrivilege(alert, ruleTypeIndex.get(alert.alertTypeId)) &&
       (canExecuteActions || (!canExecuteActions && !alert.actions.length)),
-    enabledInLicense: !!alertTypeIndex.get(alert.alertTypeId)?.enabledInLicense,
+    enabledInLicense: !!ruleTypeIndex.get(alert.alertTypeId)?.enabledInLicense,
   }));
 }

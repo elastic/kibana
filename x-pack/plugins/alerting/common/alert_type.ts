@@ -21,8 +21,8 @@ export interface AlertType<
   producer: string;
   minimumLicenseRequired: LicenseType;
   isExportable: boolean;
-  defaultInterval?: string;
-  minimumInterval?: string;
+  defaultScheduleInterval?: string;
+  minimumScheduleInterval?: string;
 }
 
 export interface ActionGroup<ActionGroupIds extends string> {

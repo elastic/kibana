@@ -20,7 +20,7 @@ import { InitialAlert } from './alert_reducer';
 
 export function validateBaseProperties(
   alertObject: InitialAlert,
-  serverAlertType?: AlertType<string, string>
+  serverRuleType?: AlertType<string, string>
 ): ValidationResult {
   const validationResult = { errors: {} };
   const errors = {
@@ -43,15 +43,15 @@ export function validateBaseProperties(
         defaultMessage: 'Check interval is required.',
       })
     );
-  } else if (serverAlertType?.minimumInterval) {
+  } else if (serverRuleType?.minimumScheduleInterval) {
     const duration = parseDuration(alertObject.schedule.interval);
-    const minimumDuration = parseDuration(serverAlertType.minimumInterval);
+    const minimumDuration = parseDuration(serverRuleType.minimumScheduleInterval);
     if (duration < minimumDuration) {
       errors.interval.push(
         i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.belowMinimumText', {
           defaultMessage: 'Interval is below minimum ({minimum}) for this rule type',
           values: {
-            minimum: serverAlertType.minimumInterval,
+            minimum: serverRuleType.minimumScheduleInterval,
           },
         })
       );
@@ -82,12 +82,12 @@ export function validateBaseProperties(
 export function getAlertErrors(
   alert: Alert,
   alertTypeModel: AlertTypeModel | null,
-  serverAlertType?: AlertType<string, string>
+  serverRuleType?: AlertType<string, string>
 ) {
   const alertParamsErrors: IErrorObject = alertTypeModel
     ? alertTypeModel.validate(alert.params).errors
     : [];
-  const alertBaseErrors = validateBaseProperties(alert, serverAlertType).errors as IErrorObject;
+  const alertBaseErrors = validateBaseProperties(alert, serverRuleType).errors as IErrorObject;
   const alertErrors = {
     ...alertParamsErrors,
     ...alertBaseErrors,
