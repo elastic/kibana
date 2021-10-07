@@ -128,7 +128,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
               />
             ) : (
               <FormattedMessage
-                id="xpack.osqueryqueryFlyoutForm.addFormTitle"
+                id="xpack.osquery.queryFlyoutForm.addFormTitle"
                 defaultMessage="Attach next query"
               />
             )}
@@ -161,7 +161,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiText size="xs" color="subdued">
                       <FormattedMessage
-                        id="xpack.osqueryqueryFlyoutForm.versionFieldOptionalLabel"
+                        id="xpack.osquery.queryFlyoutForm.versionFieldOptionalLabel"
                         defaultMessage="(optional)"
                       />
                     </EuiText>
@@ -171,12 +171,9 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                 euiFieldProps={{
                   noSuggestions: false,
                   singleSelection: { asPlainText: true },
-                  placeholder: i18n.translate(
-                    'xpack.osquery.queriesTable.osqueryVersionAllLabel',
-                    {
-                      defaultMessage: 'ALL',
-                    }
-                  ),
+                  placeholder: i18n.translate('xpack.osquery.queriesTable.osqueryVersionAllLabel', {
+                    defaultMessage: 'ALL',
+                  }),
                   options: ALL_OSQUERY_VERSIONS_OPTIONS,
                   onCreateOption: undefined,
                 }}

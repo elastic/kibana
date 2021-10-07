@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { reduce } from 'lodash';
+import { isEmpty, reduce } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -139,9 +139,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const { setFieldValue, submit, isSubmitting } = form;
 
-  const [{ policy_ids: policyIds }] = useFormData({
+  const [{ name: queryName, policy_ids: policyIds }] = useFormData({
     form,
-    watch: ['policy_ids'],
+    watch: ['name', 'policy_ids'],
   });
 
   const agentCount = useMemo(
@@ -158,8 +158,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   );
 
   const handleNameChange = useCallback(
-    (newName: string) => setFieldValue('name', newName),
-    [setFieldValue]
+    (newName: string) => isEmpty(queryName) && setFieldValue('name', newName),
+    [queryName, setFieldValue]
   );
 
   const handleSaveClick = useCallback(() => {

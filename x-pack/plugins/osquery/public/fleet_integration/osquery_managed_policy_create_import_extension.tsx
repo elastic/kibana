@@ -26,6 +26,7 @@ import {
 import { useKibana } from '../common/lib/kibana';
 import { NavigationButtons } from './navigation_buttons';
 import { DisabledCallout } from './disabled_callout';
+import { JsonEditorField } from '../shared_imports';
 
 /**
  * Exports Osquery-specific package policy instructions
@@ -46,6 +47,9 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
   } = useKibana().services;
   const { state: locationState } = useLocation();
   const { go } = useHistory();
+  const [configJSON, setConfigJSON] = useState(`{
+
+}`);
 
   const agentsLinkHref = useMemo(() => {
     if (!policy?.policy_id) return '#';
@@ -196,7 +200,17 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         agentPolicyId={policy?.policy_id}
       />
       <EuiSpacer size="xxl" />
-      <EuiSpacer size="xxl" />
+      <JsonEditorField
+        // @ts-expect-error update types
+        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+        field={{
+          label: 'Osquery config',
+          value: configJSON,
+          isChangingValue: false,
+          errors: [],
+          setValue: setConfigJSON,
+        }}
+      />
     </>
   );
 });
