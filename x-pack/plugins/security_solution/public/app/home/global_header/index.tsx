@@ -21,6 +21,8 @@ import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
 import { ADD_DATA_PATH } from '../../../../common/constants';
 import { isDetectionsPath } from '../../../../public/helpers';
+import { Sourcerer } from '../../../common/components/sourcerer';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add data',
@@ -39,6 +41,8 @@ export const GlobalHeader = React.memo(
       },
     } = useKibana().services;
     const { pathname } = useLocation();
+
+    const sourcererScope = SourcererScopeName.default;
 
     useEffect(() => {
       setHeaderActionMenu((element) => {
@@ -70,6 +74,7 @@ export const GlobalHeader = React.memo(
               >
                 {BUTTON_ADD_DATA}
               </EuiHeaderLink>
+              <Sourcerer scope={sourcererScope} />
             </EuiHeaderLinks>
           </EuiHeaderSectionItem>
         </EuiHeaderSection>

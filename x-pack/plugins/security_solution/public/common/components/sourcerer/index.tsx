@@ -26,8 +26,6 @@ import {
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
-
 import styled from 'styled-components';
 
 import * as i18n from './translations';
@@ -36,6 +34,7 @@ import { State } from '../../store';
 import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
 import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { SecurityPageName } from '../../../../common/constants';
+import { useRouteSpy } from '../../utils/route/use_route_spy';
 
 const StyledFormRow = styled(EuiFormRow)<EuiFormRowProps & { $expandAdvancedOptions: boolean }>`
   display: ${({ $expandAdvancedOptions }) => ($expandAdvancedOptions ? 'flex' : 'none')};
@@ -225,10 +224,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   }, []);
   const advancedIndicies: string[] = [];
   const indiciesInCallout = advancedIndicies.join(',');
-  const { detailName, pageName } = useParams<{
-    detailName?: string;
-    pageName?: string;
-  }>();
+  const [{ pageName, detailName }] = useRouteSpy();
   const isReadOnly =
     pageName === SecurityPageName.alerts || (SecurityPageName.rules && detailName != null);
   const callOutMessage = useMemo(
