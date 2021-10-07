@@ -8,8 +8,8 @@
 
 import './timeseries_visualization.scss';
 
-import React, { useCallback, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { Suspense, useCallback, useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import { IUiSettingsClient } from 'src/core/public';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
@@ -161,18 +161,26 @@ function TimeseriesVisualization({
           </EuiFlexItem>
         )}
         <EuiFlexItem>
-          <VisComponent
-            getConfig={getConfig}
-            model={model}
-            visData={visData}
-            uiState={uiState}
-            onBrush={onBrush}
-            onFilterClick={handleFilterClick}
-            onUiState={handleUiState}
-            syncColors={syncColors}
-            palettesService={palettesService}
-            fieldFormatMap={indexPattern?.fieldFormatMap}
-          />
+          <Suspense
+            fallback={
+              <div className="visChart__spinner">
+                <EuiLoadingChart mono size="l" />
+              </div>
+            }
+          >
+            <VisComponent
+              getConfig={getConfig}
+              model={model}
+              visData={visData}
+              uiState={uiState}
+              onBrush={onBrush}
+              onFilterClick={handleFilterClick}
+              onUiState={handleUiState}
+              syncColors={syncColors}
+              palettesService={palettesService}
+              fieldFormatMap={indexPattern?.fieldFormatMap}
+            />
+          </Suspense>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
