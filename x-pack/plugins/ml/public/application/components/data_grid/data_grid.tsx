@@ -326,7 +326,7 @@ export const DataGrid: FC<Props> = memo(
               <p>
                 {i18n.translate('xpack.ml.dataGrid.CcsWarningCalloutBody', {
                   defaultMessage:
-                    'There was an issue retrieving data for the index pattern. Source preview in combination with cross-cluster search is only supported for versions 7.10 and above. You may still configure and create the transform.',
+                    'There was an issue retrieving data for the data view. Source preview in combination with cross-cluster search is only supported for versions 7.10 and above. You may still configure and create the transform.',
                 })}
               </p>
             </EuiCallOut>

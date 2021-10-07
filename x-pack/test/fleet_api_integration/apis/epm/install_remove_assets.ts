@@ -618,6 +618,7 @@ const expectAssetsInstalled = ({
       install_status: 'installed',
       install_started_at: res.attributes.install_started_at,
       install_source: 'registry',
+      keep_policies_up_to_date: false,
     });
   });
 };

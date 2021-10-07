@@ -62,9 +62,9 @@ export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected }) 
               type: 'index-pattern',
               getIconForSavedObject: () => 'indexPatternApp',
               name: i18n.translate(
-                'xpack.transform.newTransform.searchSelection.savedObjectType.indexPattern',
+                'xpack.transform.newTransform.searchSelection.savedObjectType.dataView',
                 {
-                  defaultMessage: 'Index pattern',
+                  defaultMessage: 'Data view',
                 }
               ),
             },

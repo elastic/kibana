@@ -88,8 +88,8 @@ export const StepDefineSummary: FC<Props> = ({
         {searchItems.savedSearch === undefined && (
           <Fragment>
             <EuiFormRow
-              label={i18n.translate('xpack.transform.stepDefineSummary.indexPatternLabel', {
-                defaultMessage: 'Index pattern',
+              label={i18n.translate('xpack.transform.stepDefineSummary.dataViewLabel', {
+                defaultMessage: 'Data view',
               })}
             >
               <span>{searchItems.indexPattern.title}</span>
