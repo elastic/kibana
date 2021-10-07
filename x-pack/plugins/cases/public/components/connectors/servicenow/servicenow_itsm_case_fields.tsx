@@ -157,7 +157,7 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
       {showConnectorWarning && (
         <EuiFlexGroup>
           <EuiFlexItem>
-            <DeprecatedCallout type={isEdit ? 'danger' : 'warning'} />
+            <DeprecatedCallout />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
