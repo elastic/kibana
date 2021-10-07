@@ -12,7 +12,6 @@ import { uniq } from 'lodash';
 import { latencyAggregationTypeRt } from '../../common/latency_aggregation_types';
 import { ProfilingValueType } from '../../common/profiling';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
-import { getThroughputUnit } from '../lib/helpers/calculate_throughput';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAnnotations } from '../lib/services/annotations';
 import { getServices } from '../lib/services/get_services';

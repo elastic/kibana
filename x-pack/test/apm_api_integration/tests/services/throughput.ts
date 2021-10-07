@@ -119,10 +119,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           body = await callApi();
         });
 
-        it('returns the throughput in seconds', () => {
-          expect(body.throughputUnit).to.eql('second');
-        });
-
         it('returns the expected throughput', () => {
           const throughputValues = uniq(body.currentPeriod.map((coord) => coord.y));
           expect(throughputValues).to.eql([GO_PROD_RATE]);
@@ -141,7 +137,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('returns data for all environments', () => {
           const throughputValues = body.currentPeriod.map(({ y }) => y);
           expect(uniq(throughputValues)).to.eql([GO_PROD_RATE + GO_DEV_RATE]);
-          expect(body.throughputUnit).to.eql('second');
         });
       });
 
@@ -158,7 +153,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('returns data that matches the kuery', () => {
           const throughputValues = body.currentPeriod.map(({ y }) => y);
           expect(uniq(throughputValues)).to.eql([GO_DEV_RATE]);
-          expect(body.throughputUnit).to.eql('second');
         });
       });
     }
