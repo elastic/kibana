@@ -39,6 +39,20 @@ export function registerSearchRelevanceSuggestionsRoutes({
     })
   );
 
+  router.put(
+    skipBodyValidation({
+      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions',
+      validate: {
+        params: schema.object({
+          engineName: schema.string(),
+        }),
+      },
+    }),
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:engineName/search_relevance_suggestions',
+    })
+  );
+
   router.get(
     {
       path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions/settings',
@@ -64,6 +78,31 @@ export function registerSearchRelevanceSuggestionsRoutes({
     }),
     enterpriseSearchRequestHandler.createRequest({
       path: '/api/as/v0/engines/:engineName/search_relevance_suggestions/settings',
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions/{query}',
+      validate: {
+        params: schema.object({
+          engineName: schema.string(),
+          query: schema.string(),
+        }),
+        body: schema.object({
+          page: schema.object({
+            current: schema.number(),
+            size: schema.number(),
+          }),
+          filters: schema.object({
+            status: schema.arrayOf(schema.string()),
+            type: schema.string(),
+          }),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:engineName/search_relevance_suggestions/:query',
     })
   );
 }

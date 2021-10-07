@@ -23,10 +23,10 @@
     "cases",
     "data",
     "features",
+    "inspector",
     "ruleRegistry",
     "timelines",
-    "triggersActionsUi",
-    "inspector"
+    "triggersActionsUi"
   ],
   "ui": true,
   "server": true,
