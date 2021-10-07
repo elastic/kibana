@@ -387,7 +387,9 @@ class TutorialUi extends React.Component {
                 iconType="sortLeft"
                 iconSide="left"
               >
-                Back to directory
+                {i18n.translate('home.tutorial.backToDirectory', {
+                  defaultMessage: 'Back to directory',
+                })}
               </EuiButton>,
             ],
           }}
