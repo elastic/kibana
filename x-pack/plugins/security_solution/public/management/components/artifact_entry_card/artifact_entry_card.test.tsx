@@ -71,25 +71,35 @@ describe.each([
     );
   });
 
-  it('should display description if one exists if needed', async () => {
+  it('should display description if one exists', async () => {
+    render();
+
+    expect(renderResult.getByTestId('testCard-description').textContent).toEqual(item.description);
+  });
+
+  it("shouldn't display description", async () => {
+    render({ hideDescription: true });
+    expect(renderResult.queryByTestId('testCard-description')).toBeNull();
+  });
+
+  it('should display default empty value if description does not exist', async () => {
+    item.description = undefined;
+    render();
+    expect(renderResult.getByTestId('testCard-description').textContent).toEqual('—');
+  });
+
+  it('should display comments if one exists', async () => {
     render();
     if (isTrustedApp(item)) {
-      expect(renderResult.getByTestId('testCard-description').textContent).toEqual(
-        item.description
-      );
+      expect(renderResult.queryByTestId('testCard-comments')).toBeNull();
     } else {
-      expect(renderResult.queryByTestId('testCard-description')).toBeNull();
+      expect(renderResult.queryByTestId('testCard-comments')).not.toBeNull();
     }
   });
 
-  it('should display default empty value if description does not exist if needed', async () => {
-    item.description = undefined;
-    render();
-    if (isTrustedApp(item)) {
-      expect(renderResult.getByTestId('testCard-description').textContent).toEqual('—');
-    } else {
-      expect(renderResult.queryByTestId('testCard-description')).toBeNull();
-    }
+  it("shouldn't display comments", async () => {
+    render({ hideComments: true });
+    expect(renderResult.queryByTestId('testCard-comments')).toBeNull();
   });
 
   it('should display OS and criteria conditions', () => {

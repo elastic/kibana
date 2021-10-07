@@ -39,31 +39,28 @@ export const CardComments = memo<CardCommentsProps>(
       return getFormattedComments(comments);
     }, [comments]);
 
-    const getButtonText = useCallback(
+    const buttonText = useMemo(
       () =>
         showComments ? HIDE_COMMENTS_LABEL(comments.length) : SHOW_COMMENTS_LABEL(comments.length),
       [comments.length, showComments]
     );
 
     return !isEmpty(comments) ? (
-      <>
+      <div data-test-subj={dataTestSubj}>
         <EuiSpacer size="s" />
         <EuiButtonEmpty
           onClick={onCommentsClick}
           flush="left"
           size="xs"
-          data-test-subj={getTestId('comments-label')}
+          data-test-subj={getTestId('label')}
         >
-          {getButtonText()}
+          {buttonText}
         </EuiButtonEmpty>
         <EuiAccordion id={'1'} arrowDisplay="none" forceState={showComments ? 'open' : 'closed'}>
           <EuiSpacer size="m" />
-          <EuiCommentList
-            comments={formattedComments}
-            data-test-subj={getTestId('comments-list')}
-          />
+          <EuiCommentList comments={formattedComments} data-test-subj={getTestId('list')} />
         </EuiAccordion>
-      </>
+      </div>
     ) : null;
   }
 );

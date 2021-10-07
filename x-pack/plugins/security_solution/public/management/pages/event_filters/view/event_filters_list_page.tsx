@@ -180,6 +180,7 @@ export const EventFiltersListPage = memo(() => {
       cachedCardProps[eventFilter.id] = {
         item: eventFilter as AnyArtifact,
         policies,
+        hideDescription: true,
         'data-test-subj': 'eventFilterCard',
         actions: [
           {
