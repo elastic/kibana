@@ -69,13 +69,12 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
           }
 
           const shouldBrush = stops.length > 1 && shouldApplyColor(color ?? '');
-
           return {
             label: title,
             value: formattedValue,
-            color: shouldBrush && style.labelColor ? color : undefined,
-            bgColor: shouldBrush && style.bgColor ? color : undefined,
-            lightText: shouldBrush && style.bgColor && needsLightText(color),
+            color: shouldBrush && (style.labelColor ?? false) ? color : undefined,
+            bgColor: shouldBrush && (style.bgColor ?? false) ? color : undefined,
+            lightText: shouldBrush && (style.bgColor ?? false) && needsLightText(color),
             rowIndex,
           };
         });

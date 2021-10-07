@@ -22,18 +22,22 @@ describe('interpreter/functions#metric', () => {
     percentageMode: false,
     colorSchema: 'Green to Red',
     metricColorMode: 'None',
-    colorsRange: [
-      {
-        from: 0,
-        to: 10000,
+    palette: {
+      params: {
+        colors: ['rgb(0, 0, 0, 0)', 'rgb(112, 38, 231)'],
+        stops: [0, 10000],
+        gradient: false,
+        rangeMin: 0,
+        rangeMax: 150,
+        range: 'number',
       },
-    ],
+    },
     labels: {
       show: true,
     },
     invertColors: false,
     style: {
-      bgFill: '#000',
+      bgFill: '',
       bgColor: false,
       labelColor: false,
       subText: '',

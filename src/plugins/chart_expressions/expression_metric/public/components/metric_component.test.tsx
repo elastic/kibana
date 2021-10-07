@@ -11,20 +11,23 @@ import { shallow } from 'enzyme';
 
 import MetricVisComponent, { MetricVisComponentProps } from './metric_component';
 
-jest.mock('../format_service', () => ({
-  getFormatService: () => ({
-    deserialize: () => {
-      return {
-        convert: (x: unknown) => x,
-      };
-    },
-  }),
+jest.mock('../../../expression_metric/public/services', () => ({
+  getFormatService: () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { getFormatService } = require('../__mocks__/services');
+    return getFormatService();
+  },
+  getPaletteService: () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { getPaletteService } = require('../__mocks__/services');
+    return getPaletteService();
+  },
 }));
 
 type Props = MetricVisComponentProps;
 
 const baseVisData = {
-  columns: [{ id: 'col-0', name: 'Count' }],
+  columns: [{ id: 'col-0', name: 'Count', meta: { type: 'number' } }],
   rows: [{ 'col-0': 4301021 }],
 } as any;
 
@@ -35,7 +38,14 @@ describe('MetricVisComponent', function () {
     addLegend: false,
     metric: {
       colorSchema: 'Green to Red',
-      colorsRange: [{ from: 0, to: 1000 }],
+      palette: {
+        colors: ['rgb(0, 0, 0, 0)', 'rgb(112, 38, 231)'],
+        stops: [0, 10000],
+        gradient: false,
+        rangeMin: 0,
+        rangeMax: 1000,
+        range: 'number',
+      },
       style: {},
       labels: {
         show: true,
@@ -71,8 +81,8 @@ describe('MetricVisComponent', function () {
     const component = getComponent({
       visData: {
         columns: [
-          { id: 'col-0', name: '1st percentile of bytes' },
-          { id: 'col-1', name: '99th percentile of bytes' },
+          { id: 'col-0', name: '1st percentile of bytes', meta: { type: 'number' } },
+          { id: 'col-1', name: '99th percentile of bytes', meta: { type: 'number' } },
         ],
         rows: [{ 'col-0': 182, 'col-1': 445842.4634666484 }],
       },
