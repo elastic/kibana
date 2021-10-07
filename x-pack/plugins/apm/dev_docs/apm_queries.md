@@ -436,4 +436,4 @@ GET apm-*-metric-*,metrics-apm*/_search
 
 Possible values for `processor.event` are: `transaction`, `span`, `metric`, `error`.
 
-`metricset` is a subtype of `processor.event: metric`.
+`metricset` is a subtype of `processor.event: metric`. Possible values are: `transaction`, `span_breakdown`, `transaction_breakdown`, `app`, `service_destination`, `agent_config`
