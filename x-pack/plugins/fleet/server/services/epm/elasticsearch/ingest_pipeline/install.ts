@@ -64,7 +64,7 @@ export const installPipelines = async (
       }, [])
     : [];
 
-  const toLevelPipelineRefs = topLevelPipelinePaths.map((path) => {
+  const topLevelPipelineRefs = topLevelPipelinePaths.map((path) => {
     const { name } = getNameAndExtension(path);
     const nameForInstallation = getPipelineNameForInstallation({
       pipelineName: name,
@@ -73,7 +73,7 @@ export const installPipelines = async (
     return { id: nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
   });
 
-  pipelineRefs = [...pipelineRefs, ...toLevelPipelineRefs];
+  pipelineRefs = [...pipelineRefs, ...topLevelPipelineRefs];
 
   // check that we don't duplicate the pipeline refs if the user is reinstalling
   const installedPkg = await getInstallationObject({
@@ -93,7 +93,7 @@ export const installPipelines = async (
     ? dataStreams.reduce<Array<Promise<EsAssetReference[]>>>((acc, dataStream) => {
         if (dataStream.ingest_pipeline) {
           acc.push(
-            installPipelinesForDataStream({
+            installAllPipelines({
               dataStream,
               esClient,
               paths: pipelinePaths,
@@ -107,7 +107,7 @@ export const installPipelines = async (
 
   if (topLevelPipelinePaths) {
     pipelines.push(
-      installPipelinesForDataStream({
+      installAllPipelines({
         dataStream: undefined,
         esClient,
         paths: topLevelPipelinePaths,
@@ -140,7 +140,7 @@ export function rewriteIngestPipeline(
   return pipeline;
 }
 
-export async function installPipelinesForDataStream({
+export async function installAllPipelines({
   esClient,
   pkgVersion,
   paths,
