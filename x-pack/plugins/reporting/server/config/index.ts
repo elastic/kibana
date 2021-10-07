@@ -74,6 +74,14 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
                   `Create new roles that grant privileges to create reports using ` +
                   `Kibana application privileges under **Management > Security > Roles**.`,
               }),
+              i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepThree', {
+                defaultMessage:
+                  `Users that previously were granted reporting privileges from having the ` +
+                  `"reporting_user" role, or other role specified by "xpack.reporting.roles.allow", ` +
+                  `will no longer automatically have reporting privileges. Those users will ` +
+                  `need to be re-granted privileges using a new role, which you create, that ` +
+                  `includes Kibana application privileges for creating reports.`,
+              }),
             ],
           },
         });
