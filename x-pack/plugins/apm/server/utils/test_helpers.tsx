@@ -79,12 +79,6 @@ export async function inspectSearchParams(
 
             case 'xpack.apm.metricsInterval':
               return 30;
-
-            case 'xpack.apm.maxServiceEnvironments':
-              return 100;
-
-            case 'xpack.apm.maxServiceSelection':
-              return 50;
           }
         },
       }
@@ -102,7 +96,6 @@ export async function inspectSearchParams(
       apmAgentConfigurationIndex: 'myIndex',
       apmCustomLinkIndex: 'myIndex',
     },
-    dynamicIndexPattern: null as any,
   };
   try {
     response = await fn(mockSetup);

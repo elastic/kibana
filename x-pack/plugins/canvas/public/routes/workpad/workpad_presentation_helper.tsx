@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { i18n } from '@kbn/i18n';
 import React, { FC, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { getBaseBreadcrumb, getWorkpadBreadcrumb } from '../../lib/breadcrumbs';
@@ -15,6 +15,11 @@ import { useFullscreenPresentationHelper } from './hooks/use_fullscreen_presenta
 import { useAutoplayHelper } from './hooks/use_autoplay_helper';
 import { useRefreshHelper } from './hooks/use_refresh_helper';
 import { usePlatformService } from '../../services';
+
+const getWorkpadLabel = () =>
+  i18n.translate('xpack.canvas.workpadConflict.redirectLabel', {
+    defaultMessage: 'Workpad',
+  });
 
 export const WorkpadPresentationHelper: FC = ({ children }) => {
   const platformService = usePlatformService();
@@ -34,5 +39,19 @@ export const WorkpadPresentationHelper: FC = ({ children }) => {
     setDocTitle(workpad.name);
   }, [workpad.name]);
 
-  return <>{children}</>;
+  const conflictElement = workpad.aliasId
+    ? platformService.getLegacyUrlConflict?.({
+        objectNoun: getWorkpadLabel(),
+        currentObjectId: workpad.id,
+        otherObjectId: workpad.aliasId,
+        otherObjectPath: `#/workpad/${workpad.aliasId}`,
+      })
+    : null;
+
+  return (
+    <>
+      {conflictElement}
+      {children}
+    </>
+  );
 };

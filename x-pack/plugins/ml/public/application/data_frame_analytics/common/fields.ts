@@ -197,7 +197,7 @@ export const getDefaultFieldsFromJobCaps = (
       );
     }
 
-    // Only need to add these fields if we didn't use dest index pattern to get the fields
+    // Only need to add these fields if we didn't use dest data view to get the fields
     if (needsDestIndexFields === true) {
       allFields.push({
         id: `${resultsField}.${OUTLIER_SCORE}`,
@@ -243,7 +243,7 @@ export const getDefaultFieldsFromJobCaps = (
       );
     }
 
-    // Only need to add these fields if we didn't use dest index pattern to get the fields
+    // Only need to add these fields if we didn't use dest data view to get the fields
     if (needsDestIndexFields === true) {
       allFields.push(
         {

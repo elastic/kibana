@@ -12,8 +12,8 @@ import { IndexPattern } from '../../../data/public';
 export function getListBreadcrumbs() {
   return [
     {
-      text: i18n.translate('indexPatternManagement.indexPatterns.listBreadcrumb', {
-        defaultMessage: 'Index patterns',
+      text: i18n.translate('indexPatternManagement.dataViews.listBreadcrumb', {
+        defaultMessage: 'Data views',
       }),
       href: `/`,
     },
@@ -24,8 +24,8 @@ export function getCreateBreadcrumbs() {
   return [
     ...getListBreadcrumbs(),
     {
-      text: i18n.translate('indexPatternManagement.indexPatterns.createBreadcrumb', {
-        defaultMessage: 'Create index pattern',
+      text: i18n.translate('indexPatternManagement.dataViews.createBreadcrumb', {
+        defaultMessage: 'Create data view',
       }),
       href: `/create`,
     },

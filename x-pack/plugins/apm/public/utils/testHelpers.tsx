@@ -189,7 +189,6 @@ export async function inspectSearchParams(
       apmAgentConfigurationIndex: 'myIndex',
       apmCustomLinkIndex: 'myIndex',
     },
-    dynamicIndexPattern: null as any,
   };
   try {
     response = await fn(mockSetup);

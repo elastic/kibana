@@ -9,7 +9,7 @@ import { MlLocatorDefinition } from './ml_locator';
 import { ML_PAGES } from '../../common/constants/locator';
 import { ANALYSIS_CONFIG_TYPE } from '../../common/constants/data_frame_analytics';
 
-describe('MlUrlGenerator', () => {
+describe('ML locator', () => {
   const definition = new MlLocatorDefinition();
 
   describe('AnomalyDetection', () => {
@@ -290,7 +290,7 @@ describe('MlUrlGenerator', () => {
         });
       });
 
-      it('should generate valid URL for the Index Data Visualizer select index pattern or saved search page', async () => {
+      it('should generate valid URL for the Index Data Visualizer select data view or saved search page', async () => {
         const location = await definition.getLocation({
           page: ML_PAGES.DATA_VISUALIZER_INDEX_SELECT,
         });

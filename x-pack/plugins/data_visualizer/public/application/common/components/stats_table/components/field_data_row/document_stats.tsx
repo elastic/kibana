@@ -5,29 +5,36 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiIcon, EuiText } from '@elastic/eui';
 
 import React from 'react';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { roundToDecimalPlace } from '../../../utils';
+import { isIndexBasedFieldVisConfig } from '../../types';
 
-export const DocumentStat = ({ config }: FieldDataRowProps) => {
+interface Props extends FieldDataRowProps {
+  showIcon?: boolean;
+}
+export const DocumentStat = ({ config, showIcon }: Props) => {
   const { stats } = config;
   if (stats === undefined) return null;
-
   const { count, sampleCount } = stats;
-  if (count === undefined || sampleCount === undefined) return null;
 
-  const docsPercent = roundToDecimalPlace((count / sampleCount) * 100);
+  // If field exists is docs but we don't have count stats then don't show
+  // Otherwise if field doesn't appear in docs at all, show 0%
+  const docsCount =
+    count ?? (isIndexBasedFieldVisConfig(config) && config.existsInDocs === true ? undefined : 0);
+  const docsPercent =
+    docsCount !== undefined && sampleCount !== undefined
+      ? roundToDecimalPlace((docsCount / sampleCount) * 100)
+      : 0;
 
-  return (
-    <EuiFlexGroup alignItems={'center'}>
-      <EuiFlexItem className={'dataVisualizerColumnHeaderIcon'}>
-        <EuiIcon type="document" size={'s'} />
-      </EuiFlexItem>
-      <EuiText size={'s'}>
-        <b>{count}</b> ({docsPercent}%)
+  return docsCount !== undefined ? (
+    <>
+      {showIcon ? <EuiIcon type="document" size={'m'} className={'columnHeader__icon'} /> : null}
+      <EuiText size={'xs'}>
+        {docsCount} ({docsPercent}%)
       </EuiText>
-    </EuiFlexGroup>
-  );
+    </>
+  ) : null;
 };
