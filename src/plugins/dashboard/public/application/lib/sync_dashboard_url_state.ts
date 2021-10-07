@@ -21,7 +21,7 @@ import type {
   DashboardState,
   RawDashboardState,
 } from '../../types';
-import { convertSavedPanelsToPanelMap } from './convert_saved_panels_to_panel_map';
+import { convertSavedPanelsToPanelMap } from './convert_dashboard_panels';
 
 type SyncDashboardUrlStateProps = DashboardBuildContext & { savedDashboard: DashboardSavedObject };
 
