@@ -21,6 +21,7 @@ import { CurationLogic } from './curation_logic';
 import { PromotedDocuments, OrganicDocuments, HiddenDocuments } from './documents';
 import { ActiveQuerySelect, ManageQueriesModal } from './queries';
 import { AddResultLogic, AddResultFlyout } from './results';
+import { SuggestedDocumentsCallout } from './suggested_documents_callout';
 
 export const ManualCuration: React.FC = () => {
   const { curationId } = useParams() as { curationId: string };
@@ -46,6 +47,7 @@ export const ManualCuration: React.FC = () => {
       }}
       isLoading={dataLoading}
     >
+      <SuggestedDocumentsCallout />
       <EuiFlexGroup alignItems="flexEnd" gutterSize="xl" responsive={false}>
         <EuiFlexItem>
           <ActiveQuerySelect />

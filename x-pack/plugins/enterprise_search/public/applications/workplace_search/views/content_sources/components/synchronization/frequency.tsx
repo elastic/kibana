@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
@@ -31,6 +31,7 @@ import {
   DIFFERENT_SYNC_TYPES_LINK_LABEL,
   SYNC_BEST_PRACTICES_LINK_LABEL,
 } from '../../constants';
+import { SourceLogic } from '../../source_logic';
 import { SourceLayout } from '../source_layout';
 
 import { BlockedWindows } from './blocked_window_tab';
@@ -42,7 +43,8 @@ interface FrequencyProps {
 }
 
 export const Frequency: React.FC<FrequencyProps> = ({ tabId }) => {
-  const { handleSelectedTabChanged } = useActions(SynchronizationLogic);
+  const { contentSource } = useValues(SourceLogic);
+  const { handleSelectedTabChanged } = useActions(SynchronizationLogic({ contentSource }));
 
   const tabs = [
     {

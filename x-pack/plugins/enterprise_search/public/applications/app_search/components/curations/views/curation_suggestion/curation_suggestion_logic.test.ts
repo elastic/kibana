@@ -11,6 +11,8 @@ import {
   mockHttpValues,
 } from '../../../../../__mocks__/kea_logic';
 
+import { set } from 'lodash/fp';
+
 import '../../../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
@@ -23,6 +25,7 @@ const DEFAULT_VALUES = {
   dataLoading: true,
   suggestion: null,
   suggestedPromotedDocuments: [],
+  curation: null,
 };
 
 const suggestion: CurationSuggestion = {
@@ -30,6 +33,19 @@ const suggestion: CurationSuggestion = {
   updated_at: '2021-07-08T14:35:50Z',
   promoted: ['1', '2', '3'],
   status: 'applied',
+};
+
+const curation = {
+  id: 'cur-6155e69c7a2f2e4f756303fd',
+  queries: ['foo'],
+  promoted: [
+    {
+      id: '5',
+    },
+  ],
+  hidden: [],
+  last_updated: 'September 30, 2021 at 04:32PM',
+  organic: [],
 };
 
 const suggestedPromotedDocuments = [
@@ -117,16 +133,18 @@ describe('CurationSuggestionLogic', () => {
 
   describe('actions', () => {
     describe('onSuggestionLoaded', () => {
-      it('should save the loaded suggestion and promoted documents associated with that suggestion and set dataLoading to false', () => {
+      it('should save provided state and set dataLoading to false', () => {
         mountLogic();
         CurationSuggestionLogic.actions.onSuggestionLoaded({
           suggestion,
           suggestedPromotedDocuments,
+          curation,
         });
         expect(CurationSuggestionLogic.values).toEqual({
           ...DEFAULT_VALUES,
           suggestion,
           suggestedPromotedDocuments,
+          curation,
           dataLoading: false,
         });
       });
@@ -146,7 +164,7 @@ describe('CurationSuggestionLogic', () => {
         });
       });
 
-      it('should make an API call and trigger onSuggestionLoaded', async () => {
+      it('should make API calls to fetch data and trigger onSuggestionLoaded', async () => {
         http.post.mockReturnValueOnce(Promise.resolve(MOCK_RESPONSE));
         http.post.mockReturnValueOnce(Promise.resolve(MOCK_DOCUMENTS_RESPONSE));
         mountLogic();
@@ -213,6 +231,36 @@ describe('CurationSuggestionLogic', () => {
               },
             },
           ],
+          curation: null,
+        });
+      });
+
+      it('will also fetch curation details if the suggestion has a curation_id', async () => {
+        http.post.mockReturnValueOnce(
+          Promise.resolve(
+            set('results[0].curation_id', 'cur-6155e69c7a2f2e4f756303fd', MOCK_RESPONSE)
+          )
+        );
+        http.post.mockReturnValueOnce(Promise.resolve(MOCK_DOCUMENTS_RESPONSE));
+        http.get.mockReturnValueOnce(Promise.resolve(curation));
+        mountLogic({
+          suggestion: set('curation_id', 'cur-6155e69c7a2f2e4f756303fd', suggestion),
+        });
+        jest.spyOn(CurationSuggestionLogic.actions, 'onSuggestionLoaded');
+
+        CurationSuggestionLogic.actions.loadSuggestion();
+        await nextTick();
+
+        expect(http.get).toHaveBeenCalledWith(
+          '/internal/app_search/engines/some-engine/curations/cur-6155e69c7a2f2e4f756303fd',
+          { query: { skip_record_analytics: 'true' } }
+        );
+        await nextTick();
+
+        expect(CurationSuggestionLogic.actions.onSuggestionLoaded).toHaveBeenCalledWith({
+          suggestion: expect.any(Object),
+          suggestedPromotedDocuments: expect.any(Object),
+          curation,
         });
       });
 

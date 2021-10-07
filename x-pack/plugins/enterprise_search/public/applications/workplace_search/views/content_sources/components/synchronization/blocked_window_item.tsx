@@ -10,7 +10,6 @@ import React from 'react';
 import {
   EuiButton,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiDatePicker,
   EuiFlexGroup,
   EuiFlexItem,
@@ -81,13 +80,10 @@ const syncOptions = [
   },
 ];
 
-const dayPickerOptions = DAYS_OF_WEEK_VALUES.reduce((options, day) => {
-  options.push({
-    label: DAYS_OF_WEEK_LABELS[day.toUpperCase() as keyof typeof DAYS_OF_WEEK_LABELS],
-    value: day,
-  });
-  return options;
-}, [] as Array<EuiComboBoxOptionOption<string>>);
+const dayPickerOptions = DAYS_OF_WEEK_VALUES.map((day) => ({
+  label: DAYS_OF_WEEK_LABELS[day.toUpperCase() as keyof typeof DAYS_OF_WEEK_LABELS],
+  value: day,
+}));
 
 export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow }) => {
   const handleSyncTypeChange = () => '#TODO';

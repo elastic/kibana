@@ -21,6 +21,7 @@ import { CurationLogic } from './curation_logic';
 
 import { ManualCuration } from './manual_curation';
 import { AddResultFlyout } from './results';
+import { SuggestedDocumentsCallout } from './suggested_documents_callout';
 
 describe('ManualCuration', () => {
   const values = {
@@ -48,6 +49,12 @@ describe('ManualCuration', () => {
       'Curations',
       'query A, query B',
     ]);
+  });
+
+  it('contains a suggested documents callout', () => {
+    const wrapper = shallow(<ManualCuration />);
+
+    expect(wrapper.find(SuggestedDocumentsCallout)).toHaveLength(1);
   });
 
   it('renders the add result flyout when open', () => {
