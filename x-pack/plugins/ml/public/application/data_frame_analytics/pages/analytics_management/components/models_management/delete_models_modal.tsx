@@ -30,7 +30,11 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
     .map((model) => model.model_id);
 
   return (
-    <EuiModal onClose={onClose.bind(null, false)} initialFocus="[name=cancelModelDeletion]">
+    <EuiModal
+      onClose={onClose.bind(null, false)}
+      initialFocus="[name=cancelModelDeletion]"
+      data-test-subj="mlModelsDeleteModal"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage
@@ -72,7 +76,12 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
           />
         </EuiButtonEmpty>
 
-        <EuiButton onClick={onClose.bind(null, true)} fill color="danger">
+        <EuiButton
+          onClick={onClose.bind(null, true)}
+          fill
+          color="danger"
+          data-test-subj="mlModelsDeleteModalConfirmButton"
+        >
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.deleteModal.deleteButtonLabel"
             defaultMessage="Delete"
