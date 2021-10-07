@@ -35,8 +35,7 @@ export const RouteInit: React.FC<RouteInitProps> = ({
 
   const { clusters, loaded } = useClusters(clusterUuid, undefined, codePaths);
 
-  // TODO: we will need this when setup mode is migrated
-  const inSetupMode = isInSetupMode();
+  const inSetupMode = isInSetupMode(undefined, globalState);
 
   const cluster = getClusterFromClusters(clusters, globalState, unsetGlobalState);
 

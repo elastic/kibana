@@ -174,7 +174,7 @@ export const initSetupModeState = async (
   }
 };
 
-export const isInSetupMode = (context?: ISetupModeContext) => {
+export const isInSetupMode = (context?: ISetupModeContext, gState: GlobalState = globalState) => {
   if (context?.setupModeSupported === false) {
     return false;
   }
@@ -182,7 +182,7 @@ export const isInSetupMode = (context?: ISetupModeContext) => {
     return true;
   }
 
-  return globalState.inSetupMode;
+  return gState.inSetupMode;
 };
 
 export const isSetupModeFeatureEnabled = (feature: SetupModeFeature) => {
