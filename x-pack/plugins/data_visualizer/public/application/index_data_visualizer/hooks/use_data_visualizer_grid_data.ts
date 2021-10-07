@@ -137,7 +137,7 @@ export const useDataVisualizerGridData = (
   const [nonMetricsLoaded, setNonMetricsLoaded] = useState(defaults.nonMetricsLoaded);
 
   /** Search strategy **/
-  const fieldStatsRequest: OverallStatsSearchStrategyParams = useMemo(() => {
+  const fieldStatsRequest: OverallStatsSearchStrategyParams | undefined = useMemo(() => {
     // Obtain the interval to use for date histogram aggregations
     // (such as the document count chart). Aim for 75 bars.
     const buckets = _timeBuckets;
