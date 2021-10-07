@@ -34,6 +34,7 @@ const suggestion: CurationSuggestion = {
   updated_at: '2021-07-08T14:35:50Z',
   promoted: ['1', '2', '3'],
   status: 'pending',
+  operation: 'create',
 };
 
 const curation = {
