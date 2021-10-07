@@ -19,6 +19,7 @@ import { RawConfigurationProvider } from './raw/raw_config_service';
 import {
   applyDeprecations,
   ConfigDeprecationWithContext,
+  ConfigDeprecationContext,
   ConfigDeprecationProvider,
   configDeprecationFactory,
   DeprecatedConfigDetails,
@@ -103,6 +104,7 @@ export class ConfigService {
       ...provider(configDeprecationFactory).map((deprecation) => ({
         deprecation,
         path: flatPath,
+        context: createDeprecationContext(this.env),
       })),
     ]);
   }
@@ -298,3 +300,10 @@ const pathToString = (path: ConfigPath) => (Array.isArray(path) ? path.join('.')
  */
 const isPathHandled = (path: string, handledPaths: string[]) =>
   handledPaths.some((handledPath) => hasConfigPathIntersection(path, handledPath));
+
+const createDeprecationContext = (env: Env): ConfigDeprecationContext => {
+  return {
+    branch: env.packageInfo.branch,
+    version: env.packageInfo.version,
+  };
+};

@@ -55,7 +55,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await logsUi.logStreamPage.navigateTo();
 
         await retry.try(async () => {
-          await logsUi.logStreamPage.getNoLogsIndicesPrompt();
+          await logsUi.logStreamPage.getNoDataPage();
         });
       });
 
