@@ -367,7 +367,6 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/113745
     describe('creating and using Painless date scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName2 = 'painDate';
 
