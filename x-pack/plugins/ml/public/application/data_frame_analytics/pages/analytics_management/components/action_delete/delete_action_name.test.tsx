@@ -69,7 +69,7 @@ describe('DeleteAction', () => {
   });
 
   describe('When delete model is open', () => {
-    it('should not allow to delete target index by default.', async () => {
+    it('should not allow to delete target index by default.', () => {
       const mock = jest.spyOn(CheckPrivilige, 'checkPermission');
       mock.mockImplementation((p) => p === 'canDeleteDataFrameAnalytics');
 
