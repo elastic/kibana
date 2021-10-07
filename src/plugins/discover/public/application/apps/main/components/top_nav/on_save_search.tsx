@@ -138,11 +138,7 @@ export async function onSaveSearch({
       objectType={i18n.translate('discover.localMenu.saveSaveSearchObjectType', {
         defaultMessage: 'search',
       })}
-      description={i18n.translate('discover.localMenu.saveSaveSearchDescription', {
-        defaultMessage:
-          'Save your Discover search so you can use it in visualizations and dashboards',
-      })}
-      showDescription={false}
+      showDescription={true}
     />
   );
   showSaveModal(saveModal, services.core.i18n.Context);
