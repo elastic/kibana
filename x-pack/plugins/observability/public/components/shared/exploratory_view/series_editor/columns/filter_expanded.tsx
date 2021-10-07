@@ -66,7 +66,7 @@ export function FilterExpanded({
       queryFilters.push(qFilter.query);
     }
     if (isExistsFilter(qFilter)) {
-      queryFilters.push({ exists: qFilter.exists } as QueryDslQueryContainer);
+      queryFilters.push({ exists: qFilter.query.exists } as QueryDslQueryContainer);
     }
   });
 

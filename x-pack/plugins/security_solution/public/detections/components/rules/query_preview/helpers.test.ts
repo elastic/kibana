@@ -98,7 +98,7 @@ describe('query_preview/helpers', () => {
 
       expect(queryString).toEqual('host.name:*');
       expect(language).toEqual('kuery');
-      expect(filters).toEqual([{ meta: { alias: '', disabled: false, negate: false } }]);
+      expect(filters).toEqual([{ meta: { alias: '', disabled: false, negate: false }, query: {} }]);
       expect(queryFilter).toEqual({
         bool: {
           filter: [
@@ -124,7 +124,7 @@ describe('query_preview/helpers', () => {
 
       expect(queryString).toEqual('host.name:*');
       expect(language).toEqual('kuery');
-      expect(filters).toEqual([{ meta: { alias: '', disabled: false, negate: false } }]);
+      expect(filters).toEqual([{ meta: { alias: '', disabled: false, negate: false }, query: {} }]);
       expect(queryFilter).toEqual({
         bool: {
           filter: [
@@ -150,7 +150,7 @@ describe('query_preview/helpers', () => {
 
       expect(queryString).toEqual('host.name:*');
       expect(language).toEqual('kuery');
-      expect(filters).toEqual([{ meta: { alias: '', disabled: false, negate: false } }]);
+      expect(filters).toEqual([{ meta: { alias: '', disabled: false, negate: false }, query: {} }]);
       expect(queryFilter).toEqual({
         bool: {
           filter: [
