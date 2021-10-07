@@ -22,7 +22,7 @@ import { indicesByNodes } from '../../../components/elasticsearch/shard_allocati
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
+import { ELASTICSEARCH_SYSTEM_ID, RULE_LARGE_SHARD_SIZE } from '../../../../common/constants';
 
 export const ElasticsearchIndexPage: React.FC<ComponentProps> = () => {
   const globalState = useContext(GlobalStateContext);
@@ -73,6 +73,7 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = () => {
       }
       const alertsResponse = await fetchAlerts({
         fetch: services.http.fetch,
+        alertTypeIds: [RULE_LARGE_SHARD_SIZE],
         clusterUuid,
         timeRange: {
           min: bounds.min.valueOf(),
