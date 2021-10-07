@@ -23,7 +23,7 @@ export interface Curation {
   queries: string[];
   promoted: CurationResult[];
   hidden: CurationResult[];
-  organic: Result[];
+  organic?: Result[]; // this field is missing if there are 0 results
   suggestion?: CurationSuggestion;
 }
 
