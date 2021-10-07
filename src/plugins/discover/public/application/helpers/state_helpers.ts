@@ -33,7 +33,9 @@ export function handleSourceColumnState<TState extends { columns?: string[] }>(
     if (cleanedColumns.length === 0 && !isEqual(defaultColumns, ['_source'])) {
       cleanedColumns = defaultColumns;
       // defaultColumns could still contain _source
-      cleanedColumns = cleanedColumns.filter((column) => column !== '_source' && column !== 'Document');
+      cleanedColumns = cleanedColumns.filter(
+        (column) => column !== '_source' && column !== 'Document'
+      );
     }
     return {
       ...state,
