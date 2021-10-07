@@ -382,7 +382,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
                   >
                     <FormattedMessage
                       id="xpack.fleet.settings.userGuideLink"
-                      defaultMessage="Fleet User Guide"
+                      defaultMessage="Fleet and Elastic Agent Guide"
                     />
                   </EuiLink>
                 ),
