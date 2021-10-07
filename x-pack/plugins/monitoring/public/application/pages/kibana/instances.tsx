@@ -66,7 +66,7 @@ export const KibanaInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
       });
 
       setData(response);
-      updateTotalItemCount(response.stats.total);
+      updateTotalItemCount(response.kibanas.length);
       const alertsResponse = await fetchAlerts({
         fetch: services.http.fetch,
         alertTypeIds: [RULE_KIBANA_VERSION_MISMATCH],
