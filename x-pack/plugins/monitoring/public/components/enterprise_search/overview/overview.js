@@ -21,11 +21,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export class Overview extends PureComponent {
   render() {
     const { metrics, ...props } = this.props;
-    const metricsToShow = [
-      metrics.enterprise_search_heap_used,
-      metrics.enterprise_search_heap_committed,
-      metrics.enterprise_search_heap_total,
-    ];
+    const metricsToShow = [metrics.enterprise_search_heap_used];
 
     return (
       <EuiPage>
