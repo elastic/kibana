@@ -135,10 +135,10 @@ export async function fetchIndexShardSize(
       }
       const {
         _index: monitoringIndexName,
-        _source: { source_node: sourceNode, index_stats: indexStats },
+        _source: { index_stats: indexStats },
       } = topHit;
 
-      if (!indexStats || !indexStats.primaries || !sourceNode) {
+      if (!indexStats || !indexStats.primaries) {
         continue;
       }
 
@@ -151,7 +151,6 @@ export async function fetchIndexShardSize(
        * We can only calculate the average primary shard size at this point, since we don't have
        * data (in .monitoring-es* indices) to give us individual shards. This might change in the future
        */
-      const { name: nodeName, uuid: nodeId } = sourceNode;
       const avgShardSize = primaryShardSizeBytes / totalPrimaryShards;
       if (avgShardSize < thresholdBytes) {
         continue;
@@ -161,8 +160,6 @@ export async function fetchIndexShardSize(
         shardIndex,
         shardSize,
         clusterUuid,
-        nodeName,
-        nodeId,
         ccs: monitoringIndexName.includes(':') ? monitoringIndexName.split(':')[0] : undefined,
       });
     }
