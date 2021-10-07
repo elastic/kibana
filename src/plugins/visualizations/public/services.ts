@@ -65,17 +65,4 @@ export const [getOverlays, setOverlays] = createGetterSetter<OverlayStart>('Over
 
 export const [getChrome, setChrome] = createGetterSetter<ChromeStart>('Chrome');
 
-const [_getSpaces, setSpaces] = createGetterSetter<SpacesPluginStart>('Spaces');
-
-/** "spaces" is optional, in case if that plugin is turned off "_getSpaces" method trigger the exception  **/
-const getSpaces = () => {
-  let spaces: SpacesPluginStart | undefined;
-  try {
-    spaces = _getSpaces();
-  } catch {
-    // nothing to be here
-  }
-  return spaces;
-};
-
-export { getSpaces, setSpaces };
+export const [getSpaces, setSpaces] = createGetterSetter<SpacesPluginStart>('Spaces', false);
