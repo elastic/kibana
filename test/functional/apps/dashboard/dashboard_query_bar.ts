@@ -30,7 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('causes panels to reload when refresh is clicked', async () => {
-      expect(true).to.be(false); // TODO remove me before merge
       await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
 
       await queryBar.clickQuerySubmitButton();
