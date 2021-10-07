@@ -165,7 +165,7 @@ export default ({ getService }: FtrProviderContext) => {
           uuid: createdRule.id,
           category: 'Machine Learning Rule',
           consumer: 'siem',
-          producer: 'security-solution',
+          producer: 'siem',
           rule_id: createdRule.rule_id,
           rule_type_id: 'siem.mlRule',
           created_at: createdRule.created_at,
