@@ -9,8 +9,10 @@ import { service, timerange } from '@elastic/apm-generator';
 import expect from '@kbn/expect';
 import { first, last, mean, uniq } from 'lodash';
 import moment from 'moment';
+import { ENVIRONMENT_ALL } from '../../../../plugins/apm/common/environment_filter_values';
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
@@ -25,7 +27,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const metadata = archives_metadata[archiveName];
 
   registry.when(
-    'Throughput when data is empty',
+    'Throughput with statically generated data',
     { config: 'basic', archives: ['apm_8.0.0_empty'] },
     () => {
       const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -35,41 +37,58 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const serviceGoProdInstance = service('synth-go', 'production', 'go').instance(
           'instance-a'
         );
-        // const serviceGoDevInstance = service('synth-go', 'development', 'go').instance(
-        //   'instance-b'
-        // );
-        // const serviceJavaInstance = service('synth-java', 'production', 'java').instance(
-        //   'instance-c'
-        // );
-
-        const timestamps = timerange(start, end).interval('1s').rate(10);
-
-        await generator.generate(
-          timestamps.flatMap((timestamp) => [
-            ...serviceGoProdInstance
-              .transaction('GET /api/product/list')
-              .duration(1000)
-              .timestamp(timestamp)
-              .serialize(),
-            // ...serviceGoDevInstance
-            //   .transaction('GET /api/product/list')
-            //   .duration(500)
-            //   .timestamp(timestamp)
-            //   .serialize(),
-            // ...serviceJavaInstance
-            //   .transaction('GET /api/product/list')
-            //   .duration(500)
-            //   .timestamp(timestamp)
-            //   .serialize(),
-          ])
+        const serviceGoDevInstance = service('synth-go', 'development', 'go').instance(
+          'instance-b'
         );
+        const serviceJavaInstance = service('synth-java', 'production', 'java').instance(
+          'instance-c'
+        );
+
+        await generator.generate([
+          ...timerange(start, end)
+            .interval('1s')
+            .rate(10)
+            .flatMap((timestamp) =>
+              serviceGoProdInstance
+                .transaction('GET /api/product/list')
+                .duration(1000)
+                .timestamp(timestamp)
+                .serialize()
+            ),
+          ...timerange(start, end)
+            .interval('1s')
+            .rate(5)
+            .flatMap((timestamp) =>
+              serviceGoDevInstance
+                .transaction('GET /api/product/:id')
+                .duration(1000)
+                .timestamp(timestamp)
+                .serialize()
+            ),
+          ...timerange(start, end)
+            .interval('1s')
+            .rate(20)
+            .flatMap((timestamp) =>
+              serviceJavaInstance
+                .transaction('POST /api/product/buy')
+                .duration(1000)
+                .timestamp(timestamp)
+                .serialize()
+            ),
+        ]);
       });
 
       after(async () => {
         await generator.clean();
       });
 
-      it('succesfully runs', async () => {
+      async function callApi(overrides?: {
+        start?: string;
+        end?: string;
+        transactionType?: string;
+        environment?: string;
+        kuery?: string;
+      }) {
         const response = await apmApiClient.readUser({
           endpoint: 'GET /api/apm/services/{serviceName}/throughput',
           params: {
@@ -82,14 +101,62 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               transactionType: 'request',
               environment: 'production',
               kuery: 'processor.event:transaction',
+              ...overrides,
             },
           },
         });
 
-        const throughputValues = response.body.currentPeriod.map(({ y }) => y);
+        return response.body;
+      }
 
-        expect(uniq(throughputValues)).to.eql([10]);
-        expect(response.body.throughputUnit).to.eql('second');
+      describe('when calling it with the default parameters', () => {
+        let body: PromiseReturnType<typeof callApi>;
+
+        before(async () => {
+          body = await callApi();
+        });
+
+        it('returns the throughput in seconds', () => {
+          expect(body.throughputUnit).to.eql('second');
+        });
+
+        it('returns the expected throughput', () => {
+          const throughputValues = uniq(body.currentPeriod.map((coord) => coord.y));
+          expect(throughputValues).to.eql([15]);
+        });
+      });
+
+      describe('when setting environment to all', () => {
+        let body: PromiseReturnType<typeof callApi>;
+
+        before(async () => {
+          body = await callApi({
+            environment: ENVIRONMENT_ALL.value,
+          });
+        });
+
+        it('returns data for all environments', () => {
+          const throughputValues = body.currentPeriod.map(({ y }) => y);
+          expect(uniq(throughputValues)).to.eql([10]);
+          expect(body.throughputUnit).to.eql('second');
+        });
+      });
+
+      describe('when defining a kuery', () => {
+        let body: PromiseReturnType<typeof callApi>;
+
+        before(async () => {
+          body = await callApi({
+            kuery: `processor.event:transaction and transaction.name:"GET /api/product/:id"`,
+            environment: ENVIRONMENT_ALL.value,
+          });
+        });
+
+        it('returns data that matches the kuery', () => {
+          const throughputValues = body.currentPeriod.map(({ y }) => y);
+          expect(uniq(throughputValues)).to.eql([5]);
+          expect(body.throughputUnit).to.eql('second');
+        });
       });
     }
   );

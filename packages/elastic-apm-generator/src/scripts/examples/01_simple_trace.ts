@@ -6,18 +6,10 @@
  * Side Public License, v 1.
  */
 
-import {
-  service,
-  timerange,
-  getTransactionMetrics,
-  getSpanDestinationMetrics,
-  getGoAgentDefaults,
-} from '../..';
+import { service, timerange, getTransactionMetrics, getSpanDestinationMetrics } from '../..';
 
 export function simpleTrace(from: number, to: number) {
-  const instance = service('opbeans-go', 'production', 'go')
-    .defaults(getGoAgentDefaults())
-    .instance('instance');
+  const instance = service('opbeans-go', 'production', 'go').instance('instance');
 
   const range = timerange(from, to);
 
