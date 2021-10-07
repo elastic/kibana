@@ -463,7 +463,24 @@ export const AlertsList: React.FunctionComponent = () => {
       sortable: true,
       width: '15%',
       'data-test-subj': 'alertsTableCell-lastExecutionDate',
-      render: (date: Date) => (date ? moment(date).format('MMM D, YYYY HH:mm:ssa') : ''),
+      render: (date: Date) => {
+        if (date) {
+          return (
+            <>
+              <EuiFlexGroup direction="column" gutterSize="none">
+                <EuiFlexItem grow={false}>
+                  {moment(date).format('MMM D, YYYY HH:mm:ssa')}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText color="subdued" size="xs">
+                    {moment(date).fromNow()}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          );
+        }
+      },
     },
     {
       field: 'schedule.interval',
