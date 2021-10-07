@@ -22,6 +22,7 @@ import {
   EuiToolTip,
   EuiCallOut,
   EuiFormRowProps,
+  EuiBadge,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -36,8 +37,13 @@ import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { SecurityPageName } from '../../../../common/constants';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 
-const StyledFormRow = styled(EuiFormRow)<EuiFormRowProps & { $expandAdvancedOptions: boolean }>`
+const FormRow = styled(EuiFormRow)<EuiFormRowProps & { $expandAdvancedOptions: boolean }>`
   display: ${({ $expandAdvancedOptions }) => ($expandAdvancedOptions ? 'flex' : 'none')};
+  max-width: none;
+`;
+
+const StyledFormRow = styled(EuiFormRow)`
+  max-width: none;
 `;
 
 const StyledButton = styled(EuiButtonEmpty)`
@@ -53,6 +59,14 @@ const ResetButton = styled(EuiButtonEmpty)`
 interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
 }
+
+const PopoverContent = styled.div`
+  width: 600px;
+`;
+
+const StyledBadge = styled(EuiBadge)`
+  margin-left: 8px;
+`;
 
 export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }) => {
   const dispatch = useDispatch();
@@ -95,7 +109,24 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       value: indexName,
     }))
   );
+
+  const defaultSelectedOptions = useMemo(
+    () =>
+      getScopePatternListSelection(
+        kibanaDataViews.find((dataView) => dataView.id === dataViewId),
+        scopeId,
+        signalIndexName
+      ).map((indexSelected: string) => ({
+        label: indexSelected,
+        value: indexSelected,
+      })),
+    [dataViewId, kibanaDataViews, scopeId, signalIndexName]
+  );
+
   const isSavingDisabled = useMemo(() => selectedOptions.length === 0, [selectedOptions]);
+  const isModified = !defaultSelectedOptions.every((option) =>
+    selectedOptions.find((selectedOption) => option.value === selectedOption.value)
+  );
 
   const setPopoverIsOpenCb = useCallback(() => setPopoverIsOpen((prevState) => !prevState), []);
   const onChangeDataView = useCallback(
@@ -123,18 +154,9 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const onChangeSuper = useCallback(
     (newSelectedOption) => {
       setDataViewId(newSelectedOption);
-      setSelectedOptions(
-        getScopePatternListSelection(
-          kibanaDataViews.find((dataView) => dataView.id === newSelectedOption),
-          scopeId,
-          signalIndexName
-        ).map((indexSelected: string) => ({
-          label: indexSelected,
-          value: indexSelected,
-        }))
-      );
+      setSelectedOptions(defaultSelectedOptions);
     },
-    [kibanaDataViews, scopeId, signalIndexName]
+    [defaultSelectedOptions]
   );
 
   const resetDataSources = useCallback(() => {
@@ -162,7 +184,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   }, []);
   const trigger = useMemo(
     () => (
-      <EuiButtonEmpty
+      <StyledButton
         aria-label={i18n.SOURCERER}
         data-test-subj="sourcerer-trigger"
         flush="left"
@@ -173,9 +195,10 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         title={i18n.SOURCERER}
       >
         {i18n.SOURCERER}
-      </EuiButtonEmpty>
+        {isModified && <StyledBadge>{i18n.BADGE_TITLE}</StyledBadge>}
+      </StyledButton>
     ),
-    [setPopoverIsOpenCb, loading]
+    [loading, setPopoverIsOpenCb, isModified]
   );
 
   const dataViewSelectOptions = useMemo(
@@ -185,6 +208,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
           id === defaultDataView.id ? (
             <span data-test-subj="security-option-super">
               <EuiIcon type="logoSecurity" size="s" /> {i18n.SIEM_DATA_VIEW_LABEL}
+              {isModified && id === dataViewId && <StyledBadge>{i18n.BADGE_TITLE}</StyledBadge>}
             </span>
           ) : (
             <span data-test-subj="dataView-option-super">
@@ -193,7 +217,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
           ),
         value: id,
       })),
-    [defaultDataView.id, kibanaDataViews]
+    [dataViewId, defaultDataView.id, isModified, kibanaDataViews]
   );
 
   useEffect(() => {
@@ -244,7 +268,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         repositionOnScroll
         ownFocus
       >
-        <>
+        <PopoverContent>
           <EuiPopoverTitle>
             <>{i18n.SELECT_INDEX_PATTERNS}</>
           </EuiPopoverTitle>
@@ -255,7 +279,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
           )}
           <EuiSpacer size="s" />
           <EuiForm component="form">
-            <EuiFormRow label={i18n.INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL}>
+            <StyledFormRow label={i18n.INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL}>
               <EuiSuperSelect
                 data-test-subj="sourcerer-select"
                 placeholder={i18n.PICK_INDEX_PATTERNS}
@@ -265,7 +289,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
                 onChange={onChangeSuper}
                 disabled={isReadOnly}
               />
-            </EuiFormRow>
+            </StyledFormRow>
 
             <StyledButton
               color="text"
@@ -274,7 +298,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
             >
               {i18n.INDEX_PATTERNS_ADVANCED_OPTIONS_TITLE}
             </StyledButton>
-            <StyledFormRow
+            <FormRow
               label={i18n.INDEX_PATTERNS_LABEL}
               $expandAdvancedOptions={expandAdvancedOptions}
             >
@@ -288,10 +312,10 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
                 selectedOptions={selectedOptions}
                 isDisabled={isReadOnly}
               />
-            </StyledFormRow>
+            </FormRow>
 
             {!isReadOnly && (
-              <EuiFormRow>
+              <StyledFormRow>
                 <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
                   <EuiFlexItem grow={false}>
                     <ResetButton
@@ -317,11 +341,11 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </EuiFormRow>
+              </StyledFormRow>
             )}
             <EuiSpacer size="s" />
           </EuiForm>
-        </>
+        </PopoverContent>
       </EuiPopover>
     </EuiToolTip>
   );

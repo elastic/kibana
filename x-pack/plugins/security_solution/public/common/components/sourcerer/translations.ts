@@ -20,6 +20,10 @@ export const SOURCERER = i18n.translate('xpack.securitySolution.indexPatterns.da
   defaultMessage: 'Data sources',
 });
 
+export const BADGE_TITLE = i18n.translate('xpack.securitySolution.indexPatterns.badgeTitle', {
+  defaultMessage: 'Modified',
+});
+
 export const SIEM_DATA_VIEW_LABEL = i18n.translate(
   'xpack.securitySolution.indexPatterns.kipLabel',
   {
