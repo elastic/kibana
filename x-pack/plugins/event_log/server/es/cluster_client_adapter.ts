@@ -255,9 +255,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       await esClient.indices.putSettings({
         index: indexName,
         body: {
-          settings: {
-            'index.hidden': true,
-          },
+          'index.hidden': true,
         },
       });
     } catch (err) {
@@ -290,6 +288,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       const esClient = await this.elasticsearchClientPromise;
       await esClient.indices.updateAliases({
         body: {
+          // @ts-expect-error IndicesUpdateAliasesIndicesUpdateAliasBulk is not valid
           actions: Object.keys(currentAliases.aliases).map((aliasName) => {
             const existingAliasOptions = pick(currentAliases.aliases[aliasName], [
               'is_write_index',
