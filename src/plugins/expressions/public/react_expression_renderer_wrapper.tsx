@@ -8,7 +8,7 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { ReactExpressionRendererProps } from './react_expression_renderer';
+import type { ReactExpressionRendererProps } from './react_expression_renderer';
 
 const ReactExpressionRendererComponent = lazy(() => import('./react_expression_renderer'));
 

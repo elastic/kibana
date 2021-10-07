@@ -8,7 +8,7 @@
 
 import { pick } from 'lodash';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
+import type { ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 import {
   ExpressionsService,
   setRenderersRegistry,
