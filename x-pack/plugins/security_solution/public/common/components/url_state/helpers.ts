@@ -199,7 +199,10 @@ export const updateTimerangeUrl = (
   return timeRange;
 };
 
-export const isQueryStateEmpty = (queryState: ValueUrlState | null, urlKey: KeyUrlState) =>
+export const isQueryStateEmpty = (
+  queryState: ValueUrlState | undefined | null,
+  urlKey: KeyUrlState
+): boolean =>
   queryState == null ||
   (urlKey === CONSTANTS.appQuery && isEmpty((queryState as Query).query)) ||
   (urlKey === CONSTANTS.filters && isEmpty(queryState)) ||
