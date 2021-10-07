@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { get, last } from 'lodash';
+import { get } from 'lodash';
 import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '../../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
 import {
@@ -77,8 +77,6 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
     const palette = buildExpressionFunction('palette', {
       ...stopsWithColors,
       range: percentageMode ? 'percent' : 'number',
-      rangeMin: colorsRange[0].from,
-      rangeMax: last(colorsRange)?.to,
     });
 
     metricVis.addArgument('palette', buildExpression([palette]));
