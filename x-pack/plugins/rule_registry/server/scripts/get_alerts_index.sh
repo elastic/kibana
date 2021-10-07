@@ -20,4 +20,4 @@ curl -v -k \
  -u $USER:changeme \
  -X GET "${KIBANA_URL}${SPACE_URL}/internal/rac/alerts/index" | jq .
 
-# -X GET "${KIBANA_URL}${SPACE_URL}/api/apm/settings/apm-alerts-as-data-indices" | jq .
+# -X GET "${KIBANA_URL}${SPACE_URL}/internal/apm/settings/apm-alerts-as-data-indices" | jq .

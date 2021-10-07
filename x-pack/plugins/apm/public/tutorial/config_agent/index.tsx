@@ -90,7 +90,7 @@ function TutorialConfigAgent({
     async function fetchData() {
       setIsLoading(true);
       try {
-        const response = await http.get('/api/apm/fleet/agents');
+        const response = await http.get('/internal/apm/fleet/agents');
         if (response) {
           setData(response as APIResponseType);
         }

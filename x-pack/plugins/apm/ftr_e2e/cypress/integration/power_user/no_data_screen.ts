@@ -6,7 +6,7 @@
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-const apmIndicesSaveURL = '/api/apm/settings/apm-indices/save';
+const apmIndicesSaveURL = '/internal/apm/settings/apm-indices/save';
 
 describe('No data screen', () => {
   describe('bypass no data screen on settings pages', () => {

@@ -46,4 +46,4 @@ This will create:
 All APM api endpoints accept `_inspect=true` as a query param that will output all Elasticsearch queries performed in that request. It will be available in the browser response and on localhost it is also available in the Kibana Node.js process output.
 
 Example:
-`/api/apm/services/my_service?_inspect=true`
+`/internal/apm/services/my_service?_inspect=true`
