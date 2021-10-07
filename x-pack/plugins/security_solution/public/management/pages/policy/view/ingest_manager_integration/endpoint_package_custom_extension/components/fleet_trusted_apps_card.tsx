@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo, useState, useEffect, useRef } from 'react';
-import { EuiPanel, EuiText } from '@elastic/eui';
+import { EuiPanel, EuiText, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { GetExceptionSummaryResponse } from '../../../../../../../../common/endpoint/types';
@@ -38,7 +38,7 @@ export const FleetTrustedAppsCard = memo<FleetTrustedAppsCardProps>(
         try {
           const response = await trustedAppsApi.getTrustedAppsSummary({
             kuery: policyId
-              ? `exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all"`
+              ? `(exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`
               : undefined,
           });
           if (isMounted) {
@@ -75,13 +75,29 @@ export const FleetTrustedAppsCard = memo<FleetTrustedAppsCardProps>(
     return (
       <EuiPanel hasShadow={false} paddingSize="l" hasBorder data-test-subj="fleetTrustedAppsCard">
         <StyledEuiFlexGridGroup alignItems="baseline" justifyContent="center" cardSize={cardSize}>
-          <StyledEuiFlexGridItem gridarea="title" alignitems="flex-start">
-            <EuiText>
-              {cardSize === 'l' ? <h4>{getTitleMessage()}</h4> : <h5>{getTitleMessage()}</h5>}
-            </EuiText>
-          </StyledEuiFlexGridItem>
-          <StyledEuiFlexGridItem gridarea="summary">
-            <ExceptionItemsSummary stats={stats} isSmall={cardSize === 'm'} />
+          {cardSize === 'm' ? (
+            <EuiFlexGroup direction="row" alignItems="baseline">
+              <StyledEuiFlexGridItem gridarea="title" alignitems="flex-start">
+                <EuiText>
+                  <h5>{getTitleMessage()}</h5>
+                </EuiText>
+              </StyledEuiFlexGridItem>
+              <StyledEuiFlexGridItem gridarea="title" alignitems="flex-start">
+                <ExceptionItemsSummary stats={stats} isSmall={true} />
+              </StyledEuiFlexGridItem>
+            </EuiFlexGroup>
+          ) : (
+            <StyledEuiFlexGridItem gridarea="title" alignitems="flex-start">
+              <EuiText>
+                <h4>{getTitleMessage()}</h4>
+              </EuiText>
+            </StyledEuiFlexGridItem>
+          )}
+          <StyledEuiFlexGridItem
+            gridarea="summary"
+            alignitems={cardSize === 'm' ? 'flex-start' : 'center'}
+          >
+            {cardSize === 'l' ? <ExceptionItemsSummary stats={stats} isSmall={false} /> : null}
           </StyledEuiFlexGridItem>
           <StyledEuiFlexGridItem gridarea="link" alignitems="flex-end">
             {customLink}
