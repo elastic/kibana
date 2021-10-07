@@ -4569,6 +4569,8 @@
     "share.advancedSettings.csv.quoteValuesText": "csvエクスポートに値を引用するかどうかです",
     "share.advancedSettings.csv.quoteValuesTitle": "CSVの値を引用",
     "share.advancedSettings.csv.separatorText": "エクスポートされた値をこの文字列で区切ります",
+    "share.advancedSettings.csv.separatorTitle": "CSVセパレーター",
+    "share.contextMenu.embedCodeLabel": "埋め込みコード",
     "share.contextMenu.embedCodePanelTitle": "埋め込みコード",
     "share.contextMenu.permalinkPanelTitle": "パーマリンク",
     "share.contextMenu.permalinksLabel": "パーマリンク",
