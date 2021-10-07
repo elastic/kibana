@@ -86,7 +86,7 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
               'xpack.apm.tutorial.apmServer.fleet.message',
               {
                 defaultMessage:
-                  'The APM integration installs Elasticsearch templates and Ingest Node pipelines for APM data.',
+                  'The APM integration installs Elasticsearch templates and ingest pipelines for APM data.',
               }
             )}
             footer={

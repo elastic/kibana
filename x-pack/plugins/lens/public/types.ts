@@ -246,6 +246,7 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (
     state: T,
+    filterFn?: (layerId: string) => boolean,
     activeData?: Record<string, Datatable>
   ) => Array<DatasourceSuggestion<T>>;
 

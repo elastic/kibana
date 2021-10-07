@@ -14,57 +14,40 @@ import {
   PolicyData,
   UIPolicyConfig,
   PostTrustedAppCreateResponse,
-  GetTrustedListAppsResponse,
   MaybeImmutable,
+  GetTrustedAppsListResponse,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import {
   GetAgentStatusResponse,
   GetOnePackagePolicyResponse,
   GetPackagePoliciesResponse,
-  GetPackagesResponse,
   UpdatePackagePolicyResponse,
 } from '../../../../../fleet/common';
 import { AsyncResourceState } from '../../state';
 import { ImmutableMiddlewareAPI } from '../../../common/store';
 import { AppAction } from '../../../common/store/actions';
+import { TrustedAppsService } from '../trusted_apps/service';
+
+export type PolicyDetailsStore = ImmutableMiddlewareAPI<PolicyDetailsState, AppAction>;
 
 /**
  * Function that runs Policy Details middleware
  */
 export type MiddlewareRunner = (
-  coreStart: CoreStart,
-  store: ImmutableMiddlewareAPI<PolicyDetailsState, AppAction>,
+  context: MiddlewareRunnerContext,
+  store: PolicyDetailsStore,
   action: MaybeImmutable<AppAction>
 ) => Promise<void>;
 
-/**
- * Policy list store state
- */
-export interface PolicyListState {
-  /** Array of policy items  */
-  policyItems: PolicyData[];
-  /** Information about the latest endpoint package */
-  endpointPackageInfo?: GetPackagesResponse['response'][0];
-  /** API error if loading data failed */
-  apiError?: ServerApiError;
-  /** total number of policies */
-  total: number;
-  /** Number of policies per page */
-  pageSize: number;
-  /** page number (zero based) */
-  pageIndex: number;
-  /** data is being retrieved from server */
-  isLoading: boolean;
-  /** current location information */
-  location?: Immutable<AppLocation>;
-  /** policy is being deleted */
-  isDeleting: boolean;
-  /** Deletion status */
-  deleteStatus?: boolean;
-  /** A summary of stats for the agents associated with a given Fleet Agent Policy */
-  agentStatusSummary?: GetAgentStatusResponse['results'];
+export interface MiddlewareRunnerContext {
+  coreStart: CoreStart;
+  trustedAppsService: TrustedAppsService;
 }
+
+export type PolicyDetailsSelector<T = unknown> = (
+  state: Immutable<PolicyDetailsState>
+) => Immutable<T>;
 
 /**
  * Policy details store state
@@ -90,6 +73,11 @@ export interface PolicyDetailsState {
   license?: ILicense;
 }
 
+export interface PolicyAssignedTrustedApps {
+  location: PolicyDetailsArtifactsPageListLocationParams;
+  artifacts: GetTrustedAppsListResponse;
+}
+
 /**
  * Policy artifacts store state
  */
@@ -97,11 +85,17 @@ export interface PolicyArtifactsState {
   /** artifacts location params  */
   location: PolicyDetailsArtifactsPageLocation;
   /** A list of artifacts can be linked to the policy  */
-  assignableList: AsyncResourceState<GetTrustedListAppsResponse>;
-  /** Represents if avaialble trusted apps entries exist, regardless of whether the list is showing results  */
+  assignableList: AsyncResourceState<GetTrustedAppsListResponse>;
+  /** Represents if available trusted apps entries exist, regardless of whether the list is showing results  */
   assignableListEntriesExist: AsyncResourceState<boolean>;
   /** A list of trusted apps going to be updated  */
   trustedAppsToUpdate: AsyncResourceState<PostTrustedAppCreateResponse[]>;
+  /** Represents if there is any trusted app existing  */
+  doesAnyTrustedAppExists: AsyncResourceState<boolean>;
+  /** List of artifacts currently assigned to the policy (body specific and global) */
+  assignedList: AsyncResourceState<PolicyAssignedTrustedApps>;
+  /** A list of all available polices */
+  policies: AsyncResourceState<GetPolicyListResponse>;
 }
 
 export enum OS {
@@ -110,11 +104,15 @@ export enum OS {
   linux = 'linux',
 }
 
-export interface PolicyDetailsArtifactsPageLocation {
+export interface PolicyDetailsArtifactsPageListLocationParams {
   page_index: number;
   page_size: number;
-  show?: 'list';
   filter: string;
+}
+
+export interface PolicyDetailsArtifactsPageLocation
+  extends PolicyDetailsArtifactsPageListLocationParams {
+  show?: 'list';
 }
 
 /**

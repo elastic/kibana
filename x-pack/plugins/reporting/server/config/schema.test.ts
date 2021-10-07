@@ -84,7 +84,6 @@ describe('Reporting Config Schema', () => {
         },
         "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "index": ".reporting",
         "kibanaServer": Object {},
         "poll": Object {
           "jobCompletionNotifier": Object {
@@ -189,7 +188,6 @@ describe('Reporting Config Schema', () => {
           "useByteOrderMarkEncoding": false,
         },
         "enabled": true,
-        "index": ".reporting",
         "kibanaServer": Object {},
         "poll": Object {
           "jobCompletionNotifier": Object {

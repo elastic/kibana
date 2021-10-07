@@ -504,18 +504,21 @@ export const useField = <T, FormType = FormData, I = T>(
       const { resetValue = true, defaultValue: updatedDefaultValue } = resetOptions;
 
       setPristine(true);
-      setIsModified(false);
-      setValidating(false);
-      setIsChangingValue(false);
-      setIsValidated(false);
-      setStateErrors([]);
 
-      if (resetValue) {
-        hasBeenReset.current = true;
-        const newValue = deserializeValue(updatedDefaultValue ?? defaultValue);
-        // updateStateIfMounted('value', newValue);
-        setValue(newValue);
-        return newValue;
+      if (isMounted.current) {
+        setIsModified(false);
+        setValidating(false);
+        setIsChangingValue(false);
+        setIsValidated(false);
+        setStateErrors([]);
+
+        if (resetValue) {
+          hasBeenReset.current = true;
+          const newValue = deserializeValue(updatedDefaultValue ?? defaultValue);
+          // updateStateIfMounted('value', newValue);
+          setValue(newValue);
+          return newValue;
+        }
       }
     },
     [deserializeValue, defaultValue, setValue, setStateErrors]
