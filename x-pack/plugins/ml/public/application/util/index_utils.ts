@@ -11,14 +11,15 @@ import type { DataView, DataViewsContract } from '../../../../../../src/plugins/
 import type { SavedSearchSavedObject } from '../../../common/types/kibana';
 import { getToastNotifications, getSavedObjectsClient, getDataViews } from './dependency_cache';
 
-const indexPatternCache: DataView[] = [];
+let indexPatternCache: DataView[] = [];
 let savedSearchesCache: SavedSearchSavedObject[] = [];
 let indexPatternsContract: DataViewsContract | null = null;
 
-export function loadIndexPatterns(indexPatterns: DataViewsContract) {
+export async function loadIndexPatterns(indexPatterns: DataViewsContract) {
   indexPatternsContract = indexPatterns;
   const dataViewsContract = getDataViews();
-  return dataViewsContract.find('*');
+  indexPatternCache = await dataViewsContract.find('*');
+  return indexPatternCache;
 }
 
 export function loadSavedSearches() {
