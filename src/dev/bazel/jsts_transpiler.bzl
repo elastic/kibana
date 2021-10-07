@@ -33,6 +33,7 @@ def jsts_transpiler(name, srcs, build_pkg_name, web = False, root_input_dir = "s
     "--out-dir",
     "$(@D)",
     "--no-babelrc",
+    "--copy-files",
     "--extensions",
     ".ts,.tsx,.js",
   ] + inline_presets + additional_args

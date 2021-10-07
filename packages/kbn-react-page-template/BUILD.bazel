@@ -9,7 +9,8 @@ SOURCE_FILES = glob(
   [
     "src/**/*.ts",
     "src/**/*.tsx",
-    "types/**/*.ts"
+    "src/**/*.scss",
+    "src/**/*.svg",
   ],
   exclude = [
     "**/*.test.*",
@@ -26,7 +27,6 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "react/package.json",
   "package.json",
   "README.md"
 ]
@@ -41,20 +41,27 @@ RUNTIME_DEPS = [
 
 TYPES_DEPS = [
   "//packages/kbn-babel-preset",
+  "//packages/kbn-i18n",
   "@npm//tslib",
   "@npm//@types/jest",
   "@npm//@types/prop-types",
   "@npm//@types/classnames",
   "@npm//@types/react",
   "@npm//@elastic/eui",
-   "//packages/kbn-i18n",
 ]
+
+jsts_transpiler(
+  name = "target_webpack",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+  web = True,
+)
 
 jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
-  web = True,
+  web = False,
 )
 
 ts_config(
@@ -83,7 +90,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_webpack", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
