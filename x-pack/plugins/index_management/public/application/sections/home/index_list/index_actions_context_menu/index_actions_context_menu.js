@@ -445,8 +445,8 @@ export class IndexActionsContextMenu extends Component {
                   </EuiBadge>
                 </Fragment>
               ) : (
-                  ''
-                )}
+                ''
+              )}
             </li>
           ))}
         </ul>
@@ -573,8 +573,8 @@ export class IndexActionsContextMenu extends Component {
                   </EuiBadge>
                 </Fragment>
               ) : (
-                  ''
-                )}
+                ''
+              )}
             </li>
           ))}
         </ul>
