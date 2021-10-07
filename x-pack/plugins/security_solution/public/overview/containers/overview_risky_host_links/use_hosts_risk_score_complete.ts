@@ -15,28 +15,28 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import {
   HostsQueries,
-  HostsRiskyHostsRequestOptions,
-  HostsRiskyHostsStrategyResponse,
+  HostsRiskScoreRequestOptions,
+  HostsRiskScoreStrategyResponse,
 } from '../../../../common';
 
-type GetRiskyHostsProps = HostsRiskyHostsRequestOptions & {
+type GetHostsRiskScoreProps = HostsRiskScoreRequestOptions & {
   data: DataPublicPluginStart;
   signal: AbortSignal;
 };
 
-export const getRiskyHosts = ({
+export const getHostsRiskScore = ({
   data,
   defaultIndex,
-  filterQuery,
   timerange,
+  hostName,
   signal,
-}: GetRiskyHostsProps): Observable<HostsRiskyHostsStrategyResponse> =>
-  data.search.search<HostsRiskyHostsRequestOptions, HostsRiskyHostsStrategyResponse>(
+}: GetHostsRiskScoreProps): Observable<HostsRiskScoreStrategyResponse> =>
+  data.search.search<HostsRiskScoreRequestOptions, HostsRiskScoreStrategyResponse>(
     {
       defaultIndex,
-      factoryQueryType: HostsQueries.riskyHosts,
-      filterQuery,
+      factoryQueryType: HostsQueries.hostsRiskScore,
       timerange,
+      hostName,
     },
     {
       strategy: 'securitySolutionSearchStrategy',
@@ -44,16 +44,16 @@ export const getRiskyHosts = ({
     }
   );
 
-export const getRiskyHostsComplete = (
-  props: GetRiskyHostsProps
-): Observable<HostsRiskyHostsStrategyResponse> => {
-  return getRiskyHosts(props).pipe(
+export const getHostsRiskScoreComplete = (
+  props: GetHostsRiskScoreProps
+): Observable<HostsRiskScoreStrategyResponse> => {
+  return getHostsRiskScore(props).pipe(
     filter((response) => {
       return isErrorResponse(response) || isCompleteResponse(response);
     })
   );
 };
 
-const getRiskyHostsWithOptionalSignal = withOptionalSignal(getRiskyHostsComplete);
+const getHostsRiskScoreWithOptionalSignal = withOptionalSignal(getHostsRiskScoreComplete);
 
-export const useRiskyHostsComplete = () => useObservable(getRiskyHostsWithOptionalSignal);
+export const useHostsRiskScoreComplete = () => useObservable(getHostsRiskScoreWithOptionalSignal);
