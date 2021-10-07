@@ -41,6 +41,9 @@ export type {
 
 export const config: PluginConfigDescriptor<TaskManagerConfig> = {
   schema: configSchema,
+  exposeToUsage: {
+    max_workers: true,
+  },
   deprecations: () => [
     (settings, fromPath, addDeprecation) => {
       const taskManager = get(settings, fromPath);

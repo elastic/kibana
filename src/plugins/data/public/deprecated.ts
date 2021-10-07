@@ -16,7 +16,6 @@ import {
   isExistsFilter,
   isFilterPinned,
   isMatchAllFilter,
-  isMissingFilter,
   isPhraseFilter,
   isPhrasesFilter,
   isQueryStringFilter,
@@ -114,7 +113,6 @@ export const esFilters = {
   isPhrasesFilter,
   isRangeFilter,
   isMatchAllFilter,
-  isMissingFilter,
   isQueryStringFilter,
   isFilterPinned,
 
