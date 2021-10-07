@@ -7,7 +7,8 @@
 
 import { get, isEqual } from 'lodash';
 import expect from '@kbn/expect';
-import { ALERT_REASON, ALERT_RULE_UUID, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { DETECTION_ENGINE_RULES_STATUS_URL } from '../../../../plugins/security_solution/common/constants';
@@ -161,6 +162,7 @@ export default ({ getService }: FtrProviderContext) => {
           return expect(fullSignal).to.be.ok();
         }
         expect(fullSignal).eql({
+          ...fullSignal,
           '@timestamp': fullSignal['@timestamp'],
           agent: {
             ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
@@ -202,12 +204,12 @@ export default ({ getService }: FtrProviderContext) => {
           ecs: {
             version: '1.0.0-beta2',
           },
-          event: {
+          ...flattenWithPrefix('event', {
             action: 'error',
             category: 'user-login',
             module: 'auditd',
             kind: 'signal',
-          },
+          }),
           host: {
             architecture: 'x86_64',
             containerized: false,
@@ -252,16 +254,15 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
           [ALERT_DEPTH]: 1,
-          [ALERT_ORIGINAL_EVENT]: {
+          ...flattenWithPrefix(ALERT_ORIGINAL_EVENT, {
             action: 'error',
             category: 'user-login',
             module: 'auditd',
-          },
+          }),
           [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
           [ALERT_REASON]:
             'user-login event by root on zeek-sensor-amsterdam created high alert Query with a rule id.',
           [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
-          [ALERT_STATUS]: 'open',
           threat: {
             enrichments: get(fullSignal, 'threat.enrichments'),
           },
