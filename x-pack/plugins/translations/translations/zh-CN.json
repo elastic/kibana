@@ -5944,6 +5944,7 @@
     "visualizations.newVisWizard.readDocumentationLink": "阅读文档",
     "visualizations.newVisWizard.resultsFound": "{resultCount, plural, other {类型}}已找到",
     "visualizations.newVisWizard.searchSelection.notFoundLabel": "未找到匹配的索引或已保存搜索。",
+    "visualizations.newVisWizard.searchSelection.savedObjectType.indexPattern": "索引模式",
     "visualizations.newVisWizard.searchSelection.savedObjectType.search": "已保存搜索",
     "visualizations.newVisWizard.title": "新建可视化",
     "visualizations.newVisWizard.toolsGroupTitle": "工具",

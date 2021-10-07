@@ -5899,6 +5899,7 @@
     "visualizations.newVisWizard.newVisTypeTitle": "新規 {visTypeName}",
     "visualizations.newVisWizard.readDocumentationLink": "ドキュメンテーションを表示",
     "visualizations.newVisWizard.searchSelection.notFoundLabel": "一致インデックスまたは保存した検索が見つかりません。",
+    "visualizations.newVisWizard.searchSelection.savedObjectType.indexPattern": "インデックスパターン",
     "visualizations.newVisWizard.searchSelection.savedObjectType.search": "保存検索",
     "visualizations.newVisWizard.title": "新規ビジュアライゼーション",
     "visualizations.newVisWizard.toolsGroupTitle": "ツール",
