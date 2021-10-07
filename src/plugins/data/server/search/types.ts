@@ -35,7 +35,7 @@ export interface SearchEnhancements {
 export interface SearchStrategyDependencies {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: IScopedClusterClient;
-  uiSettingsClient: IUiSettingsClient;
+  uiSettingsClient: Pick<IUiSettingsClient, 'get'>;
   searchSessionsClient: IScopedSearchSessionsClient;
   request: KibanaRequest;
 }
