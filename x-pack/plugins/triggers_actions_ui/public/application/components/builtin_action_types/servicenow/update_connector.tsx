@@ -181,16 +181,22 @@ const UpdateConnectorComponent: React.FC<Props> = ({
         </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButtonEmpty onClick={onCancel}>{cancelButtonText}</EuiButtonEmpty>
-        <EuiButton
-          onClick={onConfirm}
-          color="danger"
-          fill
-          disabled={hasErrorsOrEmptyFields}
-          isLoading={isLoading}
-        >
-          {confirmButtonText}
-        </EuiButton>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={onCancel}>{cancelButtonText}</EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={onConfirm}
+              color="danger"
+              fill
+              disabled={hasErrorsOrEmptyFields}
+              isLoading={isLoading}
+            >
+              {confirmButtonText}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
   );

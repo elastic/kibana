@@ -56,14 +56,12 @@ export const getEncryptedFieldNotifyLabel = (
   return (
     <>
       <EuiSpacer size="s" />
-      <p data-test-subj="reenterValuesMessage">{reEnterDefaultMessage}</p>
-      {/* TODO: decide callout or text
       <EuiCallOut
         size="s"
         iconType="iInCircle"
         data-test-subj="reenterValuesMessage"
         title={reEnterDefaultMessage}
-      /> */}
+      />
       <EuiSpacer size="m" />
     </>
   );

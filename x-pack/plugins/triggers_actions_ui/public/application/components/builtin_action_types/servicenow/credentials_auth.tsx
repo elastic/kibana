@@ -11,8 +11,8 @@ import {
   EuiFieldText,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiSpacer,
   EuiFieldPassword,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
