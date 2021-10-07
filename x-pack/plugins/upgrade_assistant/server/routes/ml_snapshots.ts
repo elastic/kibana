@@ -257,7 +257,7 @@ export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
               }
 
               return response.customError({
-                statusCode: upgradeSnapshotError ? upgradeSnapshotError.statusCode : 500,
+                statusCode: upgradeSnapshotError ? upgradeSnapshotError.statusCode! : 500,
                 body: {
                   message:
                     upgradeSnapshotError?.body?.error?.reason ||
@@ -286,7 +286,7 @@ export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
             }
 
             return response.customError({
-              statusCode: upgradeSnapshotError ? upgradeSnapshotError.statusCode : 500,
+              statusCode: upgradeSnapshotError ? upgradeSnapshotError.statusCode! : 500,
               body: {
                 message:
                   upgradeSnapshotError?.body?.error?.reason ||

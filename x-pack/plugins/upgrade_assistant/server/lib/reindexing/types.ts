@@ -20,7 +20,7 @@ interface MetaProperties {
 }
 
 export interface FlatSettings {
-  settings: estypes.IndicesIndexState['settings'];
+  settings?: estypes.IndicesIndexState['settings'];
   mappings?: {
     properties?: MappingProperties;
     _meta?: MetaProperties;

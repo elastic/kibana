@@ -226,7 +226,7 @@ export const reindexServiceFactory = (
     if (reindexOp.attributes.lastCompletedStep >= ReindexStep.readonly) {
       await esClient.indices.putSettings({
         index: reindexOp.attributes.indexName,
-        body: { settings: { blocks: { write: false } } },
+        body: { blocks: { write: false } },
       });
     }
 
@@ -290,7 +290,7 @@ export const reindexServiceFactory = (
     const { indexName } = reindexOp.attributes;
     const { body: putReadonly } = await esClient.indices.putSettings({
       index: indexName,
-      body: { settings: { blocks: { write: true } } },
+      body: { blocks: { write: true } },
     });
 
     if (!putReadonly.acknowledged) {
@@ -456,8 +456,11 @@ export const reindexServiceFactory = (
     const { body: aliasResponse } = await esClient.indices.updateAliases({
       body: {
         actions: [
+          // @ts-expect-error @elastic/elasticseach IndicesUpdateAliasesIndicesUpdateAliasBulk is not valid
           { add: { index: newIndexName, alias: indexName } },
+          // @ts-expect-error @elastic/elasticseach IndicesUpdateAliasesIndicesUpdateAliasBulk is not valid
           { remove_index: { index: indexName } },
+          // @ts-expect-error @elastic/elasticseach IndicesUpdateAliasesIndicesUpdateAliasBulk is not valid
           ...extraAliases,
         ],
       },
