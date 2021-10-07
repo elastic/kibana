@@ -36,6 +36,7 @@ import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
 import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
+import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
 
 jest.mock('./utils', () => {
   const original = jest.requireActual('./utils');
@@ -57,7 +58,7 @@ jest.mock('@kbn/securitysolution-io-ts-utils', () => {
     parseScheduleDates: jest.fn(),
   };
 });
-
+jest.mock('../notifications/schedule_throttle_notification_actions');
 const mockRuleExecutionLogClient = ruleExecutionLogClientMock.create();
 
 jest.mock('../rule_execution_log/rule_execution_log_client', () => ({
@@ -200,6 +201,7 @@ describe('signal_rule_alert_type', () => {
     });
 
     mockRuleExecutionLogClient.logStatusChange.mockClear();
+    (scheduleThrottledNotificationActions as jest.Mock).mockClear();
   });
 
   describe('executor', () => {
@@ -512,6 +514,29 @@ describe('signal_rule_alert_type', () => {
           newStatus: RuleExecutionStatus.failed,
         })
       );
+    });
+
+    it('should call scheduleThrottledNotificationActions if result is false to prevent the throttle from being reset', async () => {
+      const result: SearchAfterAndBulkCreateReturnType = {
+        success: false,
+        warning: false,
+        searchAfterTimes: [],
+        bulkCreateTimes: [],
+        lastLookBackDate: null,
+        createdSignalsCount: 0,
+        createdSignals: [],
+        warningMessages: [],
+        errors: ['Error that bubbled up.'],
+      };
+      (queryExecutor as jest.Mock).mockResolvedValue(result);
+      await alert.executor(payload);
+      expect(scheduleThrottledNotificationActions).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call scheduleThrottledNotificationActions if an error was thrown to prevent the throttle from being reset', async () => {
+      (queryExecutor as jest.Mock).mockRejectedValue({});
+      await alert.executor(payload);
+      expect(scheduleThrottledNotificationActions).toHaveBeenCalledTimes(1);
     });
   });
 });
