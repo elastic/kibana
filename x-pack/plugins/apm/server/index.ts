@@ -74,8 +74,6 @@ export const config: PluginConfigDescriptor<APMXPackConfig> = {
     renameFromRoot('apm_oss.metricsIndices', 'xpack.apm.metricsIndices'),
     renameFromRoot('apm_oss.sourcemapIndices', 'xpack.apm.sourcemapIndices'),
     renameFromRoot('apm_oss.onboardingIndices', 'xpack.apm.onboardingIndices'),
-    renameFromRoot('apm_oss.indexPattern', 'xpack.apm.indexPattern'),
-    renameFromRoot('apm_oss.fleetMode', 'xpack.apm.fleetMode'),
     deprecateFromRoot('apm_oss.enabled', '8.0.0'),
     unusedFromRoot('apm_oss.fleetMode'),
     unusedFromRoot('apm_oss.indexPattern'),
