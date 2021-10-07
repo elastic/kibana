@@ -1710,7 +1710,7 @@ export class SavedObjectsRepository {
     return this.incrementCounterInternal<T>(type, id, counterFields, options);
   }
 
-  /** @internal incrementCounter function that is used interally and bypasses validation checks. */
+  /** @internal incrementCounter function that is used internally and bypasses validation checks. */
   private async incrementCounterInternal<T = unknown>(
     type: string,
     id: string,
@@ -2208,7 +2208,7 @@ const errorContent = (error: DecoratedError) => error.output.payload;
 const unique = (array: string[]) => [...new Set(array)];
 
 /**
- * Type and type guard function for converting a possibly not existant doc to an existant doc.
+ * Type and type guard function for converting a possibly not existent doc to an existent doc.
  */
 type GetResponseFound<TDocument = unknown> = estypes.GetResponse<TDocument> &
   Required<
