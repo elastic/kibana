@@ -161,11 +161,11 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('existing_fields apis', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/visualize/default');
     });
     after(async () => {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.unload('x-pack/test/functional/es_archives/visualize/default');
     });
 

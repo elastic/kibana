@@ -34,7 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/dashboard/feature_controls/security'
       );
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
 
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();
