@@ -13,7 +13,9 @@ export default function ({ getService, loadTestFile }) {
   const kibanaServer = getService('kibanaServer');
 
   describe('timelion app', function () {
-    this.tags('ciGroup1');
+    // unskipped due to flakiness in cloud in v7.15 and 7.14
+    // timelion app is hidden in these versions and is being removed in 7.16
+    this.tags(['ciGroup1', 'skipCloud']);
 
     before(async function () {
       log.debug('Starting timelion before method');

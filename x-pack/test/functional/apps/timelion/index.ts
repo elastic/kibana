@@ -9,7 +9,9 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function timelion({ loadTestFile }: FtrProviderContext) {
   describe('Timelion', function visualizeTestSuite() {
-    this.tags(['ciGroup4', 'skipFirefox']);
+    // unskipped due to flakiness in cloud in v7.15 and 7.14
+    // timelion app is hidden in these versions and is being removed in 7.16
+    this.tags(['ciGroup4', 'skipFirefox', 'skipCloud']);
 
     loadTestFile(require.resolve('./feature_controls/timelion_security'));
     loadTestFile(require.resolve('./feature_controls/timelion_spaces'));
