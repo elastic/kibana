@@ -19,7 +19,7 @@ export default function serviceNowTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
 
-  describe('ServiceNow', () => {
+  describe.skip('ServiceNow', () => {
     let serviceNowSimulatorURL: string = '';
     let serviceNowServer: http.Server;
     let proxyServer: httpProxy | undefined;
