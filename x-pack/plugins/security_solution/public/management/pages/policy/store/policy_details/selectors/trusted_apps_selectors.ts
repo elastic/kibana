@@ -5,35 +5,50 @@
  * 2.0.
  */
 
-import { matchPath } from 'react-router-dom';
-import { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../../../types';
+import { createSelector } from 'reselect';
+import { Pagination } from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
+import {
+  PolicyArtifactsState,
+  PolicyAssignedTrustedApps,
+  PolicyDetailsArtifactsPageListLocationParams,
+  PolicyDetailsSelector,
+  PolicyDetailsState,
+} from '../../../types';
 import {
   Immutable,
   ImmutableArray,
   PostTrustedAppCreateResponse,
-  GetTrustedListAppsResponse,
+  GetTrustedAppsListResponse,
+  PolicyData,
 } from '../../../../../../../common/endpoint/types';
-import { MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH } from '../../../../../common/constants';
+import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../../../common/constants';
 import {
   getLastLoadedResourceState,
   isFailedResourceState,
   isLoadedResourceState,
   isLoadingResourceState,
+  LoadedResourceState,
 } from '../../../../../state';
+import { getCurrentArtifactsLocation } from './policy_common_selectors';
 
-/**
- * Returns current artifacts location
- */
-export const getCurrentArtifactsLocation = (
-  state: Immutable<PolicyDetailsState>
-): Immutable<PolicyDetailsArtifactsPageLocation> => state.artifacts.location;
+export const doesPolicyHaveTrustedApps = (
+  state: PolicyDetailsState
+): { loading: boolean; hasTrustedApps: boolean } => {
+  return {
+    loading: isLoadingResourceState(state.artifacts.assignedList),
+    hasTrustedApps: isLoadedResourceState(state.artifacts.assignedList)
+      ? !isEmpty(state.artifacts.assignedList.data.artifacts.data)
+      : false,
+  };
+};
 
 /**
  * Returns current assignable artifacts list
  */
 export const getAssignableArtifactsList = (
   state: Immutable<PolicyDetailsState>
-): Immutable<GetTrustedListAppsResponse> | undefined =>
+): Immutable<GetTrustedAppsListResponse> | undefined =>
   getLastLoadedResourceState(state.artifacts.assignableList)?.data;
 
 /**
@@ -92,12 +107,108 @@ export const getUpdateArtifacts = (
     : undefined;
 };
 
-/** Returns a boolean of whether the user is on the policy details page or not */
-export const isOnPolicyTrustedAppsPage = (state: Immutable<PolicyDetailsState>) => {
+/**
+ * Returns does any TA exists
+ */
+export const getDoesTrustedAppExists = (state: Immutable<PolicyDetailsState>): boolean => {
   return (
-    matchPath(state.location?.pathname ?? '', {
-      path: MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
-      exact: true,
-    }) !== null
+    isLoadedResourceState(state.artifacts.doesAnyTrustedAppExists) &&
+    state.artifacts.doesAnyTrustedAppExists.data
   );
 };
+
+/**
+ * Returns does any TA exists loading
+ */
+export const doesTrustedAppExistsLoading = (state: Immutable<PolicyDetailsState>): boolean => {
+  return isLoadingResourceState(state.artifacts.doesAnyTrustedAppExists);
+};
+
+/** Returns a boolean of whether the user is on the policy details page or not */
+export const getCurrentPolicyAssignedTrustedAppsState: PolicyDetailsSelector<
+  PolicyArtifactsState['assignedList']
+> = (state) => {
+  return state.artifacts.assignedList;
+};
+
+export const getLatestLoadedPolicyAssignedTrustedAppsState: PolicyDetailsSelector<
+  undefined | LoadedResourceState<PolicyAssignedTrustedApps>
+> = createSelector(getCurrentPolicyAssignedTrustedAppsState, (currentAssignedTrustedAppsState) => {
+  return getLastLoadedResourceState(currentAssignedTrustedAppsState);
+});
+
+export const getCurrentUrlLocationPaginationParams: PolicyDetailsSelector<PolicyDetailsArtifactsPageListLocationParams> =
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  createSelector(getCurrentArtifactsLocation, ({ filter, page_index, page_size }) => {
+    return { filter, page_index, page_size };
+  });
+
+export const doesPolicyTrustedAppsListNeedUpdate: PolicyDetailsSelector<boolean> = createSelector(
+  getCurrentPolicyAssignedTrustedAppsState,
+  getCurrentUrlLocationPaginationParams,
+  (assignedListState, locationData) => {
+    return (
+      !isLoadedResourceState(assignedListState) ||
+      (isLoadedResourceState(assignedListState) &&
+        (
+          Object.keys(locationData) as Array<keyof PolicyDetailsArtifactsPageListLocationParams>
+        ).some((key) => assignedListState.data.location[key] !== locationData[key]))
+    );
+  }
+);
+
+export const isPolicyTrustedAppListLoading: PolicyDetailsSelector<boolean> = createSelector(
+  getCurrentPolicyAssignedTrustedAppsState,
+  (assignedState) => isLoadingResourceState(assignedState)
+);
+
+export const getPolicyTrustedAppList: PolicyDetailsSelector<GetTrustedAppsListResponse['data']> =
+  createSelector(getLatestLoadedPolicyAssignedTrustedAppsState, (assignedState) => {
+    return assignedState?.data.artifacts.data ?? [];
+  });
+
+export const getPolicyTrustedAppsListPagination: PolicyDetailsSelector<Pagination> = createSelector(
+  getLatestLoadedPolicyAssignedTrustedAppsState,
+  (currentAssignedTrustedAppsState) => {
+    const trustedAppsApiResponse = currentAssignedTrustedAppsState?.data.artifacts;
+
+    return {
+      // Trusted apps api is `1` based for page - need to subtract here for `Pagination` component
+      pageIndex: trustedAppsApiResponse?.page ? trustedAppsApiResponse.page - 1 : 0,
+      pageSize: trustedAppsApiResponse?.per_page ?? MANAGEMENT_PAGE_SIZE_OPTIONS[0],
+      totalItemCount: trustedAppsApiResponse?.total || 0,
+      pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
+    };
+  }
+);
+
+export const getTrustedAppsPolicyListState: PolicyDetailsSelector<
+  PolicyDetailsState['artifacts']['policies']
+> = (state) => state.artifacts.policies;
+
+export const getTrustedAppsListOfAllPolicies: PolicyDetailsSelector<PolicyData[]> = createSelector(
+  getTrustedAppsPolicyListState,
+  (policyListState) => {
+    return getLastLoadedResourceState(policyListState)?.data.items ?? [];
+  }
+);
+
+export const getTrustedAppsAllPoliciesById: PolicyDetailsSelector<
+  Record<string, Immutable<PolicyData>>
+> = createSelector(getTrustedAppsListOfAllPolicies, (allPolicies) => {
+  return allPolicies.reduce<Record<string, Immutable<PolicyData>>>((mapById, policy) => {
+    mapById[policy.id] = policy;
+    return mapById;
+  }, {}) as Immutable<Record<string, Immutable<PolicyData>>>;
+});
+
+export const getDoesAnyTrustedAppExists: PolicyDetailsSelector<
+  PolicyDetailsState['artifacts']['doesAnyTrustedAppExists']
+> = (state) => state.artifacts.doesAnyTrustedAppExists;
+
+export const getDoesAnyTrustedAppExistsIsLoading: PolicyDetailsSelector<boolean> = createSelector(
+  getDoesAnyTrustedAppExists,
+  (doesAnyTrustedAppExists) => {
+    return isLoadingResourceState(doesAnyTrustedAppExists);
+  }
+);

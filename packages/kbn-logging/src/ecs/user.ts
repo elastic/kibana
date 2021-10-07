@@ -20,7 +20,7 @@ interface NestedFields {
  * placed at the root level, but not if it is nested inside another field like
  * `destination`. A more detailed explanation of these nuances can be found at:
  *
- * https://www.elastic.co/guide/en/ecs/1.9/ecs-user-usage.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-user-usage.html
  *
  * As a result, we need to export a separate `NestedUser` type to import into
  * other interfaces internally. This contains the reusable subset of properties

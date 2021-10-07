@@ -1657,10 +1657,22 @@
             "text": "ColumnHeaderType"
           },
           "; description?: string | undefined; example?: string | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-          "IFieldSubType",
-          " | undefined; type?: string | undefined; })[]; filters?: ",
-          "Filter",
-          "[] | undefined; title: string; id: string; sort: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.IFieldSubType",
+            "text": "IFieldSubType"
+          },
+          " | undefined; type?: string | undefined; })[]; id: string; title: string; filters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined; sort: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -1697,7 +1709,13 @@
             "text": "ColumnHeaderType"
           },
           "; description?: string | undefined; example?: string | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-          "IFieldSubType",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.IFieldSubType",
+            "text": "IFieldSubType"
+          },
           " | undefined; type?: string | undefined; })[]; savedObjectId: string | null; unit?: ((n: number) => React.ReactNode) | undefined; dataProviders: ",
           {
             "pluginId": "timelines",
@@ -6135,7 +6153,13 @@
                         "text": "ColumnHeaderType"
                       },
                       "; description?: string | undefined; example?: string | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-                      "IFieldSubType",
+                      {
+                        "pluginId": "@kbn/es-query",
+                        "scope": "common",
+                        "docId": "kibKbnEsQueryPluginApi",
+                        "section": "def-common.IFieldSubType",
+                        "text": "IFieldSubType"
+                      },
                       " | undefined; type?: string | undefined; }"
                     ],
                     "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
@@ -8399,7 +8423,13 @@
             "label": "subType",
             "description": [],
             "signature": [
-              "IFieldSubType",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubType",
+                "text": "IFieldSubType"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
@@ -9683,7 +9713,7 @@
             "label": "currentStatus",
             "description": [],
             "signature": [
-              "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\" | undefined"
+              "\"open\" | \"in-progress\" | \"acknowledged\" | \"closed\" | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false
@@ -10157,7 +10187,13 @@
             "label": "authFilter",
             "description": [],
             "signature": [
-              "JsonObject",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.JsonObject",
+                "text": "JsonObject"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
@@ -10414,7 +10450,13 @@
             "label": "authFilter",
             "description": [],
             "signature": [
-              "JsonObject",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.JsonObject",
+                "text": "JsonObject"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
@@ -11251,7 +11293,13 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/store.ts",
@@ -11467,7 +11515,13 @@
             "description": [],
             "signature": [
               "string | ",
-              "JsonObject",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.JsonObject",
+                "text": "JsonObject"
+              },
               " | ",
               "ESRangeQuery",
               " | ",
@@ -12367,7 +12421,7 @@
         "label": "AlertStatus",
         "description": [],
         "signature": [
-          "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
+          "\"open\" | \"in-progress\" | \"acknowledged\" | \"closed\""
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
         "deprecated": false,
@@ -12381,7 +12435,7 @@
         "label": "AlertWorkflowStatus",
         "description": [],
         "signature": [
-          "\"open\" | \"closed\" | \"acknowledged\""
+          "\"open\" | \"acknowledged\" | \"closed\""
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
         "deprecated": false,
@@ -12662,7 +12716,13 @@
             "text": "ColumnHeaderType"
           },
           "; description?: string | undefined; example?: string | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-          "IFieldSubType",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.IFieldSubType",
+            "text": "IFieldSubType"
+          },
           " | undefined; type?: string | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
@@ -13548,7 +13608,13 @@
         "description": [],
         "signature": [
           "(status: ",
-          "STATUS_VALUES",
+          {
+            "pluginId": "@kbn/rule-data-utils",
+            "scope": "server",
+            "docId": "kibKbnRuleDataUtilsPluginApi",
+            "section": "def-server.STATUS_VALUES",
+            "text": "STATUS_VALUES"
+          },
           ", error: Error) => void"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
@@ -13563,7 +13629,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
+              "\"open\" | \"in-progress\" | \"acknowledged\" | \"closed\""
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false
@@ -13593,7 +13659,13 @@
         "description": [],
         "signature": [
           "(updated: number, conflicts: number, status: ",
-          "STATUS_VALUES",
+          {
+            "pluginId": "@kbn/rule-data-utils",
+            "scope": "server",
+            "docId": "kibKbnRuleDataUtilsPluginApi",
+            "section": "def-server.STATUS_VALUES",
+            "text": "STATUS_VALUES"
+          },
           ") => void"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
@@ -13628,7 +13700,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
+              "\"open\" | \"in-progress\" | \"acknowledged\" | \"closed\""
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false
@@ -14220,7 +14292,13 @@
             "text": "TimelineNonEcsData"
           },
           "[][]; globalFilters?: ",
-          "Filter",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
           "[] | undefined; pageSize: number; timelineId: string; }) => (props: ",
           "EuiDataGridColumnCellActionProps",
           ") => React.ReactNode"
@@ -14254,7 +14332,13 @@
                 "text": "TimelineNonEcsData"
               },
               "[][]; globalFilters?: ",
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined; pageSize: number; timelineId: string; }"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
