@@ -180,7 +180,7 @@ type BatchStats =
 
 const getAggIntervals = async (
   { asCurrentUser }: IScopedClusterClient,
-  indexPatternTitle: string,
+  indexPattern: string,
   query: any,
   fields: HistogramField[],
   samplerShardSize: number,
@@ -205,7 +205,7 @@ const getAggIntervals = async (
   }, {} as Record<string, object>);
 
   const { body } = await asCurrentUser.search({
-    index: indexPatternTitle,
+    index: indexPattern,
     size: 0,
     body: {
       query,
@@ -239,7 +239,7 @@ const getAggIntervals = async (
 // export for re-use by transforms plugin
 export const getHistogramsForFields = async (
   client: IScopedClusterClient,
-  indexPatternTitle: string,
+  indexPattern: string,
   query: any,
   fields: HistogramField[],
   samplerShardSize: number,
@@ -248,7 +248,7 @@ export const getHistogramsForFields = async (
   const { asCurrentUser } = client;
   const aggIntervals = await getAggIntervals(
     client,
-    indexPatternTitle,
+    indexPattern,
     query,
     fields,
     samplerShardSize,
@@ -291,7 +291,7 @@ export const getHistogramsForFields = async (
   }
 
   const { body } = await asCurrentUser.search({
-    index: indexPatternTitle,
+    index: indexPattern,
     size: 0,
     body: {
       query,
@@ -446,7 +446,7 @@ export class DataVisualizer {
   // returned array depend on the type of the field (keyword, number, date etc).
   // Sampling will be used if supplied samplerShardSize > 0.
   async getHistogramsForFields(
-    indexPatternTitle: string,
+    indexPattern: string,
     query: any,
     fields: HistogramField[],
     samplerShardSize: number,
@@ -454,7 +454,7 @@ export class DataVisualizer {
   ): Promise<any> {
     return await getHistogramsForFields(
       this._client,
-      indexPatternTitle,
+      indexPattern,
       query,
       fields,
       samplerShardSize,

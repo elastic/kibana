@@ -101,9 +101,9 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
           defaultMessage: 'saved search {savedSearchTitle}',
           values: { savedSearchTitle: savedSearch.attributes.title as string },
         })
-      : i18n.translate('xpack.ml.newJob.recognize.indexPatternPageTitle', {
-          defaultMessage: 'index pattern {indexPatternTitle}',
-          values: { indexPatternTitle: indexPattern.title },
+      : i18n.translate('xpack.ml.newJob.recognize.dataViewPageTitle', {
+          defaultMessage: 'data view {dataViewName}',
+          values: { dataViewName: indexPattern.title },
         });
   const displayQueryWarning = savedSearch !== null;
   const tempQuery = savedSearch === null ? undefined : combinedQuery;

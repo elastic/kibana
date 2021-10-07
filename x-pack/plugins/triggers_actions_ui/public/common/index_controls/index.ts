@@ -55,7 +55,7 @@ export const getIndexOptions = async (
       label: i18n.translate(
         'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.indicesAndIndexPatternsLabel',
         {
-          defaultMessage: 'Based on your index patterns',
+          defaultMessage: 'Based on your data views',
         }
       ),
       options: matchingOptions.map((match) => {

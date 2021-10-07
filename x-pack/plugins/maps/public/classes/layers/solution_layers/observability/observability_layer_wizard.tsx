@@ -25,7 +25,7 @@ export const ObservabilityLayerWizardConfig: LayerWizard = {
   },
   disabledReason: i18n.translate('xpack.maps.observability.disabledDesc', {
     defaultMessage:
-      'Cannot find APM index pattern. To get started with Observably, go to Observability > Overview.',
+      'Cannot find APM data view. To get started with Observably, go to Observability > Overview.',
   }),
   description: i18n.translate('xpack.maps.observability.desc', {
     defaultMessage: 'APM layers',
