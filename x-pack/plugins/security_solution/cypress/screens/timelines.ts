@@ -9,7 +9,10 @@ export const BULK_ACTIONS = '[data-test-subj="utility-bar-action-button"]';
 
 export const EXPORT_TIMELINE_ACTION = '[data-test-subj="export-timeline-action"]';
 
-export const TIMELINE = (id: string) => {
+export const TIMELINE = (id: string | undefined) => {
+  if (id == null) {
+    throw new TypeError('id should never be null or undefined');
+  }
   return `[data-test-subj="title-${id}"]`;
 };
 

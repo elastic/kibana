@@ -45,6 +45,7 @@ describe('plain_column_renderer', () => {
         columnName: 'event.category',
         eventId: _id,
         values: getValues('event.category', mockDatum),
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         field: defaultHeaders.find((h) => h.id === 'event.category')!,
         timelineId: 'test',
       });
@@ -70,6 +71,7 @@ describe('plain_column_renderer', () => {
         columnName: 'event.category',
         eventId: _id,
         values: getValues('event.category', mockDatum),
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         field: defaultHeaders.find((h) => h.id === 'event.category')!,
         timelineId: 'test',
       });
@@ -86,6 +88,7 @@ describe('plain_column_renderer', () => {
         columnName: 'destination.ip',
         eventId: _id,
         values: getValues('destination.ip', mockDatum),
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         field: defaultHeaders.find((h) => h.id === 'destination.ip')!,
         timelineId: 'test',
       });
@@ -102,6 +105,7 @@ describe('plain_column_renderer', () => {
         columnName: 'destination.bytes',
         eventId: _id,
         values: getValues('destination.bytes', mockDatum),
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         field: defaultHeaders.find((h) => h.id === 'destination.bytes')!,
         timelineId: 'test',
       });
@@ -118,6 +122,7 @@ describe('plain_column_renderer', () => {
         columnName: 'event.action',
         eventId: _id,
         values: getValues('event.action', mockDatum),
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         field: defaultHeaders.find((h) => h.id === 'event.action')!,
         timelineId: 'test',
       });
@@ -134,6 +139,7 @@ describe('plain_column_renderer', () => {
         columnName: '@timestamp',
         eventId: _id,
         values: getValues('@timestamp', mockDatum),
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         field: defaultHeaders.find((h) => h.id === '@timestamp')!,
         timelineId: 'test',
       });
@@ -151,6 +157,7 @@ describe('plain_column_renderer', () => {
         columnName: 'destination.ip',
         eventId: _id,
         values: getValues('destination.ip', mockDatum),
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         field: defaultHeaders.find((h) => h.id === 'destination.ip')!,
         timelineId: 'test',
       });
@@ -168,6 +175,7 @@ describe('plain_column_renderer', () => {
         columnName: 'event.severity',
         eventId: _id,
         values: getValues('event.severity', mockDatum),
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         field: defaultHeaders.find((h) => h.id === 'event.severity')!,
         timelineId: 'test',
       });
@@ -185,6 +193,7 @@ describe('plain_column_renderer', () => {
         columnName: 'message',
         eventId: _id,
         values: getValues('message', mockMessageDatum),
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         field: defaultHeaders.find((h) => h.id === 'message')!,
         timelineId: 'test',
       });
@@ -202,6 +211,7 @@ describe('plain_column_renderer', () => {
         columnName: 'message',
         eventId: _id,
         values: getValues('message', mockMessageDatum),
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         field: defaultHeaders.find((h) => h.id === 'message')!,
         timelineId: 'test',
       });
@@ -219,6 +229,7 @@ describe('plain_column_renderer', () => {
         columnName: '_id',
         eventId: _id,
         values: [mockTimelineData[0]._id],
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         field: defaultHeaders.find((h) => h.id === '_id')!,
         timelineId: 'test',
       });

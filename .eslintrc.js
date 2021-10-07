@@ -898,7 +898,12 @@ module.exports = {
     },
 
     /**
-     * Security Solution overrides
+     * Security Solution overrides. These rules below are maintained and owned by
+     * the people within the security-solution-platform team. Please see ping them
+     * or check with them if you are encountering issues, have suggestions, or would
+     * like to add, change, or remove any particular rule. Linters, Typescript, and rules
+     * evolve and change over time just like coding styles, so please do not hesitate to
+     * reach out.
      */
     {
       // front end and common typescript and javascript files only
@@ -932,6 +937,7 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-useless-constructor': 'error',
         '@typescript-eslint/unified-signatures': 'error',
+        '@typescript-eslint/no-non-null-assertion': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -1039,7 +1045,12 @@ module.exports = {
     },
 
     /**
-     * Lists overrides
+     * Lists overrides. These rules below are maintained and owned by
+     * the people within the security-solution-platform team. Please see ping them
+     * or check with them if you are encountering issues, have suggestions, or would
+     * like to add, change, or remove any particular rule. Linters, Typescript, and rules
+     * evolve and change over time just like coding styles, so please do not hesitate to
+     * reach out.
      */
     {
       // front end and common typescript and javascript files only
@@ -1214,8 +1225,14 @@ module.exports = {
         ],
       },
     },
+
     /**
-     * Metrics entities overrides
+     * Metrics entities overrides. These rules below are maintained and owned by
+     * the people within the security-solution-platform team. Please see ping them
+     * or check with them if you are encountering issues, have suggestions, or would
+     * like to add, change, or remove any particular rule. Linters, Typescript, and rules
+     * evolve and change over time just like coding styles, so please do not hesitate to
+     * reach out.
      */
     {
       // front end and common typescript and javascript files only

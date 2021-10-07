@@ -60,7 +60,7 @@ describe('parseEventEnrichmentResponse', () => {
       ignoreUnavailable: true,
       index: ['filebeat-*'],
     });
-    const parsedInspect = JSON.parse(parsedResponse.inspect!.dsl[0]);
+    const parsedInspect = JSON.parse(parsedResponse.inspect.dsl[0]);
     expect(parsedInspect).toEqual(expectedInspect);
   });
 

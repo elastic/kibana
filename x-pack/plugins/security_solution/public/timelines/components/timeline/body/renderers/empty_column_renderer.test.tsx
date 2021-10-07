@@ -36,6 +36,7 @@ describe('empty_column_renderer', () => {
       columnName: 'source.ip',
       eventId: _id,
       values: sourceObj != null ? sourceObj.value : undefined,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       field: defaultHeaders.find((h) => h.id === 'source.ip')!,
       timelineId: 'test',
     });
@@ -67,6 +68,7 @@ describe('empty_column_renderer', () => {
       columnName: 'source.ip',
       eventId: _id,
       values: null,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       field: defaultHeaders.find((h) => h.id === 'source.ip')!,
       timelineId: 'test',
     });

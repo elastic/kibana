@@ -134,8 +134,10 @@ describe('handlers', () => {
     const logFactoryGetMock = context.logFactory.get.getMockImplementation();
     context.logFactory.get.mockImplementation((prefix): Logger => {
       if (!instances.has(prefix)) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         instances.set(prefix, logFactoryGetMock!(prefix)!);
       }
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return instances.get(prefix)!;
     });
 

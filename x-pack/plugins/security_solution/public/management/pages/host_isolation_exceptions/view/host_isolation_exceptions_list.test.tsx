@@ -63,7 +63,9 @@ describe('When on the host isolation exceptions page', () => {
         getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
       });
       it('should show loading indicator while retrieving data', async () => {
-        let releaseApiResponse: (value?: unknown) => void;
+        let releaseApiResponse: (value?: unknown) => void = () => {
+          throw new TypeError('releaseApiResponse should be defined before first use');
+        };
 
         getHostIsolationExceptionItemsMock.mockReturnValue(
           new Promise((resolve) => (releaseApiResponse = resolve))
@@ -73,7 +75,7 @@ describe('When on the host isolation exceptions page', () => {
         expect(renderResult.getByTestId('hostIsolationExceptionsContent-loader')).toBeTruthy();
 
         const wasReceived = dataReceived();
-        releaseApiResponse!();
+        releaseApiResponse();
         await wasReceived;
         expect(renderResult.container.querySelector('.euiProgress')).toBeNull();
       });

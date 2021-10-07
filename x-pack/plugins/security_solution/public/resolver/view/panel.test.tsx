@@ -144,19 +144,20 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
           expect(dt).toHaveLength(1);
 
           const copyableFieldHoverArea = simulator()
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             .descriptionDetails(dt!)
             // The copyable field popup does not use a button as a trigger. It is instead triggered by mouse interaction with this `div`.
             .find(`[data-test-subj="resolver:panel:copyable-field-hover-area"]`)
             .filterWhere(Simulator.isDOM);
 
           expect(copyableFieldHoverArea).toHaveLength(1);
-          copyableFieldHoverArea!.simulate('mouseenter');
+          copyableFieldHoverArea?.simulate('mouseenter');
         });
         describe('and when they click the copy-to-clipboard button', () => {
           beforeEach(async () => {
             const copyButton = await simulator().resolve('resolver:panel:clipboard');
             expect(copyButton).toHaveLength(1);
-            copyButton!.simulate('click');
+            copyButton?.simulate('click');
             simulator().confirmTextWrittenToClipboard();
           });
           it(`should write ${value} to the clipboard`, async () => {
@@ -223,6 +224,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
         expect(nodeLinkTitles).toHaveLength(3);
 
         return (
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           nodeLinkTitles!
             .filterWhere((linkTitle) => linkTitle.text() === 'c.ext')
             // Find the parent `tr` and the find all hover areas in that TR. The test assumes that all cells in a row are associated.
@@ -232,11 +234,11 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
             .filterWhere(Simulator.isDOM)
         );
       });
-      cExtHoverArea!.simulate('mouseenter');
+      cExtHoverArea?.simulate('mouseenter');
     });
     describe('and when the user clicks the copy-to-clipboard button', () => {
       beforeEach(async () => {
-        (await simulator().resolve('resolver:panel:clipboard'))!.simulate('click');
+        (await simulator().resolve('resolver:panel:clipboard'))?.simulate('click');
         simulator().confirmTextWrittenToClipboard();
       });
       const expected = 'Sep 23, 2020 @ 08:25:32.316';
@@ -356,6 +358,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
                   )?.filterWhere((title) => title.text() === fieldName);
                   return (
                     simulator()
+                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                       .descriptionDetails(dt!)
                       // The copyable field popup does not use a button as a trigger. It is instead triggered by mouse interaction with this `div`.
                       .find(`[data-test-subj="resolver:panel:copyable-field-hover-area"]`)
@@ -369,7 +372,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
                 beforeEach(async () => {
                   const button = await simulator().resolve('resolver:panel:clipboard');
                   expect(button).toBeTruthy();
-                  button!.simulate('click');
+                  button?.simulate('click');
                   simulator().confirmTextWrittenToClipboard();
                 });
                 it(`should write ${expectedValue} to the clipboard`, async () => {

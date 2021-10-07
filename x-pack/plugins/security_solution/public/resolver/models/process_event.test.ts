@@ -37,6 +37,7 @@ describe('process event', () => {
       });
     });
     it('returns the right user info for the process', () => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const { name, domain } = userInfoForProcess(event)!;
       expect(name).toEqual('aaa');
       expect(domain).toEqual('bbb');

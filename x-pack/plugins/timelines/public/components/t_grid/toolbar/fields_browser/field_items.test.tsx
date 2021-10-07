@@ -40,6 +40,7 @@ describe('field_items', () => {
   const mount = useMountAppended();
 
   describe('getFieldItems', () => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     Object.keys(selectedCategoryFields!).forEach((fieldId) => {
       test(`it renders the name of the ${fieldId} field`, () => {
         const wrapper = mount(
@@ -69,6 +70,7 @@ describe('field_items', () => {
       });
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     Object.keys(selectedCategoryFields!).forEach((fieldId) => {
       test(`it renders a checkbox for the ${fieldId} field`, () => {
         const wrapper = mount(

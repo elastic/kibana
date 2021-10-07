@@ -77,6 +77,7 @@ describe('EndpointOverview Component', () => {
     ['unisolate', 'Releasing'],
   ])('it shows pending %s status', (action, expectedLabel) => {
     endpointData.isolation = true;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     endpointData.pendingActions![action] = 1;
     render();
     expect(findData.at(3).text()).toEqual(`Healthy${expectedLabel}`);

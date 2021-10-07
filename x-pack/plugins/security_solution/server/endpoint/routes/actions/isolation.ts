@@ -119,6 +119,7 @@ export const isolationRequestHandler = function (
           type: 'INPUT_ACTION',
           input_type: 'endpoint',
           agents: endpointData.map((endpt: HostMetadata) => endpt.elastic.agent.id),
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           user_id: user!.username,
           timeout: 300, // 5 minutes
           data: {

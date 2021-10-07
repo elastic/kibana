@@ -72,6 +72,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
       };
 
       if (maxWidth) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         newAdditionalProps.style!.maxWidth = maxWidth;
       }
 

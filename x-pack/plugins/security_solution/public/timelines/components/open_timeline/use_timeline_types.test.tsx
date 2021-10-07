@@ -93,6 +93,7 @@ describe('useTimelineTypes', () => {
         const { container } = render(result.current.timelineTabs);
 
         fireEvent(
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           container.querySelector('[data-test-subj="timeline-tab-template"]')!,
           new MouseEvent('click', {
             bubbles: true,
@@ -119,6 +120,7 @@ describe('useTimelineTypes', () => {
         const { container } = render(result.current.timelineTabs);
 
         fireEvent(
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           container.querySelector('[data-test-subj="timeline-tab-default"]')!,
           new MouseEvent('click', {
             bubbles: true,
@@ -165,6 +167,7 @@ describe('useTimelineTypes', () => {
         const { container } = render(<>{result.current.timelineFilters}</>);
 
         fireEvent(
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           container.querySelector('[data-test-subj="open-timeline-modal-body-filter-template"]')!,
           new MouseEvent('click', {
             bubbles: true,
@@ -191,6 +194,7 @@ describe('useTimelineTypes', () => {
         const { container } = render(<>{result.current.timelineFilters}</>);
 
         fireEvent(
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           container.querySelector('[data-test-subj="open-timeline-modal-body-filter-default"]')!,
           new MouseEvent('click', {
             bubbles: true,

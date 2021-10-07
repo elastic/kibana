@@ -41,6 +41,7 @@ import { EndpointError } from '../../../errors';
 import { InvalidInternalManifestError } from '../errors';
 
 const getArtifactObject = (artifact: InternalArtifactSchema) =>
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   JSON.parse(Buffer.from(artifact.body!, 'base64').toString());
 
 describe('ManifestManager', () => {
@@ -586,10 +587,12 @@ describe('ManifestManager', () => {
         ...ARTIFACT_EXCEPTIONS_WINDOWS,
       });
       expect(
-        JSON.parse(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))!.toString())
+        JSON.parse(String(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))?.toString()))
       ).toStrictEqual(getArtifactObject(ARTIFACT_EXCEPTIONS_MACOS));
       expect(
-        JSON.parse(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_WINDOWS))!.toString())
+        JSON.parse(
+          String(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_WINDOWS))?.toString())
+        )
       ).toStrictEqual(getArtifactObject(ARTIFACT_EXCEPTIONS_WINDOWS));
     });
 
@@ -633,7 +636,7 @@ describe('ManifestManager', () => {
         ...ARTIFACT_EXCEPTIONS_MACOS,
       });
       expect(
-        JSON.parse(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))!.toString())
+        JSON.parse(String(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))?.toString()))
       ).toStrictEqual(getArtifactObject(ARTIFACT_EXCEPTIONS_MACOS));
       expect(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_WINDOWS))).toBeUndefined();
     });
@@ -1033,6 +1036,7 @@ describe('ManifestManager', () => {
       expect(artifactToBeRemoved).not.toBeUndefined();
 
       expect(context.artifactClient.deleteArtifact).toHaveBeenCalledWith(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         getArtifactId(artifactToBeRemoved!)
       );
     });

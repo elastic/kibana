@@ -78,7 +78,7 @@ const experimentalFeaturesReducer: Reducer<State['app'], UpdateExperimentalFeatu
     return {
       ...state,
       enableExperimental: {
-        ...state.enableExperimental!,
+        ...state.enableExperimental,
         ...action.payload,
       },
     };

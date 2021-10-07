@@ -352,9 +352,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const onFilterGroupChangedCallback = useCallback(
     (newFilterGroup: Status) => {
       const timelineId = TimelineId.detectionsRulesDetailsPage;
-      clearEventsLoading!({ id: timelineId });
-      clearEventsDeleted!({ id: timelineId });
-      clearSelected!({ id: timelineId });
+      clearEventsLoading({ id: timelineId });
+      clearEventsDeleted({ id: timelineId });
+      clearSelected({ id: timelineId });
       setFilterGroup(newFilterGroup);
     },
     [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]

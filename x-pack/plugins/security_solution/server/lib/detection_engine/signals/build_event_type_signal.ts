@@ -9,6 +9,7 @@ import { getField } from './utils';
 
 export const buildEventTypeSignal = (doc: BaseSignalHit): object => {
   if (doc._source?.event != null && doc._source?.event instanceof Object) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return { ...doc._source!.event, kind: 'signal' };
   } else {
     return { kind: 'signal' };

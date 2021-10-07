@@ -79,8 +79,8 @@ describe.each([
         <ArtifactCardGrid
           {...{
             items,
-            onPageChange: pageChangeHandler!,
-            onExpandCollapse: expandCollapseHandler!,
+            onPageChange: pageChangeHandler,
+            onExpandCollapse: expandCollapseHandler,
             cardComponentProps: cardComponentPropsProvider,
             'data-test-subj': 'testGrid',
             ...props,

@@ -129,6 +129,7 @@ describe('resolver selectors', () => {
 
           // find the position of the second child
           const secondChild = selectors.graphNodeForID(state())(secondChildID);
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const positionOfSecondChild = layout.processNodePositions.get(
             secondChild as ResolverNode
           )!;
@@ -145,7 +146,7 @@ describe('resolver selectors', () => {
           });
         });
         it('the origin should be in view', () => {
-          const origin = selectors.graphNodeForID(state())(originID)!;
+          const origin = selectors.graphNodeForID(state())(originID);
           expect(
             selectors
               .visibleNodesAndEdgeLines(state())(0)
@@ -153,7 +154,7 @@ describe('resolver selectors', () => {
           ).toBe(true);
         });
         it('the first child should be in view', () => {
-          const firstChild = selectors.graphNodeForID(state())(firstChildID)!;
+          const firstChild = selectors.graphNodeForID(state())(firstChildID);
           expect(
             selectors
               .visibleNodesAndEdgeLines(state())(0)
@@ -161,7 +162,7 @@ describe('resolver selectors', () => {
           ).toBe(true);
         });
         it('the second child should not be in view', () => {
-          const secondChild = selectors.graphNodeForID(state())(secondChildID)!;
+          const secondChild = selectors.graphNodeForID(state())(secondChildID);
           expect(
             selectors
               .visibleNodesAndEdgeLines(state())(0)

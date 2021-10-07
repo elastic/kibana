@@ -602,6 +602,7 @@ describe('data state', () => {
       expect(graphables.length).toBe(3);
       for (const node of graphables) {
         expect(() => {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           selectors.ariaFlowtoCandidate(state())(nodeModel.nodeID(node)!);
         }).not.toThrow();
       }

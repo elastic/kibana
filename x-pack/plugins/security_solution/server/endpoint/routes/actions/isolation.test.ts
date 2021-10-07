@@ -197,6 +197,7 @@ describe('Host Isolation', () => {
         const [, routeHandler]: [
           RouteConfig<any, any, any, any>,
           RequestHandler<any, any, any, any>
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ] = routerMock.post.mock.calls.find(([{ path }]) => path.startsWith(routePrefix))!;
         await routeHandler(ctx, mockRequest, mockResponse);
         return ctx as unknown as jest.Mocked<SecuritySolutionRequestHandlerContext>;

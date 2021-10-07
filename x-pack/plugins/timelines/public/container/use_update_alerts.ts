@@ -38,7 +38,7 @@ export const useUpdateAlertsStatus = (
   return {
     updateAlertStatus: async ({ status, index, query }) => {
       if (['detections-page', 'detections-rules-details-page'].includes(timelineId)) {
-        return http!.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
+        return http.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
           method: 'POST',
           body: JSON.stringify({ status, query }),
         });
