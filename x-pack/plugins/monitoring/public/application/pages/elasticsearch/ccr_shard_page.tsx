@@ -16,6 +16,7 @@ import { CcrShardReact } from '../../../components/elasticsearch/ccr_shard';
 import { ComponentProps } from '../../route_init';
 import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
+import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 
 interface SetupModeProps {
   setupMode: any;
@@ -78,6 +79,7 @@ export const ElasticsearchCcrShardPage: React.FC<ComponentProps> = ({ clusters }
       data-test-subj="elasticsearchCcrShardPage"
     >
       <SetupModeRenderer
+        productName={ELASTICSEARCH_SYSTEM_ID}
         instance={instance}
         render={({ flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
