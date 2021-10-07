@@ -17,8 +17,6 @@ steps:
     agents:
       queue: c2-16
 
-  - wait
-
   - label: ":muscle: Performance Tests"
     command: .buildkite/scripts/steps/functional/performance.sh
     agents:
