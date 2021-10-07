@@ -231,32 +231,10 @@ const MonitoringApp: React.FC<{
                     fetchAllClusters={false}
                   />
 
-                  {/* APM Views */}
-                  <RouteInit
-                    path="/apm/instances/:instance"
-                    component={ApmInstancePage}
-                    codePaths={[CODE_PATH_APM]}
-                    fetchAllClusters={false}
-                  />
-
-                  {/* Logstash Routes */}
-                  <RouteInit
-                    path="/logstash/nodes"
-                    component={LogStashNodesPage}
-                    codePaths={[CODE_PATH_LOGSTASH]}
-                    fetchAllClusters={false}
-                  />
-
                   <RouteInit
                     path="/logstash/node/:uuid/advanced"
                     component={LogStashNodeAdvancedPage}
                     codePaths={[CODE_PATH_LOGSTASH]}
-                    fetchAllClusters={false}
-                  />
-                  <RouteInit
-                    path="/apm/instances"
-                    component={ApmInstancesPage}
-                    codePaths={[CODE_PATH_APM]}
                     fetchAllClusters={false}
                   />
 
@@ -294,6 +272,22 @@ const MonitoringApp: React.FC<{
                     codePaths={[CODE_PATH_LOGSTASH]}
                     fetchAllClusters={false}
                   />
+
+                  {/* APM Views */}
+                  <RouteInit
+                    path="/apm/instances/:instance"
+                    component={ApmInstancePage}
+                    codePaths={[CODE_PATH_APM]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/apm/instances"
+                    component={ApmInstancesPage}
+                    codePaths={[CODE_PATH_APM]}
+                    fetchAllClusters={false}
+                  />
+
                   <RouteInit
                     path="/apm"
                     component={ApmOverviewPage}
