@@ -13,9 +13,8 @@ import type { SavedObject } from 'src/core/server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { IFieldType } from './fields';
 import { RUNTIME_FIELD_TYPES } from './constants';
-import { SerializedFieldFormat } from '../../expressions/common';
 import { DataViewField } from './fields';
-import { FieldFormat } from '../../field_formats/common';
+import { FieldFormat, SerializedFieldFormat } from '../../field_formats/common';
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 

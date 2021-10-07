@@ -7,8 +7,11 @@
 
 import { FormatFactory } from '../../common';
 import { AxisExtentConfig, XYLayerConfig } from '../../common/expressions';
-import { Datatable, SerializedFieldFormat } from '../../../../../src/plugins/expressions/public';
-import type { IFieldFormat } from '../../../../../src/plugins/field_formats/common';
+import { Datatable } from '../../../../../src/plugins/expressions/public';
+import type {
+  IFieldFormat,
+  SerializedFieldFormat,
+} from '../../../../../src/plugins/field_formats/common';
 
 interface FormattedMetric {
   layer: string;

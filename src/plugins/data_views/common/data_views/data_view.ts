@@ -19,9 +19,12 @@ import { IIndexPattern, IFieldType } from '../../common';
 import { DataViewField, IIndexPatternFieldList, fieldList } from '../fields';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
-import { FieldFormatsStartCommon, FieldFormat } from '../../../field_formats/common';
+import {
+  FieldFormatsStartCommon,
+  FieldFormat,
+  SerializedFieldFormat,
+} from '../../../field_formats/common';
 import { DataViewSpec, TypeMeta, SourceFilter, DataViewFieldMap } from '../types';
-import { SerializedFieldFormat } from '../../../expressions/common';
 
 interface DataViewDeps {
   spec?: DataViewSpec;

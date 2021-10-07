@@ -14,8 +14,8 @@ import type {
   ExpressionValueBoxed,
   Datatable,
   DatatableColumn,
-  SerializedFieldFormat,
 } from '../../../expressions/common';
+import type { SerializedFieldFormat } from '../../../field_formats/common';
 
 export interface DateHistogramParams {
   date: boolean;

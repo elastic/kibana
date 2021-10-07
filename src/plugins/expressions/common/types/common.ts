@@ -46,14 +46,3 @@ export type TypeString<T> = KnownTypeToString<
  * `date` is typed as a number or string, and represents a date
  */
 export type UnmappedTypeStrings = 'date' | 'filter';
-
-/**
- * JSON representation of a field formatter configuration.
- * Is used to carry information about how to format data in
- * a data table as part of the column definition.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface SerializedFieldFormat<TParams = Record<string, any>> {
-  id?: string;
-  params?: TParams;
-}

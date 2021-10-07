@@ -88,7 +88,6 @@ export {
   PointSeriesRow,
   Range,
   SerializedDatatable,
-  SerializedFieldFormat,
   Style,
   TextAlignment,
   TextDecoration,

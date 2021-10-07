@@ -8,11 +8,11 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { map, pick, zipObject } from 'lodash';
+import type { SerializedFieldFormat } from 'src/plugins/field_formats/common';
 
 import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 import { PointSeries, PointSeriesColumn } from './pointseries';
 import { ExpressionValueRender } from './render';
-import { SerializedFieldFormat } from '../../types';
 
 const name = 'datatable';
 
