@@ -7,8 +7,12 @@
 
 import React from 'react';
 import { get } from 'lodash';
-import { formatMetric, formatNumber } from '../../../lib/format_number';
-import { BytesPercentageUsage, ClusterItemContainer, DisabledIfNoDataAndInSetupModeLink } from './helpers';
+import { formatNumber } from '../../../lib/format_number';
+import {
+  BytesPercentageUsage,
+  ClusterItemContainer,
+  DisabledIfNoDataAndInSetupModeLink,
+} from './helpers';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -23,31 +27,16 @@ import {
   EuiHorizontalRule,
   EuiFlexGroup,
 } from '@elastic/eui';
-import { ENTERPRISE_SEARCH_SYSTEM_ID } from '../../../../common/constants';
-import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
-import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
-import { SetupModeFeature } from '../../../../common/enums';
 
 export function EnterpriseSearchPanel(props) {
-  const { setupMode, versions } = props;
-
-  const goToInstances = () => getSafeForExternalLink('#/enterprisesearch');
-  const setupModeData = get(setupMode.data, 'enterprisesearch');
-  const setupModeMetricbeatMigrationTooltip = isSetupModeFeatureEnabled(
-    SetupModeFeature.MetricbeatMigration
-  ) ? (
-    <SetupModeTooltip
-      setupModeData={setupModeData}
-      badgeClickLink={goToInstances()}
-      productName={ENTERPRISE_SEARCH_SYSTEM_ID}
-    />
-  ) : null;
+  const { setupMode } = props;
+  const setupModeData = get(setupMode.data, 'enterprise_search');
 
   return (
     <ClusterItemContainer
       {...props}
-      url="enterprisesearch"
+      url="enterprise_search"
       title={i18n.translate('xpack.monitoring.cluster.overview.entSearchPanel.entSearchTitle', {
         defaultMessage: 'Enterprise Search',
       })}
@@ -60,7 +49,7 @@ export function EnterpriseSearchPanel(props) {
                 <DisabledIfNoDataAndInSetupModeLink
                   setupModeEnabled={setupMode.enabled}
                   setupModeData={setupModeData}
-                  href={getSafeForExternalLink('#/enterprisesearch')}
+                  href={getSafeForExternalLink('#/enterprise_search')}
                   aria-label={i18n.translate(
                     'xpack.monitoring.cluster.overview.entSearchPanel.overviewLinkAriaLabel',
                     {
@@ -78,7 +67,6 @@ export function EnterpriseSearchPanel(props) {
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-
               <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.entSearchPanel.versionLabel"
@@ -94,7 +82,6 @@ export function EnterpriseSearchPanel(props) {
                     }
                   )}
               </EuiDescriptionListDescription>
-
             </EuiDescriptionList>
           </EuiPanel>
         </EuiFlexItem>
@@ -105,7 +92,10 @@ export function EnterpriseSearchPanel(props) {
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
                   <h3>
-                    <EuiLink href={getSafeForExternalLink('#/enterprisesearch/nodes')} data-test-subj="entSearchNodes">
+                    <EuiLink
+                      href={getSafeForExternalLink('#/enterprise_search/nodes')}
+                      data-test-subj="entSearchNodes"
+                    >
                       <FormattedMessage
                         id="xpack.monitoring.cluster.overview.entSearchPanel.nodesTotalLinkLabel"
                         defaultMessage="Nodes: {nodesTotal}"
@@ -142,11 +132,9 @@ export function EnterpriseSearchPanel(props) {
               <EuiDescriptionListDescription data-test-subj="entSearchUptime">
                 {formatNumber(props.stats.uptime, 'time_since')}
               </EuiDescriptionListDescription>
-
             </EuiDescriptionList>
           </EuiPanel>
         </EuiFlexItem>
-
       </EuiFlexGrid>
     </ClusterItemContainer>
   );
