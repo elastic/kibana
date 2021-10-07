@@ -54,11 +54,16 @@ export class MyPlugin implements Plugin {
 }
 ```
 
+<DocCallOut>
+  See [the routing example plugin](https://github.com/elastic/kibana/blob/master/examples/routing_example) for more route registration examples.
+</DocCallOut>
+
 ## Consuming the endpoint from the client-side
 
-The HTTP service is also offered on the client side and provides an API to communicate with the Kibana server via HTTP interface.
+The client-side HTTP service provides an API to communicate with the Kibana server via HTTP interface.
 The client-side `HttpService` is a preconfigured wrapper around `window.fetch` that includes some default behavior and automatically handles common errors (such as session expiration). 
-The service should only be used for access to backend endpoints registered by the same plugin. Feel free to use another HTTP client library to request 3rd party services.
+
+**The service should only be used for access to backend endpoints registered by the same plugin.** Feel free to use another HTTP client library to request 3rd party services.
 
 ```ts
 import { HttpStart } from 'kibana/public';
@@ -75,4 +80,8 @@ async function fetchData(http: HttpStart, id: string) {
 
 <DocCallOut>
   See [the client-side HTTP service API docs](https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.httpsetup.md)
+</DocCallOut>
+
+<DocCallOut>
+  See [the routing example plugin](https://github.com/elastic/kibana/blob/master/examples/routing_example) for more endpoint consumption examples.
 </DocCallOut>
