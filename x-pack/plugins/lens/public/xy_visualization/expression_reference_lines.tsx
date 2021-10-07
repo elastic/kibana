@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import './expression_thresholds.scss';
 import React from 'react';
 import { groupBy } from 'lodash';
 import { EuiIcon } from '@elastic/eui';
@@ -139,30 +140,18 @@ function getMarkerBody(label: string | undefined, isHorizontal: boolean) {
   }
   return (
     <div
-      className="eui-textTruncate"
+      className="lnsXyDecorationRotatedWrapper"
       style={{
-        display: 'inline-block',
-        overflow: 'hidden',
         width: REFERENCE_LINE_MARKER_SIZE,
-        lineHeight: 1.5,
       }}
     >
       <div
+        className="eui-textTruncate lnsXyDecorationRotatedWrapper__label"
         style={{
-          display: 'inline-block',
-          whiteSpace: 'nowrap',
-          transform: 'translate(0, 100%) rotate(-90deg)',
-          transformOrigin: '0 0',
           maxWidth: REFERENCE_LINE_MARKER_SIZE * 3,
         }}
       >
         {label}
-        <div
-          style={{
-            float: 'left',
-            marginTop: '100%',
-          }}
-        />
       </div>
     </div>
   );
