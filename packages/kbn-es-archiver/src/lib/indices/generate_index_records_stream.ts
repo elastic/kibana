@@ -6,46 +6,42 @@
  * Side Public License, v 1.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import { Transform } from 'stream';
-import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { Stats } from '../stats';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 
-export function createGenerateIndexRecordsStream(client: KibanaClient, stats: Stats) {
+export function createGenerateIndexRecordsStream(client: Client, stats: Stats) {
   return new Transform({
     writableObjectMode: true,
     readableObjectMode: true,
     async transform(indexOrAlias, enc, callback) {
       try {
-        const resp = (
-          await client.indices.get(
-            {
-              index: indexOrAlias,
-              filter_path: [
-                '*.settings',
-                '*.mappings',
-                // remove settings that aren't really settings
-                '-*.settings.index.creation_date',
-                '-*.settings.index.uuid',
-                '-*.settings.index.version',
-                '-*.settings.index.provided_name',
-                '-*.settings.index.frozen',
-                '-*.settings.index.search.throttled',
-                '-*.settings.index.query',
-                '-*.settings.index.routing',
-              ],
-            },
-            {
-              headers: ES_CLIENT_HEADERS,
-            }
-          )
-        ).body as Record<string, any>;
+        const resp = await client.indices.get(
+          {
+            index: indexOrAlias,
+            filter_path: [
+              '*.settings',
+              '*.mappings',
+              // remove settings that aren't really settings
+              '-*.settings.index.creation_date',
+              '-*.settings.index.uuid',
+              '-*.settings.index.version',
+              '-*.settings.index.provided_name',
+              '-*.settings.index.frozen',
+              '-*.settings.index.search.throttled',
+              '-*.settings.index.query',
+              '-*.settings.index.routing',
+            ],
+          },
+          {
+            headers: ES_CLIENT_HEADERS,
+          }
+        );
 
         for (const [index, { settings, mappings }] of Object.entries(resp)) {
           const {
-            body: {
-              [index]: { aliases },
-            },
+            [index]: { aliases },
           } = await client.indices.getAlias(
             { index },
             {

@@ -7,7 +7,7 @@
  */
 
 import { Transform } from 'stream';
-import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { Stats } from '../stats';
 import { Progress } from '../progress';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
@@ -21,7 +21,7 @@ export function createGenerateDocRecordsStream({
   progress,
   query,
 }: {
-  client: KibanaClient;
+  client: Client;
   stats: Stats;
   progress: Progress;
   query?: Record<string, any>;

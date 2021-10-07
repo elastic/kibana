@@ -31,6 +31,7 @@ export {
   CreateTestEsClusterOptions,
   EsTestCluster,
   ICluster,
+  convertToKibanaClient,
 } from './es';
 
 export { kbnTestConfig, kibanaServerTestUser, kibanaTestUser, adminTestUser } from './kbn';

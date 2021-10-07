@@ -20,7 +20,6 @@ import Fs from 'fs';
 import { RunWithCommands, createFlagError, CA_CERT_PATH } from '@kbn/dev-utils';
 import { readConfigFile, KbnClient } from '@kbn/test';
 import { Client } from '@elastic/elasticsearch';
-import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 
 import { EsArchiver } from './es_archiver';
 
@@ -119,8 +118,7 @@ export function runCli() {
 
       const esArchiver = new EsArchiver({
         log,
-        // TODO fix the discrepancy
-        client: client as unknown as KibanaClient,
+        client,
         baseDir: process.cwd(),
         kbnClient,
       });
