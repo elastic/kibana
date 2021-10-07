@@ -433,7 +433,7 @@ export class ImportView extends Component {
 
       this.setState({ indexPatternNames });
     } catch (error) {
-      console.error('failed to load index patterns', error);
+      console.error('failed to load data views', error);
     }
   }
 
@@ -704,8 +704,8 @@ function isIndexPatternNameValid(name, indexPatternNames, index) {
   if (indexPatternNames.find((i) => i === name)) {
     return (
       <FormattedMessage
-        id="xpack.dataVisualizer.file.importView.indexPatternNameAlreadyExistsErrorMessage"
-        defaultMessage="Index pattern name already exists"
+        id="xpack.dataVisualizer.file.importView.dataViewNameAlreadyExistsErrorMessage"
+        defaultMessage="Data view name already exists"
       />
     );
   }
@@ -720,8 +720,8 @@ function isIndexPatternNameValid(name, indexPatternNames, index) {
     // name should match index
     return (
       <FormattedMessage
-        id="xpack.dataVisualizer.file.importView.indexPatternDoesNotMatchIndexNameErrorMessage"
-        defaultMessage="Index pattern does not match index name"
+        id="xpack.dataVisualizer.file.importView.indexPatternDoesNotMatchDataViewErrorMessage"
+        defaultMessage="Data view does not match index name"
       />
     );
   }

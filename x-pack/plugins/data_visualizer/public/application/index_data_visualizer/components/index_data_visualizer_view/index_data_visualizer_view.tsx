@@ -157,7 +157,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
   useEffect(() => {
     return () => {
-      // When navigating away from the index pattern
+      // When navigating away from the data view
       // Reset all previously set filters
       // to make sure new page doesn't have unrelated filters
       data.query.filterManager.removeAll();
@@ -206,10 +206,10 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     if (!currentIndexPattern.isTimeBased()) {
       toasts.addWarning({
         title: i18n.translate(
-          'xpack.dataVisualizer.index.indexPatternNotBasedOnTimeSeriesNotificationTitle',
+          'xpack.dataVisualizer.index.dataViewNotBasedOnTimeSeriesNotificationTitle',
           {
-            defaultMessage: 'The index pattern {indexPatternTitle} is not based on a time series',
-            values: { indexPatternTitle: currentIndexPattern.title },
+            defaultMessage: 'The data view {dataViewTitle} is not based on a time series',
+            values: { dataViewTitle: currentIndexPattern.title },
           }
         ),
         text: i18n.translate(
@@ -225,7 +225,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   const indexPatternFields: IndexPatternField[] = currentIndexPattern.fields;
 
   const fieldTypes = useMemo(() => {
-    // Obtain the list of non metric field types which appear in the index pattern.
+    // Obtain the list of non metric field types which appear in the data view.
     const indexedFieldTypes: JobFieldType[] = [];
     indexPatternFields.forEach((field) => {
       if (!OMIT_FIELDS.includes(field.name) && field.scripted !== true) {
@@ -275,7 +275,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       filters: Filter[];
     }) => {
       // When the user loads saved search and then clear or modify the query
-      // we should remove the saved search and replace it with the index pattern id
+      // we should remove the saved search and replace it with the data view id
       if (currentSavedSearch !== null) {
         setCurrentSavedSearch(null);
       }
@@ -689,7 +689,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     });
     // Obtain the list of all non-metric fields which appear in documents
     // (aggregatable or not aggregatable).
-    const populatedNonMetricFields: any[] = []; // Kibana index pattern non metric fields.
+    const populatedNonMetricFields: any[] = []; // Kibana data view non metric fields.
     let nonMetricFieldData: any[] = []; // Basic non metric field data loaded from requesting overall stats.
     const aggregatableExistsFields: any[] = overallStats.aggregatableExistsFields || [];
     const nonAggregatableExistsFields: any[] = overallStats.nonAggregatableExistsFields || [];
@@ -743,7 +743,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         deletable: field.runtimeField !== undefined,
       };
 
-      // Map the field type from the Kibana index pattern to the field type
+      // Map the field type from the Kibana data view to the field type
       // used in the data visualizer.
       const dataVisualizerType = kbnTypeToJobType(field);
       if (dataVisualizerType !== undefined) {

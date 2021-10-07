@@ -23,7 +23,7 @@ interface Props {
 }
 
 // Component for rendering a button which automatically sets the range of the time filter
-// to the time range of data in the index(es) mapped to the supplied Kibana index pattern or query.
+// to the time range of data in the index(es) mapped to the supplied Kibana data view or query.
 export const FullTimeRangeSelector: FC<Props> = ({
   timefilter,
   indexPattern,

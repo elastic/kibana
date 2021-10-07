@@ -77,8 +77,8 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
                 setCurrentIndexPattern(indexPattern);
               } catch (e) {
                 toasts.addError(e, {
-                  title: i18n.translate('xpack.dataVisualizer.index.indexPatternErrorMessage', {
-                    defaultMessage: 'Error finding index pattern',
+                  title: i18n.translate('xpack.dataVisualizer.index.dataViewErrorMessage', {
+                    defaultMessage: 'Error finding data view',
                   }),
                 });
               }

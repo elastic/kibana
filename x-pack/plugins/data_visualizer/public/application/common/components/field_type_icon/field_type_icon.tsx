@@ -32,7 +32,7 @@ const defaultIcon = { iconType: 'questionInCircle', color: 'gray' };
 // Extended & modified version of src/plugins/kibana_react/public/field_icon/field_icon.tsx
 export const typeToEuiIconMap: Record<string, { iconType: string; color?: string }> = {
   boolean: { iconType: 'tokenBoolean' },
-  // icon for an index pattern mapping conflict in discover
+  // icon for a data view mapping conflict in discover
   conflict: { iconType: 'alert', color: 'euiColorVis9' },
   date: { iconType: 'tokenDate' },
   date_range: { iconType: 'tokenDate' },
