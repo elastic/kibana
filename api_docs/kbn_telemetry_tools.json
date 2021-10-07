@@ -1,0 +1,60 @@
+{
+  "id": "@kbn/telemetry-tools",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/telemetry-tools",
+        "id": "def-server.runTelemetryCheck",
+        "type": "Function",
+        "tags": [],
+        "label": "runTelemetryCheck",
+        "description": [],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-telemetry-tools/src/cli/run_telemetry_check.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/telemetry-tools",
+        "id": "def-server.runTelemetryExtract",
+        "type": "Function",
+        "tags": [],
+        "label": "runTelemetryExtract",
+        "description": [],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-telemetry-tools/src/cli/run_telemetry_extract.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

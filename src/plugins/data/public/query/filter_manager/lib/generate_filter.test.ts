@@ -126,7 +126,7 @@ describe('Generate filters', () => {
     expect(filter.meta.index === INDEX_NAME);
     expect(filter.meta.negate).toBeFalsy();
     expect(isRangeFilter(filter)).toBeTruthy();
-    expect(filter.range).toEqual({
+    expect(filter.query.range).toEqual({
       [FIELD.name]: {
         gt: '192.168.0.0',
         lte: '192.168.255.255',
