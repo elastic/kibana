@@ -12,17 +12,28 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
   const logsUi = getService('logsUi');
   const retry = getService('retry');
+  const esArchiver = getService('esArchiver');
 
   describe('Log Entry Rate Tab', function () {
     this.tags('includeFirefox');
 
     describe('with a trial license', () => {
-      it('is visible', async () => {
+      it('Shows no data page when indices do not exist', async () => {
+        await logsUi.logEntryRatePage.navigateTo();
+
+        await retry.try(async () => {
+          expect(await logsUi.logEntryRatePage.getNoDataScreen()).to.be.ok();
+        });
+      });
+
+      it('shows setup page when indices exist', async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/simple_logs');
         await logsUi.logEntryRatePage.navigateTo();
 
         await retry.try(async () => {
           expect(await logsUi.logEntryRatePage.getSetupScreen()).to.be.ok();
         });
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs');
       });
     });
   });
