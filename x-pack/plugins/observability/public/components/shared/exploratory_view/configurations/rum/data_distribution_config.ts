@@ -6,7 +6,13 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, REPORT_METRIC_FIELD, RECORDS_PERCENTAGE_FIELD } from '../constants';
+import {
+  FieldLabels,
+  REPORT_METRIC_FIELD,
+  RECORDS_PERCENTAGE_FIELD,
+  ReportTypes,
+  LABEL_FIELDS_FILTER,
+} from '../constants';
 import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
@@ -41,7 +47,7 @@ import {
 
 export function getRumDistributionConfig({ indexPattern }: ConfigProps): SeriesConfig {
   return {
-    reportType: 'data-distribution',
+    reportType: ReportTypes.DISTRIBUTION,
     defaultSeriesType: 'line',
     seriesTypes: [],
     xAxisColumn: {
@@ -66,6 +72,7 @@ export function getRumDistributionConfig({ indexPattern }: ConfigProps): SeriesC
         field: USER_AGENT_NAME,
         nested: USER_AGENT_VERSION,
       },
+      LABEL_FIELDS_FILTER,
     ],
     breakdownFields: [USER_AGENT_NAME, USER_AGENT_OS, CLIENT_GEO_COUNTRY_NAME, USER_AGENT_DEVICE],
     definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],

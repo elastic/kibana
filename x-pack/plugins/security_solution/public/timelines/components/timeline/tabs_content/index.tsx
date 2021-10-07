@@ -55,7 +55,6 @@ const PinnedTabContent = lazy(() => import('../pinned_tab_content'));
 interface BasicTimelineTab {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
-  setTimelineFullScreen?: (fullScreen: boolean) => void;
   timelineFullScreen?: boolean;
   timelineId: TimelineId;
   timelineType: TimelineType;

@@ -20,17 +20,17 @@ import { SearchSessionsConfigSchema } from '../../../../config';
  * @internal
  */
 export async function getIgnoreThrottled(
-  uiSettingsClient: IUiSettingsClient
+  uiSettingsClient: Pick<IUiSettingsClient, 'get'>
 ): Promise<Pick<Search, 'ignore_throttled'>> {
   const includeFrozen = await uiSettingsClient.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
-  return { ignore_throttled: !includeFrozen };
+  return includeFrozen ? { ignore_throttled: false } : {};
 }
 
 /**
  @internal
  */
 export async function getDefaultAsyncSubmitParams(
-  uiSettingsClient: IUiSettingsClient,
+  uiSettingsClient: Pick<IUiSettingsClient, 'get'>,
   searchSessionsConfig: SearchSessionsConfigSchema | null,
   options: ISearchOptions
 ): Promise<

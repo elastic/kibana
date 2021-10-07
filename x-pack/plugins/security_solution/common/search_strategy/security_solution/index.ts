@@ -28,6 +28,8 @@ import {
   HostsKpiUniqueIpsStrategyResponse,
   HostsKpiUniqueIpsRequestOptions,
   HostFirstLastSeenRequestOptions,
+  HostsRiskScoreStrategyResponse,
+  HostsRiskScoreRequestOptions,
 } from './hosts';
 import {
   NetworkQueries,
@@ -124,6 +126,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostDetailsStrategyResponse
   : T extends UebaQueries.riskScore
   ? RiskScoreStrategyResponse
+  : T extends HostsQueries.hostsRiskScore
+  ? HostsRiskScoreStrategyResponse
   : T extends UebaQueries.hostRules
   ? HostRulesStrategyResponse
   : T extends UebaQueries.userRules
@@ -178,6 +182,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsRequestOptions
+  : T extends HostsQueries.hostsRiskScore
+  ? HostsRiskScoreRequestOptions
   : T extends HostsQueries.details
   ? HostDetailsRequestOptions
   : T extends HostsQueries.overview

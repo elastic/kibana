@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { isPromise } from '@kbn/std';
+import { ObservableLike, UnwrapObservable, UnwrapPromiseOrReturn } from '@kbn/utility-types';
 import { keys, last, mapValues, reduce, zipObject } from 'lodash';
 import {
   combineLatest,
@@ -43,6 +44,18 @@ import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
 import { ExpressionExecutionParams } from '../service';
 import { createDefaultInspectorAdapters } from '../util/create_default_inspector_adapters';
+
+type UnwrapReturnType<Function extends (...args: any[]) => unknown> =
+  ReturnType<Function> extends ObservableLike<unknown>
+    ? UnwrapObservable<ReturnType<Function>>
+    : UnwrapPromiseOrReturn<ReturnType<Function>>;
+
+// type ArgumentsOf<Function extends ExpressionFunction> = Function extends ExpressionFunction<
+//   unknown,
+//   infer Arguments
+// >
+//   ? Arguments
+//   : never;
 
 /**
  * The result returned after an expression function execution.
@@ -83,7 +96,7 @@ const createAbortErrorValue = () =>
   });
 
 export interface ExecutionParams {
-  executor: Executor<any>;
+  executor: Executor;
   ast?: ExpressionAstExpression;
   expression?: string;
   params: ExpressionExecutionParams;
@@ -107,7 +120,7 @@ export class Execution<
    * N.B. It is initialized to `null` rather than `undefined` for legacy reasons,
    * because in legacy interpreter it was set to `null` by default.
    */
-  public input: Input = null as any;
+  public input = null as unknown as Input;
 
   /**
    * Input of the started execution.
@@ -180,19 +193,19 @@ export class Execution<
     const ast = execution.ast || parseExpression(this.expression);
 
     this.state = createExecutionContainer({
-      ...executor.state.get(),
+      ...executor.state,
       state: 'not-started',
       ast,
     });
 
     const inspectorAdapters =
-      execution.params.inspectorAdapters || createDefaultInspectorAdapters();
+      (execution.params.inspectorAdapters as InspectorAdapters) || createDefaultInspectorAdapters();
 
     this.context = {
       getSearchContext: () => this.execution.params.searchContext || {},
       getSearchSessionId: () => execution.params.searchSessionId,
       getKibanaRequest: execution.params.kibanaRequest
-        ? () => execution.params.kibanaRequest
+        ? () => execution.params.kibanaRequest!
         : undefined,
       variables: execution.params.variables || {},
       types: executor.getTypes(),
@@ -201,14 +214,14 @@ export class Execution<
       logDatatable: (name: string, datatable: Datatable) => {
         inspectorAdapters.tables[name] = datatable;
       },
-      isSyncColorsEnabled: () => execution.params.syncColors,
-      ...(execution.params as any).extraContext,
+      isSyncColorsEnabled: () => execution.params.syncColors!,
+      ...execution.params.extraContext,
       getExecutionContext: () => execution.params.executionContext,
     };
 
     this.result = this.input$.pipe(
       switchMap((input) =>
-        this.race(this.invokeChain(this.state.get().ast.chain, input)).pipe(
+        this.race(this.invokeChain<Output>(this.state.get().ast.chain, input)).pipe(
           (source) =>
             new Observable<ExecutionResult<Output>>((subscriber) => {
               let latest: ExecutionResult<Output> | undefined;
@@ -270,8 +283,8 @@ export class Execution<
    * N.B. `input` is initialized to `null` rather than `undefined` for legacy reasons,
    * because in legacy interpreter it was set to `null` by default.
    */
-  public start(
-    input: Input = null as any,
+  start(
+    input = null as unknown as Input,
     isSubExpression?: boolean
   ): Observable<ExecutionResult<Output | ExpressionValueError>> {
     if (this.hasStarted) throw new Error('Execution already started.');
@@ -294,7 +307,10 @@ export class Execution<
     return this.result;
   }
 
-  invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Observable<any> {
+  invokeChain<ChainOutput = unknown>(
+    chainArr: ExpressionAstFunction[],
+    input: unknown
+  ): Observable<ChainOutput> {
     return of(input).pipe(
       ...(chainArr.map((link) =>
         switchMap((currentInput) => {
@@ -364,19 +380,24 @@ export class Execution<
         })
       ) as Parameters<Observable<unknown>['pipe']>),
       catchError((error) => of(error))
-    );
+    ) as Observable<ChainOutput>;
   }
 
-  invokeFunction(
-    fn: ExpressionFunction,
+  invokeFunction<Fn extends ExpressionFunction>(
+    fn: Fn,
     input: unknown,
     args: Record<string, unknown>
-  ): Observable<any> {
+  ): Observable<UnwrapReturnType<Fn['fn']>> {
     return of(input).pipe(
       map((currentInput) => this.cast(currentInput, fn.inputTypes)),
       switchMap((normalizedInput) => this.race(of(fn.fn(normalizedInput, args, this.context)))),
-      switchMap((fnResult: any) =>
-        isObservable(fnResult) ? fnResult : from(isPromise(fnResult) ? fnResult : [fnResult])
+      switchMap(
+        (fnResult) =>
+          (isObservable(fnResult)
+            ? fnResult
+            : from(isPromise(fnResult) ? fnResult : [fnResult])) as Observable<
+            UnwrapReturnType<Fn['fn']>
+          >
       ),
       map((output) => {
         // Validate that the function returned the type it said it would.
@@ -405,39 +426,49 @@ export class Execution<
     );
   }
 
-  public cast(value: any, toTypeNames?: string[]) {
+  public cast<Type = unknown>(value: unknown, toTypeNames?: string[]): Type {
     // If you don't give us anything to cast to, you'll get your input back
-    if (!toTypeNames || toTypeNames.length === 0) return value;
+    if (!toTypeNames?.length) {
+      return value as Type;
+    }
 
     // No need to cast if node is already one of the valid types
     const fromTypeName = getType(value);
-    if (toTypeNames.includes(fromTypeName)) return value;
+    if (toTypeNames.includes(fromTypeName)) {
+      return value as Type;
+    }
 
     const { types } = this.state.get();
     const fromTypeDef = types[fromTypeName];
 
     for (const toTypeName of toTypeNames) {
       // First check if the current type can cast to this type
-      if (fromTypeDef && fromTypeDef.castsTo(toTypeName)) {
+      if (fromTypeDef?.castsTo(toTypeName)) {
         return fromTypeDef.to(value, toTypeName, types);
       }
 
       // If that isn't possible, check if this type can cast from the current type
       const toTypeDef = types[toTypeName];
-      if (toTypeDef && toTypeDef.castsFrom(fromTypeName)) return toTypeDef.from(value, types);
+      if (toTypeDef?.castsFrom(fromTypeName)) {
+        return toTypeDef.from(value, types);
+      }
     }
 
     throw new Error(`Can not cast '${fromTypeName}' to any of '${toTypeNames.join(', ')}'`);
   }
 
   // Processes the multi-valued AST argument values into arguments that can be passed to the function
-  resolveArgs(fnDef: ExpressionFunction, input: unknown, argAsts: any): Observable<any> {
+  resolveArgs<Fn extends ExpressionFunction>(
+    fnDef: Fn,
+    input: unknown,
+    argAsts: Record<string, ExpressionAstArgument[]>
+  ): Observable<Record<string, unknown>> {
     return defer(() => {
       const { args: argDefs } = fnDef;
 
       // Use the non-alias name from the argument definition
       const dealiasedArgAsts = reduce(
-        argAsts as Record<string, ExpressionAstArgument>,
+        argAsts,
         (acc, argAst, argName) => {
           const argDef = getByAlias(argDefs, argName);
           if (!argDef) {
@@ -452,7 +483,7 @@ export class Execution<
       // Check for missing required arguments.
       for (const { aliases, default: argDefault, name, required } of Object.values(argDefs)) {
         if (!(name in dealiasedArgAsts) && typeof argDefault !== 'undefined') {
-          dealiasedArgAsts[name] = [parse(argDefault, 'argument')];
+          dealiasedArgAsts[name] = [parse(argDefault as string, 'argument')];
         }
 
         if (!required || name in dealiasedArgAsts) {
@@ -490,7 +521,7 @@ export class Execution<
       const argNames = keys(resolveArgFns);
 
       if (!argNames.length) {
-        return from([[]]);
+        return from([{}]);
       }
 
       const resolvedArgValuesObservable = combineLatest(
@@ -523,7 +554,7 @@ export class Execution<
     });
   }
 
-  public interpret<T>(ast: ExpressionAstNode, input: T): Observable<ExecutionResult<unknown>> {
+  interpret<T>(ast: ExpressionAstNode, input: T): Observable<ExecutionResult<unknown>> {
     switch (getType(ast)) {
       case 'expression':
         const execution = this.execution.executor.createExecution(

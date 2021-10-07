@@ -4,12 +4,12 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-node .buildkite/scripts/lifecycle/print_agent_links.js
+node .buildkite/scripts/lifecycle/print_agent_links.js || true
 
 echo '--- Job Environment Setup'
 
 cd '.buildkite'
-yarn install
+retry 5 15 yarn install
 cd -
 
 BUILDKITE_TOKEN="$(retry 5 5 vault read -field=buildkite_token_all_jobs secret/kibana-issues/dev/buildkite-ci)"

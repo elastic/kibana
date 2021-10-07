@@ -27,7 +27,7 @@ import {
   LensAppState,
   DispatchSetState,
 } from '../state_management';
-import { getIndexPatternsObjects, getIndexPatternsIds } from '../utils';
+import { getIndexPatternsObjects, getIndexPatternsIds, getResolvedDateRange } from '../utils';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
@@ -169,6 +169,7 @@ export const LensTopNavMenu = ({
   );
 
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
+  const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
 
   const {
     isSaveable,
@@ -200,17 +201,31 @@ export const LensTopNavMenu = ({
       datasourceStates,
     });
     const hasIndexPatternsChanged =
-      indexPatterns.length !== indexPatternIds.length ||
-      indexPatternIds.some((id) => !indexPatterns.find((indexPattern) => indexPattern.id === id));
+      indexPatterns.length + rejectedIndexPatterns.length !== indexPatternIds.length ||
+      indexPatternIds.some(
+        (id) =>
+          ![...indexPatterns.map((ip) => ip.id), ...rejectedIndexPatterns].find(
+            (loadedId) => loadedId === id
+          )
+      );
+
     // Update the cached index patterns if the user made a change to any of them
     if (hasIndexPatternsChanged) {
       getIndexPatternsObjects(indexPatternIds, data.indexPatterns).then(
-        ({ indexPatterns: indexPatternObjects }) => {
+        ({ indexPatterns: indexPatternObjects, rejectedIds }) => {
           setIndexPatterns(indexPatternObjects);
+          setRejectedIndexPatterns(rejectedIds);
         }
       );
     }
-  }, [datasourceStates, activeDatasourceId, data.indexPatterns, datasourceMap, indexPatterns]);
+  }, [
+    datasourceStates,
+    activeDatasourceId,
+    rejectedIndexPatterns,
+    datasourceMap,
+    indexPatterns,
+    data.indexPatterns,
+  ]);
 
   const { TopNavMenu } = navigation.ui;
   const { from, to } = data.query.timefilter.timefilter.getTime();
@@ -348,8 +363,11 @@ export const LensTopNavMenu = ({
         trackUiEvent('app_date_change');
       } else {
         // Query has changed, renew the session id.
-        // Time change will be picked up by the time subscription
-        dispatchSetState({ searchSessionId: data.search.session.start() });
+        // recalculate resolvedDateRange (relevant for relative time range)
+        dispatchSetState({
+          searchSessionId: data.search.session.start(),
+          resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
+        });
         trackUiEvent('app_query_change');
       }
       if (newQuery) {

@@ -29,10 +29,6 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     });
 
     // correlations
-    describe('correlations/latency_slow_transactions', function () {
-      loadTestFile(require.resolve('./correlations/latency_slow_transactions'));
-    });
-
     describe('correlations/failed_transactions', function () {
       loadTestFile(require.resolve('./correlations/failed_transactions'));
     });
@@ -41,16 +37,8 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./correlations/latency'));
     });
 
-    describe('correlations/latency_overall', function () {
-      loadTestFile(require.resolve('./correlations/latency_overall'));
-    });
-
-    describe('correlations/errors_overall', function () {
-      loadTestFile(require.resolve('./correlations/errors_overall'));
-    });
-
-    describe('correlations/errors_failed_transactions', function () {
-      loadTestFile(require.resolve('./correlations/errors_failed_transactions'));
+    describe('metadata/event_metadata', function () {
+      loadTestFile(require.resolve('./metadata/event_metadata'));
     });
 
     describe('metrics_charts/metrics_charts', function () {
@@ -151,6 +139,11 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
 
     describe('settings/custom_link', function () {
       loadTestFile(require.resolve('./settings/custom_link'));
+    });
+
+    // suggestions
+    describe('suggestions', function () {
+      loadTestFile(require.resolve('./suggestions/suggestions'));
     });
 
     // traces

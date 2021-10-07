@@ -159,6 +159,17 @@ export class DocLinksService {
           docsBase: `${ELASTICSEARCH_DOCS}`,
           asyncSearch: `${ELASTICSEARCH_DOCS}async-search-intro.html`,
           dataStreams: `${ELASTICSEARCH_DOCS}data-streams.html`,
+          deprecationLogging: `${ELASTICSEARCH_DOCS}logging.html#deprecation-logging`,
+          ilm: `${ELASTICSEARCH_DOCS}index-lifecycle-management.html`,
+          ilmForceMerge: `${ELASTICSEARCH_DOCS}ilm-forcemerge.html`,
+          ilmFreeze: `${ELASTICSEARCH_DOCS}ilm-freeze.html`,
+          ilmPhaseTransitions: `${ELASTICSEARCH_DOCS}ilm-index-lifecycle.html#ilm-phase-transitions`,
+          ilmReadOnly: `${ELASTICSEARCH_DOCS}ilm-readonly.html`,
+          ilmRollover: `${ELASTICSEARCH_DOCS}ilm-rollover.html`,
+          ilmSearchableSnapshot: `${ELASTICSEARCH_DOCS}ilm-searchable-snapshot.html`,
+          ilmSetPriority: `${ELASTICSEARCH_DOCS}ilm-set-priority.html`,
+          ilmShrink: `${ELASTICSEARCH_DOCS}ilm-shrink.html`,
+          ilmWaitForSnapshot: `${ELASTICSEARCH_DOCS}ilm-wait-for-snapshot.html`,
           indexModules: `${ELASTICSEARCH_DOCS}index-modules.html`,
           indexSettings: `${ELASTICSEARCH_DOCS}index-modules.html#index-modules-settings`,
           indexTemplates: `${ELASTICSEARCH_DOCS}index-templates.html`,
@@ -199,16 +210,17 @@ export class DocLinksService {
           mappingStore: `${ELASTICSEARCH_DOCS}mapping-store.html`,
           mappingTermVector: `${ELASTICSEARCH_DOCS}term-vector.html`,
           mappingTypesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
+          migrateIndexAllocationFilters: `${ELASTICSEARCH_DOCS}migrate-index-allocation-filters.html`,
           nodeRoles: `${ELASTICSEARCH_DOCS}modules-node.html#node-roles`,
-          remoteClusters: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html`,
-          remoteClustersProxy: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html#proxy-mode`,
-          remoteClusersProxySettings: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html#remote-cluster-proxy-settings`,
+          releaseHighlights: `${ELASTICSEARCH_DOCS}release-highlights.html`,
+          remoteClusters: `${ELASTICSEARCH_DOCS}remote-clusters.html`,
+          remoteClustersProxy: `${ELASTICSEARCH_DOCS}remote-clusters.html#proxy-mode`,
+          remoteClusersProxySettings: `${ELASTICSEARCH_DOCS}remote-clusters-settings.html#remote-cluster-proxy-settings`,
           scriptParameters: `${ELASTICSEARCH_DOCS}modules-scripting-using.html#prefer-params`,
+          setupUpgrade: `${ELASTICSEARCH_DOCS}setup-upgrade.html`,
+          shardAllocationSettings: `${ELASTICSEARCH_DOCS}modules-cluster.html#cluster-shard-allocation-settings`,
           transportSettings: `${ELASTICSEARCH_DOCS}modules-network.html#common-network-settings`,
           typesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
-          deprecationLogging: `${ELASTICSEARCH_DOCS}logging.html#deprecation-logging`,
-          setupUpgrade: `${ELASTICSEARCH_DOCS}setup-upgrade.html`,
-          releaseHighlights: `${ELASTICSEARCH_DOCS}release-highlights.html`,
         },
         siem: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
@@ -241,6 +253,7 @@ export class DocLinksService {
           kibanaSearchSettings: `${KIBANA_DOCS}advanced-options.html#kibana-search-settings`,
           visualizationSettings: `${KIBANA_DOCS}advanced-options.html#kibana-visualization-settings`,
           timelionSettings: `${KIBANA_DOCS}advanced-options.html#kibana-timelion-settings`,
+          savedObjectsApiList: `${KIBANA_DOCS}saved-objects-api.html#saved-objects-api`,
         },
         ml: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/index.html`,
@@ -270,6 +283,8 @@ export class DocLinksService {
         },
         transforms: {
           guide: `${ELASTICSEARCH_DOCS}transforms.html`,
+          // TODO add valid docs URL
+          alertingRules: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-configuring-alerts.html`,
         },
         visualize: {
           guide: `${KIBANA_DOCS}dashboard.html`,
@@ -295,6 +310,8 @@ export class DocLinksService {
           apmRules: `${KIBANA_DOCS}apm-alerts.html`,
           emailAction: `${KIBANA_DOCS}email-action-type.html`,
           emailActionConfig: `${KIBANA_DOCS}email-action-type.html`,
+          emailExchangeClientSecretConfig: `${KIBANA_DOCS}email-action-type.html#exchange-client-secret`,
+          emailExchangeClientIdConfig: `${KIBANA_DOCS}email-action-type.html#exchange-client-tenant-id`,
           generalSettings: `${KIBANA_DOCS}alert-action-settings-kb.html#general-alert-action-settings`,
           indexAction: `${KIBANA_DOCS}index-action-type.html`,
           esQuery: `${KIBANA_DOCS}rule-type-es-query.html`,
@@ -333,7 +350,7 @@ export class DocLinksService {
           elasticsearchSettings: `${ELASTICSEARCH_DOCS}security-settings.html`,
           elasticsearchEnableSecurity: `${ELASTICSEARCH_DOCS}configuring-stack-security.html`,
           indicesPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-indices`,
-          kibanaTLS: `${KIBANA_DOCS}configuring-tls.html`,
+          kibanaTLS: `${ELASTICSEARCH_DOCS}security-basic-setup.html#encrypt-internode-communication`,
           kibanaPrivileges: `${KIBANA_DOCS}kibana-privileges.html`,
           mappingRoles: `${ELASTICSEARCH_DOCS}mapping-roles.html`,
           mappingRolesFieldRules: `${ELASTICSEARCH_DOCS}role-mapping-resources.html#mapping-roles-rule-field`,
@@ -387,7 +404,7 @@ export class DocLinksService {
         },
         snapshotRestore: {
           guide: `${KIBANA_DOCS}snapshot-repositories.html`,
-          changeIndexSettings: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html#change-index-settings-during-restore`,
+          changeIndexSettings: `${ELASTICSEARCH_DOCS}index-modules.html`,
           createSnapshot: `${ELASTICSEARCH_DOCS}snapshots-take-snapshot.html`,
           getSnapshot: `${ELASTICSEARCH_DOCS}get-snapshot-api.html`,
           registerSharedFileSystem: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-filesystem-repository`,
@@ -395,6 +412,7 @@ export class DocLinksService {
           registerUrl: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-read-only-repository`,
           restoreSnapshot: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html`,
           restoreSnapshotApi: `${ELASTICSEARCH_DOCS}restore-snapshot-api.html#restore-snapshot-api-request-body`,
+          searchableSnapshotSharedCache: `${ELASTICSEARCH_DOCS}searchable-snapshots.html#searchable-snapshots-shared-cache`,
         },
         ingest: {
           append: `${ELASTICSEARCH_DOCS}append-processor.html`,
@@ -412,6 +430,7 @@ export class DocLinksService {
           fail: `${ELASTICSEARCH_DOCS}fail-processor.html`,
           foreach: `${ELASTICSEARCH_DOCS}foreach-processor.html`,
           geoIp: `${ELASTICSEARCH_DOCS}geoip-processor.html`,
+          geoMatch: `${ELASTICSEARCH_DOCS}geo-match-enrich-policy-type.html`,
           grok: `${ELASTICSEARCH_DOCS}grok-processor.html`,
           gsub: `${ELASTICSEARCH_DOCS}gsub-processor.html`,
           htmlString: `${ELASTICSEARCH_DOCS}htmlstrip-processor.html`,
@@ -454,6 +473,19 @@ export class DocLinksService {
         },
         ecs: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
+        },
+        clients: {
+          /** Changes to these URLs must also be synched in src/plugins/custom_integrations/server/language_clients/index.ts */
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/index.html`,
+          goOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/go-api/${DOC_LINK_VERSION}/overview.html`,
+          javaIndex: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/java-api-client/${DOC_LINK_VERSION}/index.html`,
+          jsIntro: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/javascript-api/${DOC_LINK_VERSION}/introduction.html`,
+          netGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/index.html`,
+          perlGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/perl-api/${DOC_LINK_VERSION}/index.html`,
+          phpGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/php-api/${DOC_LINK_VERSION}/index.html`,
+          pythonGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/index.html`,
+          rubyOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/ruby-api/${DOC_LINK_VERSION}/ruby_client.html`,
+          rustGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/rust-api/${DOC_LINK_VERSION}/index.html`,
         },
       },
     });
@@ -690,6 +722,18 @@ export interface DocLinksStart {
     }>;
     readonly ecs: {
       readonly guide: string;
+    };
+    readonly clients: {
+      readonly guide: string;
+      readonly goOverview: string;
+      readonly javaIndex: string;
+      readonly jsIntro: string;
+      readonly netGuide: string;
+      readonly perlGuide: string;
+      readonly phpGuide: string;
+      readonly pythonGuide: string;
+      readonly rubyOverview: string;
+      readonly rustGuide: string;
     };
   };
 }

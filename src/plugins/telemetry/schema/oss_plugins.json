@@ -7428,6 +7428,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "metrics:allowStringIndices": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "query:allowLeadingWildcards": {
           "type": "boolean",
           "_meta": {
@@ -7623,14 +7629,14 @@
             "description": "Non-default value of setting."
           }
         },
-        "apm:enableSignificantTerms": {
+        "observability:enableInspectEsQueries": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }
         },
-        "observability:enableInspectEsQueries": {
-          "type": "boolean",
+        "observability:maxSuggestions": {
+          "type": "integer",
           "_meta": {
             "description": "Non-default value of setting."
           }
@@ -9081,6 +9087,12 @@
           "type": "long",
           "_meta": {
             "description": "Number of TSVB visualizations using \"last value\" as a time range"
+          }
+        },
+        "timeseries_table_use_aggregate_function": {
+          "type": "long",
+          "_meta": {
+            "description": "Number of TSVB table visualizations using aggregate function"
           }
         }
       }

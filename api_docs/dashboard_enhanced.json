@@ -607,16 +607,16 @@
               "UrlGeneratorsSetup",
               "; url: ",
               "UrlService",
-              "; navigate(options: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.RedirectOptions",
-                "text": "RedirectOptions"
-              },
+              "<unknown>; navigate(options: ",
+              "RedirectOptions",
               "<",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">): void; }"
             ],
             "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
@@ -712,16 +712,16 @@
               "UrlGeneratorsStart",
               "; url: ",
               "UrlService",
-              "; navigate(options: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.RedirectOptions",
-                "text": "RedirectOptions"
-              },
+              "<unknown>; navigate(options: ",
+              "RedirectOptions",
               "<",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">): void; }"
             ],
             "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
