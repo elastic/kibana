@@ -160,8 +160,9 @@ export function getMissingCurrentDatasource() {
 }
 
 export function getMissingIndexPatterns(indexPatternIds: string[]) {
-  return i18n.translate('xpack.lens.editorFrame.expressionMissingDataView', {
-    defaultMessage: 'Could not find the {count, plural, one {data view} other {data views}}: {ids}',
+  return i18n.translate('xpack.lens.editorFrame.expressionMissingIndexPattern', {
+    defaultMessage:
+      'Could not find the {count, plural, one {index pattern} other {index pattern}}: {ids}',
     values: { count: indexPatternIds.length, ids: indexPatternIds.join(', ') },
   });
 }
