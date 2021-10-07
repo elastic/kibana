@@ -15,6 +15,7 @@ export interface IntegrationCategoryCount {
 }
 
 export const INTEGRATION_CATEGORY_DISPLAY = {
+  // Known EPR
   aws: 'AWS',
   azure: 'Azure',
   cloud: 'Cloud',
@@ -39,8 +40,12 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   ticketing: 'Ticketing',
   version_control: 'Version control',
   web: 'Web',
-  upload_file: 'Upload a file',
 
+  // Kibana added
+  upload_file: 'Upload a file',
+  language_client: 'Language client',
+
+  // Internal
   updates_available: 'Updates available',
 };
 
