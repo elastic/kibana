@@ -9,17 +9,17 @@
 /* eslint-disable max-classes-per-file */
 
 import { KbnFieldType, getKbnFieldType, castEsToKbnFieldTypeName } from '@kbn/field-types';
-import {
-  isDataViewFieldSubtypeMulti,
-  isDataViewFieldSubtypeNested,
-  getDataViewFieldSubtypeMulti,
-  getDataViewFieldSubtypeNested,
-} from '@kbn/es-query';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { RuntimeField } from '../types';
 import type { IFieldType } from './types';
 import { FieldSpec, DataView } from '..';
-import { shortenDottedString } from './utils';
+import {
+  shortenDottedString,
+  isDataViewFieldSubtypeMulti,
+  isDataViewFieldSubtypeNested,
+  getDataViewFieldSubtypeMulti,
+  getDataViewFieldSubtypeNested,
+} from './utils';
 
 /** @public */
 export class DataViewField implements IFieldType {
