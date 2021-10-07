@@ -6,19 +6,40 @@
  */
 
 import React, { useMemo } from 'react';
-import { TRANSACTION_METADATA_SECTIONS } from './sections';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { getSectionsWithRows } from '../helper';
+import { getSectionsFromFields } from '../helper';
 import { MetadataTable } from '..';
+import { ProcessorEvent } from '../../../../../common/processor_event';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
 interface Props {
   transaction: Transaction;
 }
 
 export function TransactionMetadata({ transaction }: Props) {
-  const sectionsWithRows = useMemo(
-    () => getSectionsWithRows(TRANSACTION_METADATA_SECTIONS, transaction),
-    [transaction]
+  const { data: transactionEvent, status } = useFetcher(
+    (callApmApi) => {
+      return callApmApi({
+        endpoint: 'GET /api/apm/event_metadata/{processorEvent}/{id}',
+        params: {
+          path: {
+            processorEvent: ProcessorEvent.transaction,
+            id: transaction.transaction.id,
+          },
+        },
+      });
+    },
+    [transaction.transaction.id]
   );
-  return <MetadataTable sections={sectionsWithRows} />;
+
+  const sections = useMemo(
+    () => getSectionsFromFields(transactionEvent?.metadata || {}),
+    [transactionEvent?.metadata]
+  );
+  return (
+    <MetadataTable
+      sections={sections}
+      isLoading={status === FETCH_STATUS.LOADING}
+    />
+  );
 }

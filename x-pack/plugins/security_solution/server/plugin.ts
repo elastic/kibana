@@ -59,6 +59,7 @@ import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
 import { ManifestTask } from './endpoint/lib/artifacts';
+import { CheckMetadataTransformsTask } from './endpoint/lib/metadata';
 import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig, ConfigType } from './config';
@@ -157,6 +158,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private policyWatcher?: PolicyWatcher;
 
   private manifestTask: ManifestTask | undefined;
+  private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private artifactsCache: LRU<string, Buffer>;
   private telemetryUsageCounter?: UsageCounter;
 
@@ -283,6 +285,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.security,
       plugins.ml,
       ruleDataService,
+      this.logger,
       isRuleRegistryEnabled
     );
     registerEndpointRoutes(router, endpointContext);
@@ -362,6 +365,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.taskManager,
       this.telemetryUsageCounter
     );
+
+    this.checkMetadataTransformsTask = new CheckMetadataTransformsTask({
+      endpointAppContext: endpointContext,
+      core,
+      taskManager: plugins.taskManager!,
+    });
 
     return {};
   }
@@ -451,6 +460,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.taskManager,
       this.telemetryReceiver
     );
+
+    this.checkMetadataTransformsTask?.start({
+      taskManager: plugins.taskManager!,
+    });
 
     return {};
   }

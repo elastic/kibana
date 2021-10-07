@@ -13,8 +13,10 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const returnTrue = () => true;
 
-const defaultOnFailure = (methodName: string) => (lastError: Error) => {
-  throw new Error(`${methodName} timeout: ${lastError.stack || lastError.message}`);
+const defaultOnFailure = (methodName: string) => (lastError: Error | undefined) => {
+  throw new Error(
+    `${methodName} timeout${lastError ? `: ${lastError.stack || lastError.message}` : ''}`
+  );
 };
 
 /**
@@ -50,10 +52,19 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
 
   const start = Date.now();
   const retryDelay = 502;
-  const maxAttempts = 1000; // this is a reasonable ceiling to prevent infinite loops
   let lastError;
 
-  for (let i = 1; i < maxAttempts; i++) {
+  while (true) {
+    if (Date.now() - start > timeout) {
+      await onFailure(lastError);
+      throw new Error('expected onFailure() option to throw an error');
+    } else if (lastError && onFailureBlock) {
+      const before = await runAttempt(onFailureBlock);
+      if ('error' in before) {
+        log.debug(`--- onRetryBlock error: ${before.error.message}`);
+      }
+    }
+
     const attempt = await runAttempt(block);
 
     if ('result' in attempt && accept(attempt.result)) {
@@ -70,27 +81,6 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
       lastError = attempt.error;
     }
 
-    if (lastError && onFailureBlock) {
-      const before = await runAttempt(onFailureBlock);
-      if ('error' in before) {
-        log.debug(`--- onRetryBlock error: ${before.error.message}`);
-      }
-    }
-
-    if (Date.now() - start + retryDelay < timeout) {
-      await delay(retryDelay);
-    } else {
-      // Another delay would put us over the timeout, so we should stop here
-      if (lastError) {
-        await onFailure(lastError);
-        throw new Error('expected onFailure() option to throw an error');
-      } else {
-        throw new Error(`${methodName} timeout`);
-      }
-    }
+    await delay(retryDelay);
   }
-
-  throw new Error(
-    `${methodName} used all ${maxAttempts} attempts - possible infinite loop reached`
-  );
 }

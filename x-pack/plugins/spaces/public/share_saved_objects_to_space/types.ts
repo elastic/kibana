@@ -140,3 +140,10 @@ export interface ShareToSpaceSavedObjectTarget {
    */
   noun?: string;
 }
+
+/**
+ * Properties for the SavedObjectConflictMessage component.
+ */
+export interface SavedObjectConflictMessageProps {
+  json: string;
+}

@@ -125,7 +125,7 @@ export interface ExpressionsServiceSetup {
 export interface ExpressionExecutionParams {
   searchContext?: SerializableRecord;
 
-  variables?: Record<string, any>;
+  variables?: Record<string, unknown>;
 
   /**
    * Whether to execute expression in *debug mode*. In *debug mode* inputs and
@@ -148,6 +148,8 @@ export interface ExpressionExecutionParams {
   inspectorAdapters?: Adapters;
 
   executionContext?: KibanaExecutionContext;
+
+  extraContext?: object;
 }
 
 /**
@@ -375,7 +377,7 @@ export class ExpressionsService
    */
   public readonly telemetry = (
     state: ExpressionAstExpression,
-    telemetryData: Record<string, any> = {}
+    telemetryData: Record<string, unknown> = {}
   ) => {
     return this.executor.telemetry(state, telemetryData);
   };
