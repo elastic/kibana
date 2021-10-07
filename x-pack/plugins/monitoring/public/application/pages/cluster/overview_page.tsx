@@ -14,17 +14,12 @@ import { GlobalStateContext } from '../../global_state_context';
 import { TabMenuItem } from '../page_template';
 import { Overview } from '../../../components/cluster/overview';
 import { ExternalConfigContext } from '../../external_config_context';
-import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
-import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { fetchClusters } from '../../../lib/fetch_clusters';
 
 const CODE_PATHS = [CODE_PATH_ALL];
-interface SetupModeProps {
-  setupMode: any;
-  flyoutComponent: any;
-  bottomBarComponent: any;
-}
 
 export const ClusterOverview: React.FC<{}> = () => {
   const state = useContext(GlobalStateContext);
@@ -59,25 +54,20 @@ export const ClusterOverview: React.FC<{}> = () => {
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
-    let url = '../api/monitoring/v1/clusters';
-    if (clusterUuid) {
-      url += `/${clusterUuid}`;
-    }
-
     try {
-      const response = await services.http?.fetch(url, {
-        method: 'POST',
-        body: JSON.stringify({
-          ccs,
+      if (services.http?.fetch) {
+        const response = await fetchClusters({
+          fetch: services.http.fetch,
           timeRange: {
             min: bounds.min.toISOString(),
             max: bounds.max.toISOString(),
           },
+          ccs,
+          clusterUuid,
           codePaths: CODE_PATHS,
-        }),
-      });
-
-      setClusters(formatClusters(response));
+        });
+        setClusters(response);
+      }
     } catch (err) {
       // TODO: handle errors
     } finally {
@@ -111,14 +101,3 @@ export const ClusterOverview: React.FC<{}> = () => {
     </PageTemplate>
   );
 };
-
-function formatClusters(clusters: any) {
-  return clusters.map(formatCluster);
-}
-
-function formatCluster(cluster: any) {
-  if (cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID) {
-    cluster.cluster_name = 'Standalone Cluster';
-  }
-  return cluster;
-}
