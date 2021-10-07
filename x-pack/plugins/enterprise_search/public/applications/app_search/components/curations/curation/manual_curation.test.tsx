@@ -14,22 +14,28 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { getPageTitle, getPageHeaderActions } from '../../../../test_helpers';
+import { EuiTab } from '@elastic/eui';
+
+import { getPageTitle, getPageHeaderActions, getPageHeaderTabs } from '../../../../test_helpers';
 
 jest.mock('./curation_logic', () => ({ CurationLogic: jest.fn() }));
 import { CurationLogic } from './curation_logic';
 
+import { PromotedDocuments, HiddenDocuments } from './documents';
 import { ManualCuration } from './manual_curation';
 import { AddResultFlyout } from './results';
+import { SuggestedDocumentsCallout } from './suggested_documents_callout';
 
 describe('ManualCuration', () => {
   const values = {
     dataLoading: false,
     queries: ['query A', 'query B'],
     isFlyoutOpen: false,
+    selectedPageTab: 'promoted',
   };
   const actions = {
     resetCuration: jest.fn(),
+    onSelectPageTab: jest.fn(),
   };
 
   beforeEach(() => {
@@ -38,7 +44,7 @@ describe('ManualCuration', () => {
     setMockActions(actions);
   });
 
-  it('renders', () => {
+  it('renders a view for managing a curation', () => {
     const wrapper = shallow(<ManualCuration />);
 
     expect(getPageTitle(wrapper)).toEqual('Manage curation');
@@ -48,6 +54,44 @@ describe('ManualCuration', () => {
       'Curations',
       'query A, query B',
     ]);
+  });
+
+  it('includes set of tabs in the page header', () => {
+    const wrapper = shallow(<ManualCuration />);
+
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+
+    tabs.at(0).simulate('click');
+    expect(actions.onSelectPageTab).toHaveBeenNthCalledWith(1, 'promoted');
+
+    tabs.at(1).simulate('click');
+    expect(actions.onSelectPageTab).toHaveBeenNthCalledWith(2, 'hidden');
+  });
+
+  it('contains a suggested documents callout when the selectedPageTab is ', () => {
+    const wrapper = shallow(<ManualCuration />);
+
+    expect(wrapper.find(SuggestedDocumentsCallout)).toHaveLength(1);
+  });
+
+  it('renders promoted documents when that tab is selected', () => {
+    setMockValues({ ...values, selectedPageTab: 'promoted' });
+    const wrapper = shallow(<ManualCuration />);
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+
+    expect(tabs.at(0).prop('isSelected')).toEqual(true);
+
+    expect(wrapper.find(PromotedDocuments)).toHaveLength(1);
+  });
+
+  it('renders hidden documents when that tab is selected', () => {
+    setMockValues({ ...values, selectedPageTab: 'hidden' });
+    const wrapper = shallow(<ManualCuration />);
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+
+    expect(tabs.at(1).prop('isSelected')).toEqual(true);
+
+    expect(wrapper.find(HiddenDocuments)).toHaveLength(1);
   });
 
   it('renders the add result flyout when open', () => {

@@ -19,8 +19,10 @@ import {
   COVERT_TO_MANUAL_BUTTON_LABEL,
   CONVERT_TO_MANUAL_CONFIRMATION,
 } from '../constants';
+
 import { getCurationsBreadcrumbs } from '../utils';
 
+import { HIDDEN_DOCUMENTS_TITLE, PROMOTED_DOCUMENTS_TITLE } from './constants';
 import { CurationLogic } from './curation_logic';
 import { PromotedDocuments, OrganicDocuments } from './documents';
 
@@ -29,6 +31,19 @@ export const AutomatedCuration: React.FC = () => {
   const logic = CurationLogic({ curationId });
   const { convertToManual } = useActions(logic);
   const { activeQuery, dataLoading, queries } = useValues(logic);
+
+  // This tab group is meant to visually mirror the dynamic group of tags in the ManualCuration component
+  const pageTabs = [
+    {
+      label: PROMOTED_DOCUMENTS_TITLE,
+      isSelected: true,
+    },
+    {
+      label: HIDDEN_DOCUMENTS_TITLE,
+      isSelected: false,
+      disabled: true,
+    },
+  ];
 
   return (
     <AppSearchPageTemplate
@@ -54,6 +69,7 @@ export const AutomatedCuration: React.FC = () => {
             {COVERT_TO_MANUAL_BUTTON_LABEL}
           </EuiButton>,
         ],
+        tabs: pageTabs,
       }}
       isLoading={dataLoading}
     >
