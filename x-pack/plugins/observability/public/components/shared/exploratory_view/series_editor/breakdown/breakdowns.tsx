@@ -110,7 +110,7 @@ export const NO_BREAK_DOWN_LABEL = i18n.translate(
 );
 
 export const BREAKDOWN_WARNING = i18n.translate('xpack.observability.exp.breakDownFilter.warning', {
-  defaultMessage: 'Breakdowns can be applied to only one series at a time',
+  defaultMessage: 'Breakdowns can be applied to only one series at a time.',
 });
 
 const Wrapper = styled.span`
