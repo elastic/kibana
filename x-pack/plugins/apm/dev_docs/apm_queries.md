@@ -1,4 +1,4 @@
-You can run the example queries on the [edge cluster](https://edge-oblt.elastic.dev/) or any another cluster that contains APM data.
+You can run the example queries on the [edge cluster](https://edge-oblt.elastic.dev/) or any another cluster that contains APM data. If you get a `502 Bad Gateway` error you can try adding a `terminate_after` query parameter to the search request. You can find more information about the supported query parameters [here](https://www.elastic.co/guide/en/elasticsearch/reference/7.15/search-search.html#search-search-api-query-params).
 
 # Transactions
 
