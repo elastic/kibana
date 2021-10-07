@@ -2,7 +2,7 @@
 Elastic APM agents capture different types of information from within their instrumented applications. These are known as events, and can be spans, transactions, errors, or metrics. You can find more information [here](https://www.elastic.co/guide/en/apm/get-started/current/apm-data-model.html).
 
 # Running examples
-You can run the example queries on the [edge cluster](https://edge-oblt.elastic.dev/) or any another cluster that contains APM data. If you get a `502 Bad Gateway` error you can try adding a `terminate_after` query parameter to the search request. You can find more information about the supported query parameters [here](https://www.elastic.co/guide/en/elasticsearch/reference/7.15/search-search.html#search-search-api-query-params).
+You can run the example queries on the [edge cluster](https://edge-oblt.elastic.dev/) or any another cluster that contains APM data.
 
 # Transactions
 
@@ -53,7 +53,7 @@ Noteworthy fields: `transaction.duration.us`, `transaction.duration.histogram`
 #### Transaction-based latency
 
 ```json
-GET apm-*-transaction-*,traces-apm*/_search
+GET apm-*-transaction-*,traces-apm*/_search?terminate_after=1000
 {
   "size": 0,
   "query": {
@@ -70,7 +70,7 @@ GET apm-*-transaction-*,traces-apm*/_search
 #### Metric-based latency
 
 ```json
-GET apm-*-metric-*,metrics-apm*/_search
+GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 {
   "size": 0,
   "query": {
@@ -95,14 +95,64 @@ Throughput is the number of transactions per minute. This can be calculated usin
 
 Noteworthy fields: None (based on `doc_count`)
 
-```js
+#### Transaction-based throughput
+
+```json
+GET apm-*-transaction-*,traces-apm*/_search?terminate_after=1000
 {
   "size": 0,
   "query": {
-    // same filters as for latency
+    "bool": {
+      "filter": [{ "terms": { "processor.event": ["transaction"] } }]
+    }
   },
   "aggs": {
-    "throughput": { "rate": { "unit": "minute" } }
+    "timeseries": {
+      "date_histogram": {
+        "field": "@timestamp",
+        "fixed_interval": "60s"
+      },
+      "aggs": {
+        "throughput": {
+          "rate": {
+            "unit": "minute"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+
+#### Metric-based throughput
+
+```json
+GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        { "terms": { "processor.event": ["metric"] } },
+        { "term": { "metricset.name": "transaction" } }
+      ]
+    }
+  },
+  "aggs": {
+    "timeseries": {
+      "date_histogram": {
+        "field": "@timestamp",
+        "fixed_interval": "60s"
+      },
+      "aggs": {
+        "throughput": {
+          "rate": {
+            "unit": "minute"
+          }
+        }
+      }
+    }
   }
 }
 ```
@@ -112,8 +162,32 @@ Noteworthy fields: None (based on `doc_count`)
 Failed transaction rate is the number of transactions with `event.outcome=failure` per minute.
 Noteworthy fields: `event.outcome`
 
+#### Transaction-based failed transaction rate
+
+ ```json
+GET apm-*-transaction-*,traces-apm*/_search?terminate_after=1000
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [{ "terms": { "processor.event": ["transaction"] } }]
+    }
+  },
+  "aggs": {
+    "outcomes": {
+      "terms": {
+        "field": "event.outcome",
+        "include": ["failure", "success"]
+      }
+    }
+  }
+}
+```
+
+#### Metric-based failed transaction rate
+
 ```json
-GET apm-*-metric-*,metrics-apm*/_search
+GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 {
   "size": 0,
   "query": {
@@ -162,7 +236,7 @@ Noteworthy fields: `system.cpu.total.norm.pct`, `system.process.cpu.total.norm.p
 #### Query
 
 ```json
-GET apm-*-metric-*,metrics-apm*/_search
+GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 {
   "size": 0,
   "query": {
@@ -203,7 +277,7 @@ Noteworthy fields: `system.memory.actual.free`, `system.memory.total`,
 #### Query
 
 ```json
-GET apm-*-metric-*,metrics-apm*/_search?
+GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 {
   "size": 0,
   "query": {
@@ -284,7 +358,7 @@ Noteworthy fields: `transaction.name`, `transaction.type`, `span.type`, `span.su
 #### Query
 
 ```json
-GET apm-*-metric-*,metrics-apm*/_search
+GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 {
   "size": 0,
   "query": {
@@ -347,7 +421,7 @@ A pre-aggregated document with 73 span requests from opbeans-ruby to elasticsear
 The latency between a service and an (external) endpoint
 
 ```json
-GET apm-*-metric-*,metrics-apm*/_search?
+GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 {
   "size": 0,
   "query": {
@@ -378,6 +452,7 @@ Captures the number of requests made from a service to an (external) endpoint
 #### Query
 
 ```json
+GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 {
   "size": 0,
   "query": {
@@ -390,10 +465,17 @@ Captures the number of requests made from a service to an (external) endpoint
     }
   },
   "aggs": {
-    "throughput": {
-      "rate": {
-        "field": "span.destination.service.response_time.count",
-        "unit": "minute"
+    "timeseries": {
+      "date_histogram": {
+        "field": "@timestamp",
+        "fixed_interval": "60s"
+      },
+      "aggs": {
+        "throughput": {
+          "rate": {
+            "unit": "minute"
+          }
+        }
       }
     }
   }
@@ -409,7 +491,7 @@ Most Elasticsearch queries will need to have one or more filters. There are a co
 - performance: limiting the number of documents will make the query faster
 
 ```json
-GET apm-*-metric-*,metrics-apm*/_search
+GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 {
   "query": {
     "bool": {
