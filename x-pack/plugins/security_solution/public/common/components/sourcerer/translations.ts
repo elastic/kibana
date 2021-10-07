@@ -7,6 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const CALL_OUT_TITLE = i18n.translate('xpack.securitySolution.indexPatterns.callOutTitle', {
+  defaultMessage: 'Data view cannot be modified on this page',
+});
+
+export const CALL_OUT_MESSAGE = (indicies: string) =>
+  i18n.translate('xpack.securitySolution.indexPatterns.callOutMessage', {
+    defaultMessage: `Alerts uses ${indicies} as the default data view for this page.`,
+  });
+
 export const SOURCERER = i18n.translate('xpack.securitySolution.indexPatterns.dataSourcesLabel', {
   defaultMessage: 'Data sources',
 });
@@ -26,10 +35,24 @@ export const SAVE_INDEX_PATTERNS = i18n.translate('xpack.securitySolution.indexP
   defaultMessage: 'Save',
 });
 
-export const INDEX_PATTERNS_SELECTION_LABEL = i18n.translate(
-  'xpack.securitySolution.indexPatterns.selectionLabel',
+export const INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL = i18n.translate(
+  'xpack.securitySolution.indexPatterns.chooseDataViewLabel',
   {
-    defaultMessage: 'Choose the source of the data on this page',
+    defaultMessage: 'Choose data view',
+  }
+);
+
+export const INDEX_PATTERNS_ADVANCED_OPTIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.indexPatterns.advancedOptionsTitle',
+  {
+    defaultMessage: 'Advanced options',
+  }
+);
+
+export const INDEX_PATTERNS_LABEL = i18n.translate(
+  'xpack.securitySolution.indexPatterns.indexPatternsLabel',
+  {
+    defaultMessage: 'Index patterns',
   }
 );
 

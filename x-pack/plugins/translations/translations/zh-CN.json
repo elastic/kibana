@@ -22803,7 +22803,6 @@
     "xpack.securitySolution.indexPatterns.pickIndexPatternsCombo": "选取索引模式",
     "xpack.securitySolution.indexPatterns.resetButton": "重置",
     "xpack.securitySolution.indexPatterns.save": "保存",
-    "xpack.securitySolution.indexPatterns.selectionLabel": "在此页面上选择数据源",
     "xpack.securitySolution.insert.timeline.insertTimelineButton": "插入时间线链接",
     "xpack.securitySolution.inspect.modal.closeTitle": "关闭",
     "xpack.securitySolution.inspect.modal.indexPatternDescription": "连接到 Elasticsearch 索引的索引模式。可以在“Kibana”>“高级设置”中配置这些索引。",

@@ -17,12 +17,17 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
   EuiSuperSelect,
-  EuiText,
+  EuiForm,
+  EuiFormRow,
   EuiToolTip,
+  EuiCallOut,
+  EuiFormRowProps,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+
 import styled from 'styled-components';
 
 import * as i18n from './translations';
@@ -30,9 +35,17 @@ import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import { State } from '../../store';
 import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
 import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
+import { SecurityPageName } from '../../../../common/constants';
 
-const PopoverContent = styled.div`
-  width: 600px;
+const StyledFormRow = styled(EuiFormRow)<EuiFormRowProps & { $expandAdvancedOptions: boolean }>`
+  display: ${({ $expandAdvancedOptions }) => ($expandAdvancedOptions ? 'flex' : 'none')};
+`;
+
+const StyledButton = styled(EuiButtonEmpty)`
+  &:enabled:focus,
+  &:focus {
+    background-color: transparent;
+  }
 `;
 
 const ResetButton = styled(EuiButtonEmpty)`
@@ -205,6 +218,24 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     [selectedPatterns, isPopoverOpen]
   );
 
+  const [expandAdvancedOptions, setExpandAdvancedOptions] = useState(false);
+
+  const onExpandAdvancedOptionsClicked = useCallback(() => {
+    setExpandAdvancedOptions((prevState) => !prevState);
+  }, []);
+  const advancedIndicies: string[] = [];
+  const indiciesInCallout = advancedIndicies.join(',');
+  const { detailName, pageName } = useParams<{
+    detailName?: string;
+    pageName?: string;
+  }>();
+  const isReadOnly =
+    pageName === SecurityPageName.alerts || (SecurityPageName.rules && detailName != null);
+  const callOutMessage = useMemo(
+    () => i18n.CALL_OUT_MESSAGE(indiciesInCallout),
+    [indiciesInCallout]
+  );
+
   return (
     <EuiToolTip position="top" content={tooltipContent}>
       <EuiPopover
@@ -217,58 +248,84 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         repositionOnScroll
         ownFocus
       >
-        <PopoverContent>
+        <>
           <EuiPopoverTitle>
             <>{i18n.SELECT_INDEX_PATTERNS}</>
           </EuiPopoverTitle>
+          {isReadOnly && advancedIndicies?.length > 0 && (
+            <EuiCallOut iconType="info" title={i18n.CALL_OUT_TITLE}>
+              <p>{callOutMessage}</p>
+            </EuiCallOut>
+          )}
           <EuiSpacer size="s" />
-          <EuiText color="default">{i18n.INDEX_PATTERNS_SELECTION_LABEL}</EuiText>
-          <EuiSpacer size="xs" />
-          <EuiSuperSelect
-            data-test-subj="sourcerer-select"
-            placeholder={i18n.PICK_INDEX_PATTERNS}
-            fullWidth
-            options={dataViewSelectOptions}
-            valueOfSelected={dataViewId}
-            onChange={onChangeSuper}
-          />
-          <EuiSpacer size="xs" />
-          <EuiComboBox
-            data-test-subj="sourcerer-combo-box"
-            fullWidth
-            onChange={onChangeCombo}
-            options={selectableOptions}
-            placeholder={i18n.PICK_INDEX_PATTERNS}
-            renderOption={renderOption}
-            selectedOptions={selectedOptions}
-          />
-          <EuiSpacer size="s" />
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <ResetButton
-                aria-label={i18n.INDEX_PATTERNS_RESET}
-                data-test-subj="sourcerer-reset"
-                flush="left"
-                onClick={resetDataSources}
-                title={i18n.INDEX_PATTERNS_RESET}
-              >
-                {i18n.INDEX_PATTERNS_RESET}
-              </ResetButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={handleSaveIndices}
-                disabled={isSavingDisabled}
-                data-test-subj="sourcerer-save"
-                fill
+          <EuiForm component="form">
+            <EuiFormRow label={i18n.INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL}>
+              <EuiSuperSelect
+                data-test-subj="sourcerer-select"
+                placeholder={i18n.PICK_INDEX_PATTERNS}
                 fullWidth
-                size="s"
-              >
-                {i18n.SAVE_INDEX_PATTERNS}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </PopoverContent>
+                options={dataViewSelectOptions}
+                valueOfSelected={dataViewId}
+                onChange={onChangeSuper}
+                disabled={isReadOnly}
+              />
+            </EuiFormRow>
+
+            <StyledButton
+              color="text"
+              onClick={onExpandAdvancedOptionsClicked}
+              iconType={expandAdvancedOptions ? 'arrowDown' : 'arrowRight'}
+            >
+              {i18n.INDEX_PATTERNS_ADVANCED_OPTIONS_TITLE}
+            </StyledButton>
+            <StyledFormRow
+              label={i18n.INDEX_PATTERNS_LABEL}
+              $expandAdvancedOptions={expandAdvancedOptions}
+            >
+              <EuiComboBox
+                data-test-subj="sourcerer-combo-box"
+                fullWidth
+                onChange={onChangeCombo}
+                options={selectableOptions}
+                placeholder={i18n.PICK_INDEX_PATTERNS}
+                renderOption={renderOption}
+                selectedOptions={selectedOptions}
+                isDisabled={isReadOnly}
+              />
+            </StyledFormRow>
+
+            {!isReadOnly && (
+              <EuiFormRow>
+                <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <ResetButton
+                      aria-label={i18n.INDEX_PATTERNS_RESET}
+                      data-test-subj="sourcerer-reset"
+                      flush="left"
+                      onClick={resetDataSources}
+                      title={i18n.INDEX_PATTERNS_RESET}
+                    >
+                      {i18n.INDEX_PATTERNS_RESET}
+                    </ResetButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      onClick={handleSaveIndices}
+                      disabled={isSavingDisabled}
+                      data-test-subj="sourcerer-save"
+                      fill
+                      fullWidth
+                      size="s"
+                    >
+                      {i18n.SAVE_INDEX_PATTERNS}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFormRow>
+            )}
+            <EuiSpacer size="s" />
+          </EuiForm>
+        </>
       </EuiPopover>
     </EuiToolTip>
   );
