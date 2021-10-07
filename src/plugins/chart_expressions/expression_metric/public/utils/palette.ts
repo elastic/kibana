@@ -45,23 +45,31 @@ export const getMinMaxForColumns = (datatable: Datatable) => {
 };
 
 export const parseRgbString = (rgb: string) => {
-  const [group, r, g, b, opacityGroup, opacity] =
-    rgb.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*?(,\s*(\d+)\s*)?\)/) ?? [];
+  const groups = rgb.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*?(,\s*(\d+)\s*)?\)/) ?? [];
+  if (!groups) {
+    return null;
+  }
 
-  return {
-    red: parseFloat(r),
-    green: parseFloat(g),
-    blue: parseFloat(b),
-    opacity: opacity ? parseFloat(opacity) : undefined,
-  };
+  const red = parseFloat(groups[1]);
+  const green = parseFloat(groups[2]);
+  const blue = parseFloat(groups[3]);
+  const opacity = groups[5] ? parseFloat(groups[5]) : undefined;
+
+  return { red, green, blue, opacity };
 };
 
 export const shouldApplyColor = (color: string) => {
-  const { opacity } = parseRgbString(color);
-  return opacity !== 0; // if opacity === 0 it means, there is no color to apply to the metric
+  const rgb = parseRgbString(color);
+  const { opacity } = rgb ?? {};
+  return !rgb || (rgb && opacity !== 0); // if opacity === 0 it means, there is no color to apply to the metric
 };
 
 export const needsLightText = (bgColor: string = '') => {
-  const { red, green, blue, opacity } = parseRgbString(bgColor);
+  const rgb = parseRgbString(bgColor);
+  if (!rgb) {
+    return false;
+  }
+
+  const { red, green, blue, opacity } = rgb;
   return isColorDark(red, green, blue) && opacity !== 0;
 };
