@@ -80,8 +80,18 @@ export const getTopNavLinks = ({
     }),
     testId: 'discoverSaveButton',
     run: async () => {
-      const actualIndexPattern = await getPersisted(indexPattern);
-      onSaveSearch({ savedSearch, services, indexPattern: actualIndexPattern, navigateTo, state });
+      try {
+        const actualIndexPattern = await getPersisted(indexPattern);
+        onSaveSearch({
+          savedSearch,
+          services,
+          indexPattern: actualIndexPattern,
+          navigateTo,
+          state,
+        });
+      } catch (_) {
+        // user rejected saving a temporary saved search
+      }
     },
   };
 
@@ -114,34 +124,37 @@ export const getTopNavLinks = ({
       if (!services.share) {
         return;
       }
-      const actualIndexPattern = await getPersisted(indexPattern);
-      searchSource.setField('index', actualIndexPattern);
-      const sharingData = await getSharingData(
-        searchSource,
-        state.appStateContainer.getState(),
-        services
-      );
-
-      services.share.toggleShareContextMenu({
-        anchorElement,
-        allowEmbed: false,
-        allowShortUrl: !!services.capabilities.discover.createShortUrl,
-        shareableUrl: unhashUrl(window.location.href),
-        objectId: savedSearch.id,
-        objectType: 'search',
-        sharingData: {
-          ...sharingData,
-          // CSV reports can be generated without a saved search so we provide a fallback title
-          title:
-            savedSearch.title ||
-            i18n.translate('discover.localMenu.fallbackReportTitle', {
-              defaultMessage: 'Discover search [{date}]',
-              values: { date: moment().toISOString(true) },
-            }),
-        },
-        isDirty: !savedSearch.id || state.isAppStateDirty(),
-        showPublicUrlSwitch,
-      });
+      try {
+        const actualIndexPattern = await getPersisted(indexPattern);
+        searchSource.setField('index', actualIndexPattern);
+        const sharingData = await getSharingData(
+          searchSource,
+          state.appStateContainer.getState(),
+          services
+        );
+        services.share.toggleShareContextMenu({
+          anchorElement,
+          allowEmbed: false,
+          allowShortUrl: !!services.capabilities.discover.createShortUrl,
+          shareableUrl: unhashUrl(window.location.href),
+          objectId: savedSearch.id,
+          objectType: 'search',
+          sharingData: {
+            ...sharingData,
+            // CSV reports can be generated without a saved search so we provide a fallback title
+            title:
+              savedSearch.title ||
+              i18n.translate('discover.localMenu.fallbackReportTitle', {
+                defaultMessage: 'Discover search [{date}]',
+                values: { date: moment().toISOString(true) },
+              }),
+          },
+          isDirty: !savedSearch.id || state.isAppStateDirty(),
+          showPublicUrlSwitch,
+        });
+      } catch (_) {
+        // user rejected saving a temporary saved search
+      }
     },
   };
 

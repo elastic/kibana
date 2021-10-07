@@ -186,21 +186,26 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       if (!canEditIndexPatternField || !selectedIndexPattern) {
         return;
       }
-      const actualIndexPattern = await getPersisted(selectedIndexPattern);
-      const ref = indexPatternFieldEditor.openEditor({
-        ctx: {
-          indexPattern: actualIndexPattern,
-        },
-        fieldName,
-        onSave: async () => {
-          onEditRuntimeField();
-        },
-      });
-      if (setFieldEditorRef) {
-        setFieldEditorRef(ref);
-      }
-      if (closeFlyout) {
-        closeFlyout();
+
+      try {
+        const actualIndexPattern = await getPersisted(selectedIndexPattern);
+        const ref = indexPatternFieldEditor.openEditor({
+          ctx: {
+            indexPattern: actualIndexPattern,
+          },
+          fieldName,
+          onSave: async () => {
+            onEditRuntimeField();
+          },
+        });
+        if (setFieldEditorRef) {
+          setFieldEditorRef(ref);
+        }
+        if (closeFlyout) {
+          closeFlyout();
+        }
+      } catch (_) {
+        // user rejected saving a temporary saved search
       }
     },
     [

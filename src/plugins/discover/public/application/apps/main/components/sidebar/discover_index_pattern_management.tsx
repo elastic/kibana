@@ -51,10 +51,14 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
   };
 
   const openEditor = async () => {
-    const indexPattern = await getPersisted(props.selectedIndexPattern);
-    await core.application.navigateToApp('management', {
-      path: `/kibana/indexPatterns/patterns/${indexPattern.id}`,
-    });
+    try {
+      const indexPattern = await getPersisted(props.selectedIndexPattern);
+      await core.application.navigateToApp('management', {
+        path: `/kibana/indexPatterns/patterns/${indexPattern.id}`,
+      });
+    } catch (_) {
+      // user rejected saving a temporary saved search
+    }
   };
 
   return (

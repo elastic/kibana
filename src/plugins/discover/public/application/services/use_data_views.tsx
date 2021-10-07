@@ -5,9 +5,63 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import ReactDOM from 'react-dom';
+import { I18nStart } from 'kibana/public';
+import { EuiConfirmModal } from '@elastic/eui';
 import { DataView, IndexPattern } from '../../../../data_views/common';
 import { DiscoverServices } from '../../build_services';
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+let isOpen = false;
+
+export function showConfirmPanel({
+  I18nContext,
+  onConfirm,
+  onCancel,
+}: {
+  I18nContext: I18nStart['Context'];
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  if (isOpen) {
+    return;
+  }
+
+  isOpen = true;
+  const container = document.createElement('div');
+  const onClose = () => {
+    ReactDOM.unmountComponentAtNode(container);
+    document.body.removeChild(container);
+    isOpen = false;
+    onCancel();
+  };
+
+  document.body.appendChild(container);
+  const element = (
+    <I18nContext>
+      <EuiConfirmModal
+        title="Persist temporary saved search"
+        onCancel={onClose}
+        onConfirm={onConfirm}
+        cancelButtonText="No, don't do it"
+        confirmButtonText="Yes, do it"
+        defaultFocusedButton="confirm"
+      >
+        <p>If you continue the temporary saved search will be persisted.</p>
+        <p>Are you sure you want to do this?</p>
+      </EuiConfirmModal>
+    </I18nContext>
+  );
+  ReactDOM.render(element, container);
+}
 
 export interface DiscoverDataViewEntry {
   id: string;
@@ -73,13 +127,22 @@ export function useDataViews(
       if (!newDataView.tmp) {
         return newDataView;
       }
-      return await services.data.dataViews.createAndSave({
-        id: newDataView.id,
-        title: newDataView.title,
-        timeFieldName: newDataView.timefield,
+      return new Promise((resolve, reject) => {
+        showConfirmPanel({
+          I18nContext: services.core.i18n.Context,
+          onConfirm: async () => {
+            const persisted = await services.data.dataViews.createAndSave({
+              id: newDataView.id,
+              title: newDataView.title,
+              timeFieldName: newDataView.timefield,
+            });
+            resolve(persisted);
+          },
+          onCancel: () => reject(),
+        });
       });
     },
-    [services.data.dataViews]
+    [services.core.i18n.Context, services.data.dataViews]
   );
 
   useEffect(() => {

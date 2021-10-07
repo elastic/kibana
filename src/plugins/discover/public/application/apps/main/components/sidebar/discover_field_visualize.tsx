@@ -45,12 +45,15 @@ export const DiscoverFieldVisualize: React.FC<Props> = React.memo(
     const handleVisualizeLinkClick = async (
       event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
     ) => {
-      // regular link click. let the uiActions code handle the navigation and show popup if needed
-      const actualIndexPattern = await getPersisted(indexPattern);
-
       event.preventDefault();
-      trackUiMetric?.(METRIC_TYPE.CLICK, 'visualize_link_click');
-      triggerVisualizeActions(visualizeInfo.field, actualIndexPattern.id!, details.columns);
+      // regular link click. let the uiActions code handle the navigation and show popup if needed
+      try {
+        const actualIndexPattern = await getPersisted(indexPattern);
+        trackUiMetric?.(METRIC_TYPE.CLICK, 'visualize_link_click');
+        triggerVisualizeActions(visualizeInfo.field, actualIndexPattern.id!, details.columns);
+      } catch (_) {
+        // user rejected saving a temporary saved search
+      }
     };
 
     return (
