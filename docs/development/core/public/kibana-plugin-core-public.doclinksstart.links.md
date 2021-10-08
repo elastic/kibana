@@ -146,6 +146,7 @@ readonly links: {
             readonly ruleChangeLog: string;
             readonly detectionsReq: string;
             readonly networkMap: string;
+            readonly troubleshootGaps: string;
         };
         readonly query: {
             readonly eql: string;
