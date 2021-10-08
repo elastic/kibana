@@ -21,7 +21,7 @@ export interface MetricArguments {
   percentageMode: boolean;
   colorMode: ColorMode;
   showLabels: boolean;
-  palette: PaletteOutput<CustomPaletteState>;
+  palette?: PaletteOutput<CustomPaletteState>;
   font: Style;
   metric: ExpressionValueVisDimension[];
   bucket: ExpressionValueVisDimension;

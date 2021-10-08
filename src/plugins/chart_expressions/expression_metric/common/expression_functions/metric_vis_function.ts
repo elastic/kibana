@@ -42,7 +42,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       help: i18n.translate('expressionMetricVis.function.palette.help', {
         defaultMessage: '!!!! TODO add description',
       }),
-      default: `{palette}`,
     },
     showLabels: {
       types: ['boolean'],
@@ -74,7 +73,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     },
   },
   fn(input, args, handlers) {
-    if (args.percentageMode && !args.palette) {
+    if (args.percentageMode && !args.palette?.params) {
       throw new Error('Palette must be provided when using percentageMode');
     }
 
@@ -108,7 +107,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         visType,
         visConfig: {
           metric: {
-            palette: args.palette.params,
+            palette: args.palette?.params,
             percentageMode: args.percentageMode,
             metricColorMode: args.colorMode,
             labels: {
