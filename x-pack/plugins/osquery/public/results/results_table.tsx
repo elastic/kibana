@@ -120,6 +120,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(
     () =>
+      // eslint-disable-next-line react/display-name
       ({ rowIndex, columnId }) => {
         // eslint-disable-next-line react-hooks/rules-of-hooks
         const data = useContext(DataContext);

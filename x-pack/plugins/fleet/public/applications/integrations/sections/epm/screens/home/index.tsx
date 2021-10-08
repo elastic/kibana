@@ -89,7 +89,7 @@ function mapToCard(
     title: item.title,
     version: 'version' in item ? item.version || '' : '',
     release: 'release' in item ? item.release : undefined,
-    uiInternalPathUrl,
+    url: uiInternalPathUrl,
   };
 }
 
