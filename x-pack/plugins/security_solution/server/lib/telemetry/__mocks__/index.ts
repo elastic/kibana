@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ConcreteTaskInstance, TaskStatus } from '../../../../task_manager/server';
-import { TelemetryEventsSender } from './sender';
-import { TelemetryReceiver } from './receiver';
-import { SecurityTelemetryTaskConfig } from './task';
-import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
+import { ConcreteTaskInstance, TaskStatus } from '../../../../../task_manager/server';
+import { TelemetryEventsSender } from '../sender';
+import { TelemetryReceiver } from '../receiver';
+import { SecurityTelemetryTaskConfig } from '../task';
+import { PackagePolicy } from '../../../../../fleet/common/types/models/package_policy';
 
 /**
  * Creates a mocked Telemetry Events Sender

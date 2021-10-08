@@ -14,7 +14,7 @@ import {
   createMockTelemetryEventsSender,
   createMockTelemetryReceiver,
   createMockSecurityTelemetryTask,
-} from './mocks';
+} from './__mocks__';
 
 describe('test security telemetry task', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
