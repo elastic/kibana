@@ -52,7 +52,6 @@ TYPES_DEPS = [
   "//packages/kbn-ui-shared-deps-npm",
   "//packages/kbn-utils",
   "@npm//@elastic/eui",
-  "@npm//resize-observer-polyfill",
   "@npm//webpack",
 ]
 

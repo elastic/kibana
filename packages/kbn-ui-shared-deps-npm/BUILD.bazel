@@ -29,7 +29,6 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/kbn-utils",
   "@npm//@babel/runtime",
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
@@ -60,6 +59,7 @@ RUNTIME_DEPS = [
   "@npm//rxjs",
   "@npm//styled-components",
   "@npm//symbol-observable",
+  "@npm//tslib",
   "@npm//url-loader",
   "@npm//val-loader",
   "@npm//whatwg-fetch",
@@ -70,7 +70,6 @@ WEBPACK_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-utils",
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
   "@npm//@elastic/numeral",
