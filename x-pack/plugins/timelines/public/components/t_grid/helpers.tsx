@@ -243,7 +243,7 @@ export const getCombinedFilterQuery = ({
  * @deprecated
  */
 const replaceStatusField = (filterQuery?: string): string =>
-  filterQuery?.replaceAll('signal.status', ALERT_WORKFLOW_STATUS) ?? '';
+  filterQuery?.replace(/signal\.status/g, ALERT_WORKFLOW_STATUS) ?? '';
 
 /**
  * The CSS class name of a "stateful event", which appears in both

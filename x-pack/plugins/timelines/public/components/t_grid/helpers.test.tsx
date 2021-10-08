@@ -9,11 +9,27 @@ import { cloneDeep } from 'lodash/fp';
 import { esFilters, EsQueryConfig, Filter } from '../../../../../../src/plugins/data/public';
 import { DataProviderType } from '../../../common/types/timeline';
 import { mockBrowserFields, mockDataProviders, mockIndexPattern } from '../../mock';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
-import { buildGlobalQuery, combineQueries, resolverIsShowing, showGlobalFilters } from './helpers';
+import {
+  buildCombinedQuery,
+  buildGlobalQuery,
+  combineQueries,
+  resolverIsShowing,
+  showGlobalFilters,
+} from './helpers';
+
+jest.mock('../utils/keury', () => {
+  const actual = jest.requireActual('../utils/keury');
+  return {
+    ...actual,
+    convertToBuildEsQuery: jest.fn(actual.convertToBuildEsQuery),
+  };
+});
+import { convertToBuildEsQuery } from '../utils/keury';
+const convertToBuildEsQueryMock = convertToBuildEsQuery as jest.Mock;
 
 const cleanUpKqlQuery = (str: string) => str.replace(/\n/g, '').replace(/\s\s+/g, ' ');
-
 describe('Build KQL Query', () => {
   test('Build KQL query with one data provider', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
@@ -536,6 +552,76 @@ describe('Combined Queries', () => {
     expect(filterQuery).toMatchInlineSnapshot(
       `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 1\\"}}],\\"minimum_should_match\\":1}},{\\"match_phrase\\":{\\"nestedField.secondAttributes\\":\\"test\\"}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
+  });
+
+  describe('buildCombinedQuery', () => {
+    beforeEach(() => {
+      convertToBuildEsQueryMock.mockClear();
+    });
+
+    test('replaces all signal.status fields', () => {
+      const isEventViewer = true;
+      expect(
+        buildCombinedQuery({
+          config: { ...config, ignoreFilterIfFieldNotInIndex: false },
+          dataProviders: [],
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [
+            {
+              $state: { store: esFilters.FilterStateStore.APP_STATE },
+              meta: {
+                alias: null,
+                disabled: false,
+                key: 'signal.status',
+                negate: false,
+                params: { query: 'open' },
+                type: 'phrase',
+              },
+              query: {
+                terms: {
+                  'signal.status': 'open',
+                },
+              },
+            },
+          ],
+          kqlQuery: { query: 'signal.status: "closed"', language: 'kuery' },
+          kqlMode: 'filter',
+          isEventViewer,
+        })
+      ).toEqual({
+        filterQuery: `{"bool":{"must":[],"filter":[{"bool":{"should":[{"match_phrase":{"${ALERT_WORKFLOW_STATUS}":"closed"}}],"minimum_should_match":1}},{"terms":{"${ALERT_WORKFLOW_STATUS}":"open"}}],"should":[],"must_not":[]}}`,
+      });
+    });
+
+    test('empty filterQuery returns empty string', () => {
+      convertToBuildEsQueryMock.mockReturnValue('');
+      const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+      const builtQuery = buildCombinedQuery({
+        config,
+        dataProviders,
+        indexPattern: mockIndexPattern,
+        browserFields: mockBrowserFields,
+        filters: [],
+        kqlQuery: { query: '', language: 'kuery' },
+        kqlMode: 'filter',
+      });
+      const filterQuery = builtQuery && builtQuery.filterQuery;
+      expect(filterQuery).toBe('');
+    });
+
+    test('empty query, providers and filters returns null', () => {
+      const builtQuery = buildCombinedQuery({
+        config,
+        dataProviders: [],
+        indexPattern: mockIndexPattern,
+        browserFields: mockBrowserFields,
+        filters: [],
+        kqlQuery: { query: '', language: 'kuery' },
+        kqlMode: 'filter',
+      });
+      expect(builtQuery).toBe(null);
+    });
   });
 
   describe('resolverIsShowing', () => {
