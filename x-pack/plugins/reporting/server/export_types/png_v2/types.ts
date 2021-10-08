@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './png_v2';
-export * from './printable_pdf';
-export * from './printable_pdf_v2';
+export type { JobParamsPNGV2, TaskPayloadPNGV2 } from '../../../common/types';
