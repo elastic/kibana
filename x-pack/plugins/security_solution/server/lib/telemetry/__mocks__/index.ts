@@ -15,7 +15,7 @@ import { PackagePolicy } from '../../../../../fleet/common/types/models/package_
  * Creates a mocked Telemetry Events Sender
  */
 export const createMockTelemetryEventsSender = (
-  enableTelemtry: boolean
+  enableTelemetry: boolean
 ): jest.Mocked<TelemetryEventsSender> => {
   return {
     setup: jest.fn(),
@@ -24,7 +24,7 @@ export const createMockTelemetryEventsSender = (
     fetchTelemetryUrl: jest.fn(),
     queueTelemetryEvents: jest.fn(),
     processEvents: jest.fn(),
-    isTelemetryOptedIn: jest.fn().mockReturnValue(enableTelemtry ?? jest.fn()),
+    isTelemetryOptedIn: jest.fn().mockReturnValue(enableTelemetry ?? jest.fn()),
     sendIfDue: jest.fn(),
     sendEvents: jest.fn(),
   } as unknown as jest.Mocked<TelemetryEventsSender>;
