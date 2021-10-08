@@ -14,6 +14,7 @@ export { IpFormat } from './ip';
 export { NumberFormat } from './number';
 export { PercentFormat } from './percent';
 export { StringFormat } from './string';
+export { SourceFormat } from './source';
 export { ColorFormat } from './color';
 export { TruncateFormat } from './truncate';
 export { BoolFormat } from './boolean';
