@@ -5,10 +5,19 @@
  * 2.0.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { Size, LayoutParams } from './layout';
-import type { BaseParams, BasePayload } from './base';
+import type { JobId, BaseParams, BasePayload } from './base';
 
+export { JobId, BaseParams, BasePayload };
+export { Size, LayoutParams };
+export {
+  DownloadReportFn,
+  IlmPolicyMigrationStatus,
+  IlmPolicyStatusResponse,
+  LocatorParams,
+  ManagementLinkFn,
+  UrlOrUrlLocatorTuple,
+} from './url';
 export * from './export_types';
 
 export interface PageSizeParams {
@@ -24,8 +33,6 @@ export interface PdfImageSize {
   width: number;
   height?: number;
 }
-
-export { Size, LayoutParams };
 
 export interface ReportDocumentHead {
   _id: string;
@@ -45,8 +52,6 @@ export interface TaskRunResult {
   max_size_reached?: boolean;
   warnings?: string[];
 }
-
-export { BaseParams, BasePayload };
 
 export interface ReportSource {
   /*
@@ -92,8 +97,6 @@ export interface ReportSource {
 export interface ReportDocument extends ReportDocumentHead {
   _source: ReportSource;
 }
-
-export type JobId = string;
 
 /*
  * JobStatus:
@@ -147,28 +150,3 @@ export interface JobSummarySet {
   completed: JobSummary[];
   failed: JobSummary[];
 }
-
-type DownloadLink = string;
-export type DownloadReportFn = (jobId: JobId) => DownloadLink;
-
-type ManagementLink = string;
-export type ManagementLinkFn = () => ManagementLink;
-
-export interface LocatorParams<
-  P extends SerializableRecord = SerializableRecord & { forceNow?: string }
-> {
-  id: string;
-  version: string;
-  params: P;
-}
-
-export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed-by-policy' | 'ok';
-
-export interface IlmPolicyStatusResponse {
-  status: IlmPolicyMigrationStatus;
-}
-
-type Url = string;
-type UrlLocatorTuple = [url: Url, locatorParams: LocatorParams];
-
-export type UrlOrUrlLocatorTuple = Url | UrlLocatorTuple;

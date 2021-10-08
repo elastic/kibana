@@ -6,3 +6,4 @@
  */
 
 export * from './printable_pdf';
+export * from './printable_pdf_v2';

@@ -8,6 +8,8 @@
 import type { Ensure, SerializableRecord } from '@kbn/utility-types';
 import type { LayoutParams } from './layout';
 
+export type JobId = string;
+
 export type BaseParams = Ensure<
   {
     layout?: LayoutParams;
