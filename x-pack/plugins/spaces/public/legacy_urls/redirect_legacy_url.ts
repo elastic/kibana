@@ -10,9 +10,9 @@ import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import type { StartServicesAccessor } from 'src/core/public';
 
-import type { PluginsStart } from '../../plugin';
-import type { SpacesApiUi } from '../../ui_api';
-import { DEFAULT_OBJECT_NOUN } from '../components/constants';
+import { DEFAULT_OBJECT_NOUN } from '../constants';
+import type { PluginsStart } from '../plugin';
+import type { SpacesApiUi } from '../ui_api';
 
 export function createRedirectLegacyUrl(
   getStartServices: StartServicesAccessor<PluginsStart>
@@ -22,10 +22,10 @@ export function createRedirectLegacyUrl(
     const { currentAppId$, navigateToApp } = application;
     const appId = await currentAppId$.pipe(first()).toPromise(); // retrieve the most recent value from the BehaviorSubject
 
-    const title = i18n.translate('xpack.spaces.shareToSpace.redirectLegacyUrlToast.title', {
+    const title = i18n.translate('xpack.spaces.redirectLegacyUrlToast.title', {
       defaultMessage: `We redirected you to a new URL`,
     });
-    const text = i18n.translate('xpack.spaces.shareToSpace.redirectLegacyUrlToast.text', {
+    const text = i18n.translate('xpack.spaces.redirectLegacyUrlToast.text', {
       defaultMessage: `The {objectNoun} you're looking for has a new location. Use this URL from now on.`,
       values: { objectNoun },
     });

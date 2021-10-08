@@ -48,7 +48,7 @@ export function getLensAttributeService(
         outcome,
         alias_target_id: aliasTargetId,
       } = await savedObjectStore.load(savedObjectId);
-      const { attributes, references, type, id } = savedObject;
+      const { attributes, references, id } = savedObject;
       const document = {
         ...attributes,
         references,
@@ -57,14 +57,7 @@ export function getLensAttributeService(
       const sharingSavedObjectProps = {
         aliasTargetId,
         outcome,
-        errorJSON:
-          outcome === 'conflict'
-            ? JSON.stringify({
-                targetType: type,
-                sourceId: id,
-                targetSpace: (await startDependencies.spaces.getActiveSpace()).id,
-              })
-            : undefined,
+        sourceId: id,
       };
 
       return {

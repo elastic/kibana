@@ -10,11 +10,8 @@ import type { ReactElement } from 'react';
 import type { CoreStart } from 'src/core/public';
 
 import type { CopyToSpaceFlyoutProps } from '../copy_saved_objects_to_space';
-import type {
-  LegacyUrlConflictProps,
-  SavedObjectConflictMessageProps,
-  ShareToSpaceFlyoutProps,
-} from '../share_saved_objects_to_space';
+import type { EmbeddableLegacyUrlConflictProps, LegacyUrlConflictProps } from '../legacy_urls';
+import type { ShareToSpaceFlyoutProps } from '../share_saved_objects_to_space';
 import type { SpaceAvatarProps } from '../space_avatar';
 import type { SpaceListProps } from '../space_list';
 import type { SpacesContextProps, SpacesReactContextValue } from '../spaces_context';
@@ -89,6 +86,12 @@ export interface SpacesApiUiComponent {
    */
   getSpaceList: LazyComponentFn<SpaceListProps>;
   /**
+   * Displays a callout that needs to be used if an embeddable component call to `SavedObjectsClient.resolve()` results in an `"conflict"`
+   * outcome, which indicates that the user has loaded an embeddable which is associated directly with one object (A), *and* with a legacy
+   * URL that points to a different object (B).
+   */
+  getEmbeddableLegacyUrlConflict: LazyComponentFn<EmbeddableLegacyUrlConflictProps>;
+  /**
    * Displays a callout that needs to be used if a call to `SavedObjectsClient.resolve()` results in an `"conflict"` outcome, which
    * indicates that the user has loaded the page which is associated directly with one object (A), *and* with a legacy URL that points to a
    * different object (B).
@@ -110,8 +113,4 @@ export interface SpacesApiUiComponent {
    * Displays an avatar for the given space.
    */
   getSpaceAvatar: LazyComponentFn<SpaceAvatarProps>;
-  /**
-   * Displays a saved object conflict message that directs user to disable legacy URL alias
-   */
-  getSavedObjectConflictMessage: LazyComponentFn<SavedObjectConflictMessageProps>;
 }

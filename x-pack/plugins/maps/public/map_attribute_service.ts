@@ -14,12 +14,11 @@ import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/sav
 import { getCoreOverlays, getEmbeddableService, getSavedObjectsClient } from './kibana_services';
 import { extractReferences, injectReferences } from '../common/migrations/references';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
-import { getSpacesApi } from './kibana_services';
 
 export interface SharingSavedObjectProps {
   outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
   aliasTargetId?: string;
-  errorJSON?: string;
+  sourceId?: string;
 }
 
 type MapDoc = MapSavedObjectAttributes & {
@@ -88,14 +87,7 @@ export function getMapAttributeService(): MapAttributeService {
         sharingSavedObjectProps: {
           aliasTargetId,
           outcome,
-          errorJSON:
-            outcome === 'conflict' && getSpacesApi()
-              ? JSON.stringify({
-                  targetType: MAP_SAVED_OBJECT_TYPE,
-                  sourceId: savedObjectId,
-                  targetSpace: (await getSpacesApi()!.getActiveSpace()).id,
-                })
-              : undefined,
+          sourceId: savedObjectId,
         },
       };
     },
