@@ -65,11 +65,8 @@ export const getNumberOfItems = async (
     logger.error(err);
     throw new Error(
       i18n.translate('xpack.reporting.screencapture.readVisualizationsError', {
-        defaultMessage: `An error occurred when trying to read the page for visualization panel info. You may need to increase '{configKey}'. {error}`,
-        values: {
-          error: err,
-          configKey: 'xpack.reporting.capture.timeouts.waitForElements',
-        },
+        defaultMessage: `An error occurred when trying to read the page for visualization panel info: {error}`,
+        values: { error: err },
       })
     );
   }

@@ -54,12 +54,8 @@ export const waitForVisualizations = async (
     logger.error(err);
     throw new Error(
       i18n.translate('xpack.reporting.screencapture.couldntFinishRendering', {
-        defaultMessage: `An error occurred when trying to wait for {count} visualizations to finish rendering. You may need to increase '{configKey}'. {error}`,
-        values: {
-          count: toEqual,
-          configKey: 'xpack.reporting.capture.timeouts.renderComplete',
-          error: err,
-        },
+        defaultMessage: `An error occurred when trying to wait for {count} visualizations to finish rendering. {error}`,
+        values: { count: toEqual, error: err },
       })
     );
   }

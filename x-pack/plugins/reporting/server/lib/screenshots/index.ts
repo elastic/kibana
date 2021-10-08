@@ -49,6 +49,12 @@ export interface Screenshot {
   description: string | null;
 }
 
+export interface PageSetupResults {
+  elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
+  timeRange: string | null;
+  error?: Error;
+}
+
 export interface ScreenshotResults {
   timeRange: string | null;
   screenshots: Screenshot[];
