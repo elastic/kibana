@@ -7,6 +7,8 @@
 
 import React, { useState } from 'react';
 
+import { useActions } from 'kea';
+
 import {
   EuiButtonIcon,
   EuiListGroup,
@@ -16,20 +18,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-interface Props {
-  onAccept: () => void;
-  onAutomate: () => void;
-  onReject: () => void;
-  onTurnOff: () => void;
-}
+import { CurationSuggestionLogic } from './curation_suggestion_logic';
 
-export const CurationActionsPopover: React.FC<Props> = ({
-  onAccept,
-  onAutomate,
-  onReject,
-  onTurnOff,
-}) => {
+export const CurationActionsPopover: React.FC = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const {
+    acceptSuggestion,
+    acceptAndAutomateSuggestion,
+    rejectSuggestion,
+    rejectAndDisableSuggestion,
+  } = useActions(CurationSuggestionLogic);
 
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
@@ -63,7 +61,7 @@ export const CurationActionsPopover: React.FC<Props> = ({
             'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.actionsAcceptButtonLabel',
             { defaultMessage: 'Accept this suggestion' }
           )}
-          onClick={onAccept}
+          onClick={acceptSuggestion}
           data-test-subj="acceptButton"
         />
         <EuiListGroupItem
@@ -73,7 +71,7 @@ export const CurationActionsPopover: React.FC<Props> = ({
             'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.actionsAutomateButtonLabel',
             { defaultMessage: 'Automate - always accept new suggestions for this query' }
           )}
-          onClick={onAutomate}
+          onClick={acceptAndAutomateSuggestion}
           data-test-subj="automateButton"
         />
         <EuiListGroupItem
@@ -83,7 +81,7 @@ export const CurationActionsPopover: React.FC<Props> = ({
             'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.actionsRejectButtonLabel',
             { defaultMessage: 'Reject this suggestion' }
           )}
-          onClick={onReject}
+          onClick={rejectSuggestion}
           data-test-subj="rejectButton"
         />
         <EuiListGroupItem
@@ -93,7 +91,7 @@ export const CurationActionsPopover: React.FC<Props> = ({
             'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.actionsTurnOffButtonLabel',
             { defaultMessage: 'Reject and turn off suggestions for this query' }
           )}
-          onClick={onTurnOff}
+          onClick={rejectAndDisableSuggestion}
           data-test-subj="turnoffButton"
         />
       </EuiListGroup>
