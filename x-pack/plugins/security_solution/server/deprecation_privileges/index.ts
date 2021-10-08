@@ -126,7 +126,8 @@ export const registerPrivilegeDeprecations = ({
             title: i18n.translate(
               'xpack.securitySolution.privilegeDeprecations.casesSubFeaturePrivileges.title',
               {
-                defaultMessage: 'Deprecate cases sub-feature privileges in security solution',
+                defaultMessage: 'The "{roleName}" role needs to be updated',
+                values: { roleName },
               }
             ),
             message: i18n.translate(
