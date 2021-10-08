@@ -14,7 +14,7 @@ import { Datatable } from '../../../../expressions/public';
 import { CustomPaletteState } from '../../../../charts/public';
 import { getFormatService, getPaletteService } from '../../../expression_metric/public/services';
 import { ExpressionValueVisDimension } from '../../../../visualizations/public';
-import { formatValue, getMinMaxForColumns, MinMax, shouldApplyColor } from '../utils';
+import { formatValue, shouldApplyColor } from '../utils';
 
 import './metric.scss';
 import { getColumnByAccessor } from '../utils/accessor';
@@ -28,8 +28,11 @@ export interface MetricVisComponentProps {
 }
 
 class MetricVisComponent extends Component<MetricVisComponentProps> {
-  private getColor(value: number, paletteParams: CustomPaletteState | undefined, minMax: MinMax) {
-    return getPaletteService().get('custom')?.getColorForValue?.(value, paletteParams, minMax);
+  private getColor(value: number, paletteParams: CustomPaletteState) {
+    return getPaletteService().get('custom')?.getColorForValue?.(value, paletteParams, {
+      min: paletteParams.rangeMin,
+      max: paletteParams.rangeMax,
+    });
   }
 
   private processTableGroups(table: Datatable) {
@@ -51,12 +54,10 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
       (acc: MetricOptions[], metric: ExpressionValueVisDimension) => {
         const column = getColumnByAccessor(metric.accessor, table?.columns);
         const formatter = getFormatService().deserialize(metric.format);
-        const minMax = getMinMaxForColumns(table);
         const metrics = table.rows.map((row, rowIndex) => {
           let title = column.name;
           let value: number = row[column.id];
-          const columnMinMax = minMax[column.id];
-          const color = this.getColor(value, palette, columnMinMax);
+          const color = palette ? this.getColor(value, palette) : undefined;
 
           if (isPercentageMode && stops.length) {
             value = (value - min) / (max - min);

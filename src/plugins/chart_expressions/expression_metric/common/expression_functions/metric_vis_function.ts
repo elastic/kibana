@@ -13,7 +13,6 @@ import { prepareLogTable, Dimension } from '../../../../visualizations/common/pr
 import { ColorMode } from '../../../../charts/common';
 import { MetricVisExpressionFunctionDefinition } from '../types';
 import { EXPRESSION_METRIC_NAME } from '../constants';
-import { getRangesMinMax } from './utils';
 
 export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
   name: EXPRESSION_METRIC_NAME,
@@ -76,7 +75,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
   },
   fn(input, args, handlers) {
     if (args.percentageMode && !args.palette) {
-      throw new Error('colorRange must be provided when using percentageMode');
+      throw new Error('Palette must be provided when using percentageMode');
     }
 
     const fontSize = Number.parseInt(args.font.spec.fontSize || '', 10);
@@ -109,12 +108,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         visType,
         visConfig: {
           metric: {
-            palette: args.palette.params
-              ? {
-                  ...args.palette.params,
-                  ...getRangesMinMax(args.palette.params),
-                }
-              : undefined,
+            palette: args.palette.params,
             percentageMode: args.percentageMode,
             metricColorMode: args.colorMode,
             labels: {
