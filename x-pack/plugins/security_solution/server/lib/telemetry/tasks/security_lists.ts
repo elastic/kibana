@@ -21,8 +21,6 @@ import { TelemetryEventsSender } from '../sender';
 import { TelemetryReceiver } from '../receiver';
 import { TaskExecutionPeriod } from '../task';
 
-const MAX_TELEMETRY_BATCH = 1_000;
-
 export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number) {
   return {
     type: 'security:telemetry-lists',
