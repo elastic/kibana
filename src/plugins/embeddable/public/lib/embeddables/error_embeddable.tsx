@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiText, EuiIcon, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { EuiText, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { Markdown } from '../../../../kibana_react/public';
 import { Embeddable } from './embeddable';
-import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import { EmbeddableInput, IEmbeddable } from './i_embeddable';
 import { IContainer } from '../containers';
 
 export const ERROR_EMBEDDABLE_TYPE = 'error';
@@ -22,12 +22,15 @@ export function isErrorEmbeddable<TEmbeddable extends IEmbeddable>(
   return Boolean(embeddable.fatalError || (embeddable as ErrorEmbeddable).error !== undefined);
 }
 
-export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutput> {
+export class ErrorEmbeddable extends Embeddable {
   public readonly type = ERROR_EMBEDDABLE_TYPE;
-  public error: Error | string;
   private dom?: HTMLElement;
 
-  constructor(error: Error | string, input: EmbeddableInput, parent?: IContainer) {
+  constructor(
+    public error: Error | string | JSX.Element,
+    input: EmbeddableInput,
+    parent?: IContainer
+  ) {
     super(input, {}, parent);
     this.error = error;
   }
@@ -35,7 +38,18 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
   public reload() {}
 
   public render(dom: HTMLElement) {
-    const title = typeof this.error === 'string' ? this.error : this.error.message;
+    let body: JSX.Element | null = null;
+
+    if (typeof this.error === 'string' || this.error instanceof Error) {
+      const title = typeof this.error === 'string' ? this.error : this.error.message;
+
+      body = (
+        <Markdown markdown={title} openLinksInNewTab={true} data-test-subj="errorMessageMarkdown" />
+      );
+    } else if (React.isValidElement(this.error)) {
+      body = this.error;
+    }
+
     this.dom = dom;
     ReactDOM.render(
       // @ts-ignore
@@ -43,11 +57,7 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
         <EuiText color="subdued" size="xs">
           <EuiIcon type="alert" color="danger" />
           <EuiSpacer size="s" />
-          <Markdown
-            markdown={title}
-            openLinksInNewTab={true}
-            data-test-subj="errorMessageMarkdown"
-          />
+          {body}
         </EuiText>
       </div>,
       dom
