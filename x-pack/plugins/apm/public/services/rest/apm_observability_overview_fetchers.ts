@@ -17,7 +17,7 @@ export const fetchObservabilityOverviewPageData = async ({
   bucketSize,
 }: FetchDataParams): Promise<ApmFetchDataResponse> => {
   const data = await callApmApi({
-    endpoint: 'GET /api/apm/observability_overview',
+    endpoint: 'GET /internal/apm/observability_overview',
     signal: null,
     params: {
       query: {
@@ -52,7 +52,7 @@ export const fetchObservabilityOverviewPageData = async ({
 
 export async function getHasData() {
   return await callApmApi({
-    endpoint: 'GET /api/apm/observability_overview/has_data',
+    endpoint: 'GET /internal/apm/observability_overview/has_data',
     signal: null,
   });
 }
