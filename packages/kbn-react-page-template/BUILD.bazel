@@ -61,7 +61,10 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
-  web = False,
+  additional_args = [
+    "--copy-files",
+    "--quiet"
+  ],
 )
 
 ts_config(
