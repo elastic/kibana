@@ -21,7 +21,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
     describe('when omitting `_inspect` query param', () => {
       it('returns response without `_inspect`', async () => {
         const { status, body } = await apmApiClient.readUser({
-          endpoint: 'GET /api/apm/environments',
+          endpoint: 'GET /internal/apm/environments',
           params: {
             query: {
               start: metadata.start,
@@ -39,7 +39,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
       describe('elasticsearch calls made with end-user auth are returned', () => {
         it('for environments', async () => {
           const { status, body } = await apmApiClient.readUser({
-            endpoint: 'GET /api/apm/environments',
+            endpoint: 'GET /internal/apm/environments',
             params: {
               query: {
                 start: metadata.start,
@@ -67,7 +67,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
       describe('elasticsearch calls made with internal user are not return', () => {
         it('for custom links', async () => {
           const { status, body } = await apmApiClient.readUser({
-            endpoint: 'GET /api/apm/settings/custom_links',
+            endpoint: 'GET /internal/apm/settings/custom_links',
             params: {
               query: {
                 'service.name': 'opbeans-node',

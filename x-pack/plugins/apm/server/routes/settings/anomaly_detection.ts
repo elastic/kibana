@@ -23,7 +23,7 @@ import { createApmServerRouteRepository } from '../create_apm_server_route_repos
 
 // get ML anomaly detection jobs for each environment
 const anomalyDetectionJobsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/anomaly-detection/jobs',
+  endpoint: 'GET /internal/apm/settings/anomaly-detection/jobs',
   options: {
     tags: ['access:apm', 'access:ml:canGetJobs'],
   },
@@ -51,7 +51,7 @@ const anomalyDetectionJobsRoute = createApmServerRoute({
 
 // create new ML anomaly detection jobs for each given environment
 const createAnomalyDetectionJobsRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/settings/anomaly-detection/jobs',
+  endpoint: 'POST /internal/apm/settings/anomaly-detection/jobs',
   options: {
     tags: ['access:apm', 'access:apm_write', 'access:ml:canCreateJob'],
   },
@@ -83,7 +83,7 @@ const createAnomalyDetectionJobsRoute = createApmServerRoute({
 
 // get all available environments to create anomaly detection jobs for
 const anomalyDetectionEnvironmentsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/anomaly-detection/environments',
+  endpoint: 'GET /internal/apm/settings/anomaly-detection/environments',
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);

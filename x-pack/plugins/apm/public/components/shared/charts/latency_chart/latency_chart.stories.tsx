@@ -42,8 +42,8 @@ import {
 import { LatencyChart } from './';
 
 interface Args {
-  alertsResponse: APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>;
-  latencyChartResponse: APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/latency'>;
+  alertsResponse: APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>;
+  latencyChartResponse: APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>;
 }
 
 export default {
@@ -70,7 +70,7 @@ export default {
             basePath: { prepend: () => {} },
             get: (endpoint: string) => {
               switch (endpoint) {
-                case `/api/apm/services/${serviceName}/transactions/charts/latency`:
+                case `/internal/apm/services/${serviceName}/transactions/charts/latency`:
                   return latencyChartResponse;
                 default:
                   return {};

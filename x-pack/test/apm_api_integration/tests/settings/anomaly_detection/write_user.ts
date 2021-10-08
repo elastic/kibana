@@ -15,12 +15,14 @@ export default function apiTest({ getService }: FtrProviderContext) {
   const legacyWriteUserClient = getService('legacySupertestAsApmWriteUser');
 
   function getJobs() {
-    return apmApiClient.writeUser({ endpoint: `GET /api/apm/settings/anomaly-detection/jobs` });
+    return apmApiClient.writeUser({
+      endpoint: `GET /internal/apm/settings/anomaly-detection/jobs`,
+    });
   }
 
   function createJobs(environments: string[]) {
     return apmApiClient.writeUser({
-      endpoint: `POST /api/apm/settings/anomaly-detection/jobs`,
+      endpoint: `POST /internal/apm/settings/anomaly-detection/jobs`,
       params: {
         body: { environments },
       },

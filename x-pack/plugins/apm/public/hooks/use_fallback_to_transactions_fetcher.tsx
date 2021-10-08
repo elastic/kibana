@@ -19,7 +19,7 @@ export function useFallbackToTransactionsFetcher({ kuery }: { kuery: string }) {
   const { data = { fallbackToTransactions: false } } = useFetcher(
     (callApmApi) => {
       return callApmApi({
-        endpoint: 'GET /api/apm/fallback_to_transactions',
+        endpoint: 'GET /internal/apm/fallback_to_transactions',
         params: {
           query: { kuery, start, end },
         },

@@ -17,12 +17,12 @@ export default function apiTest({ getService }: FtrProviderContext) {
   type SupertestAsUser = typeof noAccessUser | typeof readUser | typeof writeUser;
 
   function getJobs(user: SupertestAsUser) {
-    return user.get(`/api/apm/settings/anomaly-detection/jobs`).set('kbn-xsrf', 'foo');
+    return user.get(`/internal/apm/settings/anomaly-detection/jobs`).set('kbn-xsrf', 'foo');
   }
 
   function createJobs(user: SupertestAsUser, environments: string[]) {
     return user
-      .post(`/api/apm/settings/anomaly-detection/jobs`)
+      .post(`/internal/apm/settings/anomaly-detection/jobs`)
       .send({ environments })
       .set('kbn-xsrf', 'foo');
   }

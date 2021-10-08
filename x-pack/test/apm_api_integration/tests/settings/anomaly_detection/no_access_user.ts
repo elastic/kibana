@@ -13,12 +13,12 @@ export default function apiTest({ getService }: FtrProviderContext) {
   const noAccessUser = getService('legacySupertestAsNoAccessUser');
 
   function getJobs() {
-    return noAccessUser.get(`/api/apm/settings/anomaly-detection/jobs`).set('kbn-xsrf', 'foo');
+    return noAccessUser.get(`/internal/apm/settings/anomaly-detection/jobs`).set('kbn-xsrf', 'foo');
   }
 
   function createJobs(environments: string[]) {
     return noAccessUser
-      .post(`/api/apm/settings/anomaly-detection/jobs`)
+      .post(`/internal/apm/settings/anomaly-detection/jobs`)
       .send({ environments })
       .set('kbn-xsrf', 'foo');
   }

@@ -7,7 +7,7 @@
 import { getPolicyOptions } from './get_policy_options';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
 
-type APIResponseType = APIReturnType<'GET /api/apm/fleet/agents'>;
+type APIResponseType = APIReturnType<'GET /internal/apm/fleet/agents'>;
 
 const policyElasticAgentOnCloudAgent = {
   id: 'policy-elastic-agent-on-cloud',

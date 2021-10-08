@@ -13,7 +13,7 @@ import { processorEventRt } from '../../common/processor_event';
 import { setupRequest } from '../lib/helpers/setup_request';
 
 const eventMetadataRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/event_metadata/{processorEvent}/{id}',
+  endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
   options: { tags: ['access:apm'] },
   params: t.type({
     path: t.type({
