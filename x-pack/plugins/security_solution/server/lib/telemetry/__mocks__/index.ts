@@ -15,7 +15,7 @@ import { PackagePolicy } from '../../../../../fleet/common/types/models/package_
  * Creates a mocked Telemetry Events Sender
  */
 export const createMockTelemetryEventsSender = (
-  enableTelemetry: boolean
+  enableTelemetry?: boolean
 ): jest.Mocked<TelemetryEventsSender> => {
   return {
     setup: jest.fn(),
@@ -30,13 +30,15 @@ export const createMockTelemetryEventsSender = (
   } as unknown as jest.Mocked<TelemetryEventsSender>;
 };
 
-export const createMockTelemetryReceiver = (): jest.Mocked<TelemetryReceiver> => {
+export const createMockTelemetryReceiver = (
+  diagnosticsAlert?: unknown
+): jest.Mocked<TelemetryReceiver> => {
   return {
     start: jest.fn(),
     fetchClusterInfo: jest.fn(),
     fetchLicenseInfo: jest.fn(),
     copyLicenseFields: jest.fn(),
-    fetchDiagnosticAlerts: jest.fn(),
+    fetchDiagnosticAlerts: jest.fn().mockReturnValue(diagnosticsAlert ?? jest.fn()),
     fetchEndpointMetrics: jest.fn(),
     fetchEndpointPolicyResponses: jest.fn(),
     fetchTrustedApplications: jest.fn(),
