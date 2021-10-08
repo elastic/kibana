@@ -38,10 +38,12 @@ export const createMockTelemetryReceiver = (
     fetchClusterInfo: jest.fn(),
     fetchLicenseInfo: jest.fn(),
     copyLicenseFields: jest.fn(),
+    fetchFleetAgents: jest.fn(),
     fetchDiagnosticAlerts: jest.fn().mockReturnValue(diagnosticsAlert ?? jest.fn()),
     fetchEndpointMetrics: jest.fn(),
     fetchEndpointPolicyResponses: jest.fn(),
     fetchTrustedApplications: jest.fn(),
+    fetchEndpointList: jest.fn(),
   } as unknown as jest.Mocked<TelemetryReceiver>;
 };
 

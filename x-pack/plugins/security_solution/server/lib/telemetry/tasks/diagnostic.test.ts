@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from 'src/core/server/mocks';
-import { TelemetryDiagTaskConfig as taskConfig } from './diagnostic';
+import { createTelemetryDiagnosticsTaskConfig } from './diagnostic';
 import { createMockTelemetryEventsSender, createMockTelemetryReceiver } from '../__mocks__';
 
 describe('diagnostics telemetry task test', () => {
@@ -28,8 +28,9 @@ describe('diagnostics telemetry task test', () => {
     };
     const mockTelemetryEventsSender = createMockTelemetryEventsSender();
     const mockTelemetryReceiver = createMockTelemetryReceiver(testDiagnosticsAlerts);
+    const telemetryDiagnoticsTaskConfig = createTelemetryDiagnosticsTaskConfig();
 
-    await TelemetryDiagTaskConfig.runTask(
+    await telemetryDiagnoticsTaskConfig.runTask(
       'test-id',
       logger,
       mockTelemetryReceiver,
