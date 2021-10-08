@@ -8,7 +8,7 @@
 import type { Size, LayoutParams } from './layout';
 import type { JobId, BaseParams, BasePayload } from './base';
 
-export { BaseParams, BasePayload };
+export { JobId, BaseParams, BasePayload };
 export { Size, LayoutParams };
 export {
   DownloadReportFn,
