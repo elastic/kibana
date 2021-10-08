@@ -32,8 +32,11 @@ import * as Rx from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
 import { constants, ReportingStart } from '../../../../../x-pack/plugins/reporting/public';
-import type { JobParamsPDFV2 } from '../../../../plugins/reporting/server/export_types/printable_pdf_v2/types';
-import type { JobParamsPNGV2 } from '../../../../plugins/reporting/server/export_types/png_v2/types';
+import type {
+  JobParamsPNGV2,
+  JobParamsPDF,
+  JobParamsPDFV2,
+} from '../../../../plugins/reporting/public';
 
 import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
 
@@ -80,7 +83,7 @@ export const ReportingExampleApp = ({
       });
   });
 
-  const getPDFJobParamsDefault = () => {
+  const getPDFJobParamsDefault = (): JobParamsPDF => {
     return {
       layout: {
         id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
@@ -88,6 +91,8 @@ export const ReportingExampleApp = ({
       relativeUrls: ['/app/reportingExample#/intended-visualization'],
       objectType: 'develeloperExample',
       title: 'Reporting Developer Example',
+      browserTimezone: '',
+      version: '',
     };
   };
 
