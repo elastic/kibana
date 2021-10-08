@@ -156,6 +156,7 @@ export const useSavedSearch = ({
       refetch$,
       searchSessionManager,
       searchSource,
+      initialFetchStatus,
     });
 
     const subscription = fetch$.subscribe((val) => {

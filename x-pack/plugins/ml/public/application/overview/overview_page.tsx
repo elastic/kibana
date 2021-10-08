@@ -32,6 +32,7 @@ export const OverviewPage: FC = () => {
 
   const [adLazyJobCount, setAdLazyJobCount] = useState(0);
   const [dfaLazyJobCount, setDfaLazyJobCount] = useState(0);
+  const [refreshCount, setRefreshCount] = useState(0);
 
   return (
     <Fragment>
@@ -40,7 +41,7 @@ export const OverviewPage: FC = () => {
         <EuiPageBody>
           <NodeAvailableWarning />
           <JobsAwaitingNodeWarning jobCount={adLazyJobCount + dfaLazyJobCount} />
-          <SavedObjectsWarning />
+          <SavedObjectsWarning onCloseFlyout={() => setRefreshCount(refreshCount + 1)} />
           <UpgradeWarning />
 
           <EuiFlexGroup>
@@ -50,6 +51,7 @@ export const OverviewPage: FC = () => {
               createAnalyticsJobDisabled={disableCreateAnalyticsButton}
               setAdLazyJobCount={setAdLazyJobCount}
               setDfaLazyJobCount={setDfaLazyJobCount}
+              refreshCount={refreshCount}
             />
           </EuiFlexGroup>
         </EuiPageBody>

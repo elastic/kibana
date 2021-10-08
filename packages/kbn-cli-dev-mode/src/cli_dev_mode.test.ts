@@ -74,7 +74,6 @@ const createCliArgs = (parts: Partial<SomeCliArgs> = {}): SomeCliArgs => ({
   runExamples: false,
   watch: true,
   silent: false,
-  quiet: false,
   ...parts,
 });
 

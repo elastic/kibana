@@ -7,10 +7,16 @@
 
 import React from 'react';
 import { OverviewPageComponent } from './overview';
-import { shallowWithRouter } from '../lib';
+import { render } from '../lib/helper/rtl_helpers';
 
 describe('MonitorPage', () => {
-  it('shallow renders expected elements for valid props', () => {
-    expect(shallowWithRouter(<OverviewPageComponent />)).toMatchSnapshot();
+  it('renders expected elements for valid props', async () => {
+    const { findByText, findByPlaceholderText } = render(<OverviewPageComponent />);
+
+    expect(await findByText('No uptime monitors found')).toBeInTheDocument();
+
+    expect(
+      await findByPlaceholderText('Search by monitor ID, name, or url (E.g. http:// )')
+    ).toBeInTheDocument();
   });
 });

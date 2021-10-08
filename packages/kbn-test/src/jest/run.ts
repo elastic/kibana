@@ -21,7 +21,8 @@ import { resolve, relative, sep as osSep } from 'path';
 import { existsSync } from 'fs';
 import { run } from 'jest';
 import { buildArgv } from 'jest-cli/build/cli';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog, getTimeReporter } from '@kbn/dev-utils';
+import { map } from 'lodash';
 
 // yarn test:jest src/core/server/saved_objects
 // yarn test:jest src/core/public/core_system.test.ts
@@ -49,9 +50,14 @@ export function runJest(configName = 'jest.config.js') {
     writeTo: process.stdout,
   });
 
+  const runStartTime = Date.now();
+  const reportTime = getTimeReporter(log, 'scripts/jest');
+  let cwd: string;
+  let testFiles: string[];
+
   if (!argv.config) {
-    const cwd = process.env.INIT_CWD || process.cwd();
-    const testFiles = argv._.splice(2).map((p) => resolve(cwd, p));
+    cwd = process.env.INIT_CWD || process.cwd();
+    testFiles = argv._.splice(2).map((p) => resolve(cwd, p));
     const commonTestFiles = commonBasePath(testFiles);
     const testFilesProvided = testFiles.length > 0;
 
@@ -87,7 +93,14 @@ export function runJest(configName = 'jest.config.js') {
     process.env.NODE_ENV = 'test';
   }
 
-  run();
+  run().then(() => {
+    // Success means that tests finished, doesn't mean they passed.
+    reportTime(runStartTime, 'total', {
+      success: true,
+      isXpack: cwd.includes('x-pack'),
+      testFiles: map(testFiles, (testFile) => relative(cwd, testFile)),
+    });
+  });
 }
 
 /**

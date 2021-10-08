@@ -13,10 +13,12 @@ import { createMemoryHistory } from 'history';
 import { MemoryRouter, RouteComponentProps } from 'react-router-dom';
 import { CoreStart, DocLinksStart, HttpStart } from 'kibana/public';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
+import { createCallApmApi } from '../../../services/rest/createCallApmApi';
 
 const { location } = createMemoryHistory();
 
 const KibanaReactContext = createKibanaReactContext({
+  notifications: { toasts: { add: () => {} } },
   usageCollection: { reportUiCounter: () => {} },
   observability: {
     navigation: {
@@ -39,7 +41,7 @@ const KibanaReactContext = createKibanaReactContext({
       observability: { guide: '' },
     },
   } as unknown as DocLinksStart,
-} as Partial<CoreStart>);
+} as unknown as Partial<CoreStart>);
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -51,8 +53,10 @@ function Wrapper({ children }: { children?: ReactNode }) {
   );
 }
 
-// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
-describe.skip('Settings', () => {
+describe('Settings', () => {
+  beforeEach(() => {
+    createCallApmApi({} as CoreStart);
+  });
   it('renders', async () => {
     const routerProps = {
       location,

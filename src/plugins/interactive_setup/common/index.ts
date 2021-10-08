@@ -8,4 +8,13 @@
 
 export type { InteractiveSetupViewState, EnrollmentToken, Certificate, PingResult } from './types';
 export { ElasticsearchConnectionStatus } from './elasticsearch_connection_status';
-export { VERIFICATION_CODE_LENGTH } from './constants';
+export {
+  ERROR_CONFIGURE_FAILURE,
+  ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED,
+  ERROR_ENROLL_FAILURE,
+  ERROR_KIBANA_CONFIG_FAILURE,
+  ERROR_KIBANA_CONFIG_NOT_WRITABLE,
+  ERROR_OUTSIDE_PREBOOT_STAGE,
+  ERROR_PING_FAILURE,
+  VERIFICATION_CODE_LENGTH,
+} from './constants';

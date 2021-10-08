@@ -39,6 +39,7 @@
 /src/plugins/visualize/ @elastic/kibana-vis-editors
 /src/plugins/visualizations/ @elastic/kibana-vis-editors
 /src/plugins/chart_expressions/expression_tagcloud/ @elastic/kibana-vis-editors
+/src/plugins/chart_expressions/expression_metric/ @elastic/kibana-vis-editors
 /src/plugins/url_forwarding/ @elastic/kibana-vis-editors
 /packages/kbn-tinymath/ @elastic/kibana-vis-editors
 /x-pack/test/functional/apps/lens @elastic/kibana-vis-editors
@@ -243,7 +244,6 @@
 /packages/kbn-std/ @elastic/kibana-core
 /packages/kbn-config/ @elastic/kibana-core
 /packages/kbn-logging/ @elastic/kibana-core
-/packages/kbn-legacy-logging/ @elastic/kibana-core
 /packages/kbn-crypto/ @elastic/kibana-core
 /packages/kbn-http-tools/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
@@ -288,9 +288,7 @@
 
 # Security
 /src/core/server/csp/ @elastic/kibana-security @elastic/kibana-core
-/src/plugins/security_oss/ @elastic/kibana-security
 /src/plugins/interactive_setup/ @elastic/kibana-security
-/test/security_functional/ @elastic/kibana-security
 /x-pack/plugins/spaces/ @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/ @elastic/kibana-security
 /x-pack/plugins/security/ @elastic/kibana-security
@@ -448,4 +446,5 @@
 /docs/setup/configuring-reporting.asciidoc @elastic/kibana-reporting-services @elastic/kibana-app-services
 #CC# /x-pack/plugins/reporting/ @elastic/kibana-reporting-services
 
-
+# EUI design
+/src/plugins/kibana_react/public/page_template/ @elastic/eui-design @elastic/kibana-app-services

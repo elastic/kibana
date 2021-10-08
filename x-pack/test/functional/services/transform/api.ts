@@ -234,6 +234,11 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       await esSupertest.post(`/_transform/${transformId}/_start`).expect(200);
     },
 
+    async stopTransform(transformId: string) {
+      log.debug(`Stopping transform '${transformId}' ...`);
+      await esSupertest.post(`/_transform/${transformId}/_stop`).expect(200);
+    },
+
     async createAndRunTransform(transformId: string, transformConfig: PutTransformsRequestSchema) {
       await this.createTransform(transformId, transformConfig);
       await this.startTransform(transformId);
