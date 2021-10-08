@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { Ensure, SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { Size, LayoutParams } from './layout';
+import type { BaseParams, BasePayload } from './base';
+
+export * from './export_types';
 
 export interface PageSizeParams {
   pageMarginTop: number;
@@ -21,21 +25,7 @@ export interface PdfImageSize {
   height?: number;
 }
 
-export type Size = Ensure<
-  {
-    width: number;
-    height: number;
-  },
-  SerializableRecord
->;
-
-export type LayoutParams = Ensure<
-  {
-    id: string;
-    dimensions?: Size;
-  },
-  SerializableRecord
->;
+export { Size, LayoutParams };
 
 export interface ReportDocumentHead {
   _id: string;
@@ -56,23 +46,7 @@ export interface TaskRunResult {
   warnings?: string[];
 }
 
-export type BaseParams = Ensure<
-  {
-    layout?: LayoutParams;
-    objectType: string;
-    title: string;
-    browserTimezone: string; // to format dates in the user's time zone
-    version: string; // to handle any state migrations
-  },
-  SerializableRecord
->;
-
-// base params decorated with encrypted headers that come into runJob functions
-export interface BasePayload extends BaseParams {
-  headers: string;
-  spaceId?: string;
-  isDeprecated?: boolean;
-}
+export { BaseParams, BasePayload };
 
 export interface ReportSource {
   /*

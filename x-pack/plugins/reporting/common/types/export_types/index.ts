@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { JobParamsPDF, TaskPayloadPDF, JobParamsPDFLegacy } from '../../../common/types';
+export * from './printable_pdf';
