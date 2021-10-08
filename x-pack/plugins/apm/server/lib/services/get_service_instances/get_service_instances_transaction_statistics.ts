@@ -17,6 +17,7 @@ import { Coordinate } from '../../../../typings/timeseries';
 import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
+  getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
@@ -108,6 +109,9 @@ export async function getServiceInstancesTransactionStatistics<
       filter: [
         { term: { [SERVICE_NAME]: serviceName } },
         { term: { [TRANSACTION_TYPE]: transactionType } },
+        ...getDocumentTypeFilterForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
         ...kqlQuery(kuery),
