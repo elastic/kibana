@@ -133,7 +133,8 @@ export const registerPrivilegeDeprecations = ({
               'xpack.securitySolution.privilegeDeprecations.casesSubFeaturePrivileges.message',
               {
                 defaultMessage:
-                  'The "securitySolutions" feature privilege has been populated with siem feature or cases sub feature if existing.',
+                  'The "Security" feature will be split into two separate features in 8.0. The "{roleName}" role grants access to this feature, and it needs to be updated before you upgrade Kibana. This will ensure that users have access to the same features after the upgrade.',
+                values: { roleName },
               }
             ),
             level: 'warning',
