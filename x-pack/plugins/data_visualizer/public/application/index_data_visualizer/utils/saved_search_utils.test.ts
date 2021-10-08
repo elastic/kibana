@@ -13,7 +13,7 @@ import {
 import type { SavedSearchSavedObject } from '../../../../common';
 import type { SavedSearch } from '../../../../../../../src/plugins/discover/public';
 import type { Filter, FilterStateStore } from '@kbn/es-query';
-import { stubbedSavedObjectIndexPattern } from '../../../../../../../src/plugins/data/common/data_views/data_view.stub';
+import { stubbedSavedObjectIndexPattern } from '../../../../../../../src/plugins/data_views/common/data_view.stub';
 import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { fieldFormatsMock } from '../../../../../../../src/plugins/field_formats/common/mocks';
 import { uiSettingsServiceMock } from 'src/core/public/mocks';

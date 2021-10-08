@@ -8,7 +8,7 @@
 
 import { SavedObjectReference } from '../../../../../core/types';
 import { VisParams } from '../../../common';
-import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../../data/public';
+import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../../data/common';
 
 /** @internal **/
 const REF_NAME_POSTFIX = '_ref_name';

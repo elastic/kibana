@@ -9014,6 +9014,7 @@ class CiStatsReporter {
     const upstreamBranch = (_options$upstreamBran = options.upstreamBranch) !== null && _options$upstreamBran !== void 0 ? _options$upstreamBran : this.getUpstreamBranch();
     const kibanaUuid = options.kibanaUuid === undefined ? this.getKibanaUuid() : options.kibanaUuid;
     let email;
+    let branch;
 
     try {
       const {
@@ -9024,16 +9025,32 @@ class CiStatsReporter {
       this.log.debug(e.message);
     }
 
+    try {
+      const {
+        stdout
+      } = await (0, _execa.default)('git', ['branch', '--show-current']);
+      branch = stdout;
+    } catch (e) {
+      this.log.debug(e.message);
+    }
+
+    const memUsage = process.memoryUsage();
     const isElasticCommitter = email && email.endsWith('@elastic.co') ? true : false;
     const defaultMetadata = {
+      kibanaUuid,
+      isElasticCommitter,
       committerHash: email ? _crypto.default.createHash('sha256').update(email).digest('hex').substring(0, 20) : undefined,
+      email: isElasticCommitter ? email : undefined,
+      branch: isElasticCommitter ? branch : undefined,
       cpuCount: (_Os$cpus = _os.default.cpus()) === null || _Os$cpus === void 0 ? void 0 : _Os$cpus.length,
       cpuModel: (_Os$cpus$ = _os.default.cpus()[0]) === null || _Os$cpus$ === void 0 ? void 0 : _Os$cpus$.model,
       cpuSpeed: (_Os$cpus$2 = _os.default.cpus()[0]) === null || _Os$cpus$2 === void 0 ? void 0 : _Os$cpus$2.speed,
-      email: isElasticCommitter ? email : undefined,
       freeMem: _os.default.freemem(),
-      isElasticCommitter,
-      kibanaUuid,
+      memoryUsageRss: memUsage.rss,
+      memoryUsageHeapTotal: memUsage.heapTotal,
+      memoryUsageHeapUsed: memUsage.heapUsed,
+      memoryUsageExternal: memUsage.external,
+      memoryUsageArrayBuffers: memUsage.arrayBuffers,
       nestedTiming: process.env.CI_STATS_NESTED_TIMING ? true : false,
       osArch: _os.default.arch(),
       osPlatform: _os.default.platform(),

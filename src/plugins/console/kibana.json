@@ -1,12 +1,14 @@
 {
   "id": "console",
-  "version": "kibana",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
   "owner": {
     "name": "Stack Management",
     "githubTeam": "kibana-stack-management"
   },
+  "configPath": ["console"],
   "requiredPlugins": ["devTools", "share"],
   "optionalPlugins": ["usageCollection", "home"],
   "requiredBundles": ["esUiShared", "kibanaReact", "kibanaUtils", "home"]

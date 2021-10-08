@@ -21,6 +21,26 @@ GET .kibana/_search
 }
 ```
 
+If you want to manually test the downgrade of an alert then you can use this script.
+```json
+# Set saved object array references as empty arrays and set our migration version to be 7.14.0 
+POST .kibana/_update/alert:38482620-ef1b-11eb-ad71-7de7959be71c
+{
+  "script" : {
+    "source": """
+    ctx._source.migrationVersion.alert = "7.14.0";
+    ctx._source.references = []
+    """,
+    "lang": "painless"
+  }
+}
+```
+
+Reload the alert in the security_solution and notice you get these errors until you restart Kibana to cause a migration moving forward. Although you get errors,
+everything should still operate normally as we try to work even if migrations did not run correctly for any unforeseen reasons.
+
+For testing idempotentence, just re-run the same script above for a downgrade after you restarted Kibana.
+
 ## Structure on disk
 Run a query in dev tools and you should see this code that adds the following savedObject references
 to any newly saved rule:
@@ -141,4 +161,4 @@ Good examples and utilities can be found in the folder of `utils` such as:
 You can follow those patterns but if it doesn't fit your use case it's fine to just create a new file and wire up your new saved object references
 
 ## End to end tests
-At this moment there are none.
+See `test/alerting_api_integration/spaces_only/tests/alerting/migrations.ts` for tests around migrations
