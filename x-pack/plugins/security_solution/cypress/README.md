@@ -207,7 +207,7 @@ node ../../../scripts/es_archiver load auditbeat --dir ../../test/security_solut
 
 # launch the cypress test runner with overridden environment variables
 cd x-pack/plugins/security_solution
-CYPRESS_base_url=http(s)://<username>:<password>@<kbnUrl> CYPRESS_ELASTICSEARCH_URL=http(s)://<username>:<password>@<elsUrl> CYPRESS_ELASTICSEARCH_USERNAME=<username> CYPRESS_ELASTICSEARCH_PASSWORD=<password> CYPRESS_protocol=<httpOrHttps> CYPRESS_hostname=<kibanaInstanceHostName> CYPRESS_configport=<kibanaPort> CYPRESS_KIBANA_URL=<kbnUrl> yarn  cypress:run
+CYPRESS_BASE_URL=http(s)://<username>:<password>@<kbnUrl> CYPRESS_ELASTICSEARCH_URL=http(s)://<username>:<password>@<elsUrl> CYPRESS_ELASTICSEARCH_USERNAME=<username> CYPRESS_ELASTICSEARCH_PASSWORD=<password> yarn  cypress:run
 ```
 
 #### Custom Target + Headless (Firefox)
@@ -225,7 +225,7 @@ node ../../../scripts/es_archiver load auditbeat --dir ../../test/security_solut
 
 # launch the cypress test runner with overridden environment variables
 cd x-pack/plugins/security_solution
-CYPRESS_base_url=http(s)://<username>:<password>@<kbnUrl> CYPRESS_ELASTICSEARCH_URL=http(s)://<username>:<password>@<elsUrl> CYPRESS_ELASTICSEARCH_USERNAME=<username> CYPRESS_ELASTICSEARCH_PASSWORD=<password> CYPRESS_protocol=<httpOrHttps> CYPRESS_hostname=<kibanaInstanceHostName> CYPRESS_configport=<kibanaPort> CYPRESS_KIBANA_URL=<kbnUrl> yarn cypress:run:firefox
+CYPRESS_BASE_URL=http(s)://<username>:<password>@<kbnUrl> CYPRESS_ELASTICSEARCH_URL=http(s)://<username>:<password>@<elsUrl> CYPRESS_ELASTICSEARCH_USERNAME=<username> CYPRESS_ELASTICSEARCH_PASSWORD=<password> yarn cypress:run:firefox
 ```
 
 #### CCS Custom Target + Headless

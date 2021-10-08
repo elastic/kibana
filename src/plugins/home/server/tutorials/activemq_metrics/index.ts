@@ -56,5 +56,7 @@ export function activemqMetricsSpecProvider(context: TutorialContext): TutorialS
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+
+    integrationBrowserCategories: ['web'],
   };
 }

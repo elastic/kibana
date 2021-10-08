@@ -19,7 +19,6 @@ export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions
     configs: options.configs || [],
     cliArgs: {
       dev: true,
-      quiet: false,
       silent: false,
       watch: false,
       basePath: false,
