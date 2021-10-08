@@ -98,7 +98,7 @@ export const registerPrivilegeDeprecations = ({
       try {
         const roles = responseRoles.roles ?? [];
         deprecatedRoles = roles.map<DeprecationsDetails>((role) => {
-          const { metadata, elasticsearch, kibana } = role;
+          const { metadata, elasticsearch, kibana, name: roleName } = role;
 
           const updatedKibana = kibana.map((privilege) => {
             const { siem, ...otherFeatures } = privilege.feature;
