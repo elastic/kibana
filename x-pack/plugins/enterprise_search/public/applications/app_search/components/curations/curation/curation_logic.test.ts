@@ -21,7 +21,7 @@ describe('CurationLogic', () => {
   const { mount } = new LogicMounter(CurationLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const { clearFlashMessages, flashAPIErrors } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 
   const MOCK_CURATION_RESPONSE = {
     id: 'cur-123456789',
@@ -249,23 +249,6 @@ describe('CurationLogic', () => {
       });
     });
 
-    describe('resetCuration', () => {
-      it('should clear promotedIds & hiddenIds & set dataLoading to true', () => {
-        mount({ promotedIds: ['hello'], hiddenIds: ['world'] });
-
-        CurationLogic.actions.resetCuration();
-
-        expect(CurationLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          dataLoading: true,
-          promotedIds: [],
-          promotedDocumentsLoading: true,
-          hiddenIds: [],
-          hiddenDocumentsLoading: true,
-        });
-      });
-    });
-
     describe('onSelectPageTab', () => {
       it('should set the selected page tab', () => {
         mount({
@@ -330,6 +313,33 @@ describe('CurationLogic', () => {
         mount({ activeQuery: 'some query' });
 
         CurationLogic.actions.convertToManual();
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
+    });
+
+    describe('deleteCuration', () => {
+      it('should make an API call and navigate to the curations page', async () => {
+        http.delete.mockReturnValueOnce(Promise.resolve());
+        mount({}, { curationId: 'cur-123456789' });
+        jest.spyOn(CurationLogic.actions, 'onCurationLoad');
+
+        CurationLogic.actions.deleteCuration();
+        await nextTick();
+
+        expect(http.delete).toHaveBeenCalledWith(
+          '/internal/app_search/engines/some-engine/curations/cur-123456789'
+        );
+        expect(flashSuccessToast).toHaveBeenCalled();
+        expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations');
+      });
+
+      it('flashes any errors', async () => {
+        http.delete.mockReturnValueOnce(Promise.reject('error'));
+        mount({}, { curationId: 'cur-404' });
+
+        CurationLogic.actions.deleteCuration();
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
