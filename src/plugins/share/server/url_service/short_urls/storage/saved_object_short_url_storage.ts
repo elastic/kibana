@@ -86,12 +86,15 @@ const createShortUrlData = <P extends SerializableRecord = SerializableRecord>(
 };
 
 const createAttributes = <P extends SerializableRecord = SerializableRecord>(
-  data: Omit<ShortUrlData<P>, 'id'>
+  data: Partial<Omit<ShortUrlData<P>, 'id'>>
 ): ShortUrlSavedObjectAttributes => {
-  const { locator, ...rest } = data;
+  const { accessCount = 0, accessDate = 0, createDate = 0, slug = '', locator } = data;
   const attributes: ShortUrlSavedObjectAttributes = {
-    ...rest,
-    locatorJSON: JSON.stringify(locator),
+    accessCount,
+    accessDate,
+    createDate,
+    slug,
+    locatorJSON: locator ? JSON.stringify(locator) : '',
     url: '',
   };
 

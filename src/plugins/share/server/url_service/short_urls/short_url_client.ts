@@ -101,6 +101,7 @@ export class ServerShortUrlClient implements IShortUrlClient {
   private injectReferences({ data, references }: ShortUrlRecord): ShortUrlData {
     const { locators } = this.dependencies;
     if (!locators) return data;
+
     const locator = locators.get(data.locator.id);
     if (!locator) return data;
 

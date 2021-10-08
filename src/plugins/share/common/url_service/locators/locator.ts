@@ -67,13 +67,32 @@ export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
     state: P,
     references: SavedObjectReference[]
   ): P => {
-    return this.definition.inject ? this.definition.inject(state, references) : state;
+    if (!this.definition.inject) return state;
+
+    const filteredReferences = references
+      .filter((ref) => ref.name.startsWith('locator_params:'))
+      .map((ref) => ({
+        ...ref,
+        name: ref.name.substr('locator_params:'.length),
+      }));
+
+    return this.definition.inject(state, filteredReferences);
   };
 
   public readonly extract: PersistableState<P>['extract'] = (
     state: P
   ): { state: P; references: SavedObjectReference[] } => {
-    return this.definition.extract ? this.definition.extract(state) : { state, references: [] };
+    if (!this.definition.extract) return { state, references: [] };
+
+    const { state: extractedState, references } = this.definition.extract(state);
+
+    return {
+      state: extractedState,
+      references: references.map((ref) => ({
+        ...ref,
+        name: 'locator_params:' + ref.name,
+      })),
+    };
   };
 
   // LocatorPublic<P> ----------------------------------------------------------
