@@ -10,6 +10,7 @@ import React, { forwardRef, useCallback, useMemo } from 'react';
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import type { IndexPattern, IndexPatternField } from 'src/plugins/data/common';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { css, Global } from '@emotion/react';
 import { TableHeader } from './components/table_header/table_header';
 import { FORMATS_UI_SETTINGS } from '../../../../../../../field_formats/common';
 import {
@@ -17,6 +18,7 @@ import {
   SAMPLE_SIZE_SETTING,
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
+  TRUNCATE_MAX_HEIGHT,
 } from '../../../../../../common';
 import { getServices } from '../../../../../kibana_services';
 import { SortOrder } from './components/table_header/helpers';
@@ -99,6 +101,8 @@ export interface DocTableWrapperProps extends DocTableProps {
   render: (params: DocTableRenderProps) => JSX.Element;
 }
 
+const TRUNCATE_GRADIENT_HEIGHT = 15;
+
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const DocTableWrapper = forwardRef(
@@ -128,6 +132,7 @@ export const DocTableWrapper = forwardRef(
       isShortDots,
       sampleSize,
       showMultiFields,
+      maxHeight,
       filterManager,
       addBasePath,
     ] = useMemo(() => {
@@ -138,6 +143,7 @@ export const DocTableWrapper = forwardRef(
         services.uiSettings.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE),
         services.uiSettings.get(SAMPLE_SIZE_SETTING, 500),
         services.uiSettings.get(SHOW_MULTIFIELDS, false),
+        services.uiSettings.get(TRUNCATE_MAX_HEIGHT),
         services.filterManager,
         services.addBasePath,
       ];
@@ -239,6 +245,22 @@ export const DocTableWrapper = forwardRef(
         data-render-complete={!isLoading}
         ref={ref as React.MutableRefObject<HTMLDivElement>}
       >
+        {maxHeight !== 0 && (
+          <Global
+            styles={css`
+              .truncate-by-height {
+                overflow: hidden;
+                max-height: ${maxHeight > 0 ? `${maxHeight}px !important` : 'none'};
+                display: inline-block;
+              }
+              .truncate-by-height:before {
+                top: ${maxHeight > 0
+                  ? maxHeight - TRUNCATE_GRADIENT_HEIGHT
+                  : TRUNCATE_GRADIENT_HEIGHT * -1}px;
+              }
+            `}
+          />
+        )}
         {rows.length !== 0 &&
           render({
             columnLength: columns.length,

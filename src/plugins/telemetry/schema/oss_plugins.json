@@ -7344,7 +7344,7 @@
             "description": "Non-default value of setting."
           }
         },
-        "truncate:maxHeight": {
+        "discover:truncate:maxHeight": {
           "type": "long",
           "_meta": {
             "description": "Non-default value of setting."

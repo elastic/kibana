@@ -20,7 +20,7 @@ interface Props {
 }
 const TemplateComponent = ({ defPairs }: Props) => {
   return (
-    <dl className={'source'}>
+    <dl className="source">
       {defPairs.map((pair, idx) => (
         <Fragment key={idx}>
           <dt
@@ -46,8 +46,6 @@ export class SourceFormat extends FieldFormat {
   htmlConvert: HtmlContextTypeConvert = (value: string, options = {}) => {
     const { field, hit, indexPattern } = options;
 
-    // eslint-disable-next-line no-console
-    console.log('_source converter');
     if (!field) {
       const converter = this.getConverterFor('text') as Function;
 

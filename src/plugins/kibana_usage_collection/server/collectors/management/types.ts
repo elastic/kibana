@@ -77,7 +77,7 @@ export interface UsageStats {
   'fileUpload:maxFileSize': string;
   'ml:anomalyDetection:results:enableTimeDefaults': boolean;
   'ml:anomalyDetection:results:timeDefaults': string;
-  'truncate:maxHeight': number;
+  'discover:truncate:maxHeight': number;
   'timepicker:timeDefaults': string;
   'timepicker:refreshIntervalDefaults': string;
   'timepicker:quickRanges': string;

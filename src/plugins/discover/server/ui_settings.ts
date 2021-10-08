@@ -26,6 +26,7 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
+  TRUNCATE_MAX_HEIGHT,
 } from '../common';
 
 export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
@@ -219,5 +220,17 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     value: false,
     category: ['discover'],
     schema: schema.boolean(),
+  },
+  [TRUNCATE_MAX_HEIGHT]: {
+    name: i18n.translate('core.ui_settings.params.maxCellHeightTitle', {
+      defaultMessage: 'Maximum table cell height',
+    }),
+    value: 115,
+    description: i18n.translate('core.ui_settings.params.maxCellHeightText', {
+      defaultMessage:
+        'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation',
+    }),
+    schema: schema.number({ min: 0 }),
+    category: ['discover'],
   },
 });

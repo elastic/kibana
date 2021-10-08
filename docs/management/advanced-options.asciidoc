@@ -204,10 +204,6 @@ The default refresh interval for the time filter. Example:
 [[timepicker-timedefaults]]`timepicker:timeDefaults`::
 The default selection in the time filter.
 
-[[truncate-maxheight]]`truncate:maxHeight`::
-The maximum height that a cell occupies in a table. Set to 0 to disable
-truncation.
-
 [float]
 [[presentation-labs]]
 ==== Presentation Labs
@@ -315,6 +311,10 @@ When enabled, displays multi-fields in the expanded document view.
 
 [[discover-sort-defaultorder]]`discover:sort:defaultOrder`::
 The default sort direction for time-based index patterns.
+
+[[discover-truncate-maxheight]]`discover:truncate:maxHeight`::
+The maximum height that a cell occupies in a classic table. Set to 0 to disable
+truncation.
 
 [[doctable-hidetimecolumn]]`doc_table:hideTimeColumn`::
 Hides the "Time" column in *Discover* and in all saved searches on dashboards.

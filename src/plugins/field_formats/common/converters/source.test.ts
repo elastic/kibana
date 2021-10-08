@@ -43,7 +43,7 @@ describe('Source Format', () => {
     expect(
       convertHtml(hit, { field: 'field', indexPattern: { formatHit: (h: string) => h }, hit })
     ).toMatchInlineSnapshot(
-      `"<dl class=\\"source truncate-by-height\\"><dt>foo:</dt><dd>bar</dd> <dt>number:</dt><dd>42</dd> <dt>hello:</dt><dd><h1>World</h1></dd> <dt>also:</dt><dd>with \\"quotes\\" or 'single quotes'</dd> </dl>"`
+      `"<dl class=\\"source\\"><dt>foo:</dt><dd>bar</dd> <dt>number:</dt><dd>42</dd> <dt>hello:</dt><dd><h1>World</h1></dd> <dt>also:</dt><dd>with \\"quotes\\" or 'single quotes'</dd> </dl>"`
     );
   });
 });

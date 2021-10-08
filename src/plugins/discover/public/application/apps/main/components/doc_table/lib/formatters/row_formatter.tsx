@@ -18,7 +18,7 @@ interface Props {
 }
 const TemplateComponent = ({ defPairs }: Props) => {
   return (
-    <dl className={'source truncate-by-height'}>
+    <dl className="source truncate-by-height">
       {defPairs.map((pair, idx) => (
         <Fragment key={idx}>
           <dt>{pair[0]}:</dt>
