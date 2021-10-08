@@ -41,7 +41,9 @@ export function entSearchOverviewRoute(server) {
       );
 
       try {
-        const [metrics] = await Promise.all([getMetrics(req, entSearchIndexPattern, metricSet)]);
+        const [metrics] = await Promise.all([
+          getMetrics(req, entSearchIndexPattern, metricSet, [], { skipClusterUuidFilter: true }),
+        ]);
 
         return {
           metrics,

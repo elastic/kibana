@@ -20,7 +20,7 @@ export async function getMetrics(
   indexPattern: string,
   metricSet: Metric[] = [],
   filters: Array<Record<string, any>> = [],
-  metricOptions = {},
+  metricOptions: Record<string, any> = {},
   numOfBuckets: number = 0,
   groupBy: string | Record<string, any> | null = null
 ) {
