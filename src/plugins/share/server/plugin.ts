@@ -44,9 +44,11 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
       getUrl: async () => {
         throw new Error('Locator .getUrl() currently is not supported on the server.');
       },
-      shortUrls: new ServerShortUrlClientFactory({
-        currentVersion: this.version,
-      }),
+      shortUrls: ({ locators }) =>
+        new ServerShortUrlClientFactory({
+          currentVersion: this.version,
+          locators,
+        }),
     });
 
     this.url.locators.create(new LegacyShortUrlLocatorDefinition());
