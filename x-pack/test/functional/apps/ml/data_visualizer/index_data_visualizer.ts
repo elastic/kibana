@@ -7,44 +7,7 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
-import { FieldVisConfig } from '../../../../../plugins/data_visualizer/public/application/common/components/stats_table/types';
-
-interface MetricFieldVisConfig extends FieldVisConfig {
-  statsMaxDecimalPlaces: number;
-  docCountFormatted: string;
-  topValuesCount: number;
-  viewableInLens: boolean;
-}
-
-interface NonMetricFieldVisConfig extends FieldVisConfig {
-  docCountFormatted: string;
-  exampleCount: number;
-  viewableInLens: boolean;
-}
-
-interface TestData {
-  suiteTitle: string;
-  sourceIndexOrSavedSearch: string;
-  fieldNameFilters: string[];
-  fieldTypeFilters: string[];
-  rowsPerPage?: 10 | 25 | 50;
-  sampleSizeValidations: Array<{
-    size: number;
-    expected: { field: string; docCountFormatted: string };
-  }>;
-  expected: {
-    totalDocCountFormatted: string;
-    metricFields?: MetricFieldVisConfig[];
-    nonMetricFields?: NonMetricFieldVisConfig[];
-    emptyFields: string[];
-    visibleMetricFieldsCount: number;
-    totalMetricFieldsCount: number;
-    populatedFieldsCount: number;
-    totalFieldsCount: number;
-    fieldNameFiltersResultCount: number;
-    fieldTypeFiltersResultCount: number;
-  };
-}
+import { TestData, MetricFieldVisConfig } from './types';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
