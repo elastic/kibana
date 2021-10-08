@@ -7,6 +7,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
+import { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
 import type { LocatorDependencies } from './locator';
 import type { LocatorDefinition, LocatorPublic, ILocatorClient } from './types';
 import { Locator } from './locator';
@@ -43,5 +44,15 @@ export class LocatorClient implements ILocatorClient {
    */
   public get<P extends SerializableRecord>(id: string): undefined | LocatorPublic<P> {
     return this.locators.get(id);
+  }
+
+  public migrations(): { [locatorId: string]: MigrateFunctionsObject } {
+    const migrations: { [locatorId: string]: MigrateFunctionsObject } = {};
+
+    for (const locator of this.locators.values()) {
+      migrations[locator.id] = locator.migrations;
+    }
+
+    return migrations;
   }
 }

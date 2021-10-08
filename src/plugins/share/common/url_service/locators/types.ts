@@ -8,7 +8,7 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { DependencyList } from 'react';
-import { PersistableState } from 'src/plugins/kibana_utils/common';
+import { MigrateFunctionsObject, PersistableState } from 'src/plugins/kibana_utils/common';
 import type { FormatSearchParamsOptions } from './redirect';
 
 /**
@@ -28,6 +28,11 @@ export interface ILocatorClient {
    * @param id Unique ID of the locator.
    */
   get<P extends SerializableRecord>(id: string): undefined | LocatorPublic<P>;
+
+  /**
+   * Returns a combined map of all migrations for all registered locators.
+   */
+  migrations(): { [locatorId: string]: MigrateFunctionsObject };
 }
 
 /**
