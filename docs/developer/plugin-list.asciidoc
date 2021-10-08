@@ -227,11 +227,6 @@ oss plugins.
 |The service exposed by this plugin informs consumers whether they should optimize for non-interactivity. In this way plugins can avoid loading unnecessary code, data or other services.
 
 
-|{kib-repo}blob/{branch}/src/plugins/security_oss/README.md[securityOss]
-|securityOss is responsible for educating users about Elastic's free security features,
-so they can properly protect the data within their clusters.
-
-
 |{kib-repo}blob/{branch}/src/plugins/share/README.md[share]
 |The share plugin contains various utilities for displaying sharing context menu,
 generating deep links to other apps, and creating short URLs.
