@@ -82,14 +82,11 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
             continue;
           }
 
+          bundleStates.set(id, type);
+
           if (type === 'running') {
             bundlesThatWereBuilt.add(id);
           }
-
-          bundleStates.set(id, type);
-          log.debug(
-            `[${id}] state = "${type}"${type !== 'running' ? ` after ${state.durSec} sec` : ''}`
-          );
         }
 
         if (state.phase === 'running' || state.phase === 'initializing') {
