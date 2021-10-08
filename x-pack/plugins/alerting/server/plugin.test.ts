@@ -155,6 +155,15 @@ describe('Alerting Plugin', () => {
         await setup.registerType(ruleType);
         expect(ruleType.ruleTaskTimeout).toBe('5m');
       });
+
+      it('should apply default config value for cancelAlertsOnRuleTimeout if undefined on rule type', async () => {
+        const ruleType = {
+          ...sampleAlertType,
+          minimumLicenseRequired: 'basic',
+        } as AlertType<never, never, never, never, never, 'default', never>;
+        await setup.registerType(ruleType);
+        expect(ruleType.cancelAlertsOnRuleTimeout).toBe(true);
+      });
     });
   });
 

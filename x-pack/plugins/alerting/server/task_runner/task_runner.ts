@@ -226,11 +226,13 @@ export class TaskRunner<
   }
 
   private shouldLogAndScheduleActionsForAlerts() {
-    // Returns true if
-    // - execution is not cancelled
-    // OR
-    // - alerting config disables skip behavior AND rule type disables skip behavior
-    return !this.cancelled$.getValue() || !this.context.cancelAlertsOnRuleTimeout;
+    // if execution hasn't been cancelled, return true
+    if (!this.cancelled$.getValue()) {
+      return true;
+    }
+
+    // if execution has been cancelled, return true if EITHER alerting config or rule type indicate to proceed with scheduling actions
+    return !this.context.cancelAlertsOnRuleTimeout || !this.alertType.cancelAlertsOnRuleTimeout;
   }
 
   async executeAlertInstance(

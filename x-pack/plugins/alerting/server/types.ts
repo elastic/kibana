@@ -158,6 +158,7 @@ export interface AlertType<
   };
   isExportable: boolean;
   ruleTaskTimeout?: string;
+  cancelAlertsOnRuleTimeout?: boolean;
 }
 export type UntypedAlertType = AlertType<
   AlertTypeParams,

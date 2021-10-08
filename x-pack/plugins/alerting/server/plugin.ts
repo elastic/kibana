@@ -310,9 +310,11 @@ export class AlertingPlugin {
         if (!(alertType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${alertType.minimumLicenseRequired}" is not a valid license type`);
         }
-        if (!alertType.ruleTaskTimeout) {
+        if (!alertType.ruleTaskTimeout || alertType.cancelAlertsOnRuleTimeout === undefined) {
           alertingConfig.then((config) => {
-            alertType.ruleTaskTimeout = config.defaultRuleTaskTimeout;
+            alertType.ruleTaskTimeout = alertType.ruleTaskTimeout ?? config.defaultRuleTaskTimeout;
+            alertType.cancelAlertsOnRuleTimeout =
+              alertType.cancelAlertsOnRuleTimeout ?? config.cancelAlertsOnRuleTimeout;
             ruleTypeRegistry.register(alertType);
           });
         } else {
