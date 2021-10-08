@@ -65,10 +65,7 @@ export const CurationSuggestion: React.FC = () => {
         pageTitle: suggestionQuery,
       }}
     >
-      <CurationActionBar
-        onAcceptClick={() => alert('Accepted')}
-        onRejectClick={() => alert('Rejected')}
-      />
+      <CurationActionBar />
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
