@@ -10,7 +10,7 @@ import { createTelemetryDiagnosticsTaskConfig } from './diagnostic';
 import { createTelemetryEndpointTaskConfig } from './endpoint';
 import { createTelemetrySecurityListTaskConfig } from './security_lists';
 
-export function ctreateTelemetryTaskConfigs(
+export function createTelemetryTaskConfigs(
   maxSecurityListTelemetryBatch: number,
   maxEndpointTelemetryBatch: number
 ): SecurityTelemetryTaskConfig[] {
