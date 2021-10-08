@@ -6,7 +6,7 @@
  */
 
 import type { SearchSourceFields } from 'src/plugins/data/common';
-import type { BaseParams, BasePayload } from '../../types';
+import type { BaseParams, BasePayload } from '../base';
 
 export type RawValue = string | object | null | undefined;
 
