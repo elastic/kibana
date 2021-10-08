@@ -612,6 +612,7 @@ export interface DocLinksStart {
             readonly ruleChangeLog: string;
             readonly detectionsReq: string;
             readonly networkMap: string;
+            readonly troubleshootGaps: string;
         };
         readonly securitySolution: {
             readonly trustedApps: string;
@@ -684,6 +685,10 @@ export interface DocLinksStart {
             mappingRoles: string;
             mappingRolesFieldRules: string;
             runAsPrivilege: string;
+        }>;
+        readonly spaces: Readonly<{
+            kibanaLegacyUrlAliases: string;
+            kibanaDisableLegacyUrlAliasesApi: string;
         }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
