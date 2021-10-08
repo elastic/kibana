@@ -41,6 +41,46 @@ describe('.create()', () => {
   });
 });
 
+describe('.update()', () => {
+  test('can update an existing short URL', async () => {
+    const storage = new MemoryShortUrlStorage();
+    const now = Date.now();
+    const url1 = await storage.create({
+      accessCount: 0,
+      createDate: now,
+      accessDate: now,
+      locator: {
+        id: 'TEST_LOCATOR',
+        version: '7.11',
+        state: {
+          foo: 'bar',
+        },
+      },
+      slug: 'test-slug',
+    });
+
+    await storage.update(url1.id, {
+      accessCount: 1,
+    });
+
+    const url2 = await storage.getById(url1.id);
+
+    expect(url1.accessCount).toBe(0);
+    expect(url2.data.accessCount).toBe(1);
+  });
+
+  test('throws when URL does not exist', async () => {
+    const storage = new MemoryShortUrlStorage();
+    const [, error] = await of(
+      storage.update('DOES_NOT_EXIST', {
+        accessCount: 1,
+      })
+    );
+
+    expect(error).toBeInstanceOf(Error);
+  });
+});
+
 describe('.getById()', () => {
   test('can fetch by ID a newly created short URL', async () => {
     const storage = new MemoryShortUrlStorage();

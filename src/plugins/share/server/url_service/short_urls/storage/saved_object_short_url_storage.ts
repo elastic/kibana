@@ -121,6 +121,20 @@ export class SavedObjectShortUrlStorage implements ShortUrlStorage {
     return createShortUrlData<P>(savedObject);
   }
 
+  public async update<P extends SerializableRecord = SerializableRecord>(
+    id: string,
+    data: Partial<Omit<ShortUrlData<P>, 'id'>>,
+    { references }: { references?: SavedObjectReference[] } = {}
+  ): Promise<void> {
+    const { savedObjects, savedObjectType } = this.dependencies;
+    const attributes = createAttributes(data);
+
+    await savedObjects.update(savedObjectType, id, attributes, {
+      refresh: true,
+      references,
+    });
+  }
+
   public async getById<P extends SerializableRecord = SerializableRecord>(
     id: string
   ): Promise<ShortUrlRecord<P>> {

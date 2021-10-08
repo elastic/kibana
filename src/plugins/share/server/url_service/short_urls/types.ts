@@ -23,6 +23,15 @@ export interface ShortUrlStorage {
   ): Promise<ShortUrlData<P>>;
 
   /**
+   * Update an existing short URL entry.
+   */
+  update<P extends SerializableRecord = SerializableRecord>(
+    id: string,
+    data: Partial<Omit<ShortUrlData<P>, 'id'>>,
+    options?: { references?: SavedObjectReference[] }
+  ): Promise<void>;
+
+  /**
    * Fetch a short URL entry by ID.
    */
   getById<P extends SerializableRecord = SerializableRecord>(
