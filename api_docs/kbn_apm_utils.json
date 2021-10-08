@@ -1,0 +1,221 @@
+{
+  "id": "@kbn/apm-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/apm-utils",
+        "id": "def-server.parseSpanOptions",
+        "type": "Function",
+        "tags": [],
+        "label": "parseSpanOptions",
+        "description": [],
+        "signature": [
+          "(optionsOrName: string | ",
+          {
+            "pluginId": "@kbn/apm-utils",
+            "scope": "server",
+            "docId": "kibKbnApmUtilsPluginApi",
+            "section": "def-server.SpanOptions",
+            "text": "SpanOptions"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/apm-utils",
+            "scope": "server",
+            "docId": "kibKbnApmUtilsPluginApi",
+            "section": "def-server.SpanOptions",
+            "text": "SpanOptions"
+          }
+        ],
+        "path": "packages/kbn-apm-utils/src/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-utils",
+            "id": "def-server.parseSpanOptions.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "optionsOrName",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "@kbn/apm-utils",
+                "scope": "server",
+                "docId": "kibKbnApmUtilsPluginApi",
+                "section": "def-server.SpanOptions",
+                "text": "SpanOptions"
+              }
+            ],
+            "path": "packages/kbn-apm-utils/src/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-utils",
+        "id": "def-server.withSpan",
+        "type": "Function",
+        "tags": [],
+        "label": "withSpan",
+        "description": [],
+        "signature": [
+          "(optionsOrName: string | ",
+          {
+            "pluginId": "@kbn/apm-utils",
+            "scope": "server",
+            "docId": "kibKbnApmUtilsPluginApi",
+            "section": "def-server.SpanOptions",
+            "text": "SpanOptions"
+          },
+          ", cb: (span?: ",
+          "Span",
+          " | undefined) => Promise<T>) => Promise<T>"
+        ],
+        "path": "packages/kbn-apm-utils/src/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-utils",
+            "id": "def-server.withSpan.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "optionsOrName",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "@kbn/apm-utils",
+                "scope": "server",
+                "docId": "kibKbnApmUtilsPluginApi",
+                "section": "def-server.SpanOptions",
+                "text": "SpanOptions"
+              }
+            ],
+            "path": "packages/kbn-apm-utils/src/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/apm-utils",
+            "id": "def-server.withSpan.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "cb",
+            "description": [],
+            "signature": [
+              "(span?: ",
+              "Span",
+              " | undefined) => Promise<T>"
+            ],
+            "path": "packages/kbn-apm-utils/src/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/apm-utils",
+        "id": "def-server.SpanOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SpanOptions",
+        "description": [],
+        "path": "packages/kbn-apm-utils/src/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-utils",
+            "id": "def-server.SpanOptions.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/kbn-apm-utils/src/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-utils",
+            "id": "def-server.SpanOptions.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-apm-utils/src/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-utils",
+            "id": "def-server.SpanOptions.subtype",
+            "type": "string",
+            "tags": [],
+            "label": "subtype",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-apm-utils/src/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-utils",
+            "id": "def-server.SpanOptions.labels",
+            "type": "Object",
+            "tags": [],
+            "label": "labels",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "packages/kbn-apm-utils/src/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-utils",
+            "id": "def-server.SpanOptions.intercept",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "intercept",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-apm-utils/src/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

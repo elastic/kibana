@@ -11,7 +11,6 @@ import { cloneDeep } from 'lodash/fp';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ThemeProvider } from 'styled-components';
-import { useRiskyHostLinks } from '../../containers/overview_risky_host_links/use_risky_host_links';
 import { mockTheme } from '../overview_cti_links/mock';
 import { RiskyHostLinks } from '.';
 import { createStore, State } from '../../../common/store';
@@ -23,11 +22,12 @@ import {
 } from '../../../common/mock';
 import { useRiskyHostsDashboardButtonHref } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href';
 import { useRiskyHostsDashboardLinks } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_links';
+import { useHostsRiskScore } from '../../containers/overview_risky_host_links/use_hosts_risk_score';
 
 jest.mock('../../../common/lib/kibana');
 
-jest.mock('../../containers/overview_risky_host_links/use_risky_host_links');
-const useRiskyHostLinksMock = useRiskyHostLinks as jest.Mock;
+jest.mock('../../containers/overview_risky_host_links/use_hosts_risk_score');
+const useHostsRiskScoreMock = useHostsRiskScore as jest.Mock;
 
 jest.mock('../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href');
 const useRiskyHostsDashboardButtonHrefMock = useRiskyHostsDashboardButtonHref as jest.Mock;
@@ -51,10 +51,10 @@ describe('RiskyHostLinks', () => {
   });
 
   it('renders enabled module view if module is enabled', () => {
-    useRiskyHostLinksMock.mockReturnValueOnce({
+    useHostsRiskScoreMock.mockReturnValueOnce({
       loading: false,
       isModuleEnabled: true,
-      listItems: [],
+      result: [],
     });
 
     render(
@@ -62,10 +62,10 @@ describe('RiskyHostLinks', () => {
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
             <RiskyHostLinks
-              to={'now'}
-              from={'now-30d'}
-              deleteQuery={jest.fn()}
-              setQuery={jest.fn()}
+              timerange={{
+                to: 'now',
+                from: 'now-30d',
+              }}
             />
           </ThemeProvider>
         </I18nProvider>
@@ -76,10 +76,10 @@ describe('RiskyHostLinks', () => {
   });
 
   it('renders disabled module view if module is disabled', () => {
-    useRiskyHostLinksMock.mockReturnValueOnce({
+    useHostsRiskScoreMock.mockReturnValueOnce({
       loading: false,
       isModuleEnabled: false,
-      listItems: [],
+      result: [],
     });
 
     render(
@@ -87,10 +87,10 @@ describe('RiskyHostLinks', () => {
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
             <RiskyHostLinks
-              to={'now'}
-              from={'now-30d'}
-              deleteQuery={jest.fn()}
-              setQuery={jest.fn()}
+              timerange={{
+                to: 'now',
+                from: 'now-30d',
+              }}
             />
           </ThemeProvider>
         </I18nProvider>

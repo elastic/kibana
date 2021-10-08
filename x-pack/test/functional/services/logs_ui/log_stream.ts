@@ -46,5 +46,9 @@ export function LogStreamPageProvider({ getPageObjects, getService }: FtrProvide
     async getNoLogsIndicesPrompt() {
       return await testSubjects.find('noLogsIndicesPrompt');
     },
+
+    async getNoDataPage() {
+      return await testSubjects.find('noDataPage');
+    },
   };
 }
