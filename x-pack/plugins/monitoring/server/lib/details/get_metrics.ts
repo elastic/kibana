@@ -15,6 +15,7 @@ import { LegacyRequest } from '../../types';
 
 type Metric = string | { keys: string | string[]; name: string };
 
+// TODO: Switch to an options object argument here
 export async function getMetrics(
   req: LegacyRequest,
   indexPattern: string,

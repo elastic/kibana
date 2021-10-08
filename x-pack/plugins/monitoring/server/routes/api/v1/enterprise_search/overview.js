@@ -30,24 +30,19 @@ export function entSearchOverviewRoute(server) {
         }),
       },
     },
+
     async handler(req) {
-      const config = server.config();
-      const ccs = req.payload.ccs;
-      //   const clusterUuid = req.params.clusterUuid;
       const entSearchIndexPattern = prefixIndexPattern(
-        config,
+        server.config(),
         INDEX_PATTERN_ENTERPRISE_SEARCH,
-        ccs
+        req.payload.ccs
       );
 
       try {
-        const [metrics] = await Promise.all([
-          getMetrics(req, entSearchIndexPattern, metricSet, [], { skipClusterUuidFilter: true }),
-        ]);
-
-        return {
-          metrics,
-        };
+        const metrics = await getMetrics(req, entSearchIndexPattern, metricSet, [], {
+          skipClusterUuidFilter: true,
+        });
+        return { metrics };
       } catch (err) {
         return handleError(err, req);
       }
