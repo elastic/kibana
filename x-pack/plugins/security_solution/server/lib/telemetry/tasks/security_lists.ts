@@ -23,49 +23,51 @@ import { TaskExecutionPeriod } from '../task';
 
 const MAX_TELEMETRY_BATCH = 1_000;
 
-export const TelemetrySecurityListTaskConfig = {
-  type: 'security:telemetry-lists',
-  title: 'Security Solution Lists Telemetry',
-  interval: '24h',
-  timeout: '3m',
-  version: '1.0.0',
-  runTask: async (
-    taskId: string,
-    logger: Logger,
-    receiver: TelemetryReceiver,
-    sender: TelemetryEventsSender,
-    taskExecutionPeriod: TaskExecutionPeriod
-  ) => {
-    // Lists Telemetry: Trusted Applications
+export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number) {
+  return {
+    type: 'security:telemetry-lists',
+    title: 'Security Solution Lists Telemetry',
+    interval: '24h',
+    timeout: '3m',
+    version: '1.0.0',
+    runTask: async (
+      taskId: string,
+      logger: Logger,
+      receiver: TelemetryReceiver,
+      sender: TelemetryEventsSender,
+      taskExecutionPeriod: TaskExecutionPeriod
+    ) => {
+      // Lists Telemetry: Trusted Applications
 
-    const trustedApps = await receiver.fetchTrustedApplications();
-    const trustedAppsJson = templateExceptionList(trustedApps.data, LIST_TRUSTED_APPLICATION);
-    logger.debug(`Trusted Apps: ${trustedAppsJson}`);
+      const trustedApps = await receiver.fetchTrustedApplications();
+      const trustedAppsJson = templateExceptionList(trustedApps.data, LIST_TRUSTED_APPLICATION);
+      logger.debug(`Trusted Apps: ${trustedAppsJson}`);
 
-    batchTelemetryRecords(trustedAppsJson, MAX_TELEMETRY_BATCH).forEach((batch) =>
-      sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch)
-    );
+      batchTelemetryRecords(trustedAppsJson, maxTelemetryBatch).forEach((batch) =>
+        sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch)
+      );
 
-    // Lists Telemetry: Endpoint Exceptions
+      // Lists Telemetry: Endpoint Exceptions
 
-    const epExceptions = await receiver.fetchEndpointList(ENDPOINT_LIST_ID);
-    const epExceptionsJson = templateExceptionList(epExceptions.data, LIST_ENDPOINT_EXCEPTION);
-    logger.debug(`EP Exceptions: ${epExceptionsJson}`);
+      const epExceptions = await receiver.fetchEndpointList(ENDPOINT_LIST_ID);
+      const epExceptionsJson = templateExceptionList(epExceptions.data, LIST_ENDPOINT_EXCEPTION);
+      logger.debug(`EP Exceptions: ${epExceptionsJson}`);
 
-    batchTelemetryRecords(epExceptionsJson, MAX_TELEMETRY_BATCH).forEach((batch) =>
-      sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch)
-    );
+      batchTelemetryRecords(epExceptionsJson, maxTelemetryBatch).forEach((batch) =>
+        sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch)
+      );
 
-    // Lists Telemetry: Endpoint Event Filters
+      // Lists Telemetry: Endpoint Event Filters
 
-    const epFilters = await receiver.fetchEndpointList(ENDPOINT_EVENT_FILTERS_LIST_ID);
-    const epFiltersJson = templateExceptionList(epFilters.data, LIST_ENDPOINT_EVENT_FILTER);
-    logger.debug(`EP Event Filters: ${epFiltersJson}`);
+      const epFilters = await receiver.fetchEndpointList(ENDPOINT_EVENT_FILTERS_LIST_ID);
+      const epFiltersJson = templateExceptionList(epFilters.data, LIST_ENDPOINT_EVENT_FILTER);
+      logger.debug(`EP Event Filters: ${epFiltersJson}`);
 
-    batchTelemetryRecords(epFiltersJson, MAX_TELEMETRY_BATCH).forEach((batch) =>
-      sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch)
-    );
+      batchTelemetryRecords(epFiltersJson, maxTelemetryBatch).forEach((batch) =>
+        sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch)
+      );
 
-    return trustedAppsJson.length + epExceptionsJson.length + epFiltersJson.length;
-  },
-};
+      return trustedAppsJson.length + epExceptionsJson.length + epFiltersJson.length;
+    },
+  };
+}

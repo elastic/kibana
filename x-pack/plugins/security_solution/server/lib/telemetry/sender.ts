@@ -18,11 +18,11 @@ import {
 } from '../../../../task_manager/server';
 import { TelemetryReceiver } from './receiver';
 import { allowlistEventFields, copyAllowlistedFields } from './filters';
-import { listTelemetryTaskConfigs } from './tasks';
+import { createTelemetryTaskConfigs } from './tasks';
 import { createUsageCounterLabel } from './helpers';
 import { TelemetryEvent } from './types';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
-import { SecurityTelemetryTask } from './task';
+import { SecurityTelemetryTask, SecurityTelemetryTaskConfig } from './task';
 
 const usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
 
@@ -56,11 +56,13 @@ export class TelemetryEventsSender {
     this.telemetryUsageCounter = telemetryUsageCounter;
 
     if (taskManager) {
-      this.telemetryTasks = listTelemetryTaskConfigs().map((config) => {
-        const task = new SecurityTelemetryTask(config, this.logger, this, telemetryReceiver);
-        task.register(taskManager);
-        return task;
-      });
+      this.telemetryTasks = createTelemetryTaskConfigs(100, 1000).map(
+        (config: SecurityTelemetryTaskConfig) => {
+          const task = new SecurityTelemetryTask(config, this.logger, this, telemetryReceiver);
+          task.register(taskManager);
+          return task;
+        }
+      );
     }
   }
 

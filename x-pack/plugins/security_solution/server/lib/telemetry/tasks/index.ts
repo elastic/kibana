@@ -6,10 +6,17 @@
  */
 
 import { SecurityTelemetryTaskConfig } from '../task';
-import { TelemetryDiagTaskConfig } from './diagnostic';
-import { TelemetryEndpointTaskConfig } from './endpoint';
-import { TelemetrySecurityListTaskConfig } from './security_lists';
+import { createTelemetryDiagnosticsTaskConfig } from './diagnostic';
+import { createTelemetryEndpointTaskConfig } from './endpoint';
+import { createTelemetrySecurityListTaskConfig } from './security_lists';
 
-export function listTelemetryTaskConfigs(): SecurityTelemetryTaskConfig[] {
-  return [TelemetryDiagTaskConfig, TelemetryEndpointTaskConfig, TelemetrySecurityListTaskConfig];
+export function ctreateTelemetryTaskConfigs(
+  maxSecurityListTelemetryBatch: number,
+  maxEndpointTelemetryBatch: number
+): SecurityTelemetryTaskConfig[] {
+  return [
+    createTelemetryDiagnosticsTaskConfig(),
+    createTelemetryEndpointTaskConfig(maxEndpointTelemetryBatch),
+    createTelemetrySecurityListTaskConfig(maxSecurityListTelemetryBatch),
+  ];
 }
