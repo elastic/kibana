@@ -55,7 +55,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       help: i18n.translate('expressionMetricVis.function.font.help', {
         defaultMessage: 'Font settings.',
       }),
-      default: '{font size=60}',
+      default: `{font size=60}`,
     },
     metric: {
       types: ['vis_dimension'],
@@ -77,7 +77,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       throw new Error('Palette must be provided when using percentageMode');
     }
 
-    const fontSize = Number.parseInt(args.font.spec.fontSize || '', 10);
+    // const fontSize = Number.parseInt(args.font.spec.fontSize || '', 10);
     if (handlers?.inspectorAdapters?.tables) {
       const argsTable: Dimension[] = [
         [
@@ -116,9 +116,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             style: {
               bgColor: args.colorMode === ColorMode.Background,
               labelColor: args.colorMode === ColorMode.Labels,
-              fontSize,
-              subText: '',
-              bgFill: '',
+              ...args.font,
             },
           },
           dimensions: {

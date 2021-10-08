@@ -15,10 +15,10 @@ import { CustomPaletteState } from '../../../../charts/public';
 import { getFormatService, getPaletteService } from '../../../expression_metric/public/services';
 import { ExpressionValueVisDimension } from '../../../../visualizations/public';
 import { formatValue, shouldApplyColor } from '../utils';
-
-import './metric.scss';
 import { getColumnByAccessor } from '../utils/accessor';
 import { needsLightText } from '../utils/palette';
+
+import './metric.scss';
 
 export interface MetricVisComponentProps {
   visParams: Pick<VisParams, 'metric' | 'dimensions'>;
@@ -112,7 +112,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
       <MetricVisValue
         key={index}
         metric={metric}
-        fontSize={this.props.visParams.metric.style.fontSize}
+        style={this.props.visParams.metric.style}
         onFilter={this.props.visParams.dimensions.bucket ? this.filterBucket : undefined}
         showLabel={this.props.visParams.metric.labels.show}
       />

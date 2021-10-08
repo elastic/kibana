@@ -13,7 +13,7 @@ import { DatatableColumn } from '../../../../expressions';
 import { Render } from '../../../../presentation_util/public/__stories__';
 import { ColorMode, CustomPaletteState } from '../../../../charts/common';
 import { metricVisRenderer } from '../expression_renderers';
-import { MetricVisRenderConfig, visType } from '../../common/types';
+import { MetricStyle, MetricVisRenderConfig, visType } from '../../common/types';
 
 const palette: CustomPaletteState = {
   colors: ['rgb(219 231 38)', 'rgb(112 38 231)', 'rgb(38 124 231)'],
@@ -22,6 +22,17 @@ const palette: CustomPaletteState = {
   rangeMin: 0,
   rangeMax: 150,
   range: 'number',
+};
+
+const style: MetricStyle = {
+  spec: { fontSize: '12px' },
+
+  /* stylelint-disable */
+  type: 'style',
+  css: '',
+  bgColor: false,
+  labelColor: false,
+  /* stylelint-enable */
 };
 
 const config: MetricVisRenderConfig = {
@@ -47,13 +58,7 @@ const config: MetricVisRenderConfig = {
       metricColorMode: ColorMode.None,
       labels: { show: true },
       percentageMode: false,
-      style: {
-        bgColor: false,
-        bgFill: '',
-        fontSize: 60,
-        labelColor: false,
-        subText: '',
-      },
+      style,
     },
     dimensions: {
       metrics: [
@@ -141,7 +146,10 @@ storiesOf('renderers/visMetric', module)
             ...config.visConfig,
             metric: {
               ...config.visConfig.metric,
-              style: { ...config.visConfig.metric.style, fontSize: 120 },
+              style: {
+                ...config.visConfig.metric.style,
+                spec: { ...config.visConfig.metric.style.spec, fontSize: '120px' },
+              },
             },
           },
         }}

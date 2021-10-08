@@ -9,6 +9,8 @@
 import { get } from 'lodash';
 import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '../../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
+import { inter } from '../../../expressions/common';
+
 import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
@@ -68,9 +70,12 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
     showLabels: labels?.show ?? false,
   });
 
-  if (style) {
-    metricVis.addArgument('font', buildExpression(`font size=${style.fontSize}`));
-  }
+  metricVis.addArgument(
+    'font',
+    buildExpression(
+      `font family="${inter.value}" weight="bold" ${style ? `size=${style.fontSize}` : ''}`
+    )
+  );
 
   if (colorsRange && colorsRange.length) {
     const stopsWithColors = getStopsWithColorsFromRanges(colorsRange, colorSchema, invertColors);

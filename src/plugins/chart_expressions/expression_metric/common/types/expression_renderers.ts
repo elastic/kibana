@@ -7,7 +7,13 @@
  */
 
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { ColorMode, Labels, Style, CustomPaletteState } from '../../../../charts/common';
+import {
+  ColorMode,
+  Labels,
+  CustomPaletteState,
+  Style as ChartStyle,
+} from '../../../../charts/common';
+import { Style } from '../../../../expressions/common';
 
 export const visType = 'metric';
 
@@ -16,13 +22,14 @@ export interface DimensionsVisParam {
   bucket?: ExpressionValueVisDimension;
 }
 
+export type MetricStyle = Style & Pick<ChartStyle, 'bgColor' | 'labelColor'>;
 export interface MetricVisParam {
   percentageMode: boolean;
   percentageFormatPattern?: string;
   metricColorMode: ColorMode;
   palette?: CustomPaletteState;
   labels: Labels;
-  style: Style;
+  style: MetricStyle;
 }
 
 export interface VisParams {
