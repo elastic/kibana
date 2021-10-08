@@ -78,6 +78,8 @@ export interface DeprecationsDetails {
      */
     manualSteps: string[];
   };
+  /* Allow to omit the attribute "deprecationDetails" in the request of the body */
+  omitDeprecationDetails?: boolean;
 }
 
 /**
