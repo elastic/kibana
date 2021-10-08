@@ -98,7 +98,7 @@ describe(`Transform fns`, () => {
       });
     });
 
-    describe(`with a coveredFilePath of src/plugins/charts/public/static/color_maps/color_maps.ts`, () => {
+    describe(`with a coveredFilePath of src/plugins/charts/common/static/color_maps/color_maps.ts`, () => {
       const expected = 'kibana-reporting';
       it(`should resolve to ${expected}`, async () => {
         const actual = await teamAssignment(teamAssignmentsPathMOCK)(log)(obj);
@@ -110,25 +110,25 @@ describe(`Transform fns`, () => {
     describe(`last fn`, () => {
       describe(`applied to n results`, () => {
         it(`should pick the last one`, () => {
-          const nteams = `src/plugins/charts/public/static/color_maps/color_maps.ts kibana-app
-src/plugins/charts/public/static/color_maps/color_maps.ts kibana-app-arch`;
+          const nteams = `src/plugins/charts/common/static/color_maps/color_maps.ts kibana-app
+src/plugins/charts/common/static/color_maps/color_maps.ts kibana-app-arch`;
 
           const actual = last(nteams);
 
           expect(actual).toBe(
-            'src/plugins/charts/public/static/color_maps/color_maps.ts kibana-app-arch'
+            'src/plugins/charts/common/static/color_maps/color_maps.ts kibana-app-arch'
           );
         });
       });
       describe(`applied to 1 result`, () => {
         it(`should pick that 1 result`, () => {
           const nteams =
-            'src/plugins/charts/public/static/color_maps/color_maps.ts kibana-app-arch';
+            'src/plugins/charts/common/static/color_maps/color_maps.ts kibana-app-arch';
 
           const actual = last(nteams);
 
           expect(actual).toBe(
-            'src/plugins/charts/public/static/color_maps/color_maps.ts kibana-app-arch'
+            'src/plugins/charts/common/static/color_maps/color_maps.ts kibana-app-arch'
           );
         });
       });

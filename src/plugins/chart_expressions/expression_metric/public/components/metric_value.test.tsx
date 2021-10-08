@@ -9,7 +9,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { MetricVisValue } from './metric_vis_value';
+import { MetricVisValue } from './metric_value';
 
 const baseMetric = { label: 'Foo', value: 'foo' } as any;
 

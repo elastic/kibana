@@ -9,14 +9,15 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { VisualizationContainer } from '../../../visualizations/public';
-import { ExpressionRenderDefinition } from '../../../expressions/common/expression_renderers';
-import { MetricVisRenderValue } from './metric_vis_fn';
-// @ts-ignore
-const MetricVisComponent = lazy(() => import('./components/metric_vis_component'));
+import { VisualizationContainer } from '../../../../visualizations/public';
+import { ExpressionRenderDefinition } from '../../../../expressions/common/expression_renderers';
+import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig } from '../../common';
 
-export const metricVisRenderer: () => ExpressionRenderDefinition<MetricVisRenderValue> = () => ({
-  name: 'metric_vis',
+// @ts-ignore
+const MetricVisComponent = lazy(() => import('../components/metric_component'));
+
+export const metricVisRenderer: () => ExpressionRenderDefinition<MetricVisRenderConfig> = () => ({
+  name: EXPRESSION_METRIC_NAME,
   displayName: 'metric visualization',
   reuseDomNode: true,
   render: async (domNode, { visData, visConfig }, handlers) => {
