@@ -139,6 +139,7 @@ export const registerPrivilegeDeprecations = ({
               }
             ),
             level: 'warning',
+            deprecationType: 'feature',
             correctiveActions: {
               api: {
                 method: 'PUT',
