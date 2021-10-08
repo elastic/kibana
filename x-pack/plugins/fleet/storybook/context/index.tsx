@@ -27,7 +27,7 @@ import { getHttp } from './http';
 import { getUiSettings } from './ui_settings';
 import { getNotifications } from './notifications';
 import { stubbedStartServices } from './stubs';
-import { getDocLinks } from './docLinks';
+import { getDocLinks } from './doc_links';
 import { getCloud } from './cloud';
 import { getShare } from './share';
 

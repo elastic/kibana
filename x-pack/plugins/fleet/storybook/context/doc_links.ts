@@ -13,6 +13,7 @@ export const getDocLinks = () => {
       fleet: {
         learnMoreBlog:
           'https://www.elastic.co/blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic',
+        apiKeysLearnMore: 'https://www.elastic.co/guide/en/kibana/master/api-keys.html',
       },
     },
   } as unknown as DocLinksStart;
