@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-// eslint-disable-next-line max-classes-per-file
+import { ConcreteTaskInstance, TaskStatus } from '../../../../task_manager/server';
 import { TelemetryEventsSender } from './sender';
 import { TelemetryReceiver } from './receiver';
-import { DiagnosticTask, EndpointTask, ExceptionListsTask } from './tasks';
+import { SecurityTelemetryTaskConfig } from './task';
 import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
 
 /**
@@ -60,22 +60,38 @@ export const createMockPackagePolicy = (): jest.Mocked<PackagePolicy> => {
 };
 
 /**
- * Creates a mocked Telemetry Diagnostic Task
+ * Creates a mocked Security Telemetry Task Config
  */
-export class MockTelemetryDiagnosticTask extends DiagnosticTask {
-  public runTask = jest.fn();
-}
+export const createMockSecurityTelemetryTask = (
+  testType?: string,
+  testLastTimestamp?: string
+): jest.Mocked<SecurityTelemetryTaskConfig> => {
+  return {
+    type: testType,
+    title: 'test title',
+    interval: '0m',
+    timeout: '0m',
+    version: '0.0.0',
+    getLastExecutionTime: jest.fn().mockReturnValue(testLastTimestamp ?? jest.fn()),
+    runTask: jest.fn(),
+  } as unknown as jest.Mocked<SecurityTelemetryTaskConfig>;
+};
 
 /**
- * Creates a mocked Telemetry Endpoint Task
+ * Creates a mocked Task Instance
  */
-export class MockTelemetryEndpointTask extends EndpointTask {
-  public runTask = jest.fn();
-}
-
-/**
- * Creates a mocked Telemetry exception lists Task
- */
-export class MockExceptionListsTask extends ExceptionListsTask {
-  public runTask = jest.fn();
-}
+export const createMockTaskInstance = (testId: string, testType: string): ConcreteTaskInstance => {
+  return {
+    id: testId,
+    runAt: new Date(),
+    attempts: 0,
+    ownerId: '',
+    status: TaskStatus.Running,
+    startedAt: new Date(),
+    scheduledAt: new Date(),
+    retryAt: new Date(),
+    params: {},
+    state: {},
+    taskType: testType,
+  } as ConcreteTaskInstance;
+};

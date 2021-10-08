@@ -61,7 +61,7 @@ export class SecurityTelemetryTask {
     this.receiver = receiver;
   }
 
-  private getLastExecutionTime = (
+  public getLastExecutionTime = (
     taskExecutionTime: string,
     taskInstance: ConcreteTaskInstance
   ): string | undefined => {
@@ -73,7 +73,7 @@ export class SecurityTelemetryTask {
       : undefined;
   };
 
-  private getTaskId = (): string => {
+  public getTaskId = (): string => {
     return `${this.config.type}:${this.config.version}`;
   };
 
@@ -127,7 +127,7 @@ export class SecurityTelemetryTask {
     }
   };
 
-  private runTask = async (taskId: string, executionPeriod: TaskExecutionPeriod) => {
+  public runTask = async (taskId: string, executionPeriod: TaskExecutionPeriod) => {
     this.logger.debug(`Running task ${taskId}`);
     if (taskId !== this.getTaskId()) {
       this.logger.debug(`Outdated task running: ${taskId}`);
