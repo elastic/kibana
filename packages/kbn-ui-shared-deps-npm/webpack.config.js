@@ -40,7 +40,6 @@ module.exports = (_, argv) => {
 
         // modules from npm
         '@elastic/charts',
-        '@elastic/datemath',
         '@elastic/eui',
         '@elastic/eui/dist/eui_charts_theme',
         '@elastic/eui/lib/services',
