@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ColorSchemas } from '../color_maps';
-import { LabelRotation } from './collections';
+import { ColorSchemas, LabelRotation } from './static';
 
 export interface ColorSchemaParams {
   colorSchema: ColorSchemas;

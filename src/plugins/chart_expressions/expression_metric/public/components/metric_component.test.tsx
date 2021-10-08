@@ -9,9 +9,9 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import MetricVisComponent, { MetricVisComponentProps } from './metric_vis_component';
+import MetricVisComponent, { MetricVisComponentProps } from './metric_component';
 
-jest.mock('../services', () => ({
+jest.mock('../format_service', () => ({
   getFormatService: () => ({
     deserialize: () => {
       return {
