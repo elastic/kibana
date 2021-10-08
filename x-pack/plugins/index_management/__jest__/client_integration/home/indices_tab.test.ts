@@ -20,7 +20,6 @@ import { createDataStreamPayload } from './data_streams_tab.helpers';
  */
 import { stubWebWorker } from '@kbn/test/jest';
 import { createMemoryHistory } from 'history';
-import { ReactWrapper } from 'enzyme';
 stubWebWorker();
 
 describe('<IndexManagementHome />', () => {
