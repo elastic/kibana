@@ -6626,10 +6626,10 @@
     "@types/node" "*"
     form-data "^3.0.0"
 
-"@types/node-forge@^0.10.5":
-  version "0.10.5"
-  resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-0.10.5.tgz#f79925c88202817a7ec0958c3a9d3a915d362b4f"
-  integrity sha512-P+Q+MPSDr0RgIzv5h0gJuJDCm1e4RaSu/EMJZTUS4ZzboWH2uX/T7TiqAAcEFTHzCKtgMRqCgTVTX9SD72fMTQ==
+"@types/node-forge@^0.10.8":
+  version "0.10.8"
+  resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-0.10.8.tgz#02cd441f2bc82c928d0301b54d66a6eac8541927"
+  integrity sha512-pS02y9i4oqhyijveLYrgb7C/tQVHxyaFg7cxZITHO4C9oHU5gjIvtCnZXQNP6K7adXl4VtxCnijnKeuWqT++nA==
   dependencies:
     "@types/node" "*"
 
