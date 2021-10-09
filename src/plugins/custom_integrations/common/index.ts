@@ -14,8 +14,44 @@ export interface IntegrationCategoryCount {
   id: IntegrationCategory;
 }
 
-export const INTEGRATION_CATEGORY_DISPLAY = {
-  // Known EPR
+export const category = [
+  'aws',
+  'azure',
+  'cloud',
+  'config_management',
+  'containers',
+  'crm',
+  'custom',
+  'datastore',
+  'elastic_stack',
+  'google_cloud',
+  'kubernetes',
+  'languages',
+  'message_queue',
+  'monitoring',
+  'network',
+  'notification',
+  'os_system',
+  'productivity',
+  'security',
+  'sample_data',
+  'support',
+  'ticketing',
+  'version_control',
+  'web',
+
+  // Kibana added
+  'language_client',
+  'upload_file',
+
+  // Internal
+  'updates_available',
+] as const;
+
+export type IntegrationCategory = typeof category[number];
+
+// TODO: consider i18n
+export const INTEGRATION_CATEGORY_DISPLAY: { [K in IntegrationCategory]: string } = {
   aws: 'AWS',
   azure: 'Azure',
   cloud: 'Cloud',
@@ -49,7 +85,26 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   updates_available: 'Updates available',
 };
 
-export type IntegrationCategory = keyof typeof INTEGRATION_CATEGORY_DISPLAY;
+export const shipper = [
+  'beats',
+  'language_clients',
+  'other',
+  'sample_data',
+  'tests',
+  'tutorial',
+] as const;
+
+export type Shipper = typeof shipper[number];
+
+// TODO: consider i18n
+export const SHIPPER_DISPLAY: { [K in Shipper]: string } = {
+  beats: 'Beats',
+  language_clients: 'Language clients',
+  other: 'Other',
+  sample_data: 'Sample data',
+  tests: 'Tests',
+  tutorial: 'Tutorials',
+};
 
 export interface CustomIntegrationIcon {
   src: string;
@@ -65,7 +120,7 @@ export interface CustomIntegration {
   isBeta: boolean;
   icons: CustomIntegrationIcon[];
   categories: IntegrationCategory[];
-  shipper: string;
+  shipper: Shipper;
   eprOverlap?: string; // name of the equivalent Elastic Agent integration in EPR. e.g. a beat module can correspond to an EPR-package, or an APM-tutorial. When completed, Integrations-UX can preferentially show the EPR-package, rather than the custom-integration
 }
 
