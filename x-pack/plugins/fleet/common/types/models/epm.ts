@@ -365,7 +365,7 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
 };
 
 export interface IntegrationCardItem {
-  uiInternalPathUrl: string;
+  url: string;
   release?: 'beta' | 'experimental' | 'ga';
   description: string;
   name: string;
