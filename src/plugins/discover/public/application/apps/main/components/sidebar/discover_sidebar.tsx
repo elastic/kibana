@@ -8,7 +8,7 @@
 
 import './discover_sidebar.scss';
 import { throttle } from 'lodash';
-import React, { useCallback, useEffect, useState, useMemo, useRef, memo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, useRef, memo, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
@@ -41,6 +41,7 @@ import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
+import { DiscoverContext } from '../../services/discover_context';
 
 /**
  * Default number of available fields displayed and added on scroll
@@ -104,7 +105,18 @@ export function DiscoverSidebarComponent({
   editField,
   setIndexPatternTimefield,
 }: DiscoverSidebarProps) {
+  const {
+    dataViews: { isTemporary },
+  } = useContext(DiscoverContext);
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
+  const [isTempDataView, setIsTempDataView] = useState(false);
+  useEffect(() => {
+    const checkIsTempIndexPattern = async () => {
+      const result = await isTemporary(selectedIndexPattern);
+      setIsTempDataView(result);
+    };
+    checkIsTempIndexPattern();
+  }, [selectedIndexPattern, isTemporary]);
 
   const { indexPatternFieldEditor } = services;
   const indexPatternFieldEditPermission =
@@ -343,7 +355,7 @@ export function DiscoverSidebarComponent({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {selectedIndexPattern?.tmp && (
+        {isTempDataView && (
           <EuiFlexItem grow={false}>
             <form>
               <EuiSelect
@@ -427,7 +439,6 @@ export function DiscoverSidebarComponent({
                                 multiFields={multiFields?.get(field.name)}
                                 onEditField={canEditIndexPatternField ? editField : undefined}
                                 onDeleteField={canEditIndexPatternField ? deleteField : undefined}
-                                services={services}
                               />
                             </li>
                           );
@@ -487,7 +498,6 @@ export function DiscoverSidebarComponent({
                                 multiFields={multiFields?.get(field.name)}
                                 onEditField={canEditIndexPatternField ? editField : undefined}
                                 onDeleteField={canEditIndexPatternField ? deleteField : undefined}
-                                services={services}
                               />
                             </li>
                           );
@@ -516,7 +526,6 @@ export function DiscoverSidebarComponent({
                             multiFields={multiFields?.get(field.name)}
                             onEditField={canEditIndexPatternField ? editField : undefined}
                             onDeleteField={canEditIndexPatternField ? deleteField : undefined}
-                            services={services}
                           />
                         </li>
                       );

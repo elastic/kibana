@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -34,7 +34,8 @@ import { AppState } from '../../services/discover_state';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { DataDocuments$ } from '../../services/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
-import { DiscoverDataViewEntry, useDataViews } from '../../../../services/use_data_views';
+import { DataViewListItem } from '../../../../../../../data_views/common';
+import { DiscoverContext } from '../../services/discover_context';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -52,7 +53,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * List of available index patterns
    */
-  indexPatternList: DiscoverDataViewEntry[];
+  indexPatternList: DataViewListItem[];
   /**
    * Has been toggled closed
    */
@@ -77,7 +78,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Currently selected index pattern
    */
-  selectedIndexPattern?: IndexPattern;
+  selectedIndexPattern: IndexPattern;
   /**
    * Discover plugin services;
    */
@@ -117,7 +118,9 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const { selectedIndexPattern, onEditRuntimeField, useNewFieldsApi, onChangeIndexPattern } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const { getPersisted } = useDataViews(props.services);
+  const {
+    dataViews: { getPersisted },
+  } = useContext(DiscoverContext);
   /**
    * needed for merging new with old field counts, high likely legacy, but kept this behavior
    * because not 100% sure in this case

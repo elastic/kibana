@@ -17,12 +17,12 @@ import { getServices } from '../../../kibana_services';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 import { ElasticRequestState } from '../../apps/doc/types';
 import { useEsDocSearch } from '../../services/use_es_doc_search';
-import { useDataViews } from '../../services/use_data_views';
+import { IndexPattern } from '../../../../../data_views/common';
 
 interface SourceViewerProps {
   id: string;
   index: string;
-  indexPatternId: string;
+  indexPattern: IndexPattern;
   hasLineNumbers: boolean;
   width?: number;
 }
@@ -30,7 +30,7 @@ interface SourceViewerProps {
 export const SourceViewer = ({
   id,
   index,
-  indexPatternId,
+  indexPattern,
   width,
   hasLineNumbers,
 }: SourceViewerProps) => {
@@ -38,11 +38,10 @@ export const SourceViewer = ({
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
   const [jsonValue, setJsonValue] = useState<string>('');
   const useNewFieldsApi = !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
-  const { dataView } = useDataViews(services, indexPatternId);
   const [reqState, hit, requestData] = useEsDocSearch({
     id,
     index,
-    dataView,
+    dataView: indexPattern,
     requestSource: useNewFieldsApi,
   });
 

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useState, memo, useMemo } from 'react';
+import React, { useEffect, useState, memo } from 'react';
 import { History } from 'history';
 import { useParams } from 'react-router-dom';
 import type { SavedObject as SavedObjectDeprecated } from 'src/plugins/saved_objects/public';
@@ -17,6 +17,7 @@ import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../helpers/bre
 import { redirectWhenMissing } from '../../../../../kibana_utils/public';
 import { getUrlTracker } from '../../../kibana_services';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
+import { DiscoverContext } from './services/discover_context';
 import { useDataViews } from '../../services/use_data_views';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
@@ -40,16 +41,16 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
   const {
     core,
     chrome,
-    uiSettings: config,
+    uiSettings,
     data,
     toastNotifications,
     http: { basePath },
   } = services;
 
-  const { list, get } = useDataViews(services);
+  const dataViews = useDataViews(services);
+  const { list, get } = dataViews;
 
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
-  const indexPattern = useMemo(() => savedSearch?.searchSource?.getField('index'), [savedSearch]);
 
   const { id } = useParams<DiscoverLandingParams>();
 
@@ -68,11 +69,11 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
         );
          **/
         if (loadedSavedSearch && !loadedSavedSearch?.searchSource.getField('index')) {
-          const { appStateContainer } = getState({ history, uiSettings: config });
+          const { appStateContainer } = getState({ history, uiSettings });
           const { index, timefield } = appStateContainer.getState();
           const loadedIndexPattern = await get(
             index ?? services.uiSettings.get('defaultIndex'),
-            timefield
+            timefield ?? ''
           );
           loadedSavedSearch.searchSource.setField('index', loadedIndexPattern);
         }
@@ -109,7 +110,7 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
     get,
     basePath,
     chrome.recentlyAccessed,
-    config,
+    uiSettings,
     core.application.navigateToApp,
     data.indexPatterns,
     history,
@@ -126,16 +127,18 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
     );
   }, [chrome, savedSearch]);
 
-  if (!indexPattern || !savedSearch) {
+  if (!savedSearch || !list) {
     return <LoadingIndicator />;
   }
 
   return (
-    <DiscoverMainAppMemoized
-      history={history}
-      indexPatternList={list}
-      savedSearch={savedSearch}
-      services={services}
-    />
+    <DiscoverContext.Provider value={{ dataViews }}>
+      <DiscoverMainAppMemoized
+        history={history}
+        indexPatternList={list}
+        savedSearch={savedSearch}
+        services={services}
+      />
+    </DiscoverContext.Provider>
   );
 }

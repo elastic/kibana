@@ -17,7 +17,6 @@ import {
   EuiButtonProps,
   EuiSelectableMessage,
   EuiText,
-  keys,
 } from '@elastic/eui';
 import { EuiSelectableProps } from '@elastic/eui/src/components/selectable/selectable';
 import { IndexPatternRef } from './types';
@@ -96,12 +95,6 @@ export function ChangeIndexPattern({
             }
             setPopoverIsOpen(false);
           }}
-          onKeyDown={(event) => {
-            if (event.key === keys.ENTER) {
-              onChangeIndexPattern(searchTerm);
-              setPopoverIsOpen(false);
-            }
-          }}
           searchProps={{
             compressed: true,
             ...(selectableProps ? selectableProps.searchProps : undefined),
@@ -109,23 +102,25 @@ export function ChangeIndexPattern({
           }}
           noMatchesMessage={
             <EuiSelectableMessage>
-              <EuiText size="m">
+              <EuiText size="s">
                 <p>
                   <FormattedMessage
                     id="discover.fieldChooser.indexPattern.noIndexPatternsFound"
-                    defaultMessage="No index patterns found."
+                    defaultMessage="No matching index patterns found."
                   />
                 </p>
               </EuiText>
               <p>
                 <EuiButton
+                  size="s"
                   onClick={() => {
+                    setPopoverIsOpen(false);
                     onChangeIndexPattern(searchTerm);
                   }}
                 >
                   <FormattedMessage
                     id="discover.fieldChooser.indexPattern.viewData"
-                    defaultMessage="Create temporary index pattern for {indices}"
+                    defaultMessage="Create temporary index pattern"
                     values={{ indices: searchTerm }}
                   />
                 </EuiButton>

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { DiscoverServices } from '../../../build_services';
@@ -13,6 +13,7 @@ import { ContextApp } from './context_app';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useDataViews } from '../../services/use_data_views';
+import { DataView } from '../../../../../data_views/common';
 
 export interface ContextAppProps {
   /**
@@ -29,8 +30,11 @@ export interface ContextUrlParams {
 export function ContextAppRoute(props: ContextAppProps) {
   const { services } = props;
   const { chrome } = services;
+  const [dataView, setDataView] = useState<DataView | undefined>();
 
   const { indexPatternId, id } = useParams<ContextUrlParams>();
+
+  const { get } = useDataViews(services);
   /**
    * Context app state
    */
@@ -46,11 +50,17 @@ export function ContextAppRoute(props: ContextAppProps) {
     ]);
   }, [chrome]);
 
-  const { dataView: indexPattern } = useDataViews(services, indexPatternId);
+  useEffect(() => {
+    const load = async () => {
+      const nextDataView = await get(indexPatternId, '');
+      setDataView(nextDataView);
+    };
+    load();
+  }, [get, indexPatternId, setDataView]);
 
-  if (!indexPattern) {
+  if (!dataView) {
     return <LoadingIndicator />;
   }
 
-  return <ContextApp anchorId={id} indexPattern={indexPattern} />;
+  return <ContextApp anchorId={id} indexPattern={dataView} />;
 }

@@ -42,5 +42,6 @@ export function getSwitchIndexPatternAppState(
       nextIndexPattern.timeFieldName && !nextSort.length
         ? [[nextIndexPattern.timeFieldName, sortDirection]]
         : nextSort,
+    timefield: undefined,
   };
 }

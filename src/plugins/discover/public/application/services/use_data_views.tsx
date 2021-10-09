@@ -5,12 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useState, useCallback, useRef } from 'react';
-import ReactDOM from 'react-dom';
-import { I18nStart } from 'kibana/public';
-import { EuiConfirmModal } from '@elastic/eui';
-import { DataView, IndexPattern } from '../../../../data_views/common';
+import { useCallback, useEffect, useRef } from 'react';
+import { DataView, DataViewListItem } from '../../../../data_views/common';
 import { DiscoverServices } from '../../build_services';
+import { showConfirmPanel } from './use_data_views_confirm_panel';
 
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
@@ -20,74 +18,22 @@ import { DiscoverServices } from '../../build_services';
  * Side Public License, v 1.
  */
 
-let isOpen = false;
-
-export function showConfirmPanel({
-  I18nContext,
-  onConfirm,
-  onCancel,
-}: {
-  I18nContext: I18nStart['Context'];
-  onConfirm: () => void;
-  onCancel: () => void;
-}) {
-  if (isOpen) {
-    return;
-  }
-
-  isOpen = true;
-  const container = document.createElement('div');
-  const onClose = () => {
-    ReactDOM.unmountComponentAtNode(container);
-    document.body.removeChild(container);
-    isOpen = false;
-    onCancel();
-  };
-
-  document.body.appendChild(container);
-  const element = (
-    <I18nContext>
-      <EuiConfirmModal
-        title="Persist temporary saved search"
-        onCancel={onClose}
-        onConfirm={onConfirm}
-        cancelButtonText="No, don't do it"
-        confirmButtonText="Yes, do it"
-        defaultFocusedButton="confirm"
-      >
-        <p>If you continue the temporary saved search will be persisted.</p>
-        <p>Are you sure you want to do this?</p>
-      </EuiConfirmModal>
-    </I18nContext>
-  );
-  ReactDOM.render(element, container);
-}
-
-export interface DiscoverDataViewEntry {
-  id: string;
-  title: string;
-  tmp?: boolean;
-  timeFieldName?: string;
+export interface UseDataViewsReturn {
+  getList: () => Promise<DataViewListItem[]>;
+  get: (index: string, timefield: string) => Promise<undefined | DataView>;
   dataView?: DataView;
+  list?: DataViewListItem[];
+  getPersisted: (dataView: DataView) => Promise<DataView>;
+  isTemporary: (dataView: DataView) => Promise<boolean>;
 }
 
-export function useDataViews(
-  services: DiscoverServices,
-  dataViewId: string = '',
-  dataViewTimefield: string = ''
-) {
-  const list = useRef<DiscoverDataViewEntry[]>([]);
-  const [dataView, setDataView] = useState<IndexPattern>();
+export function useDataViews(services: DiscoverServices): UseDataViewsReturn {
+  const list = useRef<DataViewListItem[]>([]);
 
   const loadList = useCallback(async () => {
-    const newList: DiscoverDataViewEntry[] = [];
     const idTitleList = await services.data.dataViews.getIdsWithTitle();
-    for (const entry of idTitleList) {
-      newList.push({ id: entry.id, title: entry.title });
-    }
-    newList.sort((a, b) => (a.title > b.title ? 1 : -1));
-    list.current = newList;
-    return newList;
+    list.current = idTitleList.sort((a, b) => (a.title > b.title ? 1 : -1));
+    return list.current;
   }, [services.data.dataViews]);
 
   const getList = useCallback(async () => {
@@ -107,13 +53,11 @@ export function useDataViews(
         return await services.data.dataViews.get(index);
       }
 
-      const newDataView = await services.data.dataViews.create({
+      return await services.data.dataViews.create({
         id: index,
         title: index,
         timeFieldName: timefield,
       });
-      newDataView.tmp = true;
-      return newDataView;
     },
     [getList, services]
   );
@@ -122,37 +66,36 @@ export function useDataViews(
     loadList();
   }, [services.data.dataViews, loadList]);
 
+  const isTemporary = useCallback(
+    async (checkDataView: DataView) => {
+      const persisted = await getList();
+      return !persisted.find((item) => item.id === checkDataView.id);
+    },
+    [getList]
+  );
+
   const getPersisted = useCallback(
-    async (newDataView) => {
-      if (!newDataView.tmp) {
+    async (newDataView: DataView): Promise<DataView> => {
+      if (!(await isTemporary(newDataView))) {
         return newDataView;
       }
+
       return new Promise((resolve, reject) => {
         showConfirmPanel({
           I18nContext: services.core.i18n.Context,
           onConfirm: async () => {
-            const persisted = await services.data.dataViews.createAndSave({
+            const newPersistedDataView = await services.data.dataViews.createAndSave({
               id: newDataView.id,
               title: newDataView.title,
-              timeFieldName: newDataView.timefield,
+              timeFieldName: newDataView.timeFieldName,
             });
-            resolve(persisted);
+            resolve(newPersistedDataView);
           },
           onCancel: () => reject(),
         });
       });
     },
-    [services.core.i18n.Context, services.data.dataViews]
+    [isTemporary, services.core.i18n.Context, services.data.dataViews]
   );
-
-  useEffect(() => {
-    const load = async () => {
-      const newDataView = await get(dataViewId, dataViewTimefield);
-      setDataView(newDataView);
-    };
-    if (dataViewId) {
-      load();
-    }
-  }, [get, dataViewId, setDataView, dataViewTimefield]);
-  return { getList, get, dataView, list: list.current, getPersisted };
+  return { getList, get, list: list.current, getPersisted, isTemporary };
 }

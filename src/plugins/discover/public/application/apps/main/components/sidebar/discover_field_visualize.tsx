@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { EuiButton, EuiPopoverFooter } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
@@ -15,8 +15,7 @@ import type { IndexPattern, IndexPatternField } from 'src/plugins/data/common';
 import { triggerVisualizeActions, VisualizeInformation } from './lib/visualize_trigger_utils';
 import type { FieldDetails } from './types';
 import { getVisualizeInformation } from './lib/visualize_trigger_utils';
-import { useDataViews } from '../../../../services/use_data_views';
-import { DiscoverServices } from '../../../../../build_services';
+import { DiscoverContext } from '../../services/discover_context';
 
 interface Props {
   field: IndexPatternField;
@@ -24,13 +23,14 @@ interface Props {
   details: FieldDetails;
   multiFields?: IndexPatternField[];
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-  services: DiscoverServices;
 }
 
 export const DiscoverFieldVisualize: React.FC<Props> = React.memo(
-  ({ field, indexPattern, details, trackUiMetric, multiFields, services }) => {
+  ({ field, indexPattern, details, trackUiMetric, multiFields }) => {
     const [visualizeInfo, setVisualizeInfo] = useState<VisualizeInformation>();
-    const { getPersisted } = useDataViews(services);
+    const {
+      dataViews: { getPersisted },
+    } = useContext(DiscoverContext);
 
     useEffect(() => {
       getVisualizeInformation(field, indexPattern.id, details.columns, multiFields).then(

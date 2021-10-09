@@ -58,7 +58,7 @@ export function SingleDocRoute(props: SingleDocRouteProps) {
 
   useEffect(() => {
     const load = async () => {
-      const nextDataView = await get(indexPatternId);
+      const nextDataView = await get(indexPatternId, '');
       setDataView(nextDataView);
     };
     load();

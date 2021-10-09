@@ -7,7 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { getServices } from '../kibana_services';
-import { discoverRouter } from './discover_router';
+import { DiscoverRouter } from './discover_router';
 import { toMountPoint } from '../../../kibana_react/public';
 
 export const renderApp = (element: HTMLElement) => {
@@ -26,7 +26,7 @@ export const renderApp = (element: HTMLElement) => {
       iconType: 'glasses',
     });
   }
-  const unmount = toMountPoint(discoverRouter(services, history))(element);
+  const unmount = toMountPoint(DiscoverRouter(services, history))(element);
 
   return () => {
     unmount();

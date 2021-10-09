@@ -17,11 +17,12 @@ import { NotFoundRoute } from './apps/not_found';
 import { DiscoverServices } from '../build_services';
 import { DiscoverMainProps } from './apps/main/discover_main_route';
 
-export const discoverRouter = (services: DiscoverServices, history: History) => {
+export const DiscoverRouter = (services: DiscoverServices, history: History) => {
   const mainRouteProps: DiscoverMainProps = {
     services,
     history,
   };
+
   return (
     <KibanaContextProvider services={services}>
       <Router history={history} data-test-subj="discover-react-router">

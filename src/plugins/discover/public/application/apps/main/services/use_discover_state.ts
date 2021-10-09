@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useMemo, useEffect, useState, useCallback } from 'react';
+import { useMemo, useEffect, useState, useCallback, useContext } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
 import { getState } from './discover_state';
@@ -23,7 +23,8 @@ import { useSearchSession } from './use_search_session';
 import { FetchStatus } from '../../../types';
 import { getSwitchIndexPatternAppState } from '../utils/get_switch_index_pattern_app_state';
 import { SortPairArr } from '../components/doc_table/lib/get_sort';
-import { DiscoverDataViewEntry, useDataViews } from '../../../services/use_data_views';
+import { DataViewListItem } from '../../../../../../data_views/common';
+import { DiscoverContext } from './discover_context';
 
 export function useDiscoverState({
   services,
@@ -37,14 +38,16 @@ export function useDiscoverState({
   /**
    * List of available index patterns
    */
-  indexPatternList: DiscoverDataViewEntry[];
+  indexPatternList: DataViewListItem[];
 }) {
   const { uiSettings: config, data, filterManager, indexPatterns } = services;
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
   const { timefilter } = data.query.timefilter;
 
   const indexPattern = savedSearch.searchSource.getField('index')!;
-  const { get } = useDataViews(services);
+  const {
+    dataViews: { get },
+  } = useContext(DiscoverContext);
 
   const searchSource = useMemo(() => {
     savedSearch.searchSource.setField('index', indexPattern);
@@ -111,24 +114,24 @@ export function useDiscoverState({
    */
   useEffect(() => {
     const unsubscribe = appStateContainer.subscribe(async (nextState) => {
-      const { hideChart, interval, sort, index } = state;
+      const { hideChart, interval, sort, index, timefield } = state;
       // chart was hidden, now it should be displayed, so data is needed
       const chartDisplayChanged = nextState.hideChart !== hideChart && hideChart;
       const chartIntervalChanged = nextState.interval !== interval;
       const docTableSortChanged = !isEqual(nextState.sort, sort);
       const indexPatternChanged = !isEqual(nextState.index, index);
-      const timeFieldChanged = !isEqual(nextState.timefield, index);
+      const timeFieldChanged = !isEqual(nextState.timefield, timefield);
+
       // NOTE: this is also called when navigating from discover app to context app
-      if (nextState.index && (indexPatternChanged || (nextState.timefield && timeFieldChanged))) {
+      if (nextState.index && (indexPatternChanged || timeFieldChanged)) {
         /**
          *  Without resetting the fetch state, e.g. a time column would be displayed when switching
          *  from a index pattern without to a index pattern with time filter for a brief moment
          *  That's because appState is updated before savedSearchData$
          *  The following line of code catches this, but should be improved
          */
-        const nextIndexPattern = await get(nextState.index, nextState.timefield);
+        const nextIndexPattern = await get(nextState.index, nextState.timefield || '');
         savedSearch.searchSource.setField('index', nextIndexPattern);
-
         reset();
       }
 
@@ -177,7 +180,7 @@ export function useDiscoverState({
    */
   const onChangeIndexPattern = useCallback(
     async (id: string) => {
-      const nextIndexPattern = await get(id);
+      const nextIndexPattern = await get(id, '');
       if (nextIndexPattern && indexPattern) {
         const nextAppState = getSwitchIndexPatternAppState(
           indexPattern,
@@ -207,7 +210,7 @@ export function useDiscoverState({
 
   const onChangeTimefield = useCallback(
     (name: string) => {
-      stateContainer.setAppState({ timefield: name });
+      stateContainer.setAppState({ timefield: name || undefined });
     },
     [stateContainer]
   );

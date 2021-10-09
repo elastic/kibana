@@ -14,7 +14,7 @@ import { useDiscoverState } from './services/use_discover_state';
 import { useUrl } from './services/use_url';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
-import { DiscoverDataViewEntry } from '../../services/use_data_views';
+import { DataViewListItem } from '../../../../../data_views/common';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -26,7 +26,7 @@ export interface DiscoverMainProps {
   /**
    * List of available index patterns
    */
-  indexPatternList: DiscoverDataViewEntry[];
+  indexPatternList: DataViewListItem[];
   /**
    * Kibana core services used by discover
    */

@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverServices } from '../../../../../build_services';
 import { IndexPattern } from '../../../../../../../data/common';
-import { useDataViews } from '../../../../services/use_data_views';
+import { DiscoverContext } from '../../services/discover_context';
 
 export interface DiscoverIndexPatternManagementProps {
   /**
    * Currently selected index pattern
    */
-  selectedIndexPattern?: IndexPattern;
+  selectedIndexPattern: IndexPattern;
   /**
    * Discover plugin services;
    */
@@ -40,7 +40,9 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
     indexPatternFieldEditor?.userPermissions.editIndexPattern();
   const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
   const [isAddIndexPatternFieldPopoverOpen, setIsAddIndexPatternFieldPopoverOpen] = useState(false);
-  const { getPersisted } = useDataViews(props.services);
+  const {
+    dataViews: { getPersisted },
+  } = useContext(DiscoverContext);
 
   if (!useNewFieldsApi || !selectedIndexPattern || !canEditIndexPatternField) {
     return null;
