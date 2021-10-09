@@ -17,7 +17,7 @@ export default {
   title: 'Sections/EPM/Deployment Details',
   description: '',
   decorators: [
-    (storyFn, { globals }) => {
+    (storyFn) => {
       const sections = [{ items: [] }, { items: [storyFn()] }];
       return <EuiHeader sections={sections} />;
     },
