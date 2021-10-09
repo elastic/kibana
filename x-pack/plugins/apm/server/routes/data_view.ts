@@ -12,7 +12,7 @@ import { getDynamicDataView } from '../lib/data_view/get_dynamic_data_view';
 import { createApmServerRoute } from './create_apm_server_route';
 
 const staticDataViewRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/data_view/static',
+  endpoint: 'POST /internal/apm/data_view/static',
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const {
@@ -43,7 +43,7 @@ const staticDataViewRoute = createApmServerRoute({
 });
 
 const dynamicDataViewRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/data_view/dynamic',
+  endpoint: 'GET /internal/apm/data_view/dynamic',
   options: { tags: ['access:apm'] },
   handler: async ({ context, config, logger }) => {
     const dynamicDataView = await getDynamicDataView({
