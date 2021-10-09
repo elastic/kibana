@@ -704,6 +704,7 @@ export interface DocLinksStart {
             datastreamsNamingScheme: string;
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
+            learnMoreBlog: string;
         }>;
         readonly ecs: {
             readonly guide: string;

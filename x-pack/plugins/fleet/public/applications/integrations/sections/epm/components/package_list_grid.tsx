@@ -38,6 +38,7 @@ export interface ListProps {
   setSelectedCategory: (category: string) => void;
   onSearchChange: (search: string) => void;
   showMissingIntegrationMessage?: boolean;
+  callout?: JSX.Element | null;
 }
 
 export function PackageListGrid({
@@ -49,6 +50,7 @@ export function PackageListGrid({
   onSearchChange,
   setSelectedCategory,
   showMissingIntegrationMessage = false,
+  callout,
 }: ListProps) {
   const [searchTerm, setSearchTerm] = useState(initialSearch || '');
   const localSearchRef = useLocalSearch(list);
@@ -105,6 +107,7 @@ export function PackageListGrid({
           }}
           onChange={onQueryChange}
         />
+        {callout ? callout : null}
         <EuiSpacer />
         {gridContent}
         {showMissingIntegrationMessage && (
