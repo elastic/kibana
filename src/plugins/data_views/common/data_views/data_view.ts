@@ -76,7 +76,6 @@ export class DataView implements IIndexPattern {
    */
   public version: string | undefined;
   public sourceFilters?: SourceFilter[];
-  public tmp: boolean;
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
@@ -120,7 +119,6 @@ export class DataView implements IIndexPattern {
     this.intervalName = spec.intervalName;
     this.allowNoIndex = spec.allowNoIndex || false;
     this.runtimeFieldMap = spec.runtimeFieldMap || {};
-    this.tmp = false;
   }
 
   /**
