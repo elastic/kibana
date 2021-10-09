@@ -732,7 +732,11 @@ export class IndexActionsContextMenu extends Component {
                 anchorPosition={anchorPosition}
                 repositionOnScroll
               >
-                <EuiContextMenu initialPanelId={0} panels={panels} />
+                <EuiContextMenu
+                  data-test-subj="indexContextMenu"
+                  initialPanelId={0}
+                  panels={panels}
+                />
               </EuiPopover>
             </div>
           );

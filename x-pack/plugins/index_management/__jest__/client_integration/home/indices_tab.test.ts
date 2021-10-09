@@ -161,4 +161,41 @@ describe('<IndexManagementHome />', () => {
       expect(latestRequest.url).toBe(`${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`);
     });
   });
+  describe('index actions', () => {
+    const indexName = 'testIndex';
+    beforeEach(async () => {
+      const index = {
+        health: 'green',
+        status: 'open',
+        primary: 1,
+        replica: 1,
+        documents: 10000,
+        documents_deleted: 100,
+        size: '156kb',
+        primary_size: '156kb',
+        name: indexName,
+      };
+
+      httpRequestsMockHelpers.setLoadIndicesResponse([index]);
+      testBed = await setup();
+      const { find, component } = testBed;
+      component.update();
+
+      find('indexTableIndexNameLink').at(0).simulate('click');
+    });
+
+    test('should be able to refresh index', async () => {
+      const { find, actions } = testBed;
+      actions.clickManageContextMenuButton();
+
+      const contextMenu = find('indexContextMenu');
+      const refreshIndexButton = contextMenu
+        .find('button[data-test-subj="indexTableContextMenuButton"]')
+        .at(2);
+
+      await refreshIndexButton.simulate('click');
+      const latestRequest = server.requests[server.requests.length - 1];
+      expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/refresh`);
+    });
+  });
 });
