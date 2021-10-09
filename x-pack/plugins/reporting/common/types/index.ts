@@ -8,9 +8,9 @@
 import type { Size, LayoutParams } from './layout';
 import type { JobId, BaseParams, BasePayload } from './base';
 
-export { JobId, BaseParams, BasePayload };
-export { Size, LayoutParams };
-export {
+export type { JobId, BaseParams, BasePayload };
+export type { Size, LayoutParams };
+export type {
   DownloadReportFn,
   IlmPolicyMigrationStatus,
   IlmPolicyStatusResponse,
