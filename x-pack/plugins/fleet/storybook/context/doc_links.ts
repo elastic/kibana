@@ -11,7 +11,8 @@ export const getDocLinks = () => {
   const docLinks: DocLinksStart = {
     links: {
       fleet: {
-        learnMoreBlog: 'https://www.elastic.co/blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic',
+        learnMoreBlog:
+          'https://www.elastic.co/blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic',
       },
     },
   } as unknown as DocLinksStart;
