@@ -1066,6 +1066,10 @@ describe('PluginsService', () => {
 
   describe('plugin initialization', () => {
     beforeEach(() => {
+      jest
+        .spyOn(configService, 'isEnabledAtPath')
+        .mockImplementation((path) => Promise.resolve(!path.includes('disabled')));
+
       mockDiscover.mockReturnValue({
         error$: from([]),
         plugin$: from([
