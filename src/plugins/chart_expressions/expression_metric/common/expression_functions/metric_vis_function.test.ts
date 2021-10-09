@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { createMetricVisFn } from './metric_vis_fn';
-import { functionWrapper } from '../../../expressions/common/expression_functions/specs/tests/utils';
-import { Datatable } from '../../../expressions/common/expression_types/specs';
-
-type Arguments = Parameters<ReturnType<typeof createMetricVisFn>['fn']>[1];
+import { metricVisFunction } from './metric_vis_function';
+import type { MetricArguments } from '../../common';
+import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
+import { Datatable } from '../../../../expressions/common/expression_types/specs';
 
 describe('interpreter/functions#metric', () => {
-  const fn = functionWrapper(createMetricVisFn());
+  const fn = functionWrapper(metricVisFunction());
   const context = {
     type: 'datatable',
     rows: [{ 'col-0-1': 0 }],
@@ -52,7 +51,7 @@ describe('interpreter/functions#metric', () => {
         aggType: 'count',
       },
     ],
-  } as unknown as Arguments;
+  } as unknown as MetricArguments;
 
   it('returns an object with the correct structure', () => {
     const actual = fn(context, args, undefined);

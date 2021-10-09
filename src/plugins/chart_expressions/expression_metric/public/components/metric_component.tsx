@@ -9,21 +9,19 @@
 import { last, findIndex, isNaN } from 'lodash';
 import React, { Component } from 'react';
 import { isColorDark } from '@elastic/eui';
-import { MetricVisValue } from './metric_vis_value';
-import { Input } from '../metric_vis_fn';
+import { MetricVisValue } from './metric_value';
+import { MetricInput, VisParams, MetricOptions } from '../../common/types';
 import type { FieldFormatsContentType, IFieldFormat } from '../../../../field_formats/common';
 import { Datatable } from '../../../../expressions/public';
 import { getHeatmapColors } from '../../../../charts/public';
-import { VisParams, MetricVisMetric } from '../types';
-import { getFormatService } from '../services';
+import { getFormatService } from '../format_service';
 import { ExpressionValueVisDimension } from '../../../../visualizations/public';
-import { Range } from '../../../../expressions/public';
 
-import './metric_vis.scss';
+import './metric.scss';
 
 export interface MetricVisComponentProps {
   visParams: Pick<VisParams, 'metric' | 'dimensions'>;
-  visData: Input;
+  visData: MetricInput;
   fireEvent: (event: any) => void;
   renderComplete: () => void;
 }
@@ -33,7 +31,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     const config = this.props.visParams.metric;
     const isPercentageMode = config.percentageMode;
     const colorsRange = config.colorsRange;
-    const max = (last(colorsRange) as Range).to;
+    const max = last(colorsRange)?.to ?? 1;
     const labels: string[] = [];
 
     colorsRange.forEach((range: any) => {
@@ -66,7 +64,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     });
 
     if (bucket === -1) {
-      if (val < config.colorsRange[0].from) bucket = 0;
+      if (config.colorsRange?.[0] && val < config.colorsRange?.[0].from) bucket = 0;
       else bucket = config.colorsRange.length - 1;
     }
 
@@ -109,14 +107,13 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
   }
 
   private processTableGroups(table: Datatable) {
-    const config = this.props.visParams.metric;
-    const dimensions = this.props.visParams.dimensions;
-    const isPercentageMode = config.percentageMode;
-    const min = config.colorsRange[0].from;
-    const max = (last(config.colorsRange) as Range).to;
+    const { metric: metricConfig, dimensions } = this.props.visParams;
+    const { percentageMode: isPercentageMode, colorsRange, style } = metricConfig;
+    const min = colorsRange?.[0]?.from;
+    const max = last(colorsRange)?.to;
     const colors = this.getColors();
     const labels = this.getLabels();
-    const metrics: MetricVisMetric[] = [];
+    const metrics: MetricOptions[] = [];
 
     let bucketColumnId: string;
     let bucketFormatter: IFieldFormat;
@@ -131,27 +128,26 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
       const formatter = getFormatService().deserialize(metric.format);
       table.rows.forEach((row, rowIndex) => {
         let title = column.name;
-        let value: any = row[column.id];
+        let value: number = row[column.id];
         const color = this.getColor(value, labels, colors);
 
-        if (isPercentageMode) {
+        if (isPercentageMode && colorsRange?.length && max !== undefined && min !== undefined) {
           value = (value - min) / (max - min);
         }
-        value = this.getFormattedValue(formatter, value, 'html');
-
+        const formattedValue = this.getFormattedValue(formatter, value, 'html');
         if (bucketColumnId) {
           const bucketValue = this.getFormattedValue(bucketFormatter, row[bucketColumnId]);
           title = `${bucketValue} - ${title}`;
         }
 
-        const shouldColor = config.colorsRange.length > 1;
+        const shouldColor = colorsRange && colorsRange.length > 1;
 
         metrics.push({
           label: title,
-          value,
-          color: shouldColor && config.style.labelColor ? color : undefined,
-          bgColor: shouldColor && config.style.bgColor ? color : undefined,
-          lightText: shouldColor && config.style.bgColor && this.needsLightText(color),
+          value: formattedValue,
+          color: shouldColor && style.labelColor ? color : undefined,
+          bgColor: shouldColor && style.bgColor ? color : undefined,
+          lightText: shouldColor && style.bgColor && this.needsLightText(color),
           rowIndex,
         });
       });
@@ -160,7 +156,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     return metrics;
   }
 
-  private filterBucket = (metric: MetricVisMetric) => {
+  private filterBucket = (metric: MetricOptions) => {
     const dimensions = this.props.visParams.dimensions;
     if (!dimensions.bucket) {
       return;
@@ -180,7 +176,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     });
   };
 
-  private renderMetric = (metric: MetricVisMetric, index: number) => {
+  private renderMetric = (metric: MetricOptions, index: number) => {
     return (
       <MetricVisValue
         key={index}
