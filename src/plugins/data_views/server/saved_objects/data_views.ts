@@ -13,7 +13,8 @@ import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 export const dataViewSavedObjectType: SavedObjectsType = {
   name: DATA_VIEW_SAVED_OBJECT_TYPE,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
     icon: 'indexPatternApp',
     defaultSearchField: 'title',
