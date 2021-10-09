@@ -250,7 +250,7 @@ export default function ({ getService }: FtrProviderContext) {
                 path: '/app/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'management.kibana.indexPatterns',
               },
-              namespaceType: 'single',
+              namespaceType: 'multiple-isolated',
             });
           }));
     });
