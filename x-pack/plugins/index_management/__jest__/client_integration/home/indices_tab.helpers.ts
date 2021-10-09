@@ -28,6 +28,7 @@ export interface IndicesTestBed extends TestBed<TestSubjects> {
     getIncludeHiddenIndicesToggleStatus: () => boolean;
     clickIncludeHiddenIndicesToggle: () => void;
     clickDataStreamAt: (index: number) => void;
+    clickManageContextMenuButton: () => void;
   };
   findDataStreamDetailPanel: () => ReactWrapper;
   findDataStreamDetailPanelTitle: () => string;
@@ -47,6 +48,11 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
   const clickIncludeHiddenIndicesToggle = () => {
     const { find } = testBed;
     find('indexTableIncludeHiddenIndicesToggle').simulate('click');
+  };
+
+  const clickManageContextMenuButton = () => {
+    const { find } = testBed;
+    find('indexActionsContextMenuButton').simulate('click');
   };
 
   const getIncludeHiddenIndicesToggleStatus = () => {
@@ -95,6 +101,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
       getIncludeHiddenIndicesToggleStatus,
       clickIncludeHiddenIndicesToggle,
       clickDataStreamAt,
+      clickManageContextMenuButton,
     },
     findDataStreamDetailPanel,
     findDataStreamDetailPanelTitle,
