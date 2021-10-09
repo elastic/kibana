@@ -15,6 +15,7 @@ import {
 } from '../../../common/types';
 import {
   API_BASE_PATH,
+  CLUSTER_UPGRADE_STATUS_POLL_INTERVAL_MS,
   DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,
   CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS,
 } from '../../../common/constants';
@@ -48,6 +49,12 @@ export class ApiService {
       throw new Error('API service has not been initialized.');
     }
     const response = _useRequest<R, ResponseError>(this.client, config);
+    // NOTE: This will cause an infinite render loop in any component that both
+    // consumes the hook calling this useRequest function and also handles
+    // cluster upgrade errors. This is because we're calling handleClusterUpgradeError
+    // every time useRequest is called, which will be on every render. If handling
+    // the cluster upgrade error causes a state change in the consuming component,
+    // that will trigger a render, which will call useRequest again, and so on.
     this.handleClusterUpgradeError<UseRequestResponse<R, ResponseError>>(response.error);
     return response;
   }
@@ -67,8 +74,16 @@ export class ApiService {
     this.client = httpClient;
   }
 
-  public onClusterUpgradeStateChange(listener: ClusterUpgradeStateListener): void {
+  public onClusterUpgradeStateChange(listener: ClusterUpgradeStateListener) {
     this.clusterUpgradeStateListeners.push(listener);
+  }
+
+  public useLoadClusterUpgradeStatus() {
+    return this.useRequest({
+      path: `${API_BASE_PATH}/cluster_upgrade_status`,
+      method: 'get',
+      pollIntervalMs: CLUSTER_UPGRADE_STATUS_POLL_INTERVAL_MS,
+    });
   }
 
   public useLoadCloudBackupStatus() {

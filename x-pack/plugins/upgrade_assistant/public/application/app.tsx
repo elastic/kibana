@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt, EuiPageContent } from '@elastic/eui';
@@ -21,7 +21,7 @@ import { EsDeprecations, ComingSoonPrompt, KibanaDeprecations, Overview } from '
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
-const App: React.FunctionComponent = () => {
+const AppWithoutPolling: React.FunctionComponent = () => {
   const {
     isReadOnlyMode,
     services: { api },
@@ -34,7 +34,7 @@ const App: React.FunctionComponent = () => {
     api.onClusterUpgradeStateChange((newClusterUpgradeState: ClusterUpgradeState) => {
       setClusterUpradeState(newClusterUpgradeState);
     });
-  }, [api, setClusterUpradeState]);
+  }, [api]);
 
   // Read-only mode will be enabled up until the last minor before the next major release
   if (isReadOnlyMode) {
@@ -116,6 +116,18 @@ const App: React.FunctionComponent = () => {
       <Redirect from="/" to="/overview" />
     </Switch>
   );
+};
+
+export const App: React.FunctionComponent = () => {
+  const {
+    services: { api },
+  } = useAppContext();
+
+  // This is a hack to avoid the app getting stuck in an infinite render loop,
+  // as noted in api.ts.
+  api.useLoadClusterUpgradeStatus();
+
+  return <AppWithoutPolling />;
 };
 
 export const AppWithRouter = ({ history }: { history: ScopedHistory }) => {
