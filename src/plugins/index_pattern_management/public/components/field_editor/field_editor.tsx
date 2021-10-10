@@ -509,8 +509,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           helpText={
             <FormattedMessage
               id="indexPatternManagement.formatLabel"
-              defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be
-              completely changed and prevent highlighting in Discover from working."
+              defaultMessage="Formatting controls how values are displayed. Changing this setting might also affect the field value and highlighting in Discover."
             />
           }
         >
