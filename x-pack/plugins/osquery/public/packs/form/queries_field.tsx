@@ -11,10 +11,7 @@ import { produce } from 'immer';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  OsqueryManagerPackagePolicyInputStream,
-  OsqueryManagerPackagePolicyInput,
-} from '../../../common/types';
+import { OsqueryManagerPackagePolicyInputStream } from '../../../common/types';
 import { FieldHook } from '../../shared_imports';
 import { PackQueriesTable } from '../pack_queries_table';
 import { QueryFlyout } from '../queries/query_flyout';
@@ -23,7 +20,7 @@ import { getSupportedPlatforms } from '../queries/platforms/helpers';
 
 interface QueriesFieldProps {
   handleNameChange: (name: string) => void;
-  field: FieldHook<OsqueryManagerPackagePolicyInput[]>;
+  field: FieldHook<Array<Record<string, unknown>>>;
   integrationPackageVersion?: string | undefined;
 }
 
@@ -166,7 +163,6 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
     () =>
       field.value && field.value.length
         ? field.value.reduce((acc, query) => {
-            // @ts-expect-error update types
             if (query?.id) {
               // @ts-expect-error update types
               acc.push(query.id);
