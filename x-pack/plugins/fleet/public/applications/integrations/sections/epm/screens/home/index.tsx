@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, Fragment } from 'react';
 import { Switch, Route, useLocation, useHistory, useParams } from 'react-router-dom';
 import semverLt from 'semver/functions/lt';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import _ from 'lodash';
 
 import { installationStatuses } from '../../../../../../../common/constants';
@@ -25,6 +28,7 @@ import {
   useGetAppendCustomIntegrations,
   useGetReplacementCustomIntegrations,
   useLink,
+  useStartServices,
 } from '../../../../hooks';
 import { doesPackageHaveIntegrations } from '../../../../services';
 import { DefaultLayout } from '../../../../layouts';
@@ -170,6 +174,7 @@ const InstalledPackages: React.FC = memo(() => {
     experimental: true,
   });
   const { getHref, getAbsolutePath } = useLink();
+  const { docLinks } = useStartServices();
 
   const { selectedCategory, searchParam } = getParams(
     useParams<CategoryParams>(),
@@ -252,6 +257,38 @@ const InstalledPackages: React.FC = memo(() => {
     return mapToCard(getAbsolutePath, getHref, item);
   });
 
+  const link = (
+    <EuiLink href={docLinks.links.fleet.learnMoreBlog} target="_blank">
+      {i18n.translate('xpack.fleet.epmList.availableCalloutBlogText', {
+        defaultMessage: 'announcement blog post',
+      })}
+    </EuiLink>
+  );
+  const calloutMessage = (
+    <FormattedMessage
+      id="xpack.fleet.epmList.availableCalloutIntroText"
+      defaultMessage="To learn more about integrations and the Elastic Agent, read our {link}"
+      values={{
+        link,
+      }}
+    />
+  );
+
+  const callout =
+    selectedCategory === 'updates_available' ? null : (
+      <Fragment>
+        <EuiSpacer />
+        <EuiCallOut
+          title={i18n.translate('xpack.fleet.epmList.availableCalloutTitle', {
+            defaultMessage: 'Only installed Elastic Agent Integrations are displayed.',
+          })}
+          iconType="iInCircle"
+        >
+          <p>{calloutMessage}</p>
+        </EuiCallOut>
+      </Fragment>
+    );
+
   return (
     <PackageListGrid
       isLoading={isLoadingPackages}
@@ -261,6 +298,7 @@ const InstalledPackages: React.FC = memo(() => {
       initialSearch={searchParam}
       title={title}
       list={cards}
+      callout={callout}
     />
   );
 });
