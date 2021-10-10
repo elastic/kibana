@@ -158,7 +158,6 @@ export interface RegistryPolicyTemplate {
   [RegistryPolicyTemplateKeys.inputs]?: RegistryInput[];
   [RegistryPolicyTemplateKeys.readme]?: string;
   [RegistryPolicyTemplateKeys.multiple]?: boolean;
-  [RegistryPolicyTemplateKeys.categories]?: string[];
 }
 
 export enum RegistryInputKeys {
@@ -377,6 +376,7 @@ export interface IntegrationCardItem {
   icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
   integration: string;
   id: string;
+  categories: string[];
 }
 
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;

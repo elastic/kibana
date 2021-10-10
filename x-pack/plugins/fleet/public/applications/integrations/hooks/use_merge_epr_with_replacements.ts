@@ -6,10 +6,7 @@
  */
 
 import type { PackageListItem } from '../../../../common/types/models';
-import type {
-  CustomIntegration,
-  IntegrationCategory,
-} from '../../../../../../../src/plugins/custom_integrations/common';
+import type { CustomIntegration } from '../../../../../../../src/plugins/custom_integrations/common';
 import { filterCustomIntegrations } from '../../../../../../../src/plugins/custom_integrations/public';
 
 // Export this as a utility to find replacements for a package (e.g. in the overview-page for an EPR package)
@@ -26,14 +23,10 @@ function findReplacementsForEprPackage(
 
 export function useMergeEprPackagesWithReplacements(
   eprPackages: PackageListItem[],
-  replacements: CustomIntegration[],
-  category: IntegrationCategory | ''
+  replacements: CustomIntegration[]
 ): Array<PackageListItem | CustomIntegration> {
   const merged: Array<PackageListItem | CustomIntegration> = [];
-
-  const filteredReplacements = replacements.filter((customIntegration) => {
-    return !category || customIntegration.categories.includes(category);
-  });
+  const filteredReplacements = replacements;
 
   // Either select replacement or select beat
   eprPackages.forEach((eprPackage: PackageListItem) => {

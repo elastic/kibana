@@ -80,7 +80,7 @@ describe('useMergeEprWithReplacements', () => {
       },
     ]);
 
-    expect(useMergeEprPackagesWithReplacements(eprPackages, replacements, '')).toEqual([
+    expect(useMergeEprPackagesWithReplacements(eprPackages, replacements)).toEqual([
       {
         eprOverlap: 'activemq',
         id: 'activemq-logs',
@@ -108,7 +108,7 @@ describe('useMergeEprWithReplacements', () => {
       },
     ]);
 
-    expect(useMergeEprPackagesWithReplacements(eprPackages, replacements, '')).toEqual([
+    expect(useMergeEprPackagesWithReplacements(eprPackages, replacements)).toEqual([
       {
         name: 'activemq',
         release: 'beta',
@@ -116,32 +116,6 @@ describe('useMergeEprWithReplacements', () => {
       {
         id: 'prometheus',
         categories: ['monitoring', 'datastore'],
-      },
-    ]);
-  });
-
-  test('should respect category assignment', () => {
-    const eprPackages: PackageListItem[] = mockEprPackages([
-      {
-        name: 'activemq',
-        release: 'beta',
-      },
-    ]);
-    const replacements: CustomIntegration[] = mockIntegrations([
-      {
-        id: 'prometheus',
-        categories: ['monitoring', 'datastore'],
-      },
-      {
-        id: 'oracle',
-        categories: ['datastore'],
-      },
-    ]);
-
-    expect(useMergeEprPackagesWithReplacements(eprPackages, replacements, 'web')).toEqual([
-      {
-        name: 'activemq',
-        release: 'beta',
       },
     ]);
   });
@@ -190,7 +164,7 @@ describe('useMergeEprWithReplacements', () => {
       },
     ]);
 
-    expect(useMergeEprPackagesWithReplacements(eprPackages, replacements, '')).toEqual([
+    expect(useMergeEprPackagesWithReplacements(eprPackages, replacements)).toEqual([
       {
         name: 'aws',
         release: 'ga',

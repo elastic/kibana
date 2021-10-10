@@ -41,8 +41,6 @@ import type { PackageListItem } from '../../../../types';
 
 import type { IntegrationCardItem } from '../../../../../../../common/types/models';
 
-import type { IntegrationCategory } from '../../../../../../../../../../src/plugins/custom_integrations/common';
-
 import { useMergeEprPackagesWithReplacements } from '../../../../hooks/use_merge_epr_with_replacements';
 
 import { mergeAndReplaceCategoryCounts } from './util';
@@ -95,6 +93,7 @@ function mapToCard(
     version: 'version' in item ? item.version || '' : '',
     release: 'release' in item ? item.release : undefined,
     url: uiInternalPathUrl,
+    categories: (item.categories || []).filter((c) => !!c),
   };
 }
 
@@ -213,14 +212,6 @@ const InstalledPackages: React.FC = memo(() => {
     [allInstalledPackages]
   );
 
-  const title = useMemo(
-    () =>
-      i18n.translate('xpack.fleet.epmList.installedTitle', {
-        defaultMessage: 'Installed integrations',
-      }),
-    []
-  );
-
   const categories: CategoryFacet[] = useMemo(
     () => [
       {
@@ -296,7 +287,9 @@ const InstalledPackages: React.FC = memo(() => {
       setSelectedCategory={setSelectedCategory}
       onSearchChange={setSearchTerm}
       initialSearch={searchParam}
-      title={title}
+      title={i18n.translate('xpack.fleet.epmList.installedTitle', {
+        defaultMessage: 'Installed integrations',
+      })}
       list={cards}
       callout={callout}
     />
@@ -326,56 +319,32 @@ const AvailablePackages: React.FC = memo(() => {
     );
   }
 
-  const { data: allCategoryPackagesRes, isLoading: isLoadingAllPackages } = useGetPackages({
+  const { data: eprPackages, isLoading: isLoadingAllPackages } = useGetPackages({
     category: '',
   });
-  const { data: categoriesRes, isLoading: isLoadingCategories } = useGetCategories({
+  const { data: eprCategories, isLoading: isLoadingCategories } = useGetCategories({
     include_policy_templates: true,
   });
 
-  const allEprPackages = useMemo(
-    () => packageListToIntegrationsList(allCategoryPackagesRes?.response || []),
-    [allCategoryPackagesRes]
+  const eprIntegrationList = useMemo(
+    () => packageListToIntegrationsList(eprPackages?.response || []),
+    [eprPackages]
   );
-
-  const eprPackages = (allEprPackages || []).filter((eprPackage: PackageListItem) => {
-    if (selectedCategory === '') {
-      return true;
-    }
-    return eprPackage.categories.includes(selectedCategory);
-  });
 
   const { value: replacementCustomIntegrations } = useGetReplacementCustomIntegrations();
 
   const mergedEprPackages: Array<PackageListItem | CustomIntegration> =
     useMergeEprPackagesWithReplacements(
-      eprPackages || [],
-      replacementCustomIntegrations || [],
-      selectedCategory as IntegrationCategory
+      eprIntegrationList || [],
+      replacementCustomIntegrations || []
     );
 
   const { loading: isLoadingAppendCustomIntegrations, value: appendCustomIntegrations } =
     useGetAppendCustomIntegrations();
-  const filteredAddableIntegrations = appendCustomIntegrations
-    ? appendCustomIntegrations.filter((integration: CustomIntegration) => {
-        if (!selectedCategory) {
-          return true;
-        }
-        return integration.categories.indexOf(selectedCategory as IntegrationCategory) >= 0;
-      })
-    : [];
-
-  const title = useMemo(
-    () =>
-      i18n.translate('xpack.fleet.epmList.allTitle', {
-        defaultMessage: 'Browse by category',
-      }),
-    []
-  );
 
   const eprAndCustomPackages: Array<CustomIntegration | PackageListItem> = [
     ...mergedEprPackages,
-    ...filteredAddableIntegrations,
+    ...(appendCustomIntegrations || []),
   ];
   eprAndCustomPackages.sort((a, b) => {
     return a.title.localeCompare(b.title);
@@ -386,23 +355,23 @@ const AvailablePackages: React.FC = memo(() => {
       isLoadingCategories ||
       isLoadingAppendCustomIntegrations ||
       !appendCustomIntegrations ||
-      !categoriesRes
+      !eprCategories
         ? []
         : mergeAndReplaceCategoryCounts(
-            categoriesRes.response as Array<{ id: string; title: string; count: number }>,
+            eprCategories.response as Array<{ id: string; title: string; count: number }>,
             appendCustomIntegrations
           );
     return [
       {
         id: '',
-        count: (allEprPackages?.length || 0) + (appendCustomIntegrations?.length || 0),
+        count: (eprIntegrationList?.length || 0) + (appendCustomIntegrations?.length || 0),
       },
       ...(eprAndCustomCategories ? eprAndCustomCategories : []),
     ] as CategoryFacet[];
   }, [
-    allEprPackages?.length,
+    eprIntegrationList?.length,
     appendCustomIntegrations,
-    categoriesRes,
+    eprCategories,
     isLoadingAppendCustomIntegrations,
     isLoadingCategories,
   ]);
@@ -428,13 +397,22 @@ const AvailablePackages: React.FC = memo(() => {
     return mapToCard(getAbsolutePath, getHref, item);
   });
 
+  const filteredCards = cards.filter((c) => {
+    if (selectedCategory === '') {
+      return true;
+    }
+    return c.categories.includes(selectedCategory);
+  });
+
   return (
     <PackageListGrid
       isLoading={isLoadingAllPackages}
-      title={title}
+      title={i18n.translate('xpack.fleet.epmList.allTitle', {
+        defaultMessage: 'Browse by category',
+      })}
       controls={controls}
       initialSearch={searchParam}
-      list={cards}
+      list={filteredCards}
       setSelectedCategory={setSelectedCategory}
       onSearchChange={setSearchTerm}
       showMissingIntegrationMessage
