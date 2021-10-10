@@ -9,11 +9,6 @@
 export const PLUGIN_ID = 'customIntegrations';
 export const PLUGIN_NAME = 'customIntegrations';
 
-export interface IntegrationCategoryCount {
-  count: number;
-  id: IntegrationCategory;
-}
-
 export const INTEGRATION_CATEGORY_DISPLAY = {
   // Known EPR
   aws: 'AWS',
@@ -44,9 +39,6 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   // Kibana added
   upload_file: 'Upload a file',
   language_client: 'Language client',
-
-  // Internal
-  updates_available: 'Updates available',
 };
 
 export type IntegrationCategory = keyof typeof INTEGRATION_CATEGORY_DISPLAY;

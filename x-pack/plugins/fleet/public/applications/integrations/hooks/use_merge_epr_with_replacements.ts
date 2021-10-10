@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { PackageListItem } from '../../common/types/models';
+import type { PackageListItem } from '../../../../common/types/models';
 import type {
   CustomIntegration,
   IntegrationCategory,
-} from '../../../../../src/plugins/custom_integrations/common';
-import { filterCustomIntegrations } from '../../../../../src/plugins/custom_integrations/public';
+} from '../../../../../../../src/plugins/custom_integrations/common';
+import { filterCustomIntegrations } from '../../../../../../../src/plugins/custom_integrations/public';
 
 // Export this as a utility to find replacements for a package (e.g. in the overview-page for an EPR package)
 function findReplacementsForEprPackage(
@@ -36,10 +36,10 @@ export function useMergeEprPackagesWithReplacements(
   });
 
   // Either select replacement or select beat
-  eprPackages.forEach((eprPackage) => {
+  eprPackages.forEach((eprPackage: PackageListItem) => {
     const hits = findReplacementsForEprPackage(
       filteredReplacements,
-      eprPackage.name,
+      eprPackage.eprName || eprPackage.name,
       eprPackage.release
     );
     if (hits.length) {

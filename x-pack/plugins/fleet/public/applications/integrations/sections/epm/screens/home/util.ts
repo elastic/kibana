@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import type {
-  CustomIntegration,
-  IntegrationCategory,
-} from '../../../../../../../../../../src/plugins/custom_integrations/common';
+import type { CustomIntegration } from '../../../../../../../../../../src/plugins/custom_integrations/common';
+
+import { INTEGRATION_CATEGORY_DISPLAY } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
 import type { CategoryFacet } from './category_facets';
 
 export function mergeAndReplaceCategoryCounts(
-  eprCounts: CategoryFacet[],
+  eprCounts: Array<{ id: string; title: string; count: number }>,
   addableIntegrations: CustomIntegration[]
 ): CategoryFacet[] {
   const merged: CategoryFacet[] = [];
 
-  const addIfMissing = (category: string, count: number) => {
+  const addIfMissing = (category: string, count: number, title: string) => {
     const match = merged.find((c) => {
       return c.id === category;
     });
@@ -27,18 +26,19 @@ export function mergeAndReplaceCategoryCounts(
       match.count += count;
     } else {
       merged.push({
-        id: category as IntegrationCategory,
+        id: category,
         count,
+        title,
       });
     }
   };
 
   eprCounts.forEach((facet) => {
-    addIfMissing(facet.id, facet.count);
+    addIfMissing(facet.id, facet.count, facet.title);
   });
   addableIntegrations.forEach((integration) => {
     integration.categories.forEach((cat) => {
-      addIfMissing(cat, 1);
+      addIfMissing(cat, 1, INTEGRATION_CATEGORY_DISPLAY[cat]);
     });
   });
 

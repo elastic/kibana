@@ -11,15 +11,20 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { Loading } from '../../../../components';
-import type { IntegrationCategoryCount } from '../../../../../../../../../../src/plugins/custom_integrations/common';
-import { INTEGRATION_CATEGORY_DISPLAY } from '../../../../../../../../../../src/plugins/custom_integrations/common';
+import type { IntegrationCategory } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
 interface ALL_CATEGORY {
   id: '';
   count: number;
 }
 
-export type CategoryFacet = IntegrationCategoryCount | ALL_CATEGORY;
+export type CategoryFacet =
+  | {
+      count: number;
+      id: IntegrationCategory | 'Updates available' | string;
+      title: string;
+    }
+  | ALL_CATEGORY;
 
 export function CategoryFacets({
   showCounts,
@@ -51,7 +56,7 @@ export function CategoryFacets({
               defaultMessage: 'All',
             });
           } else {
-            title = INTEGRATION_CATEGORY_DISPLAY[category.id];
+            title = category.title || '';
           }
           return (
             <EuiFacetButton

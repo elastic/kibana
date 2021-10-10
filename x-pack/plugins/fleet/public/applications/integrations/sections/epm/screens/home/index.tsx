@@ -9,6 +9,7 @@ import React, { memo, useMemo } from 'react';
 import { Switch, Route, useLocation, useHistory, useParams } from 'react-router-dom';
 import semverLt from 'semver/functions/lt';
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 
 import { installationStatuses } from '../../../../../../../common/constants';
 import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../../../../constants';
@@ -38,7 +39,7 @@ import type { IntegrationCardItem } from '../../../../../../../common/types/mode
 
 import type { IntegrationCategory } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
-import { useMergeEprPackagesWithReplacements } from '../../../../../../hooks/use_merge_epr_with_replacements';
+import { useMergeEprPackagesWithReplacements } from '../../../../hooks/use_merge_epr_with_replacements';
 
 import { mergeAndReplaceCategoryCounts } from './util';
 import { CategoryFacets } from './category_facets';
@@ -110,26 +111,52 @@ export const EPMHomePage: React.FC = memo(() => {
   );
 });
 
+function getAllCategoriesFromIntegrations(pkg: PackageListItem) {
+  if (!doesPackageHaveIntegrations(pkg)) {
+    return pkg.categories;
+  }
+
+  const allCategories = pkg.policy_templates.reduce((accumulator, integration) => {
+    return [...accumulator, ...(integration.categories || [])];
+  }, pkg.categories || []);
+
+  return _.uniq(allCategories);
+}
+
 // Packages can export multiple integrations, aka `policy_templates`
 // In the case where packages ship >1 `policy_templates`, we flatten out the
 // list of packages by bringing all integrations to top-level so that
 // each integration is displayed as its own tile
 const packageListToIntegrationsList = (packages: PackageList): PackageList => {
   return packages.reduce((acc: PackageList, pkg) => {
-    const { policy_templates: policyTemplates = [], ...restOfPackage } = pkg;
+    const {
+      policy_templates: policyTemplates = [],
+      categories: topCategories = [],
+      ...restOfPackage
+    } = pkg;
+
+    const topPackage = {
+      ...restOfPackage,
+      eprName: pkg.name,
+      categories: getAllCategoriesFromIntegrations(pkg),
+    };
+
     return [
       ...acc,
-      restOfPackage,
+      topPackage,
       ...(doesPackageHaveIntegrations(pkg)
         ? policyTemplates.map((integration) => {
-            const { name, title, description, icons } = integration;
+            const { name, title, description, icons, categories = [] } = integration;
+            const allCategories = [...topCategories, ...categories];
             return {
               ...restOfPackage,
               id: `${restOfPackage}-${name}`,
               integration: name,
+              eprName: topPackage.eprName,
               title,
               description,
               icons: icons || restOfPackage.icons,
+              categories: _.uniq(allCategories),
             };
           })
         : []),
@@ -264,22 +291,21 @@ const AvailablePackages: React.FC = memo(() => {
   const { data: allCategoryPackagesRes, isLoading: isLoadingAllPackages } = useGetPackages({
     category: '',
   });
-  const { data: categoryPackagesRes, isLoading: isLoadingCategoryPackages } = useGetPackages({
-    category: selectedCategory,
-  });
   const { data: categoriesRes, isLoading: isLoadingCategories } = useGetCategories({
     include_policy_templates: true,
   });
-
-  const eprPackages = useMemo(
-    () => packageListToIntegrationsList(categoryPackagesRes?.response || []),
-    [categoryPackagesRes]
-  );
 
   const allEprPackages = useMemo(
     () => packageListToIntegrationsList(allCategoryPackagesRes?.response || []),
     [allCategoryPackagesRes]
   );
+
+  const eprPackages = (allEprPackages || []).filter((eprPackage: PackageListItem) => {
+    if (selectedCategory === '') {
+      return true;
+    }
+    return eprPackage.categories.includes(selectedCategory);
+  });
 
   const { value: replacementCustomIntegrations } = useGetReplacementCustomIntegrations();
 
@@ -325,7 +351,7 @@ const AvailablePackages: React.FC = memo(() => {
       !categoriesRes
         ? []
         : mergeAndReplaceCategoryCounts(
-            categoriesRes.response as CategoryFacet[],
+            categoriesRes.response as Array<{ id: string; title: string; count: number }>,
             appendCustomIntegrations
           );
     return [
@@ -366,7 +392,7 @@ const AvailablePackages: React.FC = memo(() => {
 
   return (
     <PackageListGrid
-      isLoading={isLoadingCategoryPackages}
+      isLoading={isLoadingAllPackages}
       title={title}
       controls={controls}
       initialSearch={searchParam}

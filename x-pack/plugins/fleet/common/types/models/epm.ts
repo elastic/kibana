@@ -158,6 +158,7 @@ export interface RegistryPolicyTemplate {
   [RegistryPolicyTemplateKeys.inputs]?: RegistryInput[];
   [RegistryPolicyTemplateKeys.readme]?: string;
   [RegistryPolicyTemplateKeys.multiple]?: boolean;
+  [RegistryPolicyTemplateKeys.categories]?: string[];
 }
 
 export enum RegistryInputKeys {
@@ -225,6 +226,7 @@ export type RegistrySearchResult = Pick<
   | 'internal'
   | 'data_streams'
   | 'policy_templates'
+  | 'categories'
 >;
 
 export type ScreenshotItem = RegistryImage | PackageSpecScreenshot;
@@ -362,6 +364,7 @@ export type PackageList = PackageListItem[];
 export type PackageListItem = Installable<RegistrySearchResult> & {
   integration?: string;
   id: string;
+  eprName?: string;
 };
 
 export interface IntegrationCardItem {
