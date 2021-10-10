@@ -3734,7 +3734,6 @@
     "indexPatternEditor.aliasLabel": "エイリアス",
     "indexPatternEditor.createIndex.noMatch": "名前は1つ以上のデータストリーム、インデックス、またはインデックスエイリアスと一致する必要があります。",
     "indexPatternEditor.createIndexPattern.emptyState.checkDataButton": "新規データを確認",
-    "indexPatternEditor.createIndexPattern.emptyState.createAnyway": "一部のインデックスは表示されない場合があります。{link}してください。",
     "indexPatternEditor.createIndexPattern.emptyState.createAnywayLink": "インデックスパターンを作成します",
     "indexPatternEditor.createIndexPattern.emptyState.haveData": "すでにデータがある場合",
     "indexPatternEditor.createIndexPattern.emptyState.integrationCardDescription": "さまざまなソースからデータを追加します。",

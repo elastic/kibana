@@ -3767,7 +3767,6 @@
     "indexPatternEditor.aliasLabel": "别名",
     "indexPatternEditor.createIndex.noMatch": "名称必须匹配一个或多个数据流、索引或索引别名。",
     "indexPatternEditor.createIndexPattern.emptyState.checkDataButton": "检查新数据",
-    "indexPatternEditor.createIndexPattern.emptyState.createAnyway": "部分索引可能已隐藏。仍然尝试{link}。",
     "indexPatternEditor.createIndexPattern.emptyState.createAnywayLink": "创建索引模式",
     "indexPatternEditor.createIndexPattern.emptyState.haveData": "假设您已有数据？",
     "indexPatternEditor.createIndexPattern.emptyState.integrationCardDescription": "从各种源添加数据。",
