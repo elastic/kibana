@@ -238,7 +238,6 @@ const InstalledPackages: React.FC = memo(() => {
 
   const controls = (
     <CategoryFacets
-      showCounts={true}
       categories={categories}
       selectedCategory={selectedCategory}
       onCategoryChange={({ id }: CategoryFacet) => setSelectedCategory(id)}
@@ -375,7 +374,6 @@ const AvailablePackages: React.FC = memo(() => {
 
   const controls = categories ? (
     <CategoryFacets
-      showCounts={true}
       isLoading={isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations}
       categories={categories}
       selectedCategory={selectedCategory}

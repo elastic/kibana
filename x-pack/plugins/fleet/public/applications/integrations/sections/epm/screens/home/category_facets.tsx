@@ -27,13 +27,11 @@ export const ALL_CATEGORY = {
 };
 
 export function CategoryFacets({
-  showCounts,
   isLoading,
   categories,
   selectedCategory,
   onCategoryChange,
 }: {
-  showCounts: boolean;
   isLoading?: boolean;
   categories: CategoryFacet[];
   selectedCategory: string;
@@ -50,7 +48,7 @@ export function CategoryFacets({
               isSelected={category.id === selectedCategory}
               key={category.id}
               id={category.id}
-              quantity={showCounts ? category.count : undefined}
+              quantity={category.count}
               onClick={() => onCategoryChange(category)}
             >
               {category.title}
