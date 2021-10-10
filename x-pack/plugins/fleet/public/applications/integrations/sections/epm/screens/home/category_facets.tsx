@@ -13,18 +13,18 @@ import { i18n } from '@kbn/i18n';
 import { Loading } from '../../../../components';
 import type { IntegrationCategory } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
-interface ALL_CATEGORY {
-  id: '';
+export interface CategoryFacet {
   count: number;
+  id: IntegrationCategory | 'Updates available' | '' | string;
+  title: string;
 }
 
-export type CategoryFacet =
-  | {
-      count: number;
-      id: IntegrationCategory | 'Updates available' | string;
-      title: string;
-    }
-  | ALL_CATEGORY;
+export const ALL_CATEGORY = {
+  id: '',
+  title: i18n.translate('xpack.fleet.epmList.allPackagesFilterLinkText', {
+    defaultMessage: 'All',
+  }),
+};
 
 export function CategoryFacets({
   showCounts,
@@ -45,19 +45,6 @@ export function CategoryFacets({
         <Loading />
       ) : (
         categories.map((category) => {
-          let title;
-
-          if (category.id === 'updates_available') {
-            title = i18n.translate('xpack.fleet.epmList.updatesAvailableFilterLinkText', {
-              defaultMessage: 'Updates available',
-            });
-          } else if (category.id === '') {
-            title = i18n.translate('xpack.fleet.epmList.allPackagesFilterLinkText', {
-              defaultMessage: 'All',
-            });
-          } else {
-            title = category.title || '';
-          }
           return (
             <EuiFacetButton
               isSelected={category.id === selectedCategory}
@@ -66,7 +53,7 @@ export function CategoryFacets({
               quantity={showCounts ? category.count : undefined}
               onClick={() => onCategoryChange(category)}
             >
-              {title}
+              {category.title}
             </EuiFacetButton>
           );
         })

@@ -43,8 +43,8 @@ import type { IntegrationCardItem } from '../../../../../../../common/types/mode
 
 import { useMergeEprPackagesWithReplacements } from '../../../../hooks/use_merge_epr_with_replacements';
 
-import { mergeAndReplaceCategoryCounts } from './util';
-import { CategoryFacets } from './category_facets';
+import { mergeCategoriesAndCount } from './util';
+import { ALL_CATEGORY, CategoryFacets } from './category_facets';
 import type { CategoryFacet } from './category_facets';
 
 export interface CategoryParams {
@@ -93,7 +93,7 @@ function mapToCard(
     version: 'version' in item ? item.version || '' : '',
     release: 'release' in item ? item.release : undefined,
     url: uiInternalPathUrl,
-    categories: (item.categories || []).filter((c) => !!c),
+    categories: ((item.categories || []) as string[]).filter((c: string) => !!c),
   };
 }
 
@@ -119,7 +119,7 @@ function getAllCategoriesFromIntegrations(pkg: PackageListItem) {
     return pkg.categories;
   }
 
-  const allCategories = pkg.policy_templates.reduce((accumulator, integration) => {
+  const allCategories = pkg.policy_templates?.reduce((accumulator, integration) => {
     return [...accumulator, ...(integration.categories || [])];
   }, pkg.categories || []);
 
@@ -215,12 +215,15 @@ const InstalledPackages: React.FC = memo(() => {
   const categories: CategoryFacet[] = useMemo(
     () => [
       {
-        id: '',
+        ...ALL_CATEGORY,
         count: allInstalledPackages.length,
       },
       {
         id: 'updates_available',
         count: updatablePackages.length,
+        title: i18n.translate('xpack.fleet.epmList.updatesAvailableFilterLinkText', {
+          defaultMessage: 'Updates available',
+        }),
       },
     ],
     [allInstalledPackages.length, updatablePackages.length]
@@ -322,59 +325,48 @@ const AvailablePackages: React.FC = memo(() => {
   const { data: eprPackages, isLoading: isLoadingAllPackages } = useGetPackages({
     category: '',
   });
-  const { data: eprCategories, isLoading: isLoadingCategories } = useGetCategories({
-    include_policy_templates: true,
-  });
-
   const eprIntegrationList = useMemo(
     () => packageListToIntegrationsList(eprPackages?.response || []),
     [eprPackages]
   );
-
   const { value: replacementCustomIntegrations } = useGetReplacementCustomIntegrations();
-
   const mergedEprPackages: Array<PackageListItem | CustomIntegration> =
     useMergeEprPackagesWithReplacements(
       eprIntegrationList || [],
       replacementCustomIntegrations || []
     );
-
   const { loading: isLoadingAppendCustomIntegrations, value: appendCustomIntegrations } =
     useGetAppendCustomIntegrations();
-
   const eprAndCustomPackages: Array<CustomIntegration | PackageListItem> = [
     ...mergedEprPackages,
     ...(appendCustomIntegrations || []),
   ];
-  eprAndCustomPackages.sort((a, b) => {
+  const cards: IntegrationCardItem[] = eprAndCustomPackages.map((item) => {
+    return mapToCard(getAbsolutePath, getHref, item);
+  });
+  cards.sort((a, b) => {
     return a.title.localeCompare(b.title);
   });
 
+  const { data: eprCategories, isLoading: isLoadingCategories } = useGetCategories({
+    include_policy_templates: true,
+  });
   const categories = useMemo(() => {
     const eprAndCustomCategories: CategoryFacet[] =
-      isLoadingCategories ||
-      isLoadingAppendCustomIntegrations ||
-      !appendCustomIntegrations ||
-      !eprCategories
+      isLoadingCategories || !eprCategories
         ? []
-        : mergeAndReplaceCategoryCounts(
+        : mergeCategoriesAndCount(
             eprCategories.response as Array<{ id: string; title: string; count: number }>,
-            appendCustomIntegrations
+            cards
           );
     return [
       {
-        id: '',
-        count: (eprIntegrationList?.length || 0) + (appendCustomIntegrations?.length || 0),
+        ...ALL_CATEGORY,
+        count: cards.length,
       },
       ...(eprAndCustomCategories ? eprAndCustomCategories : []),
     ] as CategoryFacet[];
-  }, [
-    eprIntegrationList?.length,
-    appendCustomIntegrations,
-    eprCategories,
-    isLoadingAppendCustomIntegrations,
-    isLoadingCategories,
-  ]);
+  }, [cards, eprCategories, isLoadingCategories]);
 
   if (!isLoadingCategories && !categoryExists(selectedCategory, categories)) {
     history.replace(pagePathGetters.integrations_all({ category: '', searchTerm: searchParam })[1]);
@@ -383,7 +375,7 @@ const AvailablePackages: React.FC = memo(() => {
 
   const controls = categories ? (
     <CategoryFacets
-      showCounts={false}
+      showCounts={true}
       isLoading={isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations}
       categories={categories}
       selectedCategory={selectedCategory}
@@ -392,10 +384,6 @@ const AvailablePackages: React.FC = memo(() => {
       }}
     />
   ) : null;
-
-  const cards = eprAndCustomPackages.map((item) => {
-    return mapToCard(getAbsolutePath, getHref, item);
-  });
 
   const filteredCards = cards.filter((c) => {
     if (selectedCategory === '') {
