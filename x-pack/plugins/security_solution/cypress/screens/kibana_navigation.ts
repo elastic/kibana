@@ -25,3 +25,7 @@ export const OVERVIEW_PAGE =
 
 export const TIMELINES_PAGE =
   '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Timelines"]';
+
+export const SPACES_BUTTON = '[data-test-subj="spacesNavSelector"]';
+
+export const getGoToSpaceMenuItem = (space: string) => `[data-test-subj="${space}-gotoSpace"]`;

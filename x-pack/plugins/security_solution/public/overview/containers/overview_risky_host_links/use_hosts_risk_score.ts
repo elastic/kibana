@@ -12,12 +12,11 @@ import { useDispatch } from 'react-redux';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../common/lib/kibana';
 import { inputsActions } from '../../../common/store/actions';
-
-import { HOST_RISK_SCORES_INDEX } from '../../../../common/constants';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import { HostsRiskScore } from '../../../../common';
 import { useHostsRiskScoreComplete } from './use_hosts_risk_score_complete';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { getHostRiskIndex } from '../../../helpers';
 
 export const QUERY_ID = 'host_risk_score';
 const noop = () => {};
@@ -50,7 +49,7 @@ export const useHostsRiskScore = ({
   const [loading, setLoading] = useState<boolean>(riskyHostsFeatureEnabled);
 
   const { addError } = useAppToasts();
-  const { data } = useKibana().services;
+  const { data, spaces } = useKibana().services;
 
   const dispatch = useDispatch();
 
@@ -99,14 +98,18 @@ export const useHostsRiskScore = ({
 
   useEffect(() => {
     if (riskyHostsFeatureEnabled && (hostName || timerange)) {
-      start({
-        data,
-        timerange: timerange ? { to: timerange.to, from: timerange.from, interval: '' } : undefined,
-        hostName,
-        defaultIndex: [HOST_RISK_SCORES_INDEX],
+      spaces.getActiveSpace().then((space) => {
+        start({
+          data,
+          timerange: timerange
+            ? { to: timerange.to, from: timerange.from, interval: '' }
+            : undefined,
+          hostName,
+          defaultIndex: [getHostRiskIndex(space.id)],
+        });
       });
     }
-  }, [start, data, timerange, hostName, riskyHostsFeatureEnabled]);
+  }, [start, data, timerange, hostName, riskyHostsFeatureEnabled, spaces]);
 
   if ((!hostName && !timerange) || !riskyHostsFeatureEnabled) {
     return null;
