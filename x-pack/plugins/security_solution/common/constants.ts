@@ -211,12 +211,6 @@ export const DEFAULT_TRANSFORMS_SETTING = JSON.stringify(defaultTransformsSettin
 export const SIGNALS_ID = `siem.signals` as const;
 
 /**
- * Preview
- */
-export const PREVIEW_ID = `siem.signals.preview` as const;
-export const PREVIEW_SECONDARY_ALIAS = 'preview-index-secondary-alias-placeholder';
-
-/**
  * IDs for RAC rule types
  */
 const RULE_TYPE_PREFIX = `siem` as const;
@@ -262,7 +256,7 @@ export const TIMELINE_FAVORITE_URL = '/api/timeline/_favorite';
 export const TIMELINE_DRAFT_URL = `${TIMELINE_URL}/_draft`;
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export`;
 export const TIMELINE_IMPORT_URL = `${TIMELINE_URL}/_import`;
-export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackazzged`;
+export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged`;
 
 export const NOTE_URL = '/api/note';
 export const PINNED_EVENT_URL = '/api/pinned_event';

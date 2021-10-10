@@ -7,36 +7,36 @@
 import moment from 'moment';
 import uuid from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
+
+import { buildSiemResponse } from '../utils';
+import { convertPreviewAPIToInternalSchema } from '../../schemas/rule_converters';
+import { PreviewRuleOptions } from '../../rule_types/types';
+import { RuleParams } from '../../schemas/rule_schemas';
+import { signalRulesAlertType } from '../../signals/signal_rule_alert_type';
+import { previewAlertInstanceFactory } from '../../signals/preview/preview_alert_instance_factory';
+import { createWarningsAndErrors } from '../../signals/preview/preview_rule_execution_log_client';
+import { parseInterval } from '../../signals/utils';
+import { buildMlAuthz } from '../../../machine_learning/authz';
+import { throwHttpError } from '../../../machine_learning/validation';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { SetupPlugins } from '../../../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import {
   DEFAULT_PREVIEW_INDEX,
   DETECTION_ENGINE_RULES_PREVIEW,
 } from '../../../../../common/constants';
-import { SetupPlugins } from '../../../../plugin';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
-import { buildSiemResponse } from '../utils';
-
 import { previewRulesSchema } from '../../../../../common/detection_engine/schemas/request';
-import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
-import { convertPreviewAPIToInternalSchema } from '../../schemas/rule_converters';
-import { PreviewRuleOptions } from '../../rule_types/types';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
+
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeState,
 } from '../../../../../../alerting/common';
-import { RuleParams } from '../../schemas/rule_schemas';
-import { parseInterval } from '../../signals/utils';
-import { signalRulesAlertType } from '../../signals/signal_rule_alert_type';
-
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ExecutorType } from '../../../../../../alerting/server/types';
-import { createWarningsAndErrors } from '../../signals/preview/preview_rule_execution_log_client';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertInstance } from '../../../../../../alerting/server/alert_instance';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { AlertInstance } from '../../../../../../alerting/server';
 
 export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
@@ -60,20 +60,14 @@ export const previewRulesRoute = async (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
-        const previewId = uuid.v4();
-
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution?.getAppClient();
-
-        if (!siemClient /* || !rulesClient*/) {
+        if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-        const internalRule = convertPreviewAPIToInternalSchema(request.body, siemClient);
-        const runState: Record<string, unknown> = {};
 
-        // const { maxSignals } = internalRule.params;
-        // const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
-        let invocationCount = internalRule.invocationCount;
+        const internalRule = convertPreviewAPIToInternalSchema(request.body, siemClient);
+        const previewRuleParams = internalRule.params;
 
         const mlAuthz = buildMlAuthz({
           license: context.licensing.license,
@@ -82,14 +76,13 @@ export const previewRulesRoute = async (
           savedObjectsClient,
         });
         throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
-
         await context.lists?.getExceptionListClient().createEndpointList();
 
-        const previewRuleParams = internalRule.params;
-
-        const { previewRuleExecutionLogClient, warningsAndErrorsStore } = createWarningsAndErrors();
-
         const spaceId = siemClient.getSpaceId();
+        const previewId = uuid.v4();
+        const { previewRuleExecutionLogClient, warningsAndErrorsStore } = createWarningsAndErrors();
+        let invocationCount = internalRule.invocationCount;
+        const runState: Record<string, unknown> = {};
 
         const runExecutors = async <
           TParams extends RuleParams,
@@ -105,36 +98,14 @@ export const previewRulesRoute = async (
             TInstanceContext,
             TActionGroupIds
           >,
-          params: TParams
+          params: TParams,
+          alertInstanceFactory: (
+            id: string
+          ) => Pick<
+            AlertInstance<TInstanceState, TInstanceContext, TActionGroupIds>,
+            'getState' | 'replaceState' | 'scheduleActions' | 'scheduleActionsWithSubGroup'
+          >
         ) => {
-          const previewAlertInstanceFactory = (id: string) => ({
-            getState() {
-              return {} as unknown as TInstanceState;
-            },
-            replaceState(state: TInstanceState) {
-              return new AlertInstance<TInstanceState, TInstanceContext, TActionGroupIds>({
-                state: {} as TInstanceState,
-                meta: { lastScheduledActions: { group: 'default', date: new Date() } },
-              });
-            },
-            scheduleActions(actionGroup: TActionGroupIds, alertcontext: TInstanceContext) {
-              return new AlertInstance<TInstanceState, TInstanceContext, TActionGroupIds>({
-                state: {} as TInstanceState,
-                meta: { lastScheduledActions: { group: 'default', date: new Date() } },
-              });
-            },
-            scheduleActionsWithSubGroup(
-              actionGroup: TActionGroupIds,
-              subgroup: string,
-              alertcontext: TInstanceContext
-            ) {
-              return new AlertInstance<TInstanceState, TInstanceContext, TActionGroupIds>({
-                state: {} as TInstanceState,
-                meta: { lastScheduledActions: { group: 'default', date: new Date() } },
-              });
-            },
-          });
-
           let statePreview = runState as TState;
 
           const startedAt = moment();
@@ -146,33 +117,33 @@ export const previewRulesRoute = async (
 
           const rule = {
             ...internalRule,
-            createdBy: 'preview-created-by',
-            updatedBy: 'preview-updated-by',
             createdAt: new Date(),
-            updatedAt: new Date(),
+            createdBy: 'preview-created-by',
             producer: 'preview-producer',
             ruleTypeId: 'preview-rule-type-id',
             ruleTypeName: 'preview-rule-type-name',
+            updatedAt: new Date(),
+            updatedBy: 'preview-updated-by',
           };
 
           while (invocationCount > 0) {
             statePreview = (await executor({
-              previousStartedAt,
-              startedAt: startedAt.toDate(),
-              state: statePreview,
               alertId: previewId,
+              createdBy: rule.createdBy,
+              name: 'preview',
+              params,
+              previousStartedAt,
+              rule,
               services: {
-                alertInstanceFactory: previewAlertInstanceFactory,
+                alertInstanceFactory,
                 savedObjectsClient: context.core.savedObjects.client,
                 scopedClusterClient: context.core.elasticsearch.client,
               },
               spaceId,
-              updatedBy: rule.updatedBy,
-              createdBy: rule.createdBy,
-              params,
+              startedAt: startedAt.toDate(),
+              state: statePreview,
               tags: [],
-              name: 'preview',
-              rule,
+              updatedBy: rule.updatedBy,
             })) as TState;
             previousStartedAt = startedAt.toDate();
             startedAt.add(parseInterval(internalRule.schedule.interval));
@@ -186,7 +157,8 @@ export const previewRulesRoute = async (
             indexNameOverride: `${DEFAULT_PREVIEW_INDEX}-${spaceId}`,
             ruleExecutionLogClientOverride: previewRuleExecutionLogClient,
           }).executor,
-          previewRuleParams
+          previewRuleParams,
+          previewAlertInstanceFactory
         );
 
         const errors = warningsAndErrorsStore.filter(

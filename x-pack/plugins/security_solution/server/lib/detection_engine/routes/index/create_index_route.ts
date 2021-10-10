@@ -89,8 +89,7 @@ export const createPreviewIndex = async (
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const index = siemClient.getPreviewIndex();
   const indexExists = await getIndexExists(esClient, index);
-  // If using the rule registry implementation, we don't want to create new .siem-signals indices -
-  // only create/update resources if there are existing indices
+  // If using the rule registry implementation, we don't want to create new .siem-signals indices
   if (ruleRegistryEnabled && !indexExists) {
     return;
   }
