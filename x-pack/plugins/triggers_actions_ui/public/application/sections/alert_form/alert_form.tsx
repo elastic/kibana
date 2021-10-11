@@ -403,6 +403,7 @@ export const AlertForm = ({
               );
               return (
                 <EuiListGroupItem
+                  wrapText
                   key={index}
                   data-test-subj={`${item.id}-SelectOption`}
                   color="primary"
