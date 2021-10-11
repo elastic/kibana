@@ -35,14 +35,6 @@ const defaultFields: Fields = {
   priority: [],
 };
 
-const valuesToString = (value: string | string[] | null): string | undefined => {
-  if (Array.isArray(value)) {
-    return value.join(',');
-  }
-
-  return value ?? undefined;
-};
-
 const ServiceNowSIRParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowSIRActionParams>
 > = ({ actionConnector, actionParams, editAction, index, errors, messageVariables }) => {
@@ -191,46 +183,6 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
           paramsProperty={'short_description'}
           inputTargetValue={incident?.short_description}
           errors={errors['subActionParams.incident.short_description'] as string[]}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow fullWidth label={i18n.SOURCE_IP_LABEL} helpText={i18n.SOURCE_IP_HELP_TEXT}>
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubActionProperty}
-          messageVariables={messageVariables}
-          paramsProperty={'source_ip'}
-          inputTargetValue={valuesToString(incident?.source_ip)}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow fullWidth label={i18n.DEST_IP_LABEL} helpText={i18n.DEST_IP_HELP_TEXT}>
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubActionProperty}
-          messageVariables={messageVariables}
-          paramsProperty={'dest_ip'}
-          inputTargetValue={valuesToString(incident?.dest_ip)}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow fullWidth label={i18n.MALWARE_URL_LABEL} helpText={i18n.MALWARE_URL_HELP_TEXT}>
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubActionProperty}
-          messageVariables={messageVariables}
-          paramsProperty={'malware_url'}
-          inputTargetValue={valuesToString(incident?.malware_url)}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow fullWidth label={i18n.MALWARE_HASH_LABEL} helpText={i18n.MALWARE_HASH_HELP_TEXT}>
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubActionProperty}
-          messageVariables={messageVariables}
-          paramsProperty={'malware_hash'}
-          inputTargetValue={valuesToString(incident?.malware_hash)}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
