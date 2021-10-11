@@ -34,7 +34,7 @@ const SERVER_IDENTIFIER_PLURAL = i18n.translate('xpack.monitoring.setupMode.serv
   defaultMessage: `servers`,
 });
 
-export function formatProductName(productName) {
+export function formatProductName(productName: string) {
   if (productName === APM_SYSTEM_ID) {
     return productName.toUpperCase();
   }
@@ -43,7 +43,7 @@ export function formatProductName(productName) {
 
 const PRODUCTS_THAT_USE_NODES = [LOGSTASH_SYSTEM_ID, ELASTICSEARCH_SYSTEM_ID];
 const PRODUCTS_THAT_USE_INSTANCES = [KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID];
-export function getIdentifier(productName, usePlural = false) {
+export function getIdentifier(productName: string, usePlural = false) {
   if (PRODUCTS_THAT_USE_INSTANCES.includes(productName)) {
     return usePlural ? INSTANCE_IDENTIFIER_PLURAL : INSTANCE_IDENTIFIER_SINGULAR;
   }

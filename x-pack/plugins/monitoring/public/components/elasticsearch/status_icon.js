@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { StatusIcon } from '../status_icon';
+import { StatusIcon, STATUS_ICON_TYPES } from '../status_icon';
 import { i18n } from '@kbn/i18n';
 
 export function ElasticsearchStatusIcon({ status }) {
   const type = (() => {
     const statusKey = status.toUpperCase();
-    return StatusIcon.TYPES[statusKey] || StatusIcon.TYPES.GRAY;
+    return STATUS_ICON_TYPES[statusKey] || STATUS_ICON_TYPES.GRAY;
   })();
 
   return (

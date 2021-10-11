@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, FunctionComponent } from 'react';
 import {
   EuiPage,
   EuiPageBody,
@@ -27,7 +27,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Legacy } from '../../legacy_shims';
 
-export const AddLicense = ({ uploadPath }) => {
+interface AddLicenseProps {
+  uploadPath?: string;
+}
+const AddLicense: FunctionComponent<AddLicenseProps> = ({ uploadPath }) => {
   return (
     <EuiCard
       title={
@@ -54,7 +57,14 @@ export const AddLicense = ({ uploadPath }) => {
   );
 };
 
-export class LicenseStatus extends React.PureComponent {
+export interface LicenseStatusProps {
+  isExpired: boolean;
+  status: string;
+  type: string;
+  expiryDate: string | Date;
+}
+
+class LicenseStatus extends React.PureComponent<LicenseStatusProps> {
   render() {
     const { isExpired, status, type, expiryDate } = this.props;
     const typeTitleCase = type.charAt(0).toUpperCase() + type.substr(1).toLowerCase();
@@ -133,7 +143,15 @@ export class LicenseStatus extends React.PureComponent {
   }
 }
 
-const LicenseUpdateInfoForPrimary = ({ isPrimaryCluster, uploadLicensePath }) => {
+export interface LicenseUpdateInfoProps {
+  isPrimaryCluster: boolean;
+  uploadLicensePath?: string;
+}
+
+const LicenseUpdateInfoForPrimary: FunctionComponent<LicenseUpdateInfoProps> = ({
+  isPrimaryCluster,
+  uploadLicensePath,
+}) => {
   if (!isPrimaryCluster) {
     return null;
   }
@@ -142,7 +160,9 @@ const LicenseUpdateInfoForPrimary = ({ isPrimaryCluster, uploadLicensePath }) =>
   return <AddLicense uploadPath={uploadLicensePath} />;
 };
 
-const LicenseUpdateInfoForRemote = ({ isPrimaryCluster }) => {
+const LicenseUpdateInfoForRemote: FunctionComponent<LicenseUpdateInfoProps> = ({
+  isPrimaryCluster,
+}) => {
   if (isPrimaryCluster) {
     return null;
   }
@@ -168,7 +188,8 @@ const LicenseUpdateInfoForRemote = ({ isPrimaryCluster }) => {
   );
 };
 
-export function License(props) {
+export interface LicenseProps extends LicenseStatusProps, LicenseUpdateInfoProps {}
+export const License: FunctionComponent<LicenseProps> = (props) => {
   const { status, type, isExpired, expiryDate } = props;
   const licenseManagement = `${Legacy.shims.getBasePath()}/app/management/stack/license_management`;
   return (
@@ -199,4 +220,4 @@ export function License(props) {
       </EuiPageBody>
     </EuiPage>
   );
-}
+};

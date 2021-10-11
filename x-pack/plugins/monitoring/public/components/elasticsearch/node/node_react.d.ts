@@ -7,11 +7,13 @@
 
 import { FunctionComponent } from 'react';
 
-export const Overview: FunctionComponent<OverviewProps>;
-
-export interface OverviewProps {
-  cluster: unknown;
-  setupMode: unknown;
-  showLicenseExpiration: boolean;
+export const NodeReact: FunctionComponent<NodeReactProps>;
+export interface NodeReactProps {
+  nodeSummary: unknown;
+  metrics: unknown;
+  logs: unknown;
   alerts: unknown;
+  nodeId: unknown;
+  clusterUuid: unknown;
+  [key: string]: any;
 }

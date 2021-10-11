@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export const SetupModeRenderer: FunctionComponent<Props>;
+import { FunctionComponent } from 'react';
 
+export const SetupModeRenderer: FunctionComponent<Record<any, any>>;
 export interface SetupModeProps {
   setupMode: any;
   flyoutComponent: any;

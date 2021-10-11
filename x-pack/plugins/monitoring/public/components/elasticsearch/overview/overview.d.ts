@@ -7,11 +7,12 @@
 
 import { FunctionComponent } from 'react';
 
-export const Overview: FunctionComponent<OverviewProps>;
-
-export interface OverviewProps {
+export const ElasticsearchOverview: FunctionComponent<ElasticsearchOverviewProps>;
+export interface ElasticsearchOverviewProps {
+  clusterStatus: unknown;
+  metrics: unknown;
+  logs: unknown;
   cluster: unknown;
-  setupMode: unknown;
-  showLicenseExpiration: boolean;
-  alerts: unknown;
+  shardActivity: unknown;
+  [key: string]: any;
 }
