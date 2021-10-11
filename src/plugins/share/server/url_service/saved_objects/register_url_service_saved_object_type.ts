@@ -83,11 +83,7 @@ export const registerUrlServiceSavedObjectType = (
           const locator = JSON.parse(doc.attributes.locatorJSON) as LocatorData;
           doc.attributes = {
             ...doc.attributes,
-            locatorJSON: JSON.stringify({
-              ...locator,
-              version,
-              state: locatorMigration(locator),
-            }),
+            locatorJSON: JSON.stringify(locatorMigration(locator)),
           };
           return doc;
         };

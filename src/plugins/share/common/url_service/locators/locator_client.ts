@@ -64,7 +64,7 @@ export class LocatorClient implements ILocatorClient {
     return migrations;
   }
 
-  // PersistableStateService -----------------------------------------------------------------------
+  // PersistableStateService<LocatorData> ----------------------------------------------------------
 
   public telemetry(
     state: LocatorData,
@@ -79,9 +79,15 @@ export class LocatorClient implements ILocatorClient {
 
   public inject(state: LocatorData, references: SavedObjectReference[]): LocatorData {
     const locator = this.getOrThrow(state.id);
+    const filteredReferences = references
+      .filter((ref) => ref.name.startsWith('locator_params:'))
+      .map((ref) => ({
+        ...ref,
+        name: ref.name.substr('locator_params:'.length),
+      }));
     return {
       ...state,
-      state: locator.inject(state.state, references),
+      state: locator.inject(state.state, filteredReferences),
     };
   }
 
@@ -93,7 +99,10 @@ export class LocatorClient implements ILocatorClient {
         ...state,
         state: extracted.state,
       },
-      references: extracted.references,
+      references: extracted.references.map((ref) => ({
+        ...ref,
+        name: 'locator_params:' + ref.name,
+      })),
     };
   }
 

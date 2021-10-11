@@ -131,4 +131,4 @@ export interface ShortUrlData<LocatorParams extends SerializableRecord = Seriali
   readonly locator: LocatorData<LocatorParams>;
 }
 
-export { LocatorData };
+export type { LocatorData };

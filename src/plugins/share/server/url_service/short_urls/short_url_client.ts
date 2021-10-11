@@ -15,6 +15,7 @@ import type {
   ShortUrlCreateParams,
   ILocatorClient,
   ShortUrlData,
+  LocatorData,
 } from '../../../common/url_service';
 import type { ShortUrlStorage } from './types';
 import { validateSlug } from './util';
@@ -45,9 +46,9 @@ export interface ServerShortUrlClientDependencies {
   storage: ShortUrlStorage;
 
   /**
-   * Part of locators service necessary for short URLs.
+   * The locators service.
    */
-  locators?: Pick<ILocatorClient, 'get'>;
+  locators: ILocatorClient;
 }
 
 export class ServerShortUrlClient implements IShortUrlClient {
@@ -67,7 +68,7 @@ export class ServerShortUrlClient implements IShortUrlClient {
       slug = humanReadableSlug ? generateSlug() : randomStr(4);
     }
 
-    const { storage, currentVersion } = this.dependencies;
+    const { storage, currentVersion, locators } = this.dependencies;
 
     if (slug) {
       const isSlugTaken = await storage.exists(slug);
@@ -76,21 +77,22 @@ export class ServerShortUrlClient implements IShortUrlClient {
       }
     }
 
-    const { state, references } = locator.extract(params);
+    const extracted = locators.extract({
+      id: locator.id,
+      version: currentVersion,
+      state: params,
+    });
     const now = Date.now();
-    const data = await storage.create(
+
+    const data = await storage.create<P>(
       {
         accessCount: 0,
         accessDate: now,
         createDate: now,
         slug,
-        locator: {
-          id: locator.id,
-          version: currentVersion,
-          state,
-        },
+        locator: extracted.state as LocatorData<P>,
       },
-      { references }
+      { references: extracted.references }
     );
 
     return {
@@ -101,16 +103,9 @@ export class ServerShortUrlClient implements IShortUrlClient {
   private injectReferences({ data, references }: ShortUrlRecord): ShortUrlData {
     const { locators } = this.dependencies;
     if (!locators) return data;
-
-    const locator = locators.get(data.locator.id);
-    if (!locator) return data;
-
     return {
       ...data,
-      locator: {
-        ...data.locator,
-        state: locator.inject(data.locator.state, references),
-      },
+      locator: locators.inject(data.locator, references),
     };
   }
 
