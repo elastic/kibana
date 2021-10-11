@@ -218,7 +218,7 @@ There is a very limited set of cases when you'd want to change these settings. F
 | Determines if HTTP authentication schemes used by the enabled authentication providers should be automatically supported during HTTP authentication. By default, this setting is set to `true`.
 
 | `xpack.security.authc.http.schemes[]`
-| List of HTTP authentication schemes that {kib} HTTP authentication should support. By default, this setting is set to `['apikey']` to support HTTP authentication with <<api-keys, `ApiKey`>> scheme.
+| List of HTTP authentication schemes that {kib} HTTP authentication should support. By default, this setting is set to `['apikey', 'bearer']` to support HTTP authentication with the <<api-keys, `ApiKey`>> and <<http-authentication, `Bearer`>> schemes.
 
 |===
 

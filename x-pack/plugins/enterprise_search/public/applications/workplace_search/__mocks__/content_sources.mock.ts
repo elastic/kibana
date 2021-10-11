@@ -51,9 +51,9 @@ const defaultIndexing = {
   rules: [],
   schedule: {
     full: 'P1D',
-    incremental: 'P2H',
-    delete: 'P10M',
-    permissions: 'P3H',
+    incremental: 'PT2H',
+    delete: 'PT10M',
+    permissions: 'PT3H',
     estimates: {
       full: {
         nextStart: '2021-09-30T15:37:38+00:00',

@@ -23,5 +23,6 @@
     { "path": "../usage_collection/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
     { "path": "../discover/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/spaces/tsconfig.json" },
   ]
 }
