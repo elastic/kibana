@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { QuerySuggestion, IIndexPattern, DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataViewBase } from '@kbn/es-query';
+import { QuerySuggestion, DataPublicPluginStart } from 'src/plugins/data/public';
 import {
   withKibana,
   KibanaReactContextValue,
@@ -21,7 +22,7 @@ interface WithKueryAutocompletionLifecycleProps {
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
     suggestions: QuerySuggestion[];
   }>;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
 }
 
 interface WithKueryAutocompletionLifecycleState {
@@ -82,7 +83,7 @@ class WithKueryAutocompletionComponent extends React.Component<
         query: expression,
         selectionStart: cursorPosition,
         selectionEnd: cursorPosition,
-        indexPatterns: [indexPattern],
+        indexPatterns: [indexPattern as any], // How to fix this without changing the dependency?
         boolFilter: [],
       })) || [];
 
