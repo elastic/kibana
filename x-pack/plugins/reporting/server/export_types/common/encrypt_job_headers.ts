@@ -10,9 +10,7 @@ import { ReportingCore } from '../..';
 import { cryptoFactory, LevelLogger } from '../../lib';
 
 /*
- * Encrypts request headers for a report job payload, so the job can authorize itself with Kibana when it is running
- * If req.body.api_key exists, the API Key will be used as the `authorize` header
- * Any other request header besides `authorization` will be preserved in the body of encrypted headers. [1]
+ * Encrypts request headers for a report job payload
  */
 export const encryptJobHeaders = async (
   reporting: ReportingCore,
@@ -22,7 +20,7 @@ export const encryptJobHeaders = async (
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
-  const headers = { ...request.headers };
+  const headers = { ...request.headers }; // TODO: Accept an optional API Key in this function, and apply it here as authorization
 
   return await crypto.encrypt(headers);
 };
