@@ -21,7 +21,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
 } from '@elastic/eui';
-import type { IndexPattern } from 'src/plugins/data/common';
+import { flattenHit, IndexPattern, META_FIELDS } from '../../../../../data/common';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -271,7 +271,11 @@ export const DiscoverGrid = ({
       getRenderCellValueFn(
         indexPattern,
         displayedRows,
-        displayedRows ? displayedRows.map((hit) => indexPattern.flattenHit(hit)) : [],
+        displayedRows
+          ? displayedRows.map((hit) =>
+              flattenHit(hit, indexPattern, { meta: services.uiSettings.get(META_FIELDS) })
+            )
+          : [],
         useNewFieldsApi,
         fieldsToShow,
         services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)
@@ -373,6 +377,7 @@ export const DiscoverGrid = ({
             setIsFilterActive(false);
           }
         },
+        uiSettings: services.uiSettings,
       }}
     >
       <span

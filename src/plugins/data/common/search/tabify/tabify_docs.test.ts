@@ -65,7 +65,7 @@ describe('tabifyDocs', () => {
   });
 
   it('combines meta fields if meta option is set', () => {
-    const table = tabifyDocs(response, index, { meta: true });
+    const table = tabifyDocs(response, index, { meta: ['_id', '_index', '_score', '_type'] });
     expect(table).toMatchSnapshot();
   });
 

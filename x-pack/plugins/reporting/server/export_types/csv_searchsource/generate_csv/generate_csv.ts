@@ -18,6 +18,7 @@ import {
   IndexPattern,
   ISearchSource,
   ISearchStartSearchSource,
+  META_FIELDS,
   SearchFieldValue,
   SearchSourceFields,
   tabifyDocs,
@@ -356,7 +357,10 @@ export class CsvGenerator {
 
         let table: Datatable | undefined;
         try {
-          table = tabifyDocs(results, index, { shallow: true, meta: true });
+          table = tabifyDocs(results, index, {
+            shallow: true,
+            meta: await this.clients.uiSettings.get(META_FIELDS),
+          });
         } catch (err) {
           this.logger.error(err);
         }

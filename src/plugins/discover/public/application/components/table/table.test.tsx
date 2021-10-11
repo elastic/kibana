@@ -65,15 +65,13 @@ const indexPattern = {
     ],
   },
   metaFields: ['_index', '_score'],
-  flattenHit: undefined,
+  flattenHit: jest.fn(),
   formatHit: jest.fn((hit) => hit._source),
 } as unknown as IndexPattern;
 
 indexPattern.fields.getByName = (name: string) => {
   return indexPattern.fields.getAll().find((field) => field.name === name);
 };
-
-indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
 
 const mountComponent = (props: DocViewerTableProps) => {
   return mountWithIntl(<DocViewerTable {...props} />);

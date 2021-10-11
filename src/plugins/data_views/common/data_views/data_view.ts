@@ -69,6 +69,9 @@ export class DataView implements IIndexPattern {
     formatField: FormatFieldFn;
   };
   public formatField: FormatFieldFn;
+  /**
+   * @deprecated Use `flattenHit` utility method exported from data plugin instead.
+   */
   public flattenHit: (hit: Record<string, any>, deep?: boolean) => Record<string, any>;
   public metaFields: string[];
   /**

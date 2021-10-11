@@ -11,18 +11,54 @@ import { isPlainObject } from 'lodash';
 import { IndexPattern } from '../..';
 import { Datatable, DatatableColumn, DatatableColumnType } from '../../../../expressions/common';
 
-export interface TabifyDocsOptions {
-  shallow?: boolean;
-  source?: boolean;
-  meta?: boolean;
+// TODO: complete this list
+type ValidMetaFieldNames = keyof Pick<
+  estypes.SearchHit,
+  '_id' | '_index' | '_source' | '_type' | '_score'
+>;
+const VALID_META_FIELD_NAMES: ValidMetaFieldNames[] = [
+  '_id',
+  '_index',
+  '_source',
+  '_type',
+  '_score',
+];
+
+function isValidMetaFieldName(field: string): field is ValidMetaFieldNames {
+  // TODO: Leave comment why to cast here
+  return (VALID_META_FIELD_NAMES as string[]).includes(field);
 }
 
+export interface TabifyDocsOptions {
+  shallow?: boolean;
+  /**
+   * If set to `false` the _source of the document, if requested, won't be
+   * merged into the flattened document.
+   */
+  source?: boolean;
+  /**
+   * Specify a list of meta field names that should be merged from the top
+   * level of the hit (i.e. not nested under _source or fields) into the flattened version.
+   * If not specified no meta fields (like _id, _index, etc.) will be merged.
+   */
+  meta?: string[];
+}
+
+/**
+ * Flattens an individual hit (from an ES response) into an object. This will
+ * create flattened field names, like `user.name`.
+ *
+ * @param hit The hit from an ES reponse's hits.hits[]
+ * @param indexPattern The index pattern for the requested index if available.
+ * @param params Parameters how to flatten the hit
+ */
 export function flattenHit(
   hit: estypes.SearchHit,
   indexPattern?: IndexPattern,
   params?: TabifyDocsOptions
 ) {
   const flat = {} as Record<string, any>;
+  const metaFields = params?.meta ?? [];
 
   function flatten(obj: Record<string, any>, keyPrefix: string = '') {
     for (const [k, val] of Object.entries(obj)) {
@@ -62,13 +98,32 @@ export function flattenHit(
   if (params?.source !== false && hit._source) {
     flatten(hit._source as Record<string, any>);
   }
-  if (params?.meta !== false) {
-    // combine the fields that Discover allows to add as columns
-    const { _id, _index, _type, _score } = hit;
-    flatten({ _id, _index, _score, _type });
-  }
 
-  return flat;
+  metaFields.forEach((metaFieldName) => {
+    if (!isValidMetaFieldName(metaFieldName) || metaFieldName === '_source') {
+      return;
+    }
+    flat[metaFieldName] = hit[metaFieldName];
+  });
+
+  return new Proxy(flat, {
+    ownKeys: (target) => {
+      return Reflect.ownKeys(target).sort((a, b) => {
+        const aIsMeta = metaFields.includes(String(a));
+        const bIsMeta = metaFields.includes(String(b));
+        if (aIsMeta && bIsMeta) {
+          return String(a).localeCompare(String(b));
+        }
+        if (aIsMeta) {
+          return 1;
+        }
+        if (bIsMeta) {
+          return -1;
+        }
+        return String(a).localeCompare(String(b));
+      });
+    },
+  });
 }
 
 export const tabifyDocs = (
