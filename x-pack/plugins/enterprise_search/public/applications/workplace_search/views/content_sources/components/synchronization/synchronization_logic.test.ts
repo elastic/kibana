@@ -175,6 +175,28 @@ describe('SynchronizationLogic', () => {
       });
     });
 
+    describe('updateFrequencySettings', () => {
+      it('calls updateServerSettings method', async () => {
+        const updateServerSettingsSpy = jest.spyOn(
+          SynchronizationLogic.actions,
+          'updateServerSettings'
+        );
+        SynchronizationLogic.actions.updateFrequencySettings();
+
+        expect(updateServerSettingsSpy).toHaveBeenCalledWith({
+          content_source: {
+            indexing: {
+              schedule: {
+                full: 'P1D',
+                incremental: 'PT2H',
+                delete: 'PT10M',
+              },
+            },
+          },
+        });
+      });
+    });
+
     describe('updateServerSettings', () => {
       const body = {
         content_source: {

@@ -20,7 +20,7 @@ import {
   BLOCKED_TIME_WINDOWS_PATH,
   getContentSourcePath,
 } from '../../../../routes';
-import { BlockedWindow, IndexingSchedule } from '../../../../types';
+import { BlockedWindow, IndexingSchedule, SyncJobType } from '../../../../types';
 
 import { SYNC_SETTINGS_UPDATED_MESSAGE } from '../../constants';
 import { SourceLogic } from '../../source_logic';
@@ -55,7 +55,7 @@ interface SynchronizationActions {
   setNavigatingBetweenTabs(navigatingBetweenTabs: boolean): boolean;
   handleSelectedTabChanged(tabId: TabId): TabId;
   addBlockedWindow(): void;
-  updateSyncSettings(): void;
+  updateFrequencySettings(): void;
   updateObjectsAndAssetsSettings(): void;
   resetSyncSettings(): void;
   updateSyncEnabled(enabled: boolean): boolean;
@@ -104,8 +104,8 @@ export const SynchronizationLogic = kea<
     }),
     setContentExtractionChecked: (checked: boolean) => checked,
     updateServerSettings: (body: ServerSyncSettingsBody) => body,
-    updateSyncSettings: true,
     setServerSchedule: (schedule: IndexingSchedule) => schedule,
+    updateFrequencySettings: true,
     updateObjectsAndAssetsSettings: true,
     resetSyncSettings: true,
     addBlockedWindow: true,
@@ -241,6 +241,19 @@ export const SynchronizationLogic = kea<
             features: {
               content_extraction: { enabled: values.contentExtractionChecked },
               thumbnails: { enabled: values.thumbnailsChecked },
+            },
+          },
+        },
+      });
+    },
+    updateFrequencySettings: () => {
+      actions.updateServerSettings({
+        content_source: {
+          indexing: {
+            schedule: {
+              full: values.schedule.full,
+              incremental: values.schedule.incremental,
+              delete: values.schedule.delete,
             },
           },
         },
