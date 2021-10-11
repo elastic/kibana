@@ -20,7 +20,7 @@ import {
   BLOCKED_TIME_WINDOWS_PATH,
   getContentSourcePath,
 } from '../../../../routes';
-import { BlockedWindow, IndexingSchedule, SyncJobType } from '../../../../types';
+import { BlockedWindow, IndexingSchedule, SyncJobType, TimeUnit } from '../../../../types';
 
 import { SYNC_SETTINGS_UPDATED_MESSAGE } from '../../constants';
 import { SourceLogic } from '../../source_logic';
@@ -45,7 +45,7 @@ interface ServerSyncSettingsBody {
         incremental: string;
         delete: string;
         permissions?: string;
-        blocked_windows: ServerBlockedWindow[];
+        blocked_windows?: ServerBlockedWindow[];
       };
     };
   };
