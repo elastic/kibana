@@ -121,7 +121,7 @@ export const getRedirectAppPath = () => {
   return '/app/management/insightsAndAlerting/reporting/r';
 };
 
-export const SCHEDULED_REPORTS_SCOPE = ['scheduled-reports'];
+export const SCHEDULED_REPORTS_SCOPE = 'scheduled-reports';
 
 // Statuses
 export enum JOB_STATUSES {

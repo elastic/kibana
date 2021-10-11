@@ -7,7 +7,7 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { schema } from '@kbn/config-schema';
-import { BASE_SCHEDULE, BASE_SCHEDULES } from '../../../common/constants';
+import { BASE_SCHEDULE, BASE_SCHEDULES, SCHEDULED_REPORTS_SCOPE } from '../../../common/constants';
 import { ReportingCore } from '../../core';
 import { reportFromTask } from '../../lib/store';
 import { ScheduledReportTaskParams } from '../../lib/tasks';
@@ -43,6 +43,7 @@ export function registerScheduleInfoRoutes(reporting: ReportingCore) {
             filter: {
               bool: {
                 must: [
+                  { term: { 'task.scope': SCHEDULED_REPORTS_SCOPE } },
                   { term: { 'task.taskType': 'report:execute' } },
                   ...[user ? { term: { 'task.user': user.username } } : undefined],
                 ].filter(Boolean) as unknown as QueryDslQueryContainer[],
@@ -70,7 +71,7 @@ export function registerScheduleInfoRoutes(reporting: ReportingCore) {
   );
 
   /*
-   * WIP Delete a user's schedule
+   * Delete a user's schedule
    */
   router.delete(
     {
@@ -96,6 +97,7 @@ export function registerScheduleInfoRoutes(reporting: ReportingCore) {
             filter: {
               bool: {
                 must: [
+                  { term: { 'task.scope': SCHEDULED_REPORTS_SCOPE } },
                   { term: { 'task.taskType': 'report:execute' } },
                   { term: { 'task.user': user ? user.username : user } },
                   { term: { _id: `task:${scheduleId}` } },

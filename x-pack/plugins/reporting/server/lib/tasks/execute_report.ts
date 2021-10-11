@@ -509,13 +509,19 @@ export class ExecuteReportTask implements ReportingTask {
     scheduledAt?: Date, // if scheduled to recur, this is this time of the first instance of this schedule, carried over from the task instance
     runAt?: Moment // if scheduled to recur
   ) {
+    // add a scope to assist APIs for schedule reports
+    let scope: string[] | undefined;
+    if ((params as ScheduledReportTaskParams<BasePayload>).interval) {
+      scope = [SCHEDULED_REPORTS_SCOPE];
+    }
+
     const taskInstance: ReportingExecuteTaskInstance = {
       taskType: REPORTING_EXECUTE_TYPE,
       state: {},
       params,
       runAt: runAt?.toDate(),
       scheduledAt,
-      scope: runAt ? SCHEDULED_REPORTS_SCOPE : undefined,
+      scope,
       user: params.created_by || undefined,
     };
 
