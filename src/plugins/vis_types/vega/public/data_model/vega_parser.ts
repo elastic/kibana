@@ -578,7 +578,10 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       return { isVegaLite, libVersion };
     } catch (e) {
       throw Error(
-        'The URL for the JSON "$schema" is incorrect. Correct the URL, then click Update.'
+        i18n.translate('visTypeVega.vegaParser.notValidSchemaForInputSpec', {
+          defaultMessage:
+            'The URL for the JSON "$schema" is incorrect. Correct the URL, then click Update.',
+        })
       );
     }
   }
