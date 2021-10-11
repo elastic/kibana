@@ -108,7 +108,6 @@ export const KibanaOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
 
   return (
     <KibanaTemplate
-      data-test-subj="kibanaOverviewPage"
       getPageData={getPageData}
       title={title}
       pageTitle={pageTitle}
