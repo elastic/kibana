@@ -192,6 +192,9 @@ export function getAlertType(logger: Logger): GeoContainmentAlertType {
       ): RuleParamsAndRefs<GeoContainmentExtractedParams> => {
         const { indexId, boundaryIndexId, ...otherParams } = params;
 
+        console.log('-------------extract recerences');
+        console.log(indexId, boundaryIndexId, otherParams, params);
+
         const references = [
           {
             name: `tracked_index_${indexId}`,
@@ -217,6 +220,9 @@ export function getAlertType(logger: Logger): GeoContainmentAlertType {
         params: GeoContainmentExtractedParams,
         references: SavedObjectReference[]
       ) => {
+        console.log('-------------inejct recerences');
+        console.log(params);
+
         const { indexRef, boundaryIndexRef, ...otherParams } = params;
         const { id: indexId = null } = references.find((ref) => ref.name === indexRef) || {};
         const { id: boundaryIndexId = null } =
