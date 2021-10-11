@@ -10,11 +10,13 @@ import { ServiceStatus, ServiceStatusLevels, ServiceStatusLevel } from './types'
 
 /**
  * Returns a single {@link ServiceStatus} that summarizes the most severe status level from a group of statuses.
- * @param statuses
  */
 export const getSummaryStatus = (
   statuses: Array<[string, ServiceStatus]>,
-  { allAvailableSummary = `All services are available` }: { allAvailableSummary?: string } = {}
+  {
+    allAvailableSummary = `All services are available`,
+    maxServices = 3,
+  }: { allAvailableSummary?: string; maxServices?: number } = {}
 ): ServiceStatus => {
   const { highestLevel, highestStatuses } = highestLevelSummary(statuses);
 
@@ -23,27 +25,35 @@ export const getSummaryStatus = (
       level: ServiceStatusLevels.available,
       summary: allAvailableSummary,
     };
-  } else if (highestStatuses.length === 1) {
-    const [serviceName, status] = highestStatuses[0]! as [string, ServiceStatus];
-    return {
-      ...status,
-      summary: `[${serviceName}]: ${status.summary!}`,
-      // TODO: include URL to status page
-      detail: status.detail ?? `See the status page for more information`,
-      meta: {
-        affectedServices: [serviceName],
-      },
-    };
   } else {
+    const affectedServices = highestStatuses.map(([serviceName]) => serviceName);
     return {
       level: highestLevel,
-      summary: `[${highestStatuses.length}] services are ${highestLevel.toString()}`,
+      summary: getSummaryContent(affectedServices, highestLevel, maxServices),
       // TODO: include URL to status page
       detail: `See the status page for more information`,
       meta: {
-        affectedServices: highestStatuses.map(([serviceName]) => serviceName),
+        affectedServices,
       },
     };
+  }
+};
+
+const getSummaryContent = (
+  affectedServices: string[],
+  statusLevel: ServiceStatusLevel,
+  maxServices: number
+): string => {
+  const serviceCount = affectedServices.length;
+  if (serviceCount === 1) {
+    return `1 service is ${statusLevel.toString()}: ${affectedServices[0]}`;
+  } else if (serviceCount > maxServices) {
+    const exceedingCount = serviceCount - maxServices;
+    return `${serviceCount} services are ${statusLevel.toString()}: ${affectedServices
+      .slice(0, maxServices)
+      .join(', ')} and ${exceedingCount} other(s)`;
+  } else {
+    return `${serviceCount} services are ${statusLevel.toString()}: ${affectedServices.join(', ')}`;
   }
 };
 
