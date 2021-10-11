@@ -444,7 +444,7 @@ NOTE: Don't forget to explicitly specify the default `apikey` and `bearer` schem
 xpack.security.authc.http.schemes: [apikey, bearer, basic, something-custom]
 --------------------------------------------------------------------------------
 
-With this configuration, you can send requests to {kib} with the `Authorization` header using `ApiKey`, `Bearer, `Basic` or `Something-Custom` HTTP schemes (case insensitive). Under the hood, {kib} relays this header to {es}, then {es} authenticates the request using the credentials in the header.
+With this configuration, you can send requests to {kib} with the `Authorization` header using `ApiKey`, `Bearer`, `Basic` or `Something-Custom` HTTP schemes (case insensitive). Under the hood, {kib} relays this header to {es}, then {es} authenticates the request using the credentials in the header.
 
 [float]
 [[embedded-content-authentication]]
