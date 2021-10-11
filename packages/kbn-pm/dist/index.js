@@ -8980,6 +8980,9 @@ var _ci_stats_config = __webpack_require__(218);
 const BASE_URL = 'https://ci-stats.kibana.dev';
 
 class CiStatsReporter {
+  /**
+   * Create a CiStatsReporter by inspecting the ENV for the necessary config
+   */
   static fromEnv(log) {
     return new CiStatsReporter((0, _ci_stats_config.parseConfig)(log), log);
   }
@@ -8988,10 +8991,21 @@ class CiStatsReporter {
     this.config = config;
     this.log = log;
   }
+  /**
+   * Determine if CI_STATS is explicitly disabled by the environment. To determine
+   * if the CiStatsReporter has enough information in the environment to send metrics
+   * for builds use #hasBuildConfig().
+   */
+
 
   isEnabled() {
     return process.env.CI_STATS_DISABLED !== 'true';
   }
+  /**
+   * Determines if the CiStatsReporter is disabled by the environment, or properly
+   * configured and able to send stats
+   */
+
 
   hasBuildConfig() {
     var _this$config, _this$config2;
