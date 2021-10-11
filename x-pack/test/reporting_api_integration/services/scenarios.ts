@@ -206,6 +206,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
         .post('/.reporting*/_delete_by_query')
         .send({ query: { match_all: {} } })
         .expect(200);
+      log.info('Deleted all reports');
     });
   };
 
@@ -224,6 +225,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
           },
         })
         .expect(200);
+      log.info('Deleted all schedules');
     });
 
     log.debug('Waiting for Task Manager to refresh...');

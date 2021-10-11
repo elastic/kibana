@@ -52,7 +52,6 @@ export default function ({ getService }: FtrProviderContext) {
         expectSnapshot(schedule).toMatchInline(`
           Object {
             "attempts": 0,
-            "created_by": null,
             "retryAt": null,
             "startedAt": null,
             "state": Object {},
@@ -130,14 +129,16 @@ export default function ({ getService }: FtrProviderContext) {
       expect(scheduleResponse.status).eql(200);
       const schedule = JSON.parse(scheduleResponse.text).schedule;
       const scheduleId = schedule.id;
-      expect(schedule.params.created_by == null).to.eql(true);
+      expect(schedule.user).empty();
+      expect(schedule.params.created_by).to.eql(false);
 
       log.info(`testing that schedule can be deleted`);
       const deleted = await supertest
         .delete(`/api/reporting/schedules/delete/${scheduleId}`)
-        .set('kbn-xsrf', 'xxx')
-        .auth('elastic', 'changeme');
-      expectSnapshot(deleted.text).toMatchInline(`"{\\"deleted\\":true}"`);
+        .set('kbn-xsrf', 'xxx');
+      expectSnapshot(deleted.text).toMatchInline(
+        `"{\\"statusCode\\":404,\\"error\\":\\"Not Found\\",\\"message\\":\\"Not Found\\"}"`
+      );
     });
   });
 }

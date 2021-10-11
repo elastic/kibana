@@ -187,7 +187,7 @@ export class RequestHandler {
     const task = await reporting.scheduleTask({
       title: jobParams.title,
       jobtype: exportType.jobType,
-      created_by: user ? user.username : user,
+      created_by: user ? user.username : false, // "false" = security is disabled, the schedule is available upon any request
       payload: {
         ...job,
         headers,

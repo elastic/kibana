@@ -13,13 +13,13 @@ const POST_URL = `http://localhost:5601${PDF_V2_DASHBOARD_ECOMMERCE}`;
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
-  const supertestNoAuth = getService('supertestWithoutAuth');
+  const supertest = getService('supertestWithoutAuth');
   const reportingAPI = getService('reportingAPI');
   const log = getService('log');
   const retry = getService('retry');
 
   const countReportDocuments = async () => {
-    const count = await supertestNoAuth.get(`/api/reporting/jobs/count`).set('kbn-xsrf', 'xxx');
+    const count = await supertest.get(`/api/reporting/jobs/count`).set('kbn-xsrf', 'xxx');
     return parseInt(count.text, 10);
   };
 
