@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import styled, { css } from 'styled-components';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
@@ -16,7 +16,7 @@ const EmptyPrompt = styled(EuiEmptyPrompt)`
   `}
 `;
 
-export const HostIsolationExceptionsEmptyState = memo<{}>(() => {
+export const HostIsolationExceptionsEmptyState = memo<{ onAdd: () => void }>(({ onAdd }) => {
   return (
     <EmptyPrompt
       data-test-subj="hostIsolationExceptionsEmpty"
@@ -34,6 +34,14 @@ export const HostIsolationExceptionsEmptyState = memo<{}>(() => {
           id="xpack.securitySolution.hostIsolationExceptions.listEmpty.message"
           defaultMessage="There are currently no host isolation exceptions"
         />
+      }
+      actions={
+        <EuiButton fill onClick={onAdd} data-test-subj="hostIsolationExceptions">
+          <FormattedMessage
+            id="xpack.securitySolution.hostIsolationExceptions.listEmpty.addButton"
+            defaultMessage="Add Host Isolation Exception"
+          />
+        </EuiButton>
       }
     />
   );
