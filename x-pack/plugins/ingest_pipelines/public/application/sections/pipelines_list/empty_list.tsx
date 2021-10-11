@@ -5,19 +5,37 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiEmptyPrompt, EuiLink, EuiPageContent, EuiButton } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink, EuiPageContent, EuiButton, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { ScopedHistory } from 'kibana/public';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import { useKibana } from '../../../shared_imports';
-import { getCreatePath } from '../../services/navigation';
+import { getCreateFromCsvPath, getCreatePath } from '../../services/navigation';
 
 export const EmptyList: FunctionComponent = () => {
   const { services } = useKibana();
   const history = useHistory() as ScopedHistory;
+  const [showPopover, setShowPopover] = useState<boolean>(false);
+
+  const createMenuItems = [
+    {
+      name: i18n.translate('xpack.ingestPipelines.list.table.emptyPrompt.createButtonLabel', {
+        defaultMessage: 'Create new pipeline',
+      }),
+      ...reactRouterNavigate(history, getCreatePath()),
+      'data-test-subj': `emptyStateCreatePipelineButton`,
+    },
+    {
+      name: i18n.translate('xpack.ingestPipelines.list.table.emptyPrompt.createButtonLabel.createPipelineFromCsvButtonLabel', {
+        defaultMessage: 'Create new pipeline from CSV',
+      }),
+      ...reactRouterNavigate(history, getCreateFromCsvPath()),
+      'data-test-subj': `emptyStatecreatePipelineFromCsvButton`,
+    },
+  ];
 
   return (
     <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
@@ -45,16 +63,37 @@ export const EmptyList: FunctionComponent = () => {
           </p>
         }
         actions={
-          <EuiButton
-            data-test-subj="emptyStateCreatePipelineButton"
-            {...reactRouterNavigate(history, getCreatePath())}
-            iconType="plusInCircle"
-            fill
-          >
-            {i18n.translate('xpack.ingestPipelines.list.table.emptyPrompt.createButtonLabel', {
-              defaultMessage: 'Create a pipeline',
-            })}
-          </EuiButton>
+          <EuiPopover
+          isOpen={showPopover}
+          closePopover={() => setShowPopover(false)}
+          button={
+            <EuiButton
+              fill
+              iconSide="right"
+              iconType="arrowDown"
+              data-test-subj="createPipelineDropdown"
+              key="createPipelineDropdown"
+              onClick={() => setShowPopover((previousBool) => !previousBool)}
+            >
+              {i18n.translate('xpack.ingestPipelines.list.table.createPipelineDropdownLabel', {
+                defaultMessage: 'Create pipeline',
+              })}
+            </EuiButton>
+          }
+          panelPaddingSize="none"
+          repositionOnScroll
+        >
+          <EuiContextMenu
+            initialPanelId={0}
+            data-test-subj="autoFollowPatternActionContextMenu"
+            panels={[
+              {
+                id: 0,
+                items: createMenuItems,
+              },
+            ]}
+          />
+        </EuiPopover>
         }
       />
     </EuiPageContent>
