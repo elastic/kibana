@@ -46,7 +46,6 @@ import type { DashboardStart } from '../../../dashboard/public';
 import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 import type { UsageCollectionStart } from '../../../usage_collection/public';
 import type { SavedSearch } from '../../../discover/public';
-import type { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
 
 import { PureVisState } from '../../common/types';
 

@@ -111,6 +111,7 @@ export async function onSaveSearch({
     const saveOptions: SaveSavedSearchOptions = {
       onTitleDuplicate,
       copyOnSave: newCopyOnSave,
+      isTitleDuplicateConfirmed,
     };
     const response = await saveDataSource({
       indexPattern,

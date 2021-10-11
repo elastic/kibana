@@ -19,6 +19,7 @@ import { loadIndexPattern, resolveIndexPattern } from './utils/resolve_index_pat
 import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../helpers/breadcrumbs';
 import { redirectWhenMissing } from '../../../../../kibana_utils/public';
+import { DataViewSavedObjectConflictError } from '../../../../../data_views/common';
 import { getUrlTracker } from '../../../kibana_services';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 
@@ -119,22 +120,26 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
           );
         }
       } catch (e) {
-        redirectWhenMissing({
-          history,
-          navigateToApp: core.application.navigateToApp,
-          basePath,
-          mapping: {
-            search: '/',
-            'index-pattern': {
-              app: 'management',
-              path: `kibana/objects/savedSearches/${id}`,
+        if (e instanceof DataViewSavedObjectConflictError) {
+          setError(e);
+        } else {
+          redirectWhenMissing({
+            history,
+            navigateToApp: core.application.navigateToApp,
+            basePath,
+            mapping: {
+              search: '/',
+              'index-pattern': {
+                app: 'management',
+                path: `kibana/objects/savedSearches/${id}`,
+              },
             },
-          },
-          toastNotifications,
-          onBeforeRedirect() {
-            getUrlTracker().setTrackedUrl('/');
-          },
-        })(e);
+            toastNotifications,
+            onBeforeRedirect() {
+              getUrlTracker().setTrackedUrl('/');
+            },
+          })(e);
+        }
       }
     }
 

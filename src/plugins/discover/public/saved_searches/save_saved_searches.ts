@@ -13,6 +13,7 @@ import { toSavedSearchAttributes } from './saved_searches_utils';
 
 export interface SaveSavedSearchOptions {
   onTitleDuplicate?: () => void;
+  isTitleDuplicateConfirmed?: boolean;
   copyOnSave?: boolean;
 }
 
@@ -48,6 +49,7 @@ export const saveSavedSearch = async (
   if (savedSearch.title) {
     if (
       isNew &&
+      !options.isTitleDuplicateConfirmed &&
       options.onTitleDuplicate &&
       (await hasDuplicatedTitle(savedSearch.title, savedObjectsClient))
     ) {
