@@ -13,6 +13,7 @@ import {
 } from './mappings_editor.helpers';
 
 export { nextTick, getRandomString, findTestSubject, TestBed } from '@kbn/test/jest';
+export { kibanaVersion } from './setup_environment';
 
 export const componentHelpers = {
   mappingsEditor: { setup: mappingsEditorSetup, getMappingsEditorDataFactory },

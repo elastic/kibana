@@ -6,17 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
-
 import { CustomIntegrationsPluginSetup } from '../server';
 
-function createCustomIntegrationsSetup(): MockedKeys<CustomIntegrationsPluginSetup> {
-  const mock = {
+function createCustomIntegrationsSetup(): jest.Mocked<CustomIntegrationsPluginSetup> {
+  const mock: jest.Mocked<CustomIntegrationsPluginSetup> = {
     registerCustomIntegration: jest.fn(),
     getAppendCustomIntegrations: jest.fn(),
   };
 
-  return mock as MockedKeys<CustomIntegrationsPluginSetup>;
+  return mock;
 }
 
 export const customIntegrationsMock = {

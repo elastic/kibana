@@ -30,8 +30,8 @@ const EnrichmentSectionHeader: React.FC<{ type?: ENRICHMENT_TYPES }> = ({ type }
           <EuiTitle size="xxxs">
             <h5>
               {type === ENRICHMENT_TYPES.IndicatorMatchRule
-                ? i18n.INDICATOR_TOOLTIP_TITLE
-                : i18n.INVESTIGATION_TOOLTIP_TITLE}
+                ? i18n.INDICATOR_ENRICHMENT_TITLE
+                : i18n.INVESTIGATION_ENRICHMENT_TITLE}
             </h5>
           </EuiTitle>
         </EuiFlexItem>

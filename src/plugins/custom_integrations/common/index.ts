@@ -9,12 +9,13 @@
 export const PLUGIN_ID = 'customIntegrations';
 export const PLUGIN_NAME = 'customIntegrations';
 
-export interface CategoryCount {
+export interface IntegrationCategoryCount {
   count: number;
-  id: Category;
+  id: IntegrationCategory;
 }
 
-export const CATEGORY_DISPLAY = {
+export const INTEGRATION_CATEGORY_DISPLAY = {
+  // Known EPR
   aws: 'AWS',
   azure: 'Azure',
   cloud: 'Cloud',
@@ -39,12 +40,21 @@ export const CATEGORY_DISPLAY = {
   ticketing: 'Ticketing',
   version_control: 'Version control',
   web: 'Web',
-  upload_file: 'Upload a file',
 
+  // Kibana added
+  upload_file: 'Upload a file',
+  language_client: 'Language client',
+
+  // Internal
   updates_available: 'Updates available',
 };
 
-export type Category = keyof typeof CATEGORY_DISPLAY;
+export type IntegrationCategory = keyof typeof INTEGRATION_CATEGORY_DISPLAY;
+
+export interface CustomIntegrationIcon {
+  src: string;
+  type: 'eui' | 'svg';
+}
 
 export interface CustomIntegration {
   id: string;
@@ -53,9 +63,11 @@ export interface CustomIntegration {
   type: 'ui_link';
   uiInternalPath: string;
   isBeta: boolean;
-  icons: Array<{ src: string; type: string }>;
-  categories: Category[];
+  icons: CustomIntegrationIcon[];
+  categories: IntegrationCategory[];
   shipper: string;
+  eprOverlap?: string; // name of the equivalent Elastic Agent integration in EPR. e.g. a beat module can correspond to an EPR-package, or an APM-tutorial. When completed, Integrations-UX can preferentially show the EPR-package, rather than the custom-integration
 }
 
-export const ROUTES_ADDABLECUSTOMINTEGRATIONS = `/api/${PLUGIN_ID}/appendCustomIntegrations`;
+export const ROUTES_APPEND_CUSTOM_INTEGRATIONS = `/internal/${PLUGIN_ID}/appendCustomIntegrations`;
+export const ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS = `/internal/${PLUGIN_ID}/replacementCustomIntegrations`;

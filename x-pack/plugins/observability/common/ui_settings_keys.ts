@@ -6,3 +6,4 @@
  */
 
 export const enableInspectEsQueries = 'observability:enableInspectEsQueries';
+export const maxSuggestions = 'observability:maxSuggestions';

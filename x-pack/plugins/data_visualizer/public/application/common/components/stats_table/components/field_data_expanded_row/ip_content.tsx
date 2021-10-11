@@ -11,7 +11,7 @@ import { TopValues } from '../../../top_values';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
 
-export const IpContent: FC<FieldDataRowProps> = ({ config }) => {
+export const IpContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
   const { stats } = config;
   if (stats === undefined) return null;
   const { count, sampleCount, cardinality } = stats;
@@ -21,7 +21,12 @@ export const IpContent: FC<FieldDataRowProps> = ({ config }) => {
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerIPContent'}>
       <DocumentStatsTable config={config} />
-      <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" />
+      <TopValues
+        stats={stats}
+        fieldFormat={fieldFormat}
+        barColor="secondary"
+        onAddFilter={onAddFilter}
+      />
     </ExpandedRowContent>
   );
 };

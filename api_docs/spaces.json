@@ -1380,6 +1380,39 @@
                 "deprecated": false
               }
             ]
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesApiUiComponent.getSavedObjectConflictMessage",
+            "type": "Function",
+            "tags": [],
+            "label": "getSavedObjectConflictMessage",
+            "description": [
+              "\nDisplays a saved object conflict message that directs user to disable legacy URL alias"
+            ],
+            "signature": [
+              "(props: ",
+              "SavedObjectConflictMessageProps",
+              ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+            ],
+            "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesApiUiComponent.getSavedObjectConflictMessage.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -1489,7 +1522,7 @@
             "section": "def-common.GetSpaceResult",
             "text": "GetSpaceResult"
           },
-          ", \"color\" | \"description\" | \"id\" | \"name\" | \"initials\" | \"imageUrl\" | \"_reserved\">"
+          ", \"color\" | \"id\" | \"description\" | \"name\" | \"initials\" | \"imageUrl\" | \"_reserved\">"
         ],
         "path": "x-pack/plugins/spaces/public/types.ts",
         "deprecated": false,

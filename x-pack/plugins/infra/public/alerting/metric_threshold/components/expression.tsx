@@ -236,6 +236,13 @@ export const Expressions: React.FC<Props> = (props) => {
     if (!alertParams.sourceId) {
       setAlertParams('sourceId', source?.id || 'default');
     }
+
+    if (typeof alertParams.alertOnNoData === 'undefined') {
+      setAlertParams('alertOnNoData', true);
+    }
+    if (typeof alertParams.alertOnGroupDisappear === 'undefined') {
+      setAlertParams('alertOnGroupDisappear', true);
+    }
   }, [metadata, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFieldSearchChange = useCallback(
@@ -247,6 +254,33 @@ export const Expressions: React.FC<Props> = (props) => {
     () => alertParams.criteria?.every((c) => c.aggType === Aggregators.RATE),
     [alertParams.criteria]
   );
+
+  const hasGroupBy = useMemo(
+    () => alertParams.groupBy && alertParams.groupBy.length > 0,
+    [alertParams.groupBy]
+  );
+
+  const groupByFilterTestPatterns = useMemo(() => {
+    if (!alertParams.groupBy) return null;
+    const groups = !Array.isArray(alertParams.groupBy)
+      ? [alertParams.groupBy]
+      : alertParams.groupBy;
+    return groups.map((group: string) => ({
+      groupName: group,
+      pattern: new RegExp(`{"match(_phrase)?":{"${group}":"(.*?)"}}`),
+    }));
+  }, [alertParams.groupBy]);
+
+  const redundantFilterGroupBy = useMemo(() => {
+    if (!alertParams.filterQuery || !groupByFilterTestPatterns) return [];
+    return groupByFilterTestPatterns
+      .map(({ groupName, pattern }) => {
+        if (pattern.test(alertParams.filterQuery!)) {
+          return groupName;
+        }
+      })
+      .filter((g) => typeof g === 'string') as string[];
+  }, [alertParams.filterQuery, groupByFilterTestPatterns]);
 
   return (
     <>
@@ -397,7 +431,7 @@ export const Expressions: React.FC<Props> = (props) => {
       <EuiSpacer size={'m'} />
       <EuiFormRow
         label={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerText', {
-          defaultMessage: 'Create alert per (optional)',
+          defaultMessage: 'Group alerts by (optional)',
         })}
         helpText={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerHelpText', {
           defaultMessage:
@@ -413,9 +447,46 @@ export const Expressions: React.FC<Props> = (props) => {
             ...options,
             groupBy: alertParams.groupBy || undefined,
           }}
+          errorOptions={redundantFilterGroupBy}
         />
       </EuiFormRow>
-
+      {redundantFilterGroupBy.length > 0 && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="danger">
+            <FormattedMessage
+              id="xpack.infra.metrics.alertFlyout.alertPerRedundantFilterError"
+              defaultMessage="This rule will only alert per one {matchedGroups} because the filter query contains an exact match for {groupCount, plural, one {this field} other {these fields}}."
+              values={{
+                matchedGroups: <strong>{redundantFilterGroupBy.join(', ')}</strong>,
+                groupCount: redundantFilterGroupBy.length,
+              }}
+            />
+          </EuiText>
+        </>
+      )}
+      <EuiSpacer size={'s'} />
+      <EuiCheckbox
+        id="metrics-alert-group-disappear-toggle"
+        label={
+          <>
+            {i18n.translate('xpack.infra.metrics.alertFlyout.alertOnGroupDisappear', {
+              defaultMessage: 'Alert me if a group stops reporting data',
+            })}{' '}
+            <EuiToolTip
+              content={i18n.translate('xpack.infra.metrics.alertFlyout.groupDisappearHelpText', {
+                defaultMessage:
+                  'Enable this to trigger the action if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
+              })}
+            >
+              <EuiIcon type="questionInCircle" color="subdued" />
+            </EuiToolTip>
+          </>
+        }
+        disabled={!hasGroupBy}
+        checked={Boolean(hasGroupBy && alertParams.alertOnGroupDisappear)}
+        onChange={(e) => setAlertParams('alertOnGroupDisappear', e.target.checked)}
+      />
       <EuiSpacer size={'m'} />
     </>
   );

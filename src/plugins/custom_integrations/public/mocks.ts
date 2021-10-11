@@ -6,16 +6,31 @@
  * Side Public License, v 1.
  */
 
-import { CustomIntegrationsSetup } from './types';
+import { pluginServices } from './services';
+import { PluginServiceRegistry } from '../../presentation_util/public';
+import { CustomIntegrationsSetup, CustomIntegrationsStart } from './types';
+import { CustomIntegrationsServices } from './services';
+import { providers } from './services/stub';
 
 function createCustomIntegrationsSetup(): jest.Mocked<CustomIntegrationsSetup> {
-  const mock = {
+  const mock: jest.Mocked<CustomIntegrationsSetup> = {
     getAppendCustomIntegrations: jest.fn(),
+    getReplacementCustomIntegrations: jest.fn(),
   };
-
   return mock;
+}
+
+function createCustomIntegrationsStart(): jest.Mocked<CustomIntegrationsStart> {
+  const registry = new PluginServiceRegistry<CustomIntegrationsServices>(providers);
+  pluginServices.setRegistry(registry.start({}));
+  const ContextProvider = pluginServices.getContextProvider();
+
+  return {
+    ContextProvider: jest.fn(ContextProvider),
+  };
 }
 
 export const customIntegrationsMock = {
   createSetup: createCustomIntegrationsSetup,
+  createStart: createCustomIntegrationsStart,
 };
