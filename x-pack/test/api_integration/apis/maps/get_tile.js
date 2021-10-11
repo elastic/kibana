@@ -13,8 +13,7 @@ import { MVT_SOURCE_LAYER_NAME } from '../../../../plugins/maps/common/constants
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/114471
-  describe.skip('getTile', () => {
+  describe('getTile', () => {
     it('should return vector tile containing document', async () => {
       const resp = await supertest
         .get(
@@ -32,8 +31,10 @@ export default function ({ getService }) {
       const layer = jsonTile.layers[MVT_SOURCE_LAYER_NAME];
       expect(layer.length).to.be(3); // 2 docs + the metadata feature
 
-      // 1st doc
-      const feature = layer.feature(0);
+      // Verify ES document
+      // ES document order not consistent. Resolve index based on _id
+      const docIndex = layer.feature(0).properties._id === 'AU_x3_BsGFA8no6Qjjug' ? 0 : 1;
+      const feature = layer.feature(docIndex);
       expect(feature.type).to.be(1);
       expect(feature.extent).to.be(4096);
       expect(feature.id).to.be(undefined);
@@ -46,7 +47,7 @@ export default function ({ getService }) {
       });
       expect(feature.loadGeometry()).to.eql([[{ x: 44, y: 2382 }]]);
 
-      // Metadata feature
+      // Verify Metadata feature
       const metadataFeature = layer.feature(2);
       expect(metadataFeature.type).to.be(3);
       expect(metadataFeature.extent).to.be(4096);
