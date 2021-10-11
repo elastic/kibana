@@ -49,6 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
       log.info(`checking for the first report instance`);
       await retry.tryForTime(5000, async () => {
         expect(await countReportDocuments()).eql(1);
+        log.info(`found the first report instance`);
       });
 
       // wait 1 minute for another report job to fire
@@ -58,6 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
       log.info(`checking for the second report instance`);
       await retry.tryForTime(5000, async () => {
         expect(await countReportDocuments()).eql(2);
+        log.info(`found the second report instance`);
       });
     });
   });

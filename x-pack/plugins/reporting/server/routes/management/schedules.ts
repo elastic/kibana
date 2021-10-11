@@ -7,7 +7,7 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { schema } from '@kbn/config-schema';
-import { BASE_SCHEDULE } from '../../../common/constants';
+import { BASE_SCHEDULE, BASE_SCHEDULES } from '../../../common/constants';
 import { ReportingCore } from '../../core';
 import { reportFromTask } from '../../lib/store';
 import { ScheduledReportTaskParams } from '../../lib/tasks';
@@ -23,7 +23,7 @@ export function registerScheduleInfoRoutes(reporting: ReportingCore) {
    */
   router.get(
     {
-      path: `${BASE_SCHEDULE}/list`,
+      path: `${BASE_SCHEDULES}/list`,
       validate: {
         query: schema.object({}),
       },
