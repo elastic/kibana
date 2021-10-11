@@ -23,7 +23,11 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
               const numAlerts = alerts.length;
               logger.debug(`Found ${numAlerts} alerts.`);
 
-              if (ruleDataClient.isWriteEnabled() && numAlerts) {
+              if (
+                ruleDataClient.isWriteEnabled() &&
+                numAlerts &&
+                options.services.shouldLogAndScheduleActionsForAlerts() // This check ensures that rule execution has not been cancelled due to timeout or, if it has whether we still want to proceed with handling alerts after rule timeout
+              ) {
                 const commonRuleFields = getCommonAlertFields(options);
 
                 const response = await ruleDataClient.getWriter().bulk({

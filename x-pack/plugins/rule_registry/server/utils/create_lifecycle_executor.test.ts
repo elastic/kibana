@@ -349,6 +349,33 @@ describe('createLifecycleExecutor', () => {
       })
     );
   });
+
+  it('does not write alert documents when rule execution is cancelled and feature flags indicate to skip', async () => {
+    const logger = loggerMock.create();
+    const ruleDataClientMock = createRuleDataClientMock();
+    const executor = createLifecycleExecutor(
+      logger,
+      ruleDataClientMock
+    )<{}, TestRuleState, never, never, never>(async (options) => {
+      expect(options.state).toEqual(initialRuleState);
+
+      const nextRuleState: TestRuleState = {
+        aRuleStateKey: 'NEXT_RULE_STATE_VALUE',
+      };
+
+      return nextRuleState;
+    });
+
+    await executor(
+      createDefaultAlertExecutorOptions({
+        params: {},
+        state: { wrapped: initialRuleState, trackedAlerts: {} },
+        shouldLogAndScheduleActionsForAlerts: false,
+      })
+    );
+
+    expect(ruleDataClientMock.getWriter).not.toHaveBeenCalled();
+  });
 });
 
 type TestRuleState = Record<string, unknown> & {
