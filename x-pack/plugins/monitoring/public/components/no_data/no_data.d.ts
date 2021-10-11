@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export const euiTableStorageGetter: (string) => any;
-export const euiTableStorageSetter: (string) => any;
-export const EuiMonitoringTable: FunctionComponent<Props>;
+import { FunctionComponent } from 'react';
+
+export const NoData: FunctionComponent<Record<any, any>>;
