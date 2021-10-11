@@ -34,7 +34,7 @@ import { getDetailedErrorMessage, getErrorStatusCode } from './errors';
 
 export interface EnrollParameters {
   apiKey: string;
-  hosts: string[];
+  hosts: readonly string[];
   caFingerprint: string;
 }
 
@@ -392,5 +392,16 @@ export class ElasticsearchService {
       .replace(/-/g, '+')
       .replace(/([^\n]{1,65})/g, '$1\n')
       .replace(/\n$/g, '')}\n-----END CERTIFICATE-----\n`;
+  }
+
+  public static formatFingerprint(caFingerprint: string) {
+    // Convert a plain hex string returned in the enrollment token to a format that ES client
+    // expects, i.e. to a colon delimited hex string in upper case: deadbeef -> DE:AD:BE:EF.
+    return (
+      caFingerprint
+        .toUpperCase()
+        .match(/.{1,2}/g)
+        ?.join(':') ?? ''
+    );
   }
 }
