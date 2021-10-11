@@ -77,7 +77,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       throw new Error('Palette must be provided when using percentageMode');
     }
 
-    // const fontSize = Number.parseInt(args.font.spec.fontSize || '', 10);
     if (handlers?.inspectorAdapters?.tables) {
       const argsTable: Dimension[] = [
         [

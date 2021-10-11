@@ -55,7 +55,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
         const column = getColumnByAccessor(metric.accessor, table?.columns);
         const formatter = getFormatService().deserialize(metric.format);
         const metrics = table.rows.map((row, rowIndex) => {
-          let title = column.name;
+          let title = metric.format.params.customLabel ?? column.name;
           let value: number = row[column.id];
           const color = palette ? this.getColor(value, palette) : undefined;
 
