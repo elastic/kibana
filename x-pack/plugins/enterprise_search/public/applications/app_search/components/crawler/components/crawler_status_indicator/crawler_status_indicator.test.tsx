@@ -37,7 +37,7 @@ describe('CrawlerStatusIndicator', () => {
   describe('when status is not a valid status', () => {
     it('is disabled', () => {
       // this tests a codepath that should be impossible to reach, status should always be a CrawlerStatus
-      // but we use a switch statement and need to test the default case for this to recieve 100% coverage
+      // but we use a switch statement and need to test the default case for this to receive 100% coverage
       setMockValues({
         ...MOCK_VALUES,
         mostRecentCrawlRequestStatus: null,
