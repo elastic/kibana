@@ -46,7 +46,9 @@ interface FrequencyProps {
 
 export const Frequency: React.FC<FrequencyProps> = ({ tabId }) => {
   const { contentSource } = useValues(SourceLogic);
-  const { hasUnsavedFrequencyChanges } = useValues(SynchronizationLogic({ contentSource }));
+  const { hasUnsavedFrequencyChanges, navigatingBetweenTabs } = useValues(
+    SynchronizationLogic({ contentSource })
+  );
   const { handleSelectedTabChanged, resetSyncSettings, updateFrequencySettings } = useActions(
     SynchronizationLogic({ contentSource })
   );
@@ -108,7 +110,7 @@ export const Frequency: React.FC<FrequencyProps> = ({ tabId }) => {
       isLoading={false}
     >
       <UnsavedChangesPrompt
-        hasUnsavedChanges={hasUnsavedFrequencyChanges}
+        hasUnsavedChanges={!navigatingBetweenTabs && hasUnsavedFrequencyChanges}
         messageText={SYNC_UNSAVED_CHANGES_MESSAGE}
       />
       <ViewContentHeader
