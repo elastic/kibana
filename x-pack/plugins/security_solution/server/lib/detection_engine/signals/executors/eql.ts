@@ -70,8 +70,8 @@ export const eqlExecutor = async ({
     );
     result.warning = true;
   }
-  try {
-    if (!experimentalFeatures.ruleRegistryEnabled) {
+  if (!experimentalFeatures.ruleRegistryEnabled) {
+    try {
       const signalIndexVersion = await getIndexVersion(
         services.scopedClusterClient.asCurrentUser,
         ruleParams.outputIndex
@@ -81,14 +81,14 @@ export const eqlExecutor = async ({
           `EQL based rules require an update to version ${MIN_EQL_RULE_INDEX_VERSION} of the detection alerts index mapping`
         );
       }
-    }
-  } catch (err) {
-    if (err.statusCode === 403) {
-      throw new Error(
-        `EQL based rules require the user that created it to have the view_index_metadata, read, and write permissions for index: ${ruleParams.outputIndex}`
-      );
-    } else {
-      throw err;
+    } catch (err) {
+      if (err.statusCode === 403) {
+        throw new Error(
+          `EQL based rules require the user that created it to have the view_index_metadata, read, and write permissions for index: ${ruleParams.outputIndex}`
+        );
+      } else {
+        throw err;
+      }
     }
   }
   const inputIndex = await getInputIndex({
@@ -97,6 +97,7 @@ export const eqlExecutor = async ({
     version,
     index: ruleParams.index,
   });
+  logger.info(`INDEX: ${inputIndex}`);
 
   const request = buildEqlSearchRequest(
     ruleParams.query,
