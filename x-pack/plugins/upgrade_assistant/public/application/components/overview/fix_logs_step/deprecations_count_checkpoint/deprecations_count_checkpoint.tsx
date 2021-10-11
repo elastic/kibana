@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 import moment from 'moment-timezone';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n/react';
 
@@ -44,6 +44,9 @@ const i18nTexts = {
       defaultMessage: 'Reset counter',
     }
   ),
+  errorToastTitle: i18n.translate('xpack.upgradeAssistant.overview.verifyChanges.errorToastTitle', {
+    defaultMessage: 'Could not delete deprecation logs cache',
+  }),
 };
 
 interface Props {
@@ -57,8 +60,12 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
   setCheckpoint,
   setHasNoDeprecationLogs,
 }) => {
+  const [isDeletingCache, setIsDeletingCache] = useState(false);
   const {
-    services: { api },
+    services: {
+      api,
+      core: { notifications },
+    },
   } = useAppContext();
   const { data, error, isLoading, resendRequest, isInitialRequest } = api.getDeprecationLogsCount(
     checkpoint
@@ -70,7 +77,19 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
   const calloutIcon = hasLogs ? 'alert' : 'check';
   const calloutTestId = hasLogs ? 'hasWarningsCallout' : 'noWarningsCallout';
 
-  const onResetClick = () => {
+  const onResetClick = async () => {
+    setIsDeletingCache(true);
+    const { error: deleteLogsCacheError } = await api.deleteDeprecationLogsCache();
+    setIsDeletingCache(false);
+
+    if (deleteLogsCacheError) {
+      notifications.toasts.addDanger({
+        title: i18nTexts.errorToastTitle,
+        text: deleteLogsCacheError.message.toString(),
+      });
+      return;
+    }
+
     const now = moment().toISOString();
     setCheckpoint(now);
   };
@@ -115,7 +134,12 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
       data-test-subj={calloutTestId}
     >
       <p>{i18nTexts.calloutBody}</p>
-      <EuiButton color={calloutTint} onClick={onResetClick} data-test-subj="resetLastStoredDate">
+      <EuiButton
+        color={calloutTint}
+        onClick={onResetClick}
+        isLoading={isDeletingCache || isLoading}
+        data-test-subj="resetLastStoredDate"
+      >
         {i18nTexts.resetCounterButton}
       </EuiButton>
     </EuiCallOut>
