@@ -235,6 +235,36 @@ export const DocTableWrapper = forwardRef(
       ]
     );
 
+    const truncateStyles = (
+      <Global
+        styles={css`
+          .truncate-by-height {
+            overflow: hidden;
+            max-height: ${maxHeight > 0 ? `${maxHeight}px !important` : 'none'};
+            display: inline-block;
+          }
+          .truncate-by-height:before {
+            top: ${maxHeight > 0
+              ? maxHeight - TRUNCATE_GRADIENT_HEIGHT
+              : TRUNCATE_GRADIENT_HEIGHT * -1}px;
+          }
+        `}
+      />
+    );
+
+    const noResultsError = (
+      <div className="kbnDocTable__error">
+        <EuiText size="xs" color="subdued">
+          <EuiIcon type="visualizeApp" size="m" color="subdued" />
+          <EuiSpacer size="m" />
+          <FormattedMessage
+            id="discover.docTable.noResultsTitle"
+            defaultMessage="No results found"
+          />
+        </EuiText>
+      </div>
+    );
+
     return (
       <div
         className="kbnDocTableWrapper eui-yScroll eui-xScroll"
@@ -245,22 +275,7 @@ export const DocTableWrapper = forwardRef(
         data-render-complete={!isLoading}
         ref={ref as React.MutableRefObject<HTMLDivElement>}
       >
-        {maxHeight !== 0 && (
-          <Global
-            styles={css`
-              .truncate-by-height {
-                overflow: hidden;
-                max-height: ${maxHeight > 0 ? `${maxHeight}px !important` : 'none'};
-                display: inline-block;
-              }
-              .truncate-by-height:before {
-                top: ${maxHeight > 0
-                  ? maxHeight - TRUNCATE_GRADIENT_HEIGHT
-                  : TRUNCATE_GRADIENT_HEIGHT * -1}px;
-              }
-            `}
-          />
-        )}
+        {maxHeight !== 0 && truncateStyles}
         {rows.length !== 0 &&
           render({
             columnLength: columns.length,
@@ -270,18 +285,7 @@ export const DocTableWrapper = forwardRef(
             renderHeader,
             renderRows,
           })}
-        {!rows.length && (
-          <div className="kbnDocTable__error">
-            <EuiText size="xs" color="subdued">
-              <EuiIcon type="visualizeApp" size="m" color="subdued" />
-              <EuiSpacer size="m" />
-              <FormattedMessage
-                id="discover.docTable.noResultsTitle"
-                defaultMessage="No results found"
-              />
-            </EuiText>
-          </div>
-        )}
+        {!rows.length && noResultsError}
       </div>
     );
   }

@@ -8,7 +8,6 @@
 
 import { getAccessibilitySettings } from './accessibility';
 import { getDateFormatSettings } from './date_formats';
-import { getMiscUiSettings } from './misc';
 import { getNavigationSettings } from './navigation';
 import { getNotificationsSettings } from './notifications';
 import { getThemeSettings } from './theme';
@@ -21,7 +20,6 @@ describe('getCoreSettings', () => {
     const summedLength = [
       getAccessibilitySettings(),
       getDateFormatSettings(),
-      getMiscUiSettings(),
       getNavigationSettings(),
       getNotificationsSettings(),
       getThemeSettings(),
