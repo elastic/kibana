@@ -6,6 +6,7 @@
  */
 
 import { useState, useCallback } from 'react';
+import { EuiTableSortingType } from '@elastic/eui';
 import { euiTableStorageGetter, euiTableStorageSetter } from '../../components/table';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
@@ -23,12 +24,7 @@ interface Page {
   index: number;
 }
 
-interface Sorting {
-  sort: {
-    field: string;
-    direction: string;
-  };
-}
+type Sorting = EuiTableSortingType<string>;
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 

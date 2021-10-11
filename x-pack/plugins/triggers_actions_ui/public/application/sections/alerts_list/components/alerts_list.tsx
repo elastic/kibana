@@ -38,7 +38,14 @@ import {
 import { useHistory } from 'react-router-dom';
 
 import { isEmpty } from 'lodash';
-import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
+import {
+  ActionType,
+  Alert,
+  AlertTableItem,
+  AlertType,
+  RuleTypeIndex,
+  Pagination,
+} from '../../../../types';
 import { AlertAdd, AlertEdit } from '../../alert_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
 import { AlertQuickEditButtonsWithApi as AlertQuickEditButtons } from '../../common/components/alert_quick_edit_buttons';
@@ -81,7 +88,7 @@ const ENTER_KEY = 13;
 interface AlertTypeState {
   isLoading: boolean;
   isInitialized: boolean;
-  data: AlertTypeIndex;
+  data: RuleTypeIndex;
 }
 interface AlertState {
   isLoading: boolean;
@@ -169,7 +176,7 @@ export const AlertsList: React.FunctionComponent = () => {
       try {
         setAlertTypesState({ ...alertTypesState, isLoading: true });
         const alertTypes = await loadAlertTypes({ http });
-        const index: AlertTypeIndex = new Map();
+        const index: RuleTypeIndex = new Map();
         for (const alertType of alertTypes) {
           index.set(alertType.id, alertType);
         }
@@ -1002,6 +1009,7 @@ export const AlertsList: React.FunctionComponent = () => {
           }}
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
+          ruleTypeIndex={alertTypesState.data}
           onSave={loadAlertsData}
         />
       )}
@@ -1013,6 +1021,9 @@ export const AlertsList: React.FunctionComponent = () => {
           }}
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
+          ruleType={
+            alertTypesState.data.get(currentRuleToEdit.alertTypeId) as AlertType<string, string>
+          }
           onSave={loadAlertsData}
         />
       )}
@@ -1051,17 +1062,17 @@ function filterAlertsById(alerts: Alert[], ids: string[]): Alert[] {
 
 function convertAlertsToTableItems(
   alerts: Alert[],
-  alertTypesIndex: AlertTypeIndex,
+  ruleTypeIndex: RuleTypeIndex,
   canExecuteActions: boolean
 ) {
   return alerts.map((alert, index: number) => ({
     ...alert,
     index,
     actionsCount: alert.actions.length,
-    alertType: alertTypesIndex.get(alert.alertTypeId)?.name ?? alert.alertTypeId,
+    alertType: ruleTypeIndex.get(alert.alertTypeId)?.name ?? alert.alertTypeId,
     isEditable:
-      hasAllPrivilege(alert, alertTypesIndex.get(alert.alertTypeId)) &&
+      hasAllPrivilege(alert, ruleTypeIndex.get(alert.alertTypeId)) &&
       (canExecuteActions || (!canExecuteActions && !alert.actions.length)),
-    enabledInLicense: !!alertTypesIndex.get(alert.alertTypeId)?.enabledInLicense,
+    enabledInLicense: !!ruleTypeIndex.get(alert.alertTypeId)?.enabledInLicense,
   }));
 }
