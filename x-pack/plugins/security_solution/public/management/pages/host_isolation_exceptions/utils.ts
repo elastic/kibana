@@ -25,9 +25,9 @@ export function createEmptyHostIsolationException(): CreateExceptionListItemSche
     list_id: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
     name: '',
     namespace_type: 'agnostic',
+    os_types: ['windows', 'linux', 'macos'],
     tags: ['policy:all'],
     type: 'simple',
-    os_types: ['windows', 'linux', 'macos'],
   };
 }
 

@@ -29,7 +29,7 @@ export interface HostIsolationExceptionsPageState {
     status: AsyncResourceState<ExceptionListItemSchema>;
   };
   form: {
-    entry: CreateExceptionListItemSchema | undefined;
+    entry?: CreateExceptionListItemSchema;
     status: AsyncResourceState<ExceptionListItemSchema>;
   };
 }

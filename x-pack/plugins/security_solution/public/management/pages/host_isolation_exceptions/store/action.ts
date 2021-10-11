@@ -20,7 +20,7 @@ export type HostIsolationExceptionsFormStateChanged =
   };
 
 export type HostIsolationExceptionsFormEntryChanged =
-  Action<'hostIslationExceptionsFormEntryChanged'> & {
+  Action<'hostIsolationExceptionsFormEntryChanged'> & {
     payload: HostIsolationExceptionsPageState['form']['entry'];
   };
 

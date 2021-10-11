@@ -34,7 +34,7 @@ describe('When on the host isolation exceptions flyout form', () => {
   });
 
   describe('When creating a new exception', () => {
-    describe('with invalida data', () => {
+    describe('with invalid data', () => {
       it('should show disabled buttons when the form first load', () => {
         renderResult = render();
         expect(renderResult.getByTestId('add-exception-cancel-button')).not.toHaveAttribute(
