@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Observable, of } from 'rxjs';
-import { map, share, switchMap } from 'rxjs/operators';
+import { map, share } from 'rxjs/operators';
 import { inflateResponse } from '.';
 import { fromStreamingXhr } from './from_streaming_xhr';
 import { split } from './split';
@@ -19,7 +18,7 @@ export interface FetchStreamingParams {
   method?: 'GET' | 'POST';
   body?: string;
   signal?: AbortSignal;
-  compressionDisabled$?: Observable<boolean>;
+  getIsCompressionDisabled?: () => boolean;
 }
 
 /**
@@ -32,49 +31,38 @@ export function fetchStreaming({
   method = 'POST',
   body = '',
   signal,
-  compressionDisabled$ = of(false),
+  getIsCompressionDisabled = () => false,
 }: FetchStreamingParams) {
   const xhr = new window.XMLHttpRequest();
 
-  const msgStream = compressionDisabled$.pipe(
-    switchMap((compressionDisabled) => {
-      if (!compressionDisabled) {
-        url = appendQueryParam(url, 'compress', 'true');
-      }
+  const isCompressionDisabled = getIsCompressionDisabled();
+  if (!isCompressionDisabled) {
+    url = appendQueryParam(url, 'compress', 'true');
+  }
 
-      // Begin the request
-      xhr.open(method, url);
-      xhr.withCredentials = true;
+  // Begin the request
+  xhr.open(method, url);
+  xhr.withCredentials = true;
 
-      // Set the HTTP headers
-      Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
+  // Set the HTTP headers
+  Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
 
-      const stream = fromStreamingXhr(xhr, signal);
+  const stream = fromStreamingXhr(xhr, signal);
 
-      // Send the payload to the server
-      xhr.send(body);
+  // Send the payload to the server
+  xhr.send(body);
 
-      // Return a stream of chunked decompressed messages
-      return stream.pipe(
-        split('\n'),
-        map((msg) => {
-          return compressionDisabled ? msg : inflateResponse(msg);
-        })
-      );
+  // Return a stream of chunked decompressed messages
+  const stream$ = stream.pipe(
+    split('\n'),
+    map((msg) => {
+      return isCompressionDisabled ? msg : inflateResponse(msg);
     }),
     share()
   );
 
-  // start execution
-  const msgStreamSub = msgStream.subscribe({
-    error: (e) => {},
-    complete: () => {
-      msgStreamSub.unsubscribe();
-    },
-  });
-
   return {
     xhr,
-    stream: msgStream,
+    stream: stream$,
   };
 }
