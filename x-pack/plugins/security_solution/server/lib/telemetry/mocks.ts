@@ -8,7 +8,7 @@
 // eslint-disable-next-line max-classes-per-file
 import { TelemetryEventsSender } from './sender';
 import { TelemetryReceiver } from './receiver';
-import { DiagnosticTask, EndpointTask, ExceptionListsTask } from './tasks';
+import { DiagnosticTask, EndpointTask, ExceptionListsTask, DetectionRulesTask } from './tasks';
 import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
 
 /**
@@ -40,6 +40,8 @@ export const createMockTelemetryReceiver = (): jest.Mocked<TelemetryReceiver> =>
     fetchEndpointMetrics: jest.fn(),
     fetchEndpointPolicyResponses: jest.fn(),
     fetchTrustedApplications: jest.fn(),
+    fetchDetectionRules: jest.fn(),
+    fetchDetectionExceptionList: jest.fn(),
   } as unknown as jest.Mocked<TelemetryReceiver>;
 };
 
@@ -77,5 +79,12 @@ export class MockTelemetryEndpointTask extends EndpointTask {
  * Creates a mocked Telemetry exception lists Task
  */
 export class MockExceptionListsTask extends ExceptionListsTask {
+  public runTask = jest.fn();
+}
+
+/**
+ * Creates a mocked Telemetry detection rules lists Task
+ */
+export class MockDetectionRuleListsTask extends DetectionRulesTask {
   public runTask = jest.fn();
 }

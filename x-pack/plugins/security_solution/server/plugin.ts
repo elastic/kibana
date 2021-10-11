@@ -459,7 +459,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       exceptionListsClient: exceptionListClient,
     });
 
-    this.telemetryReceiver.start(core, this.endpointAppContextService, exceptionListClient);
+    const globalConfig = this.context.config.legacy.get();
+    this.telemetryReceiver.start(
+      core,
+      globalConfig.kibana.index,
+      this.endpointAppContextService,
+      exceptionListClient
+    );
 
     this.telemetryEventsSender.start(
       plugins.telemetry,
