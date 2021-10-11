@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useContext, useCallback } from 'react';
 import { MonitoringTimeContainer } from '../../application/hooks/use_monitoring_time';
-import { GlobalStateContext } from '../../application/global_state_context';
+import { GlobalStateContext } from '../../application/contexts/global_state_context';
 import { Legacy } from '../../legacy_shims';
 
 interface MonitoringToolbarProps {
