@@ -94,8 +94,8 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
               inlineScript: defaultValues[ConfigKeys.SOURCE_INLINE],
               params: defaultValues[ConfigKeys.PARAMS],
               isGeneratedScript:
-                defaultValues[ConfigKeys.METADATA].script_source.is_generated_script,
-              fileName: defaultValues[ConfigKeys.METADATA].script_source.file_name,
+                defaultValues[ConfigKeys.METADATA].script_source?.is_generated_script,
+              fileName: defaultValues[ConfigKeys.METADATA].script_source?.file_name,
             }),
             [defaultValues]
           )}

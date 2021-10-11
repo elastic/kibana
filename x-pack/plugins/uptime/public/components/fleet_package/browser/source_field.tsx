@@ -5,9 +5,9 @@
  * 2.0.
  */
 import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-
 import {
   EuiTabbedContent,
   EuiFormRow,
@@ -36,8 +36,8 @@ interface SourceConfig {
   password: string;
   inlineScript: string;
   params: string;
-  isGeneratedScript: boolean;
-  fileName: string;
+  isGeneratedScript?: boolean;
+  fileName?: string;
 }
 
 interface Props {
@@ -260,13 +260,27 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
         <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
           <EuiFlexItem grow={false}>
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.scriptRecorder.label"
+              id="xpack.uptime.createPackagePolicy.stepConfigure.browser.scriptRecorder.label"
               defaultMessage="Script recorder"
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge label="Beta" />
-          </EuiFlexItem>
+          <StyledBetaBadgeWrapper grow={false}>
+            <EuiBetaBadge
+              label={i18n.translate(
+                'xpack.uptime.createPackagePolicy.stepConfigure.browser.scriptRecorder.experimentalLabel',
+                {
+                  defaultMessage: 'Experimental',
+                }
+              )}
+              iconType="beaker"
+              tooltipContent={i18n.translate(
+                'xpack.uptime.createPackagePolicy.stepConfigure.browser.scriptRecorder.experimentalTooltip',
+                {
+                  defaultMessage: 'This module is not GA. Please help us by reporting any bugs.',
+                }
+              )}
+            />
+          </StyledBetaBadgeWrapper>
         </EuiFlexGroup>
       ),
       'data-test-subj': 'syntheticsSourceTab__scriptRecorder',
@@ -301,3 +315,9 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
     />
   );
 };
+
+const StyledBetaBadgeWrapper = styled(EuiFlexItem)`
+  .euiToolTipAnchor {
+    display: flex;
+  }
+`;

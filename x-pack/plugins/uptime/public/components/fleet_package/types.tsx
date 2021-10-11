@@ -116,8 +116,8 @@ export enum ConfigKeys {
   WAIT = 'wait',
 }
 
-export interface BrowserMetadata {
-  script_source: {
+export interface Metadata {
+  script_source?: {
     is_generated_script: boolean;
     file_name: string;
   };
@@ -195,7 +195,7 @@ export interface ITCPAdvancedFields {
 }
 
 export type IBrowserSimpleFields = {
-  [ConfigKeys.METADATA]: BrowserMetadata;
+  [ConfigKeys.METADATA]: Metadata;
   [ConfigKeys.SOURCE_INLINE]: string;
   [ConfigKeys.SOURCE_ZIP_URL]: string;
   [ConfigKeys.SOURCE_ZIP_FOLDER]: string;

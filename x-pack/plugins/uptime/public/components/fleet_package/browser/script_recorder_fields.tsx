@@ -6,7 +6,8 @@
  */
 
 import React, { useState, useCallback } from 'react';
-
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiLink,
   EuiFlexGroup,
@@ -26,7 +27,7 @@ import { Uploader } from './uploader';
 interface Props {
   onChange: ({ scriptText, fileName }: { scriptText: string; fileName: string }) => void;
   script: string;
-  fileName: string;
+  fileName?: string;
 }
 
 export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
@@ -44,7 +45,10 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
     <>
       <EuiSpacer size="m" />
       <EuiLink href="https://github.com/elastic/synthetics-recorder/releases/" target="_blank">
-        Download the Elastic Synthetics Recorder
+        <FormattedMessage
+          id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.recorderLink"
+          defaultMessage="Download the Elastic Synthetics Recorder"
+        />
       </EuiLink>
       <EuiSpacer size="m" />
       {isEditable && script ? (
@@ -66,7 +70,10 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
                 iconType="editorCodeBlock"
                 iconSide="right"
               >
-                Show script
+                <FormattedMessage
+                  id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.showScriptLabel"
+                  defaultMessage="Show script"
+                />
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -77,7 +84,10 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
                   iconSide="right"
                   color="danger"
                 >
-                  Remove script
+                  <FormattedMessage
+                    id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.removeScriptLabel"
+                    defaultMessage="Remove script"
+                  />
                 </EuiButton>
               )}
             </EuiFlexItem>
@@ -89,10 +99,11 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
           ownFocus
           onClose={() => setShowScript(false)}
           aria-labelledby="syntheticsBrowerScriptBlockHeader"
+          closeButtonAriaLabel={CLOSE_BUTTON_LABEL}
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <span id="syntheticsBrowerScriptBlockHeader">{fileName}</span>
+              <span id="syntheticsBrowerScriptBlockHeader">{fileName || MOCK_FILE_NAME}</span>
             </EuiTitle>
           </EuiFlyoutHeader>
           <div style={{ height: '100%' }}>
@@ -105,3 +116,17 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
     </>
   );
 }
+
+const MOCK_FILE_NAME = i18n.translate(
+  'xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.scriptRecorder.mockFileName',
+  {
+    defaultMessage: 'test_script.js',
+  }
+);
+
+const CLOSE_BUTTON_LABEL = i18n.translate(
+  'xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.scriptRecorder.closeButtonLabel',
+  {
+    defaultMessage: 'Close script flyout',
+  }
+);
