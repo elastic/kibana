@@ -168,6 +168,7 @@ describe('SynchronizationLogic', () => {
       };
       it('calls API and sets values', async () => {
         const setContentSourceSpy = jest.spyOn(SourceLogic.actions, 'setContentSource');
+        const setServerScheduleSpy = jest.spyOn(SynchronizationLogic.actions, 'setServerSchedule');
         const promise = Promise.resolve(contentSource);
         http.patch.mockReturnValue(promise);
         SynchronizationLogic.actions.updateServerSettings(body);
@@ -180,6 +181,7 @@ describe('SynchronizationLogic', () => {
         );
         await promise;
         expect(setContentSourceSpy).toHaveBeenCalledWith(contentSource);
+        expect(setServerScheduleSpy).toHaveBeenCalledWith(contentSource.indexing.schedule);
         expect(flashSuccessToast).toHaveBeenCalledWith('Source synchronization settings updated.');
       });
 

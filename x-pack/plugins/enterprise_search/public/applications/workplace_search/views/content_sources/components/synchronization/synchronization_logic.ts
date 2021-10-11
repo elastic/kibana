@@ -61,6 +61,7 @@ interface SynchronizationActions {
   updateSyncEnabled(enabled: boolean): boolean;
   setThumbnailsChecked(checked: boolean): boolean;
   setContentExtractionChecked(checked: boolean): boolean;
+  setServerSchedule(schedule: IndexingSchedule): IndexingSchedule;
   updateServerSettings(body: ServerSyncSettingsBody): ServerSyncSettingsBody;
 }
 
@@ -94,6 +95,7 @@ export const SynchronizationLogic = kea<
     setContentExtractionChecked: (checked: boolean) => checked,
     updateServerSettings: (body: ServerSyncSettingsBody) => body,
     updateSyncSettings: true,
+    setServerSchedule: (schedule: IndexingSchedule) => schedule,
     updateObjectsAndAssetsSettings: true,
     resetSyncSettings: true,
     addBlockedWindow: true,
@@ -125,11 +127,17 @@ export const SynchronizationLogic = kea<
         resetSyncSettings: () => props.contentSource.indexing.features.contentExtraction.enabled,
       },
     ],
-    cachedSchedule: [stripScheduleSeconds(props.contentSource.indexing.schedule)],
+    cachedSchedule: [
+      stripScheduleSeconds(props.contentSource.indexing.schedule),
+      {
+        setServerSchedule: (_, schedule) => schedule,
+      },
+    ],
     schedule: [
       stripScheduleSeconds(props.contentSource.indexing.schedule),
       {
         resetSyncSettings: () => stripScheduleSeconds(props.contentSource.indexing.schedule),
+        setServerSchedule: (_, schedule) => schedule,
       },
     ],
   }),
@@ -210,6 +218,7 @@ export const SynchronizationLogic = kea<
         });
 
         SourceLogic.actions.setContentSource(response);
+        SynchronizationLogic.actions.setServerSchedule(response.indexing.schedule);
         flashSuccessToast(SYNC_SETTINGS_UPDATED_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
