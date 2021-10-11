@@ -35,7 +35,7 @@ export interface ManageScopeInit extends Partial<ManageScope> {
   id: SourcererScopeName;
 }
 
-export type SourcererScopeById = Record<SourcererScopeName | string, ManageScope>;
+export type SourcererScopeById = Record<SourcererScopeName, ManageScope>;
 
 export interface SourcererDataView {
   /** Uniquely identifies a Kibana Index Pattern */
@@ -64,7 +64,7 @@ export interface SourcererModel {
   sourcererScopes: SourcererScopeById;
 }
 
-export const initSourcererScope = {
+export const initSourcererScope: Omit<ManageScope, 'id'> = {
   loading: false,
   indicesExist: false,
   selectedDataViewId: '',
