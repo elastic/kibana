@@ -14,7 +14,7 @@ import { dataVisualizerRefresh$, Refresh } from '../../services/timefilter_refre
 
 export interface DataVisualizerIndexPatternManagementProps {
   /**
-   * Currently selected index pattern
+   * Currently selected data view
    */
   currentIndexPattern?: IndexPattern;
   /**
@@ -79,9 +79,9 @@ export function DataVisualizerIndexPatternManagement(
           iconType="boxesHorizontal"
           data-test-subj="dataVisualizerIndexPatternManagementButton"
           aria-label={i18n.translate(
-            'xpack.dataVisualizer.index.indexPatternManagement.actionsPopoverLabel',
+            'xpack.dataVisualizer.index.dataViewManagement.actionsPopoverLabel',
             {
-              defaultMessage: 'Index pattern settings',
+              defaultMessage: 'Data view settings',
             }
           )}
           onClick={() => {
@@ -103,8 +103,8 @@ export function DataVisualizerIndexPatternManagement(
               addField();
             }}
           >
-            {i18n.translate('xpack.dataVisualizer.index.indexPatternManagement.addFieldButton', {
-              defaultMessage: 'Add field to index pattern',
+            {i18n.translate('xpack.dataVisualizer.index.dataViewManagement.addFieldButton', {
+              defaultMessage: 'Add field to data view',
             })}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
@@ -118,8 +118,8 @@ export function DataVisualizerIndexPatternManagement(
               });
             }}
           >
-            {i18n.translate('xpack.dataVisualizer.index.indexPatternManagement.manageFieldButton', {
-              defaultMessage: 'Manage index pattern fields',
+            {i18n.translate('xpack.dataVisualizer.index.dataViewManagement.manageFieldButton', {
+              defaultMessage: 'Manage data view fields',
             })}
           </EuiContextMenuItem>,
         ]}

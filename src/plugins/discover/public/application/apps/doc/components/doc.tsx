@@ -52,8 +52,8 @@ export function Doc(props: DocProps) {
             iconType="alert"
             title={
               <FormattedMessage
-                id="discover.doc.failedToLocateIndexPattern"
-                defaultMessage="No index pattern matches ID {indexPatternId}."
+                id="discover.doc.failedToLocateDataView"
+                defaultMessage="No data view matches ID {indexPatternId}."
                 values={{ indexPatternId: props.indexPatternId }}
               />
             }

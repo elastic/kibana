@@ -11,7 +11,7 @@ import { act } from 'react-dom/test-utils';
 import initStoryshots from '@storybook/addon-storyshots';
 
 // skipped: https://github.com/elastic/kibana/issues/113991
-describe.skip('Fleet Storybook Smoke', () => {
+describe('Fleet Storybook Smoke', () => {
   initStoryshots({
     configPath: __dirname,
     framework: 'react',
