@@ -109,7 +109,7 @@ a| Workload
 
 a| Runtime
 
-| This section tracks excution performance of Task Manager, tracking task _drift_, worker _load_, and execution stats broken down by type, including duration and execution results.
+| This section tracks execution performance of Task Manager, tracking task _drift_, worker _load_, and execution stats broken down by type, including duration and execution results.
 
 
 a| Capacity Estimation

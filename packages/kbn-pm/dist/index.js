@@ -8965,6 +8965,8 @@ var _execa = _interopRequireDefault(__webpack_require__(134));
 
 var _axios = _interopRequireDefault(__webpack_require__(177));
 
+var _http = _interopRequireDefault(__webpack_require__(199));
+
 var _ci_stats_config = __webpack_require__(218);
 
 /*
@@ -8974,6 +8976,7 @@ var _ci_stats_config = __webpack_require__(218);
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+// @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
 const BASE_URL = 'https://ci-stats.kibana.dev';
 
 class CiStatsReporter {
@@ -9014,6 +9017,7 @@ class CiStatsReporter {
     const upstreamBranch = (_options$upstreamBran = options.upstreamBranch) !== null && _options$upstreamBran !== void 0 ? _options$upstreamBran : this.getUpstreamBranch();
     const kibanaUuid = options.kibanaUuid === undefined ? this.getKibanaUuid() : options.kibanaUuid;
     let email;
+    let branch;
 
     try {
       const {
@@ -9024,16 +9028,32 @@ class CiStatsReporter {
       this.log.debug(e.message);
     }
 
+    try {
+      const {
+        stdout
+      } = await (0, _execa.default)('git', ['branch', '--show-current']);
+      branch = stdout;
+    } catch (e) {
+      this.log.debug(e.message);
+    }
+
+    const memUsage = process.memoryUsage();
     const isElasticCommitter = email && email.endsWith('@elastic.co') ? true : false;
     const defaultMetadata = {
+      kibanaUuid,
+      isElasticCommitter,
       committerHash: email ? _crypto.default.createHash('sha256').update(email).digest('hex').substring(0, 20) : undefined,
+      email: isElasticCommitter ? email : undefined,
+      branch: isElasticCommitter ? branch : undefined,
       cpuCount: (_Os$cpus = _os.default.cpus()) === null || _Os$cpus === void 0 ? void 0 : _Os$cpus.length,
       cpuModel: (_Os$cpus$ = _os.default.cpus()[0]) === null || _Os$cpus$ === void 0 ? void 0 : _Os$cpus$.model,
       cpuSpeed: (_Os$cpus$2 = _os.default.cpus()[0]) === null || _Os$cpus$2 === void 0 ? void 0 : _Os$cpus$2.speed,
-      email: isElasticCommitter ? email : undefined,
       freeMem: _os.default.freemem(),
-      isElasticCommitter,
-      kibanaUuid,
+      memoryUsageRss: memUsage.rss,
+      memoryUsageHeapTotal: memUsage.heapTotal,
+      memoryUsageHeapUsed: memUsage.heapUsed,
+      memoryUsageExternal: memUsage.external,
+      memoryUsageArrayBuffers: memUsage.arrayBuffers,
       nestedTiming: process.env.CI_STATS_NESTED_TIMING ? true : false,
       osArch: _os.default.arch(),
       osPlatform: _os.default.platform(),
@@ -9156,7 +9176,8 @@ class CiStatsReporter {
           url: path,
           baseURL: BASE_URL,
           headers,
-          data: body
+          data: body,
+          adapter: _http.default
         });
         return true;
       } catch (error) {

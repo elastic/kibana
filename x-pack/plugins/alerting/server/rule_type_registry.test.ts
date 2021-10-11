@@ -112,6 +112,32 @@ describe('register()', () => {
     );
   });
 
+  test('throws if AlertType ruleTaskTimeout is not a valid duration', () => {
+    const alertType: AlertType<never, never, never, never, never, 'default'> = {
+      id: 123 as unknown as string,
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      ruleTaskTimeout: '23 milisec',
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      executor: jest.fn(),
+      producer: 'alerts',
+    };
+    const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+
+    expect(() => registry.register(alertType)).toThrowError(
+      new Error(
+        `Rule type \"123\" has invalid timeout: string is not a valid duration: 23 milisec.`
+      )
+    );
+  });
+
   test('throws if RuleType action groups contains reserved group id', () => {
     const alertType: AlertType<never, never, never, never, never, 'default' | 'NotReserved'> = {
       id: 'test',
@@ -181,6 +207,28 @@ describe('register()', () => {
     `);
   });
 
+  test('allows an AlertType to specify a custom rule task timeout', () => {
+    const alertType: AlertType<never, never, never, never, never, 'default', 'backToAwesome'> = {
+      id: 'test',
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      defaultActionGroupId: 'default',
+      ruleTaskTimeout: '13m',
+      executor: jest.fn(),
+      producer: 'alerts',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+    };
+    const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+    registry.register(alertType);
+    expect(registry.get('test').ruleTaskTimeout).toBe('13m');
+  });
+
   test('throws if the custom recovery group is contained in the AlertType action groups', () => {
     const alertType: AlertType<
       never,
@@ -237,6 +285,7 @@ describe('register()', () => {
       isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
+      ruleTaskTimeout: '20m',
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
     registry.register(alertType);
@@ -246,6 +295,7 @@ describe('register()', () => {
         Object {
           "alerting:test": Object {
             "createTaskRunner": [Function],
+            "timeout": "20m",
             "title": "Test",
           },
         },
