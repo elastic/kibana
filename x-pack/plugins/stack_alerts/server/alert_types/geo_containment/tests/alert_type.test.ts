@@ -6,7 +6,8 @@
  */
 
 import { loggingSystemMock } from '../../../../../../../src/core/server/mocks';
-import { getAlertType, GeoContainmentParams } from '../alert_type';
+import { getAlertType } from '../alert_type';
+import type { GeoContainmentParams } from '../../../../../alerting/server';
 
 describe('alertType', () => {
   const logger = loggingSystemMock.create().get();
