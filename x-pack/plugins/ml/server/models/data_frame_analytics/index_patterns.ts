@@ -11,10 +11,10 @@ export class IndexPatternHandler {
   constructor(private dataViewService: DataViewsService) {}
   // returns a id based on an index pattern name
   async getIndexPatternId(indexName: string) {
-    const ip = (await this.dataViewService.find(indexName)).find(
+    const dv = (await this.dataViewService.find(indexName)).find(
       ({ title }) => title === indexName
     );
-    return ip?.id;
+    return dv?.id;
   }
 
   async deleteIndexPatternById(indexId: string) {

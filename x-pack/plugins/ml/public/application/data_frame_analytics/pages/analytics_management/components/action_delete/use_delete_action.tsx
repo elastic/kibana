@@ -55,8 +55,8 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
 
   const checkIndexPatternExists = async () => {
     try {
-      const ip = (await dataViews.find(indexName)).find(({ title }) => title === indexName);
-      if (ip !== undefined) {
+      const dv = (await dataViews.find(indexName)).find(({ title }) => title === indexName);
+      if (dv !== undefined) {
         setIndexPatternExists(true);
       } else {
         setIndexPatternExists(false);

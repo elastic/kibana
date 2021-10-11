@@ -412,9 +412,9 @@ export const useNavigateToWizardWithClonedJob = () => {
     let sourceIndexId;
 
     try {
-      const ip = (await dataViews.find(sourceIndex)).find(({ title }) => title === sourceIndex);
-      if (ip !== undefined) {
-        sourceIndexId = ip.id;
+      const dv = (await dataViews.find(sourceIndex)).find(({ title }) => title === sourceIndex);
+      if (dv !== undefined) {
+        sourceIndexId = dv.id;
       } else {
         toasts.addDanger(
           i18n.translate('xpack.ml.dataframe.analyticsList.noSourceIndexPatternForClone', {

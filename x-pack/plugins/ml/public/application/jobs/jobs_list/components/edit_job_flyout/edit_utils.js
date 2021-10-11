@@ -111,8 +111,8 @@ export function loadIndexPatterns(maxNumber) {
     dataViewsContract
       .find('*', maxNumber)
       .then((dataViews) => {
-        const indexPatterns = dataViews.sort((a, b) => a.title.localeCompare(b.title));
-        resolve(indexPatterns);
+        const sortedDataViews = dataViews.sort((a, b) => a.title.localeCompare(b.title));
+        resolve(sortedDataViews);
       })
       .catch((resp) => {
         reject(resp);

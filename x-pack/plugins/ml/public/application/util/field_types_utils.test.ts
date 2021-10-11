@@ -25,19 +25,19 @@ describe('ML - field type utils', () => {
       };
       expect(kbnTypeToMLJobType(field)).toBe(ML_JOB_FIELD_TYPES.NUMBER);
 
-      // @ts-ignore reassigning ready-only type
+      // @ts-ignore reassigning read-only type
       field.type = KBN_FIELD_TYPES.DATE;
       expect(kbnTypeToMLJobType(field)).toBe(ML_JOB_FIELD_TYPES.DATE);
 
-      // @ts-ignore reassigning ready-only type
+      // @ts-ignore reassigning read-only type
       field.type = KBN_FIELD_TYPES.IP;
       expect(kbnTypeToMLJobType(field)).toBe(ML_JOB_FIELD_TYPES.IP);
 
-      // @ts-ignore reassigning ready-only type
+      // @ts-ignore reassigning read-only type
       field.type = KBN_FIELD_TYPES.BOOLEAN;
       expect(kbnTypeToMLJobType(field)).toBe(ML_JOB_FIELD_TYPES.BOOLEAN);
 
-      // @ts-ignore reassigning ready-only type
+      // @ts-ignore reassigning read-only type
       field.type = KBN_FIELD_TYPES.GEO_POINT;
       expect(kbnTypeToMLJobType(field)).toBe(ML_JOB_FIELD_TYPES.GEO_POINT);
     });
