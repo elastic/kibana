@@ -11,10 +11,12 @@ export const CALL_OUT_TITLE = i18n.translate('xpack.securitySolution.indexPatter
   defaultMessage: 'Data view cannot be modified on this page',
 });
 
-export const CALL_OUT_MESSAGE = (indicies: string) =>
-  i18n.translate('xpack.securitySolution.indexPatterns.callOutMessage', {
-    defaultMessage: `Alerts uses ${indicies} as the default data view for this page.`,
-  });
+export const CALL_OUT_MESSAGE = i18n.translate(
+  'xpack.securitySolution.indexPatterns.callOutMessage',
+  {
+    defaultMessage: 'Data view cannot be modified for this page',
+  }
+);
 
 export const SOURCERER = i18n.translate('xpack.securitySolution.indexPatterns.dataSourcesLabel', {
   defaultMessage: 'Data sources',
@@ -74,6 +76,14 @@ export const INDEX_PATTERNS_LABEL = i18n.translate(
   'xpack.securitySolution.indexPatterns.indexPatternsLabel',
   {
     defaultMessage: 'Index patterns',
+  }
+);
+
+export const INDEX_PATTERNS_DESCRIPTIONS = i18n.translate(
+  'xpack.securitySolution.indexPatterns.descriptionsLabel',
+  {
+    defaultMessage:
+      'These are the index patterns currently selected. Filtering out index patterns from your data view can help improve overall performance.',
   }
 );
 
