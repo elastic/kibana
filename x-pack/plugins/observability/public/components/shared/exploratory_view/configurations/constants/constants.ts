@@ -48,6 +48,7 @@ import {
   BACKEND_TIME_LABEL,
   MONITORS_DURATION_LABEL,
   PAGE_LOAD_TIME_LABEL,
+  LABELS_FIELD,
 } from './labels';
 
 export const DEFAULT_TIME = { from: 'now-1h', to: 'now' };
@@ -91,6 +92,8 @@ export const FieldLabels: Record<string, string> = {
   'Business.KPI': KPI_LABEL,
   'http.request.method': REQUEST_METHOD,
   percentile: 'Percentile',
+  LABEL_FIELDS_FILTER: LABELS_FIELD,
+  LABEL_FIELDS_BREAKDOWN: 'Labels field',
 };
 
 export const DataViewLabels: Record<ReportViewType, string> = {
@@ -128,3 +131,5 @@ export const PERCENTILE_RANKS = [
   '75th' as OperationType,
   '50th' as OperationType,
 ];
+export const LABEL_FIELDS_FILTER = 'LABEL_FIELDS_FILTER';
+export const LABEL_FIELDS_BREAKDOWN = 'LABEL_FIELDS_BREAKDOWN';

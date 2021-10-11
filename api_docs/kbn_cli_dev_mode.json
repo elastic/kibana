@@ -1,0 +1,59 @@
+{
+  "id": "@kbn/cli-dev-mode",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/cli-dev-mode",
+        "id": "def-server.bootstrapDevMode",
+        "type": "Function",
+        "tags": [],
+        "label": "bootstrapDevMode",
+        "description": [],
+        "signature": [
+          "({ configs, cliArgs, applyConfigOverrides }: BootstrapArgs) => Promise<void>"
+        ],
+        "path": "packages/kbn-cli-dev-mode/src/bootstrap.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cli-dev-mode",
+            "id": "def-server.bootstrapDevMode.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ configs, cliArgs, applyConfigOverrides }",
+            "description": [],
+            "signature": [
+              "BootstrapArgs"
+            ],
+            "path": "packages/kbn-cli-dev-mode/src/bootstrap.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

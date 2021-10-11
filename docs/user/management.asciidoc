@@ -17,7 +17,7 @@ Consult your administrator if you do not have the appropriate access.
 [cols="50, 50"]
 |===
 
-| {ref}/ingest.html[Ingest Node Pipelines]
+| {ref}/ingest.html[Ingest Pipelines]
 | Create and manage ingest pipelines that let you perform common transformations
 and enrichments on your data.
 

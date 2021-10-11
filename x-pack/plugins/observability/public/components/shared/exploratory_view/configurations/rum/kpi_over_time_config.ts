@@ -8,6 +8,8 @@
 import { ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
+  LABEL_FIELDS_BREAKDOWN,
+  LABEL_FIELDS_FILTER,
   OPERATION_COLUMN,
   RECORDS_FIELD,
   REPORT_METRIC_FIELD,
@@ -73,6 +75,7 @@ export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): SeriesCon
         field: USER_AGENT_NAME,
         nested: USER_AGENT_VERSION,
       },
+      LABEL_FIELDS_FILTER,
     ],
     breakdownFields: [
       USER_AGENT_NAME,
@@ -80,6 +83,7 @@ export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): SeriesCon
       CLIENT_GEO_COUNTRY_NAME,
       USER_AGENT_DEVICE,
       PERCENTILE,
+      LABEL_FIELDS_BREAKDOWN,
     ],
     baseFilters: [
       ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),

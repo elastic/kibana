@@ -22,7 +22,7 @@ describe('ExpandedSeriesRow', function () {
   it('should render properly', async function () {
     render(<ExpandedSeriesRow seriesId={0} seriesConfig={dataViewSeries} series={mockUxSeries} />);
 
-    expect(screen.getByText('Breakdowns')).toBeInTheDocument();
+    expect(screen.getByText('Breakdown by')).toBeInTheDocument();
     expect(screen.getByText('Operation')).toBeInTheDocument();
   });
 

@@ -78,7 +78,7 @@ export const lineVisTypeDefinition = {
             truncate: 100,
           },
           title: {
-            text: defaultCountLabel,
+            text: '',
           },
           style: {},
         },
