@@ -319,3 +319,17 @@ export const OFF = i18n.translate(
     defaultMessage: 'Off',
   }
 );
+
+export const CORRELATION_ID = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.correlationID',
+  {
+    defaultMessage: 'Correlation ID (optional)',
+  }
+);
+
+export const CORRELATION_DISPLAY = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.correlationDisplay',
+  {
+    defaultMessage: 'Correlation Display (optional)',
+  }
+);

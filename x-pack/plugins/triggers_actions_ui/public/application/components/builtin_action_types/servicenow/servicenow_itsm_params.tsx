@@ -13,10 +13,10 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
-  EuiCheckbox,
-  EuiToolTip,
-  EuiIcon,
+  EuiLink,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionParamsProps } from '../../../../types';
 import { ServiceNowITSMActionParams, Choice, Fields, ServiceNowActionConnector } from './types';
@@ -26,7 +26,6 @@ import { useGetChoices } from './use_get_choices';
 import { choicesToEuiOptions, isLegacyConnector } from './helpers';
 
 import * as i18n from './translations';
-import { UPDATE_INCIDENT_VARIABLE, NOT_UPDATE_INCIDENT_VARIABLE } from './config';
 
 const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {
@@ -42,6 +41,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowITSMActionParams>
 > = ({ actionConnector, actionParams, editAction, index, errors, messageVariables }) => {
   const {
+    docLinks,
     http,
     notifications: { toasts },
   } = useKibana().services;
@@ -59,12 +59,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
     [actionParams.subActionParams]
   );
 
-  const hasUpdateIncident =
-    incident.correlation_id != null && incident.correlation_id === UPDATE_INCIDENT_VARIABLE;
-  const [updateIncident, setUpdateIncident] = useState<boolean>(hasUpdateIncident);
   const [choices, setChoices] = useState<Fields>(defaultFields);
-
-  const correlationID = updateIncident ? UPDATE_INCIDENT_VARIABLE : NOT_UPDATE_INCIDENT_VARIABLE;
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
@@ -101,14 +96,6 @@ const ServiceNowParamsFields: React.FunctionComponent<
     );
   }, []);
 
-  const onUpdateIncidentSwitchChange = useCallback(() => {
-    const newCorrelationID = !updateIncident
-      ? UPDATE_INCIDENT_VARIABLE
-      : NOT_UPDATE_INCIDENT_VARIABLE;
-    editSubActionProperty('correlation_id', newCorrelationID);
-    setUpdateIncident(!updateIncident);
-  }, [editSubActionProperty, updateIncident]);
-
   const categoryOptions = useMemo(() => choicesToEuiOptions(choices.category), [choices.category]);
   const urgencyOptions = useMemo(() => choicesToEuiOptions(choices.urgency), [choices.urgency]);
   const severityOptions = useMemo(() => choicesToEuiOptions(choices.severity), [choices.severity]);
@@ -138,7 +125,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
       editAction(
         'subActionParams',
         {
-          incident: { correlation_id: correlationID, correlation_display: 'Alerting' },
+          incident: { correlation_id: '{{rule.id}}:{{alert.id}}' },
           comments: [],
         },
         index
@@ -155,7 +142,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
       editAction(
         'subActionParams',
         {
-          incident: { correlation_id: correlationID, correlation_display: 'Alerting' },
+          incident: { correlation_id: '{{rule.id}}:{{alert.id}}' },
           comments: [],
         },
         index
@@ -255,6 +242,46 @@ const ServiceNowParamsFields: React.FunctionComponent<
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
+      {!isOldConnector && (
+        <>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow
+                fullWidth
+                label={i18n.CORRELATION_ID}
+                helpText={
+                  <EuiLink href={docLinks.links.alerting.serviceNowAction} target="_blank">
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.correlationIDHelpLabel"
+                      defaultMessage="Identifier for updating incidents"
+                    />
+                  </EuiLink>
+                }
+              >
+                <TextFieldWithMessageVariables
+                  index={index}
+                  editAction={editSubActionProperty}
+                  messageVariables={messageVariables}
+                  paramsProperty={'correlation_id'}
+                  inputTargetValue={incident?.correlation_id ?? undefined}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFormRow fullWidth label={i18n.CORRELATION_DISPLAY}>
+                <TextFieldWithMessageVariables
+                  index={index}
+                  editAction={editSubActionProperty}
+                  messageVariables={messageVariables}
+                  paramsProperty={'correlation_display'}
+                  inputTargetValue={incident?.correlation_display ?? undefined}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
+      )}
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
@@ -295,26 +322,6 @@ const ServiceNowParamsFields: React.FunctionComponent<
         inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
         label={i18n.COMMENTS_LABEL}
       />
-      {!isOldConnector && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiCheckbox
-                id="update-incident-checkbox"
-                label={i18n.UPDATE_INCIDENT_LABEL}
-                checked={updateIncident}
-                onChange={onUpdateIncidentSwitchChange}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip position="top" content="provide some description about what it does">
-                <EuiIcon type="questionInCircle" />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
     </>
   );
 };

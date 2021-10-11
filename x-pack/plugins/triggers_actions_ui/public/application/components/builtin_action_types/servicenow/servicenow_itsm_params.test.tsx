@@ -122,6 +122,8 @@ describe('ServiceNowITSMParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="categorySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="subcategorySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="short_descriptionInput"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="correlation_idInput"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="correlation_displayInput"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="descriptionTextArea"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="commentsTextArea"]').exists()).toBeTruthy();
   });
@@ -231,6 +233,11 @@ describe('ServiceNowITSMParamsFields renders', () => {
     const changeEvent = { target: { value: 'Bug' } } as React.ChangeEvent<HTMLSelectElement>;
     const simpleFields = [
       { dataTestSubj: 'input[data-test-subj="short_descriptionInput"]', key: 'short_description' },
+      { dataTestSubj: 'input[data-test-subj="correlation_idInput"]', key: 'correlation_id' },
+      {
+        dataTestSubj: 'input[data-test-subj="correlation_displayInput"]',
+        key: 'correlation_display',
+      },
       { dataTestSubj: 'textarea[data-test-subj="descriptionTextArea"]', key: 'description' },
       { dataTestSubj: '[data-test-subj="urgencySelect"]', key: 'urgency' },
       { dataTestSubj: '[data-test-subj="severitySelect"]', key: 'severity' },

@@ -145,6 +145,8 @@ describe('ServiceNowSIRParamsFields renders', () => {
   test('all params fields is rendered', () => {
     const wrapper = mount(<ServiceNowSIRParamsFields {...defaultProps} />);
     expect(wrapper.find('[data-test-subj="short_descriptionInput"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="correlation_idInput"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="correlation_displayInput"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="prioritySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="categorySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="subcategorySelect"]').exists()).toBeTruthy();
@@ -280,6 +282,11 @@ describe('ServiceNowSIRParamsFields renders', () => {
     const changeEvent = { target: { value: 'Bug' } } as React.ChangeEvent<HTMLSelectElement>;
     const simpleFields = [
       { dataTestSubj: 'input[data-test-subj="short_descriptionInput"]', key: 'short_description' },
+      { dataTestSubj: 'input[data-test-subj="correlation_idInput"]', key: 'correlation_id' },
+      {
+        dataTestSubj: 'input[data-test-subj="correlation_displayInput"]',
+        key: 'correlation_display',
+      },
       { dataTestSubj: 'textarea[data-test-subj="descriptionTextArea"]', key: 'description' },
       { dataTestSubj: '[data-test-subj="prioritySelect"]', key: 'priority' },
       { dataTestSubj: '[data-test-subj="categorySelect"]', key: 'category' },
