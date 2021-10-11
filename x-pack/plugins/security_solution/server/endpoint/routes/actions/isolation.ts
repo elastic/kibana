@@ -150,7 +150,7 @@ export const isolationRequestHandler = function (
       agent: {
         id: agents,
       },
-      EndpointAction: {
+      EndpointActions: {
         action_id: actionID,
         expiration: moment().add(2, 'weeks').toISOString(),
         type: 'INPUT_ACTION',
@@ -209,7 +209,7 @@ export const isolationRequestHandler = function (
       fleetActionIndexResult = await esClient.index<EndpointAction>({
         index: AGENT_ACTIONS_INDEX,
         body: {
-          ...doc.EndpointAction,
+          ...doc.EndpointActions,
           '@timestamp': doc['@timestamp'],
           agents,
           timeout: 300, // 5 minutes

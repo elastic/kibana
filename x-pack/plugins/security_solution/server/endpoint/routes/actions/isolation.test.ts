@@ -363,7 +363,7 @@ describe('Host Isolation', () => {
 
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
         expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
-        expect(actionDocs[0].body.EndpointAction.data.command).toEqual('unisolate');
+        expect(actionDocs[0].body.EndpointActions.data.command).toEqual('unisolate');
         expect(actionDocs[1].body.data.command).toEqual('unisolate');
       });
 
@@ -385,7 +385,7 @@ describe('Host Isolation', () => {
 
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
         expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
-        expect(actionDocs[0].body.EndpointAction.data.command).toEqual('isolate');
+        expect(actionDocs[0].body.EndpointActions.data.command).toEqual('isolate');
         expect(actionDocs[1].body.data.command).toEqual('isolate');
       });
 

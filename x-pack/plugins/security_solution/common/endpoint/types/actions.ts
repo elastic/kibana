@@ -38,7 +38,7 @@ export interface LogsEndpointAction {
   agent: {
     id: string | string[];
   };
-  EndpointAction: EndpointActionFields & ActionRequestFields;
+  EndpointActions: EndpointActionFields & ActionRequestFields;
   error?: EcsError;
   user: {
     id: string;
@@ -50,7 +50,7 @@ export interface LogsEndpointActionResponse {
   agent: {
     id: string | string[];
   };
-  EndpointAction: EndpointActionFields & ActionResponseFields;
+  EndpointActions: EndpointActionFields & ActionResponseFields;
   error?: EcsError;
 }
 

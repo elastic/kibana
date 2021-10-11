@@ -22,7 +22,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         agent: {
           id: [this.randomUUID()],
         },
-        EndpointAction: {
+        EndpointActions: {
           action_id: this.randomUUID(),
           expiration: this.randomFutureDate(timeStamp),
           type: 'INPUT_ACTION',
@@ -42,11 +42,11 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   }
 
   generateIsolateAction(overrides: DeepPartial<LogsEndpointAction> = {}): LogsEndpointAction {
-    return merge(this.generate({ EndpointAction: { data: { command: 'isolate' } } }), overrides);
+    return merge(this.generate({ EndpointActions: { data: { command: 'isolate' } } }), overrides);
   }
 
   generateUnIsolateAction(overrides: DeepPartial<LogsEndpointAction> = {}): LogsEndpointAction {
-    return merge(this.generate({ EndpointAction: { data: { command: 'unisolate' } } }), overrides);
+    return merge(this.generate({ EndpointActions: { data: { command: 'unisolate' } } }), overrides);
   }
 
   /** Generates an endpoint action response */
@@ -61,7 +61,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         agent: {
           id: this.randomUUID(),
         },
-        EndpointAction: {
+        EndpointActions: {
           action_id: this.randomUUID(),
           completed_at: timeStamp.toISOString(),
           data: {
